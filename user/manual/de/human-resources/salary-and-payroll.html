@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Gehalt und Gehaltsabrechung</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Gehalt und Gehaltsabrechung" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/human-resources/salary-structure.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/human-resources/salary-structure.png" data-html-block="meta_block">
+<meta name="og:title" content="Gehalt und Gehaltsabrechung" data-html-block="meta_block">
+<meta name="twitter:title" content="Gehalt und Gehaltsabrechung" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/human-resources/salary-structure.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/de/human-resources/salary-and-payroll">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-salary-and-payroll" data-path="user/manual/de/human-resources/salary-and-payroll"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/de/human-resources">
+		Personalwesen</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Gehalt und Gehaltsabrechung</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="salary-and-payroll" style="text-align: Left">
+	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+
+<p>Ein Gehalt ist ein fester Geldbetrag oder eine Ersatzvergütung die vom Arbeitsgeber für die Arbeitsleistung des Arbeitnehmers an diesen gezahlt wird.</p>
+
+<p>Die Gehaltsabrechnung ist der zugrundeliegende Datensatz zum Verwaltungsakt von Gehältern, Löhnen, Boni, Nettoauszahlungen und Abzügen für einen Mitarbeiter.</p>
+
+<p>Um in ERPNext eine Gehaltsabrechnung durchzuführen</p>
+
+<p>1. Erstellen Sie Gehaltsstrukturen für alle Arbeitnehmer.</p>
+
+<p>2. Erstellen Sie über den Prozess Gehaltsabrechnung Gehaltsabrechnungen.</p>
+
+<p>3. Buchen Sie das Gehalt in Ihren Konten.</p>
+
+<h3>Gehaltsstruktur</h3>
+
+<p>Die Gehaltsstruktur gibt an, wie Gehälter auf Basis von Einkommen und Abzügen errechnet werden.</p>
+
+<p>Gehaltsstrukturen werden verwendet um Organisationen zu helfen</p>
+
+<p>1. Gehaltslevel zu erhalten, die am Markt wettbewerbsfähig sind.</p>
+
+<p>2. Ein ausgeglichenes Verhältnis zwischen den Entlohnungen intern anfallender Jobs zu erreichen.</p>
+
+<p>3. Unterschiede in den Ebenen von Verwantwortung, Begabungen und Leistungen zu erkennen und entsprechend zu vergüten und Gehaltserhöhungen zu verwalten.</p>
+
+<p>Eine Gehaltsstruktur kann folgende Komponenten enthalten:</p>
+
+<ul>
+<li><strong>Basisgehalt:</strong> Das ist das steuerbare Basiseinkommen.</li>
+<li><strong>Spezielle Zulagen:</strong> Normalerweise kleiner als das Basiseinkommen</li>
+<li><strong>Urlaubsgeld:</strong> Betrag den der Arbeitgeber dem Arbeitnehmer für einen Urlaub zahlt</li>
+<li><strong>Abfindung:</strong> Bestimmter Betrag, der dem Arbeitnehmer vom Arbeitgeber gezahlt wird, wenn der Mitarbeiter das Unternehmen verlässt oder in Rente geht.</li>
+<li><strong>Rentenversicherung:</strong> Betrag für zukünftige Rentenzahlungen und andere Leistunge, die unter die Rentenversicherung fallen.</li>
+<li><strong>Krankenversicherung</strong></li>
+<li><strong>Pflegeversicherung</strong></li>
+<li><strong>Arbeitslosenversicherung</strong></li>
+<li><strong>Solidaritätszuschlag</strong></li>
+<li><strong>Steuern</strong></li>
+<li><strong>Boni</strong>: Steuerbare Beträge, die dem Arbeitnehmer aufgrund guter individueller Leistungen gezahlt werden.</li>
+<li><strong>Mietzulage</strong></li>
+<li><strong>Aktienoptionen für Mitarbeiter</strong></li>
+</ul>
+
+<p>Um eine neue Gehaltsstruktur zu erstellen, gehen Sie zu:</p>
+
+<blockquote>
+  <p>Personalwesen &gt; Einstellungen &gt; Gehaltsstruktur &gt; Neu</p>
+</blockquote>
+
+<h4>Abbildung 1: Gehaltsstruktur</h4>
+
+<p><img class="screenshot" alt="Gehaltsstruktur" src="https://frappe.github.io/erpnext/assets/img/human-resources/salary-structure.png"></p>
+
+<h3>In der Gehaltsstruktur</h3>
+
+<ul>
+<li>Wählen Sie einen Arbeitnehmer.</li>
+<li>Geben Sie das Startdatum an, ab dem die Gehaltsstruktur gültig ist (Anmerkung: Es kann während eines bestimmten Zeitraums immer nur eine Gehaltsstruktur für einen Arbeitnehmer aktiv sein.)</li>
+<li>In der Tabelle Einkommen und Abzüge werden alle von Ihnen definierten Einkommens- und Abzugsarten automatisch eingetragen. Geben Sie für Einkommen und Abzüge Beträge ein und speichern Sie die Gehaltsstruktur.</li>
+</ul>
+
+<h3>Unbezahlter Urlaub</h3>
+
+<p>Unbezahlter Urlaub entsteht dann, wenn ein Mitarbeiter keinen normalen Urlaub mehr hat oder ohne Genehmigung über einen Urlaubsantrag abwesend ist. Wenn Sie möchten, dass ERPNext automatisch unbezahlten Urlaub abzieht, müssen Sie in der Vorlage "Einkommens- und Abzugsart" "Unbezahlten Urlaub anwenden" anklicken. Der Betrag der dem Gehalt gekürzt wird ergibt sich aus dem Verhältnis zwischen den Tagen des unbezahlten Urlaubs und den Gesamtarbeitstagen des Monats (basierend auf der Urlaubstabelle).</p>
+
+<p>Wenn Sie nicht möchten, dass ERPNext unbezahlten Urlaub verwaltet, klicken Sie die Option in keiner Einkommens und Abzugsart an.</p>
+
+<hr />
+
+<h3>Gehaltszettel erstellen</h3>
+
+<p>Wenn die Gehaltsstruktur einmal angelegt ist, können Sie eine Gehaltsabrechnung aus demselben Formular heraus erstellen, oder Sie können für den Monat eine Gehaltsabrechnung erstellen über den Punkt "Gehaltsabrechnung bearbeiten".</p>
+
+<p>Um eine Gehaltsabrechnung über die Gehaltsstruktur zu erstellen, klicken Sie auf die Schaltfläche "Gehaltsabrechnung erstellen".</p>
+
+<h4>Abbildung 2: Gehaltsabrechnung</h4>
+
+<p><img class="screenshot" alt="Lohnzettel" src="https://frappe.github.io/erpnext/assets/img/human-resources/salary-slip.png"></p>
+
+<p>Sie können auch Gehaltsabrechnungen für mehrere verschiedene Mitarbeiter über "Gehaltsabrechnung bearbeiten" anlegen.</p>
+
+<blockquote>
+  <p>Personalwesen &gt; Werkzeuge &gt; Gehaltsabrechnung bearbeiten</p>
+</blockquote>
+
+<h4>Abbildung 3: Gehaltsabrechnung durchführen</h4>
+
+<p><img class="screenshot" alt="Gehaltsabrechnung durchführen" src="https://frappe.github.io/erpnext/assets/img/human-resources/process-payroll.png"></p>
+
+<p>Beim Bearbeiten einer Gehaltsabrechnung</p>
+
+<p>1. Wählen Sie die Firma, für die Sie Gehaltsabrechnungen erstellen wollen.</p>
+
+<p>2. Wählen Sie den ensprechenden Monat und das Jahr.</p>
+
+<p>3. Klicken Sie auf "Gehaltsabrechnung erstellen". Hierdurch werden für jeden aktiven Mitarbeiter für den gewählten Monat Datensätze für die Gehaltsabrechnung angelegt. Wenn die Gehaltsabrechnungen einmal angelegt sind, erstellt das System keine weiteren Gehaltsabrechnungen. Alle Aktualisierungen werden im Bereich "Aktivitätsprotokoll" angezeigt.</p>
+
+<p>4. Wenn alle Gehaltsabrechnungen erstellt wurden, können Sie prüfen, ob Sie richtig sind, und sie bearbeiten, wenn Sie unbezahlten Urlaub abziehen wollen.</p>
+
+<p>5. Wenn Sie das geprüft haben, können Sie sie alle gemeinsam "übertragen" indem Sie auf die Schaltfläche "Gehaltsabrechnung übertragen" klicken. Wenn Sie möchten, dass Sie automatisch per E-Mail an einen Mitarbeiter verschickt werden, stellen Sie sicher, dass Sie die Option "E-Mail absenden" angeklickt haben.</p>
+
+<h3>Gehälter in Konten buchen</h3>
+
+<p>Der letzte Schritt ist, die Gehälter mit Ihren Konten zu verbuchen.</p>
+
+<p>Gehälter unterliegen im Geschäftsablauf normalerweise sehr strengen Datenschutzregeln. In den meisten Fällen gibt die Firma eine einzige Zahlung an die Bank, die alle Gehälter beinhaltet, und die Bank verteilt dann die Gehälter an die einzelnen Konten der Mitarbeiter. Bei dieser Vorgehensweise gibt es nur eine einzige Zahlungsbuchung im Hauptbuch der Firma niemand mit Zugriff auf die Konten des Unternehmens hat auf die individuellen Gehaltsdaten Zugriff.</p>
+
+<p>Die Buchung zur Gehaltsabrechnung ist eine Journalbuchung welche das Bankkonto des Unternehmens belastet und den Gesamtbetrag aller Gehälter dem Gehaltskonto gutschreibt.</p>
+
+<p>Um einen Beleg über die Gehaltszahlung aus dem Punkt "Gehaltsabrechnung bearbeiten" heraus zu erstellen, klicken Sie auf "Bankbeleg erstellen" und es wird eine neue Journalbuchung  mit den Gesamtbeträgen der Gehälter erstellt.</p>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="appraisal.html">Mitarbeiterbeurteilung</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="icon icon-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/human-resources/salary-and-payroll.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Fertigungsauftrag</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Fertigungsauftrag" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
+<meta name="og:title" content="Fertigungsauftrag" data-html-block="meta_block">
+<meta name="twitter:title" content="Fertigungsauftrag" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/de/manufacturing/production-order">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-production-order" data-path="user/manual/de/manufacturing/production-order"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/de/manufacturing">
+		Fertigung</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Fertigungsauftrag</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="production-order" style="text-align: Left">
+	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+
+<p>Der Fertigungsauftrag (auch als Arbeitsauftrag bezeichnet) ist ein Dokument welches vom Produktionsplaner als Startsignal in die Fertigung gegeben wird, um eine bestimmte Anzahl eines bestimmten Artikels zu produzieren. Der Fertigungsauftrag unterstützt Sie auch dabei den Materialbedarf (Lagerbuchung) für diesen Artikel aus der <strong>Stückliste</strong> zu generieren.</p>
+
+<p>Der <strong>Fertigungsauftrag</strong> wird aus dem <strong>Werkzeug zur Fertigungsplanung</strong> generiert, basierend auf den Kundenaufträgen. Sie können weiterhin direkt einen Fertigungsauftrag erstellen über:</p>
+
+<blockquote>
+  <p>Fertigung &gt; Dokumente &gt; Fertigungsauftrag &gt; Neu</p>
+</blockquote>
+
+<p><img class="screenshot" alt="Fertigungsauftrag" src="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png"></p>
+
+<h3>Einen Fertigungsauftrag erstellen</h3>
+
+<ul>
+<li>Wählen Sie den Artikel aus, der gefertigt werden soll.</li>
+<li>Die Standard-Stückliste für diesen Artikel wird aus dem System gezogen. Sie können die Stückliste auch ändern.</li>
+<li>Wenn die ausgewählte Stückliste auch Arbeitsgänge mit berücksichtigt, sollte das System alle Arbeitsgänge aus der Stückliste übernehmen.</li>
+<li>Geben Sie das geplante Startdatum an (ein geschätztes Datum zu dem die Produktion beginnen soll).</li>
+<li>Wählen Sie das Lager aus. Das Fertigungslager ist der Ort zu dem die Artikel gelangen, wenn Sie mit der Herstellung beginnen, und das Eingangslager ist der Ort, wo fertige Erzeugnisse lagern, bevor sie versandt werden.</li>
+</ul>
+
+<blockquote>
+  <p>Anmerkung: Sie können einen Fertigungsauftrag abspeichern ohne ein Lager auszuwählen. Läger sind jedoch zwingend erforderlich um einen Fertigungsauftrag zu übertragen.</p>
+</blockquote>
+
+<h3>Arbeitsplätze neu zuordnen/Dauer von Arbeitsgängen</h3>
+
+<ul>
+<li>Als Voreinstellung zieht das System Arbeitsplätze und die Dauer von Arbeitsgängen aus der gewählten Stückliste.</li>
+</ul>
+
+<p><img class="screenshot" alt="Fertigungsauftrag - Arbeitsgänge" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-operations.png"></p>
+
+<ul>
+<li>Wenn Sie den Arbeitsplatz für einen bestimmten Arbeitsgang im Fertigungsauftrag neu zuordnen möchten, können Sie das tun, bevor Sie den Fertigungsauftrag übertragen.</li>
+</ul>
+
+<p><img class="screenshot" alt="Fertigungsauftrag - Arbeitsgänge neu zuordnen" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-reassigning-operations.png"></p>
+
+<ul>
+<li>Wählen Sie den betreffenden Arbeitsgang aus und ändern Sie seinen Arbeitsplatz.</li>
+<li>Sie können auch die Dauer des Arbeitsgangs ändern.</li>
+</ul>
+
+<h3>Kapazitätsplanung im Fertigungsauftrag</h3>
+
+<ul>
+<li>Wenn ein Fertigungsauftrag basierend auf dem geplanten Startdatum und der Verfügbarkeit des Arbeitsplatzes übertragen wird, plant das System alle Arbeitsgänge für den Fertigungsauftrag ein (wenn der Fertigungsauftrag selbst Arbeitsgänge enthält).</li>
+</ul>
+
+<h3>Material der Fertigung übergeben</h3>
+
+<ul>
+<li>Wenn Sie Ihren Fertigungsauftrags übertragen haben, müssen Sie das Rohmaterial übertragen um den Fertigungsprozess zu starten.</li>
+<li>Das erstellt eine Lagerbuchung mit allen Artikeln, die benötigt werden, um diesen Fertigungsauftrag abzuschliessen. Die Artikel werden an das Fertigungslager übertragen (dieser Prozess fügt basierend auf Ihren Einstellungen Unterbaugruppen mit Stückliste als EINEN Artikel hinzu oder löst die Unterpunkte auf).</li>
+<li>Klicken Sie auf "Material der Fertigung übergeben".</li>
+</ul>
+
+<p><img class="screenshot" alt="Materialübertrag" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-material-transfer.png"></p>
+
+<ul>
+<li>Geben Sie die Menge des Materials an, das übertragen werden soll.</li>
+</ul>
+
+<p><img class="screenshot" alt="Materialübertrag - Menge" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-material-transfer-qty.png"></p>
+
+<ul>
+<li>Übertragen Sie die Lagerbuchung.</li>
+</ul>
+
+<p><img class="screenshot" alt="Lagerbuchung zum Kundenauftrag" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-SE-for-material-transfer.png"></p>
+
+<ul>
+<li>Das an die Fertigung übertragene Material wird basierend auf der Lagerbuchung im Fertigungsauftrag aktualisiert.</li>
+</ul>
+
+<p><img class="screenshot" alt="Lagerbuchung zum Fertigungsauftrag" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-material-transfer-updated.png"></p>
+
+<h3>Zeitprotokoll erstellen</h3>
+
+<ul>
+<li>Der Fortschritt des Fertigungsauftrages kann über ein [Zeitprotokoll]<img class="screenshot" alt="Make TL against PO" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-operations-make-tl.png"> mitprotokolliert werden.</li>
+<li>Zeitprotokolle werden zu den Arbeitsgängen des Fertigungsauftrages erstellt.</li>
+<li>Vorlagen für Zeitprotokolle werden für die eingeplanten Arbeitsgänge zum Zeitpunkt des Übertragens des Fertigungsauftrages erstellt.</li>
+<li>Um weitere Zeitprotokolle zu einem Arbeitsgang zu erstellen, wählen Sie "Zeitprotokoll erstellen" im betreffenden Arbeitsgang aus.</li>
+</ul>
+
+<p><img class="screenshot" alt="Zeitprotokoll zum Fertigungsauftrag erstellen" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-operations-make-tl.png"></p>
+
+<h3>Fertige Erzeugnisse aktualisieren</h3>
+
+<ul>
+<li>Wenn Sie den Fertigungsauftrag fertiggestellt haben, müssen Sie die Fertigen Erzeugnisse aktualisieren.</li>
+<li>Das erstellt eine Lagerbuchung, welche alle Unterartikel vom Fertigungslager abzieht und dem Lager "Fertige Erzeugnisse" gutschreibt.</li>
+<li>Klicken Sie auf "Fertige Erzeugnisse aktualisieren".</li>
+</ul>
+
+<p><img class="screenshot" alt="Fertigerzeugnisse aktualiseren" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-FG-update.png"></p>
+
+<ul>
+<li>Geben Sie die Menge des übertragenen Materials an.</li>
+</ul>
+
+<p><img class="screenshot" alt="Menge der Fertigerzeugnisse aktualisieren" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-FG-update-qty.png"></p>
+
+<blockquote>
+  <p>Tipp: Sie können einen Fertigungsauftrag auch teilweise fertig stellen, indem Sie über eine Lagerbuchung das Lager Fertige Erzeugnisse aktualisieren.</p>
+</blockquote>
+
+<h3>Einen Fertigungsauftrag anhalten</h3>
+
+<ul>
+<li>Wenn Sie einen Fertigungsauftrag anhalten, wird sein Status auf "Angehalten" gesetzt, mit der Folge, dass alle Herstellungsprozesse für diesen Fertigungsauftrag eingestellt werden.</li>
+<li>Um den Fertigungsauftrag anzuhalten klicken Sie auf die Schaltfläche "Anhalten".</li>
+</ul>
+
+<p>1. Wenn Sie den Fertigungsauftrag übertragen, reserviert das System für jeden Arbeitsgang des Fertigungsauftrags in Serie gemäß dem geplanten Startdatum basierend auf der Verfügbarkeit des Arbeitsplatzes ein Zeitfenster. Die Verfügbarkeit des Arbeitsplatzes hängt von den Arbeitszeiten des Arbeitsplatzes und der Urlaubsliste ab und davon, ob ein anderer Arbeitsgang des Fertigungsauftrages in diesem Zeitfenster eingeplant wurde. Sie können in den Fertigungseinstellungen die Anzahl der Tage angeben, in denen das System versucht den Arbeitsgang einzuplanen. Standardmäßig ist dieser Wert auf 30 Tage eingestellt. Wenn der Arbeitsgang über das verfügbare Zeitfenster hinaus Zeit benötigt, fragt Sie das System, ob der Arbeitsgang pausieren soll. Wenn das System die Terminplanung erstellen konnte, legt es Zeitprotokolle an und speichert sie. Sie können diese verändern und später übertragen.
+2. Sie können außerdem zusätzliche Zeitprotokolle für einen Arbeitsgang erstellen. Hierzu wählen Sie den betreffenden Arbeitsgang aus und klicken Sie auf "Zeitprotokoll erstellen".
+3. Rohmaterial übertragen: Dieser Schritt erstellt eine Lagerbuchung mit allen Artikeln, die benötigt werden, um dem Fertigungsauftrag abzuschliessen, und dem Fertigungslager hinzugefügt werden müssen (Unterartikel werden entweder als EIN Artikel mit Stücklister ODER in aufgelöster Form gemäß Ihren Einstellungen hinzugefügt).
+4. Fertigerzeugnisse aktualisieren: Dieser Schritt erstellt eine Lagerbuchung, welche alle Unterartikel vom Fertigungslager abzieht und dem Lager Fertige Erzeugnisse hinzufügt.
+5. Um die zum Fertigungsauftrag erstellten Zeitprotokolle anzusehen, klicken Sie auf "Zeitprotokolle anzeigen".</p>
+
+<p><img class="screenshot" alt="Fertigungsauftrag anhalten" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-stop.png"></p>
+
+<ul>
+<li>Sie können auch einen angehaltenen Fertigungsauftrag wieder weiter laufen lassen.</li>
+</ul>
+
+<blockquote>
+  <p>Anmerkung: Um einen Fertigungsauftrag zu einem Artikel zu erstellen müssen Sie auf dem Artikelformular das Feld "Fertigungsauftrag zulassen" ankreuzen.</p>
+</blockquote>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="workstation.html">Arbeitsplatz</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="icon icon-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/manufacturing/production-order.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

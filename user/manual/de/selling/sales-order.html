@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Kundenauftrag</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Kundenauftrag" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/sales-order-f.jpg" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/sales-order-f.jpg" data-html-block="meta_block">
+<meta name="og:title" content="Kundenauftrag" data-html-block="meta_block">
+<meta name="twitter:title" content="Kundenauftrag" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/sales-order-f.jpg" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/de/selling/sales-order">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-sales-order" data-path="user/manual/de/selling/sales-order"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/de/selling">
+		Vertrieb</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Kundenauftrag</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="sales-order" style="text-align: Left">
+	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+
+<p>Der Kundenauftrag bestätigt Ihren Verkauf und stößt Einkauf (<strong>Materialanfrage</strong>), Versand (<strong>Lieferschein</strong>), Abrechnung (<strong>Ausgangsrechnung</strong>) und Fertigung (<strong>Produktionsplan</strong>) an.</p>
+
+<p>Ein Kundenauftrag ist normalerweise ein bindender Vertrag mit Ihrem Kunden.</p>
+
+<p>Wenn Ihr Kunde das Angebot annimmt, können Sie das Angebot in einen Kundenauftrag umwandeln.</p>
+
+<h3>Flußdiagramm des Kundenauftrags</h3>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/sales-order-f.jpg" alt="Kundenauftrag" /></p>
+
+<p>Um einen neuen Kundenauftrag zu erstellen gehen Sie zu:</p>
+
+<blockquote>
+  <p>Vertrieb &gt; Kundenauftrag &gt; Neuer Kundenauftrag</p>
+</blockquote>
+
+<h3>Einen Kundenauftrag aus einem Angebot erstellen</h3>
+
+<p>Sie können einen Kundenauftrag auch aus einem übertragenen Angebot heraus erstellen.</p>
+
+<p><img class="screenshot" alt="Kundenauftrag aus Angebot erstellen" src="https://frappe.github.io/erpnext/assets/img/selling/make-SO-from-quote.png"></p>
+
+<p>Oder Sie erstellen einen neuen Kundenauftrag und entnehmen die Details aus dem Angebot.</p>
+
+<p><img class="screenshot" alt="Kundenauftrag aus Angebot erstellen" src="https://frappe.github.io/erpnext/assets/img/selling/make-so.gif"></p>
+
+<p>Die meisten Informationen im Kundenauftrag sind dieselben wie im Angebot. Einige Dinge möchte der Kundenauftrag aber aktualisiert haben.</p>
+
+<ul>
+<li>Voraussichtlicher Liefertermin</li>
+<li>Kundenbestellnummer: Wenn Ihnen Ihr Kunde einen Kundenauftrag geschickt hat, können Sie dessen Nummer als Refernz für die Zukunft (Abrechnung) erfassen.</li>
+</ul>
+
+<h3>Packliste</h3>
+
+<p>Die Tabelle "Packliste" wird automatisch aktualisiert, wenn Sie den Kundenauftrag abspeichern. Wenn einer der Artikel in Ihrer Tabelle ein Produkt-Bundle (Paket) ist, dann enthält die Packliste eine aufgelöste Übersicht Ihrer Artikel.</p>
+
+<h3>Reservierung und Lager</h3>
+
+<p>Wenn Ihr Kundenauftrag Artikel enthält, für die das Lager nachverfolgt wird ("Ist Lagerartikel" ist mit JA markiert), dann fragt sie ERPNext nach einem Reservierungslager. Wenn Sie ein Standard-Lager für den Artikel eingestellt haben, wird dieses automatisch verwendet.</p>
+
+<p>Die "reservierte" Menge hilft Ihnen dabei, die Menge abzuschätzen, die Sie basierend auf all Ihren Verpflichtungen einkaufen müssen.</p>
+
+<h3>Vertriebsteam</h3>
+
+<p><strong>Vertriebspartner:</strong> Wenn ein Verkauf über einen Vertriebspartner gebucht wurde, können Sie die Einzelheiten des Vertriebspartners mit der Provision und anderen gesammelten Informationen aktualisieren.</p>
+
+<p><strong>Vertriebsperson:</strong> ERPNext erlaubt es Ihnen verschiedene Vertriebspersonen zu markieren, die an diesem Geschäft mitgearbeitet haben. Sie können auch den Anteil an der Zielerreichung auf die Vertriebspersonen aufteilen und nachverfolgen wieviele Prämien sie mit diesem Geschäft verdient haben.</p>
+
+<h3>Wiederkehrende Kundenaufträge</h3>
+
+<p>Wenn Sie mit einem Kunden einen Serienkontrakt vereinbart haben, bei dem Sie einen monatlichen, vierteljährlichen, halbjährlichen oder jährlichen Kundenauftrag generieren müssen, können Sie hierfür "In wiederkehrende Bestellung umwandeln" aktivieren.</p>
+
+<p>Hier können Sie folgende Details eingeben: Wie häufig Sie eine Bestellung generieren wollen im Feld "Wiederholungstyp", an welchem Tag des Monats die Bestellung generiert werden soll im Feld "Wiederholen an Tag des Monats" und das Datum an dem die wiederkehrenden Bestellungen eingestellt werden sollen im Feld "Enddatum".</p>
+
+<p><strong>Wiederholungstyp:</strong> Hier können Sie die Häufigkeit in der Sie eine Bestellung generieren wollen eingeben.</p>
+
+<p><strong>Wiederholen an Tag des Monats:</strong> Sie können angeben, an welchem Tag des Monats die Bestellung generiert werden soll.</p>
+
+<p><strong>Enddatum:</strong> Das Datum an dem die wiederkehrenden Bestellungen eingestellt werden sollen.</p>
+
+<p>Wenn Sie den Kundenauftrag aktualisieren, wird eine wiederkehrende ID generiert, die für alle wiederkehrenden Bestellungen dieses speziellen Kundenauftrag gleich ist.</p>
+
+<p>ERPNext erstellt automatisch eine neue Bestellung und versendet eine E-Mail-Mitteilung an die E-Mail-Konten, die Sie im Feld "Benachrichtigungs-E-Mail-Adresse" eingestellt haben.</p>
+
+<p><img class="screenshot" alt="Wiederkehrende Kundenaufträge" src="https://frappe.github.io/erpnext/assets/img/selling/recurring-sales-order.png"></p>
+
+<h3>Die nächsten Schritte</h3>
+
+<p>In dem Moment, in dem Sie Ihren Kundenauftrag "übertragen" haben, können Sie nun verschiedene Aktionen im Unternehmen anstossen:</p>
+
+<ul>
+<li>Um den Beschaffungsvorgang einzuleiten klicken Sie auf "Materialanforderung"</li>
+<li>Um den Versand einzuleiten klicken Sie auf "Auslieferung"</li>
+<li>Um eine Rechnung zu erstellen klicken Sie auf "Rechnung"</li>
+<li>Um den Prozess anzuhalten, klicken Sie auf "Anhalten"</li>
+</ul>
+
+<h3>Übertragung</h3>
+
+<p>Der Kundenauftrag ist eine "übertragbare" Transaktion. Sehen Sie hierzu auch die Dokumentenphasen. Sie können abhängige Schritte (wie einen Lieferschein zu erstellen) erst dann durchführen, wenn Sie den Kundenauftrag übertragen haben.</p>
+
+<h3>Kundenauftrag mit Wartungsauftrag</h3>
+
+<p>Wenn der Bestelltyp des Kundenauftrags "Wartung" ist, folgen Sie bitte unten dargestellten Schritten:</p>
+
+<ul>
+<li><strong>Schritt 1:</strong> Geben Sie die Währung, die Preisliste und die Artikeldetails ein.</li>
+<li><strong>Schritt 2:</strong> Berücksichtigen Sie Steuern und andere Informationen.</li>
+<li><strong>Schritt 3:</strong> Speichern und übertragen Sie das Formular.</li>
+<li><strong>Schritt 4:</strong> Wenn das Formular übertragen wurde, zeigt die Aktionsschaltfläche drei Auswahlmöglichkeiten: 1) Wartungsbesuch 2) Wartungsplan 3) Rechnung</li>
+</ul>
+
+<blockquote>
+  <p><strong>Anmerkung 1:</strong> Wenn Sie auf die Aktionsschaltfläche klicken und "Wartungsbesuch" auswählen können Sie das Besuchsformular direkt ausfüllen. Die Details werden automatisch aus dem Kundenauftrag übernommen.</p>
+  
+  <p><strong>Anmerkung 2:</strong> Wenn Sie auf die Aktionsschaltfläche klicken und "Wartungsplan" auswählen, können Sie die Details zum Wartungsplan eintragen. Die Details werden autmomatisch aus dem Kundenauftrag übernommen.</p>
+  
+  <p><strong>Anmerkung 3:</strong> Wenn Sie auf die Schaltfläche "Rechnung" klicken, können Sie eine Rechnung für die Wartungsarbeiten erstellen. Die Details werden automatisch aus dem Kundenauftrag übernommen.</p>
+</blockquote>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="setup">Einrichtung</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="icon icon-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/selling/sales-order.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

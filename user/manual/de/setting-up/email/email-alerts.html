@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>E-Mail-Benachrichtigung</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="E-Mail-Benachrichtigung" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:title" content="E-Mail-Benachrichtigung" data-html-block="meta_block">
+<meta name="twitter:title" content="E-Mail-Benachrichtigung" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/de/setting-up/email/email-alerts">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-email-alerts" data-path="user/manual/de/setting-up/email/email-alerts"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/de/setting-up/email">
+		E-Mail</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>E-Mail-Benachrichtigung</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="email-alerts" style="text-align: Left">
+	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+
+<p>Sie können verschiedene E-Mail-Benachrichtigungen in Ihrem System einstellen, um Sie an wichtige Aktivitäten zu erinnern, beispielsweise an:</p>
+
+<p>1. das Enddatum einer Aufgabe.</p>
+
+<p>2. einen vom Kunden erwarteten Liefertermin eines Kundenauftrages.</p>
+
+<p>3. einen vom Lieferanten erwarteten Zahlungstermin.</p>
+
+<p>4. eine Erinnerung zum Nachfassen.</p>
+
+<p>5. Wenn der Wert einer Bestellung einen bestimmten Betrag überschreitet.</p>
+
+<p>6. Wenn ein Vertrag ausläuft.</p>
+
+<p>7. Wenn eine Aufgabe abgeschlossen ist oder Ihren Status ändert.</p>
+
+<p>Hierfür müssen Sie eine E-Mail-Erinnerung einstellen.</p>
+
+<blockquote>
+  <p>Einstellungen &gt; E-Mail &gt; E-Mail-Benachrichtigung</p>
+</blockquote>
+
+<h3>Einen Alarm einstellen</h3>
+
+<p>Um eine E-Mail-Erinnerung einzustellen, gehen Sie wie folgt vor:</p>
+
+<p>1. Wählen Sie das Dokument aus, welches Sie beobachten wollen.</p>
+
+<p>2. Geben Sie an, welche Ereignisse Sie beobachten wollen. Ereignisse sind:</p>
+
+<p>2.1 Neu: Wenn ein Dokument des gewählten Typs erstellt wird.</p>
+
+<p>2.2 Speichern / Übertragen / Stornieren: Wenn ein Dokument des gewählten Typs gespeichert, übertragen oder storniert wird.</p>
+
+<p>2.3 Änderung des Wertes: Wenn sich ein bestimmter Wert ändert.</p>
+
+<p>2.4 Tage vor / Tage nach: Stellen Sie eine Benachrichtigung einige Tage vor oder nach einem <strong>Referenzdatum</strong> ein. Um die Anzahl der Tage einzugeben, geben Sie einen Wert in <strong>Tage vor oder nach</strong> ein. Das kann sehr nützlich sein, wenn es sich um Fälligkeitstermine handelt oder es um das Nachverfolgen von Leads oder Angeboten geht.</p>
+
+<p>3. Stellen Sie, wenn Sie möchten, Zusatzbedingungen ein.</p>
+
+<p>4. Geben Sie die Empfänger der Erinnerung an. Der Empfänger kann sowohl über ein Feld des Dokumentes als auch über eine feste Liste ausgewählt werden.</p>
+
+<p>5. Verfassen Sie die Nachricht.</p>
+
+<hr />
+
+<h4>Beispiel</h4>
+
+<p>1. <a href="img class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/email/email-alert-1.png"">Kriterien definieren</a></p>
+
+<p>2. <a href="img class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/email/email-alert-2.png"">Empfänger und Nachrichtentext eingeben</a></p>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="email-digest.html">Täglicher E-Mail-Bericht</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="icon icon-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/setting-up/email/email-alerts.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Benutzer-Berechtigungen</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Benutzer-Berechtigungen" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:title" content="Benutzer-Berechtigungen" data-html-block="meta_block">
+<meta name="twitter:title" content="Benutzer-Berechtigungen" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/de/setting-up/users-and-permissions/user-permissions">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-user-permissions" data-path="user/manual/de/setting-up/users-and-permissions/user-permissions"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/de/setting-up/users-and-permissions">
+		Benutzer und Berechtigungen</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Benutzer-Berechtigungen</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="user-permissions" style="text-align: Left">
+	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+
+<p>Verwenden Sie den Benutzerberechtigungen-Manager um den Zugriff eines Benutzers auf eine Menge von Dokumenten einzuschränken.</p>
+
+<p>Rollenbasierte Berechtigungen definieren den Rahmen an Dokumententypen, innerhalb derer sich ein Benutzer mit einer Anzahl von Rollen bewegen darf. Sie können jedoch noch feinere Einstellungen treffen, wenn Sie für einen Benutzer Benutzerberechtigungen definieren. Wenn Sie bestimmte Dokumente in der Liste der Benutzerberechtigungen eintragen, dann können Sie den Zugriff dieses Benutzers auf bestimmte Dokumente eines bestimmten DocTypes begrenzen, unter der Bedingung, dass die Option "Benutzerberechtigungen anwenden" im Rollenberechtigungs-Manager aktiviert ist.</p>
+
+<p>Beginnen Sie wie folgt:</p>
+
+<blockquote>
+  <p>Einstellungen &gt; Berechtigungen &gt; Benutzerrechte-Manager</p>
+</blockquote>
+
+<p>Abbildung: Übersicht aus dem Benutzerberechtigungs-Manager die aufzeigt, wie Benutzer nur auf bestimmte Firmen zugreifen können</p>
+
+<h4>Beispiel:</h4>
+
+<p>Der Benutzer "aromn@example.com" hat die Rolle "Nutzer Vertrieb" und wir möchten die Zugriffsrechte des Benutzers so einschränken, dass er nur auf Datensätze einer bestimmten Firma, nämlich der Wind Power LLC, zugreifen kann.</p>
+
+<p>1. Wir fügen eine Benutzerberechtigungs-Zeile für die Firma hinzu.</p>
+
+<p>Abbildung: Hinzufügen einer Zeile "Benutzer-Berechtigung" für die Kombination aus dem Benutzer "aromn@example.com" und der Firma Wind Power LLC</p>
+
+<p>2. Die Rolle "Alle" hat nur Leseberechtigungen für die Firma, "Benutzer-Berechtigungen anwenden" ist aktiviert.</p>
+
+<p>Abbildung: Leseberechtigung mit aktivierter Option "Benutzer-Berechtigungen anwenden" für den DocType Firma</p>
+
+<p>3. Die oben abgebildete Kombination der zwei Regeln führt dazu, dass der Benutzer "aromn@example.com" für die Firma Wind Power LLC nur Leserechte hat.</p>
+
+<p>Abbildung: Der Zugriff wird auf die Firma Wind Power LLC beschränkt</p>
+
+<p>4. Wir möchten nun diese Benutzer-Berechtigung für "Firma" auf andere Dokumente wie "Angebot", "Kundenauftrag" etc. übertragen. Diese Formulare haben <strong>Verknüpfungsfelder zu "Firma"</strong>. Als Ergebnis werden Benutzer-Berechtigungen von "Firma" auch auf diese Dokumente übertragen, was dazu führt, dass der Benutzer "aromn@example.com" auf diese Dokumente zugreifen kann, wenn Sie mit Wind Power LLC verbunden sind.</p>
+
+<p>Abbildung: Benutzer mit der Rolle "Nutzer Vertrieb" können, basierend auf Ihren Benutzer-Berechtigungen, Angebote lesen, schreiben, erstellen, übertragen und stornieren, wenn "Benutzer-Berechtigungen anwenden" aktiviert ist.</p>
+
+<p>Abbildung: Die Auflistung der Angebote enthält nur Ergebnisse für die Firma Wind Power LLC für den Benutzer "aromn@example.com"</p>
+
+<p>5. Benutzer-Berechtigungen werden automatisch auf Basis von verknüpften Feldern angewandt, genauso wie wir es bei den Angeboten gesehen haben. Aber: Das Lead-Formular hat vier Verknüpfungsfelder: "Region", "Firma", "Eigentümer des Leads" und "Nächster Kontakt durch". Nehmen wir an, Sie möchten dass die Leads den Zugriff des Benutzers basierend auf Ihrer Region einschränken, obwohl Sie für die DocTypes "Benutzer", "Region" und "Firma" Benutzer-Berechtigungen angelegt haben. Dann gehen Sie wir folgt vor: Aktivieren Sie die Option "Benutzer-Berechtigungen ignorieren" für die Verknüpfungsfelder "Firma", "Eigentümer des Leads" und "Nächster Kontakt durch".</p>
+
+<p>Abbildung: Der Vertriebsmitarbeiter kann Leads lesen, schreiben und erstellen, eingeschränkt durch Benutzer-Berechtigungen.</p>
+
+<p>Abbildung: Markieren Sie "Benutzer-Berechtigungen ignorieren" für die Felder "Firma", "Lead-Inhaber" und "Nächster Kontakt durch" über Setup &gt; Anpassen &gt; Formular anpassen &gt; Lead.</p>
+
+<p>Abbildung: Aufgrund der obigen Kombination kann der Benutzer "aromn@example.com" nur auf Leads der Region "United States" zugreifen.</p>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="sharing.html">Teilen</a></p></p>
+
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="icon icon-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/setting-up/users-and-permissions/user-permissions.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

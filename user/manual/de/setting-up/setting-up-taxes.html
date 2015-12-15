@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Steuern einrichten</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Steuern einrichten" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/taxes/item-tax.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/taxes/item-tax.png" data-html-block="meta_block">
+<meta name="og:title" content="Steuern einrichten" data-html-block="meta_block">
+<meta name="twitter:title" content="Steuern einrichten" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/taxes/item-tax.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/de/setting-up/setting-up-taxes">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-setting-up-taxes" data-path="user/manual/de/setting-up/setting-up-taxes"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/de/setting-up">
+		Einstellungen</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Steuern einrichten</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="setting-up-taxes" style="text-align: Left">
+	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+
+<p>Eine der hauptsächlichen Antriebskräfte für die zwingende Verwendung des Buchhaltungswerkzeuges ist die Kalkulation von Steuern. Egal ob Sie Geld verdienen oder nicht, Ihre Regierung tut es (und hilft damit Ihrem Land sicher und wohlhabend zu sein). Und wenn Sie Ihre Steuern nicht richtig berechnen, dann ist sie sehr unglücklich. Gut, lassen wir die Philosophie mal beiseite. ERPNext ermöglicht es Ihnen konfigurierbare Steuervorlagen zu erstellen, die Sie bei Ihren Ver- und Einkäufen verwenden können.</p>
+
+<h3>Steuerkonten</h3>
+
+<p>Steuerkonten, die Sie in der Steuervorlage verwenden möchten, müssen Sie im Kontenplan als "Steuer" markieren.</p>
+
+<h3>Artikelsteuer</h3>
+
+<p>Wenn einige Ihrer Artikel einer anderen Besteuerung unterliegen als andere, geben Sie diese in der Artikelsteuer-Tabelle an. Auch dann, wenn Sie Ihre Verkaufs- und Einkaufssteuern als Standardsteuersätze hinterlegt haben, verwendet das System für Kalkulationen den Artikelsteuersatz. Die Artikelsteuer hat Vorrang gegenüber anderen Verkaufs- oder Einkaufssteuern. Wenn Sie jedoch die Standard-Verkaufs- und Einkaufssteuern verwenden wollen, geben Sie bitte keine Artikelsteuer in den Artikelstammdaten an. Dann entscheidet sich das System für die Verkaufs- und Einkaufssteuersätze, die Sie als Standardsätze festgelegt haben.</p>
+
+<p>Die Tabelle zu den Artikelsteuern ist ein Abschnitt in den Artikelstammdaten.</p>
+
+<p><img class="screenshot" alt="Artikelsteuer" src="https://frappe.github.io/erpnext/assets/img/taxes/item-tax.png"></p>
+
+<ul>
+<li><strong>Inklusive oder Exklusive Steuer:</strong> ERPNext erlaubt es Ihnen Artikelpreise inklusive Steuer einzugeben.</li>
+</ul>
+
+<p><img class="screenshot" alt="Steuer inklusive" src="https://frappe.github.io/erpnext/assets/img/taxes/inclusive-tax.png"></p>
+
+<ul>
+<li><strong>Ausnahme von der Regel:</strong> Die Einstellungen zur Artikelsteuer werden nur dann benötigt, wenn sich der Steuersatz eines bestimmten Artikels von demjenigen, den Sie im Standard-Steuerkonto definiert haben, unterscheidet.</li>
+<li><strong>Die Artikelsteuer kann überschrieben werden:</strong> Sie können den Artikelsteuersatz überschreiben oder ändern, wenn Sie in der Artikelsteuertabelle zu den Artikelstammdaten gehen.</li>
+</ul>
+
+<h3>Vorlage für Verkaufssteuern und -abgaben</h3>
+
+<p>Normalerweise müssen Sie die von Ihren Kunden an Sie gezahlten Steuern sammeln und an den Staat abführen. Manchmal kann es vorkommen, dass Sie mehrere unterschiedliche Steuern an verschiedene Staatsorgane abführen müssen, wie z. B. an Gemeinden, Bund, Länder oder europäische Organisationen.</p>
+
+<p>ERPNext ermittelt Steuern über Vorlagen. Andere Arten von Abgaben, die für Ihre Rechnungen Relevanz haben (wie Versandgebühren, Versicherung, etc.) können genauso wie Steuern eingestellt werden.</p>
+
+<p>Wählen Sie eine Vorlage und passen Sie diese gemäß Ihren Wünschen an.</p>
+
+<p>Um eine neue Vorlage zu einer Verkaufssteuer z. B. mit dem Namen Vorlage für Verkaufssteuern und -abgaben zu erstellen, gehen Sie zu:</p>
+
+<blockquote>
+  <p>Einstellungen &gt; Rechnungswesen &gt; Vorlage für Verkaufssteuern und -abgaben</p>
+</blockquote>
+
+<p><img class="screenshot" alt="Vorlage für Verkaufssteuern" src="https://frappe.github.io/erpnext/assets/img/taxes/sales-tax-master.png"></p>
+
+<p>Wenn Sie eine neue Vorlage erstellen, müssen Sie für jeden Steuertyp eine neue Zeile einfügen.</p>
+
+<p>Der Steuersatz, den Sie hier definieren, wird zum Standardsteuersatz für alle Artikel. Wenn es Artikel mit davon abweichenden Steuersätzen gibt, müssen Sie in den Stammdaten über die Tabelle Artikelsteuer hinzugefügt werden.</p>
+
+<p>In jeder Zeile müssen Sie folgendes angeben:</p>
+
+<ul>
+<li><p>Typ der Kalulation:</p>
+
+<ul>
+<li>Auf Nettosumme: Hier wird auf Basis der Nettogesamtsumme (Gesamtbetrag ohne Steuern) kalkuliert.</li>
+<li><p>Auf vorherige Zeilensumme/vorherigen Zeilenbetrag: Sie können Steuern auf Basis der vorherigen Zeilensumme/des vorherigen Zeilenbetrags ermitteln. Wenn Sie diese Option auswählen, wird die Steuer als Prozenzsatz der vorherigen Zeilensumme/des vorherigen Zeilenbetrags (in der Steuertabelle) angewandt. "Vorheriger Zeilenbetrag" meint hierbei einen bestimmten Steuerbetrag. Und "Vorherige Zeilensumme" bezeichnet die Nettosumme zuzüglich der zutreffenden Steuern in dieser Zeile. Geben Sie über das Feld "Zeile eingeben" die Zeilennummer an auf die die aktuell ausgewählte Steuer angewendet werden soll. Wenn Sie die Steuer auf die dritte Zeile anwenden wollengeben Sie im Eingabefeld "3" ein.</p></li>
+<li><p>Geben Sie in die Spalte "Satz" den aktuellen Wert für den Steuersatz ein.</p></li>
+</ul></li>
+<li><p>Kontenbezeichnung: Die Bezeichnung des Kontos, unter dem diee Steuer verbucht werden soll.</p></li>
+<li>Kostenstelle: Wenn es sich bei der Steuer/Abgabe um einen Ertrag handelt (wie z. B. die Versandgebühren) muss sie zu einer Kostenstelle gebucht werden.</li>
+<li>Beschreibung: Beschreibung der Steuer (wird in Rechnungen und Angeboten angedruckt)</li>
+<li>Satz: Steuersatz</li>
+<li>Betrag: Steuerbetrag</li>
+<li>Gesamtsumme: Gesamtsumme bis zu diesem Punkt.</li>
+<li>Zeile eingeben: Wenn die Kalkulation auf Basis "vorherige Zeilensumme" erfolgt, können Sie die Zeilennummer auswählen, die für die Kalkulation zugrunde gelegt wird (Standardeinstellung ist hier die vorhergehende Zeile).</li>
+<li>Ist diese Steuer im Basissatz enthalten?: Wenn Sie diese Option ankreuzen heißt das, dass diese Steuer nicht am Ende der Artikeltabelle angezeigt wird, aber Ihrer Hauptartikeltabelle miteinbezogen wird. Dies ist dann nützlich, wenn Sie Ihrem Kunden einen runden Preis geben wollen (inklusive aller Steuern).</li>
+</ul>
+
+<p>Wenn Sie Ihre Vorlage eingerichtet haben, können Sie diese in Ihren Verkaufstransaktionen auswählen.</p>
+
+<h3>Vorlage für Einkaufssteuern und -abgaben</h3>
+
+<p>Die Vorlage für Einkaufssteuern und -abgaben ist ähnlich der Vorlage für Verkaufssteuern und -abgaben.</p>
+
+<p>Diese Steuervorlage verwenden Sie für Lieferantenaufträge und Eingangsrechnungen. Wenn Sie mit Mehrwertsteuern (MwSt) zu tun haben, bei denen Sie dem Staat die Differenz zwischen Ihren Eingangs- und Ausgangssteuern zahlen, können Sie das selbe Konto wie für Verkaufssteuern verwenden.</p>
+
+<p>Die Spalten in dieser Tabelle sind denen in der Vorlage für Verkaufssteuern und -abgaben ähnlich mit folgendem Unterschied.</p>
+
+<p>Steuern oder Gebühren berücksichtigen für: In diesem Abschnitt können Sie angeben, ob die Steuer/Abgabe nur für die Bewertung (kein Teil der Gesamtsumme) oder nur für die Gesamtsumme (fügt dem Artikel keinen Wert hinzu) oder für beides wichtig ist.</p>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="pos-setting.html">Einstellungen zum Verkaufsort (Point of Sale)</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="icon icon-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/setting-up/setting-up-taxes.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

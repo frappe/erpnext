@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Kontenplan</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Kontenplan" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/accounts/financial-analytics-bl.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/accounts/financial-analytics-bl.png" data-html-block="meta_block">
+<meta name="og:title" content="Kontenplan" data-html-block="meta_block">
+<meta name="twitter:title" content="Kontenplan" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/accounts/financial-analytics-bl.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/de/accounts/chart-of-accounts">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-chart-of-accounts" data-path="user/manual/de/accounts/chart-of-accounts"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/de/accounts">
+		Rechnungswesen</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Kontenplan</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="chart-of-accounts" style="text-align: Left">
+	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+
+<p>Der Kontenplan bildet die Blaupause Ihres Unternehmens. Die Rahmenstruktur Ihres Kontenplans basiert auf einem System der doppelten Buchführung, die auf der ganzen Welt zum Standard der finanziellen Bewertung eines Unternehmens geworden ist.</p>
+
+<p>Der Kontenplan hilft Ihnen bei der Beantwortung folgender Fragen:</p>
+
+<ul>
+<li>Was ist Ihre Organisation wert?</li>
+<li>Wieviele Schulden haben Sie?</li>
+<li>Wieviel Gewinn erwirtschaften Sie (und in diesem Zuge auch, wieviele Steuern zahlen Sie?)</li>
+<li>Wieviel Umsatz generieren Sie?</li>
+<li>Wie setzen sich Ihre Ausgaben zusammen?</li>
+</ul>
+
+<p>Als Manager werden Sie zu schätzen wissen, wenn Sie beurteilen können wie Ihr Geschäft läuft.</p>
+
+<blockquote>
+  <p>Tipp: Wenn Sie eine Bilanz nicht lesen können (es hat lange gedauert bis wir das konnten), dann ist jetzt eine gute Gelegenheit es zu erlernen. Es wird die Mühe wert sein. Sie können auch die Hilfe Ihres Buchhalters in Anspruch nehmen, wenn Sie Ihren Kontenplan einrichten möchten.</p>
+</blockquote>
+
+<p>Sie können in ERPNext leicht die finanzielle Lage Ihres Unternehmens einsehen. Ein Beispiel für eine Finanzanalyse sehen Sie unten abgebildet.</p>
+
+<p><img class="screenshot" alt="Finanzanalyse Bilanz" src="https://frappe.github.io/erpnext/assets/img/accounts/financial-analytics-bl.png"></p>
+
+<p>Um Ihren Kontenplan in ERPNext zu bearbeiten gehen Sie zu:</p>
+
+<blockquote>
+  <p>Rechnungswesen &gt; Einstellungen &gt; Kontenplan</p>
+</blockquote>
+
+<p>Im Kontenplan erhalten Sie eine Baumstruktur der Konten(bezeichnungen) und Kontengruppen, die ein Unternehmen benötigt um seine Buchungsvorgänge vornehmen zu können. ERPNext richtet für jede neu angelegte Firma einen einfachen Kontenrahmen ein, aber Sie müssen noch Anpassungen vornehmen, damit Ihren Anforderungen und gesetzlichen Bestimmungen Genüge geleistet wird. Der Kontenplan gibt für jede Firma an, wie Buchungssätze klassifiziert werden, meistens aufgrund gesetzlicher Vorschriften (Steuern und Einhaltung staatlicher Regelungen).</p>
+
+<p>Lassen Sie uns die Hauptgruppen des Kontenplans besser verstehen lernen.</p>
+
+<p><img class="screenshot" alt="Kontenplan" src="https://frappe.github.io/erpnext/assets/img/accounts/chart-of-accounts-1.png"></p>
+
+<h3>Bilanzkonten</h3>
+
+<p>Die Bilanz beinhaltet Vermögenswerte (Mittelverwendung) und Verbindlichkeiten (Mittelherkunft), die den Nettowert Ihres Unternehmens zu einem bestimmten Zeitpunkt angeben. Wenn Sie eine Finanzperiode beginnen oder beenden dann ist die Gesamtsumme aller Vermögenswerte gleich den Verbindlichkeiten.</p>
+
+<blockquote>
+  <p>Buchhaltung: Wenn Sie in Bezug auf Buchhaltung Anfänger sind, wundern Sie sich vielleicht, wie das Vermögen gleich den Verbindlichkeiten sein kann? Das würde ja heißen, dass das Unternehmen selbst nichts besitzt. Das ist auch richtig. Alle Investitionen, die im Unternehmen getätigt werden, um Vermögen anzuschaffen (wie Land, Möbel, Maschinen) werden von den Inhabern getätigt und sind für das Unternehmen eine Verbindlichkeit. Wenn das Unternehmen schliessen möchte, müssen alle Vermögenswerte verkauft werden und die Verbindlichkeiten den Inhabern zurückgezahlt werden (einschliesslich der Gewinne), es bleibt nichts übrig.</p>
+</blockquote>
+
+<p>So repräsentieren in dieser Sichtweise alle Konten ein Vermögen des Unternehmens, wie Bank, Grundstücke, Geschäftsausstattung, oder eine Verbindlichkeit (Kapital welches das Unternehmen anderen schuldet), wie Eigenkapital und diverse Verbindlichkeiten.</p>
+
+<p>Zwei besondere Konten, die in diesem Zuge angesprochen werden sollten, sind die Forderungen (Geld, welches Sie noch von Ihren Kunden bekommen) und die Verbindlichkeiten (aus Lieferungen und Leistungen) (Geld, welches Sie noch an Ihre Lieferanten zahlen müssen), jeweils dem Vermögen und den Verbindlichkeiten zugeordnet.</p>
+
+<h3>Gewinn- und Verlustkonten</h3>
+
+<p>Gewinn und Verlust ist die Gruppe von Ertrags- und Aufwandskonten, die Ihre Buchungstransaktionen eines Zeitraums repräsentieren.</p>
+
+<p>Entgegen den Bilanzkonten, repräsentieren Gewinn und Verlustkonnten (GuV) keine Nettowerte (Vermögen), sondern die Menge an Geld, welche im Zuge von Geschäften mit Kunden in einem Zeitraum ausgegeben oder verdient wird. Deshalb sind sie auch zu Beginn und zum Ende eines Geschäftsjahres gleich 0.</p>
+
+<p>In ERPNext ist es einfach eine graphische Auswertung von Gewinn und Verlust zu erstellen. Im Folgenden ist ein Beispiel einer GuV-Analyse abgebildet:</p>
+
+<p><img class="screenshot" alt="Finanzanalyse GuV" src="https://frappe.github.io/erpnext/assets/img/accounts/financial-analytics-pl.png"></p>
+
+<p>(Am ersten Tag eines Jahres haben Sie noch keinen Gewinn oder Verlust gemacht, aber Sie haben bereits Vermögen, deshalb haben Bestandskonten zum Anfang oder Ende eines Zeitraums einen Wert.)</p>
+
+<h3>Gruppen und Hauptbücher</h3>
+
+<p>Es gibt in ERPNext zwei Hauptgruppen von Konten: Gruppen und Bücher. Gruppen können Untergruppen und Bücher haben, wohingegen Bücher die Knoten Ihres Plans sind und nicht weiter unterteilt werden können.</p>
+
+<p>Buchungstransaktionen können nur zu Kontobüchern erstellt werden (nicht zu Gruppen).</p>
+
+<blockquote>
+  <p>Info: Der Begriff "Hauptbuch" bezeichnet eine Aufzeichnung, in der Buchungen verzeichnet sind. Normalerweise gibt es für jedes Konto (wie z. B. einem Kunden oder Lieferanten) nur ein Buch.</p>
+  
+  <p>Anmerkung: Ein Kontenbuch wird manchmal auch als Kontokopf bezeichnet.</p>
+</blockquote>
+
+<p><img class="screenshot" alt="Kontenplan" src="https://frappe.github.io/erpnext/assets/img/accounts/chart-of-accounts-2.png"></p>
+
+<h3>Andere Kontentypen</h3>
+
+<p>Wenn sie in ERPNext ein neues Konto anlegen, können Sie dazu auch Informationen mit angeben, und zwar deshalb, weil es eine Hilfe sein kann, in einem bestimmte Szenario, ein bestimmtes Konto, wie Bankkonto ein Steuerkonto, auszuwählen. Das hat auf den Kontenrahmen selbst keine Auswirkung.</p>
+
+<h3>Konten erstellen und bearbeiten</h3>
+
+<p>Um ein neues Konto zu erstellen, gehen Sie Ihren Kontenplan durch und klicken Sie auf die Kontengruppe unter der Sie das neue Konto erstellen wollen. Auf der rechten Seite finden Sie die Option ein neues Konto zu "öffnen" oder ein Unterkonto zu erstellen.</p>
+
+<p><img class="screenshot" alt="Kontenplan" src="https://frappe.github.io/erpnext/assets/img/accounts/chart-of-accounts-3.png"></p>
+
+<p>Die Option zum Erstellen erscheint nur dann, wenn Sie auf ein Konto vom Typ Gruppe (Ordner) klicken.</p>
+
+<p>ERPNext legt eine Standardkontenstruktur an, wenn eine Firma angelegt wird. Es liegt aber an Ihnen, Konten zu bearbeiten, hinzuzufügen oder zu löschen.</p>
+
+<p>Typischerweise werden Sie vielleicht Konten hierfür anlegen wollen:</p>
+
+<ul>
+<li>Aufwandskonten (Reisen, Gehälter, Telefon) unter Aufwände</li>
+<li>Steuern (Mehrwertsteuer, Verkaufssteuer je nach Ihrem Land) unter kurzfristige Verbindlichkeiten</li>
+<li>Verkaufsarten (z. B. Produktverkäufe, Dienstleistungsverkäufe) unter Erträge</li>
+<li>Vermögenstypen (Gebäude, Maschinen, Geschäftsausstattung) unter Anlagevermögen</li>
+</ul>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="making-payments.html">Zahlungen durchführen</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="icon icon-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/accounts/chart-of-accounts.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

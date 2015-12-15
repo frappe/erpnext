@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Benutzerdefinierter DocType</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Benutzerdefinierter DocType" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/setup/customize/doctype-basics.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/setup/customize/doctype-basics.png" data-html-block="meta_block">
+<meta name="og:title" content="Benutzerdefinierter DocType" data-html-block="meta_block">
+<meta name="twitter:title" content="Benutzerdefinierter DocType" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/setup/customize/doctype-basics.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/de/customize-erpnext/custom-doctype">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-custom-doctype" data-path="user/manual/de/customize-erpnext/custom-doctype"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/de/customize-erpnext">
+		ERPNext anpassen</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Benutzerdefinierter DocType</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="custom-doctype" style="text-align: Left">
+	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+
+<p>Ein DocType oder Dokumententyp wird dazu verwendet Formulare in ERPNext einzufügen. Formulare wie Kundenauftrag, Ausgangsrechnung und Fertigungsauftrag werden im Hintergrund als DocType verarbeitet. Nehmen wir an, dass wir für ein Buch einen benutzerdefinierten DocType erstellen.</p>
+
+<p>Ein benutzerspezifischer DocType erlaubt es Ihnen nach Ihren Bedürfnissen benutzerspezifische Formulare in ERPNext einzufügen.</p>
+
+<p>Um einen neuen DocType zu erstellen, gehen Sie zu:</p>
+
+<blockquote>
+  <p>Einstellungen &gt; Anpassen &gt; Doctype &gt; Neu</p>
+</blockquote>
+
+<h3>Einzelheiten zum DocType</h3>
+
+<p>1. Modul: Wählen Sie das Modul aus, in dem dieser DocType verwendet wird.</p>
+
+<p>2. Dokumententyp: Geben Sie an, ob dieser DocType Hauptdaten befördern oder Transaktionen nachverfolgen soll. Der DocType für das Buch wird als Vorlage hinzugefügt.</p>
+
+<p>3. Ist Untertabelle: Wenn dieser DocType als Tabelle in einen anderen DocType eingefügt wird, wie die Artikeltabelle in den DocType Kundenauftrag, dann sollten Sie auch "Ist Untertabelle" ankreuzen. Ansonsten nicht.</p>
+
+<p>4. Ist einzeln: Wenn diese Option aktiviert ist, wird dieser DocType zu einem einzeln verwendeten Formular, wie die Vertriebseinstellungen, die nicht von Benutzern reproduziert werden können.</p>
+
+<p>5. Benutzerdefiniert?: Dieses Feld ist standardmäßig aktiviert, wenn ein benutzerdefinierter DocType hinzugefügt wird.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/doctype-basics.png" alt="Grundlagen zum Doctype" /></p>
+
+<h3>Felder</h3>
+
+<p>In der Tabelle Felder können Sie die Felder (Eigenschaften) des DocTypes (Artikel) hinzufügen.</p>
+
+<p>Felder sind viel mehr als Datenbankspalten; sie können sein:</p>
+
+<p>1. Spalten in der Datenbank</p>
+
+<p>2. Wichtig für das Layout (Bereiche, Spaltentrennung)</p>
+
+<p>3. Untertabellen (Feld vom Typ Tabelle)</p>
+
+<p>4. HTML</p>
+
+<p>5. Aktionen (Schaltflächen)</p>
+
+<p>6. Anhänge oder Bilder</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/Doctype-all-fields.png" alt="Felder im DocType" /></p>
+
+<p>Wenn Sie Felder hinzufügen, müssen Sie den <strong>Typ</strong> angeben. Für eine Bereichs- oder Spaltentrennung  ist die <strong>Bezeichnung</strong> optional. Der <strong>Name</strong> (Feldname) ist der Name der Spalte in der Datenbank.</p>
+
+<p>Sie können auch weitere Einstellungen des Feldes eingeben, so z. B. ob es zwingend erforderlich ist, schreibgeschützt, usw.</p>
+
+<h3>Benennung</h3>
+
+<p>In diesem Abschnitt können Sie Kriterien definieren nach denen Dokumente dieses DocTypes benannt werden. Es gibt viele verschiedene Kriterien nach denen ein Dokument benannt werden kann, wie z. B. dem Wert in diesem spezifischen Feld, oder die Benamungsserie, oder der Wert der vom Benutzer an der Eingabeaufforderung eingegeben wird, die angezeit wird, wenn ein Dokument abgespeichert wird. Im folgenden Beispiel benennen wir auf Grundlage des Wertes im Feld <strong>book_name</strong>.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/doctype-field-naming.png" alt="Bezeichnung von DocTypes" /></p>
+
+<h3>Berechtigung</h3>
+
+<p>In dieser Tabelle können Sie Rollen und Berechtigungs-Rollen für diese für die betreffenden DocTypes auswählen.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/Doctype-permissions.png" alt="Berechtigungen bei DocTypes" /></p>
+
+<h3>DocTypes abspeichern</h3>
+
+<p>Wenn Sie einen DocType abspeichern, erscheint ein Popup-Fenster über welches Sie den Namen des DocTypes eingeben können.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/Doctype-save.png" alt="DocTypes speichern" /></p>
+
+<h3>Der DocType im System</h3>
+
+<p>Um den DocType zu aktivieren, öffnen Sie das Modul, welches Sie für den DocType definiert haben. Da wird den DocType "Books" im Modul Personalwesen erstellt haben, gehen Sie hierhin um Zugriff zu erhalten:</p>
+
+<blockquote>
+  <p>Personalwesen &gt; Dokumente &gt; Buch</p>
+</blockquote>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/Doctype-list-view.png" alt="Übersicht der DocTypes" /></p>
+
+<h3>Buchvorlage</h3>
+
+<p>Wenn Sie die Felder ausfüllen, schaut das ganze dann so aus.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/Doctype-book-added.png" alt="Übersicht der DocTypes" /></p>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="custom-scripts">Benutzerdefinierte Skripte</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="icon icon-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/customize-erpnext/custom-doctype.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

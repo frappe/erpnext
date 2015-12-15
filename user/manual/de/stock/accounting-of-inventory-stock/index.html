@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Bewertung des Lagerbestandes</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Bewertung des Lagerbestandes" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:title" content="Bewertung des Lagerbestandes" data-html-block="meta_block">
+<meta name="twitter:title" content="Bewertung des Lagerbestandes" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/de/stock/accounting-of-inventory-stock">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-accounting-of-inventory-stock" data-path="user/manual/de/stock/accounting-of-inventory-stock"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/de/stock">
+		Lager</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Bewertung des Lagerbestandes</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="accounting-of-inventory-stock" style="text-align: Left">
+	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+
+<p>Der Wert des verfügbaren Lagerbestandes wird im Kontenplan des Unternehmens als Vermögenswert behandelt. Abhängig von der Art der Artikel wird hier zwischen Anlagevermögen und Umlaufvermögen unterschieden. Um eine Bilanz vorzubereiten, sollten Sie die Buchungen für diese Vermögen erstellen. Es gibt generell zwei unterschiedliche Methoden den Lagerbestand zu bewerten:</p>
+
+<h3>Ständige Inventur</h3>
+
+<p>Bei diesem Prozess bucht das System jede Lagertransaktion um Lagerbestand und Buchbestand zu synchronisieren. Das ist die Standardeinstellung in ERPNext für neue Konten.</p>
+
+<p>Wenn Sie Artikel kaufen und erhalten, werden diese Artikel als Vermögen des Unternehmens gebucht (Warenbestand/Anlagevermögen). Wenn Sie diese Artikel wieder verkaufen und ausliefern, werden Kosten (Selbstkosten) in Höhe der Bezugskosten der Artikel verbucht. Nach jeder Lagertransaktion werden Buchungen im Hauptbuch erstellt. Dies hat zum Ergebnis, dass der Wert im Lagerbuch immer gleich dem Wert in der Bilanz bleibt. Das verbessert die Aussagekraft der Bilanz und der Gewinn- und Verlustrechnung.</p>
+
+<p>Um Buchungen für bestimmte Lagertransaktionen zu überprüfen, bitte unter <a href="https://frappe.github.io/erpnext/user/manual/en/stock/accounting-of-inventory-stock/perpetual-inventory.html">Beispiele</a> nachlesen.</p>
+
+<h4>Vorteile</h4>
+
+<p>Das System der laufenden Inventur macht es Ihnen leichter eine exakte Aussage über Vermögen und Kosten zu erhalten. Die Lagerbilanz wird ständig mit den relevanten Kontoständen abgeglichen, somit müssen keine manuellen Buchungen mehr für jede Periode erstellt werden, um die Salden auszugleichen.</p>
+
+<p>Für den Fall, dass neue zurückdatierte Transaktionen erstellt werden oder Stornierungen von bereits angelegten Transaktionen statt finden, werden für alle Artikel dieser Transaktion alle Buchungen im Lagerbuch und Hauptbuch, die danach liegen, neu berechnet. Auf dieselbe Vorgehensweise wird zurück gegriffen, wenn Kosten zum übertragenen Kaufbeleg hinzugefügt werden, nachgereicht über das Hilfsprogramm für Einstandskosten.</p>
+
+<blockquote>
+  <p>Anmerkung: Die ständige Inventur hängt vollständig von der Artikelbewertung ab. Deshalb müssen Sie bei der Eingabe der Werte vorsichtiger vorgehen, wenn Sie gleichzeitig annehmende Lagertransaktionen wie Kaufbeleg, Materialschein oder Fertigung/Umpacken erstellen.</p>
+</blockquote>
+
+<hr />
+
+<h3>Stichtagsinventur</h3>
+
+<p>Bei dieser Methode werden periodisch manuelle Buchungen erstellt, um die Lagerbilanz und die relevanten Kontenstände abzugleichen. Das System erstellt die Buchungen für Vermögen zum Zeitpunkt des Materialeinkaufs oder -verkaufs nicht automatisch.</p>
+
+<p>Während einer Buchungsperiode werden Kosten in ihrem Buchhaltungssystem gebucht, wenn Sie Artikel kaufen und erhalten. Einen Teil dieser Artikel verkaufen und liefern Sie dann aus.</p>
+
+<p>Am Ende einer Buchungsperiode muss dann der Gesamtwert der verkauften Artikel als Unternehmensvermögen (oft als Warenbestand) gebucht werden.</p>
+
+<p>Die Differenz aus dem Wert der Waren, die noch nicht verkauft wurden, und dem Warenbestand zum Ende der letzten Periode kann positiv oder negativ sein und wird dem Vermögen (Warenbestand/Anlagevermögen) hinzugefügt. Wenn es sich um einen negativen Betrag handelt, erfolgt die Buchung spiegelverkehrt.</p>
+
+<p>Dieser Gesamtprozess wird als Stichtagsinventur bezeichnet.</p>
+
+<p>Wenn Sie als bereits existierender Benutzer die Stichtagsinventur nutzen aber zur Ständigen Inventur wechseln möchten, müssen Sie der Migrationsanleitung folgen. Für weitere Details lesen Sie <a href="https://frappe.github.io/erpnext/user/manual/en/stock/accounting-of-inventory-stock/migrate-to-perpetual-inventory.html">Migration aus der Stichtagsinventur</a>.</p>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="tools">Werkzeuge</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="icon icon-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/stock/accounting-of-inventory-stock/index.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

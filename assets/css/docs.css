@@ -448,7 +448,8 @@ a.btn-primary:visited {
   color: #fff;
 }
 .btn-next-wrapper {
-  margin: 32px 0 16px;
+  margin-top: 32px;
+  text-align: right;
 }
 h2 {
   margin-top: 48px;
@@ -572,21 +573,18 @@ hr {
   margin: 48px 0px 30px;
 }
 .edit {
-  padding-left: 20px;
-  background: url('https://frappe.github.io/erpnext/assets/img/smiley.png') 0% 50% no-repeat;
   color: #8d99a6;
-  display: block;
-  margin-top: -22px;
 }
 a.edit,
 a.edit:hover,
 a.edit:focus,
-a.edit:visited {
+a.edit:visited,
+.edit-container .icon {
   color: #8d99a6;
 }
 .btn-next {
-  margin-top: 16px;
-  float: right;
+  margin-top: 30px;
+  margin-bottom: 0px;
 }
 .btn-next:after {
   content: " \2192";
@@ -603,4 +601,10 @@ a.edit:visited {
 }
 .hero-and-content [data-html-block="hero"] {
   overflow-y: hidden;
+}
+.page-content-wrapper > .row .col-sm-8 {
+  width: 100%;
+}
+.page-content-wrapper > .row .col-sm-4 {
+  display: none;
 }

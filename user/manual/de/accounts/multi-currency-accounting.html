@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Buchungen in unterschiedlichen Währungen</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Buchungen in unterschiedlichen Währungen" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/chart-of-accounts.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/chart-of-accounts.png" data-html-block="meta_block">
+<meta name="og:title" content="Buchungen in unterschiedlichen Währungen" data-html-block="meta_block">
+<meta name="twitter:title" content="Buchungen in unterschiedlichen Währungen" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/chart-of-accounts.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/de/accounts/multi-currency-accounting">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-multi-currency-accounting" data-path="user/manual/de/accounts/multi-currency-accounting"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/de/accounts">
+		Rechnungswesen</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Buchungen in unterschiedlichen Währungen</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="multi-currency-accounting" style="text-align: Left">
+	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+
+<p>In ERPNext können Sie Buchungen in unterschiedlichen Währungen erstellen. Beispiel: Wenn Sie ein Bankkonto in einer Fremdwährung haben, dann können Sie Transaktionen in dieser Währung durchführen und das System zeigt Ihnen den Kontostand der Bank nur in dieser speziellen Währung an.</p>
+
+<h3>Einrichtung</h3>
+
+<p>Um mit Buchungen in unterschiedlichen Währungen zu beginnen, müssen Sie die Buchungswährung im Datensatz des Kontos einstellen. Sie können bei der Anlage eine Währung aus dem Kontenplan auswählen.</p>
+
+<p><img class="screenshot" alt="Währung über den Kontenplan einstellen"    src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/chart-of-accounts.png"></p>
+
+<p>Sie können die Währung auch zuordnen oder bearbeiten, indem Sie den jeweiligen Datensatz für bereits angelegte Konten öffnen. </p>
+
+<p><img class="screenshot" alt="Kontenwährung anpassen"    src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/account.png"></p>
+
+<p>Für Kunden/Lieferanten können Sie die Buchungswährung auch im Gruppendatensatz einstellen. Wenn sich die Buchungswährung der Gruppe von der Firmenwährung unterscheidet, müssen Sie die Standardkonten für Forderungen und Verbindlichkeiten auf diese Währung einstellen.</p>
+
+<p><img class="screenshot" alt="Währung des Kundenkontos"      src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/customer.png"></p>
+
+<p>Wenn Sie die Buchungswährung für einen Artikel oder eine Gruppe eingestellt haben, können Sie Buchungen zu ihnen erstellen. Wenn sich die Buchungswährung der Gruppe von der Firmenwährung unterscheidet, dann beschränkt das System beim Erstellen von Transaktionen für diese Gruppe Buchungen auf diese Währung. Wenn die Buchungswährung die selbe wie die Firmenwährung ist, können Sie Transaktionen für diese Guppe in jeder beliebigen Währung erstellen. Aber die Hauptbuch-Buchungen werden immer in der Buchungswährung der Gruppe vorliegen. In jedem Fall ist die Wärung des Verbindlichkeitenkontos immer gleich der Buchungswährung der Gruppe.</p>
+
+<p>Sie können die Buchungswährung im Datensatz für die Gruppe/das Konto verändern, solange bis Sie Transaktionen für sie erstellen. Nach dem Buchen erlaubt es das System nicht die Buchungswährung für einen Konto- oder Gruppendatensatz zu ändern.</p>
+
+<p>Wenn Sie mehrere Firmen verwalten muss die Buchungswährung der Gruppe für alle Firmen gleich sein.</p>
+
+<h3>Transaktionen</h3>
+
+<h4>Ausgangsrechnung</h4>
+
+<p>In einer Ausgangsrechnung muss die Währung der Transaktion gleich der Buchungswährung des Kunden sein, wenn die Buchungswährung des Kunden anders als die Firmenwährung ist. Andernfalls können sie in der Rechnung jede beliebige Währung auswählen. Bei der Auswahl des Kunden zieht das System das Verbindlichkeitenkonto aus dem Kunden/aus der Firma. Die Währung des Verbindlichkeitenkontos muss die selbe sein wie die Buchungswährung des Kunden.</p>
+
+<p>Nun wird im POS der gezahlte Betrag in der Transaktionswährung eingegeben, im Gegensatz zur vorherigen Firmenwährung. Auch der Ausbuchungsbetrag wird in der Transaktionswährung eingegeben.</p>
+
+<p>Der ausstehende Betrag und Anzahlungsbeträge werden immer in der Währung des Kundenkontos kalkuliert und angezeigt.</p>
+
+<p><img class="screenshot" alt="Offene Ausgangsrechnung"   src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/sales-invoice.png"></p>
+
+<h4>Eingangsrechnung</h4>
+
+<p>In ähnlicher Art und Weise werden in Eingangsrechnungen Buchungen basierend auf der Buchungswährung des Lieferanten durchgeführt. Der ausstehende Betrag und Anzahlungen werden ebenfalls in der Buchungswährung des Lieferanten angezeigt. Abschreibungsbeträge werden nun in der Transaktionswährung eingegeben.</p>
+
+<h4>Buchungssatz</h4>
+
+<p>In einer Journalbuchung können Sie Transaktionen in unterschiedlichen Währungen erstellen. Es gibt ein Auswahlfeld "Unterschiedliche Währungen" um Buchungen in mehreren Währungen zu aktivieren. Wenn die Option "Unterschiedliche Währungen" ausgewählt wurde, können Sie Konten mit unterschiedlichen Währungen auswählen.</p>
+
+<p><img class="screenshot" alt="Wechselkurs im Buchungssatz"   src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/journal-entry-multi-currency.png"></p>
+
+<p>In der Kontenübersicht zeigt das System den Abschnitt Währung an und holt sich die Kontenwährung und den Wechselkurs automatisch, wenn Sie ein Konto mit ausländischer Währung auswählen. Sie können den Wechselkurs später manuell ändern/anpassen.</p>
+
+<p>In einem einzelnen Buchungssatz können Sie nur Konten mit einer alternativen Währung auswählen, abweichend von Konten in der Firmenwährung. Die Beträge für Soll und Haben sollten in der Kontenwährung eingegeben werden, das System berechnet und zeigt dann den Betrag für Soll und Haben automatisch in der Firmenwährung.</p>
+
+<p><img class="screenshot" alt="Buchungssatz mit verschiedenen Währungen"      src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/journal-entry-row.png"></p>
+
+<h4>Beispiel 1: Zahlungsbuchung eines Kunden in alternativer Währung</h4>
+
+<p>Nehmen wir an, dass die Standardwährung einer Firma Indische Rupien ist, und die Buchungswährung des Kunden US-Dollar. Der Kunde zahlt den vollen Rechnungsbetrag zu einer offenen Rechnung in Höhe von 100 US-Dollar. Der Wechselkurs (US-Dollar in Indische Rupien) in der Ausgangsrechnung war mit 60 angegeben.</p>
+
+<p>Der Wechselkurs in der Zahlungsbuchung sollte immer der selbe wie auf der Rechnung (60) sein, auch dann, wenn der Wechselkurs am Tag der Zahlung 62 beträgt. Dem Bankkonto wird der Betrag mit einem Wechselkurs von 62 gut geschrieben. Deshalb wird ein Wechelkursgewinn bzw. -verlust basierend auf dem Unterschied im Wechselkurs gebucht.</p>
+
+<p><img class="screenshot" alt="Zahlungsbuchung"   src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/payment-entry.png"></p>
+
+<h4>Beispiel 2: Überweisung zwischen Banken (US-Dollar -> Indische Rupien)</h4>
+
+<p>Nehmen wir an, dass die Standardwährung der Firma Indische Rupien ist. Sie haben ein Paypal-Konto in der Währung US-Dollar. Sie erhalten auf das Paypal-Konto Zahlungen und wir gehen davon aus, dass Paypal einmal in der Woche Beträge auf Ihr Bankkonto, mit der Währung Indische Rupien, überweist.</p>
+
+<p>Das Paypal-Konto wird an einem anderen Datum mit einem anderen Wechselkurs belastet, als die Gutschrift auf das Bankkonto erfolgt. Aus diesem Grund gibt es normalerweise einen Wechselkursgewinn oder -verlust zur Überweisungsbuchung. In der Überweisungsbuchung stellt das System den Wechselkurs basierend auf dem durchschnittlichen Wechselkurs für eingehende Zahlungen des Paypal-Kontos ein. Sie müssen den Wechelkursgewinn oder -verlust basierend auf dem durchschnittlichen Wechselkurs und dem Wechselkurs am Überweisungstag berechnen und eingeben.</p>
+
+<p>Nehmen wir an, dass das Paypal-Konto folgende Beträge, die noch nicht auf Ihr anderes Bankkonto überwiesen wurden, in einer Woche als Gutschrift erhalten hat.</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <td>Datum</td>
+            <td>Konto</td>
+            <td>Soll (USD)</td>
+            <td>Wechselkurs</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>02.09.2015</td>
+            <td>Paypal</td>
+            <td>100</td>
+            <td>60</td>
+        </tr>
+        <tr>
+            <td>02.09.2015</td>
+            <td>Paypal</td>
+            <td>100</td>
+            <td>61</td>
+        </tr>
+        <tr>
+            <td>02.09.2015</td>
+            <td>Paypal</td>
+            <td>100</td>
+            <td>64</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>Angenommen, der Wechselkurs am Zahlungstag ist 62, dann schaut die Buchung zur Banküberweisung wie folgt aus:</p>
+
+<p><img class="screenshot" alt="Übertrag zwischen den Banken"      src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/bank-transfer.png"></p>
+
+<h3>Berichte</h3>
+
+<h4>Hauptbuch</h4>
+
+<p>Im Hauptbuch zeigt das System den Betrag einer Gutschrift/Lastschrift in beiden Währungen an, wenn nach Konto gefiltert wurde, und wenn die Kontenwährung unterschiedlich zur Firmenwährung ist.</p>
+
+<p><img class="screenshot" alt="Bericht zum Hauptbuch"     src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/general-ledger.png"></p>
+
+<h4>Forderungs- und Verbindlichkeitenkonten</h4>
+
+<p>Im Bericht zu den Konten Forderungen und Verbindlichkeiten zeigt das System alle Beträge in der Währung der Gruppe/in der Kontenwährung an.</p>
+
+<p><img class="screenshot" alt="Bericht zu den Forderungen"    src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/accounts-receivable.png"></p>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="tools">Werkzeuge</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="icon icon-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/accounts/multi-currency-accounting.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

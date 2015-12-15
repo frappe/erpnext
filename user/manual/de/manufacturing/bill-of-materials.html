@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Stückliste</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Stückliste" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/manufacturing/bom.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/manufacturing/bom.png" data-html-block="meta_block">
+<meta name="og:title" content="Stückliste" data-html-block="meta_block">
+<meta name="twitter:title" content="Stückliste" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/manufacturing/bom.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/de/manufacturing/bill-of-materials">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-bill-of-materials" data-path="user/manual/de/manufacturing/bill-of-materials"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/de/manufacturing">
+		Fertigung</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Stückliste</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="bill-of-materials" style="text-align: Left">
+	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+
+<p>Das Herz des Fertigungssystems bildet die Stückliste. Die <strong>Stückliste</strong> ist eine Auflistung aller Materialien (egal ob gekauft oder selbst hergestellt) und Arbeitsgänge die in das fertige Erzeugnis oder Untererzeugnis einfliessen. In ERPNext kann eine Komponente ihre eigene Stückliste haben, und formt somit eine mehrstufige Baumstruktur.</p>
+
+<p>Um passende Einkaufsanfragen zu erstellen, müssen Sie Ihre Stücklisten immer auf dem aktuellen Stand halten. Um eine neue Stückliste anzulegen, gehen Sie zu:</p>
+
+<blockquote>
+  <p>Fertigung &gt; Dokumente &gt; Stückliste &gt; Neue Stückliste</p>
+</blockquote>
+
+<p><img class="screenshot" alt="Task" src="https://frappe.github.io/erpnext/assets/img/manufacturing/bom.png"></p>
+
+<p>Um Arbeitsgänge hinzuzufügen, wählen Sie "Mit Arbeitsgängen". Die Übersicht der Arbeitsgänge erscheint.</p>
+
+<p><img class="screenshot" alt="Task" src="https://frappe.github.io/erpnext/assets/img/manufacturing/bom-operations.png"></p>
+
+<ul>
+<li>Wählen Sie den Artikel für den Sie eine Stückliste erstellen wollen.</li>
+<li>Fügen Sie die Arbeitsgänge, die Sie durchlaufen müssen, um diesen Artikel zu fertigen, in der Tabelle der Arbeitsgänge hinzu. Für jeden Arbeitsgang werden Sie nach einem Arbeitsplatz gefragt. Wenn nötig, müssen Sie neue Arbeitsplätze anlegen.</li>
+<li>Arbeitsplätze sind nur für die Produktkostenkalkulation und die Terminplanung der Arbeitsgänge des Fertigungsauftrags definiert, nicht für das Fertigungslager.</li>
+<li>Der Bestand an Erzeugnissen wird über das Lager nachverfolgt, nicht über die Arbeitsplätze.</li>
+</ul>
+
+<h3>Kostenkalkulation einer Stückliste</h3>
+
+<ul>
+<li>Der Bereich Kostenkalkulation der Stückliste gibt einen ungefähren Wert der Produktionskosten eines Artikels wieder</li>
+<li>Fügen Sie die Liste der Artikel, die Sie für jeden Arbeitsgang benötigen, mit der entsprechenden Menge hinzu. Bei dem Artikel kann es sich um einen Zukaufartikel oder um eine Unterfertigung mit eigener Stückliste handeln. Wenn der Artikel in der Zeile ein gefertigter Artikel ist und mehrere verschiedene Stücklisten hat, wählen Sie die passende Stückliste aus. Sie können auch festlegen, ob ein Teil des Artikels zu Ausschuss wird.</li>
+</ul>
+
+<p><img class="screenshot" alt="Kostenkalkulation" src="https://frappe.github.io/erpnext/assets/img/manufacturing/bom-costing.png"></p>
+
+<ul>
+<li>Diese Kosten können über die Schaltfläche "Kosten aktualisieren" aktualisiert werden.</li>
+</ul>
+
+<p><img class="screenshot" alt="Kosten aktualisieren" src="https://frappe.github.io/erpnext/assets/img/manufacturing/bom-update-cost.png"></p>
+
+<h3>Benötigtes Material (aufgelöst)</h3>
+
+<p>Diese Tabelle listet alles Material auf, welches benötigt wird um den Artikel zu fertigen. Sie zieht weiterhin Unterbaugruppen mit Menge an.</p>
+
+<p><img class="screenshot" alt="Aufgelöste Ansicht" src="https://frappe.github.io/erpnext/assets/img/manufacturing/bom-exploded.png"></p>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="production-order.html">Fertigungsauftrag</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="icon icon-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/manufacturing/bill-of-materials.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>
