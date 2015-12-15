@@ -92,3 +92,7 @@ Wenn der Bestelltyp des Kundenauftrags "Wartung" ist, folgen Sie bitte unten dar
 > **Anmerkung 3:** Wenn Sie auf die Schaltfläche "Rechnung" klicken, können Sie eine Rechnung für die Wartungsarbeiten erstellen. Die Details werden automatisch aus dem Kundenauftrag übernommen.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
