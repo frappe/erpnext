@@ -1,6 +1,6 @@
 ## 1.3 Einführung in ERPNext
 
-Es gibt viele Ansatzpunkte für eine Einführung in ERPNext.
+Es gibt viele Möglichkeiten für den Einstieg in ERPNext.
 
 ### 1\. Schauen Sie sich das Demoprogramm an
 
