@@ -12,7 +12,7 @@ Wenn Sie die Benutzerschnittstelle ausprobieren wollen und wissen wollen, wie si
 
 ERPNext.com wird von der Organisation (Frappe), die ERPNext veröffentlicht, verwaltet. Sie können sich ein eigenes Konto anlegen, indem Sie sich auf der [Internetseite registrieren](https://erpnext.com).
 
-Sie können Sich außerdem auch dazu entscheiden, Ihre Software auf ERPNext.com zu speichern, wenn Sie einen Hostingvertrag abschliessen. Das ist eine Art, wie Sie die Organisation, die ERPNext entwickelt und verbessert, unterstützen können. In diesem Fall bekommen Sie zusätzlich direkten Support bei Hostingfragen.
+Sie können Sich außerdem auch dazu entscheiden, Ihre Software auf ERPNext.com zu speichern, wenn Sie einen Hostingvertrag abschliessen. Das ist eine Möglichkeit, wie Sie die Organisation, die ERPNext entwickelt und verbessert, unterstützen können. In diesem Fall bekommen Sie zusätzlich direkten Support bei Hostingfragen.
 
 ### 3\. Laden Sie sich eine virtuelle Maschine herunter
 
