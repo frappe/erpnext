@@ -48,3 +48,7 @@ Sie könnenjederzeit die Artikelliste bearbeiten und die zur Fertigung geplante 
 > Anmerkung: Wie ändern Sie einen Fertigungsplan? Des Ergebnis des Werkzeuges zur Produktionsplanung ist der Fertigungsauftrag. Sobald Ihre Aufträge erstellt wurden, können Sie sie ändern, indem Sie die Fertigungsaufträge ändern.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
