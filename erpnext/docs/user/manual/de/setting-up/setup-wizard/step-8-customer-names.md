@@ -20,3 +20,7 @@ Kontaktname: Shiv Agarwal
 Um mehr über Kunden zu erfahren, lesen Sie im Abschnitt [Details zu Kunden]({{docs_base_url}}/user/manual/en/CRM/customer.html) nach.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
