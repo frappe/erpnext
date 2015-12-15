@@ -13,3 +13,7 @@ Setzen Sie die Standardeinstellungen wie definiert.
 > Wichtig: Wenn Sie einen bestimmten Benutzer angeben, werden die POS-Einstellungen nur auf diesen Benutzer angewendet. Wenn diese Optin leer bleibt, werden die Einstellungen auf alle Benutzer angewendet. Um mehr über POS zu erfahren, gehen Sie zu POS.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
