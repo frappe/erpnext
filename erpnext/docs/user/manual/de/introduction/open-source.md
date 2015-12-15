@@ -1,6 +1,6 @@
 ## 1.2 Freie Software
 
-Der Quellkode ist eine Freie Software. Sie ist offen für alle zum Verstehen, zum Erweitern und zum Verbessern. Und sie ist kostenlos!
+Der Quellcode von ERPNext ist Open Source. Er ist für alle offen: Zum Verstehen, zum Erweitern und zum Verbessern. Und er ist kostenlos!
 
 Vorteile einer freien Software sind:
 
