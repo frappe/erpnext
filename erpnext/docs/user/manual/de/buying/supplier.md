@@ -27,3 +27,7 @@ Wenn Sie in einer anderen Firma ein Konto erstellen möchten, ändern Sie einfac
 > Tipp: Sie können Lieferanten auf über das Datenimport-Werkzeug importieren.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
