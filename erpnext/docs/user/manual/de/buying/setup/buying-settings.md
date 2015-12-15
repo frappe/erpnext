@@ -39,3 +39,7 @@ Wenn diese Option auf "JA" eingestellt ist, hält Sie ERPNext davon ab, eine Ein
 Wenn diese Option aUf "JA" eingestellt ist, hält Sie ERPNext davon ab, eine Eingangsrechnung zu erstelln, ohne vorher einen Kaufbeleg erstellt zu haben.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
