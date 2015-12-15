@@ -258,3 +258,35 @@ def get_columns(period_list):
 		})
 
 	return columns
+
+
+def get_data_account_type(company, account_type, period_list):
+    data = {}
+    for period in period_list:
+        gl_sum = frappe.db.sql_list("""select sum(credit) - sum(debit) FROM `tabGL Entry`
+                                    where company='%s' and posting_date >= '%s' and posting_date <= '%s' and
+                                    account in ( SELECT name FROM tabAccount WHERE account_type = '%s')""" %
+                                    (company, period['from_date'], period['to_date'], account_type))
+        if gl_sum[0]:
+            amount = gl_sum[0]
+        else:
+            amount = 0
+        data.update({"from_date": period['from_date'], "to_date": period['to_date'], period["key"]: amount})
+    return data
+
+
+def add_total_row_account(out, data, label, period_list):
+    # print out
+    total_row = {
+        "account_name": "'" + _("{0}").format(label) + "'",
+        "account": None
+    }
+
+    for row in data:
+        if row.get("parent_account"):
+            for period in period_list:
+                total_row.setdefault(period.key, 0.0)
+                total_row[period.key] += row.get(period.key, 0.0)
+
+    out.append(total_row)
+    out.append({})
