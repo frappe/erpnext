@@ -54,3 +54,7 @@ Auch dann, wenn Sie Ausgaben, die ein Budget übersteigen, ignorieren, werden Si
 > Anmerkung: Wenn Sie ein Budget erstellen, muss dieses in der Kostenstelle für jedes Konto eingestellt werden. Beispiel: Wenn Sie eine Kostenstelle "Onlineverkäufe" haben, können Sie das Werbebudget dadurch einschränken, dass Sie eine entsprechende Zeile anfügen und den Betrag genau angeben.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
