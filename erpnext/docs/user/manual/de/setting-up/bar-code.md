@@ -31,3 +31,7 @@ Gehen Sie zu "Artikel" und klicken Sie auf "Neue Zeile einfügen".
 Die Schreibmarke wird automatisch im Barcodefeld positioniert. So können Sie sofort den Barcode einlesen und mit Ihren Arbeiten fortfahren.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
