@@ -117,7 +117,7 @@ Ein geographisches Gebiet für eine Vertriebstätigkeit. Für Regionen können S
 > Vertrieb > Einstellungen > Region
 
 #### Vertriebspartner
-Eine Drittpartei/ein Händler/ein Partnerunternehmen oder ein Handelsvertreter, welche die Produkte des Unternehmens vertreiben, normalerweise auf Provisionsbasis.
+Eine Drittpartei, ein Händler, ein Partnerunternehmen oder ein Handelsvertreter, welche die Produkte des Unternehmens vertreiben, normalerweise auf Provisionsbasis.
 
 > Vertrieb > Einstellungen > Vertriebspartner
 
