@@ -77,3 +77,7 @@ In diesem Werkzeug können Sie ein Konto auswählen (z. B. das Konto Ihres Kunde
 Um Zahlungen und Rechnungen zu abzugleichen, wählen Sie Rechnungen und Journalbelege aus und klicken Sie auf "Abgleichen".
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
