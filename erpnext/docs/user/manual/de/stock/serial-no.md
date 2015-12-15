@@ -20,3 +20,7 @@ Der Lagerbestand eines Artikels kann nur dann beeinflusst werden, wenn die Serie
 * Wenn in den Artikelstammdaten "Hat Seriennummer" aktiviert wird, können Sie die Spalte "Seriennummer" in der Lagerbuchung/im Kaufbeleg leer lassen und die Seriennummern werden automatisch aus dieser Serie heraus erstellt.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
