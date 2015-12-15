@@ -25,3 +25,7 @@ Um Ärgernisse bei der Installation von Instanzen zu vermeiden, ist ERPNext als 
 Wenn Sie sich mit der Installation von Anwendungen auf *nix-Plattformen auskennen, lesen Sie die Anweisungen zur Installation des [Frappe Bench](https://github.com/frappe/frappe-bench).
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
