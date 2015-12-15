@@ -116,3 +116,7 @@ Im Bericht zu den Konten Forderungen und Verbindlichkeiten zeigt das System alle
 <img class="screenshot" alt="Bericht zu den Forderungen"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/accounts-receivable.png">
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
