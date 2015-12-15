@@ -20,7 +20,7 @@ Der Speicherort des ERPNext-Quellcodes befindet sich auf GitHub. Sie finden ihn 
 
 ### Alternativen
 
-Es gibt viele Freie ERP-Systeme. Einige bekannte sind:
+Es gibt viele andere freie ERP-Systeme. Einige bekannte sind:
 
 1. Odoo<BR>
 2. OpenBravo
