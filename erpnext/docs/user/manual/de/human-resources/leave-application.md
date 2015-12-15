@@ -18,3 +18,7 @@ Wenn Ihre Firma ein formales System hat, wo Mitarbeiter einen Antrag für Ihren 
 Um einem Mitarbeiter Urlaub zuzuteilen, kreuzen Sie [Urlaubszuteilung]({{docs_base_url}}/user/manual/en/human-resources/setup/leave-allocation.html) an.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
