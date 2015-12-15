@@ -69,3 +69,7 @@ Der Urlaubsantrag ist ein gutes **Beispiel**, welches alle Bereiche des Berechti
 <img class="screenshot" alt="Es dem Benutzer der Personalverwaltung ermöglichen, den Zugriff auf Urlaubsanträge zu delegieren, indem er 'Benutzerberechtigungen einstellen' markiert. Dies erlaubt es dem Benutzer der Personalverwaltung auf den Benutzerberechtigungen-Manager für 'Urlaubsanträge' zuzugreifen" src="{{docs_base_url}}/assets/img/users-and-permissions/setting-up-permissions-hr-user-role.png">
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
