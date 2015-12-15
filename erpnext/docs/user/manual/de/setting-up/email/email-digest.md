@@ -15,3 +15,7 @@ Stellen Sie ein, wie oft Sie eine Benachrichtigung erhalten wollen, markieren Si
 <img class="screenshot" alt="E-Mail-Bericht" src="{{docs_base_url}}/assets/img/setup/email/email-digest.png">
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
