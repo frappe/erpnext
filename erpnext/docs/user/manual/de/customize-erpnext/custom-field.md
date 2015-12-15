@@ -82,3 +82,7 @@ Sie können weitere Eigenschaften auswählen wie:
 Wenn er die Berechtigung hat, kann ein Benutzer ein benutzerdefiniertes Feld löschen. Zum Beisiel dann, wenn es standardmäßig gelöscht wird, weil ein anderes benutzerdefiniertes Feld mit gleichem Namen hinzugefügt wurde. Dann sollten Sie das neue Feld automatisch dort angeordnet sehen, wo das alte Feld gelöscht wurde.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
