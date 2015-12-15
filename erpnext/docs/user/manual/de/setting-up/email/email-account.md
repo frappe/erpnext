@@ -37,3 +37,7 @@ Wenn Sie möchten, dass ERPNext Sie benachrichtigt, wenn eine E-Mail für eine b
 <img class="screenshot" alt="Eingehende Email" src="{{docs_base_url}}/assets/img/setup/email/email-account-unreplied.png">
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
