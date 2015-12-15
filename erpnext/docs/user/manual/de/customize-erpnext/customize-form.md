@@ -49,72 +49,48 @@ Bei einem benutzerdefinierten Formular können Sie auch Anhänge erlauben, die m
 
 Im Folgenden erhalten Sie eine Auflistung der Eigenschaften, die Sie für ein bestimmtes Feld eines benutzerdefinierten Formulars anpassen können.
 
-Feldeigenschaft            Verwendungszweck
 
-Beim Drucken verbergen     Verbirgt das Feld im Standard-Druckformat.
-Verborgen                  Verbirgt das Feld im Datenerfassungs-Formular.
-Ist zwingend erforderlich  Stellt das Feld als zwingend erforderlich ein.
-Feldtyp                    Klicken Sie hier, um mehr über Feldtypen zu erfahren.
-Optionen                   Hier können Sie Auswahlmöglichkeiten eines DropDown-Feldes auflisten. Für ein Verknüpfungsfeld kann auch der zutreffende DocType mit angegeben werden.
-Beim Übertragen erlauben   Wenn Sie diesen Punkt aktivieren, kann der Benutzer den Wert des Feldes auch in einem übertragenen Formular aktualisieren.
-Standard                   Der hier angegebene Wert wird beim Erstellen eines neuen Datensatzes angezogen.
-Beschreibung               Enthält Erläuterungen zum Feld zum besseren Verständis.
-Bezeichnung                Das ist der Feldname, wie er im Formular angezeigt wird.
-
-
-<style>
-    td {
-    padding:5px 10px 5px 5px;
-    };
-    img {
-    align:center;
-    };
-table, th, td {
-    border: 1px solid black;
-    border-collapse: collapse;
-}
-</style>
 <table border="1" width="700px">
   <tbody>
     <tr>
-      <td style="text-align: center;"><b>Field property</b></td>
-      <td style="text-align: center;"><b>Purpose</b></td>
+      <td style="text-align: center;"><b>Feldeigenschaft</b></td>
+      <td style="text-align: center;"><b>Verwendungszweck</b></td>
     </tr>
     <tr>
-      <td>Print hide</td>
-      <td>Checking it will hide field from Standard print format.</td>
+      <td>Beim Drucken verbergen</td>
+      <td>Verbirgt das Feld beim Standarddruck</td>
     </tr>
     <tr>
-      <td>Hidden</td>
-      <td>Checking it field will hide field in the data entry form.</td>
+      <td>Verborgen</td>
+      <td>Verbirgt das Feld im Formular zur Datenerfassung.</td>
     </tr>
     <tr>
-      <td>Mandatory</td>
-      <td>Checking it will set field as mandatory.</td>
+      <td>Zwingend erforderlich</td>
+      <td>Stellt das Feld als zwingend erforderlich ein.</td>
     </tr>
     <tr>
-      <td>Field Type</td>
-      <td>Click <a href="https://erpnext.com/kb/customize/field-types">here</a> to learn about of fields types.</td>
+      <td>Feldtyp</td>
+      <td>Klicken Sie <a href="https://erpnext.com/kb/customize/field-types">hier</a> um mehr über Feldtypen zu erfahren.</td>
     </tr>
     <tr>
-      <td>Options</td>
-      <td>Possible result for a drop down fields can be listed here. Also for a link field, relevant Doctype can be provided.</td>
+      <td>Optionen/td>
+      <td>Hier können Sie Auswahlmöglichkeiten eines DropDown-Feldes auflisten. Für ein Verknüpfungsfeld kann auch der zutreffende DocType mit angegeben werden.</td>
     </tr>
     <tr>
-      <td>Allow on submit</td>
-      <td>Checking it will let user update value in field even in submitted form.</td>
+      <td>Beim Übertragen erlauben</td>
+      <td>Wenn Sie diesen Punkt aktivieren, kann der Benutzer den Wert des Feldes auch in einem übertragenen Formular aktualisieren.</td>
     </tr>
     <tr>
-      <td>Default</td>
-      <td>Value defined in default will be pulled on new record creation.</td>
+      <td>Standard</td>
+      <td>Der hier angegebene Wert wird beim Erstellen eines neuen Datensatzes angezogen.</td>
     </tr>
     <tr>
-      <td>Description</td>
-      <td>Gives field description for users understanding.</td>
+      <td>Beschreibung</td>
+      <td>Enthält Erläuterungen zum Feld zum besseren Verständis.</td>
     </tr>
     <tr>
-      <td>Label</td>
-      <td>Label is the field name which appears in form.</td>
+      <td>Bezeichnung</td>
+      <td>Das ist der Feldname, wie er im Formular angezeigt wird.</td>
     </tr>
   </tbody>
 </table>
