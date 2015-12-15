@@ -70,3 +70,7 @@ Die Spalten in dieser Tabelle sind denen in der Vorlage für Verkaufssteuern und
 Steuern oder Gebühren berücksichtigen für: In diesem Abschnitt können Sie angeben, ob die Steuer/Abgabe nur für die Bewertung (kein Teil der Gesamtsumme) oder nur für die Gesamtsumme (fügt dem Artikel keinen Wert hinzu) oder für beides wichtig ist.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
