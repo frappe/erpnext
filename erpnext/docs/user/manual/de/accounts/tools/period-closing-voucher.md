@@ -30,3 +30,7 @@ Der Periodenabschlussbeleg erstellt Buchungen im Hauptbuch, bei denen alle Ertra
 Wenn Sie Buchungen zu einem abgeschlossenen Geschäftsjahr erstellen, besonders dann, wenn für dieses Geschäftsjahr schon ein Periodenabschlussbeleg erstellt wurde, sollten Sie einen neuen Periodenabschlussbeleg erstellen. Der spätere Beleg überträgt dann nur den offenen Differenzbetrag aus der GuV in die Schlußbilanz.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
