@@ -45,3 +45,7 @@ Um Zeitprotokolle über den Kalender zu erstellen, gehen Sie zu "Zeitprotokoll" 
 * Nach dem Übertragen des Zeitprotokolls müssen Sie einen [Zeitprotokollstapel]({{docs_base_url}}/user/manual/en/projects/time-log-batch.html) erstellen um mit der Abrechnung fortfahren zu können.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
