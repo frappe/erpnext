@@ -22,6 +22,6 @@ Um Ärgernisse bei der Installation von Instanzen zu vermeiden, ist ERPNext als 
 
 ### 4\. Installieren Sie ERPNext auf Ihrem Unix/Linux/Mac-Rechner
 
-Wenn Sie sich mit der Installation von Anwendungen auf *nix-Plattformen auskennen, lesen Sie die Anweisungen zur Installation des Frappe Bench. [Frappe Bench](https://github.com/frappe/frappe-bench)
+Wenn Sie sich mit der Installation von Anwendungen auf *nix-Plattformen auskennen, lesen Sie die Anweisungen zur Installation des [Frappe Bench](https://github.com/frappe/frappe-bench).
 
 {next}
