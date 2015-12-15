@@ -72,3 +72,7 @@ Ein Angebot ist eine "übertragbare" Transaktion. Sobald Sie das Angebot an Ihre
 Wenn Sie Ihre Vertriebstransaktionen wie z. B. ein Angebot (oder eine Kundenbestellung) erstellen, dann haben Sie wahrscheinlich schon gemerkt, dass es eine Spalte "Rabatt" gibt. Auf der linken Seite befindet sich der Preislisten-Preis auf der rechten Seite der Grundpreis. Sie können einen Rabatt hinzufügen um den Grundpreis zu aktualisieren. Um mehr über Rabatte zu erfahren lesen Sie bitte den Abschnitt [Rabatt](http://erpnext.org/discount).
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
