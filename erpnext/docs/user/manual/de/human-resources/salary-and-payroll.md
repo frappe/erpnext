@@ -103,3 +103,7 @@ Die Buchung zur Gehaltsabrechnung ist eine Journalbuchung welche das Bankkonto d
 Um einen Beleg über die Gehaltszahlung aus dem Punkt "Gehaltsabrechnung bearbeiten" heraus zu erstellen, klicken Sie auf "Bankbeleg erstellen" und es wird eine neue Journalbuchung  mit den Gesamtbeträgen der Gehälter erstellt.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
