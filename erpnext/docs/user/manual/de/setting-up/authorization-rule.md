@@ -43,3 +43,7 @@ Wenn ein Benutzer aus dem Vertrieb versucht eine Kundenbestellung mit einem Wert
 >Wenn Sie den Vertriebsmitarbeiter generall davon ausschliessen wollen, Kundenaufträge zu übertragen, dann sollten Sie keine Autorisierungsregel erstellen, sondern die Berechtigung zum Übertragen über den Rollenberchtigungs-Manager für die Rolle Vertriebsmitarbeiter entfernen.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
