@@ -43,3 +43,7 @@ Das System geht standardmäßig davon aus, dass der Preis während des gesamten 
 ### 9\. Benutzer erlauben, die Preisliste zu Transaktionen zu bearbeiten
 Die Artikeltabelle einer Vertriebstransaktion hat ein Feld, das als Preislisten-Preis bezeichnet wird. Dieses Feld kann standardmäßig in keiner Vertriebstransaktion bearbeitet werden. Damit wird sicher gestellt, dass der Preis für alle Artikel aus dem Datensatz für den Artikelpreis erstellt wird, und der Benutzer keine Möglichkeit hat, hier einzuwirken.
 Wenn Sie einem Benutzer ermöglichen müssen, den Artikelpreis, der aus der Preisliste gezogen wird, zu ändern, sollten Sie dieses Feld deaktivieren.
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
