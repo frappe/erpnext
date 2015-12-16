@@ -45,7 +45,7 @@ def get_columns():
 		_("Posting Date") + ":Date:80", _("Customer") + ":Link/Customer:120",
 		_("Customer Name") + "::120", _("Customer Group") + ":Link/Customer Group:120",
 		_("Receivable Account") + ":Link/Account:120", _("Territory") + ":Link/Territory:80",
-		_("Project") + ":Link/Project:80", _("organization") + ":Link/organization:100",
+		_("Project") + ":Link/Project:80", _("Organization") + ":Link/organization:100",
 		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
 		_("Income Account") + ":Link/Account:140", _("Qty") + ":Float:120",
 		_("Rate") + ":Currency:120", _("Amount") + ":Currency:120"
@@ -54,7 +54,7 @@ def get_columns():
 def get_conditions(filters):
 	conditions = ""
 
-	for opts in (("organization", " and organization=%(organization)s"),
+	for opts in (("Organization", " and organization=%(organization)s"),
 		("customer", " and si.customer = %(customer)s"),
 		("item_code", " and si_item.item_code = %(item_code)s"),
 		("from_date", " and si.posting_date>=%(from_date)s"),

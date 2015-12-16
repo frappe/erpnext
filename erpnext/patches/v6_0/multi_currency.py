@@ -10,7 +10,7 @@ def execute():
 		"Journal Entry Account", "Sales Invoice", "Purchase Invoice", "Customer", "Supplier"):
 			frappe.reload_doctype(dt)
 
-	organization_list = frappe.get_all("organization", fields=["name", "default_currency", "default_receivable_account"])
+	organization_list = frappe.get_all("Organization", fields=["name", "default_currency", "default_receivable_account"])
 	for organization in organization_list:
 
 		# update currency in account and gl entry as per organization currency

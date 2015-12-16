@@ -1,7 +1,7 @@
 accounting-for-projects
 c-form
 changing-parent-account
-customer-for-multiple-company
+customer-for-multiple-organization
 depreciation-for-fixed-asset-items
 difference-entry-button
 fiscal-year-error

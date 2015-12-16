@@ -48,7 +48,7 @@ def get_columns(filters):
 	columns = [
 		_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", _("Branch")+ ":Link/Branch:120",
 		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
-		 _("organization") + ":Link/organization:120"
+		 _("Organization") + ":Link/organization:120"
 	]
 
 	for day in range(filters["total_days_in_month"]):
@@ -88,7 +88,7 @@ def get_conditions(filters):
 
 	conditions = " and month(att_date) = %(month)s and fiscal_year = %(fiscal_year)s"
 
-	if filters.get("organization"): conditions += " and organization = %(organization)s"
+	if filters.get("Organization"): conditions += " and organization = %(organization)s"
 	if filters.get("employee"): conditions += " and employee = %(employee)s"
 
 	return conditions, filters

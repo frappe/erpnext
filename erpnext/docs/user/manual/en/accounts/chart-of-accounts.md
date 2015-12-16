@@ -5,7 +5,7 @@ organization is doing financially.
 
 The Chart of Accounts helps you to answer:
 
-  * What is your organisation worth?
+  * What is your organization worth?
   * How much debt have you taken?
   * How much profit are you making (and hence paying tax)?
   * How much are you selling?

@@ -5,11 +5,11 @@ frappe.query_reports["Gross Profit"] = {
 	"filters": [
 		{
 			"fieldname":"organization",
-			"label": __("organization"),
+			"label": __("Organization"),
 			"fieldtype": "Link",
 			"options": "organization",
 			"reqd": 1,
-			"default": frappe.defaults.get_user_default("organization")
+			"default": frappe.defaults.get_user_default("Organization")
 		},
 		{
 			"fieldname":"from_date",

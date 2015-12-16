@@ -7,7 +7,7 @@ from frappe import _, throw
 from frappe.utils import flt
 
 def get_organization_currency(organization):
-	currency = frappe.db.get_value("organization", organization, "default_currency", cache=True)
+	currency = frappe.db.get_value("Organization", organization, "default_currency", cache=True)
 	if not currency:
 		currency = frappe.db.get_default("currency")
 	if not currency:
@@ -33,7 +33,7 @@ def before_tests():
 	frappe.clear_cache()
 	# complete setup if missing
 	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
-	if not frappe.get_list("organization"):
+	if not frappe.get_list("Organization"):
 		setup_complete({
 			"currency"			:"USD",
 			"first_name"		:"Test",

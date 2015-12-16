@@ -98,7 +98,7 @@ class update_entries_after(object):
 
 		self.organization = frappe.db.get_value("Warehouse", self.warehouse, "organization")
 		self.precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"),
-			currency=frappe.db.get_value("organization", self.organization, "default_currency", cache=True))
+			currency=frappe.db.get_value("Organization", self.organization, "default_currency", cache=True))
 
 		self.prev_stock_value = self.previous_sle.stock_value or 0.0
 		self.stock_queue = json.loads(self.previous_sle.stock_queue or "[]")

@@ -182,7 +182,7 @@ def get_basic_details(args, item):
 		["Cost Center", "cost_center", "cost_center"], ["Warehouse", "warehouse", ""]]:
 			organization = frappe.db.get_value(d[0], out.get(d[1]), "organization")
 			if not out[d[1]] or (organization and args.organization != organization):
-				out[d[1]] = frappe.db.get_value("organization", args.organization, d[2]) if d[2] else None
+				out[d[1]] = frappe.db.get_value("Organization", args.organization, d[2]) if d[2] else None
 
 	for fieldname in ("item_name", "item_group", "barcode", "brand", "stock_uom"):
 		out[fieldname] = item.get(fieldname)
@@ -265,7 +265,7 @@ def validate_conversion_rate(args, meta):
 	from erpnext.controllers.accounts_controller import validate_conversion_rate
 
 	if (not args.conversion_rate
-		and args.currency==frappe.db.get_value("organization", args.organization, "default_currency")):
+		and args.currency==frappe.db.get_value("Organization", args.organization, "default_currency")):
 		args.conversion_rate = 1.0
 
 	# validate currency conversion rate

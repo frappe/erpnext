@@ -1,7 +1,7 @@
 # Kreditlimit
 <span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
-Ein Kreditlimit ist der maximale Betrag von Kredit, die ein Finanzinstitut oder ein Verleiher einem Schuldner für eine bestimmte Kreditlinie überlässt. Aus der Sicht einer Organisation ist es der maximale Kreditbetrag der einem Kunden für eingekaufte Waren gewährt wird.
+Ein Kreditlimit ist der maximale Betrag von Kredit, die ein Finanzinstitut oder ein Verleiher einem Schuldner für eine bestimmte Kreditlinie überlässt. Aus der Sicht einer organization ist es der maximale Kreditbetrag der einem Kunden für eingekaufte Waren gewährt wird.
 
 Um das Kreditlimit einzustellen, gehen Sie zur Kundenvorlage
 

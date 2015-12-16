@@ -156,7 +156,7 @@ def set_account_and_due_date(party, account, party_type, organization, posting_d
 
 def get_organization_currency():
 	organization_currency = frappe._dict()
-	for d in frappe.get_all("organization", fields=["name", "default_currency"]):
+	for d in frappe.get_all("Organization", fields=["name", "default_currency"]):
 		organization_currency.setdefault(d.name, d.default_currency)
 
 	return organization_currency
@@ -182,7 +182,7 @@ def get_party_account(party_type, party, organization):
 
 		if not account:
 			default_account_name = "default_receivable_account" if party_type=="Customer" else "default_payable_account"
-			account = frappe.db.get_value("organization", organization, default_account_name)
+			account = frappe.db.get_value("Organization", organization, default_account_name)
 
 		return account
 
@@ -259,14 +259,14 @@ def get_credit_days(party_type, party, organization):
 			if not credit_days_based_on:
 				credit_days_based_on, credit_days = \
 					frappe.db.get_value("Customer Group", customer_group, ["credit_days_based_on", "credit_days"]) \
-					or frappe.db.get_value("organization", organization, ["credit_days_based_on", "credit_days"])
+					or frappe.db.get_value("Organization", organization, ["credit_days_based_on", "credit_days"])
 
 			return credit_days_based_on, credit_days
 		else:
 			credit_days, supplier_type = frappe.db.get_value(party_type, party, ["credit_days", "supplier_type"])
 			if not credit_days:
 				credit_days = frappe.db.get_value("Supplier Type", supplier_type, "credit_days") \
-					or frappe.db.get_value("organization", organization, "credit_days")
+					or frappe.db.get_value("Organization", organization, "credit_days")
 
 			return credit_days
 

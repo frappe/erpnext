@@ -106,6 +106,6 @@ def get_dashboard_info(supplier):
 
 	out["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
 	out["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
-	out["organization_currency"] = frappe.db.sql_list("select distinct default_currency from taborganization")
+	out["organization_currency"] = frappe.db.sql_list("select distinct default_currency from tabOrganization")
 
 	return out

@@ -10,6 +10,6 @@ def execute():
 		print "Country not specified in Global Defaults"
 		return
 
-	for organization in frappe.db.sql_list("""select name from `taborganization`
+	for organization in frappe.db.sql_list("""select name from `tabOrganization`
 		where ifnull(country, '')=''"""):
-		frappe.db.set_value("organization", organization, "country", country)
+		frappe.db.set_value("Organization", organization, "country", country)

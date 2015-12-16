@@ -165,7 +165,7 @@ class ProcessPayroll(Document):
 
 	def make_journal_entry(self, salary_account = None):
 		amount = self.get_total_salary()
-		default_bank_account = frappe.db.get_value("organization", self.organization,
+		default_bank_account = frappe.db.get_value("Organization", self.organization,
 			"default_bank_account")
 
 		journal_entry = frappe.new_doc('Journal Entry')

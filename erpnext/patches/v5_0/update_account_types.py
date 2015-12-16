@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	for organization in frappe.db.get_all("organization"):
-		organization = frappe.get_doc("organization", organization.name)
+	for organization in frappe.db.get_all("Organization"):
+		organization = frappe.get_doc("Organization", organization.name)
 
 		match_types = ("Stock Received But Not Billed", "Stock Adjustment", "Expenses Included In Valuation",
 			"Cost of Goods Sold")

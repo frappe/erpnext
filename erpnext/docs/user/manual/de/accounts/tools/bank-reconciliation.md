@@ -3,9 +3,9 @@
 
 ### Kontoauszug
 
-Ein Kontenabgleich ist ein Prozess, welcher den Unterschied zwischen dem Kontostand, der auf dem Kontoauszug einer Organisation wie von der Bank angegeben erscheint, und dem zugehörigen Betrag, wie er in den eigenen Buchhaltungsuntertalgen der Organisation zu einem bestimmten Zeitpunkt erscheint, aufklärt.
+Ein Kontenabgleich ist ein Prozess, welcher den Unterschied zwischen dem Kontostand, der auf dem Kontoauszug einer organization wie von der Bank angegeben erscheint, und dem zugehörigen Betrag, wie er in den eigenen Buchhaltungsuntertalgen der organization zu einem bestimmten Zeitpunkt erscheint, aufklärt.
 
-Solche Unterschiede können zum Beispiel dann auftauchen, wenn ein Scheck oder eine Menge an Schecks, die von der Organisation ausgeschrieben wurden, nicht bei der Bank eingereicht wurden, wenn eine Banküberweisung, wie zum Beispiel eine Gutschrift, oder eine Bankgebühr noch nicht in den Buchhaltungsdaten der Organisation erfasst wurden, oder wenn die Bank oder die Organisation selbst einen Fehler gemacht haben.
+Solche Unterschiede können zum Beispiel dann auftauchen, wenn ein Scheck oder eine Menge an Schecks, die von der organization ausgeschrieben wurden, nicht bei der Bank eingereicht wurden, wenn eine Banküberweisung, wie zum Beispiel eine Gutschrift, oder eine Bankgebühr noch nicht in den Buchhaltungsdaten der organization erfasst wurden, oder wenn die Bank oder die organization selbst einen Fehler gemacht haben.
 
 Der Kontoauszug erscheint in ERPNext in der Form eines Berichtes.
 

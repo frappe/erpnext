@@ -66,7 +66,7 @@ def get_data(filters, conditions):
 					t1.docstatus = 1 %s %s
 					group by %s
 				""" % (query_details,  conditions["trans"],  conditions["trans"], conditions["addl_tables"], "%s",
-					"%s", conditions.get("addl_tables_relational_cond"), cond, conditions["group_by"]), (filters.get("organization"),
+					"%s", conditions.get("addl_tables_relational_cond"), cond, conditions["group_by"]), (filters.get("Organization"),
 					filters["fiscal_year"]),as_list=1)
 
 		for d in range(len(data1)):
@@ -82,7 +82,7 @@ def get_data(filters, conditions):
 					""" %
 					(sel_col,  conditions["trans"],  conditions["trans"], conditions["addl_tables"],
 						"%s", "%s", conditions["group_by"], "%s", conditions.get("addl_tables_relational_cond")),
-					(filters.get("organization"), filters.get("fiscal_year"), data1[d][0]), as_list=1)
+					(filters.get("Organization"), filters.get("fiscal_year"), data1[d][0]), as_list=1)
 
 			for i in range(len(row)):
 				des = ['' for q in range(len(conditions["columns"]))]
@@ -95,7 +95,7 @@ def get_data(filters, conditions):
 						(sel_col, conditions["period_wise_select"], conditions["trans"],
 						 	conditions["trans"], conditions["addl_tables"], "%s", "%s", sel_col,
 							"%s", conditions["group_by"], "%s", conditions.get("addl_tables_relational_cond")),
-						(filters.get("organization"), filters.get("fiscal_year"), row[i][0],
+						(filters.get("Organization"), filters.get("fiscal_year"), row[i][0],
 							data1[d][0]), as_list=1)
 
 				des[ind] = row[i]
@@ -111,7 +111,7 @@ def get_data(filters, conditions):
 				""" %
 				(query_details, conditions["trans"], conditions["trans"], conditions["addl_tables"],
 					"%s", "%s", cond, conditions.get("addl_tables_relational_cond", ""), conditions["group_by"]),
-				(filters.get("organization"), filters.get("fiscal_year")), as_list=1)
+				(filters.get("Organization"), filters.get("fiscal_year")), as_list=1)
 
 	return data
 

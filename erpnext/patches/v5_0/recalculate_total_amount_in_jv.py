@@ -5,7 +5,7 @@ import frappe
 from frappe.utils import money_in_words
 
 def execute():
-	organization_currency = dict(frappe.db.sql("select name, default_currency from `taborganization`"))
+	organization_currency = dict(frappe.db.sql("select name, default_currency from `tabOrganization`"))
 	bank_or_cash_accounts = frappe.db.sql_list("""select name from `tabAccount`
 		where account_type in ('Bank', 'Cash') and docstatus < 2""")
 

@@ -32,7 +32,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 			}
 		},
 		{
-			fieldtype:"Select", label: __("organization"), fieldname: "organization",
+			fieldtype:"Select", label: __("Organization"), fieldname: "organization",
 			link:"organization", default_value: __("Select organization..."),
 			filter: function(val, item, opts) {
 				return item.organization == val || val == opts.default_value || item._show;
@@ -220,7 +220,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		this.update_groups();
 		this.accounts_initialized = true;
 
-		if(!me.is_default("organization")) {
+		if(!me.is_default("Organization")) {
 			// show Net Profit / Loss
 			var net_profit = {
 				organization: me.organization,

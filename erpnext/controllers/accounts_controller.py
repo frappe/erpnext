@@ -413,7 +413,7 @@ class AccountsController(TransactionBase):
 	@property
 	def organization_abbr(self):
 		if not hasattr(self, "_abbr"):
-			self._abbr = frappe.db.get_value("organization", self.organization, "abbr")
+			self._abbr = frappe.db.get_value("Organization", self.organization, "abbr")
 
 		return self._abbr
 
@@ -486,7 +486,7 @@ def get_taxes_and_charges(master_doctype, master_name):
 def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, organization):
 	"""common validation for currency and price list currency"""
 
-	organization_currency = frappe.db.get_value("organization", organization, "default_currency", cache=True)
+	organization_currency = frappe.db.get_value("Organization", organization, "default_currency", cache=True)
 
 	if not conversion_rate:
 		throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(

@@ -2,7 +2,7 @@
 
 A credit limit is the maximum amount of credit that a financial institution or
 other lender will extend to a debtor for a particular line of credit. From an
-organisation's perspective, it is the maximum amount of credit which a
+organization's perspective, it is the maximum amount of credit which a
 customer gets on goods purchased.  
 
 To set credit limit go to Customer - Master

@@ -232,6 +232,6 @@ def get_credit_limit(customer, organization):
 	credit_limit, customer_group = frappe.db.get_value("Customer", customer, ["credit_limit", "customer_group"])
 	if not credit_limit:
 		credit_limit = frappe.db.get_value("Customer Group", customer_group, "credit_limit") or \
-			frappe.db.get_value("organization", organization, "credit_limit")
+			frappe.db.get_value("Organization", organization, "credit_limit")
 
 	return credit_limit

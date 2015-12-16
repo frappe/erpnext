@@ -30,12 +30,12 @@ def create_receivable_payable_account():
 			
 				account_id = account.name
 			
-			frappe.db.set_value("organization", args["organization"], ("default_receivable_account"
+			frappe.db.set_value("Organization", args["organization"], ("default_receivable_account"
 				if args["account_type"]=="Receivable" else "default_payable_account"), account_id)
 
 			receivable_payable_accounts.setdefault(args["organization"], {}).setdefault(args["account_type"], account_id)
 
-	for organization in frappe.db.sql_list("select name from taborganization"):
+	for organization in frappe.db.sql_list("select name from tabOrganization"):
 		_create_account({
 				"account_name": "Debtors",
 				"account_type": "Receivable",
@@ -55,8 +55,8 @@ def create_receivable_payable_account():
 def get_parent_account(organization, master_type):
 	parent_account = None
 	
-	if "receivables_group" in frappe.db.get_table_columns("organization"):
-		parent_account = frappe.db.get_value("organization", organization,
+	if "receivables_group" in frappe.db.get_table_columns("Organization"):
+		parent_account = frappe.db.get_value("Organization", organization,
 			"receivables_group" if master_type=="Customer" else "payables_group")
 	if not parent_account:
 		parent_account = frappe.db.get_value("Account", {"organization": organization,
@@ -88,7 +88,7 @@ def set_party_in_jv_and_gl_entry(receivable_payable_accounts):
 		for i, d in enumerate(records):
 			account_details = account_map.get(d.account, {})
 			account_type = "Receivable" if account_details.get("master_type")=="Customer" else "Payable"
-			new_account = receivable_payable_accounts[account_details.get("organization")][account_type]
+			new_account = receivable_payable_accounts[account_details.get("Organization")][account_type]
 
 			frappe.db.sql("update `tab{0}` set account=%s, party_type=%s, party=%s where name=%s".format(dt),
 				(new_account, account_details.get("master_type"), account_details.get("master_name"), d.name))

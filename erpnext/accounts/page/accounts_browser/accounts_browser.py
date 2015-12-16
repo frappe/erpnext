@@ -11,7 +11,7 @@ from erpnext.accounts.report.financial_statements import sort_root_accounts
 @frappe.whitelist()
 def get_companies():
 	"""get a list of companies based on permission"""
-	return [d.name for d in frappe.get_list("organization", fields=["name"],
+	return [d.name for d in frappe.get_list("Organization", fields=["name"],
 		order_by="name")]
 
 @frappe.whitelist()
@@ -46,7 +46,7 @@ def get_children():
 				args['parent'], as_dict=1)
 
 	if ctype == 'Account':
-		organization_currency = frappe.db.get_value("organization", organization, "default_currency")
+		organization_currency = frappe.db.get_value("Organization", organization, "default_currency")
 		for each in acc:
 			each["organization_currency"] = organization_currency
 			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False))

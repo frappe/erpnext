@@ -144,14 +144,14 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 			and `%s` LIKE %s
 		limit %s, %s""" %
 		(", ".join(['%s']*len(filters.get("account_type"))), "%s", searchfield, "%s", "%s", "%s"),
-		tuple(filters.get("account_type") + [filters.get("organization"), "%%%s%%" % txt,
+		tuple(filters.get("account_type") + [filters.get("Organization"), "%%%s%%" % txt,
 			start, page_len]))
 	if not tax_accounts:
 		tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount
 			where tabAccount.docstatus!=2 and is_group = 0
 				and organization = %s and `%s` LIKE %s limit %s, %s"""
 			% ("%s", searchfield, "%s", "%s", "%s"),
-			(filters.get("organization"), "%%%s%%" % txt, start, page_len))
+			(filters.get("Organization"), "%%%s%%" % txt, start, page_len))
 
 	return tax_accounts
 
@@ -305,7 +305,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	if not filters: filters = {}
 
 	condition = ""
-	if filters.get("organization"):
+	if filters.get("Organization"):
 		condition += "and tabAccount.organization = %(organization)s"
 
 	return frappe.db.sql("""select tabAccount.name from `tabAccount`
@@ -316,5 +316,5 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				{condition} {match_condition}"""
 			.format(condition=condition, match_condition=get_match_cond(doctype), key=searchfield), {
 				'txt': "%%%s%%" % frappe.db.escape(txt),
-				'organization': filters.get("organization", "")
+				'organization': filters.get("Organization", "")
 			})

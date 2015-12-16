@@ -120,8 +120,8 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 		this.frm.get_docfield("items").allow_bulk_edit = 1;
 
 		if (sys_defaults.auto_accounting_for_stock) {
-			this.frm.add_fetch("organization", "stock_adjustment_account", "expense_account");
-			this.frm.add_fetch("organization", "cost_center", "cost_center");
+			this.frm.add_fetch("Organization", "stock_adjustment_account", "expense_account");
+			this.frm.add_fetch("Organization", "cost_center", "cost_center");
 
 			this.frm.fields_dict["expense_account"].get_query = function() {
 				return {

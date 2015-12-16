@@ -25,7 +25,7 @@ def execute(filters=None):
 def get_columns():
 	return [_("Project Id") + ":Link/Project:140", _("Cost of Purchased Items") + ":Currency:160",
 		_("Cost of Issued Items") + ":Currency:160", _("Cost of Delivered Items") + ":Currency:160",
-		_("Project Name") + "::120", _("Project Status") + "::120", _("organization") + ":Link/organization:100",
+		_("Project Name") + "::120", _("Project Status") + "::120", _("Organization") + ":Link/organization:100",
 		_("Customer") + ":Link/Customer:140", _("Project Value") + ":Currency:120",
 		_("Project Start Date") + ":Date:120", _("Completion Date") + ":Date:120"]
 

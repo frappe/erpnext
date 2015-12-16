@@ -5,7 +5,7 @@ frappe.query_reports["Stock Projected Qty"] = {
 	"filters": [
 		{
 			"fieldname":"organization",
-			"label": __("organization"),
+			"label": __("Organization"),
 			"fieldtype": "Link",
 			"options": "organization"
 		},

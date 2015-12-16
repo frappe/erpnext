@@ -74,7 +74,7 @@ class StockEntry(StockController):
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
 
 		if self.purpose in ("Manufacture", "Repack") and not self.difference_account:
-			self.difference_account = frappe.db.get_value("organization", self.organization, "default_expense_account")
+			self.difference_account = frappe.db.get_value("Organization", self.organization, "default_expense_account")
 
 	def set_transfer_qty(self):
 		for item in self.get("items"):
@@ -464,14 +464,14 @@ class StockEntry(StockController):
 			["Cost Center", "cost_center", "cost_center"]]:
 				organization = frappe.db.get_value(d[0], ret.get(d[1]), "organization")
 				if not ret[d[1]] or (organization and self.organization != organization):
-					ret[d[1]] = frappe.db.get_value("organization", self.organization, d[2]) if d[2] else None
+					ret[d[1]] = frappe.db.get_value("Organization", self.organization, d[2]) if d[2] else None
 
 		# update uom
 		if args.get("uom") and for_update:
 			ret.update(self.get_uom_details(args))
 
 		if not ret["expense_account"]:
-			ret["expense_account"] = frappe.db.get_value("organization", self.organization, "stock_adjustment_account")
+			ret["expense_account"] = frappe.db.get_value("Organization", self.organization, "stock_adjustment_account")
 
 		stock_and_rate = args.get('warehouse') and self.get_warehouse_details(args) or {}
 		ret.update(stock_and_rate)
@@ -705,7 +705,7 @@ class StockEntry(StockController):
 		return issued_item_qty
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
-		expense_account, cost_center = frappe.db.get_values("organization", self.organization, \
+		expense_account, cost_center = frappe.db.get_values("Organization", self.organization, \
 			["default_expense_account", "cost_center"])[0]
 
 		for d in item_dict:

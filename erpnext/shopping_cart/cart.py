@@ -50,7 +50,7 @@ def place_order():
 
 	if quotation.lead:
 		# organization used to create customer accounts
-		frappe.defaults.set_user_default("organization", quotation.organization)
+		frappe.defaults.set_user_default("Organization", quotation.organization)
 
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))

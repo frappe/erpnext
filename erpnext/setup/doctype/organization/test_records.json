@@ -4,7 +4,7 @@
   "organization_name": "_Test organization",
   "country": "India",
   "default_currency": "INR",
-  "doctype": "organization",
+  "doctype": "Organization",
   "domain": "Manufacturing",
   "chart_of_accounts": "Standard"
  },
@@ -13,7 +13,7 @@
   "organization_name": "_Test organization 1",
   "country": "United States",
   "default_currency": "USD",
-  "doctype": "organization",
+  "doctype": "Organization",
   "domain": "Retail",
   "chart_of_accounts": "Standard"
  },
@@ -22,7 +22,7 @@
   "organization_name": "_Test organization 2",
   "default_currency": "EUR",
   "country": "Germany",
-  "doctype": "organization",
+  "doctype": "Organization",
   "domain": "Retail",
   "chart_of_accounts": "Standard"
  }

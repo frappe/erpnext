@@ -507,12 +507,12 @@ def get_default_bank_cash_account(organization, voucher_type, mode_of_payment=No
 			return account
 
 	if voucher_type=="Bank Entry":
-		account = frappe.db.get_value("organization", organization, "default_bank_account")
+		account = frappe.db.get_value("Organization", organization, "default_bank_account")
 		if not account:
 			account = frappe.db.get_value("Account",
 				{"organization": organization, "account_type": "Bank", "is_group": 0})
 	elif voucher_type=="Cash Entry":
-		account = frappe.db.get_value("organization", organization, "default_cash_account")
+		account = frappe.db.get_value("Organization", organization, "default_cash_account")
 		if not account:
 			account = frappe.db.get_value("Account",
 				{"organization": organization, "account_type": "Cash", "is_group": 0})
@@ -593,7 +593,7 @@ def get_payment_entry_against_invoice(dt, dn):
 	})
 
 def get_payment_entry(ref_doc, args):
-	cost_center = frappe.db.get_value("organization", ref_doc.organization, "cost_center")
+	cost_center = frappe.db.get_value("Organization", ref_doc.organization, "cost_center")
 	exchange_rate = get_exchange_rate(args.get("party_account"), args.get("party_account_currency"),
 		ref_doc.organization, ref_doc.doctype, ref_doc.name)
 
@@ -670,7 +670,7 @@ def get_outstanding(args):
 	if isinstance(args, basestring):
 		args = json.loads(args)
 
-	organization_currency = get_organization_currency(args.get("organization"))
+	organization_currency = get_organization_currency(args.get("Organization"))
 
 	if args.get("doctype") == "Journal Entry":
 		condition = " and party=%(party)s" if args.get("party") else ""

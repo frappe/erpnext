@@ -41,10 +41,10 @@ $.extend(erpnext, {
 		if(cur_frm.fields_dict.organization) {
 			var companies = Object.keys(locals[":organization"] || {});
 			if(companies.length === 1) {
-				if(!cur_frm.doc.organization) cur_frm.set_value("organization", companies[0]);
-				cur_frm.toggle_display("organization", false);
+				if(!cur_frm.doc.organization) cur_frm.set_value("Organization", companies[0]);
+				cur_frm.toggle_display("Organization", false);
 			} else if(erpnext.last_selected_organization) {
-				if(!cur_frm.doc.organization) cur_frm.set_value("organization", erpnext.last_selected_organization);
+				if(!cur_frm.doc.organization) cur_frm.set_value("Organization", erpnext.last_selected_organization);
 			}
 		}
 	},

@@ -3,7 +3,7 @@
 
 frappe.provide("erpnext.organization");
 
-frappe.ui.form.on("organization", {
+frappe.ui.form.on("Organization", {
 	onload: function(frm) {
 		erpnext.organization.setup_queries(frm);
 	}, 

@@ -97,7 +97,7 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 			"Sales Order", "Delivery Note"]},
 		{fieldtype:"Select", fieldname: "value_or_qty", label:  __("Value or Qty"),
 			options:[{label: __("Value"), value: "Value"}, {label: __("Quantity"), value: "Quantity"}]},
-		{fieldtype:"Select", fieldname: "organization", label: __("organization"), link:"organization",
+		{fieldtype:"Select", fieldname: "organization", label: __("Organization"), link:"organization",
 			default_value: __("Select organization...")},
 		{fieldtype:"Date", fieldname: "from_date", label: __("From Date")},
 		{fieldtype:"Label", fieldname: "to", label: __("To")},

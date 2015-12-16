@@ -181,7 +181,7 @@ def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		quotation = frappe.get_doc(target)
 
-		organization_currency = frappe.db.get_value("organization", quotation.organization, "default_currency")
+		organization_currency = frappe.db.get_value("Organization", quotation.organization, "default_currency")
 		party_account_currency = get_party_account_currency("Customer", quotation.customer, quotation.organization)
 
 		if organization_currency == party_account_currency:

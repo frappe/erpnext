@@ -21,7 +21,7 @@ class ShoppingCartSettings(Document):
 
 	def validate_exchange_rates_exist(self):
 		"""check if exchange rates exist for all Price List currencies (to organization's currency)"""
-		organization_currency = frappe.db.get_value("organization", self.organization, "default_currency")
+		organization_currency = frappe.db.get_value("Organization", self.organization, "default_currency")
 		if not organization_currency:
 			msgprint(_("Please specify currency in organization") + ": " + self.organization,
 				raise_exception=ShoppingCartSetupError)

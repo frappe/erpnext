@@ -14,7 +14,7 @@ from erpnext.accounts.utils import FiscalYearError
 from erpnext.accounts.doctype.account.account import RootNotEditable
 
 def setup_complete(args=None):
-	if frappe.db.sql("select name from taborganization"):
+	if frappe.db.sql("select name from tabOrganization"):
 		frappe.throw(_("Setup Already Complete!!"))
 
 	install_fixtures.install(args.get("country"))
@@ -96,7 +96,7 @@ def create_fiscal_year_and_organization(args):
 
 	# organization
 	frappe.get_doc({
-		"doctype":"organization",
+		"doctype":"Organization",
 		'domain': args.get("industry"),
 		'organization_name':args.get('organization_name').strip(),
 		'abbr':args.get('organization_abbr'),
@@ -134,7 +134,7 @@ def set_defaults(args):
 
 	global_defaults.save()
 
-	frappe.db.set_value("System Settings", None, "email_footer_address", args.get("organization"))
+	frappe.db.set_value("System Settings", None, "email_footer_address", args.get("Organization"))
 
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.auto_accounting_for_stock = 1
@@ -186,7 +186,7 @@ def create_email_digest():
 	if not system_managers:
 		return
 
-	companies = frappe.db.sql_list("select name FROM `taborganization`")
+	companies = frappe.db.sql_list("select name FROM `tabOrganization`")
 	for organization in companies:
 		if not frappe.db.exists("Email Digest", "Default Weekly Digest - " + organization):
 			edigest = frappe.get_doc({

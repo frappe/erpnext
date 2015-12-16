@@ -99,7 +99,7 @@
    "no_copy": 0, 
    "oldfieldname": "customer_type", 
    "oldfieldtype": "Select", 
-   "options": "\nCompany\nIndividual", 
+   "options": "\nOrganization\nIndividual", 
    "permlevel": 0, 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 

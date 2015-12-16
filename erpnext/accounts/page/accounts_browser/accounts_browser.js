@@ -38,7 +38,7 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 		'</ol>'+
 		'<p>'+__('Please setup your chart of accounts before you start Accounting Entries')+'</p></div>').appendTo(main);
 
-	if (frappe.boot.user.can_create.indexOf("organization") !== -1) {
+	if (frappe.boot.user.can_create.indexOf("Organization") !== -1) {
 		wrapper.page.add_menu_item(__('New organization'), function() { newdoc('organization'); }, true);
 	}
 
@@ -51,7 +51,7 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 	}, "octicon octicon-plus");
 
 	// organization-select
-	wrapper.$organization_select = wrapper.page.add_select("organization", [])
+	wrapper.$organization_select = wrapper.page.add_select("Organization", [])
 		.change(function() {
 			var ctype = frappe.get_route()[1] || 'Account';
 			erpnext.account_chart = new erpnext.AccountsChart(ctype, $(this).val(),
@@ -66,7 +66,7 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 			$.each(r.message, function(i, v) {
 				$('<option>').html(v).attr('value', v).appendTo(wrapper.$organization_select);
 			});
-			wrapper.$organization_select.val(frappe.defaults.get_user_default("organization") || r.message[0]).change();
+			wrapper.$organization_select.val(frappe.defaults.get_user_default("Organization") || r.message[0]).change();
 		}
 	});
 }

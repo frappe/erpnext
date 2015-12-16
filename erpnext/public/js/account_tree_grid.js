@@ -55,7 +55,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 
 	},
 	filters: [
-		{fieldtype: "Select", label: __("organization"), link:"organization", fieldname: "organization",
+		{fieldtype: "Select", label: __("Organization"), link:"organization", fieldname: "organization",
 			default_value: __("Select organization..."),
 			filter: function(val, item, opts, me) {
 				if (item.organization == val || val == opts.default_value) {

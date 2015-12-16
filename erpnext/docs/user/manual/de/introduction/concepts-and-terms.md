@@ -13,12 +13,12 @@ Bezeichnung für die Firmendatensätze, die unter ERPNext verwendet werden. In e
 > Rechnungswesen > Einstellungen > Firma
 
 #### Kunde
-Bezeichnung eines Kunden. Ein Kunde kann eine Einzelperson oder eine Organisation sein. Sie können für jeden Kunden mehrere verschiedene Kontakte und Adressen erstellen.
+Bezeichnung eines Kunden. Ein Kunde kann eine Einzelperson oder eine organization sein. Sie können für jeden Kunden mehrere verschiedene Kontakte und Adressen erstellen.
 
 > Vertrieb > Dokumente > Kunde
 
 #### Lieferant
-Bezeichnung eines Lieferanten von Waren oder Dienstleistungen. Ihr Telekommunikationsanbieter ist ein Lieferant, genauso wie Ihr Lieferant für Rohmaterial. Auch in diesem Fall kann der Lieferant eine Einzelperson oder eine Organisation sein und mehrere verschiedene Kontakte und Adressen haben.
+Bezeichnung eines Lieferanten von Waren oder Dienstleistungen. Ihr Telekommunikationsanbieter ist ein Lieferant, genauso wie Ihr Lieferant für Rohmaterial. Auch in diesem Fall kann der Lieferant eine Einzelperson oder eine organization sein und mehrere verschiedene Kontakte und Adressen haben.
 
 > Einkauf > Dokumente > Lieferant
 

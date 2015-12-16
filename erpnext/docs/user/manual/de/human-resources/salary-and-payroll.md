@@ -17,7 +17,7 @@ Um in ERPNext eine Gehaltsabrechnung durchzuführen
 
 Die Gehaltsstruktur gibt an, wie Gehälter auf Basis von Einkommen und Abzügen errechnet werden.
 
-Gehaltsstrukturen werden verwendet um Organisationen zu helfen
+Gehaltsstrukturen werden verwendet um organizationen zu helfen
 
 1\. Gehaltslevel zu erhalten, die am Markt wettbewerbsfähig sind.
 

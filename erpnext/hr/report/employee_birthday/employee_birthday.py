@@ -18,7 +18,7 @@ def get_columns():
 	return [
 		_("Employee") + ":Link/Employee:120", _("Name") + ":Data:200", _("Date of Birth")+ ":Date:100",
 		_("Branch") + ":Link/Branch:120", _("Department") + ":Link/Department:120",
-		_("Designation") + ":Link/Designation:120", _("Gender") + "::60", _("organization") + ":Link/organization:120"
+		_("Designation") + ":Link/Designation:120", _("Gender") + "::60", _("Organization") + ":Link/organization:120"
 	]
 
 def get_employees(filters):
@@ -34,7 +34,7 @@ def get_conditions(filters):
 			"Dec"].index(filters["month"]) + 1
 		conditions += " and month(date_of_birth) = '%s'" % month
 
-	if filters.get("organization"): conditions += " and organization = '%s'" % \
+	if filters.get("Organization"): conditions += " and organization = '%s'" % \
 		filters["organization"].replace("'", "\\'")
 
 	return conditions

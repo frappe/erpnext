@@ -404,7 +404,7 @@ def get_bom_items_as_dict(bom, organization, qty=1, fetch_exploded=1):
 			["Cost Center", "cost_center", "cost_center"], ["Warehouse", "default_warehouse", ""]]:
 				organization_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "organization")
 				if not item_details.get(d[1]) or (organization_in_record and organization != organization_in_record):
-					item_dict[item][d[1]] = frappe.db.get_value("organization", organization, d[2]) if d[2] else None
+					item_dict[item][d[1]] = frappe.db.get_value("Organization", organization, d[2]) if d[2] else None
 
 	return item_dict
 

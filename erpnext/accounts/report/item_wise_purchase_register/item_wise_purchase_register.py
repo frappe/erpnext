@@ -46,14 +46,14 @@ def get_columns():
 		_("Item Group") + ":Link/Item Group:100", _("Invoice") + ":Link/Purchase Invoice:120",
 		_("Posting Date") + ":Date:80", _("Supplier") + ":Link/Supplier:120",
 		"Supplier Name::120", "Payable Account:Link/Account:120", _("Project") + ":Link/Project:80",
-		_("organization") + ":Link/organization:100", _("Purchase Order") + ":Link/Purchase Order:100",
+		_("Organization") + ":Link/organization:100", _("Purchase Order") + ":Link/Purchase Order:100",
 		_("Purchase Receipt") + ":Link/Purchase Receipt:100", _("Expense Account") + ":Link/Account:140",
 		_("Qty") + ":Float:120", _("Rate") + ":Currency:120", _("Amount") + ":Currency:120"]
 
 def get_conditions(filters):
 	conditions = ""
 
-	for opts in (("organization", " and organization=%(organization)s"),
+	for opts in (("Organization", " and organization=%(organization)s"),
 		("supplier", " and pi.supplier = %(supplier)s"),
 		("item_code", " and pi_item.item_code = %(item_code)s"),
 		("from_date", " and pi.posting_date>=%(from_date)s"),
@@ -76,7 +76,7 @@ def get_items(filters):
 		order by pi.posting_date desc, pi_item.item_code desc""" % (conditions, match_conditions), filters, as_dict=1)
 
 def get_aii_accounts():
-	return dict(frappe.db.sql("select name, stock_received_but_not_billed from taborganization"))
+	return dict(frappe.db.sql("select name, stock_received_but_not_billed from tabOrganization"))
 
 def get_tax_accounts(item_list, columns):
 	import json

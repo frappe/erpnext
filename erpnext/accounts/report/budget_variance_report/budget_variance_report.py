@@ -68,7 +68,7 @@ def get_costcenter_target_details(filters):
 		from `tabCost Center` cc, `tabBudget Detail` bd
 		where bd.parent=cc.name and bd.fiscal_year=%s and
 		cc.organization=%s order by cc.name""" % ('%s', '%s'),
-		(filters.get("fiscal_year"), filters.get("organization")), as_dict=1)
+		(filters.get("fiscal_year"), filters.get("Organization")), as_dict=1)
 
 #Get target distribution details of accounts of cost center
 def get_target_distribution_details(filters):
@@ -88,7 +88,7 @@ def get_actual_details(filters):
 		from `tabGL Entry` gl, `tabBudget Detail` bd
 		where gl.fiscal_year=%s and organization=%s
 		and bd.account=gl.account and bd.parent=gl.cost_center""" % ('%s', '%s'),
-		(filters.get("fiscal_year"), filters.get("organization")), as_dict=1)
+		(filters.get("fiscal_year"), filters.get("Organization")), as_dict=1)
 
 	cc_actual_details = {}
 	for d in ac_details:

@@ -2,7 +2,7 @@
 	{%= frappe.boot.letter_heads[filters.letter_head || frappe.defaults.get_default("letter_head")] %}
 </div>
 <h2 class="text-center">{%= __("Statement of Account") %}</h2>
-<h4 class="text-center">{%= (filters.party || filters.account) && ((filters.party || filters.account) + ", ")  || "" %} {%= filters.company %}</h4>
+<h4 class="text-center">{%= (filters.party || filters.account) && ((filters.party || filters.account) + ", ")  || "" %} {%= filters.organization %}</h4>
 <h5 class="text-center">
 	{%= dateutil.str_to_user(filters.from_date) %}
 	{%= __("to") %}

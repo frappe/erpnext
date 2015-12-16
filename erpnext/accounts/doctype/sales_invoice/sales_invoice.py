@@ -260,7 +260,7 @@ class SalesInvoice(SellingController):
 				"Sales Invoice Advance", "advances", "credit_in_account_currency", "sales_order")
 
 	def get_organization_abbr(self):
-		return frappe.db.sql("select abbr from taborganization where name=%s", self.organization)[0][0]
+		return frappe.db.sql("select abbr from tabOrganization where name=%s", self.organization)[0][0]
 
 	def update_against_document_in_jv(self):
 		"""

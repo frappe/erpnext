@@ -83,7 +83,7 @@ class ReceivablePayableReport(object):
 
 		future_vouchers = self.get_entries_after(self.filters.report_date, args.get("party_type"))
 
-		organization_currency = frappe.db.get_value("organization", self.filters.get("organization"), "default_currency")
+		organization_currency = frappe.db.get_value("Organization", self.filters.get("Organization"), "default_currency")
 
 		data = []
 		for gle in self.get_entries_till(self.filters.report_date, args.get("party_type")):

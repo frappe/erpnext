@@ -1,4 +1,4 @@
-<!-- title: Company -->
+<!-- title: Organization -->
 
 
 
@@ -10,7 +10,7 @@
 	Version 6.x.x</a>
 
 
-	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/setup/doctype/company"
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/setup/doctype/organization"
 		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
 
 </div>
@@ -19,7 +19,7 @@
 
 
 
-    <p><b>Table Name:</b> <code>tabCompany</code></p>
+    <p><b>Table Name:</b> <code>tabOrganization</code></p>
 
 
 Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.
@@ -52,11 +52,11 @@ Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Org
         
         <tr >
             <td>2</td>
-            <td class="danger" title="Mandatory"><code>company_name</code></td>
+            <td class="danger" title="Mandatory"><code>organization_name</code></td>
             <td >
                 Data</td>
             <td >
-                Company
+                Organization
                 
             </td>
             <td></td>
@@ -658,11 +658,11 @@ Stop</pre>
         
         <tr class="info">
             <td>38</td>
-            <td ><code>company_info</code></td>
+            <td ><code>organization_info</code></td>
             <td >
                 Section Break</td>
             <td >
-                Company Info
+                Organization Info
                 <p class="text-muted small">
                     For reference only.</p>
             </td>
@@ -767,18 +767,18 @@ Stop</pre>
             <td >
                 Registration Details
                 <p class="text-muted small">
-                    Company registration numbers for your reference. Tax numbers etc.</p>
+                    Organization registration numbers for your reference. Tax numbers etc.</p>
             </td>
             <td></td>
         </tr>
         
         <tr >
             <td>47</td>
-            <td ><code>delete_company_transactions</code></td>
+            <td ><code>delete_organization_transactions</code></td>
             <td >
                 Button</td>
             <td >
-                Delete Company Transactions
+                Delete Organization Transactions
                 
             </td>
             <td></td>
@@ -790,7 +790,7 @@ Stop</pre>
 
     <hr>
     <h3>Controller</h3>
-    <h4>erpnext.setup.doctype.company.company</h4>
+    <h4>erpnext.setup.doctype.organization.organization</h4>
 
     
 
@@ -798,7 +798,7 @@ Stop</pre>
 
 	
         
-	<h3 style="font-weight: normal;">Class <b>Company</b></h3>
+	<h3 style="font-weight: normal;">Class <b>Organization</b></h3>
     
     <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
     
@@ -941,7 +941,7 @@ Stop</pre>
 		<b>on_trash</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Trash accounts and cost centers for this company if no gl entry exists</p>
+	<div class="docs-attr-desc"><p>Trash accounts and cost centers for this organization if no gl entry exists</p>
 </div>
 	<br>
 
@@ -1040,10 +1040,10 @@ Stop</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="erpnext.setup.doctype.company.company.get_company_currency" href="#erpnext.setup.doctype.company.company.get_company_currency" class="text-muted small">
+        <a name="erpnext.setup.doctype.organization.organization.get_organization_currency" href="#erpnext.setup.doctype.organization.organization.get_organization_currency" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.setup.doctype.company.company.<b>get_company_currency</b>
-        <i class="text-muted">(company)</i>
+		erpnext.setup.doctype.organization.organization.<b>get_organization_currency</b>
+        <i class="text-muted">(organization)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1056,10 +1056,10 @@ Stop</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="erpnext.setup.doctype.company.company.get_name_with_abbr" href="#erpnext.setup.doctype.company.company.get_name_with_abbr" class="text-muted small">
+        <a name="erpnext.setup.doctype.organization.organization.get_name_with_abbr" href="#erpnext.setup.doctype.organization.organization.get_name_with_abbr" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.setup.doctype.company.company.<b>get_name_with_abbr</b>
-        <i class="text-muted">(name, company)</i>
+		erpnext.setup.doctype.organization.organization.<b>get_name_with_abbr</b>
+        <i class="text-muted">(name, organization)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1071,13 +1071,13 @@ Stop</pre>
         
     
     <p><span class="label label-info">Public API</span>
-        <br><code>/api/method/erpnext.setup.doctype.company.company.replace_abbr</code>
+        <br><code>/api/method/erpnext.setup.doctype.organization.organization.replace_abbr</code>
     </p>
 	<p class="docs-attr-name">
-        <a name="erpnext.setup.doctype.company.company.replace_abbr" href="#erpnext.setup.doctype.company.company.replace_abbr" class="text-muted small">
+        <a name="erpnext.setup.doctype.organization.organization.replace_abbr" href="#erpnext.setup.doctype.organization.organization.replace_abbr" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.setup.doctype.company.company.<b>replace_abbr</b>
-        <i class="text-muted">(company, old, new)</i>
+		erpnext.setup.doctype.organization.organization.<b>replace_abbr</b>
+        <i class="text-muted">(organization, old, new)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1194,7 +1194,7 @@ Stop</pre>
             <li>
 
 
-<a href="https://frappe.github.io/erpnext/current/models/accounts/fiscal_year_company">Fiscal Year Company</a>
+<a href="https://frappe.github.io/erpnext/current/models/accounts/fiscal_year_organization">Fiscal Year Organization</a>
 
 </li>
 			

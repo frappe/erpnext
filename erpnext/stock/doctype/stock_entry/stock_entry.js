@@ -32,7 +32,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		});
 
 		if(cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
-			this.frm.add_fetch("organization", "stock_adjustment_account", "expense_account");
+			this.frm.add_fetch("Organization", "stock_adjustment_account", "expense_account");
 			this.frm.fields_dict.items.grid.get_field('expense_account').get_query =
 					function() {
 				return {
@@ -58,7 +58,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		cur_frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 		this.set_default_account(function() {
 			if(me.frm.doc.__islocal && me.frm.doc.organization && !me.frm.doc.amended_from) {
-				cur_frm.script_manager.trigger("organization");
+				cur_frm.script_manager.trigger("Organization");
 			}
 		});
 	},

@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import cstr
 
 def execute():
-	for organization in frappe.db.sql("select name, expenses_included_in_valuation from taborganization", as_dict=1):
+	for organization in frappe.db.sql("select name, expenses_included_in_valuation from tabOrganization", as_dict=1):
 		frozen_date = get_frozen_date(organization.name, organization.expenses_included_in_valuation)
 
 		# Purchase Invoices after frozen date

@@ -10,7 +10,7 @@ from frappe.model.document import Document
 
 class Warehouse(Document):
 	def autoname(self):
-		suffix = " - " + frappe.db.get_value("organization", self.organization, "abbr")
+		suffix = " - " + frappe.db.get_value("Organization", self.organization, "abbr")
 		if not self.warehouse_name.endswith(suffix):
 			self.name = self.warehouse_name + suffix
 

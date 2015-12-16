@@ -88,7 +88,7 @@ def get_conditions(filters):
 		else:
 			filters["reference_type"] = "Purchase Invoice"
 		
-	if filters.get("organization"):
+	if filters.get("Organization"):
 		conditions.append("jv.organization=%(organization)s")
 
 	if filters.get("from_date"):

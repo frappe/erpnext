@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	for organization in frappe.get_all("organization",
+	for organization in frappe.get_all("Organization",
 			["name", "default_receivable_account", "default_payable_account"]):
 
 		if organization.default_receivable_account:

@@ -27,10 +27,10 @@ def boot_session(bootinfo):
 
 		if not bootinfo.customer_count:
 			bootinfo.setup_complete = frappe.db.sql("""select name from
-				taborganization limit 1""") and 'Yes' or 'No'
+				tabOrganization limit 1""") and 'Yes' or 'No'
 
 		bootinfo.docs += frappe.db.sql("""select name, default_currency, cost_center,
-			default_terms, default_letter_head from `taborganization`""",
+			default_terms, default_letter_head from `tabOrganization`""",
 			as_dict=1, update={"doctype":":organization"})
 
 def load_country_and_currency(bootinfo):

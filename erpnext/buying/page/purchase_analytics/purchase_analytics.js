@@ -94,7 +94,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 			options:["Purchase Invoice", "Purchase Order", "Purchase Receipt"]},
 		{fieldtype:"Select", label: __("Value or Qty"), fieldname: "value_or_qty",
 			options:["Value", "Quantity"]},
-		{fieldtype:"Select", label: __("organization"), link:"organization", fieldname: "organization",
+		{fieldtype:"Select", label: __("Organization"), link:"organization", fieldname: "organization",
 			default_value: __("Select organization...")},
 		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},

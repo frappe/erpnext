@@ -11,7 +11,7 @@ class CostCenter(NestedSet):
 
 	def autoname(self):
 		self.name = self.cost_center_name.strip() + ' - ' + \
-			frappe.db.get_value("organization", self.organization, "abbr")
+			frappe.db.get_value("Organization", self.organization, "abbr")
 			
 
 	def validate(self):

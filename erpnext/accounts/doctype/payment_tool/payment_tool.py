@@ -79,7 +79,7 @@ class PaymentTool(Document):
 		
 		d2.set(amount_field_bank, abs(total_payment_amount))
 		
-		organization_currency = frappe.db.get_value("organization", self.organization, "default_currency")
+		organization_currency = frappe.db.get_value("Organization", self.organization, "default_currency")
 		if party_account_currency != organization_currency or \
 			(bank_account_currency and bank_account_currency != organization_currency):
 				jv.multi_currency = 1
@@ -99,7 +99,7 @@ def get_outstanding_vouchers(args):
 	args = json.loads(args)
 
 	party_account_currency = get_account_currency(args.get("party_account"))
-	organization_currency = frappe.db.get_value("organization", args.get("organization"), "default_currency")
+	organization_currency = frappe.db.get_value("Organization", args.get("Organization"), "default_currency")
 
 	if ((args.get("party_type") == "Customer" and args.get("received_or_paid") == "Paid")
 		or (args.get("party_type") == "Supplier" and args.get("received_or_paid") == "Received")):
@@ -150,7 +150,7 @@ def get_orders_to_be_billed(party_type, party, party_account_currency, organizat
 @frappe.whitelist()
 def get_against_voucher_amount(against_voucher_type, against_voucher_no, party_account, organization):
 	party_account_currency = get_account_currency(party_account)
-	organization_currency = frappe.db.get_value("organization", organization, "default_currency")
+	organization_currency = frappe.db.get_value("Organization", organization, "default_currency")
 	ref_field = "base_grand_total" if party_account_currency == organization_currency else "grand_total"
 
 	if against_voucher_type in ["Sales Order", "Purchase Order"]:

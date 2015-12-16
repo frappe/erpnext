@@ -199,7 +199,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
-		frappe.permissions.add_user_permission("organization", "_Test organization 1", "test2@example.com")
+		frappe.permissions.add_user_permission("Organization", "_Test organization 1", "test2@example.com")
 
 		test_user = frappe.get_doc("User", "test@example.com")
 		test_user.add_roles("Sales User", "Stock User")
@@ -222,7 +222,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
-		frappe.permissions.remove_user_permission("organization", "_Test organization 1", "test2@example.com")
+		frappe.permissions.remove_user_permission("Organization", "_Test organization 1", "test2@example.com")
 
 	def test_block_delivery_note_against_cancelled_sales_order(self):
 		so = make_sales_order()

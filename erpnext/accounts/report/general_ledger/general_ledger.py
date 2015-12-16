@@ -52,7 +52,7 @@ def set_account_currency(filters):
 	if not (filters.get("account") or filters.get("party")):
 		return filters
 	else:
-		filters["organization_currency"] = frappe.db.get_value("organization", filters.organization, "default_currency")
+		filters["organization_currency"] = frappe.db.get_value("Organization", filters.organization, "default_currency")
 		account_currency = None
 
 		if filters.get("account"):

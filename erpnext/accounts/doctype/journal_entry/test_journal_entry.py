@@ -97,7 +97,7 @@ class TestJournalEntry(unittest.TestCase):
 		set_perpetual_inventory(0)
 
 	def test_monthly_budget_crossed_ignore(self):
-		frappe.db.set_value("organization", "_Test organization", "monthly_bgt_flag", "Ignore")
+		frappe.db.set_value("Organization", "_Test organization", "monthly_bgt_flag", "Ignore")
 
 		self.set_total_expense_zero("2013-02-28")
 
@@ -108,7 +108,7 @@ class TestJournalEntry(unittest.TestCase):
 			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
 
 	def test_monthly_budget_crossed_stop(self):
-		frappe.db.set_value("organization", "_Test organization", "monthly_bgt_flag", "Stop")
+		frappe.db.set_value("Organization", "_Test organization", "monthly_bgt_flag", "Stop")
 
 		self.set_total_expense_zero("2013-02-28")
 
@@ -117,12 +117,12 @@ class TestJournalEntry(unittest.TestCase):
 
 		self.assertRaises(BudgetError, jv.submit)
 
-		frappe.db.set_value("organization", "_Test organization", "monthly_bgt_flag", "Ignore")
+		frappe.db.set_value("Organization", "_Test organization", "monthly_bgt_flag", "Ignore")
 
 	def test_yearly_budget_crossed_stop(self):
 		self.test_monthly_budget_crossed_ignore()
 
-		frappe.db.set_value("organization", "_Test organization", "yearly_bgt_flag", "Stop")
+		frappe.db.set_value("Organization", "_Test organization", "yearly_bgt_flag", "Stop")
 
 		self.set_total_expense_zero("2013-02-28")
 
@@ -131,7 +131,7 @@ class TestJournalEntry(unittest.TestCase):
 
 		self.assertRaises(BudgetError, jv.submit)
 
-		frappe.db.set_value("organization", "_Test organization", "yearly_bgt_flag", "Ignore")
+		frappe.db.set_value("Organization", "_Test organization", "yearly_bgt_flag", "Ignore")
 
 	def test_monthly_budget_on_cancellation(self):
 		self.set_total_expense_zero("2013-02-28")
@@ -148,11 +148,11 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv2.name}))
 
-		frappe.db.set_value("organization", "_Test organization", "monthly_bgt_flag", "Stop")
+		frappe.db.set_value("Organization", "_Test organization", "monthly_bgt_flag", "Stop")
 
 		self.assertRaises(BudgetError, jv1.cancel)
 
-		frappe.db.set_value("organization", "_Test organization", "monthly_bgt_flag", "Ignore")
+		frappe.db.set_value("Organization", "_Test organization", "monthly_bgt_flag", "Ignore")
 
 	def get_actual_expense(self, monthly_end_date):
 		return get_actual_expense({

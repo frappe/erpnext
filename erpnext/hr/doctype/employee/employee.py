@@ -57,7 +57,7 @@ class Employee(Document):
 
 	def update_user_permissions(self):
 		frappe.permissions.add_user_permission("Employee", self.name, self.user_id)
-		frappe.permissions.set_user_permission_if_allowed("organization", self.organization, self.user_id)
+		frappe.permissions.set_user_permission_if_allowed("Organization", self.organization, self.user_id)
 
 	def update_user(self):
 		# add employee role if missing

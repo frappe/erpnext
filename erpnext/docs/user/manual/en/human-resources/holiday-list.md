@@ -1,7 +1,7 @@
 Holiday List is a list which contains the dates of holidays along with the
 occasion of that holiday. The list is generally valid for one calendar year.  
 
-Most organisations have a standard Holiday-List for their employees. Some even
+Most organizations have a standard Holiday-List for their employees. Some even
 have different holiday lists for laborers and a different one for management
 staff.
 

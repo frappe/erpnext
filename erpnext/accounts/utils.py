@@ -28,8 +28,8 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 		cond += " and %(transaction_date)s >= fy.year_start_date and %(transaction_date)s <= fy.year_end_date"
 
 	if organization:
-		cond += """ and (not exists(select name from `tabFiscal Year organization` fyc where fyc.parent = fy.name)
-			or exists(select organization from `tabFiscal Year organization` fyc where fyc.parent = fy.name and fyc.organization=%(organization)s ))"""
+		cond += """ and (not exists(select name from `tabFiscal Year Organization` fyc where fyc.parent = fy.name)
+			or exists(select organization from `tabFiscal Year Organization` fyc where fyc.parent = fy.name and fyc.organization=%(organization)s ))"""
 
 	fy = frappe.db.sql("""select fy.name, fy.year_start_date, fy.year_end_date from `tabFiscal Year` fy
 		where %s order by fy.year_start_date desc""" % cond, {
@@ -102,7 +102,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 
 			# If group and currency same as organization,
 			# always return balance based on debit and credit in organization currency
-			if acc.account_currency == frappe.db.get_value("organization", acc.organization, "default_currency"):
+			if acc.account_currency == frappe.db.get_value("Organization", acc.organization, "default_currency"):
 				in_account_currency = False
 		else:
 			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account), ))
@@ -272,10 +272,10 @@ def remove_against_link_from_jv(ref_type, ref_no):
 
 @frappe.whitelist()
 def get_organization_default(organization, fieldname):
-	value = frappe.db.get_value("organization", organization, fieldname)
+	value = frappe.db.get_value("Organization", organization, fieldname)
 
 	if not value:
-		throw(_("Please set default value {0} in organization {1}").format(frappe.get_meta("organization").get_label(fieldname), organization))
+		throw(_("Please set default value {0} in organization {1}").format(frappe.get_meta("Organization").get_label(fieldname), organization))
 
 	return value
 
@@ -324,7 +324,7 @@ def validate_expense_against_budget(args):
 			""", (args.cost_center, args.account, args.fiscal_year), as_dict=True)
 
 			if budget and budget[0].budget_allocated:
-				yearly_action, monthly_action = frappe.db.get_value("organization", args.organization,
+				yearly_action, monthly_action = frappe.db.get_value("Organization", args.organization,
 					["yearly_bgt_flag", "monthly_bgt_flag"])
 				action_for = action = ""
 
@@ -382,8 +382,8 @@ def get_actual_expense(args):
 
 def get_currency_precision(currency=None):
 	if not currency:
-		currency = frappe.db.get_value("organization",
-			frappe.db.get_default("organization"), "default_currency", cache=True)
+		currency = frappe.db.get_value("Organization",
+			frappe.db.get_default("Organization"), "default_currency", cache=True)
 	currency_format = frappe.db.get_value("Currency", currency, "number_format", cache=True)
 
 	from frappe.utils import get_number_format_info
@@ -411,7 +411,7 @@ def get_stock_rbnb_difference(posting_date, organization):
 	stock_rbnb = flt(pr_valuation_amount, 2) - flt(pi_valuation_amount, 2)
 
 	# Balance as per system
-	stock_rbnb_account = "Stock Received But Not Billed - " + frappe.db.get_value("organization", organization, "abbr")
+	stock_rbnb_account = "Stock Received But Not Billed - " + frappe.db.get_value("Organization", organization, "abbr")
 	sys_bal = get_balance_on(stock_rbnb_account, posting_date, in_account_currency=False)
 
 	# Amount should be credited

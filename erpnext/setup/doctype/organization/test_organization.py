@@ -7,8 +7,8 @@ test_ignore = ["Account", "Cost Center"]
 import frappe
 import unittest
 
-class Testorganization(unittest.TestCase):
+class TestOrganization(unittest.TestCase):
 	pass
 
 
-test_records = frappe.get_test_records('organization')
+test_records = frappe.get_test_records('Organization')

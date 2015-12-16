@@ -14,7 +14,7 @@ def execute(filters=None):
 	customers = []
 	organization_condition = ""
 
-	if filters.get("organization"):
+	if filters.get("Organization"):
 		organization_condition = ' and organization=%(organization)s'
 
 	for si in frappe.db.sql("""select posting_date, customer, base_grand_total from `tabSales Invoice`

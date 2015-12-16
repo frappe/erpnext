@@ -1,15 +1,15 @@
 ### Bank Reconciliation Statement
 
 A Bank Reconciliation is a process that explains the difference between the
-bank balance shown in an organisation's bank statement, as supplied by the
-bank, and the corresponding amount shown in the organisation's own accounting
+bank balance shown in an organization's bank statement, as supplied by the
+bank, and the corresponding amount shown in the organization's own accounting
 records at a particular point in time.  
 
 Such differences may occur, for example, because a cheque or a list of cheques
-issued by the organisation has not been presented to the bank, a banking
+issued by the organization has not been presented to the bank, a banking
 transaction, such as a credit received, or a charge made by the bank, has not
-yet been recorded in the organisations books, or either the bank or the
-organisation itself has made an error.
+yet been recorded in the organizations books, or either the bank or the
+organization itself has made an error.
 
 The Bank Reconciliation statement in ERPNext comes in the form of a report.
 

@@ -45,7 +45,7 @@ class Workstation(Document):
 
 @frappe.whitelist()
 def get_default_holiday_list():
-	return frappe.db.get_value("organization", frappe.defaults.get_user_default("organization"), "default_holiday_list")
+	return frappe.db.get_value("Organization", frappe.defaults.get_user_default("Organization"), "default_holiday_list")
 
 def check_if_within_operating_hours(workstation, operation, from_datetime, to_datetime):
 	if from_datetime and to_datetime:

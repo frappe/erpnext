@@ -11,7 +11,7 @@ from frappe.desk.notifications import clear_notifications
 @frappe.whitelist()
 def delete_organization_transactions(organization_name):
 	frappe.only_for("System Manager")
-	doc = frappe.get_doc("organization", organization_name)
+	doc = frappe.get_doc("Organization", organization_name)
 
 	if frappe.session.user != doc.owner:
 		frappe.throw(_("Transactions can only be deleted by the creator of the organization"), frappe.PermissionError)
@@ -88,7 +88,7 @@ def delete_time_logs(organization_name):
 
 def delete_lead_addresses(organization_name):
 	"""Delete addresses to which leads are linked"""
-	for lead in frappe.get_all("Lead", filters={"company": company_name}):
+	for lead in frappe.get_all("Lead", filters={"organization": organization_name}):
 		frappe.db.sql("""delete from `tabAddress`
 			where lead=%s and (customer='' or customer is null) and (supplier='' or supplier is null)""", lead.name)
 

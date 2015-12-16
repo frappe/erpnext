@@ -15,8 +15,8 @@ class AccountsSettings(Document):
 
 		if cint(self.auto_accounting_for_stock):
 			# set default perpetual account in organization
-			for organization in frappe.db.sql("select name from taborganization"):
-				organization = frappe.get_doc("organization", organization[0])
+			for organization in frappe.db.sql("select name from tabOrganization"):
+				organization = frappe.get_doc("Organization", organization[0])
 				organization.flags.ignore_permissions = True
 				organization.save()
 
@@ -24,7 +24,8 @@ class AccountsSettings(Document):
 			warehouse_list = frappe.db.sql("select name, organization from tabWarehouse", as_dict=1)
 			warehouse_with_no_organization = [d.name for d in warehouse_list if not d.organization]
 			if warehouse_with_no_organization:
-				frappe.throw(_("organization is missing in warehouses {0}").format(comma_and(warehouse_with_no_organization)))
+				frappe.throw(_("Organization is missing in warehouses {0}")
+					.format(comma_and(warehouse_with_no_organization)))
 			for wh in warehouse_list:
 				wh_doc = frappe.get_doc("Warehouse", wh.name)
 				wh_doc.flags.ignore_permissions = True

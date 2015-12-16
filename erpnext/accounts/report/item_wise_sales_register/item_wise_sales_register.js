@@ -24,10 +24,10 @@ frappe.query_reports["Item-wise Sales Register"] = frappe.query_reports["Sales R
 		},
 		{
 			"fieldname":"organization",
-			"label": __("organization"),
+			"label": __("Organization"),
 			"fieldtype": "Link",
 			"options": "organization",
-			"default": frappe.defaults.get_user_default("organization")
+			"default": frappe.defaults.get_user_default("Organization")
 		}
 	]
 }

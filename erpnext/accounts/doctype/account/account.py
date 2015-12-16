@@ -20,7 +20,7 @@ class Account(Document):
 
 	def autoname(self):
 		self.name = self.account_name.strip() + ' - ' + \
-			frappe.db.get_value("organization", self.organization, "abbr")
+			frappe.db.get_value("Organization", self.organization, "abbr")
 
 	def validate(self):
 		self.validate_parent()
@@ -99,7 +99,7 @@ class Account(Document):
 
 	def validate_account_currency(self):
 		if not self.account_currency:
-			self.account_currency = frappe.db.get_value("organization", self.organization, "default_currency")
+			self.account_currency = frappe.db.get_value("Organization", self.organization, "default_currency")
 
 		elif self.account_currency != frappe.db.get_value("Account", self.name, "account_currency"):
 			if frappe.db.get_value("GL Entry", {"account": self.name}):
@@ -224,7 +224,7 @@ def get_account_currency(account):
 	def generator():
 		account_currency, organization = frappe.db.get_value("Account", account, ["account_currency", "organization"])
 		if not account_currency:
-			account_currency = frappe.db.get_value("organization", organization, "default_currency")
+			account_currency = frappe.db.get_value("Organization", organization, "default_currency")
 
 		return account_currency
 

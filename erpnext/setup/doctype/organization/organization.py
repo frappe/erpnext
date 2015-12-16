@@ -11,7 +11,7 @@ import frappe.defaults
 
 from frappe.model.document import Document
 
-class organization(Document):
+class Organization(Document):
 	def onload(self):
 		self.get("__onload").transactions_exist = self.check_if_transactions_exist()
 
@@ -48,7 +48,7 @@ class organization(Document):
 							.format(self.get(field), self.name))
 
 	def validate_currency(self):
-		self.previous_default_currency = frappe.db.get_value("organization", self.name, "default_currency")
+		self.previous_default_currency = frappe.db.get_value("Organization", self.name, "default_currency")
 		if self.default_currency and self.previous_default_currency and \
 			self.default_currency != self.previous_default_currency and \
 			self.check_if_transactions_exist():
@@ -204,7 +204,7 @@ class organization(Document):
 		if not frappe.db.get_value("Stock Ledger Entry", {"organization": self.name}):
 			frappe.db.sql("""delete from `tabWarehouse` where organization=%s""", self.name)
 
-		frappe.defaults.clear_default("organization", value=self.name)
+		frappe.defaults.clear_default("Organization", value=self.name)
 
 		# clear default accounts, warehouses from item
 		if warehouses:
@@ -237,7 +237,7 @@ def replace_abbr(organization, old, new):
 
 	frappe.only_for("System Manager")
 
-	frappe.db.set_value("organization", organization, "abbr", new)
+	frappe.db.set_value("Organization", organization, "abbr", new)
 
 	def _rename_record(dt):
 		for d in frappe.db.sql("select name from `tab%s` where organization=%s" % (dt, '%s'), organization):
@@ -250,7 +250,7 @@ def replace_abbr(organization, old, new):
 		frappe.db.commit()
 
 def get_name_with_abbr(name, organization):
-	organization_abbr = frappe.db.get_value("organization", organization, "abbr")
+	organization_abbr = frappe.db.get_value("Organization", organization, "abbr")
 	parts = name.split(" - ")
 
 	if parts[-1].lower() != organization_abbr.lower():
@@ -260,4 +260,4 @@ def get_name_with_abbr(name, organization):
 
 def get_organization_currency(organization):
 	return frappe.local_cache("organization_currency", organization,
-		lambda: frappe.db.get_value("organization", organization, "default_currency"))
+		lambda: frappe.db.get_value("Organization", organization, "default_currency"))
