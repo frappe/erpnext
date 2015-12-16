@@ -7,4 +7,11 @@ import frappe
 from frappe.model.document import Document
 
 class PaymentGateway(Document):
-	pass
+	def validate(self):
+		self.update_default_payment_gateway()
+	
+	def update_default_payment_gateway(self):
+		frappe.db.sql("""update `tabPayment Gateway` set is_default = 0
+			where is_default = 1 """)
+		
+		
