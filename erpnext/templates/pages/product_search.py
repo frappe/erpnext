@@ -10,7 +10,9 @@ no_cache = 1
 no_sitemap = 1
 
 @frappe.whitelist(allow_guest=True)
-def get_product_list(search=None, start=0, limit=10):
+def get_product_list(search=None, start=0, limit=12):
+	# limit = 12 because we show 12 items in the grid view
+
 	# base query
 	query = """select name, item_name, page_name, website_image, thumbnail, item_group,
 			web_long_description as website_description, parent_website_route

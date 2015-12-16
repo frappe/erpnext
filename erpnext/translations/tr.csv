@@ -59,7 +59,7 @@ DocType: Quality Inspection Reading,Parameter,Parametre
 apps/erpnext/erpnext/projects/doctype/project/project.py +43,Expected End Date can not be less than Expected Start Date,Beklenen Bitiş Tarihi Beklenen Başlangıç Tarihinden daha az olamaz
 apps/erpnext/erpnext/utilities/transaction_base.py +107,Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ,Satır # {0}: Puan aynı olmalıdır {1}: {2} ({3} / {4})
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +206,New Leave Application,Yeni İzin Uygulaması
-apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +134,Bank Draft,Banka poliçesi
+apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +134,Bank Draft,Banka Havalesi
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +134,Bank Draft,Banka poliçesi
 DocType: Features Setup,1. To maintain the customer wise item code and to make them searchable based on their code use this option,1.Müşteriye bilgilendirme sağlamak için Malzeme kodu ve bu seçenek kullanılarak onları kodları ile araştırılabilir yapmak
 DocType: Mode of Payment Account,Mode of Payment Account,Ödeme Hesabının Mod
@@ -231,7 +231,7 @@ apps/erpnext/erpnext/config/stock.py +258,Items and Pricing,Öğeleri ve Fiyatla
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +37,From Date should be within the Fiscal Year. Assuming From Date = {0},Tarihten itibaren Mali yıl içinde olmalıdır Tarihten itibaren  = {0} varsayılır
 DocType: Appraisal,Select the Employee for whom you are creating the Appraisal.,Değerlendirme oluşturduğunuz Çalışanı seçin
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +96,Cost Center {0} does not belong to Company {1},Maliyet Merkezi {0} Şirket {1} e ait değildir.
-DocType: Customer,Individual,Tek
+DocType: Customer,Individual,Bireysel
 apps/erpnext/erpnext/config/support.py +23,Plan for maintenance visits.,Bakım ziyaretleri planı
 DocType: SMS Settings,Enter url parameter for message,Mesaj için url parametresi girin
 apps/erpnext/erpnext/config/selling.py +148,Rules for applying pricing and discount.,Fiyatlandırma ve indirim uygulanması için kurallar.
@@ -435,7 +435,7 @@ apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +143,Reason for losi
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +143,Reason for losing,Kaybetme nedeni
 apps/erpnext/erpnext/manufacturing/doctype/workstation/workstation.py +79,Workstation is closed on the following dates as per Holiday List: {0},İş İstasyonu Tatil List göre aşağıdaki tarihlerde kapalı: {0}
 DocType: Employee,Single,Tek
-DocType: Employee,Single,Tek
+DocType: Employee,Single,Bireysel
 DocType: Issue,Attachment,Haciz
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +29,Budget cannot be set for Group Cost Center,Bütçe Grubu Maliyet Merkezi için ayarlanamaz
 DocType: Account,Cost of Goods Sold,Satışların Maliyeti
@@ -522,7 +522,7 @@ DocType: Shipping Rule,Net Weight,Net Ağırlık
 DocType: Employee,Emergency Phone,Acil Telefon
 DocType: Employee,Emergency Phone,Acil Telefon
 ,Serial No Warranty Expiry,Seri No Garanti Bitiş tarihi
-DocType: Sales Order,To Deliver,Sunacak
+DocType: Sales Order,To Deliver,Teslim edildi
 DocType: Purchase Invoice Item,Item,Ürün
 DocType: Purchase Invoice Item,Item,Ürün
 DocType: Journal Entry,Difference (Dr - Cr),Fark (Dr - Cr)
@@ -608,7 +608,7 @@ DocType: Lead,Middle Income,Orta Gelir
 DocType: Lead,Middle Income,Orta Gelir
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +58,Opening (Cr),Açılış (Cr)
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +58,Opening (Cr),Açılış (Cr)
-apps/erpnext/erpnext/stock/doctype/item/item.py +702,Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.,Zaten başka UOM bazı işlem (ler) yaptık çünkü Öğe için Ölçü Varsayılan Birim {0} doğrudan değiştirilemez. Farklı Standart UOM kullanmak için yeni bir öğe oluşturmanız gerekecektir.
+apps/erpnext/erpnext/stock/doctype/item/item.py +702,Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.,Zaten başka Ölçü Birimi bazı işlem (ler) yaptık çünkü Öğe için Ölçü Varsayılan Birim {0} doğrudan değiştirilemez. Farklı Standart Ölçü Birimi kullanmak için yeni bir öğe oluşturmanız gerekecektir.
 apps/erpnext/erpnext/accounts/utils.py +195,Allocated amount can not be negative,Tahsis edilen miktar negatif olamaz
 DocType: Purchase Order Item,Billed Amt,Faturalı Tutarı
 DocType: Warehouse,A logical Warehouse against which stock entries are made.,Stok girişleri mantıksal Depoya karşı yapıldı
@@ -1074,7 +1074,7 @@ DocType: Sales Partner,Implementation Partner,Uygulama Ortağı
 apps/erpnext/erpnext/controllers/selling_controller.py +227,Sales Order {0} is {1},Satış Sipariş {0} {1}
 DocType: Opportunity,Contact Info,İletişim Bilgileri
 apps/erpnext/erpnext/config/stock.py +273,Making Stock Entries,Stok Girişleri Yapımı
-DocType: Packing Slip,Net Weight UOM,Net Ağırlık UOM
+DocType: Packing Slip,Net Weight UOM,Net Ağırlık Ölçü Birimi
 DocType: Item,Default Supplier,Standart Tedarikçi
 DocType: Item,Default Supplier,Standart Tedarikçi
 DocType: Manufacturing Settings,Over Production Allowance Percentage,Üretim Ödeneği Yüzde üzerinde
@@ -1147,12 +1147,12 @@ DocType: Purchase Invoice,Is Return,İade mi
 DocType: Price List Country,Price List Country,Fiyat Listesi Ülke
 apps/erpnext/erpnext/selling/page/sales_browser/sales_browser.js +123,Further nodes can be only created under 'Group' type nodes,Ek kısımlar ancak 'Grup' tipi kısımlar altında oluşturulabilir
 apps/erpnext/erpnext/utilities/doctype/contact/contact.py +67,Please set Email ID,E-posta kimliğini ayarlamak Lütfen
-DocType: Item,UOMs,UOMs
+DocType: Item,UOMs,Ölçü Birimleri
 apps/erpnext/erpnext/stock/utils.py +171,{0} valid serial nos for Item {1},Ürün {1} için {0} geçerli bir seri numarası
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Ürün Kodu Seri No için değiştirilemez
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Ürün Kodu Seri No için değiştirilemez
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +22,POS Profile {0} already created for user: {1} and company {2},POS Profili {0} zaten kullanıcı için oluşturulan: {1} ve şirket {2}
-DocType: Purchase Order Item,UOM Conversion Factor,UOM Dönüşüm Katsayısı
+DocType: Purchase Order Item,UOM Conversion Factor,Ölçü Birimi Dönüşüm Katsayısı
 DocType: Stock Settings,Default Item Group,Standart Ürün Grubu
 apps/erpnext/erpnext/config/buying.py +13,Supplier database.,Tedarikçi Veritabanı.
 DocType: Account,Balance Sheet,Bilanço
@@ -1246,7 +1246,7 @@ DocType: Employee,Place of Issue,Verildiği yer
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +59,Contract,Sözleşme
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +59,Contract,Sözleşme
 DocType: Email Digest,Add Quote,Alıntı ekle
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +488,UOM coversion factor required for UOM: {0} in Item: {1},Ürün {1} de UOM: {0} için UOM dönüştürme katsayısı gereklidir.
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +488,UOM coversion factor required for UOM: {0} in Item: {1},Ürün {1} de Ölçü Birimi: {0} için Ölçü Birimi dönüştürme katsayısı gereklidir.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +83,Indirect Expenses,Dolaylı Giderler
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +83,Indirect Expenses,Dolaylı Giderler
 apps/erpnext/erpnext/controllers/selling_controller.py +163,Row {0}: Qty is mandatory,Satır {0}: Miktar zorunludur
@@ -1501,7 +1501,7 @@ DocType: Landed Cost Voucher,Landed Cost Help,Indi Maliyet Yardım
 DocType: Leave Block List,Block Holidays on important days.,Önemli günlerde Blok Tatil.
 ,Accounts Receivable Summary,Alacak Hesapları Özeti
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +187,Please set User ID field in an Employee record to set Employee Role,Çalışan Rolü ayarlamak için Çalışan kaydındaki Kullanıcı Kimliği alanını Lütfen
-DocType: UOM,UOM Name,UOM Adı
+DocType: UOM,UOM Name,Ölçü Birimi
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +33,Contribution Amount,Katkı Tutarı
 DocType: Sales Invoice,Shipping Address,Teslimat Adresi
 DocType: Stock Reconciliation,This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,"Bu araç, güncellemek veya sistemde stok miktarı ve değerleme düzeltmek için yardımcı olur. Genellikle sistem değerlerini ve ne aslında depolarda var eşitlemek için kullanılır."
@@ -1646,7 +1646,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +102,Marketing Expenses,Pazarlama Giderleri
 ,Item Shortage Report,Ürün yetersizliği Raporu
 ,Item Shortage Report,Ürün yetersizliği Raporu
-apps/erpnext/erpnext/stock/doctype/item/item.js +200,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Ağırlık çok ""Ağırlık UoM"" belirtiniz \n, söz edilmektedir"
+apps/erpnext/erpnext/stock/doctype/item/item.js +200,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Ağırlık çok ""Ağırlık Ölçü Birimi"" belirtiniz \n, söz edilmektedir"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Bu stok girdisini yapmak için kullanılan Malzeme Talebi
 apps/erpnext/erpnext/config/support.py +43,Single unit of an Item.,Bir Ürünün tek birimi
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +213,Time Log Batch {0} must be 'Submitted',Günlük Seri {0} 'Teslim edilmelidir'
@@ -1723,7 +1723,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +201,Duplicate Serial 
 DocType: Shipping Rule Condition,A condition for a Shipping Rule,Nakliye Kuralı için koşul
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +326,Item is not allowed to have Production Order.,Ürün Üretim Siparişi için izin verilmez.
 DocType: Packing Slip,The net weight of this package. (calculated automatically as sum of net weight of items),Bu paketin net ağırlığı (Ürünlerin net toplamından otomatik olarak hesaplanır)
-DocType: Sales Order,To Deliver and Bill,Sunun ve Bill için
+DocType: Sales Order,To Deliver and Bill,Teslim edildi ve Faturalandı
 DocType: GL Entry,Credit Amount in Account Currency,Hesap Para Birimi Kredi Tutarı
 apps/erpnext/erpnext/config/manufacturing.py +24,Time Logs for manufacturing.,Üretim için Time Kayıtlar.
 DocType: Item,Apply Warehouse-wise Reorder Level,Depo-bilge Yeniden Sipariş Seviyesi Uygula
@@ -1933,7 +1933,7 @@ apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +47,
 apps/erpnext/erpnext/config/setup.py +83,"Show / Hide features like Serial Nos, POS etc.","Seri No, POS vb gibi özellikleri göster/sakla"
 apps/erpnext/erpnext/templates/emails/reorder_item.html +1,Following Material Requests have been raised automatically based on Item's re-order level,Malzeme İstekleri ardından öğesinin yeniden sipariş seviyesine göre otomatik olarak gündeme gelmiş
 apps/erpnext/erpnext/controllers/accounts_controller.py +254,Account {0} is invalid. Account Currency must be {1},Hesap {0} geçersiz. Hesap Para olmalıdır {1}
-apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +34,UOM Conversion factor is required in row {0},UOM Dönüşüm katsayısı satır {0} da gereklidir
+apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +34,UOM Conversion factor is required in row {0},Ölçü Birimi Dönüşüm katsayısı satır {0} da gereklidir
 apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +52,Clearance date cannot be before check date in row {0},Gümrükleme tarihi {0} satırındaki kontrol tarihinden önce olamaz
 DocType: Salary Slip,Deduction,Kesinti
 DocType: Salary Slip,Deduction,Kesinti
@@ -1959,7 +1959,7 @@ DocType: Production Order Operation,Actual Operation Time,Gerçek Çalışma Sü
 DocType: Authorization Rule,Applicable To (User),(Kullanıcıya) Uygulanabilir
 DocType: Purchase Taxes and Charges,Deduct,Düşmek
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,Job Description,İş Tanımı
-DocType: Purchase Order Item,Qty as per Stock UOM,Her Stok UOM(birim) için miktar
+DocType: Purchase Order Item,Qty as per Stock UOM,Her Stok Ölçü Birimi (birim) için miktar
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +126,"Special Characters except ""-"", ""#"", ""."" and ""/"" not allowed in naming series","Dışında Özel Karakterler ""-"" ""."", ""#"", ve ""/"" serisi adlandırma izin verilmiyor"
 DocType: Campaign,"Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment.","Satış Kampanyaları Takip Edin. İlanlar, Özlü Sözler takip edin, Satış Sipariş vb Kampanyalar dan Yatırım Dönüş ölçmek için."
 DocType: Expense Claim,Approver,Onaylayan
@@ -2032,7 +2032,7 @@ apps/erpnext/erpnext/config/selling.py +299,Sales Order to Payment,Ödeme Satı�
 DocType: Expense Claim Detail,Expense Claim Detail,Gideri Talebi Detayı
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +271,Time Logs created:,Zaman Günlükleri oluşturuldu:
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +761,Please select correct account,Doğru hesabı seçin
-DocType: Item,Weight UOM,Ağırlık UOM
+DocType: Item,Weight UOM,Ağırlık Ölçü Birimi
 DocType: Employee,Blood Group,Kan grubu
 DocType: Employee,Blood Group,Kan grubu
 DocType: Purchase Invoice Item,Page Break,Sayfa Sonu
@@ -2269,7 +2269,7 @@ DocType: Item,Will also apply for variants unless overrridden,Overrridden sürec
 DocType: Purchase Invoice,Advances,Avanslar
 DocType: Purchase Invoice,Advances,Avanslar
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +32,Approving User cannot be same as user the rule is Applicable To,Onaylayan Kullanıcı kuralın uygulanabilir olduğu kullanıcı ile aynı olamaz
-DocType: Stock Entry Detail,Basic Rate (as per Stock UOM),Temel Oranı (Stok UOM göre)
+DocType: Stock Entry Detail,Basic Rate (as per Stock UOM),Temel Oranı (Stok Ölçü Birimi göre)
 DocType: SMS Log,No of Requested SMS,İstenen SMS Sayısı
 DocType: Campaign,Campaign-.####,Kampanya-.####
 DocType: Campaign,Campaign-.####,Kampanya-.####
@@ -2409,7 +2409,7 @@ DocType: BOM Item,"See ""Rate Of Materials Based On"" in Costing Section","Maliy
 DocType: Appraisal Goal,Key Responsibility Area,Kilit Sorumluluk Alanı
 DocType: Item Reorder,Material Request Type,Malzeme İstek Türü
 DocType: Item Reorder,Material Request Type,Malzeme İstek Türü
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +84,Row {0}: UOM Conversion Factor is mandatory,Satır {0}: UOM Dönüşüm Faktörü zorunludur
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +84,Row {0}: UOM Conversion Factor is mandatory,Satır {0}: Ölçü Birimi Dönüşüm Faktörü zorunludur
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +17,Ref,Ref
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +17,Ref,Ref
 DocType: Cost Center,Cost Center,Maliyet Merkezi
@@ -2590,7 +2590,7 @@ apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +84,Row # {0}: Can
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +52,Plot,Konu
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +52,Plot,Konu
 DocType: Item Group,Show this slideshow at the top of the page,Sayfanın üstünde bu slayt gösterisini göster
-DocType: BOM,Item UOM,Ürün UOM
+DocType: BOM,Item UOM,Ürün Ölçü Birimi
 DocType: Sales Taxes and Charges,Tax Amount After Discount Amount (Company Currency),İndirim Tutarı sonra Vergi Tutarı (Şirket Para)
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +149,Target warehouse is mandatory for row {0},Satır {0} için hedef depo zorunludur
 DocType: Quality Inspection,Quality Inspection,Kalite Kontrol
@@ -2779,7 +2779,7 @@ DocType: Sales Invoice,Write Off Outstanding Amount,Bekleyen Miktarı Sil
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Otomatik mükerrer faturaya ihtiyacınız olup olmadığını kontrol edin, herhangi bir satış faturası ibraz edildikten sonra tekrar bölümü görünür olacaktır."
 DocType: Account,Accounts Manager,Hesap Yöneticisi
 apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',Günlük {0} 'Teslim edilmelidir'
-DocType: Stock Settings,Default Stock UOM,Varsayılan Stok UOM
+DocType: Stock Settings,Default Stock UOM,Varsayılan Stok Ölçü Birimi
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Etkinlik Türü dayalı Oranı Maliyetlendirme (saatte)
 DocType: Production Planning Tool,Create Material Requests,Malzeme İstekleri Oluştur
 DocType: Employee Education,School/University,Okul / Üniversite
@@ -2896,7 +2896,7 @@ DocType: Lead,From Customer,Müşteriden
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +37,Calls,Aramalar
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +37,Calls,Aramalar
 DocType: Project,Total Costing Amount (via Time Logs),Toplam Maliyet Tutarı (Zaman Kayıtlar üzerinden)
-DocType: Purchase Order Item Supplied,Stock UOM,Stok Uom
+DocType: Purchase Order Item Supplied,Stock UOM,Stok Ölçü Birimi
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +198,Purchase Order {0} is not submitted,Satınalma Siparişi {0} teslim edilmedi
 apps/erpnext/erpnext/stock/doctype/item/item.js +32,Projected,Öngörülen
 apps/erpnext/erpnext/stock/doctype/item/item.js +32,Projected,Öngörülen
@@ -2977,7 +2977,7 @@ apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Bask�
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Baskı Şablonları için başlıklar, örneğin Proforma Fatura"
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +140,Valuation type charges can not marked as Inclusive,Değerleme tipi ücretleri dahil olarak işaretlenmiş olamaz
 DocType: POS Profile,Update Stock,Stok güncelle
-apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +100,Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,Ürünler için farklı UOM yanlış (Toplam) net ağırlıklı değere yol açacaktır. Net ağırlıklı değerin aynı olduğundan emin olun.
+apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +100,Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,Ürünler için farklı Ölçü Birimi yanlış (Toplam) net ağırlıklı değere yol açacaktır. Net ağırlıklı değerin aynı olduğundan emin olun.
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +39,BOM Rate,BOM Oranı
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +85,Please pull items from Delivery Note,İrsaliyeden Ürünleri çekin
 apps/erpnext/erpnext/accounts/utils.py +270,Journal Entries {0} are un-linked,Dergi Girişler {0}-un bağlı olduğu
@@ -3294,7 +3294,7 @@ apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +178,Warehouse
 DocType: Leave Allocation,Unused leaves,Kullanılmayan yapraklar
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Cr,Cr
 DocType: Customer,Default Receivable Accounts,Alacak Hesapları Standart
-DocType: Tax Rule,Billing State,Fatura Devlet
+DocType: Tax Rule,Billing State,Fatura Kamu
 DocType: Item Reorder,Transfer,Transfer
 DocType: Item Reorder,Transfer,Transfer
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +636,Fetch exploded BOM (including sub-assemblies),(Alt-montajlar dahil) patlamış BOM'ları getir
@@ -3477,7 +3477,7 @@ DocType: Serial No,Distinct unit of an Item,Bir Öğe Farklı birim
 DocType: Pricing Rule,Buying,Satın alma
 DocType: HR Settings,Employee Records to be created by,Oluşturulacak Çalışan Kayıtları
 apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,Bu Günlük partisi iptal edildi.
-,Reqd By Date,Tarihle gerekli
+,Reqd By Date,Teslim Tarihi
 DocType: Salary Slip Earning,Salary Slip Earning,Bordro Dahili Kazanç
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +161,Creditors,Alacaklılar
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +91,Row # {0}: Serial No is mandatory,Satır # {0}: Seri No zorunludur
@@ -3601,7 +3601,7 @@ DocType: GL Entry,Party,Taraf
 DocType: Sales Order,Delivery Date,Teslimat Tarihi
 DocType: Opportunity,Opportunity Date,Fırsat tarihi
 DocType: Purchase Receipt,Return Against Purchase Receipt,Satınalma Makbuzu Karşı dön
-DocType: Purchase Order,To Bill,Bill için
+DocType: Purchase Order,To Bill,Faturala
 DocType: Material Request,% Ordered,% Sipariş edildi
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +61,Piecework,Parça başı iş
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +61,Piecework,Parça başı iş
@@ -3896,7 +3896,7 @@ DocType: Sales Invoice,C-Form Applicable,Uygulanabilir C-Formu
 DocType: Sales Invoice,C-Form Applicable,Uygulanabilir C-Formu
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +340,Operation Time must be greater than 0 for Operation {0},Çalışma Süresi Çalışma için 0&#39;dan büyük olmalıdır {0}
 DocType: Supplier,Address and Contacts,Adresler ve Kontaklar
-DocType: UOM Conversion Detail,UOM Conversion Detail,UOM Dönüşüm Detayı
+DocType: UOM Conversion Detail,UOM Conversion Detail,Ölçü Birimi Dönüşüm Detayı
 apps/erpnext/erpnext/public/js/setup_wizard.js +257,Keep it web friendly 900px (w) by 100px (h),100px (yukseklik) ile 900 px (genislik) web dostu tutun
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +329,Production Order cannot be raised against a Item Template,Üretim siparişi Ürün Şablon karşı yükseltilmiş edilemez
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +44,Charges are updated in Purchase Receipt against each item,Ücretler her öğenin karşı Satınalma Fiş güncellenir
@@ -4202,7 +4202,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +141,"e.g. ""My Company LLC""","�
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +173,Notice Period,İhbar Süresi
 DocType: Bank Reconciliation Detail,Voucher ID,Föy Kimliği
 apps/erpnext/erpnext/setup/doctype/territory/territory.js +14,This is a root territory and cannot be edited.,Bu bir kök bölgedir ve düzenlenemez.
-DocType: Packing Slip,Gross Weight UOM,Brüt Ağırlık UOM
+DocType: Packing Slip,Gross Weight UOM,Brüt Ağırlık Ölçü Birimi
 DocType: Email Digest,Receivables / Payables,Alacaklar / Borçlar
 DocType: Email Digest,Receivables / Payables,Alacaklar / Borçlar
 DocType: Delivery Note Item,Against Sales Invoice,Satış Faturası Karşılığı
@@ -4226,7 +4226,7 @@ DocType: Batch,Batch,Yığın
 apps/erpnext/erpnext/stock/doctype/item/item.js +20,Balance,Bakiye
 DocType: Project,Total Expense Claim (via Expense Claims),Toplam Gider İddiası (Gider Talepleri yoluyla)
 DocType: Journal Entry,Debit Note,Borç dekontu
-DocType: Stock Entry,As per Stock UOM,Stok UOM gereğince
+DocType: Stock Entry,As per Stock UOM,Stok Ölçü Birimi gereğince
 apps/erpnext/erpnext/stock/doctype/batch/batch_list.js +7,Not Expired,Süresi Doldu Değil
 DocType: Journal Entry,Total Debit,Toplam Borç
 DocType: Journal Entry,Total Debit,Toplam Borç
@@ -4405,7 +4405,7 @@ DocType: Sales Order,Customer's Purchase Order Date,Müşterinin Sipariş Tarihi
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +183,Capital Stock,Öz sermaye
 DocType: Packing Slip,Package Weight Details,Ambalaj Ağırlığı Detayları
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +105,Please select a csv file,Bir csv dosyası seçiniz
-DocType: Purchase Order,To Receive and Bill,Alma ve Bill için
+DocType: Purchase Order,To Receive and Bill,Teslimat ve Ödeme
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +94,Designer,Tasarımcı
 apps/erpnext/erpnext/config/selling.py +121,Terms and Conditions Template,Şartlar ve Koşullar Şablon
 apps/erpnext/erpnext/config/selling.py +121,Terms and Conditions Template,Şartlar ve Koşullar Şablon
