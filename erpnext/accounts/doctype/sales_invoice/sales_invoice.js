@@ -75,6 +75,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry).addClass("btn-primary");
+				cur_frm.add_custom_button(__('Make Payment Request'), this.make_payment_request);
 			}
 
 		}

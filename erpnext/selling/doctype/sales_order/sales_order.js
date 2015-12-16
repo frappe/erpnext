@@ -54,6 +54,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				if(flt(doc.per_billed)==0) {
 					cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
+					cur_frm.add_custom_button(__('Make Payment Request'), this.make_payment_request);
 				}
 
 				if (this.frm.has_perm("submit")) {
