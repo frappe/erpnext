@@ -288,6 +288,50 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 		}
 		refresh_field('product_bundle_help');
+	},
+	
+	make_payment_request: function() {
+		if (!cur_frm.doc.contact_email){
+			cur_frm.cscript.get_customer_email();
+		}
+		else {
+			cur_frm.cscript.create_payment_request(cur_frm.doc.contact_email)
+		}
+	},
+	
+	get_customer_email: function() {
+		var dialog = new frappe.ui.Dialog({
+			title: __("Recipient Details"),
+			fields: [
+				{"fieldtype": "Data", "label": __("Recipient Email Id"), "fieldname": "recipient_id",
+					"reqd": 1},
+				{"fieldtype": "Button", "label": __("Make Payment Request"), 
+					"fieldname": "make_pr", "cssClass": "btn-primary"}
+			]
+		});
+
+		dialog.fields_dict.make_pr.$input.click(function() {
+			args = dialog.get_values();
+			if(!args) return;
+			dialog.hide();
+			cur_frm.cscript.create_payment_request(args.recipient_id)
+			
+		});
+		dialog.show();
+	},
+	
+	create_payment_request: function(recipient_id){
+		frappe.call({
+			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
+			args: {
+				"dt": cur_frm.doc.doctype,
+				"dn": cur_frm.doc.name,
+				"recipient_id": recipient_id
+			},
+			callback: function(r) {
+				
+			}
+		})
 	}
 });
 
