@@ -632,7 +632,8 @@ def get_payment_entry(ref_doc, args):
 	})
 
 	bank_row = jv.append("accounts")
-	bank_account = get_default_bank_cash_account(ref_doc.company, "Bank Entry")
+	
+	bank_account = args.get("bank_account", get_default_bank_cash_account(ref_doc.company, "Bank Entry"))
 	if bank_account:
 		bank_row.update(bank_account)
 		bank_row.exchange_rate = get_exchange_rate(bank_account["account"],
@@ -653,7 +654,7 @@ def get_payment_entry(ref_doc, args):
 	jv.set_amounts_in_company_currency()
 	jv.set_total_debit_credit()
 
-	return jv.as_dict()
+	return jv if args.get("return_obj") else jv.as_dict()
 
 @frappe.whitelist()
 def get_opening_accounts(company):
