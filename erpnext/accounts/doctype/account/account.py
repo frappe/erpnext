@@ -199,6 +199,10 @@ class Account(Document):
 
 			if val != [self.is_group, self.root_type, self.company]:
 				throw(_("""Merging is only possible if following properties are same in both records. Is Group, Root Type, Company"""))
+				
+			if self.is_group and frappe.db.get_value("Account", new, "parent_account") == old:
+				frappe.db.set_value("Account", new, "parent_account", 
+					frappe.db.get_value("Account", old, "parent_account"))
 
 		return new_account
 
