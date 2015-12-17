@@ -7,10 +7,10 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt, today
 from frappe import _
-from erpnext.accounts.doctype.journal_entry.journal_entry import (get_payment_entry_against_order, 
-get_payment_entry_against_invoice, get_payment_entry)
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency, get_balance_on
+from itertools import chain
 
 class PaymentRequest(Document):		
 	def validate(self):
@@ -135,6 +135,8 @@ def make_payment_request(dt, dn, recipient_id=None):
 		"reference_doctype": dt,
 		"reference_name": dn
 	}).insert()
+	
+	return pr.name
 
 def get_reference_doc_details(dt, dn):
 	""" return reference doc Sales Order/Sales Invoice"""
@@ -156,3 +158,15 @@ def get_amount(ref_doc, dt):
 def get_gateway_details():
 	"""return gateway and payment account of default payment gateway"""
 	return frappe.db.get_value("Payment Gateway", {"is_default": 1}, ["gateway", "payment_account"])
+
+@frappe.whitelist()
+def get_print_format_list(ref_doctype):
+	print_format_list = ["Standard"]
+	
+	print_format_list.extend(list(chain.from_iterable(frappe.db.sql("""select name from `tabPrint Format` 
+		where doc_type=%s""", ref_doctype, as_list=1))))
+	
+	return {
+		"print_format": print_format_list
+	}
+	
