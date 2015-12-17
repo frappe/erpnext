@@ -178,7 +178,8 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 
 	else:
 		for gl in gl_entries:
-			if gl.posting_date >= getdate(filters.from_date) and gl.posting_date <= getdate(filters.to_date):
+			if gl.posting_date >= getdate(filters.from_date) and gl.posting_date <= getdate(filters.to_date) \
+					and gl.is_opening == "No":
 				data.append(gl)
 
 

@@ -155,7 +155,7 @@ erpnext.SalesChart = Class.extend({
 						if(node.expanded) {
 							node.toggle_node();
 						}
-						node.reload();
+						node.reload_parent();
 					}
 				}
 			});
