@@ -269,6 +269,8 @@ def get_data_account_type(company, account_type, period_list):
                                     (company, period['from_date'], period['to_date'], account_type))
         if gl_sum[0]:
             amount = gl_sum[0]
+            if account_type == "Depreciation":
+                amount *= -1
         else:
             amount = 0
         data.update({"from_date": period['from_date'], "to_date": period['to_date'], period["key"]: amount})
