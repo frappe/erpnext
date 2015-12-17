@@ -300,7 +300,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			},
 			callback: function(r) {
 				if(!r.exc){
-					frappe.msgprint(__("payment Request generated"))
+					frappe.msgprint(__("Payment Request generated"))
 				}
 			}
 		})
