@@ -28,8 +28,7 @@ def execute(filters=None):
 		"section_footer": _("Net Cash from Investing"),
 		"section_header": _("Cash Flow from Investing"),
 		"account_types": [
-			{"account_type": "Fixed Asset", "label": _("Net Change in Fixed Asset")},
-			# {"account_type": "Investment", "label": _("Net Change in Fixed Asset")},
+			{"account_type": "Fixed Asset", "label": _("Net Change in Fixed Asset")}
 		]
 	}
 
@@ -106,6 +105,8 @@ def get_account_type_based_data(company, account_type, period_list):
 		
 		if gl_sum and gl_sum[0]:
 			amount = gl_sum[0]
+			if account_type == "Depreciation":
+				amount *= -1
 		else:
 			amount = 0
 		
