@@ -299,7 +299,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				"recipient_id": cur_frm.doc.contact_email
 			},
 			callback: function(r) {
-				
+				if(!r.exc){
+					frappe.msgprint(__("payment Request generated"))
+				}
 			}
 		})
 	}
