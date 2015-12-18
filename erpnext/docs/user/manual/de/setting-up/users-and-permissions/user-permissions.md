@@ -9,7 +9,11 @@ Beginnen Sie wie folgt:
 > Einstellungen > Berechtigungen > Benutzerrechte-Manager
 
 
-Abbildung: Übersicht aus dem Benutzerberechtigungs-Manager die aufzeigt, wie Benutzer nur auf bestimmte Firmen zugreifen können
+<figure>
+	<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-company.png"
+		class="img-responsive" alt="Benutzerberechntigungen-Manager">
+	<figcaption>Übersicht aus dem Benutzerberechtigungs-Manager die aufzeigt, wie Benutzer nur auf bestimmte Firmen zugreifen können.</figcaption>
+</figure>
 
 #### Beispiel:
 
