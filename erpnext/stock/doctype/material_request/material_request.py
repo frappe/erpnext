@@ -123,6 +123,10 @@ class MaterialRequest(BuyingController):
 					from `tabStock Entry Detail` where material_request = %s
 					and material_request_item = %s and docstatus = 1""",
 					(self.name, d.name))[0][0])
+
+				if d.ordered_qty and d.ordered_qty > d.qty:
+					frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1} cannot be greater than requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, d.qty, d.item_code))
+
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
 			# note: if qty is 0, its row is still counted in len(self.get("items"))

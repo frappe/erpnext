@@ -39,24 +39,23 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 					this.make_supplier_quotation,
 						frappe.boot.doctype_icons["Supplier Quotation"]);
 
-			if(doc.material_request_type === "Material Transfer" && doc.status === "Submitted")
-				cur_frm.add_custom_button(__("Transfer Material"), this.make_stock_entry,
-					frappe.boot.doctype_icons["Stock Entry"]);
-
-			if(doc.material_request_type === "Material Issue" && doc.status === "Submitted")
-				cur_frm.add_custom_button(__("Issue Material"), this.make_stock_entry,
-					frappe.boot.doctype_icons["Stock Entry"]);
-
 			if(flt(doc.per_ordered, 2) < 100) {
+				if(doc.material_request_type === "Material Transfer" && doc.status === "Submitted")
+					cur_frm.add_custom_button(__("Transfer Material"), this.make_stock_entry,
+						frappe.boot.doctype_icons["Stock Entry"]);
+
+				if(doc.material_request_type === "Material Issue" && doc.status === "Submitted")
+					cur_frm.add_custom_button(__("Issue Material"), this.make_stock_entry,
+						frappe.boot.doctype_icons["Stock Entry"]);
+
 				if(doc.material_request_type === "Purchase")
 					cur_frm.add_custom_button(__('Make Purchase Order'),
 						this.make_purchase_order, frappe.boot.doctype_icons["Purchase Order"]);
 
 				cur_frm.add_custom_button(__('Stop'),
 					cur_frm.cscript['Stop Material Request'], "icon-exclamation", "btn-default");
+
 			}
-
-
 		}
 
 		if (this.frm.doc.docstatus===0) {
