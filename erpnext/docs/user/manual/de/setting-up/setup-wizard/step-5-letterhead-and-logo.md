@@ -21,7 +21,3 @@ Um später einen Briefkopf über das Modul "Einstellungen" auszuwählen, lesen S
 Sie können jeden beliebigen Anhang in ERPNext auch als Link, also als Verknüpfung mit einer Datei im Internet, darstellen. Zum Beispiel dann, wenn Sie Werkzeuge wie Dropbox oder Google-Docs verwenden, um Ihre Dateien zu verwalten.
 
 {next}
-
-Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
-
-<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
