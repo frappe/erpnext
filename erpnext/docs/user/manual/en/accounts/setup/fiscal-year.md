@@ -1,5 +1,5 @@
 A fiscal year is also known as a financial year or a budget year. It is used
-for calculating financial statements in businesses and other organisations.
+for calculating financial statements in businesses and other organizations.
 The fiscal year may or may not be the same as a calendar year. For tax
 purposes, companies can choose to be calendar-year taxpayers or fiscal-year
 taxpayers. In many jurisdictions, regulatory laws regarding accounting and

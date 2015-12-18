@@ -5,14 +5,14 @@ is used and some basic concepts in ERPNext.
 
 ### Basic Concepts
 
-#### Company
+#### organization
 
-This represents the Company records for which ERPNext is setup. With this same
-setup, you can create multiple Company records, each representing a different
-legal entity. The accounting for each Company will be different, but they will
+This represents the organization records for which ERPNext is setup. With this same
+setup, you can create multiple organization records, each representing a different
+legal entity. The accounting for each organization will be different, but they will
 share the Customer, Supplier and Item records.
 
-> Setup > Company
+> Setup > organization
 
 #### Customer
 
@@ -23,7 +23,7 @@ You can create multiple Contacts and Addresses for each Customer.
 
 #### Supplier
 
-Represents a supplier of goods or services. Your telephone company is a
+Represents a supplier of goods or services. Your telephone organization is a
 Supplier, so is your raw materials Supplier. Again, a Supplier can be an
 individual or an organization and has multiple Contacts and Addresses.
 
@@ -89,7 +89,7 @@ date and transactions can only be recorded in this period. When you “close” 
 fiscal year, it's balances are transferred as “opening” balances for the next
 fiscal year.
 
-> Setup > Company > Fiscal Year
+> Setup > organization > Fiscal Year
 
 #### Cost Center
 
@@ -171,7 +171,7 @@ for Territories and each sale is linked to a Territory.
 #### Sales Partner
 
 A third party distributer / dealer / affiliate / commission agent who sells
-the company’s products usually for a commission.
+the organization’s products usually for a commission.
 
 > Selling > Setup > Sales Partner
 
@@ -278,7 +278,7 @@ A classification of Item.
 #### Employee
 
 Record of a person who has been in present or past, in the employment of the
-company.
+organization.
 
 > Human Resources > Employee
 

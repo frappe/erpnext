@@ -10,11 +10,11 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		var me = this;
 		this.frm.fields_dict.purchase_receipts.grid.get_field('purchase_receipt').get_query =
 			function() {
-				if(!me.frm.doc.company) msgprint(__("Please enter company first"));
+				if(!me.frm.doc.organization) msgprint(__("Please enter organization first"));
 				return {
 					filters:[
 						['Purchase Receipt', 'docstatus', '=', '1'],
-						['Purchase Receipt', 'company', '=', me.frm.doc.company],
+						['Purchase Receipt', 'organization', '=', me.frm.doc.organization],
 					]
 				}
 		};

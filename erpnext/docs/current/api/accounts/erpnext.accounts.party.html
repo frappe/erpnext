@@ -36,7 +36,7 @@
         <a name="erpnext.accounts.party._get_party_details" href="#erpnext.accounts.party._get_party_details" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.party.<b>_get_party_details</b>
-        <i class="text-muted">(party=None, account=None, party_type=Customer, company=None, posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False)</i>
+        <i class="text-muted">(party=None, account=None, party_type=Customer, organization=None, posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -49,9 +49,9 @@
     
     
 	<p class="docs-attr-name">
-        <a name="erpnext.accounts.party.get_company_currency" href="#erpnext.accounts.party.get_company_currency" class="text-muted small">
+        <a name="erpnext.accounts.party.get_organization_currency" href="#erpnext.accounts.party.get_organization_currency" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.accounts.party.<b>get_company_currency</b>
+		erpnext.accounts.party.<b>get_organization_currency</b>
         <i class="text-muted">()</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -68,7 +68,7 @@
         <a name="erpnext.accounts.party.get_credit_days" href="#erpnext.accounts.party.get_credit_days" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.party.<b>get_credit_days</b>
-        <i class="text-muted">(party_type, party, company)</i>
+        <i class="text-muted">(party_type, party, organization)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -102,7 +102,7 @@
         <a name="erpnext.accounts.party.get_due_date" href="#erpnext.accounts.party.get_due_date" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.party.<b>get_due_date</b>
-        <i class="text-muted">(posting_date, party_type, party, company)</i>
+        <i class="text-muted">(posting_date, party_type, party, organization)</i>
     </p>
 	<div class="docs-attr-desc"><p>Set Due Date = Posting Date + Credit Days</p>
 </div>
@@ -120,7 +120,7 @@
         <a name="erpnext.accounts.party.get_party_account" href="#erpnext.accounts.party.get_party_account" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.party.<b>get_party_account</b>
-        <i class="text-muted">(party_type, party, company)</i>
+        <i class="text-muted">(party_type, party, organization)</i>
     </p>
 	<div class="docs-attr-desc"><p>Returns the account for the given <code>party</code>.
 Will first search in party (Customer / Supplier) record, if not found,
@@ -139,7 +139,7 @@ finally will return default.</p>
         <a name="erpnext.accounts.party.get_party_account_currency" href="#erpnext.accounts.party.get_party_account_currency" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.party.<b>get_party_account_currency</b>
-        <i class="text-muted">(party_type, party, company)</i>
+        <i class="text-muted">(party_type, party, organization)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -157,7 +157,7 @@ finally will return default.</p>
         <a name="erpnext.accounts.party.get_party_details" href="#erpnext.accounts.party.get_party_details" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.party.<b>get_party_details</b>
-        <i class="text-muted">(party=None, account=None, party_type=Customer, company=None, posting_date=None, price_list=None, currency=None, doctype=None)</i>
+        <i class="text-muted">(party=None, account=None, party_type=Customer, organization=None, posting_date=None, price_list=None, currency=None, doctype=None)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -173,7 +173,7 @@ finally will return default.</p>
         <a name="erpnext.accounts.party.get_party_gle_currency" href="#erpnext.accounts.party.get_party_gle_currency" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.party.<b>get_party_gle_currency</b>
-        <i class="text-muted">(party_type, party, company)</i>
+        <i class="text-muted">(party_type, party, organization)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -189,7 +189,7 @@ finally will return default.</p>
         <a name="erpnext.accounts.party.set_account_and_due_date" href="#erpnext.accounts.party.set_account_and_due_date" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.party.<b>set_account_and_due_date</b>
-        <i class="text-muted">(party, account, party_type, company, posting_date, doctype)</i>
+        <i class="text-muted">(party, account, party_type, organization, posting_date, doctype)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -271,7 +271,7 @@ finally will return default.</p>
         <a name="erpnext.accounts.party.set_taxes" href="#erpnext.accounts.party.set_taxes" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.party.<b>set_taxes</b>
-        <i class="text-muted">(party, party_type, posting_date, company, customer_group=None, supplier_type=None, billing_address=None, shipping_address=None, use_for_shopping_cart=None)</i>
+        <i class="text-muted">(party, party_type, posting_date, organization, customer_group=None, supplier_type=None, billing_address=None, shipping_address=None, use_for_shopping_cart=None)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -287,7 +287,7 @@ finally will return default.</p>
         <a name="erpnext.accounts.party.validate_due_date" href="#erpnext.accounts.party.validate_due_date" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.party.<b>validate_due_date</b>
-        <i class="text-muted">(posting_date, due_date, party_type, party, company)</i>
+        <i class="text-muted">(posting_date, due_date, party_type, party, organization)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -319,7 +319,7 @@ finally will return default.</p>
         <a name="erpnext.accounts.party.validate_party_gle_currency" href="#erpnext.accounts.party.validate_party_gle_currency" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.party.<b>validate_party_gle_currency</b>
-        <i class="text-muted">(party_type, party, company, party_account_currency=None)</i>
+        <i class="text-muted">(party_type, party, organization, party_account_currency=None)</i>
     </p>
 	<div class="docs-attr-desc"><p>Validate party account currency with existing GL Entry's currency</p>
 </div>

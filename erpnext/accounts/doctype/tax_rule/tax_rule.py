@@ -53,7 +53,7 @@ class TaxRule(Document):
 			"shipping_city":	self.shipping_city,
 			"shipping_state":	self.shipping_state,
 			"shipping_country":	self.shipping_country,
-			"company":			self.company
+			"organization":			self.organization
 		}
 
 		conds=""

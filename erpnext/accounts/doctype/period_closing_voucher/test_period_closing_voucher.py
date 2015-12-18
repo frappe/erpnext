@@ -13,11 +13,11 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
 		year_start_date = get_fiscal_year(today())[1]
 
-		make_journal_entry("_Test Bank - _TC", "Sales - _TC", 400,
-			"_Test Cost Center - _TC", submit=True)
+		make_journal_entry("_Test Bank - _TO", "Sales - _TO", 400,
+			"_Test Cost Center - _TO", submit=True)
 
-		make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 600, "_Test Cost Center - _TC", submit=True)
+		make_journal_entry("_Test Account Cost for Goods Sold - _TO",
+			"_Test Bank - _TO", 600, "_Test Cost Center - _TO", submit=True)
 
 		random_expense_account = frappe.db.sql("""
 			select t1.account,
@@ -26,7 +26,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 					as balance_in_account_currency
 			from `tabGL Entry` t1, `tabAccount` t2
 			where t1.account = t2.name and t2.root_type = 'Expense'
-				and t2.docstatus < 2 and t2.company = '_Test Company'
+				and t2.docstatus < 2 and t2.organization = '_Test Organization'
 				and t1.posting_date between %s and %s
 			group by t1.account
 			having sum(t1.debit) > sum(t1.credit)
@@ -35,7 +35,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		profit_or_loss = frappe.db.sql("""select sum(t1.debit) - sum(t1.credit) as balance
 			from `tabGL Entry` t1, `tabAccount` t2
 			where t1.account = t2.name and t2.report_type = 'Profit and Loss'
-			and t2.docstatus < 2 and t2.company = '_Test Company'
+			and t2.docstatus < 2 and t2.organization = '_Test Organization'
 			and t1.posting_date between %s and %s""", (year_start_date, today()))
 
 		profit_or_loss = flt(profit_or_loss[0][0]) if profit_or_loss else 0
@@ -45,7 +45,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		# Check value for closing account
 		gle_amount_for_closing_account = frappe.db.sql("""select debit - credit
 			from `tabGL Entry` where voucher_type='Period Closing Voucher' and voucher_no=%s
-			and account = '_Test Account Reserves and Surplus - _TC'""", pcv.name)
+			and account = '_Test Account Reserves and Surplus - _TO'""", pcv.name)
 
 		gle_amount_for_closing_account = flt(gle_amount_for_closing_account[0][0]) \
 			if gle_amount_for_closing_account else 0
@@ -69,8 +69,8 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 	def make_period_closing_voucher(self):
 		pcv = frappe.get_doc({
 			"doctype": "Period Closing Voucher",
-			"closing_account_head": "_Test Account Reserves and Surplus - _TC",
-			"company": "_Test Company",
+			"closing_account_head": "_Test Account Reserves and Surplus - _TO",
+			"organization": "_Test Organization",
 			"fiscal_year": get_fiscal_year(today())[0],
 			"posting_date": today(),
 			"remarks": "test"

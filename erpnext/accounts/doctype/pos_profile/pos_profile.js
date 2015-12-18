@@ -31,7 +31,7 @@ cur_frm.fields_dict['cash_bank_account'].get_query = function(doc,cdt,cdn) {
 		filters:{
 			'report_type': "Balance Sheet",
 			'is_group': 0,
-			'company': doc.company
+			'organization': doc.organization
 		}
 	}
 }
@@ -42,7 +42,7 @@ cur_frm.fields_dict['income_account'].get_query = function(doc,cdt,cdn) {
 	return{
 		filters:{
 			'is_group': 0,
-			'company': doc.company,
+			'organization': doc.organization,
 			'account_type': "Income Account"
 		}
 	}
@@ -54,7 +54,7 @@ cur_frm.fields_dict['income_account'].get_query = function(doc,cdt,cdn) {
 cur_frm.fields_dict['cost_center'].get_query = function(doc,cdt,cdn) {
 	return{
 		filters:{
-			'company': doc.company,
+			'organization': doc.organization,
 			'is_group': 0
 		}
 	}
@@ -67,7 +67,7 @@ cur_frm.fields_dict["expense_account"].get_query = function(doc) {
 	return {
 		filters: {
 			"report_type": "Profit and Loss",
-			"company": doc.company,
+			"organization": doc.organization,
 			"is_group": 0
 		}
 	}
@@ -92,7 +92,7 @@ cur_frm.fields_dict.write_off_account.get_query = function(doc) {
 		filters:{
 			'report_type': 'Profit and Loss',
 			'is_group': 0,
-			'company': doc.company
+			'organization': doc.organization
 		}
 	}
 }
@@ -103,7 +103,7 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 	return{
 		filters:{
 			'is_group': 0,
-			'company': doc.company
+			'organization': doc.organization
 		}
 	}
 }

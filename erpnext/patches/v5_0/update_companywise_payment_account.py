@@ -16,6 +16,6 @@ def execute():
 			parent_doc = frappe.get_doc("Mode of Payment", d.get("name"))
 
 			parent_doc.set("accounts",
-				[{"company": frappe.db.get_value("Account", d.get("default_account"), "company"),
+				[{"organization": frappe.db.get_value("Account", d.get("default_account"), "organization"),
 				"default_account": d.get("default_account")}])
 			parent_doc.save()

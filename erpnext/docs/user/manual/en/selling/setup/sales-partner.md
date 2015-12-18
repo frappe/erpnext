@@ -17,7 +17,7 @@ You can track their address and contact details and also allocate Sales Partner 
 ### Including Sales Partners in Your Website
 
 To include the name of your Partner on your website, check the "Show in
-Website" box. When click on "Show in Website", you will see field where you can attach logo of partner's company and enter brief and introduction of partner.
+Website" box. When click on "Show in Website", you will see field where you can attach logo of partner's organization and enter brief and introduction of partner.
 
 <img class="screenshot" alt="Sales Partner" src="{{docs_base_url}}/assets/img/selling/sales-partner-website.png">
 

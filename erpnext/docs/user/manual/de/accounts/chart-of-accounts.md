@@ -5,7 +5,7 @@ Der Kontenplan bildet die Blaupause Ihres Unternehmens. Die Rahmenstruktur Ihres
 
 Der Kontenplan hilft Ihnen bei der Beantwortung folgender Fragen:
 
-* Was ist Ihre Organisation wert?
+* Was ist Ihre organization wert?
 * Wieviele Schulden haben Sie?
 * Wieviel Gewinn erwirtschaften Sie (und in diesem Zuge auch, wieviele Steuern zahlen Sie?)
 * Wieviel Umsatz generieren Sie?

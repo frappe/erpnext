@@ -1,13 +1,13 @@
-# Step 4: Company Details
+# Step 4: organization Details
 
-Enter Company Details like Name, Abbreviation and Financial Year Details.
+Enter organization Details like Name, Abbreviation and Financial Year Details.
 
-<img alt="Company Details" class="screenshot"
+<img alt="organization Details" class="screenshot"
 src="{{docs_base_url}}/assets/img/setup-wizard/step-4.png">
 
 ---
 
-### Company Abbreviation
+### organization Abbreviation
 
 These will be appened to your **Account** Heads, for example if your abbreviation is **WP**, then your Sales account will be **Sales - WPL**
 

@@ -44,10 +44,10 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
 		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate",
 			this.frm.doc.name);
-		var company_currency = this.get_company_currency();
+		var organization_currency = this.get_organization_currency();
 
 		if(!this.frm.doc.conversion_rate) {
-			if(this.frm.doc.currency == company_currency) {
+			if(this.frm.doc.currency == organization_currency) {
 				this.frm.set_value("conversion_rate", 1);
 			} else {
 				frappe.throw(repl('%(conversion_rate_label)s' +
@@ -56,7 +56,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 					{
 						"conversion_rate_label": conversion_rate_label,
 						"from_currency": this.frm.doc.currency,
-						"to_currency": company_currency
+						"to_currency": organization_currency
 					}));
 			}
 			
@@ -74,12 +74,12 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				item.net_amount = item.amount;
 				item.item_tax_amount = 0.0;
 
-				me.set_in_company_currency(item, ["price_list_rate", "rate", "amount", "net_rate", "net_amount"]);
+				me.set_in_organization_currency(item, ["price_list_rate", "rate", "amount", "net_rate", "net_amount"]);
 			});
 		}
 	},
 
-	set_in_company_currency: function(doc, fields) {
+	set_in_organization_currency: function(doc, fields) {
 		var me = this;
 		$.each(fields, function(i, f) {
 			doc["base_"+f] = flt(flt(doc[f], precision(f, doc)) * me.frm.doc.conversion_rate, precision("base_" + f, doc));
@@ -140,7 +140,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				item.net_amount = flt(item.amount / (1 + cumulated_tax_fraction), precision("net_amount", item));
 				item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
 
-				me.set_in_company_currency(item, ["net_rate", "net_amount"]);
+				me.set_in_organization_currency(item, ["net_rate", "net_amount"]);
 			}
 		});
 	},
@@ -313,7 +313,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		tax.tax_amount = flt(tax.tax_amount, precision("tax_amount", tax));
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, precision("tax_amount", tax));
 
-		this.set_in_company_currency(tax, ["total", "tax_amount", "tax_amount_after_discount_amount"]);
+		this.set_in_organization_currency(tax, ["total", "tax_amount", "tax_amount_after_discount_amount"]);
 	},
 
 	adjust_discount_amount_loss: function(tax) {
@@ -322,7 +322,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			discount_amount_loss, precision("tax_amount", tax));
 		tax.total = flt(tax.total + discount_amount_loss, precision("total", tax));
 		
-		this.set_in_company_currency(tax, ["total", "tax_amount_after_discount_amount"]);
+		this.set_in_organization_currency(tax, ["total", "tax_amount_after_discount_amount"]);
 	},
 	
 	manipulate_grand_total_for_inclusive_tax: function() {
@@ -343,7 +343,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 					last_tax.tax_amount_after_discount += diff;
 					last_tax.total += diff;
 					
-					this.set_in_company_currency(last_tax, 
+					this.set_in_organization_currency(last_tax, 
 						["total", "tax_amount", "tax_amount_after_discount_amount"]);
 				}
 			}
@@ -379,13 +379,13 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			this.frm.doc.base_grand_total = flt((this.frm.doc.taxes_and_charges_added || this.frm.doc.taxes_and_charges_deducted) ?
 				flt(this.frm.doc.grand_total * this.frm.doc.conversion_rate) : this.frm.doc.base_net_total);
 
-			this.set_in_company_currency(this.frm.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"]);
+			this.set_in_organization_currency(this.frm.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"]);
 		}
 
 		this.frm.doc.total_taxes_and_charges = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
 			precision("total_taxes_and_charges"));
 
-		this.set_in_company_currency(this.frm.doc, ["total_taxes_and_charges"]);
+		this.set_in_organization_currency(this.frm.doc, ["total_taxes_and_charges"]);
 
 		// Round grand total as per precision
 		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "base_grand_total"]);
@@ -447,7 +447,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 					item.net_amount = flt(item.net_amount - distributed_amount, precision("base_amount", item));
 					item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
 
-					me.set_in_company_currency(item, ["net_rate", "net_amount"]);
+					me.set_in_organization_currency(item, ["net_rate", "net_amount"]);
 				});
 
 				this.discount_amount_applied = true;
@@ -518,7 +518,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			} else {
 				this.frm.doc.paid_amount = 0
 			}
-			this.set_in_company_currency(this.frm.doc, ["paid_amount"]);
+			this.set_in_organization_currency(this.frm.doc, ["paid_amount"]);
 			this.frm.refresh_field("paid_amount");
 			this.frm.refresh_field("base_paid_amount");
 			

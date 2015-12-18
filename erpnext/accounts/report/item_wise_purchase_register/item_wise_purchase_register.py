@@ -25,9 +25,9 @@ def execute(filters=None):
 			purchase_receipt = ", ".join(frappe.db.sql_list("""select distinct parent
 			from `tabPurchase Receipt Item` where docstatus=1 and prevdoc_detail_docname=%s""", d.po_detail))
 
-		expense_account = d.expense_account or aii_account_map.get(d.company)
+		expense_account = d.expense_account or aii_account_map.get(d.organization)
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.supplier,
-			d.supplier_name, d.credit_to, d.project_name, d.company, d.purchase_order,
+			d.supplier_name, d.credit_to, d.project_name, d.organization, d.purchase_order,
 			purchase_receipt, expense_account, d.qty, d.base_net_rate, d.base_net_amount]
 
 		for tax in tax_accounts:
@@ -46,14 +46,14 @@ def get_columns():
 		_("Item Group") + ":Link/Item Group:100", _("Invoice") + ":Link/Purchase Invoice:120",
 		_("Posting Date") + ":Date:80", _("Supplier") + ":Link/Supplier:120",
 		"Supplier Name::120", "Payable Account:Link/Account:120", _("Project") + ":Link/Project:80",
-		_("Company") + ":Link/Company:100", _("Purchase Order") + ":Link/Purchase Order:100",
+		_("Organization") + ":Link/organization:100", _("Purchase Order") + ":Link/Purchase Order:100",
 		_("Purchase Receipt") + ":Link/Purchase Receipt:100", _("Expense Account") + ":Link/Account:140",
 		_("Qty") + ":Float:120", _("Rate") + ":Currency:120", _("Amount") + ":Currency:120"]
 
 def get_conditions(filters):
 	conditions = ""
 
-	for opts in (("company", " and company=%(company)s"),
+	for opts in (("Organization", " and organization=%(organization)s"),
 		("supplier", " and pi.supplier = %(supplier)s"),
 		("item_code", " and pi_item.item_code = %(item_code)s"),
 		("from_date", " and pi.posting_date>=%(from_date)s"),
@@ -67,7 +67,7 @@ def get_items(filters):
 	conditions = get_conditions(filters)
 	match_conditions = frappe.build_match_conditions("Purchase Invoice")
 
-	return frappe.db.sql("""select pi_item.parent, pi.posting_date, pi.credit_to, pi.company,
+	return frappe.db.sql("""select pi_item.parent, pi.posting_date, pi.credit_to, pi.organization,
 		pi.supplier, pi.remarks, pi.base_net_total, pi_item.item_code, pi_item.item_name, pi_item.item_group,
 		pi_item.project_name, pi_item.purchase_order, pi_item.purchase_receipt, pi_item.po_detail,
 		pi_item.expense_account, pi_item.qty, pi_item.base_net_rate, pi_item.base_net_amount, pi.supplier_name
@@ -76,7 +76,7 @@ def get_items(filters):
 		order by pi.posting_date desc, pi_item.item_code desc""" % (conditions, match_conditions), filters, as_dict=1)
 
 def get_aii_accounts():
-	return dict(frappe.db.sql("select name, stock_received_but_not_billed from tabCompany"))
+	return dict(frappe.db.sql("select name, stock_received_but_not_billed from tabOrganization"))
 
 def get_tax_accounts(item_list, columns):
 	import json

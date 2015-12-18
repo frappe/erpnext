@@ -16,7 +16,7 @@ frappe.ui.form.on("Production Order", "onload", function(frm) {
 	}
 
 	erpnext.production_order.set_custom_buttons(frm);
-	erpnext.production_order.setup_company_filter(frm);
+	erpnext.production_order.setup_organization_filter(frm);
 	erpnext.production_order.setup_bom_filter(frm);
 });
 
@@ -117,17 +117,17 @@ erpnext.production_order = {
 		frm.set_value("total_operating_cost", (flt(frm.doc.additional_operating_cost) + variable_cost))
 	},
 
-	setup_company_filter: function(frm) {
-		var company_filter = function(doc) {
+	setup_organization_filter: function(frm) {
+		var organization_filter = function(doc) {
 			return {
 				filters: {
-					'company': frm.doc.company
+					'organization': frm.doc.organization
 				}
 			}
 		}
 
-		frm.fields_dict.fg_warehouse.get_query = company_filter;
-		frm.fields_dict.wip_warehouse.get_query = company_filter;
+		frm.fields_dict.fg_warehouse.get_query = organization_filter;
+		frm.fields_dict.wip_warehouse.get_query = organization_filter;
 	},
 
 	setup_bom_filter: function(frm) {

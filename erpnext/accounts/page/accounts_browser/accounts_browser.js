@@ -38,20 +38,20 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 		'</ol>'+
 		'<p>'+__('Please setup your chart of accounts before you start Accounting Entries')+'</p></div>').appendTo(main);
 
-	if (frappe.boot.user.can_create.indexOf("Company") !== -1) {
-		wrapper.page.add_menu_item(__('New Company'), function() { newdoc('Company'); }, true);
+	if (frappe.boot.user.can_create.indexOf("Organization") !== -1) {
+		wrapper.page.add_menu_item(__('New organization'), function() { newdoc('organization'); }, true);
 	}
 
 	wrapper.page.add_menu_item(__('Refresh'), function() {
-			wrapper.$company_select.change();
+			wrapper.$organization_select.change();
 		});
 
 	wrapper.page.set_primary_action(__('New'), function() {
 		erpnext.account_chart && erpnext.account_chart.make_new();
 	}, "octicon octicon-plus");
 
-	// company-select
-	wrapper.$company_select = wrapper.page.add_select("Company", [])
+	// organization-select
+	wrapper.$organization_select = wrapper.page.add_select("Organization", [])
 		.change(function() {
 			var ctype = frappe.get_route()[1] || 'Account';
 			erpnext.account_chart = new erpnext.AccountsChart(ctype, $(this).val(),
@@ -62,11 +62,11 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 	return frappe.call({
 		method: 'erpnext.accounts.page.accounts_browser.accounts_browser.get_companies',
 		callback: function(r) {
-			wrapper.$company_select.empty();
+			wrapper.$organization_select.empty();
 			$.each(r.message, function(i, v) {
-				$('<option>').html(v).attr('value', v).appendTo(wrapper.$company_select);
+				$('<option>').html(v).attr('value', v).appendTo(wrapper.$organization_select);
 			});
-			wrapper.$company_select.val(frappe.defaults.get_user_default("company") || r.message[0]).change();
+			wrapper.$organization_select.val(frappe.defaults.get_user_default("Organization") || r.message[0]).change();
 		}
 	});
 }
@@ -78,12 +78,12 @@ frappe.pages["Accounts Browser"].on_page_show = function(wrapper){
 
 
 	if(erpnext.account_chart && erpnext.account_chart.ctype != ctype) {
-		wrapper.$company_select.change();
+		wrapper.$organization_select.change();
 	}
 }
 
 erpnext.AccountsChart = Class.extend({
-	init: function(ctype, company, wrapper, page) {
+	init: function(ctype, organization, wrapper, page) {
 		$(wrapper).empty();
 		var me = this;
 		me.ctype = ctype;
@@ -95,11 +95,11 @@ erpnext.AccountsChart = Class.extend({
 
 		// __("Accounts"), __("Cost Centers")
 
-		me.company = company;
+		me.organization = organization;
 		this.tree = new frappe.ui.Tree({
 			parent: $(wrapper),
 			label: ctype==="Account" ? "Accounts" : "Cost Centers",
-			args: {ctype: ctype, comp: company},
+			args: {ctype: ctype, comp: organization},
 			method: 'erpnext.accounts.page.accounts_browser.accounts_browser.get_children',
 			click: function(link) {
 				// bold
@@ -135,7 +135,7 @@ erpnext.AccountsChart = Class.extend({
 							"account": node.label,
 							"from_date": sys_defaults.year_start_date,
 							"to_date": sys_defaults.year_end_date,
-							"company": me.company
+							"organization": me.organization
 						};
 						frappe.set_route("query-report", "General Ledger");
 					},
@@ -169,7 +169,7 @@ erpnext.AccountsChart = Class.extend({
 						+ (node.data.balance_in_account_currency ?
 							(format_currency(Math.abs(node.data.balance_in_account_currency),
 								node.data.account_currency) + " / ") : "")
-						+ format_currency(Math.abs(node.data.balance), node.data.company_currency)
+						+ format_currency(Math.abs(node.data.balance), node.data.organization_currency)
 						+ " " + dr_or_cr
 						+ '</span>').insertBefore(node.$ul);
 				}
@@ -219,8 +219,8 @@ erpnext.AccountsChart = Class.extend({
 					description: __("Optional. This setting will be used to filter in various transactions.") },
 				{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate')},
 				{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse"},
-				{fieldtype:'Link', fieldname:'account_currency', label:__('Currency'), options:"Currency",
-					description: __("Optional. Sets company's default currency, if not specified.")}
+				{fieldtype:'Link', fieldname:'account_currency', label:__('Currency'), options:"Currency", 
+					description: __("Optional. Sets organization's default currency, if not specified.")}
 			]
 		})
 
@@ -260,8 +260,8 @@ erpnext.AccountsChart = Class.extend({
 
 			var node = me.tree.get_selected_node();
 			v.parent_account = node.label;
-			v.company = me.company;
-
+			v.organization = me.organization;
+			
 			if(node.root) {
 				v.is_root = true;
 				v.parent_account = null;
@@ -314,7 +314,7 @@ erpnext.AccountsChart = Class.extend({
 			var node = me.tree.get_selected_node();
 
 			v.parent_cost_center = node.label;
-			v.company = me.company;
+			v.organization = me.organization;
 
 			return frappe.call({
 				args: v,

@@ -5,8 +5,8 @@ frappe.provide("erpnext.stock");
 
 erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 	onload: function() {
-		// warehouse query if company
-		if (this.frm.fields_dict.company) {
+		// warehouse query if organization
+		if (this.frm.fields_dict.organization) {
 			this.setup_warehouse_query();
 		}
 	},
@@ -26,7 +26,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 					voucher_no: me.frm.doc.name,
 					from_date: me.frm.doc.posting_date,
 					to_date: me.frm.doc.posting_date,
-					company: me.frm.doc.company
+					organization: me.frm.doc.organization
 				};
 				frappe.set_route("query-report", "Stock Ledger");
 			}, "icon-bar-chart");
@@ -42,7 +42,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 					voucher_no: me.frm.doc.name,
 					from_date: me.frm.doc.posting_date,
 					to_date: me.frm.doc.posting_date,
-					company: me.frm.doc.company,
+					organization: me.frm.doc.organization,
 					group_by_voucher: false
 				};
 				frappe.set_route("query-report", "General Ledger");

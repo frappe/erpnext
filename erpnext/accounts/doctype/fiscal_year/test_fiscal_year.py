@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, unittest
 
 test_records = frappe.get_test_records('Fiscal Year')
-test_ignore = ["Company"]
+test_ignore = ["organization"]
 
 class TestFiscalYear(unittest.TestCase):
 	def test_extra_year(self):

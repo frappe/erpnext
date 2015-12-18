@@ -37,7 +37,7 @@ def add_header(w):
 	w.writerow(["Status should be one of these values: " + status])
 	w.writerow(["If you are overwriting existing attendance records, 'ID' column mandatory"])
 	w.writerow(["ID", "Employee", "Employee Name", "Date", "Status",
-		"Fiscal Year", "Company", "Naming Series"])
+		"Fiscal Year", "organization", "Naming Series"])
 	return w
 
 def add_data(w, args):
@@ -56,7 +56,7 @@ def add_data(w, args):
 				existing_attendance and existing_attendance.name or "",
 				employee.name, employee.employee_name, date,
 				existing_attendance and existing_attendance.status or "",
-				get_fiscal_year(date)[0], employee.company,
+				get_fiscal_year(date)[0], employee.organization,
 				existing_attendance and existing_attendance.naming_series or get_naming_series(),
 			]
 			w.writerow(row)
@@ -69,7 +69,7 @@ def get_dates(args):
 	return dates
 
 def get_active_employees():
-	employees = frappe.db.sql("""select name, employee_name, company
+	employees = frappe.db.sql("""select name, employee_name, organization
 		from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1)
 	return employees
 

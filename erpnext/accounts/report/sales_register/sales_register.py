@@ -97,7 +97,7 @@ def get_columns(invoice_list):
 def get_conditions(filters):
 	conditions = ""
 
-	if filters.get("company"): conditions += " and company=%(company)s"
+	if filters.get("Organization"): conditions += " and organization=%(organization)s"
 	if filters.get("customer"): conditions += " and customer = %(customer)s"
 
 	if filters.get("from_date"): conditions += " and posting_date >= %(from_date)s"

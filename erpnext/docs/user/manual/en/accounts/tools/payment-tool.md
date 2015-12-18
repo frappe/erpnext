@@ -3,7 +3,7 @@ The Payment Tool Feature allows non-accounting personnel to generate Journal Ent
 
 To go to Payment Tool, click on Accounts > Tools > Payment Tool.
 
-1. Select the Company Name.
+1. Select the organization Name.
 2. Select the Party Type (Customer or Supplier) and the name of the customer or supplier against whom the payment has been made or received.
 3. Use the Received Or Paid field to specify 'Received' if payment is being received or 'Paid' if User is making the payment.
 4. Select the Mode of Payment and the Payment Account .

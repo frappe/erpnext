@@ -310,7 +310,7 @@
    "no_copy": 0, 
    "oldfieldname": "basic_rate", 
    "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
+   "options": "Organization:organization:default_currency", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0, 

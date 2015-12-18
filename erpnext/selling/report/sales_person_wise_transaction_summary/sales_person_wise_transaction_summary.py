@@ -50,7 +50,7 @@ def get_conditions(filters, date_field):
 	conditions = [""]
 	values = []
 	
-	for field in ["company", "customer", "territory"]:
+	for field in ["organization", "customer", "territory"]:
 		if filters.get(field):
 			conditions.append("dt.{0}=%s".format(field))
 			values.append(filters[field])

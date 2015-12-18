@@ -90,7 +90,6 @@ class TestSalarySlip(unittest.TestCase):
 
 		salary_slip_test_employee = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@example.com"))
-
 		salary_slip_test_employee_2 = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee_2@example.com"))
 
@@ -113,7 +112,7 @@ class TestSalarySlip(unittest.TestCase):
 				"naming_series": "_T-Employee-",
 				"employee_name": user,
 				"user_id": user,
-				"company": "_Test Company",
+				"organization": "_Test Organization",
 				"date_of_birth": "1990-05-08",
 				"date_of_joining": "2013-01-01",
 				"department": "_Test Department 1",

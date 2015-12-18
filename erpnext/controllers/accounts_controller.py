@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
 from frappe.utils import today, flt, cint
-from erpnext.setup.utils import get_company_currency, get_exchange_rate
+from erpnext.setup.utils import get_organization_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
@@ -20,11 +20,11 @@ class AccountsController(TransactionBase):
 		super(AccountsController, self).__init__(arg1, arg2)
 
 	@property
-	def company_currency(self):
-		if not hasattr(self, "__company_currency"):
-			self.__company_currency = get_company_currency(self.company)
+	def organization_currency(self):
+		if not hasattr(self, "__organization_currency"):
+			self.__organization_currency = get_organization_currency(self.organization)
 
-		return self.__company_currency
+		return self.__organization_currency
 
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
@@ -100,9 +100,9 @@ class AccountsController(TransactionBase):
 			if not self.due_date:
 				frappe.throw(_("Due Date is mandatory"))
 
-			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer, self.company)
+			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer, self.organization)
 		elif self.doctype == "Purchase Invoice":
-			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
+			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.organization)
 
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("currency"):
@@ -113,22 +113,22 @@ class AccountsController(TransactionBase):
 				self.price_list_currency = frappe.db.get_value("Price List",
 					self.get(fieldname), "currency")
 
-				if self.price_list_currency == self.company_currency:
+				if self.price_list_currency == self.organization_currency:
 					self.plc_conversion_rate = 1.0
 
 				elif not self.plc_conversion_rate:
 					self.plc_conversion_rate = get_exchange_rate(
-						self.price_list_currency, self.company_currency)
+						self.price_list_currency, self.organization_currency)
 
 			# currency
 			if not self.currency:
 				self.currency = self.price_list_currency
 				self.conversion_rate = self.plc_conversion_rate
-			elif self.currency == self.company_currency:
+			elif self.currency == self.organization_currency:
 				self.conversion_rate = 1.0
 			elif not self.conversion_rate:
 				self.conversion_rate = get_exchange_rate(self.currency,
-					self.company_currency)
+					self.organization_currency)
 
 	def set_missing_item_details(self):
 		"""set missing item values"""
@@ -138,7 +138,7 @@ class AccountsController(TransactionBase):
 			auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
 			if auto_accounting_for_stock:
-				stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
+				stock_not_billed_account = self.get_organization_default("stock_received_but_not_billed")
 				
 			stock_items = self.get_stock_items()
 
@@ -220,7 +220,7 @@ class AccountsController(TransactionBase):
 	def get_gl_dict(self, args, account_currency=None):
 		"""this method populates the common properties of a gl entry record"""
 		gl_dict = frappe._dict({
-			'company': self.company,
+			'organization': self.organization,
 			'posting_date': self.posting_date,
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,
@@ -246,8 +246,8 @@ class AccountsController(TransactionBase):
 		return gl_dict
 
 	def validate_account_currency(self, account, account_currency=None):
-		valid_currency = [self.company_currency]
-		if self.get("currency") and self.currency != self.company_currency:
+		valid_currency = [self.organization_currency]
+		if self.get("currency") and self.currency != self.organization_currency:
 			valid_currency.append(self.currency)
 
 		if account_currency not in valid_currency:
@@ -255,20 +255,20 @@ class AccountsController(TransactionBase):
 				.format(account, _(" or ").join(valid_currency)))
 
 	def set_balance_in_account_currency(self, gl_dict, account_currency=None):
-		if (not self.get("conversion_rate") and account_currency!=self.company_currency):
+		if (not self.get("conversion_rate") and account_currency!=self.organization_currency):
 				frappe.throw(_("Account: {0} with currency: {1} can not be selected")
 					.format(gl_dict.account, account_currency))
 
-		gl_dict["account_currency"] = self.company_currency if account_currency==self.company_currency \
+		gl_dict["account_currency"] = self.organization_currency if account_currency==self.organization_currency \
 			else account_currency
 
 		# set debit/credit in account currency if not provided
 		if flt(gl_dict.debit) and not flt(gl_dict.debit_in_account_currency):
-			gl_dict.debit_in_account_currency = gl_dict.debit if account_currency==self.company_currency \
+			gl_dict.debit_in_account_currency = gl_dict.debit if account_currency==self.organization_currency \
 				else flt(gl_dict.debit / (self.get("conversion_rate")), 2)
 
 		if flt(gl_dict.credit) and not flt(gl_dict.credit_in_account_currency):
-			gl_dict.credit_in_account_currency = gl_dict.credit if account_currency==self.company_currency \
+			gl_dict.credit_in_account_currency = gl_dict.credit if account_currency==self.organization_currency \
 				else flt(gl_dict.credit / (self.get("conversion_rate")), 2)
 
 	def clear_unallocated_advances(self, childtype, parentfield):
@@ -371,9 +371,9 @@ class AccountsController(TransactionBase):
 					if total_billed_amt - max_allowed_amt > 0.01:
 						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings").format(item.item_code, item.idx, max_allowed_amt))
 
-	def get_company_default(self, fieldname):
-		from erpnext.accounts.utils import get_company_default
-		return get_company_default(self.company, fieldname)
+	def get_organization_default(self, fieldname):
+		from erpnext.accounts.utils import get_organization_default
+		return get_organization_default(self.organization, fieldname)
 
 	def get_stock_items(self):
 		stock_items = []
@@ -411,9 +411,9 @@ class AccountsController(TransactionBase):
 			.format(advance_paid, self.name, self.base_grand_total))
 
 	@property
-	def company_abbr(self):
+	def organization_abbr(self):
 		if not hasattr(self, "_abbr"):
-			self._abbr = frappe.db.get_value("Company", self.company, "abbr")
+			self._abbr = frappe.db.get_value("Organization", self.organization, "abbr")
 
 		return self._abbr
 
@@ -444,10 +444,10 @@ class AccountsController(TransactionBase):
 		if self.get("currency"):
 			party_type, party = self.get_party()
 			if party_type and party:
-				party_account_currency = get_party_account_currency(party_type, party, self.company)
+				party_account_currency = get_party_account_currency(party_type, party, self.organization)
 
 				if (party_account_currency
-					and party_account_currency != self.company_currency
+					and party_account_currency != self.organization_currency
 					and self.currency != party_account_currency):
 
 					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
@@ -483,14 +483,14 @@ def get_taxes_and_charges(master_doctype, master_name):
 
 	return taxes_and_charges
 
-def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
+def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, organization):
 	"""common validation for currency and price list currency"""
 
-	company_currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
+	organization_currency = frappe.db.get_value("Organization", organization, "default_currency", cache=True)
 
 	if not conversion_rate:
 		throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(
-			conversion_rate_label, currency, company_currency))
+			conversion_rate_label, currency, organization_currency))
 
 def validate_taxes_and_charges(tax):
 	if tax.charge_type in ['Actual', 'On Net Total'] and tax.row_id:

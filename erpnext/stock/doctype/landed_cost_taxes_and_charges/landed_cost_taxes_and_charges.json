@@ -65,7 +65,7 @@
    "label": "Amount", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "Company:company:default_currency", 
+   "options": "Organization:organization:default_currency", 
    "permlevel": 0, 
    "print_hide": 0, 
    "read_only": 0, 

@@ -32,10 +32,10 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 			}
 		},
 		{
-			fieldtype:"Select", label: __("Company"), fieldname: "company",
-			link:"Company", default_value: __("Select Company..."),
+			fieldtype:"Select", label: __("Organization"), fieldname: "organization",
+			link:"organization", default_value: __("Select organization..."),
 			filter: function(val, item, opts) {
-				return item.company == val || val == opts.default_value || item._show;
+				return item.organization == val || val == opts.default_value || item._show;
 			}
 		},
 		{fieldtype:"Select", label: __("Fiscal Year"), link:"Fiscal Year", fieldname: "fiscal_year",
@@ -220,10 +220,10 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		this.update_groups();
 		this.accounts_initialized = true;
 
-		if(!me.is_default("company")) {
+		if(!me.is_default("Organization")) {
 			// show Net Profit / Loss
 			var net_profit = {
-				company: me.company,
+				organization: me.organization,
 				id: "Net Profit / Loss",
 				name: "Net Profit / Loss",
 				indent: 0,
@@ -240,7 +240,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 			});
 
 			$.each(me.data, function(i, ac) {
-				if(!ac.parent_account && me.apply_filter(ac, "company") &&
+				if(!ac.parent_account && me.apply_filter(ac, "organization") &&
 						ac.report_type==net_profit.report_type) {
 					$.each(me.columns, function(i, col) {
 						if(col.formatter==me.currency_formatter && col.balance_type=="Dr") {
@@ -301,7 +301,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 
 			var show = pl_or_bs == "Balance Sheet" ?
 				account.report_type=="Balance Sheet" : account.report_type=="Profit and Loss";
-			if (show && account.checked && me.apply_filter(account, "company")) {
+			if (show && account.checked && me.apply_filter(account, "organization")) {
 				data.push({
 					label: account.name,
 					data: $.map(me.columns, function(col, idx) {

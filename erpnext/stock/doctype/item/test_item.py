@@ -29,7 +29,7 @@ def make_item(item_code, properties=None):
 
 
 	if item.is_stock_item and not item.default_warehouse:
-		item.default_warehouse = "_Test Warehouse - _TC"
+		item.default_warehouse = "_Test Warehouse - _TO"
 
 	item.insert()
 
@@ -47,7 +47,7 @@ class TestItem(unittest.TestCase):
 
 	# def test_template_cannot_have_stock(self):
 	# 		item = self.get_item(10)
-	# 		make_stock_entry(item_code=item.name, target="Stores - _TC", qty=1, basic_rate=1)
+	# 		make_stock_entry(item_code=item.name, target="Stores - _TO", qty=1, basic_rate=1)
 	# 		item.has_variants = 1
 	# 		self.assertRaises(ItemTemplateCannotHaveStock, item.save)
 
@@ -63,10 +63,10 @@ class TestItem(unittest.TestCase):
 			"item_code": "_Test Item",
 			"item_name": "_Test Item",
 			"description": "_Test Item 1",
-			"warehouse": "_Test Warehouse - _TC",
-			"income_account": "Sales - _TC",
-			"expense_account": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center 2 - _TC",
+			"warehouse": "_Test Warehouse - _TO",
+			"income_account": "Sales - _TO",
+			"expense_account": "_Test Account Cost for Goods Sold - _TO",
+			"cost_center": "_Test Cost Center 2 - _TO",
 			"qty": 1.0,
 			"price_list_rate": 100.0,
 			"base_price_list_rate": 0.0,
@@ -85,7 +85,7 @@ class TestItem(unittest.TestCase):
 
 		details = get_item_details({
 			"item_code": "_Test Item",
-			"company": "_Test Company",
+			"organization": "_Test Organization",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
 			"parenttype": "Sales Order",
@@ -139,7 +139,7 @@ class TestItem(unittest.TestCase):
 					"increment": 0.5
 				}
 			],
-			"default_warehouse": "_Test Warehouse - _TC"
+			"default_warehouse": "_Test Warehouse - _TO"
 		})
 
 		variant = create_variant("_Test Numeric Template Item", {"Test Size": "Large", "Test Item Length": 1.1})

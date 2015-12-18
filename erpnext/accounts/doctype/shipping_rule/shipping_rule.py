@@ -8,7 +8,7 @@ import frappe
 from frappe import _, msgprint, throw
 from frappe.utils import flt, fmt_money
 from frappe.model.document import Document
-from erpnext.setup.utils import get_company_currency
+from erpnext.setup.utils import get_organization_currency
 
 class OverlappingConditionError(frappe.ValidationError): pass
 class FromGreaterThanToError(frappe.ValidationError): pass
@@ -77,11 +77,11 @@ class ShippingRule(Document):
 						overlaps.append([d1, d2])
 
 		if overlaps:
-			company_currency = get_company_currency(self.company)
+			organization_currency = get_organization_currency(self.organization)
 			msgprint(_("Overlapping conditions found between:"))
 			messages = []
 			for d1, d2 in overlaps:
-				messages.append("%s-%s = %s " % (d1.from_value, d1.to_value, fmt_money(d1.shipping_amount, currency=company_currency)) +
-					_("and") + " %s-%s = %s" % (d2.from_value, d2.to_value, fmt_money(d2.shipping_amount, currency=company_currency)))
+				messages.append("%s-%s = %s " % (d1.from_value, d1.to_value, fmt_money(d1.shipping_amount, currency=organization_currency)) +
+					_("and") + " %s-%s = %s" % (d2.from_value, d2.to_value, fmt_money(d2.shipping_amount, currency=organization_currency)))
 
 			msgprint("\n".join(messages), raise_exception=OverlappingConditionError)

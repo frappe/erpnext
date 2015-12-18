@@ -74,7 +74,7 @@ class StockEntry(StockController):
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
 
 		if self.purpose in ("Manufacture", "Repack") and not self.difference_account:
-			self.difference_account = frappe.db.get_value("Company", self.company, "default_expense_account")
+			self.difference_account = frappe.db.get_value("Organization", self.organization, "default_expense_account")
 
 	def set_transfer_qty(self):
 		for item in self.get("items"):
@@ -92,7 +92,7 @@ class StockEntry(StockController):
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
 
 			item_details = self.get_item_details(frappe._dict({"item_code": item.item_code,
-				"company": self.company, "project_name": self.project_name, "uom": item.uom}), for_update=True)
+				"organization": self.organization, "project_name": self.project_name, "uom": item.uom}), for_update=True)
 
 			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
 				"cost_center", "conversion_factor"):
@@ -391,7 +391,7 @@ class StockEntry(StockController):
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
 
 	def get_gl_entries(self, warehouse_account):
-		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		expenses_included_in_valuation = self.get_organization_default("expenses_included_in_valuation")
 
 		gl_entries = super(StockEntry, self).get_gl_entries(warehouse_account)
 
@@ -462,16 +462,16 @@ class StockEntry(StockController):
 		}
 		for d in [["Account", "expense_account", "default_expense_account"],
 			["Cost Center", "cost_center", "cost_center"]]:
-				company = frappe.db.get_value(d[0], ret.get(d[1]), "company")
-				if not ret[d[1]] or (company and self.company != company):
-					ret[d[1]] = frappe.db.get_value("Company", self.company, d[2]) if d[2] else None
+				organization = frappe.db.get_value(d[0], ret.get(d[1]), "organization")
+				if not ret[d[1]] or (organization and self.organization != organization):
+					ret[d[1]] = frappe.db.get_value("Organization", self.organization, d[2]) if d[2] else None
 
 		# update uom
 		if args.get("uom") and for_update:
 			ret.update(self.get_uom_details(args))
 
 		if not ret["expense_account"]:
-			ret["expense_account"] = frappe.db.get_value("Company", self.company, "stock_adjustment_account")
+			ret["expense_account"] = frappe.db.get_value("Organization", self.organization, "stock_adjustment_account")
 
 		stock_and_rate = args.get('warehouse') and self.get_warehouse_details(args) or {}
 		ret.update(stock_and_rate)
@@ -596,7 +596,7 @@ class StockEntry(StockController):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
 		# item dict = { item_code: {qty, description, stock_uom} }
-		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
+		item_dict = get_bom_items_as_dict(self.bom_no, self.organization, qty=qty,
 			fetch_exploded = self.use_multi_level_bom)
 
 		for item in item_dict.values():
@@ -705,7 +705,7 @@ class StockEntry(StockController):
 		return issued_item_qty
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
-		expense_account, cost_center = frappe.db.get_values("Company", self.company, \
+		expense_account, cost_center = frappe.db.get_values("Organization", self.organization, \
 			["default_expense_account", "cost_center"])[0]
 
 		for d in item_dict:

@@ -61,7 +61,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
-   "description": "Select company name first.", 
+   "description": "Select organization name first.", 
    "fieldname": "parent_sales_person", 
    "fieldtype": "Link", 
    "hidden": 0, 

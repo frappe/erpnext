@@ -8,7 +8,7 @@ from frappe import _
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
 	# if initial setup not completed, return
-	if not (frappe.db.a_row_exists("Company") and frappe.db.a_row_exists("Fiscal Year")):
+	if not (frappe.db.a_row_exists("Organization") and frappe.db.a_row_exists("Fiscal Year")):
 		return
 
 	if cint(frappe.db.get_value('Stock Settings', None, 'auto_indent')):
@@ -16,10 +16,10 @@ def reorder_item():
 
 def _reorder_item():
 	material_requests = {"Purchase": {}, "Transfer": {}}
-	warehouse_company = frappe._dict(frappe.db.sql("""select name, company from `tabWarehouse`
+	warehouse_organization = frappe._dict(frappe.db.sql("""select name, organization from `tabWarehouse`
 		where disabled=0"""))
-	default_company = (frappe.defaults.get_defaults().get("company") or
-		frappe.db.sql("""select name from tabCompany limit 1""")[0][0])
+	default_organization = (frappe.defaults.get_defaults().get("Organization") or
+		frappe.db.sql("""select name from tabOrganization limit 1""")[0][0])
 
 	items_to_consider = frappe.db.sql_list("""select name from `tabItem` item
 		where is_stock_item=1 and has_variants=0
@@ -39,7 +39,7 @@ def _reorder_item():
 	item_warehouse_projected_qty = get_item_warehouse_projected_qty(items_to_consider)
 
 	def add_to_material_request(item_code, warehouse, reorder_level, reorder_qty, material_request_type):
-		if warehouse not in warehouse_company:
+		if warehouse not in warehouse_organization:
 			# a disabled warehouse
 			return
 
@@ -54,9 +54,9 @@ def _reorder_item():
 			if deficiency > reorder_qty:
 				reorder_qty = deficiency
 
-			company = warehouse_company.get(warehouse) or default_company
+			organization = warehouse_organization.get(warehouse) or default_organization
 
-			material_requests[material_request_type].setdefault(company, []).append({
+			material_requests[material_request_type].setdefault(organization, []).append({
 				"item_code": item_code,
 				"warehouse": warehouse,
 				"reorder_qty": reorder_qty
@@ -105,15 +105,15 @@ def create_material_request(material_requests):
 			exceptions_list.append(frappe.get_traceback())
 
 	for request_type in material_requests:
-		for company in material_requests[request_type]:
+		for organization in material_requests[request_type]:
 			try:
-				items = material_requests[request_type][company]
+				items = material_requests[request_type][organization]
 				if not items:
 					continue
 
 				mr = frappe.new_doc("Material Request")
 				mr.update({
-					"company": company,
+					"organization": organization,
 					"transaction_date": nowdate(),
 					"material_request_type": "Material Transfer" if request_type=="Transfer" else request_type
 				})

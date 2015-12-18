@@ -24,7 +24,7 @@ Die Tabelle zu den Artikelsteuern ist ein Abschnitt in den Artikelstammdaten.
 
 ### Vorlage für Verkaufssteuern und -abgaben
 
-Normalerweise müssen Sie die von Ihren Kunden an Sie gezahlten Steuern sammeln und an den Staat abführen. Manchmal kann es vorkommen, dass Sie mehrere unterschiedliche Steuern an verschiedene Staatsorgane abführen müssen, wie z. B. an Gemeinden, Bund, Länder oder europäische Organisationen.
+Normalerweise müssen Sie die von Ihren Kunden an Sie gezahlten Steuern sammeln und an den Staat abführen. Manchmal kann es vorkommen, dass Sie mehrere unterschiedliche Steuern an verschiedene Staatsorgane abführen müssen, wie z. B. an Gemeinden, Bund, Länder oder europäische organizationen.
 
 ERPNext ermittelt Steuern über Vorlagen. Andere Arten von Abgaben, die für Ihre Rechnungen Relevanz haben (wie Versandgebühren, Versicherung, etc.) können genauso wie Steuern eingestellt werden.
 

@@ -3,7 +3,7 @@ frappe.ui.form.on("Hub Settings", "onload", function(frm) {
 		frm.set_value("seller_country", frappe.defaults.get_default("country"));
 	}
 	if(!frm.doc.seller_name) {
-		frm.set_value("seller_name", frappe.defaults.get_default("company"));
+		frm.set_value("seller_name", frappe.defaults.get_default("Organization"));
 	}
 });
 

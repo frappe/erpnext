@@ -1,5 +1,5 @@
 change-password
-delete-a-company-and-all-related-transactions
+delete-a-organization-and-all-related-transactions
 edit-submitted-document
 integrating-erpnext-with-other-application
 manage-header-and-footer

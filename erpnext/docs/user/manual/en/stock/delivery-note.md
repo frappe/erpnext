@@ -1,4 +1,4 @@
-A Delivery Note is made when a shipment is shipped from the company’s
+A Delivery Note is made when a shipment is shipped from the organization’s
 Warehouse.
 
 A copy of the Delivery Note is usually sent with the transporter. The Delivery

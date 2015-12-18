@@ -230,7 +230,7 @@ Opening Entry</pre>
                 
             </td>
             <td>
-                <pre>Company:company:default_currency</pre>
+                <pre>Organization:organization:default_currency</pre>
             </td>
         </tr>
         
@@ -244,7 +244,7 @@ Opening Entry</pre>
                 
             </td>
             <td>
-                <pre>Company:company:default_currency</pre>
+                <pre>Organization:organization:default_currency</pre>
             </td>
         </tr>
         
@@ -258,7 +258,7 @@ Opening Entry</pre>
                 
             </td>
             <td>
-                <pre>Company:company:default_currency</pre>
+                <pre>Organization:organization:default_currency</pre>
             </td>
         </tr>
         
@@ -459,7 +459,7 @@ Accounts Payable</pre>
                 
             </td>
             <td>
-                <pre>Company:company:default_currency</pre>
+                <pre>Organization:organization:default_currency</pre>
             </td>
         </tr>
         
@@ -557,11 +557,11 @@ Accounts Payable</pre>
         
         <tr >
             <td>39</td>
-            <td class="danger" title="Mandatory"><code>company</code></td>
+            <td class="danger" title="Mandatory"><code>organization</code></td>
             <td >
                 Link</td>
             <td >
-                Company
+                Organization
                 
             </td>
             <td>
@@ -569,7 +569,7 @@ Accounts Payable</pre>
                 
 
 
-<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
+<a href="https://frappe.github.io/erpnext/current/models/setup/organization">Organization</a>
 
 
                 
@@ -874,9 +874,9 @@ Yes</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="set_amounts_in_company_currency" href="#set_amounts_in_company_currency" class="text-muted small">
+        <a name="set_amounts_in_organization_currency" href="#set_amounts_in_organization_currency" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>set_amounts_in_company_currency</b>
+		<b>set_amounts_in_organization_currency</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -1165,7 +1165,7 @@ Yes</pre>
         <a name="erpnext.accounts.doctype.journal_entry.journal_entry.get_account_balance_and_party_type" href="#erpnext.accounts.doctype.journal_entry.journal_entry.get_account_balance_and_party_type" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.journal_entry.journal_entry.<b>get_account_balance_and_party_type</b>
-        <i class="text-muted">(account, date, company, debit=None, credit=None, exchange_rate=None)</i>
+        <i class="text-muted">(account, date, organization, debit=None, credit=None, exchange_rate=None)</i>
     </p>
 	<div class="docs-attr-desc"><p>Returns dict of account balance and party type to be set in Journal Entry on selection of account.</p>
 </div>
@@ -1215,7 +1215,7 @@ Yes</pre>
         <a name="erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account" href="#erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.journal_entry.journal_entry.<b>get_default_bank_cash_account</b>
-        <i class="text-muted">(company, voucher_type, mode_of_payment=None)</i>
+        <i class="text-muted">(organization, voucher_type, mode_of_payment=None)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1233,7 +1233,7 @@ Yes</pre>
         <a name="erpnext.accounts.doctype.journal_entry.journal_entry.get_exchange_rate" href="#erpnext.accounts.doctype.journal_entry.journal_entry.get_exchange_rate" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.journal_entry.journal_entry.<b>get_exchange_rate</b>
-        <i class="text-muted">(account, account_currency=None, company=None, reference_type=None, reference_name=None, debit=None, credit=None, exchange_rate=None)</i>
+        <i class="text-muted">(account, account_currency=None, organization=None, reference_type=None, reference_name=None, debit=None, credit=None, exchange_rate=None)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1251,7 +1251,7 @@ Yes</pre>
         <a name="erpnext.accounts.doctype.journal_entry.journal_entry.get_opening_accounts" href="#erpnext.accounts.doctype.journal_entry.journal_entry.get_opening_accounts" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.journal_entry.journal_entry.<b>get_opening_accounts</b>
-        <i class="text-muted">(company)</i>
+        <i class="text-muted">(organization)</i>
     </p>
 	<div class="docs-attr-desc"><p>get all balance sheet accounts for opening entry</p>
 </div>
@@ -1287,7 +1287,7 @@ Yes</pre>
         <a name="erpnext.accounts.doctype.journal_entry.journal_entry.get_party_account_and_balance" href="#erpnext.accounts.doctype.journal_entry.journal_entry.get_party_account_and_balance" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.journal_entry.journal_entry.<b>get_party_account_and_balance</b>
-        <i class="text-muted">(company, party_type, party)</i>
+        <i class="text-muted">(organization, party_type, party)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>

@@ -528,8 +528,8 @@ erpnext.pos.toggle = function(frm, show) {
 			frappe.throw(__("Please select Price List"));
 		}
 
-		if(!frm.doc.company) {
-			frappe.throw(__("Please select Company"));
+		if(!frm.doc.organization) {
+			frappe.throw(__("Please select organization"));
 		}
 	}
 

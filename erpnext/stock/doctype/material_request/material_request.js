@@ -68,7 +68,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 							docstatus: 1,
 							status: ["!=", "Stopped"],
 							per_delivered: ["<", 99.99],
-							company: cur_frm.doc.company
+							organization: cur_frm.doc.organization
 						}
 					})
 				}, "icon-download", "btn-default");
@@ -106,7 +106,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		d.get_input("fetch").on("click", function() {
 			var values = d.get_values();
 			if(!values) return;
-			values["company"] = cur_frm.doc.company;
+			values["organization"] = cur_frm.doc.organization;
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.bom.bom.get_bom_items",
 				args: values,
@@ -131,7 +131,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		this.get_terms();
 	},
 
-	validate_company_and_party: function(party_field) {
+	validate_organization_and_party: function(party_field) {
 		return true;
 	},
 

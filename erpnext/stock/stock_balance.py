@@ -173,7 +173,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 		if serial_nos and flt(serial_nos[0][0]) != flt(d[2]):
 			print d[0], d[1], d[2], serial_nos[0][0]
 
-		sle = frappe.db.sql("""select valuation_rate, company from `tabStock Ledger Entry`
+		sle = frappe.db.sql("""select valuation_rate, organization from `tabStock Ledger Entry`
 			where item_code = %s and warehouse = %s and ifnull(is_cancelled, 'No') = 'No'
 			order by posting_date desc limit 1""", (d[0], d[1]))
 
@@ -190,7 +190,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			'actual_qty'				: flt(serial_nos[0][0]) - flt(d[2]),
 			'stock_uom'					: d[3],
 			'incoming_rate'				: sle and flt(serial_nos[0][0]) > flt(d[2]) and flt(sle[0][0]) or 0,
-			'company'					: sle and cstr(sle[0][1]) or 0,
+			'organization'					: sle and cstr(sle[0][1]) or 0,
 			'fiscal_year'				: fiscal_year,
 			'is_cancelled'			 	: 'No',
 			'batch_no'					: '',

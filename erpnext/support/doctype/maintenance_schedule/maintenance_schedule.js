@@ -25,7 +25,7 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 							docstatus: 1,
 							order_type: me.frm.doc.order_type,
 							customer: me.frm.doc.customer || undefined,
-							company: me.frm.doc.company
+							organization: me.frm.doc.organization
 						}
 					});
 				}, "icon-download", "btn-default");

@@ -2,7 +2,7 @@
 	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
 </div>
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
-<h4 class="text-center">{%= filters.account && (filters.account + ", ")  || "" %} {%= filters.company %}</h4>
+<h4 class="text-center">{%= filters.account && (filters.account + ", ")  || "" %} {%= filters.organization %}</h4>
 <h5 class="text-center">
 	{%= filters.ageing_based_on %}
 	{%= __("Until") %}

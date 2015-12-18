@@ -1,5 +1,5 @@
 Stock Reconciliation is the process of counting and evaluating stock-in-trade,
-usually at an organisations year end in order to value the total stock for
+usually at an organizations year end in order to value the total stock for
 preparation of the accounts. In this process actual physical stocks are
 checked and recorded in the system. The actual stocks and the stock in the system should be in agreement and accurate. If they are not, you can
 use the stock reconciliation tool to reconcile stock balance and value with actuals.

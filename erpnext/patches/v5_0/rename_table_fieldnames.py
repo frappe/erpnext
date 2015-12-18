@@ -96,7 +96,7 @@ rename_map = {
 		["employee_leave_approvers", "leave_approvers"],
 		["educational_qualification_details", "education"],
 		["previous_experience_details", "external_work_history"],
-		["experience_in_company_details", "internal_work_history"]
+		["experience_in_organization_details", "internal_work_history"]
 	],
 	"Expense Claim": [
 		["expense_voucher_details", "expenses"]
@@ -223,7 +223,7 @@ def execute():
 	frappe.reload_doc("manufacturing", "doctype", "workstation_working_hour")
 	frappe.reload_doc("stock", "doctype", "item_variant")
 	frappe.reload_doc("accounts", "doctype", "party_account")
-	frappe.reload_doc("accounts", "doctype", "fiscal_year_company")
+	frappe.reload_doc("accounts", "doctype", "fiscal_year_organization")
 
 	#rename table fieldnames
 	for dn in rename_map:

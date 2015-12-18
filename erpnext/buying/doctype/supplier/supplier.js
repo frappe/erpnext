@@ -63,7 +63,7 @@ cur_frm.fields_dict['accounts'].grid.get_field('account').get_query = function(d
 	return {
 		filters: {
 			'account_type': 'Payable',
-			'company': d.company,
+			'organization': d.organization,
 			"is_group": 0
 		}
 	}

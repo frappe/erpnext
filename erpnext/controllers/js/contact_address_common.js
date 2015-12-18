@@ -48,7 +48,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 				if((refdoc.doctype == "Quotation" && refdoc.quotation_to=="Lead") ||
 					(refdoc.doctype == "Opportunity" && refdoc.enquiry_from=="Lead") || (doctype=="Lead")) {
 						cur_frm.set_value("lead", refdoc.lead || refdoc.name);
-						cur_frm.set_value("lead_name", refdoc.customer_name || refdoc.company_name || refdoc.lead_name);
+						cur_frm.set_value("lead_name", refdoc.customer_name || refdoc.organization_name || refdoc.lead_name);
 						if(cur_frm.doc.doctype==="Address")
 							cur_frm.set_value("address_title", cur_frm.doc.lead_name);
 				}

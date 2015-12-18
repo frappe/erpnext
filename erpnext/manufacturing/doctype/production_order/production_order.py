@@ -63,10 +63,10 @@ class ProductionOrder(Document):
 				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
 
 	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company
+		from erpnext.stock.utils import validate_warehouse_organization
 
 		for w in [self.fg_warehouse, self.wip_warehouse]:
-			validate_warehouse_company(w, self.company)
+			validate_warehouse_organization(w, self.organization)
 
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
@@ -362,7 +362,7 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.purpose = purpose
 	stock_entry.production_order = production_order_id
-	stock_entry.company = production_order.company
+	stock_entry.organization = production_order.organization
 	stock_entry.from_bom = 1
 	stock_entry.bom_no = production_order.bom_no
 	stock_entry.use_multi_level_bom = production_order.use_multi_level_bom

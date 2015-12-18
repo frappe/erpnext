@@ -286,7 +286,7 @@ def make_serial_no(serial_no, sle):
 
 	sr.serial_no = serial_no
 	sr.item_code = sle.item_code
-	sr.company = sle.company
+	sr.organization = sle.organization
 	sr.via_stock_ledger = True
 	sr.insert()
 

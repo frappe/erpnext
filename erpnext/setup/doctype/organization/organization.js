@@ -1,47 +1,47 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.company");
+frappe.provide("erpnext.organization");
 
-frappe.ui.form.on("Company", {
+frappe.ui.form.on("Organization", {
 	onload: function(frm) {
-		erpnext.company.setup_queries(frm);
+		erpnext.organization.setup_queries(frm);
 	}, 
 	
 	onload_post_render: function(frm) {
-		frm.get_field("delete_company_transactions").$input.addClass("btn-danger");
+		frm.get_field("delete_organization_transactions").$input.addClass("btn-danger");
 	},
 	country: function(frm) {
-		erpnext.company.set_chart_of_accounts_options(frm.doc);
+		erpnext.organization.set_chart_of_accounts_options(frm.doc);
 	},
-	delete_company_transactions: function(frm) {
+	delete_organization_transactions: function(frm) {
 		frappe.verify_password(function() {
 			var d = frappe.prompt({
 				fieldtype:"Data",
-				fieldname: "company_name",
-				label: __("Please re-type company name to confirm"),
+				fieldname: "organization_name",
+				label: __("Please re-type organization name to confirm"),
 				reqd: 1,
-				description: __("Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.")},
+				description: __("Please make sure you really want to delete all the transactions for this organization. Your master data will remain as it is. This action cannot be undone.")},
 					function(data) {
-						if(data.company_name !== frm.doc.name) {
-							frappe.msgprint("Company name not same");
+						if(data.organization_name !== frm.doc.name) {
+							frappe.msgprint("organization name not same");
 							return;
 						}
 						frappe.call({
-							method: "erpnext.setup.doctype.company.delete_company_transactions.delete_company_transactions",
+							method: "erpnext.setup.doctype.organization.delete_organization_transactions.delete_organization_transactions",
 							args: {
-								company_name: data.company_name
+								organization_name: data.organization_name
 							},
 							freeze: true,
 							callback: function(r, rt) {
 								if(!r.exc)
-									frappe.msgprint(__("Successfully deleted all transactions related to this company!"));
+									frappe.msgprint(__("Successfully deleted all transactions related to this organization!"));
 							},
 							onerror: function() {
 								frappe.msgprint(__("Wrong Password"));
 							}
 						});
-					}, __("Delete all the Transactions for this Company"), __("Delete")
+					}, __("Delete all the Transactions for this organization"), __("Delete")
 				);
 				d.get_primary_btn().addClass("btn-danger");
 			}
@@ -60,10 +60,10 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			!cur_frm.doc.__onload.transactions_exist));
 	}
 
-	erpnext.company.set_chart_of_accounts_options(doc);
+	erpnext.organization.set_chart_of_accounts_options(doc);
 }
 
-erpnext.company.set_chart_of_accounts_options = function(doc) {
+erpnext.organization.set_chart_of_accounts_options = function(doc) {
 	var selected_value = doc.chart_of_accounts;
 	if(doc.country) {
 		return frappe.call({
@@ -96,9 +96,9 @@ cur_frm.cscript.change_abbr = function() {
 		args = dialog.get_values();
 		if(!args) return;
 		return frappe.call({
-			method: "erpnext.setup.doctype.company.company.replace_abbr",
+			method: "erpnext.setup.doctype.organization.organization.replace_abbr",
 			args: {
-				"company": cur_frm.doc.name,
+				"organization": cur_frm.doc.name,
 				"old": cur_frm.doc.abbr,
 				"new": args.new_abbr
 			},
@@ -118,7 +118,7 @@ cur_frm.cscript.change_abbr = function() {
 	dialog.show();
 }
 
-erpnext.company.setup_queries = function(frm) {
+erpnext.organization.setup_queries = function(frm) {
 	$.each([
 		["default_bank_account", {"account_type": "Bank"}], 
 		["default_cash_account", {"account_type": "Cash"}], 
@@ -130,7 +130,7 @@ erpnext.company.setup_queries = function(frm) {
 		["cost_center", {}],
 		["round_off_cost_center", {}]
 	], function(i, v) {
-		erpnext.company.set_custom_query(frm, v);
+		erpnext.organization.set_custom_query(frm, v);
 	});
 	
 	if (sys_defaults.auto_accounting_for_stock) {
@@ -139,14 +139,14 @@ erpnext.company.setup_queries = function(frm) {
 			["expenses_included_in_valuation", {"root_type": "Expense"}],
 			["stock_received_but_not_billed", {"report_type": "Balance Sheet"}]
 		], function(i, v) {
-			erpnext.company.set_custom_query(frm, v);
+			erpnext.organization.set_custom_query(frm, v);
 		});
 	}
 }
 
-erpnext.company.set_custom_query = function(frm, v) {
+erpnext.organization.set_custom_query = function(frm, v) {
 	var filters = {
-		"company": frm.doc.name,
+		"organization": frm.doc.name,
 		"is_group": 0
 	};
 	for (var key in v[1]) 

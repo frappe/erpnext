@@ -36,9 +36,9 @@ class ProductionPlanningTool(Document):
 	def clear_item_table(self):
 		self.set('items', [])
 
-	def validate_company(self):
-		if not self.company:
-			frappe.throw(_("Please enter Company"))
+	def validate_organization(self):
+		if not self.organization:
+			frappe.throw(_("Please enter organization"))
 
 	def get_open_sales_orders(self):
 		""" Pull sales orders  which are pending to deliver based on criteria selected"""
@@ -58,7 +58,7 @@ class ProductionPlanningTool(Document):
 			from `tabSales Order` so, `tabSales Order Item` so_item
 			where so_item.parent = so.name
 				and so.docstatus = 1 and so.status != "Stopped"
-				and so.company = %(company)s
+				and so.organization = %(organization)s
 				and so_item.qty > so_item.delivered_qty {0}
 				and (exists (select name from `tabItem` item where item.name=so_item.item_code
 					and (item.is_pro_applicable = 1 or item.is_sub_contracted_item = 1 {1}))
@@ -71,7 +71,7 @@ class ProductionPlanningTool(Document):
 				"to_date": self.to_date,
 				"customer": self.customer,
 				"item": self.fg_item,
-				"company": self.company
+				"organization": self.organization
 			}, as_dict=1)
 
 		self.add_so_in_table(open_so)
@@ -150,7 +150,7 @@ class ProductionPlanningTool(Document):
 			pi.planned_qty				= flt(p['pending_qty'])
 
 	def validate_data(self):
-		self.validate_company()
+		self.validate_organization()
 		for d in self.get('items'):
 			validate_bom_no(d.item_code, d.bom_no)
 			if not flt(d.planned_qty):
@@ -191,7 +191,7 @@ class ProductionPlanningTool(Document):
 						"bom_no"			: d.bom_no,
 						"description"		: d.description,
 						"stock_uom"			: d.stock_uom,
-						"company"			: self.company,
+						"organization"			: self.organization,
 						"wip_warehouse"		: "",
 						"fg_warehouse"		: d.warehouse,
 						"status"			: "Draft",
@@ -366,7 +366,7 @@ class ProductionPlanningTool(Document):
 				pr_doc.update({
 					"transaction_date": nowdate(),
 					"status": "Draft",
-					"company": self.company,
+					"organization": self.organization,
 					"requested_by": frappe.session.user,
 					"material_request_type": "Purchase"
 				})

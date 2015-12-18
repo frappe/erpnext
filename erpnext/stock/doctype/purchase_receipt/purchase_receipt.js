@@ -48,7 +48,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 								docstatus: 1,
 								status: ["not in", ["Stopped", "Closed"]],
 								per_received: ["<", 99.99],
-								company: cur_frm.doc.company
+								organization: cur_frm.doc.organization
 							}
 						})
 				});

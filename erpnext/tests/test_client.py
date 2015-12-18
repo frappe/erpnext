@@ -14,11 +14,11 @@ selenium_tests = True
 #
 # 	def test_material_request(self):
 # 		sel.new_doc("Stock", "Material Request")
-# 		sel.set_field("company", "_Test Company")
+# 		sel.set_field("Organization", "_Test Organization")
 # 		sel.add_child("items")
 # 		sel.set_field("item_code", "_Test Item")
 # 		sel.set_field("qty", "1")
-# 		sel.set_field("warehouse", "_Test Warehouse - _TC")
+# 		sel.set_field("warehouse", "_Test Warehouse - _TO")
 # 		sel.set_field("schedule_date", formatdate())
 # 		sel.done_add_child("items")
 # 		sel.primary_action()

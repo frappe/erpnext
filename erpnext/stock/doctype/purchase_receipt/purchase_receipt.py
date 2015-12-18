@@ -122,7 +122,7 @@ class PurchaseReceipt(BuyingController):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
 			"Purchase Order": {
 				"ref_dn_field": "prevdoc_docname",
-				"compare_fields": [["supplier", "="], ["company", "="],	["currency", "="]],
+				"compare_fields": [["supplier", "="], ["organization", "="],	["currency", "="]],
 			},
 			"Purchase Order Item": {
 				"ref_dn_field": "prevdoc_detail_docname",
@@ -235,7 +235,7 @@ class PurchaseReceipt(BuyingController):
 		purchase_controller = frappe.get_doc("Purchase Common")
 
 		# Check for Approving Authority
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.organization, self.base_grand_total)
 
 		# Set status as Submitted
 		frappe.db.set(self, 'status', 'Submitted')
@@ -298,8 +298,8 @@ class PurchaseReceipt(BuyingController):
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map
 
-		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
-		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		stock_rbnb = self.get_organization_default("stock_received_but_not_billed")
+		expenses_included_in_valuation = self.get_organization_default("expenses_included_in_valuation")
 
 		gl_entries = []
 		warehouse_with_no_account = []
@@ -332,7 +332,7 @@ class PurchaseReceipt(BuyingController):
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
 						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
-							if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
+							if stock_rbnb_currency==self.organization_currency else flt(d.net_amount, d.precision("net_amount"))
 					}, stock_rbnb_currency))
 
 					negative_expense_to_be_booked += flt(d.item_tax_amount)

@@ -11,7 +11,7 @@ class CostCenter(NestedSet):
 
 	def autoname(self):
 		self.name = self.cost_center_name.strip() + ' - ' + \
-			frappe.db.get_value("Company", self.company, "abbr")
+			frappe.db.get_value("Organization", self.organization, "abbr")
 			
 
 	def validate(self):
@@ -19,9 +19,9 @@ class CostCenter(NestedSet):
 		self.validate_accounts()
 
 	def validate_mandatory(self):
-		if self.cost_center_name != self.company and not self.parent_cost_center:
+		if self.cost_center_name != self.organization and not self.parent_cost_center:
 			frappe.throw(_("Please enter parent cost center"))
-		elif self.cost_center_name == self.company and self.parent_cost_center:
+		elif self.cost_center_name == self.organization and self.parent_cost_center:
 			frappe.throw(_("Root cannot have a parent cost center"))
 			
 	def validate_accounts(self):
@@ -32,11 +32,11 @@ class CostCenter(NestedSet):
 		for d in self.get('budgets'):
 			if d.account:
 				account_details = frappe.db.get_value("Account", d.account, 
-					["is_group", "company", "report_type"], as_dict=1)
+					["is_group", "organization", "report_type"], as_dict=1)
 				if account_details.is_group:
 					frappe.throw(_("Budget cannot be assigned against Group Account {0}").format(d.account))
-				elif account_details.company != self.company:
-					frappe.throw(_("Account {0} does not belongs to company {1}").format(d.account, self.company))
+				elif account_details.organization != self.organization:
+					frappe.throw(_("Account {0} does not belongs to organization {1}").format(d.account, self.organization))
 				elif account_details.report_type != "Profit and Loss":
 					frappe.throw(_("Budget cannot be assigned against {0}, as it's not an Income or Expense account")
 						.format(d.account))
@@ -73,9 +73,9 @@ class CostCenter(NestedSet):
 			parent_cost_center = %s and docstatus != 2", self.name)
 
 	def before_rename(self, olddn, newdn, merge=False):
-		# Add company abbr if not provided
-		from erpnext.setup.doctype.company.company import get_name_with_abbr
-		new_cost_center = get_name_with_abbr(newdn, self.company)
+		# Add organization abbr if not provided
+		from erpnext.setup.doctype.organization.organization import get_name_with_abbr
+		new_cost_center = get_name_with_abbr(newdn, self.organization)
 
 		# Validate properties before merging
 		super(CostCenter, self).before_rename(olddn, new_cost_center, merge, "is_group")

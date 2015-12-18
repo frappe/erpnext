@@ -16,7 +16,7 @@ def execute(filters=None):
 	for project in proj_details:
 		data.append([project.name, pr_item_map.get(project.name, 0),
 			se_item_map.get(project.name, 0), dn_item_map.get(project.name, 0),
-			project.project_name, project.status, project.company,
+			project.project_name, project.status, project.organization,
 			project.customer, project.estimated_costing, project.expected_start_date,
 			project.expected_end_date])
 
@@ -25,12 +25,12 @@ def execute(filters=None):
 def get_columns():
 	return [_("Project Id") + ":Link/Project:140", _("Cost of Purchased Items") + ":Currency:160",
 		_("Cost of Issued Items") + ":Currency:160", _("Cost of Delivered Items") + ":Currency:160",
-		_("Project Name") + "::120", _("Project Status") + "::120", _("Company") + ":Link/Company:100",
+		_("Project Name") + "::120", _("Project Status") + "::120", _("Organization") + ":Link/organization:100",
 		_("Customer") + ":Link/Customer:140", _("Project Value") + ":Currency:120",
 		_("Project Start Date") + ":Date:120", _("Completion Date") + ":Date:120"]
 
 def get_project_details():
-	return frappe.db.sql(""" select name, project_name, status, company, customer, estimated_costing,
+	return frappe.db.sql(""" select name, project_name, status, organization, customer, estimated_costing,
 		expected_start_date, expected_end_date from tabProject where docstatus < 2""", as_dict=1)
 
 def get_purchased_items_cost():

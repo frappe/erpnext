@@ -1,7 +1,7 @@
 [
  {
   "advance_paid": 0.0,
-  "company": "_Test Company", 
+  "organization": "_Test Organization", 
   "conversion_rate": 1.0, 
   "currency": "INR", 
   "customer": "_Test Customer", 
@@ -27,7 +27,7 @@
     "parentfield": "items", 
     "qty": 10.0, 
     "rate": 100.0, 
-    "warehouse": "_Test Warehouse - _TC"
+    "warehouse": "_Test Warehouse - _TO"
    }
   ], 
   "selling_price_list": "_Test Price List", 

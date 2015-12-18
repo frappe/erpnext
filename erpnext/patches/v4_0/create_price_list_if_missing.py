@@ -8,7 +8,7 @@ from frappe.utils.nestedset import get_root_of
 
 def execute():
 	# setup not complete
-	if not frappe.db.sql("""select name from tabCompany limit 1"""):
+	if not frappe.db.sql("""select name from tabOrganization limit 1"""):
 		return
 
 	if "shopping_cart" in frappe.get_installed_apps():

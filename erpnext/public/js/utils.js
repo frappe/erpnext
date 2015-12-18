@@ -4,22 +4,22 @@ frappe.provide("erpnext");
 frappe.provide("erpnext.utils");
 
 $.extend(erpnext, {
-	get_currency: function(company) {
-		if(!company && cur_frm)
-			company = cur_frm.doc.company;
-		if(company)
-			return frappe.get_doc(":Company", company).default_currency || frappe.boot.sysdefaults.currency;
+	get_currency: function(organization) {
+		if(!organization && cur_frm)
+			organization = cur_frm.doc.organization;
+		if(organization)
+			return frappe.get_doc(":organization", organization).default_currency || frappe.boot.sysdefaults.currency;
 		else
 			return frappe.boot.sysdefaults.currency;
 	},
 
-	get_fiscal_year: function(company, date, fn) {
+	get_fiscal_year: function(organization, date, fn) {
 		if(frappe.meta.get_docfield(cur_frm.doctype, "fiscal_year")) {
 			frappe.call({
 				type:"GET",
 				method: "erpnext.accounts.utils.get_fiscal_year",
 				args: {
-					"company": company,
+					"organization": organization,
 					"date": date,
 					"verbose": 0
 				},
@@ -37,14 +37,14 @@ $.extend(erpnext, {
 		}
 	},
 
-	hide_company: function() {
-		if(cur_frm.fields_dict.company) {
-			var companies = Object.keys(locals[":Company"] || {});
+	hide_organization: function() {
+		if(cur_frm.fields_dict.organization) {
+			var companies = Object.keys(locals[":organization"] || {});
 			if(companies.length === 1) {
-				if(!cur_frm.doc.company) cur_frm.set_value("company", companies[0]);
-				cur_frm.toggle_display("company", false);
-			} else if(erpnext.last_selected_company) {
-				if(!cur_frm.doc.company) cur_frm.set_value("company", erpnext.last_selected_company);
+				if(!cur_frm.doc.organization) cur_frm.set_value("Organization", companies[0]);
+				cur_frm.toggle_display("Organization", false);
+			} else if(erpnext.last_selected_organization) {
+				if(!cur_frm.doc.organization) cur_frm.set_value("Organization", erpnext.last_selected_organization);
 			}
 		}
 	},

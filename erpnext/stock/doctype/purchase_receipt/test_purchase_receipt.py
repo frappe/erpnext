@@ -29,18 +29,18 @@ class TestPurchaseReceipt(unittest.TestCase):
 		set_perpetual_inventory(0)
 		
 		existing_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
-			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
+			"warehouse": "_Test Warehouse - _TO"}, "stock_value")
 		
 		pr = make_purchase_receipt()
 
 		stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
 			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name,
-				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, "stock_value_difference")
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TO"}, "stock_value_difference")
 
 		self.assertEqual(stock_value_difference, 250)
 
 		current_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
-			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
+			"warehouse": "_Test Warehouse - _TO"}, "stock_value")
 		self.assertEqual(current_bin_stock_value, existing_bin_stock_value + 250)
 
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
@@ -64,8 +64,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		expected_values = {
 			stock_in_hand_account: [375.0, 0.0],
 			fixed_asset_account: [375.0, 0.0],
-			"Stock Received But Not Billed - _TC": [0.0, 500.0],
-			"Expenses Included In Valuation - _TC": [0.0, 250.0]
+			"Stock Received But Not Billed - _TO": [0.0, 500.0],
+			"Expenses Included In Valuation - _TO": [0.0, 250.0]
 		}
 
 		for gle in gl_entries:
@@ -80,8 +80,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_subcontracting(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 		
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100)
-		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TC", 
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TO", qty=100, basic_rate=100)
+		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TO", 
 			qty=100, basic_rate=100)
 		
 		pr = make_purchase_receipt(item_code="_Test FG Item", qty=10, rate=500, is_subcontracted="Yes")
@@ -104,7 +104,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.get("items")[0].qty = 3
 		pr.get("items")[0].rejected_qty = 2
 		pr.get("items")[0].received_qty = 5
-		pr.get("items")[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		pr.get("items")[0].rejected_warehouse = "_Test Rejected Warehouse - _TO"
 		pr.insert()
 		pr.submit()
 
@@ -140,8 +140,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = {
-			"_Test Warehouse - _TC": [0.0, 100.0],
-			"Stock Received But Not Billed - _TC": [100.0, 0.0],
+			"_Test Warehouse - _TO": [0.0, 100.0],
+			"Stock Received But Not Billed - _TO": [100.0, 0.0],
 		}
 
 		for gle in gl_entries:
@@ -163,7 +163,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		serial_no = get_serial_nos(pr.get("items")[0].serial_no)[0]
 		
 		_check_serial_no_values(serial_no, {
-			"warehouse": "_Test Warehouse - _TC",
+			"warehouse": "_Test Warehouse - _TO",
 			"purchase_document_no": pr.name
 		})
 		
@@ -202,17 +202,17 @@ def make_purchase_receipt(**args):
 		pr.posting_date = args.posting_date
 	if args.posting_time:
 		pr.posting_time = args.posting_time
-	pr.company = args.company or "_Test Company"
+	pr.organization = args.organization or "_Test Organization"
 	pr.supplier = args.supplier or "_Test Supplier"
 	pr.is_subcontracted = args.is_subcontracted or "No"
-	pr.supplier_warehouse = "_Test Warehouse 1 - _TC"
+	pr.supplier_warehouse = "_Test Warehouse 1 - _TO"
 	pr.currency = args.currency or "INR"
 	pr.is_return = args.is_return
 	pr.return_against = args.return_against
 	
 	pr.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
-		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"warehouse": args.warehouse or "_Test Warehouse - _TO",
 		"qty": args.qty or 5,
 		"received_qty": args.qty or 5,
 		"rate": args.rate or 50,

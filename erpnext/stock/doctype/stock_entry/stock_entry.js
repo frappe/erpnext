@@ -26,18 +26,18 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				"filters": {
 					"docstatus": 1,
 					"is_subcontracted": "Yes",
-					"company": me.frm.doc.company
+					"organization": me.frm.doc.organization
 				}
 			};
 		});
 
 		if(cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
-			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
+			this.frm.add_fetch("Organization", "stock_adjustment_account", "expense_account");
 			this.frm.fields_dict.items.grid.get_field('expense_account').get_query =
 					function() {
 				return {
 					filters: {
-						"company": me.frm.doc.company,
+						"organization": me.frm.doc.organization,
 						"is_group": 0
 					}
 				}
@@ -45,7 +45,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			this.frm.set_query("difference_account", function() {
 				return {
 					"filters": {
-						"company": me.frm.doc.company,
+						"organization": me.frm.doc.organization,
 						"is_group": 0
 					}
 				};
@@ -57,8 +57,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		var me = this;
 		cur_frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 		this.set_default_account(function() {
-			if(me.frm.doc.__islocal && me.frm.doc.company && !me.frm.doc.amended_from) {
-				cur_frm.script_manager.trigger("company");
+			if(me.frm.doc.__islocal && me.frm.doc.organization && !me.frm.doc.amended_from) {
+				cur_frm.script_manager.trigger("Organization");
 			}
 		});
 	},
@@ -85,12 +85,12 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	set_default_account: function(callback) {
 		var me = this;
 
-		if(cint(frappe.defaults.get_default("auto_accounting_for_stock")) && this.frm.doc.company) {
+		if(cint(frappe.defaults.get_default("auto_accounting_for_stock")) && this.frm.doc.organization) {
 			return this.frm.call({
-				method: "erpnext.accounts.utils.get_company_default",
+				method: "erpnext.accounts.utils.get_organization_default",
 				args: {
 					"fieldname": "stock_adjustment_account",
-					"company": this.frm.doc.company
+					"organization": this.frm.doc.organization
 				},
 				callback: function(r) {
 					if (!r.exc) {
@@ -265,7 +265,7 @@ cur_frm.fields_dict['production_order'].get_query = function(doc) {
 		filters: [
 			['Production Order', 'docstatus', '=', 1],
 			['Production Order', 'qty', '>','`tabProduction Order`.produced_qty'],
-			['Production Order', 'company', '=', cur_frm.doc.company]
+			['Production Order', 'organization', '=', cur_frm.doc.organization]
 		]
 	}
 }
@@ -312,7 +312,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			'bom_no'			: d.bom_no,
 			'expense_account'	: d.expense_account,
 			'cost_center'		: d.cost_center,
-			'company'			: cur_frm.doc.company
+			'organization'			: cur_frm.doc.organization
 		};
 		return frappe.call({
 			doc: cur_frm.doc,
@@ -392,17 +392,17 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
 	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "cost_center");
 }
 
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	if(doc.company) {
-		erpnext.get_fiscal_year(doc.company, doc.posting_date, function() {
-			var company_doc = frappe.get_doc(":Company", doc.company);
-			if(company_doc.default_letter_head) {
-				cur_frm.set_value("letter_head", company_doc.default_letter_head);
+cur_frm.cscript.organization = function(doc, cdt, cdn) {
+	if(doc.organization) {
+		erpnext.get_fiscal_year(doc.organization, doc.posting_date, function() {
+			var organization_doc = frappe.get_doc(":organization", doc.organization);
+			if(organization_doc.default_letter_head) {
+				cur_frm.set_value("letter_head", organization_doc.default_letter_head);
 			}
 		});
 	}
 }
 
 cur_frm.cscript.posting_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
+	erpnext.get_fiscal_year(doc.organization, doc.posting_date);
 }

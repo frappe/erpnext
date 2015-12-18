@@ -61,14 +61,14 @@ class TestSalesInvoice(unittest.TestCase):
 		# check tax calculation
 		expected_values = {
 			"keys": ["tax_amount", "total"],
-			"_Test Account Shipping Charges - _TC": [100, 1350],
-			"_Test Account Customs Duty - _TC": [125, 1475],
-			"_Test Account Excise Duty - _TC": [140, 1615],
-			"_Test Account Education Cess - _TC": [2.8, 1617.8],
-			"_Test Account S&H Education Cess - _TC": [1.4, 1619.2],
-			"_Test Account CST - _TC": [32.38, 1651.58],
-			"_Test Account VAT - _TC": [156.25, 1807.83],
-			"_Test Account Discount - _TC": [-180.78, 1627.05]
+			"_Test Account Shipping Charges - _TO": [100, 1350],
+			"_Test Account Customs Duty - _TO": [125, 1475],
+			"_Test Account Excise Duty - _TO": [140, 1615],
+			"_Test Account Education Cess - _TO": [2.8, 1617.8],
+			"_Test Account S&H Education Cess - _TO": [1.4, 1619.2],
+			"_Test Account CST - _TO": [32.38, 1651.58],
+			"_Test Account VAT - _TO": [156.25, 1807.83],
+			"_Test Account Discount - _TO": [-180.78, 1627.05]
 		}
 
 		for d in si.get("taxes"):
@@ -115,14 +115,14 @@ class TestSalesInvoice(unittest.TestCase):
 		# check tax calculation
 		expected_values = {
 			"keys": ["base_tax_amount", "base_total", "tax_amount", "total"],
-			"_Test Account Shipping Charges - _TC": [100, 1350, 2, 27],
-			"_Test Account Customs Duty - _TC": [125, 1475, 2.5, 29.5],
-			"_Test Account Excise Duty - _TC": [140, 1615, 2.8, 32.3],
-			"_Test Account Education Cess - _TC": [3, 1618, 0.06, 32.36],
-			"_Test Account S&H Education Cess - _TC": [1.5, 1619.5, 0.03, 32.39],
-			"_Test Account CST - _TC": [32.5, 1652, 0.65, 33.04],
-			"_Test Account VAT - _TC": [156.5, 1808.5, 3.13, 36.17],
-			"_Test Account Discount - _TC": [-180.5, 1628, -3.61, 32.56]
+			"_Test Account Shipping Charges - _TO": [100, 1350, 2, 27],
+			"_Test Account Customs Duty - _TO": [125, 1475, 2.5, 29.5],
+			"_Test Account Excise Duty - _TO": [140, 1615, 2.8, 32.3],
+			"_Test Account Education Cess - _TO": [3, 1618, 0.06, 32.36],
+			"_Test Account S&H Education Cess - _TO": [1.5, 1619.5, 0.03, 32.39],
+			"_Test Account CST - _TO": [32.5, 1652, 0.65, 33.04],
+			"_Test Account VAT - _TO": [156.5, 1808.5, 3.13, 36.17],
+			"_Test Account Discount - _TO": [-180.5, 1628, -3.61, 32.56]
 		}
 
 		for d in si.get("taxes"):
@@ -138,8 +138,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.append("taxes", {
 			"doctype": "Sales Taxes and Charges",
 			"charge_type": "On Previous Row Amount",
-			"account_head": "_Test Account Service Tax - _TC",
-			"cost_center": "_Test Cost Center - _TC",
+			"account_head": "_Test Account Service Tax - _TO",
+			"cost_center": "_Test Cost Center - _TO",
 			"description": "Service Tax",
 			"rate": 10,
 			"row_id": 8,
@@ -184,15 +184,15 @@ class TestSalesInvoice(unittest.TestCase):
 		# check tax calculation
 		expected_values = {
 			"keys": ["tax_amount", "tax_amount_after_discount_amount", "total"],
-			"_Test Account Excise Duty - _TC": [140, 130.31, 1293.76],
-			"_Test Account Education Cess - _TC": [2.8, 2.61, 1296.37],
-			"_Test Account S&H Education Cess - _TC": [1.4, 1.31, 1297.68],
-			"_Test Account CST - _TC": [27.88, 25.96, 1323.64],
-			"_Test Account VAT - _TC": [156.25, 145.43, 1469.07],
-			"_Test Account Customs Duty - _TC": [125, 116.35, 1585.42],
-			"_Test Account Shipping Charges - _TC": [100, 100, 1685.42],
-			"_Test Account Discount - _TC": [-180.33, -168.54, 1516.88],
-			"_Test Account Service Tax - _TC": [-18.03, -16.88, 1500]
+			"_Test Account Excise Duty - _TO": [140, 130.31, 1293.76],
+			"_Test Account Education Cess - _TO": [2.8, 2.61, 1296.37],
+			"_Test Account S&H Education Cess - _TO": [1.4, 1.31, 1297.68],
+			"_Test Account CST - _TO": [27.88, 25.96, 1323.64],
+			"_Test Account VAT - _TO": [156.25, 145.43, 1469.07],
+			"_Test Account Customs Duty - _TO": [125, 116.35, 1585.42],
+			"_Test Account Shipping Charges - _TO": [100, 100, 1685.42],
+			"_Test Account Discount - _TO": [-180.33, -168.54, 1516.88],
+			"_Test Account Service Tax - _TO": [-18.03, -16.88, 1500]
 		}
 
 		for d in si.get("taxes"):
@@ -208,8 +208,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.append("taxes", {
 			"doctype": "Sales Taxes and Charges",
 			"charge_type": "On Previous Row Amount",
-			"account_head": "_Test Account Service Tax - _TC",
-			"cost_center": "_Test Cost Center - _TC",
+			"account_head": "_Test Account Service Tax - _TO",
+			"cost_center": "_Test Cost Center - _TO",
 			"description": "Service Tax",
 			"rate": 10,
 			"row_id": 8
@@ -234,7 +234,7 @@ class TestSalesInvoice(unittest.TestCase):
 			[test_records[3]["taxes"][5]["account_head"], 0.0, 116.35],
 			[test_records[3]["taxes"][6]["account_head"], 0.0, 100],
 			[test_records[3]["taxes"][7]["account_head"], 168.54, 0.0],
-			["_Test Account Service Tax - _TC", 16.88, 0.0],
+			["_Test Account Service Tax - _TO", 16.88, 0.0],
 		])
 
 		for gle in gl_entries:
@@ -295,14 +295,14 @@ class TestSalesInvoice(unittest.TestCase):
 		# check tax calculation
 		expected_values = {
 			"keys": ["tax_amount", "total"],
-			"_Test Account Excise Duty - _TC": [140, 1389.98],
-			"_Test Account Education Cess - _TC": [2.8, 1392.78],
-			"_Test Account S&H Education Cess - _TC": [1.4, 1394.18],
-			"_Test Account CST - _TC": [27.88, 1422.06],
-			"_Test Account VAT - _TC": [156.25, 1578.31],
-			"_Test Account Customs Duty - _TC": [125, 1703.31],
-			"_Test Account Shipping Charges - _TC": [100, 1803.31],
-			"_Test Account Discount - _TC": [-180.33, 1622.98]
+			"_Test Account Excise Duty - _TO": [140, 1389.98],
+			"_Test Account Education Cess - _TO": [2.8, 1392.78],
+			"_Test Account S&H Education Cess - _TO": [1.4, 1394.18],
+			"_Test Account CST - _TO": [27.88, 1422.06],
+			"_Test Account VAT - _TO": [156.25, 1578.31],
+			"_Test Account Customs Duty - _TO": [125, 1703.31],
+			"_Test Account Shipping Charges - _TO": [100, 1803.31],
+			"_Test Account Discount - _TO": [-180.33, 1622.98]
 		}
 
 		for d in si.get("taxes"):
@@ -366,14 +366,14 @@ class TestSalesInvoice(unittest.TestCase):
 		# check tax calculation
 		expected_values = {
 			"keys": ["base_tax_amount", "base_total", "tax_amount", "total"],
-			"_Test Account Excise Duty - _TC": [5540.5, 55042, 110.81, 1100.84],
-			"_Test Account Education Cess - _TC": [111, 55153, 2.22, 1103.06],
-			"_Test Account S&H Education Cess - _TC": [55.5, 55208.5, 1.11, 1104.17],
-			"_Test Account CST - _TC": [1104, 56312.5, 22.08, 1126.25],
-			"_Test Account VAT - _TC": [6188, 62500.5, 123.76, 1250.01],
-			"_Test Account Customs Duty - _TC": [4950.5, 67451, 99.01, 1349.02],
-			"_Test Account Shipping Charges - _TC": [ 100, 67551, 2, 1351.02],
-			"_Test Account Discount - _TC": [ -6755, 60796, -135.10, 1215.92]
+			"_Test Account Excise Duty - _TO": [5540.5, 55042, 110.81, 1100.84],
+			"_Test Account Education Cess - _TO": [111, 55153, 2.22, 1103.06],
+			"_Test Account S&H Education Cess - _TO": [55.5, 55208.5, 1.11, 1104.17],
+			"_Test Account CST - _TO": [1104, 56312.5, 22.08, 1126.25],
+			"_Test Account VAT - _TO": [6188, 62500.5, 123.76, 1250.01],
+			"_Test Account Customs Duty - _TO": [4950.5, 67451, 99.01, 1349.02],
+			"_Test Account Shipping Charges - _TO": [ 100, 67551, 2, 1351.02],
+			"_Test Account Discount - _TO": [ -6755, 60796, -135.10, 1215.92]
 		}
 
 		for d in si.get("taxes"):
@@ -445,7 +445,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pos = copy.deepcopy(test_records[1])
 		pos["is_pos"] = 1
 		pos["update_stock"] = 1
-		pos["cash_bank_account"] = "_Test Bank - _TC"
+		pos["cash_bank_account"] = "_Test Bank - _TO"
 		pos["paid_amount"] = 600.0
 
 		si = frappe.copy_doc(pos)
@@ -458,7 +458,7 @@ class TestSalesInvoice(unittest.TestCase):
 			si.name, as_dict=1)[0]
 		self.assertTrue(sle)
 		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty],
-			["_Test Item", "_Test Warehouse - _TC", -1.0])
+			["_Test Item", "_Test Warehouse - _TO", -1.0])
 
 		# check gl entries
 		gl_entries = frappe.db.sql("""select account, debit, credit
@@ -466,7 +466,7 @@ class TestSalesInvoice(unittest.TestCase):
 			order by account asc, debit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
-		stock_in_hand = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TC"})
+		stock_in_hand = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TO"})
 
 		expected_gl_entries = sorted([
 			[si.debit_to, 630.0, 0.0],
@@ -476,7 +476,7 @@ class TestSalesInvoice(unittest.TestCase):
 			[stock_in_hand, 0.0, abs(sle.stock_value_difference)],
 			[pos["items"][0]["expense_account"], abs(sle.stock_value_difference), 0.0],
 			[si.debit_to, 0.0, 600.0],
-			["_Test Bank - _TC", 600.0, 0.0]
+			["_Test Bank - _TO", 600.0, 0.0]
 		])
 
 		for i, gle in enumerate(sorted(gl_entries, key=lambda gle: gle.account)):
@@ -496,20 +496,20 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def make_pos_profile(self):
 		pos_profile = frappe.get_doc({
-			"cash_bank_account": "_Test Bank - _TC",
-			"company": "_Test Company",
-			"cost_center": "_Test Cost Center - _TC",
+			"cash_bank_account": "_Test Bank - _TO",
+			"organization": "_Test Organization",
+			"cost_center": "_Test Cost Center - _TO",
 			"currency": "INR",
 			"doctype": "POS Profile",
-			"expense_account": "_Test Account Cost for Goods Sold - _TC",
-			"income_account": "Sales - _TC",
+			"expense_account": "_Test Account Cost for Goods Sold - _TO",
+			"income_account": "Sales - _TO",
 			"name": "_Test POS Profile",
 			"naming_series": "_T-POS Profile-",
 			"selling_price_list": "_Test Price List",
 			"territory": "_Test Territory",
-			"warehouse": "_Test Warehouse - _TC",
-			"write_off_account": "_Test Write Off - _TC",
-			"write_off_cost_center": "_Test Write Off Cost Center - _TC"
+			"warehouse": "_Test Warehouse - _TO",
+			"write_off_account": "_Test Write Off - _TO",
+			"write_off_cost_center": "_Test Write Off Cost Center - _TO"
 		})
 
 		if not frappe.db.exists("POS Profile", "_Test POS Profile"):
@@ -517,21 +517,21 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_si_gl_entry_with_perpetual_inventory_and_update_stock_with_warehouse_but_no_account(self):
 		set_perpetual_inventory()
-		frappe.delete_doc("Account", "_Test Warehouse No Account - _TC")
+		frappe.delete_doc("Account", "_Test Warehouse No Account - _TO")
 
 		# insert purchase receipt
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
 			as pr_test_records
 		pr = frappe.copy_doc(pr_test_records[0])
 		pr.naming_series = "_T-Purchase Receipt-"
-		pr.get("items")[0].warehouse = "_Test Warehouse No Account - _TC"
+		pr.get("items")[0].warehouse = "_Test Warehouse No Account - _TO"
 		pr.insert()
 		pr.submit()
 
 		si_doc = copy.deepcopy(test_records[1])
 		si_doc["update_stock"] = 1
 		# si_doc["posting_time"] = "12:05"
-		si_doc.get("items")[0]["warehouse"] = "_Test Warehouse No Account - _TC"
+		si_doc.get("items")[0]["warehouse"] = "_Test Warehouse No Account - _TO"
 
 		si = frappe.copy_doc(si_doc)
 		si.insert()
@@ -543,7 +543,7 @@ class TestSalesInvoice(unittest.TestCase):
 			si.name, as_dict=1)[0]
 		self.assertTrue(sle)
 		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty],
-			["_Test Item", "_Test Warehouse No Account - _TC", -1.0])
+			["_Test Item", "_Test Warehouse No Account - _TO", -1.0])
 
 		# check gl entries
 		gl_entries = frappe.db.sql("""select account, debit, credit
@@ -703,7 +703,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		serial_nos = get_serial_nos(si.get("items")[0].serial_no)
 
-		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
+		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TO")
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"))
 
@@ -740,7 +740,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_return_sales_invoice(self):
 		set_perpetual_inventory()
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TO", qty=50, basic_rate=100)
 
 		actual_qty_0 = get_qty_after_transaction()
 
@@ -769,12 +769,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# Check gl entry
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice",
-			"voucher_no": si1.name, "account": "_Test Warehouse - _TC"}, "debit")
+			"voucher_no": si1.name, "account": "_Test Warehouse - _TO"}, "debit")
 
 		self.assertEquals(gle_warehouse_amount, stock_value_difference)
 
 		party_credited = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice",
-			"voucher_no": si1.name, "account": "Debtors - _TC", "party": "_Test Customer"}, "credit")
+			"voucher_no": si1.name, "account": "Debtors - _TO", "party": "_Test Customer"}, "credit")
 
 		self.assertEqual(party_credited, 1000)
 
@@ -817,14 +817,14 @@ class TestSalesInvoice(unittest.TestCase):
 		expected_values = {
 			"keys": ["tax_amount", "tax_amount_after_discount_amount",
 				"base_tax_amount_after_discount_amount"],
-			"_Test Account Shipping Charges - _TC": [100, 100, 100],
-			"_Test Account Customs Duty - _TC": [62.5, 62.5, 62.5],
-			"_Test Account Excise Duty - _TC": [70, 70, 70],
-			"_Test Account Education Cess - _TC": [1.4, 1.4, 1.4],
-			"_Test Account S&H Education Cess - _TC": [.7, 0.7, 0.7],
-			"_Test Account CST - _TC": [17.2, 17.2, 17.2],
-			"_Test Account VAT - _TC": [78.13, 78.13, 78.13],
-			"_Test Account Discount - _TC": [-95.49, -95.49, -95.49]
+			"_Test Account Shipping Charges - _TO": [100, 100, 100],
+			"_Test Account Customs Duty - _TO": [62.5, 62.5, 62.5],
+			"_Test Account Excise Duty - _TO": [70, 70, 70],
+			"_Test Account Education Cess - _TO": [1.4, 1.4, 1.4],
+			"_Test Account S&H Education Cess - _TO": [.7, 0.7, 0.7],
+			"_Test Account CST - _TO": [17.2, 17.2, 17.2],
+			"_Test Account VAT - _TO": [78.13, 78.13, 78.13],
+			"_Test Account Discount - _TO": [-95.49, -95.49, -95.49]
 		}
 
 		for d in si.get("taxes"):
@@ -838,7 +838,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_multi_currency_gle(self):
 		set_perpetual_inventory(0)
-		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TO",
 			currency="USD", conversion_rate=50)
 
 		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit,
@@ -849,14 +849,14 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = {
-			"_Test Receivable USD - _TC": {
+			"_Test Receivable USD - _TO": {
 				"account_currency": "USD",
 				"debit": 5000,
 				"debit_in_account_currency": 100,
 				"credit": 0,
 				"credit_in_account_currency": 0
 			},
-			"Sales - _TC": {
+			"Sales - _TO": {
 				"account_currency": "INR",
 				"debit": 0,
 				"debit_in_account_currency": 0,
@@ -881,23 +881,23 @@ class TestSalesInvoice(unittest.TestCase):
 		# Customer currency = USD
 
 		# Transaction currency cannot be INR
-		si1 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+		si1 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TO",
 			do_not_save=True)
 
 		self.assertRaises(InvalidCurrency, si1.save)
 
 		# Transaction currency cannot be EUR
-		si2 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+		si2 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TO",
 			currency="EUR", conversion_rate=80, do_not_save=True)
 
 		self.assertRaises(InvalidCurrency, si2.save)
 
 		# Transaction currency only allowed in USD
-		si3 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+		si3 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TO",
 			currency="USD", conversion_rate=50)
 
 		# Party Account currency must be in USD, as there is existing GLE with USD
-		si4 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TC",
+		si4 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TO",
 			currency="USD", conversion_rate=50, do_not_submit=True)
 
 		self.assertRaises(InvalidAccountCurrency, si4.submit)
@@ -905,7 +905,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# Party Account currency must be in USD, force customer currency as there is no GLE
 
 		si3.cancel()
-		si5 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TC",
+		si5 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TO",
 			currency="USD", conversion_rate=50, do_not_submit=True)
 
 		self.assertRaises(InvalidAccountCurrency, si5.submit)
@@ -916,9 +916,9 @@ def create_sales_invoice(**args):
 	if args.posting_date:
 		si.posting_date = args.posting_date or nowdate()
 
-	si.company = args.company or "_Test Company"
+	si.organization = args.organization or "_Test Organization"
 	si.customer = args.customer or "_Test Customer"
-	si.debit_to = args.debit_to or "Debtors - _TC"
+	si.debit_to = args.debit_to or "Debtors - _TO"
 	si.update_stock = args.update_stock
 	si.is_pos = args.is_pos
 	si.is_return = args.is_return
@@ -928,12 +928,12 @@ def create_sales_invoice(**args):
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
-		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"warehouse": args.warehouse or "_Test Warehouse - _TO",
 		"qty": args.qty or 1,
 		"rate": args.rate or 100,
-		"income_account": "Sales - _TC",
-		"expense_account": "Cost of Goods Sold - _TC",
-		"cost_center": "_Test Cost Center - _TC",
+		"income_account": "Sales - _TO",
+		"expense_account": "Cost of Goods Sold - _TO",
+		"cost_center": "_Test Cost Center - _TO",
 		"serial_no": args.serial_no
 	})
 

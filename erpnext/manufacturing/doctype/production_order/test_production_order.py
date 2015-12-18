@@ -17,25 +17,25 @@ class TestProductionOrder(unittest.TestCase):
 		set_perpetual_inventory(0)
 
 		planned0 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item",
-			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty") or 0
+			"warehouse": "_Test Warehouse 1 - _TO"}, "planned_qty") or 0
 
 		pro_order = make_prod_order_test_record()
 
 		planned1 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item",
-			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty")
+			"warehouse": "_Test Warehouse 1 - _TO"}, "planned_qty")
 
 		self.assertEqual(planned1, planned0 + 10)
 
 		# add raw materials to stores
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
-			target="Stores - _TC", qty=100, basic_rate=100)
+			target="Stores - _TO", qty=100, basic_rate=100)
 		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
-			target="Stores - _TC", qty=100, basic_rate=100)
+			target="Stores - _TO", qty=100, basic_rate=100)
 
 		# from stores to wip
 		s = frappe.get_doc(make_stock_entry(pro_order.name, "Material Transfer for Manufacture", 4))
 		for d in s.get("items"):
-			d.s_warehouse = "Stores - _TC"
+			d.s_warehouse = "Stores - _TO"
 		s.insert()
 		s.submit()
 
@@ -47,7 +47,7 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Production Order", pro_order.name, "produced_qty"), 4)
 
 		planned2 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item",
-			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty")
+			"warehouse": "_Test Warehouse 1 - _TO"}, "planned_qty")
 
 		self.assertEqual(planned2, planned0 + 6)
 
@@ -58,9 +58,9 @@ class TestProductionOrder(unittest.TestCase):
 		pro_doc = self.check_planned_qty()
 
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
-			target="_Test Warehouse - _TC", qty=100, basic_rate=100)
+			target="_Test Warehouse - _TO", qty=100, basic_rate=100)
 		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
-			target="_Test Warehouse - _TC", qty=100, basic_rate=100)
+			target="_Test Warehouse - _TO", qty=100, basic_rate=100)
 
 		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Manufacture", 7))
 		s.insert()
@@ -153,9 +153,9 @@ def make_prod_order_test_record(**args):
 	pro_order.bom_no = frappe.db.get_value("BOM", {"item": pro_order.production_item,
 		"is_active": 1, "is_default": 1})
 	pro_order.qty = args.qty or 10
-	pro_order.wip_warehouse = args.wip_warehouse or "_Test Warehouse - _TC"
-	pro_order.fg_warehouse = args.fg_warehouse or "_Test Warehouse 1 - _TC"
-	pro_order.company = args.company or "_Test Company"
+	pro_order.wip_warehouse = args.wip_warehouse or "_Test Warehouse - _TO"
+	pro_order.fg_warehouse = args.fg_warehouse or "_Test Warehouse 1 - _TO"
+	pro_order.organization = args.organization or "_Test Organization"
 	pro_order.stock_uom = "_Test UOM"
 	if args.planned_start_date:
 		pro_order.planned_start_date = args.planned_start_date

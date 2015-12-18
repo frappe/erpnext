@@ -15,7 +15,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 		pr = frappe.copy_doc(pr_test_records[0])
 		pr.submit()
 
-		bin_details = frappe.db.get_value("Bin", {"warehouse": "_Test Warehouse - _TC",
+		bin_details = frappe.db.get_value("Bin", {"warehouse": "_Test Warehouse - _TO",
 			"item_code": "_Test Item"},	["actual_qty", "stock_value"], as_dict=1)
 
 		self.submit_landed_cost_voucher(pr)
@@ -23,7 +23,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 		pr_lc_value = frappe.db.get_value("Purchase Receipt Item", {"parent": pr.name}, "landed_cost_voucher_amount")
 		self.assertEquals(pr_lc_value, 25.0)
 
-		bin_details_after_lcv = frappe.db.get_value("Bin", {"warehouse": "_Test Warehouse - _TC",
+		bin_details_after_lcv = frappe.db.get_value("Bin", {"warehouse": "_Test Warehouse - _TO",
 			"item_code": "_Test Item"},	["actual_qty", "stock_value"], as_dict=1)
 
 		self.assertEqual(bin_details.actual_qty, bin_details_after_lcv.actual_qty)
@@ -41,8 +41,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 		expected_values = {
 			stock_in_hand_account: [400.0, 0.0],
 			fixed_asset_account: [400.0, 0.0],
-			"Stock Received But Not Billed - _TC": [0.0, 500.0],
-			"Expenses Included In Valuation - _TC": [0.0, 300.0]
+			"Stock Received But Not Billed - _TO": [0.0, 500.0],
+			"Expenses Included In Valuation - _TO": [0.0, 300.0]
 		}
 
 		for gle in gl_entries:
@@ -68,13 +68,13 @@ class TestLandedCostVoucher(unittest.TestCase):
 			["warehouse", "purchase_rate"], as_dict=1)
 
 		self.assertEquals(serial_no.purchase_rate - serial_no_rate, 5.0)
-		self.assertEquals(serial_no.warehouse, "_Test Warehouse - _TC")
+		self.assertEquals(serial_no.warehouse, "_Test Warehouse - _TO")
 
 		set_perpetual_inventory(0)
 
 	def submit_landed_cost_voucher(self, pr):
 		lcv = frappe.new_doc("Landed Cost Voucher")
-		lcv.company = "_Test Company"
+		lcv.organization = "_Test Organization"
 		lcv.set("purchase_receipts", [{
 			"purchase_receipt": pr.name,
 			"supplier": pr.supplier,
@@ -83,7 +83,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 		}])
 		lcv.set("taxes", [{
 			"description": "Insurance Charges",
-			"account": "_Test Account Insurance Charges - _TC",
+			"account": "_Test Account Insurance Charges - _TO",
 			"amount": 50.0
 		}])
 

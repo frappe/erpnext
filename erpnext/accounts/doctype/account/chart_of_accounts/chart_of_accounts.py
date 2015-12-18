@@ -6,7 +6,7 @@ import frappe, os, json
 from frappe.utils import cstr
 from unidecode import unidecode
 
-def create_charts(chart_name, company):
+def create_charts(chart_name, organization):
 	chart = get_chart(chart_name)
 
 	if chart:
@@ -31,13 +31,13 @@ def create_charts(chart_name, company):
 					account = frappe.get_doc({
 						"doctype": "Account",
 						"account_name": account_name,
-						"company": company,
+						"organization": organization,
 						"parent_account": parent,
 						"is_group": is_group,
 						"root_type": root_type,
 						"report_type": report_type,
 						"account_type": child.get("account_type"),
-						"account_currency": frappe.db.get_value("Company", company, "default_currency")
+						"account_currency": frappe.db.get_value("Organization", organization, "default_currency")
 					})
 
 					if root_account:

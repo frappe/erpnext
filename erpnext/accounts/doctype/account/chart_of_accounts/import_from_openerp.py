@@ -218,7 +218,7 @@ def make_account_trees():
 			del accounts[id]["children"]
 
 def make_charts():
-	"""write chart files in app/setup/doctype/company/charts"""
+	"""write chart files in app/setup/doctype/organization/charts"""
 	for chart_id in charts:
 		src = charts[chart_id]
 		if not src.get("name") or not src.get("account_root_id"):

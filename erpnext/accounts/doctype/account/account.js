@@ -15,7 +15,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_display(['account_type', 'tax_rate'], cint(doc.is_group)==0)
 
 	// disable fields
-	cur_frm.toggle_enable(['account_name', 'is_group', 'company'], false);
+	cur_frm.toggle_enable(['account_name', 'is_group', 'organization'], false);
 
 	if(cint(doc.is_group)==0) {
 		cur_frm.toggle_display('freeze_account', doc.__onload && doc.__onload.can_freeze_account);
@@ -59,7 +59,7 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 				"account": doc.name,
 				"from_date": sys_defaults.year_start_date,
 				"to_date": sys_defaults.year_end_date,
-				"company": doc.company
+				"organization": doc.organization
 			};
 			frappe.set_route("query-report", "General Ledger");
 		}, "icon-table");
@@ -89,7 +89,7 @@ cur_frm.fields_dict['parent_account'].get_query = function(doc) {
 	return {
 		filters: {
 			"is_group": 1,
-			"company": doc.company
+			"organization": doc.organization
 		}
 	}
 }

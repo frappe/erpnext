@@ -8,7 +8,7 @@ from frappe.utils import add_days, cint, cstr, flt, getdate, nowdate, rounded, d
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
-from erpnext.setup.utils import get_company_currency
+from erpnext.setup.utils import get_organization_currency
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 
@@ -164,8 +164,8 @@ class SalarySlip(TransactionBase):
 		if not self.net_pay:
 			self.calculate_net_pay()
 
-		company_currency = get_company_currency(self.company)
-		self.total_in_words = money_in_words(self.rounded_total, company_currency)
+		organization_currency = get_organization_currency(self.organization)
+		self.total_in_words = money_in_words(self.rounded_total, organization_currency)
 
 		set_employee_name(self)
 
@@ -209,10 +209,10 @@ class SalarySlip(TransactionBase):
 
 
 	def send_mail_funct(self):
-		receiver = frappe.db.get_value("Employee", self.employee, "company_email")
+		receiver = frappe.db.get_value("Employee", self.employee, "organization_email")
 		if receiver:
 			subj = 'Salary Slip - ' + cstr(self.month) +'/'+cstr(self.fiscal_year)
 			frappe.sendmail([receiver], subject=subj, message = _("Please see attachment"),
 				attachments=[frappe.attach_print(self.doctype, self.name, file_name=self.name)])
 		else:
-			msgprint(_("Company Email ID not found, hence mail not sent"))
+			msgprint(_("organization Email ID not found, hence mail not sent"))

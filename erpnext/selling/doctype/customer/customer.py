@@ -173,10 +173,10 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
 		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
 
 
-def check_credit_limit(customer, company):
-	customer_outstanding = get_customer_outstanding(customer, company)
+def check_credit_limit(customer, organization):
+	customer_outstanding = get_customer_outstanding(customer, organization)
 
-	credit_limit = get_credit_limit(customer, company)
+	credit_limit = get_credit_limit(customer, organization)
 	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
 		msgprint(_("Credit limit has been crossed for customer {0} {1}/{2}")
 			.format(customer, customer_outstanding, credit_limit))
@@ -187,10 +187,10 @@ def check_credit_limit(customer, company):
 			throw(_("Please contact to the user who have Sales Master Manager {0} role")
 				.format(" / " + credit_controller if credit_controller else ""))
 
-def get_customer_outstanding(customer, company):
+def get_customer_outstanding(customer, organization):
 	# Outstanding based on GL Entries
 	outstanding_based_on_gle = frappe.db.sql("""select sum(debit) - sum(credit)
-		from `tabGL Entry` where party_type = 'Customer' and party = %s and company=%s""", (customer, company))
+		from `tabGL Entry` where party_type = 'Customer' and party = %s and organization=%s""", (customer, organization))
 
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
@@ -198,8 +198,8 @@ def get_customer_outstanding(customer, company):
 	outstanding_based_on_so = frappe.db.sql("""
 		select sum(base_grand_total*(100 - per_billed)/100)
 		from `tabSales Order`
-		where customer=%s and docstatus = 1 and company=%s
-		and per_billed < 100 and status != 'Stopped'""", (customer, company))
+		where customer=%s and docstatus = 1 and organization=%s
+		and per_billed < 100 and status != 'Stopped'""", (customer, organization))
 
 	outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
 
@@ -209,10 +209,10 @@ def get_customer_outstanding(customer, company):
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
 		where
 			dn.name = dn_item.parent
-			and dn.customer=%s and dn.company=%s
+			and dn.customer=%s and dn.organization=%s
 			and dn.docstatus = 1 and dn.status != 'Stopped'
 			and ifnull(dn_item.against_sales_order, '') = ''
-			and ifnull(dn_item.against_sales_invoice, '') = ''""", (customer, company), as_dict=True)
+			and ifnull(dn_item.against_sales_invoice, '') = ''""", (customer, organization), as_dict=True)
 
 	outstanding_based_on_dn = 0.0
 
@@ -228,10 +228,10 @@ def get_customer_outstanding(customer, company):
 	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
 
 
-def get_credit_limit(customer, company):
+def get_credit_limit(customer, organization):
 	credit_limit, customer_group = frappe.db.get_value("Customer", customer, ["credit_limit", "customer_group"])
 	if not credit_limit:
 		credit_limit = frappe.db.get_value("Customer Group", customer_group, "credit_limit") or \
-			frappe.db.get_value("Company", company, "credit_limit")
+			frappe.db.get_value("Organization", organization, "credit_limit")
 
 	return credit_limit

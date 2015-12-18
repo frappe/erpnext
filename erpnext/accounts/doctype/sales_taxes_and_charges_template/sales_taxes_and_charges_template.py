@@ -16,8 +16,8 @@ def valdiate_taxes_and_charges_template(doc):
 
 	if doc.is_default == 1:
 		frappe.db.sql("""update `tab{0}` set is_default = 0
-			where is_default = 1 and name != %s and company = %s""".format(doc.doctype),
-			(doc.name, doc.company))
+			where is_default = 1 and name != %s and organization = %s""".format(doc.doctype),
+			(doc.name, doc.organization))
 
 	for tax in doc.get("taxes"):
 		validate_taxes_and_charges(tax)

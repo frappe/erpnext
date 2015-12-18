@@ -49,7 +49,7 @@ class TestPaymentTool(unittest.TestCase):
 		#Create SI with partial outstanding
 		si1 = self.create_voucher(si_test_records[0], {
 			"customer": "_Test Customer 3",
-			"debit_to": "_Test Receivable - _TC"
+			"debit_to": "_Test Receivable - _TO"
 		})
 
 		self.create_against_jv(jv_test_records[0], {
@@ -60,7 +60,7 @@ class TestPaymentTool(unittest.TestCase):
 		#Create SI with no outstanding
 		si2 = self.create_voucher(si_test_records[0], {
 			"customer": "_Test Customer 3",
-			"debit_to": "_Test Receivable - _TC"
+			"debit_to": "_Test Receivable - _TO"
 		})
 
 		self.create_against_jv(jv_test_records[0], {
@@ -72,7 +72,7 @@ class TestPaymentTool(unittest.TestCase):
 
 		pi = self.create_voucher(pi_test_records[0], {
 			"supplier": "_Test Supplier 1",
-			"credit_to": "_Test Payable - _TC"
+			"credit_to": "_Test Payable - _TO"
 		})
 
 		#Create a dict containing properties and expected values
@@ -85,13 +85,13 @@ class TestPaymentTool(unittest.TestCase):
 		}
 
 		args = {
-			"company": "_Test Company",
+			"organization": "_Test Organization",
 			"party_type": "Customer",
 			"received_or_paid": "Received",
 			"party": "_Test Customer 3",
-			"party_account": "_Test Receivable - _TC",
+			"party_account": "_Test Receivable - _TO",
 			"payment_mode": "Cheque",
-			"payment_account": "_Test Bank - _TC",
+			"payment_account": "_Test Bank - _TO",
 			"reference_no": "123456",
 			"reference_date": "2013-02-14"
 		}
@@ -102,7 +102,7 @@ class TestPaymentTool(unittest.TestCase):
 			"party_type": "Supplier",
 			"received_or_paid": "Paid",
 			"party": "_Test Supplier 1",
-			"party_account": "_Test Payable - _TC"
+			"party_account": "_Test Payable - _TO"
 		})
 		expected_outstanding["Journal Entry"] = [base_supplier_jv.name, 400.00]
 		self.make_voucher_for_party(args, expected_outstanding)

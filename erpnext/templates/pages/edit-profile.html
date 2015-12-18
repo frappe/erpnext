@@ -11,8 +11,8 @@
 			<input class="form-control" type="text" id="fullname" placeholder="Your Name">
 		</fieldset>
 		<fieldset>
-			<label>Company Name</label>
-			<input class="form-control" type="text" id="company_name" placeholder="Company Name" value="{{ company_name }}">
+			<label>Organization Name</label>
+			<input class="form-control" type="text" id="organization_name" placeholder="Organization Name" value="{{ organization_name }}">
 		</fieldset>
 		<fieldset>
 			<label>Mobile No</label>
@@ -34,7 +34,7 @@ $(document).ready(function() {
 			type: "POST",
 			args: {
 				fullname: $("#fullname").val(),
-				company_name: $("#company_name").val(),
+				organization_name: $("#organization_name").val(),
 				mobile_no: $("#mobile_no").val(),
 				phone: $("#phone").val()
 			},

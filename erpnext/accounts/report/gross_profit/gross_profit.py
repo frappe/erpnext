@@ -214,8 +214,8 @@ class GrossProfitGenerator(object):
 
 	def load_invoice_items(self):
 		conditions = ""
-		if self.filters.company:
-			conditions += " and company = %(company)s"
+		if self.filters.organization:
+			conditions += " and organization = %(organization)s"
 		if self.filters.from_date:
 			conditions += " and posting_date >= %(from_date)s"
 		if self.filters.to_date:
@@ -240,7 +240,7 @@ class GrossProfitGenerator(object):
 		res = frappe.db.sql("""select item_code, voucher_type, voucher_no,
 				voucher_detail_no, stock_value, warehouse, actual_qty as qty
 			from `tabStock Ledger Entry`
-			where company=%(company)s
+			where organization=%(organization)s
 			order by
 				item_code desc, warehouse desc, posting_date desc,
 				posting_time desc, name desc""", self.filters, as_dict=True)

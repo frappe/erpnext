@@ -39,7 +39,7 @@ class SupplierQuotation(BuyingController):
 		super(SupplierQuotation, self).validate_with_previous_doc({
 			"Material Request": {
 				"ref_dn_field": "prevdoc_docname",
-				"compare_fields": [["company", "="]],
+				"compare_fields": [["organization", "="]],
 			},
 			"Material Request Item": {
 				"ref_dn_field": "prevdoc_detail_docname",

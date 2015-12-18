@@ -1,6 +1,6 @@
 [
  {
-  "company": "_Test Company", 
+  "organization": "_Test Organization", 
   "doctype": "Material Request", 
   "fiscal_year": "_Test Fiscal Year 2013", 
   "items": [
@@ -13,7 +13,7 @@
     "qty": 54.0, 
     "schedule_date": "2013-02-18", 
     "uom": "_Test UOM 1", 
-    "warehouse": "_Test Warehouse - _TC"
+    "warehouse": "_Test Warehouse - _TO"
    }, 
    {
     "description": "_Test Item Home Desktop 200", 
@@ -24,7 +24,7 @@
     "qty": 3.0, 
     "schedule_date": "2013-02-19", 
     "uom": "_Test UOM 1", 
-    "warehouse": "_Test Warehouse - _TC"
+    "warehouse": "_Test Warehouse - _TO"
    }
   ], 
   "material_request_type": "Purchase", 

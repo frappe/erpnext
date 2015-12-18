@@ -2,7 +2,7 @@ Landed Cost is the total cost of a product to reach the product at the buyer’s
 
 > To understand landed cost better, let’s take an example based on our daily lives. You need to purchase a new washing machine for your home. Before making actual purchase, you probably do some investigation to know the best price. In this process, you often found a better deal from a store which is long away from your home. But you should also consider shipping cost while buying from that store. Total cost including transportation might be more than the price you get in your nearby store. In that case you will choose to buy from  your nearest store, as landed cost of the item is cheaper in the nearest store.
 
-Similarly in business, identifying landed cost for a item / product is very crucial, as it helps to decide selling cost of that item and impacts company’s profitability. Hence all applicable landed cost charges should be included in item’s valuation rate.
+Similarly in business, identifying landed cost for a item / product is very crucial, as it helps to decide selling cost of that item and impacts organization’s profitability. Hence all applicable landed cost charges should be included in item’s valuation rate.
 
 According to the [Third-Party Logistics Study](http://www.3plstudy.com/), only 45% of the respondents stated that they use Landed Cost extensively. The main reasons of not using Landed Cost are unavailability of necessary data (49%), lack of right tools (48%), do not have sufficient time (31%) and not sure how to apply landed cost (27%).
 

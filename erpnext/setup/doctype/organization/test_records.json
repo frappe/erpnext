@@ -1,28 +1,28 @@
 [
  {
-  "abbr": "_TC",
-  "company_name": "_Test Company",
+  "abbr": "_TO",
+  "organization_name": "_Test Organization",
   "country": "India",
   "default_currency": "INR",
-  "doctype": "Company",
+  "doctype": "Organization",
   "domain": "Manufacturing",
   "chart_of_accounts": "Standard"
  },
  {
-  "abbr": "_TC1",
-  "company_name": "_Test Company 1",
+  "abbr": "_TO1",
+  "organization_name": "_Test Organization 1",
   "country": "United States",
   "default_currency": "USD",
-  "doctype": "Company",
+  "doctype": "Organization",
   "domain": "Retail",
   "chart_of_accounts": "Standard"
  },
  {
-  "abbr": "_TC2",
-  "company_name": "_Test Company 2",
+  "abbr": "_TO2",
+  "organization_name": "_Test Organization 2",
   "default_currency": "EUR",
   "country": "Germany",
-  "doctype": "Company",
+  "doctype": "Organization",
   "domain": "Retail",
   "chart_of_accounts": "Standard"
  }

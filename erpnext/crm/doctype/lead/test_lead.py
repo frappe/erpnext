@@ -18,6 +18,6 @@ class TestLead(unittest.TestCase):
 		self.assertEquals(customer.doctype, "Customer")
 		self.assertEquals(customer.lead_name, "_T-Lead-00001")
 
-		customer.company = "_Test Company"
+		customer.organization = "_Test Organization"
 		customer.customer_group = "_Test Customer Group"
 		customer.insert()

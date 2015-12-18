@@ -8,7 +8,7 @@ To use the Production Planning Tool, go to:
 
 Let's consider a scenario to understand this better.
 
-If company manufactures computers, Bill of Material of its finished item will constitute of:
+If organization manufactures computers, Bill of Material of its finished item will constitute of:
 
 1. Monitor
 1. Key Board

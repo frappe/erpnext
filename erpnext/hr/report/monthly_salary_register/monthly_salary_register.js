@@ -25,11 +25,11 @@ frappe.query_reports["Monthly Salary Register"] = {
 			"options": "Employee"
 		},
 		{
-			"fieldname":"company",
-			"label": __("Company"),
+			"fieldname":"organization",
+			"label": __("Organization"),
 			"fieldtype": "Link",
-			"options": "Company",
-			"default": frappe.defaults.get_user_default("company")
+			"options": "organization",
+			"default": frappe.defaults.get_user_default("Organization")
 		}
 	]
 }

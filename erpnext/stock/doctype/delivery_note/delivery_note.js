@@ -34,7 +34,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 								per_delivered: ["<", 99.99],
 								project_name: cur_frm.doc.project_name || undefined,
 								customer: cur_frm.doc.customer || undefined,
-								company: cur_frm.doc.company
+								organization: cur_frm.doc.organization
 							}
 						})
 					});
@@ -257,7 +257,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 		return {
 			filters: {
 				"report_type": "Profit and Loss",
-				"company": doc.company,
+				"organization": doc.organization,
 				"is_group": 0
 			}
 		}
@@ -279,7 +279,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 		return {
 
 			filters: {
-				'company': doc.company,
+				'organization': doc.organization,
 				"is_group": 0
 			}
 		}

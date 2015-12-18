@@ -16,15 +16,15 @@ def get_context(context):
 		"customer": party.name}, ["mobile_no", "phone"])
 
 	return {
-		"company_name": cstr(party.customer_name if party.doctype == "Customer" else party.company_name),
+		"organization_name": cstr(party.customer_name if party.doctype == "Customer" else party.organization_name),
 		"mobile_no": cstr(mobile_no),
 		"phone": cstr(phone)
 	}
 
 @frappe.whitelist()
-def update_user(fullname, password=None, company_name=None, mobile_no=None, phone=None):
+def update_user(fullname, password=None, organization_name=None, mobile_no=None, phone=None):
 	from erpnext.shopping_cart.cart import update_party
-	update_party(fullname, company_name, mobile_no, phone)
+	update_party(fullname, organization_name, mobile_no, phone)
 
 	if not fullname:
 		return _("Name is required")

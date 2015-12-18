@@ -1,8 +1,8 @@
 # Step 5: Letterhead and Logo
 
-Attach Company Letterhead and Company Logo.
+Attach organization Letterhead and organization Logo.
 
-<img alt="Company Logo and Letterhead" class="screenshot"
+<img alt="organization Logo and Letterhead" class="screenshot"
 src="{{docs_base_url}}/assets/img/setup-wizard/step-5.png">
 
 ---

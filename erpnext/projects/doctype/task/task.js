@@ -3,7 +3,7 @@
 
 frappe.provide("erpnext.projects");
 
-cur_frm.add_fetch("project", "company", "company");
+cur_frm.add_fetch("project", "organization", "organization");
 
 frappe.ui.form.on("Task", {
 	refresh: function(frm) {

@@ -1,6 +1,6 @@
 frappe.listview_settings['Quotation'] = {
 	add_fields: ["customer_name", "base_grand_total", "status",
-		"company", "currency"],
+		"organization", "currency"],
 	get_indicator: function(doc) {
 		if(doc.status==="Submitted") {
 			return [__("Submitted"), "blue", "status,=,Submitted"];

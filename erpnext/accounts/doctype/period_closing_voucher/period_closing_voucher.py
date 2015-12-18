@@ -28,9 +28,9 @@ class PeriodClosingVoucher(AccountsController):
 				.format(self.closing_account_head))
 
 		account_currency = get_account_currency(self.closing_account_head)
-		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
-		if account_currency != company_currency:
-			frappe.throw(_("Currency of the Closing Account must be {0}").format(company_currency))
+		organization_currency = frappe.db.get_value("Organization", self.organization, "default_currency")
+		if account_currency != organization_currency:
+			frappe.throw(_("Currency of the Closing Account must be {0}").format(organization_currency))
 
 	def validate_posting_date(self):
 		from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
@@ -52,21 +52,21 @@ class PeriodClosingVoucher(AccountsController):
 		pl_accounts = self.get_pl_balances()
 
 		for acc in pl_accounts:
-			if flt(acc.balance_in_company_currency):
+			if flt(acc.balance_in_organization_currency):
 				gl_entries.append(self.get_gl_dict({
 					"account": acc.account,
 					"account_currency": acc.account_currency,
 					"debit_in_account_currency": abs(flt(acc.balance_in_account_currency)) \
 						if flt(acc.balance_in_account_currency) < 0 else 0,
-					"debit": abs(flt(acc.balance_in_company_currency)) \
-						if flt(acc.balance_in_company_currency) < 0 else 0,
+					"debit": abs(flt(acc.balance_in_organization_currency)) \
+						if flt(acc.balance_in_organization_currency) < 0 else 0,
 					"credit_in_account_currency": abs(flt(acc.balance_in_account_currency)) \
 						if flt(acc.balance_in_account_currency) > 0 else 0,
-					"credit": abs(flt(acc.balance_in_company_currency)) \
-						if flt(acc.balance_in_company_currency) > 0 else 0
+					"credit": abs(flt(acc.balance_in_organization_currency)) \
+						if flt(acc.balance_in_organization_currency) > 0 else 0
 				}))
 
-				net_pl_balance += flt(acc.balance_in_company_currency)
+				net_pl_balance += flt(acc.balance_in_organization_currency)
 
 		if net_pl_balance:
 			gl_entries.append(self.get_gl_dict({
@@ -86,10 +86,10 @@ class PeriodClosingVoucher(AccountsController):
 			select
 				t1.account, t2.account_currency,
 				sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as balance_in_account_currency,
-				sum(t1.debit) - sum(t1.credit) as balance_in_company_currency
+				sum(t1.debit) - sum(t1.credit) as balance_in_organization_currency
 			from `tabGL Entry` t1, `tabAccount` t2
 			where t1.account = t2.name and t2.report_type = 'Profit and Loss'
-			and t2.docstatus < 2 and t2.company = %s
+			and t2.docstatus < 2 and t2.organization = %s
 			and t1.posting_date between %s and %s
 			group by t1.account
-		""", (self.company, self.get("year_start_date"), self.posting_date), as_dict=1)
+		""", (self.organization, self.get("year_start_date"), self.posting_date), as_dict=1)

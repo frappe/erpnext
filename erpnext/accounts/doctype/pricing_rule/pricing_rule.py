@@ -86,7 +86,7 @@ def apply_pricing_rule(args):
 			"conversion_rate": "something",
 			"price_list": "something",
 			"plc_conversion_rate": "something",
-			"company": "something",
+			"organization": "something",
 			"transaction_date": "something",
 			"campaign": "something",
 			"sales_partner": "something",
@@ -184,7 +184,7 @@ def get_pricing_rules(args):
 
 
 	conditions = ""
-	for field in ["company", "customer", "supplier", "supplier_type", "campaign", "sales_partner"]:
+	for field in ["organization", "customer", "supplier", "supplier_type", "campaign", "sales_partner"]:
 		if args.get(field):
 			conditions += " and ifnull("+field+", '') in (%("+field+")s, '')"
 		else:

@@ -110,7 +110,7 @@ class TestShoppingCart(unittest.TestCase):
 		from erpnext.accounts.party import set_taxes
 
 		tax_rule_master = set_taxes(quotation.customer, "Customer", \
-			quotation.transaction_date, quotation.company, None, None, \
+			quotation.transaction_date, quotation.organization, None, None, \
 			quotation.customer_address, quotation.shipping_address_name, 1)
 
 		self.assertEquals(quotation.taxes_and_charges, tax_rule_master)
@@ -136,7 +136,7 @@ class TestShoppingCart(unittest.TestCase):
 				"qty": 1
 			}],
 			"taxes": frappe.get_doc("Sales Taxes and Charges Template", "_Test Tax 1").taxes,
-			"company": "_Test Company"
+			"organization": "_Test Organization"
 		}
 
 		quotation.update(values)
@@ -155,7 +155,7 @@ class TestShoppingCart(unittest.TestCase):
 
 		settings.update({
 			"enabled": 1,
-			"company": "_Test Company",
+			"organization": "_Test Organization",
 			"default_customer_group": "_Test Customer Group",
 			"quotation_series": "_T-Quotation-",
 			"price_list": "_Test Price List India"

@@ -19,7 +19,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 					query: "erpnext.controllers.queries.tax_account_query",
 					filters: {
 						"account_type": account_type,
-						"company": doc.company
+						"organization": doc.organization
 					}
 				}
 			});
@@ -27,7 +27,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 			frm.set_query("cost_center", "taxes", function(doc) {
 				return {
 					filters: {
-						'company': doc.company,
+						'organization': doc.organization,
 						"is_group": 0
 					}
 				}

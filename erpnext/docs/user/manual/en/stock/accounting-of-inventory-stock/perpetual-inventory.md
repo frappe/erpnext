@@ -13,7 +13,7 @@ asset account will be reduced, based on the valuation amount of those items.
 
 ## **Activation**
 
-  1. Setup the following default accounts for each Company 
+  1. Setup the following default accounts for each organization 
 
     * Stock Received But Not Billed
     * Stock Adjustment Account
@@ -29,7 +29,7 @@ asset account will be reduced, based on the valuation amount of those items.
 
 ## **Example**
 
-Consider following Chart of Accounts and Warehouse setup for your company:
+Consider following Chart of Accounts and Warehouse setup for your organization:
 
 #### Chart of Accounts
 

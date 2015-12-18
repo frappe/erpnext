@@ -8,8 +8,8 @@ from frappe import _
 from frappe.utils import nowdate
 
 class website_maker(object):
-	def __init__(self, company, tagline, user):
-		self.company = company
+	def __init__(self, organization, tagline, user):
+		self.organization = organization
 		self.tagline = tagline
 		self.user = user
 		self.make_web_page()
@@ -20,15 +20,15 @@ class website_maker(object):
 		# home page
 		self.webpage = frappe.get_doc({
 			"doctype": "Web Page",
-			"title": self.company,
+			"title": self.organization,
 			"published": 1,
 			"header": "<div class='hero text-center'><h1>{0}</h1>".format(self.tagline or "Headline")+\
 				'<p>'+_("This is an example website auto-generated from ERPNext")+"</p>"+\
 				'<p><a class="btn btn-primary" href="/login">Login</a></p></div>',
-			"description": self.company + ":" + (self.tagline or ""),
+			"description": self.organization + ":" + (self.tagline or ""),
 			"css": frappe.get_template("setup/setup_wizard/data/sample_home_page.css").render(),
 			"main_section": frappe.get_template("setup/setup_wizard/data/sample_home_page.html").render({
-				"company": self.company, "tagline": (self.tagline or "")
+				"organization": self.organization, "tagline": (self.tagline or "")
 			})
 		}).insert()
 
@@ -36,8 +36,8 @@ class website_maker(object):
 		# update in home page in settings
 		website_settings = frappe.get_doc("Website Settings", "Website Settings")
 		website_settings.home_page = self.webpage.name
-		website_settings.brand_html = self.company
-		website_settings.copyright = self.company
+		website_settings.brand_html = self.organization
+		website_settings.copyright = self.organization
 		website_settings.top_bar_items = []
 		website_settings.append("top_bar_items", {
 			"doctype": "Top Bar Item",
@@ -84,9 +84,9 @@ class website_maker(object):
 		}).insert()
 
 def test():
-	frappe.delete_doc("Web Page", "test-company")
+	frappe.delete_doc("Web Page", "test-organization")
 	frappe.delete_doc("Blog Post", "welcome")
 	frappe.delete_doc("Blogger", "administrator")
 	frappe.delete_doc("Blog Category", "general")
-	website_maker("Test Company", "Better Tools for Everyone", "Administrator")
+	website_maker("Test organization", "Better Tools for Everyone", "Administrator")
 	frappe.db.commit()

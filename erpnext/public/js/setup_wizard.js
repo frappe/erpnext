@@ -1,7 +1,7 @@
 frappe.provide("erpnext.wiz");
 
 frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
-	if(sys_defaults.company) {
+	if(sys_defaults.organization) {
 		frappe.set_route("desk");
 		return;
 	}
@@ -137,11 +137,11 @@ function load_erpnext_slides() {
 			title: __("The Organization"),
 			icon: "icon-building",
 			fields: [
-				{fieldname:'company_name', label: __('Company Name'), fieldtype:'Data', reqd:1,
-					placeholder: __('e.g. "My Company LLC"')},
-				{fieldname:'company_abbr', label: __('Company Abbreviation'), fieldtype:'Data',
+				{fieldname:'organization_name', label: __('organization Name'), fieldtype:'Data', reqd:1,
+					placeholder: __('e.g. "My organization LLC"')},
+				{fieldname:'organization_abbr', label: __('organization Abbreviation'), fieldtype:'Data',
 					description: __('Max 5 characters'), placeholder: __('e.g. "MC"'), reqd:1},
-				{fieldname:'company_tagline', label: __('What does it do?'), fieldtype:'Data',
+				{fieldname:'organization_tagline', label: __('What does it do?'), fieldtype:'Data',
 					placeholder:__('e.g. "Build tools for builders"'), reqd:1},
 				{fieldname:'bank_account', label: __('Bank Account'), fieldtype:'Data',
 					placeholder: __('e.g. "XYZ National Bank"'), reqd:1 },
@@ -155,7 +155,7 @@ function load_erpnext_slides() {
 				{fieldname:'fy_end_date', label:__('Financial Year End Date'), fieldtype:'Date',
 					description: __('Your financial year ends on'), reqd:1},
 			],
-			help: __('The name of your company for which you are setting up this system.'),
+			help: __('The name of your organization for which you are setting up this system.'),
 
 			onload: function(slide) {
 				erpnext.wiz.org.load_chart_of_accounts(slide);
@@ -170,8 +170,8 @@ function load_erpnext_slides() {
 					return false;
 				}
 
-				if ((this.values.company_name || "").toLowerCase() == "company") {
-					msgprint(__("Company Name cannot be Company"));
+				if ((this.values.organization_name || "").toLowerCase() == "organization") {
+					msgprint(__("organization Name cannot be organization"));
 					return false;
 				}
 
@@ -223,16 +223,16 @@ function load_erpnext_slides() {
 			},
 
 			bind_events: function(slide) {
-				slide.get_input("company_name").on("change", function() {
-					var parts = slide.get_input("company_name").val().split(" ");
+				slide.get_input("organization_name").on("change", function() {
+					var parts = slide.get_input("organization_name").val().split(" ");
 					var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
-					slide.get_field("company_abbr").set_input(abbr.slice(0, 5).toUpperCase());
-				}).val(frappe.boot.sysdefaults.company_name || "").trigger("change");
+					slide.get_field("organization_abbr").set_input(abbr.slice(0, 5).toUpperCase());
+				}).val(frappe.boot.sysdefaults.organization_name || "").trigger("change");
 
-				slide.get_input("company_abbr").on("change", function() {
-					if(slide.get_input("company_abbr").val().length > 5) {
-						msgprint("Company Abbreviation cannot have more than 5 characters");
-						slide.get_field("company_abbr").set_input("");
+				slide.get_input("organization_abbr").on("change", function() {
+					if(slide.get_input("organization_abbr").val().length > 5) {
+						msgprint("organization Abbreviation cannot have more than 5 characters");
+						slide.get_field("organization_abbr").set_input("");
 					}
 				});
 

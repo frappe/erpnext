@@ -21,7 +21,7 @@ def get_columns():
 def get_data(filters):
 	bin_list = get_bin_list(filters)
 	item_map = get_item_map(filters.get("item_code"))
-	warehouse_company = {}
+	warehouse_organization = {}
 	data = []
 
 	for bin in bin_list:
@@ -32,12 +32,12 @@ def get_data(filters):
 			continue
 
 		# item = item_map.setdefault(bin.item_code, get_item(bin.item_code))
-		company = warehouse_company.setdefault(bin.warehouse, frappe.db.get_value("Warehouse", bin.warehouse, "company"))
+		organization = warehouse_organization.setdefault(bin.warehouse, frappe.db.get_value("Warehouse", bin.warehouse, "organization"))
 
 		if filters.brand and filters.brand != item.brand:
 			continue
 
-		elif filters.company and filters.company != company:
+		elif filters.organization and filters.organization != organization:
 			continue
 
 		re_order_level = re_order_qty = 0

@@ -1,6 +1,6 @@
 # Opening Stock
 
-<p class="lead"> Opening Stock is the Stock quantity in the beginning of every accounting year of an organisation. The closing Stock with the prior accounting year becomes the opening Stock with the existing accounting year.</p>
+<p class="lead"> Opening Stock is the Stock quantity in the beginning of every accounting year of an organization. The closing Stock with the prior accounting year becomes the opening Stock with the existing accounting year.</p>
 
 Opening Stock can be done for serialized Items as well as non-serialized Items.To update opening stock for non-serialized Item, you should perform Stock Reconciliation. For serialised Item, you can make Stock Entry of type Material Receipt.
 

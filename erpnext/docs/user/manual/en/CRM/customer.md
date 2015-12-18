@@ -28,16 +28,16 @@ Thus we may have identical Customer Names that are uniquely identified by the ID
 ### Integration with Accounts
 
 In ERPNext, there is a separate Account record for each Customer, for each
-Company.
+organization.
 
 When you create a new Customer, ERPNext will automatically create an Account
-Ledger for the Customer under “Accounts Receivable” in the Company set in the
+Ledger for the Customer under “Accounts Receivable” in the organization set in the
 Customer record.
 
 > Advanced Tip: If you want to change the Account Group under which the
-Customer Account is created, you can set it in the Company master.
+Customer Account is created, you can set it in the organization master.
 
-If you want to create an Account in another Company, just change the Company
+If you want to create an Account in another organization, just change the organization
 value and “Save” the Customer again.
 
 ### Customer Settings
@@ -49,7 +49,7 @@ You can set “Credit Days”, so that it is automatically set due date in the S
 Invoices made against this Customer. Credit Days can be defined as fixed days or last day of the next month based on invoice date.
 
 You can set how much credit you want to allow for a Customer by adding the
-“Credit Limit”. You can also set a global “Credit Limit” in the Company
+“Credit Limit”. You can also set a global “Credit Limit” in the organization
 master. Classifying Customers
 
 ERPNext allows you to group your Customers using [Customer Group]({{docs_base_url}}/user/manual/en/crm/setup/customer-group.html) 

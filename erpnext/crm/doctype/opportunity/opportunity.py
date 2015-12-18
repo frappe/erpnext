@@ -80,8 +80,8 @@ class Opportunity(TransactionBase):
 		if self.customer:
 			self.customer_name = frappe.db.get_value("Customer", self.customer, "customer_name")
 		elif self.lead:
-			lead_name, company_name = frappe.db.get_value("Lead", self.lead, ["lead_name", "company_name"])
-			self.customer_name = company_name or lead_name
+			lead_name, organization_name = frappe.db.get_value("Lead", self.lead, ["lead_name", "organization_name"])
+			self.customer_name = organization_name or lead_name
 
 	def get_cust_address(self,name):
 		details = frappe.db.sql("""select customer_name, address, territory, customer_group
@@ -181,15 +181,15 @@ def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		quotation = frappe.get_doc(target)
 
-		company_currency = frappe.db.get_value("Company", quotation.company, "default_currency")
-		party_account_currency = get_party_account_currency("Customer", quotation.customer, quotation.company)
+		organization_currency = frappe.db.get_value("Organization", quotation.organization, "default_currency")
+		party_account_currency = get_party_account_currency("Customer", quotation.customer, quotation.organization)
 
-		if company_currency == party_account_currency:
+		if organization_currency == party_account_currency:
 			exchange_rate = 1
 		else:
-			exchange_rate = get_exchange_rate(party_account_currency, company_currency)
+			exchange_rate = get_exchange_rate(party_account_currency, organization_currency)
 
-		quotation.currency = party_account_currency or company_currency
+		quotation.currency = party_account_currency or organization_currency
 		quotation.conversion_rate = exchange_rate
 
 		quotation.run_method("set_missing_values")

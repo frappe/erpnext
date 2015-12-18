@@ -14,8 +14,8 @@
   "supplier_name": "_Test Supplier USD",
   "supplier_type": "_Test Supplier Type",
   "accounts": [{
-    "company": "_Test Company",
-    "account": "_Test Payable USD - _TC"
+    "organization": "_Test Organization",
+    "account": "_Test Payable USD - _TO"
   }]
  }
 ]

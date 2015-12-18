@@ -6,7 +6,7 @@ import json
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, rounded
-from erpnext.setup.utils import get_company_currency
+from erpnext.setup.utils import get_organization_currency
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
 
@@ -37,13 +37,13 @@ class calculate_taxes_and_totals(object):
 
 	def validate_conversion_rate(self):
 		# validate conversion rate
-		company_currency = get_company_currency(self.doc.company)
-		if not self.doc.currency or self.doc.currency == company_currency:
-			self.doc.currency = company_currency
+		organization_currency = get_organization_currency(self.doc.organization)
+		if not self.doc.currency or self.doc.currency == organization_currency:
+			self.doc.currency = organization_currency
 			self.doc.conversion_rate = 1.0
 		else:
 			validate_conversion_rate(self.doc.currency, self.doc.conversion_rate,
-				self.doc.meta.get_label("conversion_rate"), self.doc.company)
+				self.doc.meta.get_label("conversion_rate"), self.doc.organization)
 
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 
@@ -62,11 +62,11 @@ class calculate_taxes_and_totals(object):
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.net_amount = item.amount
 
-				self._set_in_company_currency(item, ["price_list_rate", "rate", "net_rate", "amount", "net_amount"])
+				self._set_in_organization_currency(item, ["price_list_rate", "rate", "net_rate", "amount", "net_amount"])
 
 				item.item_tax_amount = 0.0
 
-	def _set_in_company_currency(self, doc, fields):
+	def _set_in_organization_currency(self, doc, fields):
 		"""set values in base currency"""
 		for f in fields:
 			val = flt(flt(doc.get(f), doc.precision(f)) * self.doc.conversion_rate, doc.precision("base_" + f))
@@ -116,7 +116,7 @@ class calculate_taxes_and_totals(object):
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
 				item.discount_percentage = flt(item.discount_percentage, item.precision("discount_percentage"))
 
-				self._set_in_company_currency(item, ["net_rate", "net_amount"])
+				self._set_in_organization_currency(item, ["net_rate", "net_amount"])
 
 	def _load_item_tax_rate(self, item_tax_rate):
 		return json.loads(item_tax_rate) if item_tax_rate else {}
@@ -262,7 +262,7 @@ class calculate_taxes_and_totals(object):
 		tax.tax_amount = flt(tax.tax_amount, tax.precision("tax_amount"))
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount"))
 
-		self._set_in_company_currency(tax, ["total", "tax_amount", "tax_amount_after_discount_amount"])
+		self._set_in_organization_currency(tax, ["total", "tax_amount", "tax_amount_after_discount_amount"])
 
 	def adjust_discount_amount_loss(self, tax):
 		discount_amount_loss = self.doc.grand_total - flt(self.doc.discount_amount) - tax.total
@@ -270,7 +270,7 @@ class calculate_taxes_and_totals(object):
 			discount_amount_loss, tax.precision("tax_amount"))
 		tax.total = flt(tax.total + discount_amount_loss, tax.precision("total"))
 
-		self._set_in_company_currency(tax, ["total", "tax_amount_after_discount_amount"])
+		self._set_in_organization_currency(tax, ["total", "tax_amount_after_discount_amount"])
 
 	def manipulate_grand_total_for_inclusive_tax(self):
 		# if fully inclusive taxes and diff
@@ -283,7 +283,7 @@ class calculate_taxes_and_totals(object):
 				last_tax.tax_amount_after_discount_amount += diff
 				last_tax.total += diff
 				
-				self._set_in_company_currency(last_tax, 
+				self._set_in_organization_currency(last_tax, 
 					["total", "tax_amount", "tax_amount_after_discount_amount"])
 
 	def calculate_totals(self):
@@ -293,7 +293,7 @@ class calculate_taxes_and_totals(object):
 		self.doc.total_taxes_and_charges = flt(self.doc.grand_total - self.doc.net_total,
 			self.doc.precision("total_taxes_and_charges"))
 
-		self._set_in_company_currency(self.doc, ["total_taxes_and_charges"])
+		self._set_in_organization_currency(self.doc, ["total_taxes_and_charges"])
 
 		if self.doc.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
 			self.doc.base_grand_total = flt(self.doc.grand_total * self.doc.conversion_rate) \
@@ -313,7 +313,7 @@ class calculate_taxes_and_totals(object):
 				if (self.doc.taxes_and_charges_added or self.doc.taxes_and_charges_deducted) \
 				else self.doc.base_net_total
 
-			self._set_in_company_currency(self.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"])
+			self._set_in_organization_currency(self.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"])
 
 		self.doc.round_floats_in(self.doc, ["grand_total", "base_grand_total"])
 
@@ -357,7 +357,7 @@ class calculate_taxes_and_totals(object):
 
 					item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0
 
-					self._set_in_company_currency(item, ["net_rate", "net_amount"])
+					self._set_in_organization_currency(item, ["net_rate", "net_amount"])
 
 				self.discount_amount_applied = True
 				self._calculate()

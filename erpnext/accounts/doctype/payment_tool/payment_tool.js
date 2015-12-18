@@ -19,7 +19,7 @@ frappe.ui.form.on("Payment Tool", "onload", function(frm) {
 			filters: {
 				"account_type": ["in", ["Bank", "Cash"]],
 				"is_group": 0,
-				"company": frm.doc.company
+				"organization": frm.doc.organization
 			}
 		}
 	});
@@ -47,7 +47,7 @@ frappe.ui.form.on("Payment Tool", "party", function(frm) {
 		return frappe.call({
 			method: "erpnext.accounts.party.get_party_account",
 			args: {
-				company: frm.doc.company,
+				organization: frm.doc.organization,
 				party_type: frm.doc.party_type,
 				party: frm.doc.party
 			},
@@ -80,7 +80,7 @@ frappe.ui.form.on("Payment Tool", "party_account", function(frm) {
 	}
 })
 
-frappe.ui.form.on("Payment Tool", "company", function(frm) {
+frappe.ui.form.on("Payment Tool", "organization", function(frm) {
 	erpnext.payment_tool.check_mandatory_to_set_button(frm);
 });
 
@@ -94,7 +94,7 @@ frappe.ui.form.on("Payment Tool", "payment_mode", function(frm) {
 		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 		args: {
 				"mode_of_payment": frm.doc.payment_mode,
-				"company": frm.doc.company
+				"organization": frm.doc.organization
 		},
 		callback: function(r, rt) {
 			if(r.message) {
@@ -106,7 +106,7 @@ frappe.ui.form.on("Payment Tool", "payment_mode", function(frm) {
 
 
 erpnext.payment_tool.check_mandatory_to_set_button = function(frm) {
-	if (frm.doc.company && frm.doc.party_type && frm.doc.party && frm.doc.received_or_paid && frm.doc.party_account) {
+	if (frm.doc.organization && frm.doc.party_type && frm.doc.party && frm.doc.received_or_paid && frm.doc.party_account) {
 		frm.fields_dict.get_outstanding_vouchers.$input.addClass("btn-primary");
 	}
 }
@@ -121,7 +121,7 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_outstanding_vouchers',
 		args: {
 			args: {
-				"company": frm.doc.company,
+				"organization": frm.doc.organization,
 				"party_type": frm.doc.party_type,
 				"received_or_paid": frm.doc.received_or_paid,
 				"party": frm.doc.party,
@@ -203,7 +203,7 @@ frappe.ui.form.on("Payment Tool Detail", "against_voucher_no", function(frm, cdt
 			"against_voucher_type": row.against_voucher_type,
 			"against_voucher_no": row.against_voucher_no,
 			"party_account": frm.doc.party_account,
-			"company": frm.doc.company
+			"organization": frm.doc.organization
 		},
 		callback: function(r) {
 			if(!r.exc) {
@@ -260,7 +260,7 @@ frappe.ui.form.on("Payment Tool", "make_journal_entry", function(frm) {
 });
 
 erpnext.payment_tool.check_mandatory_to_fetch = function(doc) {
-	$.each(["Company", "Party Type", "Party", "Received or Paid"], function(i, field) {
+	$.each(["organization", "Party Type", "Party", "Received or Paid"], function(i, field) {
 		if(!doc[frappe.model.scrub(field)]) frappe.throw(__("Please select {0} first", [field]));
 	});
 }

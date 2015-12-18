@@ -132,8 +132,8 @@ class StockController(AccountsController):
 		account_list = [d.account for d in expected_gle]
 		acc_diff = get_stock_and_account_difference(account_list, expected_gle[0].posting_date)
 
-		cost_center = self.get_company_default("cost_center")
-		stock_adjustment_account = self.get_company_default("stock_adjustment_account")
+		cost_center = self.get_organization_default("cost_center")
+		stock_adjustment_account = self.get_organization_default("stock_adjustment_account")
 
 		gl_entries = []
 		for account, diff in acc_diff.items():
@@ -187,7 +187,7 @@ class StockController(AccountsController):
 			"actual_qty": (self.docstatus==1 and 1 or -1)*flt(d.get("stock_qty")),
 			"stock_uom": frappe.db.get_value("Item", args.get("item_code") or d.get("item_code"), "stock_uom"),
 			"incoming_rate": 0,
-			"company": self.company,
+			"organization": self.organization,
 			"fiscal_year": self.fiscal_year,
 			"batch_no": cstr(d.get("batch_no")).strip(),
 			"serial_no": d.get("serial_no"),
@@ -305,13 +305,13 @@ class StockController(AccountsController):
 		self.make_sl_entries(sl_entries)
 		
 	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company
+		from erpnext.stock.utils import validate_warehouse_organization
 
 		warehouses = list(set([d.warehouse for d in
 			self.get("items") if getattr(d, "warehouse", None)]))
 
 		for w in warehouses:
-			validate_warehouse_company(w, self.company)
+			validate_warehouse_organization(w, self.organization)
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):

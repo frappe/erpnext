@@ -6,12 +6,12 @@ import frappe
 from frappe import _, throw
 from frappe.utils import flt
 
-def get_company_currency(company):
-	currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
+def get_organization_currency(organization):
+	currency = frappe.db.get_value("Organization", organization, "default_currency", cache=True)
 	if not currency:
 		currency = frappe.db.get_default("currency")
 	if not currency:
-		throw(_('Please specify Default Currency in Company Master and Global Defaults'))
+		throw(_('Please specify Default Currency in organization Master and Global Defaults'))
 
 	return currency
 
@@ -33,20 +33,20 @@ def before_tests():
 	frappe.clear_cache()
 	# complete setup if missing
 	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
-	if not frappe.get_list("Company"):
+	if not frappe.get_list("Organization"):
 		setup_complete({
 			"currency"			:"USD",
 			"first_name"		:"Test",
 			"last_name"			:"User",
-			"company_name"		:"Wind Power LLC",
+			"organization_name"		:"Wind Power LLC",
 			"timezone"			:"America/New_York",
-			"company_abbr"		:"WP",
+			"organization_abbr"		:"WP",
 			"industry"			:"Manufacturing",
 			"country"			:"United States",
 			"fy_start_date"		:"2014-01-01",
 			"fy_end_date"		:"2014-12-31",
 			"language"			:"english",
-			"company_tagline"	:"Testing",
+			"organization_tagline"	:"Testing",
 			"email"				:"test@erpnext.com",
 			"password"			:"test",
 			"chart_of_accounts" : "Standard"

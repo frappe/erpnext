@@ -44,10 +44,10 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.make_bank_entry = function(doc,cdt,cdn){
-    if(doc.company && doc.month && doc.fiscal_year){
+    if(doc.organization && doc.month && doc.fiscal_year){
     	cur_frm.cscript.make_jv(doc, cdt, cdn);
     } else {
-  	  msgprint(__("Company, Month and Fiscal Year is mandatory"));
+  	  msgprint(__("organization, Month and Fiscal Year is mandatory"));
     }
 }
 

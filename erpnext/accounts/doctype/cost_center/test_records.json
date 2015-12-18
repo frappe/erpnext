@@ -2,32 +2,32 @@
  {
   "budgets": [
    {
-    "account": "_Test Account Cost for Goods Sold - _TC",
+    "account": "_Test Account Cost for Goods Sold - _TO",
     "budget_allocated": 100000,
     "doctype": "Budget Detail",
     "fiscal_year": "_Test Fiscal Year 2013",
     "parentfield": "budgets"
    }
   ],
-  "company": "_Test Company",
+  "organization": "_Test Organization",
   "cost_center_name": "_Test Cost Center",
   "distribution_id": "_Test Distribution",
   "doctype": "Cost Center",
   "is_group": 0,
-  "parent_cost_center": "_Test Company - _TC"
+  "parent_cost_center": "_Test Organization - _TO"
  },
  {
-  "company": "_Test Company",
+  "organization": "_Test Organization",
   "cost_center_name": "_Test Cost Center 2",
   "doctype": "Cost Center",
   "is_group": 0,
-  "parent_cost_center": "_Test Company - _TC"
+  "parent_cost_center": "_Test Organization - _TO"
  },
  {
-  "company": "_Test Company",
+  "organization": "_Test Organization",
   "cost_center_name": "_Test Write Off Cost Center",
   "doctype": "Cost Center",
   "is_group": 0,
-  "parent_cost_center": "_Test Company - _TC"
+  "parent_cost_center": "_Test Organization - _TO"
  }
 ]

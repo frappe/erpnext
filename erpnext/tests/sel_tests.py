@@ -46,9 +46,9 @@ def run():
 
 	next_slide("2")
 
-	sel.set_field("company_name", "Wind Power LLC")
+	sel.set_field("organization_name", "Wind Power LLC")
 	sel.set_field("fy_start_date", "01-04-2014")
-	sel.set_field("company_tagline", "Wind Power For Everyone")
+	sel.set_field("organization_tagline", "Wind Power For Everyone")
 
 	next_slide("3")
 	next_slide("4")

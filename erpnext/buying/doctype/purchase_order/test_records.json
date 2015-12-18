@@ -2,7 +2,7 @@
  {
   "advance_paid": 0.0,  
   "buying_price_list": "_Test Price List", 
-  "company": "_Test Company", 
+  "organization": "_Test Organization", 
   "conversion_rate": 1.0, 
   "currency": "INR", 
   "doctype": "Purchase Order", 
@@ -26,7 +26,7 @@
     "schedule_date": "2013-03-01", 
     "stock_uom": "_Test UOM", 
     "uom": "_Test UOM", 
-    "warehouse": "_Test Warehouse - _TC"
+    "warehouse": "_Test Warehouse - _TO"
    }
   ], 
   "supplier": "_Test Supplier", 
@@ -36,7 +36,7 @@
  {
   "advance_paid": 0.0,  
   "buying_price_list": "_Test Price List", 
-  "company": "_Test Company", 
+  "organization": "_Test Organization", 
   "conversion_rate": 1.0, 
   "currency": "INR", 
   "doctype": "Purchase Order", 
@@ -60,7 +60,7 @@
     "schedule_date": "2013-03-01", 
     "stock_uom": "_Test UOM", 
     "uom": "_Test UOM", 
-    "warehouse": "_Test Warehouse - _TC"
+    "warehouse": "_Test Warehouse - _TO"
    }
   ], 
   "supplier": "_Test Supplier", 

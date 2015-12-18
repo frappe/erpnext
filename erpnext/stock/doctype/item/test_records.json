@@ -1,13 +1,13 @@
 [
  {
-  "default_warehouse": "_Test Warehouse - _TC",
+  "default_warehouse": "_Test Warehouse - _TO",
   "description": "_Test Item 1",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
+  "expense_account": "_Test Account Cost for Goods Sold - _TO",
+  "cost_center": "_Test Cost Center - _TO",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
+  "income_account": "Sales - _TO",
   "inspection_required": 0,
   "is_asset_item": 0,
   "is_pro_applicable": 0,
@@ -23,24 +23,24 @@
   "reorder_levels": [
    {
     "material_request_type": "Purchase",
-    "warehouse": "_Test Warehouse - _TC",
+    "warehouse": "_Test Warehouse - _TO",
     "warehouse_reorder_level": 20,
     "warehouse_reorder_qty": 20
    }
   ],
   "stock_uom": "_Test UOM",
   "show_in_website": 1,
-  "website_warehouse": "_Test Warehouse - _TC"
+  "website_warehouse": "_Test Warehouse - _TO"
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
+  "default_warehouse": "_Test Warehouse - _TO",
   "description": "_Test Item 2",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
+  "expense_account": "_Test Account Cost for Goods Sold - _TO",
+  "cost_center": "_Test Cost Center - _TO",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
+  "income_account": "Sales - _TO",
   "inspection_required": 0,
   "is_asset_item": 0,
   "is_pro_applicable": 0,
@@ -54,17 +54,17 @@
   "item_name": "_Test Item 2",
   "stock_uom": "_Test UOM",
   "show_in_website": 1,
-  "website_warehouse": "_Test Warehouse - _TC"
+  "website_warehouse": "_Test Warehouse - _TO"
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
+  "default_warehouse": "_Test Warehouse - _TO",
   "description": "_Test Item Home Desktop 100 3",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
+  "expense_account": "_Test Account Cost for Goods Sold - _TO",
+  "cost_center": "_Test Cost Center - _TO",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
+  "income_account": "Sales - _TO",
   "inspection_required": 0,
   "is_asset_item": 0,
   "is_pro_applicable": 0,
@@ -81,20 +81,20 @@
     "doctype": "Item Tax",
     "parentfield": "taxes",
     "tax_rate": 10,
-    "tax_type": "_Test Account Excise Duty - _TC"
+    "tax_type": "_Test Account Excise Duty - _TO"
    }
   ],
   "stock_uom": "_Test UOM 1"
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
+  "default_warehouse": "_Test Warehouse - _TO",
   "description": "_Test Item Home Desktop 200 4",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
+  "expense_account": "_Test Account Cost for Goods Sold - _TO",
+  "cost_center": "_Test Cost Center - _TO",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
+  "income_account": "Sales - _TO",
   "inspection_required": 0,
   "is_asset_item": 0,
   "is_pro_applicable": 0,
@@ -111,11 +111,11 @@
  {
   "description": "_Test Product Bundle Item 5",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
+  "expense_account": "_Test Account Cost for Goods Sold - _TO",
+  "cost_center": "_Test Cost Center - _TO",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
+  "income_account": "Sales - _TO",
   "inspection_required": 0,
   "is_asset_item": 0,
   "is_pro_applicable": 0,
@@ -130,14 +130,14 @@
   "stock_uom": "_Test UOM"
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
+  "default_warehouse": "_Test Warehouse - _TO",
   "description": "_Test FG Item 6",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
+  "expense_account": "_Test Account Cost for Goods Sold - _TO",
+  "cost_center": "_Test Cost Center - _TO",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
+  "income_account": "Sales - _TO",
   "inspection_required": 0,
   "is_asset_item": 0,
   "is_pro_applicable": 1,
@@ -170,7 +170,7 @@
   "stock_uom": "_Test UOM"
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
+  "default_warehouse": "_Test Warehouse - _TO",
   "description": "_Test Serialized Item 8",
   "doctype": "Item",
   "has_batch_no": 0,
@@ -189,7 +189,7 @@
   "stock_uom": "_Test UOM"
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
+  "default_warehouse": "_Test Warehouse - _TO",
   "description": "_Test Serialized Item 9",
   "doctype": "Item",
   "has_batch_no": 0,
@@ -209,14 +209,14 @@
   "stock_uom": "_Test UOM"
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
+  "default_warehouse": "_Test Warehouse - _TO",
   "description": "_Test Item Home Desktop Manufactured 10",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
+  "expense_account": "_Test Account Cost for Goods Sold - _TO",
+  "cost_center": "_Test Cost Center - _TO",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
+  "income_account": "Sales - _TO",
   "inspection_required": 0,
   "is_asset_item": 0,
   "is_pro_applicable": 1,
@@ -230,14 +230,14 @@
   "stock_uom": "_Test UOM"
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
+  "default_warehouse": "_Test Warehouse - _TO",
   "description": "_Test FG Item 2 11",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
+  "expense_account": "_Test Account Cost for Goods Sold - _TO",
+  "cost_center": "_Test Cost Center - _TO",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
+  "income_account": "Sales - _TO",
   "inspection_required": 0,
   "is_asset_item": 0,
   "is_pro_applicable": 1,
@@ -252,14 +252,14 @@
   "stock_uom": "_Test UOM"
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
+  "default_warehouse": "_Test Warehouse - _TO",
   "description": "_Test Variant Item 12",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
+  "expense_account": "_Test Account Cost for Goods Sold - _TO",
+  "cost_center": "_Test Cost Center - _TO",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
+  "income_account": "Sales - _TO",
   "inspection_required": 0,
   "is_asset_item": 0,
   "is_pro_applicable": 1,
@@ -282,7 +282,7 @@
   "reorder_levels": [
       {
        "material_request_type": "Purchase",
-       "warehouse": "_Test Warehouse - _TC",
+       "warehouse": "_Test Warehouse - _TO",
        "warehouse_reorder_level": 20,
        "warehouse_reorder_qty": 20
       }

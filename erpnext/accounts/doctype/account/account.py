@@ -20,7 +20,7 @@ class Account(Document):
 
 	def autoname(self):
 		self.name = self.account_name.strip() + ' - ' + \
-			frappe.db.get_value("Company", self.company, "abbr")
+			frappe.db.get_value("Organization", self.organization, "abbr")
 
 	def validate(self):
 		self.validate_parent()
@@ -36,16 +36,16 @@ class Account(Document):
 		"""Fetch Parent Details and validate parent account"""
 		if self.parent_account:
 			par = frappe.db.get_value("Account", self.parent_account,
-				["name", "is_group", "company"], as_dict=1)
+				["name", "is_group", "organization"], as_dict=1)
 			if not par:
 				throw(_("Account {0}: Parent account {1} does not exist").format(self.name, self.parent_account))
 			elif par.name == self.name:
 				throw(_("Account {0}: You can not assign itself as parent account").format(self.name))
 			elif not par.is_group:
 				throw(_("Account {0}: Parent account {1} can not be a ledger").format(self.name, self.parent_account))
-			elif par.company != self.company:
-				throw(_("Account {0}: Parent account {1} does not belong to company: {2}")
-					.format(self.name, self.parent_account, self.company))
+			elif par.organization != self.organization:
+				throw(_("Account {0}: Parent account {1} does not belong to organization: {2}")
+					.format(self.name, self.parent_account, self.organization))
 
 	def set_root_and_report_type(self):
 		if self.parent_account:
@@ -99,7 +99,7 @@ class Account(Document):
 
 	def validate_account_currency(self):
 		if not self.account_currency:
-			self.account_currency = frappe.db.get_value("Company", self.company, "default_currency")
+			self.account_currency = frappe.db.get_value("Organization", self.organization, "default_currency")
 
 		elif self.account_currency != frappe.db.get_value("Account", self.name, "account_currency"):
 			if frappe.db.get_value("GL Entry", {"account": self.name}):
@@ -185,9 +185,9 @@ class Account(Document):
 		self.update_nsm_model()
 
 	def before_rename(self, old, new, merge=False):
-		# Add company abbr if not provided
-		from erpnext.setup.doctype.company.company import get_name_with_abbr
-		new_account = get_name_with_abbr(new, self.company)
+		# Add organization abbr if not provided
+		from erpnext.setup.doctype.organization.organization import get_name_with_abbr
+		new_account = get_name_with_abbr(new, self.organization)
 
 		# Validate properties before merging
 		if merge:
@@ -195,10 +195,10 @@ class Account(Document):
 				throw(_("Account {0} does not exist").format(new))
 
 			val = list(frappe.db.get_value("Account", new_account,
-				["is_group", "root_type", "company"]))
+				["is_group", "root_type", "organization"]))
 
-			if val != [self.is_group, self.root_type, self.company]:
-				throw(_("""Merging is only possible if following properties are same in both records. Is Group, Root Type, Company"""))
+			if val != [self.is_group, self.root_type, self.organization]:
+				throw(_("""Merging is only possible if following properties are same in both records. Is Group, Root Type, organization"""))
 
 		return new_account
 
@@ -212,19 +212,19 @@ class Account(Document):
 
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name from tabAccount
-		where is_group = 1 and docstatus != 2 and company = %s
+		where is_group = 1 and docstatus != 2 and organization = %s
 		and %s like %s order by name limit %s, %s""" %
 		("%s", searchfield, "%s", "%s", "%s"),
-		(filters["company"], "%%%s%%" % txt, start, page_len), as_list=1)
+		(filters["organization"], "%%%s%%" % txt, start, page_len), as_list=1)
 
 def get_account_currency(account):
 	"""Helper function to get account currency"""
 	if not account:
 		return
 	def generator():
-		account_currency, company = frappe.db.get_value("Account", account, ["account_currency", "company"])
+		account_currency, organization = frappe.db.get_value("Account", account, ["account_currency", "organization"])
 		if not account_currency:
-			account_currency = frappe.db.get_value("Company", company, "default_currency")
+			account_currency = frappe.db.get_value("Organization", organization, "default_currency")
 
 		return account_currency
 

@@ -23,6 +23,6 @@ import frappe
 
 product_name = "ERPNext"
 user_defaults = {
-	"Company": "company",
+	"organization": "organization",
 	"Territory": "territory"
 }

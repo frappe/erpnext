@@ -8,7 +8,7 @@ from frappe import session, _
 from erpnext.utilities.transaction_base import TransactionBase
 
 class AuthorizationControl(TransactionBase):
-	def get_appr_user_role(self, det, doctype_name, total, based_on, condition, item, company):
+	def get_appr_user_role(self, det, doctype_name, total, based_on, condition, item, organization):
 		amt_list, appr_users, appr_roles = [], [], []
 		users, roles = '',''
 		if det:
@@ -18,14 +18,14 @@ class AuthorizationControl(TransactionBase):
 
 			app_dtl = frappe.db.sql("""select approving_user, approving_role from `tabAuthorization Rule`
 				where transaction = %s and (value = %s or value > %s)
-				and docstatus != 2 and based_on = %s and company = %s %s""" %
+				and docstatus != 2 and based_on = %s and organization = %s %s""" %
 				('%s', '%s', '%s', '%s', '%s', condition),
-				(doctype_name, flt(max_amount), total, based_on, company))
+				(doctype_name, flt(max_amount), total, based_on, organization))
 
 			if not app_dtl:
 				app_dtl = frappe.db.sql("""select approving_user, approving_role from `tabAuthorization Rule`
 					where transaction = %s and (value = %s or value > %s) and docstatus != 2
-					and based_on = %s and ifnull(company,'') = '' %s""" %
+					and based_on = %s and ifnull(organization,'') = '' %s""" %
 					('%s', '%s', '%s', '%s', condition), (doctype_name, flt(max_amount), total, based_on))
 
 			for d in app_dtl:
@@ -36,24 +36,24 @@ class AuthorizationControl(TransactionBase):
 				frappe.msgprint(_("Not authroized since {0} exceeds limits").format(_(based_on)))
 				frappe.throw(_("Can be approved by {0}").format(comma_or(appr_roles + appr_users)))
 
-	def validate_auth_rule(self, doctype_name, total, based_on, cond, company, item = ''):
+	def validate_auth_rule(self, doctype_name, total, based_on, cond, organization, item = ''):
 		chk = 1
 		add_cond1,add_cond2	= '',''
 		if based_on == 'Itemwise Discount':
 			add_cond1 += " and master_name = '"+cstr(item).replace("'", "\\'")+"'"
 			itemwise_exists = frappe.db.sql("""select value from `tabAuthorization Rule`
 				where transaction = %s and value <= %s
-				and based_on = %s and company = %s and docstatus != 2 %s %s""" %
-				('%s', '%s', '%s', '%s', cond, add_cond1), (doctype_name, total, based_on, company))
+				and based_on = %s and organization = %s and docstatus != 2 %s %s""" %
+				('%s', '%s', '%s', '%s', cond, add_cond1), (doctype_name, total, based_on, organization))
 
 			if not itemwise_exists:
 				itemwise_exists = frappe.db.sql("""select value from `tabAuthorization Rule`
 					where transaction = %s and value <= %s and based_on = %s
-					and ifnull(company,'') = ''	and docstatus != 2 %s %s""" %
+					and ifnull(organization,'') = ''	and docstatus != 2 %s %s""" %
 					('%s', '%s', '%s', cond, add_cond1), (doctype_name, total, based_on))
 
 			if itemwise_exists:
-				self.get_appr_user_role(itemwise_exists, doctype_name, total, based_on, cond+add_cond1, item,company)
+				self.get_appr_user_role(itemwise_exists, doctype_name, total, based_on, cond+add_cond1, item,organization)
 				chk = 0
 		if chk == 1:
 			if based_on == 'Itemwise Discount':
@@ -61,18 +61,18 @@ class AuthorizationControl(TransactionBase):
 
 			appr = frappe.db.sql("""select value from `tabAuthorization Rule`
 				where transaction = %s and value <= %s and based_on = %s
-				and company = %s and docstatus != 2 %s %s""" %
-				('%s', '%s', '%s', '%s', cond, add_cond2), (doctype_name, total, based_on, company))
+				and organization = %s and docstatus != 2 %s %s""" %
+				('%s', '%s', '%s', '%s', cond, add_cond2), (doctype_name, total, based_on, organization))
 
 			if not appr:
 				appr = frappe.db.sql("""select value from `tabAuthorization Rule`
 					where transaction = %s and value <= %s and based_on = %s
-					and ifnull(company,'') = '' and docstatus != 2 %s %s""" %
+					and ifnull(organization,'') = '' and docstatus != 2 %s %s""" %
 					('%s', '%s', '%s', cond, add_cond2), (doctype_name, total, based_on))
 
-			self.get_appr_user_role(appr, doctype_name, total, based_on, cond+add_cond2, item, company)
+			self.get_appr_user_role(appr, doctype_name, total, based_on, cond+add_cond2, item, organization)
 
-	def bifurcate_based_on_type(self, doctype_name, total, av_dis, based_on, doc_obj, val, company):
+	def bifurcate_based_on_type(self, doctype_name, total, av_dis, based_on, doc_obj, val, organization):
 		add_cond = ''
 		auth_value = av_dis
 
@@ -89,11 +89,11 @@ class AuthorizationControl(TransactionBase):
 		if based_on == 'Itemwise Discount':
 			if doc_obj:
 				for t in doc_obj.get("items"):
-					self.validate_auth_rule(doctype_name, t.discount_percentage, based_on, add_cond, company,t.item_code )
+					self.validate_auth_rule(doctype_name, t.discount_percentage, based_on, add_cond, organization,t.item_code )
 		else:
-			self.validate_auth_rule(doctype_name, auth_value, based_on, add_cond, company)
+			self.validate_auth_rule(doctype_name, auth_value, based_on, add_cond, organization)
 
-	def validate_approving_authority(self, doctype_name,company, total, doc_obj = ''):
+	def validate_approving_authority(self, doctype_name,organization, total, doc_obj = ''):
 		if not frappe.db.count("Authorization Rule"):
 			return
 
@@ -114,11 +114,11 @@ class AuthorizationControl(TransactionBase):
 		# Check for authorization set for individual user
 		based_on = [x[0] for x in frappe.db.sql("""select distinct based_on from `tabAuthorization Rule`
 			where transaction = %s and system_user = %s
-			and (company = %s or ifnull(company,'')='') and docstatus != 2""",
-			(doctype_name, session['user'], company))]
+			and (organization = %s or ifnull(organization,'')='') and docstatus != 2""",
+			(doctype_name, session['user'], organization))]
 
 		for d in based_on:
-			self.bifurcate_based_on_type(doctype_name, total, av_dis, d, doc_obj, 1, company)
+			self.bifurcate_based_on_type(doctype_name, total, av_dis, d, doc_obj, 1, organization)
 
 		# Remove user specific rules from global authorization rules
 		for r in based_on:
@@ -128,12 +128,12 @@ class AuthorizationControl(TransactionBase):
 		based_on = [x[0] for x in frappe.db.sql("""select based_on
 			from `tabAuthorization Rule`
 			where transaction = %s and system_role IN (%s) and based_on IN (%s)
-			and (company = %s or ifnull(company,'')='')
+			and (organization = %s or ifnull(organization,'')='')
 			and docstatus != 2
-		""" % ('%s', "'"+"','".join(frappe.get_roles())+"'", "'"+"','".join(final_based_on)+"'", '%s'), (doctype_name, company))]
+		""" % ('%s', "'"+"','".join(frappe.get_roles())+"'", "'"+"','".join(final_based_on)+"'", '%s'), (doctype_name, organization))]
 
 		for d in based_on:
-			self.bifurcate_based_on_type(doctype_name, total, av_dis, d, doc_obj, 2, company)
+			self.bifurcate_based_on_type(doctype_name, total, av_dis, d, doc_obj, 2, organization)
 
 		# Remove role specific rules from global authorization rules
 		for r in based_on:
@@ -141,21 +141,21 @@ class AuthorizationControl(TransactionBase):
 
 		# Check for global authorization
 		for g in final_based_on:
-			self.bifurcate_based_on_type(doctype_name, total, av_dis, g, doc_obj, 0, company)
+			self.bifurcate_based_on_type(doctype_name, total, av_dis, g, doc_obj, 0, organization)
 
-	def get_value_based_rule(self,doctype_name,employee,total_claimed_amount,company):
+	def get_value_based_rule(self,doctype_name,employee,total_claimed_amount,organization):
 		val_lst =[]
 		val = frappe.db.sql("""select value from `tabAuthorization Rule`
 			where transaction=%s and (to_emp=%s or
 				to_designation IN (select designation from `tabEmployee` where name=%s))
-			and ifnull(value,0)< %s and company = %s and docstatus!=2""",
-			(doctype_name,employee,employee,total_claimed_amount,company))
+			and ifnull(value,0)< %s and organization = %s and docstatus!=2""",
+			(doctype_name,employee,employee,total_claimed_amount,organization))
 
 		if not val:
 			val = frappe.db.sql("""select value from `tabAuthorization Rule`
 				where transaction=%s and (to_emp=%s or
 					to_designation IN (select designation from `tabEmployee` where name=%s))
-				and ifnull(value,0)< %s and ifnull(company,'') = '' and docstatus!=2""",
+				and ifnull(value,0)< %s and ifnull(organization,'') = '' and docstatus!=2""",
 				(doctype_name, employee, employee, total_claimed_amount))
 
 		if val:
@@ -166,15 +166,15 @@ class AuthorizationControl(TransactionBase):
 		max_val = max(val_lst)
 		rule = frappe.db.sql("""select name, to_emp, to_designation, approving_role, approving_user
 			from `tabAuthorization Rule`
-			where transaction=%s and company = %s
+			where transaction=%s and organization = %s
 			and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s))
 			and ifnull(value,0)= %s and docstatus!=2""",
-			(doctype_name,company,employee,employee,flt(max_val)), as_dict=1)
+			(doctype_name,organization,employee,employee,flt(max_val)), as_dict=1)
 
 		if not rule:
 			rule = frappe.db.sql("""select name, to_emp, to_designation, approving_role, approving_user
 				from `tabAuthorization Rule`
-				where transaction=%s and ifnull(company,'') = ''
+				where transaction=%s and ifnull(organization,'') = ''
 				and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s))
 				and ifnull(value,0)= %s and docstatus!=2""",
 				(doctype_name,employee,employee,flt(max_val)), as_dict=1)
@@ -190,20 +190,20 @@ class AuthorizationControl(TransactionBase):
 		if doc_obj:
 			if doctype_name == 'Expense Claim':
 				rule = self.get_value_based_rule(doctype_name, doc_obj.employee,
-					doc_obj.total_claimed_amount, doc_obj.company)
+					doc_obj.total_claimed_amount, doc_obj.organization)
 			elif doctype_name == 'Appraisal':
 				rule = frappe.db.sql("""select name, to_emp, to_designation, approving_role, approving_user
 					from `tabAuthorization Rule` where transaction=%s
 					and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s))
-					and company = %s and docstatus!=2""",
-					(doctype_name,doc_obj.employee, doc_obj.employee, doc_obj.company),as_dict=1)
+					and organization = %s and docstatus!=2""",
+					(doctype_name,doc_obj.employee, doc_obj.employee, doc_obj.organization),as_dict=1)
 
 				if not rule:
 					rule = frappe.db.sql("""select name, to_emp, to_designation, approving_role, approving_user
 						from `tabAuthorization Rule`
 						where transaction=%s and (to_emp=%s or
 							to_designation IN (select designation from `tabEmployee` where name=%s))
-							and ifnull(company,'') = '' and docstatus!=2""",
+							and ifnull(organization,'') = '' and docstatus!=2""",
 							(doctype_name,doc_obj.employee, doc_obj.employee), as_dict=1)
 
 			if rule:

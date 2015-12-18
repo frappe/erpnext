@@ -8,38 +8,38 @@ To start with, go to:
 > Setup > Permissions > User Permissions Manager
 
 <figure>
-	<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-company.png"
+	<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-organization.png"
 		class="img-responsive" alt="User Permissions Manager">
-	<figcaption>User Permissions Manager displaying how users can access only a specific Company.</figcaption>
+	<figcaption>User Permissions Manager displaying how users can access only a specific organization.</figcaption>
 </figure>
 
 #### Example
 
-User 'aromn@example.com' has Sales User role and we want to limit the user to access records for only a specific Company 'Wind Power LLC'.
+User 'aromn@example.com' has Sales User role and we want to limit the user to access records for only a specific organization 'Wind Power LLC'.
 
-  1. We add a User Permissions row for Company.
+  1. We add a User Permissions row for organization.
 	<figure>
-		<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permission-user-limited-by-company.png"
-			class="img-responsive" alt="User Permissions For Company">
-		<figcaption>Add User Permissions row for a combination of User 'aromn@example.com' and Company 'Wind Power LLC'.</figcaption>
+		<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permission-user-limited-by-organization.png"
+			class="img-responsive" alt="User Permissions For organization">
+		<figcaption>Add User Permissions row for a combination of User 'aromn@example.com' and organization 'Wind Power LLC'.</figcaption>
 	</figure>
 
-  1. Also Role "All" has only Read permission for Company, with 'Apply User Permissions' checked.
+  1. Also Role "All" has only Read permission for organization, with 'Apply User Permissions' checked.
 	<figure>
-		<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-company-role-all.png"
-			class="img-responsive" alt="Role Permissions for All on Company">
-		<figcaption>Read Permission with Apply User Permissions checked for DocType Company.</figcaption>
+		<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-organization-role-all.png"
+			class="img-responsive" alt="Role Permissions for All on organization">
+		<figcaption>Read Permission with Apply User Permissions checked for DocType organization.</figcaption>
 	</figure>
 
-  1. The combined effect of the above two rules lead to User 'aromn@example.com' having only Read access to Company 'Wind Power LLC'.
+  1. The combined effect of the above two rules lead to User 'aromn@example.com' having only Read access to organization 'Wind Power LLC'.
 	<figure>
-		<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-company-wind-power-llc.png"
-			class="img-responsive" alt="Effect of Role and User Permissions on Company">
-		<figcaption>Access is limited to Company 'Wind Power LLC'.</figcaption>
+		<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-organization-wind-power-llc.png"
+			class="img-responsive" alt="Effect of Role and User Permissions on organization">
+		<figcaption>Access is limited to organization 'Wind Power LLC'.</figcaption>
 	</figure>
 
-  1. We want this User Permission on Company to get applied on other documents like Quotation, Sales Order, etc.
-These forms have a **Link Field based on Company**. As a result, User Permissions on Company also get applied on these documents, which leads to User 'aromn@example.com' to acces these documents having Company 'Wind Power LLC'.
+  1. We want this User Permission on organization to get applied on other documents like Quotation, Sales Order, etc.
+These forms have a **Link Field based on organization**. As a result, User Permissions on organization also get applied on these documents, which leads to User 'aromn@example.com' to acces these documents having organization 'Wind Power LLC'.
 	<figure>
 		<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-quotation-sales-user.png"
 			class="img-responsive" alt="Sales User Role Permissions for Quotation">
@@ -47,11 +47,11 @@ These forms have a **Link Field based on Company**. As a result, User Permission
 	</figure>
 	<figure>
 		<img src="{{docs_base_url}}/assets/old_images/erpnext/user-permissions-quotation-list.png"
-			class="img-responsive" alt="Quotation List limited to results for Company 'Wind Power LLC'">
-		<figcaption>Quotation List is limited to results for Company 'Wind Power LLC' for User 'aromn@example.com'.</figcaption>
+			class="img-responsive" alt="Quotation List limited to results for organization 'Wind Power LLC'">
+		<figcaption>Quotation List is limited to results for organization 'Wind Power LLC' for User 'aromn@example.com'.</figcaption>
 	</figure>
 
-  1. User Permissions get applied automatically based on Link Fields, just like how it worked for Quotation. But, Lead Form has 4 Link fields: Territory, Company, Lead Owner and Next Contact By. Say, you want Leads to limit access to Users based only on Territory, even though you have defined User Permissions for DocTypes User, Territory and Company. You can do this by setting 'Ignore User Permissions' for Link fields: Company, Lead Owner and Next Contact By.
+  1. User Permissions get applied automatically based on Link Fields, just like how it worked for Quotation. But, Lead Form has 4 Link fields: Territory, organization, Lead Owner and Next Contact By. Say, you want Leads to limit access to Users based only on Territory, even though you have defined User Permissions for DocTypes User, Territory and organization. You can do this by setting 'Ignore User Permissions' for Link fields: organization, Lead Owner and Next Contact By.
 	<figure>
 		<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-lead-role-permissions.png"
 			class="img-responsive" alt="Role Permissions on Lead for Sales User Role">
@@ -60,7 +60,7 @@ These forms have a **Link Field based on Company**. As a result, User Permission
 	<figure>
 		<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-ignore-user-permissions.png"
 			class="img-responsive" alt="Set Ingore User Permissions from Setup > Customize > Customize Form">
-		<figcaption>Check 'Ingore User Permissions' for Company, Lead Owner and Next Contact By fields using Setup > Customize > Customize Form for Lead.</figcaption>
+		<figcaption>Check 'Ingore User Permissions' for organization, Lead Owner and Next Contact By fields using Setup > Customize > Customize Form for Lead.</figcaption>
 	</figure>
 	<figure>
 		<img src="{{docs_base_url}}/assets/old_images/erpnext/user-permissions-lead-based-on-territory.png"

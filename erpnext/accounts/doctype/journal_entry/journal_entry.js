@@ -16,7 +16,7 @@ frappe.ui.form.on("Journal Entry", {
 					"voucher_no": frm.doc.name,
 					"from_date": frm.doc.posting_date,
 					"to_date": frm.doc.posting_date,
-					"company": frm.doc.company,
+					"organization": frm.doc.organization,
 					group_by_voucher: 0
 				};
 				frappe.set_route("query-report", "General Ledger");
@@ -50,7 +50,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 	},
 
 	load_defaults: function() {
-		if(this.frm.doc.__islocal && this.frm.doc.company) {
+		if(this.frm.doc.__islocal && this.frm.doc.organization) {
 			frappe.model.set_default_values(this.frm.doc);
 			$.each(this.frm.doc.accounts || [], function(i, jvd) {
 					frappe.model.set_default_values(jvd);
@@ -71,7 +71,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		me.frm.set_query("cost_center", "accounts", function(doc, cdt, cdn) {
 			return {
 				filters: {
-					company: me.frm.doc.company,
+					organization: me.frm.doc.organization,
 					is_group: 0
 				}
 			};
@@ -155,18 +155,18 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		var d = frappe.get_doc(cdt, cdn);
 		if(d.reference_name) {
 			if (d.reference_type==="Purchase Invoice" && !flt(d.debit)) {
-				this.get_outstanding('Purchase Invoice', d.reference_name, doc.company, d);
+				this.get_outstanding('Purchase Invoice', d.reference_name, doc.organization, d);
 			}
 			if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
-				this.get_outstanding('Sales Invoice', d.reference_name, doc.company, d);
+				this.get_outstanding('Sales Invoice', d.reference_name, doc.organization, d);
 			}
 			if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
-				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
+				this.get_outstanding('Journal Entry', d.reference_name, doc.organization, d);
 			}
 		}
 	},
 
-	get_outstanding: function(doctype, docname, company, child) {
+	get_outstanding: function(doctype, docname, organization, child) {
 		var me = this;
 		var args = {
 			"doctype": doctype,
@@ -174,7 +174,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			"party": child.party,
 			"account": child.account,
 			"account_currency": child.account_currency,
-			"company": company
+			"organization": organization
 		}
 
 		return frappe.call({
@@ -217,14 +217,14 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 cur_frm.script_manager.make(erpnext.accounts.JournalEntry);
 
-cur_frm.cscript.company = function(doc, cdt, cdn) {
+cur_frm.cscript.organization = function(doc, cdt, cdn) {
 	cur_frm.refresh_fields();
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
+	erpnext.get_fiscal_year(doc.organization, doc.posting_date);
 }
 
 cur_frm.cscript.posting_date = function(doc, cdt, cdn){
 	cur_frm.posting_date = cur_frm.doc.posting_date;
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
+	erpnext.get_fiscal_year(doc.organization, doc.posting_date);
 }
 
 cur_frm.cscript.update_totals = function(doc) {
@@ -265,7 +265,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Entry");
 	cur_frm.set_df_property("cheque_date", "reqd", doc.voucher_type=="Bank Entry");
 
-	if(!doc.company) return;
+	if(!doc.organization) return;
 
 	var update_jv_details = function(doc, r) {
 		var jvdetail = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
@@ -284,7 +284,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
 				args: {
 					"voucher_type": doc.voucher_type,
-					"company": doc.company
+					"organization": doc.organization
 				},
 				callback: function(r) {
 					if(r.message) {
@@ -297,7 +297,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 				type:"GET",
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_opening_accounts",
 				args: {
-					"company": doc.company
+					"organization": doc.organization
 				},
 				callback: function(r) {
 					frappe.model.clear_table(doc, "accounts");
@@ -315,12 +315,12 @@ frappe.ui.form.on("Journal Entry Account", {
 	party: function(frm, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
 		if(!d.account && d.party_type && d.party) {
-			if(!frm.doc.company) frappe.throw(__("Please select Company"));
+			if(!frm.doc.organization) frappe.throw(__("Please select organization"));
 			return frm.call({
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_party_account_and_balance",
 				child: d,
 				args: {
-					company: frm.doc.company,
+					organization: frm.doc.organization,
 					party_type: d.party_type,
 					party: d.party
 				}
@@ -331,7 +331,7 @@ frappe.ui.form.on("Journal Entry Account", {
 	account: function(frm, dt, dn) {
 		var d = locals[dt][dn];
 		if(d.account) {
-			if(!frm.doc.company) frappe.throw(__("Please select Company first"));
+			if(!frm.doc.organization) frappe.throw(__("Please select organization first"));
 			if(!frm.doc.posting_date) frappe.throw(__("Please select Posting Date first"));
 
 			return frappe.call({
@@ -339,7 +339,7 @@ frappe.ui.form.on("Journal Entry Account", {
 				args: {
 					account: d.account,
 					date: frm.doc.posting_date,
-					company: frm.doc.company,
+					organization: frm.doc.organization,
 					debit: flt(d.debit_in_account_currency),
 					credit: flt(d.credit_in_account_currency),
 					exchange_rate: d.exchange_rate
@@ -355,11 +355,11 @@ frappe.ui.form.on("Journal Entry Account", {
 	},
 
 	debit_in_account_currency: function(frm, cdt, cdn) {
-		erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
+		erpnext.journal_entry.set_debit_credit_in_organization_currency(frm, cdt, cdn);
 	},
 
 	credit_in_account_currency: function(frm, cdt, cdn) {
-		erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
+		erpnext.journal_entry.set_debit_credit_in_organization_currency(frm, cdt, cdn);
 	},
 
 	debit: function(frm, dt, dn) {
@@ -394,7 +394,7 @@ $.extend(erpnext.journal_entry, {
 		})
 	},
 
-	set_debit_credit_in_company_currency: function(frm, cdt, cdn) {
+	set_debit_credit_in_organization_currency: function(frm, cdt, cdn) {
 		erpnext.journal_entry.set_exchange_rate(frm, cdt, cdn);
 
 		var row = locals[cdt][cdn];
@@ -409,10 +409,10 @@ $.extend(erpnext.journal_entry, {
 	},
 
 	set_exchange_rate: function(frm, cdt, cdn) {
-		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+		var organization_currency = frappe.get_doc(":organization", frm.doc.organization).default_currency;
 		var row = locals[cdt][cdn];
 
-		if(row.account_currency == company_currency || !frm.doc.multi_currency) {
+		if(row.account_currency == organization_currency || !frm.doc.multi_currency) {
 			frappe.model.set_value(cdt, cdn, "exchange_rate", 1);
 		} else if (!row.exchange_rate || row.exchange_rate == 1 || row.account_type == "Bank") {
 			frappe.call({
@@ -420,7 +420,7 @@ $.extend(erpnext.journal_entry, {
 				args: {
 					account: row.account,
 					account_currency: row.account_currency,
-					company: frm.doc.company,
+					organization: frm.doc.organization,
 					reference_type: cstr(row.reference_type),
 					reference_name: cstr(row.reference_name),
 					debit: flt(row.debit_in_account_currency),
@@ -495,12 +495,12 @@ $.extend(erpnext.journal_entry, {
 
 	account_query: function(frm) {
 		var filters = {
-			company: frm.doc.company,
+			organization: frm.doc.organization,
 			is_group: 0
 		};
 		if(!frm.doc.multi_currency) {
 			$.extend(filters, {
-				account_currency: frappe.get_doc(":Company", frm.doc.company).default_currency
+				account_currency: frappe.get_doc(":organization", frm.doc.organization).default_currency
 			});
 		}
 		return { filters: filters };

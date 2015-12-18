@@ -12,7 +12,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Global Defaults",
 					"label": _("Global Settings"),
-					"description": _("Set Default Values like Company, Currency, Current Fiscal Year, etc."),
+					"description": _("Set Default Values like organization, Currency, Current Fiscal Year, etc."),
 					"hide_count": True
 				}
 			]

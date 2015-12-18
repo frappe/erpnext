@@ -42,7 +42,7 @@ Renaming document affects existing transaction where this record is selected. Co
 9. Cost Center	   	
 10. Item Group
 11. Item	   	
-12. Company
+12. organization
 13. Role
 14. Earning Type
 15. Note 

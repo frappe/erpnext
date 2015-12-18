@@ -240,7 +240,7 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 					price_list: frm.doc.buying_price_list,
 					price_list_currency: frm.doc.price_list_currency,
 					plc_conversion_rate: frm.doc.plc_conversion_rate,
-					company: frm.doc.company,
+					organization: frm.doc.organization,
 					is_subcontracted: frm.doc.is_subcontracted,
 					transaction_date: frm.doc.transaction_date || frm.doc.posting_date,
 					ignore_pricing_rule: frm.doc.ignore_pricing_rule

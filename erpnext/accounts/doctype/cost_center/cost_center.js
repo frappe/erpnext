@@ -16,7 +16,7 @@ erpnext.accounts.CostCenterController = frappe.ui.form.Controller.extend({
 			this.frm.set_query("account", "budgets", function() {
 				return {
 					filters:[
-						['Account', 'company', '=', me.frm.doc.company],
+						['Account', 'organization', '=', me.frm.doc.organization],
 						['Account', 'is_group', '=', '0']
 					]
 				}
@@ -27,7 +27,7 @@ erpnext.accounts.CostCenterController = frappe.ui.form.Controller.extend({
 			return {
 				filters:[
 					['Cost Center', 'is_group', '=', '1'],
-					['Cost Center', 'company', '=', me.frm.doc.company],
+					['Cost Center', 'organization', '=', me.frm.doc.organization],
 				]
 			}
 		});
@@ -39,7 +39,7 @@ $.extend(cur_frm.cscript, new erpnext.accounts.CostCenterController({frm: cur_fr
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	var intro_txt = '';
 	cur_frm.toggle_display('cost_center_name', doc.__islocal);
-	cur_frm.toggle_enable(['is_group', 'company'], doc.__islocal);
+	cur_frm.toggle_enable(['is_group', 'organization'], doc.__islocal);
 
 	if(!doc.__islocal && doc.is_group==1) {
 		intro_txt += __('Note: This Cost Center is a Group. Cannot make accounting entries against groups.');
@@ -55,8 +55,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.parent_cost_center = function(doc, cdt, cdn) {
-	if(!doc.company){
-		msgprint(__('Please enter company name first'));
+	if(!doc.organization){
+		msgprint(__('Please enter organization name first'));
 	}
 }
 

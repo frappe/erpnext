@@ -88,7 +88,7 @@ class SalesInvoice(SellingController):
 			# Check for Approving Authority
 			if not self.recurring_id:
 				frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
-				 	self.company, self.base_grand_total, self)
+				 	self.organization, self.base_grand_total, self)
 
 		self.check_prev_docstatus()
 
@@ -182,15 +182,15 @@ class SalesInvoice(SellingController):
 				validate_against_credit_limit = True
 				break
 		if validate_against_credit_limit:
-			check_credit_limit(self.customer, self.company)
+			check_credit_limit(self.customer, self.organization)
 
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
 
 		if not self.debit_to:
-			self.debit_to = get_party_account("Customer", self.customer, self.company)
+			self.debit_to = get_party_account("Customer", self.customer, self.organization)
 		if not self.due_date and self.customer:
-			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
+			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.organization)
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
@@ -218,7 +218,7 @@ class SalesInvoice(SellingController):
 			return
 
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
-		pos = get_pos_profile(self.company)
+		pos = get_pos_profile(self.organization)
 
 		if pos:
 			if not for_validate and not self.customer:
@@ -227,7 +227,7 @@ class SalesInvoice(SellingController):
 				# self.set_customer_defaults()
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
-				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account',
+				'selling_price_list', 'organization', 'select_print_heading', 'cash_bank_account',
 				'write_off_account', 'write_off_cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
@@ -259,8 +259,8 @@ class SalesInvoice(SellingController):
 			super(SalesInvoice, self).get_advances(self.debit_to, "Customer", self.customer,
 				"Sales Invoice Advance", "advances", "credit_in_account_currency", "sales_order")
 
-	def get_company_abbr(self):
-		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
+	def get_organization_abbr(self):
+		return frappe.db.sql("select abbr from tabOrganization where name=%s", self.organization)[0][0]
 
 	def update_against_document_in_jv(self):
 		"""
@@ -316,12 +316,12 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).validate_with_previous_doc({
 			"Sales Order": {
 				"ref_dn_field": "sales_order",
-				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
+				"compare_fields": [["customer", "="], ["organization", "="], ["project_name", "="],
 					["currency", "="]],
 			},
 			"Delivery Note": {
 				"ref_dn_field": "delivery_note",
-				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
+				"compare_fields": [["customer", "="], ["organization", "="], ["project_name", "="],
 					["currency", "="]],
 			},
 		})
@@ -438,12 +438,12 @@ class SalesInvoice(SellingController):
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
-			where ifnull(user,'') = %s and company = %s""", (frappe.session['user'], self.company))
+			where ifnull(user,'') = %s and organization = %s""", (frappe.session['user'], self.organization))
 		warehouse = user_pos_profile[0][1] if user_pos_profile else None
 
 		if not warehouse:
 			global_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
-				where (user is null or user = '') and company = %s""", self.company)
+				where (user is null or user = '') and organization = %s""", self.organization)
 
 			if global_pos_profile:
 				warehouse = global_pos_profile[0][1]
@@ -532,7 +532,7 @@ class SalesInvoice(SellingController):
 					"against": self.against_income_account,
 					"debit": self.base_grand_total,
 					"debit_in_account_currency": self.base_grand_total \
-						if self.party_account_currency==self.company_currency else self.grand_total,
+						if self.party_account_currency==self.organization_currency else self.grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype
 				}, self.party_account_currency)
@@ -548,7 +548,7 @@ class SalesInvoice(SellingController):
 						"against": self.customer,
 						"credit": flt(tax.base_tax_amount_after_discount_amount),
 						"credit_in_account_currency": flt(tax.base_tax_amount_after_discount_amount) \
-							if account_currency==self.company_currency else flt(tax.tax_amount_after_discount_amount),
+							if account_currency==self.organization_currency else flt(tax.tax_amount_after_discount_amount),
 						"cost_center": tax.cost_center
 					}, account_currency)
 				)
@@ -564,7 +564,7 @@ class SalesInvoice(SellingController):
 						"against": self.customer,
 						"credit": item.base_net_amount,
 						"credit_in_account_currency": item.base_net_amount \
-							if account_currency==self.company_currency else item.net_amount,
+							if account_currency==self.organization_currency else item.net_amount,
 						"cost_center": item.cost_center
 					}, account_currency)
 				)
@@ -586,7 +586,7 @@ class SalesInvoice(SellingController):
 					"against": self.cash_bank_account,
 					"credit": self.base_paid_amount,
 					"credit_in_account_currency": self.base_paid_amount \
-						if self.party_account_currency==self.company_currency else self.paid_amount,
+						if self.party_account_currency==self.organization_currency else self.paid_amount,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
@@ -597,7 +597,7 @@ class SalesInvoice(SellingController):
 					"against": self.customer,
 					"debit": self.base_paid_amount,
 					"debit_in_account_currency": self.base_paid_amount \
-						if bank_account_currency==self.company_currency else self.paid_amount
+						if bank_account_currency==self.organization_currency else self.paid_amount
 				}, bank_account_currency)
 			)
 
@@ -614,7 +614,7 @@ class SalesInvoice(SellingController):
 					"against": self.write_off_account,
 					"credit": self.base_write_off_amount,
 					"credit_in_account_currency": self.base_write_off_amount \
-						if self.party_account_currency==self.company_currency else self.write_off_amount,
+						if self.party_account_currency==self.organization_currency else self.write_off_amount,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype
 				}, self.party_account_currency)
@@ -625,7 +625,7 @@ class SalesInvoice(SellingController):
 					"against": self.customer,
 					"debit": self.base_write_off_amount,
 					"debit_in_account_currency": self.base_write_off_amount \
-						if write_off_account_currency==self.company_currency else self.write_off_amount,
+						if write_off_account_currency==self.organization_currency else self.write_off_amount,
 					"cost_center": self.write_off_cost_center
 				}, write_off_account_currency)
 			)
@@ -637,9 +637,9 @@ def get_list_context(context=None):
 	return list_context
 
 @frappe.whitelist()
-def get_bank_cash_account(mode_of_payment, company):
+def get_bank_cash_account(mode_of_payment, organization):
 	account = frappe.db.get_value("Mode of Payment Account",
-		{"parent": mode_of_payment, "company": company}, "default_account")
+		{"parent": mode_of_payment, "organization": organization}, "default_account")
 	if not account:
 		frappe.msgprint(_("Please set default Cash or Bank account in Mode of Payment {0}").format(mode_of_payment))
 	return {

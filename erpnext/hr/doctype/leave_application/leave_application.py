@@ -95,7 +95,7 @@ class LeaveApplication(Document):
 
 	def show_block_day_warning(self):
 		block_dates = get_applicable_block_dates(self.from_date, self.to_date,
-			self.employee, self.company, all_lists=True)
+			self.employee, self.organization, all_lists=True)
 
 		if block_dates:
 			frappe.msgprint(_("Warning: Leave application contains following block dates") + ":")
@@ -104,7 +104,7 @@ class LeaveApplication(Document):
 
 	def validate_block_days(self):
 		block_dates = get_applicable_block_dates(self.from_date, self.to_date,
-			self.employee, self.company)
+			self.employee, self.organization)
 
 		if block_dates and self.status == "Approved":
 			frappe.throw(_("You are not authorized to approve leaves on Block Dates"), LeaveDayBlockedError)
@@ -325,28 +325,28 @@ def is_lwp(leave_type):
 def get_events(start, end):
 	events = []
 
-	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "company"],
+	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "organization"],
 		as_dict=True)
 	if not employee:
 		return events
 
-	employee, company = employee.name, employee.company
+	employee, organization = employee.name, employee.organization
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("Leave Application")
 
 	# show department leaves for employee
 	if "Employee" in frappe.get_roles():
-		add_department_leaves(events, start, end, employee, company)
+		add_department_leaves(events, start, end, employee, organization)
 
 	add_leaves(events, start, end, match_conditions)
 
-	add_block_dates(events, start, end, employee, company)
-	add_holidays(events, start, end, employee, company)
+	add_block_dates(events, start, end, employee, organization)
+	add_holidays(events, start, end, employee, organization)
 
 	return events
 
-def add_department_leaves(events, start, end, employee, company):
+def add_department_leaves(events, start, end, employee, organization):
 	department = frappe.db.get_value("Employee", employee, "department")
 
 	if not department:
@@ -354,7 +354,7 @@ def add_department_leaves(events, start, end, employee, company):
 
 	# department leaves
 	department_employees = frappe.db.sql_list("""select name from tabEmployee where department=%s
-		and company=%s""", (department, company))
+		and organization=%s""", (department, organization))
 
 	match_conditions = "employee in (\"%s\")" % '", "'.join(department_employees)
 	add_leaves(events, start, end, match_conditions=match_conditions)
@@ -383,12 +383,12 @@ def add_leaves(events, start, end, match_conditions=None):
 		if e not in events:
 			events.append(e)
 
-def add_block_dates(events, start, end, employee, company):
+def add_block_dates(events, start, end, employee, organization):
 	# block days
 	from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 
 	cnt = 0
-	block_dates = get_applicable_block_dates(start, end, employee, company, all_lists=True)
+	block_dates = get_applicable_block_dates(start, end, employee, organization, all_lists=True)
 
 	for block_date in block_dates:
 		events.append({
@@ -400,7 +400,7 @@ def add_block_dates(events, start, end, employee, company):
 		})
 		cnt+=1
 
-def add_holidays(events, start, end, employee, company):
+def add_holidays(events, start, end, employee, organization):
 	applicable_holiday_list = frappe.db.get_value("Employee", employee, "holiday_list")
 	if not applicable_holiday_list:
 		return

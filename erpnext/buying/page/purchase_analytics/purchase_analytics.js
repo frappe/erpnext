@@ -21,7 +21,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
-			doctypes: ["Item", "Item Group", "Supplier", "Supplier Type", "Company", "Fiscal Year",
+			doctypes: ["Item", "Item Group", "Supplier", "Supplier Type", "organization", "Fiscal Year",
 				"Purchase Invoice", "Purchase Invoice Item",
 				"Purchase Order", "Purchase Order Item[Purchase Analytics]",
 				"Purchase Receipt", "Purchase Receipt Item[Purchase Analytics]"],
@@ -94,8 +94,8 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 			options:["Purchase Invoice", "Purchase Order", "Purchase Receipt"]},
 		{fieldtype:"Select", label: __("Value or Qty"), fieldname: "value_or_qty",
 			options:["Value", "Quantity"]},
-		{fieldtype:"Select", label: __("Company"), link:"Company", fieldname: "company",
-			default_value: __("Select Company...")},
+		{fieldtype:"Select", label: __("Organization"), link:"organization", fieldname: "organization",
+			default_value: __("Select organization...")},
 		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype:"Select", label: __("Range"), fieldname: "range",
@@ -107,7 +107,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		var me = this;
 		this._super();
 
-		this.trigger_refresh_on_change(["value_or_qty", "tree_type", "based_on", "company"]);
+		this.trigger_refresh_on_change(["value_or_qty", "tree_type", "based_on", "organization"]);
 
 		this.show_zero_check()
 		this.setup_plot_check();
@@ -202,7 +202,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		var is_val = this.value_or_qty == 'Value';
 
 		$.each(this.tl[this.based_on], function(i, tl) {
-			if (me.is_default('company') ? true : tl.company === me.company) {
+			if (me.is_default('organization') ? true : tl.organization === me.organization) {
 				var posting_date = dateutil.str_to_obj(tl.posting_date);
 				if (posting_date >= from_date && posting_date <= to_date) {
 					var item = me.item_by_name[tl[me.tree_grid.item_key]] ||
