@@ -22,8 +22,3 @@ Wenn die Ständige Inventur aktiviert wurde, verbucht das System weiterhin Buchu
 
 <img class="screenshot" alt="Lagerbuch und Reklamation" src="{{docs_base_url}}/assets/img/stock/sales-return-general-ledger.png">
 
-
-Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
-
-<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
-
