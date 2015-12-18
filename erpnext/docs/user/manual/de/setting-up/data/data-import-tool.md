@@ -77,7 +77,7 @@ Wenn Sie ein Formular öffnen, dann sehen Sie in der Seitenleiste rechts einen A
 
 ### Was ist eine CSV-Datei?
 Eine CSV (Durch Kommas getrennte Werte)-Datei ist ein Datensatz, den Sie in ERPNext hochladen können um verschiedene Daten zu aktualisieren. Jedes gebräuchliche Tabellenkalkulationsprogramm wie MS-Excel oder OpenOffice Spreadsheet kann im CSV-Format abspeichern.
-Wenn Sie Microsoft Excel benutzen und nicht-englische Zeichen verwenden, dann sollten Sie Ihre Datei UTF-8-kodiert abspeichern. Bei älteren Versionen von Excel gibt es keinen eindeutigen Weg als UTF-8 zu speichern. Deshalb können Sie die Datei auch ganz einfach als CSV abspeichern, dann mit Notepad öffnen und als UTF-8 abspeichern. (Microsoft Excel kann das leider nicht.)
+Wenn Sie Microsoft Excel benutzen und nicht-englische Zeichen verwenden, dann sollten Sie Ihre Datei UTF-8-kodiert abspeichern. Bei älteren Versionen von Excel gibt es keinen sauberen Weg UTF-8-kodiert zu speichern. Deshalb können Sie die Datei auch ganz einfach als CSV abspeichern, dann mit Notepad öffnen und als UTF-8 abspeichern. (Microsoft Excel kann das leider nicht.)
 
 {next}
 
