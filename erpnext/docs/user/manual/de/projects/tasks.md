@@ -53,7 +53,3 @@ Sie können [Aufwandsabrechnungen]({{docs_base_url}}/user/manual/en/human-resour
 <img class="screenshot" alt="Aufgabe - Gesamtsumme Aufwandsabrechnung" src="{{docs_base_url}}/assets/img/project/task_total_expense_claim.png">
 
 {next}
-
-Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
-
-<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
