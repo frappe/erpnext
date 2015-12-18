@@ -57,9 +57,9 @@ Abbildung: Die Auflistung der Angebote enthält nur Ergebnisse für die Firma Wi
 Abbildung: Der Vertriebsmitarbeiter kann Leads lesen, schreiben und erstellen, eingeschränkt durch Benutzer-Berechtigungen.
 
 <img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-ignore-user-permissions.png"
-			class="img-responsive" alt="Set Ingore User Permissions from Setup > Customize > Customize Form">
+			class="img-responsive" alt="Benutzerberechtigungen ignorieren einstellen">
 
-Abbildung: Markieren Sie "Benutzer-Berechtigungen ignorieren" für die Felder "Firma", "Lead-Inhaber" und "Nächster Kontakt durch" über Setup > Anpassen > Formular anpassen > Lead.
+Abbildung: Markieren von "Benutzer-Berechtigungen ignorieren" für die Felder "Firma", "Lead-Inhaber" und "Nächster Kontakt durch" über Setup > Anpassen > Formular anpassen > Lead.
 
 <img src="{{docs_base_url}}/assets/old_images/erpnext/user-permissions-lead-based-on-territory.png"
 			class="img-responsive" alt="Liste der Leads beschränkt auf Datensätze mit der Region USA">
