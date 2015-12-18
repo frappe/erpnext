@@ -21,27 +21,48 @@ Der Benutzer 'aromn@example.com' hat die Rolle "Nutzer Vertrieb" und wir möchte
 <img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permission-user-limited-by-company.png"
 		class="img-responsive" alt="Benutzerberechtigungen für Firma">
 
-Hinzufügen einer Zeile Benutzer-Berechtigung für die Kombination aus dem Benutzer aromn@example.com und der Firma Wind Power LLC.
+Abbildung: Hinzufügen einer Zeile Benutzer-Berechtigung für die Kombination aus dem Benutzer aromn@example.com und der Firma Wind Power LLC.
 
 2\. Die Rolle "Alle" hat nur Leseberechtigungen für die Firma, "Benutzer-Berechtigungen anwenden" ist aktiviert.
+
+<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-company-role-all.png"
+			class="img-responsive" alt="Rollenberechtigungen für Alle einer Firma">
 
 Abbildung: Leseberechtigung mit aktivierter Option "Benutzer-Berechtigungen anwenden" für den DocType Firma
 
 3\. Die oben abgebildete Kombination der zwei Regeln führt dazu, dass der Benutzer "aromn@example.com" für die Firma Wind Power LLC nur Leserechte hat.
 
+<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-company-wind-power-llc.png"
+			class="img-responsive" alt="Ausworkungen von Rolle und Benutzerberechtigung auf Firma">
+
 Abbildung: Der Zugriff wird auf die Firma Wind Power LLC beschränkt
 
 4\. Wir möchten nun diese Benutzer-Berechtigung für "Firma" auf andere Dokumente wie "Angebot", "Kundenauftrag" etc. übertragen. Diese Formulare haben **Verknüpfungsfelder zu "Firma"**. Als Ergebnis werden Benutzer-Berechtigungen von "Firma" auch auf diese Dokumente übertragen, was dazu führt, dass der Benutzer "aromn@example.com" auf diese Dokumente zugreifen kann, wenn Sie mit Wind Power LLC verbunden sind.
 
+<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-quotation-sales-user.png"
+			class="img-responsive" alt="Benutzerberechtigungen der Rolle Vertriebsmitarbeiter für ein Angebot">
+			
 Abbildung: Benutzer mit der Rolle "Nutzer Vertrieb" können, basierend auf Ihren Benutzer-Berechtigungen, Angebote lesen, schreiben, erstellen, übertragen und stornieren, wenn "Benutzer-Berechtigungen anwenden" aktiviert ist.
+			
+<img src="{{docs_base_url}}/assets/old_images/erpnext/user-permissions-quotation-list.png"
+		class="img-responsive" alt="Angebotsliste beschränkt auf die Ergebnisse für die Firma Wind Power LLC">
 
 Abbildung: Die Auflistung der Angebote enthält nur Ergebnisse für die Firma Wind Power LLC für den Benutzer "aromn@example.com"
 
 5\. Benutzer-Berechtigungen werden automatisch auf Basis von verknüpften Feldern angewandt, genauso wie wir es bei den Angeboten gesehen haben. Aber: Das Lead-Formular hat vier Verknüpfungsfelder: "Region", "Firma", "Eigentümer des Leads" und "Nächster Kontakt durch". Nehmen wir an, Sie möchten dass die Leads den Zugriff des Benutzers basierend auf Ihrer Region einschränken, obwohl Sie für die DocTypes "Benutzer", "Region" und "Firma" Benutzer-Berechtigungen angelegt haben. Dann gehen Sie wir folgt vor: Aktivieren Sie die Option "Benutzer-Berechtigungen ignorieren" für die Verknüpfungsfelder "Firma", "Eigentümer des Leads" und "Nächster Kontakt durch".
 
+<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-lead-role-permissions.png"
+			class="img-responsive" alt="Rollenberechtigungen für den Leaf für die Rolle Vertriebsmitarbeiter">
+
 Abbildung: Der Vertriebsmitarbeiter kann Leads lesen, schreiben und erstellen, eingeschränkt durch Benutzer-Berechtigungen.
 
+<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-ignore-user-permissions.png"
+			class="img-responsive" alt="Set Ingore User Permissions from Setup > Customize > Customize Form">
+
 Abbildung: Markieren Sie "Benutzer-Berechtigungen ignorieren" für die Felder "Firma", "Lead-Inhaber" und "Nächster Kontakt durch" über Setup > Anpassen > Formular anpassen > Lead.
+
+		<img src="{{docs_base_url}}/assets/old_images/erpnext/user-permissions-lead-based-on-territory.png"
+			class="img-responsive" alt="Liste der Leads beschränkt auf Datensätze mit der Region USA">
 
 Abbildung: Aufgrund der obigen Kombination kann der Benutzer "aromn@example.com" nur auf Leads der Region "United States" zugreifen.
 
