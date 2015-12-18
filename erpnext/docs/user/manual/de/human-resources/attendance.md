@@ -11,7 +11,3 @@ Sie können einen monatlichen Report über Ihre Anwesenheiten erhalten, indem Si
 Sie können auch ganz einfach Anwesenheiten über das [Werkzeug zum Hochladen von Anwesenheiten]({{docs_base_url}}/user/manual/en/human-resources/tools/upload-attendance.html) hochladen.
 
 {next}
-
-Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
-
-<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
