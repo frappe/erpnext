@@ -1,10 +1,10 @@
 ## 2.2.1 Benutzer hinzufügen
 
-Benutzer können vom System-Manager hinzugefügt werden. Wenn Sie ein System-Manager sind, können Sie Benutzer hinzufügen über
+Benutzer können vom System-Manager hinzugefügt werden. Wenn Sie ein System-Manager sind, können Sie Benutzer wie im Folgenden dargestellt hinzufügen:
 
 Es gibt zwei Hauptarten von Benutzern: Webbenutzer und Systembenutzer. Systembenutzer sind Leute, die ERPNext im Unternehmen verwenden. Webbenutzer sind Kunden oder Lieferanten (Portalbenutzer).
 
-Für einen Benutzer können viele Informationen eingegeben werden. Im Sinne der Anwenderfreundlichkeit ist die Menge an Informationen, die für Webbenutzer eingegeben werden können, gering: Der Vorname und die Email-Adresse. Wichtig ist, dass Sie erkennen, dass die Email-Adresse der eindeutige Schlüssel (ID) dafür ist, einen Benutzer zu identifizieren.
+Zu einem Benutzer können viele Informationen eingegeben werden. Im Sinne der Anwenderfreundlichkeit ist die Menge an Informationen, die für Webbenutzer eingegeben werden können, gering: Der Vorname und die Email-Adresse. Wichtig ist, dass Sie erkennen, dass die Email-Adresse der eindeutige Schlüssel (ID) dafür ist, einen Benutzer zu identifizieren.
 
 > Einstellungen > Benutzer > Benutzer
 
