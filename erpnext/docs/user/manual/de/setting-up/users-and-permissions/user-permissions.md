@@ -52,7 +52,7 @@ Abbildung: Die Auflistung der Angebote enthält nur Ergebnisse für die Firma Wi
 5\. Benutzer-Berechtigungen werden automatisch auf Basis von verknüpften Feldern angewandt, genauso wie wir es bei den Angeboten gesehen haben. Aber: Das Lead-Formular hat vier Verknüpfungsfelder: "Region", "Firma", "Eigentümer des Leads" und "Nächster Kontakt durch". Nehmen wir an, Sie möchten dass die Leads den Zugriff des Benutzers basierend auf Ihrer Region einschränken, obwohl Sie für die DocTypes "Benutzer", "Region" und "Firma" Benutzer-Berechtigungen angelegt haben. Dann gehen Sie wir folgt vor: Aktivieren Sie die Option "Benutzer-Berechtigungen ignorieren" für die Verknüpfungsfelder "Firma", "Eigentümer des Leads" und "Nächster Kontakt durch".
 
 <img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-lead-role-permissions.png"
-			class="img-responsive" alt="Rollenberechtigungen für den Leaf für die Rolle Vertriebsmitarbeiter">
+			class="img-responsive" alt="Rollenberechtigungen für den Lead für die Rolle Vertriebsmitarbeiter">
 
 Abbildung: Der Vertriebsmitarbeiter kann Leads lesen, schreiben und erstellen, eingeschränkt durch Benutzer-Berechtigungen.
 
@@ -61,7 +61,7 @@ Abbildung: Der Vertriebsmitarbeiter kann Leads lesen, schreiben und erstellen, e
 
 Abbildung: Markieren Sie "Benutzer-Berechtigungen ignorieren" für die Felder "Firma", "Lead-Inhaber" und "Nächster Kontakt durch" über Setup > Anpassen > Formular anpassen > Lead.
 
-		<img src="{{docs_base_url}}/assets/old_images/erpnext/user-permissions-lead-based-on-territory.png"
+<img src="{{docs_base_url}}/assets/old_images/erpnext/user-permissions-lead-based-on-territory.png"
 			class="img-responsive" alt="Liste der Leads beschränkt auf Datensätze mit der Region USA">
 
 Abbildung: Aufgrund der obigen Kombination kann der Benutzer "aromn@example.com" nur auf Leads der Region "United States" zugreifen.
