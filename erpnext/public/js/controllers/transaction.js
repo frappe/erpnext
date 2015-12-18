@@ -865,12 +865,48 @@ frappe.ui.form.on(cur_frm.cscript.tax_table, "included_in_print_rate", function(
 })
 
 frappe.ui.form.on(cur_frm.doctype, "apply_discount_on", function(frm) {
-	cur_frm.cscript.calculate_taxes_and_totals();
+	if(frm.doc.additional_discount_percentage) {
+		frm.trigger("additional_discount_percentage");
+	} else {
+		cur_frm.cscript.calculate_taxes_and_totals();
+	}
 })
 
+frappe.ui.form.on(cur_frm.doctype, "additional_discount_percentage", function(frm) {
+	if (frm.via_discount_amount) {
+		return;
+	}
+	
+	if(!frm.doc.apply_discount_on) {
+		frappe.msgprint(__("Please set 'Apply Additional Discount On'"));
+		return
+	}
+	
+	frm.via_discount_percentage = true;
+	
+	if(frm.doc.additional_discount_percentage && frm.doc.discount_amount) {
+		// Reset discount amount and net / grand total
+		frm.set_value("discount_amount", 0);
+	}
+	
+	var total = flt(frm.doc[frappe.model.scrub(frm.doc.apply_discount_on)]);
+	var discount_amount = flt(total*flt(frm.doc.additional_discount_percentage) / 100, 
+		precision("discount_amount"));
+		
+	frm.set_value("discount_amount", discount_amount);
+	delete frm.via_discount_percentage;
+});
+
 frappe.ui.form.on(cur_frm.doctype, "discount_amount", function(frm) {
-	cur_frm.cscript.set_dynamic_labels();
-	cur_frm.cscript.calculate_taxes_and_totals();
-})
+	frm.cscript.set_dynamic_labels();
+	
+	if (!frm.via_discount_percentage) {
+		frm.via_discount_amount = true;
+		frm.set_value("additional_discount_percentage", 0);
+		delete frm.via_discount_amount;
+	}
+	
+	frm.cscript.calculate_taxes_and_totals();
+});
 
 
