@@ -8,12 +8,9 @@ Beginnen Sie wie folgt:
 
 > Einstellungen > Berechtigungen > Benutzerrechte-Manager
 
+<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-company.png" class="img-responsive" alt="Benutzerberechtigungen-Manager">
 
-<figure>
-	<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-company.png"
-		class="img-responsive" alt="Benutzerberechtigungen-Manager">
-	<figcaption> Übersicht aus dem Benutzerberechtigungs-Manager die aufzeigt, wie Benutzer nur auf bestimmte Firmen zugreifen können.</figcaption>
-</figure>
+Übersicht aus dem Benutzerberechtigungs-Manager die aufzeigt, wie Benutzer nur auf bestimmte Firmen zugreifen können.
 
 #### Beispiel:
 
@@ -21,12 +18,10 @@ Der Benutzer 'aromn@example.com' hat die Rolle "Nutzer Vertrieb" und wir möchte
 
 1\. Wir fügen eine Benutzerberechtigungs-Zeile für die Firma hinzu.
 
-<figure>
-	<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permission-user-limited-by-company.png"
+<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permission-user-limited-by-company.png"
 		class="img-responsive" alt="Benutzerberechtigungen für Firma">
-	<figcaption>Hinzufügen einer Zeile Benutzer-Berechtigung für die Kombination aus dem Benutzer aromn@example.com und der Firma Wind Power LLC.</figcaption>
-</figure>
 
+Hinzufügen einer Zeile Benutzer-Berechtigung für die Kombination aus dem Benutzer aromn@example.com und der Firma Wind Power LLC.
 
 2\. Die Rolle "Alle" hat nur Leseberechtigungen für die Firma, "Benutzer-Berechtigungen anwenden" ist aktiviert.
 
