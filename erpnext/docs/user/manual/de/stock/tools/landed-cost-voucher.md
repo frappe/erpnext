@@ -33,7 +33,3 @@ Im Dokument können Sie verschiedene Kaufbelege auswählen und alle Artikel dara
 3\. Wenn Sie die Ständige Inventur nutzen, verbucht das System Buchungen im Hauptbuch um den Lagerbestand zu korrigieren. Es belastet (erhöht) das Konto des zugehörigen Lagers und entlastet (erniedrigt) das Konto "Ausgaben in Bewertung eingerechnet". Wenn Artikel schon geliefert wurden, wurden die Selbstkosten zur alten Bewertung verbucht. Daher werden Hauptbuch-Buchungen erneut für alle zukünftigen ausgehenden Buchungen verbundener Artikel erstellt um den Selbstkosten-Betrag zu korrigieren.
 
 {next}
-
-Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
-
-<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
