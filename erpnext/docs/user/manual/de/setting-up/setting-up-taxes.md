@@ -48,14 +48,14 @@ In jeder Zeile müssen Sie folgendes angeben:
 
     * Geben Sie in die Spalte "Satz" den aktuellen Wert für den Steuersatz ein.
  
-* Kontenbezeichnung: Die Bezeichnung des Kontos, unter dem diee Steuer verbucht werden soll.
+* Kontenbezeichnung: Die Bezeichnung des Kontos, unter dem diese Steuer verbucht werden soll.
 * Kostenstelle: Wenn es sich bei der Steuer/Abgabe um einen Ertrag handelt (wie z. B. die Versandgebühren) muss sie zu einer Kostenstelle gebucht werden.
 * Beschreibung: Beschreibung der Steuer (wird in Rechnungen und Angeboten angedruckt)
 * Satz: Steuersatz
 * Betrag: Steuerbetrag
 * Gesamtsumme: Gesamtsumme bis zu diesem Punkt.
 * Zeile eingeben: Wenn die Kalkulation auf Basis "vorherige Zeilensumme" erfolgt, können Sie die Zeilennummer auswählen, die für die Kalkulation zugrunde gelegt wird (Standardeinstellung ist hier die vorhergehende Zeile).
-* Ist diese Steuer im Basissatz enthalten?: Wenn Sie diese Option ankreuzen heißt das, dass diese Steuer nicht am Ende der Artikeltabelle angezeigt wird, aber Ihrer Hauptartikeltabelle miteinbezogen wird. Dies ist dann nützlich, wenn Sie Ihrem Kunden einen runden Preis geben wollen (inklusive aller Steuern).
+* Ist diese Steuer im Basissatz enthalten?: Wenn Sie diese Option ankreuzen, heißt das, dass diese Steuer nicht am Ende der Artikeltabelle angezeigt wird, aber in Ihrer Hauptartikeltabelle miteinbezogen wird. Dies ist dann nützlich, wenn Sie Ihrem Kunden einen runden Preis geben wollen (inklusive aller Steuern).
 
 Wenn Sie Ihre Vorlage eingerichtet haben, können Sie diese in Ihren Verkaufstransaktionen auswählen.
 
