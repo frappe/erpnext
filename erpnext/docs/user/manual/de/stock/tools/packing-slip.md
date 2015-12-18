@@ -5,7 +5,3 @@ Ein Packzettel ist ein Dokument, welches die Artikel einer Sendung auflistet. No
 <img class="screenshot" alt="Packzettel" src="{{docs_base_url}}/assets/img/stock/packing-slip.png">
 
 {next}
-
-Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
-
-<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
