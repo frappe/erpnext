@@ -1,6 +1,6 @@
 ## 2.3.1 Systemeinstellungen
 
-Sie können ERPNext so lokalisieren, dass bestimmte Zeitzonen-, Datums-, Zahlen- und Währungsformate benutzt werden, und außerdem den globalen Auslauf von Sitzungen über die Systemeinstellungen festlegen.
+Sie können ERPNext so lokalisieren, dass bestimmte Zeitzonen und Formate für Datum, Zahlen und Währung benutzt werden. Zusätzlich können Sie global den Verfall von Sitzungen über die Systemeinstellungen festlegen.
 
 Um die Systemeinstellungen zu öffnen, gehen Sie zu:
 
