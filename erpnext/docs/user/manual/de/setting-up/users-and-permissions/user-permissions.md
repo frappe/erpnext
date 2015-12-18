@@ -11,7 +11,7 @@ Beginnen Sie wie folgt:
 
 <figure>
 	<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-company.png"
-		class="img-responsive" alt="Benutzerberechntigungen-Manager">
+		class="img-responsive" alt="Benutzerberechtigungen-Manager">
 	<figcaption> Übersicht aus dem Benutzerberechtigungs-Manager die aufzeigt, wie Benutzer nur auf bestimmte Firmen zugreifen können.</figcaption>
 </figure>
 
