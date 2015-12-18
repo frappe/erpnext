@@ -4,7 +4,7 @@ Sie können in ERPNext (sofern es erlaubt ist) ein Dokument umbenennen, indem Si
 
 Alternativ können Sie auch folgenden Weg wählen, wenn Sie eine größere Menge von Datensätzen umbenennen wollen:
 
-Einstellungen > Daten > Werkzeug zum Massen-Umbenennen
+> Einstellungen > Daten > Werkzeug zum Massen-Umbenennen
 
 Dieses Werkzeug ermöglicht es Ihnen, gleichzeitig mehrere Datensätze umzubenennen.
 
