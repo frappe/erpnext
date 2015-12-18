@@ -38,6 +38,7 @@ Fügen Sie abschliessend die CSV-Datei im Abschnitt Import hinzu. Klicken Sie au
 #### Anmerkungen:
 
 1\. Stellen Sie sicher, dass Sie als Verschlüsselung UTF-8 verwenden, wenn Ihre Anwendung das zulässt.
+
 2\. Lassen Sie die Spalte ID für einen neuen Datensatz leer.
 
 ### 4. Hochladen aller Tabellen (übergeordnete und Untertabellen)
@@ -47,7 +48,7 @@ Wenn Sie alle Tabellen auswählen, dann erhalten Sie Spalten für alle Tabellen 
 Wenn Sie mehrere verschiedene Unterzeilen haben, dann müssen Sie einen neuen Hauptartikel in einer neuen Zeile eintragen. Sehen Sie hierzu das Beispiel unten:
 
 
-    Main Table                          ~   Child Table
+    Haupttabelle                        ~   Untertabelle
     Spalte 1    Spalte 2    Spalte 3    ~   Spalte 1    Spalte 2    Spalte 3
     v11         v12         v13             c11         c12         c13
                                             c14         c15         c17
