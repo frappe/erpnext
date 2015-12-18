@@ -17,11 +17,15 @@ Beginnen Sie wie folgt:
 
 #### Beispiel:
 
-Der Benutzer "aromn@example.com" hat die Rolle "Nutzer Vertrieb" und wir möchten die Zugriffsrechte des Benutzers so einschränken, dass er nur auf Datensätze einer bestimmten Firma, nämlich der Wind Power LLC, zugreifen kann.
+Der Benutzer 'aromn@example.com' hat die Rolle "Nutzer Vertrieb" und wir möchten die Zugriffsrechte des Benutzers so einschränken, dass er nur auf Datensätze einer bestimmten Firma, nämlich der Wind Power LLC, zugreifen kann.
 
 1\. Wir fügen eine Benutzerberechtigungs-Zeile für die Firma hinzu.
 
-Abbildung: Hinzufügen einer Zeile "Benutzer-Berechtigung" für die Kombination aus dem Benutzer "aromn@example.com" und der Firma Wind Power LLC
+	<figure>
+		<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permission-user-limited-by-company.png"
+			class="img-responsive" alt="Benutzerberechtigungen für Firma">
+		<figcaption>Hinzufügen einer Zeile 'Benutzer-Berechtigung' für die Kombination aus dem Benutzer 'aromn@example.com' und der Firma Wind Power LLC.</figcaption>
+	</figure>
 
 2\. Die Rolle "Alle" hat nur Leseberechtigungen für die Firma, "Benutzer-Berechtigungen anwenden" ist aktiviert.
 
