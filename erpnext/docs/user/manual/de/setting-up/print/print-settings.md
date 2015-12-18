@@ -1,6 +1,6 @@
 ## 2.6.1 Druckeinstellungen
 
-Über die Druckeinstellungen können Sie Ihre Standarddruckeinstellungen wie Papiergröße, Standardgröße für Text, Ausgabe als PDF oder als HTLM, etc. einstellen.
+Über die Druckeinstellungen können Sie Ihre Standarddruckeinstellungen wie Papiergröße, Standardgröße für Text, Ausgabe als PDF oder als HTML, etc. einstellen.
 
 Um die Druckeinstellungen zu bearbeiten, gehen Sie zu:
 
