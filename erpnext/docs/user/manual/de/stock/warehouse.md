@@ -19,7 +19,3 @@ Bei der täglichen Arbeit kommt es vor, dass fälschlicherweise doppelte Einträ
 > Hinweis: ERPNext berechnet den Lagerbestand für jede mögliche Kombination aus Artikel und Lager. Aus diesem Grund können Sie sich für jeden beliebigen Artikel den Lagerbestand in einem bestimmten Lager zu einem bestimmten Datum anzeigen lassen.
 
 {next}
-
-Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
-
-<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
