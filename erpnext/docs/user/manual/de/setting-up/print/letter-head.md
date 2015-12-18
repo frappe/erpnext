@@ -3,7 +3,7 @@
 Sie können in ERPNext viele verschiedene Briefköpfe verwalten. In einem Briefkopf können Sie:
 
 * Ein Bild mit Ihrem Logo, Ihrem Firmensymbol oder anderen Informationen, die Sie auf dem Briefkopf haben möchten, erstellen.
-* Das Bild an den Datensatz Ihres Briefkopfes anhängen, indem Sie auf das Bildsymbol klicken um automatisch den HTML-Kode zu generieren, den Sie für dem Briefkopf benötigen.
+* Das Bild an den Datensatz Ihres Briefkopfes anhängen, indem Sie auf das Bildsymbol klicken um automatisch den HTML-Code zu generieren, den Sie für dem Briefkopf benötigen.
 * Wenn Sie möchten, dass dies der Standardbriefkopf wird, klicken Sie auf "Ist Standard".
 
 Ihr Briefkopf erscheint nun auf allen Ausdrucken und E-Mails.
