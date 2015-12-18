@@ -1,7 +1,7 @@
 [
  {
   "buying_price_list": "_Test Price List", 
-  "organization": "_Test organization", 
+  "organization": "_Test Organization", 
   "conversion_rate": 1.0, 
   "currency": "INR", 
   "doctype": "Supplier Quotation", 
@@ -22,7 +22,7 @@
     "qty": 10.0, 
     "rate": 500.0, 
     "uom": "_Test UOM", 
-    "warehouse": "_Test Warehouse - _TC"
+    "warehouse": "_Test Warehouse - _TO"
    }
   ], 
   "supplier": "_Test Supplier", 

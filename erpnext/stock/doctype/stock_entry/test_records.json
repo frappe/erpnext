@@ -1,19 +1,19 @@
 [
  {
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Stock Entry",
   "items": [
    {
     "conversion_factor": 1.0,
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "doctype": "Stock Entry Detail",
-    "expense_account": "Stock Adjustment - _TC",
+    "expense_account": "Stock Adjustment - _TO",
     "basic_rate": 100,
     "item_code": "_Test Item",
     "parentfield": "items",
     "qty": 50.0,
     "stock_uom": "_Test UOM",
-    "t_warehouse": "_Test Warehouse - _TC",
+    "t_warehouse": "_Test Warehouse - _TO",
     "transfer_qty": 50.0,
     "uom": "_Test UOM"
    }
@@ -23,20 +23,20 @@
 
 
  {
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Stock Entry",
   "fiscal_year": "_Test Fiscal Year 2013",
   "items": [
    {
     "conversion_factor": 1.0,
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "doctype": "Stock Entry Detail",
-    "expense_account": "Stock Adjustment - _TC",
+    "expense_account": "Stock Adjustment - _TO",
     "basic_rate": 100,
     "item_code": "_Test Item",
     "parentfield": "items",
     "qty": 40.0,
-    "s_warehouse": "_Test Warehouse - _TC",
+    "s_warehouse": "_Test Warehouse - _TO",
     "stock_uom": "_Test UOM",
     "transfer_qty": 40.0,
     "uom": "_Test UOM"
@@ -48,22 +48,22 @@
 
 
  {
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Stock Entry",
   "fiscal_year": "_Test Fiscal Year 2013",
   "items": [
    {
     "conversion_factor": 1.0,
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "doctype": "Stock Entry Detail",
-    "expense_account": "Stock Adjustment - _TC",
+    "expense_account": "Stock Adjustment - _TO",
     "basic_rate": 100,
     "item_code": "_Test Item",
     "parentfield": "items",
     "qty": 45.0,
-    "s_warehouse": "_Test Warehouse - _TC",
+    "s_warehouse": "_Test Warehouse - _TO",
     "stock_uom": "_Test UOM",
-    "t_warehouse": "_Test Warehouse 1 - _TC",
+    "t_warehouse": "_Test Warehouse 1 - _TO",
     "transfer_qty": 45.0,
     "uom": "_Test UOM"
    }
@@ -74,35 +74,35 @@
 
 
  {
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Stock Entry",
   "fiscal_year": "_Test Fiscal Year 2013",
   "items": [
    {
     "conversion_factor": 1.0,
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "doctype": "Stock Entry Detail",
-    "expense_account": "Stock Adjustment - _TC",
+    "expense_account": "Stock Adjustment - _TO",
     "basic_rate": 100,
     "item_code": "_Test Item",
     "parentfield": "items",
     "qty": 50.0,
-    "s_warehouse": "_Test Warehouse - _TC",
+    "s_warehouse": "_Test Warehouse - _TO",
     "stock_uom": "_Test UOM",
     "transfer_qty": 50.0,
     "uom": "_Test UOM"
    },
    {
     "conversion_factor": 1.0,
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "doctype": "Stock Entry Detail",
-    "expense_account": "Stock Adjustment - _TC",
+    "expense_account": "Stock Adjustment - _TO",
     "basic_rate": 5000,
     "item_code": "_Test Item Home Desktop 100",
     "parentfield": "items",
     "qty": 1,
     "stock_uom": "_Test UOM",
-    "t_warehouse": "_Test Warehouse - _TC",
+    "t_warehouse": "_Test Warehouse - _TO",
     "transfer_qty": 1,
     "uom": "_Test UOM"
    }

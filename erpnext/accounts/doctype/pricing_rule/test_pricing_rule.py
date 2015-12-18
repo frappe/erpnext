@@ -22,13 +22,13 @@ class TestPricingRule(unittest.TestCase):
 			"price_or_discount": "Discount Percentage",
 			"price": 0,
 			"discount_percentage": 10,
-			"organization": "_Test organization"
+			"organization": "_Test Organization"
 		}
 		frappe.get_doc(test_record.copy()).insert()
 
 		args = frappe._dict({
 			"item_code": "_Test Item",
-			"organization": "_Test organization",
+			"organization": "_Test Organization",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
 			"parenttype": "Sales Order",

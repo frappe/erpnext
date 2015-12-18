@@ -1,7 +1,7 @@
 [
  {
   "buying_price_list": "_Test Price List",
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "conversion_rate": 1.0,
   "currency": "INR",
   "doctype": "Purchase Receipt",
@@ -10,7 +10,7 @@
   "base_net_total": 500.0,
   "taxes": [
    {
-    "account_head": "_Test Account Shipping Charges - _TC",
+    "account_head": "_Test Account Shipping Charges - _TO",
     "add_deduct_tax": "Add",
     "category": "Valuation and Total",
     "charge_type": "Actual",
@@ -19,10 +19,10 @@
     "parentfield": "taxes",
     "rate": 100.0,
     "tax_amount": 100.0,
-	"cost_center": "Main - _TC"
+	"cost_center": "Main - _TO"
    },
    {
-    "account_head": "_Test Account VAT - _TC",
+    "account_head": "_Test Account VAT - _TO",
     "add_deduct_tax": "Add",
     "category": "Total",
     "charge_type": "Actual",
@@ -31,10 +31,10 @@
     "parentfield": "taxes",
     "rate": 120.0,
     "tax_amount": 120.0,
-	"cost_center": "Main - _TC"
+	"cost_center": "Main - _TO"
    },
    {
-    "account_head": "_Test Account Customs Duty - _TC",
+    "account_head": "_Test Account Customs Duty - _TO",
     "add_deduct_tax": "Add",
     "category": "Valuation",
     "charge_type": "Actual",
@@ -43,7 +43,7 @@
     "parentfield": "taxes",
     "rate": 150.0,
     "tax_amount": 150.0,
-	"cost_center": "Main - _TC"
+	"cost_center": "Main - _TO"
    }
   ],
   "items": [
@@ -61,8 +61,8 @@
     "rejected_qty": 0.0,
     "stock_uom": "_Test UOM",
     "uom": "_Test UOM",
-    "warehouse": "_Test Warehouse - _TC",
-	"cost_center": "Main - _TC"
+    "warehouse": "_Test Warehouse - _TO",
+	"cost_center": "Main - _TO"
    },
    {
     "base_amount": 250.0,
@@ -78,8 +78,8 @@
     "rejected_qty": 0.0,
     "stock_uom": "_Test UOM",
     "uom": "_Test UOM",
-    "warehouse": "_Test Warehouse 1 - _TC",
-	"cost_center": "Main - _TC"
+    "warehouse": "_Test Warehouse 1 - _TO",
+	"cost_center": "Main - _TO"
    }
   ],
   "supplier": "_Test Supplier"
@@ -88,7 +88,7 @@
 
  {
   "buying_price_list": "_Test Price List",
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "conversion_rate": 1.0,
   "currency": "INR",
   "doctype": "Purchase Receipt",
@@ -112,11 +112,11 @@
     "rejected_qty": 0.0,
     "stock_uom": "_Test UOM",
     "uom": "_Test UOM",
-    "warehouse": "_Test Warehouse - _TC",
-	"cost_center": "Main - _TC"
+    "warehouse": "_Test Warehouse - _TO",
+	"cost_center": "Main - _TO"
    }
   ],
   "supplier": "_Test Supplier",
-  "supplier_warehouse": "_Test Warehouse - _TC"
+  "supplier_warehouse": "_Test Warehouse - _TO"
  }
 ]

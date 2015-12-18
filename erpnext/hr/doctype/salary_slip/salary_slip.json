@@ -893,7 +893,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2015-12-14 07:07:23.233745", 
+ "modified": "2015-12-18 02:24:44.474877", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 
@@ -913,12 +913,11 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "restrict": 0, 
    "role": "HR User", 
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 1, 
-   "user_permission_doctypes": "[\"Branch\",\"Organization\",\"Department\",\"Designation\",\"Fiscal Year\",\"Salary Slip\"]", 
+   "user_permission_doctypes": "[\"Employee\"]", 
    "write": 1
   }, 
   {
@@ -935,7 +934,6 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "restrict": 0, 
    "role": "HR Manager", 
    "set_user_permissions": 0, 
    "share": 1, 
@@ -956,11 +954,11 @@
    "print": 0, 
    "read": 1, 
    "report": 0, 
-   "restrict": 0, 
    "role": "Employee", 
    "set_user_permissions": 0, 
    "share": 0, 
    "submit": 0, 
+   "user_permission_doctypes": "[\"Employee\"]", 
    "write": 0
   }
  ], 

@@ -40,7 +40,7 @@ class TestStockReconciliation(unittest.TestCase):
 			
 			last_sle = get_previous_sle({
 				"item_code": "_Test Item",
-				"warehouse": "_Test Warehouse - _TC",
+				"warehouse": "_Test Warehouse - _TO",
 				"posting_date": d[2],
 				"posting_time": d[3]
 			})
@@ -67,7 +67,7 @@ class TestStockReconciliation(unittest.TestCase):
 				# no gl entries
 				self.assertTrue(frappe.db.get_value("Stock Ledger Entry",
 					{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}))
-				self.assertFalse(get_stock_and_account_difference(["_Test Account Stock In Hand - _TC"]))
+				self.assertFalse(get_stock_and_account_difference(["_Test Account Stock In Hand - _TO"]))
 
 			stock_reco.cancel()
 
@@ -83,27 +83,27 @@ class TestStockReconciliation(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		make_stock_entry(posting_date="2012-12-15", posting_time="02:00", item_code="_Test Item",
-			target="_Test Warehouse - _TC", qty=10, basic_rate=700)
+			target="_Test Warehouse - _TO", qty=10, basic_rate=700)
 
 		make_stock_entry(posting_date="2012-12-25", posting_time="03:00", item_code="_Test Item",
-			source="_Test Warehouse - _TC", qty=15)
+			source="_Test Warehouse - _TO", qty=15)
 
 		make_stock_entry(posting_date="2013-01-05", posting_time="07:00", item_code="_Test Item",
-			target="_Test Warehouse - _TC", qty=15, basic_rate=1200)
+			target="_Test Warehouse - _TO", qty=15, basic_rate=1200)
 
 def create_stock_reconciliation(**args):
 	args = frappe._dict(args)
 	sr = frappe.new_doc("Stock Reconciliation")
 	sr.posting_date = args.posting_date or nowdate()
 	sr.posting_time = args.posting_time or nowtime()
-	sr.organization = args.organization or "_Test organization"
+	sr.organization = args.organization or "_Test Organization"
 	sr.fiscal_year = get_fiscal_year(sr.posting_date)[0]
 	sr.expense_account = args.expense_account or \
-		("Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC")
-	sr.cost_center = args.cost_center or "_Test Cost Center - _TC"
+		("Stock Adjustment - _TO" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TO")
+	sr.cost_center = args.cost_center or "_Test Cost Center - _TO"
 	sr.append("items", {
 		"item_code": args.item_code or "_Test Item",
-		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"warehouse": args.warehouse or "_Test Warehouse - _TO",
 		"qty": args.qty,
 		"valuation_rate": args.rate
 	})
@@ -117,7 +117,7 @@ def create_stock_reconciliation(**args):
 def set_valuation_method(item_code, valuation_method):
 	frappe.db.set_value("Item", item_code, "valuation_method", valuation_method)
 
-	for warehouse in frappe.get_all("Warehouse", filters={"organization": "_Test organization"}):
+	for warehouse in frappe.get_all("Warehouse", filters={"organization": "_Test Organization"}):
 		update_entries_after({
 			"item_code": item_code,
 			"warehouse": warehouse.name

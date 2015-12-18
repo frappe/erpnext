@@ -1,7 +1,7 @@
 [
  {
-  "abbr": "_TC",
-  "organization_name": "_Test organization",
+  "abbr": "_TO",
+  "organization_name": "_Test Organization",
   "country": "India",
   "default_currency": "INR",
   "doctype": "Organization",
@@ -9,8 +9,8 @@
   "chart_of_accounts": "Standard"
  },
  {
-  "abbr": "_TC1",
-  "organization_name": "_Test organization 1",
+  "abbr": "_TO1",
+  "organization_name": "_Test Organization 1",
   "country": "United States",
   "default_currency": "USD",
   "doctype": "Organization",
@@ -18,8 +18,8 @@
   "chart_of_accounts": "Standard"
  },
  {
-  "abbr": "_TC2",
-  "organization_name": "_Test organization 2",
+  "abbr": "_TO2",
+  "organization_name": "_Test Organization 2",
   "default_currency": "EUR",
   "country": "Germany",
   "doctype": "Organization",

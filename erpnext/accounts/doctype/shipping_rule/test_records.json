@@ -1,9 +1,9 @@
 [
  {
-  "account": "_Test Account Shipping Charges - _TC",
+  "account": "_Test Account Shipping Charges - _TO",
   "calculate_based_on": "Net Total",
-  "organization": "_Test organization",
-  "cost_center": "_Test Cost Center - _TC",
+  "organization": "_Test Organization",
+  "cost_center": "_Test Cost Center - _TO",
   "doctype": "Shipping Rule",
   "label": "_Test Shipping Rule",
   "name": "_Test Shipping Rule",
@@ -32,10 +32,10 @@
   "worldwide_shipping": 1
  },
  {
-  "account": "_Test Account Shipping Charges - _TC",
+  "account": "_Test Account Shipping Charges - _TO",
   "calculate_based_on": "Net Total",
-  "organization": "_Test organization",
-  "cost_center": "_Test Cost Center - _TC",
+  "organization": "_Test Organization",
+  "cost_center": "_Test Cost Center - _TO",
   "doctype": "Shipping Rule",
   "label": "_Test Shipping Rule - India",
   "name": "_Test Shipping Rule - India",
@@ -66,10 +66,10 @@
   ]
  },
  {
-  "account": "_Test Account Shipping Charges - _TC",
+  "account": "_Test Account Shipping Charges - _TO",
   "calculate_based_on": "Net Total",
-  "organization": "_Test organization",
-  "cost_center": "_Test Cost Center - _TC",
+  "organization": "_Test Organization",
+  "cost_center": "_Test Cost Center - _TO",
   "doctype": "Shipping Rule",
   "label": "_Test Shipping Rule - Rest of the World",
   "name": "_Test Shipping Rule - Rest of the World",

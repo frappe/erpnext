@@ -2,11 +2,11 @@
  {
   "cheque_date": "2013-03-14",
   "cheque_no": "33",
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Journal Entry",
   "accounts": [
    {
-    "account": "_Test Receivable - _TC",
+    "account": "_Test Receivable - _TO",
 	"party_type": "Customer",
 	"party": "_Test Customer",
     "credit_in_account_currency": 400.0,
@@ -15,7 +15,7 @@
     "parentfield": "accounts"
    },
    {
-    "account": "_Test Bank - _TC",
+    "account": "_Test Bank - _TO",
     "credit_in_account_currency": 0.0,
     "debit_in_account_currency": 400.0,
     "doctype": "Journal Entry Account",
@@ -33,11 +33,11 @@
  {
   "cheque_date": "2013-02-14",
   "cheque_no": "33",
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Journal Entry",
   "accounts": [
    {
-    "account": "_Test Payable - _TC",
+    "account": "_Test Payable - _TO",
 	"party_type": "Supplier",
 	"party": "_Test Supplier",
     "credit_in_account_currency": 0.0,
@@ -46,7 +46,7 @@
     "parentfield": "accounts"
    },
    {
-    "account": "_Test Bank - _TC",
+    "account": "_Test Bank - _TO",
     "credit_in_account_currency": 400.0,
     "debit_in_account_currency": 0.0,
     "doctype": "Journal Entry Account",
@@ -64,11 +64,11 @@
  {
   "cheque_date": "2013-02-14",
   "cheque_no": "33",
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Journal Entry",
   "accounts": [
    {
-    "account": "_Test Receivable - _TC",
+    "account": "_Test Receivable - _TO",
 	"party_type": "Customer",
 	"party": "_Test Customer",
     "credit_in_account_currency": 0.0,
@@ -77,8 +77,8 @@
     "parentfield": "accounts"
    },
    {
-    "account": "Sales - _TC",
-    "cost_center": "_Test Cost Center - _TC",
+    "account": "Sales - _TO",
+    "cost_center": "_Test Cost Center - _TO",
     "credit_in_account_currency": 400.0,
     "debit_in_account_currency": 0.0,
     "doctype": "Journal Entry Account",

@@ -7,11 +7,11 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 
 class TestGLEntry(unittest.TestCase):
 	def test_round_off_entry(self):
-		frappe.db.set_value("Organization", "_Test organization", "round_off_account", "_Test Write Off - _TC")
-		frappe.db.set_value("Organization", "_Test organization", "round_off_cost_center", "_Test Cost Center - _TC")
+		frappe.db.set_value("Organization", "_Test Organization", "round_off_account", "_Test Write Off - _TO")
+		frappe.db.set_value("Organization", "_Test Organization", "round_off_cost_center", "_Test Cost Center - _TO")
 
-		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 100, "_Test Cost Center - _TC", submit=False)
+		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TO",
+			"_Test Bank - _TO", 100, "_Test Cost Center - _TO", submit=False)
 
 		jv.get("accounts")[0].debit = 100.01
 		jv.flags.ignore_validate = True
@@ -19,7 +19,7 @@ class TestGLEntry(unittest.TestCase):
 
 		round_off_entry = frappe.db.sql("""select name from `tabGL Entry`
 			where voucher_type='Journal Entry' and voucher_no = %s
-			and account='_Test Write Off - _TC' and cost_center='_Test Cost Center - _TC'
+			and account='_Test Write Off - _TO' and cost_center='_Test Cost Center - _TO'
 			and debit = 0 and credit = '.01'""", jv.name)
 
 		self.assertTrue(round_off_entry)

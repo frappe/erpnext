@@ -1,6 +1,6 @@
 [
  {
-  "organization": "_Test organization", 
+  "organization": "_Test Organization", 
   "date_of_birth": "1980-01-01", 
   "date_of_joining": "2010-01-01", 
   "department": "_Test Department", 
@@ -12,7 +12,7 @@
   "user_id": "test@example.com"
  }, 
  {
-  "organization": "_Test organization", 
+  "organization": "_Test Organization", 
   "date_of_birth": "1980-01-01", 
   "date_of_joining": "2010-01-01", 
   "department": "_Test Department 1", 
@@ -24,7 +24,7 @@
   "user_id": "test1@example.com"
  }, 
  {
-  "organization": "_Test organization", 
+  "organization": "_Test Organization", 
   "date_of_birth": "1980-01-01", 
   "date_of_joining": "2010-01-01", 
   "department": "_Test Department 1", 

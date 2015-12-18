@@ -36,9 +36,9 @@ class TestStockEntry(unittest.TestCase):
 	def test_fifo(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 		item_code = "_Test Item 2"
-		warehouse = "_Test Warehouse - _TC"
+		warehouse = "_Test Warehouse - _TO"
 
-		create_stock_reconciliation(item_code="_Test Item 2", warehouse="_Test Warehouse - _TC",
+		create_stock_reconciliation(item_code="_Test Item 2", warehouse="_Test Warehouse - _TO",
 			qty=0, rate=100)
 
 		make_stock_entry(item_code=item_code, target=warehouse, qty=1, basic_rate=10)
@@ -88,14 +88,14 @@ class TestStockEntry(unittest.TestCase):
 			template = item
 
 		projected_qty, actual_qty = frappe.db.get_value("Bin", {"item_code": item_code,
-			"warehouse": "_Test Warehouse - _TC"}, ["projected_qty", "actual_qty"]) or [0, 0]
+			"warehouse": "_Test Warehouse - _TO"}, ["projected_qty", "actual_qty"]) or [0, 0]
 
 		# stock entry reqd for auto-reorder
-		create_stock_reconciliation(item_code=item_code, warehouse="_Test Warehouse - _TC",
+		create_stock_reconciliation(item_code=item_code, warehouse="_Test Warehouse - _TO",
 			qty = actual_qty + abs(projected_qty) + 10, rate=100)
 
 		projected_qty = frappe.db.get_value("Bin", {"item_code": item_code,
-			"warehouse": "_Test Warehouse - _TC"}, "projected_qty") or 0
+			"warehouse": "_Test Warehouse - _TO"}, "projected_qty") or 0
 
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
 
@@ -120,19 +120,19 @@ class TestStockEntry(unittest.TestCase):
 	def test_material_receipt_gl_entry(self):
 		set_perpetual_inventory()
 
-		mr = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
+		mr = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TO",
 			qty=50, basic_rate=100)
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
 			"warehouse": mr.get("items")[0].t_warehouse})
 
 		self.check_stock_ledger_entries("Stock Entry", mr.name,
-			[["_Test Item", "_Test Warehouse - _TC", 50.0]])
+			[["_Test Item", "_Test Warehouse - _TO", 50.0]])
 
 		self.check_gl_entries("Stock Entry", mr.name,
 			sorted([
 				[stock_in_hand_account, 5000.0, 0.0],
-				["Stock Adjustment - _TC", 0.0, 5000.0]
+				["Stock Adjustment - _TO", 0.0, 5000.0]
 			])
 		)
 
@@ -147,16 +147,16 @@ class TestStockEntry(unittest.TestCase):
 	def test_material_issue_gl_entry(self):
 		set_perpetual_inventory()
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TO",
 			qty=50, basic_rate=100)
 
-		mi = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC", qty=40)
+		mi = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TO", qty=40)
 
 		self.check_stock_ledger_entries("Stock Entry", mi.name,
-			[["_Test Item", "_Test Warehouse - _TC", -40.0]])
+			[["_Test Item", "_Test Warehouse - _TO", -40.0]])
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"warehouse": "_Test Warehouse - _TC"})
+			"warehouse": "_Test Warehouse - _TO"})
 
 		stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
 			"voucher_no": mi.name}, "stock_value_difference"))
@@ -164,7 +164,7 @@ class TestStockEntry(unittest.TestCase):
 		self.check_gl_entries("Stock Entry", mi.name,
 			sorted([
 				[stock_in_hand_account, 0.0, stock_value_diff],
-				["Stock Adjustment - _TC", stock_value_diff, 0.0]
+				["Stock Adjustment - _TO", stock_value_diff, 0.0]
 			])
 		)
 
@@ -181,11 +181,11 @@ class TestStockEntry(unittest.TestCase):
 
 		create_stock_reconciliation(qty=100, rate=100)
 
-		mtn = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC",
-			target="_Test Warehouse 1 - _TC", qty=45)
+		mtn = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TO",
+			target="_Test Warehouse 1 - _TO", qty=45)
 
 		self.check_stock_ledger_entries("Stock Entry", mtn.name,
-			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
+			[["_Test Item", "_Test Warehouse - _TO", -45.0], ["_Test Item", "_Test Warehouse 1 - _TO", 45.0]])
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
 			"warehouse": mtn.get("items")[0].s_warehouse})
@@ -194,7 +194,7 @@ class TestStockEntry(unittest.TestCase):
 			"warehouse": mtn.get("items")[0].t_warehouse})
 
 		stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
-			"voucher_no": mtn.name, "warehouse": "_Test Warehouse - _TC"}, "stock_value_difference"))
+			"voucher_no": mtn.name, "warehouse": "_Test Warehouse - _TO"}, "stock_value_difference"))
 
 		self.check_gl_entries("Stock Entry", mtn.name,
 			sorted([
@@ -213,8 +213,8 @@ class TestStockEntry(unittest.TestCase):
 	def test_repack_no_change_in_valuation(self):
 		set_perpetual_inventory(0)
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
-		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TO", qty=50, basic_rate=100)
+		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TO",
 			qty=50, basic_rate=100)
 
 		repack = frappe.copy_doc(test_records[3])
@@ -224,8 +224,8 @@ class TestStockEntry(unittest.TestCase):
 		repack.submit()
 
 		self.check_stock_ledger_entries("Stock Entry", repack.name,
-			[["_Test Item", "_Test Warehouse - _TC", -50.0],
-				["_Test Item Home Desktop 100", "_Test Warehouse - _TC", 1]])
+			[["_Test Item", "_Test Warehouse - _TO", -50.0],
+				["_Test Item Home Desktop 100", "_Test Warehouse - _TO", 1]])
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s
@@ -237,7 +237,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_repack_with_additional_costs(self):
 		set_perpetual_inventory()
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TO", qty=50, basic_rate=100)
 		repack = frappe.copy_doc(test_records[3])
 		repack.posting_date = nowdate()
 		repack.posting_time = nowtime()
@@ -271,7 +271,7 @@ class TestStockEntry(unittest.TestCase):
 		self.check_gl_entries("Stock Entry", repack.name,
 			sorted([
 				[stock_in_hand_account, 1200, 0.0],
-				["Expenses Included In Valuation - _TC", 0.0, 1200.0]
+				["Expenses Included In Valuation - _TO", 0.0, 1200.0]
 			])
 		)
 		set_perpetual_inventory(0)
@@ -355,12 +355,12 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_serial_no_not_exists(self):
 		frappe.db.sql("delete from `tabSerial No` where name in ('ABCD', 'EFGH')")
-		make_serialized_item(target_warehouse="_Test Warehouse 1 - _TC")
+		make_serialized_item(target_warehouse="_Test Warehouse 1 - _TO")
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Issue"
 		se.get("items")[0].item_code = "_Test Serialized Item With Series"
 		se.get("items")[0].qty = 2
-		se.get("items")[0].s_warehouse = "_Test Warehouse 1 - _TC"
+		se.get("items")[0].s_warehouse = "_Test Warehouse 1 - _TO"
 		se.get("items")[0].t_warehouse = None
 		se.get("items")[0].serial_no = "ABCD\nEFGH"
 		se.get("items")[0].transfer_qty = 2
@@ -399,8 +399,8 @@ class TestStockEntry(unittest.TestCase):
 		se.get("items")[0].qty = 1
 		se.get("items")[0].transfer_qty = 1
 		se.get("items")[0].serial_no = serial_nos[0]
-		se.get("items")[0].s_warehouse = "_Test Warehouse - _TC"
-		se.get("items")[0].t_warehouse = "_Test Warehouse 1 - _TC"
+		se.get("items")[0].s_warehouse = "_Test Warehouse - _TO"
+		se.get("items")[0].t_warehouse = "_Test Warehouse 1 - _TO"
 		se.insert()
 		self.assertRaises(SerialNoItemError, se.submit)
 
@@ -414,17 +414,17 @@ class TestStockEntry(unittest.TestCase):
 		se.get("items")[0].qty = 1
 		se.get("items")[0].transfer_qty = 1
 		se.get("items")[0].serial_no = serial_no
-		se.get("items")[0].s_warehouse = "_Test Warehouse - _TC"
-		se.get("items")[0].t_warehouse = "_Test Warehouse 1 - _TC"
+		se.get("items")[0].s_warehouse = "_Test Warehouse - _TO"
+		se.get("items")[0].t_warehouse = "_Test Warehouse 1 - _TO"
 		se.insert()
 		se.submit()
-		self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TC")
+		self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TO")
 
 		se.cancel()
-		self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse - _TC")
+		self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse - _TO")
 
 	def test_serial_warehouse_error(self):
-		make_serialized_item(target_warehouse="_Test Warehouse 1 - _TC")
+		make_serialized_item(target_warehouse="_Test Warehouse 1 - _TO")
 
 		t = make_serialized_item()
 		serial_nos = get_serial_nos(t.get("items")[0].serial_no)
@@ -435,8 +435,8 @@ class TestStockEntry(unittest.TestCase):
 		se.get("items")[0].qty = 1
 		se.get("items")[0].transfer_qty = 1
 		se.get("items")[0].serial_no = serial_nos[0]
-		se.get("items")[0].s_warehouse = "_Test Warehouse 1 - _TC"
-		se.get("items")[0].t_warehouse = "_Test Warehouse - _TC"
+		se.get("items")[0].s_warehouse = "_Test Warehouse 1 - _TO"
+		se.get("items")[0].t_warehouse = "_Test Warehouse - _TO"
 		se.insert()
 		self.assertRaises(SerialNoWarehouseError, se.submit)
 
@@ -455,7 +455,7 @@ class TestStockEntry(unittest.TestCase):
 
 		from erpnext.stock.utils import InvalidWarehouseorganization
 		st1 = frappe.copy_doc(test_records[0])
-		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TC1"
+		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TO1"
 		st1.insert()
 		self.assertRaises(InvalidWarehouseorganization, st1.submit)
 
@@ -467,8 +467,8 @@ class TestStockEntry(unittest.TestCase):
 			set_user_permission_doctypes(doctype="Stock Entry", role=role,
 				apply_user_permissions=1, user_permission_doctypes=["Warehouse"])
 
-		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "User Permission")
-		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "User Permission")
+		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TO", "test@example.com", "User Permission")
+		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TO1", "test2@example.com", "User Permission")
 		test_user = frappe.get_doc("User", "test@example.com")
 		test_user.add_roles("Sales User", "Sales Manager", "Stock User")
 		test_user.remove_roles("Stock Manager")
@@ -478,20 +478,20 @@ class TestStockEntry(unittest.TestCase):
 
 		frappe.set_user("test@example.com")
 		st1 = frappe.copy_doc(test_records[0])
-		st1.organization = "_Test organization 1"
-		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TC1"
+		st1.organization = "_Test Organization 1"
+		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TO1"
 		self.assertRaises(frappe.PermissionError, st1.insert)
 
 		frappe.set_user("test2@example.com")
 		st1 = frappe.copy_doc(test_records[0])
-		st1.organization = "_Test organization 1"
-		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TC1"
+		st1.organization = "_Test Organization 1"
+		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TO1"
 		st1.insert()
 		st1.submit()
 
-		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC",
+		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TO",
 			"test@example.com", parenttype="User Permission")
-		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 2 - _TC1",
+		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 2 - _TO1",
 			"test2@example.com", parenttype="User Permission")
 
 	def test_freeze_stocks(self):
@@ -520,19 +520,19 @@ class TestStockEntry(unittest.TestCase):
 
 		production_order = frappe.new_doc("Production Order")
 		production_order.update({
-			"organization": "_Test organization",
-			"fg_warehouse": "_Test Warehouse 1 - _TC",
+			"organization": "_Test Organization",
+			"fg_warehouse": "_Test Warehouse 1 - _TO",
 			"production_item": "_Test FG Item 2",
 			"bom_no": bom_no,
 			"qty": 1.0,
 			"stock_uom": "_Test UOM",
-			"wip_warehouse": "_Test Warehouse - _TC",
+			"wip_warehouse": "_Test Warehouse - _TO",
 			"additional_operating_cost": 1000
 		})
 		production_order.insert()
 		production_order.submit()
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TO", qty=50, basic_rate=100)
 
 		stock_entry = _make_stock_entry(production_order.name, "Manufacture", 1)
 
@@ -552,13 +552,13 @@ class TestStockEntry(unittest.TestCase):
 
 		production_order = frappe.new_doc("Production Order")
 		production_order.update({
-			"organization": "_Test organization",
-			"fg_warehouse": "_Test Warehouse 1 - _TC",
+			"organization": "_Test Organization",
+			"fg_warehouse": "_Test Warehouse 1 - _TO",
 			"production_item": "_Test Variant Item-S",
 			"bom_no": bom_no,
 			"qty": 1.0,
 			"stock_uom": "_Test UOM",
-			"wip_warehouse": "_Test Warehouse - _TC"
+			"wip_warehouse": "_Test Warehouse - _TO"
 		})
 		production_order.insert()
 		production_order.submit()
@@ -570,20 +570,20 @@ class TestStockEntry(unittest.TestCase):
 		self.assertTrue("_Test Variant Item-S" in [d.item_code for d in stock_entry.items])
 
 	def test_same_serial_nos_in_repack_or_manufacture_entries(self):
-		s1 = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+		s1 = make_serialized_item(target_warehouse="_Test Warehouse - _TO")
 		serial_nos = s1.get("items")[0].serial_no
 
-		s2 = make_stock_entry(item_code="_Test Serialized Item With Series", source="_Test Warehouse - _TC",
+		s2 = make_stock_entry(item_code="_Test Serialized Item With Series", source="_Test Warehouse - _TO",
 			qty=2, basic_rate=100, purpose="Repack", serial_no=serial_nos, do_not_save=True)
 
 		s2.append("items", {
 			"item_code": "_Test Serialized Item",
-			"t_warehouse": "_Test Warehouse - _TC",
+			"t_warehouse": "_Test Warehouse - _TO",
 			"qty": 2,
 			"basic_rate": 120,
-			"expense_account": "Stock Adjustment - _TC",
+			"expense_account": "Stock Adjustment - _TO",
 			"conversion_factor": 1.0,
-			"cost_center": "_Test Cost Center - _TC",
+			"cost_center": "_Test Cost Center - _TO",
 			"serial_no": serial_nos
 		})
 
@@ -624,12 +624,12 @@ def make_stock_entry(**args):
 	else:
 		s.purpose = args.purpose
 
-	s.organization = args.organization or "_Test organization"
+	s.organization = args.organization or "_Test Organization"
 	s.fiscal_year = get_fiscal_year(s.posting_date)[0]
 	s.purchase_receipt_no = args.purchase_receipt_no
 	s.delivery_note_no = args.delivery_note_no
 	s.sales_invoice_no = args.sales_invoice_no
-	s.difference_account = args.difference_account or "Stock Adjustment - _TC"
+	s.difference_account = args.difference_account or "Stock Adjustment - _TO"
 
 	s.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
@@ -637,9 +637,9 @@ def make_stock_entry(**args):
 		"t_warehouse": args.to_warehouse or args.target,
 		"qty": args.qty,
 		"basic_rate": args.basic_rate,
-		"expense_account": args.expense_account or "Stock Adjustment - _TC",
+		"expense_account": args.expense_account or "Stock Adjustment - _TO",
 		"conversion_factor": 1.0,
-		"cost_center": "_Test Cost Center - _TC",
+		"cost_center": "_Test Cost Center - _TO",
 		"serial_no": args.serial_no
 	})
 
@@ -654,7 +654,7 @@ def get_qty_after_transaction(**args):
 
 	last_sle = get_previous_sle({
 		"item_code": args.item_code or "_Test Item",
-		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"warehouse": args.warehouse or "_Test Warehouse - _TO",
 		"posting_date": args.posting_date or nowdate(),
 		"posting_time": args.posting_time or nowtime()
 	})

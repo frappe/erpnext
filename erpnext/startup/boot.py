@@ -31,7 +31,7 @@ def boot_session(bootinfo):
 
 		bootinfo.docs += frappe.db.sql("""select name, default_currency, cost_center,
 			default_terms, default_letter_head from `tabOrganization`""",
-			as_dict=1, update={"doctype":":organization"})
+			as_dict=1, update={"doctype":":Organization"})
 
 def load_country_and_currency(bootinfo):
 	country = frappe.db.get_default("country")

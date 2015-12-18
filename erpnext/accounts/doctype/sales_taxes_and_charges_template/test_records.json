@@ -1,10 +1,10 @@
 [
  {
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
-    "account_head": "_Test Account VAT - _TC",
+    "account_head": "_Test Account VAT - _TO",
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
@@ -12,7 +12,7 @@
     "rate": 6
    },
    {
-    "account_head": "_Test Account Service Tax - _TC",
+    "account_head": "_Test Account Service Tax - _TO",
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
@@ -23,40 +23,40 @@
   "title": "_Test Sales Taxes and Charges Template"
  },
  {
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
-    "account_head": "_Test Account Shipping Charges - _TC",
+    "account_head": "_Test Account Shipping Charges - _TO",
     "charge_type": "Actual",
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "description": "Shipping Charges",
     "doctype": "Sales Taxes and Charges",
     "parentfield": "taxes",
     "tax_amount": 100
    },
    {
-    "account_head": "_Test Account Customs Duty - _TC",
+    "account_head": "_Test Account Customs Duty - _TO",
     "charge_type": "On Net Total",
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "description": "Customs Duty",
     "doctype": "Sales Taxes and Charges",
     "parentfield": "taxes",
     "rate": 10
    },
    {
-    "account_head": "_Test Account Excise Duty - _TC",
+    "account_head": "_Test Account Excise Duty - _TO",
     "charge_type": "On Net Total",
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "description": "Excise Duty",
     "doctype": "Sales Taxes and Charges",
     "parentfield": "taxes",
     "rate": 12
    },
    {
-    "account_head": "_Test Account Education Cess - _TC",
+    "account_head": "_Test Account Education Cess - _TO",
     "charge_type": "On Previous Row Amount",
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "description": "Education Cess",
     "doctype": "Sales Taxes and Charges",
     "parentfield": "taxes",
@@ -64,9 +64,9 @@
     "row_id": 3
    },
    {
-    "account_head": "_Test Account S&H Education Cess - _TC",
+    "account_head": "_Test Account S&H Education Cess - _TO",
     "charge_type": "On Previous Row Amount",
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "description": "S&H Education Cess",
     "doctype": "Sales Taxes and Charges",
     "parentfield": "taxes",
@@ -74,9 +74,9 @@
     "row_id": 3
    },
    {
-    "account_head": "_Test Account CST - _TC",
+    "account_head": "_Test Account CST - _TO",
     "charge_type": "On Previous Row Total",
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "description": "CST",
     "doctype": "Sales Taxes and Charges",
     "parentfield": "taxes",
@@ -84,18 +84,18 @@
     "row_id": 5
    },
    {
-    "account_head": "_Test Account VAT - _TC",
+    "account_head": "_Test Account VAT - _TO",
     "charge_type": "On Net Total",
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
     "parentfield": "taxes",
     "rate": 12.5
    },
    {
-    "account_head": "_Test Account Discount - _TC",
+    "account_head": "_Test Account Discount - _TO",
     "charge_type": "On Previous Row Total",
-    "cost_center": "_Test Cost Center - _TC",
+    "cost_center": "_Test Cost Center - _TO",
     "description": "Discount",
     "doctype": "Sales Taxes and Charges",
     "parentfield": "taxes",
@@ -106,11 +106,11 @@
   "title": "_Test India Tax Master"
  },
  {
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
-    "account_head": "_Test Account VAT - _TC",
+    "account_head": "_Test Account VAT - _TO",
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
@@ -118,7 +118,7 @@
     "rate": 12
    },
    {
-    "account_head": "_Test Account Service Tax - _TC",
+    "account_head": "_Test Account Service Tax - _TO",
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
@@ -129,11 +129,11 @@
   "title": "_Test Sales Taxes and Charges Template - Rest of the World"
  },
  {
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
-    "account_head": "_Test Account VAT - _TC",
+    "account_head": "_Test Account VAT - _TO",
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
@@ -141,7 +141,7 @@
     "rate": 12
    },
    {
-    "account_head": "_Test Account Service Tax - _TC",
+    "account_head": "_Test Account Service Tax - _TO",
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
@@ -152,11 +152,11 @@
   "title": "_Test Sales Taxes and Charges Template 1"
  },
  {
-  "organization": "_Test organization",
+  "organization": "_Test Organization",
   "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
-    "account_head": "_Test Account VAT - _TC",
+    "account_head": "_Test Account VAT - _TO",
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
@@ -164,7 +164,7 @@
     "rate": 12
    },
    {
-    "account_head": "_Test Account Service Tax - _TC",
+    "account_head": "_Test Account Service Tax - _TO",
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
@@ -177,11 +177,11 @@
  {
 	"doctype" : "Sales Taxes and Charges Template",
 	"title": "_Test Tax 1",
-	"organization": "_Test organization",
+	"organization": "_Test Organization",
 	"taxes":[{
 		"charge_type": "Actual",
-		"account_head": "Sales Expenses - _TC",
-		"cost_center": "Main - _TC",
+		"account_head": "Sales Expenses - _TO",
+		"cost_center": "Main - _TO",
 		"description": "Test Shopping cart taxes with Tax Rule",
 		"tax_amount": 1000
 	}]
@@ -189,11 +189,11 @@
  {
 	"doctype" : "Sales Taxes and Charges Template",
 	"title": "_Test Tax 2",
-	"organization": "_Test organization",
+	"organization": "_Test Organization",
 	"taxes":[{
 		"charge_type": "Actual",
-		"account_head": "Sales Expenses - _TC",
-		"cost_center": "Main - _TC",
+		"account_head": "Sales Expenses - _TO",
+		"cost_center": "Main - _TO",
 		"description": "Test Shopping cart taxes with Tax Rule",
 		"tax_amount": 200
 	}]

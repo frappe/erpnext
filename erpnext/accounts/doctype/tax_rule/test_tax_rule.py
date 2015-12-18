@@ -122,7 +122,7 @@ def make_tax_rule(**args):
 		if key != "save":
 			tax_rule.set(key, val)
 
-	tax_rule.organization = args.organization or "_Test organization"
+	tax_rule.organization = args.organization or "_Test Organization"
 
 	if args.save:
 		tax_rule.insert()

@@ -27,15 +27,15 @@ class TestPurchaseInvoice(unittest.TestCase):
 		dl = wrapper
 
 		expected_gl_entries = {
-			"_Test Payable - _TC": [0, 1512.30],
-			"_Test Account Cost for Goods Sold - _TC": [1250, 0],
-			"_Test Account Shipping Charges - _TC": [100, 0],
-			"_Test Account Excise Duty - _TC": [140, 0],
-			"_Test Account Education Cess - _TC": [2.8, 0],
-			"_Test Account S&H Education Cess - _TC": [1.4, 0],
-			"_Test Account CST - _TC": [29.88, 0],
-			"_Test Account VAT - _TC": [156.25, 0],
-			"_Test Account Discount - _TC": [0, 168.03],
+			"_Test Payable - _TO": [0, 1512.30],
+			"_Test Account Cost for Goods Sold - _TO": [1250, 0],
+			"_Test Account Shipping Charges - _TO": [100, 0],
+			"_Test Account Excise Duty - _TO": [140, 0],
+			"_Test Account Education Cess - _TO": [2.8, 0],
+			"_Test Account S&H Education Cess - _TO": [1.4, 0],
+			"_Test Account CST - _TO": [29.88, 0],
+			"_Test Account VAT - _TO": [156.25, 0],
+			"_Test Account Discount - _TO": [0, 168.03],
 		}
 		gl_entries = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type = 'Purchase Invoice' and voucher_no = %s""", dl.name, as_dict=1)
@@ -78,10 +78,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = dict((d[0], d) for d in [
-			["_Test Payable - _TC", 0, 720],
-			["Stock Received But Not Billed - _TC", 500.0, 0],
-			["_Test Account Shipping Charges - _TC", 100.0, 0],
-			["_Test Account VAT - _TC", 120.0, 0],
+			["_Test Payable - _TO", 0, 720],
+			["Stock Received But Not Billed - _TO", 500.0, 0],
+			["_Test Account Shipping Charges - _TO", 100.0, 0],
+			["_Test Account VAT - _TO", 120.0, 0],
 		])
 
 		for i, gle in enumerate(gl_entries):
@@ -95,7 +95,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi = frappe.copy_doc(test_records[1])
 		pi.get("items")[0].item_code = "_Test Non Stock Item"
-		pi.get("items")[0].expense_account = "_Test Account Cost for Goods Sold - _TC"
+		pi.get("items")[0].expense_account = "_Test Account Cost for Goods Sold - _TO"
 		pi.get("taxes").pop(0)
 		pi.get("taxes").pop(1)
 		pi.insert()
@@ -107,9 +107,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = sorted([
-			["_Test Payable - _TC", 0, 620],
-			["_Test Account Cost for Goods Sold - _TC", 500.0, 0],
-			["_Test Account VAT - _TC", 120.0, 0],
+			["_Test Payable - _TO", 0, 620],
+			["_Test Account Cost for Goods Sold - _TO", 500.0, 0],
+			["_Test Account VAT - _TO", 120.0, 0],
 		])
 
 		for i, gle in enumerate(gl_entries):
@@ -136,14 +136,14 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		# tax amounts
 		expected_values = [
-			["_Test Account Shipping Charges - _TC", 100, 1350],
-			["_Test Account Customs Duty - _TC", 125, 1350],
-			["_Test Account Excise Duty - _TC", 140, 1490],
-			["_Test Account Education Cess - _TC", 2.8, 1492.8],
-			["_Test Account S&H Education Cess - _TC", 1.4, 1494.2],
-			["_Test Account CST - _TC", 29.88, 1524.08],
-			["_Test Account VAT - _TC", 156.25, 1680.33],
-			["_Test Account Discount - _TC", 168.03, 1512.30],
+			["_Test Account Shipping Charges - _TO", 100, 1350],
+			["_Test Account Customs Duty - _TO", 125, 1350],
+			["_Test Account Excise Duty - _TO", 140, 1490],
+			["_Test Account Education Cess - _TO", 2.8, 1492.8],
+			["_Test Account S&H Education Cess - _TO", 1.4, 1494.2],
+			["_Test Account CST - _TO", 29.88, 1524.08],
+			["_Test Account VAT - _TO", 156.25, 1680.33],
+			["_Test Account Discount - _TO", 168.03, 1512.30],
 		]
 
 		for i, tax in enumerate(wrapper.get("taxes")):
@@ -170,14 +170,14 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		# tax amounts
 		expected_values = [
-			["_Test Account Shipping Charges - _TC", 100, 1350],
-			["_Test Account Customs Duty - _TC", 125, 1350],
-			["_Test Account Excise Duty - _TC", 140, 1490],
-			["_Test Account Education Cess - _TC", 2.8, 1492.8],
-			["_Test Account S&H Education Cess - _TC", 1.4, 1494.2],
-			["_Test Account CST - _TC", 29.88, 1524.08],
-			["_Test Account VAT - _TC", 156.25, 1680.33],
-			["_Test Account Discount - _TC", 168.03, 1512.30],
+			["_Test Account Shipping Charges - _TO", 100, 1350],
+			["_Test Account Customs Duty - _TO", 125, 1350],
+			["_Test Account Excise Duty - _TO", 140, 1490],
+			["_Test Account Education Cess - _TO", 2.8, 1492.8],
+			["_Test Account S&H Education Cess - _TO", 1.4, 1494.2],
+			["_Test Account CST - _TO", 29.88, 1524.08],
+			["_Test Account VAT - _TO", 156.25, 1680.33],
+			["_Test Account Discount - _TO", 168.03, 1512.30],
 		]
 
 		for i, tax in enumerate(wrapper.get("taxes")):
@@ -256,8 +256,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = {
-			"Creditors - _TC": [100.0, 0.0],
-			"Stock Received But Not Billed - _TC": [0.0, 100.0],
+			"Creditors - _TO": [100.0, 0.0],
+			"Stock Received But Not Billed - _TO": [0.0, 100.0],
 		}
 
 		for gle in gl_entries:
@@ -269,7 +269,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_multi_currency_gle(self):
 		set_perpetual_inventory(0)
 
-		pi = make_purchase_invoice(supplier="_Test Supplier USD", credit_to="_Test Payable USD - _TC",
+		pi = make_purchase_invoice(supplier="_Test Supplier USD", credit_to="_Test Payable USD - _TO",
 			currency="USD", conversion_rate=50)
 
 		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit,
@@ -280,14 +280,14 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = {
-			"_Test Payable USD - _TC": {
+			"_Test Payable USD - _TO": {
 				"account_currency": "USD",
 				"debit": 0,
 				"debit_in_account_currency": 0,
 				"credit": 12500,
 				"credit_in_account_currency": 250
 			},
-			"_Test Account Cost for Goods Sold - _TC": {
+			"_Test Account Cost for Goods Sold - _TO": {
 				"account_currency": "INR",
 				"debit": 12500,
 				"debit_in_account_currency": 12500,
@@ -302,7 +302,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 
 		# Check for valid currency
-		pi1 = make_purchase_invoice(supplier="_Test Supplier USD", credit_to="_Test Payable USD - _TC",
+		pi1 = make_purchase_invoice(supplier="_Test Supplier USD", credit_to="_Test Payable USD - _TO",
 			do_not_save=True)
 
 		self.assertRaises(InvalidCurrency, pi1.save)
@@ -322,7 +322,7 @@ def make_purchase_invoice(**args):
 		pi.posting_date = args.posting_date
 	if args.posting_time:
 		pi.posting_time = args.posting_time
-	pi.organization = args.organization or "_Test organization"
+	pi.organization = args.organization or "_Test Organization"
 	pi.supplier = args.supplier or "_Test Supplier"
 	pi.currency = args.currency or "INR"
 	pi.conversion_rate = args.conversion_rate or 1
@@ -331,13 +331,13 @@ def make_purchase_invoice(**args):
 
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
-		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"warehouse": args.warehouse or "_Test Warehouse - _TO",
 		"qty": args.qty or 5,
 		"rate": args.rate or 50,
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": "_Test UOM",
-		"cost_center": "_Test Cost Center - _TC",
+		"cost_center": "_Test Cost Center - _TO",
 		"project_name": args.project_name
 	})
 	if not args.do_not_save:

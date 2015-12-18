@@ -197,9 +197,9 @@ class TestSalesOrder(unittest.TestCase):
 			set_user_permission_doctypes(doctype="Sales Order", role=role,
 				apply_user_permissions=1, user_permission_doctypes=["Warehouse"])
 
-		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
-		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
-		frappe.permissions.add_user_permission("Organization", "_Test organization 1", "test2@example.com")
+		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TO", "test@example.com")
+		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TO1", "test2@example.com")
+		frappe.permissions.add_user_permission("Organization", "_Test Organization 1", "test2@example.com")
 
 		test_user = frappe.get_doc("User", "test@example.com")
 		test_user.add_roles("Sales User", "Stock User")
@@ -211,8 +211,8 @@ class TestSalesOrder(unittest.TestCase):
 
 		frappe.set_user("test@example.com")
 
-		so = make_sales_order(organization="_Test organization 1",
-			warehouse="_Test Warehouse 2 - _TC1", do_not_save=True)
+		so = make_sales_order(organization="_Test Organization 1",
+			warehouse="_Test Warehouse 2 - _TO1", do_not_save=True)
 		so.conversion_rate = 0.02
 		so.plc_conversion_rate = 0.02
 		self.assertRaises(frappe.PermissionError, so.insert)
@@ -220,9 +220,9 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.set_user("test2@example.com")
 		so.insert()
 
-		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
-		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
-		frappe.permissions.remove_user_permission("Organization", "_Test organization 1", "test2@example.com")
+		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TO", "test@example.com")
+		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TO1", "test2@example.com")
+		frappe.permissions.remove_user_permission("Organization", "_Test Organization 1", "test2@example.com")
 
 	def test_block_delivery_note_against_cancelled_sales_order(self):
 		so = make_sales_order()
@@ -301,13 +301,13 @@ class TestSalesOrder(unittest.TestCase):
 
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "is_sales_item": 1,
 			"is_purchase_item": 1, "delivered_by_supplier": 1, 'default_supplier': '_Test Supplier',
-		    "expense_account": "_Test Account Cost for Goods Sold - _TC",
-		    "cost_center": "_Test Cost Center - _TC"
+		    "expense_account": "_Test Account Cost for Goods Sold - _TO",
+		    "cost_center": "_Test Cost Center - _TO"
 			})
 
 		dn_item = make_item("_Test Regular Item", {"is_stock_item": 1, "is_sales_item": 1,
-			"is_purchase_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  		  	"cost_center": "_Test Cost Center - _TC"})
+			"is_purchase_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TO",
+  		  	"cost_center": "_Test Cost Center - _TO"})
 
 		so_items = [
 			{
@@ -320,7 +320,7 @@ class TestSalesOrder(unittest.TestCase):
 			},
 			{
 				"item_code": dn_item.item_code,
-				"warehouse": "_Test Warehouse - _TC",
+				"warehouse": "_Test Warehouse - _TO",
 				"qty": 2,
 				"rate": 300,
 				"conversion_factor": 1.0
@@ -328,13 +328,13 @@ class TestSalesOrder(unittest.TestCase):
 		]
 
 		#setuo existing qty from bin
-		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
+		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TO"},
 			fields=["ordered_qty", "reserved_qty"])
 
 		existing_ordered_qty = bin[0].ordered_qty if bin else 0.0
 		existing_reserved_qty = bin[0].reserved_qty if bin else 0.0
 
-		bin = frappe.get_all("Bin", filters={"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"},
+		bin = frappe.get_all("Bin", filters={"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TO"},
 			fields=["reserved_qty"])
 
 		existing_reserved_qty_for_dn_item = bin[0].reserved_qty if bin else 0.0
@@ -355,7 +355,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(dn.items[0].item_code, dn_item.item_code)
 
 		#test ordered_qty and reserved_qty
-		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
+		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TO"},
 			fields=["ordered_qty", "reserved_qty"])
 
 		ordered_qty = bin[0].ordered_qty if bin else 0.0
@@ -365,7 +365,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty)
 
 		reserved_qty = frappe.db.get_value("Bin",
-					{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
+					{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TO"}, "reserved_qty")
 
 		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item + 1)
 
@@ -379,7 +379,7 @@ class TestSalesOrder(unittest.TestCase):
 		#test reserved qty after complete delivery
 		dn = create_dn_against_so(so.name, delivered_qty=1)
 		reserved_qty = frappe.db.get_value("Bin",
-			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
+			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TO"}, "reserved_qty")
 
 		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item)
 
@@ -387,7 +387,7 @@ class TestSalesOrder(unittest.TestCase):
 		so.db_set('status', "Closed")
 		so.update_reserved_qty()
 
-		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
+		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TO"},
 			fields=["ordered_qty", "reserved_qty"])
 
 		ordered_qty = bin[0].ordered_qty if bin else 0.0
@@ -397,23 +397,23 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty)
 
 		reserved_qty = frappe.db.get_value("Bin",
-			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
+			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TO"}, "reserved_qty")
 
 		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item)
 
 	def test_reserved_qty_for_closing_so(self):
-		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
+		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TO"},
 			fields=["reserved_qty"])
 
 		existing_reserved_qty = bin[0].reserved_qty if bin else 0.0
 
 		so = make_sales_order(item_code="_Test Item", qty=1)
 
-		self.assertEquals(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_reserved_qty+1)
+		self.assertEquals(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TO"), existing_reserved_qty+1)
 
 		so.update_status("Closed")
 
-		self.assertEquals(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_reserved_qty)
+		self.assertEquals(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TO"), existing_reserved_qty)
 
 
 def make_sales_order(**args):
@@ -422,7 +422,7 @@ def make_sales_order(**args):
 	if args.transaction_date:
 		so.transaction_date = args.transaction_date
 
-	so.organization = args.organization or "_Test organization"
+	so.organization = args.organization or "_Test Organization"
 	so.customer = args.customer or "_Test Customer"
 	so.delivery_date = add_days(so.transaction_date, 10)
 	so.currency = args.currency or "INR"
@@ -430,7 +430,7 @@ def make_sales_order(**args):
 		so.selling_price_list = args.selling_price_list
 
 	if "warehouse" not in args:
-		args.warehouse = "_Test Warehouse - _TC"
+		args.warehouse = "_Test Warehouse - _TO"
 
 	if args.item_list:
 		for item in args.item_list:
@@ -461,7 +461,7 @@ def create_dn_against_so(so, delivered_qty=0):
 	dn.submit()
 	return dn
 
-def get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
+def get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TO"):
 	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		"reserved_qty"))
 

@@ -37,7 +37,7 @@ class TestJournalEntry(unittest.TestCase):
 		if test_voucher.doctype == "Journal Entry":
 			self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 				where account = %s and docstatus = 1 and parent = %s""",
-				("_Test Receivable - _TC", test_voucher.name)))
+				("_Test Receivable - _TO", test_voucher.name)))
 
 		self.assertFalse(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_type = %s and reference_name = %s""", (test_voucher.doctype, test_voucher.name)))
@@ -84,7 +84,7 @@ class TestJournalEntry(unittest.TestCase):
 
 		jv = frappe.copy_doc(test_records[0])
 		jv.get("accounts")[0].update({
-			"account": "_Test Warehouse - _TC",
+			"account": "_Test Warehouse - _TO",
 			"party_type": None,
 			"party": None
 		})
@@ -97,80 +97,80 @@ class TestJournalEntry(unittest.TestCase):
 		set_perpetual_inventory(0)
 
 	def test_monthly_budget_crossed_ignore(self):
-		frappe.db.set_value("Organization", "_Test organization", "monthly_bgt_flag", "Ignore")
+		frappe.db.set_value("Organization", "_Test Organization", "monthly_bgt_flag", "Ignore")
 
 		self.set_total_expense_zero("2013-02-28")
 
-		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 40000, "_Test Cost Center - _TC", submit=True)
+		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TO",
+			"_Test Bank - _TO", 40000, "_Test Cost Center - _TO", submit=True)
 
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
 
 	def test_monthly_budget_crossed_stop(self):
-		frappe.db.set_value("Organization", "_Test organization", "monthly_bgt_flag", "Stop")
+		frappe.db.set_value("Organization", "_Test Organization", "monthly_bgt_flag", "Stop")
 
 		self.set_total_expense_zero("2013-02-28")
 
-		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 40000, "_Test Cost Center - _TC")
+		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TO",
+			"_Test Bank - _TO", 40000, "_Test Cost Center - _TO")
 
 		self.assertRaises(BudgetError, jv.submit)
 
-		frappe.db.set_value("Organization", "_Test organization", "monthly_bgt_flag", "Ignore")
+		frappe.db.set_value("Organization", "_Test Organization", "monthly_bgt_flag", "Ignore")
 
 	def test_yearly_budget_crossed_stop(self):
 		self.test_monthly_budget_crossed_ignore()
 
-		frappe.db.set_value("Organization", "_Test organization", "yearly_bgt_flag", "Stop")
+		frappe.db.set_value("Organization", "_Test Organization", "yearly_bgt_flag", "Stop")
 
 		self.set_total_expense_zero("2013-02-28")
 
-		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 150000, "_Test Cost Center - _TC")
+		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TO",
+			"_Test Bank - _TO", 150000, "_Test Cost Center - _TO")
 
 		self.assertRaises(BudgetError, jv.submit)
 
-		frappe.db.set_value("Organization", "_Test organization", "yearly_bgt_flag", "Ignore")
+		frappe.db.set_value("Organization", "_Test Organization", "yearly_bgt_flag", "Ignore")
 
 	def test_monthly_budget_on_cancellation(self):
 		self.set_total_expense_zero("2013-02-28")
 
-		jv1 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", submit=True)
+		jv1 = make_journal_entry("_Test Account Cost for Goods Sold - _TO",
+			"_Test Bank - _TO", 20000, "_Test Cost Center - _TO", submit=True)
 
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv1.name}))
 
-		jv2 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", submit=True)
+		jv2 = make_journal_entry("_Test Account Cost for Goods Sold - _TO",
+			"_Test Bank - _TO", 20000, "_Test Cost Center - _TO", submit=True)
 
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv2.name}))
 
-		frappe.db.set_value("Organization", "_Test organization", "monthly_bgt_flag", "Stop")
+		frappe.db.set_value("Organization", "_Test Organization", "monthly_bgt_flag", "Stop")
 
 		self.assertRaises(BudgetError, jv1.cancel)
 
-		frappe.db.set_value("Organization", "_Test organization", "monthly_bgt_flag", "Ignore")
+		frappe.db.set_value("Organization", "_Test Organization", "monthly_bgt_flag", "Ignore")
 
 	def get_actual_expense(self, monthly_end_date):
 		return get_actual_expense({
-			"account": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
+			"account": "_Test Account Cost for Goods Sold - _TO",
+			"cost_center": "_Test Cost Center - _TO",
 			"monthly_end_date": monthly_end_date,
-			"organization": "_Test organization",
+			"organization": "_Test Organization",
 			"fiscal_year": get_fiscal_year(monthly_end_date)[0]
 		})
 
 	def set_total_expense_zero(self, posting_date):
 		existing_expense = self.get_actual_expense(posting_date)
-		make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True)
+		make_journal_entry("_Test Account Cost for Goods Sold - _TO",
+			"_Test Bank - _TO", -existing_expense, "_Test Cost Center - _TO", submit=True)
 
 	def test_multi_currency(self):
-		jv = make_journal_entry("_Test Bank USD - _TC",
-			"_Test Bank - _TC", 100, exchange_rate=50, save=False)
+		jv = make_journal_entry("_Test Bank USD - _TO",
+			"_Test Bank - _TO", 100, exchange_rate=50, save=False)
 
 		jv.get("accounts")[1].credit_in_account_currency = 5000
 		jv.submit()
@@ -183,14 +183,14 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = {
-			"_Test Bank USD - _TC": {
+			"_Test Bank USD - _TO": {
 				"account_currency": "USD",
 				"debit": 5000,
 				"debit_in_account_currency": 100,
 				"credit": 0,
 				"credit_in_account_currency": 0
 			},
-			"_Test Bank - _TC": {
+			"_Test Bank - _TO": {
 				"account_currency": "INR",
 				"debit": 0,
 				"debit_in_account_currency": 0,
@@ -213,8 +213,8 @@ class TestJournalEntry(unittest.TestCase):
 
 	def test_disallow_change_in_account_currency_for_a_party(self):
 		# create jv in USD
-		jv = make_journal_entry("_Test Bank USD - _TC",
-			"_Test Receivable USD - _TC", 100, save=False)
+		jv = make_journal_entry("_Test Bank USD - _TO",
+			"_Test Receivable USD - _TO", 100, save=False)
 
 		jv.accounts[1].update({
 			"party_type": "Customer",
@@ -224,8 +224,8 @@ class TestJournalEntry(unittest.TestCase):
 		jv.submit()
 
 		# create jv in USD, but account currency in INR
-		jv = make_journal_entry("_Test Bank - _TC",
-			"_Test Receivable - _TC", 100, save=False)
+		jv = make_journal_entry("_Test Bank - _TO",
+			"_Test Receivable - _TO", 100, save=False)
 
 		jv.accounts[1].update({
 			"party_type": "Customer",
@@ -235,8 +235,8 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertRaises(InvalidAccountCurrency, jv.submit)
 
 		# back in USD
-		jv = make_journal_entry("_Test Bank USD - _TC",
-			"_Test Receivable USD - _TC", 100, save=False)
+		jv = make_journal_entry("_Test Bank USD - _TO",
+			"_Test Receivable USD - _TO", 100, save=False)
 
 		jv.accounts[1].update({
 			"party_type": "Customer",
@@ -248,7 +248,7 @@ class TestJournalEntry(unittest.TestCase):
 def make_journal_entry(account1, account2, amount, cost_center=None, exchange_rate=1, save=True, submit=False):
 	jv = frappe.new_doc("Journal Entry")
 	jv.posting_date = "2013-02-14"
-	jv.organization = "_Test organization"
+	jv.organization = "_Test Organization"
 	jv.fiscal_year = "_Test Fiscal Year 2013"
 	jv.user_remark = "test"
 	jv.multi_currency = 1

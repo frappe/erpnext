@@ -52,6 +52,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, po.name)
 
 		po.submit()
+
 		pi = make_purchase_invoice(po.name)
 
 		self.assertEquals(pi.doctype, "Purchase Invoice")
@@ -63,7 +64,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_warehouse_organization_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseorganization
-		po = create_purchase_order(organization="_Test organization 1", do_not_save=True)
+		po = create_purchase_order(organization="_Test Organization 1", do_not_save=True)
 		self.assertRaises(InvalidWarehouseorganization, po.insert)
 
 	def test_uom_integer_validation(self):
@@ -72,18 +73,18 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
 	
 	def test_ordered_qty_for_closing_po(self):			
-		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, 
+		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TO"}, 
 			fields=["ordered_qty"])	
 		
 		existing_ordered_qty = bin[0].ordered_qty if bin else 0.0
 			
 		po = create_purchase_order(item_code= "_Test Item", qty=1)
 		
-		self.assertEquals(get_ordered_qty(item_code= "_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty+1)
+		self.assertEquals(get_ordered_qty(item_code= "_Test Item", warehouse="_Test Warehouse - _TO"), existing_ordered_qty+1)
 		
 		po.update_status("Closed")
 		
-		self.assertEquals(get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty)
+		self.assertEquals(get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TO"), existing_ordered_qty)
 
 def create_purchase_order(**args):
 	po = frappe.new_doc("Purchase Order")
@@ -91,7 +92,7 @@ def create_purchase_order(**args):
 	if args.transaction_date:
 		po.transaction_date = args.transaction_date
 
-	po.organization = args.organization or "_Test organization"
+	po.organization = args.organization or "_Test Organization"
 	po.supplier = args.customer or "_Test Supplier"
 	po.is_subcontracted = args.is_subcontracted or "No"
 	po.currency = args.currency or frappe.db.get_value("Organization", po.organization, "default_currency")
@@ -99,7 +100,7 @@ def create_purchase_order(**args):
 
 	po.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
-		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"warehouse": args.warehouse or "_Test Warehouse - _TO",
 		"qty": args.qty or 10,
 		"rate": args.rate or 500,
 		"schedule_date": add_days(nowdate(), 1)
@@ -118,7 +119,7 @@ def create_pr_against_po(po, received_qty=4):
 	pr.submit()
 	return pr
 
-def get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
+def get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TO"):
 	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		"ordered_qty"))
 
