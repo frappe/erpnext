@@ -1,4 +1,6 @@
-## 4.12.2 Qualitätsprüfung
+# Qualitätsprüfung
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 In ERPNext können Sie eingehende und ausgehende Produkte für eine Qualitätsprüfung markieren. Um diese Funktion in ERPNext zu aktivieren, gehen Sie zu:
 
