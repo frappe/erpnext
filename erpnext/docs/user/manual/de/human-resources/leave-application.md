@@ -1,4 +1,6 @@
-## 11.2 Urlaubsantrag
+# Urlaubsantrag
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Wenn Ihre Firma ein formales System hat, wo Mitarbeiter einen Antrag für Ihren Urlaub einreichen müssen, um sich für einen bezahlten Urlaub zu qualifizieren, können Sie einen Urlaubsantrag erstellen um die Genehmigung und die Nutzung des Urlaubs nachzuverfolgen. Sie müssen den Mitarbeiter, den Urlaubstyp und den Zeitraum, für den Urlaub genommen werden soll, angeben.
 
