@@ -1,4 +1,6 @@
-## 2. Einstellungen
+# Einstellungen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Ein ERP-System einzurichten ist in etwa so, als ob Sie mit Ihrer Geschäftstätigkeit noch einmal von vorne beginnen würden, jedoch in einer virtuellen Welt. Glücklicherweise ist es nicht so schwer wie im realen Geschäftsbetrieb und Sie können vorher einen Testlauf durchführen!
 
