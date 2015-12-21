@@ -64,7 +64,7 @@ Buchungstransaktionen können nur zu Kontobüchern erstellt werden (nicht zu Gru
 
 ### Andere Kontentypen
 
-Wenn sie in ERPNext ein neues Konto anlegen, können Sie dazu auch Informationen mit angeben, und zwar deshalb, weil es eine Hilfe sein kann, in einem bestimmte Szenario, ein bestimmtes Konto, wie Bankkonto ein Steuerkonto, auszuwählen. Das hat auf den Kontenrahmen selbst keine Auswirkung.
+Wenn sie in ERPNext ein neues Konto anlegen, können Sie dazu auch Informationen mit angeben. Sie können diese als Hilfe verwenden, Wenn Sie ein Konto, wie ein Bank- oder ein Steuerkonto, auszuwählen müssen. Auf den Kontenrahmen selbst hat das keine Auswirkung.
 
 ### Konten erstellen und bearbeiten
 
@@ -79,7 +79,7 @@ ERPNext legt eine Standardkontenstruktur an, wenn eine Firma angelegt wird. Es l
 Typischerweise werden Sie vielleicht Konten hierfür anlegen wollen:
 
 * Aufwandskonten (Reisen, Gehälter, Telefon) unter Aufwände
-* Steuern (Mehrwertsteuer, Verkaufssteuer je nach Ihrem Land) unter kurzfristige Verbindlichkeiten
+* Steuern (Mehrwertsteuer, Verkaufssteuer je nach Land) unter kurzfristige Verbindlichkeiten
 * Verkaufsarten (z. B. Produktverkäufe, Dienstleistungsverkäufe) unter Erträge
 * Vermögenstypen (Gebäude, Maschinen, Geschäftsausstattung) unter Anlagevermögen
 
