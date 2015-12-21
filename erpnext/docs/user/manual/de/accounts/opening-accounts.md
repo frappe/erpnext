@@ -1,6 +1,6 @@
 # Eröffnungskonto
 
-<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span> 
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Jetzt, da Sie den größten Teil der Einrichtung hinter sich haben, wird es Zeit tiefer einzusteigen!
 
