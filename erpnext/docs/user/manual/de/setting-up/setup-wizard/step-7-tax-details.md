@@ -1,4 +1,6 @@
-## 2.1.7 Schritt 7: Steuerdetails
+# Schritt 7: Steuerdetails
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Geben Sie bis zu drei Steuerarten an, die Sie regelmäßig bei Gehaltsabrechnungen verwenden. Dieser Assistent erstellt eine Steuervorlage, welche die Steuern für jede Steuerart berechnet.
 
