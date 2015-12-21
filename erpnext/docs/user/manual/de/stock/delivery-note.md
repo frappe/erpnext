@@ -30,7 +30,7 @@ Wenn Sie per Containerversand oder nach Gewicht versenden, können Sie die Packl
 
 > Lagerbestand > Werkzeuge > Packzettel > Neu
 
-Sie können für Ihren Lieferschein mehrere Packlisten erstellen und ERPNext stellt sicher dass die Mengenangaben in der Packliste  nicht die Mengen im Lieferschein übersteigen.
+Sie können für Ihren Lieferschein mehrere Packlisten erstellen und ERPNext stellt sicher, dass die Mengenangaben in der Packliste  nicht die Mengen im Lieferschein übersteigen.
 
 ---
 
