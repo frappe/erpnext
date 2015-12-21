@@ -1,4 +1,6 @@
-## 12.1 Kundenaufträge, Rechnungen und Versandstatus
+# Kundenaufträge, Rechnungen und Versandstatus
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Das Webportal von ERPNext gibt Ihren Kunden einen schnellen Zugriff auf Ihre Aufträge, Rechnungen und Sendungen.
 Kunden können den Status Ihrer Bestellungen, Rechnungen und des Versandes nachprüfen, indem sie sich auf der Webseite einloggen.
