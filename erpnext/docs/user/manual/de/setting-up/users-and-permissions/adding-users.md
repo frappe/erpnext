@@ -1,4 +1,6 @@
-## 2.2.1 Benutzer hinzufügen
+# Benutzer hinzufügen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Benutzer können vom System-Manager hinzugefügt werden. Wenn Sie ein System-Manager sind, können Sie Benutzer wie im Folgenden dargestellt hinzufügen:
 
