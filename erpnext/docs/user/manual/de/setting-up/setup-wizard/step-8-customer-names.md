@@ -1,4 +1,6 @@
-## 2.1.8 Schritt 8: Kunden
+# Schritt 8: Kunden
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Geben Sie die Namen Ihrer Kunden und die Kontaktpersonen ein.
 
