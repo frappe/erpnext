@@ -1,4 +1,6 @@
-## 4.13.1 Lagereinstellungen
+# Lagereinstellungen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Sie können Standardeinstellungen für Ihre mit dem Lager verbundenen Transaktionen hier voreinstellen.
 
