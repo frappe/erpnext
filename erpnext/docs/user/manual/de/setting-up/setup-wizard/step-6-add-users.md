@@ -1,4 +1,6 @@
-## 2.1.6 Schritt 6: Benutzer hinzufügen
+# Schritt 6: Benutzer hinzufügen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Fügen Sie weitere Benutzer hinzu und teilen Sie ihnen gemäß Ihren Verantwortungsbereichen am Arbeitsplatz Rollen zu.
 
