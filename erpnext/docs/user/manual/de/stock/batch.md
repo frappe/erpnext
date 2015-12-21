@@ -1,4 +1,6 @@
-## 4.9 Charge
+# Charge
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Die Funktion Chargenverwaltung in ERPNext versetzt Sie in die Lage, verschiedene Einheiten eines Artikels zu gruppieren und ihnen eine einzigartige Nummer, die man Chargennummer nennt, zuzuweisen.
 
