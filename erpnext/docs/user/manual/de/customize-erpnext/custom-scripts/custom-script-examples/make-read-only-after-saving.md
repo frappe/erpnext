@@ -1,4 +1,6 @@
-## 15.3.1.4 Nach dem Speichern "Schreibschutz" einstellen
+# Nach dem Speichern "Schreibschutz" einstellen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Verwenden Sie die Methode cur_frm.set_df_property um die Anzeige Ihres Feldes zu aktualiseren.
 
