@@ -1,6 +1,6 @@
 # Ausgangsrechung
 
-<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span> 
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Eine Ausgangsrechnung ist eine Rechnung, die Sie an Ihren Kunden senden, und aufgrund derer der Kunde eine Zahlung leistet. Die Ausgangsrechnung ist ein Buchungsvorgang. Beim Übertragen einer Ausgangsrechnung aktualisiert das System das Forderungskonto und bucht einen Ertrag gegen das Kundenkonto.
 
