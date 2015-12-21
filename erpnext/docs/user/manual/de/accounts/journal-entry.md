@@ -20,7 +20,7 @@ In einem Buchungssatz müssen Sie folgendes tun:
 
 #### Differenz
 
-Das "Differenz"-Feld zeigt den Unterschied zwischen den Soll- und Habenbeträgen. Dieser Wert sollte "0" sein bevor der Buchungssatz übertragen wird. Wenn dieser Wert nicht "0" ist, dann können Sie auf die Schaltfläche "Differenzbuchung erstellen" klicken, um eine neue Zeile mit dem benötigten Betrag, der benötigt wird, die Differenz auf "0" zu stellen, einzufügen.
+Das "Differenz"-Feld zeigt den Unterschied zwischen den Soll- und Habenbeträgen. Dieser Wert sollte "0" sein bevor der Buchungssatz übertragen wird. Wenn dieser Wert nicht "0" ist, dann können Sie auf die Schaltfläche "Differenzbuchung erstellen" klicken, um eine neue Zeile mit dem Betrag, der benötigt wird, die Differenz auf "0" zu stellen, einzufügen.
 
 ---
 
@@ -51,6 +51,6 @@ Eine Abschreibung tritt dann auf, wenn Sie einen bestimmten Wert Ihres Vermögen
 * Soll: Abschreibung (Aufwand)
 * Haben: Vermögenskonto (das Konto auf das Sie den Vermögenswert, denn Sie abschreiben, gebucht haben)
 
-> Anmerkung: Beachten Sie, dass es spezielle landesspezifische Regeln dafür gibt, in welcher Höhe bestimmte Arten von Vermögensgegenständen abgeschrieben werden können.
+> Anmerkung: Beachten Sie, dass es spezielle landesspezifische Regeln dafür gibt, in welcher Höhe bestimmte Arten von Vermögensgegenständen abgeschrieben werden können (Abschreibungstabellen!).
 
 {next}
