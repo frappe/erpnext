@@ -1,4 +1,4 @@
-# 5.6.1 Kampagne
+# Kampagne
 
 <span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span> 
 
