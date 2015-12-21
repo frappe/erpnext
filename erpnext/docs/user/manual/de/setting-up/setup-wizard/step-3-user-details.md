@@ -7,6 +7,6 @@ src="{{docs_base_url}}/assets/img/setup-wizard/step-3.png">
 
 ---
 
-Anmerkung: Fügen Sie ein eigenes Foto hinzu, nicht das Ihrer Firma.
+Anmerkung: Fügen Sie ein Foto von Ihnen selbst hinzu, nicht eines von Ihrer Firma.
 
 {next}
