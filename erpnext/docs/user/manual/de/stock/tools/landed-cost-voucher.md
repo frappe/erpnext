@@ -1,4 +1,6 @@
-## 4.12.3 Einstandskostenbeleg
+# Einstandskostenbeleg
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Die Einstandskosten sind der Gesamtbetrag aller Kosten eines Produktes bis es die Tür des Käufers erreicht. Die Einstandskosten umfassen die Originalkosten des Produktes, alle Versandkosten, Zölle, Steuern, Versicherung und Gebühren für Währungsumrechung usw. Es kann sein, dass nicht in jeder Sendung alle diese Komponenten anwendbar sind, aber die zutreffenden Komponenten müssen als Teil der Einstandskosten berücksichtigt werden.
 
