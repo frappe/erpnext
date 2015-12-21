@@ -1,4 +1,6 @@
-## 2.2.4 Teilen
+# Teilen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span>
 
 Zusätzlich zu Benutzer- und Rollenberechtigungen können Sie ein Dokument auch mit einem anderen Benutzer "teilen", wenn Sie die Berechtigungen zum teilen haben.
 
