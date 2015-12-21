@@ -34,7 +34,7 @@ So verbuchen Sie einen Verkauf (aufgeschlüsselt):
 
 ### Termine
 
-Veröffentlichungsdatum: Das Datum zu dem sich die Ausgangsrechnung auf Ihre Bilanz auswirkt, d. h. auf das Hauptbuch. Das wirkt sich auf alle Ihre Bilanzen in dieser Abrechnungsperiode aus.
+Veröffentlichungsdatum (Erstellungsdatum): Das Datum zu dem sich die Ausgangsrechnung auf Ihre Bilanz auswirkt, d. h. auf das Hauptbuch. Das wirkt sich auf alle Ihre Bilanzen in dieser Abrechnungsperiode aus.
 
 Fälligkeitsdatum: Das Datum zu dem die Zahlung fällig ist (wenn Sie auf Rechnung verkauft haben). Das kann automatisch über die Kundenstammdaten vorgegeben werden.
 
