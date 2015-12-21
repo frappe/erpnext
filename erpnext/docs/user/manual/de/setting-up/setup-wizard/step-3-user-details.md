@@ -1,4 +1,6 @@
-## 2.1.3 Benutzerdetails
+# Benutzerdetails
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Geben Sie Details zum Benutzerprofil, wie Name, Benutzer-ID und das bevorzugte Passwort ein.
 
