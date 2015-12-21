@@ -1,6 +1,6 @@
 # Kontenabgleich
 
-<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span> 
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 ### Kontoauszug
 
