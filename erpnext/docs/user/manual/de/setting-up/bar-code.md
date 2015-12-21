@@ -1,4 +1,6 @@
-## 2.16 Barcode
+# Barcode
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Ein Barcode ist ein maschinenlesbarer Code und besteht aus Nummern und Mustern von parallelen Linien mit unterschiedlicher Breite, die auf eine Ware aufgedruckt werden. Barcodes werden speziell zur Lagerverwaltung verwendet.
 
