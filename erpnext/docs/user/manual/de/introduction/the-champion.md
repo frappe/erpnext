@@ -1,4 +1,6 @@
-## 1.4 Der Champion
+# Der Champion
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 <img class="cover" alt="Bild" src="{{docs_base_url}}/assets/old_images/erpnext/implementation-image.png">
 
