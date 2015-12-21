@@ -6,11 +6,11 @@ Der Kontenplan hilft Ihnen bei der Beantwortung folgender Fragen:
 
 * Was ist Ihre Organisation wert?
 * Wieviele Schulden haben Sie?
-* Wieviel Gewinn erwirtschaften Sie (und in diesem Zuge auch, wieviele Steuern zahlen Sie?)
+* Wieviel Gewinn erwirtschaften Sie (und in diesem Zuge auch, wieviele Steuern zahlen Sie)?
 * Wieviel Umsatz generieren Sie?
 * Wie setzen sich Ihre Ausgaben zusammen?
 
-Als Manager werden Sie zu schätzen wissen, wenn Sie beurteilen können wie Ihr Geschäft läuft.
+Als Manager werden Sie es zu schätzen wissen, wenn Sie beurteilen können wie Ihr Geschäft läuft.
 
 > Tipp: Wenn Sie eine Bilanz nicht lesen können (es hat lange gedauert bis wir das konnten), dann ist jetzt eine gute Gelegenheit es zu erlernen. Es wird die Mühe wert sein. Sie können auch die Hilfe Ihres Buchhalters in Anspruch nehmen, wenn Sie Ihren Kontenplan einrichten möchten.
 
@@ -34,9 +34,9 @@ Die Bilanz beinhaltet Vermögenswerte (Mittelverwendung) und Verbindlichkeiten (
 
 > Buchhaltung: Wenn Sie in Bezug auf Buchhaltung Anfänger sind, wundern Sie sich vielleicht, wie das Vermögen gleich den Verbindlichkeiten sein kann? Das würde ja heißen, dass das Unternehmen selbst nichts besitzt. Das ist auch richtig. Alle Investitionen, die im Unternehmen getätigt werden, um Vermögen anzuschaffen (wie Land, Möbel, Maschinen) werden von den Inhabern getätigt und sind für das Unternehmen eine Verbindlichkeit. Wenn das Unternehmen schliessen möchte, müssen alle Vermögenswerte verkauft werden und die Verbindlichkeiten den Inhabern zurückgezahlt werden (einschliesslich der Gewinne), es bleibt nichts übrig.
 
-So repräsentieren in dieser Sichtweise alle Konten ein Vermögen des Unternehmens, wie Bank, Grundstücke, Geschäftsausstattung, oder eine Verbindlichkeit (Kapital welches das Unternehmen anderen schuldet), wie Eigenkapital und diverse Verbindlichkeiten.
+So repräsentieren in dieser Sichtweise alle Konten ein Vermögen des Unternehmens, wie Bank, Grundstücke, Geschäftsausstattung, oder eine Verbindlichkeit (Kapital welches das Unternehmen anderen schuldet), wie Eigenkapital und diverse andere Verbindlichkeiten (Fremdkapital).
 
-Zwei besondere Konten, die in diesem Zuge angesprochen werden sollten, sind die Forderungen (Geld, welches Sie noch von Ihren Kunden bekommen) und die Verbindlichkeiten (aus Lieferungen und Leistungen) (Geld, welches Sie noch an Ihre Lieferanten zahlen müssen), jeweils dem Vermögen und den Verbindlichkeiten zugeordnet.
+Zwei besondere Konten, die in diesem Zuge angesprochen werden sollten, sind die Forderungen (Geld, welches Sie noch von Ihren Kunden bekommen) und die Verbindlichkeiten aus Lieferungen und Leistungen (Geld, welches Sie noch an Ihre Lieferanten zahlen müssen), die jeweils dem Vermögen bzw. den Verbindlichkeiten zugeordnet sind.
 
 ### Gewinn- und Verlustkonten
 
