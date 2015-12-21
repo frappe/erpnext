@@ -1,4 +1,6 @@
-## 9.3 Zeitprotokoll
+# Zeitprotokoll
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Über Zeitprotokoll kann Arbeitszeit aufgezeichnet werden. Man kann sie nutzen um folgendes mitzuprotokollieren:
 
