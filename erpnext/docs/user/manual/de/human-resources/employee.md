@@ -1,4 +1,6 @@
-## 11.1 Mitarbeiter
+# Mitarbeiter
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Es gibt viele Felder, die Sie in einem Mitarbeiterdatensatz hinzufügen können.
 
