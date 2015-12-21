@@ -1,6 +1,6 @@
 ## 3.1 Journalbuchung / Buchungssatz
 
-Außer der **Ausgangsrechnung** und der **Eingangsrechnung** werden alle Buchungsvorgänge als **Journalbuchung / Buchungssatz** erstellt. Ein **Buchungssatz** ist ein Standard-Geschäftsvorfall aus dem Rechnungswesen, der sich auf mehrere verschiedene Konten auswirkt und bei dem die Summen von Soll und Haben gleich groß sind.
+Außer der **Ausgangsrechnung** und der **Eingangsrechnung** werden alle Buchungsvorgänge als **Journalbuchung / Buchungssatz** erstellt. Ein **Buchungssatz** ist ein Standard-Geschäftsvorfall aus dem Rechnungswesen, der sich auf mehrere verschiedene Konten auswirkt, und bei dem die Summen von Soll und Haben gleich groß sind.
 
 Um einen neuen Buchungssatz zu erstellen, gehen Sie zu:
 
@@ -9,6 +9,7 @@ Um einen neuen Buchungssatz zu erstellen, gehen Sie zu:
 <img class="screenshot" alt="Buchungssatz" src="{{docs_base_url}}/assets/img/accounts/journal-entry.png">
 
 In einem Buchungssatz müssen Sie folgendes tun:
+
 * Die Belegart über das DropDown-Menü auswählen.
 * Zeilen für die einzelnen Buchungen hinzufügen. In jeder Zeile müssen Sie folgendes Angeben:
     * Das Konto, das betroffen ist.
