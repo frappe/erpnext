@@ -1,4 +1,6 @@
-## 11.12.3 Filiale
+# Filiale
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Filialen Ihres Unternehmens
 
