@@ -15,7 +15,7 @@ Zusatzbeispiel: Die Firma East Wind wird mit dem Kürzel EW abgekürzt. "Shades 
 
 ### Geschäftsjahr
 
-Jede Jahresperiode an deren Ende die Konten einer Firma abgeschlossen werden, wird als Geschäftsjahr bezeichnet. In einigen Ländern startet das Geschäftsjahr zum 1. Januar, in anderen zum 1. April.
+Jede Jahresperiode, an deren Ende die Konten einer Firma abgeschlossen werden, wird als Geschäftsjahr bezeichnet. In einigen Ländern startet das Geschäftsjahr zum 1. Januar, in anderen zum 1. April.
 
 Das Enddatum wird automatisch eingestellt.
 
