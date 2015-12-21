@@ -1,6 +1,8 @@
-## 15.3.1.3 Kode auf Basis von Custom Logic erstellen
+# Code auf Basis von Custom Logic erstellen
 
-Fügen Sie diesen Kode so in einem benutzerdefinierten Skript eines Artikels hinzu, dass der neue Artikelkode generiert wird, bevor der neue Artikel abgespeichert wird.
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
+
+Fügen Sie diesen Code so in einem benutzerdefinierten Skript eines Artikels hinzu, dass der neue Artikelcode generiert wird, bevor der neue Artikel abgespeichert wird.
 
 (Vielen Dank an Aditya Duggal)
 
