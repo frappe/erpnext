@@ -22,7 +22,7 @@ Sie müssen auch die Kostenstelle angeben, auf die Ihr Ertrag gebucht wird. Erin
 
 ### Buchungen in der doppelten Buchführung für einen typischen Verkaufsvorfall
 
-So verbuchen Sie einen Verkauf aufgeschlüsselt:
+So verbuchen Sie einen Verkauf (aufgeschlüsselt):
 
 **Soll:** Kunde (Gesamtsumme) 
 
