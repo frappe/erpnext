@@ -1,4 +1,6 @@
-## 2.9 Preisliste
+# Preisliste
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 ERPNext lässt es zu, viele verschiedene Verkaufs- und Einkaufspreise für einen Artikel zu verwalten, indem eine Preisliste verwendet wird. "Preisliste" ist hierbei die Bezeichnung, die Sie einer Menge von Artikelpreisen geben können.
 
