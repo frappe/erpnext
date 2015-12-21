@@ -2,7 +2,7 @@
 
 ### Zahlungswerkzeug
 
-Die Funktion Zahlungswerkzeug erlaubt es Personal, das kein Buchhalter ist, Journalbuchungen zu erstellen, indem zutreffende Felder in Journalbuchungen mit Konten- und Zahlungsdetails gefüllt werden.
+Die Funktion Zahlungswerkzeug erlaubt es Personal, das kein Buchhalter ist, Journalbuchungen/Buchungssätze zu erstellen, indem zutreffende Felder in Journalbuchungen/Buchungssätzen mit Konten- und Zahlungsdetails gefüllt werden.
 
 Um zum Zahlungswerkzeug zu gelangen, gehen Sie zu
 
