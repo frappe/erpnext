@@ -1,4 +1,6 @@
-## 4.14 Kundenreklamationen
+# Kundenreklamationen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Dass verkaufte Produkte zurück gesendet werden ist in der Wirtschaft üblich. Gründe für die Rücksendung durch den Kunden sind Qualitätsmängel, verspätete Lieferung oder auch anderes.
 
