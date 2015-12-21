@@ -1,4 +1,6 @@
-## 2.3.1 Systemeinstellungen
+# Systemeinstellungen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Sie können ERPNext so lokalisieren, dass bestimmte Zeitzonen und Formate für das Datum, Zahlen und die Währung benutzt werden. Zusätzlich können Sie global den Verfall von Sitzungen über die Systemeinstellungen festlegen.
 
