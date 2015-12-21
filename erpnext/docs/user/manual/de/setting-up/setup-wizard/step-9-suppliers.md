@@ -1,4 +1,6 @@
-## 2.1.9 Schritt 9: Lieferanten
+# Schritt 9: Lieferanten
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Geben Sie ein paar Namen Ihrer Lieferanten ein.
 
