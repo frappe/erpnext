@@ -4,9 +4,9 @@ Am Ende eines jeden Vertriebs- und Beschaffungsvorgangs stehen die Abrechnung un
 
 In ERPNext besteht Ihr Arbeit aus drei Haupttätigkeiten:
 
-* Ausgangsrechnung: Die Rechnungen, die Sie Ihren Kunden über die Produkte oder Dienstleistungen, die Sei anbieten, senden.
-* Eingangsrechnung: Rechnungen, die Sie von Ihren Lieferanten für deren Produkte oder Dienstleistungen erhalten.
-* Journalbuchungen / Buchungssätze: Für Buchungen wie Zahlung, Gutschrift und andere.
+* Ausgangsrechnungen: Rechnungen, die Sie Ihren Kunden über von Ihnen angebotene Produkte oder Dienstleistungen senden.
+* Eingangsrechnungen: Rechnungen, die Sie von Ihren Lieferanten für deren Produkte oder Dienstleistungen erhalten.
+* Journalbuchungen / Buchungssätze: Für Buchungen wie Zahlung, Gutschrift usw.
 
 #### Themen
 
