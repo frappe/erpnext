@@ -300,7 +300,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			},
 			callback: function(r) {
 				if(!r.exc){
-					frappe.msgprint(__("Payment Request generated"))
+					var doc = frappe.model.sync(r.message);
+					console.log(r.message)
+					frappe.set_route("Form", r.message.doctype, r.message.name);
 				}
 			}
 		})

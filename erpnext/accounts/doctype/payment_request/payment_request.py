@@ -11,7 +11,7 @@ from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_ent
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency, get_balance_on
 from itertools import chain
-
+from paypal_integration.express_checkout import set_express_checkout
 class PaymentRequest(Document):		
 	def validate(self):
 		self.validate_payment_request()	
@@ -22,11 +22,8 @@ class PaymentRequest(Document):
 			frappe.throw(_("Payment Request already exist"))
 		
 	def on_submit(self):
-		if self.status == "Paid":
-			self.set_paid()
-			
-		self.send_email()
 		self.send_payment_request()
+		self.send_email()
 		self.make_communication_entry()
 	
 	def on_cancel(self):
@@ -39,12 +36,17 @@ class PaymentRequest(Document):
 		pass
 	
 	def send_payment_request(self):
-		pass
-	
-	def make_communication_log_entry(self):
-		pass
-	
+		if self.payment_gateway == "PayPal":	
+			self.payment_url = set_express_checkout(self.amount, "USD", {"doctype": self.doctype, 
+				"docname": self.name})
+		
+		if self.payment_url:
+			frappe.db.set_value(self.doctype, self.name, "status", "Initiated")
+			
 	def set_paid(self):
+		if frappe.session.user == "Guest":
+			frappe.set_user("Administrator")
+			
 		self.create_journal_voucher_entry()
 	
 	def create_journal_voucher_entry(self):
@@ -85,12 +87,15 @@ class PaymentRequest(Document):
 		}
 		
 		jv =  get_payment_entry(ref_doc, payment_details)
+		
 		jv.update({
 			"voucher_type": "Journal Entry",
 			"posting_date": today()
 		})
 		jv.submit()
-	
+		
+		frappe.db.set_value(self.doctype, self.name, "status", "Paid")
+		
 	def send_email(self):
 		"""send email with payment link"""
 		frappe.sendmail(recipients=self.email_to, sender=None, subject=self.subject,
@@ -99,13 +104,13 @@ class PaymentRequest(Document):
 						
 	def get_message(self):
 		"""return message with payment gateway link"""
-		return self.message + "<br> Payment Link <a href='https://www.google.com'> link for payment gateway </a>"
+		return self.message + self.payment_url if self.payment_url else ""
 		
 	def set_failed(self):
 		pass
 	
 	def set_cancelled(self):
-		pass
+		frappe.db.set_value(self.doctype, self.name, "status", "Cancelled")
 	
 	def make_communication_entry(self):
 		"""Make communication entry"""
@@ -125,18 +130,20 @@ def make_payment_request(dt, dn, recipient_id=None):
 	ref_doc = get_reference_doc_details(dt, dn)
 	payment_gateway, payment_account = get_gateway_details()
 	
-	pr = frappe.get_doc({
-		"doctype": "Payment Request",
+	pr = frappe.new_doc("Payment Request")
+	pr.update({
 		"payment_gateway": payment_gateway,
 		"payment_account": payment_account,
 		"currency": ref_doc.currency,
 		"amount": get_amount(ref_doc, dt),
 		"email_to": recipient_id,
+		"subject": "Payment Request for %s"%dn,
+		"message": frappe.get_doc("Accounts Settings").message,
 		"reference_doctype": dt,
 		"reference_name": dn
-	}).insert()
+	})
 	
-	return pr.name
+	return pr.as_dict()
 
 def get_reference_doc_details(dt, dn):
 	""" return reference doc Sales Order/Sales Invoice"""
