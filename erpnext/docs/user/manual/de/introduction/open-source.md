@@ -1,4 +1,6 @@
-## 1.2 Freie Software
+# Freie Software
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Der Quellcode von ERPNext ist Open Source. Er ist für alle offen: Zum Verstehen, zum Erweitern und zum Verbessern. Und er ist kostenlos!
 
