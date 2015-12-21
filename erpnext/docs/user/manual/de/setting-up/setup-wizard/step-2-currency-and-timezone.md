@@ -1,4 +1,6 @@
-## 2.1.2 Währung und Zeitzone
+# Währung und Zeitzone
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Stellen Sie den Namen Ihres Landes, die Währung und die Zeitzone ein.
 
