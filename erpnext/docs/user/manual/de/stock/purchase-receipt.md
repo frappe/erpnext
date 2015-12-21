@@ -22,7 +22,7 @@ Wenn Sie aussortieren, müssen Sie ein Ausschusslager angeben, mit dem Sie angeb
 
 ### Qualitätsprüfung
 
-Wenn für bestimmte Artikel eine Qualitätsprüfungen zwingend erforderlich sind (wenn Sie das z. B. so in den Artikelstammdaten angegeben haben), müssen Sie die Spalte Qualitätsprüfungsnummer (QA Nr) aktualisieren. Das System erlaubt Ihnen ein "Übertragen" des Kaufbelegs nur dann, wenn Sie die Qualitätsprüfungsnummer aktualisieren.
+Wenn für bestimmte Artikel Qualitätsprüfungen zwingend erforderlich sind (wenn Sie das z. B. so in den Artikelstammdaten angegeben haben), müssen Sie die Spalte Qualitätsprüfungsnummer (QA Nr) aktualisieren. Das System erlaubt Ihnen ein "Übertragen" des Kaufbelegs nur dann, wenn Sie die Qualitätsprüfungsnummer aktualisieren.
 
 ### Umwandlung von Standardmaßeinheiten
 
@@ -34,7 +34,7 @@ Da sich der eingegangene Artikel auf den Wert des Lagerbestandes auswirkt, ist e
 
 ### Steuern und Bewertung
 
-Einige Ihrer Steuern und Gebühren können sich auf den Wert Ihres Artikels auswirken. Zum Beispiel: Eine Steuer wird möglicherweise nicht zum Wert Ihres Artikels hinzugerechnet, weil Sie beim Verkauf des Artikels die Steuer aufrechnen müssen. Aus diesem Grund sollten Sie sicher stellen, dass in der Tabelle "Steuern und Gebühren" alle Steuern für eine angemessene Bewertung korrekt eingetragen sind
+Einige Ihrer Steuern und Gebühren können sich auf den Wert Ihres Artikels auswirken. Beispiel: Eine Steuer wird möglicherweise nicht zum Wert Ihres Artikels hinzugerechnet, weil Sie beim Verkauf des Artikels die Steuer aufrechnen müssen. Aus diesem Grund sollten Sie sicher stellen, dass in der Tabelle "Steuern und Gebühren" alle Steuern für eine angemessene Bewertung korrekt eingetragen sind
 
 ### Seriennummern und Chargen
 
