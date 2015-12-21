@@ -1,4 +1,6 @@
-## 11.12.6 Einkommensart
+# Einkommensart
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Sie können zu den Bestandteilen der Gehaltsabrechnung Datensätze erstellen und sie als Einkommensart beschreiben.
 
