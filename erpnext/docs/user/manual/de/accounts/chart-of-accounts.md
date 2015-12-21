@@ -1,6 +1,6 @@
 # Kontenplan
 
-<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span> 
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Der Kontenplan bildet die Blaupause Ihres Unternehmens. Die Rahmenstruktur Ihres Kontenplans basiert auf einem System der doppelten Buchführung, die auf der ganzen Welt zum Standard der finanziellen Bewertung eines Unternehmens geworden ist.
 
