@@ -1,4 +1,6 @@
-## 6.1 Angebot
+# Angebot
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Während eines Verkaufsvorgangs wird der Kunde ein schriftliches Angebot über die Produkte oder Dienstleistungen, die Sie anbieten möchten, anfragen, inklusive der Preise und anderen Vertragsbedingungen. Dies bezeichnet man als Vorschlag, Kostenvoranschlag, Pro Forma-Rechnung oder Angebot.
 
