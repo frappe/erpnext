@@ -1,6 +1,6 @@
 # Kampagne
 
-<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span> 
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Eine Kampagne ist eine groß angelegte Umsetzung einer Vertriebsstrategie um ein Produkt oder eine Dienstleistung zu bewerben. Dies erfolgt in einem Marktsegment in einer bestimmten geographischen Region um bestimmte Ziele zu erreichen.
 
