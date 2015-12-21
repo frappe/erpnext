@@ -1,4 +1,6 @@
-## 2.6.4 Briefköpfe
+# Briefköpfe
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Sie können in ERPNext viele verschiedene Briefköpfe verwalten. In einem Briefkopf können Sie:
 
