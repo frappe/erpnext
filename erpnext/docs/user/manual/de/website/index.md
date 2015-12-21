@@ -1,4 +1,6 @@
-## 13. Webseite
+# Webseite
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Webseiten sind Kernbestandteile eines jeden Geschäftslebens. Eine gute Webseite zu haben bedeutet normalerweise:
 
