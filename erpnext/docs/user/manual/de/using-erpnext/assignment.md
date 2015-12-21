@@ -1,4 +1,6 @@
-## 14.6 Zuweisungen
+# Zuweisungen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Die Option "Zuweisen zu" in ERPNext erlaubt es Ihnen ein bestimmtes Dokument einem Benutzer, der weiter an diesem Dokument arbeiten soll, zu zu weisen.
 
