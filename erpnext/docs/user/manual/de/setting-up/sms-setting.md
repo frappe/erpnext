@@ -1,4 +1,6 @@
-## 2.11 SMS-Einstellungen
+# SMS-Einstellungen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Um SMS-Dienste in ERPNext zu integrieren, wenden Sie sich an einen Anbieter eines SMS-Gateways der Ihnen eine HTTP-Schnittstelle (API) zur Verfügung stellt. Er wird Ihnen ein Konto erstellen und Ihnen eindeutige Zugangsdaten zukommen lassen.
 
