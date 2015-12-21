@@ -52,7 +52,7 @@ So können Sie Ihre Kontoauszüge und Ihre Systembuchungen angleichen.
 
 ### Offene Zahlungen verwalten
 
-Ausgenommen von Endkundenverkäufen sind in den meisten Fällen die Rechnungslegung und die Zahlung voneinander getrennte Aktivitäten. Es gibt verschiedene Kombinationsmöglichkeiten, wie Zahlungen getätigt werden können. Diese Kombinationen finden sowohl bei Verkäufen als auch bei Einkäufen Anwendung.
+Abgesehen von Barverkäufen sind in den meisten Fällen die Rechnungslegung und die Bezahlung voneinander getrennte Aktivitäten. Es gibt verschiedene Kombinationsmöglichkeiten, wie Zahlungen getätigt werden können. Diese Kombinationen finden sowohl bei Verkäufen als auch bei Einkäufen Anwendung.
 
 * Zahlungen können im Voraus erfolgen (100% Anzahlung).
 * Sie können nach dem Versand erfolgen. Entweder zum Zeitpunkt der Lieferung oder innerhalb von ein paar Tagen.
@@ -66,7 +66,7 @@ Der gesamte offene Betrag einer Rechnung ist die Summe aller Buchungen, die zu d
 
 ### Zahlungen mit Rechnungen abgleichen
 
-In komplexen Szenarien, besonders im Geschäftsfeld Investitionsgüter, gibt es manchmal keinen direkten Bezug zwischen Zahlungen und Rechnungen. Sie schicken an Ihre Kunden Rechnungen und Kunden senden Ihnen Zahlungsblöcke oder Zahlungen, die auf einem Zeitplan basieren, der nicht mit Ihren Rechnungen verknüpft ist.
+In komplexen Szenarien, besonders im Geschäftsfeld der Investitionsgüter, gibt es manchmal keinen direkten Bezug zwischen Zahlungen und Rechnungen. Sie schicken an Ihre Kunden Rechnungen und Kunden senden Ihnen Zahlungsblöcke oder Zahlungen, die auf einem Zeitplan basieren, der nicht mit Ihren Rechnungen verknüpft ist.
 
 In solchen Fällen können Sie das Werkzeug zum Zahlungsabgleich verwenden.
 
