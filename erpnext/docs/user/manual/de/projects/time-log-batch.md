@@ -1,4 +1,6 @@
-## 9.4 Zeitprotokollstapel
+# Zeitprotokollstapel
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Sie können Zeitprotokolle abrechnen, indem Sie sie zusammenbündeln. Das gibt Ihnen die Flexibiliät die Abrechnung an den Kunden so zu handhaben wie sie es wollen. Um einen neuen Zeitprotokollstapel zu erstellen, gehen Sie zu:
 
