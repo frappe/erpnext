@@ -1,4 +1,6 @@
-## 2.1.1 Sprache
+# Sprache
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Wählen Sie Ihre Sprache. ERPNext gibt es in mehr als 20 Sprachen.
 
