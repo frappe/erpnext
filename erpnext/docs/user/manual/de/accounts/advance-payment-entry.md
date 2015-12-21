@@ -4,13 +4,13 @@ Eine Zahlung, die vom Kunden vor dem Versand des Produktes geleistet wird wird a
 
 **Beispiel:** Nehmen wir an, dass die Kundin Jane Do ein Doppelbett für 10.000 Euro bestellt. Sie wird nach einer Anzahlung gefragt bevor das Möbelhaus die Arbeit an der Bestellung beginnt. Sie zahlt 5.000 Euro in bar an.
 
-Gegen Sie zu Rechnungswesen und öffnen Sie einen neuen Buchungssatz um die Buchung zur Vorkasse zu erstellen.
+Gehen Sie zum Modul Rechnungswesen und eröffnen Sie einen neuen Buchungssatz um die Buchung zur Vorkasse zu erstellen.
 
 > Rechnungswesen > Dokumente > Journalbuchung > Neu
 
-Gegen Sie als Belegart "Barbeleg" an. Das kann bei unterschiedlichen Kunden unterschiedlich sein. Wenn jemand mit Scheck zahlt, dann ist die Belegart "Bankbeleg". Wählen Sie nun das Kundenkonto aus und erstellen Sie die entsprechenden Einträge für Soll und Haben.
+Geben Sie als Belegart "Barbeleg" an. Das kann bei unterschiedlichen Kunden unterschiedlich sein. Wenn jemand mit Scheck zahlt, dann ist die Belegart "Bankbeleg". Wählen Sie nun das Kundenkonto aus und erstellen Sie die entsprechenden Einträge für Soll und Haben.
 
-Da der Kunde 5.000 Euro bar angezahlt hat, wird dieser Betrag als Habenbuchung zum Kunden verbucht. Um dem eine Sollbuchung gegenüberzustellen (wir erinnern uns an die doppelte Buchführung) geben Sie zum Bankkonto der Firma 5.000 Euro als Soll ein. Klicken Sie das Feld "Ist Anzahlung" in der Zeile an.
+Da der Kunde 5.000 Euro bar angezahlt hat, wird dieser Betrag als Habenbuchung zum Kunden verbucht. Um dem eine Sollbuchung gegenüberzustellen (wir erinnern uns an die doppelte Buchführung), geben Sie als Soll für das Bankkonto der Firma 5.000 Euro ein. Klicken Sie das Feld "Ist Anzahlung" in der Zeile an.
 
 #### Abbildung 1: Journalbuchung bei Vorkasse
 
@@ -18,7 +18,7 @@ Da der Kunde 5.000 Euro bar angezahlt hat, wird dieser Betrag als Habenbuchung z
 
 ### Doppelte Buchführung
 
-Bei der doppelten Buchführung hat jede Transaktion einen positiven oder negativen Gegenpart: Soll und Haben. Für jede Transaktion gibt es eine [Sollbuchung](http://www.e-conomic.co.uk/accountingsystem/glossary/debit) auf einem Konto und eine [Habenbuchung](http://www.e-conomic.co.uk/accountingsystem/glossary/credit) auf einem anderen Kont. Das heißt, dass jede Transaktion zu zwei Konten erfolgt. Ein Konto wird belastet, weil sich ein Betrag erhöht, und eines wird entlastet, weil sich der Betrag vermindert.
+Bei der doppelten Buchführung hat jede Transaktion einen positiven oder negativen Gegenpart: Soll und Haben. Für jede Transaktion gibt es eine [Sollbuchung](http://www.e-conomic.co.uk/accountingsystem/glossary/debit) auf einem Konto und eine [Habenbuchung](http://www.e-conomic.co.uk/accountingsystem/glossary/credit) auf einem anderen Konto. Das heißt, dass jede Transaktion zu zwei Konten erfolgt. Ein Konto wird belastet, weil sich ein Betrag erhöht, und eines wird entlastet, weil sich der Betrag vermindert.
 
 #### Abbildung 2: Transaktion und Ausgleichsbuchung
 
