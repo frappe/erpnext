@@ -1,4 +1,6 @@
-## 4.2 Lagerbuchung
+# Lagerbuchung
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Eine Lagerbuchung ist ein einfaches Dokument, welches Sie Lagerbewegungen aus einem Lager heraus, in ein Lager hinein oder zwischen Lagern aufzeichnen lässt.
 
