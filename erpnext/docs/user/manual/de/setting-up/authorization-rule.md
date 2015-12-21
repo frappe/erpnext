@@ -1,4 +1,6 @@
-## 2.10 Autorisierungsregeln
+# Autorisierungsregeln
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Mit Hilfe des Werkzeugs "Autorisierungsregeln" können Sie Regeln für Genehmigungen bestimmen, die an Bedingungen geknüpft sind.
 
