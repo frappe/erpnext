@@ -1,4 +1,6 @@
-## 7.3 Lieferantenauftrag
+# Lieferantenauftrag
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Ein Lieferantenauftrag verhält sich analog zu einem Kundenauftrag. Normalerweise handelt es sich um einen bindenden Vertrag mit Ihrem Lieferanten bei dem Sie versichern eine Anzahl von Artikeln zu den entsprechenden Bedingungen zu kaufen.
 
