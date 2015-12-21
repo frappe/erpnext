@@ -12,11 +12,11 @@ Es gibt drei Haupttypen von Buchungen:
 * Lagerbuchung: Artikel, die von einem Lager in ein anderes Lager übertragen werden.
 * Lieferschein: Artikel, die an Kunden versandt wurden.
 
-### Wie verfolgt ERPNext Lagerbewegungen und Lagerstände?
+### Wie verfolgt ERPNext Lagerbewegungen und Lagerbestände?
 
 Das Lager abzubilden bedeutet nicht nur, Mengen zu addieren und subtrahieren. Schwierigkeiten treten dann auf, wenn:
 
-* Zurückdatierte (vergangene) Buchungen getätigt/geändert werden: Dies wirkt sich auf zukünftige Lagerstände aus und könnte zu negativen Beständen führen.
+* Zurückdatierte (vergangene) Buchungen getätigt/geändert werden: Dies wirkt sich auf zukünftige Lagerstände aus und kann zu negativen Beständen führen.
 * Das Lager basierend auf der FIFO(Firts-in-first-out)-Methode bewertet werden soll: ERPNext benötigt eine Reihenfolge aller Transaktionen, um den exakten Wert Ihrer Artikel ermitteln zu können.
 * Lagerberichte zu einem beliebigen Zeitpunkt in der Vergangenheit benötigt werden: Wenn Sie für Artikel X zu einem Zeitpunkt Y die Menge/den Wert in ihrem Lager nachvollziehen müssen.
 
