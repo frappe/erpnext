@@ -1,4 +1,6 @@
-## 8.5 Arbeitsgang
+# Arbeitsgang
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 ### Arbeitsgang
 
