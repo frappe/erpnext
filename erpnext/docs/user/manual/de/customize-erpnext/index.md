@@ -1,4 +1,6 @@
-## 15. ERPNext anpassen
+# ERPNext anpassen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 ERPNext bietet viele Werkzeuge um das System kundenspezifisch anzupassen.
 
