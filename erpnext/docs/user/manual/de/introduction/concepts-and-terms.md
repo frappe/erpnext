@@ -1,4 +1,6 @@
-## 1.7 Konzepte und Begriffe
+# Konzepte und Begriffe
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Machen Sie sich mit der Terminologie, die verwendet wird, und mit einigen Grundbegriffen von ERPNext vertraut, bevor Sie mit der Einführung beginnen.
 
