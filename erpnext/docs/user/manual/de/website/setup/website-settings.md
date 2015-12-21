@@ -1,4 +1,6 @@
-## 13.5.1 Einstellungen zur Webseite
+# Einstellungen zur Webseite
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Die meisten der Einstellungen, die Ihre Webseite betreffen, können hier eingestellt werden.
 
