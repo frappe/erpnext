@@ -1,4 +1,6 @@
-## 2.5.2 E-Mail-Benachrichtigung
+# E-Mail-Benachrichtigung
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Sie können verschiedene E-Mail-Benachrichtigungen in Ihrem System einstellen, um Sie an wichtige Aktivitäten zu erinnern, beispielsweise an:
 
