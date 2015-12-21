@@ -72,6 +72,6 @@ Da Sie die Erträge und Aufwendungen zu diesen Rechnungen bereits in der vorheri
 
 Wenn es Ihnen egal ist, welche Artikel in diesen Rechnungen enthalten sind, dann erstellen Sie einfach einen Platzhalter-Artikel in der Rechnung. Die Artikelnummer ist in der Rechnung nicht zwingend erforderlich, also sollte das kein Problem sein.
 
-Wenn Sie alle Ihre Rechnungen eingegeben haben, hat Ihr Eröffnungskonto einen Stand von 0.
+Wenn Sie alle Ihre Rechnungen eingegeben haben, hat Ihr Eröffnungskonto einen Saldo von 0.
 
 {next}
