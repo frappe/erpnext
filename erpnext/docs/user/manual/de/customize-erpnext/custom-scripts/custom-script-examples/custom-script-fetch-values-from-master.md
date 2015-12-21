@@ -1,4 +1,6 @@
-## 15.3.1.1 Benutzerdefiniertes Skript holt sich Werte aus der Formularvorlage
+# Benutzerdefiniertes Skript holt sich Werte aus der Formularvorlage
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Um einen Wert oder eine Verknüpfung auf eine Auswahl zu holen, verwenden Sie die Methode add_fetch.
 
