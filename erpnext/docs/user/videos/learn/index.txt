@@ -38,3 +38,5 @@ advance-payments
 drop-ship
 file-manager
 publish-items-on-website
+shopping-cart
+report-builder

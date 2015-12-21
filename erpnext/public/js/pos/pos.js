@@ -7,7 +7,7 @@ erpnext.pos.PointOfSale = Class.extend({
 	init: function(wrapper, frm) {
 		this.wrapper = wrapper;
 		this.frm = frm;
-		this.wrapper.html(frappe.render_template("pos", {}));
+		this.wrapper.html(frappe.render_template("pos", {currency: this.frm.currency}));
 
 		this.check_transaction_type();
 		this.make();
@@ -15,6 +15,11 @@ erpnext.pos.PointOfSale = Class.extend({
 		var me = this;
 		$(this.frm.wrapper).on("refresh-fields", function() {
 			me.refresh();
+		});
+		
+		this.wrapper.find('input.discount-percentage').on("change", function() {
+			frappe.model.set_value(me.frm.doctype, me.frm.docname, 
+				"additional_discount_percentage", flt(this.value));
 		});
 
 		this.wrapper.find('input.discount-amount').on("change", function() {
@@ -230,6 +235,7 @@ erpnext.pos.PointOfSale = Class.extend({
 	},
 	refresh_fields: function() {
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
+		this.wrapper.find('input.discount-percentage').val(this.frm.doc.additional_discount_percentage);
 		this.wrapper.find('input.discount-amount').val(this.frm.doc.discount_amount);
 
 		this.show_items_in_item_cart();

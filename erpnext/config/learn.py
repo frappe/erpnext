@@ -57,6 +57,16 @@ def get_data():
 					"label": _("Workflow"),
 					"youtube_id": "yObJUg9FxFs"
 				},
+				{
+					"type": "help",
+					"label": _("Email Account"),
+					"youtube_id": "YFYe0DrB95o"
+				},
+				{
+					"type": "help",
+					"label": _("File Manager"),
+					"youtube_id": "4-osLW3E_Rk"
+				},
 			]
 		},
 		{
@@ -76,7 +86,12 @@ def get_data():
 					"type": "help",
 					"label": _("Opening Accounting Balance"),
 					"youtube_id": "kdgM20Q-q68"
-				}
+				},
+				{
+					"type": "help",
+					"label": _("Advance Payments"),
+					"youtube_id": "J46-6qtyZ9U"
+				},
 			]
 		},
 		{
@@ -111,7 +126,17 @@ def get_data():
 					"type": "help",
 					"label": _("Point-of-Sale"),
 					"youtube_id": "4WkelWkbP_c"
-				}
+				},
+				{
+					"type": "help",
+					"label": _("Product Bundle"),
+					"youtube_id": "yk-7kPrRyRRc"
+				},
+				{
+					"type": "help",
+					"label": _("Drop Ship"),
+					"youtube_id": "hUc0hu_XLdo"
+				},
 			]
 		},
 		{
@@ -151,6 +176,11 @@ def get_data():
 					"type": "help",
 					"label": _("Managing Subcontracting"),
 					"youtube_id": "ThiMCC2DtKo"
+				},
+				{
+					"type": "help",
+					"label": _("Quality Inspection"),
+					"youtube_id": "WmtcF3Y40Fs"
 				},
 			]
 		},
@@ -232,6 +262,16 @@ def get_data():
 					"type": "help",
 					"label": _("Managing Projects"),
 					"youtube_id": "egxIGwtoKI4"
+				},
+			]
+		},
+		{
+			"label": _("Website"),
+			"items": [
+				{
+					"type": "help",
+					"label": _("Publish Items on Website"),
+					"youtube_id": "W31LBBNzbgc"
 				},
 			]
 		},

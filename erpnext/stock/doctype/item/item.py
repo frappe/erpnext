@@ -541,7 +541,8 @@ class Item(WebsiteGenerator):
 		if self.variant_of:
 			template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
 			if template_uom != self.stock_uom:
-				frappe.throw(_("Default Unit of Measure for Variant must be same as Template"))
+				frappe.throw(_("Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'")
+					.format(self.stock_uom, template_uom))
 
 	def validate_attributes(self):
 		if self.has_variants or self.variant_of:

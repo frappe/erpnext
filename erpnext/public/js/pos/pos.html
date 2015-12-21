@@ -25,17 +25,25 @@
 						</div>
                     </div>
                     <div class="row pos-bill-row discount-amount-area">
-                        <div class="col-xs-6"><h6 class="text-muted">{%= __("Discount Amount") %}</h6></div>
-                        <div class="col-xs-6"><input type="text" class="form-control discount-amount text-right"></div>
+                        <div class="col-xs-6"><h6 class="text-muted">{%= __("Discount") %}</h6></div>
+						<div class="col-xs-3 discount-field-col">
+							<div class="input-group input-group-sm">
+								<span class="input-group-addon">%</span>
+								<input type="text" class="form-control discount-percentage text-right">
+							</div>
+						</div>
+                        <div class="col-xs-3 discount-field-col">
+							<div class="input-group input-group-sm">
+								<span class="input-group-addon">{%= get_currency_symbol(currency) %}</span>
+								<input type="text" class="form-control discount-amount text-right"
+							  		placeholder="{%= 0.00 %}">
+							</div>
+						</div>
                     </div>
                     <div class="row pos-bill-row grand-total-area">
                         <div class="col-xs-6"><h6>{%= __("Grand Total") %}</h6></div>
                         <div class="col-xs-6"><h6 class="grand-total text-right"></h6></div>
                     </div>
-                    <!-- <div class="row pos-bill-row paid-amount-area">
-                        <div class="col-xs-6"><h6 class="text-muted">{%= __("Amount Paid") %}</h6></div>
-                        <div class="col-xs-6"><input type="text" class="form-control paid-amount text-right"></div>
-                    </div> -->
     			</div>
     		</div>
     	</div>

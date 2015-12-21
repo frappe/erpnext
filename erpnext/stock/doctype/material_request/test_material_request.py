@@ -276,8 +276,8 @@ class TestMaterialRequest(unittest.TestCase):
 			"fiscal_year": "_Test Fiscal Year 2013",
 		})
 		se_doc.get("items")[0].update({
-			"qty": 60.0,
-			"transfer_qty": 60.0,
+			"qty": 54.0,
+			"transfer_qty": 54.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"basic_rate": 1.0
 		})
@@ -307,7 +307,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.load_from_db()
 
 		self.assertEquals(mr.per_ordered, 100)
-		self.assertEquals(mr.get("items")[0].ordered_qty, 60.0)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 54.0)
 		self.assertEquals(mr.get("items")[1].ordered_qty, 3.0)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
@@ -383,7 +383,7 @@ class TestMaterialRequest(unittest.TestCase):
 	def _get_requested_qty(self, item_code, warehouse):
 		return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"))
 
-	def test_make_stock_entry_for_Material_Issue(self):
+	def test_make_stock_entry_for_material_issue(self):
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
 		mr = frappe.copy_doc(test_records[0]).insert()
@@ -422,13 +422,13 @@ class TestMaterialRequest(unittest.TestCase):
 
 		se_doc = make_stock_entry(mr.name)
 		se_doc.fiscal_year = "_Test Fiscal Year 2014"
-		se_doc.get("items")[0].qty = 60.0
+		se_doc.get("items")[0].qty = 54.0
 		se_doc.insert()
 		se_doc.submit()
 
 		# check if per complete is as expected
 		mr.load_from_db()
-		self.assertEquals(mr.get("items")[0].ordered_qty, 60.0)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 54.0)
 		self.assertEquals(mr.get("items")[1].ordered_qty, 3.0)
 
 		#testing bin requested qty after issuing stock against material request

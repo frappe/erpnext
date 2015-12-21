@@ -353,17 +353,20 @@ Distinct unit of an Item
             <td>22</td>
             <td ><code>delivery_document_type</code></td>
             <td >
-                Select</td>
+                Link</td>
             <td >
                 Delivery Document Type
                 
             </td>
             <td>
-                <pre>
-Delivery Note
-Sales Invoice
-Stock Entry
-Purchase Receipt</pre>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/core/doctype">DocType</a>
+
+
+                
             </td>
         </tr>
         
@@ -371,12 +374,14 @@ Purchase Receipt</pre>
             <td>23</td>
             <td ><code>delivery_document_no</code></td>
             <td >
-                Data</td>
+                Dynamic Link</td>
             <td >
                 Delivery Document No
                 
             </td>
-            <td></td>
+            <td>
+                <pre>delivery_document_type</pre>
+            </td>
         </tr>
         
         <tr >

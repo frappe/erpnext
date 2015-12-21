@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import json
 import frappe
-from frappe import _
+from frappe import _, scrub
 from frappe.utils import cint, flt, rounded
 from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
@@ -20,6 +20,7 @@ class calculate_taxes_and_totals(object):
 		self._calculate()
 
 		if self.doc.meta.get_field("discount_amount"):
+			self.set_discount_amount()
 			self.apply_discount_amount()
 
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
@@ -325,6 +326,11 @@ class calculate_taxes_and_totals(object):
 	def _cleanup(self):
 		for tax in self.doc.get("taxes"):
 			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
+			
+	def set_discount_amount(self):
+		if not self.doc.discount_amount and self.doc.additional_discount_percentage:
+			self.doc.discount_amount = flt(flt(self.doc.get(scrub(self.doc.apply_discount_on))) 
+				* self.doc.additional_discount_percentage / 100, self.doc.precision("discount_amount"))
 
 	def apply_discount_amount(self):
 		if self.doc.discount_amount:

@@ -223,8 +223,12 @@
         <li><a href="{{docs_base_url}}/user/videos/learn/publish-items-on-website.html">
             Publish Items on Website</a>
             <span class="text-muted pull-right">5:14</span>
+        </li><li><a href="{{docs_base_url}}/user/videos/learn/shopping-cart.html">
+            Shopping Cart</a>
+            <span class="text-muted pull-right">6:32</span>
         </li>
     </ul>
+	<br>
     <h3>Customization</h3>
     <ul class="list-unstyled video-list">
         <li><a href="{{docs_base_url}}/user/videos/learn/field-customization.html">
@@ -234,6 +238,10 @@
         <li><a href="{{docs_base_url}}/user/videos/learn/workflow.html">
             Workflow</a>
             <span class="text-muted pull-right">3:38</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/report-builder.html">
+            Report Builder</a>
+            <span class="text-muted pull-right">4:27</span>
         </li>
     </ul>
 </div>
