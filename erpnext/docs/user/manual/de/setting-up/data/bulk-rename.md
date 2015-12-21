@@ -1,4 +1,6 @@
-## 2.4.2 Massenweises Umbenennen von Datensätzen
+# Massenweises Umbenennen von Datensätzen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Sie können in ERPNext (sofern es erlaubt ist) ein Dokument umbenennen, indem Sie im Dokument zu **Menü > Umbenennen** gehen.
 
