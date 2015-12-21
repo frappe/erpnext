@@ -1,6 +1,6 @@
 # Kontakt
 
-<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span> 
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Kontakte und Adressen werden in ERPNext separat abgespeichert, so dass Sie mehrere verschiedene Kontakte oder Adressen den Kunden und Lieferanten zuordnen können.
 
