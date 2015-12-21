@@ -1,6 +1,6 @@
 # Eingangsrechnung
 
-<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span> 
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Die Eingangsrechnung ist das exakte Gegenteil zur Ausgangsrechnung. Es ist die Rechnung, die Ihnen Ihr Lieferant für gelieferte Produkte oder Dienstleistungen schickt. Hier schlüsseln Sie die Aufwände für die Lieferung auf. Eine Eingangsrechnung zu erstellen ist der Erstellung einer Ausgangsrechnung sehr ähnlich.
 
