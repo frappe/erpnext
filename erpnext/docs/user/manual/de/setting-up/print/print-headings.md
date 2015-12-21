@@ -1,4 +1,6 @@
-## 2.6.3 Druckköpfe
+# Druckköpfe
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Druckköpfe bezeichnen die "Überschriften" Ihrer Ausgangsrechnungen, Lieferantenangebote etc. Sie können eine Liste an Bezeichnungen für geschäftliche Korrespondenzen erstellen.
 
