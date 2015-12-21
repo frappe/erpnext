@@ -1,3 +1,5 @@
-## 11.10 Werkzeuge
+# Werkzeuge
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 {next}
