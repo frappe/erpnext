@@ -1,4 +1,6 @@
-## 2.2.3 Benutzer-Berechtigungen
+# Benutzer-Berechtigungen
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Verwenden Sie den Benutzerberechtigungen-Manager um den Zugriff eines Benutzers auf eine Menge von Dokumenten einzuschränken.
 
