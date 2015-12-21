@@ -1,4 +1,6 @@
-## 15.3.1.5 Abbruchrechte einschränken
+# Abbruchrechte einschränken
+
+<span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
 Fügen Sie dem Ereignis custom_before_cancel eine Steuerungsfunktion hinzu:
 
