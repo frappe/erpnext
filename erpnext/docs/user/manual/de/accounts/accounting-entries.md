@@ -1,6 +1,6 @@
 ## 3.10 Buchungen
 
-Das Konzept der Buchführung erklärt sich über unten angeführtes Beispiel: Wir nehmen die Firma "Tealaden" als Beispiel und sehen uns an, wie Buchungen für die Geschäftstätigkeiten erstellt werden.
+Das Konzept der Buchführung erklärt sich über unten angeführtes Beispiel: Wir nehmen die Firma "Teeladen" als Beispiel und sehen uns an, wie Buchungen für die Geschäftstätigkeiten erstellt werden.
 
 * Max Mustermann (Inhaber des Teeladens) investiert 25.000 Euro um die Geschäftstätigkeit zu beginnen.
 
