@@ -14,9 +14,9 @@ Die meisten kleinen und mittleren Fertigungsaktivitäten basieren auf einer Auft
 
 Für Systeme auf Basis der Projektfertigung, sollte das Fertigungsmodul zusammen mit dem Projektmodul verwendet werden.
 
-Fertigung und Vorräte
+### Fertigung und Vorräte
 
-Sie können unfertige Erzeugnisse über das Lager Unfertige Erzeugnisse nachvollziehen.
+Sie können unfertige Erzeugnisse über das Lager "Unfertige Erzeugnisse" nachvollziehen.
 
 ERPNext unterstützt Sie dabei Materialüberträge nachzuvollziehen, indem Lagerbuchungen aus Ihren Fertigungsaufträgen unter Zuhilfenahme Ihrer Stücklisten erstellt werden.
 
