@@ -2,7 +2,7 @@
 
 <span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
-Alle Maschinen benötigen regalmäßige Wartung, im besonderen diejenigen, die viele bewegliche Teile beinhalten. Wenn Sie also mit der Wartung dieser Artikel Geschäfte machen oder selbst welche besitzen, stellt der Wartungsplan ein nützliches Hilfsmittel dar, um die entsprechenden Wartungsarbeiten zu planen.
+Alle Maschinen benötigen regelmäßige Wartung, im besonderen diejenigen, die viele bewegliche Teile beinhalten. Wenn Sie also mit der Wartung dieser Artikel Geschäfte machen oder selbst welche besitzen, stellt der Wartungsplan ein nützliches Hilfsmittel dar, um die entsprechenden Wartungsarbeiten zu planen.
 
 Wenn eine Kundenanfrage eine Wartung aufgrund eines Stillstandes verlangt, bezieht sich das auf eine vorbeugende Wartung.
 
@@ -14,7 +14,7 @@ Um einen neuen Wartungsplan zu erstellen, gehen Sie zu:
 
 Im Wartungsplan gibt es zwei Abschnitte:
 
-Im ersten Abschnitt können Sie die Artikel auswählen, für die Sie diesen Plan erstellen wollen, weiterhin wie oft ein Wartungsbesuch erfolgen soll. Das kann optional auch aus dem Kundenauftrag gezogen werden. Nach der Auswahl der Artike sollten Sie den Datensatz abspeichern
+Im ersten Abschnitt können Sie die Artikel auswählen, für die Sie diesen Plan erstellen wollen, weiterhin wie oft ein Wartungsbesuch erfolgen soll. Das kann optional auch aus dem Kundenauftrag gezogen werden. Nach der Auswahl der Artikel sollten Sie den Datensatz abspeichern
 
 Der zweite Abschnitt beinhaltet die Wartungsaktivitäten des Plans. "Zeitplan erstellen" erstellt eine separate Zeile für jede Wartungsaktivität.
 
