@@ -2,7 +2,7 @@
 
 <span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
-Verwenden Sie die Methode `cur_frm.set_df_property' um die Anzeige Ihres Feldes zu aktualiseren.
+Verwenden Sie die Methode `cur_frm.set_df_property` um die Anzeige Ihres Feldes zu aktualiseren.
 
 In diesem Skript verwenden wir auch die Eigenschaft __islocal des Dokuments um zu prüfen ob das Dokument wenigstens einmal abgespeichert wurde oder nie. Wenn __islocal gleich 1 ist, dann wurde das Dokument noch nie gespeichert.
 
