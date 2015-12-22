@@ -2,13 +2,13 @@
 
 <span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
-Ein Wartungsbesuch ist ein Datensatz über einen Besuch eines Technikers bei einem Kunden, in den meisten Fällen wegen einer Kundenanfrage. Sie können einen Wartungsbesuch wir folgt erstellen:
+Ein Wartungsbesuch ist ein Datensatz über einen Besuch eines Technikers bei einem Kunden, in den meisten Fällen wegen einer Kundenanfrage. Sie können einen Wartungsbesuch wie folgt erstellen:
 
 > Support > Dokumente > Wartungsbesuch > Neu
 
 <img class="screenshot" alt="Wartungsbesuch" src="{{docs_base_url}}/assets/img/support/maintenance-visit.png">
 
-Der Wartungsbesuch inhält Informationen über:
+Der Wartungsbesuch enthält Informationen über:
 
 * Den Kunden
 * Den Artikel der geprüft/gewartet wurde
