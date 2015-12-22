@@ -35,8 +35,8 @@ Ein Angebot enthält Informationen über:
 
 Die Preise, die sie abgeben, hängen von zwei Dingen ab:
 
-* Die Preisliste: Wenn Sie mehrere verschiedene Preislisten haben, können Sie eine Preisliste auswählen oder sie mit dem Kunden markieren (so dass sie automatisch vorselektiert wird). Ihre Artikelpreise werden automatisch über die Preisliste aktualisert. Für weitere Informationen bitte bei [Preisliste]({{docs_base_url}}/user/manual/en/setting-up/price-lists.html) weiterlesen.
-* Die Währung: Wenn Sie einem Kunden in einer anderen Währung anbieten, müssen Sie die Umrechnungsfaktoren aktualisieren um ERPNext in die Lage zu versetzen die Information in Ihrer Standardwährung zu speichern. Das hilft Ihnen dabei den Wert Ihres Angebots in der Standardwährung zu analysieren.
+* Der Preisliste: Wenn Sie mehrere verschiedene Preislisten haben, können Sie eine Preisliste auswählen oder sie mit dem Kunden markieren (so dass sie automatisch vorselektiert wird). Ihre Artikelpreise werden automatisch über die Preisliste aktualisert. Für weitere Informationen bitte bei [Preisliste]({{docs_base_url}}/user/manual/en/setting-up/price-lists.html) weiterlesen.
+* Der Währung: Wenn Sie einem Kunden in einer anderen Währung anbieten, müssen Sie die Umrechnungsfaktoren aktualisieren um ERPNext in die Lage zu versetzen die Information in Ihrer Standardwährung zu speichern. Das hilft Ihnen dabei den Wert Ihres Angebots in der Standardwährung zu analysieren.
 
 ### Steuern
 
@@ -52,7 +52,7 @@ Im Idealfall beinhaltet jedes Angebot einen Satz an Vertragsbedingungen. Normale
 
 Was sollten die Vertragsbedingungen beinhalten?
 
-* Die Gültigkeit des Angebotes
+* Die Gültigkeitsdauer des Angebotes
 * Die Zahlungsbedingungen (Vorkasse, auf Rechnung, Anzahlung etc.)
 * Optionen und Aufpreise
 * Sicherheitswarnungen und Gebrauchshinweise
