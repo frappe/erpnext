@@ -51,7 +51,7 @@ Klicken Sie hier um weitere Informationen über Feldtypen, die Sie bei einem ben
 
 ### Optionen einstellen
 
-Wenn Sie ein Verknüpfungsfeld erstellen,dann wird der Name des DocType, mit dem dieses Feld verknüpft werden soll, in das Feld "Optionen" eingefügt. Klicken Sie [hier](https://erpnext.com/kb/customize/creating-custom-link-field) um weitere Informationen darüber zu erhalten, wie man benutzerdefinierte Verknüpfungsfelder erstellt.
+Wenn Sie ein Verknüpfungsfeld erstellen, dann wird der Name des DocType, mit dem dieses Feld verknüpft werden soll, in das Feld "Optionen" eingefügt. Klicken Sie [hier](https://erpnext.com/kb/customize/creating-custom-link-field) um weitere Informationen darüber zu erhalten, wie man benutzerdefinierte Verknüpfungsfelder erstellt.
 
 ![Verknüpfung mit einem benutzerdefinierten Feld]({{docs_base_url}}/assets/old_images/erpnext/custom-field-link.png)
 
@@ -69,7 +69,7 @@ Sie können weitere Eigenschaften auswählen wie:
 
 2\. Beim Drucken verbergen: Soll dieses Feld beim Ausdruck sichtbar sein oder nicht?
 
-3\. Feldbeschreibung: Hier steht eine kurze Beschreibung des Feldes die gleich unter dem Feld erscheint.
+3\. Feldbeschreibung: Hier steht eine kurze Beschreibung des Feldes, die gleich unter dem Feld erscheint.
 
 4\. Standardwert: Der Wert in diesem Feld wird automatisch aktualisiert.
 
