@@ -831,6 +831,29 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				refresh_field('to_date');
 			}
 		}
+	},
+	
+	items_add: function(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		if(row.idx==1) {
+			// set default cost center
+			row.cost_center = erpnext.get_default_cost_center(doc.company);
+		} else {
+			// Copy from first row
+			this.frm.script_manager.copy_from_first_row("items", row, 
+				["income_account", "expense_account", "cost_center", "project_name"]);
+		}
+	},
+	
+	taxes_add: function(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		if(row.idx==1) {
+			// set default cost center
+			row.cost_center = erpnext.get_default_cost_center(doc.company);
+		} else {
+			// Copy from first row
+			this.frm.script_manager.copy_from_first_row("taxes", row, ["cost_center"]);
+		}
 	}
 });
 

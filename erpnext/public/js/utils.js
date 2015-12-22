@@ -30,6 +30,14 @@ $.extend(erpnext, {
 			});
 		}
 	},
+	
+	get_default_cost_center: function(company) {
+		var default_cost_center = frappe.defaults.get_user_default("Cost Center");
+		if (!default_cost_center && company) {
+			default_cost_center = frappe.get_doc(":Company", company).cost_center;
+		}
+		return default_cost_center
+	},
 
 	toggle_naming_series: function() {
 		if(cur_frm.fields_dict.naming_series) {

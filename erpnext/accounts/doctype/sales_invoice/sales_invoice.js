@@ -245,11 +245,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.write_off_outstanding_amount_automatically();
 	},
 
-	items_add: function(doc, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "cost_center"]);
-	},
-
 	set_dynamic_labels: function() {
 		this._super();
 		this.hide_fields(this.frm.doc);
