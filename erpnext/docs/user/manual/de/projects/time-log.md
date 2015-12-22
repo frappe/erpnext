@@ -16,7 +16,7 @@
 
 1\. Um ein neues Zeitprotokoll zu erstellen, gehen Sie zu:
 
-> Projekte > Dokumente > Zeitprotokoll > Neue
+> Projekte > Dokumente > Zeitprotokoll > Neu
 
 2\. Sie können ein neues Zeitprotokoll auch über den Kalender erstellen.
 
