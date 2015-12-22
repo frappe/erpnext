@@ -2,7 +2,7 @@
 
 <span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
-Ein Kunde, manchmal auch als Auftraggeber, Käufer oder Besteller bezeichnet, ist diejenige Person, die von einem Verkäufer für eine monetäre Gegenleistung Waren, Dienstleistungen, Produkte oder Ideen bekommt. Ein Kunde kann von einem Hersteller oder Lieferanten auch aufgrund einer anderen (nicht monetären) Vergütung waren oder Dienstleistungen erhalten.
+Ein Kunde, manchmal auch als Auftraggeber, Käufer oder Besteller bezeichnet, ist diejenige Person, die von einem Verkäufer für eine monetäre Gegenleistung Waren, Dienstleistungen, Produkte oder Ideen bekommt. Ein Kunde kann von einem Hersteller oder Lieferanten auch aufgrund einer anderen (nicht monetären) Vergütung Waren oder Dienstleistungen erhalten.
 
 Sie können Ihre Kunden entweder direkt erstellen über
 
@@ -34,9 +34,9 @@ Wenn Sie in einer anderen Firma ein Konto erstellen wollen, ändern Sie einfach 
 
 Sie können eine Preisliste mit einem Kunden verknüpfen (wählen Sie hierzu "Standardpreisliste"), so dass die Preisliste automatisch aufgerufen wird, wenn Sie den Kunden auswählen.
 
-Sie können die Zieltage so einstellen, dass diese Einstellung automatisch in Ausgangsrechnungen an diesen Kunden verwendet wird. Zieltage können als festeingestellte Tage definiert werden oder als letzter Tag des nächsten Monats  basierend auf dem Rechnungsdatum.
+Sie können das Zahlungsziel so einstellen, dass diese Einstellung automatisch in Ausgangsrechnungen an diesen Kunden verwendet wird. Zieltage können als festeingestellte Tage definiert werden oder als letzter Tag des nächsten Monats  basierend auf dem Rechnungsdatum.
 
-Sie können einstellen, wieviel Ziel Sie für einen Kunden durch hinzufügen der "Kreditlinie" erlauben wollen. Sie können auch ein allgemeines Ziel-Limit in den Unternehmensstammdaten einstellen. 
+Sie können einstellen, wieviel Zahlungsziel Sie für einen Kunden durch hinzufügen der "Kreditlinie" erlauben wollen. Sie können auch ein allgemeines Ziel-Limit in den Unternehmensstammdaten einstellen. 
 
 ### Kundenklassifizierung
 
