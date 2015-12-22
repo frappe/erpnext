@@ -2,7 +2,7 @@
 
 <span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
-Fügen Sie dem Ereignis custom_before_cancel eine Steuerungsfunktion hinzu:
+Fügen Sie dem Ereignis `custom_before_cancel` eine Steuerungsfunktion hinzu:
 
     cur_frm.cscript.custom_before_cancel = function(doc) {
         if (user_roles.indexOf("Accounts User")!=-1 && user_roles.indexOf("Accounts Manager")==-1
