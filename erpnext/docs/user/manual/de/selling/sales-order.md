@@ -69,9 +69,9 @@ ERPNext erstellt automatisch eine neue Bestellung und versendet eine E-Mail-Mitt
 
 In dem Moment, in dem Sie Ihren Kundenauftrag "übertragen" haben, können Sie nun verschiedene Aktionen im Unternehmen anstossen:
 
-* Um den Beschaffungsvorgang einzuleiten klicken Sie auf "Materialanforderung"
-* Um den Versand einzuleiten klicken Sie auf "Auslieferung"
-* Um eine Rechnung zu erstellen klicken Sie auf "Rechnung"
+* Um den Beschaffungsvorgang einzuleiten, klicken Sie auf "Materialanforderung"
+* Um den Versand einzuleiten, klicken Sie auf "Auslieferung"
+* Um eine Rechnung zu erstellen, klicken Sie auf "Rechnung"
 * Um den Prozess anzuhalten, klicken Sie auf "Anhalten"
 
 ### Übertragung
@@ -87,10 +87,13 @@ Wenn der Bestelltyp des Kundenauftrags "Wartung" ist, folgen Sie bitte unten dar
 * **Schritt 3:** Speichern und übertragen Sie das Formular.
 * **Schritt 4:** Wenn das Formular übertragen wurde, zeigt die Aktionsschaltfläche drei Auswahlmöglichkeiten: 1) Wartungsbesuch 2) Wartungsplan 3) Rechnung
 
-> **Anmerkung 1:** Wenn Sie auf die Aktionsschaltfläche klicken und "Wartungsbesuch" auswählen können Sie das Besuchsformular direkt ausfüllen. Die Details werden automatisch aus dem Kundenauftrag übernommen.
+> **Anmerkung 1:** 
+Wenn Sie auf die Aktionsschaltfläche klicken und "Wartungsbesuch" auswählen können Sie das Besuchsformular direkt ausfüllen. Die Details werden automatisch aus dem Kundenauftrag übernommen.
 
-> **Anmerkung 2:** Wenn Sie auf die Aktionsschaltfläche klicken und "Wartungsplan" auswählen, können Sie die Details zum Wartungsplan eintragen. Die Details werden autmomatisch aus dem Kundenauftrag übernommen.
+> **Anmerkung 2:** 
+Wenn Sie auf die Aktionsschaltfläche klicken und "Wartungsplan" auswählen, können Sie die Details zum Wartungsplan eintragen. Die Details werden autmomatisch aus dem Kundenauftrag übernommen.
 
-> **Anmerkung 3:** Wenn Sie auf die Schaltfläche "Rechnung" klicken, können Sie eine Rechnung für die Wartungsarbeiten erstellen. Die Details werden automatisch aus dem Kundenauftrag übernommen.
+> **Anmerkung 3:** 
+Wenn Sie auf die Schaltfläche "Rechnung" klicken, können Sie eine Rechnung für die Wartungsarbeiten erstellen. Die Details werden automatisch aus dem Kundenauftrag übernommen.
 
 {next}
