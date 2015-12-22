@@ -12,7 +12,7 @@ Sie können zum benutzerdefinierten Formular folgendermaßen gelangen:
 
 > Einstellungen > Anpassen > Benutzerdefiniertes Formular.
 
-Der Systemmanager findet die Option "Benutzerdefiniertes Formular" auch in der Liste Kundenauftrag (bzw. jedes andere Formular für diesen Sachverhalt). 
+Der Systemmanager findet die Option "Benutzerdefiniertes Formular" auch in der Liste Kundenauftrag (bzw. in jedem anderen Formular für diesen Sachverhalt). 
 
 ![Formular anpassen - Listenansicht]({{docs_base_url}}/assets/old_images/erpnext/customize-form-list-view.png)
 
@@ -26,7 +26,7 @@ Wählen Sie jetzt den DocType/das Dokument aus, welcher/s das anzupassende Feld 
 
 Wenn Sie den DocType/das Dokument ausgewählt haben, werden alle Felder als Zeilen in der Tabelle des benutzerdefinierten Formulars aktualisiert. Scrollen sie bis zu dem Feld, das Sie bearbeiten wollen, in diesem Fall "Projektname".
 
-Wenn Sie auf die Zeile "Projektname" klicken, werden Felder mit verschiedenen Eigenschaften für dieses Feld angezeigt. Um die Eigenschaft "Ist zwingend erforderlich" für ein Feld anzupassen gibt es ein Feld "Zwingend erfoderlich". Wenn Sie dieses Feld markieren, wird das Feld "Projektname" im Angebotsformular als zwingend erforderlich eingestellt.
+Wenn Sie auf die Zeile "Projektname" klicken, werden Felder mit verschiedenen Eigenschaften für dieses Feld angezeigt. Um die Eigenschaft "Ist zwingend erforderlich" für ein Feld einzustellen, gibt es ein Feld "Zwingend erfoderlich". Wenn Sie dieses Feld markieren, wird das Feld "Projektname" im Angebotsformular als zwingend erforderlich eingestellt.
 
 ![Formular anpassen - Zwingend erfoderliche Angaben]({{docs_base_url}}/assets/old_images/erpnext/customize-form-mandatory.png)
 
@@ -45,9 +45,9 @@ Genauso können Sie folgende Eigenschaften eines Feldes anpassen.
 
 Bevor Sie das Formular "Kundenauftrag" testen, sollten Sie den Cache leeren und den Inhalt des Browserfensters aktualiseren, um die Änderungen wirksam werden zu lassen.
 
-Bei einem benutzerdefinierten Formular können Sie auch Anhänge erlauben, die maximal zulässige Anzahl von Anhängen festlegen und das Stanard-Druckformat einstellen.
+Bei einem benutzerdefinierten Formular können Sie auch Anhänge zulassen, die maximal erlaubte Anzahl von Anhängen festlegen und das Standard-Druckformat einstellen.
 
-> Anmerkung: Obwohl wir Ihnen möglichst viele Möglichkeiten einräumen wollen, Ihr ERP-System an die Erfordernisse Ihres Geschäftes anzupassen, empfehlen wir Ihnen, keine "wilden" Änderungen an den Formularen vorzunehmen. Die Änderungen können sich nämlich auf bestimmte Operationen auswirken und Ihre Formulare beschädigen. Machen Sie kleine Änderungen und prüfen Sie die Auswirkungen bevor Sie fortfahren.
+> Anmerkung: Obwohl wir Ihnen möglichst viele Möglichkeiten einräumen wollen, Ihr ERP-System an die Erfordernisse Ihrer Geschäftstätigkeit anzupassen, empfehlen wir Ihnen, keine "wilden" Änderungen an den Formularen vorzunehmen. Die Änderungen können sich nämlich auf bestimmte Operationen auswirken und Ihre Formulare beschädigen. Machen Sie kleine Änderungen und prüfen Sie die Auswirkungen bevor Sie fortfahren.
 
 Im Folgenden erhalten Sie eine Auflistung der Eigenschaften, die Sie für ein bestimmtes Feld eines benutzerdefinierten Formulars anpassen können.
 
