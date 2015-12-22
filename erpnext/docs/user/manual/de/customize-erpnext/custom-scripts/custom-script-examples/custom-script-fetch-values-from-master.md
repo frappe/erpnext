@@ -2,7 +2,7 @@
 
 <span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
-Um einen Wert oder eine Verknüpfung auf eine Auswahl zu erhalten, verwenden Sie die Methode add_fetch.
+Um einen Wert oder eine Verknüpfung auf eine Auswahl zu erhalten, verwenden Sie die Methode `add_fetch`.
 
 > `add_fetch(link_fieldname, source_fieldname, target_fieldname)`
 
