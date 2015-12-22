@@ -12,7 +12,7 @@ Lassen Sie uns die verschiedenen Optionen durckgehen.
 
 Wenn ein Lieferant abgespeichert wird, erstellt das System eine eindeutige Kennung bzw. einen eindeutigen Namen für diesen Lieferanten, auf den in verschiedenen Einkaufstransaktionen Bezug genommen wird.
 
-Wenn nicht anders eingestellt, verwendet ERPNext den Lieferantennamen als eindeutige Kennung. Wenn Sie Lieferanten nach Namen wir SUPP-00001, SUP-00002 unterscheiden wollen, oder nach Serien eines bestimmten Musters, stellen Sie die Benahmung der Lieferanten auf "Nummernkreis" ein.
+Wenn nicht anders eingestellt, verwendet ERPNext den Lieferantennamen als eindeutige Kennung. Wenn Sie Lieferanten nach Namen wie SUPP-00001, SUP-00002 unterscheiden wollen, oder nach Serien eines bestimmten Musters, stellen Sie die Benamung der Lieferanten auf "Nummernkreis" ein.
 
 Sie können den Nummernkreis selbst definieren oder einstellen:
 
@@ -28,7 +28,7 @@ Stellen Sie hier ein, was der Standartwert für den Lieferantentyp ist, wenn ein
 
 Geben Sie an, was der Standardwert für die Einkaufspreisliste ist, wenn eine neue Einkaufstransaktion erstellt wird.
 
-### 4. Selben Preis während des gesamten Einkaufszyklus beibeihalten
+### 4. Denselben Preis während des gesamten Einkaufszyklus beibeihalten
 
 Wenn diese Option aktiviert ist, wird Sie ERPNext unterbrechen, wenn Sie den Artikelpreis in einer Lieferantenbestellung oder in einem auf einer Lieferantenbestellung basierenden Kaufbeleg ändern wollen, d. h. das System behält den selben Preis während des gesamten Einkaufszyklus bei. Wenn Sie den Artikelpreis unbedingt ändern müssen, sollten Sie diese Option deaktivieren.
 
@@ -38,6 +38,6 @@ Wenn diese Option auf "JA" eingestellt ist, hält Sie ERPNext davon ab, eine Ein
 
 ### 6. Kaufbeleg benötigt
 
-Wenn diese Option aUf "JA" eingestellt ist, hält Sie ERPNext davon ab, eine Eingangsrechnung zu erstelln, ohne vorher einen Kaufbeleg erstellt zu haben.
+Wenn diese Option auf "JA" eingestellt ist, hält Sie ERPNext davon ab, eine Eingangsrechnung zu erstellen, ohne vorher einen Kaufbeleg erstellt zu haben.
 
 {next}
