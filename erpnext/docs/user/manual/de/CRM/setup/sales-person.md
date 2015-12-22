@@ -9,5 +9,3 @@ Vertriebsmitarbeiter verhalten sich wie Regionen. Sie können ein Organigramm de
 ### Vertriebspersonen in Transaktionen
 
 Sie können einen Vertriebsmitarbeiter wie im Kundenauftrag, dem Lieferschein und der Ausgangsrechnung in Kunden- und Verkaufstransaktionen nutzen. Klicken Sie hier, um mehr darüber zu erfahren, wie Vertriebsmitarbeiter in den Transaktionen eines Verkaufszyklus verwendet werden.
-
-{next}
