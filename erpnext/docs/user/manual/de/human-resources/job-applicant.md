@@ -12,7 +12,7 @@ Um einen neuen Bewerber anzulegen, gehen Sie zu:
 
 ### Verknüpfung mit einem E-Mail-Konto
 
-Sie können die Bewerbersuche mit einem E-Mail-Konto verknüpfen. Wenn wir annehmen, dass Sie die Bewerbersuche mit der E-Mail-Adresse job@example.com verknüpfen, dann wird das System zu jeder E-Mail, die eingeht, einen Bewerber mit der entsprechenden E-Mail-Adresse anlegen.
+Sie können die Bewerbersuche mit einem E-Mail-Konto verknüpfen. Wenn wir annehmen, dass Sie die Bewerbersuche mit der E-Mail-Adresse jobs@example.com verknüpfen, dann wird das System zu jeder E-Mail, die eingeht, einen Bewerber mit der entsprechenden E-Mail-Adresse anlegen.
 
 * Um ein E-Mail-Konto mit der Bewerbersuche zu verknüpfen, gehen Sie zu:
 
