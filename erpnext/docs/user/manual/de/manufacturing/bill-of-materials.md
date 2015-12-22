@@ -6,7 +6,7 @@ Das Herz des Fertigungssystems bildet die Stückliste. Die **Stückliste** ist e
 
 Um passende Einkaufsanfragen zu erstellen, müssen Sie Ihre Stücklisten immer auf dem aktuellen Stand halten. Um eine neue Stückliste anzulegen, gehen Sie zu:
 
->Fertigung > Dokumente > Stückliste > Neue Stückliste
+>Fertigung > Dokumente > Stückliste > Neu
 
 <img class="screenshot" alt="Task" src="{{docs_base_url}}/assets/img/manufacturing/bom.png">
 
