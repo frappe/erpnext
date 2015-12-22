@@ -2,7 +2,7 @@
 
 <span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
-Das Werkzeug zur Fertigungsplanung unterstützt Sie dabei die Fertigung zu planen und Artikel für eine Periode einzukaufen (normalerweise eine Woche oder ein Monat).
+Das Werkzeug zur Fertigungsplanung unterstützt Sie dabei die Fertigung zu planen und Artikel für eine Periode einzukaufen (normalerweise eine Woche oder einen Monat).
 
 Die Liste der Artikel kann über die offenen Kundenaufträge im System erstellt werden. Folgendes wird angelegt:
 
@@ -45,7 +45,7 @@ Das Werkzeug zur Fertigungsplanung wird auf zwei Ebenend verwendet:
 
 Das Werkzeug erstellt eine Aktualisierung, wenn Sie bereits einen Kundenauftrag für einen bestimmten Artikel zu einem Kundenauftrag erstellt haben ("geplante Menge").
 
-Sie könnenjederzeit die Artikelliste bearbeiten und die zur Fertigung geplante Menge erhöhen bzw. vermindern.
+Sie können jederzeit die Artikelliste bearbeiten und die zur Fertigung geplante Menge erhöhen bzw. vermindern.
 
 > Anmerkung: Wie ändern Sie einen Fertigungsplan? Des Ergebnis des Werkzeuges zur Produktionsplanung ist der Fertigungsauftrag. Sobald Ihre Aufträge erstellt wurden, können Sie sie ändern, indem Sie die Fertigungsaufträge ändern.
 
