@@ -2,7 +2,7 @@
 
 <span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
-Die meisten der Einstellungen, die Ihre Webseite betreffen, können hier eingestellt werden.
+Hier können Sie die Einstellungen für Ihre Webseite bearbeiten.
 
 <img class="screenshot" alt="Webseiten-Einstellungen" src="{{docs_base_url}}/assets/img/website/website-settings.png">
 
@@ -18,11 +18,11 @@ Wählen Sie das Thema für Ihre Webseite aus. Sie können auch neue Themen für 
 
 <img class="screenshot" alt="Webseiten-Themen" src="{{docs_base_url}}/assets/img/website/website-theme.png">
 
-* Wählen "Neues Webseiten-Thema erstellen" wenn Sie das Standars-Thema der Webseite anpassen wollen.
+* Wählen Sie "Neues Webseiten-Thema erstellen" wenn Sie das Standard-Thema der Webseite anpassen wollen.
 
 ### Banner
 
-Hier können Sie ein Banner/Logo auf Ihrer Webseite hinzufügen. Hängen Sie das Bild an und klicken Sie auf "Banner aus Bild einrichten". Das System erstellt einen HTML-Kode unter Banner HTML.
+Hier können Sie ein Banner/Logo auf Ihrer Webseite hinzufügen. Hängen Sie das Bild an und klicken Sie auf "Banner aus Bild einrichten". Das System erstellt einen HTML-Code unter Banner.html.
 
 <img class="screenshot" alt="Banner" src="{{docs_base_url}}/assets/img/website/banner.png">
 
@@ -40,6 +40,6 @@ Sie können Google Analytics und soziale Netzwerke in Ihre Webseite mit einbinde
 
 <img class="screenshot" alt="Einbindungen" src="{{docs_base_url}}/assets/img/website/integrations.png">
 
-* Sie können ein öffentliches Anmelden auf Ihr ERPNext-Konto unterbinden indem Sie auf "Anmelden deaktivieren" klicken.
+* Sie können ein öffentliches Anmelden auf Ihr ERPNext-Konto unterbinden, indem Sie auf "Anmelden deaktivieren" klicken.
 
 {next}
