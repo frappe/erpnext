@@ -12,6 +12,7 @@ from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency, get_balance_on
 from itertools import chain
 from paypal_integration.express_checkout import set_express_checkout
+
 class PaymentRequest(Document):		
 	def validate(self):
 		self.validate_payment_request()	
@@ -37,7 +38,7 @@ class PaymentRequest(Document):
 	
 	def send_payment_request(self):
 		if self.payment_gateway == "PayPal":	
-			self.payment_url = set_express_checkout(self.amount, "USD", {"doctype": self.doctype, 
+			self.payment_url = set_express_checkout(self.amount, self.currency, {"doctype": self.doctype, 
 				"docname": self.name})
 		
 		if self.payment_url:
@@ -58,6 +59,7 @@ class PaymentRequest(Document):
 			"amount": self.amount,
 			"return_obj": True
 		}
+		
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name) 
 		
 		if self.reference_doctype == "Sales Order":
@@ -86,14 +88,15 @@ class PaymentRequest(Document):
 			"account_type": account_details.account_type
 		}
 		
+		#create voucher entry
 		jv =  get_payment_entry(ref_doc, payment_details)
-		
 		jv.update({
 			"voucher_type": "Journal Entry",
 			"posting_date": today()
 		})
 		jv.submit()
 		
+		#set status as paid for Payment Request
 		frappe.db.set_value(self.doctype, self.name, "status", "Paid")
 		
 	def send_email(self):
@@ -152,7 +155,13 @@ def get_reference_doc_details(dt, dn):
 def get_amount(ref_doc, dt):
 	"""get amount based on doctype"""
 	if dt == "Sales Order":
-		amount = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
+		party_account = get_party_account("Customer", ref_doc.get('customer'), ref_doc.company)
+		party_account_currency = get_account_currency(party_account)
+		
+		if party_account_currency == ref_doc.company_currency:
+			amount = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
+		else:
+			amount = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 	
 	if dt == "Sales Invoice":
 		amount = abs(ref_doc.outstanding_amount)
