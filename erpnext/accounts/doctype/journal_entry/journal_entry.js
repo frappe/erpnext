@@ -40,25 +40,14 @@ frappe.ui.form.on("Journal Entry", {
 
 erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 	onload: function() {
-		this.load_defaults();
+		if(!this.frm.doc.amended_from) this.frm.doc.posting_date = this.frm.posting_date || get_today();
+
 		this.setup_queries();
 		this.setup_balance_formatter();
 	},
 
 	onload_post_render: function() {
 		cur_frm.get_field("accounts").grid.set_multiple_add("account");
-	},
-
-	load_defaults: function() {
-		if(this.frm.doc.__islocal && this.frm.doc.company) {
-			frappe.model.set_default_values(this.frm.doc);
-			$.each(this.frm.doc.accounts || [], function(i, jvd) {
-					frappe.model.set_default_values(jvd);
-				}
-			);
-
-			if(!this.frm.doc.amended_from) this.frm.doc.posting_date = this.frm.posting_date || get_today();
-		}
 	},
 
 	setup_queries: function() {
@@ -132,8 +121,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 			return out;
 		});
-
-
 	},
 
 	setup_balance_formatter: function() {
@@ -192,6 +179,14 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 	accounts_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
+		if(row.idx==1) {
+			// set default cost center
+			row.cost_center = erpnext.get_default_cost_center(doc.company);
+		} else {
+			// Copy from first row
+			this.frm.script_manager.copy_from_first_row("accounts", row, ["cost_center"]);
+		}
+		
 		$.each(doc.accounts, function(i, d) {
 			if(d.account && d.party && d.party_type) {
 				row.account = d.account;
@@ -211,8 +206,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			}
 		}
 		cur_frm.cscript.update_totals(doc);
-	},
-
+	}
 });
 
 cur_frm.script_manager.make(erpnext.accounts.JournalEntry);
