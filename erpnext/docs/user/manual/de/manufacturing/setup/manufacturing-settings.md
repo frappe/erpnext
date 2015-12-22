@@ -15,5 +15,3 @@ Fertigung im Urlaub zulassen: Hier können Sie angeben, ob das System an Urlaubs
 Kapazitätsplanung für (Tage): Hier können Sie die Anzahl der Tage angeben, für die die Kapazität geplant werden soll.
 
 Zeit zwischen den Arbeitsgängen (in Minuten): Hier können Sie die Pause zwischen den Arbeitsschritten der Fertigung definieren.
-
-{next}
