@@ -56,7 +56,7 @@ In diesem Abschnitt können Sie Kriterien definieren nach denen Dokumente dieses
 
 ### Berechtigung
 
-In dieser Tabelle können Sie Rollen und Berechtigungs-Rollen für diese für die betreffenden DocTypes auswählen.
+In dieser Tabelle können Sie Rollen und deren Berechtigungen für die betreffenden DocTypes auswählen.
 
 ![Berechtigungen bei DocTypes]({{docs_base_url}}/assets/img/setup/customize/Doctype-permissions.png)
 
@@ -68,7 +68,7 @@ Wenn Sie einen DocType abspeichern, erscheint ein Popup-Fenster über welches Si
 
 ### Der DocType im System
 
-Um den DocType zu aktivieren, öffnen Sie das Modul, welches Sie für den DocType definiert haben. Da wird den DocType "Books" im Modul Personalwesen erstellt haben, gehen Sie hierhin um Zugriff zu erhalten:
+Um den DocType zu aktivieren, öffnen Sie das Modul, welches Sie für den DocType definiert haben. Da wir den DocType "Books" im Modul Personalwesen erstellt haben, gehen Sie hierhin um Zugriff zu erhalten:
 
 > Personalwesen > Dokumente > Buch
 
