@@ -24,7 +24,7 @@ Um eine Standard-Bezeichnung einzufügen, gehen Sie zu:
 
 Sie können eine Bezeichnung definieren, indem Sie Dokumenteneinstellungen in geschweifte Klammern {} setzen. Beispiel: Wenn Ihr Dokument die Eigenschaften `customer_name` und `project` hat, können Sie die Standard-Bezeichnung wie folgt setzen:
 
-> {customer_name} for {project}
+> `{customer_name} for {project}`
 
 <img class="screenshot" alt = "Bezeichnung anpassen"
     src="{{docs_base_url}}/assets/img/customize/customize-title.gif">
