@@ -2,7 +2,7 @@
 
 <span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
-Ein Gehalt ist ein fester Geldbetrag oder eine Ersatzvergütung die vom Arbeitsgeber für die Arbeitsleistung des Arbeitnehmers an diesen gezahlt wird.
+Ein Gehalt ist ein fester Geldbetrag oder eine Ersatzvergütung die vom Arbeitgeber für die Arbeitsleistung des Arbeitnehmers an diesen gezahlt wird.
 
 Die Gehaltsabrechnung ist der zugrundeliegende Datensatz zum Verwaltungsakt von Gehältern, Löhnen, Boni, Nettoauszahlungen und Abzügen für einen Mitarbeiter.
 
@@ -24,7 +24,7 @@ Gehaltsstrukturen werden verwendet um Organisationen zu helfen
 
 2\. Ein ausgeglichenes Verhältnis zwischen den Entlohnungen intern anfallender Jobs zu erreichen.
 
-3\. Unterschiede in den Ebenen von Verwantwortung, Begabungen und Leistungen zu erkennen und entsprechend zu vergüten und Gehaltserhöhungen zu verwalten.
+3\. Unterschiede in den Ebenen von Verantwortung, Begabungen und Leistungen zu erkennen und entsprechend zu vergüten und Gehaltserhöhungen zu verwalten.
 
 Eine Gehaltsstruktur kann folgende Komponenten enthalten:
 
@@ -32,7 +32,7 @@ Eine Gehaltsstruktur kann folgende Komponenten enthalten:
 * **Spezielle Zulagen:** Normalerweise kleiner als das Basiseinkommen
 * **Urlaubsgeld:** Betrag den der Arbeitgeber dem Arbeitnehmer für einen Urlaub zahlt
 * **Abfindung:** Bestimmter Betrag, der dem Arbeitnehmer vom Arbeitgeber gezahlt wird, wenn der Mitarbeiter das Unternehmen verlässt oder in Rente geht.
-* **Rentenversicherung:** Betrag für zukünftige Rentenzahlungen und andere Leistunge, die unter die Rentenversicherung fallen.
+* **Rentenversicherung:** Betrag für zukünftige Rentenzahlungen und andere Leistungen, die unter die Rentenversicherung fallen.
 * **Krankenversicherung**
 * **Pflegeversicherung**
 * **Arbeitslosenversicherung**
@@ -58,7 +58,7 @@ Um eine neue Gehaltsstruktur zu erstellen, gehen Sie zu:
 
 ### Unbezahlter Urlaub
 
-Unbezahlter Urlaub entsteht dann, wenn ein Mitarbeiter keinen normalen Urlaub mehr hat oder ohne Genehmigung über einen Urlaubsantrag abwesend ist. Wenn Sie möchten, dass ERPNext automatisch unbezahlten Urlaub abzieht, müssen Sie in der Vorlage "Einkommens- und Abzugsart" "Unbezahlten Urlaub anwenden" anklicken. Der Betrag der dem Gehalt gekürzt wird ergibt sich aus dem Verhältnis zwischen den Tagen des unbezahlten Urlaubs und den Gesamtarbeitstagen des Monats (basierend auf der Urlaubstabelle).
+Unbezahlter Urlaub entsteht dann, wenn ein Mitarbeiter keinen normalen Urlaub mehr hat oder ohne Genehmigung über einen Urlaubsantrag abwesend ist. Wenn Sie möchten, dass ERPNext automatisch unbezahlten Urlaub abzieht, müssen Sie in der Vorlage "Einkommens- und Abzugsart" "Unbezahlten Urlaub anwenden" anklicken. Der Betrag, der dem Gehalt gekürzt wird, ergibt sich aus dem Verhältnis zwischen den Tagen des unbezahlten Urlaubs und den Gesamtarbeitstagen des Monats (basierend auf der Urlaubstabelle).
 
 Wenn Sie nicht möchten, dass ERPNext unbezahlten Urlaub verwaltet, klicken Sie die Option in keiner Einkommens und Abzugsart an.
 
@@ -98,10 +98,10 @@ Beim Bearbeiten einer Gehaltsabrechnung
 
 Der letzte Schritt ist, die Gehälter mit Ihren Konten zu verbuchen.
 
-Gehälter unterliegen im Geschäftsablauf normalerweise sehr strengen Datenschutzregeln. In den meisten Fällen gibt die Firma eine einzige Zahlung an die Bank, die alle Gehälter beinhaltet, und die Bank verteilt dann die Gehälter an die einzelnen Konten der Mitarbeiter. Bei dieser Vorgehensweise gibt es nur eine einzige Zahlungsbuchung im Hauptbuch der Firma niemand mit Zugriff auf die Konten des Unternehmens hat auf die individuellen Gehaltsdaten Zugriff.
+Gehälter unterliegen im Geschäftsablauf normalerweise sehr strengen Datenschutzregeln. In den meisten Fällen gibt die Firma eine einzige Zahlung an die Bank, die alle Gehälter beinhaltet, und die Bank verteilt dann die Gehälter an die einzelnen Konten der Mitarbeiter. Bei dieser Vorgehensweise gibt es nur eine einzige Zahlungsbuchung im Hauptbuch der Firma. Niemand mit Zugriff auf die Konten des Unternehmens hat auf die individuellen Gehaltsdaten Zugriff.
 
-Die Buchung zur Gehaltsabrechnung ist eine Journalbuchung welche das Bankkonto des Unternehmens belastet und den Gesamtbetrag aller Gehälter dem Gehaltskonto gutschreibt.
+Die Buchung zur Gehaltsabrechnung ist eine Journalbuchung/ein Buchungssatz welche(r) das Bankkonto des Unternehmens belastet und den Gesamtbetrag aller Gehälter dem Gehaltskonto gutschreibt.
 
-Um einen Beleg über die Gehaltszahlung aus dem Punkt "Gehaltsabrechnung bearbeiten" heraus zu erstellen, klicken Sie auf "Bankbeleg erstellen" und es wird eine neue Journalbuchung  mit den Gesamtbeträgen der Gehälter erstellt.
+Um einen Beleg über die Gehaltszahlung aus dem Punkt "Gehaltsabrechnung bearbeiten" heraus zu erstellen, klicken Sie auf "Bankbeleg erstellen" und es wird eine neue Journalbuchung/ein neuer Buchungssatz  mit den Gesamtbeträgen der Gehälter erstellt.
 
 {next}
