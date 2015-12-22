@@ -4,7 +4,7 @@
 
 Kontakte und Adressen werden in ERPNext separat abgespeichert, so dass Sie mehrere verschiedene Kontakte oder Adressen den Kunden und Lieferanten zuordnen können.
 
-Um einen neuen Kontakt zu erstellen, gehe Sie zu
+Um einen neuen Kontakt zu erstellen, gehen Sie zu
 
 > CRM > Dokumente > Kontakt > Neu
 
