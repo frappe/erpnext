@@ -2,7 +2,7 @@
 
 <span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
-Kunden können über das Kundenportal sehr einfach Fälle eröffnen. Eine einfaches und intuitive Schnittstelle ermöglichst es dem Kunden ihre Probleme und Anliegen zu schildern. Sie können weiterhin den kompletten Kommunikationsvorgang nachverfolgen.
+Kunden können über das Kundenportal sehr einfach Fälle eröffnen. Eine einfache und intuitive Schnittstelle ermöglichst es dem Kunden seine Probleme und Anliegen zu schildern. Er kann weiterhin den kompletten Kommunikationsvorgang nachverfolgen.
 
 ### Ticketliste leeren
 
