@@ -55,13 +55,13 @@ Sie können [Aufwandsabrechnungen]({{docs_base_url}}/user/manual/en/human-resour
 
 ### Kostenstelle
 
-Sie können zu einem Projekt eine [Kostenstelle]({{docs_base_url}}/user/manual/en/accounts/setup/cost-center.html) erstellen oder Sie können eine existierende Kostenstelle verwenden um alle Aufwände die zu einem Projekt entstehen mitzuverfolgen.
+Sie können zu einem Projekt eine [Kostenstelle]({{docs_base_url}}/user/manual/en/accounts/setup/cost-center.html) erstellen oder Sie können eine existierende Kostenstelle verwenden um alle Aufwände, die zu einem Projekt entstehen, mitzuverfolgen.
 
 <img class="screenshot" alt="Projekt - Kostenstelle" src="{{docs_base_url}}/assets/img/project/project_cost_center.png">
 
 ### Projektkostenabrechnung
 
-Der Abschnitt Projektkostenabrechnung hilft Ihnen dabei, die Zeit und die AUfwände die in einem Projekt anfallen, nachzuverfolgen.
+Der Abschnitt Projektkostenabrechnung hilft Ihnen dabei, die Zeit und die Aufwände, die in einem Projekt anfallen, nachzuverfolgen.
 
 <img class="screenshot" alt="Projekt - Kostenabrechnung" src="{{docs_base_url}}/assets/img/project/project_costing.png">
 
@@ -70,7 +70,7 @@ Der Abschnitt Projektkostenabrechnung hilft Ihnen dabei, die Zeit und die AUfwä
 
 ### Abrechnung
 
-Sie können einen [Kundenauftrag]({{docs_base_url}}/user/manual/en/selling/sales-order.html) zu einem Projekt erstellen bzw. ihn mit dem Projekt verknüpfen. Wenn er einmal verlinkt ist, können Sie das Vertriebsmodul dazu nutzen, dass Projekt mit Ihrem Kunden abzurechnen.
+Sie können einen [Kundenauftrag]({{docs_base_url}}/user/manual/en/selling/sales-order.html) zu einem Projekt erstellen bzw. ihn mit dem Projekt verknüpfen. Wenn er einmal verknüpft ist, können Sie das Vertriebsmodul dazu nutzen, das Projekt mit Ihrem Kunden abzurechnen.
 
 <img class="screenshot" alt="Projekt - Kundenauftrag" src="{{docs_base_url}}/assets/img/project/project_sales_order.png">
 
@@ -84,4 +84,4 @@ Ein Gantt-Diagramm illustriert einen Projektplan, ERPNext erstellt Ihnen eine il
 
 <img class="screenshot" alt="Projekt - Gantt-Diagramm" src="{{docs_base_url}}/assets/img/project/project_gantt_chart.png">
 
-[next]
+{next}
