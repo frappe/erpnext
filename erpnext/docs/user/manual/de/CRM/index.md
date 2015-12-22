@@ -2,8 +2,8 @@
 
 <span class="text-muted contributed-by">Übersetzt von CWT Connector & Wire Technology GmbH</span> 
 
-ERPNext hilft Ihnen dabei Geschäftschancen aus Gelegenheiten und Kunden nachzuvollziehen und Angebote und Auftragsbestätigungen an Kunden zu senden.
+ERPNext hilft Ihnen dabei Opportunities (Vertriebs-Chancen) aus Leads (Interessenten) und Kunden nachzuvollziehen und Angebote und Auftragsbestätigungen an Kunden zu senden.
 
-Das CRM-Modul stellt die Möglichkeit zur Verfügung, Gelegenheiten, Chancen und Kunden zu verwalten.
+Das CRM-Modul stellt die Möglichkeit zur Verfügung, Leads, Opportunities und Kunden zu verwalten.
 
 {index}
