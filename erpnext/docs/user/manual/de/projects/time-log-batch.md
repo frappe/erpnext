@@ -4,7 +4,7 @@
 
 Sie können Zeitprotokolle abrechnen, indem Sie sie zusammenbündeln. Das gibt Ihnen die Flexibiliät die Abrechnung an den Kunden so zu handhaben wie sie es wollen. Um einen neuen Zeitprotokollstapel zu erstellen, gehen Sie zu:
 
->Projekte > Dokumente > Zeitprotokollstapel > Neuer Zeitprotokollstapel
+>Projekte > Dokumente > Zeitprotokollstapel > Neu
 
 ODER
 
@@ -22,6 +22,6 @@ ODER
 
 <img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="{{docs_base_url}}/assets/img/project/time_log_batch_sales_invoice.png">
 
-* Wenn Sie die Ausgangsrechnung "übertragen", wird die Nummer der Ausgangsrechnung in den Zeitprotokollen und im Zeitprotokollstapel aktualisiert und ihr Status wird auf "abgerechnet" geändert.
+* Wenn Sie die Ausgangsrechnung "übertragen", wird die Nummer der Ausgangsrechnung in den Zeitprotokollen und im Zeitprotokollstapel aktualisiert und ihr Status wird auf "Abgerechnet" geändert.
 
 {next}
