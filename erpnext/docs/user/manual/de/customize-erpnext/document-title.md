@@ -10,7 +10,7 @@ Beispiel: Die Standardbezeichung eines **Angebotes** ist der Kundenname. Wenn Si
 
 Ab der Version 6.0 von ERPNext haben alle Transaktionen eine Eigenschaft "Bezeichnung". Wenn Sie keine Eigenschaft "Bezeichnung" finden, können Sie ein **benutzerdefiniertes Feld** "Bezeichnung" hinzufügen und dieses über **Formular anpassen** entsprechend gestalten.
 
-Sie können für diese Eigenschaft den Standardwert übernehmen indem Sie in **Standard** oder **Optionen** den Python-Kode einfügen.
+Sie können für diese Eigenschaft den Standardwert übernehmen indem Sie in **Standard** oder **Optionen** den Python-Code einfügen.
 
 Um eine Standard-Bezeichnung einzufügen, gehen Sie zu:
 
@@ -22,7 +22,7 @@ Um eine Standard-Bezeichnung einzufügen, gehen Sie zu:
 
 ### Bezeichnungen definieren
 
-Sie können eine Bezeichnung definieren, indem Sie Dokumenteneinstellungen in geschweifte Klammern {} setzen. Beispiel: Wenn Ihr Dokument die Eigenschaften customer_name und project hat, können Sie die Standard-Bezeichnung wie folgt setzen:
+Sie können eine Bezeichnung definieren, indem Sie Dokumenteneinstellungen in geschweifte Klammern {} setzen. Beispiel: Wenn Ihr Dokument die Eigenschaften `customer_name` und `project` hat, können Sie die Standard-Bezeichnung wie folgt setzen:
 
 > {customer_name} for {project}
 
