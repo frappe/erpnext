@@ -9,5 +9,3 @@ Geben Sie den Urlaubstyp an, der Mitarbeitern zugeordnet werden kann.
 * "Maximale zulässige Urlaubstage" gibt die Maximalanzahl von Tagen dieses Urlaubstyps an, die zusammen genommen werden können.
 * "Ist unbezahlter Urlaub" gibt an, dass es sich um unbezahlten Urlaub handelt.
 * "Negativen Saldo zulassen" gibt an, dass das System negative Beträge handhaben darf.
-
-{next}
