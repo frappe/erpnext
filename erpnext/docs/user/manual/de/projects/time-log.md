@@ -18,7 +18,7 @@
 
 > Projekte > Dokumente > Zeitprotokoll > Neue
 
-2\. Sie können ein neues Zeitprotokll auch über den Kalender erstellen.
+2\. Sie können ein neues Zeitprotokoll auch über den Kalender erstellen.
 
 Um Zeitprotokolle über den Kalender zu erstellen, gehen Sie zu "Zeitprotokoll" und wählen Sie "Kalender" aus.
 
@@ -28,7 +28,7 @@ Um Zeitprotokolle über den Kalender zu erstellen, gehen Sie zu "Zeitprotokoll" 
 
 <img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="{{docs_base_url}}/assets/img/project/time_log_calendar_day.gif">
 
-* Sie können Zeitprotokolle auch aus der Wochen- oder Tagesansicht des Kalender heraus erstellen.
+* Sie können Zeitprotokolle auch aus der Wochen- oder Tagesansicht des Kalenders heraus erstellen.
 
 <img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="{{docs_base_url}}/assets/img/project/time_log_calendar_week.gif">
 
@@ -37,7 +37,7 @@ Um Zeitprotokolle über den Kalender zu erstellen, gehen Sie zu "Zeitprotokoll" 
 
 ### Abrechnung über Zeitprotokolle
 
-* Wenn Sie ein Zeitprotokoll abrechnen wollen, müssem Sie die Option "Abrechenbar" anklicken.
+* Wenn Sie ein Zeitprotokoll abrechnen wollen, müssen Sie die Option "Abrechenbar" anklicken.
 * Im Abschnitt Kostenberechnung erstellt das System den Rechungsbetrag über die [Aktivitätskosten]({{docs_base_url}}/user/manual/en/projects/activity-cost.html)  basierend auf dem angegebenen Mitarbeiter und der angegebenen Aktivitätsart.
 * Das System kalkuliert dann den Rechnungsbetrag basierend auf den im Zeitprotokoll angegebenen Stunden.
 * Wenn "Abrechenbar" nicht markiert wurde, zeigt das System beim "Rechnungsbetrag" 0 an.
