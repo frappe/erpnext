@@ -35,5 +35,3 @@ Beim Auswählen des übergeordneten Artikels aus der Hauptartikelliste werden di
 ####Produkt-Bundles nutzen um Angebote abzubilden
 
 Diese Einsatzmöglichkeit von Produkt-Bundles wurde entdeckt, als ein Kunde, der mit Nahrungsmitteln handelte, nach einer Funktion fragte, Angebote wie "Kaufe eins und bekomme eines frei dazu" abzubilden. Um das umzusetzen, legte er einen Nicht-Lager-Artikel an, der als übergeordneter Artikel verwendet wurde. In der Beschreibung des Artikels gab er die Einzelheiten zu diesem Angebot und ein Bild an. Der Verkaufsartikel wurde dann als Packartikel ausgewählt, wobei die Menge 2 war. Somit zog das System immer dann, wenn ein Artikel über dieses Angebot verkauft wurde, eine Menge von 2 im Lager ab.
-
-{next}
