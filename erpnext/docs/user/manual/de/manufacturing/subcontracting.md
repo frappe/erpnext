@@ -4,19 +4,21 @@
 
 Fremdvergabe ist eine Art Arbeitsvertrag bei dem bestimmte Arbeiten an andere Unternehmen ausgelagert werden. Das ermöglicht es mehr als eine Phase eines Projektes zum selben Zeitpunkt abzuarbeiten, was oftmals zu einer schnelleren Fertigstellung führt. Fremdvergabe von Arbeiten wird in vielen Industriebranchen praktiziert. So vergeben z. B. Hersteller, die eine Vielzahl von Produkten aus anspruchsvollen Bestandteilen erstellen, Unteraufträge zur Herstellung von Komponenten und verarbeiten diese dann in Ihren Fabrikationsanlagen.
 
-Wenn Sie bei Ihrer Tätigkeit bestimmte Prozesse an eine Drittpartei, bei der Sie Rohmateriel einkaufen, unterbeauftragen. können Sie das über die Option "Fremdvergabe" in ERPNext nachverfolgen.
+Wenn Sie bei Ihrer Tätigkeit bestimmte Prozesse an eine Drittpartei, bei der Sie Rohmateriel einkaufen, unterbeauftragen, können Sie das über die Option "Fremdvergabe" in ERPNext nachverfolgen.
 
 ### Fremdvergabe einstellen
 
-1\. Erstellen Sie getrennte Artikel für unbearbeitete und bearbeitet Produkte. Beispiel: Wenn Sie Ihrem Lieferanten unlackierte Artikel X übergeben und Ihnen der Lieferant lackierte Produkte X zurückliefert, dann erstellen Sie zwei Artikel: "X unlackiert" und "X".
+1\. Erstellen Sie getrennte Artikel für unbearbeitete und bearbeitete Produkte. Beispiel: Wenn Sie Ihrem Lieferanten unlackierte Artikel X übergeben und Ihnen der Lieferant lackierte Produkte X zurückliefert, dann erstellen Sie zwei Artikel: "X unlackiert" und "X".
 
 2\. Erstellen Sie ein Lager für den Lieferanten, damit Sie die übergebenen Artikel nachverfolgen können (möglicherweise geben Sie ja Artikel im Wert einer Monatslieferung außer Haus).
 
-3\. Stellen Sie für den bearbeiteten Artikel  und der Artikelvorlage den Punkt "Ist Fremdvergabe" auf JA ein.
+3\. Stellen Sie für den bearbeiteten Artikel auf der Artikelvorlage den Punkt "Ist Fremdvergabe" auf JA ein.
 
 ![Fremdvergabe]({{docs_base_url}}/assets/old_images/erpnext/subcontract.png)
 
-**Schritt 1:** Erstellen Sie für den bearbeiteten Artikel eine Stückliste, die den unbearbeiteten Artikel als Unterartikel enthält. Beispiel: Wenn Sie einen Stift herstellen, wird der bearbeitete Stift mit der Stückliste benannt, wbei der Tintentank, der Knopf und andere Artikel, die in die Fertigung eingehen als Unterartikel verwaltet werden.
+**Schritt 1:** Erstellen Sie für den bearbeiteten Artikel eine Stückliste, die den unbearbeiteten Artikel als Unterartikel enthält.
+
+Beispiel: Wenn Sie einen Stift herstellen, wird der bearbeitete Stift mit der Stückliste benannt, wobei der Tintentank, der Knopf und andere Artikel, die in die Fertigung eingehen, als Unterartikel verwaltet werden.
 
 **Schritt 2:** Erstellen Sie für den bearbeiteten Artikel eine Kundenbestellung. Wenn Sie abspeichern, werden unter "Rohmaterial geliefert" alle unbearbeiteten Artikel aufgrund Ihrer Stückliste aktualisert.
 
