@@ -10,7 +10,7 @@ Webseiten sind Kernbestandteile eines jeden Geschäftslebens. Eine gute Webseite
 
 Es sei denn Sie sind selbst Webentwickler.
 
-Wäre es nicht toll, wenn es einen Weg gäbe, Ihren Produktkatalog auf Ihrer Webseite automatisch aus dem ERP-System aktualiseren zu können?
+Wäre es nicht toll, wenn es einen Weg gäbe, Ihren Produktkatalog auf Ihrer Webseite automatisch aus dem ERP-System heraus aktualisieren zu können?
 
 Wir haben uns genau das gleiche gedacht und haben deshalb eine kleine aber feine App zur Webseitenentwicklung gebaut, direkt in ERPNext! Wenn Sie das Webseitenmodul von ERPNext nutzen, können Sie:
 
@@ -20,9 +20,9 @@ Wir haben uns genau das gleiche gedacht und haben deshalb eine kleine aber feine
 
 3\. Ihren Produktkatalog basierend auf den Artikelstammdaten erstellen 
 
-In Kürze werden wir einen Einkaufswagen mit bereit stellen, so dass Ihre Kunden Bestellung aufgeben können und online zahlen können.
+In Kürze werden wir zudem einen Einkaufswagen bereit stellen, so dass Ihre Kunden Bestellungen aufgeben und online zahlen können.
 
-Obwohl es keine Voraussetzung für eine gute Webseite ist, sollten Sie vielleicht doch ein bisschen Grundwissen zu HTML und CSS mitbringen, oder aber einen professionellen Service in Anspruch nehmen. Das gute daran ist, dass Sie selbst Inhalte, Blogs und Produkte hinzufügen und ändern können, sobald die Grundeinstellungen erledigt sind.
+Obwohl es keine Voraussetzung für eine gute Webseite ist, sollten Sie vielleicht doch ein bisschen Grundwissen zu HTML und CSS mitbringen, oder aber einen professionellen Service in Anspruch nehmen. Das Gute daran ist, dass Sie selbst Inhalte, Blogs und Produkte hinzufügen und ändern können, sobald die Grundeinstellungen erledigt sind.
 
 ### Themen
 
