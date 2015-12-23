@@ -383,7 +383,7 @@ def get_actual_expense(args):
 def get_currency_precision(currency=None):
 	if not currency:
 		currency = frappe.db.get_value("Company",
-			frappe.db.get_default("company"), "default_currency", cache=True)
+			frappe.db.get_default("Company"), "default_currency", cache=True)
 	currency_format = frappe.db.get_value("Currency", currency, "number_format", cache=True)
 
 	from frappe.utils import get_number_format_info

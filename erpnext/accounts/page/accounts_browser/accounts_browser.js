@@ -66,7 +66,7 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 			$.each(r.message, function(i, v) {
 				$('<option>').html(v).attr('value', v).appendTo(wrapper.$company_select);
 			});
-			wrapper.$company_select.val(frappe.defaults.get_user_default("company") || r.message[0]).change();
+			wrapper.$company_select.val(frappe.defaults.get_user_default("Company") || r.message[0]).change();
 		}
 	});
 }

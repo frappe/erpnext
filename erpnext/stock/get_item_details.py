@@ -143,7 +143,7 @@ def get_basic_details(args, item):
 		item.update_template_tables()
 
 	from frappe.defaults import get_user_default_as_list
-	user_default_warehouse_list = get_user_default_as_list('warehouse')
+	user_default_warehouse_list = get_user_default_as_list('Warehouse')
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list)==1 else ""
 
