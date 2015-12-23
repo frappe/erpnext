@@ -11,7 +11,6 @@ from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_ent
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency, get_balance_on
 from itertools import chain
-from paypal_integration.express_checkout import set_express_checkout
 
 class PaymentRequest(Document):		
 	def validate(self):
@@ -23,8 +22,10 @@ class PaymentRequest(Document):
 			frappe.throw(_("Payment Request already exist"))
 		
 	def on_submit(self):
-		self.send_payment_request()
-		self.send_email()
+		if not self.mute_email:
+			self.send_payment_request()
+			self.send_email()
+			
 		self.make_communication_entry()
 	
 	def on_cancel(self):
@@ -37,7 +38,8 @@ class PaymentRequest(Document):
 		pass
 	
 	def send_payment_request(self):
-		if self.payment_gateway == "PayPal":	
+		if self.payment_gateway == "PayPal":
+			from paypal_integration.express_checkout import set_express_checkout
 			self.payment_url = set_express_checkout(self.amount, self.currency, {"doctype": self.doctype, 
 				"docname": self.name})
 		
@@ -48,7 +50,7 @@ class PaymentRequest(Document):
 		if frappe.session.user == "Guest":
 			frappe.set_user("Administrator")
 			
-		self.create_journal_voucher_entry()
+		return self.create_journal_voucher_entry()
 	
 	def create_journal_voucher_entry(self):
 		"""create voucher entry"""
@@ -99,6 +101,8 @@ class PaymentRequest(Document):
 		#set status as paid for Payment Request
 		frappe.db.set_value(self.doctype, self.name, "status", "Paid")
 		
+		return jv
+		
 	def send_email(self):
 		"""send email with payment link"""
 		frappe.sendmail(recipients=self.email_to, sender=None, subject=self.subject,
@@ -128,23 +132,30 @@ class PaymentRequest(Document):
 		comm.insert(ignore_permissions=True)
 
 @frappe.whitelist()
-def make_payment_request(dt, dn, recipient_id=None):
+def make_payment_request(**args):
 	"""Make payment request"""
-	ref_doc = get_reference_doc_details(dt, dn)
-	payment_gateway, payment_account = get_gateway_details()
+	args = frappe._dict(args)
+	ref_doc = get_reference_doc_details(args.dt, args.dn)
+	payment_gateway, payment_account = get_gateway_details(args)
 	
 	pr = frappe.new_doc("Payment Request")
 	pr.update({
 		"payment_gateway": payment_gateway,
 		"payment_account": payment_account,
 		"currency": ref_doc.currency,
-		"amount": get_amount(ref_doc, dt),
-		"email_to": recipient_id,
-		"subject": "Payment Request for %s"%dn,
+		"amount": get_amount(ref_doc, args.dt),
+		"mute_email": args.mute_email or 0,
+		"email_to": args.recipient_id or "",
+		"subject": "Payment Request for %s"%args.dn,
 		"message": frappe.get_doc("Accounts Settings").message,
-		"reference_doctype": dt,
-		"reference_name": dn
+		"reference_doctype": args.dt,
+		"reference_name": args.dn
 	})
+	
+	if args.submit_doc:
+		pr.insert(ignore_permissions=True)
+		pr.submit()
+		return pr
 	
 	return pr.as_dict()
 
@@ -171,8 +182,11 @@ def get_amount(ref_doc, dt):
 	else:
 		frappe.throw(_("Payment Entry is already created"))
 		
-def get_gateway_details():
+def get_gateway_details(args):
 	"""return gateway and payment account of default payment gateway"""
+	if args.payemnt_gateway:
+		frappe.db.get_value("Payment Gateway", args.payemnt_gateway, ["gateway", "payment_account"])
+		
 	return frappe.db.get_value("Payment Gateway", {"is_default": 1}, ["gateway", "payment_account"])
 
 @frappe.whitelist()
