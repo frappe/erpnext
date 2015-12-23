@@ -1,8 +1,6 @@
-<h1>Managing Tree Structure Masters</h1>
+#Managing Tree Structure Masters
 
-<h1>Managing Tree Structure Masters</h1>
-
-Some of the masters in ERPNext are maintained in tree structure. Tree structured masters allow you to set Parent masters, and Child masters under those Parents. Setting up this structure allows you creating intelligent report, and track growth at each level in the hierarchy. 
+Some of the masters in ERPNext are maintained in tree structure. Tree structured masters allow you to set parent master, and child masters under those parents. Setting up this structure allows you creating intelligent report, and track growth at each level in the hierarchy. 
 
 Following is the partial list of masters which are maintained in the tree structure.
 
@@ -26,7 +24,7 @@ Following are the steps to manage and create record in the tree structured maste
 
 Also you can type master name in Awesome Bar to go to the related master.
 
-Tree master allows you to set Parent Territories, and Child Territories Groups under those Parents.
+Tree master allows you to set parent Territories, and Child Territories Groups under those parents.
 
 ####Step 2 : New Parent Territory
 
