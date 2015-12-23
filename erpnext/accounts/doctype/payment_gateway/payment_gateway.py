@@ -9,9 +9,13 @@ from frappe.model.document import Document
 class PaymentGateway(Document):
 	def validate(self):
 		self.update_default_payment_gateway()
+		self.set_as_default()
 	
 	def update_default_payment_gateway(self):
-		frappe.db.sql("""update `tabPayment Gateway` set is_default = 0
-			where is_default = 1 """)
+		if self.is_default:
+			frappe.db.sql("""update `tabPayment Gateway` set is_default = 0
+				where is_default = 1 """)
 		
-		
+	def set_as_default(self):
+		if not frappe.db.get_value("Payment Gateway", {"is_default": 1, "name": ("!=", self.name)}, "name"):
+			self.is_default = 1
