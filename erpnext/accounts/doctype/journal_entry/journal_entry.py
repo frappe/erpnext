@@ -104,6 +104,12 @@ class JournalEntry(AccountsController):
 						msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.").format(d.idx, d.account))
 					elif d.reference_type in ("Sales Order", "Purchase Order") and d.is_advance != "Yes":
 						frappe.throw(_("Row {0}: Payment against Sales/Purchase Order should always be marked as advance").format(d.idx))
+						
+				if d.is_advance == "Yes":
+					if d.party_type == 'Customer' and flt(d.debit) > 0:
+						frappe.throw(_("Row {0}: Advance against Customer must be credit").format(d.idx))
+					elif d.party_type == 'Supplier' and flt(d.credit) > 0:
+						frappe.throw(_("Row {0}: Advance against Supplier must be debit").format(d.idx))
 
 	def validate_against_jv(self):
 		for d in self.get('accounts'):

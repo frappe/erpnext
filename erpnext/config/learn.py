@@ -21,6 +21,11 @@ def get_data():
 					"label": _("Customizing Forms"),
 					"youtube_id": "pJhL9mmxV_U"
 				},
+				{
+					"type": "help",
+					"label": _("Report Builder"),
+					"youtube_id": "y0o5iYZOioU"
+				},
 			]
 
 		},
@@ -272,6 +277,11 @@ def get_data():
 					"type": "help",
 					"label": _("Publish Items on Website"),
 					"youtube_id": "W31LBBNzbgc"
+				},
+				{
+					"type": "help",
+					"label": _("Shopping Cart"),
+					"youtube_id": "xkrYO-KFukM"
 				},
 			]
 		},
