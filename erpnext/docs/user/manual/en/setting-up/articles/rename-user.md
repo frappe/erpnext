@@ -1,31 +1,27 @@
-<h1>Rename User</h1>
-
-<h1>Rename User</h1>
+#Rename User
 
 Renaming functionality allows you to edit id of specific record. User is saved with person's email id. Only User with System Manager's role will be able to rename User IDs.
 
 Following are the steps to rename user id.
 
-#### Step 1: Go to User List
+#### Step 1: Users
 
-Setup &gt; Users &gt; User
+`Setup > Users > User`
 
-Click to open user id you want to rename.
+Open User to be renamed.
 
-#### Step 2: Go to Menu and click on Rename option. 
+#### Step 2: Rename
 
-When will you click on Rename option, pop up will open on same form. 
+From Menu, select Rename.
 
-<img src="{{docs_base_url}}/assets/img/articles/Selection_019811b13.png">
+<img alt="Rename" class="screenshot" src="{{docs_base_url}}/assets/img/articles/rename-user-1.png">
 
+#### Step 3: Update
 
-#### Step 3: Enter new user ID and Press Rename Button.
+Enter valid email id and click on Rename.
 
+<img alt="Update" class="screenshot" src="{{docs_base_url}}/assets/img/articles/rename-user-2.png"> 
 
-<img src="{{docs_base_url}}/assets/img/articles/Selection_021ac61a5.png"> 
-
-After successful renaming user can login to their ERPNext account with new ID.
-
-
+After successful renaming, User will be able login using updated user id.
 
 <!-- markdown -->

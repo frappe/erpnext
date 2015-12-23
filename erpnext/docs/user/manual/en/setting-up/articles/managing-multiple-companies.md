@@ -4,7 +4,7 @@ ERPNext allows you to create multiple companies in a single ERPNext instance.
 
 In one account has multiple companies, you will find option to select Company in each transactions. While most of the records (mostly transactions) will be separated based on Company, there are few masters like Item, Item Group, Customer Group, Territory etc. which are common among all the companies.
 
-If you have separate teams working on each company, you can restrict access of the User to the data of specific Company. Click [here](http://frappe.github.io/erpnext/user/manual/en/setting-up/users-and-permissions/) to know how to set permission rules for giving restricted access to the User.
+If you have separate teams working on each company, you can restrict access of the User to the data of specific Company. Click [here]({{docs_base_url}}/user/manual/en/setting-up/users-and-permissions/) to know how to set permission rules for giving restricted access to the User.
 
 Following are the steps to add new Company.
 

@@ -1,14 +1,7 @@
 #Integrating ERPNext with other Applications
 
-For now, ERPNext doesn't have out-of-the-box integration available for the third party applications. However, Frappe has REST API using which you can get ERPNext integrated with any other solution.
+For now, ERPNext has out-of-the-box integration available for some applications like Shopify, your SMS gateway and payment gateway. To integrate ERPNext with other application, you can use REST API of Frappe. Check following links to learn more about REST API of Frappe.
 
-Learn more about Frappe API here.
-
-[https://frappe.io/help/rest_api](https://frappe.io/help/rest_api)
-
-For experts services on integration, you can connect with our service providers from community portal.
-
-[https://community.eprnext.com/service-providers](https://community.erpnext.com/service-providers)
-
+[Frappe Rest API](https://frappe.github.io/frappe/user/guides/integration/rest_api.html)
 
 <!-- markdown -->
