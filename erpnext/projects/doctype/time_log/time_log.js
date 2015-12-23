@@ -46,7 +46,7 @@ frappe.ui.form.on("Time Log", "before_save", function(frm) {
 frappe.ui.form.on("Time Log", "to_time", function(frm) {
 	if(frm._setting_hours) return;
 	frm.set_value("hours", moment(cur_frm.doc.to_time).diff(moment(cur_frm.doc.from_time),
-		"minutes") / 60);
+		"seconds") / 3600);
 
 });
 
