@@ -1,24 +1,22 @@
-<h1>Managing Multiple Companies</h1>
+#Managing Multiple Companies
 
-<h1>Managing Multiple Companies</h1>
+ERPNext allows you to create multiple companies in a single ERPNext instance.
 
-ERPNext allows you to create multiple companies in the same/common ERPNext account.
+In one account has multiple companies, you will find option to select Company in each transactions. While most of the records (mostly transactions) will be separated based on Company, there are few masters like Item, Item Group, Customer Group, Territory etc. which are common among all the companies.
 
-With this, you will find option to select Company in your transactions. While most of the transactions will be separated based on Company, there are few masters like Item, Item Group, Customer Group, Territory etc. which can be used across all the companies.
+If you have separate teams working on each company, you can restrict access of the User to the data of specific Company. Click [here](http://frappe.github.io/erpnext/user/manual/en/setting-up/users-and-permissions/) to know how to set permission rules for giving restricted access to the User.
 
-If you have separate teams working on each company, you can also restrict the access of user to the data of specific company. Click [here](https://manual.erpnext.com/search?txt=user%20permission) to know more about how to set permission to achieve the same.
-
-Following are the steps to create companies in your ERPNext account.
+Following are the steps to add new Company.
 
 ####Go to Setup Module
 
-`Setup &gt; Masters &gt; Company &gt; New`
+`Accounts > Setup > Company > New`
 
 ####Enter Company Details
 
-Company master will be saved with Company Name provided at the time of its creation. 
+Company will be saved with Company Name provided.
 
-![New Company]({{docs_base_url}}/assets/img/articles/SGrab_343.png)
+<img alt="New Company" class="screenshot" src="{{docs_base_url}}/assets/img/articles/new-company-1.png">
 
 Also, you can define other properties for new company like:
 
@@ -30,13 +28,13 @@ Also, you can define other properties for new company like:
 
 Value will be auto-filled in most of these field to define company-wise defaults. You can edit/customize it as per your requirement. 
 
-![New Company]({{docs_base_url}}/assets/img/articles/SGrab_344.png)
+<img alt="New Company" class="screenshot" src="{{docs_base_url}}/assets/img/articles/new-company-2.png">
 
 ####Chart of Account for New Company
 
 A separate Chart of Account master will be set for each company in the ERPNext. This allows you managing Accounts/Ledger master separately for each company. Also it allows you avail financial statement and reports like Balance Sheet and Profit and Loss Statement separately for each company.
 
-![Company]({{docs_base_url}}/assets/img/articles/SGrab_342.png)
+<img alt="New Company" class="screenshot" src="{{docs_base_url}}/assets/img/articles/new-company-3.png">
 
 
 <!-- markdown -->
