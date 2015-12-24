@@ -538,7 +538,7 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
 		}
 
 @frappe.whitelist()
-def get_payment_entry_against_order(dt, dn):
+def get_payment_entry_against_order(dt, dn, args=None):
 	ref_doc = frappe.get_doc(dt, dn)
 
 	if flt(ref_doc.per_billed, 2) > 0:
@@ -556,10 +556,13 @@ def get_payment_entry_against_order(dt, dn):
 	party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
 	party_account_currency = get_account_currency(party_account)
 
-	if party_account_currency == ref_doc.company_currency:
-		amount = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
+	if not args or not args["amount"]:
+		if party_account_currency == ref_doc.company_currency:
+			amount = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
+		else:
+			amount = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 	else:
-		amount = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
+		amount = args["amount"]
 
 	return get_payment_entry(ref_doc, {
 		"party_type": party_type,
@@ -569,11 +572,13 @@ def get_payment_entry_against_order(dt, dn):
 		"amount_field_bank": amount_field_bank,
 		"amount": amount,
 		"remarks": 'Advance Payment received against {0} {1}'.format(dt, dn),
-		"is_advance": "Yes"
+		"is_advance": "Yes",
+		"bank_account": args["bank_account"] if args else None,
+		"return_obj": args["return_obj"] if args else None
 	})
 
 @frappe.whitelist()
-def get_payment_entry_against_invoice(dt, dn):
+def get_payment_entry_against_invoice(dt, dn, args=None):
 	ref_doc = frappe.get_doc(dt, dn)
 	if dt == "Sales Invoice":
 		party_type = "Customer"
@@ -597,9 +602,11 @@ def get_payment_entry_against_invoice(dt, dn):
 		"party_account_currency": ref_doc.party_account_currency,
 		"amount_field_party": amount_field_party,
 		"amount_field_bank": amount_field_bank,
-		"amount": abs(ref_doc.outstanding_amount),
+		"amount": args["amount"] if args else abs(ref_doc.outstanding_amount),
 		"remarks": 'Payment received against {0} {1}. {2}'.format(dt, dn, ref_doc.remarks),
-		"is_advance": "No"
+		"is_advance": "No",
+		"bank_account": args["bank_account"] if args else None,
+		"return_obj": args["return_obj"] if args else None
 	})
 
 def get_payment_entry(ref_doc, args):
@@ -653,7 +660,7 @@ def get_payment_entry(ref_doc, args):
 
 	jv.set_amounts_in_company_currency()
 	jv.set_total_debit_credit()
-
+	
 	return jv if args.get("return_obj") else jv.as_dict()
 
 @frappe.whitelist()
