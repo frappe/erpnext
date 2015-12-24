@@ -12,17 +12,22 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 
 test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
 
+payment_gateway = {
+	"doctype": "Payment Gateway",
+	"gateway": "_Test Gateway"
+}
+
 payment_method = [
 	{
-		"doctype": "Payment Gateway",
+		"doctype": "Payment Gateway Account",
 		"is_default": 1,
-		"gateway": "_Test Gateway INR",
+		"gateway": "_Test Gateway",
 		"payment_account": "_Test Bank - _TC",
 		"currency": "INR"
 	},
 	{
-		"doctype": "Payment Gateway",
-		"gateway": "_Test Gateway USD",
+		"doctype": "Payment Gateway Account",
+		"gateway": "_Test Gateway",
 		"payment_account": "_Test Bank - _TC",
 		"currency": "USD"
 	}
@@ -30,9 +35,13 @@ payment_method = [
 
 class TestPaymentRequest(unittest.TestCase):
 	def setUp(self):
-		for gateway in payment_method:
-			if not frappe.db.get_value("Payment Gateway", gateway["gateway"], "name"):
-				frappe.get_doc(gateway).insert(ignore_permissions=True)
+		if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
+			frappe.get_doc(payment_gateway).insert(ignore_permissions=True)
+			
+		for method in payment_method:
+			if not frappe.db.get_value("Payment Gateway Account", {"gateway": method["gateway"], 
+				"currency": method["currency"]}, "name"):
+				frappe.get_doc(method).insert(ignore_permissions=True)
 			
 	def test_payment_request_linkings(self):
 		SO_INR = make_sales_order(currency="INR")
@@ -63,7 +72,7 @@ class TestPaymentRequest(unittest.TestCase):
 			currency="USD", conversion_rate=50)
 
 		pr = make_payment_request(dt="Sales Invoice", dn=SI_USD.name, recipient_id="saurabh@erpnext.com",
-			mute_email=1, submit_doc=1, payemnt_gateway="_Test Gateway USD")
+			mute_email=1, submit_doc=1, payemnt_gateway="_Test Gateway - USD")
 		jv = pr.set_paid()
 
 		self.assertEquals(jv.accounts[0].account, "_Test Receivable USD - _TC")
