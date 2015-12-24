@@ -1,26 +1,29 @@
-<h1>Allow Fields to be Changed After Submit</h1>
+#Editing Value in Submitted Document
 
-In many cases a field may need to be changed even after the document has been submitted to allow flexibility. The _Allow On Submit_ option is available for such a purpose. Certain standard fields in Doctypes are set as Allow On Submit by default (such as _Letterhead_ and _Print Heading_ in Invoices). The user can set Custom Fields as Allow On Submit using Customize Form.
+Once document is submitted, fields are frozen, and no editing is allowd. Still there are certain standard fields like Letter Head, Print Heading which can still be edited. For the custom field, if **Allow on Submit** property is checked, it will be editable even after document is submitted.
 
-**Note:** Standard Fields cannot be set as Allow On Submit by a User
+<div class="well"> Standard fields cannot be set as Allow on Submit.</div>
 
-#### Step 1: Go to Customize Form in Setup Module.
+#### Step 1: Go To
 
-```Setup >> Customize >> Customize Form```
+`Setup > Customize > Customize Form`
 
-#### 
-####Step 2: Select the form containing the desired Custom Field in _Enter Form Type_ field.
+####Step 2: Select Form
 
-![]({{docs_base_url}}/assets/img/articles/kb_custom_name.png)
+In Customize Form, select Document Type (Quotation, Sales Order, Purchase Invoice Item etc.)
 
-#### **Step 3:** In the _Fields_ section, scroll down, click on the Custom field and check the _Allow On Submit._
+<img alt="select docytpe" class="screenshot" src="{{docs_base_url}}/assets/img/articles/allow-on-submit-1.png">
 
-![]({{docs_base_url}}/assets/img/articles/kb_allowonsubmit_checkinform.png)
+#### Step 3: Edit Field Property
 
-_This field can now be changed even after the Document is submitted_.
+In the fields section, click on the Custom field and check the **Allow On Submit**.
 
-**Note:** The Custom Fields can also be set as Allow On Submit during the time of creation by checking the Allow On Submit option that is available.
-![]({{docs_base_url}}/assets/img/articles/kb_allowonsubmit_checkinfield.png)
+<img alt="Check Allow on Submit" class="screenshot" src="{{docs_base_url}}/assets/img/articles/allow-on-submit-2.png">
 
+#### Step 3: Update Customize Form
+
+<img alt="Update" class="screenshot" src="{{docs_base_url}}/assets/img/articles/allow-on-submit-3.png">
+
+After updating Customize Form, you should reload your ERPNext account. Then check form, and field to confirm it its editbale in submitted form as well.
 
 <!-- markdown -->

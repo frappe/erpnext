@@ -2,7 +2,7 @@
 
 Data Import Tool allows importing documents (like customers, Suppliers, Orders, Invoices etc.) from spreadsheet file into ERPNext. The very same tool can also be used for overwrite values in the existing documents.
 
-<div class="well">Over-writing data from Data Import Tool works only for the saved transactions, and not for Submitted ones.</div>
+<div class="well">Overwriting data from Data Import Tool works only for the saved transactions, and not for Submitted ones.</div>
 
 Let's assume there are no. of items for which we need to overwrite Item Group. Following are the steps to go about overwriting Item Groups for existing Items.
 
