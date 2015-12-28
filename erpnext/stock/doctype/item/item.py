@@ -34,7 +34,8 @@ class Item(WebsiteGenerator):
 			if self.variant_of:
 				item_code_suffix = ""
 				for attribute in self.attributes:
-					item_code_suffix += "-" + str(attribute.attribute_value)
+					attribute_abbr = frappe.db.get_value("Item Attribute Value", {"parent": attribute.attribute, "attribute_value": attribute.attribute_value}, "abbr")
+					item_code_suffix += "-" + str(attribute_abbr or attribute.attribute_value)
 				self.item_code = str(self.variant_of) + item_code_suffix
 			else:
 				from frappe.model.naming import make_autoname
