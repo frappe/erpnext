@@ -52,7 +52,8 @@ status_map = {
 	],
 	"Delivery Note": [
 		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
+		["To Bill", "eval:self.per_billed < 100 and self.docstatus == 1"],
+		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
 	],
@@ -153,7 +154,6 @@ class StatusUpdater(Document):
 		# check if overflow is within tolerance
 		tolerance, self.tolerance, self.global_tolerance = get_tolerance_for(item['item_code'],
 			self.tolerance, self.global_tolerance)
-
 		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) /
 		 	item[args['target_ref_field']]) * 100
 

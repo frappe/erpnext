@@ -48,7 +48,8 @@ class DeliveryNote(SellingController):
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_invoice',
-			'overflow_type': 'delivery'
+			'overflow_type': 'delivery',
+			'no_tolerance': 1
 		},
 		{
 			'source_dt': 'Delivery Note Item',
@@ -56,21 +57,11 @@ class DeliveryNote(SellingController):
 			'join_field': 'so_detail',
 			'target_field': 'returned_qty',
 			'target_parent_dt': 'Sales Order',
-			# 'target_parent_field': 'per_delivered',
-			# 'target_ref_field': 'qty',
 			'source_field': '-1 * qty',
-			# 'percent_join_field': 'against_sales_order',
-			# 'overflow_type': 'delivery',
 			'extra_cond': """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)"""
 		}]
 
-	def onload(self):
-		billed_qty = frappe.db.sql("""select sum(qty) from `tabSales Invoice Item`
-			where docstatus=1 and delivery_note=%s""", self.name)
-		if billed_qty:
-			total_qty = sum((item.qty for item in self.get("items")))
-			self.set_onload("billing_complete", (billed_qty[0][0] == total_qty))
-			
+	def onload(self):			
 		self.set_onload("has_return_entry", len(frappe.db.exists({"doctype": "Delivery Note", 
 			"is_return": 1, "return_against": self.name, "docstatus": 1})))
 
@@ -199,6 +190,7 @@ class DeliveryNote(SellingController):
 
 		# update delivered qty in sales order
 		self.update_prevdoc_status()
+		self.update_billing_status()
 
 		if not self.is_return:
 			self.check_credit_limit()
@@ -206,18 +198,15 @@ class DeliveryNote(SellingController):
 		self.update_stock_ledger()
 		self.make_gl_entries()
 
-		frappe.db.set(self, 'status', 'Submitted')
-
-
 	def on_cancel(self):
 		self.check_stop_or_close_sales_order("against_sales_order")
 		self.check_next_docstatus()
 
 		self.update_prevdoc_status()
+		self.update_billing_status()
 
 		self.update_stock_ledger()
 
-		frappe.db.set(self, 'status', 'Cancelled')
 		self.cancel_packing_slips()
 
 		self.make_gl_entries_on_cancel()
@@ -279,6 +268,73 @@ class DeliveryNote(SellingController):
 		self.set_status(update=True, status=status)
 		self.notify_update()
 		clear_doctype_notifications(self)
+		
+	def update_billing_status(self):
+		updated_delivery_notes = [self.name]
+		for d in self.get("items"):
+			if d.si_detail and not d.so_detail:
+				d.billed_amt = d.amount
+				frappe.db.set(d, 'billed_amt', d.amount)
+			elif d.so_detail:
+				updated_delivery_notes += update_billing_amount_based_on_so(d.so_detail)
+				d.billed_amt = frappe.db.get_value("Delivery Note Item", d.name, "billed_amt")
+		
+		for dn in set(updated_delivery_notes):
+			update_billing_percentage(dn)
+			self.per_billed = frappe.db.get_value("Delivery Note", self.name, "per_billed")
+				
+def update_billing_percentage(delivery_note, set_modified=True):
+	frappe.db.sql("""update `tabDelivery Note`
+		set per_billed = round(ifnull(
+			(select ifnull(sum(if(amount > billed_amt, billed_amt, amount)), 0) * 100 / sum(amount)
+				from `tabDelivery Note Item` where parent=%s), 0), 2)
+			, modified = now(), modified_by = %s
+		where name=%s""", (delivery_note, frappe.session.user, delivery_note))
+		
+	if set_modified:
+		dn = frappe.get_doc("Delivery Note", delivery_note)
+		dn.set_status(update=True)
+		dn.notify_update()
+
+def update_billing_amount_based_on_so(so_detail):
+	# Billed against Sales Order directly
+	billed_against_so = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item` 
+		where so_detail=%s and (dn_detail is null or dn_detail = '') and docstatus=1""", so_detail)
+	billed_against_so = billed_against_so and billed_against_so[0][0] or 0
+	
+	# Get all Delivery Note Item rows against the Sales Order Item row
+	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent 
+		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
+		where dn.name=dn_item.parent and dn_item.so_detail=%s 
+			and dn.docstatus=1 and dn.is_return = 0
+		order by dn.posting_date asc, dn.posting_time asc, dn.name asc""", so_detail, as_dict=1)
+
+	updated_dn = []
+	for dnd in dn_details:
+		billed_amt_agianst_dn = 0
+		
+		# If delivered against Sales Invoice
+		if dnd.si_detail:
+			billed_amt_agianst_dn = flt(dnd.amount)
+			billed_against_so -= billed_amt_agianst_dn
+		else:
+			# Get billed amount directly against Delivery Note
+			billed_amt_agianst_dn = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item` 
+				where dn_detail=%s and docstatus=1""", dnd.name)
+			billed_amt_agianst_dn = billed_amt_agianst_dn and billed_amt_agianst_dn[0][0] or 0
+		
+		# Distribute billed amount directly against SO between DNs based on FIFO
+		if billed_against_so and billed_amt_agianst_dn < dnd.amount:
+			pending_to_bill = flt(dnd.amount) - billed_amt_agianst_dn
+			if pending_to_bill <= billed_against_so:
+				billed_amt_agianst_dn += pending_to_bill
+			else:
+				billed_amt_agianst_dn += billed_against_so
+				
+		frappe.db.set_value("Delivery Note Item", dnd.name, "billed_amt", billed_amt_agianst_dn)
+		updated_dn.append(dnd.parent)
+		
+	return updated_dn
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
