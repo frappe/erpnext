@@ -184,6 +184,7 @@ DocType: Sales Partner,Reseller,លក់បន្ត
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +41,Please enter Company,សូមបញ្ចូលក្រុមហ៊ុន
 DocType: Delivery Note Item,Against Sales Invoice Item,ការប្រឆាំងនឹងការធាតុលក់វិក័យប័ត្រ
 ,Production Orders in Progress,ការបញ្ជាទិញផលិតកម្មក្នុងវឌ្ឍនភាព
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +37,Net Cash from Financing,សាច់ប្រាក់សុទ្ធពីការផ្តល់ហិរញ្ញប្បទាន
 DocType: Lead,Address & Contact,អាសយដ្ឋានទំនាក់ទំនង
 DocType: Leave Allocation,Add unused leaves from previous allocations,បន្ថែមស្លឹកដែលមិនបានប្រើពីការបែងចែកពីមុន
 DocType: Newsletter List,Total Subscribers,អតិថិជនសរុប
@@ -448,6 +449,7 @@ DocType: Buying Settings,Supplier Naming By,ដាក់ឈ្មោះអ្ន
 DocType: Activity Type,Default Costing Rate,អត្រាផ្សារលំនាំដើម
 DocType: Maintenance Schedule,Maintenance Schedule,កាលវិភាគថែទាំ
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +34,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","បន្ទាប់មក Pricing ក្បួនត្រូវបានត្រងចេញដោយផ្អែកលើអតិថិជន, ក្រុមអតិថិជនដែនដី, ហាងទំនិញ, ប្រភេទហាងទំនិញ, យុទ្ធនាការ, ការលក់ដៃគូល"
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +22,Net Change in Inventory,ការផ្លាស់ប្តូរសុទ្ធនៅសារពើភ័ណ្ឌ
 DocType: Employee,Passport Number,លេខលិខិតឆ្លងដែន
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +82,Manager,កម្មវិធីគ្រប់គ្រង
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +582,From Purchase Receipt,ពីការទទួលទិញ
@@ -685,6 +687,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 ,Company Name,ឈ្មោះក្រុមហ៊ុន
 DocType: SMS Center,Total Message(s),សារសរុប (s បាន)
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +627,Select Item for Transfer,ជ្រើសធាតុសម្រាប់ការផ្ទេរ
+DocType: Purchase Invoice,Additional Discount Percentage,ការបញ្ចុះតម្លៃបន្ថែមទៀតភាគរយ
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +24,View a list of all the help videos,មើលបញ្ជីនៃការជួយវីដេអូទាំងអស់
 DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,ជ្រើសប្រធានគណនីរបស់ធនាគារនេះដែលជាកន្លែងដែលការត្រួតពិនិត្យត្រូវបានតម្កល់ទុក។
 DocType: Selling Settings,Allow user to edit Price List Rate in transactions,អនុញ្ញាតឱ្យអ្នកប្រើដើម្បីកែសម្រួលអត្រាតំលៃបញ្ជីនៅក្នុងប្រតិបត្តិការ
@@ -786,6 +789,7 @@ DocType: Item,website page link,តំណភ្ជាប់ទំព័រវេ
 DocType: Company,Company registration numbers for your reference. Tax numbers etc.,លេខចុះបញ្ជីក្រុមហ៊ុនសម្រាប់ជាឯកសារយោងរបស់អ្នក។ ចំនួនពន្ធល
 DocType: Sales Partner,Distributor,ចែកចាយ
 DocType: Shopping Cart Shipping Rule,Shopping Cart Shipping Rule,ការដើរទិញឥវ៉ាន់វិធានការដឹកជញ្ជូនក្នុងកន្រ្តក
+apps/erpnext/erpnext/public/js/controllers/transaction.js +881,Please set 'Apply Additional Discount On',សូមកំណត់ &#39;អនុវត្តការបញ្ចុះតម្លៃបន្ថែមទៀតនៅលើ &quot;
 ,Ordered Items To Be Billed,ធាតុបញ្ជាឱ្យនឹងត្រូវបានផ្សព្វផ្សាយ
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,ពីជួរមានដើម្បីឱ្យមានតិចជាងដើម្បីជួរ
 apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,ជ្រើសកំណត់ហេតុនិងការដាក់ស្នើវេលាម៉ោងដើម្បីបង្កើតវិក័យប័ត្រលក់ថ្មី។
@@ -971,6 +975,7 @@ DocType: Sales Order Item,Planned Quantity,បរិមាណដែលបាន�
 DocType: Purchase Invoice Item,Item Tax Amount,ចំនួនទឹកប្រាក់ពន្ធលើធាតុ
 DocType: Item,Maintain Stock,ការរក្សាហ៊ុន
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +211,Stock Entries already created for Production Order ,ធាតុភាគហ៊ុនដែលបានបង្កើតរួចផលិតកម្មលំដាប់
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +31,Net Change in Fixed Asset,ការផ្លាស់ប្តូរសុទ្ធនៅលើអចលនទ្រព្យ
 DocType: Leave Control Panel,Leave blank if considered for all designations,ប្រសិនបើអ្នកទុកវាឱ្យទទេសម្រាប់ការរចនាទាំងអស់បានពិចារណាថា
 apps/erpnext/erpnext/projects/report/daily_time_log_summary/daily_time_log_summary.py +16,From Datetime,ចាប់ពី Datetime
 DocType: Email Digest,For Company,សម្រាប់ក្រុមហ៊ុន
@@ -1040,6 +1045,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliat
 apps/erpnext/erpnext/public/js/setup_wizard.js +153,Financial Year Start Date,កាលបរិច្ឆេទចាប់ផ្តើមក្នុងឆ្នាំហិរញ្ញវត្ថុ
 DocType: Employee External Work History,Total Experience,បទពិសោធន៍សរុប
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +276,Packing Slip(s) cancelled,គ្រូពេទ្យប្រហែលជាវេចខ្ចប់ (s) បានត្រូវបានលុបចោល
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,លំហូរសាច់ប្រាក់ចេញពីការវិនិយោគ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,ការចោទប្រកាន់ការដឹកជញ្ជូននិងការបញ្ជូនបន្ត
 DocType: Material Request Item,Sales Order No,គ្មានការលក់សណ្តាប់ធ្នាប់
 DocType: Item Group,Item Group Name,ធាតុឈ្មោះក្រុម
@@ -1103,6 +1109,7 @@ DocType: HR Settings,Stop Birthday Reminders,បញ្ឈប់ការរំ�
 DocType: SMS Center,Receiver List,បញ្ជីអ្នកទទួល
 DocType: Payment Tool Detail,Payment Amount,ចំនួនទឹកប្រាក់ការទូទាត់
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +46,Consumed Amount,ចំនួនទឹកប្រាក់ដែលគេប្រើប្រាស់
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +89,Net Change in Cash,ការផ្លាស់ប្តូរសាច់ប្រាក់សុទ្ធ
 DocType: Salary Structure Deduction,Salary Structure Deduction,ការកាត់រចនាសម្ព័ន្ធប្រាក់បៀវត្ស
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Issued Items,តម្លៃនៃធាតុដែលបានចេញផ្សាយ
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +41,Age (Days),អាយុ (ថ្ងៃ)
@@ -1131,6 +1138,7 @@ DocType: Payment Reconciliation,Payments,ការទូទាត់
 DocType: Budget Detail,Budget Allocated,ថវិកាដែលបានត្រៀមបម្រុងទុក
 DocType: Journal Entry,Entry Type,ប្រភេទធាតុ
 ,Customer Credit Balance,សមតុល្យឥណទានអតិថិជន
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +21,Net Change in Accounts Payable,ការផ្លាស់ប្តូរសុទ្ធក្នុងគណនីទូទាត់
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +137,Please verify your email id,សូមផ្ទៀងផ្ទាត់លេខសម្គាល់អ៊ីមែលរបស់អ្នក
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +42,Customer required for 'Customerwise Discount',អតិថិជនដែលបានទាមទារសម្រាប់ &#39;បញ្ចុះតម្លៃ Customerwise &quot;
 apps/erpnext/erpnext/config/accounts.py +53,Update bank payment dates with journals.,ធ្វើឱ្យទាន់សម័យកាលបរិច្ឆេទទូទាត់ប្រាក់ធនាគារដែលទិនានុប្បវត្តិ។
@@ -1529,6 +1537,7 @@ DocType: Naming Series,User must always select,អ្នកប្រើដែល
 DocType: Stock Settings,Allow Negative Stock,អនុញ្ញាតឱ្យហ៊ុនអវិជ្ជមាន
 DocType: Installation Note,Installation Note,ចំណាំការដំឡើង
 apps/erpnext/erpnext/public/js/setup_wizard.js +301,Add Taxes,បន្ថែមពន្ធ
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +38,Cash Flow from Financing,លំហូរសាច់ប្រាក់ពីការផ្តល់ហិរញ្ញប្បទាន
 ,Financial Analytics,វិភាគហិរញ្ញវត្ថុ
 DocType: Quality Inspection,Verified By,បានផ្ទៀងផ្ទាត់ដោយ
 DocType: Address,Subsidiary,ក្រុមហ៊ុនបុត្រសម្ព័ន្ធ
@@ -1566,6 +1575,7 @@ apps/erpnext/erpnext/config/selling.py +158,Setup incoming server for sales emai
 DocType: Warranty Claim,Raised By,បានលើកឡើងដោយ
 DocType: Payment Tool,Payment Account,គណនីទូទាត់ប្រាក់
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +713,Please specify Company to proceed,សូមបញ្ជាក់ក្រុមហ៊ុនដើម្បីបន្ត
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +20,Net Change in Accounts Receivable,ការផ្លាស់ប្តូរសុទ្ធក្នុងគណនីអ្នកទទួល
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +46,Compensatory Off,ទូទាត់បិទ
 DocType: Quality Inspection Reading,Accepted,បានទទួលយក
 apps/erpnext/erpnext/setup/doctype/company/company.js +24,Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.,សូមប្រាកដថាអ្នកពិតជាចង់លុបប្រតិបតិ្តការទាំងអស់សម្រាប់ក្រុមហ៊ុននេះ។ ទិន្នន័យមេរបស់អ្នកនឹងនៅតែជាវាគឺជា។ សកម្មភាពនេះមិនអាចមិនធ្វើវិញ។
@@ -1941,6 +1951,7 @@ DocType: Quality Inspection,Outgoing,ចេញ
 DocType: Material Request,Requested For,ស្នើសម្រាប់
 DocType: Quotation Item,Against Doctype,ប្រឆាំងនឹងការ DOCTYPE
 DocType: Delivery Note,Track this Delivery Note against any Project,តាមដានការដឹកជញ្ជូនចំណាំនេះប្រឆាំងនឹងគម្រោងណាមួយឡើយ
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +28,Net Cash from Investing,សាច់ប្រាក់សុទ្ធពីការវិនិយោគ
 apps/erpnext/erpnext/accounts/doctype/account/account.py +176,Root account can not be deleted,គណនី root មិនអាចត្រូវបានលុប
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +75,Show Stock Entries,បង្ហាញធាតុហ៊ុន
 ,Is Primary Address,គឺជាអាសយដ្ឋានបឋមសិក្សា
@@ -2062,6 +2073,7 @@ apps/erpnext/erpnext/config/accounts.py +23,Bills raised by Suppliers.,វិក
 DocType: POS Profile,Write Off Account,បិទការសរសេរគណនី
 DocType: Purchase Invoice,Return Against Purchase Invoice,ការវិលត្រឡប់ពីការប្រឆាំងនឹងការទិញវិក័យប័ត្រ
 DocType: Item,Warranty Period (in days),ការធានារយៈពេល (នៅក្នុងថ្ងៃ)
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +16,Net Cash from Operations,ប្រតិបត្ដិការសាច់ប្រាក់សុទ្ធពី
 apps/erpnext/erpnext/public/js/setup_wizard.js +310,e.g. VAT,ឧអាករលើតម្លៃបន្ថែម
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +26,Item 4,ធាតុ 4
 DocType: Journal Entry Account,Journal Entry Account,គណនីធាតុទិនានុប្បវត្តិ
@@ -2236,6 +2248,7 @@ DocType: Purchase Taxes and Charges,Valuation and Total,ការវាយតម
 DocType: Tax Rule,Shipping City,ការដឹកជញ្ជូនក្នុងទីក្រុង
 DocType: Account,Purchase User,អ្នកប្រើប្រាស់ទិញ
 DocType: Notification Control,Customize the Notification,ប្ដូរតាមសេចក្តីជូនដំណឹងនេះ
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +17,Cash Flow from Operations,លំហូរសាច់ប្រាក់ពីការប្រតិបត្ដិការ
 apps/erpnext/erpnext/utilities/doctype/address_template/address_template.py +24,Default Address Template cannot be deleted,អាសយដ្ឋានលំនាំដើមទំព័រគំរូមិនអាចត្រូវបានលុប
 DocType: Sales Invoice,Shipping Rule,វិធានការដឹកជញ្ជូន
 DocType: Journal Entry,Print Heading,បោះពុម្ពក្បាល
@@ -2294,6 +2307,7 @@ DocType: Stock Entry,Update Rate and Availability,អត្រាធ្វើឱ
 DocType: Stock Settings,Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,ចំនួនភាគរយដែលអ្នកត្រូវបានអនុញ្ញាតឱ្យទទួលបានច្រើនជាងការប្រឆាំងនឹងឬផ្តល់នូវបរិមាណបញ្ជាឱ្យ។ ឧទាហរណ៍: ប្រសិនបើអ្នកបានបញ្ជាឱ្យបាន 100 គ្រឿង។ និងអនុញ្ញាតឱ្យរបស់អ្នកគឺ 10% បន្ទាប់មកលោកអ្នកត្រូវបានអនុញ្ញាតឱ្យទទួលបាន 110 គ្រឿង។
 DocType: Pricing Rule,Customer Group,ក្រុមផ្ទាល់ខ្លួន
 DocType: Item,Website Description,វេបសាយការពិពណ៌នាសង្ខេប
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +40,Net Change in Equity,ការផ្លាស់ប្តូរសុទ្ធនៅសមភាព
 DocType: Serial No,AMC Expiry Date,កាលបរិច្ឆេទ AMC ផុតកំណត់
 ,Sales Register,ការលក់ចុះឈ្មោះ
 DocType: Quotation,Quotation Lost Reason,សម្រង់បាត់បង់មូលហេតុ
@@ -2615,6 +2629,7 @@ DocType: Purchase Receipt,Rate at which supplier's currency is converted to comp
 DocType: Opportunity,Next Contact,ទំនាក់ទំនងបន្ទាប់
 DocType: Employee,Employment Type,ប្រភេទការងារធ្វើ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +40,Fixed Assets,ទ្រព្យសកម្មថេរ
+,Cash Flow,លំហូរសាច់ប្រាក់
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +85,Application period cannot be across two alocation records,រយៈពេលប្រើប្រាស់មិនអាចមាននៅទូទាំងកំណត់ត្រា alocation ទាំងពីរនាក់
 DocType: Item Group,Default Expense Account,ចំណាយតាមគណនីលំនាំដើម
 DocType: Employee,Notice (days),សេចក្តីជូនដំណឹង (ថ្ងៃ)

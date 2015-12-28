@@ -214,6 +214,7 @@ DocType: Sales Partner,Reseller,Торговий посередник
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +41,Please enter Company,"Будь ласка, введіть компанія"
 DocType: Delivery Note Item,Against Sales Invoice Item,На накладна Пункт
 ,Production Orders in Progress,Виробничі замовлення у Прогрес
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +37,Net Cash from Financing,Чисті грошові кошти від фінансової
 DocType: Lead,Address & Contact,Адреса &amp; Контактна
 DocType: Leave Allocation,Add unused leaves from previous allocations,Додати невикористовувані листя від попередніх асигнувань
 apps/erpnext/erpnext/controllers/recurring_document.py +203,Next Recurring {0} will be created on {1},Наступна Періодичні {0} буде створений на {1}
@@ -513,6 +514,7 @@ DocType: Buying Settings,Supplier Naming By,Постачальник Неймі�
 DocType: Activity Type,Default Costing Rate,За замовчуванням Калькуляція Оцінити
 DocType: Maintenance Schedule,Maintenance Schedule,Графік регламентних робіт
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +34,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","Тоді ціноутворення Правила фільтруються на основі Замовника, Група покупців, краю, постачальник, Тип постачальник, кампанії, і т.д. Sales Partner"
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +22,Net Change in Inventory,Чиста зміна в інвентаризації
 DocType: Employee,Passport Number,Номер паспорта
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +82,Manager,Менеджер
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +582,From Purchase Receipt,Від покупки отриманні
@@ -776,6 +778,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 ,Company Name,Назва компанії
 DocType: SMS Center,Total Message(s),Всього повідомлень (їй)
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +627,Select Item for Transfer,Вибрати пункт трансферу
+DocType: Purchase Invoice,Additional Discount Percentage,Додаткова знижка у відсотках
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +24,View a list of all the help videos,Переглянути перелік усіх довідкових відео
 DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,"Вибір рахунка керівник банку, в якому перевірка була зберігання."
 DocType: Selling Settings,Allow user to edit Price List Rate in transactions,Дозволити користувачеві редагувати прайс-лист в угодах Оцінити
@@ -888,6 +891,7 @@ DocType: Company,Company registration numbers for your reference. Tax numbers et
 DocType: Sales Partner,Distributor,Дистриб&#39;ютор
 DocType: Shopping Cart Shipping Rule,Shopping Cart Shipping Rule,Кошик Правило Доставка
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +209,Production Order {0} must be cancelled before cancelling this Sales Order,Виробничий замовлення {0} має бути скасований до скасування цього замовлення клієнта
+apps/erpnext/erpnext/public/js/controllers/transaction.js +881,Please set 'Apply Additional Discount On',"Будь ласка, встановіть &quot;Застосувати Додаткова Знижка On &#39;"
 ,Ordered Items To Be Billed,Замовлені товари To Be Оголошений
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,"С Діапазон повинен бути менше, ніж діапазон"
 apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Виберіть час і журнали Розмістити створити нову рахунок-фактуру.
@@ -1100,6 +1104,7 @@ DocType: Sales Order Item,Planned Quantity,Плановані Кількість
 DocType: Purchase Invoice Item,Item Tax Amount,Пункт Сума податку
 DocType: Item,Maintain Stock,Підтримання складі
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +211,Stock Entries already created for Production Order ,Сток Записи вже створені для виробничого замовлення
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +31,Net Change in Fixed Asset,Чиста зміна в основних фондів
 DocType: Leave Control Panel,Leave blank if considered for all designations,"Залиште порожнім, якщо вважати всіх позначень"
 apps/erpnext/erpnext/controllers/accounts_controller.py +517,Charge of type 'Actual' in row {0} cannot be included in Item Rate,Нарахування типу &quot;Актуальні &#39;в рядку {0} не можуть бути включені в п Оцінити
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +182,Max: {0},Макс: {0}
@@ -1178,6 +1183,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliat
 apps/erpnext/erpnext/public/js/setup_wizard.js +153,Financial Year Start Date,Фінансовий рік Дата початку
 DocType: Employee External Work History,Total Experience,Загальний досвід
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +276,Packing Slip(s) cancelled,Упаковка ковзання (и) скасовується
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Потік грошових коштів від інвестиційної
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Вантажні та експедиторські Збори
 DocType: Material Request Item,Sales Order No,Продажі Замовити Немає
 DocType: Item Group,Item Group Name,Назва товару Група
@@ -1251,6 +1257,7 @@ DocType: SMS Center,Receiver List,Приймач Список
 DocType: Payment Tool Detail,Payment Amount,Сума оплати
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +46,Consumed Amount,Споживана Сума
 apps/erpnext/erpnext/public/js/pos/pos.js +497,{0} View,Перегляд {0}
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +89,Net Change in Cash,Чиста зміна грошових коштів
 DocType: Salary Structure Deduction,Salary Structure Deduction,Зарплата Структура Відрахування
 apps/erpnext/erpnext/stock/doctype/item/item.py +335,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Одиниця виміру {0} був введений більш ніж один раз в таблицю перетворення фактора
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Issued Items,Вартість виданих предметів
@@ -1287,6 +1294,7 @@ DocType: Payment Reconciliation,Payments,Платежі
 DocType: Budget Detail,Budget Allocated,Бюджету виділено
 DocType: Journal Entry,Entry Type,Тип запису
 ,Customer Credit Balance,Замовник Кредитний Баланс
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +21,Net Change in Accounts Payable,Чиста зміна кредиторської заборгованості
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +137,Please verify your email id,"Будь ласка, перевірте ваш електронний ідентифікатор"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +42,Customer required for 'Customerwise Discount',Замовник вимагає для &#39;&#39; Customerwise Знижка
 apps/erpnext/erpnext/config/accounts.py +53,Update bank payment dates with journals.,Оновлення банківські платіжні дати з журналів.
@@ -1747,6 +1755,7 @@ DocType: Naming Series,User must always select,Користувач завжди
 DocType: Stock Settings,Allow Negative Stock,Дозволити негативний складі
 DocType: Installation Note,Installation Note,Установка Примітка
 apps/erpnext/erpnext/public/js/setup_wizard.js +301,Add Taxes,Додати Податки
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +38,Cash Flow from Financing,Потік грошових коштів від фінансової
 ,Financial Analytics,Фінансова аналітика
 DocType: Quality Inspection,Verified By,Перевірено
 DocType: Address,Subsidiary,Дочірня компанія
@@ -1789,6 +1798,7 @@ apps/erpnext/erpnext/config/selling.py +158,Setup incoming server for sales emai
 DocType: Warranty Claim,Raised By,Raised By
 DocType: Payment Tool,Payment Account,Оплата рахунку
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +713,Please specify Company to proceed,"Будь ласка, сформулюйте компанії, щоб продовжити"
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +20,Net Change in Accounts Receivable,Чисте зміна дебіторської заборгованості
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +46,Compensatory Off,Компенсаційні Викл
 DocType: Quality Inspection Reading,Accepted,Прийняті
 apps/erpnext/erpnext/setup/doctype/company/company.js +24,Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.,"Будь ласка, переконайтеся, що ви дійсно хочете видалити всі транзакції для компанії. Ваші основні дані залишиться, як є. Ця дія не може бути скасовано."
@@ -2212,6 +2222,7 @@ DocType: Quality Inspection,Outgoing,Вихідний
 DocType: Material Request,Requested For,Запитувана Для
 DocType: Quotation Item,Against Doctype,На DOCTYPE
 DocType: Delivery Note,Track this Delivery Note against any Project,Підписка на накладну проти будь-якого проекту
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +28,Net Cash from Investing,Чисті грошові кошти від інвестиційної
 apps/erpnext/erpnext/accounts/doctype/account/account.py +176,Root account can not be deleted,Корінь рахунок не може бути видалений
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +75,Show Stock Entries,Показати фонду Записи
 ,Is Primary Address,Є первинним Адреса
@@ -2351,6 +2362,7 @@ apps/erpnext/erpnext/config/accounts.py +23,Bills raised by Suppliers.,"Зако
 DocType: POS Profile,Write Off Account,Списання аккаунт
 DocType: Purchase Invoice,Return Against Purchase Invoice,Повернутися в рахунку-фактурі проти
 DocType: Item,Warranty Period (in days),Гарантійний термін (в днях)
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +16,Net Cash from Operations,Чисті грошові кошти від операційної
 apps/erpnext/erpnext/public/js/setup_wizard.js +310,e.g. VAT,"наприклад, ПДВ"
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +26,Item 4,Пункт 4
 DocType: Journal Entry Account,Journal Entry Account,Запис у щоденнику аккаунт
@@ -2542,6 +2554,7 @@ DocType: Purchase Invoice Item,Image View,Перегляд зображення
 DocType: Issue,Opening Time,Відкриття Час
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +92,From and To dates required,"Від і До дати, необхідних"
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +46,Securities & Commodity Exchanges,Цінні папери та бірж
+apps/erpnext/erpnext/stock/doctype/item/item.py +544,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',"За замовчуванням Одиниця виміру для варіанту &#39;{0}&#39; має бути такою ж, як в шаблоні &quot;{1} &#39;"
 DocType: Shipping Rule,Calculate Based On,"Розрахувати, засновані на"
 DocType: Delivery Note Item,From Warehouse,Від Склад
 DocType: Purchase Taxes and Charges,Valuation and Total,Оцінка і Загальна
@@ -2549,6 +2562,7 @@ DocType: Tax Rule,Shipping City,Доставка Місто
 apps/erpnext/erpnext/stock/doctype/item/item.js +58,This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set,"Цей пункт є Варіант {0} (шаблон). Атрибути будуть скопійовані з шаблону, якщо &quot;Ні Копіювати&quot; не встановлений"
 DocType: Account,Purchase User,Купівля користувача
 DocType: Notification Control,Customize the Notification,Налаштувати повідомлення
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +17,Cash Flow from Operations,Потік грошових коштів від операцій
 apps/erpnext/erpnext/utilities/doctype/address_template/address_template.py +24,Default Address Template cannot be deleted,За замовчуванням Адреса Шаблон не може бути видалений
 DocType: Sales Invoice,Shipping Rule,Правило Доставка
 DocType: Journal Entry,Print Heading,Роздрукувати товарної позиції
@@ -2615,6 +2629,7 @@ DocType: Stock Settings,Percentage you are allowed to receive or deliver more ag
 DocType: Pricing Rule,Customer Group,Група клієнтів
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +168,Expense account is mandatory for item {0},Витрати рахунку є обов&#39;язковим для пункту {0}
 DocType: Item,Website Description,Сайт Опис
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +40,Net Change in Equity,Чиста зміна в капіталі
 DocType: Serial No,AMC Expiry Date,КУА Дата закінчення терміну дії
 ,Sales Register,Продажі Реєстрація
 DocType: Quotation,Quotation Lost Reason,Цитата Втрати Причина
@@ -2916,6 +2931,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +61,Piecework,Від
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +64,Avg. Buying Rate,СР Купівля Оцінити
 DocType: Task,Actual Time (in Hours),Фактичний час (в годинах)
 DocType: Employee,History In Company,Історія У Компанії
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +128,The total Issue / Transfer quantity {0} in Material Request {1} cannot be greater than requested quantity {2} for Item {3},"Кількість Загальна Випуск / передачі {0} в матеріальній запит {1} не може бути більше, ніж необхідної кількості {2} для п {3}"
 apps/erpnext/erpnext/config/crm.py +151,Newsletters,Розсилка
 DocType: Address,Shipping,Доставка
 DocType: Stock Ledger Entry,Stock Ledger Entry,Фото Ledger Entry
@@ -2979,6 +2995,7 @@ apps/erpnext/erpnext/manufacturing/doctype/workstation/workstation.py +36,Row #{
 DocType: Opportunity,Next Contact,Наступна Контактні
 DocType: Employee,Employment Type,Вид зайнятості
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +40,Fixed Assets,Основні активи
+,Cash Flow,Грошовий потік
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +85,Application period cannot be across two alocation records,Термін подачі заяв не може бути з двох alocation записів
 DocType: Item Group,Default Expense Account,За замовчуванням Витрати аккаунт
 DocType: Employee,Notice (days),Примітка (днів)

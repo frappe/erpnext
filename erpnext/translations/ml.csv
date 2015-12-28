@@ -214,6 +214,7 @@ DocType: Sales Partner,Reseller,റീസെല്ലറിൽ
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +41,Please enter Company,കമ്പനി നൽകുക
 DocType: Delivery Note Item,Against Sales Invoice Item,സെയിൽസ് ഇൻവോയിസ് ഇനം എഗെൻസ്റ്റ്
 ,Production Orders in Progress,പുരോഗതിയിലാണ് പ്രൊഡക്ഷൻ ഉത്തരവുകൾ
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +37,Net Cash from Financing,ഫിനാൻസിംഗ് നിന്നുള്ള നെറ്റ് ക്യാഷ്
 DocType: Lead,Address & Contact,വിലാസം &amp; ബന്ധപ്പെടാനുള്ള
 DocType: Leave Allocation,Add unused leaves from previous allocations,മുൻ വിഹിതം നിന്ന് ഉപയോഗിക്കാത്ത ഇലകൾ ചേർക്കുക
 apps/erpnext/erpnext/controllers/recurring_document.py +203,Next Recurring {0} will be created on {1},അടുത്തത് ആവർത്തിക്കുന്നു {0} {1} സൃഷ്ടിക്കപ്പെടും
@@ -514,6 +515,7 @@ DocType: Buying Settings,Supplier Naming By,ആയപ്പോഴേക്ക
 DocType: Activity Type,Default Costing Rate,സ്ഥിരസ്ഥിതി ആറെണ്ണവും റേറ്റ്
 DocType: Maintenance Schedule,Maintenance Schedule,മെയിൻറനൻസ് ഷെഡ്യൂൾ
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +34,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","അപ്പോൾ വിലനിർണ്ണയത്തിലേക്ക് കസ്റ്റമർ, കസ്റ്റമർ ഗ്രൂപ്പ്, ടെറിട്ടറി, വിതരണക്കാരൻ, വിതരണക്കാരൻ ടൈപ്പ്, കാമ്പയിൻ, തുടങ്ങിയവ സെയിൽസ് പങ്കാളി അടിസ്ഥാനമാക്കി ഔട്ട് ഫിൽറ്റർ"
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +22,Net Change in Inventory,ഇൻവെന്ററി ലെ മൊത്തം മാറ്റം
 DocType: Employee,Passport Number,പാസ്പോർട്ട് നമ്പർ
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +82,Manager,മാനേജർ
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +582,From Purchase Receipt,വാങ്ങൽ രസീത് നിന്ന്
@@ -777,6 +779,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 ,Company Name,കമ്പനി പേര്
 DocType: SMS Center,Total Message(s),ആകെ സന്ദേശം (ങ്ങൾ)
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +627,Select Item for Transfer,ട്രാൻസ്ഫർ വേണ്ടി ഇനം തിരഞ്ഞെടുക്കുക
+DocType: Purchase Invoice,Additional Discount Percentage,അധിക കിഴിവും ശതമാനം
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +24,View a list of all the help videos,എല്ലാ സഹായം വീഡിയോ ലിസ്റ്റ് കാണൂ
 DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,ചെക്ക് സൂക്ഷിച്ചത് എവിടെ ബാങ്കിന്റെ അക്കൗണ്ട് തല തിരഞ്ഞെടുക്കുക.
 DocType: Selling Settings,Allow user to edit Price List Rate in transactions,ഉപയോക്തൃ ഇടപാടുകൾ ൽ വില പട്ടിക റേറ്റ് എഡിറ്റ് ചെയ്യാൻ അനുവദിക്കുക
@@ -889,6 +892,7 @@ DocType: Company,Company registration numbers for your reference. Tax numbers et
 DocType: Sales Partner,Distributor,വിതരണക്കാരൻ
 DocType: Shopping Cart Shipping Rule,Shopping Cart Shipping Rule,ഷോപ്പിംഗ് കാർട്ട് ഷിപ്പിംഗ് റൂൾ
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +209,Production Order {0} must be cancelled before cancelling this Sales Order,പ്രൊഡക്ഷൻ ഓർഡർ {0} ഈ സെയിൽസ് ഓർഡർ റദ്ദാക്കുന്നതിൽ മുമ്പ് റദ്ദാക്കി വേണം
+apps/erpnext/erpnext/public/js/controllers/transaction.js +881,Please set 'Apply Additional Discount On',&#39;പ്രയോഗിക്കുക അഡീഷണൽ ഡിസ്കൌണ്ട്&#39; സജ്ജീകരിക്കുക
 ,Ordered Items To Be Billed,ബില്ല് ഉത്തരവിട്ടു ഇനങ്ങൾ
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,റേഞ്ച് നിന്നും പരിധി വരെ കുറവ് ഉണ്ട്
 apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,സമയം ലോഗുകൾ തിരഞ്ഞെടുത്ത് ഒരു പുതിയ സെയിൽസ് ഇൻവോയിസ് സൃഷ്ടിക്കാൻ സമർപ്പിക്കുക.
@@ -1101,6 +1105,7 @@ DocType: Sales Order Item,Planned Quantity,ആസൂത്രണം ചെയ്
 DocType: Purchase Invoice Item,Item Tax Amount,ഇനം നികുതിയും
 DocType: Item,Maintain Stock,സ്റ്റോക്ക് നിലനിറുത്തുക
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +211,Stock Entries already created for Production Order ,ഇതിനകം പ്രൊഡക്ഷൻ ഓർഡർ സൃഷ്ടിച്ചു സ്റ്റോക്ക് എൻട്രികൾ
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +31,Net Change in Fixed Asset,സ്ഥിര അസറ്റ് ലെ നെറ്റ് മാറ്റുക
 DocType: Leave Control Panel,Leave blank if considered for all designations,എല്ലാ തരത്തിലുള്ള വേണ്ടി പരിഗണിക്കും എങ്കിൽ ശൂന്യമായിടൂ
 apps/erpnext/erpnext/controllers/accounts_controller.py +517,Charge of type 'Actual' in row {0} cannot be included in Item Rate,&#39;യഥാർത്ഥ&#39; തരം ചുമതലയുള്ള വരിയിലെ {0} ഇനം റേറ്റ് ഉൾപ്പെടുത്തിയിട്ടുണ്ട് ചെയ്യാൻ കഴിയില്ല
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +182,Max: {0},പരമാവധി: {0}
@@ -1179,6 +1184,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliat
 apps/erpnext/erpnext/public/js/setup_wizard.js +153,Financial Year Start Date,സാമ്പത്തിക വർഷം ആരംഭ തീയതി
 DocType: Employee External Work History,Total Experience,ആകെ അനുഭവം
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +276,Packing Slip(s) cancelled,പായ്ക്കിംഗ് ജി (കൾ) റദ്ദാക്കി
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,നിക്ഷേപം മുതൽ ക്യാഷ് ഫ്ളോ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,ചരക്കുഗതാഗതം കൈമാറലും ചുമത്തിയിട്ടുള്ള
 DocType: Material Request Item,Sales Order No,സെയിൽസ് ഓർഡർ ഇല്ല
 DocType: Item Group,Item Group Name,ഇനം ഗ്രൂപ്പ് പേര്
@@ -1252,6 +1258,7 @@ DocType: SMS Center,Receiver List,റിസീവർ പട്ടിക
 DocType: Payment Tool Detail,Payment Amount,പേയ്മെന്റ് തുക
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +46,Consumed Amount,ക്ഷയിച്ചിരിക്കുന്നു തുക
 apps/erpnext/erpnext/public/js/pos/pos.js +497,{0} View,{0} കാണുക
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +89,Net Change in Cash,പണമായി നെറ്റ് മാറ്റുക
 DocType: Salary Structure Deduction,Salary Structure Deduction,ശമ്പളം ഘടന കിഴിച്ചുകൊണ്ടു
 apps/erpnext/erpnext/stock/doctype/item/item.py +335,Unit of Measure {0} has been entered more than once in Conversion Factor Table,മെഷർ {0} യൂണിറ്റ് ഒരിക്കൽ പരിവർത്തന ഫാക്ടർ പട്ടികയിലെ അധികം നൽകി
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Issued Items,ഇഷ്യൂ ഇനങ്ങൾ ചെലവ്
@@ -1288,6 +1295,7 @@ DocType: Payment Reconciliation,Payments,പേയ്മെൻറുകൾ
 DocType: Budget Detail,Budget Allocated,ബജറ്റ് അലോക്കേറ്റഡ്
 DocType: Journal Entry,Entry Type,എൻട്രി തരം
 ,Customer Credit Balance,കസ്റ്റമർ ക്രെഡിറ്റ് ബാലൻസ്
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +21,Net Change in Accounts Payable,അടയ്ക്കേണ്ട തുക ലെ നെറ്റ് മാറ്റുക
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +137,Please verify your email id,നിങ്ങളുടെ ഇമെയിൽ ഐഡി സ്ഥിരീകരിക്കുന്നതിന് ദയവായി
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +42,Customer required for 'Customerwise Discount',&#39;Customerwise കിഴിവും&#39; ആവശ്യമുള്ളതിൽ കസ്റ്റമർ
 apps/erpnext/erpnext/config/accounts.py +53,Update bank payment dates with journals.,ഡയറിയിലെ ബാങ്ക് പേയ്മെന്റ് തീയതികൾ അപ്ഡേറ്റ്.
@@ -1748,6 +1756,7 @@ DocType: Naming Series,User must always select,ഉപയോക്താവ്
 DocType: Stock Settings,Allow Negative Stock,നെഗറ്റീവ് സ്റ്റോക്ക് അനുവദിക്കുക
 DocType: Installation Note,Installation Note,ഇന്സ്റ്റലേഷന് കുറിപ്പ്
 apps/erpnext/erpnext/public/js/setup_wizard.js +301,Add Taxes,നികുതികൾ ചേർക്കുക
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +38,Cash Flow from Financing,ഫിനാൻസിംഗ് നിന്നുള്ള ക്യാഷ് ഫ്ളോ
 ,Financial Analytics,ഫിനാൻഷ്യൽ അനലിറ്റിക്സ്
 DocType: Quality Inspection,Verified By,പരിശോധിച്ചു
 DocType: Address,Subsidiary,സഹായകന്
@@ -1790,6 +1799,7 @@ apps/erpnext/erpnext/config/selling.py +158,Setup incoming server for sales emai
 DocType: Warranty Claim,Raised By,ഉന്നയിക്കുന്ന
 DocType: Payment Tool,Payment Account,പേയ്മെന്റ് അക്കൗണ്ട്
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +713,Please specify Company to proceed,തുടരാനായി കമ്പനി വ്യക്തമാക്കുക
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +20,Net Change in Accounts Receivable,അക്കൗണ്ടുകൾ സ്വീകാര്യം ലെ നെറ്റ് മാറ്റുക
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +46,Compensatory Off,ഓഫാക്കുക നഷ്ടപരിഹാര
 DocType: Quality Inspection Reading,Accepted,സ്വീകരിച്ചു
 apps/erpnext/erpnext/setup/doctype/company/company.js +24,Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.,ശരിക്കും ഈ കമ്പനിയുടെ എല്ലാ ഇടപാടുകൾ ഇല്ലാതാക്കാൻ ആഗ്രഹിക്കുന്ന ദയവായി ഉറപ്പാക്കുക. അത് പോലെ നിങ്ങളുടെ മാസ്റ്റർ ഡാറ്റ തുടരും. ഈ പ്രവർത്തനം തിരുത്താൻ കഴിയില്ല.
@@ -2213,6 +2223,7 @@ DocType: Quality Inspection,Outgoing,അയയ്ക്കുന്ന
 DocType: Material Request,Requested For,ഇൻവേർനോ
 DocType: Quotation Item,Against Doctype,Doctype എഗെൻസ്റ്റ്
 DocType: Delivery Note,Track this Delivery Note against any Project,ഏതെങ്കിലും പ്രോജക്ട് നേരെ ഈ ഡെലിവറി നോട്ട് ട്രാക്ക്
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +28,Net Cash from Investing,മുടക്കുന്ന നിന്നും നെറ്റ് ക്യാഷ്
 apps/erpnext/erpnext/accounts/doctype/account/account.py +176,Root account can not be deleted,റൂട്ട് അക്കൌണ്ട് ഇല്ലാതാക്കാൻ കഴിയില്ല
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +75,Show Stock Entries,കാണിക്കുക സ്റ്റോക്ക് എൻട്രികളിൽ
 ,Is Primary Address,പ്രാഥമിക വിലാസം
@@ -2352,6 +2363,7 @@ apps/erpnext/erpnext/config/accounts.py +23,Bills raised by Suppliers.,വിത
 DocType: POS Profile,Write Off Account,അക്കൗണ്ട് ഓഫാക്കുക എഴുതുക
 DocType: Purchase Invoice,Return Against Purchase Invoice,വാങ്ങൽ ഇൻവോയിസ് എഗെൻസ്റ്റ് മടങ്ങുക
 DocType: Item,Warranty Period (in days),(ദിവസങ്ങളിൽ) വാറന്റി കാലാവധി
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +16,Net Cash from Operations,ഓപ്പറേഷൻസ് നിന്നുള്ള നെറ്റ് ക്യാഷ്
 apps/erpnext/erpnext/public/js/setup_wizard.js +310,e.g. VAT,ഉദാ വാറ്റ്
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +26,Item 4,ഇനം 4
 DocType: Journal Entry Account,Journal Entry Account,ജേണൽ എൻട്രി അക്കൗണ്ട്
@@ -2545,6 +2557,7 @@ DocType: Purchase Invoice Item,Image View,ചിത്രം കാണുക
 DocType: Issue,Opening Time,സമയം തുറക്കുന്നു
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +92,From and To dates required,നിന്ന് ആവശ്യമായ തീയതികൾ ചെയ്യുക
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +46,Securities & Commodity Exchanges,സെക്യൂരിറ്റീസ് &amp; ചരക്ക് കൈമാറ്റ
+apps/erpnext/erpnext/stock/doctype/item/item.py +544,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',മോഡലിന് അളവു യൂണിറ്റ് &#39;{0}&#39; ഫലകം അതേ ആയിരിക്കണം &#39;{1}&#39;
 DocType: Shipping Rule,Calculate Based On,അടിസ്ഥാനത്തിൽ ഓൺ കണക്കുകൂട്ടുക
 DocType: Delivery Note Item,From Warehouse,വെയർഹൗസിൽ നിന്ന്
 DocType: Purchase Taxes and Charges,Valuation and Total,"മൂലധനം, മൊത്ത"
@@ -2552,6 +2565,7 @@ DocType: Tax Rule,Shipping City,ഷിപ്പിംഗ് സിറ്റി
 apps/erpnext/erpnext/stock/doctype/item/item.js +58,This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set,ഈ ഇനം {0} (ഫലകം) ഒരു വേരിയന്റാകുന്നു. &#39;നോ പകർത്തുക&#39; വെച്ചിരിക്കുന്നു ചെയ്തിട്ടില്ലെങ്കിൽ വിശേഷണങ്ങൾ ടെംപ്ലേറ്റ് നിന്നും മേൽ പകർത്തുന്നു
 DocType: Account,Purchase User,വാങ്ങൽ ഉപയോക്താവ്
 DocType: Notification Control,Customize the Notification,അറിയിപ്പ് ഇഷ്ടാനുസൃതമാക്കുക
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +17,Cash Flow from Operations,ഓപ്പറേഷൻസ് നിന്നുള്ള ക്യാഷ് ഫ്ളോ
 apps/erpnext/erpnext/utilities/doctype/address_template/address_template.py +24,Default Address Template cannot be deleted,സ്ഥിരസ്ഥിതി വിലാസം ഫലകം ഇല്ലാതാക്കാൻ കഴിയില്ല
 DocType: Sales Invoice,Shipping Rule,ഷിപ്പിംഗ് റൂൾ
 DocType: Journal Entry,Print Heading,പ്രിന്റ് തലക്കെട്ട്
@@ -2619,6 +2633,7 @@ DocType: Stock Settings,Percentage you are allowed to receive or deliver more ag
 DocType: Pricing Rule,Customer Group,കസ്റ്റമർ ഗ്രൂപ്പ്
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +168,Expense account is mandatory for item {0},ചിലവേറിയ ഇനത്തിന്റെ {0} നിര്ബന്ധമാണ്
 DocType: Item,Website Description,വെബ്സൈറ്റ് വിവരണം
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +40,Net Change in Equity,ഇക്വിറ്റി ലെ മൊത്തം മാറ്റം
 DocType: Serial No,AMC Expiry Date,എഎംസി കാലഹരണ തീയതി
 ,Sales Register,സെയിൽസ് രജിസ്റ്റർ
 DocType: Quotation,Quotation Lost Reason,ക്വട്ടേഷൻ ലോസ്റ്റ് കാരണം
@@ -2921,6 +2936,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +61,Piecework,Piecew
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +64,Avg. Buying Rate,ശരാ. വാങ്ങുക റേറ്റ്
 DocType: Task,Actual Time (in Hours),(അവേഴ്സ്) യഥാർത്ഥ സമയം
 DocType: Employee,History In Company,കമ്പനിയിൽ ചരിത്രം
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +128,The total Issue / Transfer quantity {0} in Material Request {1} cannot be greater than requested quantity {2} for Item {3},മൊത്തം ഇഷ്യു / ട്രാന്സ്ഫര് അളവ് {0} മെറ്റീരിയൽ അഭ്യർത്ഥന ലെ {1} ആവശ്യപ്പെട്ട അളവ് {2} ഇനം {3} വേണ്ടി വലുതായിരിക്കും കഴിയില്ല
 apps/erpnext/erpnext/config/crm.py +151,Newsletters,വാർത്താക്കുറിപ്പുകൾ
 DocType: Address,Shipping,ഷിപ്പിംഗ്
 DocType: Stock Ledger Entry,Stock Ledger Entry,ഓഹരി ലെഡ്ജർ എൻട്രി
@@ -2984,6 +3000,7 @@ apps/erpnext/erpnext/manufacturing/doctype/workstation/workstation.py +36,Row #{
 DocType: Opportunity,Next Contact,അടുത്തത് കോൺടാക്റ്റ്
 DocType: Employee,Employment Type,തൊഴിൽ തരം
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +40,Fixed Assets,നിശ്ചിത ആസ്തികൾ
+,Cash Flow,ധനപ്രവാഹം
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +85,Application period cannot be across two alocation records,അപേക്ഷാ കാലയളവിൽ രണ്ട് alocation രേഖകള് ഉടനീളം ആകാൻ പാടില്ല
 DocType: Item Group,Default Expense Account,സ്ഥിരസ്ഥിതി ചിലവേറിയ
 DocType: Employee,Notice (days),അറിയിപ്പ് (ദിവസം)
