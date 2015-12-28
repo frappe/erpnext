@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, today
+from frappe.utils import flt, nowdate, get_url
 from frappe import _
 from erpnext.accounts.doctype.journal_entry.journal_entry import (get_payment_entry_against_invoice, 
 get_payment_entry_against_order)
@@ -15,12 +15,18 @@ from itertools import chain
 
 class PaymentRequest(Document):		
 	def validate(self):
-		self.validate_payment_request()	
-		
+		self.validate_payment_request()
+		self.validate_currency()
+
 	def validate_payment_request(self):
 		if frappe.db.get_value("Payment Request", {"reference_name": self.reference_name, 
 			"name": ("!=", self.name), "status": ("not in", ["Initiated", "Paid"]), "docstatus": 1}, "name"):
 			frappe.throw(_("Payment Request already exist"))
+	
+	def validate_currency(self):
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		if ref_doc.currency != frappe.db.get_value("Account", self.payment_account, "account_currency"):
+			frappe.throw(_("Transaction currency is not simillar to Gateway Currency"))
 		
 	def on_submit(self):
 		if not self.mute_email:
@@ -39,10 +45,7 @@ class PaymentRequest(Document):
 		pass
 	
 	def send_payment_request(self):
-		if self.gateway == "PayPal":
-			from paypal_integration.express_checkout import set_express_checkout
-			self.payment_url = set_express_checkout(self.amount, self.currency, {"doctype": self.doctype, 
-				"docname": self.name})
+		self.payment_url = get_url("/api/method/erpnext.accounts.doctype.payment_request.payment_request.gererate_payemnt_request?name={0}".format(self.name))
 		
 		if self.payment_url:
 			frappe.db.set_value(self.doctype, self.name, "status", "Initiated")
@@ -57,17 +60,8 @@ class PaymentRequest(Document):
 		"""create entry"""
 		payment_details = {
 			"amount": self.amount,
-			"return_obj": True
-		}
-		
-		account_details = frappe.db.get_value("Account", self.payment_account,
-					["account_currency", "account_type"], as_dict=1)
-		
-		payment_details["bank_account"] = {
-			"account": self.payment_account,
-			"balance": get_balance_on(self.payment_account),
-			"account_currency": account_details.account_currency,
-			"account_type": account_details.account_type
+			"return_obj": True,
+			"bank_account": self.payment_account
 		}
 				
 		if self.reference_doctype == "Sales Order":
@@ -78,7 +72,7 @@ class PaymentRequest(Document):
 			
 		jv.update({
 			"voucher_type": "Journal Entry",
-			"posting_date": today()
+			"posting_date": nowdate()
 		})		
 
 		jv.submit()
@@ -121,7 +115,7 @@ def make_payment_request(**args):
 	"""Make payment request"""
 	args = frappe._dict(args)
 	ref_doc = get_reference_doc_details(args.dt, args.dn)
-	name, gateway, payment_account = get_gateway_details(args)
+	name, gateway, payment_account, message = get_gateway_details(args)
 	
 	pr = frappe.new_doc("Payment Request")
 	pr.update({
@@ -133,7 +127,7 @@ def make_payment_request(**args):
 		"mute_email": args.mute_email or 0,
 		"email_to": args.recipient_id or "",
 		"subject": "Payment Request for %s"%args.dn,
-		"message": frappe.get_doc("Accounts Settings").message,
+		"message": message,
 		"reference_doctype": args.dt,
 		"reference_name": args.dn
 	})
@@ -171,9 +165,11 @@ def get_amount(ref_doc, dt):
 def get_gateway_details(args):
 	"""return gateway and payment account of default payment gateway"""
 	if args.payemnt_gateway:
-		return frappe.db.get_value("Payment Gateway Account", args.payemnt_gateway, ["name", "gateway", "payment_account"])
+		return frappe.db.get_value("Payment Gateway Account", args.payemnt_gateway, 
+			["name", "gateway", "payment_account", "message"])
 		
-	return frappe.db.get_value("Payment Gateway Account", {"is_default": 1}, ["name", "gateway", "payment_account"])
+	return frappe.db.get_value("Payment Gateway Account", {"is_default": 1}, 
+		["name", "gateway", "payment_account", "message"])
 
 @frappe.whitelist()
 def get_print_format_list(ref_doctype):
@@ -186,3 +182,13 @@ def get_print_format_list(ref_doctype):
 		"print_format": print_format_list
 	}
 	
+@frappe.whitelist(allow_guest=True)
+def gererate_payemnt_request(name):
+	doc = frappe.get_doc("Payment Request", name)
+	if doc.gateway == "PayPal":
+		from paypal_integration.express_checkout import set_express_checkout
+		payment_url = set_express_checkout(doc.amount, doc.currency, {"doctype": doc.doctype,
+			"docname": doc.name})
+	
+	frappe.local.response["type"] = "redirect"
+	frappe.local.response["location"] = payment_url
