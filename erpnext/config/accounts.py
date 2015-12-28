@@ -90,7 +90,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Payment Gateway",
+					"name": "Payment Gateway Account",
 					"description": _("Setup Gateway accounts.")
 				},
 				{

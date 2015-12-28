@@ -508,7 +508,7 @@ class JournalEntry(AccountsController):
 			d.party_balance = party_balance[(d.party_type, d.party)]
 
 @frappe.whitelist()
-def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
+def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None, account=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company)
@@ -516,16 +516,18 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
 			account.update({"balance": get_balance_on(account.get("account"))})
 			return account
 
-	if voucher_type=="Bank Entry":
-		account = frappe.db.get_value("Company", company, "default_bank_account")
-		if not account:
-			account = frappe.db.get_value("Account",
-				{"company": company, "account_type": "Bank", "is_group": 0})
-	elif voucher_type=="Cash Entry":
-		account = frappe.db.get_value("Company", company, "default_cash_account")
-		if not account:
-			account = frappe.db.get_value("Account",
-				{"company": company, "account_type": "Cash", "is_group": 0})
+	if not account:
+		if voucher_type=="Bank Entry":
+			account = frappe.db.get_value("Company", company, "default_bank_account")
+			if not account:
+				account = frappe.db.get_value("Account",
+					{"company": company, "account_type": "Bank", "is_group": 0})
+				
+		elif voucher_type=="Cash Entry":
+			account = frappe.db.get_value("Company", company, "default_cash_account")
+			if not account:
+				account = frappe.db.get_value("Account",
+					{"company": company, "account_type": "Cash", "is_group": 0})
 
 	if account:
 		account_details = frappe.db.get_value("Account", account,
@@ -640,7 +642,8 @@ def get_payment_entry(ref_doc, args):
 
 	bank_row = jv.append("accounts")
 	
-	bank_account = args.get("bank_account", get_default_bank_cash_account(ref_doc.company, "Bank Entry"))
+	#make it bank_details
+	bank_account = get_default_bank_cash_account(ref_doc.company, "Bank Entry", account=args.get("bank_account"))
 	if bank_account:
 		bank_row.update(bank_account)
 		bank_row.exchange_rate = get_exchange_rate(bank_account["account"],
