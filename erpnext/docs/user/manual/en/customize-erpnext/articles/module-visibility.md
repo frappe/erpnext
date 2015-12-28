@@ -1,17 +1,19 @@
-<h1>Module Visibility</h1>
+#Module Visibility
 
-If you have permission on specific module, but it is still not visible to you, following is how you should go about checking setting to make it visible again.
+If you have permission on specific module, but it is still not visible, following are the possibilities of issues you should look at. Let's consider a scenario that user is permission of Website module, but not able to access it.
 
-As step zero, reassure that you have role assigned which is required for accessing Website and Shopping Cart module. For modules in question, you should have "Website Manager" role assigned. If permissions has been customized in your account, check Role Permission Manager to know which Role has permission on Website and Shopping Cart module.
+As step zero, ensure that you have "Website Manager" role assigned. It is a standard Role which grants permission on Website module. If permissions has been customized in your account, check Role Permission Manager to know which Role has permission on Website, and then check if same Role is assigned to User.
 
-If modules are hidden in-spite of assignment of required permission, then you should check if Website and Shopping Cart module is not disabled from All Application option on your desk/home page.
+If module is hidden in-spite of assignment of required Role, then you should check if Website is not disabled from All Application.
 
-![All Applications]({{docs_base_url}}/assets/img/articles/$SGrab_223.png)
+<img alt="All Applications" class="screenshot" src="{{docs_base_url}}/assets/img/articles/module-visibility-1.gif">
 
-If modules are still not visible, check if it is hidden by System Manager from Show/Hide Modules option in the Setup module.
+If Website is checked in All Application, but still not visible for the User, check if is hidden by System Manager. In the Setup module, feature called Show/Hide Modules allows System Manager to hide specific module from all the Users.
 
-<div class="well">Setup &gt;&gt; Settings &gt;&gt; Show / Hide Modules</div>Ensure required module are checked, and not disabled in this page. If you just enabled/activated it, update Show/Hide Module page, and check your home page after Help &gt;&gt; Clear Cache.
+`Setup > Settings > Show / Hide Modules`
 
-<div class="well">Note: In this help page, Website and Shopping Cart module is considered as an example. You can troubleshoot visibility issues for other modules following same steps.</div>
+Ensure Website module is checked. If you just enabled/activated it, update Show/Hide Module page, and then Reload tab of your ERPNext account. After reload, changes made in the Setup module will be applied and will be visible in the system.
+
+On the same lines, you can check for the visibility issue of other modules as well.
 
 <!-- markdown -->
