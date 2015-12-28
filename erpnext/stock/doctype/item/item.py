@@ -33,6 +33,11 @@ class Item(WebsiteGenerator):
 		if frappe.db.get_default("item_naming_by")=="Naming Series" and not self.variant_of:
 			from frappe.model.naming import make_autoname
 			self.item_code = make_autoname(self.naming_series+'.#####')
+		elif frappe.db.get_default("item_naming_by")=="Naming Series" and self.variant_of:
+			item_code_suffix = ""
+			for attribute in self.attributes:
+				item_code_suffix += "-" + str(attribute.attribute_value)
+			self.item_code = str(self.variant_of) + item_code_suffix
 		elif not self.item_code:
 			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
 
