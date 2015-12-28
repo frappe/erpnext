@@ -1,4 +1,4 @@
-<h1>Customizing Sorting Order in the List View</h1>
+#Customizing Sorting Order in the List View
 
 **Question:** I want records in my Item List sorted based on Desc Order of Item Code.
 
@@ -10,20 +10,17 @@
 
 ####Step 2: Select Doctype
 
-Select document for which you Sort Order is to be customized. Considering a scenario, Item should be selected in the Doctype field.
+Select document type for which Sort Order is to be customized.
+
+<img alt="Sort Order field" class="screenshot" src="{{docs_base_url}}/assets/img/articles/sort-order-2.png">
 
 ####Step 3: Update Sort Details
 
 In the Customize Form, you will find these fields.
 
-![Sort Order field]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-04-02 at 3.26.51 pm.png)
+<img alt="Sort Order field" class="screenshot" src="{{docs_base_url}}/assets/img/articles/sort-order-1.png">
 
-1. Sort Field
-
-Select field based on which sorting will be done. It will be "Item_Code" field in scenario.
-
-2. Sort Order
-
-Sort Order will be two possible options, **Asc** for ascending, and **Desc** for descending.
+1. Sort Field: Select field based on which sorting will be done. It will be "Item_Code" field in scenario.
+2. Sort Order: Sort Order will be two possible options, **Asc** for ascending, and **Desc** for descending.
 
 <!-- markdown -->

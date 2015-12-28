@@ -29,8 +29,8 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 
 		if(!this.frm.doc.status)
 			set_multiple(cdt, cdn, { status:'Draft' });
-		if(!this.frm.doc.company && frappe.defaults.get_user_default("company"))
-			set_multiple(cdt, cdn, { company:frappe.defaults.get_user_default("company") });
+		if(!this.frm.doc.company && frappe.defaults.get_user_default("Company"))
+			set_multiple(cdt, cdn, { company:frappe.defaults.get_user_default("Company") });
 		if(!this.frm.doc.fiscal_year && sys_defaults.fiscal_year)
 			set_multiple(cdt, cdn, { fiscal_year:sys_defaults.fiscal_year });
 

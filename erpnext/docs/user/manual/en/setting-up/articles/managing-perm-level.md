@@ -2,7 +2,7 @@
 
 In each document, you can group fields by "levels". Each group of field is denoted by a unique number (0, 1, 2, 3 etc.). A separate set of permission rules can be applied to each field group. By default all fields are of level 0.
 
-Perm Level for a field can be defined in the [Customize Form](https://frappe.github.io/erpnext/user/manual/en/customize-erpnext/customize-form.html).
+Perm Level for a field can be defined in the [Customize Form](docs_base_url}}/user/manual/en/customize-erpnext/customize-form.html).
 
 <img alt="Perm Level Field" class="screenshot" src="{{docs_base_url}}/assets/img/articles/perm-level-1.gif">
 

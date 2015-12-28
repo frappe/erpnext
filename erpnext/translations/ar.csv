@@ -93,7 +93,7 @@ DocType: Rename Tool,"Attach .csv file with two columns, one for the old name an
 DocType: Packed Item,Parent Detail docname,الأم تفاصيل docname
 apps/erpnext/erpnext/public/js/setup_wizard.js +380,Kg,كجم
 apps/erpnext/erpnext/config/hr.py +48,Opening for a Job.,فتح عن وظيفة.
-DocType: Item Attribute,Increment,زيادة
+DocType: Item Attribute,Increment,الزيادة
 apps/erpnext/erpnext/public/js/stock_analytics.js +63,Select Warehouse...,حدد مستودع ...
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +6,Advertising,إعلان
 apps/erpnext/erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py +22,Same Company is entered more than once,يتم إدخال نفس الشركة أكثر من مرة
@@ -284,7 +284,7 @@ DocType: Employee,External Work History,التاريخ العمل الخارجي
 apps/erpnext/erpnext/projects/doctype/task/task.py +86,Circular Reference Error,خطأ مرجع دائري
 DocType: Delivery Note,In Words (Export) will be visible once you save the Delivery Note.,وبعبارة (تصدير) أن تكون واضحة مرة واحدة قمت بحفظ ملاحظة التسليم.
 DocType: Lead,Industry,صناعة
-DocType: Employee,Job Profile,الملف ظيفة
+DocType: Employee,Job Profile,ملف الوظيفة
 DocType: Newsletter,Newsletter,النشرة الإخبارية
 DocType: Stock Settings,Notify by Email on creation of automatic Material Request,إبلاغ عن طريق البريد الإلكتروني على خلق مادة التلقائي طلب
 DocType: Journal Entry,Multi Currency,متعدد العملات
@@ -1165,7 +1165,7 @@ DocType: Account,"If the account is frozen, entries are allowed to restricted us
 DocType: Email Digest,Bank Balance,الرصيد المصرفي
 apps/erpnext/erpnext/controllers/accounts_controller.py +453,Accounting Entry for {0}: {1} can only be made in currency: {2},القيد المحاسبي ل{0}: {1} لا يمكن إلا أن يكون في العملة: {2}
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +44,No active Salary Structure found for employee {0} and the month,لا هيكل الراتب نشط تم العثور عليها ل موظف {0} والشهر
-DocType: Job Opening,"Job profile, qualifications required etc.",الملامح المهمة ، المؤهلات المطلوبة الخ
+DocType: Job Opening,"Job profile, qualifications required etc.",ملف الوظيفة ، المؤهلات المطلوبة الخ
 DocType: Journal Entry Account,Account Balance,رصيد حسابك
 apps/erpnext/erpnext/config/accounts.py +112,Tax Rule for transactions.,القاعدة الضريبية للمعاملات.
 DocType: Rename Tool,Type of document to rename.,نوع الوثيقة إلى إعادة تسمية.
@@ -1183,7 +1183,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +143,Source wareho
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +581,Packing Slip,زلة التعبئة
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Office Rent,مكتب للإيجار
 apps/erpnext/erpnext/config/setup.py +110,Setup SMS gateway settings,إعدادات العبارة الإعداد SMS
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +60,Import Failed!,استيراد فشل !
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +60,Import Failed!,فشل الاستيراد !
 apps/erpnext/erpnext/public/js/templates/address_list.html +21,No address added yet.,أي عنوان أضاف بعد.
 DocType: Workstation Working Hour,Workstation Working Hour,محطة العمل ساعة العمل
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +83,Analyst,محلل
@@ -1534,7 +1534,7 @@ apps/erpnext/erpnext/config/projects.py +51,Gantt chart of all tasks.,مخطط �
 DocType: Appraisal,For Employee Name,لاسم الموظف
 DocType: Holiday List,Clear Table,الجدول واضح
 DocType: Features Setup,Brands,العلامات التجارية
-DocType: C-Form Invoice Detail,Invoice No,الفاتورة لا
+DocType: C-Form Invoice Detail,Invoice No,رقم الفاتورة
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +568,From Purchase Order,من أمر الشراء
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +93,"Leave cannot be applied/cancelled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}",ترك لا يمكن تطبيقها / إلغاء قبل {0}، كما كان رصيد الإجازة بالفعل في السجل تخصيص إجازة في المستقبل إعادة توجيهها تحمل {1}
 DocType: Activity Cost,Costing Rate,تكلف سعر
@@ -1949,7 +1949,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +71,Production,ال�
 DocType: Item,Allow Production Order,تسمح أمر الإنتاج
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.js +60,Row {0}:Start Date must be before End Date,الصف {0} : يجب أن يكون تاريخ بدء قبل تاريخ الانتهاء
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Qty),إجمالي (الكمية)
-DocType: Installation Note Item,Installed Qty,تثبيت الكمية
+DocType: Installation Note Item,Installed Qty,الكميات الثابتة
 DocType: Lead,Fax,فاكس
 DocType: Purchase Taxes and Charges,Parenttype,Parenttype
 DocType: Salary Structure,Total Earning,إجمالي الدخل
@@ -2066,7 +2066,7 @@ DocType: Price List,Applicable for Countries,ينطبق على البلدان
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +44,Computers,أجهزة الكمبيوتر
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.js +14,This is a root customer group and cannot be edited.,هذه هي مجموعة العملاء الجذرية والتي لا يمكن تحريرها.
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +39,Please setup your chart of accounts before you start Accounting Entries,إرضاء الإعداد مخططك من الحسابات قبل البدء مقالات المحاسبة
-DocType: Purchase Invoice,Ignore Pricing Rule,تجاهل التسعير القاعدة
+DocType: Purchase Invoice,Ignore Pricing Rule,تجاهل قاعدة التسعير
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +91,From Date in Salary Structure cannot be lesser than Employee Joining Date.,من التسجيل في هيكل الراتب لا يمكن أن يكون أقل من الموظف تاريخ الالتحاق بالعمل.
 DocType: Employee Education,Graduate,تخريج
 DocType: Leave Block List,Block Days,كتلة أيام
@@ -2383,7 +2383,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +119,Delivery warehouse required for stock item {0},مستودع تسليم المطلوب للبند الأوراق المالية {0}
 DocType: Packing Slip,The gross weight of the package. Usually net weight + packaging material weight. (for print),الوزن الكلي للحزمة. الوزن الصافي عادة + تغليف المواد الوزن. (للطباعة)
 DocType: Accounts Settings,Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,يسمح للمستخدمين مع هذا الدور لضبط الحسابات المجمدة و إنشاء / تعديل القيود المحاسبية على حسابات مجمدة
-DocType: Serial No,Is Cancelled,وألغي
+DocType: Serial No,Is Cancelled,ألغي
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +286,My Shipments,بلدي الشحنات
 DocType: Journal Entry,Bill Date,تاريخ الفاتورة
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +43,"Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:",حتى لو كانت هناك قوانين التسعير متعددة مع الأولوية القصوى، يتم تطبيق الأولويات الداخلية ثم التالية:
@@ -3269,7 +3269,7 @@ apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +67,"Cannot declare 
 DocType: Purchase Taxes and Charges Template,Purchase Master Manager,مدير ماستر شراء
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +422,Production Order {0} must be submitted,إنتاج النظام {0} يجب أن تقدم
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +150,Please select Start Date and End Date for Item {0},يرجى تحديد تاريخ بدء و نهاية التاريخ القطعة ل {0}
-apps/erpnext/erpnext/config/stock.py +136,Main Reports,الرئيسية تقارير
+apps/erpnext/erpnext/config/stock.py +136,Main Reports,التقارير الرئيسية
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.js +16,To date cannot be before from date,حتى الآن لا يمكن أن يكون قبل تاريخ من
 DocType: Purchase Receipt Item,Prevdoc DocType,Prevdoc DOCTYPE
 apps/erpnext/erpnext/stock/doctype/item/item.js +193,Add / Edit Prices,إضافة / تحرير الأسعار
@@ -3309,7 +3309,7 @@ DocType: Naming Series,Help HTML,مساعدة HTML
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +50,Total weightage assigned should be 100%. It is {0},يجب أن يكون مجموع الترجيح تعيين 100 ٪ . فمن {0}
 apps/erpnext/erpnext/controllers/status_updater.py +141,Allowance for over-{0} crossed for Item {1},اتاحة لأكثر من {0} للصنف {1}
 DocType: Address,Name of person or organization that this address belongs to.,اسم الشخص أو المنظمة التي ينتمي إلى هذا العنوان.
-apps/erpnext/erpnext/public/js/setup_wizard.js +343,Your Suppliers,لديك موردون
+apps/erpnext/erpnext/public/js/setup_wizard.js +343,Your Suppliers,الموردون
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +58,Cannot set as Lost as Sales Order is made.,لا يمكن تعيين كما فقدت كما يرصد ترتيب المبيعات .
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +65,Another Salary Structure {0} is active for employee {1}. Please make its status 'Inactive' to proceed.,"آخر هيكل الراتب {0} نشط للموظف {1}. يرجى التأكد مكانتها ""غير فعال"" للمتابعة."
 DocType: Purchase Invoice,Contact,اتصل

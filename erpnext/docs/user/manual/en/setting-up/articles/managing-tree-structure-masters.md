@@ -1,6 +1,6 @@
 #Managing Tree Structure Masters
 
-Some of the masters in ERPNext are maintained in tree structure. Tree structured masters allow you to set parent master, and child masters under those parents. Setting up this structure allows you creating intelligent report, and track growth at each level in the hierarchy. 
+Some of the masters in ERPNext are maintained in tree structure. Tree structured masters allow you to set Parent master, and Child masters under those Parents. Setting up this structure allows you creating intelligent report, and track growth at each level in the hierarchy. 
 
 Following is the partial list of masters which are maintained in the tree structure.
 
@@ -22,17 +22,13 @@ Following are the steps to manage and create record in the tree structured maste
 
 `Selling > Setup > Territory`
 
-Also you can type master name in Awesome Bar to go to the related master.
+####Step 2 : Parent Territory
 
-Tree master allows you to set parent Territories, and Child Territories Groups under those parents.
+<img alt="Default Territories" class="screenshot" src="{{docs_base_url}}/assets/img/articles/territory-2.png">
 
-####Step 2 : New Parent Territory
+When click on Parent territory, you will see option to add child territory under it. All default Territory groups will be listed under Parent group called "All Territories". You can add further Parent or child Territory Groups under it.
 
-![Territory Group]({{docs_base_url}}/assets/img/articles/Sselection_013.png)
-
-When click on Parent Territory, you will see option to add child territory under it. All default Territory groups will be listed under parent group called "All Territories". You can add further parent or child Territory Groups under it.
-
-####Step 3: Name The Territory Group
+####Step 3: Add new Territory
 
 When click on Add Child, a dialog box will provide two fields.
 
@@ -45,12 +41,13 @@ Territory will be saved with Territory Name provided here.
 If Group Node selected as Yes, then this Territory will be created as Parent, which means you can further create sub-territories under it. If select No, then it will become child Territory which you will be able to select in another masters.
 
 <div class="well">Only child Territory Groups are selectable in another masters and transactions.</div>
-![Child Territory]({{docs_base_url}}/assets/img/articles/Selection_0124080f1.png)
+
+<img alt="Default Territories" class="screenshot" src="{{docs_base_url}}/assets/img/articles/territory-1.gif">
 
 Following is how Child Territories will be listed under a Parent Territory.
 
-![Territory Tree]({{docs_base_url}}/assets/img/articles/Selection_014.png)
+<img alt="Adding new Territories" class="screenshot" src="{{docs_base_url}}/assets/img/articles/territory-3.png">
 
-Following this steps, you can manage other tree masters in ERPNext.
+Following this steps, you can manage other tree masters as well in ERPNext.
 
 <!-- markdown -->

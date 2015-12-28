@@ -140,6 +140,8 @@ class update_entries_after(object):
 			"actual_qty": self.qty_after_transaction,
 			"stock_value": self.stock_value
 		})
+		bin_doc.flags.via_stock_ledger_entry = True
+		
 		bin_doc.save(ignore_permissions=True)
 
 	def process_sle(self, sle):
