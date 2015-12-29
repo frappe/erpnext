@@ -1,4 +1,4 @@
-<h1>Customer for Multiple Company</h1>
+#Customer for Multiple Company
 
 ERPNext allows you managing multiple companies in one ERPNext account. It is possible that you will have Customer and Supplier which would belong to more than one company of yours. While creating sales and purchase transactions, system shows result of Customer and Suppliers for that Company only.
 

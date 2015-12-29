@@ -1,4 +1,4 @@
-<h1>Post Dated Cheque Entry</h1>
+#Post Dated Cheque Entry
 
 Post Dated Cheque is a cheque dated on future date given to another party. This actually works as an advance payment which will could be cleared post cheque date only.
 

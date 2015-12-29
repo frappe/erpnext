@@ -1,4 +1,4 @@
-<h1>Managing Transactions In Multiple Currency</h1>
+#Managing Transactions In Multiple Currency
 
 You can make transaction in your base currency as well as in customer or supplier currencies. When you make transaction in your customer or supplier currency, the same currency reflects only in print format of that transaction. And system pass back end
 entry in your base currency.

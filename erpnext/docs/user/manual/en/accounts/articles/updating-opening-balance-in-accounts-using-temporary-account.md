@@ -1,4 +1,4 @@
-<h1>Updating Opening Balance in Accounts using Temporary Account</h1>
+# Updating Opening Balance in Accounts using Temporary Account
 
 For updating opening balances in the Accounts, you will need to use temporary adjustment accounts. In the Chart of Account, two adjustment accounts will be created by default.
 

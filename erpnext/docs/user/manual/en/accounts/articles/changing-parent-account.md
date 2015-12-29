@@ -1,4 +1,4 @@
-<h1>Changing Parent Account</h1>
+#Changing Parent Account
 
 Chart of Account has hierarchical structure. This means each account has a parent account defined for it. You will have few ledger preset, and few ledger (like for Customer, Supplier, Warehouse) will be auto-created based on their master record. These ledger will be placed under pre-defined groups in the Chart of Account. If needed you can place specific account under another group by changing its Parent Account.
 

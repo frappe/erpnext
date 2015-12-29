@@ -14,14 +14,5 @@ You can also set field specific precision. To do that go to `Setup > Customize >
 
 <img alt="Field-wise Precision" class="screenshot" src="{{docs_base_url}}/assets/img/articles/precision-2.png">
 
-**Note:**
-
-If you are changing precision of a field to a higher number, all the related field's precision should be updated as well. For example, if you want invoice total to be upto five decimals, you should set the precision of all related fields to five decimal places as well.
-
-    | Doctype | Fields |
-	|---------|-------:|
-	| Sales Invoice Item | price_list_rate, base_price_list_rate, rate, base_rate, amount and base_amount |
-    | Taxes and Charges | tax_amount, total and tax_amount_after_discount |
-    | Sales Invoice | net_total, other_charges_total, discount_amount and grand_total |
 
 <!-- markdown -->

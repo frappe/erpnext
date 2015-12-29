@@ -1,4 +1,4 @@
-<h1>Accounting for Projects</h1>
+#Accounting for Projects
 
 Accounting for the projects is tracked via Cost Center in ERPNext. This will require you creating separate Cost Center for each Project. Separate Cost Center for each Project all allow:<
 

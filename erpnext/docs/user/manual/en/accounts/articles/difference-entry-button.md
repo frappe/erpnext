@@ -1,4 +1,4 @@
-<h1>Difference Entry Button </h1>
+#Difference Entry Button
 
 As per accounting standards Debit amount must be equal to Credit amount. If these amounts are not equal, then entry will not be executed in system. Also system will through validation message. And difference amount will reflect under Difference (Dr-Cr) field.
 <br>

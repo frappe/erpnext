@@ -1,4 +1,4 @@
-<h1>Fixing Fiscal Year's Error</h1>
+# Fixing Fiscal Year Error
 
 While creating entries in ERPNext, system validates if dates (like Posting Date, Transaction Date etc.) matches with Fiscal Year selected in the entry. If not, system through an error message saying:
 
