@@ -329,7 +329,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 1, 
+   "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "message", 
@@ -484,7 +484,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2015-12-23 23:49:22.755235", 
+ "modified": "2015-12-29 12:56:45.456546", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Request", 

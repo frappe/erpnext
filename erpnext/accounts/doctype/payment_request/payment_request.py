@@ -132,6 +132,9 @@ def make_payment_request(**args):
 		"reference_name": args.dn
 	})
 	
+	if args.return_doc:
+		return pr
+		
 	if args.submit_doc:
 		pr.insert(ignore_permissions=True)
 		pr.submit()
@@ -146,14 +149,14 @@ def get_reference_doc_details(dt, dn):
 def get_amount(ref_doc, dt):
 	"""get amount based on doctype"""
 	if dt == "Sales Order":
-		party_account = get_party_account("Customer", ref_doc.get('customer'), ref_doc.company)
-		party_account_currency = get_account_currency(party_account)
-		
-		if party_account_currency == ref_doc.company_currency:
-			amount = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
-		else:
-			amount = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
-	
+		# party_account = get_party_account("Customer", ref_doc.get('customer'), ref_doc.company)
+# 		party_account_currency = get_account_currency(party_account)
+
+		# if party_account_currency == ref_doc.company_currency:
+		amount = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
+		# else:
+# 			amount = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
+#
 	if dt == "Sales Invoice":
 		amount = abs(ref_doc.outstanding_amount)
 	
