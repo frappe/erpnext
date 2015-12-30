@@ -269,33 +269,19 @@ class DeliveryNote(SellingController):
 		self.notify_update()
 		clear_doctype_notifications(self)
 		
-	def update_billing_status(self):
+	def update_billing_status(self, set_modified=True):
 		updated_delivery_notes = [self.name]
 		for d in self.get("items"):
 			if d.si_detail and not d.so_detail:
-				d.billed_amt = d.amount
 				frappe.db.set(d, 'billed_amt', d.amount)
 			elif d.so_detail:
 				updated_delivery_notes += update_billing_amount_based_on_so(d.so_detail)
-				d.billed_amt = frappe.db.get_value("Delivery Note Item", d.name, "billed_amt")
 		
 		for dn in set(updated_delivery_notes):
-			update_billing_percentage(dn)
+			dn_doc = self if (dn == self.name) else frappe.get_doc("Delivery Note", dn)
+			dn_doc.update_billing_percentage(set_modified=set_modified)
 
 		self.load_from_db()
-				
-def update_billing_percentage(delivery_note, set_modified=True):
-	frappe.db.sql("""update `tabDelivery Note`
-		set per_billed = round(ifnull(
-			(select ifnull(sum(if(amount > billed_amt, billed_amt, amount)), 0) * 100 / sum(amount)
-				from `tabDelivery Note Item` where parent=%s), 0), 2)
-			, modified = now(), modified_by = %s
-		where name=%s""", (delivery_note, frappe.session.user, delivery_note))
-		
-	if set_modified:
-		dn = frappe.get_doc("Delivery Note", delivery_note)
-		dn.set_status(update=True)
-		dn.notify_update()
 
 def update_billing_amount_based_on_so(so_detail):
 	# Billed against Sales Order directly
