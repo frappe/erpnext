@@ -11,6 +11,7 @@ import frappe.defaults
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_amount_based_on_po
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -246,6 +247,7 @@ class PurchaseInvoice(BuyingController):
 			self.update_against_document_in_jv()
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
+			self.update_billing_status_in_pr()
 
 		self.update_project()
 
@@ -407,6 +409,8 @@ class PurchaseInvoice(BuyingController):
 
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
+			self.update_billing_status_in_pr()
+			
 		self.make_gl_entries_on_cancel()
 		self.update_project()
 
@@ -430,6 +434,18 @@ class PurchaseInvoice(BuyingController):
 					"fiscal_year": self.fiscal_year, "name": ("!=", self.name), "docstatus": ("<", 2)})
 				if pi:
 					frappe.throw("Supplier Invoice No exists in Purchase Invoice {0}".format(pi))
+					
+	def update_billing_status_in_pr(self, set_modified=True):
+		updated_pr = []
+		for d in self.get("items"):
+			if d.pr_detail and not d.po_detail:
+				frappe.db.set_value("Purchase Receipt Item", d.pr_detail, "billed_amt", d.amount)
+				updated_pr.append(d.purchase_receipt)
+			elif d.po_detail:
+				updated_pr += update_billing_amount_based_on_po(d.po_detail)
+			
+		for pr in set(updated_pr):
+			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(set_modified=set_modified)
 
 @frappe.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):

@@ -59,7 +59,8 @@ status_map = {
 	],
 	"Purchase Receipt": [
 		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
+		["To Bill", "eval:self.per_billed < 100 and self.docstatus == 1"],
+		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
 	]
@@ -178,15 +179,10 @@ class StatusUpdater(Document):
 			else:
 				args['cond'] = ' and parent!="%s"' % self.name.replace('"', '\"')
 
-			args['set_modified'] = ''
-			if change_modified:
-				args['set_modified'] = ', modified = now(), modified_by = "{0}"'\
-					.format(frappe.db.escape(frappe.session.user))
-
 			self._update_children(args)
 
 			if "percent_join_field" in args:
-				self._update_percent_field(args)
+				self._update_percent_field_in_targets(args, change_modified)
 
 	def _update_children(self, args):
 		"""Update quantities or amount in child table"""
@@ -216,40 +212,47 @@ class StatusUpdater(Document):
 						from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
 						and (docstatus=1 %(cond)s) %(extra_cond)s) %(second_source_condition)s
 					where name='%(detail_id)s'""" % args)
-
-	def _update_percent_field(self, args):
+					
+	def _update_percent_field_in_targets(self, args, change_modified=True):
 		"""Update percent field in parent transaction"""
-		unique_transactions = set([d.get(args['percent_join_field']) for d in self.get_all_children(args['source_dt'])])
+		distinct_transactions = set([d.get(args['percent_join_field']) 
+			for d in self.get_all_children(args['source_dt'])])
 
-		for name in unique_transactions:
-			if not name:
-				continue
+		for name in distinct_transactions:
+			if name:
+				args['name'] = name
+				self._update_percent_field(args, change_modified)
 
-			args['name'] = name
+	def _update_percent_field(self, args, change_modified=True):
+		"""Update percent field in parent transaction"""
+		
+		args['set_modified'] = ''
+		if change_modified:
+			args['set_modified'] = ', modified = now(), modified_by = "{0}"'\
+				.format(frappe.db.escape(frappe.session.user))
+		
+		if args.get('target_parent_field'):
+			frappe.db.sql("""update `tab%(target_parent_dt)s`
+				set %(target_parent_field)s = round(
+					ifnull((select
+						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, %(target_field)s, %(target_ref_field)s)), 0)
+						/ sum(%(target_ref_field)s) * 100
+					from `tab%(target_dt)s` where parent="%(name)s"), 0), 2)
+					%(set_modified)s
+				where name='%(name)s'""" % args)
 
-			# update percent complete in the parent table
-			if args.get('target_parent_field'):
-				frappe.db.sql("""update `tab%(target_parent_dt)s`
-					set %(target_parent_field)s = round(
-						ifnull((select
-							ifnull(sum(if(%(target_ref_field)s > %(target_field)s, %(target_field)s, %(target_ref_field)s)), 0)
-							/ sum(%(target_ref_field)s) * 100
-						from `tab%(target_dt)s` where parent="%(name)s"), 0), 2)
-						%(set_modified)s
-					where name='%(name)s'""" % args)
+		# update field
+		if args.get('status_field'):
+			frappe.db.sql("""update `tab%(target_parent_dt)s`
+				set %(status_field)s = if(%(target_parent_field)s<0.001,
+					'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
+					'Fully %(keyword)s', 'Partly %(keyword)s'))
+				where name='%(name)s'""" % args)
 
-			# update field
-			if args.get('status_field'):
-				frappe.db.sql("""update `tab%(target_parent_dt)s`
-					set %(status_field)s = if(%(target_parent_field)s<0.001,
-						'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
-						'Fully %(keyword)s', 'Partly %(keyword)s'))
-					where name='%(name)s'""" % args)
-
-			if args.get("set_modified"):
-				target = frappe.get_doc(args["target_parent_dt"], name)
-				target.set_status(update=True)
-				target.notify_update()
+		if args.get("set_modified"):
+			target = frappe.get_doc(args["target_parent_dt"], args["name"])
+			target.set_status(update=True)
+			target.notify_update()
 
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
 		ref_fieldname = ref_dt.lower().replace(" ", "_")

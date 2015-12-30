@@ -12,8 +12,7 @@ from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
-from erpnext.stock.doctype.delivery_note.delivery_note \
-	import update_billing_amount_based_on_so, update_billing_percentage
+from erpnext.stock.doctype.delivery_note.delivery_note import update_billing_amount_based_on_so
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -635,7 +634,7 @@ class SalesInvoice(SellingController):
 				}, write_off_account_currency)
 			)
 			
-	def update_billing_status_in_dn(self):
+	def update_billing_status_in_dn(self, set_modified=True):
 		updated_delivery_notes = []
 		for d in self.get("items"):
 			if d.dn_detail and not d.so_detail:
@@ -645,7 +644,7 @@ class SalesInvoice(SellingController):
 				updated_delivery_notes += update_billing_amount_based_on_so(d.so_detail)
 			
 		for dn in set(updated_delivery_notes):
-			update_billing_percentage(dn)
+			frappe.get_doc("Delivery Note", dn).update_billing_percentage(set_modified=set_modified)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
