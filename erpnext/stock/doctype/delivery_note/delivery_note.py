@@ -281,7 +281,8 @@ class DeliveryNote(SellingController):
 		
 		for dn in set(updated_delivery_notes):
 			update_billing_percentage(dn)
-			self.per_billed = frappe.db.get_value("Delivery Note", self.name, "per_billed")
+
+		self.load_from_db()
 				
 def update_billing_percentage(delivery_note, set_modified=True):
 	frappe.db.sql("""update `tabDelivery Note`
@@ -328,10 +329,13 @@ def update_billing_amount_based_on_so(so_detail):
 			pending_to_bill = flt(dnd.amount) - billed_amt_agianst_dn
 			if pending_to_bill <= billed_against_so:
 				billed_amt_agianst_dn += pending_to_bill
+				billed_against_so -= pending_to_bill
 			else:
 				billed_amt_agianst_dn += billed_against_so
+				billed_against_so = 0
 				
 		frappe.db.set_value("Delivery Note Item", dnd.name, "billed_amt", billed_amt_agianst_dn)
+		
 		updated_dn.append(dnd.parent)
 		
 	return updated_dn

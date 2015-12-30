@@ -18,6 +18,7 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry \
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoWarehouseError
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
 	import create_stock_reconciliation, set_valuation_method
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order, create_dn_against_so
 
 class TestDeliveryNote(unittest.TestCase):
 	def test_over_billing_against_dn(self):
@@ -405,6 +406,112 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		update_delivery_note_status(dn.name, "Closed")
 		self.assertEquals(frappe.db.get_value("Delivery Note", dn.name, "Status"), "Closed")
+		
+	def test_dn_billing_status_case1(self):
+		# SO -> DN -> SI
+		so = make_sales_order()
+		dn = create_dn_against_so(so.name, delivered_qty=2)
+		
+		self.assertEqual(dn.status, "To Bill")
+		self.assertEqual(dn.per_billed, 0)
+		
+		si = make_sales_invoice(dn.name)
+		si.submit()
+		
+		dn.load_from_db()
+		self.assertEqual(dn.get("items")[0].billed_amt, 200)
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+		
+	def test_dn_billing_status_case2(self):
+		# SO -> SI and SO -> DN1, DN2
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
+		
+		so = make_sales_order()
+		
+		si = make_sales_invoice(so.name)
+		si.get("items")[0].qty = 5
+		si.insert()
+		si.submit()
+		
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		
+		dn1 = make_delivery_note(so.name)
+		dn1.posting_time = "10:00"
+		dn1.get("items")[0].qty = 2
+		dn1.submit()
+		
+		self.assertEqual(dn1.get("items")[0].billed_amt, 200)
+		self.assertEqual(dn1.per_billed, 100)
+		self.assertEqual(dn1.status, "Completed")
+		
+		dn2 = make_delivery_note(so.name)
+		dn2.posting_time = "08:00"
+		dn2.get("items")[0].qty = 4
+		dn2.submit()
+		
+		dn1.load_from_db()
+		self.assertEqual(dn1.get("items")[0].billed_amt, 100)
+		self.assertEqual(dn1.per_billed, 50)
+		self.assertEqual(dn1.status, "To Bill")
+		
+		self.assertEqual(dn2.get("items")[0].billed_amt, 400)
+		self.assertEqual(dn2.per_billed, 100)
+		self.assertEqual(dn2.status, "Completed")
+		
+	def test_dn_billing_status_case3(self):
+		# SO -> DN1 -> SI and SO -> SI and SO -> DN2
+		from erpnext.selling.doctype.sales_order.sales_order \
+			import make_delivery_note, make_sales_invoice as make_sales_invoice_from_so
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		
+		so = make_sales_order()
+		
+		dn1 = make_delivery_note(so.name)
+		dn1.posting_time = "10:00"
+		dn1.get("items")[0].qty = 2
+		dn1.submit()
+
+		si1 = make_sales_invoice(dn1.name)
+		si1.submit()
+		
+		dn1.load_from_db()
+		self.assertEqual(dn1.per_billed, 100)
+		
+		si2 = make_sales_invoice_from_so(so.name)
+		si2.get("items")[0].qty = 4
+		si2.submit()
+		
+		dn2 = make_delivery_note(so.name)
+		dn2.posting_time = "08:00"
+		dn2.get("items")[0].qty = 5
+		dn2.submit()
+		
+		dn1.load_from_db()
+		self.assertEqual(dn1.get("items")[0].billed_amt, 200)
+		self.assertEqual(dn1.per_billed, 100)
+		self.assertEqual(dn1.status, "Completed")
+		
+		self.assertEqual(dn2.get("items")[0].billed_amt, 400)
+		self.assertEqual(dn2.per_billed, 80)
+		self.assertEqual(dn2.status, "To Bill")
+		
+	def test_dn_billing_status_case4(self):
+		# SO -> SI -> DN
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
+		
+		so = make_sales_order()
+		
+		si = make_sales_invoice(so.name)
+		si.submit()
+		
+		dn = make_delivery_note(si.name)
+		dn.submit()
+		
+		self.assertEqual(dn.get("items")[0].billed_amt, 1000)
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
