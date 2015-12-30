@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate, get_url
+from frappe.utils import flt, nowdate, get_url, cstr
 from frappe import _
 from erpnext.accounts.doctype.journal_entry.journal_entry import (get_payment_entry_against_invoice, 
 get_payment_entry_against_order)
@@ -46,7 +46,6 @@ class PaymentRequest(Document):
 	
 	def send_payment_request(self):
 		self.payment_url = get_url("/api/method/erpnext.accounts.doctype.payment_request.payment_request.gererate_payemnt_request?name={0}".format(self.name))
-		
 		if self.payment_url:
 			frappe.db.set_value(self.doctype, self.name, "status", "Initiated")
 			
@@ -90,7 +89,7 @@ class PaymentRequest(Document):
 						
 	def get_message(self):
 		"""return message with payment gateway link"""
-		return self.message + self.payment_url if self.payment_url else ""
+		return  self.message + """ <a href="%s"> Click here to pay </a>"""%self.payment_url
 		
 	def set_failed(self):
 		pass
@@ -149,14 +148,8 @@ def get_reference_doc_details(dt, dn):
 def get_amount(ref_doc, dt):
 	"""get amount based on doctype"""
 	if dt == "Sales Order":
-		# party_account = get_party_account("Customer", ref_doc.get('customer'), ref_doc.company)
-# 		party_account_currency = get_account_currency(party_account)
-
-		# if party_account_currency == ref_doc.company_currency:
 		amount = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
-		# else:
-# 			amount = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
-#
+
 	if dt == "Sales Invoice":
 		amount = abs(ref_doc.outstanding_amount)
 	

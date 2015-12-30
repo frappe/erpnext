@@ -1,4 +1,4 @@
-Payment Request is mediator between payment gateway and erpnext. From Sales Order or Sales Invoice you can initiate Payment Request. 
+Payment Request will act as mediator between Payment Gateway and ERPNext. You can create payment request via Sales Order or Sales Invoice.
 
 - Create Payment Request via Sales Order
 <img class="screenshot" alt="Payment Request" src="{{docs_base_url}}/assets/img/accounts/pr-from-so.png">
