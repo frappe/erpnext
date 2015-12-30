@@ -72,9 +72,8 @@ class TestPaymentRequest(unittest.TestCase):
 			currency="USD", conversion_rate=50)
 
 		pr = make_payment_request(dt="Sales Invoice", dn=SI_USD.name, recipient_id="saurabh@erpnext.com",
-			mute_email=1, submit_doc=1, payemnt_gateway="_Test Gateway - USD")
-		jv = pr.set_paid()
-
-		self.assertEquals(jv.accounts[0].account, "_Test Receivable USD - _TC")
-		self.assertEquals(jv.accounts[0].account_currency, "USD")
-		self.assertEquals(jv.accounts[1].account, pr.payment_account)
+			mute_email=1, return_doc=1, payemnt_gateway="_Test Gateway - USD")
+		
+		self.assertRaises(frappe.ValidationError, pr.save)
+		
+		

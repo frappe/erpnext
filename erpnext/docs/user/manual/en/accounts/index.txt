@@ -1,6 +1,7 @@
 journal-entry
 sales-invoice
 purchase-invoice
+payment-request
 chart-of-accounts
 making-payments
 advance-payment-entry
