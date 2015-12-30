@@ -1,7 +1,6 @@
-accounting-for-projects
+tracking-project-profitability-using-cost-center
 c-form
 changing-parent-account
-customer-for-multiple-company
 depreciation-for-fixed-asset-items
 difference-entry-button
 fiscal-year-error
