@@ -107,6 +107,7 @@ class TestItem(unittest.TestCase):
 
 		# doing it again should raise error
 		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		variant.item_code = "_Test Variant Item-L-duplicate"
 		self.assertRaises(ItemVariantExistsError, variant.save)
 
 	def test_make_item_variant_with_numeric_values(self):

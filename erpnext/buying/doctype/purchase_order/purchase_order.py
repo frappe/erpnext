@@ -140,7 +140,7 @@ class PurchaseOrder(BuyingController):
 		clear_doctype_notifications(self)
 
 	def on_submit(self):
-		if self.has_drop_ship_item():
+		if self.is_against_so():
 			self.update_status_updater()
 
 		super(PurchaseOrder, self).on_submit()
@@ -157,8 +157,10 @@ class PurchaseOrder(BuyingController):
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
-		if self.has_drop_ship_item():
+		if self.is_against_so():
 			self.update_status_updater()
+			
+		if self.has_drop_ship_item():
 			self.update_delivered_qty_in_sales_order()
 
 		pc_obj = frappe.get_doc('Purchase Common')
@@ -222,13 +224,10 @@ class PurchaseOrder(BuyingController):
 			so.notify_update()
 
 	def has_drop_ship_item(self):
-		is_drop_ship = False
-
-		for item in self.items:
-			if item.delivered_by_supplier == 1:
-				is_drop_ship = True
-
-		return is_drop_ship
+		return any([d.delivered_by_supplier for d in self.items])
+		
+	def is_against_so(self):
+		return any([d.prevdoc_doctype for d in self.items if d.prevdoc_doctype=="Sales Order"])
 
 	def set_received_qty_for_drop_ship_items(self):
 		for item in self.items:

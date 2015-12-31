@@ -1,30 +1,41 @@
-<h1>Depreciation for Fixed Asset Items</h1>
+#Depreciation for Fixed Asset Items
 
-Depereciation of fixed asset items.
+Depreciation is when you write off certain value of your assets as an expense. For example, office computer will be used for five years. Hence total value of computer should be booked as expense over the period of five years.
 
-####Separate Group of Depreciation Account
+As per perpetual inventory valuation system (set by default), you should create Stock Reconciliation for depreciating value of fixed asset items. Check below steps to learn more.
 
-![Fixed Asset Account]({{docs_base_url}}/assets/img/articles/$SGrab_384.png)
+#### Step 1: Depreciation Account
 
-####Depreciation Entry for Fixed Asset Items
+Depreciation account is auto-created, under Indirect Expenses account.
 
-Depreciation is when you write off certain value of your assets as an expense. For example if you have a computer that you will use for say 5 years, you can distribute its expense over the period and pass a
-Journal Voucher at the end of each year reducing its value by a certain percentage.
+<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/depreciation-1.png">
 
-As per perpetual inventory valuation system (set by default), you should create Stock Reconciliation for depreciating value of fixed asset items. In the Stock Reconciliation template, you should only enter Item's Code, Warehouse and its current value.
+#### Step 2: Stock Reconciliation
 
-Let's assume current value of our computer is $250, and its purchase value was $320.
+To create new Stock Reconciliation, go to:
 
-![Fixed Asset Depreciation]({{docs_base_url}}/assets/img/articles/$SGrab_385.png)
+`Stock > Setup > Stock Reconciliation > New`
 
-In this case, depreciation amount of Computer will be $70 ($320-$250). Depreciation Amount will be booked under Difference (expense) Account selected in the stock reconciliation.
+Set Posting Date and Time of Stock Reconciliation will when you wish depreciation entry to be posted in your accounts.
 
-![Fixed Asset Depreciation]({{docs_base_url}}/assets/img/articles/$SGrab_386.png)
+#### Step 3: Item
 
-Following is how general ledger will be posted for fixed this Stock Reconciliation.
+Select Fixed Asset Items in the item table. Update Warehouse of an item. For item valuation, update post-depreciation value. For example, item value was 100. Depreciation amount is 20. As per this post-depreciation valuation of an item will be 80. Hence 80 should be posted as valuation in the Stock Reconciliation.
 
-![Fixed Asset General Ledger]({{docs_base_url}}/assets/img/articles/$SGrab_387.png)
+<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/depreciation-2.png">
 
-Click [here](https://erpnext.com/user-guide/setting-up/stock-reconciliation-for-non-serialized-item) for steps to be followed when making Stock Reconciliation entry.
+#### Step 4: Depreciation Account
+
+Select Depereciation Account in which depereciation amount will be booked.
+
+<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/depreciation-3.png">
+
+#### Step 5: Submit
+
+On submission of Stock Reconciliation, depreciation will booked for items asset items.
+
+<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/depreciation-4.png">
+
+Click [here]({{docs_base_url}}/user/manual/en/setting-up/stock-reconciliation-for-non-serialized-item) for steps to be followed when making Stock Reconciliation entry.
 
 <!-- markdown -->

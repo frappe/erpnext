@@ -12,5 +12,5 @@ module-visibility
 perm-level-error-in-permission-manager
 search-record-by-specific-field
 set-language
-set-precision-for-float-currency-and-percent-fields
+set-precision
 user-restriction

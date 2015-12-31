@@ -1,8 +1,10 @@
-<h1>Changing Parent Account</h1>
+#Changing Parent Account
 
-Chart of Account has hierarchical structure. This means each account has a parent account defined for it. You will have few ledger preset, and few ledger (like for Customer, Supplier, Warehouse) will be auto-created based on their master record. These ledger will be placed under pre-defined groups in the Chart of Account. If needed you can place specific account under another group by changing its Parent Account.
+Chart of Account has hierarchical structure. Each account has a parent it is listed under. 
 
-Following are the steps to edit Parent for specific Account.
+There are some accounts which are auto-created. For example, Account for Warehouse is auto-created when new Wareouse is added in the system. These accounts are added under pre-defined account ledger. Warehouse Account is always added under Stock Assets, under Current Assets.
+
+If you wish to place specific Account into another parent Account, you can achieve the same as below.
 
 ####1. Go to Chart of Account
 
@@ -12,17 +14,22 @@ Click on Account for which Parent Account is to be changed.
 
 ####2. Edit Account
 
-![Account]({{docs_base_url}}/assets/img/articles/Selection_080.png)  
+<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/change-parent-2.png"> 
 
 ####3. Change Parent Account
 
 Search and select preferred Parent Account and save.
 
-![Account]({{docs_base_url}}/assets/img/articles/Selection_084.png)
+<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/change-parent-3.png">
 
 Refresh system from Help menu to experience the change.
 
-![Account]({{docs_base_url}}/assets/img/articles/Selection_085.png)
+<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/change-parent-4.png">
 
-<div class="well">Note: Change of Parent Account is not applicable for Root Accounts.</div>
+<div class="well"> Note: Parent cannot be customized for the Root Accounts, like Asset, Liability, Income, Expense, Equity.</div>
+
+#### Quick Help
+
+<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/change-parent-account-1.gif">
+
 <!-- markdown -->

@@ -30,9 +30,18 @@ class Item(WebsiteGenerator):
 		self.get("__onload").sle_exists = self.check_if_sle_exists()
 
 	def autoname(self):
-		if frappe.db.get_default("item_naming_by")=="Naming Series" and not self.variant_of:
-			from frappe.model.naming import make_autoname
-			self.item_code = make_autoname(self.naming_series+'.#####')
+		if frappe.db.get_default("item_naming_by")=="Naming Series":
+			if self.variant_of:
+				if not self.item_code:
+					item_code_suffix = ""
+					for attribute in self.attributes:
+						attribute_abbr = frappe.db.get_value("Item Attribute Value", 
+							{"parent": attribute.attribute, "attribute_value": attribute.attribute_value}, "abbr")
+						item_code_suffix += "-" + str(attribute_abbr or attribute.attribute_value)
+					self.item_code = str(self.variant_of) + item_code_suffix
+			else:
+				from frappe.model.naming import make_autoname
+				self.item_code = make_autoname(self.naming_series+'.#####')
 		elif not self.item_code:
 			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
 
@@ -563,11 +572,10 @@ class Item(WebsiteGenerator):
 					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
 				args[d.attribute] = d.attribute_value
 
-			if self.variant_of:
-				# test this during insert because naming is based on item_code and we cannot use condition like self.name != variant
-				variant = get_variant(self.variant_of, args)
-				if variant and self.get("__islocal"):
-					frappe.throw(_("Item variant {0} exists with same attributes").format(variant), ItemVariantExistsError)
+			variant = get_variant(self.variant_of, args, self.name)
+			if variant:
+				frappe.throw(_("Item variant {0} exists with same attributes")
+					.format(variant), ItemVariantExistsError)
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
 	if (not end_of_life) or (disabled is None):
