@@ -106,8 +106,23 @@ def create_fiscal_year_and_company(args):
 	}).insert()
 
 	# Bank Account
+	create_bank_account(args)
 
 	args["curr_fiscal_year"] = curr_fiscal_year
+	
+def create_bank_account(args):
+	if args.get("bank_account"):
+		bank_account_group =  frappe.db.get_value("Account", 
+			{"account_type": "Bank", "is_group": 1, "root_type": "Asset"})
+		if bank_account_group:
+			frappe.get_doc({
+				"doctype": "Account",
+				'account_name': args.get("bank_account"),
+				'parent_account': bank_account_group,
+				'is_group':0,
+				'company':args.get('company_name').strip(),
+				"account_type": "Bank",
+			}).insert()
 
 def create_price_lists(args):
 	for pl_type, pl_name in (("Selling", _("Standard Selling")), ("Buying", _("Standard Buying"))):
