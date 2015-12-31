@@ -1,21 +1,27 @@
-<h1>Search Record by Specific Field</h1>
+#Search Record by Specific Field
 
-While creating any document in ERPNext, you might have to select other record id in it (like selecting Customer in Quotation). For ease in selecting other record, you can search them based on value in various fields of that record. Search By functionality enables you searching and filtering records based on value in the specific fields of that record.
+While creating any document (say Sales Invoice), you have to select other document id in it (say Serial No). For ease in selection, you can also make value of oother field of that visible in the search result. Search By functionality enables to define field whos value will be visible in the search result.
 
-Let's consider an example to learn Search By functionality better. While creating Sales Order, we need to select Customer in it. If we need to filter search result of Customer for specific Customer Group, we should go about following these steps to achieve it.
+Let's assume that while creating Sales Invoice, you wish to see Serial No result, with respective Warehouse.
 
-####Search By in Customize Form
+#### Step 1: Customize Form
 
-In the Customize Form tool, you will find field called Search Field. You should enter field names based on which we can search and filter result for this document.
+`Setup > Customize > Customize Form`
 
-Considering our scenario, we should update name of Customer Group field for Customer in the Customize Form.
+#### Step 2: Select Document
 
-![Search By in Customize Form]()
+`Document Type = Serial No.`
 
-####Searching in Another Record.
+#### Step 3:  Search Field
+
+Update Warehouse field name in the Search By field.
+
+<img alt="Search By in Customize Form" class="screenshot" src="{{docs_base_url}}/assets/img/articles/search-by-1.png">
+
+#### Searching in Another Record.
 
 While creating transaction, to get filtered result for Customer, you should firstly click on search magnifier.
 
-![Search for master]()
+<img alt="Search By in Customize Form" class="screenshot" src="{{docs_base_url}}/assets/img/articles/search-by-2.png">
 
 <!-- markdown -->

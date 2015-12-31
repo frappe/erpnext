@@ -1,4 +1,4 @@
-<h1>Manage Foreign Exchange Difference</h1>
+# Manage Foreign Exchange Difference
 
 When you book Sales Invoices and Purchase invoices in multiple currencies, you will have to deal with currency difference while booking payment entry. You can easily manage this in ERPNext in following ways.  
 

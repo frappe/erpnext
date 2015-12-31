@@ -1,4 +1,4 @@
-<h1>WIthdrawing Salary from Owner's Equity Account</h1>
+#WIthdrawing Salary from Owner's Equity Account
 
 ### Question
 

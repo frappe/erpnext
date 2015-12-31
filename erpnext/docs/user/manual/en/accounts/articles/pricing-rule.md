@@ -1,4 +1,4 @@
-<h1>Pricing Rule</h1>
+#Pricing Rule
 
 Pricing Rule allows you to define rules based on which item's price or discount to be applied is determined.
 
