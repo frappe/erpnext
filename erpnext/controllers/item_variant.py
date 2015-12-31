@@ -12,7 +12,7 @@ class InvalidItemAttributeValueError(frappe.ValidationError): pass
 class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
 
 @frappe.whitelist()
-def get_variant(variant, template, args):
+def get_variant(template, args, variant=None):
 	"""Validates Attributes and their Values, then looks for an exactly matching Item Variant
 
 		:param item: Template Item
@@ -26,7 +26,7 @@ def get_variant(variant, template, args):
 
 	validate_item_variant_attributes(template, args)
 
-	return find_variant(variant, template, args)
+	return find_variant(template, args, variant)
 
 def validate_item_variant_attributes(item, args):
 	attribute_values = {}
@@ -65,7 +65,7 @@ def validate_item_variant_attributes(item, args):
 			frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values").format(
 				value, attribute))
 
-def find_variant(variant_item_code, template, args):
+def find_variant(template, args, variant_item_code=None):
 	conditions = ["""(iv_attribute.attribute="{0}" and iv_attribute.attribute_value="{1}")"""\
 		.format(frappe.db.escape(key), frappe.db.escape(cstr(value))) for key, value in args.items()]
 
@@ -80,7 +80,7 @@ def find_variant(variant_item_code, template, args):
 			select name from `tabItem Variant Attribute` iv_attribute
 				where iv_attribute.parent=item.name
 				and ({conditions}) and parent != %s
-		)""".format(conditions=conditions), (template, variant_item_code))
+		)""".format(conditions=conditions), (template, cstr(variant_item_code)))
 
 	for variant in possible_variants:
 		variant = frappe.get_doc("Item", variant)

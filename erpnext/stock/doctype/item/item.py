@@ -563,7 +563,7 @@ class Item(WebsiteGenerator):
 					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
 				args[d.attribute] = d.attribute_value
 
-			variant = get_variant(self.name, self.variant_of, args)
+			variant = get_variant(self.variant_of, args, self.name)
 			if variant:
 				frappe.throw(_("Item variant {0} exists with same attributes")
 					.format(variant), ItemVariantExistsError)
