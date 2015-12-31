@@ -563,11 +563,10 @@ class Item(WebsiteGenerator):
 					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
 				args[d.attribute] = d.attribute_value
 
-			if self.variant_of:
-				# test this during insert because naming is based on item_code and we cannot use condition like self.name != variant
-				variant = get_variant(self.variant_of, args)
-				if variant and self.get("__islocal"):
-					frappe.throw(_("Item variant {0} exists with same attributes").format(variant), ItemVariantExistsError)
+			variant = get_variant(self.name, self.variant_of, args)
+			if variant:
+				frappe.throw(_("Item variant {0} exists with same attributes")
+					.format(variant), ItemVariantExistsError)
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
 	if (not end_of_life) or (disabled is None):
