@@ -32,11 +32,13 @@ class Item(WebsiteGenerator):
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
 			if self.variant_of:
-				item_code_suffix = ""
-				for attribute in self.attributes:
-					attribute_abbr = frappe.db.get_value("Item Attribute Value", {"parent": attribute.attribute, "attribute_value": attribute.attribute_value}, "abbr")
-					item_code_suffix += "-" + str(attribute_abbr or attribute.attribute_value)
-				self.item_code = str(self.variant_of) + item_code_suffix
+				if not self.item_code:
+					item_code_suffix = ""
+					for attribute in self.attributes:
+						attribute_abbr = frappe.db.get_value("Item Attribute Value", 
+							{"parent": attribute.attribute, "attribute_value": attribute.attribute_value}, "abbr")
+						item_code_suffix += "-" + str(attribute_abbr or attribute.attribute_value)
+					self.item_code = str(self.variant_of) + item_code_suffix
 			else:
 				from frappe.model.naming import make_autoname
 				self.item_code = make_autoname(self.naming_series+'.#####')
