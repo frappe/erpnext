@@ -401,7 +401,7 @@ def make_delivery_note(source_name, target_doc=None):
 	return target_doc
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None):
+def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Sales Invoice Advance
@@ -410,6 +410,7 @@ def make_sales_invoice(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.is_pos = 0
 		target.ignore_pricing_rule = 1
+		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
@@ -442,7 +443,7 @@ def make_sales_invoice(source_name, target_doc=None):
 			"doctype": "Sales Team",
 			"add_if_empty": True
 		}
-	}, target_doc, postprocess)
+	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
 
 	return doclist
 

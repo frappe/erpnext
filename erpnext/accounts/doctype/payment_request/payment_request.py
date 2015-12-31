@@ -44,6 +44,13 @@ class PaymentRequest(Document):
 	def set_status(self):
 		pass
 	
+	def make_invoice(self):
+		if self.make_sales_invoice:
+			from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+			si = make_sales_invoice(self.reference_name, ignore_permissions=True)
+			si = frappe.get_doc(si).insert(ignore_permissions=True)
+			si.submit()
+	
 	def send_payment_request(self):
 		self.payment_url = get_url("/api/method/erpnext.accounts.doctype.payment_request.payment_request.gererate_payemnt_request?name={0}".format(self.name))
 		if self.payment_url:
@@ -53,8 +60,11 @@ class PaymentRequest(Document):
 		if frappe.session.user == "Guest":
 			frappe.set_user("Administrator")
 			
-		return self.create_journal_entry()
-	
+		jv = self.create_journal_entry()
+		self.make_invoice()
+		
+		return jv
+		
 	def create_journal_entry(self):
 		"""create entry"""
 		payment_details = {
@@ -62,6 +72,8 @@ class PaymentRequest(Document):
 			"return_obj": True,
 			"bank_account": self.payment_account
 		}
+		
+		frappe.flags.ignore_account_permission = True
 				
 		if self.reference_doctype == "Sales Order":
 			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name, payment_details)
@@ -73,7 +85,7 @@ class PaymentRequest(Document):
 			"voucher_type": "Journal Entry",
 			"posting_date": nowdate()
 		})		
-
+		jv.insert(ignore_permissions=True)
 		jv.submit()
 		
 		#set status as paid for Payment Request
@@ -109,9 +121,10 @@ class PaymentRequest(Document):
 		})
 		comm.insert(ignore_permissions=True)
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def make_payment_request(**args):
 	"""Make payment request"""
+	
 	args = frappe._dict(args)
 	ref_doc = get_reference_doc_details(args.dt, args.dn)
 	name, gateway, payment_account, message = get_gateway_details(args)
@@ -122,6 +135,7 @@ def make_payment_request(**args):
 		"gateway": gateway,
 		"payment_account": payment_account,
 		"currency": ref_doc.currency,
+		"make_sales_invoice": args.cart or 0,
 		"amount": get_amount(ref_doc, args.dt),
 		"mute_email": args.mute_email or 0,
 		"email_to": args.recipient_id or "",
@@ -137,8 +151,14 @@ def make_payment_request(**args):
 	if args.submit_doc:
 		pr.insert(ignore_permissions=True)
 		pr.submit()
-		return pr
-	
+		
+		if args.cart:
+			gererate_payemnt_request(pr.name)
+			frappe.db.commit()
+		
+		if not args.cart:	
+			return pr
+			
 	return pr.as_dict()
 
 def get_reference_doc_details(dt, dn):

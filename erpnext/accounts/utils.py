@@ -247,7 +247,7 @@ def update_against_doc(d, jv_obj):
 
 	# will work as update after submit
 	jv_obj.flags.ignore_validate_update_after_submit = True
-	jv_obj.save()
+	jv_obj.save(ignore_permissions=True)
 
 def remove_against_link_from_jv(ref_type, ref_no):
 	linked_jv = frappe.db.sql_list("""select parent from `tabJournal Entry Account`
