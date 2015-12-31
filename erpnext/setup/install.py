@@ -17,6 +17,14 @@ def after_install():
 	add_web_forms()
 	frappe.db.commit()
 
+def check_setup_wizard_not_completed():
+	if frappe.db.get_default('desktop:home_page') == 'desktop':
+		print
+		print "ERPNext can only be installed on a fresh site where the setup wizard is not completed"
+		print "You can reinstall this site (after saving your data) using: bench --site [sitename] reinstall"
+		print
+		return False
+
 def feature_setup():
 	"""save global defaults and features setup"""
 	doc = frappe.get_doc("Features Setup", "Features Setup")
