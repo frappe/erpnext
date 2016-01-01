@@ -275,7 +275,7 @@ class DeliveryNote(SellingController):
 			if d.si_detail and not d.so_detail:
 				frappe.db.set(d, 'billed_amt', d.amount)
 			elif d.so_detail:
-				updated_delivery_notes += update_billing_amount_based_on_so(d.so_detail)
+				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail)
 		
 		for dn in set(updated_delivery_notes):
 			dn_doc = self if (dn == self.name) else frappe.get_doc("Delivery Note", dn)
@@ -283,7 +283,7 @@ class DeliveryNote(SellingController):
 
 		self.load_from_db()
 
-def update_billing_amount_based_on_so(so_detail):
+def update_billed_amount_based_on_so(so_detail):
 	# Billed against Sales Order directly
 	billed_against_so = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item` 
 		where so_detail=%s and (dn_detail is null or dn_detail = '') and docstatus=1""", so_detail)

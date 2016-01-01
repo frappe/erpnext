@@ -11,7 +11,7 @@ import frappe.defaults
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_amount_based_on_po
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -438,11 +438,14 @@ class PurchaseInvoice(BuyingController):
 	def update_billing_status_in_pr(self, set_modified=True):
 		updated_pr = []
 		for d in self.get("items"):
-			if d.pr_detail and not d.po_detail:
-				frappe.db.set_value("Purchase Receipt Item", d.pr_detail, "billed_amt", d.amount)
+			if d.pr_detail:
+				billed_amt = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item` 
+					where pr_detail=%s and docstatus=1""", d.pr_detail)
+				billed_amt = billed_amt and billed_amt[0][0] or 0
+				frappe.db.set_value("Purchase Receipt Item", d.pr_detail, "billed_amt", billed_amt)
 				updated_pr.append(d.purchase_receipt)
 			elif d.po_detail:
-				updated_pr += update_billing_amount_based_on_po(d.po_detail)
+				updated_pr += update_billed_amount_based_on_po(d.po_detail)
 			
 		for pr in set(updated_pr):
 			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(set_modified=set_modified)
