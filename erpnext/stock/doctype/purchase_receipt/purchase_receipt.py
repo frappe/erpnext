@@ -444,8 +444,7 @@ class PurchaseReceipt(BuyingController):
 		updated_pr = [self.name]
 		for d in self.get("items"):
 			if d.prevdoc_detail_docname:
-				updated_pr += update_billing_amount_based_on_po(d.prevdoc_detail_docname)
-				d.billed_amt = frappe.db.get_value("Purchase Receipt Item", d.name, "billed_amt")
+				updated_pr += update_billed_amount_based_on_po(d.prevdoc_detail_docname)
 	
 		for pr in set(updated_pr):
 			pr_doc = self if (pr == self.name) else frappe.get_doc("Purchase Receipt", pr)
@@ -453,7 +452,7 @@ class PurchaseReceipt(BuyingController):
 
 		self.load_from_db()
 
-def update_billing_amount_based_on_po(po_detail):
+def update_billed_amount_based_on_po(po_detail):
 	# Billed against Sales Order directly
 	billed_against_po = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item` 
 		where po_detail=%s and (pr_detail is null or pr_detail = '') and docstatus=1""", po_detail)

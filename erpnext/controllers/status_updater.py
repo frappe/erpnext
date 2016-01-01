@@ -249,7 +249,7 @@ class StatusUpdater(Document):
 					'Fully %(keyword)s', 'Partly %(keyword)s'))
 				where name='%(name)s'""" % args)
 
-		if args.get("set_modified"):
+		if change_modified:
 			target = frappe.get_doc(args["target_parent_dt"], args["name"])
 			target.set_status(update=True)
 			target.notify_update()
