@@ -1,0 +1,4 @@
+- Billing Status in Delivery Note (DN) and Purchase Receipt (PR)
+	- If Invoice made directly against DN/PR, calculate based on actual billed amount
+	- If Invoice made via Sales Order/Purchase Order, allocate billed amount in DN/PR based on FIFO
+	- Billing status updated in existing DN/PR
