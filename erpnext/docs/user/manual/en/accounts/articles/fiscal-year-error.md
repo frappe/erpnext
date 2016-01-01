@@ -12,7 +12,7 @@ Only User with System Manager's Role Assigned has permission to create new Fisca
 
 `Accounts > Setup > Fiscal Year`
 
-Click [here]({{docs_base_url}}/user/manual/en/accounts/setup/fiscal-year) to learn more about Fiscal Year.
+Click [here]({{docs_base_url}}/user/manual/en/accounts/setup/fiscal-year.html) to learn more about Fiscal Year.
 
 #### Set Fiscal Year as Default
 
@@ -29,4 +29,5 @@ Default Fiscal Year will be updated in the Global Default setting as well. You c
 Save Global Default, and Reload your ERPNext account. Then, default Fiscal Year will be auto-updated in your transactions.
 
 Note: In transactions, you can manually select required Fiscal Year, from More Info section.
+
 <!-- markdown -->

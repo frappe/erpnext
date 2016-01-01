@@ -1,9 +1,9 @@
-#Update Stock Option in Sales Invoice
+#Delivery from Sales Invoice
 
-The <i>Update Stock</i> check box is available in the <i>Items</i> section within <i>Sales Invoice</i> form.
+If you have items delivery and invoicing happening at the same time, you can create delivery from with Sales Invocice itself. Sales Invoice has field called **Update Stock**, just before Item table. If this field is checked, on submission of Sales Invoice, stock of Item will be deducted from selected Warehouse.
 
-<img src="{{docs_base_path}}/assets/img/articles/kb_updatestk_field.png" height="221" width="603">
+<img alt="Update Stock" class="screenshot" src="{{docs_base_url}}/assets/img/articles/update-stock.png">
 
-Usually the Sales Invoice is a voucher specifying the amount to be paid against Quantity delivered/to be delivered as per a particular Sales Order.
+On checking Update Stock, Sales Invoice Item will show relevant fields like Warehouse, Serial No., Batch No., Item valuation etc.
 
-Checking the update Stock option before submitting an Invoice will directly deduct the Stock from the Inventory on submission of the Sales Invoice. In such a case the Sales Invoice also satisfies the function of a Delivery Note.
+On submission of Sales Invoice, with general ledger posting, stock ledger posting will happen as well.
