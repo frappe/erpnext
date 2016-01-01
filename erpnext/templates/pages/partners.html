@@ -1,8 +1,10 @@
+{% extends "templates/web.html" %}
+
 {% block title %} {{ title }} {% endblock %}
 
 {% block header %}<h2>{{ title }}</h2>{% endblock %}
 
-{% block content %}
+{% block page_content %}
 <div class="partners-content">
 	{% for partner_info in partners %}
 	<div class="row">

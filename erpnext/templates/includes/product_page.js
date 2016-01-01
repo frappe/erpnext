@@ -86,7 +86,7 @@ frappe.ready(function() {
 			return;
 		}
 
-		frappe.load_via_ajax(window.location.pathname + "?variant=" + item_code);
+		window.location.href = window.location.pathname + "?variant=" + item_code;
 	});
 });
 
