@@ -52,8 +52,8 @@ class PurchaseReceipt(BuyingController):
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("items")))
 			self.set_onload("billing_complete", (billed_qty[0][0] == total_qty))
-			
-		self.set_onload("has_return_entry", len(frappe.db.exists({"doctype": "Purchase Receipt", 
+
+		self.set_onload("has_return_entry", len(frappe.db.exists({"doctype": "Purchase Receipt",
 			"is_return": 1, "return_against": self.name, "docstatus": 1})))
 
 	def validate(self):
@@ -99,7 +99,7 @@ class PurchaseReceipt(BuyingController):
 			if flt(d.rejected_qty) and not d.rejected_warehouse:
 				d.rejected_warehouse = self.rejected_warehouse
 				if not d.rejected_warehouse:
-					frappe.throw(_("Rejected Warehouse is mandatory against regected item"))
+					frappe.throw(_("Row #{0}: Rejected Warehouse is mandatory against rejected Item {1}").format(d.idx, d.item_code))
 
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
