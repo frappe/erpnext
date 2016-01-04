@@ -1,3 +1,5 @@
+{% extends "templates/web.html" %}
+
 {% block title %} {{ "Product Search" }} {% endblock %}
 
 {% block header %}<h2>Product Search</h2>{% endblock %}
@@ -6,11 +8,11 @@
 {% include 'templates/includes/product_search_box.html' %}
 {% endblock %}
 
-{% block content %}
+{% block page_content %}
 <script>{% include "templates/includes/product_list.js" %}</script>
 
 <script>
-$(document).ready(function() {
+frappe.ready(function() {
 	var txt = get_url_arg("q");
 	$(".search-results").html("Search results for: " + txt);
 	window.search = txt;

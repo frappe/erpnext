@@ -1,3 +1,5 @@
+{% extends "templates/web.html" %}
+
 {% block title %} {{ title }} {% endblock %}
 
 {% block header %}<h2>{{ title }}</h2>{% endblock %}
@@ -6,7 +8,7 @@
 {% include 'templates/includes/product_search_box.html' %}
 {% endblock %}
 
-{% block content %}
+{% block page_content %}
 {% from "erpnext/templates/includes/macros.html" import product_image %}
 <div class="item-content">
 	<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
