@@ -125,7 +125,7 @@ class StockReconciliation(StockController):
 			for msg in self.validation_messages:
 				msgprint(msg)
 
-			raise frappe.ValidationError
+			raise frappe.ValidationError(self.validation_messages)
 
 	def validate_item(self, item_code, row_num):
 		from erpnext.stock.doctype.item.item import validate_end_of_life, \
@@ -250,15 +250,15 @@ class StockReconciliation(StockController):
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time):
 	items = frappe.get_list("Bin", fields=["item_code"], filters={"warehouse": warehouse}, as_list=1)
-	
-	items += frappe.get_list("Item", fields=["name"], filters= {"is_stock_item": 1, "has_serial_no": 0, 
+
+	items += frappe.get_list("Item", fields=["name"], filters= {"is_stock_item": 1, "has_serial_no": 0,
 		"has_batch_no": 0, "has_variants": 0, "default_warehouse": warehouse}, as_list=1)
-		
+
 	res = []
 	for item in set(items):
-		stock_bal = get_stock_balance(item[0], warehouse, posting_date, posting_time, 
+		stock_bal = get_stock_balance(item[0], warehouse, posting_date, posting_time,
 			with_valuation_rate=True)
-		
+
 		res.append({
 			"item_code": item[0],
 			"warehouse": warehouse,

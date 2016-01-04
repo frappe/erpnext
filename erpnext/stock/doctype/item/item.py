@@ -35,7 +35,7 @@ class Item(WebsiteGenerator):
 				if not self.item_code:
 					item_code_suffix = ""
 					for attribute in self.attributes:
-						attribute_abbr = frappe.db.get_value("Item Attribute Value", 
+						attribute_abbr = frappe.db.get_value("Item Attribute Value",
 							{"parent": attribute.attribute, "attribute_value": attribute.attribute_value}, "abbr")
 						item_code_suffix += "-" + str(attribute_abbr or attribute.attribute_value)
 					self.item_code = str(self.variant_of) + item_code_suffix
