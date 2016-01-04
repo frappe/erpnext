@@ -1,5 +1,5 @@
 employee
-leave-application
+leave
 expense-claim
 attendance
 salary-and-payroll
