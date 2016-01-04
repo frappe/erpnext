@@ -8,6 +8,10 @@
 {% include 'templates/includes/product_search_box.html' %}
 {% endblock %}
 
+{% block breadcrumbs %}
+    {% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
 {% block page_content %}
 {% from "erpnext/templates/includes/macros.html" import product_image %}
 <div class="item-content">
