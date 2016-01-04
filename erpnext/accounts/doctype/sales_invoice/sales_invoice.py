@@ -12,6 +12,7 @@ from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
+from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -98,6 +99,7 @@ class SalesInvoice(SellingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		self.update_billing_status_in_dn()
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -110,6 +112,7 @@ class SalesInvoice(SellingController):
 			self.update_against_document_in_jv()
 
 		self.update_time_log_batch(self.name)
+		
 
 	def before_cancel(self):
 		self.update_time_log_batch(None)
@@ -129,6 +132,7 @@ class SalesInvoice(SellingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		self.update_billing_status_in_dn()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
@@ -629,6 +633,21 @@ class SalesInvoice(SellingController):
 					"cost_center": self.write_off_cost_center
 				}, write_off_account_currency)
 			)
+			
+	def update_billing_status_in_dn(self, set_modified=True):
+		updated_delivery_notes = []
+		for d in self.get("items"):
+			if d.dn_detail:
+				billed_amt = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item` 
+					where dn_detail=%s and docstatus=1""", d.dn_detail)
+				billed_amt = billed_amt and billed_amt[0][0] or 0
+				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_amt", billed_amt)
+				updated_delivery_notes.append(d.delivery_note)
+			elif d.so_detail:
+				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail)
+			
+		for dn in set(updated_delivery_notes):
+			frappe.get_doc("Delivery Note", dn).update_billing_percentage(set_modified=set_modified)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
