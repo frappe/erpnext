@@ -198,6 +198,9 @@ class BOM(Document):
 			self.uom = ret[1]
 			self.item_name= ret[2]
 
+		if not self.quantity:
+			frappe.throw(_("Quantity should be greater than 0"))
+
 	def validate_materials(self):
 		""" Validate raw material entries """
 		if not self.get('items'):
