@@ -10,14 +10,14 @@ You can also assign / modify the currency by opening specific Account record for
 
 <img class="screenshot" alt="Modify Account Currency"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/account.png">
 
-For Customer / Supplier (Party), you can also define it's accounting currency in the Party record. If the Party's accounting currency is different from Company Currency, you have to mention Default Receivable / Payable Account in that currency.
+For Customer / Supplier (Party), you can also define it's billing currency in the Party record. If the Party's accounting currency is different from Company Currency, you should mention Default Receivable / Payable Account in that currency.
 
 <img class="screenshot" alt="Customer Accounting Currency"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/customer.png">
 
 
-Once you defined Accounting Currency in Party / Account record, you are ready to make transactions against them. If Party's accounting currency is different from Company Currency, system will restrict to make transaction for that party with that currency only. If accounting currency is same as Company Currency, you can make transactions for that Party in any currency. But accounting entries (GL Entries) will always be in Party's Accounting Currency. In any case, currency of Receivable Account will always be same as accounting currency of the Party.
+Once you defined Currency in the Account and selected relevant accounts in the Party record , you are ready to make transactions against them. If Party account currency is different from Company Currency, system will restrict to make transaction for that party with that currency only. If account currency is same as Company Currency, you can make transactions for that Party in any currency. But accounting entries (GL Entries) will always be in Party Account Currency.
 
-You can change accounting currency in Party / Account record, until making any transactions against them. After making accounting entries, system will not allow to change the accounting currency for both Party / Account record.
+You can change accounting currency in Party / Account record, until making any transactions against them. After making accounting entries, system will not allow to change the currency for both Party / Account record.
 
 In case of multi-company setup, accounting currency of Party must be same for all the companies.
 
@@ -44,9 +44,7 @@ In Journal Entry, you can make transactions in different currencies. There is a 
 <img class="screenshot" alt="Journal Entry Exchange Rate"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/journal-entry-multi-currency.png">
 
  
-In Accounts table, on selection of foreign currency account, system will show Currency section and fetch Account Currency and Exchange Rate automatically. You can change / modify the Exchange Rate later manually.
-
-In a single Journal Entry, you can select accounts with only one alternate currency, apart from accounts in Company Currency. Debit / Credit amount should be entered in Account Currency, system will calculate and show the Debit / Credit amount in Company Currency automatically.
+In Accounts table, on selection of foreign currency account, system will show Currency section and fetch Account Currency and Exchange Rate automatically. You can change / modify the Exchange Rate later manually. Debit / Credit amount should be entered in Account Currency, system will calculate and show the Debit / Credit amount in Company Currency automatically.
 
 <img class="screenshot" alt="Journal Entry in multi currency"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/journal-entry-row.png">
 
@@ -63,7 +61,8 @@ Exchange Rate in the payment entry should always be same as invoice (60), even i
 Suppose, default currency of the company is INR. You have an Paypal account for which Currency is USD. You receive payments in the paypal account and lets say, paypal transfers amount once in a week to your other bank account which is managed in INR. 
 
 Paypal account gets debited on different date with different exchange rate, but on transfer date the exchange rate can be different. Hence, there is generally Exchange Loss / Gain on the transfer entry.
-In the bank transfer entry, system sets exchange rate based on the average incoming exchange rate Paypal account. You need to calculate and enter Exchange Loss / Gain based on the average exchange rate and the exchange rate on the transfer date.
+In the bank transfer entry, system sets exchange rate of the credit account (Paypal) based on the average incoming exchange rate. This is to maintain Paypal balance properly in company currency. In case you modify the average exchange rate, you need to adjust the exchange rate manually in the future entries, so that balance in account currency and company currency are in sync.
+Then you should calculate and enter Exchange Loss / Gain based on the Paypal exchange rate and the exchange rate on the transfer date.
 
 Lets say, Paypal account debited by following amounts over the week, which has not been transferred to your other bank account.
 
