@@ -26,7 +26,7 @@ class PaymentRequest(Document):
 	def validate_currency(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		if ref_doc.currency != frappe.db.get_value("Account", self.payment_account, "account_currency"):
-			frappe.throw(_("Transaction currency is not simillar to Gateway Currency"))
+			frappe.throw(_("Transaction currency is not similar to Gateway Currency"))
 		
 	def on_submit(self):
 		if not self.mute_email:
@@ -48,11 +48,11 @@ class PaymentRequest(Document):
 		if self.make_sales_invoice:
 			from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 			si = make_sales_invoice(self.reference_name, ignore_permissions=True)
-			si = frappe.get_doc(si).insert(ignore_permissions=True)
+			si = si.insert(ignore_permissions=True)
 			si.submit()
 	
 	def send_payment_request(self):
-		self.payment_url = get_url("/api/method/erpnext.accounts.doctype.payment_request.payment_request.gererate_payemnt_request?name={0}".format(self.name))
+		self.payment_url = get_url("/api/method/erpnext.accounts.doctype.payment_request.payment_request.generate_payemnt_request?name={0}".format(self.name))
 		if self.payment_url:
 			frappe.db.set_value(self.doctype, self.name, "status", "Initiated")
 			
@@ -153,7 +153,7 @@ def make_payment_request(**args):
 		pr.submit()
 		
 		if args.cart:
-			gererate_payemnt_request(pr.name)
+			generate_payemnt_request(pr.name)
 			frappe.db.commit()
 		
 		if not args.cart:	
@@ -199,7 +199,7 @@ def get_print_format_list(ref_doctype):
 	}
 	
 @frappe.whitelist(allow_guest=True)
-def gererate_payemnt_request(name):
+def generate_payemnt_request(name):
 	doc = frappe.get_doc("Payment Request", name)
 	if doc.gateway == "PayPal":
 		from paypal_integration.express_checkout import set_express_checkout
