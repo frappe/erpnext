@@ -25,7 +25,7 @@ cur_frm.cscript.make_dashboard = function(doc) {
 	if(doc.__islocal)
 		return;
 	if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager"))
-		cur_frm.dashboard.set_headline('<span class="text-muted">Loading...</span>')
+		cur_frm.dashboard.set_headline('<span class="text-muted">' + __('Loading') + '</span>')
 
 	cur_frm.dashboard.add_doctype_badge("Supplier Quotation", "supplier");
 	cur_frm.dashboard.add_doctype_badge("Purchase Order", "supplier");
@@ -41,7 +41,7 @@ cur_frm.cscript.make_dashboard = function(doc) {
 		callback: function(r) {
 			if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager")) {
 				cur_frm.dashboard.set_headline(
-					__("Total Billing This Year: ") + "<b>"
+					__("Total billing this year") + ": <b>"
 					+ format_currency(r.message.billing_this_year, cur_frm.doc.party_account_currency)
 					+ '</b> / <span class="text-muted">' + __("Total Unpaid") + ": <b>"
 					+ format_currency(r.message.total_unpaid, cur_frm.doc.party_account_currency)
