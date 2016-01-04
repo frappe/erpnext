@@ -1,9 +1,18 @@
+{% extends "templates/web.html" %}
+
 {% block title %} {{ "Shopping Cart" }} {% endblock %}
 
 {% block header %}<h2>{{ _("My Cart") }}</h2>{% endblock %}
 
-{% block script %}{% include "templates/includes/cart.js" %}{% endblock %}
-{% block style %}{% include "templates/includes/cart.css" %}{% endblock %}
+{% block script %}
+<script>{% include "templates/includes/cart.js" %}</script>
+{% endblock %}
+
+{% block style %}
+<style>
+    {% include "templates/includes/cart.css" %}
+</style>
+{% endblock %}
 
 
 {% block header_actions %}
@@ -14,7 +23,7 @@
 {% endif %}
 {% endblock %}
 
-{% block content %}
+{% block page_content %}
 
 {% from "templates/includes/macros.html" import item_name_and_description %}
 

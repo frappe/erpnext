@@ -1,8 +1,10 @@
+{% extends "templates/web.html" %}
+
 {% block title %} {{ "My Profile" }} {% endblock %}
 
 {% block header %}<h2>My Profile</h2>{% endblock %}
 
-{% block content %}
+{% block page_content %}
 <div class="user-content" style="max-width: 500px;">
 	<div class="alert alert-warning" id="message" style="display: none;"></div>
 	<form>
@@ -26,7 +28,7 @@
 	</form>
 </div>
 <script>
-$(document).ready(function() {
+frappe.ready(function() {
 	$("#fullname").val(getCookie("full_name") || "");
 	$("#update_user").click(function() {
 		frappe.call({

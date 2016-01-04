@@ -18,8 +18,6 @@ class PaymentReconciliation(Document):
 		dr_or_cr = "credit_in_account_currency" if self.party_type == "Customer" \
 			else "debit_in_account_currency"
 
-		cond = self.check_condition()
-
 		bank_account_condition = "t2.against_account like %(bank_cash_account)s" \
 				if self.bank_cash_account else "1=1"
 
@@ -34,7 +32,6 @@ class PaymentReconciliation(Document):
 				and t2.party_type = %(party_type)s and t2.party = %(party)s
 				and t2.account = %(account)s and {dr_or_cr} > 0
 				and (t2.reference_type is null or t2.reference_type in ('', 'Sales Order', 'Purchase Order'))
-				{cond}
 				and (CASE
 					WHEN t1.voucher_type in ('Debit Note', 'Credit Note')
 					THEN 1=1
@@ -42,7 +39,6 @@ class PaymentReconciliation(Document):
 				END)
 			""".format(**{
 				"dr_or_cr": dr_or_cr,
-				"cond": cond,
 				"bank_account_condition": bank_account_condition,
 			}), {
 				"party_type": self.party_type,
@@ -158,8 +154,8 @@ class PaymentReconciliation(Document):
 			frappe.throw(_("Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row"))
 
 	def check_condition(self):
-		cond = " and posting_date >= {0}".format(frappe.db.escape(self.from_date)) if self.from_date else ""
-		cond += " and posting_date <= {0}".format(frappe.db.escape(self.to_date)) if self.to_date else ""
+		cond = " and posting_date >= '{0}'".format(frappe.db.escape(self.from_date)) if self.from_date else ""
+		cond += " and posting_date <= '{0}'".format(frappe.db.escape(self.to_date)) if self.to_date else ""
 
 		if self.party_type == "Customer":
 			dr_or_cr = "debit_in_account_currency"

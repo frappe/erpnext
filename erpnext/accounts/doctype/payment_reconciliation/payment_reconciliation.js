@@ -47,6 +47,11 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 
 	refresh: function() {
 		this.frm.disable_save();
+		this.toggle_primary_action();
+	},
+
+	onload_post_render: function() {
+		this.toggle_primary_action();
 	},
 
 	party: function() {
@@ -75,6 +80,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			method: 'get_unreconciled_entries',
 			callback: function(r, rt) {
 				me.set_invoice_options();
+				me.toggle_primary_action();
 			}
 		});
 
@@ -87,10 +93,11 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			method: 'reconcile',
 			callback: function(r, rt) {
 				me.set_invoice_options();
+				me.toggle_primary_action();
 			}
 		});
 	},
-	
+
 	set_invoice_options: function() {
 		var invoices = [];
 
@@ -107,6 +114,20 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 		});
 
 		refresh_field("payments");
+	},
+
+	toggle_primary_action: function() {
+		if ((this.frm.doc.payments || []).length) {
+			this.frm.fields_dict.reconcile.$input
+				&& this.frm.fields_dict.reconcile.$input.addClass("btn-primary");
+			this.frm.fields_dict.get_unreconciled_entries.$input
+				&& this.frm.fields_dict.get_unreconciled_entries.$input.removeClass("btn-primary");
+		} else {
+			this.frm.fields_dict.reconcile.$input
+				&& this.frm.fields_dict.reconcile.$input.removeClass("btn-primary");
+			this.frm.fields_dict.get_unreconciled_entries.$input
+				&& this.frm.fields_dict.get_unreconciled_entries.$input.addClass("btn-primary");
+		}
 	}
 
 });

@@ -15,6 +15,7 @@
     </div>
 </div>
 <script>
+frappe.ready(function() {
 	$("#footer-subscribe-button").click(function() {
 
 		if($("#footer-subscribe-email").val()) {
@@ -38,5 +39,6 @@
 		else
 			frappe.msgprint(frappe._("Please enter email address"))
 	});
+});
 </script>
 {% endif %}

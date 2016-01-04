@@ -1,11 +1,17 @@
+{% extends "templates/web.html" %}
+
 {% block header %}
 <h1>{{ doc.name }}</h1>
 <!-- <h6 class="text-muted">{{ doc._title or doc.doctype }}</h6> -->
 {% endblock %}
 
-{% block style %}{% include "templates/includes/order/order.css" %}{% endblock %}
+{% block style %}
+<style>
+    {% include "templates/includes/order/order.css" %}
+</style>
+{% endblock %}
 
-{% block content %}
+{% block page_content %}
 
 {% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description %}
 

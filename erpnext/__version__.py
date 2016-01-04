@@ -1,2 +1,2 @@
 from __future__ import unicode_literals
-__version__ = '6.15.1'
+__version__ = '6.16.0'
