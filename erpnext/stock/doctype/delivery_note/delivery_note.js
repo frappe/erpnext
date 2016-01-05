@@ -46,13 +46,13 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
 				this.show_general_ledger();
 			}
-			if (this.frm.has_perm("submit") && (doc.status !== "Closed") 
+			if (this.frm.has_perm("submit") && (doc.status !== "Closed")
 				&& this.frm.doc.__onload && this.frm.doc.__onload.has_return_entry) {
 					cur_frm.add_custom_button(__("Close"), this.close_delivery_note)
 			}
 		}
 
-		if(doc.__onload && !doc.__onload.billing_complete && doc.docstatus==1 
+		if(doc.__onload && !doc.__onload.billing_complete && doc.docstatus==1
 				&& !doc.is_return && doc.status!="Closed") {
 			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
 			var from_sales_invoice = false;
@@ -65,7 +65,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		}
 
 		if(doc.docstatus==1 && doc.status === "Closed" && this.frm.has_perm("submit")) {
-			cur_frm.add_custom_button(__('Re-open'), this.reopen_delivery_note)
+			cur_frm.add_custom_button(__('Reopen'), this.reopen_delivery_note)
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
 

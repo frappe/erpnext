@@ -60,7 +60,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					cur_frm.add_custom_button(__('Invoice'),
 						 this.make_purchase_invoice).addClass("btn-primary");
 				}
-				if (this.frm.has_perm("submit") && 
+				if (this.frm.has_perm("submit") &&
 					this.frm.doc.__onload && this.frm.doc.__onload.has_return_entry) {
 						cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt)
 				}
@@ -69,7 +69,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 
 
 		if(this.frm.doc.docstatus==1 && this.frm.doc.status === "Closed" && this.frm.has_perm("submit")) {
-			cur_frm.add_custom_button(__('Re-open'), this.reopen_purchase_receipt)
+			cur_frm.add_custom_button(__('Reopen'), this.reopen_purchase_receipt)
 		}
 
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");

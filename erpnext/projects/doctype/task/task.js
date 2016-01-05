@@ -31,12 +31,12 @@ frappe.ui.form.on("Task", {
 
 			if(frm.perm[0].write) {
 				if(frm.doc.status!=="Closed" && frm.doc.status!=="Cancelled") {
-					frm.add_custom_button("Close", function() {
+					frm.add_custom_button(__("Close"), function() {
 						frm.set_value("status", "Closed");
 						frm.save();
 					});
 				} else {
-					frm.add_custom_button("Reopen", function() {
+					frm.add_custom_button(__("Reopen"), function() {
 						frm.set_value("status", "Open");
 						frm.save();
 					});

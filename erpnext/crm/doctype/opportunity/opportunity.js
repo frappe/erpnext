@@ -90,12 +90,12 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	var frm = cur_frm;
 	if(frm.perm[0].write && doc.docstatus==0) {
 		if(frm.doc.status==="Open") {
-			frm.add_custom_button("Close", function() {
+			frm.add_custom_button(__("Close"), function() {
 				frm.set_value("status", "Closed");
 				frm.save();
 			});
 		} else {
-			frm.add_custom_button("Reopen", function() {
+			frm.add_custom_button(__("Reopen"), function() {
 				frm.set_value("status", "Open");
 				frm.save();
 			});

@@ -51,7 +51,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	filters: [
 		{fieldtype:"Select", label: __("Value or Qty"), fieldname: "value_or_qty",
-			options:["Value", "Quantity"],
+			options:[{label:__("Value"), value:"Value"}, {label:__("Quantity"), value:"Quantity"}],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
@@ -64,7 +64,13 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype:"Select", label: __("Range"), fieldname: "range",
-			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]}
+			options:[
+				{label:__("Daily"), value:"Daily"},
+				{label:__("Weekly"), value:"Weekly"},
+				{label:__("Monthly"), value:"Monthly"},
+				{label:__("Quarterly"), value:"Quarterly"},
+				{label:__("Yearly"), value:"Yearly"},
+			]}
 	],
 	setup_filters: function() {
 		var me = this;

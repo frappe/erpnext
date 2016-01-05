@@ -66,7 +66,7 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 		callback: function(r) {
 			if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager")) {
 				cur_frm.dashboard.set_headline(
-					__("Total Billing This Year: ") + "<b>"
+					__("Total billing this year") + ": <b>"
 					+ format_currency(r.message.billing_this_year, cur_frm.doc.party_account_currency)
 					+ '</b> / <span class="text-muted">' + __("Unpaid") + ": <b>"
 					+ format_currency(r.message.total_unpaid, cur_frm.doc.party_account_currency)
