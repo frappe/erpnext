@@ -216,13 +216,15 @@ class Company(Document):
 			frappe.db.sql("""delete from `tabItem Reorder` where warehouse in (%s)"""
 				% ', '.join(['%s']*len(warehouses)), tuple(warehouses))
 
-		for f in ["income_account", "expense_account"]:
-			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-				% (f, f, ', '.join(['%s']*len(accounts))), tuple(accounts))
+		if accounts:
+			for f in ["income_account", "expense_account"]:
+				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
+					% (f, f, ', '.join(['%s']*len(accounts))), tuple(accounts))
 
-		for f in ["selling_cost_center", "buying_cost_center"]:
-			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-				% (f, f, ', '.join(['%s']*len(cost_centers))), tuple(cost_centers))
+		if cost_centers:
+			for f in ["selling_cost_center", "buying_cost_center"]:
+				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
+					% (f, f, ', '.join(['%s']*len(cost_centers))), tuple(cost_centers))
 
 		# reset default company
 		frappe.db.sql("""update `tabSingles` set value=""

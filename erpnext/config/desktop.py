@@ -32,7 +32,8 @@ def get_data():
 			"icon": "icon-th",
 			"icon": "octicon octicon-credit-card",
 			"type": "page",
-			"link": "pos"
+			"link": "pos",
+			"label": _("POS")
 		},
 		"Projects": {
 			"color": "#8e44ad",
@@ -68,6 +69,7 @@ def get_data():
 			"force_show": True,
 			"icon": "octicon octicon-device-camera-video",
 			"type": "module",
-			"is_help": True
+			"is_help": True,
+			"label": _("Learn")
 		}
 	}

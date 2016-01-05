@@ -246,7 +246,7 @@ def insert_item_price(args):
 				"price_list_rate": price_list_rate
 			})
 			item_price.insert()
-			frappe.msgprint("Item Price added for {0} in Price List {1}".format(args.item_code,
+			frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
 				args.price_list))
 
 def get_price_list_rate_for(args, item_code):

@@ -82,24 +82,26 @@ def get_charts_for_country(country):
 	def _get_chart_name(content):
 		if content:
 			content = json.loads(content)
-			if content and content.get("is_active", "No") == "Yes" and content.get("disabled", "No") == "No":
+
+			if frappe.local.flags.allow_unverified_charts:
+				charts.append(content["name"])
+
+			elif content and content.get("is_active", "No") == "Yes" and content.get("disabled", "No") == "No":
 				charts.append(content["name"])
 
 	country_code = frappe.db.get_value("Country", country, "code")
 	if country_code:
-		path = os.path.join(os.path.dirname(__file__), "verified")
-		for fname in os.listdir(path):
-			if fname.startswith(country_code) and fname.endswith(".json"):
-				with open(os.path.join(path, fname), "r") as f:
-					_get_chart_name(f.read())
+		folders = ("verified",)
+		if frappe.local.flags.allow_unverified_charts:
+			folders = ("verified", "unverified")
 
-	# countries_use_OHADA_system = ["Benin", "Burkina Faso", "Cameroon", "Central African Republic", "Comoros",
-	# 	"Congo", "Ivory Coast", "Gabon", "Guinea", "Guinea Bissau", "Equatorial Guinea", "Mali", "Niger",
-	# 	"Replica of Democratic Congo", "Senegal", "Chad", "Togo"]
-	#
-	# if country in countries_use_OHADA_system:
-	# 	with open(os.path.join(os.path.dirname(__file__), "syscohada_syscohada_chart_template.json"), "r") as f:
-	# 		_get_chart_name(f.read())
+		for folder in folders:
+			path = os.path.join(os.path.dirname(__file__), folder)
+
+			for fname in os.listdir(path):
+				if fname.startswith(country_code) and fname.endswith(".json"):
+					with open(os.path.join(path, fname), "r") as f:
+						_get_chart_name(f.read())
 
 	if len(charts) != 1:
 		charts.append("Standard")

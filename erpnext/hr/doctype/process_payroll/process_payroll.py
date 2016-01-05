@@ -80,9 +80,9 @@ class ProcessPayroll(Document):
 
 
 	def create_log(self, ss_list):
-		log = "<p>No employee for the above selected criteria OR salary slip already created</p>"
+		log = "<p>" + _("No employee for the above selected criteria OR salary slip already created") + "</p>"
 		if ss_list:
-			log = "<b>Salary Slip Created For</b>\
+			log = "<b>" + _("Salary Slip Created") + "</b>\
 			<br><br>%s" % '<br>'.join(self.format_as_links(ss_list))
 		return log
 
