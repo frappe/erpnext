@@ -4,18 +4,13 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Search Record By Specific Field</title>
+	<title> Search Record By Specific Field </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
-
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
 
     
 	<link rel="shortcut icon"
@@ -25,15 +20,12 @@
 		href="/assets/img/favicon.ico"
 		type="image/x-icon">
     
-<meta name="name" content="Search Record By Specific Field" data-html-block="meta_block">
-<meta name="twitter:card" content="summary" data-html-block="meta_block">
-<meta name="og:type" content="article" data-html-block="meta_block">
-<meta name="og:title" content="Search Record By Specific Field" data-html-block="meta_block">
-<meta name="twitter:title" content="Search Record By Specific Field" data-html-block="meta_block">
-<meta name="description" content="" data-html-block="meta_block">
 
 		
-			<style></style></head>
+<style>
+
+</style>
+</head>
 <body data-path="user/manual/en/customize-erpnext/articles/search-record-by-specific-field">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
@@ -74,23 +66,25 @@
 	<!-- post login tools -->
 
 </ul>
-
 				
 			</div>
 		</div>
 	</nav>
-</header>
-<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
-                                
-                            </div>
-							<div class="container">
-                               <div class="page-container" id="page-search-record-by-specific-field" data-path="user/manual/en/customize-erpnext/articles/search-record-by-specific-field"
+</header><div class="hero-and-content">
+                        <div data-html-block="hero"></div>
+                        <div class="container" data-html-block="content">
+                        
+<div class="page-container" id="page-search-record-by-specific-field" data-path="user/manual/en/customize-erpnext/articles/search-record-by-specific-field"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
-                <div class="col-sm-8">
-                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+				<div class=" col-sm-12 ">
+					
+	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+	                    
+    
+    
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -99,40 +93,50 @@
 	</li>
 	
 </ul>
-</div>
-            		<div class="page-header-block" data-html-block="header"></div>
+
+    
+
+	                </div>
+					
+	        		<div class="page-header-block" data-html-block="header">
+	                    
+	        		</div>
                 </div>
-                <div class="col-sm-4">
-            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
-                </div>
+				
             </div>
-    		
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="search-record-by-specific-field" style="text-align: Left">
+	<article class="web-page-content" id="search-record-by-specific-field" styl
+
+    e="text-align: Left">
 	<h1>Search Record by Specific Field</h1>
 
-<p>While creating any document in ERPNext, you might have to select other record id in it (like selecting Customer in Quotation). For ease in selecting other record, you can search them based on value in various fields of that record. Search By functionality enables you searching and filtering records based on value in the specific fields of that record.</p>
+<p>While creating any document (say Sales Invoice), you have to select other document id in it (say Serial No). For ease in selection, you can also make value of oother field of that visible in the search result. Search By functionality enables to define field whos value will be visible in the search result.</p>
 
-<p>Let's consider an example to learn Search By functionality better. While creating Sales Order, we need to select Customer in it. If we need to filter search result of Customer for specific Customer Group, we should go about following these steps to achieve it.</p>
+<p>Let's assume that while creating Sales Invoice, you wish to see Serial No result, with respective Warehouse.</p>
 
-<h4>Search By in Customize Form</h4>
+<h4>Step 1: Customize Form</h4>
 
-<p>In the Customize Form tool, you will find field called Search Field. You should enter field names based on which we can search and filter result for this document.</p>
+<p><code>Setup &gt; Customize &gt; Customize Form</code></p>
 
-<p>Considering our scenario, we should update name of Customer Group field for Customer in the Customize Form.</p>
+<h4>Step 2: Select Document</h4>
 
-<p><img src="" alt="Search By in Customize Form" /></p>
+<p><code>Document Type = Serial No.</code></p>
+
+<h4>Step 3:  Search Field</h4>
+
+<p>Update Warehouse field name in the Search By field.</p>
+
+<p><img alt="Search By in Customize Form" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/search-by-1.png"></p>
 
 <h4>Searching in Another Record.</h4>
 
 <p>While creating transaction, to get filtered result for Customer, you should firstly click on search magnifier.</p>
 
-<p><img src="" alt="Search for master" /></p>
+<p><img alt="Search By in Customize Form" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/search-by-2.png"></p>
 
 <!-- markdown -->
-
 	</article>
 	
 </div>
@@ -140,19 +144,8 @@
     	</div>
 	</div>
 </div>
-                               
-<div class="page-container">
-	<div class="page-content">
-	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/customize-erpnext/articles/search-record-by-specific-field.md">
-			Improve this page
-		</a>
-	</div>
-	</div>
-</div>
-                            </div>
-                        
+
+                        </div>
                     </div>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
@@ -178,7 +171,7 @@
                                     Forum</a>
                                 </li>
                                 <li>
-                                    <a href="https://apps.frappe.io">
+                                    <a href="https://frappe.io/apps">
                                     Frappe Apps</a>
                                 </li>
                             </ul>
@@ -213,15 +206,22 @@
 	<!-- post login tools -->
 
 </ul>
-
 				</div>
 			</div>
 		</div>
 	</div>
 
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
 	<!-- js should be loaded in body! -->
-		<script>
-        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+	<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";
+    </script>
+    <script></script>
+
 
 	<!-- csrf_token --></body>
 </html>

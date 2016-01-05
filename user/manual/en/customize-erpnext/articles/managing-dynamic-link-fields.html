@@ -4,18 +4,13 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Managing Dynamic Link Fields</title>
+	<title> Managing Dynamic Link Fields </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
-
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
 
     
 	<link rel="shortcut icon"
@@ -25,18 +20,12 @@
 		href="/assets/img/favicon.ico"
 		type="image/x-icon">
     
-<meta name="name" content="Managing Dynamic Link Fields" data-html-block="meta_block">
-<meta name="twitter:card" content="summary" data-html-block="meta_block">
-<meta name="image" content="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_349.png" data-html-block="meta_block">
-<meta name="og:type" content="article" data-html-block="meta_block">
-<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_349.png" data-html-block="meta_block">
-<meta name="og:title" content="Managing Dynamic Link Fields" data-html-block="meta_block">
-<meta name="twitter:title" content="Managing Dynamic Link Fields" data-html-block="meta_block">
-<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_349.png" data-html-block="meta_block">
-<meta name="description" content="" data-html-block="meta_block">
 
 		
-			<style></style></head>
+<style>
+
+</style>
+</head>
 <body data-path="user/manual/en/customize-erpnext/articles/managing-dynamic-link-fields">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
@@ -77,23 +66,25 @@
 	<!-- post login tools -->
 
 </ul>
-
 				
 			</div>
 		</div>
 	</nav>
-</header>
-<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
-                                
-                            </div>
-							<div class="container">
-                               <div class="page-container" id="page-managing-dynamic-link-fields" data-path="user/manual/en/customize-erpnext/articles/managing-dynamic-link-fields"
+</header><div class="hero-and-content">
+                        <div data-html-block="hero"></div>
+                        <div class="container" data-html-block="content">
+                        
+<div class="page-container" id="page-managing-dynamic-link-fields" data-path="user/manual/en/customize-erpnext/articles/managing-dynamic-link-fields"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
-                <div class="col-sm-8">
-                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+				<div class=" col-sm-12 ">
+					
+	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+	                    
+    
+    
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -102,62 +93,68 @@
 	</li>
 	
 </ul>
-</div>
-            		<div class="page-header-block" data-html-block="header"></div>
+
+    
+
+	                </div>
+					
+	        		<div class="page-header-block" data-html-block="header">
+	                    
+	        		</div>
                 </div>
-                <div class="col-sm-4">
-            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
-                </div>
+				
             </div>
-    		
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="managing-dynamic-link-fields" style="text-align: Left">
+	<article class="web-page-content" id="managing-dynamic-link-fields" styl
+
+    e="text-align: Left">
 	<h1>Managing Dynamic Link Fields</h1>
 
-<p>Dynamic Link field is one which can search and hold value of any document/doctype. Let's consider an example to learn how Dynamic Link field can benefit us.</p>
+<p>Dynamic Link field is one which can search and hold value of any document/doctype. Let's consider an example to learn how Dynamic Link field works.</p>
 
-<p>While creating Opportunity or Quotation, we have to explicitly define if it is for Lead or Customer. Based on our selection (Lead/Customer), another link field shows up where we can select actual Lead or Customer for whom we are creating this Quotation.</p>
+<p>While creating Opportunity or Quotation, we have to explicitly define if it is for Lead or Customer. Based on our selection (Lead/Customer), another link field shows up where we can select actual Lead or Customer.</p>
 
-<p>If you set later field as Dynamic Link, where we select actual Lead or Customer, this field will be able to search Leads as well as Customers. Hence we need not insert separate link fields for Customer and Lead.</p>
+<p>If you set former field as Dynamic Link, where we select actual Lead or Customer, then the later field will be linked to master selected in the first field, i.e. Leads or Customers. Hence we need not insert separate link fields for Customer and Lead.</p>
 
-<p>Let's check steps to insert Custom Dynamic Field. For an instance, we will insert it under Journal Voucher Form.</p>
+<p>Below are the steps to insert Custom Dynamic Field. For an instance, we will insert Dynamic Link Field in Journal Entry.</p>
 
-<h4>Insert Link Field for Doctype</h4>
+<h4>Step 1: Insert Link Field for Doctype</h4>
 
 <p>Firstly we will create a link field which will be linked to the Doctype.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_349.png" alt="Custom Link Field" /></p>
+<p><img alt="Custom Link Field" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/dynamic-field-1.gif"></p>
 
-<p>By <strong>Doctype</strong> mentioned in the Option field, we mean parent Doctype. So, just like Quotation is one Doctype, which has multiple Quotation under it. Same way, Doctype is also a Doctype which has Sales Order Doctype, Purchase Order Doctype and other form's doctype created under it as child Doctype.</p>
+<p>By <strong>Doctype</strong> mentioned in the Option field, we mean parent Doctype. So, just like Quotation is one Doctype, which has multiple Quotation under it. Same way, Doctype is also a Doctype which has Sales Order, Purchase Order and other doctypes created as Doctype records.</p>
 
 <p>-- Doctype<br>
------ Sales Order<br>
------ Purchase Invoice<br>
------ Quotation<br>
------ Sales Invoice<br>
------ Employee<br>
------ Production Order<br>
-and so on, till all the forms/document of ERPNext is covered.</p>
+---- Sales Order<br>
+---- Purchase Invoice<br>
+---- Quotation<br>
+---- Sales Invoice<br>
+---- Employee<br>
+---- Production Order<br>
+.. and so on.</p>
 
-<p>So linking this field with parent Doctype master list all the child doctypes/forms.</p>
+<p>So linking this field with parent Doctype will list all the Doctype records.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_352.png" alt="journal Voucher Link Field" /></p>
+<p><img alt="journal Voucher Link Field" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/dynamic-field-2.png"></p>
 
-<h4>Insert Dynamic Link Field</h4>
+<h4>Step 2: Insert Dynamic Link Field</h4>
 
-<p>It will be "Dynamic Link" for Field Type, and field name of Doctype field mentioned in its Option field.</p>
+<p>This custom field's type will be "Dynamic Link". In the Option field, name of Doctype link field will be mentioned.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_350.png" alt="Custom Dynamic Field" /></p>
+<p><img alt="Custom Dynamic Field" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/dynamic-field-3.gif"></p>
 
-<p>This field will allow us to select document id, based on value selected in the Doctype link field. For example, if we select Sales Order in the prior field, this field will list all the Sales Orders id. If we select Purchase Invoice in the prior field, this field will render all the Purchase Order for our selection.</p>
+<p>This field will allow selecting document id, based on value selected in the Doctype link field. For example, if we select Sales Order in the prior field, Dynamic Link field will list all the Sales Orders ids.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_353.png" alt="Journal Voucher Dynamic Field " /></p>
+<p><img alt="Custom Dynamic Field" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/dynamic-field-4.gif"></p>
 
-<h4>Customizing options in the Doctype Link field</h4>
+<div class="well">
+**Customizing options in the Doctype Link field**
 
-<p>Bydefault, Docytpe link field will provide all the forms/doctypes for selection. If you wish this field to show certain specific doctypes in the search result, you will need to write Custom Script for it.</p>
+Bydefault, Docytpe link field will provide all the forms/doctypes for selection. If you wish this field to show certain specific doctypes in the search result, you will need to write Custom Script for it.</div>
 
 <!-- markdown -->
 	</article>
@@ -167,19 +164,8 @@ and so on, till all the forms/document of ERPNext is covered.</p>
     	</div>
 	</div>
 </div>
-                               
-<div class="page-container">
-	<div class="page-content">
-	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/customize-erpnext/articles/managing-dynamic-link-fields.md">
-			Improve this page
-		</a>
-	</div>
-	</div>
-</div>
-                            </div>
-                        
+
+                        </div>
                     </div>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
@@ -205,7 +191,7 @@ and so on, till all the forms/document of ERPNext is covered.</p>
                                     Forum</a>
                                 </li>
                                 <li>
-                                    <a href="https://apps.frappe.io">
+                                    <a href="https://frappe.io/apps">
                                     Frappe Apps</a>
                                 </li>
                             </ul>
@@ -240,15 +226,22 @@ and so on, till all the forms/document of ERPNext is covered.</p>
 	<!-- post login tools -->
 
 </ul>
-
 				</div>
 			</div>
 		</div>
 	</div>
 
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
 	<!-- js should be loaded in body! -->
-		<script>
-        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+	<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";
+    </script>
+    <script></script>
+
 
 	<!-- csrf_token --></body>
 </html>

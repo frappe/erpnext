@@ -4,18 +4,13 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Recurring Order And Invoices</title>
+	<title> Recurring Order And Invoices </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
-
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
 
     
 	<link rel="shortcut icon"
@@ -25,18 +20,12 @@
 		href="/assets/img/favicon.ico"
 		type="image/x-icon">
     
-<meta name="name" content="Recurring Order And Invoices" data-html-block="meta_block">
-<meta name="twitter:card" content="summary" data-html-block="meta_block">
-<meta name="image" content="{{ docs_base_path }}/assets/img/articles/is-recurring.gif" data-html-block="meta_block">
-<meta name="og:type" content="article" data-html-block="meta_block">
-<meta name="twitter:image:src" content="{{ docs_base_path }}/assets/img/articles/is-recurring.gif" data-html-block="meta_block">
-<meta name="og:title" content="Recurring Order And Invoices" data-html-block="meta_block">
-<meta name="twitter:title" content="Recurring Order And Invoices" data-html-block="meta_block">
-<meta name="og:image" content="{{ docs_base_path }}/assets/img/articles/is-recurring.gif" data-html-block="meta_block">
-<meta name="description" content="" data-html-block="meta_block">
 
 		
-			<style></style></head>
+<style>
+
+</style>
+</head>
 <body data-path="user/manual/en/accounts/articles/recurring-order-and-invoices">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
@@ -77,23 +66,25 @@
 	<!-- post login tools -->
 
 </ul>
-
 				
 			</div>
 		</div>
 	</nav>
-</header>
-<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
-                                
-                            </div>
-							<div class="container">
-                               <div class="page-container" id="page-recurring-order-and-invoices" data-path="user/manual/en/accounts/articles/recurring-order-and-invoices"
+</header><div class="hero-and-content">
+                        <div data-html-block="hero"></div>
+                        <div class="container" data-html-block="content">
+                        
+<div class="page-container" id="page-recurring-order-and-invoices" data-path="user/manual/en/accounts/articles/recurring-order-and-invoices"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
-                <div class="col-sm-8">
-                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+				<div class=" col-sm-12 ">
+					
+	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+	                    
+    
+    
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -102,21 +93,56 @@
 	</li>
 	
 </ul>
-</div>
-            		<div class="page-header-block" data-html-block="header"></div>
+
+    
+
+	                </div>
+					
+	        		<div class="page-header-block" data-html-block="header">
+	                    
+	        		</div>
                 </div>
-                <div class="col-sm-4">
-            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
-                </div>
+				
             </div>
-    		
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="recurring-order-and-invoices" style="text-align: Left">
+	<article class="web-page-content" id="recurring-order-and-invoices" styl
+
+    e="text-align: Left">
 	<h1>Recurring Orders and Invoices</h1>
 
-If you have a contract with a <b>Customer</b> where you bill the Customer on a monthly, quarterly, half-yearly or annual basis, you should use recurring feature in orders and invoices. <br><br><h4>Scenario:</h4><br>Subscription for your hosted ERPNext account requires yearly renewal. We use Sales Order for generating proforma invoices. To automate proforma invoicing for renewal, we set original Sales Order as recurring. Recurring proforma invoice is created automatically just before customer's account is about to expire, and requires renewal. This recurring Proforma Invoice is also emailed automatically to the customer.<br><br>Feature of setting document as recurring is available in Sales Order, Sales Invoice, Purchase Order and Purchase Invoice.<br><br>Option to set document as recurring will be visible only after submission. Recurring is last section in document. Check <b>Is Recurring</b> to set document as recurring.<br><br><img src="{{ docs_base_path }}/assets/img/articles/is-recurring.gif"><br><br><b>From Date and To Date: </b>This defines contract period with the customer.<br><br><b>Repeat on the Day of Month: </b>If recurring type is set as Monthly, then it will be day of the month on which&nbsp; recurring invoice will be generated.<br><br><b>End Date:</b> Date after which auto-creation of recurring invoice will be stopped.<br><br><b>Notification Email Address:</b> Email Addresses (separated by comma) on which recurring invoice will be emailed when auto-generated.<br><br><b>Recurring ID: </b>Recurring ID will be original document id which will be linked to all corresponding recurring document. For example, original Sales Invoice's id will be updated into all recurring Sales Invoices.<br><br><b>Recurring Print Format:</b> Select a print format to define document view which should be emailed to customer.<br><br><h4>Exception Handling:</h4><p>In a situation where recurring invoice is not created successfully, user with System Manager role is notified about it via email. Also the document on which recurring event failed, "Is Recurring" field is unchecked for it. This means system doesn't try creating recurring invoice for that document again.</p><p>Failure in creation of recurring invoice could be due to multiple reasons like wrong email id mentioned in the Email Notification field in Recurring section etc.</p><p>On receipt of notification, if cause of failure is fixed (like correcting email id) within 24 hours, then recurring invoice will be generated automatically. If issue is not fixed within the said time, then document should be created for that month/year manually.<br></p>
+<p>If you have a contract with a <strong>Customer</strong> where you bill the Customer on a monthly, quarterly, half-yearly or annual basis, you should use recurring feature in orders and invoices. </p>
+
+<h4>Scenario:</h4>
+
+<p>Subscription for your hosted ERPNext account requires yearly renewal. We use Sales Order for generating proforma invoices. To automate proforma invoicing for renewal, we set original Sales Order as recurring. Recurring proforma invoice is created automatically just before customer's account is about to expire, and requires renewal. This recurring Proforma Invoice is also emailed automatically to the customer.</p>
+
+<p>Feature of setting document as recurring is available in Sales Order, Sales Invoice, Purchase Order and Purchase Invoice.</p>
+
+<p>Option to set document as recurring will be visible only after submission. Recurring is last section in document. Check <strong>Is Recurring</strong> to set document as recurring.</p>
+
+<p><img alt="Recurring Invoice" class="screenshot" src="{{ docs_base_path }}/assets/img/articles/is-recurring.gif"></p>
+
+<p><strong>From Date and To Date:</strong> This defines contract period with the customer.</p>
+
+<p><strong>Repeat on the Day of Month:</strong> If recurring type is set as Monthly, then it will be day of the month on which&nbsp; recurring invoice will be generated.</p>
+
+<p><strong>End Date:</strong> Date after which auto-creation of recurring invoice will be stopped.</p>
+
+<p><strong>Notification Email Address:</strong> Email Addresses (separated by comma) on which recurring invoice will be emailed when auto-generated.</p>
+
+<p><strong>Recurring ID:</strong> Recurring ID will be original document id which will be linked to all corresponding recurring document. For example, original Sales Invoice's id will be updated into all recurring Sales Invoices.</p>
+
+<p><strong>Recurring Print Format:</strong> Select a print format to define document view which should be emailed to customer.</p>
+
+<h4>Exception Handling:</h4>
+
+<p>In a situation where recurring invoice is not created successfully, user with System Manager role is notified about it via email. Also the document on which recurring event failed, "Is Recurring" field is unchecked for it. This means system doesn't try creating recurring invoice for that document again.</p>
+
+<p>Failure in creation of recurring invoice could be due to multiple reasons like wrong email id mentioned in the Email Notification field in Recurring section etc.</p>
+
+<p>On receipt of notification, if cause of failure is fixed (like correcting email id) within 24 hours, then recurring invoice will be generated automatically. If issue is not fixed within the said time, then document should be created for that month/year manually.</p>
 	</article>
 	
 </div>
@@ -124,19 +150,8 @@ If you have a contract with a <b>Customer</b> where you bill the Customer on a m
     	</div>
 	</div>
 </div>
-                               
-<div class="page-container">
-	<div class="page-content">
-	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/articles/recurring-order-and-invoices.html">
-			Improve this page
-		</a>
-	</div>
-	</div>
-</div>
-                            </div>
-                        
+
+                        </div>
                     </div>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
@@ -162,7 +177,7 @@ If you have a contract with a <b>Customer</b> where you bill the Customer on a m
                                     Forum</a>
                                 </li>
                                 <li>
-                                    <a href="https://apps.frappe.io">
+                                    <a href="https://frappe.io/apps">
                                     Frappe Apps</a>
                                 </li>
                             </ul>
@@ -197,15 +212,22 @@ If you have a contract with a <b>Customer</b> where you bill the Customer on a m
 	<!-- post login tools -->
 
 </ul>
-
 				</div>
 			</div>
 		</div>
 	</div>
 
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
 	<!-- js should be loaded in body! -->
-		<script>
-        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+	<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";
+    </script>
+    <script></script>
+
 
 	<!-- csrf_token --></body>
 </html>

@@ -4,18 +4,13 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Making Custom Reports In Erpnext</title>
+	<title> Making Custom Reports In Erpnext </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
-
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
 
     
 	<link rel="shortcut icon"
@@ -25,18 +20,12 @@
 		href="/assets/img/favicon.ico"
 		type="image/x-icon">
     
-<meta name="name" content="Making Custom Reports In Erpnext" data-html-block="meta_block">
-<meta name="twitter:card" content="summary" data-html-block="meta_block">
-<meta name="image" content="https://frappe.github.io/erpnext/assets/img/articles/Selection_046.png" data-html-block="meta_block">
-<meta name="og:type" content="article" data-html-block="meta_block">
-<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/articles/Selection_046.png" data-html-block="meta_block">
-<meta name="og:title" content="Making Custom Reports In Erpnext" data-html-block="meta_block">
-<meta name="twitter:title" content="Making Custom Reports In Erpnext" data-html-block="meta_block">
-<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/articles/Selection_046.png" data-html-block="meta_block">
-<meta name="description" content="" data-html-block="meta_block">
 
 		
-			<style></style></head>
+<style>
+
+</style>
+</head>
 <body data-path="user/manual/en/customize-erpnext/articles/making-custom-reports-in-erpnext">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
@@ -77,23 +66,25 @@
 	<!-- post login tools -->
 
 </ul>
-
 				
 			</div>
 		</div>
 	</nav>
-</header>
-<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
-                                
-                            </div>
-							<div class="container">
-                               <div class="page-container" id="page-making-custom-reports-in-erpnext" data-path="user/manual/en/customize-erpnext/articles/making-custom-reports-in-erpnext"
+</header><div class="hero-and-content">
+                        <div data-html-block="hero"></div>
+                        <div class="container" data-html-block="content">
+                        
+<div class="page-container" id="page-making-custom-reports-in-erpnext" data-path="user/manual/en/customize-erpnext/articles/making-custom-reports-in-erpnext"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
-                <div class="col-sm-8">
-                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+				<div class=" col-sm-12 ">
+					
+	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+	                    
+    
+    
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -102,71 +93,47 @@
 	</li>
 	
 </ul>
-</div>
-            		<div class="page-header-block" data-html-block="header"></div>
+
+    
+
+	                </div>
+					
+	        		<div class="page-header-block" data-html-block="header">
+	                    
+	        		</div>
                 </div>
-                <div class="col-sm-4">
-            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
-                </div>
+				
             </div>
-    		
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="making-custom-reports-in-erpnext" style="text-align: Left">
+	<article class="web-page-content" id="making-custom-reports-in-erpnext" styl
+
+    e="text-align: Left">
 	<h1>Reports in ERPNext</h1>
 
 <p>There are three kind of reports in ERPNext.</p>
 
-<h3>1. Query Report</h3>
+<h3>1. Report Builder</h3>
 
-<p>Query Report is written in SQL which pull values from database and fetch in the report. Though SQL queries can be written from front end, like HTML for customer print format, its restricted from hosted users. Because it will allow users with no access to specific report to query data from query report.</p>
+<p>Report Builder is an in-built report customization tool in ERPNext. This allows you to define specific fields of the form which shall be added in the report. Also you can set required filters, sorting and give preferred name to report.</p>
 
-<p>Check Purchase Order Item to be Received report in Stock module for example of Query report.</p>
+<iframe width="660" height="371" src="https://www.youtube.com/embed/y0o5iYZOioU" frameborder="0" allowfullscreen></iframe>
 
-<h3>2. Script Report</h3>
+<h3>2. Query Report</h3>
 
-<p>Script Reports are written in Python and stored on server side. These are complex reports which involves exception of logic and calculation. Since these reports are written on server side, its not available for hosted users.</p>
+<p>Query Report is written in SQL which pull values from account's database and fetch in the report. Though SQL queries can be written from front end, like HTML, its restricted in hosted users. Because it will allow users with no access to specific report to query data directly from the database.</p>
 
-<p>Check Financial Analytics report in Accounts module for example of Script Report.</p>
+<p>Check Purchase Order Item to be Received report in Stock module for example of Query report. Click <a href="https://frappe.github.io/frappe/user/guides/reports-and-printing/how-to-make-query-report.html">here</a> to learn how to create Query Report.</p>
 
-<h3>3. Report Builder</h3>
+<h3>3. Script Report</h3>
 
-<p>Report Builder is an in-built report customization tool in ERPNext. This allows you to define fields of the form which shall appear as column in the report. Also you can set required filters and do sorting as per your preference.</p>
+<p>Script Reports are written in Python and stored on server side. These are complex reports which involves logic and calculation. Since these reports are written on server side, customizing it from hosted account is not possible. </p>
 
-<p>Each form in ERPNext has Report Builder option in its list view.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_046.png" alt="Report Builder Icon" /></p>
-
-<h4>Adding Column in Report</h4>
-
-<p>Go to Menu and click on Pick Column option to select field which should be added as column in the report. You can also select the field from the child table (eg. Item table in Sales Invoice) of the form.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_050.png" alt="Report Pick Column" /></p>
-
-<h4>Applying Filters</h4>
-
-<p>All the fields of the form will be applicable for setting filter as well.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_238.png" alt="Report Pick Column" /></p>
-
-<h4>Sorting</h4>
-
-<p>Select field based on which report will be sorted.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_052f7b160.png" alt="Report Pick Column" /></p>
-
-<h4>Save Report</h4>
-
-<p>Go to Menu and click on Save button to have this report saved with selected column, filters and sorting.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_241.png" alt="Report Pick Column" /></p>
-
-<p>Saved reports appear under Customize section in the module's home page. Customize Report section only appear if you have custom reports being saved for documents of that module.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_242.png" alt="Report Pick Column" /></p>
+<p>Check Financial Analytics report in Accounts module for example of Script Report. Click <a href="https://frappe.github.io/frappe/user/guides/reports-and-printing/how-to-make-script-reports.html">here</a> to learn how to create Script Report.</p>
 
 <!-- markdown --> 
+
 	</article>
 	
 </div>
@@ -174,19 +141,8 @@
     	</div>
 	</div>
 </div>
-                               
-<div class="page-container">
-	<div class="page-content">
-	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/customize-erpnext/articles/making-custom-reports-in-erpnext.md">
-			Improve this page
-		</a>
-	</div>
-	</div>
-</div>
-                            </div>
-                        
+
+                        </div>
                     </div>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
@@ -212,7 +168,7 @@
                                     Forum</a>
                                 </li>
                                 <li>
-                                    <a href="https://apps.frappe.io">
+                                    <a href="https://frappe.io/apps">
                                     Frappe Apps</a>
                                 </li>
                             </ul>
@@ -247,15 +203,22 @@
 	<!-- post login tools -->
 
 </ul>
-
 				</div>
 			</div>
 		</div>
 	</div>
 
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
 	<!-- js should be loaded in body! -->
-		<script>
-        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+	<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";
+    </script>
+    <script></script>
+
 
 	<!-- csrf_token --></body>
 </html>

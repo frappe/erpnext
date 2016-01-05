@@ -4,18 +4,13 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Difference Entry Button</title>
+	<title> Difference Entry Button </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
-
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
 
     
 	<link rel="shortcut icon"
@@ -25,18 +20,12 @@
 		href="/assets/img/favicon.ico"
 		type="image/x-icon">
     
-<meta name="name" content="Difference Entry Button" data-html-block="meta_block">
-<meta name="twitter:card" content="summary" data-html-block="meta_block">
-<meta name="image" content="{{ docs_base_path }}/assets/img/articles/Selection_002.png" data-html-block="meta_block">
-<meta name="og:type" content="article" data-html-block="meta_block">
-<meta name="twitter:image:src" content="{{ docs_base_path }}/assets/img/articles/Selection_002.png" data-html-block="meta_block">
-<meta name="og:title" content="Difference Entry Button" data-html-block="meta_block">
-<meta name="twitter:title" content="Difference Entry Button" data-html-block="meta_block">
-<meta name="og:image" content="{{ docs_base_path }}/assets/img/articles/Selection_002.png" data-html-block="meta_block">
-<meta name="description" content="" data-html-block="meta_block">
 
 		
-			<style></style></head>
+<style>
+
+</style>
+</head>
 <body data-path="user/manual/en/accounts/articles/difference-entry-button">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
@@ -77,23 +66,25 @@
 	<!-- post login tools -->
 
 </ul>
-
 				
 			</div>
 		</div>
 	</nav>
-</header>
-<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
-                                
-                            </div>
-							<div class="container">
-                               <div class="page-container" id="page-difference-entry-button" data-path="user/manual/en/accounts/articles/difference-entry-button"
+</header><div class="hero-and-content">
+                        <div data-html-block="hero"></div>
+                        <div class="container" data-html-block="content">
+                        
+<div class="page-container" id="page-difference-entry-button" data-path="user/manual/en/accounts/articles/difference-entry-button"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
-                <div class="col-sm-8">
-                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+				<div class=" col-sm-12 ">
+					
+	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+	                    
+    
+    
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -102,32 +93,36 @@
 	</li>
 	
 </ul>
-</div>
-            		<div class="page-header-block" data-html-block="header"></div>
+
+    
+
+	                </div>
+					
+	        		<div class="page-header-block" data-html-block="header">
+	                    
+	        		</div>
                 </div>
-                <div class="col-sm-4">
-            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
-                </div>
+				
             </div>
-    		
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="difference-entry-button" style="text-align: Left">
-	<h1>Difference Entry Button </h1>
+	<article class="web-page-content" id="difference-entry-button" styl
 
-As per accounting standards Debit amount must be equal to Credit amount. If these amounts are not equal, then entry will not be executed in system. Also system will through validation message. And difference amount will reflect under Difference (Dr-Cr) field.
-<br>
-<img src="{{ docs_base_path }}/assets/img/articles/Selection_002.png"><br>
-When you press 'Make Difference Entry' button, one new Row will be added under Journal Entry Accounts table with difference amount. You can edit that row to select appropriate account.
-<br>
-<img src="{{ docs_base_path }}/assets/img/articles/Selection_003.png">
-<br>
-<br>On selecting account under new row, you will be able to submit Journal Entry.
-<br>
-<br>
-<div class="well">If debit and credit amount entered for accounts are already tallying, then you need not click on "Make Difference Entry" button.</div>
+    e="text-align: Left">
+	<h1>Difference Entry</h1>
 
+<p>As per accounting standards, debit in a accounting entry must be equal to credit. If not, system does allow submission of accounting transaction, thereby stops ledger posting. In ERPNext, on saving accounting entry, system validates if debit and credit is tallying.</p>
+
+<p><img alt="Debit Credit Not Equal" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/difference-entry-1.png"></p>
+
+<p>To have entry balanced, you should one more row, select another account, and update different amount in it. Or you can add difference amount in one of the Account's row itself.</p>
+
+<p>On clicking 'Make Difference Entry' button, new Row will be added under Journal Entry Accounts table, with difference amount. You can edit that row to select appropriate Account.</p>
+
+<p><img alt="Debit Credit Not Equal" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/difference-entry-2.gif"></p>
+
+<p>On selecting account under new row, debit and credit an entry will be tallying, and you should be able to submit Journal Entri correctly.</p>
 
 <!-- markdown -->
 	</article>
@@ -137,19 +132,8 @@ When you press 'Make Difference Entry' button, one new Row will be added under J
     	</div>
 	</div>
 </div>
-                               
-<div class="page-container">
-	<div class="page-content">
-	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/articles/difference-entry-button.html">
-			Improve this page
-		</a>
-	</div>
-	</div>
-</div>
-                            </div>
-                        
+
+                        </div>
                     </div>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
@@ -175,7 +159,7 @@ When you press 'Make Difference Entry' button, one new Row will be added under J
                                     Forum</a>
                                 </li>
                                 <li>
-                                    <a href="https://apps.frappe.io">
+                                    <a href="https://frappe.io/apps">
                                     Frappe Apps</a>
                                 </li>
                             </ul>
@@ -210,15 +194,22 @@ When you press 'Make Difference Entry' button, one new Row will be added under J
 	<!-- post login tools -->
 
 </ul>
-
 				</div>
 			</div>
 		</div>
 	</div>
 
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
 	<!-- js should be loaded in body! -->
-		<script>
-        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+	<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";
+    </script>
+    <script></script>
+
 
 	<!-- csrf_token --></body>
 </html>

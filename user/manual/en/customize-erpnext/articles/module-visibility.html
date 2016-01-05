@@ -4,18 +4,13 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Module Visibility</title>
+	<title> Module Visibility </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
-
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
 
     
 	<link rel="shortcut icon"
@@ -25,18 +20,12 @@
 		href="/assets/img/favicon.ico"
 		type="image/x-icon">
     
-<meta name="name" content="Module Visibility" data-html-block="meta_block">
-<meta name="twitter:card" content="summary" data-html-block="meta_block">
-<meta name="image" content="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_223.png" data-html-block="meta_block">
-<meta name="og:type" content="article" data-html-block="meta_block">
-<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_223.png" data-html-block="meta_block">
-<meta name="og:title" content="Module Visibility" data-html-block="meta_block">
-<meta name="twitter:title" content="Module Visibility" data-html-block="meta_block">
-<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_223.png" data-html-block="meta_block">
-<meta name="description" content="" data-html-block="meta_block">
 
 		
-			<style></style></head>
+<style>
+
+</style>
+</head>
 <body data-path="user/manual/en/customize-erpnext/articles/module-visibility">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
@@ -77,23 +66,25 @@
 	<!-- post login tools -->
 
 </ul>
-
 				
 			</div>
 		</div>
 	</nav>
-</header>
-<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
-                                
-                            </div>
-							<div class="container">
-                               <div class="page-container" id="page-module-visibility" data-path="user/manual/en/customize-erpnext/articles/module-visibility"
+</header><div class="hero-and-content">
+                        <div data-html-block="hero"></div>
+                        <div class="container" data-html-block="content">
+                        
+<div class="page-container" id="page-module-visibility" data-path="user/manual/en/customize-erpnext/articles/module-visibility"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
-                <div class="col-sm-8">
-                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+				<div class=" col-sm-12 ">
+					
+	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+	                    
+    
+    
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -102,33 +93,40 @@
 	</li>
 	
 </ul>
-</div>
-            		<div class="page-header-block" data-html-block="header"></div>
+
+    
+
+	                </div>
+					
+	        		<div class="page-header-block" data-html-block="header">
+	                    
+	        		</div>
                 </div>
-                <div class="col-sm-4">
-            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
-                </div>
+				
             </div>
-    		
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="module-visibility" style="text-align: Left">
+	<article class="web-page-content" id="module-visibility" styl
+
+    e="text-align: Left">
 	<h1>Module Visibility</h1>
 
-<p>If you have permission on specific module, but it is still not visible to you, following is how you should go about checking setting to make it visible again.</p>
+<p>If you have permission on specific module, but it is still not visible, following are the possibilities of issues you should look at. Let's consider a scenario that user is permission of Website module, but not able to access it.</p>
 
-<p>As step zero, reassure that you have role assigned which is required for accessing Website and Shopping Cart module. For modules in question, you should have "Website Manager" role assigned. If permissions has been customized in your account, check Role Permission Manager to know which Role has permission on Website and Shopping Cart module.</p>
+<p>As step zero, ensure that you have "Website Manager" role assigned. It is a standard Role which grants permission on Website module. If permissions has been customized in your account, check Role Permission Manager to know which Role has permission on Website, and then check if same Role is assigned to User.</p>
 
-<p>If modules are hidden in-spite of assignment of required permission, then you should check if Website and Shopping Cart module is not disabled from All Application option on your desk/home page.</p>
+<p>If module is hidden in-spite of assignment of required Role, then you should check if Website is not disabled from All Application.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_223.png" alt="All Applications" /></p>
+<p><img alt="All Applications" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/module-visibility-1.gif"></p>
 
-<p>If modules are still not visible, check if it is hidden by System Manager from Show/Hide Modules option in the Setup module.</p>
+<p>If Website is checked in All Application, but still not visible for the User, check if is hidden by System Manager. In the Setup module, feature called Show/Hide Modules allows System Manager to hide specific module from all the Users.</p>
 
-<div class="well">Setup &gt;&gt; Settings &gt;&gt; Show / Hide Modules</div>Ensure required module are checked, and not disabled in this page. If you just enabled/activated it, update Show/Hide Module page, and check your home page after Help &gt;&gt; Clear Cache.
+<p><code>Setup &gt; Settings &gt; Show / Hide Modules</code></p>
 
-<div class="well">Note: In this help page, Website and Shopping Cart module is considered as an example. You can troubleshoot visibility issues for other modules following same steps.</div>
+<p>Ensure Website module is checked. If you just enabled/activated it, update Show/Hide Module page, and then Reload tab of your ERPNext account. After reload, changes made in the Setup module will be applied and will be visible in the system.</p>
+
+<p>On the same lines, you can check for the visibility issue of other modules as well.</p>
 
 <!-- markdown -->
 	</article>
@@ -138,19 +136,8 @@
     	</div>
 	</div>
 </div>
-                               
-<div class="page-container">
-	<div class="page-content">
-	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/customize-erpnext/articles/module-visibility.md">
-			Improve this page
-		</a>
-	</div>
-	</div>
-</div>
-                            </div>
-                        
+
+                        </div>
                     </div>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
@@ -176,7 +163,7 @@
                                     Forum</a>
                                 </li>
                                 <li>
-                                    <a href="https://apps.frappe.io">
+                                    <a href="https://frappe.io/apps">
                                     Frappe Apps</a>
                                 </li>
                             </ul>
@@ -211,15 +198,22 @@
 	<!-- post login tools -->
 
 </ul>
-
 				</div>
 			</div>
 		</div>
 	</div>
 
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
 	<!-- js should be loaded in body! -->
-		<script>
-        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+	<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";
+    </script>
+    <script></script>
+
 
 	<!-- csrf_token --></body>
 </html>
