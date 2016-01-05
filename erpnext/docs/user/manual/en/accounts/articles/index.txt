@@ -11,6 +11,5 @@ managing-transactions-in-multiple-currency
 fiscal-year-creation
 post-dated-cheque-entry
 update-stock-option-in-sales-invoice
-updating-opening-balance-in-accounts-using-temporary-account
 what-is-the-differences-of-total-and-valuation-in-tax-and-charges
 withdrawing-salary-from-owners-equity-account
