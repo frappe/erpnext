@@ -24,8 +24,9 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 		erpnext.toggle_naming_series();
 		if(!this.frm.doc.__islocal && this.frm.doc.__onload &&
 			!this.frm.doc.__onload.salary_structure_exists) {
-				cur_frm.add_custom_button(__('Make Salary Structure'), function() {
-					me.make_salary_structure(this); }, frappe.boot.doctype_icons["Salary Structure"]);
+				cur_frm.add_custom_button(__('Salary Structure'), function() {
+					me.make_salary_structure(this); }, __("Make"));
+				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 	},
 

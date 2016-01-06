@@ -97,8 +97,9 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 
 		if(doc.docstatus==1 && frappe.model.can_create("Journal Entry") &&
 			cint(doc.total_amount_reimbursed) < cint(doc.total_sanctioned_amount))
-			 cur_frm.add_custom_button(__("Make Bank Entry"),
-			 	cur_frm.cscript.make_bank_entry, frappe.boot.doctype_icons["Journal Entry"]);
+			 cur_frm.add_custom_button(__("Bank Entry"),
+			 	cur_frm.cscript.make_bank_entry, __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 	}
 }
 

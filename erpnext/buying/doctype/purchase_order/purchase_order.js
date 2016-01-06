@@ -37,49 +37,54 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		}
 
 		cur_frm.set_df_property("drop_ship", "hidden", !is_drop_ship);
-
+		
 		if(doc.docstatus == 1 && !in_list(["Stopped", "Closed", "Delivered"], doc.status)) {
 			if (this.frm.has_perm("submit")) {
 				if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) {
-					cur_frm.add_custom_button(__('Stop'), this.stop_purchase_order);
+					cur_frm.add_custom_button(__('Stop'), this.stop_purchase_order, __("Status"));
 				}
 
-				cur_frm.add_custom_button(__('Close'), this.close_purchase_order);
+				cur_frm.add_custom_button(__('Close'), this.close_purchase_order, __("Status"));
 			}
 
-			if(flt(doc.per_billed)==0) {
-				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
-			}
-
+			
 			if(is_drop_ship && doc.status!="Delivered"){
-				cur_frm.add_custom_button(__('Mark as Delivered'),
-					 this.delivered_by_supplier).addClass("btn-primary");
+				cur_frm.add_custom_button(__('Delivered'),
+					 this.delivered_by_supplier, __("Status"));
+					 
+				cur_frm.page.set_inner_btn_group_as_primary(__("Status"));
 			}
 		} else if(doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Get Last Purchase Rate'), this.get_last_purchase_rate);
 			
 			cur_frm.cscript.add_from_mappers();
 		}
-
+		
+		if(doc.docstatus == 1 && in_list(["Stopped", "Closed", "Delivered"], doc.status)) {
+			if (this.frm.has_perm("submit")) {
+				cur_frm.add_custom_button(__('Re-open'), this.unstop_purchase_order, __("Status"));
+			}
+		}
+		
 		if(doc.docstatus == 1 && !in_list(["Stopped", "Closed"], doc.status)) {
 			if(flt(doc.per_received, 2) < 100 && allow_receipt) {
-				cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt).addClass("btn-primary");
+				cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt, __("Make"));
 
 				if(doc.is_subcontracted==="Yes") {
-					cur_frm.add_custom_button(__('Transfer Material to Supplier'),
-						function() { me.make_stock_entry(); });
+					cur_frm.add_custom_button(__('Material to Supplier'),
+						function() { me.make_stock_entry(); }, __("Transfer"));
 				}
 			}
 
 			if(flt(doc.per_billed, 2) < 100)
 				cur_frm.add_custom_button(__('Invoice'),
-					this.make_purchase_invoice).addClass("btn-primary");
-		}
-
-		if(doc.docstatus == 1 && in_list(["Stopped", "Closed", "Delivered"], doc.status)) {
-			if (this.frm.has_perm("submit")) {
-				cur_frm.add_custom_button(__('Re-open'), this.unstop_purchase_order).addClass("btn-primary");
+					this.make_purchase_invoice, __("Make"));
+			
+			if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
+				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry, __("Make"));
 			}
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			
 		}
 	},
 
@@ -126,7 +131,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	},
 
 	add_from_mappers: function() {
-		cur_frm.add_custom_button(__('From Material Request'),
+		cur_frm.add_custom_button(__('Material Request'),
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
@@ -139,10 +144,9 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: cur_frm.doc.company
 					}
 				})
-			}
-		);
+			}, __("From"));
 
-		cur_frm.add_custom_button(__('From Supplier Quotation'),
+		cur_frm.add_custom_button(__('Supplier Quotation'),
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
@@ -153,10 +157,9 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: cur_frm.doc.company
 					}
 				})
-			}
-		);
+			}, __("From"));
 
-		cur_frm.add_custom_button(__('For Supplier'),
+		cur_frm.add_custom_button(__('Supplier'),
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
@@ -165,8 +168,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						docstatus: ["!=", 2],
 					}
 				})
-			}
-		);
+			}, __("For"));
 	},
 
 	tc_name: function() {
