@@ -1,7 +1,6 @@
 {
     "country_code": "ae",
     "name": "U.A.E Chart of Accounts",
-	"is_active": "Yes",
     "tree": {
         "Assets": {
             "Current Assets": {
