@@ -47,21 +47,13 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				this.show_general_ledger();
 			}
 			if (this.frm.has_perm("submit") && (doc.status !== "Closed")
-				&& this.frm.doc.__onload && this.frm.doc.__onload.has_return_entry) {
+				&& this.frm.doc.__onload && !this.frm.doc.__onload.has_return_entry) {
 					cur_frm.add_custom_button(__("Close"), this.close_delivery_note)
 			}
 		}
 
-		if(doc.__onload && !doc.__onload.billing_complete && doc.docstatus==1
-				&& !doc.is_return && doc.status!="Closed") {
-			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
-			var from_sales_invoice = false;
-			from_sales_invoice = cur_frm.doc.items.some(function(item) {
-				return item.against_sales_invoice ? true : false;
-			});
-
-			if(!from_sales_invoice)
-				cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
+		if(doc.docstatus==1 && !doc.is_return && doc.status!="Closed" && flt(doc.per_billed, 2) < 100) {
+			cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
 		}
 
 		if(doc.docstatus==1 && doc.status === "Closed" && this.frm.has_perm("submit")) {
@@ -285,6 +277,3 @@ if (sys_defaults.auto_accounting_for_stock) {
 		}
 	}
 }
-
-
-

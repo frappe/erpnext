@@ -15,20 +15,32 @@ class TestLandedCostVoucher(unittest.TestCase):
 		pr = frappe.copy_doc(pr_test_records[0])
 		pr.submit()
 
-		bin_details = frappe.db.get_value("Bin", {"warehouse": "_Test Warehouse - _TC",
-			"item_code": "_Test Item"},	["actual_qty", "stock_value"], as_dict=1)
+		last_sle = frappe.db.get_value("Stock Ledger Entry", {
+				"voucher_type": pr.doctype,
+				"voucher_no": pr.name,
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC"
+			},
+			fieldname=["qty_after_transaction", "stock_value"],
+			as_dict=1)
 
 		self.submit_landed_cost_voucher(pr)
 
 		pr_lc_value = frappe.db.get_value("Purchase Receipt Item", {"parent": pr.name}, "landed_cost_voucher_amount")
 		self.assertEquals(pr_lc_value, 25.0)
 
-		bin_details_after_lcv = frappe.db.get_value("Bin", {"warehouse": "_Test Warehouse - _TC",
-			"item_code": "_Test Item"},	["actual_qty", "stock_value"], as_dict=1)
+		last_sle_after_landed_cost = frappe.db.get_value("Stock Ledger Entry", {
+				"voucher_type": pr.doctype,
+				"voucher_no": pr.name,
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC"
+			},
+			fieldname=["qty_after_transaction", "stock_value"],
+			as_dict=1)
 
-		self.assertEqual(bin_details.actual_qty, bin_details_after_lcv.actual_qty)
+		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
 
-		self.assertEqual(bin_details_after_lcv.stock_value - bin_details.stock_value, 25.0)
+		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 25.0)
 
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 

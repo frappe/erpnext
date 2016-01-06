@@ -1,7 +1,6 @@
 {
     "country_code": "hn",
     "name": "Plantilla de cuentas de Honduras (sencilla)",
-	"is_active": "Yes",
     "tree": {
         "Activo": {
             "Activo Corriente": {

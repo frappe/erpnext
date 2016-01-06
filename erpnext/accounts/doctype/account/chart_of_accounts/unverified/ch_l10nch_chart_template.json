@@ -1,7 +1,6 @@
 {
     "country_code": "ch",
     "name": "Plan comptable STERCHI",
-	"is_active": "Yes",
 	"disabled": "Yes",
     "tree": {
         "Actif": {

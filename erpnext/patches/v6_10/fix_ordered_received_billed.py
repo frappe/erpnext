@@ -14,4 +14,4 @@ def execute():
 			{"patch_date": not_null_patch_date}):
 
 			doc = frappe.get_doc(doctype, name)
-			doc.update_qty(change_modified=False)
+			doc.update_qty(update_modified=False)

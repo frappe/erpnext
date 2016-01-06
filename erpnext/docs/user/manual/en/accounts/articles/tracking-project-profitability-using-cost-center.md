@@ -25,7 +25,7 @@ To create new Cost Center, go to:
 
 `Accounts > Setup > Cost Center`
 
-[Click here to learn how to manage Cost Centers.]({{docs_base_url}}/user/manual/en/accounts/setup/cost-center)
+[Click here to learn how to manage Cost Centers.]({{docs_base_url}}/user/manual/en/accounts/setup/cost-center.html)
 
 #### 1.3 Update Cost Center in the Project
 
@@ -75,6 +75,6 @@ To check Budget Variance report, go to:
 
 `Accounts > Standard Reports > Budget Variance Report`
 
-[Click here to learn how to do budgeting from Cost Center]({{docs_base_url}}/user/manual/en/accounts/budgeting).
+[Click here to learn how to do budgeting from Cost Center]({{docs_base_url}}/user/manual/en/accounts/budgeting.html).
 
 <!-- markdown -->

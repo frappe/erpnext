@@ -7,11 +7,10 @@ import unittest
 import frappe
 import frappe.defaults
 from frappe.utils import cint, flt, cstr
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def test_make_purchase_invoice(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
-
 		pr = make_purchase_receipt(do_not_save=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, pr.name)
 		pr.submit()
@@ -184,6 +183,45 @@ class TestPurchaseReceipt(unittest.TestCase):
 		
 		update_purchase_receipt_status(pr.name, "Closed")
 		self.assertEquals(frappe.db.get_value("Purchase Receipt", pr.name, "status"), "Closed")
+		
+	def test_pr_billing_status(self):
+		# PO -> PR1 -> PI and PO -> PI and PO -> PR2
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.buying.doctype.purchase_order.purchase_order \
+			import make_purchase_receipt, make_purchase_invoice as make_purchase_invoice_from_po
+		
+		po = create_purchase_order()
+		
+		pr1 = make_purchase_receipt(po.name)
+		pr1.posting_time = "10:00"
+		pr1.get("items")[0].received_qty = 2
+		pr1.get("items")[0].qty = 2
+		pr1.submit()
+		
+		pi1 = make_purchase_invoice(pr1.name)
+		pi1.submit()
+		
+		pr1.load_from_db()
+		self.assertEqual(pr1.per_billed, 100)
+		
+		pi2 = make_purchase_invoice_from_po(po.name)
+		pi2.get("items")[0].qty = 4
+		pi2.submit()
+		
+		pr2 = make_purchase_receipt(po.name)
+		pr2.posting_time = "08:00"
+		pr2.get("items")[0].received_qty = 5
+		pr2.get("items")[0].qty = 5
+		pr2.submit()
+		
+		pr1.load_from_db()
+		self.assertEqual(pr1.get("items")[0].billed_amt, 1000)
+		self.assertEqual(pr1.per_billed, 100)
+		self.assertEqual(pr1.status, "Completed")
+		
+		self.assertEqual(pr2.get("items")[0].billed_amt, 2000)
+		self.assertEqual(pr2.per_billed, 80)
+		self.assertEqual(pr2.status, "To Bill")
 		
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit

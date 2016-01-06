@@ -36,6 +36,6 @@ On submission of Stock Reconciliation, depreciation will booked for items asset 
 
 <img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/depreciation-4.png">
 
-Click [here]({{docs_base_url}}/user/manual/en/setting-up/stock-reconciliation-for-non-serialized-item) for steps to be followed when making Stock Reconciliation entry.
+Click [here]({{docs_base_url}}/user/manual/en/setting-up/stock-reconciliation-for-non-serialized-item.html) for steps to be followed when making Stock Reconciliation entry.
 
 <!-- markdown -->

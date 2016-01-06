@@ -1,25 +1,23 @@
 # Manage Foreign Exchange Difference
 
-When you book Sales Invoices and Purchase invoices in multiple currencies, you will have to deal with currency difference while booking payment entry. You can easily manage this in ERPNext in following ways.  
+In ERPNext, you can create transactions in the foriegn currency as well. When creating transaction in the foreign currency, system updates current exchanage rate with respect to customer/supplier's currency and base currency on your Company. Since Exchange Rate is always flucuating, on might receive payment from the client on exchange rate different from one mentioned in the Sales/Purchase Invoice. Following is the intruction on how to manage different amount avail in payment entry due to exchange rate change.
 
-####Add Expense Account
+#### Add Expense Account
 
-To mange currency difference, create Account **Foreign Exchange Gain/Loss**.
+To mange currency difference, create Account **Foreign Exchange Gain/Loss**. This account is generally created on the Expense side of P&L statement. However, you can place it under another group as per your accounting requirement.
 
-![Account]({{docs_base_url}}/assets/img/articles/Selection_577.png)
+<img alt="Accounts Frozen Date" class="screenshot" src="{{docs_base_url}}/assets/img/articles/exchange-rate-difference-1.png">
 
-####Book Payment Entry
+#### Book Payment Entry
 
-In the payment voucher, update invoice amount against Customer or Supplier account, then update actual payment amount against Bank/ Cash account. Add new row and select Foreign Exchange Gain/Loss to update currency difference amount.
+In the payment voucher, update invoice amount against Customer or Supplier account, then update actual payment amount against Bank/Cash account. Add new row and select Foreign Exchange Gain/Loss to update currency difference amount.
 
-####Scenario
+In the below scenario, Sales Invoice was made EUR, at the exchange rate of 1.090. As per this rate, Sales Invoice amount in USD (base currency) was $1000.
 
-Below is the Sales Invoice for a customer in Europe. The base currency of a Company in USD. Sales Invoice is  made at the exchange rate (USD to Eur) of 1.128.
+One receipt of payment, exchange rate changed. As per the new exchange rate, payment received in the base currency was $1080. This means gain of $80 due to change in exchange rate. Following is how Foreign Exchange Gain will be booked in this scenerio.
 
-![Sales Invoice]({{docs_base_url}}/assets/img/articles/Selection_576.png)
+<img alt="Accounts Frozen Date" class="screenshot" src="{{docs_base_url}}/assets/img/articles/exchange-rate-difference-2.gif">
 
-When receiving payment from the customer, exchange rate changed to 1.20. As per the update in the exchange rate, payment was for $120. Following is how payment entry will be booked to adjust the difference amount.
-
-![Journal Entry image]({{docs_base_url}}/assets/img/articles/Selection_578.png) 
+In case you incur loss due to change foriegn exchnage rate, then different amount about be updated in the debit of Foreign Exchange Gain/Loss account. Also you can add another row to update another expenses like bank charges, remittance charges etc.
 
 <!-- markdown -->

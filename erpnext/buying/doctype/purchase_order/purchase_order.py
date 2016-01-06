@@ -8,6 +8,7 @@ from frappe.utils import cstr, flt
 from frappe import msgprint, _, throw
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
 
@@ -83,6 +84,34 @@ class PurchaseOrder(BuyingController):
 			if d.prevdoc_detail_docname and not d.schedule_date:
 				d.schedule_date = frappe.db.get_value("Material Request Item",
 						d.prevdoc_detail_docname, "schedule_date")
+						
+
+	def get_last_purchase_rate(self):
+		"""get last purchase rates for all items"""
+		
+		conversion_rate = flt(self.get('conversion_rate')) or 1.0
+
+		for d in self.get("items"):
+			if d.item_code:
+				last_purchase_details = get_last_purchase_details(d.item_code, self.name)
+
+				if last_purchase_details:
+					d.base_price_list_rate = (last_purchase_details['base_price_list_rate'] * 
+						(flt(d.conversion_factor) or 1.0))
+					d.discount_percentage = last_purchase_details['discount_percentage']
+					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
+					d.price_list_rate = d.base_price_list_rate / conversion_rate
+					d.rate = d.base_rate / conversion_rate
+				else:
+					# if no last purchase found, reset all values to 0
+					for field in ("base_price_list_rate", "base_rate", 
+						"price_list_rate", "rate", "discount_percentage"):
+							d.set(field, 0)
+
+					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
+					if item_last_purchase_rate:
+						d.base_price_list_rate = d.base_rate = d.price_list_rate \
+							= d.rate = item_last_purchase_rate
 
 	# Check for Stopped status
 	def check_for_stopped_or_closed_status(self, pc_obj):
