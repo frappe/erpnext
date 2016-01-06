@@ -33,10 +33,9 @@ $.extend(shopping_cart, {
 				},
 				btn: opts.btn,
 				callback: function(r) {
+					shopping_cart.set_cart_count();
 					if(opts.callback)
 						opts.callback(r);
-
-					shopping_cart.set_cart_count();
 				}
 			});
 		}
@@ -56,10 +55,6 @@ $.extend(shopping_cart, {
 		
 		
 		if(cart_count) {
-			// if($badge.length === 0) {
-// 				var $badge = $('<span class="badge"></span>')
-// 					.appendTo($cart.find("a").addClass("badge-hover"));
-// 			}
 			$badge.html(cart_count);
 		} else {
 			$badge.remove();
