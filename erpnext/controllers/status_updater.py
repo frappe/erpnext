@@ -52,13 +52,15 @@ status_map = {
 	],
 	"Delivery Note": [
 		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
+		["To Bill", "eval:self.per_billed < 100 and self.docstatus == 1"],
+		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
 	],
 	"Purchase Receipt": [
 		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
+		["To Bill", "eval:self.per_billed < 100 and self.docstatus == 1"],
+		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
 	]
@@ -79,7 +81,7 @@ class StatusUpdater(Document):
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			return
-				
+
 		if self.doctype in status_map:
 			_status = self.status
 
@@ -102,9 +104,9 @@ class StatusUpdater(Document):
 
 			if self.status != _status and self.status not in ("Submitted", "Cancelled"):
 				self.add_comment("Label", _(self.status))
-			
+
 			if update:
-				frappe.db.set_value(self.doctype, self.name, "status", self.status, 
+				frappe.db.set_value(self.doctype, self.name, "status", self.status,
 					update_modified=update_modified)
 
 	def validate_qty(self):
@@ -153,7 +155,6 @@ class StatusUpdater(Document):
 		# check if overflow is within tolerance
 		tolerance, self.tolerance, self.global_tolerance = get_tolerance_for(item['item_code'],
 			self.tolerance, self.global_tolerance)
-
 		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) /
 		 	item[args['target_ref_field']]) * 100
 
@@ -166,10 +167,10 @@ class StatusUpdater(Document):
 			throw(_("{0} must be reduced by {1} or you should increase overflow tolerance")
 				.format(_(item["target_ref_field"].title()), item["reduce_by"]))
 
-	def update_qty(self, change_modified=True):
+	def update_qty(self, update_modified=True):
 		"""Updates qty or amount at row level
 
-			:param change_modified: If true, updates `modified` and `modified_by` for target parent doc
+			:param update_modified: If true, updates `modified` and `modified_by` for target parent doc
 		"""
 		for args in self.status_updater:
 			# condition to include current record (if submit or no if cancel)
@@ -178,21 +179,18 @@ class StatusUpdater(Document):
 			else:
 				args['cond'] = ' and parent!="%s"' % self.name.replace('"', '\"')
 
-			args['set_modified'] = ''
-			if change_modified:
-				args['set_modified'] = ', modified = now(), modified_by = "{0}"'\
-					.format(frappe.db.escape(frappe.session.user))
-
-			self._update_children(args)
+			self._update_children(args, update_modified)
 
 			if "percent_join_field" in args:
-				self._update_percent_field(args)
+				self._update_percent_field_in_targets(args, update_modified)
 
-	def _update_children(self, args):
+	def _update_children(self, args, update_modified):
 		"""Update quantities or amount in child table"""
 		for d in self.get_all_children():
 			if d.doctype != args['source_dt']:
 				continue
+
+			self._update_modified(args, update_modified)
 
 			# updates qty in the child table
 			args['detail_id'] = d.get(args['join_field'])
@@ -212,44 +210,58 @@ class StatusUpdater(Document):
 				if not args.get("extra_cond"): args["extra_cond"] = ""
 
 				frappe.db.sql("""update `tab%(target_dt)s`
-					set %(target_field)s = (select ifnull(sum(%(source_field)s), 0)
-						from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
-						and (docstatus=1 %(cond)s) %(extra_cond)s) %(second_source_condition)s
+					set %(target_field)s = (
+						(select ifnull(sum(%(source_field)s), 0)
+							from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
+							and (docstatus=1 %(cond)s) %(extra_cond)s)
+						%(second_source_condition)s
+					)
+					%(update_modified)s
 					where name='%(detail_id)s'""" % args)
 
-	def _update_percent_field(self, args):
+	def _update_percent_field_in_targets(self, args, update_modified=True):
 		"""Update percent field in parent transaction"""
-		unique_transactions = set([d.get(args['percent_join_field']) for d in self.get_all_children(args['source_dt'])])
+		distinct_transactions = set([d.get(args['percent_join_field'])
+			for d in self.get_all_children(args['source_dt'])])
 
-		for name in unique_transactions:
-			if not name:
-				continue
+		for name in distinct_transactions:
+			if name:
+				args['name'] = name
+				self._update_percent_field(args, update_modified)
 
-			args['name'] = name
+	def _update_percent_field(self, args, update_modified=True):
+		"""Update percent field in parent transaction"""
 
-			# update percent complete in the parent table
-			if args.get('target_parent_field'):
-				frappe.db.sql("""update `tab%(target_parent_dt)s`
-					set %(target_parent_field)s = round(
-						ifnull((select
-							ifnull(sum(if(%(target_ref_field)s > %(target_field)s, %(target_field)s, %(target_ref_field)s)), 0)
-							/ sum(%(target_ref_field)s) * 100
-						from `tab%(target_dt)s` where parent="%(name)s"), 0), 2)
-						%(set_modified)s
-					where name='%(name)s'""" % args)
+		self._update_modified(args, update_modified)
 
-			# update field
-			if args.get('status_field'):
-				frappe.db.sql("""update `tab%(target_parent_dt)s`
-					set %(status_field)s = if(%(target_parent_field)s<0.001,
-						'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
-						'Fully %(keyword)s', 'Partly %(keyword)s'))
-					where name='%(name)s'""" % args)
+		if args.get('target_parent_field'):
+			frappe.db.sql("""update `tab%(target_parent_dt)s`
+				set %(target_parent_field)s = round(
+					ifnull((select
+						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, %(target_field)s, %(target_ref_field)s)), 0)
+						/ sum(%(target_ref_field)s) * 100
+					from `tab%(target_dt)s` where parent="%(name)s"), 0), 2)
+					%(update_modified)s
+				where name='%(name)s'""" % args)
 
-			if args.get("set_modified"):
-				target = frappe.get_doc(args["target_parent_dt"], name)
-				target.set_status(update=True)
-				target.notify_update()
+		# update field
+		if args.get('status_field'):
+			frappe.db.sql("""update `tab%(target_parent_dt)s`
+				set %(status_field)s = if(%(target_parent_field)s<0.001,
+					'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
+					'Fully %(keyword)s', 'Partly %(keyword)s'))
+				where name='%(name)s'""" % args)
+
+		if update_modified:
+			target = frappe.get_doc(args["target_parent_dt"], args["name"])
+			target.set_status(update=True)
+			target.notify_update()
+
+	def _update_modified(self, args, update_modified):
+		args['update_modified'] = ''
+		if update_modified:
+			args['update_modified'] = ', modified = now(), modified_by = "{0}"'\
+				.format(frappe.db.escape(frappe.session.user))
 
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
 		ref_fieldname = ref_dt.lower().replace(" ", "_")
