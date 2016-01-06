@@ -10,11 +10,11 @@ Feature of setting document as recurring is available in Sales Order, Sales Invo
 
 Option to set document as recurring will be visible only after submission. Recurring is last section in document. Check **Is Recurring** to set document as recurring.
 
-<img alt="Recurring Invoice" class="screenshot" src="{{docs_base_path}}/assets/img/articles/is-recurring.gif">
+<img alt="Recurring Invoice" class="screenshot" src="{{docs_base_url}}/assets/img/accounts/recurring.gif">
 
 **From Date and To Date:** This defines contract period with the customer.
 
-**Repeat on the Day of Month:** If recurring type is set as Monthly, then it will be day of the month on which&nbsp; recurring invoice will be generated.
+**Repeat on the Day of Month:** If recurring type is set as Monthly, then it will be day of the month on which recurring invoice will be generated.
 
 **End Date:** Date after which auto-creation of recurring invoice will be stopped.
 
