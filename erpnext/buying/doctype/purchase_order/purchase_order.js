@@ -56,6 +56,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					 this.delivered_by_supplier).addClass("btn-primary");
 			}
 		} else if(doc.docstatus===0) {
+			cur_frm.add_custom_button(__('Get Last Purchase Rate'), this.get_last_purchase_rate);
+			
 			cur_frm.cscript.add_from_mappers();
 		}
 
@@ -204,6 +206,16 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 	delivered_by_supplier: function(){
 		cur_frm.cscript.update_status('Deliver', 'Delivered')
+	},
+	
+	get_last_purchase_rate: function() {
+		frappe.call({
+			"method": "get_last_purchase_rate",
+			"doc": cur_frm.doc,
+			callback: function(r, rt) {
+				cur_frm.cscript.calculate_taxes_and_totals();
+			}
+		})
 	}
 
 });
