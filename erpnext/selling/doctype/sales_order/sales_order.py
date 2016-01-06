@@ -288,11 +288,26 @@ class SalesOrder(SellingController):
 
 		frappe.db.set_value("Sales Order", self.name, "per_delivered", flt(delivered_qty/tot_qty) * 100,
 		update_modified=False)
+	
+	def set_indicator(self):
+		"""Set indicator for portal"""
+		if self.per_billed < 100 and self.per_delivered < 100:
+			self.indicator_color = "orange"
+			self.indicator_title = _("Not Paid and Not Delivered")
+		
+		elif self.per_billed == 100 and self.per_delivered < 100:
+			self.indicator_color = "orange"
+			self.indicator_title = _("Paid and Not Delivered")
 
+		else:
+			self.indicator_color = "green"
+			self.indicator_title = _("Paid")
+			
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
 	list_context["title"] = _("My Orders")
+	list_context["parents"] = [{"title": _("My Account"), "name": "me"}]
 	return list_context
 
 @frappe.whitelist()

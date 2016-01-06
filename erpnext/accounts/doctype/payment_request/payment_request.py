@@ -15,6 +15,7 @@ from itertools import chain
 
 class PaymentRequest(Document):		
 	def validate(self):
+		self.validate_payment_gateway_account()
 		self.validate_payment_request()
 		self.validate_currency()
 
@@ -27,6 +28,17 @@ class PaymentRequest(Document):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		if ref_doc.currency != frappe.db.get_value("Account", self.payment_account, "account_currency"):
 			frappe.throw(_("Transaction currency is not similar to Gateway Currency"))
+			
+	def validate_payment_gateway_account(self):
+		if not self.payment_gateway:
+			frappe.throw(_("Payment Gateway Account is not configured"))
+			
+	def validate_payment_gateway(self):
+		if self.gateway == "PayPal":
+			if not frappe.db.get_value("PayPal Settings", None, "api_username"):
+				if not frappe.conf.paypal_username:
+					frappe.throw(_("PayPal Settings missing"))
+			
 		
 	def on_submit(self):
 		if not self.mute_email:
@@ -36,8 +48,8 @@ class PaymentRequest(Document):
 		self.make_communication_entry()
 	
 	def on_cancel(self):
-		pass
-	
+		self.set_cancelled()
+		
 	def on_update_after_submit(self):
 		pass
 	
@@ -127,20 +139,20 @@ def make_payment_request(**args):
 	
 	args = frappe._dict(args)
 	ref_doc = get_reference_doc_details(args.dt, args.dn)
-	name, gateway, payment_account, message = get_gateway_details(args)
+	gateway_account = get_gateway_details(args)
 	
 	pr = frappe.new_doc("Payment Request")
 	pr.update({
-		"payment_gateway": name,
-		"gateway": gateway,
-		"payment_account": payment_account,
+		"payment_gateway": gateway_account.name,
+		"gateway": gateway_account.gateway,
+		"payment_account": gateway_account.payment_account,
 		"currency": ref_doc.currency,
 		"make_sales_invoice": args.cart or 0,
 		"amount": get_amount(ref_doc, args.dt),
 		"mute_email": args.mute_email or 0,
 		"email_to": args.recipient_id or "",
 		"subject": "Payment Request for %s"%args.dn,
-		"message": message,
+		"message": gateway_account.message,
 		"reference_doctype": args.dt,
 		"reference_name": args.dn
 	})
@@ -181,11 +193,16 @@ def get_amount(ref_doc, dt):
 def get_gateway_details(args):
 	"""return gateway and payment account of default payment gateway"""
 	if args.payemnt_gateway:
-		return frappe.db.get_value("Payment Gateway Account", args.payemnt_gateway, 
-			["name", "gateway", "payment_account", "message"])
-		
-	return frappe.db.get_value("Payment Gateway Account", {"is_default": 1}, 
-		["name", "gateway", "payment_account", "message"])
+		gateway_account = frappe.db.get_value("Payment Gateway Account", args.payemnt_gateway, 
+			["name", "gateway", "payment_account", "message"], as_dict=1)
+	
+	gateway_account = frappe.db.get_value("Payment Gateway Account", {"is_default": 1}, 
+		["name", "gateway", "payment_account", "message"], as_dict=1)
+	
+	if not gateway_account:
+		frappe.throw(_("Payment Gateway Account is not configured"))
+	
+	return gateway_account
 
 @frappe.whitelist()
 def get_print_format_list(ref_doctype):
@@ -213,4 +230,8 @@ def generate_payment_request(name):
 		frappe.respond_as_web_page(_("Invalid Payment Request"), 
 			_("Payment Request has been canceled by vendor"), success=False, 
 			http_status_code=frappe.ValidationError.http_status_code)
+			
+@frappe.whitelist(allow_guest=True)
+def resend_payment_email(docname):
+	return frappe.get_doc("Payment Request", docname).send_email()
 		

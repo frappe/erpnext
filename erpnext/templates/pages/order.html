@@ -1,10 +1,12 @@
 {% extends "templates/web.html" %}
 
 {% block header %}
-<h1>
-	{{ doc.name }}
-</h1>
+<h1>{{ doc.name }}</h1>
 <!-- <h6 class="text-muted">{{ doc._title or doc.doctype }}</h6> -->
+{% endblock %}
+
+{% block breadcrumbs %}
+	{% include "templates/includes/breadcrumbs.html" %}
 {% endblock %}
 
 {% block style %}
@@ -22,12 +24,6 @@
         <span class="indicator {{ doc.indicator_color or "darkgrey" }}">
             {{ doc.indicator_title or doc.status or "Submitted" }}
         </span>
-		{% if doc.base_net_total == doc.advance_paid and payment_ref%}
-		<div>
-			<span class="indicator green" data-toggle="tooltip" title=" Reference Id: {{payment_ref}}"> Paid</span>
-		</div>
-		{% endif %}
-		
 	</div>
     <div class="col-xs-6 text-muted text-right h6">
         {{ doc.get_formatted("transaction_date") }}
@@ -87,7 +83,8 @@
 <div class="cart-taxes row small">
     <div class="col-sm-8"><!-- empty --></div>
     <div class="col-sm-4">
-        {% if doc.per_billed <= 0 %}
+        {% if (doc.doctype=="Sales Order" and doc.per_billed <= 0) 
+			or (doc.doctype=="Sales Invoice" and doc.outstanding_amount > 0) %}
 		<div class="page-header-actions-block" data-html-block="header-actions">
 			<p>
 			    <a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&mute_email=1&cart=1"
