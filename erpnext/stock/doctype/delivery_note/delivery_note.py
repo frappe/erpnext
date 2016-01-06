@@ -61,8 +61,8 @@ class DeliveryNote(SellingController):
 			'extra_cond': """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)"""
 		}]
 
-	def onload(self):			
-		self.set_onload("has_return_entry", len(frappe.db.exists({"doctype": "Delivery Note", 
+	def onload(self):
+		self.set_onload("has_return_entry", len(frappe.db.exists({"doctype": "Delivery Note",
 			"is_return": 1, "return_against": self.name, "docstatus": 1})))
 
 	def before_print(self):
@@ -162,7 +162,7 @@ class DeliveryNote(SellingController):
 
 	def validate_warehouse(self):
 		super(DeliveryNote, self).validate_warehouse()
-		
+
 		for d in self.get_item_list():
 			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
 				if not d['warehouse']:
@@ -268,48 +268,48 @@ class DeliveryNote(SellingController):
 		self.set_status(update=True, status=status)
 		self.notify_update()
 		clear_doctype_notifications(self)
-		
-	def update_billing_status(self, set_modified=True):
+
+	def update_billing_status(self, update_modified=True):
 		updated_delivery_notes = [self.name]
 		for d in self.get("items"):
 			if d.si_detail and not d.so_detail:
-				frappe.db.set(d, 'billed_amt', d.amount)
+				d.db_set('billed_amt', d.amount, update_modified=update_modified)
 			elif d.so_detail:
-				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail)
-		
+				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
+
 		for dn in set(updated_delivery_notes):
 			dn_doc = self if (dn == self.name) else frappe.get_doc("Delivery Note", dn)
-			dn_doc.update_billing_percentage(set_modified=set_modified)
+			dn_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
 
-def update_billed_amount_based_on_so(so_detail):
+def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly
-	billed_against_so = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item` 
+	billed_against_so = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
 		where so_detail=%s and (dn_detail is null or dn_detail = '') and docstatus=1""", so_detail)
 	billed_against_so = billed_against_so and billed_against_so[0][0] or 0
-	
+
 	# Get all Delivery Note Item rows against the Sales Order Item row
-	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent 
+	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent
 		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
-		where dn.name=dn_item.parent and dn_item.so_detail=%s 
+		where dn.name=dn_item.parent and dn_item.so_detail=%s
 			and dn.docstatus=1 and dn.is_return = 0
 		order by dn.posting_date asc, dn.posting_time asc, dn.name asc""", so_detail, as_dict=1)
 
 	updated_dn = []
 	for dnd in dn_details:
 		billed_amt_agianst_dn = 0
-		
+
 		# If delivered against Sales Invoice
 		if dnd.si_detail:
 			billed_amt_agianst_dn = flt(dnd.amount)
 			billed_against_so -= billed_amt_agianst_dn
 		else:
 			# Get billed amount directly against Delivery Note
-			billed_amt_agianst_dn = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item` 
+			billed_amt_agianst_dn = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
 				where dn_detail=%s and docstatus=1""", dnd.name)
 			billed_amt_agianst_dn = billed_amt_agianst_dn and billed_amt_agianst_dn[0][0] or 0
-		
+
 		# Distribute billed amount directly against SO between DNs based on FIFO
 		if billed_against_so and billed_amt_agianst_dn < dnd.amount:
 			pending_to_bill = flt(dnd.amount) - billed_amt_agianst_dn
@@ -319,11 +319,11 @@ def update_billed_amount_based_on_so(so_detail):
 			else:
 				billed_amt_agianst_dn += billed_against_so
 				billed_against_so = 0
-				
-		frappe.db.set_value("Delivery Note Item", dnd.name, "billed_amt", billed_amt_agianst_dn)
-		
+
+		frappe.db.set_value("Delivery Note Item", dnd.name, "billed_amt", billed_amt_agianst_dn, update_modified=update_modified)
+
 		updated_dn.append(dnd.parent)
-		
+
 	return updated_dn
 
 def get_list_context(context=None):

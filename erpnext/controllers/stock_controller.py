@@ -313,7 +313,7 @@ class StockController(AccountsController):
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)
 			
-	def update_billing_percentage(self, set_modified=True):
+	def update_billing_percentage(self, update_modified=True):
 		self._update_percent_field({
 			"target_dt": self.doctype + " Item",
 			"target_parent_dt": self.doctype,
@@ -321,7 +321,7 @@ class StockController(AccountsController):
 			"target_ref_field": "amount",
 			"target_field": "billed_amt",
 			"name": self.name,
-		}, set_modified)
+		}, update_modified)
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):

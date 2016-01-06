@@ -151,14 +151,14 @@ class PurchaseInvoice(BuyingController):
 		against_accounts = []
 		stock_items = self.get_stock_items()
 		for item in self.get("items"):
-			# in case of auto inventory accounting, 
+			# in case of auto inventory accounting,
 			# against expense account is always "Stock Received But Not Billed"
 			# for a stock item and if not epening entry and not drop-ship entry
-			
+
 			if auto_accounting_for_stock and item.item_code in stock_items \
-				and self.is_opening == 'No' and (not item.po_detail or 
+				and self.is_opening == 'No' and (not item.po_detail or
 					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
-				
+
 				item.expense_account = stock_not_billed_account
 				item.cost_center = None
 
@@ -410,7 +410,7 @@ class PurchaseInvoice(BuyingController):
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 			self.update_billing_status_in_pr()
-			
+
 		self.make_gl_entries_on_cancel()
 		self.update_project()
 
@@ -434,21 +434,21 @@ class PurchaseInvoice(BuyingController):
 					"fiscal_year": self.fiscal_year, "name": ("!=", self.name), "docstatus": ("<", 2)})
 				if pi:
 					frappe.throw("Supplier Invoice No exists in Purchase Invoice {0}".format(pi))
-					
-	def update_billing_status_in_pr(self, set_modified=True):
+
+	def update_billing_status_in_pr(self, update_modified=True):
 		updated_pr = []
 		for d in self.get("items"):
 			if d.pr_detail:
-				billed_amt = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item` 
+				billed_amt = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
 					where pr_detail=%s and docstatus=1""", d.pr_detail)
 				billed_amt = billed_amt and billed_amt[0][0] or 0
-				frappe.db.set_value("Purchase Receipt Item", d.pr_detail, "billed_amt", billed_amt)
+				frappe.db.set_value("Purchase Receipt Item", d.pr_detail, "billed_amt", billed_amt, update_modified=update_modified)
 				updated_pr.append(d.purchase_receipt)
 			elif d.po_detail:
-				updated_pr += update_billed_amount_based_on_po(d.po_detail)
-			
+				updated_pr += update_billed_amount_based_on_po(d.po_detail, update_modified)
+
 		for pr in set(updated_pr):
-			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(set_modified=set_modified)
+			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)
 
 @frappe.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):

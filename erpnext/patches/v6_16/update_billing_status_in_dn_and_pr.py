@@ -8,26 +8,26 @@ def execute():
 	for dt in ("Delivery Note", "Purchase Receipt"):
 		frappe.reload_doctype(dt)
 		frappe.reload_doctype(dt + " Item")
-		
+
 	# Update billed_amt in DN and PR which are not against any order
-	for d in frappe.db.sql("""select name from `tabDelivery Note Item` 
+	for d in frappe.db.sql("""select name from `tabDelivery Note Item`
 		where (so_detail is null or so_detail = '') and docstatus=1""", as_dict=1):
-			billed_amt = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item` 
+			billed_amt = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
 				where dn_detail=%s and docstatus=1""", d.name)
 			billed_amt = billed_amt and billed_amt[0][0] or 0
-			frappe.db.set_value("Delivery Note Item", d.name, "billed_amt", billed_amt)
-			
+			frappe.db.set_value("Delivery Note Item", d.name, "billed_amt", billed_amt, update_modified=False)
+
 	# Update billed_amt in DN and PR which are not against any order
-	for d in frappe.db.sql("""select name from `tabPurchase Receipt Item` 
+	for d in frappe.db.sql("""select name from `tabPurchase Receipt Item`
 		where (prevdoc_detail_docname is null or prevdoc_detail_docname = '') and docstatus=1""", as_dict=1):
-			billed_amt = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item` 
+			billed_amt = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
 				where pr_detail=%s and docstatus=1""", d.name)
 			billed_amt = billed_amt and billed_amt[0][0] or 0
-			frappe.db.set_value("Purchase Receipt Item", d.name, "billed_amt", billed_amt)
-		
+			frappe.db.set_value("Purchase Receipt Item", d.name, "billed_amt", billed_amt, update_modified=False)
+
 	# Update billed amt which are against order or invoice
 	# Update billing status for all
 	for d in frappe.db.sql("select name from `tab{0}` where docstatus=1".format(dt), as_dict=1):
 		doc = frappe.get_doc(dt, d.name)
-		doc.update_billing_status(set_modified=False)
+		doc.update_billing_status(update_modified=False)
 		doc.set_status(update=True, update_modified=False)
