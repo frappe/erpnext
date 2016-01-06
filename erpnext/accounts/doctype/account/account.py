@@ -23,6 +23,8 @@ class Account(Document):
 			frappe.db.get_value("Company", self.company, "abbr")
 
 	def validate(self):
+		if frappe.local.flags.allow_unverified_charts:
+			return
 		self.validate_parent()
 		self.validate_root_details()
 		self.set_root_and_report_type()
