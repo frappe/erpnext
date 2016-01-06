@@ -4,13 +4,12 @@
 // shopping cart
 frappe.provide("shopping_cart");
 
-$(function() {
+frappe.ready(function() {
 	// update user
 	if(full_name) {
 		$('.navbar li[data-label="User"] a')
 			.html('<i class="icon-fixed-width icon-user"></i> ' + full_name);
 	}
-
 	// update login
 	shopping_cart.set_cart_count();
 });
@@ -46,7 +45,7 @@ $.extend(shopping_cart, {
 		var $cart = $('.cart-icon');
 		var $badge = $cart.find("#cart-count");
 
-		if(cart_count === "0") {
+		if(parseInt(cart_count) === 0) {
 			$cart.css("display", "none");
 		}
 		else {
