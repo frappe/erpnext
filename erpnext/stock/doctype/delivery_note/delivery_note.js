@@ -47,7 +47,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				this.show_general_ledger();
 			}
 			if (this.frm.has_perm("submit") && (doc.status !== "Closed")
-				&& this.frm.doc.__onload && this.frm.doc.__onload.has_return_entry) {
+				&& this.frm.doc.__onload && !this.frm.doc.__onload.has_return_entry) {
 					cur_frm.add_custom_button(__("Close"), this.close_delivery_note)
 			}
 		}

@@ -61,7 +61,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 						 this.make_purchase_invoice).addClass("btn-primary");
 				}
 				if (this.frm.has_perm("submit") &&
-					this.frm.doc.__onload && this.frm.doc.__onload.has_return_entry) {
+					this.frm.doc.__onload && !this.frm.doc.__onload.has_return_entry) {
 						cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt)
 				}
 			}
