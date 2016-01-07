@@ -6,16 +6,18 @@ import frappe
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 
 def execute():
+	frappe.reload_doctype("Sales Order Item")
+
 	repost_for = frappe.db.sql("""
-		select 
-			distinct item_code, warehouse 
-		from 
+		select
+			distinct item_code, warehouse
+		from
 			(
 				(
-					select distinct item_code, warehouse 
+					select distinct item_code, warehouse
 								from `tabSales Order Item` where docstatus=1
 				) UNION (
-					select distinct item_code, warehouse 
+					select distinct item_code, warehouse
 					from `tabPacked Item` where docstatus=1 and parenttype='Sales Order'
 				)
 			) so_item
@@ -27,8 +29,8 @@ def execute():
 			update_bin_qty(item_code, warehouse, {
 				"reserved_qty": get_reserved_qty(item_code, warehouse)
 			})
-			
-	frappe.db.sql("""delete from tabBin 
+
+	frappe.db.sql("""delete from tabBin
 		where exists(
 			select name from tabItem where name=tabBin.item_code and ifnull(is_stock_item, 0) = 0
 		)
