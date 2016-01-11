@@ -55,34 +55,24 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 				title: __('Add/Remove Recipients'),
 				width: 400
 			});
-			var dialog_div = $a(d.body, 'div', 'dialog-div', '', '');
-			var tab = make_table(dialog_div, r.user_list.length+2, 2, '', ['15%', '85%']);
-			tab.className = 'user-list';
-			var add_or_update = 'Add';
+
 			$.each(r.user_list, function(i, v) {
-				var check = $a_input($td(tab, i+1, 0), 'checkbox');
-				check.value = v.name;
-				if(v.checked==1) {
-					check.checked = 1;
-					add_or_update = 'Update';
-				}
 				var fullname = frappe.user.full_name(v.name);
-				if(fullname !== v.name) v.name = fullname + " &lt;" + v.name + "&gt;";
+				if(fullname !== v.name) fullname = fullname + " &lt;" + v.name + "&gt;";
+
 				if(v.enabled==0) {
-					v.name = repl("<span style='color: red'> %(name)s (" + __("disabled user") + ")</span>", {name: v.name});
+					fullname = repl("<span style='color: red'> %(name)s (" + __("disabled user") + ")</span>", {name: v.name});
 				}
-				var user = $a($td(tab, i+1, 1), 'span', '', '', v.name);
-				//user.onclick = function() { check.checked = !check.checked; }
+
+				$('<div class="checkbox"><label>\
+					<input type="checkbox" data-id="' + v.name + '"'+
+						(v.checked ? 'checked' : '') +
+				'> '+ fullname +'</label></div>').appendTo(d.body);
 			});
 
 			// Display add recipients button
-			if(r.user_list.length>15) {
-				$btn($td(tab, 0, 1), __('{0} Recipients',[__(add_or_update)]), function() {
-					cur_frm.cscript.add_to_rec_list(doc, tab, r.user_list.length);
-				});
-			}
-			$btn($td(tab, r.user_list.length+1, 1),__('{0} Recipients',[__(add_or_update)]), function() {
-				cur_frm.cscript.add_to_rec_list(doc, tab, r.user_list.length);
+			d.set_primary_action("Update", function() {
+				cur_frm.cscript.add_to_rec_list(doc, d.body, r.user_list.length);
 			});
 
 			cur_frm.rec_dialog = d;
@@ -91,15 +81,13 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 	});
 }
 
-cur_frm.cscript.add_to_rec_list = function(doc, tab, length) {
+cur_frm.cscript.add_to_rec_list = function(doc, dialog, length) {
 	// add checked users to list of recipients
 	var rec_list = [];
-	for(var i = 1; i <= length; i++) {
-		var input = $($td(tab, i, 0)).find('input');
-		if(input.is(':checked')) {
-			rec_list.push(input.attr('value'));
-		}
-	}
+	$(dialog).find('input:checked').each(function(i, input) {
+		rec_list.push($(input).attr('data-id'));
+	});
+
 	doc.recipient_list = rec_list.join('\n');
 	cur_frm.rec_dialog.hide();
 	cur_frm.save();
