@@ -540,7 +540,7 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None, a
 		}
 
 @frappe.whitelist()
-def get_payment_entry_against_order(dt, dn, args=None):
+def get_payment_entry_against_order(dt, dn, amount=None, journal_entry=False, bank_account=None):
 	ref_doc = frappe.get_doc(dt, dn)
 
 	if flt(ref_doc.per_billed, 2) > 0:
@@ -558,13 +558,11 @@ def get_payment_entry_against_order(dt, dn, args=None):
 	party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
 	party_account_currency = get_account_currency(party_account)
 
-	if not args or not args["amount"]:
+	if not amount:
 		if party_account_currency == ref_doc.company_currency:
 			amount = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
 		else:
 			amount = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
-	else:
-		amount = args["amount"]
 
 	return get_payment_entry(ref_doc, {
 		"party_type": party_type,
@@ -575,12 +573,12 @@ def get_payment_entry_against_order(dt, dn, args=None):
 		"amount": amount,
 		"remarks": 'Advance Payment received against {0} {1}'.format(dt, dn),
 		"is_advance": "Yes",
-		"bank_account": args["bank_account"] if args else None,
-		"return_obj": args["return_obj"] if args else None
+		"bank_account": bank_account,
+		"journal_entry": journal_entry
 	})
 
 @frappe.whitelist()
-def get_payment_entry_against_invoice(dt, dn, args=None):
+def get_payment_entry_against_invoice(dt, dn, amount=None, journal_entry=False, bank_account=None):
 	ref_doc = frappe.get_doc(dt, dn)
 	if dt == "Sales Invoice":
 		party_type = "Customer"
@@ -604,11 +602,11 @@ def get_payment_entry_against_invoice(dt, dn, args=None):
 		"party_account_currency": ref_doc.party_account_currency,
 		"amount_field_party": amount_field_party,
 		"amount_field_bank": amount_field_bank,
-		"amount": args["amount"] if args else abs(ref_doc.outstanding_amount),
+		"amount": amount if amount else abs(ref_doc.outstanding_amount),
 		"remarks": 'Payment received against {0} {1}. {2}'.format(dt, dn, ref_doc.remarks),
 		"is_advance": "No",
-		"bank_account": args["bank_account"] if args else None,
-		"return_obj": args["return_obj"] if args else None
+		"bank_account": bank_account,
+		"journal_entry": journal_entry
 	})
 
 def get_payment_entry(ref_doc, args):
@@ -616,14 +614,14 @@ def get_payment_entry(ref_doc, args):
 	exchange_rate = get_exchange_rate(args.get("party_account"), args.get("party_account_currency"),
 		ref_doc.company, ref_doc.doctype, ref_doc.name)
 
-	jv = frappe.new_doc("Journal Entry")
-	jv.update({
+	je = frappe.new_doc("Journal Entry")
+	je.update({
 		"voucher_type": "Bank Entry",
 		"company": ref_doc.company,
 		"remark": args.get("remarks")
 	})
 
-	party_row = jv.append("accounts", {
+	party_row = je.append("accounts", {
 		"account": args.get("party_account"),
 		"party_type": args.get("party_type"),
 		"party": ref_doc.get(args.get("party_type").lower()),
@@ -640,7 +638,7 @@ def get_payment_entry(ref_doc, args):
 		"reference_name": ref_doc.name
 	})
 
-	bank_row = jv.append("accounts")
+	bank_row = je.append("accounts")
 	
 	#make it bank_details
 	bank_account = get_default_bank_cash_account(ref_doc.company, "Bank Entry", account=args.get("bank_account"))
@@ -659,12 +657,12 @@ def get_payment_entry(ref_doc, args):
 	# set multi currency check
 	if party_row.account_currency != ref_doc.company_currency \
 		or (bank_row.account_currency and bank_row.account_currency != ref_doc.company_currency):
-			jv.multi_currency = 1
+			je.multi_currency = 1
 
-	jv.set_amounts_in_company_currency()
-	jv.set_total_debit_credit()
+	je.set_amounts_in_company_currency()
+	je.set_total_debit_credit()
 	
-	return jv if args.get("return_obj") else jv.as_dict()
+	return je if args.get("journal_entry") else je.as_dict()
 
 @frappe.whitelist()
 def get_opening_accounts(company):

@@ -12,13 +12,13 @@ class PaymentGatewayAccount(Document):
 		
 	def validate(self):
 		self.update_default_payment_gateway()
-		self.set_as_default()
+		self.set_as_default_if_not_set()
 	
 	def update_default_payment_gateway(self):
 		if self.is_default:
 			frappe.db.sql("""update `tabPayment Gateway Account` set is_default = 0
 				where is_default = 1 """)
 		
-	def set_as_default(self):
+	def set_as_default_if_not_set(self):
 		if not frappe.db.get_value("Payment Gateway Account", {"is_default": 1, "name": ("!=", self.name)}, "name"):
 			self.is_default = 1

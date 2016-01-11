@@ -124,7 +124,7 @@ def create_bank_account(args):
 				"account_type": "Bank",
 			})
 			try:
-				bank_account.insert()
+				return bank_account.insert()
 			except RootNotEditable:
 				frappe.throw(_("Bank account cannot be named as {0}").format(args.get("bank_account")))
 

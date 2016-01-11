@@ -62,7 +62,7 @@ class TestPaymentRequest(unittest.TestCase):
 		SO_INR = make_sales_order(currency="INR")
 		pr = make_payment_request(dt="Sales Order", dn=SO_INR.name, recipient_id="saurabh@erpnext.com", 
 			mute_email=1, submit_doc=1)	 
-		jv = pr.set_paid()
+		jv = pr.set_as_paid()
 		
 		SO_INR = frappe.get_doc("Sales Order", SO_INR.name)
 		

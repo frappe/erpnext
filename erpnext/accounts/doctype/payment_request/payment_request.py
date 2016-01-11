@@ -23,12 +23,12 @@ class PaymentRequest(Document):
 	def validate_payment_request(self):
 		if frappe.db.get_value("Payment Request", {"reference_name": self.reference_name, 
 			"name": ("!=", self.name), "status": ("not in", ["Initiated", "Paid"]), "docstatus": 1}, "name"):
-			frappe.throw(_("Payment Request already exist"))
+			frappe.throw(_("Payment Request already exists {0}".fomart(self.reference_name)))
 	
 	def validate_currency(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		if ref_doc.currency != frappe.db.get_value("Account", self.payment_account, "account_currency"):
-			frappe.throw(_("Transaction currency is not similar to Gateway Currency"))
+			frappe.throw(_("Transaction currency must be same as Payment Gateway currency"))
 			
 	def validate_payment_gateway_account(self):
 		if not self.payment_gateway:
@@ -49,12 +49,15 @@ class PaymentRequest(Document):
 		self.make_communication_entry()
 	
 	def on_cancel(self):
-		self.set_cancelled()
+		self.set_as_cancelled()
 		
 	def on_update_after_submit(self):
 		pass
 	
 	def set_status(self):
+		pass
+	
+	def get_payment_url(self):
 		pass
 	
 	def make_invoice(self):
@@ -69,7 +72,7 @@ class PaymentRequest(Document):
 		if self.payment_url:
 			frappe.db.set_value(self.doctype, self.name, "status", "Initiated")
 			
-	def set_paid(self):
+	def set_as_paid(self):
 		if frappe.session.user == "Guest":
 			frappe.set_user("Administrator")
 			
@@ -82,17 +85,19 @@ class PaymentRequest(Document):
 		"""create entry"""
 		payment_details = {
 			"amount": self.amount,
-			"return_obj": True,
+			"journal_entry": True,
 			"bank_account": self.payment_account
 		}
 		
 		frappe.flags.ignore_account_permission = True
 				
 		if self.reference_doctype == "Sales Order":
-			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name, payment_details)
+			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name,\
+			 amount=self.amount, journal_entry=True, bank_account=self.payment_account)
 			
 		if self.reference_doctype == "Sales Invoice":
-			jv = get_payment_entry_against_invoice(self.reference_doctype, self.reference_name, payment_details)
+			jv = get_payment_entry_against_invoice(self.reference_doctype, self.reference_name,\
+			 amount=self.amount, journal_entry=True, bank_account=self.payment_account)
 			
 		jv.update({
 			"voucher_type": "Journal Entry",
@@ -114,12 +119,13 @@ class PaymentRequest(Document):
 						
 	def get_message(self):
 		"""return message with payment gateway link"""
-		return  cstr(self.message) + """ <a href="%s"> Click here to pay </a>"""%self.payment_url
+		return  cstr(self.message) + " <a href='{0}'>{1}</a>".format(self.payment_url, \
+			self.payment_url_message or _(" Click here to pay"))
 		
 	def set_failed(self):
 		pass
 	
-	def set_cancelled(self):
+	def set_as_cancelled(self):
 		frappe.db.set_value(self.doctype, self.name, "status", "Cancelled")
 	
 	def make_communication_entry(self):
@@ -133,13 +139,16 @@ class PaymentRequest(Document):
 			"reference_name": self.reference_name
 		})
 		comm.insert(ignore_permissions=True)
+	
+	def get_payment_success_url(self):
+		return self.payment_success_url
 
 @frappe.whitelist(allow_guest=True)
 def make_payment_request(**args):
 	"""Make payment request"""
 	
 	args = frappe._dict(args)
-	ref_doc = get_reference_doc_details(args.dt, args.dn)
+	ref_doc = frappe.get_doc(args.dt, args.dn)
 	gateway_account = get_gateway_details(args)
 	
 	pr = frappe.new_doc("Payment Request")
@@ -154,6 +163,8 @@ def make_payment_request(**args):
 		"email_to": args.recipient_id or "",
 		"subject": "Payment Request for %s"%args.dn,
 		"message": gateway_account.message,
+		"payment_url_message": gateway_account.payment_url_message,
+		"payment_success_url": gateway_account.payment_success_url,
 		"reference_doctype": args.dt,
 		"reference_name": args.dn
 	})
@@ -174,10 +185,6 @@ def make_payment_request(**args):
 			
 	return pr.as_dict()
 
-def get_reference_doc_details(dt, dn):
-	""" return reference doc Sales Order/Sales Invoice"""
-	return frappe.get_doc(dt, dn)
-
 def get_amount(ref_doc, dt):
 	"""get amount based on doctype"""
 	if dt == "Sales Order":
@@ -195,10 +202,12 @@ def get_gateway_details(args):
 	"""return gateway and payment account of default payment gateway"""
 	if args.payemnt_gateway:
 		gateway_account = frappe.db.get_value("Payment Gateway Account", args.payemnt_gateway, 
-			["name", "gateway", "payment_account", "message"], as_dict=1)
+			["name", "gateway", "payment_account", "message", "payment_url_message", "payment_success_url"],
+			 as_dict=1)
 	
 	gateway_account = frappe.db.get_value("Payment Gateway Account", {"is_default": 1}, 
-		["name", "gateway", "payment_account", "message"], as_dict=1)
+		["name", "gateway", "payment_account", "message", "payment_url_message", "payment_success_url"], 
+			as_dict=1)
 	
 	if not gateway_account:
 		frappe.throw(_("Payment Gateway Account is not configured"))
@@ -209,29 +218,20 @@ def get_gateway_details(args):
 def get_print_format_list(ref_doctype):
 	print_format_list = ["Standard"]
 	
-	print_format_list.extend(list(chain.from_iterable(frappe.db.sql("""select name from `tabPrint Format` 
-		where doc_type=%s""", ref_doctype, as_list=1))))
+	print_format_list.extend([p.name for p in frappe.get_all("Print Format", 
+		filters={"doc_type": ref_doctype})])
 	
 	return {
 		"print_format": print_format_list
 	}
-	
+
 @frappe.whitelist(allow_guest=True)
 def generate_payment_request(name):
-	doc = frappe.get_doc("Payment Request", name)
-	if doc.docstatus not in [0, 2]:
-		if doc.gateway == "PayPal":
-			from paypal_integration.express_checkout import set_express_checkout
-			payment_url = set_express_checkout(doc.amount, doc.currency, {"doctype": doc.doctype,
-				"docname": doc.name})
-	
+	payment_url = frappe.get_doc("Payment Request", name).run_method("get_payment_url")
+	if payment_url:
 		frappe.local.response["type"] = "redirect"
 		frappe.local.response["location"] = payment_url
-	else:
-		frappe.respond_as_web_page(_("Invalid Payment Request"), 
-			_("Payment Request has been canceled by vendor"), success=False, 
-			http_status_code=frappe.ValidationError.http_status_code)
-			
+		
 @frappe.whitelist(allow_guest=True)
 def resend_payment_email(docname):
 	return frappe.get_doc("Payment Request", docname).send_email()
