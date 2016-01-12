@@ -33,9 +33,23 @@ Installation Note: Update Installed Qty, Update Percent Qty and Validate over in
         <a name="_update_children" href="#_update_children" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>_update_children</b>
-        <i class="text-muted">(self, args)</i>
+        <i class="text-muted">(self, args, update_modified)</i>
     </p>
 	<div class="docs-attr-desc"><p>Update quantities or amount in child table</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="_update_modified" href="#_update_modified" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>_update_modified</b>
+        <i class="text-muted">(self, args, update_modified)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -47,7 +61,21 @@ Installation Note: Update Installed Qty, Update Percent Qty and Validate over in
         <a name="_update_percent_field" href="#_update_percent_field" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>_update_percent_field</b>
-        <i class="text-muted">(self, args)</i>
+        <i class="text-muted">(self, args, update_modified=True)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Update percent field in parent transaction</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="_update_percent_field_in_targets" href="#_update_percent_field_in_targets" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>_update_percent_field_in_targets</b>
+        <i class="text-muted">(self, args, update_modified=True)</i>
     </p>
 	<div class="docs-attr-desc"><p>Update percent field in parent transaction</p>
 </div>
@@ -131,14 +159,14 @@ Installation Note: Update Installed Qty, Update Percent Qty and Validate over in
         <a name="update_qty" href="#update_qty" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>update_qty</b>
-        <i class="text-muted">(self, change_modified=True)</i>
+        <i class="text-muted">(self, update_modified=True)</i>
     </p>
 	<div class="docs-attr-desc"><p>Updates qty or amount at row level</p>
 
 <p><strong>Parameters:</strong></p>
 
 <ul>
-<li><strong><code>change_modified</code></strong> -  If true, updates <code>modified</code> and <code>modified_by</code> for target parent doc</li>
+<li><strong><code>update_modified</code></strong> -  If true, updates <code>modified</code> and <code>modified_by</code> for target parent doc</li>
 </ul>
 </div>
 	<br>
