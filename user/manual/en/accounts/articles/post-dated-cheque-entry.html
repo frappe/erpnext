@@ -112,35 +112,35 @@
     e="text-align: Left">
 	<h1>Post Dated Cheque Entry</h1>
 
-<p>Post Dated Cheque is a cheque dated on future date given to another party. This actually works as an advance payment which will could be cleared post cheque date only.</p>
+<p>Post Dated Cheque is a cheque dated on future date. Party generally give post dated cheque, as advance payment. This cheque would be cleared only after cheque date has arrived.</p>
 
-<p>In ERPNext, you can manage post dated cheque entries via journal voucher. Following are step to book payment entry for post dated cheque.</p>
+<p>In ERPNext, create Journal Entries for post dated cheque.</p>
 
-<h4>New Journal Voucher</h4>
+<h4>New Journal Entry</h4>
 
 <p>To open new journal voucher go to </p>
 
-<p><code>Accounts &gt; Documents &gt; Journal Voucher &gt; New</code></p>
+<p><code>Accounts &gt; Documents &gt; Journal Entry &gt; New</code></p>
 
-<h4>Set Posting Date and other details</h4>
+<h4>Set Posting Date</h4>
 
-<p>Assuming your Cheque Date is 31st December, 2014 (or any future date) and you need value of this cheque to reflect in the bank balance after cheque date only.</p>
+<p>Assuming your Cheque Date is 31st December, 2016 (or any future date). As a result, this posting in your bank ledger will appear on Posting Date updated.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_005d73bc7.png" alt="Journal Voucher" /></p>
+<p><img alt="JE Posting Date" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/post-dated-1.gif"></p>
 
 <p>Note: Journal Voucher Reference Date should equal to or less than Posting Date.</p>
 
-<h4>Step 3: Save and Submit Journal Voucher</h4>
+<h4>Step 3: Save and Submit</h4>
 
-<p>After entering required details Save and Submit the Journal Voucher.</p>
+<p>After entering required details, Save and Submit the Journal Entry.</p>
 
 <h4>Adjusting Post Dated  Cheque Entry</h4>
 
-<p>If Post Dated Journal Voucher needs to be adjusted against any invoice, it can be accomplished via <a href="https://erpnext.com/user-guide/accounts/payment-reconciliation">Payment Reconciliation Tool</a>.</p>
+<p>If Post Dated Journal Entry needs to be adjusted against any invoice, it can be accomplished via <a href="https://frappe.github.io/erpnext/user/manual/en/accounts/tools/payment-reconciliation.html">Payment Reconciliation Tool</a>.</p>
 
-<p>When cheque is cleared in the future date, i.e. actual date on the cheque, you can update its Clearance Date via <a href="https://erpnext.com/user-guide/accounts/bank-reconciliation">Bank Reconciliation Tool</a>.</p>
+<p>When cheque is cleared, i.e. on actual date on the cheque, you can update its Clearance Date via <a href="https://frappe.github.io/erpnext/user/manual/en/accounts/tools/bank-reconciliation.html">Bank Reconciliation Tool</a>.</p>
 
-<p>You might find value of this Journal Voucher already reflecting against bank's ledger. You should check <strong>Bank Reconciliation Statement</strong>, a report in the account module to know difference of balance as per system, and balance expected in the bank.
+<p>You might find value of this Journal Entry already reflecting against bank's ledger. You should check <strong>Bank Reconciliation Statement</strong>, a report in the account module to know difference of bank balance as per system, and actual balance in a account.
 <!-- markdown --></p>
 	</article>
 	

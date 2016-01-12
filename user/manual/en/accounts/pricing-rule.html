@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Managing Transactions In Multiple Currency </title>
+	<title> Pricing Rule </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -26,7 +26,7 @@
 
 </style>
 </head>
-<body data-path="user/manual/en/accounts/articles/managing-transactions-in-multiple-currency">
+<body data-path="user/manual/en/accounts/pricing-rule">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -74,7 +74,7 @@
                         <div data-html-block="hero"></div>
                         <div class="container" data-html-block="content">
                         
-<div class="page-container" id="page-managing-transactions-in-multiple-currency" data-path="user/manual/en/accounts/articles/managing-transactions-in-multiple-currency"
+<div class="page-container" id="page-pricing-rule" data-path="user/manual/en/accounts/pricing-rule"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
@@ -88,8 +88,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/manual/en/accounts/articles">
-		Articles</a>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/accounts">
+		Accounts</a>
 	</li>
 	
 </ul>
@@ -107,46 +107,90 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="managing-transactions-in-multiple-currency" styl
+	<article class="web-page-content" id="pricing-rule" styl
 
     e="text-align: Left">
-	<h1>Managing Transactions In Multiple Currency</h1>
+	<h1>Pricing Rule</h1>
 
-<p>In ERPNext, transactions can be created in the base currency as well as in parties (customer or supplier) currency. In transaction is created in the parties currency, their currency symbol is updated in the print foramt as well.</p>
+<p>Pricing Rule is a master where you can define rules based on which discount is applied to specific Customer or Supplier.</p>
 
-<p>Let's consider a Sales Invoice, where your base currency is of a Company is USD and party currency is EUR.</p>
+<h3>Scenario:</h3>
 
-<h4>Step 1: New Sales Invoice</h4>
+<p>Following are the few cases which can be addressed using Pricing Rule.</p>
 
-<p><code>Accounts &gt; Documents &gt; Sales Invoice &gt; New</code></p>
+<ol>
+<li><p>As per the promotional sale policy, if customer purchases more than 10 units of an item, he enjoys 20% discount. </p></li>
+<li><p>For Customer "XYZ", selling price for the specific Item should be updated as ###.</p></li>
+<li><p>Items categorized under specific Item Group has same selling or buying price.</p></li>
+<li><p>Customers balonging to specific Customer Group should get ### selling price, ot % of Discount on Items.</p></li>
+<li><p>Supplier's categorized under specific Supplier Type should have ### buying rate applied.</p></li>
+</ol>
 
-<h4>Step 2: Select Party</h4>
+<p>To have %Discount and Price List Rate for an Item auto-applied, you should create Pricing Rules for it.</p>
 
-<p>Select Customer from the Customer master. If default Currency is updated in the Customer master, same will be fetched in the Sales Invoice as well, as Customer Currency.</p>
+<p>Pricing Rule master has two sections:</p>
 
-<h4>Step 3: Exchange Rate</h4>
+<h3>1. Applicability Section:</h3>
 
-<p>Currenct Exchange between between base currency and customer currency will auto-fetch.</p>
+<p>In this section, conditions are set for the application of Pricing Rule. When transaction meets condition as specified in this section, Price or Discount as specified in the Pricing Rule will be applied. You can set condition on following values.</p>
 
-<p><img alt="Accounts Frozen Date" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/multiple-currency-1.gif"></p>
+<h4>1.1 Applicable On:</h4>
 
-<h4>Step 4: Update Details</h4>
+<p><img alt="Applicable On" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/pricing-rule-on.png"></p>
 
-<p>Update other details like Item, Taxes, Terms. In the Taxes and other Charges table, charges of type Actual should be updated in the Customer's currency.</p>
+<p>If you want Pricing Rule to be applied on all the items, select based on Item Group. For value, select <strong>All Item Group</strong> (parent Item Group).</p>
 
-<h4>Step 4: Save and Submit</h4>
+<h4>1.2 Applicable For:</h4>
 
-<p>Save Sales Invoice and then check Print Format. For all the Currency field (rate, amount, totals) Customer's Currency symbol will be updated as well.</p>
+<p>Applicability option will updated based on our selection for Selling or Buying or both. You can set applicability on one of the following master.</p>
 
-<p><img alt="Accounts Frozen Date" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/multiple-currency-2.png"></p>
+<p><img alt="Applicable for" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/pricing-rule-for.png"></p>
 
-<h4>Currency Exchange Masters</h4>
+<h4>1.3 Quantity:</h4>
 
-<p>If you have come to terms with party to follow standard exchange rate throughout, you can capture it by creating Currency Exchange Rate master. To create new Currency Exchange Rate master, go to:</p>
+<p>Specify minimum and maximum qty of an item when this Pricing Rule should be applicable.</p>
 
-<p><code>Accounts &gt; Setup &gt; Currency Exchange</code></p>
+<p><img alt="Applicable Qty" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/pricing-rule-qty.png"></p>
 
-<p>If system find Exchange Rate master for any cuurrecy, it is given preference over currency exchnage rate.</p>
+<h3>2. Application:</h3>
+
+<p>Using Price List Rule, you can ultimately define price or %discount to be applied on an item.</p>
+
+<p><img alt="Applicable" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/pricing-rule-application.png"></p>
+
+<h4>2.1 Price</h4>
+
+<p>Price or Discount specified in the Pricing Rule will be applied only if above applicability rules are matched with values in the transaction. Price mentioned in Pricing Rule will be given priority over item's Price List rate.</p>
+
+<p><img alt="Applicable Price" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/pricing-rule-price.png"></p>
+
+<h4>2.2 Discount Percentage</h4>
+
+<p>Discount Percentage can be applied for a specific Price List. To have it applied for all the Price List, %Discount field should be left blank.</p>
+
+<p><img alt="Discount" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/pricing-rule-discount.png"></p>
+
+<p>If %Discount is to be applied on all Price Lists, then leave Price List field blank.</p>
+
+<h4>Validity</h4>
+
+<p>Enter From and To date between which this Pricing Rule will be applicable. This will be useful if creating Pricing Rule for sales promotion exercise available for certain days.</p>
+
+<p><img alt="Validity" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/pricing-rule-validity.png"></p>
+
+<h4>Priority</h4>
+
+<p>If two or more Pricing Rules are found based on same conditions, Priority is applied. Priority is a number between 0 to 20 while default value is zero (blank). Higher number means it will take precedence if there are multiple Pricing Rules with same conditions.</p>
+
+<p><img alt="Priority" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/pricing-rule-priority.png"></p>
+
+<h4>Disable</h4>
+
+<p>Check to Disable Pricing Rule.</p>
+
+<p><img alt="Disable" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/pricing-rule-disable.png"></p>
+
+<!-- markdown -->
 	</article>
 	
 </div>
@@ -160,7 +204,7 @@
 	<div class="page-content">
 	<div class="edit-container text-center">
 		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/articles/managing-transactions-in-multiple-currency.md">
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/pricing-rule.md">
 			Improve this page
 		</a>
 	</div>

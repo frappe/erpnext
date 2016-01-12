@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Managing Transactions In Multiple Currency </title>
+	<title> Freeze Accounting Entries </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -26,7 +26,7 @@
 
 </style>
 </head>
-<body data-path="user/manual/en/accounts/articles/managing-transactions-in-multiple-currency">
+<body data-path="user/manual/en/accounts/articles/freeze-accounting-entries">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -74,7 +74,7 @@
                         <div data-html-block="hero"></div>
                         <div class="container" data-html-block="content">
                         
-<div class="page-container" id="page-managing-transactions-in-multiple-currency" data-path="user/manual/en/accounts/articles/managing-transactions-in-multiple-currency"
+<div class="page-container" id="page-freeze-accounting-entries" data-path="user/manual/en/accounts/articles/freeze-accounting-entries"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
@@ -107,46 +107,30 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="managing-transactions-in-multiple-currency" styl
+	<article class="web-page-content" id="freeze-accounting-entries" styl
 
     e="text-align: Left">
-	<h1>Managing Transactions In Multiple Currency</h1>
+	<h1>Freeze Accounting Entries</h1>
 
-<p>In ERPNext, transactions can be created in the base currency as well as in parties (customer or supplier) currency. In transaction is created in the parties currency, their currency symbol is updated in the print foramt as well.</p>
+<p>To freeze accounting entries upto a certain date, follow below given steps.</p>
 
-<p>Let's consider a Sales Invoice, where your base currency is of a Company is USD and party currency is EUR.</p>
+<h4>Step 1: Go to:</h4>
 
-<h4>Step 1: New Sales Invoice</h4>
+<p><code>Accounts &gt; Setup &gt; Accounts Settings</code></p>
 
-<p><code>Accounts &gt; Documents &gt; Sales Invoice &gt; New</code></p>
+<h4>Step 2: Set Date</h4>
 
-<h4>Step 2: Select Party</h4>
+<p>Set date in the <strong>Accounts Frozen Upto</strong> field.</p>
 
-<p>Select Customer from the Customer master. If default Currency is updated in the Customer master, same will be fetched in the Sales Invoice as well, as Customer Currency.</p>
+<p><img alt="Accounts Frozen Date" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/frozen-date-1.png"></p>
 
-<h4>Step 3: Exchange Rate</h4>
+<p>Now, the system will not allow to make any accounting entries before set date. If at all someone tries creating entries, system will show error message as below.</p>
 
-<p>Currenct Exchange between between base currency and customer currency will auto-fetch.</p>
+<p><img alt="Frozen Date Error" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/frozen-date-2.png"></p>
 
-<p><img alt="Accounts Frozen Date" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/multiple-currency-1.gif"></p>
+<p>You can still allow user with certain role to create/edit entries beyound accounts frozen date. You can set that Role in the Account Settings itself.</p>
 
-<h4>Step 4: Update Details</h4>
-
-<p>Update other details like Item, Taxes, Terms. In the Taxes and other Charges table, charges of type Actual should be updated in the Customer's currency.</p>
-
-<h4>Step 4: Save and Submit</h4>
-
-<p>Save Sales Invoice and then check Print Format. For all the Currency field (rate, amount, totals) Customer's Currency symbol will be updated as well.</p>
-
-<p><img alt="Accounts Frozen Date" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/multiple-currency-2.png"></p>
-
-<h4>Currency Exchange Masters</h4>
-
-<p>If you have come to terms with party to follow standard exchange rate throughout, you can capture it by creating Currency Exchange Rate master. To create new Currency Exchange Rate master, go to:</p>
-
-<p><code>Accounts &gt; Setup &gt; Currency Exchange</code></p>
-
-<p>If system find Exchange Rate master for any cuurrecy, it is given preference over currency exchnage rate.</p>
+<p><img alt="Frozen Date Error" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/frozen-date-3.png"></p>
 	</article>
 	
 </div>
@@ -160,7 +144,7 @@
 	<div class="page-content">
 	<div class="edit-container text-center">
 		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/articles/managing-transactions-in-multiple-currency.md">
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/articles/freeze-accounting-entries.md">
 			Improve this page
 		</a>
 	</div>

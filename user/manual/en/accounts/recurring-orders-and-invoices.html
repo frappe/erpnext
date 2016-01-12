@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Managing Transactions In Multiple Currency </title>
+	<title> Recurring Orders And Invoices </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -26,7 +26,7 @@
 
 </style>
 </head>
-<body data-path="user/manual/en/accounts/articles/managing-transactions-in-multiple-currency">
+<body data-path="user/manual/en/accounts/recurring-orders-and-invoices">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -74,7 +74,7 @@
                         <div data-html-block="hero"></div>
                         <div class="container" data-html-block="content">
                         
-<div class="page-container" id="page-managing-transactions-in-multiple-currency" data-path="user/manual/en/accounts/articles/managing-transactions-in-multiple-currency"
+<div class="page-container" id="page-recurring-orders-and-invoices" data-path="user/manual/en/accounts/recurring-orders-and-invoices"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
@@ -88,8 +88,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/manual/en/accounts/articles">
-		Articles</a>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/accounts">
+		Accounts</a>
 	</li>
 	
 </ul>
@@ -107,46 +107,42 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="managing-transactions-in-multiple-currency" styl
+	<article class="web-page-content" id="recurring-orders-and-invoices" styl
 
     e="text-align: Left">
-	<h1>Managing Transactions In Multiple Currency</h1>
+	<h1>Recurring Orders and Invoices</h1>
 
-<p>In ERPNext, transactions can be created in the base currency as well as in parties (customer or supplier) currency. In transaction is created in the parties currency, their currency symbol is updated in the print foramt as well.</p>
+<p>If you have a contract with a <strong>Customer</strong> where you bill the Customer on a monthly, quarterly, half-yearly or annual basis, you should use recurring feature in orders and invoices. </p>
 
-<p>Let's consider a Sales Invoice, where your base currency is of a Company is USD and party currency is EUR.</p>
+<h4>Scenario:</h4>
 
-<h4>Step 1: New Sales Invoice</h4>
+<p>Subscription for your hosted ERPNext account requires yearly renewal. We use Sales Order for generating proforma invoices. To automate proforma invoicing for renewal, we set original Sales Order as recurring. Recurring proforma invoice is created automatically just before customer's account is about to expire, and requires renewal. This recurring Proforma Invoice is also emailed automatically to the customer.</p>
 
-<p><code>Accounts &gt; Documents &gt; Sales Invoice &gt; New</code></p>
+<p>Feature of setting document as recurring is available in Sales Order, Sales Invoice, Purchase Order and Purchase Invoice.</p>
 
-<h4>Step 2: Select Party</h4>
+<p>Option to set document as recurring will be visible only after submission. Recurring is last section in document. Check <strong>Is Recurring</strong> to set document as recurring.</p>
 
-<p>Select Customer from the Customer master. If default Currency is updated in the Customer master, same will be fetched in the Sales Invoice as well, as Customer Currency.</p>
+<p><img alt="Recurring Invoice" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/accounts/recurring.gif"></p>
 
-<h4>Step 3: Exchange Rate</h4>
+<p><strong>From Date and To Date:</strong> This defines contract period with the customer.</p>
 
-<p>Currenct Exchange between between base currency and customer currency will auto-fetch.</p>
+<p><strong>Repeat on the Day of Month:</strong> If recurring type is set as Monthly, then it will be day of the month on which recurring invoice will be generated.</p>
 
-<p><img alt="Accounts Frozen Date" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/multiple-currency-1.gif"></p>
+<p><strong>End Date:</strong> Date after which auto-creation of recurring invoice will be stopped.</p>
 
-<h4>Step 4: Update Details</h4>
+<p><strong>Notification Email Address:</strong> Email Addresses (separated by comma) on which recurring invoice will be emailed when auto-generated.</p>
 
-<p>Update other details like Item, Taxes, Terms. In the Taxes and other Charges table, charges of type Actual should be updated in the Customer's currency.</p>
+<p><strong>Recurring ID:</strong> Recurring ID will be original document id which will be linked to all corresponding recurring document. For example, original Sales Invoice's id will be updated into all recurring Sales Invoices.</p>
 
-<h4>Step 4: Save and Submit</h4>
+<p><strong>Recurring Print Format:</strong> Select a print format to define document view which should be emailed to customer.</p>
 
-<p>Save Sales Invoice and then check Print Format. For all the Currency field (rate, amount, totals) Customer's Currency symbol will be updated as well.</p>
+<h4>Exception Handling:</h4>
 
-<p><img alt="Accounts Frozen Date" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/multiple-currency-2.png"></p>
+<p>In a situation where recurring invoice is not created successfully, user with System Manager role is notified about it via email. Also the document on which recurring event failed, "Is Recurring" field is unchecked for it. This means system doesn't try creating recurring invoice for that document again.</p>
 
-<h4>Currency Exchange Masters</h4>
+<p>Failure in creation of recurring invoice could be due to multiple reasons like wrong email id mentioned in the Email Notification field in Recurring section etc.</p>
 
-<p>If you have come to terms with party to follow standard exchange rate throughout, you can capture it by creating Currency Exchange Rate master. To create new Currency Exchange Rate master, go to:</p>
-
-<p><code>Accounts &gt; Setup &gt; Currency Exchange</code></p>
-
-<p>If system find Exchange Rate master for any cuurrecy, it is given preference over currency exchnage rate.</p>
+<p>On receipt of notification, if cause of failure is fixed (like correcting email id) within 24 hours, then recurring invoice will be generated automatically. If issue is not fixed within the said time, then document should be created for that month/year manually.</p>
 	</article>
 	
 </div>
@@ -160,7 +156,7 @@
 	<div class="page-content">
 	<div class="edit-container text-center">
 		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/articles/managing-transactions-in-multiple-currency.md">
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/recurring-orders-and-invoices.md">
 			Improve this page
 		</a>
 	</div>
