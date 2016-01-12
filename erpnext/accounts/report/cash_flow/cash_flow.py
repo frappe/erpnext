@@ -50,10 +50,12 @@ def execute(filters=None):
 	# compute net profit / loss
 	income = get_data(filters.company, "Income", "Credit", period_list, ignore_closing_entries=True)
 	expense = get_data(filters.company, "Expense", "Debit", period_list, ignore_closing_entries=True)
-	net_profit_loss = get_net_profit_loss(income, expense, period_list)
+	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
 
 	data = []
 
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	
 	for cash_flow_account in cash_flow_accounts:
 
 		section_data = []
@@ -79,14 +81,16 @@ def execute(filters=None):
 			account_data.update({
 				"account_name": account['label'], 
 				"indent": 1,
-				"parent_account": cash_flow_account['section_header']
+				"parent_account": cash_flow_account['section_header'],
+				"currency": company_currency
 			})
 			data.append(account_data)
 			section_data.append(account_data)
 
-		add_total_row_account(data, section_data, cash_flow_account['section_footer'], period_list)
+		add_total_row_account(data, section_data, cash_flow_account['section_footer'], 
+			period_list, company_currency)
 
-	add_total_row_account(data, data, _("Net Change in Cash"), period_list)
+	add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency)
 	columns = get_columns(period_list)
 
 	return columns, data
@@ -118,10 +122,11 @@ def get_account_type_based_data(company, account_type, period_list):
 	return data
 
 
-def add_total_row_account(out, data, label, period_list):
+def add_total_row_account(out, data, label, period_list, currency):
 	total_row = {
 		"account_name": "'" + _("{0}").format(label) + "'",
-		"account": None
+		"account": None,
+		"currency": currency
 	}
 
 	for row in data:

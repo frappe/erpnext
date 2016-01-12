@@ -300,6 +300,9 @@ class SalesInvoice(SellingController):
 		account = frappe.db.get_value("Account", self.debit_to,
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
+		if not account:
+			frappe.throw(_("Debit To is required"))
+
 		if account.report_type != "Balance Sheet":
 			frappe.throw(_("Debit To account must be a Balance Sheet account"))
 

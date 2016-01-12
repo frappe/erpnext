@@ -16,6 +16,8 @@ def execute(filters=None):
 	return columns, data
 
 def validate_filters(filters):
+	if not filters.fiscal_year:
+		frappe.throw(_("Fiscal Year {0} is required"))
 	filters.year_start_date, filters.year_end_date = frappe.db.get_value("Fiscal Year", filters.fiscal_year,
 		["year_start_date", "year_end_date"])
 	filters.year_start_date = getdate(filters.year_start_date)

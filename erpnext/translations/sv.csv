@@ -8,7 +8,7 @@ apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +33,Cancel
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +19,Consumer Products,Konsumentprodukter
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +68,Please select Party Type first,Välj Partityp först
 DocType: Item,Customer Items,Kundartiklar
-apps/erpnext/erpnext/accounts/doctype/account/account.py +45,Account {0}: Parent account {1} can not be a ledger,Kontot {0}: Förälder kontot {1} kan inte vara en liggare
+apps/erpnext/erpnext/accounts/doctype/account/account.py +47,Account {0}: Parent account {1} can not be a ledger,Kontot {0}: Förälder kontot {1} kan inte vara en liggare
 DocType: Item,Publish Item to hub.erpnext.com,Publish Post som hub.erpnext.com
 apps/erpnext/erpnext/config/setup.py +93,Email Notifications,E-postmeddelanden
 DocType: Item,Default Unit of Measure,Standard mätenhet
@@ -21,7 +21,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +36,Currency is required for Price List {0},Valuta krävs för prislista {0}
 DocType: Sales Taxes and Charges Template,* Will be calculated in the transaction.,* Kommer att beräknas i transaktionen.
 DocType: Purchase Order,Customer Contact,Kundkontakt
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +661,From Material Request,Från Materialförfrågan
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +663,From Material Request,Från Materialförfrågan
 apps/erpnext/erpnext/selling/page/sales_browser/sales_browser.js +37,{0} Tree,{0} Trä
 DocType: Job Applicant,Job Applicant,Arbetssökande
 apps/erpnext/erpnext/hub_node/page/hub/hub_body.html +18,No more results.,Inga fler resultat.
@@ -63,8 +63,9 @@ apps/erpnext/erpnext/accounts/page/pos/pos_page.html +13,Make new POS Profile,Sk
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +31,Health Care,Sjukvård
 DocType: Purchase Invoice,Monthly,Månadsvis
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +66,Delay in payment (Days),Försenad betalning (dagar)
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +607,Invoice,Faktura
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +609,Invoice,Faktura
 DocType: Maintenance Schedule Item,Periodicity,Periodicitet
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +20,Fiscal Year {0} is required,Räkenskapsårets {0} krävs
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +21,Defense,Försvar
 DocType: Company,Abbr,Förkortning
 DocType: Appraisal Goal,Score (0-5),Poäng (0-5)
@@ -98,13 +99,13 @@ apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +6,Advertising,Reklam
 apps/erpnext/erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py +22,Same Company is entered more than once,Samma Företaget anges mer än en gång
 DocType: Employee,Married,Gift
 apps/erpnext/erpnext/accounts/party.py +38,Not permitted for {0},Ej tillåtet för {0}
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +392,Stock cannot be updated against Delivery Note {0},Stock kan inte uppdateras mot följesedel {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +396,Stock cannot be updated against Delivery Note {0},Stock kan inte uppdateras mot följesedel {0}
 DocType: Payment Reconciliation,Reconcile,Avstämma
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +30,Grocery,Matvaror
 DocType: Quality Inspection Reading,Reading 1,Avläsning 1
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +100,Make Bank Entry,Skapa Bank inlägg
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +40,Pension Funds,Pensionsfonder
-apps/erpnext/erpnext/accounts/doctype/account/account.py +149,Warehouse is mandatory if account type is Warehouse,Lagret är obligatoriskt om kontotyp är Lager
+apps/erpnext/erpnext/accounts/doctype/account/account.py +151,Warehouse is mandatory if account type is Warehouse,Lagret är obligatoriskt om kontotyp är Lager
 DocType: SMS Center,All Sales Person,Alla försäljningspersonal
 DocType: Lead,Person Name,Namn
 DocType: Sales Order,"Check if recurring order, uncheck to stop recurring or put proper End Date","Markera om återkommande order, avmarkera för att stoppa återkommande eller ange Slutdatum"
@@ -125,16 +126,16 @@ DocType: Quality Inspection,Get Specification Details,Hämta Specifikation Detal
 DocType: Lead,Interested,Intresserad
 apps/erpnext/erpnext/config/manufacturing.py +14,Bill of Material,Bill of Material
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +158,Opening,Öppning
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +27,From {0} to {1},Från {0} till {1}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +28,From {0} to {1},Från {0} till {1}
 DocType: Item,Copy From Item Group,Kopiera från artikelgrupp
 DocType: Journal Entry,Opening Entry,Öppnings post
 DocType: Stock Entry,Additional Costs,Merkostnader
-apps/erpnext/erpnext/accounts/doctype/account/account.py +120,Account with existing transaction can not be converted to group.,Konto med befintlig transaktioner kan inte omvandlas till grupp.
+apps/erpnext/erpnext/accounts/doctype/account/account.py +122,Account with existing transaction can not be converted to group.,Konto med befintlig transaktioner kan inte omvandlas till grupp.
 DocType: Lead,Product Enquiry,Produkt Förfrågan
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +13,Please enter company first,Ange företaget först
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +334,Please select Company first,Välj Företaget först
 DocType: Employee Education,Under Graduate,Enligt Graduate
-apps/erpnext/erpnext/selling/report/sales_person_target_variance_item_group_wise/sales_person_target_variance_item_group_wise.js +22,Target On,Mål på
+apps/erpnext/erpnext/selling/report/sales_person_target_variance_item_group_wise/sales_person_target_variance_item_group_wise.js +27,Target On,Mål på
 DocType: BOM,Total Cost,Total Kostnad
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.js +9,Activity Log:,Aktivitets Logg:
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +194,Item {0} does not exist in the system or has expired,Objektet existerar inte {0} i systemet eller har löpt ut
@@ -163,7 +164,7 @@ DocType: Item,Supply Raw Materials for Purchase,Leverera råvaror för köp
 apps/erpnext/erpnext/stock/get_item_details.py +133,Item {0} must be a Purchase Item,Produkt {0} måste vara en beställningsprodukt
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Hämta mallen, fyll lämpliga uppgifter och bifoga den modifierade filen. Alla datum och anställdas kombinationer i den valda perioden kommer i mallen, med befintliga närvaroutdrag"
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +444,Item {0} is not active or end of life has been reached,Produkt {0} är inte aktiv eller uttjänta har nåtts
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +447,Item {0} is not active or end of life has been reached,Produkt {0} är inte aktiv eller uttjänta har nåtts
 DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Kommer att uppdateras efter fakturan skickas.
 apps/erpnext/erpnext/controllers/accounts_controller.py +511,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Om du vill inkludera skatt i rad {0} i punkt hastighet, skatter i rader {1} måste också inkluderas"
 apps/erpnext/erpnext/config/hr.py +90,Settings for HR Module,Inställningar för HR-modul
@@ -179,7 +180,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +114,The first user will become t
 apps/erpnext/erpnext/config/manufacturing.py +39,Details of the operations carried out.,Detaljer om de åtgärder som genomförs.
 DocType: Serial No,Maintenance Status,Underhåll Status
 apps/erpnext/erpnext/config/stock.py +258,Items and Pricing,Produkter och prissättning
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +37,From Date should be within the Fiscal Year. Assuming From Date = {0},Från Datum bör ligga inom räkenskapsåret. Förutsatt Från Datum = {0}
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +39,From Date should be within the Fiscal Year. Assuming From Date = {0},Från Datum bör ligga inom räkenskapsåret. Förutsatt Från Datum = {0}
 DocType: Appraisal,Select the Employee for whom you are creating the Appraisal.,Välj anställd för vilken du skapar bedömning.
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +96,Cost Center {0} does not belong to Company {1},Kostnadsställe {0} tillhör inte bolaget {1}
 DocType: Customer,Individual,Individuell
@@ -221,7 +222,7 @@ DocType: Newsletter List,Total Subscribers,Totalt Medlemmar
 ,Contact Name,Kontaktnamn
 DocType: Production Plan Item,SO Pending Qty,SO Väntar Antal
 DocType: Process Payroll,Creates salary slip for above mentioned criteria.,Skapar lönebesked för ovan nämnda kriterier.
-apps/erpnext/erpnext/templates/generators/item.html +26,No description given,Ingen beskrivning ges
+apps/erpnext/erpnext/templates/generators/item.html +30,No description given,Ingen beskrivning ges
 apps/erpnext/erpnext/config/buying.py +18,Request for purchase.,Begäran om köp.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +173,Only the selected Leave Approver can submit this Leave Application,Endast den valda Ledighets ansvarig kan lämna denna ledighets applikationen
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +114,Relieving Date must be greater than Date of Joining,Avgångs Datum måste vara större än Datum för anställningsdatum
@@ -249,7 +250,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +605,Item {0} is cancelled,Punkt
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +607,Material Request,Materialförfrågan
 DocType: Bank Reconciliation,Update Clearance Date,Uppdatera Clearance Datum
 DocType: Item,Purchase Details,Inköpsdetaljer
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +321,Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1},"Produkt  {0} hittades inte i ""råvaror som levereras""  i beställning {1}"
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +324,Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1},"Produkt  {0} hittades inte i ""råvaror som levereras""  i beställning {1}"
 DocType: Employee,Relation,Förhållande
 DocType: Shipping Rule,Worldwide Shipping,Världsomspännande sändnings
 apps/erpnext/erpnext/config/selling.py +23,Confirmed orders from Customers.,Bekräftade ordrar från kunder.
@@ -270,6 +271,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +86,P
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41,Latest,Senaste
 apps/erpnext/erpnext/public/js/setup_wizard.js +143,Max 5 characters,Max 5 tecken
 DocType: Employee,The first Leave Approver in the list will be set as the default Leave Approver,Den första Lämna godkännare i listan kommer att anges som standard Lämna godkännare
+apps/erpnext/erpnext/config/desktop.py +73,Learn,Lär dig
 apps/erpnext/erpnext/projects/doctype/activity_type/activity_type.js +3,Activity Cost per Employee,Aktivitet Kostnad per anställd
 DocType: Accounts Settings,Settings for Accounts,Inställningar för konton
 apps/erpnext/erpnext/config/crm.py +90,Manage Sales Person Tree.,Hantera Säljare.
@@ -308,10 +310,10 @@ DocType: Sales Invoice,Rate at which Customer Currency is converted to customer'
 DocType: Features Setup,"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","Finns i BOM, följesedel, Inköp Faktura, produktionsorder, inköpsorder, inköpskvitto, Försäljning Faktura, kundorder, införande i lager, Tidrapport"
 DocType: Item Tax,Tax Rate,Skattesats
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +54,{0} already allocated for Employee {1} for period {2} to {3},{0} som redan tilldelats för anställd {1} för perioden {2} till {3}
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +629,Select Item,Välj Punkt
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +631,Select Item,Välj Punkt
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +150,"Item: {0} managed batch-wise, can not be reconciled using \
 					Stock Reconciliation, instead use Stock Entry","Produkt: {0} förvaltade satsvis, kan inte förenas med \ Lagersammansättning, använd istället Lageranteckning"
-apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +262,Purchase Invoice {0} is already submitted,Inköpsfakturan {0} är redan lämnad
+apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +264,Purchase Invoice {0} is already submitted,Inköpsfakturan {0} är redan lämnad
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +87,Row # {0}: Batch No must be same as {1} {2},Rad # {0}: Batch nr måste vara samma som {1} {2}
 apps/erpnext/erpnext/accounts/doctype/account/account.js +54,Convert to non-Group,Konvertera till icke-gruppen
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +55,Purchase Receipt must be submitted,Inköpskvitto måste lämnas in
@@ -352,6 +354,7 @@ DocType: Purchase Receipt,Vehicle Date,Fordons Datum
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +39,Medical,Medicinsk
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +143,Reason for losing,Anledning till att förlora
 apps/erpnext/erpnext/manufacturing/doctype/workstation/workstation.py +79,Workstation is closed on the following dates as per Holiday List: {0},Arbetsstation är stängd på följande datum enligt kalender: {0}
+apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +32,Opportunities,Möjligheter
 DocType: Employee,Single,Singel
 DocType: Issue,Attachment,Bifogning
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +29,Budget cannot be set for Group Cost Center,Budget kan inte ställas in för koncernens kostnadsställe
@@ -439,15 +442,14 @@ DocType: BOM,Operating Cost,Rörelse Kostnad
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +27,Increment cannot be 0,Inkrement kan inte vara 0
 DocType: Production Planning Tool,Material Requirement,Material Krav
 DocType: Company,Delete Company Transactions,Radera Företagstransactions
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +85,Item {0} is not Purchase Item,Produkt {0} är inte ett beställningsobjekt
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +86,Item {0} is not Purchase Item,Produkt {0} är inte ett beställningsobjekt
 apps/erpnext/erpnext/controllers/recurring_document.py +185,"{0} is an invalid email address in 'Notification \
 					Email Address'",{0} är en ogiltig e-postadress i &quot;Anmälan \ e-postadress&quot;
-apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +44,Total Billing This Year:,Totalt Billing detta år:
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Lägg till / redigera skatter och avgifter
 DocType: Purchase Invoice,Supplier Invoice No,Leverantörsfaktura Nej
 DocType: Territory,For reference,Som referens
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +154,"Cannot delete Serial No {0}, as it is used in stock transactions","Kan inte ta bort Löpnummer {0}, eftersom det används i aktietransaktioner"
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +229,Closing (Cr),Closing (Cr)
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +231,Closing (Cr),Closing (Cr)
 DocType: Serial No,Warranty Period (Days),Garantiperiod (dagar)
 DocType: Installation Note Item,Installation Note Item,Installeringsnotis objekt
 ,Pending Qty,Väntar Antal
@@ -525,7 +527,7 @@ apps/erpnext/erpnext/controllers/trends.py +39,'Based On' and 'Group By' can not
 DocType: Sales Person,Sales Person Targets,Försäljnings Person Mål
 DocType: Production Order Operation,In minutes,På några minuter
 DocType: Issue,Resolution Date,Åtgärds Datum
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +644,Please set default Cash or Bank account in Mode of Payment {0},Ställ in standard Kontant eller bankkonto i betalningssätt {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +663,Please set default Cash or Bank account in Mode of Payment {0},Ställ in standard Kontant eller bankkonto i betalningssätt {0}
 DocType: Selling Settings,Customer Naming By,Kundnamn på
 apps/erpnext/erpnext/accounts/doctype/account/account.js +67,Convert to Group,Konvertera till gruppen
 DocType: Activity Cost,Activity Type,Aktivitetstyp
@@ -558,6 +560,7 @@ DocType: Account,Accounts,Konton
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +67,Marketing,Marknadsföring
 DocType: Features Setup,To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,Om du vill spåra objekt i försäljnings- och inköps dokument som grundar sig på deras serienummer nos. Detta är kan också användas för att spåra garanti detaljerad information om produkten.
 DocType: Purchase Receipt Item Supplied,Current Stock,Nuvarande lager
+apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +44,Total billing this year,Total fakturering detta år
 DocType: Account,Expenses Included In Valuation,Kostnader ingår i rapporten
 DocType: Employee,Provide email id registered in company,Ange E-post ID registrerat i bolaget
 DocType: Hub Settings,Seller City,Säljaren stad
@@ -581,13 +584,13 @@ DocType: Lead,Campaign Name,Kampanjens namn
 DocType: Purchase Order,Supply Raw Materials,Supply Råvaror
 DocType: Purchase Invoice,The date on which next invoice will be generated. It is generated on submit.,Det datum då nästa faktura kommer att genereras. Det genereras på skicka.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +10,Current Assets,Nuvarande Tillgångar
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +92,{0} is not a stock Item,{0} är inte en lagervara
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +93,{0} is not a stock Item,{0} är inte en lagervara
 DocType: Mode of Payment Account,Default Account,Standard konto
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +157,Lead must be set if Opportunity is made from Lead,Prospekt måste ställas in om Möjligheten är skapad av Prospekt
 apps/erpnext/erpnext/hr/doctype/holiday_list/holiday_list.py +33,Please select weekly off day,Välj helgdagar
 DocType: Production Order Operation,Planned End Time,Planerat Sluttid
 ,Sales Person Target Variance Item Group-Wise,Försäljningen Person Mål Varians Post Group-Wise
-apps/erpnext/erpnext/accounts/doctype/account/account.py +112,Account with existing transaction cannot be converted to ledger,Konto med befintlig transaktioner kan inte omvandlas till liggaren
+apps/erpnext/erpnext/accounts/doctype/account/account.py +114,Account with existing transaction cannot be converted to ledger,Konto med befintlig transaktioner kan inte omvandlas till liggaren
 DocType: Delivery Note,Customer's Purchase Order No,Kundens inköpsorder Nr
 DocType: Employee,Cell Number,Mobilnummer
 apps/erpnext/erpnext/stock/reorder_item.py +171,Auto Material Requests Generated,Automaterial Framställningar Generated
@@ -603,7 +606,7 @@ apps/erpnext/erpnext/controllers/buying_controller.py +274,Row {0}: Conversion F
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +27,Accounting Entries can be made against leaf nodes. Entries against Groups are not allowed.,Bokföringsposter kan göras mot huvudnoder. Inlägg mot grupper är inte tillåtna.
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +359,Cannot deactivate or cancel BOM as it is linked with other BOMs,Det går inte att inaktivera eller avbryta BOM eftersom det är kopplat till andra stycklistor
 DocType: Opportunity,Maintenance,Underhåll
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +187,Purchase Receipt number required for Item {0},Inköpskvitto nummer som krävs för artikel {0}
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +188,Purchase Receipt number required for Item {0},Inköpskvitto nummer som krävs för artikel {0}
 DocType: Item Attribute Value,Item Attribute Value,Produkt Attribut Värde
 apps/erpnext/erpnext/config/crm.py +64,Sales campaigns.,Säljkampanjer.
 DocType: Sales Taxes and Charges Template,"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
@@ -650,7 +653,7 @@ apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +48,'Update Stock'
 apps/erpnext/erpnext/public/js/setup_wizard.js +380,Nos,Nos
 DocType: Item,Items with higher weightage will be shown higher,Produkter med högre medelvikt kommer att visas högre
 DocType: Bank Reconciliation Detail,Bank Reconciliation Detail,Bankavstämning Detalj
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +636,My Invoices,Mina Fakturor
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +655,My Invoices,Mina Fakturor
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py +43,No employee found,Ingen anställd hittades
 DocType: Purchase Order,Stopped,Stoppad
 DocType: Item,If subcontracted to a vendor,Om underleverantörer till en leverantör
@@ -670,7 +673,7 @@ apps/erpnext/erpnext/config/support.py +13,Support queries from customers.,Suppo
 DocType: Features Setup,"To enable ""Point of Sale"" features",För att aktivera &quot;Point of Sale&quot; funktioner
 DocType: Bin,Moving Average Rate,Rörligt medelvärdes hastighet
 DocType: Production Planning Tool,Select Items,Välj objekt
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} against Bill {1} dated {2},{0} mot räkning {1} daterad {2}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +338,{0} against Bill {1} dated {2},{0} mot räkning {1} daterad {2}
 DocType: Maintenance Visit,Completion Status,Slutförande Status
 DocType: Sales Invoice Item,Target Warehouse,Target Lager
 DocType: Item,Allow over delivery or receipt upto this percent,Tillåt överleverans eller mottagande upp till denna procent
@@ -706,7 +709,7 @@ apps/erpnext/erpnext/config/hr.py +38,Performance appraisal.,Utvecklingssamtal.
 DocType: Sales Invoice Item,Stock Details,Lager Detaljer
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +29,Project Value,Projekt Värde
 apps/erpnext/erpnext/config/selling.py +304,Point-of-Sale,Butiksförsäljnig
-apps/erpnext/erpnext/accounts/doctype/account/account.py +98,"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Kontosaldo redan i Kredit,du är inte tillåten att ställa in ""Balans måste vara"" som ""Debet '"
+apps/erpnext/erpnext/accounts/doctype/account/account.py +100,"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Kontosaldo redan i Kredit,du är inte tillåten att ställa in ""Balans måste vara"" som ""Debet '"
 DocType: Account,Balance must be,Balans måste vara
 DocType: Hub Settings,Publish Pricing,Publicera prissättning
 DocType: Notification Control,Expense Claim Rejected Message,Räkning avvisas meddelande
@@ -757,7 +760,7 @@ DocType: Mode of Payment Account,Default Bank / Cash account will be automatical
 DocType: Employee,Permanent Address Is,Permanent Adress är
 DocType: Production Order Operation,Operation completed for how many finished goods?,Driften färdig för hur många färdiga varor?
 apps/erpnext/erpnext/public/js/setup_wizard.js +252,The Brand,Varumärket
-apps/erpnext/erpnext/controllers/status_updater.py +164,Allowance for over-{0} crossed for Item {1}.,Ersättning för över {0} korsade till punkt {1}.
+apps/erpnext/erpnext/controllers/status_updater.py +165,Allowance for over-{0} crossed for Item {1}.,Ersättning för över {0} korsade till punkt {1}.
 DocType: Employee,Exit Interview Details,Avsluta intervju Detaljer
 DocType: Item,Is Purchase Item,Är beställningsobjekt
 DocType: Journal Entry Account,Purchase Invoice,Inköpsfaktura
@@ -769,7 +772,7 @@ DocType: Payment Tool,Paid,Betalats
 DocType: Salary Slip,Total in words,Totalt i ord
 DocType: Material Request Item,Lead Time Date,Ledtid datum
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +54, is mandatory. Maybe Currency Exchange record is not created for ,är obligatoriskt. Kanske Valutaväxling posten inte skapas för
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +111,Row #{0}: Please specify Serial No for Item {1},Rad # {0}: Ange Löpnummer för punkt {1}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +112,Row #{0}: Please specify Serial No for Item {1},Rad # {0}: Ange Löpnummer för punkt {1}
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +538,"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","För ""Produktgrupper"" poster, Lager, Serienummer och Batch kommer  att övervägas från ""Packlistan"". Om Lager och Batch inte är samma för alla förpacknings objekt för alla ""Produktgrupper"" , kan dessa värden skrivas in i huvud produkten, kommer värden kopieras till ""Packlistan""."
 apps/erpnext/erpnext/config/stock.py +28,Shipments to customers.,Transporter till kunder.
 DocType: Purchase Invoice Item,Purchase Order Item,Inköpsorder Artikeln
@@ -778,7 +781,7 @@ DocType: Payment Tool,Set Payment Amount = Outstanding Amount,Ställ Betalningsb
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +53,Variance,Varians
 ,Company Name,Företagsnamn
 DocType: SMS Center,Total Message(s),Totalt Meddelande (er)
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +627,Select Item for Transfer,Välj föremål för Transfer
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +629,Select Item for Transfer,Välj föremål för Transfer
 DocType: Purchase Invoice,Additional Discount Percentage,Ytterligare rabatt Procent
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +24,View a list of all the help videos,Visa en lista över alla hjälp videos
 DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,"Välj konto chefen för banken, där kontrollen avsattes."
@@ -786,7 +789,7 @@ DocType: Selling Settings,Allow user to edit Price List Rate in transactions,Til
 DocType: Pricing Rule,Max Qty,Max Antal
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +106,Row {0}: Payment against Sales/Purchase Order should always be marked as advance,Rad {0}: Betalning mot Försäljning / inköpsorder bör alltid märkas i förskott
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +16,Chemical,Kemisk
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +691,All items have already been transferred for this Production Order.,Alla objekt har redan överförts till denna produktionsorder.
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +682,All items have already been transferred for this Production Order.,Alla objekt har redan överförts till denna produktionsorder.
 DocType: Process Payroll,Select Payroll Year and Month,Välj Lön År och Månad
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +32,"Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts and create a new Account (by clicking on Add Child) of type ""Bank""","Gå till lämplig grupp (vanligtvis Tillämpning av fonder> Omsättningstillgångar> bankkonton och skapa ett nytt konto (genom att klicka på Lägg till typ) av typen ""Bank"""
 DocType: Workstation,Electricity Cost,Elkostnad
@@ -800,7 +803,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Vit
 DocType: SMS Center,All Lead (Open),Alla Ledare (Öppna)
 DocType: Purchase Invoice,Get Advances Paid,Få utbetalda förskott
 apps/erpnext/erpnext/public/js/setup_wizard.js +112,Attach Your Picture,Bifoga din bild
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +629,Make ,Göra
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +631,Make ,Göra
 DocType: Journal Entry,Total Amount in Words,Total mängd i ord
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +7,There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,Det var ett problem. En trolig orsak kan vara att du inte har sparat formuläret. Vänligen kontakta support@erpnext.com om problemet kvarstår.
 apps/erpnext/erpnext/templates/pages/cart.html +5,My Cart,Min kundvagn
@@ -902,12 +905,11 @@ DocType: Purchase Invoice,Start date of current invoice's period,Startdatum för
 apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,This Time Log Batch har fakturerats.
 apps/erpnext/erpnext/crm/doctype/lead/lead.js +32,Create Opportunity,Skapa Möjlighet
 DocType: Salary Slip,Leave Without Pay,Lämna utan lön
-DocType: Supplier,Communications,Kommunikation
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +287,Capacity Planning Error,Kapacitetsplanering Error
 ,Trial Balance for Party,Trial Balance för Party
 DocType: Lead,Consultant,Konsult
 DocType: Salary Slip,Earnings,Vinster
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +355,Finished Item {0} must be entered for Manufacture type entry,Färdiga artiklar {0} måste anges för Tillverkningstypen
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +358,Finished Item {0} must be entered for Manufacture type entry,Färdiga artiklar {0} måste anges för Tillverkningstypen
 apps/erpnext/erpnext/config/learn.py +92,Opening Accounting Balance,Ingående redovisning Balans
 DocType: Sales Invoice Advance,Sales Invoice Advance,Försäljning Faktura Advance
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +398,Nothing to request,Ingenting att begära
@@ -950,7 +952,7 @@ DocType: Payment Reconciliation,Unreconciled Payment Details,Sonade Betalningsin
 DocType: Global Defaults,Current Fiscal Year,Innevarande räkenskapsår
 DocType: Global Defaults,Disable Rounded Total,Inaktivera avrundat Totalbelopp
 DocType: Lead,Call,Ring
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +396,'Entries' cannot be empty,&#39;poster&#39; kan inte vara tomt
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +400,'Entries' cannot be empty,&#39;poster&#39; kan inte vara tomt
 apps/erpnext/erpnext/utilities/transaction_base.py +78,Duplicate row {0} with same {1},Duplicate raden {0} med samma {1}
 ,Trial Balance,Trial Balans
 apps/erpnext/erpnext/config/hr.py +205,Setting up Employees,Ställa in Anställda
@@ -994,7 +996,7 @@ DocType: Item,Lead Time in days,Ledtid i dagar
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +193,Not authorized to edit frozen Account {0},Ej tillåtet att redigera fryst konto {0}
 DocType: Journal Entry,Get Outstanding Invoices,Hämta utestående fakturor
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +63,Sales Order {0} is not valid,Kundorder {0} är inte giltig
-apps/erpnext/erpnext/setup/doctype/company/company.py +172,"Sorry, companies cannot be merged","Tyvärr, kan företagen inte slås samman"
+apps/erpnext/erpnext/setup/doctype/company/company.py +159,"Sorry, companies cannot be merged","Tyvärr, kan företagen inte slås samman"
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +145,Small,Liten
 DocType: Employee,Employee Number,Anställningsnummer
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +65,Case No(s) already in use. Try from Case No {0},Ärendenr är redani bruk. Försök från ärende nr {0}
@@ -1007,7 +1009,7 @@ apps/erpnext/erpnext/selling/report/sales_person_target_variance_item_group_wise
 DocType: Employee,Place of Issue,Utgivningsplats
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +59,Contract,Kontrakt
 DocType: Email Digest,Add Quote,Lägg Citat
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +488,UOM coversion factor required for UOM: {0} in Item: {1},UOM coverfaktor krävs för UOM: {0} i punkt: {1}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +494,UOM coversion factor required for UOM: {0} in Item: {1},UOM coverfaktor krävs för UOM: {0} i punkt: {1}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +83,Indirect Expenses,Indirekta kostnader
 apps/erpnext/erpnext/controllers/selling_controller.py +163,Row {0}: Qty is mandatory,Rad {0}: Antal är obligatoriskt
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +8,Agriculture,Jordbruk
@@ -1023,7 +1025,7 @@ DocType: Email Digest,Annual Income,Årlig inkomst
 DocType: Serial No,Serial No Details,Serial Inga detaljer
 DocType: Purchase Invoice Item,Item Tax Rate,Produkt Skattesats
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +119,"For {0}, only credit accounts can be linked against another debit entry",För {0} kan endast kreditkonton länkas mot en annan debitering
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +477,Delivery Note {0} is not submitted,Följesedel {0} är inte lämnad
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +481,Delivery Note {0} is not submitted,Följesedel {0} är inte lämnad
 apps/erpnext/erpnext/stock/get_item_details.py +136,Item {0} must be a Sub-contracted Item,Produkt  {0} måste vara ett underleverantörs produkt
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +41,Capital Equipments,Kapital Utrustning
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +31,"Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.","Prissättning regel baseras först på ""Lägg till på' fälten, som kan vara artikel, artikelgrupp eller Märke."
@@ -1033,7 +1035,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 DocType: Appraisal Goal,Goal,Mål
 DocType: Sales Invoice Item,Edit Description,Redigera Beskrivning
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +318,Expected Delivery Date is lesser than Planned Start Date.,Förväntad leveransdatum är mindre än planerat startdatum.
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +691,For Supplier,För Leverantör
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +693,For Supplier,För Leverantör
 DocType: Account,Setting Account Type helps in selecting this Account in transactions.,Ställa Kontotyp hjälper i att välja detta konto i transaktioner.
 DocType: Purchase Invoice,Grand Total (Company Currency),Totalsumma (Företagsvaluta)
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +42,Total Outgoing,Totalt Utgående
@@ -1104,7 +1106,7 @@ DocType: Holiday List,Holidays,Helgdagar
 DocType: Sales Order Item,Planned Quantity,Planerad Kvantitet
 DocType: Purchase Invoice Item,Item Tax Amount,Produkt skattebeloppet
 DocType: Item,Maintain Stock,Behåll Lager
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +211,Stock Entries already created for Production Order ,Aktie Inlägg redan skapats för produktionsorder
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +212,Stock Entries already created for Production Order ,Aktie Inlägg redan skapats för produktionsorder
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +31,Net Change in Fixed Asset,Netto Förändring av anläggningstillgång
 DocType: Leave Control Panel,Leave blank if considered for all designations,Lämna tomt om det anses vara för alla beteckningar
 apps/erpnext/erpnext/controllers/accounts_controller.py +517,Charge of type 'Actual' in row {0} cannot be included in Item Rate,"Avgift av typ ""faktiska"" i raden {0} kan inte ingå i artikelomsättningen"
@@ -1154,7 +1156,7 @@ DocType: Stock Entry,Total Additional Costs,Totalt Merkostnader
 apps/erpnext/erpnext/public/js/setup_wizard.js +377,Sub Assemblies,Sub Assemblies
 DocType: Shipping Rule Condition,To Value,Att Värdera
 DocType: Supplier,Stock Manager,Lagrets direktör
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +143,Source warehouse is mandatory for row {0},Källa lager är obligatoriskt för rad {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +144,Source warehouse is mandatory for row {0},Källa lager är obligatoriskt för rad {0}
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +581,Packing Slip,Följesedel
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Office Rent,Kontorshyra
 apps/erpnext/erpnext/config/setup.py +110,Setup SMS gateway settings,Setup SMS-gateway-inställningar
@@ -1183,7 +1185,7 @@ DocType: Leave Type,Is Leave Without Pay,Är ledighet utan lön
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +129,No records found in the Payment table,Inga träffar i betalningstabellen
 apps/erpnext/erpnext/public/js/setup_wizard.js +153,Financial Year Start Date,Budgetåret Startdatum
 DocType: Employee External Work History,Total Experience,Total Experience
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +276,Packing Slip(s) cancelled,Följesedlar avbryts
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +265,Packing Slip(s) cancelled,Följesedlar avbryts
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Kassaflöde från investeringsverksamheten
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,"Frakt, spedition Avgifter"
 DocType: Material Request Item,Sales Order No,Kundorder Ingen
@@ -1231,11 +1233,11 @@ DocType: Address,Lead Name,Prospekt Namn
 ,POS,POS
 apps/erpnext/erpnext/config/stock.py +268,Opening Stock Balance,Ingående lagersaldo
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +36,{0} must appear only once,{0} måste bara finnas en gång
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +332,Not allowed to tranfer more {0} than {1} against Purchase Order {2},Ej tillåtet att flytta mer {0} än {1} mot beställning {2}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +335,Not allowed to tranfer more {0} than {1} against Purchase Order {2},Ej tillåtet att flytta mer {0} än {1} mot beställning {2}
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py +62,Leaves Allocated Successfully for {0},Lämnar Avsatt framgångsrikt för {0}
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +40,No Items to pack,Inga produkter att packa
 DocType: Shipping Rule Condition,From Value,Från Värde
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +550,Manufacturing Quantity is mandatory,Tillverknings Kvantitet är obligatorisk
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +541,Manufacturing Quantity is mandatory,Tillverknings Kvantitet är obligatorisk
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +45,Amounts not reflected in bank,Belopp som inte återspeglas i bank
 DocType: Quality Inspection Reading,Reading 4,Avläsning 4
 apps/erpnext/erpnext/config/hr.py +23,Claims for company expense.,Anspråk på företagets bekostnad.
@@ -1266,15 +1268,15 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js 
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +41,Age (Days),Ålder (dagar)
 DocType: Quotation Item,Quotation Item,Offert Artikel
 DocType: Account,Account Name,Kontonamn
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +34,From Date cannot be greater than To Date,Från Datum kan inte vara större än Till Datum
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +36,From Date cannot be greater than To Date,Från Datum kan inte vara större än Till Datum
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +194,Serial No {0} quantity {1} cannot be a fraction,Serienummer {0} kvantitet {1} inte kan vara en fraktion
 apps/erpnext/erpnext/config/buying.py +59,Supplier Type master.,Leverantör Typ mästare.
 DocType: Purchase Order Item,Supplier Part Number,Leverantör Artikelnummer
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +92,Conversion rate cannot be 0 or 1,Konverteringskurs kan inte vara 0 eller 1
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +93,Conversion rate cannot be 0 or 1,Konverteringskurs kan inte vara 0 eller 1
 apps/erpnext/erpnext/controllers/stock_controller.py +247,{0} {1} is cancelled or stopped,{0} {1} avbryts eller stoppas
 DocType: Accounts Settings,Credit Controller,Kreditcontroller
 DocType: Delivery Note,Vehicle Dispatch Date,Fordon Avgångs Datum
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +202,Purchase Receipt {0} is not submitted,Inköpskvitto {0} är inte lämnat
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +203,Purchase Receipt {0} is not submitted,Inköpskvitto {0} är inte lämnat
 DocType: Company,Default Payable Account,Standard betalkonto
 apps/erpnext/erpnext/config/website.py +13,"Settings for online shopping cart such as shipping rules, price list etc.","Inställningar för webbutik som fraktregler, prislista mm"
 apps/erpnext/erpnext/controllers/website_list_for_contact.py +65,{0}% Billed,{0}% Fakturerad
@@ -1290,7 +1292,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +112,Row {0
 DocType: Company,Default Values,Standardvärden
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.js +236,Row {0}: Payment amount can not be negative,Rad {0}: Betalningsbelopp kan inte vara negativ
 DocType: Expense Claim,Total Amount Reimbursed,Totala belopp som ersatts
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +64,Against Supplier Invoice {0} dated {1},Mot leverantörsfakturor {0} den {1}
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +65,Against Supplier Invoice {0} dated {1},Mot leverantörsfakturor {0} den {1}
 DocType: Customer,Default Price List,Standard Prislista
 DocType: Payment Reconciliation,Payments,Betalningar
 DocType: Budget Detail,Budget Allocated,Budget
@@ -1334,10 +1336,10 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +200,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Vikt nämns \ Vänligen ange ""Vikt UOM"" också"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Material Begäran används för att göra detta Lagerinlägg
 apps/erpnext/erpnext/config/support.py +43,Single unit of an Item.,Enda enhet av ett objekt.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +213,Time Log Batch {0} must be 'Submitted',Tid Log Batch {0} måste &quot;Avsändare&quot;
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +217,Time Log Batch {0} must be 'Submitted',Tid Log Batch {0} måste &quot;Avsändare&quot;
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Skapa kontering för varje lagerförändring
 DocType: Leave Allocation,Total Leaves Allocated,Totala Löv Avsatt
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +387,Warehouse required at Row No {0},Lager krävs vid Rad nr {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +391,Warehouse required at Row No {0},Lager krävs vid Rad nr {0}
 apps/erpnext/erpnext/public/js/setup_wizard.js +169,Please enter valid Financial Year Start and End Dates,Ange ett giltigt räkenskapsåret start- och slutdatum
 DocType: Employee,Date Of Retirement,Datum för pensionering
 DocType: Upload Attendance,Get Template,Hämta mall
@@ -1346,6 +1348,7 @@ DocType: Item,Weightage,Vikt
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +91,A Customer Group exists with same name please change the Customer name or rename the Customer Group,"En kundgrupp finns med samma namn, ändra Kundens namn eller döp om kundgruppen"
 apps/erpnext/erpnext/public/js/pos/pos.js +152,Please select {0} first.,Välj {0} först.
 apps/erpnext/erpnext/templates/pages/order.html +62,text {0},text {0}
+apps/erpnext/erpnext/public/js/templates/contact_list.html +2,New Contact,Ny kontakt
 DocType: Territory,Parent Territory,Överordnat område
 DocType: Quality Inspection Reading,Reading 2,Avläsning 2
 DocType: Stock Entry,Material Receipt,Material Kvitto
@@ -1370,7 +1373,7 @@ DocType: Stock Reconciliation,Reconciliation JSON,Avstämning JSON
 apps/erpnext/erpnext/accounts/report/financial_statements.html +3,Too many columns. Export the report and print it using a spreadsheet application.,Alltför många kolumner. Exportera rapporten och skriva ut det med hjälp av ett kalkylprogram.
 DocType: Sales Invoice Item,Batch No,Batch nr
 DocType: Selling Settings,Allow multiple Sales Orders against a Customer's Purchase Order,Tillåt flera kundorder mot Kundens beställning
-apps/erpnext/erpnext/setup/doctype/company/company.py +152,Main,Huvud
+apps/erpnext/erpnext/setup/doctype/company/company.py +139,Main,Huvud
 apps/erpnext/erpnext/stock/doctype/item/item_list.js +13,Variant,Variant
 DocType: Naming Series,Set prefix for numbering series on your transactions,Ställ prefix för nummerserie på dina transaktioner
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +164,Stopped order cannot be cancelled. Unstop to cancel.,Stoppad ordning kan inte avbrytas. Unstop att avbryta.
@@ -1470,7 +1473,7 @@ DocType: Naming Series,Current Value,Nuvarande Värde
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +171,{0} created,{0} skapad
 DocType: Delivery Note Item,Against Sales Order,Mot kundorder
 ,Serial No Status,Serial No Status
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +382,Item table can not be blank,Produkt tabellen kan inte vara tomt
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +447,Item table can not be blank,Produkt tabellen kan inte vara tomt
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +138,"Row {0}: To set {1} periodicity, difference between from and to date \
 						must be greater than or equal to {2}","Rad {0}: Om du vill ställa {1} periodicitet, tidsskillnad mellan från och till dags datum \ måste vara större än eller lika med {2}"
 DocType: Pricing Rule,Selling,Försäljnings
@@ -1479,7 +1482,7 @@ DocType: Sales Person,Name and Employee ID,Namn och Anställnings ID
 apps/erpnext/erpnext/accounts/party.py +275,Due Date cannot be before Posting Date,Förfallodatum kan inte vara före Publiceringsdatum
 DocType: Website Item Group,Website Item Group,Webbplats Produkt Grupp
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +170,Duties and Taxes,Tullar och skatter
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +318,Please enter Reference date,Ange Referensdatum
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +322,Please enter Reference date,Ange Referensdatum
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +44,{0} payment entries can not be filtered by {1},{0} betalningsposter kan inte filtreras genom {1}
 DocType: Item Website Specification,Table for Item that will be shown in Web Site,Tabell för punkt som kommer att visas i Web Site
 DocType: Purchase Order Item Supplied,Supplied Qty,Medföljande Antal
@@ -1494,7 +1497,7 @@ DocType: Account,Frozen,Fryst
 DocType: Installation Note,Installation Time,Installationstid
 DocType: Sales Invoice,Accounting Details,Redovisning Detaljer
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Delete all the Transactions for this Company,Ta bort alla transaktioner för detta företag
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +189,Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Production Order # {3}. Please update operation status via Time Logs,Rad # {0}: Operation {1} är inte klar för {2} st av färdiga varor i produktionsorder # {3}. Uppdatera driftstatus via Tidsloggar
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +190,Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Production Order # {3}. Please update operation status via Time Logs,Rad # {0}: Operation {1} är inte klar för {2} st av färdiga varor i produktionsorder # {3}. Uppdatera driftstatus via Tidsloggar
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +57,Investments,Investeringarna
 DocType: Issue,Resolution Details,Åtgärds Detaljer
 DocType: Quality Inspection Reading,Acceptance Criteria,Acceptanskriterier
@@ -1527,7 +1530,7 @@ DocType: Employee,Personal Details,Personliga Detaljer
 ,Maintenance Schedules,Underhålls scheman
 ,Quotation Trends,Offert Trender
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +139,Item Group not mentioned in item master for item {0},Produktgruppen nämns inte i huvudprodukten för objektet {0}
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +303,Debit To account must be a Receivable account,Debitering av konto måste vara ett mottagarkonto
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +307,Debit To account must be a Receivable account,Debitering av konto måste vara ett mottagarkonto
 DocType: Shipping Rule Condition,Shipping Amount,Fraktbelopp
 ,Pending Amount,Väntande antal
 DocType: Purchase Invoice Item,Conversion Factor,Omvandlingsfaktor
@@ -1544,12 +1547,12 @@ DocType: Bank Reconciliation,Include Reconciled Entries,Inkludera avstämnignsan
 apps/erpnext/erpnext/config/accounts.py +41,Tree of finanial accounts.,Träd finanial konton.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Lämna tomt om det anses vara för alla typer  av anställda
 DocType: Landed Cost Voucher,Distribute Charges Based On,Fördela avgifter som grundas på
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +313,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Kontot {0} måste vara av typen ""Fast tillgång"" som punkt {1} är en tillgångspost"
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +317,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Kontot {0} måste vara av typen ""Fast tillgång"" som punkt {1} är en tillgångspost"
 DocType: HR Settings,HR Settings,HR Inställningar
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +114,Expense Claim is pending approval. Only the Expense Approver can update status.,Räkning väntar på godkännande. Endast Utgiftsgodkännare kan uppdatera status.
 DocType: Purchase Invoice,Additional Discount Amount,Ytterligare rabatt Belopp
 DocType: Leave Block List Allow,Leave Block List Allow,Lämna Block List Tillåt
-apps/erpnext/erpnext/setup/doctype/company/company.py +236,Abbr can not be blank or space,Förkortning kan inte vara tomt
+apps/erpnext/erpnext/setup/doctype/company/company.py +225,Abbr can not be blank or space,Förkortning kan inte vara tomt
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +50,Sports,Sport
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +61,Total Actual,Totalt Faktisk
 apps/erpnext/erpnext/public/js/setup_wizard.js +380,Unit,Enhet
@@ -1561,7 +1564,7 @@ DocType: POS Profile,Price List,Prislista
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +20,{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,{0} är nu standard räkenskapsår. Vänligen uppdatera din webbläsare för att ändringen ska träda i kraft.
 apps/erpnext/erpnext/projects/doctype/project/project.js +47,Expense Claims,Räkningar
 DocType: Issue,Support,Stöd
-apps/erpnext/erpnext/templates/generators/item.html +80,View Cart,Visa kundvagn
+apps/erpnext/erpnext/templates/generators/item.html +84,View Cart,Visa kundvagn
 ,BOM Search,BOM Sök
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +176,Closing (Opening + Totals),Stänger (Öppna + Totals)
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +26,Please specify currency in Company,Ange valuta i bolaget
@@ -1573,13 +1576,14 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +254,Account {0} is inva
 apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +34,UOM Conversion factor is required in row {0},UOM omräkningsfaktor i rad {0}
 apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +52,Clearance date cannot be before check date in row {0},Utförsäljningsdatumet kan inte vara före markerat datum i rad {0}
 DocType: Salary Slip,Deduction,Avdrag
+apps/erpnext/erpnext/stock/get_item_details.py +249,Item Price added for {0} in Price List {1},Artikel Pris till för {0} i prislista {1}
 DocType: Address Template,Address Template,Adress Mall
 apps/erpnext/erpnext/selling/page/sales_browser/sales_browser.js +128,Please enter Employee Id of this sales person,Ange anställnings Id för denna säljare
 DocType: Territory,Classification of Customers by region,Klassificering av kunder per region
 DocType: Project,% Tasks Completed,% Uppgifter Avslutade
 DocType: Project,Gross Margin,Bruttomarginal
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +140,Please enter Production Item first,Ange Produktionsartikel först
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +72,disabled user,inaktiverad användare
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +64,disabled user,inaktiverad användare
 DocType: Opportunity,Quotation,Offert
 DocType: Salary Slip,Total Deduction,Totalt Avdrag
 DocType: Quotation,Maintenance User,Serviceanvändare
@@ -1598,7 +1602,7 @@ apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +126,"Special 
 DocType: Campaign,"Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment.","Håll koll på säljkampanjer. Håll koll på Prospekter, Offerter, kundorder etc från kampanjer för att mäta avkastning på investeringen."
 DocType: Expense Claim,Approver,Godkännare
 ,SO Qty,SO Antal
-apps/erpnext/erpnext/accounts/doctype/account/account.py +162,"Stock entries exist against warehouse {0}, hence you cannot re-assign or modify Warehouse","Arkiv poster finns mot lager {0}, därför du kan inte åter tilldela eller ändra Warehouse"
+apps/erpnext/erpnext/accounts/doctype/account/account.py +164,"Stock entries exist against warehouse {0}, hence you cannot re-assign or modify Warehouse","Arkiv poster finns mot lager {0}, därför du kan inte åter tilldela eller ändra Warehouse"
 DocType: Appraisal,Calculate Total Score,Beräkna Totalsumma
 DocType: Supplier Quotation,Manufacturing Manager,Tillverkningsansvarig
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +191,Serial No {0} is under warranty upto {1},Löpnummer {0} är under garanti upp till {1}
@@ -1623,10 +1627,10 @@ DocType: Email Digest,Note: Email will not be sent to disabled users,Obs: E-post
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +36,Select Company...,Välj Företaget ...
 DocType: Leave Control Panel,Leave blank if considered for all departments,Lämna tomt om det anses vara för alla avdelningar
 apps/erpnext/erpnext/config/hr.py +95,"Types of employment (permanent, contract, intern etc.).","Typer av anställning (permanent, kontrakts, praktikant osv)."
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +356,{0} is mandatory for Item {1},{0} är obligatoriskt för punkt {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +360,{0} is mandatory for Item {1},{0} är obligatoriskt för punkt {1}
 DocType: Currency Exchange,From Currency,Från Valuta
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +154,"Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row","Välj tilldelade beloppet, Faktura Typ och fakturanumret i minst en rad"
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +107,Sales Order required for Item {0},Kundorder krävs för punkt {0}
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +98,Sales Order required for Item {0},Kundorder krävs för punkt {0}
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +50,Amounts not reflected in system,Belopp som inte återspeglas i systemet
 DocType: Purchase Invoice Item,Rate (Company Currency),Andel (Företagsvaluta)
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +40,Others,Annat
@@ -1642,7 +1646,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +145,"e.g. ""Build tools for buil
 DocType: Quality Inspection,In Process,Pågående
 DocType: Authorization Rule,Itemwise Discount,Produktvis rabatt
 DocType: Purchase Order Item,Reference Document Type,Referensdokument Typ
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +326,{0} against Sales Order {1},{0} mot kundorder {1}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +330,{0} against Sales Order {1},{0} mot kundorder {1}
 DocType: Account,Fixed Asset,Fast tillgångar
 apps/erpnext/erpnext/config/stock.py +278,Serialized Inventory,Serial numrerade Inventory
 DocType: Activity Type,Default Billing Rate,Standardfakturerings betyg
@@ -1652,7 +1656,7 @@ apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_re
 apps/erpnext/erpnext/config/selling.py +299,Sales Order to Payment,Kundorder till betalning
 DocType: Expense Claim Detail,Expense Claim Detail,Räkningen Detalj
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +271,Time Logs created:,Tid Loggar skapat:
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +767,Please select correct account,Välj rätt konto
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +771,Please select correct account,Välj rätt konto
 DocType: Item,Weight UOM,Vikt UOM
 DocType: Employee,Blood Group,Blodgrupp
 DocType: Purchase Invoice Item,Page Break,Sidbrytning
@@ -1683,7 +1687,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 DocType: Time Log,To Time,Till Time
 DocType: Authorization Rule,Approving Role (above authorized value),Godkännande Roll (ovan auktoriserad värde)
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +25,"To add child nodes, explore tree and click on the node under which you want to add more nodes.","Om du vill lägga ordnade noder, utforska träd och klicka på noden där du vill lägga till fler noder."
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +102,Credit To account must be a Payable account,Kredit till konto måste vara en skuld konto
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +103,Credit To account must be a Payable account,Kredit till konto måste vara en skuld konto
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +231,BOM recursion: {0} cannot be parent or child of {2},BOM rekursion: {0} kan inte vara över eller barn under {2}
 DocType: Production Order Operation,Completed Qty,Avslutat Antal
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +122,"For {0}, only debit accounts can be linked against another credit entry",För {0} kan bara debitkonton länkas mot en annan kreditering
@@ -1694,8 +1698,9 @@ DocType: Stock Reconciliation Item,Current Valuation Rate,Nuvarande värderingen
 DocType: Item,Customer Item Codes,Kund artikelnummer
 DocType: Opportunity,Lost Reason,Förlorad Anledning
 apps/erpnext/erpnext/config/accounts.py +68,Create Payment Entries against Orders or Invoices.,Skapa Betalnings inlägg mot Order eller Fakturor.
+apps/erpnext/erpnext/public/js/templates/address_list.html +1,New Address,Ny adress
 DocType: Quality Inspection,Sample Size,Provstorlek
-apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +446,All items have already been invoiced,Alla objekt har redan fakturerats
+apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +498,All items have already been invoiced,Alla objekt har redan fakturerats
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +47,Please specify a valid 'From Case No.',Ange ett giltigt Från ärende nr &quot;
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +304,Further cost centers can be made under Groups but entries can be made against non-Groups,Ytterligare kostnadsställen kan göras i grupperna men poster kan göras mot icke-grupper
 DocType: Project,External,Extern
@@ -1768,7 +1773,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Process Payroll,Create Salary Slip,Skapa lönebeskedet
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +53,Expected balance as per bank,Förväntad balans per bank
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +158,Source of Funds (Liabilities),Källa fonderna (skulder)
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +345,Quantity in row {0} ({1}) must be same as manufactured quantity {2},Kvantitet i rad {0} ({1}) måste vara samma som tillverkad mängd {2}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +348,Quantity in row {0} ({1}) must be same as manufactured quantity {2},Kvantitet i rad {0} ({1}) måste vara samma som tillverkad mängd {2}
 DocType: Appraisal,Employee,Anställd
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.js +10,Import Email From,Importera e-post från
 apps/erpnext/erpnext/utilities/doctype/contact/contact.js +67,Invite as User,Bjud in som Användare
@@ -1780,7 +1785,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +75,Group 
 apps/erpnext/erpnext/templates/form_grid/material_request_grid.html +7,Required On,Obligatorisk På
 DocType: Sales Invoice,Mass Mailing,Massutskick
 DocType: Rename Tool,File to Rename,Fil att byta namn på
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +180,Purchse Order number required for Item {0},Inköp Beställningsnummer krävs för artikel {0}
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +181,Purchse Order number required for Item {0},Inköp Beställningsnummer krävs för artikel {0}
 apps/erpnext/erpnext/public/js/controllers/transaction.js +136,Show Payments,Visa Betalningar
 apps/erpnext/erpnext/controllers/buying_controller.py +236,Specified BOM {0} does not exist for Item {1},Fastställt BOM {0} finns inte till punkt {1}
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +197,Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Underhållsschema {0} måste avbrytas innanman kan dra avbryta kundorder
@@ -1790,6 +1795,7 @@ apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_st
 DocType: Selling Settings,Sales Order Required,Kundorder krävs
 apps/erpnext/erpnext/crm/doctype/lead/lead.js +30,Create Customer,Skapa kund
 DocType: Purchase Invoice,Credit To,Kredit till
+apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +31,Active Leads / Customers,Aktiva Leads / Kunder
 DocType: Employee Education,Post Graduate,Betygsinlägg
 DocType: Maintenance Schedule Detail,Maintenance Schedule Detail,Underhållsschema Detalj
 DocType: Quality Inspection Reading,Reading 9,Avläsning 9
@@ -1810,7 +1816,7 @@ DocType: Payment Tool,Total Payment Amount,Totalt Betalningsbelopp
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +145,{0} ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3},{0} ({1}) kan inte vara större än planerad kvantitet ({2}) i produktionsorder {3}
 DocType: Shipping Rule,Shipping Rule Label,Frakt Regel Etikett
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +207,Raw Materials cannot be blank.,Råvaror kan inte vara tomt.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +418,"Could not update stock, invoice contains drop shipping item.","Det gick inte att uppdatera lager, faktura innehåller släppa sjöfarten objekt."
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +422,"Could not update stock, invoice contains drop shipping item.","Det gick inte att uppdatera lager, faktura innehåller släppa sjöfarten objekt."
 DocType: Newsletter,Test,Test
 apps/erpnext/erpnext/stock/doctype/item/item.py +407,"As there are existing stock transactions for this item, \
 							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'","Eftersom det redan finns lagertransaktioner för denna artikel, \ kan du inte ändra värdena för ""Har Löpnummer"", ""Har Batch Nej"", ""Är Lagervara"" och ""Värderingsmetod"""
@@ -1832,7 +1838,7 @@ DocType: Delivery Note,Transporter Name,Transportör Namn
 DocType: Authorization Rule,Authorized Value,Auktoriserad Värde
 DocType: Contact,Enter department to which this Contact belongs,Ange avdelning som denna Kontakt tillhör
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +57,Total Absent,Totalt Frånvarande
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +744,Item or Warehouse for row {0} does not match Material Request,Produkt eller Lager för rad {0} matchar inte Materialförfrågan
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +735,Item or Warehouse for row {0} does not match Material Request,Produkt eller Lager för rad {0} matchar inte Materialförfrågan
 apps/erpnext/erpnext/config/stock.py +104,Unit of Measure,Måttenhet
 DocType: Fiscal Year,Year End Date,År Slutdatum
 DocType: Task Depends On,Task Depends On,Uppgift Beror på
@@ -1858,7 +1864,7 @@ apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +21,N
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +117,Contract End Date must be greater than Date of Joining,Kontraktets Slutdatum måste vara större än Datum för inträde
 DocType: Sales Partner,A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,En tredje parts distributör / återförsäljare / bonusagent / affiliate / återförsäljare som säljer företagens produkter för en provision.
 DocType: Customer Group,Has Child Node,Har Under Node
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +338,{0} against Purchase Order {1},{0} mot beställning {1}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +342,{0} against Purchase Order {1},{0} mot beställning {1}
 DocType: SMS Settings,"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)","Ange statiska url parametrar här (T.ex.. Avsändare = ERPNext, användarnamn = ERPNext, lösenord = 1234 mm)"
 apps/erpnext/erpnext/accounts/utils.py +42,{0} {1} not in any active Fiscal Year. For more details check {2}.,{0} {1} inte någon aktiv räkenskapsår. För mer information kolla {2}.
 apps/erpnext/erpnext/setup/setup_wizard/default_website.py +26,This is an example website auto-generated from ERPNext,Detta är ett exempel webbplats automatiskt genererade från ERPNext
@@ -1886,7 +1892,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 10. Add or Deduct: Whether you want to add or deduct the tax.","Schablonskatt mall som kan tillämpas på alla köptransaktioner. Denna mall kan innehålla en lista över skatte huvuden och även andra kostnadshuvuden som &quot;Shipping&quot;, &quot;Försäkring&quot;, &quot;Hantera&quot; etc. #### Obs Skattesatsen du definierar här kommer att bli den schablonskatt för alla ** artiklar * *. Om det finns ** artiklar ** som har olika priser, måste de läggas till i ** Punkt skatt ** tabellen i ** Punkt ** mästare. #### Beskrivning av kolumner 1. Beräkning Typ: - Det kan vara på ** Net Totalt ** (som är summan av grundbeloppet). - ** I föregående v Totalt / Belopp ** (för kumulativa skatter eller avgifter). Om du väljer det här alternativet, kommer skatten att tillämpas som en procentandel av föregående rad (i skattetabellen) belopp eller total. - ** Faktisk ** (som nämns). 2. Konto Head: Konto huvudbok enligt vilket denna skatt kommer att bokas 3. Kostnadsställe: Om skatten / avgiften är en inkomst (som sjöfarten) eller kostnader det måste bokas mot ett kostnadsställe. 4. Beskrivning: Beskrivning av skatten (som ska skrivas ut i fakturor / citationstecken). 5. Sätt betyg: skattesats. 6. Belopp Momsbelopp. 7. Totalt: Ackumulerad total till denna punkt. 8. Skriv Row: Om baserad på &quot;Föregående rad Total&quot; kan du välja radnumret som kommer att tas som en bas för denna beräkning (standard är föregående rad). 9. Tänk skatt eller avgift för: I det här avsnittet kan du ange om skatten / avgiften är endast för värdering (inte en del av den totala) eller endast för total (inte tillföra värde till objektet) eller för båda. 10. Lägg till eller dra av: Oavsett om du vill lägga till eller dra av skatten."
 DocType: Purchase Receipt Item,Recd Quantity,Recd Kvantitet
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +104,Cannot produce more Item {0} than Sales Order quantity {1},Det går inte att producera mer artiklar {0} än kundorderns mängd {1}
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +483,Stock Entry {0} is not submitted,Stock Entry {0} är inte lämnat
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +487,Stock Entry {0} is not submitted,Stock Entry {0} är inte lämnat
 DocType: Payment Reconciliation,Bank / Cash Account,Bank / Konto
 DocType: Tax Rule,Billing City,Fakturerings Ort
 DocType: Global Defaults,Hide Currency Symbol,Dölj Valutasymbol
@@ -1918,6 +1924,7 @@ DocType: Sales Order,Billing Status,Faktureringsstatus
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +135,Utility Expenses,Utility Kostnader
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +65,90-Above,90-Ovan
 DocType: Buying Settings,Default Buying Price List,Standard Inköpslista
+apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +83,No employee for the above selected criteria OR salary slip already created,Ingen anställd för ovan valda kriterier eller lönebeskedet redan skapat
 DocType: Notification Control,Sales Order Message,Kundorder Meddelande
 apps/erpnext/erpnext/config/setup.py +15,"Set Default Values like Company, Currency, Current Fiscal Year, etc.","Ange standardvärden som bolaget, Valuta, varande räkenskapsår, etc."
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.js +28,Payment Type,Betalning Typ
@@ -1953,7 +1960,7 @@ DocType: Stock Reconciliation Item,Current Qty,Aktuellt Antal
 DocType: BOM Item,"See ""Rate Of Materials Based On"" in Costing Section",Se &quot;Rate of Materials Based On&quot; i kalkyl avsnitt
 DocType: Appraisal Goal,Key Responsibility Area,Nyckelansvar Områden
 DocType: Item Reorder,Material Request Type,Typ av Materialbegäran
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +84,Row {0}: UOM Conversion Factor is mandatory,Rad {0}: UOM Omvandlingsfaktor är obligatorisk
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +85,Row {0}: UOM Conversion Factor is mandatory,Rad {0}: UOM Omvandlingsfaktor är obligatorisk
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +17,Ref,Ref
 DocType: Cost Center,Cost Center,Kostnadscenter
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +36,Voucher #,Rabatt #
@@ -1975,7 +1982,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +328,Please
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +643,Please select a value for {0} quotation_to {1},Välj ett värde för {0} offert_till {1}
 apps/erpnext/erpnext/config/selling.py +33,All Addresses.,Alla adresser.
 DocType: Company,Stock Settings,Stock Inställningar
-apps/erpnext/erpnext/accounts/doctype/account/account.py +201,"Merging is only possible if following properties are same in both records. Is Group, Root Type, Company","Sammanslagning är endast möjligt om följande egenskaper är desamma i båda posterna. Är gruppen, Root typ, Företag"
+apps/erpnext/erpnext/accounts/doctype/account/account.py +203,"Merging is only possible if following properties are same in both records. Is Group, Root Type, Company","Sammanslagning är endast möjligt om följande egenskaper är desamma i båda posterna. Är gruppen, Root typ, Företag"
 apps/erpnext/erpnext/config/crm.py +72,Manage Customer Group Tree.,Hantera Kundgruppsträd.
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +302,New Cost Center Name,Nytt kostnadsställe Namn
 DocType: Leave Control Panel,Leave Control Panel,Lämna Kontrollpanelen
@@ -1995,7 +2002,7 @@ DocType: Bank Reconciliation Detail,Cheque Number,Check Nummer
 DocType: Payment Tool Detail,Payment Tool Detail,Betalning Verktygs Detalj
 ,Sales Browser,Försäljnings Webbläsare
 DocType: Journal Entry,Total Credit,Total Credit
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +486,Warning: Another {0} # {1} exists against stock entry {2},Varning: En annan {0} # {1} finns mot införande i lager {2}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +490,Warning: Another {0} # {1} exists against stock entry {2},Varning: En annan {0} # {1} finns mot införande i lager {2}
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +386,Local,Lokal
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +26,Loans and Advances (Assets),Utlåning (tillgångar)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +12,Debtors,Gäldenärer
@@ -2063,10 +2070,10 @@ DocType: Maintenance Visit,Purposes,Ändamål
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +103,Atleast one item should be entered with negative quantity in return document,Minst ett objekt ska anges med negativt kvantitet i returdokument
 apps/erpnext/erpnext/manufacturing/doctype/workstation/workstation.py +67,"Operation {0} longer than any available working hours in workstation {1}, break down the operation into multiple operations","Operation {0} längre än alla tillgängliga arbetstiden i arbetsstation {1}, bryta ner verksamheten i flera operationer"
 ,Requested,Begärd
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +66,No Remarks,Anmärkningar
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +67,No Remarks,Anmärkningar
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js +13,Overdue,Försenad
 DocType: Account,Stock Received But Not Billed,Stock mottagits men inte faktureras
-apps/erpnext/erpnext/accounts/doctype/account/account.py +80,Root Account must be a group,Root Hänsyn måste vara en grupp
+apps/erpnext/erpnext/accounts/doctype/account/account.py +82,Root Account must be a group,Root Hänsyn måste vara en grupp
 DocType: Salary Slip,Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,Bruttolön + efterskott Belopp + inlösen Belopp - Totalt Avdrag
 DocType: Monthly Distribution,Distribution Name,Distributions Namn
 DocType: Features Setup,Sales and Purchase,Försäljning och Inköp
@@ -2080,6 +2087,7 @@ DocType: Journal Entry Account,Sales Invoice,Försäljning Faktura
 DocType: Journal Entry Account,Party Balance,Parti Balans
 DocType: Sales Invoice Item,Time Log Batch,Tid Log Batch
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +437,Please select Apply Discount On,Välj Verkställ rabatt på
+apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Lön Slip Skapad
 DocType: Company,Default Receivable Account,Standard Mottagarkonto
 DocType: Process Payroll,Create Bank Entry for the total salary paid for the above selected criteria,Skapa Bankinlägg för den totala lönen för de ovan valda kriterier
 DocType: Stock Entry,Material Transfer for Manufacture,Material Transfer för Tillverkning
@@ -2087,7 +2095,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +18,Discount 
 DocType: Purchase Invoice,Half-yearly,Halvårs
 apps/erpnext/erpnext/accounts/report/financial_statements.py +16,Fiscal Year {0} not found.,Räkenskapsårets {0} hittades inte.
 DocType: Bank Reconciliation,Get Relevant Entries,Hämta relevanta uppgifter
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +405,Accounting Entry for Stock,Kontering för lager
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +408,Accounting Entry for Stock,Kontering för lager
 DocType: Sales Invoice,Sales Team1,Försäljnings Team1
 apps/erpnext/erpnext/stock/doctype/item/item.py +462,Item {0} does not exist,Punkt {0} inte existerar
 DocType: Sales Invoice,Customer Address,Kundadress
@@ -2098,7 +2106,7 @@ apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +5
 DocType: Item Group,Show this slideshow at the top of the page,Visa denna bildspel längst upp på sidan
 DocType: BOM,Item UOM,Produkt UOM
 DocType: Sales Taxes and Charges,Tax Amount After Discount Amount (Company Currency),Skattebelopp efter rabatt Belopp (Company valuta)
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +149,Target warehouse is mandatory for row {0},Target lager är obligatoriskt för rad {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +150,Target warehouse is mandatory for row {0},Target lager är obligatoriskt för rad {0}
 DocType: Quality Inspection,Quality Inspection,Kvalitetskontroll
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +144,Extra Small,Extra Liten
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +546,Warning: Material Requested Qty is less than Minimum Order Qty,Varning: Material Begärt Antal är mindre än Minimum Antal
@@ -2106,7 +2114,7 @@ apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +191,Account {0} is f
 DocType: Company,Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,Juridisk person / Dotterbolag med en separat kontoplan som tillhör organisationen.
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +29,"Food, Beverage & Tobacco","Mat, dryck och tobak"
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +20,PL or BS,PL eller BS
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +541,Can only make payment against unbilled {0},Kan bara göra betalning mot ofakturerade {0}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +545,Can only make payment against unbilled {0},Kan bara göra betalning mot ofakturerade {0}
 apps/erpnext/erpnext/controllers/selling_controller.py +122,Commission rate cannot be greater than 100,Provisionshastighet kan inte vara större än 100
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +41,Minimum Inventory Level,Minsta lagernivå
 DocType: Stock Entry,Subcontract,Subkontrakt
@@ -2144,7 +2152,7 @@ apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +23,Name or Email
 apps/erpnext/erpnext/config/stock.py +74,Incoming quality inspection.,Inkommande kvalitetskontroll.
 DocType: Purchase Order Item,Returned Qty,Återvände Antal
 DocType: Employee,Exit,Utgång
-apps/erpnext/erpnext/accounts/doctype/account/account.py +138,Root Type is mandatory,Root Type är obligatorisk
+apps/erpnext/erpnext/accounts/doctype/account/account.py +140,Root Type is mandatory,Root Type är obligatorisk
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +295,Serial No {0} created,Löpnummer {0} skapades
 DocType: Item Customer Detail,"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","För att underlätta för kunderna, kan dessa koder användas i utskriftsformat som fakturor och följesedlar"
 DocType: Employee,You can enter any date manually,Du kan ange något datum manuellt
@@ -2171,7 +2179,7 @@ apps/erpnext/erpnext/support/page/support_analytics/support_analytics.js +31,Sel
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +43,Reorder Level,Ombeställningsnivå
 DocType: Attendance,Attendance Date,Närvaro Datum
 DocType: Salary Structure,Salary breakup based on Earning and Deduction.,Lön upplösning baserat på inkomster och avdrag.
-apps/erpnext/erpnext/accounts/doctype/account/account.py +110,Account with child nodes cannot be converted to ledger,Konto med underordnade noder kan inte omvandlas till liggaren
+apps/erpnext/erpnext/accounts/doctype/account/account.py +112,Account with child nodes cannot be converted to ledger,Konto med underordnade noder kan inte omvandlas till liggaren
 DocType: Address,Preferred Shipping Address,Önskad leveransadress
 DocType: Purchase Receipt Item,Accepted Warehouse,Godkänt Lager
 DocType: Bank Reconciliation Detail,Posting Date,Bokningsdatum
@@ -2227,11 +2235,11 @@ DocType: Material Request,Requested For,Begärd För
 DocType: Quotation Item,Against Doctype,Mot Doctype
 DocType: Delivery Note,Track this Delivery Note against any Project,Prenumerera på det här följesedel mot någon Project
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +28,Net Cash from Investing,Nettokassaflöde från Investera
-apps/erpnext/erpnext/accounts/doctype/account/account.py +176,Root account can not be deleted,Root-kontot kan inte tas bort
+apps/erpnext/erpnext/accounts/doctype/account/account.py +178,Root account can not be deleted,Root-kontot kan inte tas bort
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +75,Show Stock Entries,Visa Stock Inlägg
 ,Is Primary Address,Är Primär adress
 DocType: Production Order,Work-in-Progress Warehouse,Pågående Arbete - Lager
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +316,Reference #{0} dated {1},Referens # {0} den {1}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +320,Reference #{0} dated {1},Referens # {0} den {1}
 apps/erpnext/erpnext/templates/includes/cart/cart_address.html +13,Manage Addresses,Hantera Adresser
 DocType: Pricing Rule,Item Code,Produktkod
 DocType: Production Planning Tool,Create Production Orders,Skapa produktionsorder
@@ -2239,7 +2247,7 @@ DocType: Serial No,Warranty / AMC Details,Garanti / AMC Detaljer
 DocType: Journal Entry,User Remark,Användar Anmärkning
 DocType: Lead,Market Segment,Marknadssegment
 DocType: Employee Internal Work History,Employee Internal Work History,Anställd interna arbetshistoria
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +223,Closing (Dr),Closing (Dr)
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +225,Closing (Dr),Closing (Dr)
 DocType: Contact,Passive,Passiv
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +228,Serial No {0} not in stock,Löpnummer {0} inte i lager
 apps/erpnext/erpnext/config/selling.py +127,Tax template for selling transactions.,Skatte mall för att sälja transaktioner.
@@ -2255,7 +2263,7 @@ DocType: Sales Invoice Item,Available Qty at Warehouse,Tillgång Antal vid Lager
 ,Billed Amount,Fakturerat antal
 DocType: Bank Reconciliation,Bank Reconciliation,Bankavstämning
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +9,Get Updates,Hämta uppdateringar
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Material Request {0} is cancelled or stopped,Material Begäran {0} avbryts eller stoppas
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +135,Material Request {0} is cancelled or stopped,Material Begäran {0} avbryts eller stoppas
 apps/erpnext/erpnext/public/js/setup_wizard.js +395,Add a few sample records,Lägg till några exempeldokument
 apps/erpnext/erpnext/config/hr.py +210,Leave Management,Lämna ledning
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +81,Group by Account,Grupp per konto
@@ -2264,14 +2272,14 @@ DocType: Lead,Lower Income,Lägre intäkter
 DocType: Period Closing Voucher,"The account head under Liability, in which Profit/Loss will be booked","Kontot huvudet under ansvar, där Vinst / Förlust bokas"
 DocType: Payment Tool,Against Vouchers,Mot Kuponger
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +23,Quick Help,Snabbhjälp
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +168,Source and target warehouse cannot be same for row {0},Källa och mål lager kan inte vara samma för rad {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +169,Source and target warehouse cannot be same for row {0},Källa och mål lager kan inte vara samma för rad {0}
 DocType: Features Setup,Sales Extras,Försäljnings Extras
 apps/erpnext/erpnext/accounts/utils.py +346,{0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} budget för Konto {1} mot kostnadsställe {2} kommer att överstiga med {3}
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +243,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry","Differenskonto måste vara en tillgång / skuld kontotyp, eftersom denna lageravstämning är en öppnings post"
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +141,Purchase Order number required for Item {0},Inköpsordernr som krävs för punkt {0}
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date',&quot;Från datum&quot; måste vara efter &quot;Till datum&quot;
 ,Stock Projected Qty,Lager Projicerad Antal
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +150,Customer {0} does not belong to project {1},Kund {0} tillhör inte projektet {1}
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +141,Customer {0} does not belong to project {1},Kund {0} tillhör inte projektet {1}
 DocType: Sales Order,Customer's Purchase Order,Kundens beställning
 DocType: Warranty Claim,From Company,Från Företag
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +95,Value or Qty,Värde eller Antal
@@ -2281,7 +2289,7 @@ DocType: Purchase Invoice,Purchase Taxes and Charges,Inköp skatter och avgifter
 DocType: Leave Block List,Leave Block List Allowed,Lämna Block List tillåtna
 apps/erpnext/erpnext/public/js/setup_wizard.js +108,You will use it to Login,Du kommer att använda den för att logga in
 DocType: Sales Partner,Retailer,Återförsäljare
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +99,Credit To account must be a Balance Sheet account,Tack till kontot måste vara ett balanskonto
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +100,Credit To account must be a Balance Sheet account,Tack till kontot måste vara ett balanskonto
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +128,All Supplier Types,Alla Leverantörs Typer
 apps/erpnext/erpnext/stock/doctype/item/item.py +46,Item Code is mandatory because Item is not automatically numbered,Produktkod är obligatoriskt eftersom Varan inte är automatiskt numrerad
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +93,Quotation {0} not of type {1},Offert {0} inte av typen {1}
@@ -2327,7 +2335,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +119,Delivery wa
 DocType: Packing Slip,The gross weight of the package. Usually net weight + packaging material weight. (for print),Bruttovikten på paketet. Vanligtvis nettovikt + förpackningsmaterial vikt. (För utskrift)
 DocType: Accounts Settings,Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,Användare med den här rollen får ställa frysta konton och skapa / ändra bokföringsposter mot frysta konton
 DocType: Serial No,Is Cancelled,Är Inställd
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +286,My Shipments,Mina Transporter
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +332,My Shipments,Mina Transporter
 DocType: Journal Entry,Bill Date,Faktureringsdatum
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +43,"Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Även om det finns flera prissättningsregler med högsta prioritet, kommer följande interna prioriteringar tillämpas:"
 DocType: Supplier,Supplier Details,Leverantör Detaljer
@@ -2348,10 +2356,10 @@ DocType: Lead,From Customer,Från Kunden
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +37,Calls,Samtal
 DocType: Project,Total Costing Amount (via Time Logs),Totalt kalkyl Belopp (via Time Loggar)
 DocType: Purchase Order Item Supplied,Stock UOM,Lager UOM
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +198,Purchase Order {0} is not submitted,Inköpsorder {0} inte lämnad
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +199,Purchase Order {0} is not submitted,Inköpsorder {0} inte lämnad
 apps/erpnext/erpnext/stock/doctype/item/item.js +32,Projected,Projicerad
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +218,Serial No {0} does not belong to Warehouse {1},Serienummer {0} tillhör inte Lager {1}
-apps/erpnext/erpnext/controllers/status_updater.py +137,Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,Obs: Systemet kommer inte att kontrollera över leverans och överbokning till punkt {0} då kvantitet eller belopp är 0
+apps/erpnext/erpnext/controllers/status_updater.py +139,Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,Obs: Systemet kommer inte att kontrollera över leverans och överbokning till punkt {0} då kvantitet eller belopp är 0
 DocType: Notification Control,Quotation Message,Offert Meddelande
 DocType: Issue,Opening Date,Öppningsdatum
 DocType: Journal Entry,Remark,Anmärkning
@@ -2407,7 +2415,7 @@ apps/erpnext/erpnext/manufacturing/doctype/bom_replace_tool/bom_replace_tool.py 
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +111,Date Of Retirement must be greater than Date of Joining,Datum för pensionering måste vara större än Datum för att delta
 DocType: Sales Invoice,Against Income Account,Mot Inkomst konto
 apps/erpnext/erpnext/controllers/website_list_for_contact.py +69,{0}% Delivered,{0}% Levererad
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +78,Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).,Produkt  {0}: Beställd st {1} kan inte vara mindre än minimiorder st {2} (definierat i punkt).
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +79,Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).,Produkt  {0}: Beställd st {1} kan inte vara mindre än minimiorder st {2} (definierat i punkt).
 DocType: Monthly Distribution Percentage,Monthly Distribution Percentage,Månadsdistributions Procent
 DocType: Territory,Territory Targets,Territorium Mål
 DocType: Delivery Note,Transporter Info,Transporter info
@@ -2438,7 +2446,7 @@ apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.js +14,This is a ro
 apps/erpnext/erpnext/templates/pages/order.html +64,Rate: {0},Betyg: {0}
 DocType: Salary Slip Deduction,Salary Slip Deduction,Lön Slip Avdrag
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +202,Select a group node first.,Välj en grupp nod först.
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +74,Purpose must be one of {0},Syfte måste vara en av {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +75,Purpose must be one of {0},Syfte måste vara en av {0}
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +108,Fill the form and save it,Fyll i formuläret och spara det
 DocType: Production Planning Tool,Download a report containing all raw materials with their latest inventory status,Hämta en rapport som innehåller alla råvaror med deras senaste lagerstatus
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +26,Community Forum,Community Forum
@@ -2476,7 +2484,7 @@ DocType: Company,Default Cash Account,Standard Konto
 apps/erpnext/erpnext/config/accounts.py +79,Company (not Customer or Supplier) master.,Företag (inte kund eller leverantör) ledare.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +100,Please enter 'Expected Delivery Date',Ange &quot;Förväntat leveransdatum&quot;
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +182,Delivery Notes {0} must be cancelled before cancelling this Sales Order,Följesedelsnoteringar {0} måste avbrytas innan du kan avbryta denna kundorder
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +374,Paid amount + Write Off Amount can not be greater than Grand Total,Betald belopp + Avskrivningsbelopp kan inte vara större än Totalsumma
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +378,Paid amount + Write Off Amount can not be greater than Grand Total,Betald belopp + Avskrivningsbelopp kan inte vara större än Totalsumma
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +78,{0} is not a valid Batch Number for Item {1},{0} är inte en giltig batchnummer för punkt {1}
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +126,Note: There is not enough leave balance for Leave Type {0},Obs: Det finns inte tillräckligt med ledighetdagar för ledighet typ {0}
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.js +9,"Note: If payment is not made against any reference, make Journal Entry manually.","Notera: Om betalning inte sker mot någon referens, gör Journalpost manuellt."
@@ -2493,12 +2501,12 @@ apps/erpnext/erpnext/hr/doctype/employee/employee.py +105,Date of Birth cannot b
 apps/erpnext/erpnext/controllers/accounts_controller.py +218,{0} '{1}' is disabled,{0} {1} &quot;är inaktiverad
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity_list.js +13,Set as Open,Ange som Open
 DocType: Notification Control,Send automatic emails to Contacts on Submitting transactions.,Skicka automatiska meddelanden till kontakter på Skickar transaktioner.
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +230,"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +231,"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
 					Available Qty: {4}, Transfer Qty: {5}","Rad {0}: Antal inte tillgängligt i lager {1} på {2} {3}. Tillgängliga Antal: {4}, Transfer Antal: {5}"
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +20,Item 3,Produkt 3
 DocType: Purchase Order,Customer Contact Email,Kundkontakt Email
 DocType: Sales Team,Contribution (%),Bidrag (%)
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +464,Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,"Obs: Betalningpost kommer inte skapas eftersom ""Kontanter eller bankkonto"" angavs inte"
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +468,Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,"Obs: Betalningpost kommer inte skapas eftersom ""Kontanter eller bankkonto"" angavs inte"
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +171,Responsibilities,Ansvarsområden
 apps/erpnext/erpnext/stock/doctype/item/item_list.js +11,Template,Mall
 DocType: Sales Person,Sales Person Name,Försäljnings Person Namn
@@ -2522,7 +2530,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +684,From D
 DocType: Time Log,From Time,Från Tid
 DocType: Notification Control,Custom Message,Anpassat Meddelande
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +33,Investment Banking,Investment Banking
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +370,Cash or Bank Account is mandatory for making payment entry,Kontant eller bankkonto är obligatoriskt för utbetalningensposten
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +374,Cash or Bank Account is mandatory for making payment entry,Kontant eller bankkonto är obligatoriskt för utbetalningensposten
 DocType: Purchase Invoice,Price List Exchange Rate,Prislista Växelkurs
 DocType: Purchase Invoice Item,Rate,Betygsätt
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +62,Intern,Intern
@@ -2543,6 +2551,7 @@ apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +9,Airline,Flygbolag
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +582,Issue Material,Problem Material
 DocType: Material Request Item,For Warehouse,För Lager
 DocType: Employee,Offer Date,Erbjudandet Datum
+apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,Citat
 DocType: Hub Settings,Access Token,Tillträde token
 DocType: Sales Invoice Item,Serial No,Serienummer
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +144,Please enter Maintaince Details first,Ange servicedetaljer först
@@ -2580,7 +2589,7 @@ DocType: C-Form,Amended From,Ändrat Från
 apps/erpnext/erpnext/public/js/setup_wizard.js +377,Raw Material,Råmaterial
 DocType: Leave Application,Follow via Email,Följ via e-post
 DocType: Purchase Taxes and Charges,Tax Amount After Discount Amount,Skattebelopp efter rabatt Belopp
-apps/erpnext/erpnext/accounts/doctype/account/account.py +181,Child account exists for this account. You can not delete this account.,Underkonto existerar för det här kontot. Du kan inte ta bort det här kontot.
+apps/erpnext/erpnext/accounts/doctype/account/account.py +183,Child account exists for this account. You can not delete this account.,Underkonto existerar för det här kontot. Du kan inte ta bort det här kontot.
 apps/erpnext/erpnext/setup/doctype/territory/territory.py +19,Either target qty or target amount is mandatory,Antingen mål antal eller målbeloppet är obligatorisk
 apps/erpnext/erpnext/stock/get_item_details.py +452,No default BOM exists for Item {0},Ingen standard BOM finns till punkt {0}
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +335,Please select Posting Date first,Välj Publiceringsdatum först
@@ -2598,7 +2607,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +302,"List your tax heads (e.g. V
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +230,Serial Nos Required for Serialized Item {0},Serial Nos krävs för Serialiserad Punkt {0}
 DocType: Journal Entry,Bank Entry,Bank anteckning
 DocType: Authorization Rule,Applicable To (Designation),Är tillämpligt för (Destination)
-apps/erpnext/erpnext/templates/generators/item.html +64,Add to Cart,Lägg till i kundvagn
+apps/erpnext/erpnext/templates/generators/item.html +68,Add to Cart,Lägg till i kundvagn
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.js +28,Group By,Gruppera efter
 apps/erpnext/erpnext/config/accounts.py +143,Enable / disable currencies.,Aktivera / inaktivera valutor.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +114,Postal Expenses,Post Kostnader
@@ -2606,17 +2615,17 @@ apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),Totalt (Amt)
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +26,Entertainment & Leisure,Underhållning &amp; Fritid
 DocType: Purchase Order,The date on which recurring order will be stop,Den dag då återkommande beställning kommer att stoppa
 DocType: Quality Inspection,Item Serial No,Produkt Löpnummer
-apps/erpnext/erpnext/controllers/status_updater.py +143,{0} must be reduced by {1} or you should increase overflow tolerance,{0} måste minskas med {1} eller om du bör öka överfödstolerans
+apps/erpnext/erpnext/controllers/status_updater.py +145,{0} must be reduced by {1} or you should increase overflow tolerance,{0} måste minskas med {1} eller om du bör öka överfödstolerans
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +57,Total Present,Totalt Närvarande
 apps/erpnext/erpnext/public/js/setup_wizard.js +381,Hour,Timme
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +145,"Serialized Item {0} cannot be updated \
 					using Stock Reconciliation",Serie Punkt {0} kan inte uppdateras \ använder Stock Avstämning
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +601,Transfer Material to Supplier,Överföra material till leverantören
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +603,Transfer Material to Supplier,Överföra material till leverantören
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +29,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,Nya Löpnummer kan inte ha Lager. Lagermåste ställas in av lagerpost eller inköpskvitto
 DocType: Lead,Lead Type,Prospekt Typ
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +82,Create Quotation,Skapa offert
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +110,You are not authorized to approve leaves on Block Dates,Du har inte behörighet att godkänna löv på Block Datum
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +311,All these items have already been invoiced,Alla dessa punkter har redan fakturerats
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +357,All these items have already been invoiced,Alla dessa punkter har redan fakturerats
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py +37,Can be approved by {0},Kan godkännas av {0}
 DocType: Shipping Rule,Shipping Rule Conditions,Frakt härskar Villkor
 DocType: BOM Replace Tool,The new BOM after replacement,Den nya BOM efter byte
@@ -2628,7 +2637,6 @@ DocType: Production Planning Tool,Production Planning Tool,Produktionsplanerings
 DocType: Quality Inspection,Report Date,Rapportdatum
 DocType: C-Form,Invoices,Fakturor
 DocType: Job Opening,Job Title,Jobbtitel
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +80,{0} Recipients,{0} Mottagare
 DocType: Features Setup,Item Groups in Details,Produktgrupper i Detaljer
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +335,Quantity to Manufacture must be greater than 0.,Kvantitet som Tillverkning måste vara större än 0.
 apps/erpnext/erpnext/accounts/page/pos/pos.js +4,Start Point-of-Sale (POS),Start Point-of-Sale (POS)
@@ -2636,7 +2644,7 @@ apps/erpnext/erpnext/config/support.py +28,Visit report for maintenance call.,Be
 DocType: Stock Entry,Update Rate and Availability,Uppdateringsfrekvens och tillgänglighet
 DocType: Stock Settings,Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,Andel som är tillåtet att ta emot eller leverera mer mot beställt antal. Till exempel: Om du har beställt 100 enheter. och din ersättning är 10% då du får ta emot 110 enheter.
 DocType: Pricing Rule,Customer Group,Kundgrupp
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +168,Expense account is mandatory for item {0},Utgiftskonto är obligatorisk för produkten {0}
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +169,Expense account is mandatory for item {0},Utgiftskonto är obligatorisk för produkten {0}
 DocType: Item,Website Description,Webbplats Beskrivning
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +40,Net Change in Equity,Nettoförändringen i eget kapital
 DocType: Serial No,AMC Expiry Date,AMC Förfallodatum
@@ -2646,12 +2654,12 @@ DocType: Address,Plant,Fastighet
 apps/erpnext/erpnext/setup/doctype/supplier_type/supplier_type.js +5,There is nothing to edit.,Det finns inget att redigera.
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +108,Summary for this month and pending activities,Sammanfattning för denna månad och pågående aktiviteter
 DocType: Customer Group,Customer Group Name,Kundgruppnamn
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +411,Please remove this Invoice {0} from C-Form {1},Ta bort denna faktura {0} från C-Form {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +415,Please remove this Invoice {0} from C-Form {1},Ta bort denna faktura {0} från C-Form {1}
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Välj Överföring om du även vill inkludera föregående räkenskapsårs balans till detta räkenskapsår
 DocType: GL Entry,Against Voucher Type,Mot Kupongtyp
 DocType: Item,Attributes,Attributer
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +486,Get Items,Hämta artiklar
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +191,Please enter Write Off Account,Ange avskrivningskonto
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +192,Please enter Write Off Account,Ange avskrivningskonto
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +71,Last Order Date,Sista beställningsdatum
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +179,Make Excise Invoice,Skapa punktfaktura
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +39,Account {0} does not belongs to company {1},Kontot {0} till inte företaget {1}
@@ -2680,7 +2688,7 @@ apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +28,Financial Services,
 apps/erpnext/erpnext/controllers/item_variant.py +61,Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3},Värde för Attribut {0} måste vara inom intervallet {1} till {2} i steg om {3}
 DocType: Tax Rule,Sales,Försäljning
 DocType: Stock Entry Detail,Basic Amount,BASBELOPP
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +178,Warehouse required for stock Item {0},Lager krävs för Lagervara {0}
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +169,Warehouse required for stock Item {0},Lager krävs för Lagervara {0}
 DocType: Leave Allocation,Unused leaves,Oanvända blad
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Cr,Cr
 DocType: Customer,Default Receivable Accounts,Standard Mottagarkonton
@@ -2740,7 +2748,7 @@ DocType: Hub Settings,Seller Country,Säljare Land
 apps/erpnext/erpnext/config/learn.py +278,Publish Items on Website,Publicera artiklar på webbplatsen
 DocType: Authorization Rule,Authorization Rule,Auktoriseringsregel
 DocType: Sales Invoice,Terms and Conditions Details,Villkor Detaljer
-apps/erpnext/erpnext/templates/generators/item.html +90,Specifications,Specifikationer
+apps/erpnext/erpnext/templates/generators/item.html +94,Specifications,Specifikationer
 DocType: Sales Taxes and Charges Template,Sales Taxes and Charges Template,Försäljnings Skatter och avgifter Mall
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +10,Apparel & Accessories,Kläder &amp; tillbehör
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +67,Number of Order,Antal Beställningar
@@ -2762,7 +2770,7 @@ apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/paymen
 DocType: Time Log,Billing Amount,Fakturerings Mängd
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +84,Invalid quantity specified for item {0}. Quantity should be greater than 0.,Ogiltig mängd som anges för produkten {0}. Kvantitet bör vara större än 0.
 apps/erpnext/erpnext/config/hr.py +18,Applications for leave.,Ansökan om ledighet.
-apps/erpnext/erpnext/accounts/doctype/account/account.py +179,Account with existing transaction can not be deleted,Konto med befintlig transaktioner kan inte tas bort
+apps/erpnext/erpnext/accounts/doctype/account/account.py +181,Account with existing transaction can not be deleted,Konto med befintlig transaktioner kan inte tas bort
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +99,Legal Expenses,Rättsskydds
 DocType: Sales Order,"The day of the month on which auto order will be generated e.g. 05, 28 etc","Den dagen i den månad som auto beställning kommer att genereras t.ex. 05, 28 etc"
 DocType: Sales Invoice,Posting Time,Boknings Tid
@@ -2778,7 +2786,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Maintenance Visit,Breakdown,Nedbrytning
 apps/erpnext/erpnext/controllers/accounts_controller.py +259,Account: {0} with currency: {1} can not be selected,Konto: {0} med valuta: kan inte väljas {1}
 DocType: Bank Reconciliation Detail,Cheque Date,Check Datum
-apps/erpnext/erpnext/accounts/doctype/account/account.py +47,Account {0}: Parent account {1} does not belong to company: {2},Konto {0}: Förälder konto {1} tillhör inte företaget: {2}
+apps/erpnext/erpnext/accounts/doctype/account/account.py +49,Account {0}: Parent account {1} does not belong to company: {2},Konto {0}: Förälder konto {1} tillhör inte företaget: {2}
 apps/erpnext/erpnext/setup/doctype/company/company.js +38,Successfully deleted all transactions related to this company!,Framgångsrikt bort alla transaktioner i samband med detta företag!
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +21,As on Date,Som på Date
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +58,Probation,Skyddstillsyn
@@ -2803,7 +2811,7 @@ DocType: Brand,Item Manager,Produktansvarig
 DocType: Cost Center,Add rows to set annual budgets on Accounts.,Lägg rader för att ställa in årsbudgetar på konton.
 DocType: Buying Settings,Default Supplier Type,Standard Leverantörstyp
 DocType: Production Order,Total Operating Cost,Totala driftskostnaderna
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +163,Note: Item {0} entered multiple times,Obs: Punkt {0} inlagd flera gånger
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +154,Note: Item {0} entered multiple times,Obs: Punkt {0} inlagd flera gånger
 apps/erpnext/erpnext/config/crm.py +27,All Contacts.,Alla kontakter.
 DocType: Newsletter,Test Email Id,Test e-post ID
 apps/erpnext/erpnext/public/js/setup_wizard.js +142,Company Abbreviation,Företagetsförkortning
@@ -2828,7 +2836,7 @@ DocType: Stock Settings,Role Allowed to edit frozen stock,Roll tillåtet att red
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +101,All Customer Groups,Alla kundgrupper
 apps/erpnext/erpnext/controllers/accounts_controller.py +492,{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} är obligatorisk. Kanske Valutaväxlingsposten  inte är skapad för {1} till {2}.
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +37,Tax Template is mandatory.,Skatte Mall är obligatorisk.
-apps/erpnext/erpnext/accounts/doctype/account/account.py +41,Account {0}: Parent account {1} does not exist,Konto {0}: Förälder konto {1} existerar inte
+apps/erpnext/erpnext/accounts/doctype/account/account.py +43,Account {0}: Parent account {1} does not exist,Konto {0}: Förälder konto {1} existerar inte
 DocType: Purchase Invoice Item,Price List Rate (Company Currency),Prislista värde (Företagsvaluta)
 DocType: Account,Temporary,Tillfällig
 DocType: Address,Preferred Billing Address,Önskad faktureringsadress
@@ -2867,13 +2875,13 @@ Updated via 'Time Log'","i protokollet Uppdaterad via ""Tidslog"""
 DocType: Customer,From Lead,Från Prospekt
 apps/erpnext/erpnext/config/manufacturing.py +19,Orders released for production.,Order släppts för produktion.
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +42,Select Fiscal Year...,Välj räkenskapsår ...
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +451,POS Profile required to make POS Entry,POS profil som krävs för att göra POS inlägg
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +455,POS Profile required to make POS Entry,POS profil som krävs för att göra POS inlägg
 DocType: Hub Settings,Name Token,Namn token
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +128,Standard Selling,Standardförsäljnings
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +137,Atleast one warehouse is mandatory,Minst ett lager är obligatorisk
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +138,Atleast one warehouse is mandatory,Minst ett lager är obligatorisk
 DocType: Serial No,Out of Warranty,Ingen garanti
 DocType: BOM Replace Tool,Replace,Ersätt
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +322,{0} against Sales Invoice {1},{0} mot faktura {1}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +326,{0} against Sales Invoice {1},{0} mot faktura {1}
 apps/erpnext/erpnext/stock/doctype/item/item.py +58,Please enter default Unit of Measure,Ange standardmåttenhet
 DocType: Purchase Invoice Item,Project Name,Projektnamn
 DocType: Supplier,Mention if non-standard receivable account,Nämn om icke-standardiserade fordran konto
@@ -2929,7 +2937,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +274,"Add users to your organizat
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +97,Row # {0}: Serial No {1} does not match with {2} {3},Rad # {0}: Löpnummer {1} inte stämmer överens med {2} {3}
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +44,Casual Leave,Tillfällig ledighet
 DocType: Batch,Batch ID,Batch-ID
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +342,Note: {0},Obs: {0}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +346,Note: {0},Obs: {0}
 ,Delivery Note Trends,Följesedel Trender
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +104,This Week's Summary,Veckans Sammanfattning
 apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +74,{0} must be a Purchased or Sub-Contracted Item in row {1},{0} måste vara ett Köpt eller underleverantörers föremål i rad {1}
@@ -2971,7 +2979,7 @@ DocType: Task,Total Expense Claim (via Expense Claim),Totalkostnadskrav (via utg
 apps/erpnext/erpnext/accounts/report/sales_register/sales_register.py +66,Customer Id,Kundnummer
 apps/erpnext/erpnext/projects/doctype/time_log/time_log.py +110,To Time must be greater than From Time,Till tid måste vara större än From Time
 DocType: Journal Entry Account,Exchange Rate,Växelkurs
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +474,Sales Order {0} is not submitted,Kundorder {0} är inte lämnat
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +478,Sales Order {0} is not submitted,Kundorder {0} är inte lämnat
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +74,Warehouse {0}: Parent account {1} does not bolong to the company {2},Lager {0}: Moderbolaget konto {1} tillhör inte företaget {2}
 DocType: BOM,Last Purchase Rate,Senaste Beställningsvärde
 DocType: Account,Asset,Tillgång
@@ -2991,7 +2999,7 @@ DocType: Sales Invoice,Paid Amount,Betalt belopp
 ,Available Stock for Packing Items,Tillgängligt lager för förpackningsprodukter
 DocType: Item Variant,Item Variant,Produkt Variant
 apps/erpnext/erpnext/utilities/doctype/address_template/address_template.py +15,Setting this Address Template as default as there is no other default,Ställa den här adressen mall som standard eftersom det inte finns någon annan standard
-apps/erpnext/erpnext/accounts/doctype/account/account.py +96,"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Kontosaldo redan i Debit, du är inte tillåten att ställa ""Balans måste vara"" som ""Kredit"""
+apps/erpnext/erpnext/accounts/doctype/account/account.py +98,"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Kontosaldo redan i Debit, du är inte tillåten att ställa ""Balans måste vara"" som ""Kredit"""
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +76,Quality Management,Kvalitetshantering
 DocType: Production Planning Tool,Filter based on customer,Filter utifrån kundernas
 DocType: Payment Tool Detail,Against Voucher No,Mot kupongnr
@@ -3069,7 +3077,7 @@ DocType: BOM,Rate Of Materials Based On,Hastighet av material baserade på
 apps/erpnext/erpnext/support/page/support_analytics/support_analytics.js +21,Support Analtyics,Stöd Analtyics
 apps/erpnext/erpnext/accounts/doctype/accounts_settings/accounts_settings.py +27,Company is missing in warehouses {0},Företaget saknas i lager {0}
 DocType: POS Profile,Terms and Conditions,Villkor
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +43,To Date should be within the Fiscal Year. Assuming To Date = {0},Till Datum bör ligga inom räkenskapsåret. Förutsatt att Dag = {0}
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +45,To Date should be within the Fiscal Year. Assuming To Date = {0},Till Datum bör ligga inom räkenskapsåret. Förutsatt att Dag = {0}
 DocType: Employee,"Here you can maintain height, weight, allergies, medical concerns etc","Här kan du behålla längd, vikt, allergier, medicinska problem etc"
 DocType: Leave Block List,Applies to Company,Gäller Företag
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +175,Cannot cancel because submitted Stock Entry {0} exists,Det går inte att avbryta eftersom lämnad Lagernotering {0} existerar
@@ -3083,7 +3091,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +154,Your financial year begins o
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +46,Please enter Purchase Receipts,Ange kvitton
 DocType: Sales Invoice,Get Advances Received,Få erhållna förskott
 DocType: Email Digest,Add/Remove Recipients,Lägg till / ta bort mottagare
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +425,Transaction not allowed against stopped Production Order {0},Transaktion inte tillåtet mot stoppad produktionsorder {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +428,Transaction not allowed against stopped Production Order {0},Transaktion inte tillåtet mot stoppad produktionsorder {0}
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.js +19,"To set this Fiscal Year as Default, click on 'Set as Default'","För att ställa denna verksamhetsåret som standard, klicka på &quot;Ange som standard&quot;"
 apps/erpnext/erpnext/config/support.py +54,Setup incoming server for support email id. (e.g. support@example.com),Inställning inkommande server stöd e-id. (T.ex. support@example.com)
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +19,Shortage Qty,Brist Antal
@@ -3180,7 +3188,7 @@ DocType: Warranty Claim,Resolved By,Åtgärdad av
 DocType: Appraisal,Start Date,Start Datum
 apps/erpnext/erpnext/config/hr.py +130,Allocate leaves for a period.,Tilldela avgångar under en period.
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +139,Click here to verify,Klicka här för att kontrollera
-apps/erpnext/erpnext/accounts/doctype/account/account.py +43,Account {0}: You can not assign itself as parent account,Konto {0}: Du kan inte tilldela sig själv som förälder konto
+apps/erpnext/erpnext/accounts/doctype/account/account.py +45,Account {0}: You can not assign itself as parent account,Konto {0}: Du kan inte tilldela sig själv som förälder konto
 DocType: Purchase Invoice Item,Price List Rate,Prislista värde
 DocType: Item,"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",Visa &quot;i lager&quot; eller &quot;Inte i lager&quot; som bygger på lager tillgängliga i detta lager.
 apps/erpnext/erpnext/config/manufacturing.py +13,Bill of Materials (BOM),Bill of Materials (BOM)
@@ -3189,7 +3197,7 @@ DocType: Time Log,Hours,Timmar
 DocType: Project,Expected Start Date,Förväntat startdatum
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +41,Remove item if charges is not applicable to that item,Ta bort alternativ om avgifter inte är tillämpade för denna post
 DocType: SMS Settings,Eg. smsgateway.com/api/send_sms.cgi,T.ex. smsgateway.com/api/send_sms.cgi
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +598,Receive,Receive
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +600,Receive,Receive
 DocType: Maintenance Visit,Fully Completed,Helt Avslutad
 apps/erpnext/erpnext/projects/doctype/project/project_list.js +6,{0}% Complete,{0}% Färdig
 DocType: Employee,Educational Qualification,Utbildnings Kvalificering
@@ -3199,7 +3207,7 @@ apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +166,{0} has been succ
 apps/erpnext/erpnext/stock/doctype/item/item.py +433,Row {0}: An Reorder entry already exists for this warehouse {1},Rad {0}: En Beställnings post finns redan för detta lager {1}
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +67,"Cannot declare as lost, because Quotation has been made.","Det går inte att ange som förlorad, eftersom Offert har gjorts."
 DocType: Purchase Taxes and Charges Template,Purchase Master Manager,Inköpschef
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +422,Production Order {0} must be submitted,Produktionsorder {0} måste lämnas in
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +425,Production Order {0} must be submitted,Produktionsorder {0} måste lämnas in
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +150,Please select Start Date and End Date for Item {0},Välj startdatum och slutdatum för punkt {0}
 apps/erpnext/erpnext/config/stock.py +136,Main Reports,Huvud Rapporter
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.js +16,To date cannot be before from date,Hittills inte kan vara före startdatum
@@ -3217,7 +3225,7 @@ DocType: Account,Income,Inkomst
 DocType: Industry Type,Industry Type,Industrityp
 apps/erpnext/erpnext/templates/includes/cart.js +136,Something went wrong!,Något gick snett!
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +101,Warning: Leave application contains following block dates,Varning: Ledighetsansökan innehåller följande block datum
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +256,Sales Invoice {0} has already been submitted,Fakturan {0} har redan lämnats in
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +245,Sales Invoice {0} has already been submitted,Fakturan {0} har redan lämnats in
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +30,Completion Date,Slutförande Datum
 DocType: Purchase Invoice Item,Amount (Company Currency),Belopp (Företagsvaluta)
 apps/erpnext/erpnext/config/hr.py +105,Organization unit (department) master.,Organisation enhet (avdelnings) ledare.
@@ -3239,7 +3247,7 @@ apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +86,Employe
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +271,You cannot credit and debit same account at the same time,Du kan inte kreditera och debitera samma konto på samma gång
 DocType: Naming Series,Help HTML,Hjälp HTML
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +50,Total weightage assigned should be 100%. It is {0},Totalt weightage delas ska vara 100%. Det är {0}
-apps/erpnext/erpnext/controllers/status_updater.py +141,Allowance for over-{0} crossed for Item {1},Ersättning för över {0} korsade till punkt {1}
+apps/erpnext/erpnext/controllers/status_updater.py +143,Allowance for over-{0} crossed for Item {1},Ersättning för över {0} korsade till punkt {1}
 DocType: Address,Name of person or organization that this address belongs to.,Namn på den person eller organisation som den här adressen tillhör.
 apps/erpnext/erpnext/public/js/setup_wizard.js +343,Your Suppliers,Dina Leverantörer
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +58,Cannot set as Lost as Sales Order is made.,Kan inte ställa in då Förlorad kundorder är gjord.
@@ -3256,13 +3264,12 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +114,Website Image {0} attached 
 DocType: Issue,Content Type,Typ av innehåll
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +17,Computer,Dator
 DocType: Item,List this Item in multiple groups on the website.,Lista detta objekt i flera grupper på webbplatsen.
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +291,Please check Multi Currency option to allow accounts with other currency,Kontrollera flera valutor möjlighet att tillåta konton med annan valuta
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +295,Please check Multi Currency option to allow accounts with other currency,Kontrollera flera valutor möjlighet att tillåta konton med annan valuta
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +62,Item: {0} does not exist in the system,Produkt: {0} existerar inte i systemet
-apps/erpnext/erpnext/accounts/doctype/account/account.py +88,You are not authorized to set Frozen value,Du har inte behörighet att ställa in Frysta värden
+apps/erpnext/erpnext/accounts/doctype/account/account.py +90,You are not authorized to set Frozen value,Du har inte behörighet att ställa in Frysta värden
 DocType: Payment Reconciliation,Get Unreconciled Entries,Hämta ej verifierade Anteckningar
 DocType: Payment Reconciliation,From Invoice Date,Från fakturadatum
 DocType: Cost Center,Budgets,Budgetar
-DocType: Employee,Emergency Contact Details,Akut Kontaktuppgifter
 apps/erpnext/erpnext/public/js/setup_wizard.js +144,What does it do?,Vad gör den?
 DocType: Delivery Note,To Warehouse,Till Warehouse
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +45,Account {0} has been entered more than once for fiscal year {1},Kontot {0} har angetts mer än en gång för räkenskapsåret {1}
@@ -3274,14 +3281,14 @@ DocType: Purchase Taxes and Charges,Account Head,Kontohuvud
 apps/erpnext/erpnext/config/stock.py +79,Update additional costs to calculate landed cost of items,Uppdatera merkostnader för att beräkna landade kostnaden för objekt
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +111,Electrical,Elektrisk
 DocType: Stock Entry,Total Value Difference (Out - In),Total Value Skillnad (Out - In)
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +310,Row {0}: Exchange Rate is mandatory,Rad {0}: Växelkurser är obligatorisk
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +314,Row {0}: Exchange Rate is mandatory,Rad {0}: Växelkurser är obligatorisk
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +27,User ID not set for Employee {0},Användar-ID inte satt för anställd {0}
 apps/erpnext/erpnext/support/doctype/maintenance_visit/maintenance_visit.js +30,From Warranty Claim,Från garantianspråk
 DocType: Stock Entry,Default Source Warehouse,Standardkälla Lager
 DocType: Item,Customer Code,Kund kod
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +212,Birthday Reminder for {0},Påminnelse födelsedag för {0}
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +72,Days Since Last Order,Dagar sedan senast Order
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +300,Debit To account must be a Balance Sheet account,Debitering av kontot måste vara ett balanskonto
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +304,Debit To account must be a Balance Sheet account,Debitering av kontot måste vara ett balanskonto
 DocType: Buying Settings,Naming Series,Namge Serien
 DocType: Leave Block List,Leave Block List Name,Lämna Blocklistnamn
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +32,Stock Assets,Stock Tillgångar
@@ -3336,7 +3343,7 @@ apps/erpnext/erpnext/manufacturing/doctype/bom_replace_tool/bom_replace_tool.py 
 ,Sales Analytics,Försäljnings Analytics
 DocType: Manufacturing Settings,Manufacturing Settings,Tillverknings Inställningar
 apps/erpnext/erpnext/config/setup.py +56,Setting up Email,Ställa in e-post
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +90,Please enter default currency in Company Master,Ange standardvaluta i Bolaget
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +91,Please enter default currency in Company Master,Ange standardvaluta i Bolaget
 DocType: Stock Entry Detail,Stock Entry Detail,Stock Entry Detalj
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +101,Daily Reminders,Dagliga påminnelser
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +82,Tax Rule Conflicts with {0},Skatt Regel Konflikter med {0}
@@ -3362,13 +3369,13 @@ DocType: Task,Closing Date,Slutdatum
 DocType: Sales Order Item,Produced Quantity,Producerat Kvantitet
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +84,Engineer,Ingenjör
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +38,Search Sub Assemblies,Sök Sub Assemblies
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +380,Item Code required at Row No {0},Produkt kod krävs vid Radnr {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +384,Item Code required at Row No {0},Produkt kod krävs vid Radnr {0}
 DocType: Sales Partner,Partner Type,Partner Typ
 DocType: Purchase Taxes and Charges,Actual,Faktisk
 DocType: Authorization Rule,Customerwise Discount,Kundrabatt
 DocType: Purchase Invoice,Against Expense Account,Mot utgiftskonto
 DocType: Production Order,Production Order,Produktionsorder
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +263,Installation Note {0} has already been submitted,Installeringsnotis {0} har redan lämnats in
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +252,Installation Note {0} has already been submitted,Installeringsnotis {0} har redan lämnats in
 DocType: Quotation Item,Against Docname,Mot doknamn
 DocType: SMS Center,All Employee (Active),Personal (aktiv)
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +9,View Now,Visa nu
@@ -3380,7 +3387,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +57,Part-time,Deltid
 DocType: Employee,Applicable Holiday List,Tillämplig kalender
 DocType: Employee,Cheque,Check
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +56,Series Updated,Serie Uppdaterad
-apps/erpnext/erpnext/accounts/doctype/account/account.py +141,Report Type is mandatory,Rapporttyp är obligatorisk
+apps/erpnext/erpnext/accounts/doctype/account/account.py +143,Report Type is mandatory,Rapporttyp är obligatorisk
 DocType: Item,Serial Number Series,Serial Number Series
 apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +69,Warehouse is mandatory for stock Item {0} in row {1},Lager är obligatoriskt för Lagervara {0} i rad {1}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +45,Retail & Wholesale,Detaljhandel och grossisthandel
@@ -3396,7 +3403,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 DocType: Attendance,Attendance,Närvaro
 DocType: BOM,Materials,Material
 DocType: Leave Block List,"If not checked, the list will have to be added to each Department where it has to be applied.","Om inte markerad, måste listan läggas till varje avdelning där den måste tillämpas."
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +518,Posting date and posting time is mandatory,Bokningsdatum och bokningstid är obligatorisk
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +509,Posting date and posting time is mandatory,Bokningsdatum och bokningstid är obligatorisk
 apps/erpnext/erpnext/config/buying.py +79,Tax template for buying transactions.,Skatte mall för att köpa transaktioner.
 ,Item Prices,Produktpriser
 DocType: Purchase Order,In Words will be visible once you save the Purchase Order.,I Ord kommer att synas när du sparar beställningen.
@@ -3405,10 +3412,10 @@ apps/erpnext/erpnext/config/stock.py +120,Price List master.,Huvudprislista.
 DocType: Task,Review Date,Kontroll Datum
 DocType: Purchase Invoice,Advance Payments,Förskottsbetalningar
 DocType: Purchase Taxes and Charges,On Net Total,På Net Totalt
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +160,Target warehouse in row {0} must be same as Production Order,Target lager i rad {0} måste vara densamma som produktionsorder
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +161,Target warehouse in row {0} must be same as Production Order,Target lager i rad {0} måste vara densamma som produktionsorder
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.py +97,No permission to use Payment Tool,Ingen tillåtelse att använda betalningsverktyg
 apps/erpnext/erpnext/controllers/recurring_document.py +189,'Notification Email Addresses' not specified for recurring %s,"""Anmälan e-postadresser"" inte angett för återkommande% s"
-apps/erpnext/erpnext/accounts/doctype/account/account.py +106,Currency can not be changed after making entries using some other currency,Valuta kan inte ändras efter att ha gjort poster med någon annan valuta
+apps/erpnext/erpnext/accounts/doctype/account/account.py +108,Currency can not be changed after making entries using some other currency,Valuta kan inte ändras efter att ha gjort poster med någon annan valuta
 DocType: Company,Round Off Account,Avrunda konto
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +84,Administrative Expenses,Administrativa kostnader
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +18,Consulting,Konsultering
@@ -3465,6 +3472,7 @@ DocType: Selling Settings,Maintain Same Rate Throughout Sales Cycle,Behåll samm
 DocType: Manufacturing Settings,Plan time logs outside Workstation Working Hours.,Planera tidsloggar utanför planerad arbetstid.
 apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +95,{0} {1} has already been submitted,{0} {1} har redan lämnats in
 ,Items To Be Requested,Produkter att begäras
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +593,Get Last Purchase Rate,Hämta Senaste Beställningsvärdet
 DocType: Time Log,Billing Rate based on Activity Type (per hour),Billing Pris baseras på Aktivitetstyp (per timme)
 DocType: Company,Company Info,Företagsinfo
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +218,"Company Email ID not found, hence mail not sent","Företagets epost-ID hittades inte, darför inte epost skickas"
@@ -3474,20 +3482,20 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +462,Debit 
 DocType: Fiscal Year,Year Start Date,År Startdatum
 DocType: Attendance,Employee Name,Anställd Namn
 DocType: Sales Invoice,Rounded Total (Company Currency),Avrundat Totalt (Företagsvaluta)
-apps/erpnext/erpnext/accounts/doctype/account/account.py +122,Cannot covert to Group because Account Type is selected.,Det går inte att konvertera till koncernen eftersom Kontotyp valts.
+apps/erpnext/erpnext/accounts/doctype/account/account.py +124,Cannot covert to Group because Account Type is selected.,Det går inte att konvertera till koncernen eftersom Kontotyp valts.
 DocType: Purchase Common,Purchase Common,Gemensamma inköp
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +95,{0} {1} has been modified. Please refresh.,{0} {1} har ändrats. Vänligen uppdatera.
 DocType: Leave Block List,Stop users from making Leave Applications on following days.,Stoppa användare från att göra Lämna program på följande dagarna.
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +591,From Opportunity,Från Möjlighet
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +166,Employee Benefits,Ersättningar till anställda
 DocType: Sales Invoice,Is POS,Är POS
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +245,Packed quantity must equal quantity for Item {0} in row {1},Packad kvantitet måste vara samma kvantitet för punkt {0} i rad {1}
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +234,Packed quantity must equal quantity for Item {0} in row {1},Packad kvantitet måste vara samma kvantitet för punkt {0} i rad {1}
 DocType: Production Order,Manufactured Qty,Tillverkas Antal
 DocType: Purchase Receipt Item,Accepted Quantity,Godkänd Kvantitet
 apps/erpnext/erpnext/accounts/party.py +25,{0}: {1} does not exists,{0}: {1} existerar inte
 apps/erpnext/erpnext/config/accounts.py +18,Bills raised to Customers.,Fakturor till kunder.
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Project Id,Projekt Id
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +478,Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2},Rad nr {0}: Beloppet kan inte vara större än utestående beloppet mot utgiftsräkning {1}. I avvaktan på Beloppet är {2}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +482,Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2},Rad nr {0}: Beloppet kan inte vara större än utestående beloppet mot utgiftsräkning {1}. I avvaktan på Beloppet är {2}
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.py +40,{0} subscribers added,{0} abonnenter tillagda
 DocType: Maintenance Schedule,Schedule,Tidtabell
 DocType: Cost Center,"Define Budget for this Cost Center. To set budget action, see ""Company List""","Definiera budget för detta kostnadsställe. Om du vill ställa budget action, se &quot;Företag Lista&quot;"
@@ -3520,7 +3528,7 @@ apps/erpnext/erpnext/config/stock.py +283,Batch Inventory,Sats Inventory
 DocType: Employee,Contract End Date,Kontrakts Slutdatum
 DocType: Sales Order,Track this Sales Order against any Project,Prenumerera på det här kundorder mot varje Project
 DocType: Production Planning Tool,Pull sales orders (pending to deliver) based on the above criteria,Hämta försäljningsorder (i avvaktan på att leverera) baserat på ovanstående kriterier
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +677,From Supplier Quotation,Från leverantör Offert
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +679,From Supplier Quotation,Från leverantör Offert
 DocType: Deduction Type,Deduction Type,Avdragstyp
 DocType: Attendance,Half Day,Halv Dag
 DocType: Pricing Rule,Min Qty,Min Antal
@@ -3528,7 +3536,7 @@ DocType: Features Setup,"To track items in sales and purchase documents with bat
 DocType: GL Entry,Transaction Date,Transaktionsdatum
 DocType: Production Plan Item,Planned Qty,Planerade Antal
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +93,Total Tax,Totalt Skatt
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +176,For Quantity (Manufactured Qty) is mandatory,För Kvantitet (Tillverkad Antal) är obligatorisk
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +177,For Quantity (Manufactured Qty) is mandatory,För Kvantitet (Tillverkad Antal) är obligatorisk
 DocType: Stock Entry,Default Target Warehouse,Standard Valt Lager
 DocType: Purchase Invoice,Net Total (Company Currency),Netto Totalt (Företagsvaluta)
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +79,Row {0}: Party Type and Party is only applicable against Receivable / Payable account,Rad {0}: Parti Typ och Parti gäller endast mot Fordran / Betal konto
@@ -3584,7 +3592,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +53,Make Variant,Gör Variant
 apps/erpnext/erpnext/config/hr.py +145,Block leave applications by department.,Block ledighet applikationer avdelningsvis.
 apps/erpnext/erpnext/templates/pages/cart.html +51,Cart is Empty,Kundvagnen är tom
 DocType: Production Order,Actual Operating Cost,Faktisk driftkostnad
-apps/erpnext/erpnext/accounts/doctype/account/account.py +77,Root cannot be edited.,Root kan inte redigeras.
+apps/erpnext/erpnext/accounts/doctype/account/account.py +79,Root cannot be edited.,Root kan inte redigeras.
 apps/erpnext/erpnext/accounts/utils.py +197,Allocated amount can not greater than unadusted amount,Avsatt belopp kan inte större än icke redigerat belopp
 DocType: Manufacturing Settings,Allow Production on Holidays,Tillåt Produktion på helgdagar
 DocType: Sales Order,Customer's Purchase Order Date,Kundens inköpsorder Datum
@@ -3595,7 +3603,7 @@ DocType: Purchase Order,To Receive and Bill,Ta emot och Bill
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +94,Designer,Designer
 apps/erpnext/erpnext/config/selling.py +121,Terms and Conditions Template,Villkor Mall
 DocType: Serial No,Delivery Details,Leveransdetaljer
-apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +386,Cost Center is required in row {0} in Taxes table for type {1},Kostnadsställe krävs rad {0} i skatte tabellen för typ {1}
+apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +390,Cost Center is required in row {0} in Taxes table for type {1},Kostnadsställe krävs rad {0} i skatte tabellen för typ {1}
 DocType: Item,Automatically create Material Request if quantity falls below this level,Skapa automatiskt Material Begäran om kvantitet understiger denna nivå
 ,Item-wise Purchase Register,Produktvis Inköpsregister
 DocType: Batch,Expiry Date,Utgångsdatum
@@ -3616,6 +3624,6 @@ DocType: Employee,Reason for Leaving,Anledning för att lämna
 DocType: Expense Claim Detail,Sanctioned Amount,Sanktionerade Belopp
 DocType: GL Entry,Is Opening,Är Öppning
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +170,Row {0}: Debit entry can not be linked with a {1},Rad {0}: debitering kan inte kopplas till en {1}
-apps/erpnext/erpnext/accounts/doctype/account/account.py +195,Account {0} does not exist,Kontot {0} existerar inte
+apps/erpnext/erpnext/accounts/doctype/account/account.py +197,Account {0} does not exist,Kontot {0} existerar inte
 DocType: Account,Cash,Kontanter
 DocType: Employee,Short biography for website and other publications.,Kort biografi för webbplatsen och andra publikationer.
