@@ -80,6 +80,8 @@ def get_data(company, root_type, balance_must_be, period_list, ignore_closing_en
 		return None
 
 	accounts, accounts_by_name = filter_accounts(accounts)
+	
+	company_currency = frappe.db.get_value("Company", company, "default_currency")
 
 	gl_entries_by_account = {}
 	for root in frappe.db.sql("""select lft, rgt from tabAccount
@@ -90,10 +92,10 @@ def get_data(company, root_type, balance_must_be, period_list, ignore_closing_en
 
 	calculate_values(accounts_by_name, gl_entries_by_account, period_list)
 	accumulate_values_into_parents(accounts, accounts_by_name, period_list)
-	out = prepare_data(accounts, balance_must_be, period_list)
+	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
 
 	if out:
-		add_total_row(out, balance_must_be, period_list)
+		add_total_row(out, balance_must_be, period_list, company_currency)
 
 	return out
 
@@ -114,7 +116,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
 				accounts_by_name[d.parent_account][period.key] = accounts_by_name[d.parent_account].get(period.key, 0.0) + \
 					d.get(period.key, 0.0)
 
-def prepare_data(accounts, balance_must_be, period_list):
+def prepare_data(accounts, balance_must_be, period_list, company_currency):
 	out = []
 	year_start_date = period_list[0]["year_start_date"].strftime("%Y-%m-%d")
 	year_end_date = period_list[-1]["year_end_date"].strftime("%Y-%m-%d")
@@ -128,7 +130,8 @@ def prepare_data(accounts, balance_must_be, period_list):
 			"parent_account": d.parent_account,
 			"indent": flt(d.indent),
 			"from_date": year_start_date,
-			"to_date": year_end_date
+			"to_date": year_end_date,
+			"currency": company_currency
 		}
 		for period in period_list:
 			if d.get(period.key):
@@ -146,10 +149,11 @@ def prepare_data(accounts, balance_must_be, period_list):
 
 	return out
 
-def add_total_row(out, balance_must_be, period_list):
+def add_total_row(out, balance_must_be, period_list, company_currency):
 	total_row = {
 		"account_name": "'" + _("Total ({0})").format(balance_must_be) + "'",
-		"account": None
+		"account": None,
+		"currency": company_currency
 	}
 
 	for row in out:
@@ -241,7 +245,7 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, g
 
 	return gl_entries_by_account
 
-def get_columns(period_list):
+def get_columns(period_list, company=None):
 	columns = [{
 		"fieldname": "account",
 		"label": _("Account"),
@@ -249,11 +253,21 @@ def get_columns(period_list):
 		"options": "Account",
 		"width": 300
 	}]
+	if company:
+		columns.append({
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1
+		})
+	
 	for period in period_list:
 		columns.append({
 			"fieldname": period.key,
 			"label": period.label,
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150
 		})
 

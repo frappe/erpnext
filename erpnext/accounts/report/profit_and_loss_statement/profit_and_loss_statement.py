@@ -9,10 +9,10 @@ from erpnext.accounts.report.financial_statements import (get_period_list, get_c
 
 def execute(filters=None):
 	period_list = get_period_list(filters.fiscal_year, filters.periodicity)
-
+	
 	income = get_data(filters.company, "Income", "Credit", period_list, ignore_closing_entries=True)
 	expense = get_data(filters.company, "Expense", "Debit", period_list, ignore_closing_entries=True)
-	net_profit_loss = get_net_profit_loss(income, expense, period_list)
+	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
 
 	data = []
 	data.extend(income or [])
@@ -20,16 +20,17 @@ def execute(filters=None):
 	if net_profit_loss:
 		data.append(net_profit_loss)
 
-	columns = get_columns(period_list)
+	columns = get_columns(period_list, filters.company)
 
 	return columns, data
 
-def get_net_profit_loss(income, expense, period_list):
+def get_net_profit_loss(income, expense, period_list, company):
 	if income and expense:
 		net_profit_loss = {
 			"account_name": "'" + _("Net Profit / Loss") + "'",
 			"account": None,
-			"warn_if_negative": True
+			"warn_if_negative": True,
+			"currency": frappe.db.get_value("Company", company, "default_currency")
 		}
 
 		for period in period_list:

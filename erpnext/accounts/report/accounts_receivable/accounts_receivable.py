@@ -68,6 +68,7 @@ class ReceivablePayableReport(object):
 				"label": _("Currency"),
 				"fieldtype": "Data",
 				"width": 100,
+				"hidden": 1
 			},
 			_("Remarks") + "::200"
 		]

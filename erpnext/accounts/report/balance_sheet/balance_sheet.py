@@ -13,7 +13,8 @@ def execute(filters=None):
 	asset = get_data(filters.company, "Asset", "Debit", period_list)
 	liability = get_data(filters.company, "Liability", "Credit", period_list)
 	equity = get_data(filters.company, "Equity", "Credit", period_list)
-	provisional_profit_loss = get_provisional_profit_loss(asset, liability, equity, period_list)
+	provisional_profit_loss = get_provisional_profit_loss(asset, liability, equity, 
+		period_list, filters.company)
 
 	data = []
 	data.extend(asset or [])
@@ -26,12 +27,13 @@ def execute(filters=None):
 
 	return columns, data
 
-def get_provisional_profit_loss(asset, liability, equity, period_list):
+def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 	if asset and (liability or equity):
 		provisional_profit_loss = {
 			"account_name": "'" + _("Provisional Profit / Loss (Credit)") + "'",
 			"account": None,
-			"warn_if_negative": True
+			"warn_if_negative": True,
+			"currency": frappe.db.get_value("Company", company, "default_currency")
 		}
 
 		has_value = False
