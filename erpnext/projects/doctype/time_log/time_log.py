@@ -236,6 +236,9 @@ class TimeLog(Document):
 				self.billing_amount = self.billing_rate * self.hours
 			else:
 				self.billing_amount = 0
+		
+		if self.additional_cost and self.billable:
+			self.billing_amount += self.additional_cost
 
 	def update_task_and_project(self):
 		"""Update costing rate in Task or Project if either is set"""
