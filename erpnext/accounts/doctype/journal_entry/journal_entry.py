@@ -611,8 +611,10 @@ def get_payment_entry_against_invoice(dt, dn, amount=None, journal_entry=False, 
 
 def get_payment_entry(ref_doc, args):
 	cost_center = frappe.db.get_value("Company", ref_doc.company, "cost_center")
-	exchange_rate = get_exchange_rate(args.get("party_account"), args.get("party_account_currency"),
-		ref_doc.company, ref_doc.doctype, ref_doc.name)
+	exchange_rate = 1
+	if args.get("party_account"):
+		exchange_rate = get_exchange_rate(args.get("party_account"), args.get("party_account_currency"),
+			ref_doc.company, ref_doc.doctype, ref_doc.name)
 
 	je = frappe.new_doc("Journal Entry")
 	je.update({
