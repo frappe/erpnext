@@ -40,7 +40,6 @@ class PaymentRequest(Document):
 				if not frappe.conf.paypal_username:
 					frappe.throw(_("PayPal Settings missing"))
 			
-		
 	def on_submit(self):
 		if not self.mute_email:
 			self.send_payment_request()
@@ -227,11 +226,8 @@ def get_print_format_list(ref_doctype):
 
 @frappe.whitelist(allow_guest=True)
 def generate_payment_request(name):
-	payment_url = frappe.get_doc("Payment Request", name).run_method("get_payment_url")
-	if payment_url:
-		frappe.local.response["type"] = "redirect"
-		frappe.local.response["location"] = payment_url
-		
+	frappe.get_doc("Payment Request", name).run_method("get_payment_url")
+	
 @frappe.whitelist(allow_guest=True)
 def resend_payment_email(docname):
 	return frappe.get_doc("Payment Request", docname).send_email()
