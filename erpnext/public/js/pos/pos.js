@@ -16,9 +16,9 @@ erpnext.pos.PointOfSale = Class.extend({
 		$(this.frm.wrapper).on("refresh-fields", function() {
 			me.refresh();
 		});
-		
+
 		this.wrapper.find('input.discount-percentage').on("change", function() {
-			frappe.model.set_value(me.frm.doctype, me.frm.docname, 
+			frappe.model.set_value(me.frm.doctype, me.frm.docname,
 				"additional_discount_percentage", flt(this.value));
 		});
 
@@ -61,6 +61,9 @@ erpnext.pos.PointOfSale = Class.extend({
 				"placeholder": this.party
 			},
 			parent: this.wrapper.find(".party-area"),
+			frm: this.frm,
+			doctype: this.frm.doctype,
+			docname: this.frm.docname,
 			only_input: true,
 		});
 		this.party_field.make_input();
@@ -481,7 +484,7 @@ erpnext.pos.PointOfSale = Class.extend({
 
 			var paid_amount = flt((flt(values.paid_amount) - flt(values.change)), precision("paid_amount"));
 			me.frm.set_value("paid_amount", paid_amount);
-			
+
 			// specifying writeoff amount here itself, so as to avoid recursion issue
 			me.frm.set_value("write_off_amount", me.frm.doc.grand_total - paid_amount);
 			me.frm.set_value("outstanding_amount", 0);
