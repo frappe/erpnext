@@ -10,9 +10,11 @@ frappe.ui.form.on("Stock Reconciliation", {
 		// end of life
 		frm.set_query("item_code", "items", function(doc, cdt, cdn) {
 			return {
-				filters:[
-					['Item', 'end_of_life', '>=', frappe.datetime.nowdate()]
-				]
+				query: "erpnext.controllers.queries.item_query",
+				filters:{
+					"is_stock_item": 1,
+					"has_serial_no": 0
+				}
 			}
 		});
 	},
