@@ -18,11 +18,12 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this._super(doc, dt, dn);
 
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
-			cur_frm.add_custom_button(__('Make Sales Order'),
-				cur_frm.cscript['Make Sales Order'], frappe.boot.doctype_icons["Sales Order"]);
+			cur_frm.add_custom_button(__('Sales Order'),
+				cur_frm.cscript['Make Sales Order'], __("Make"));
+				
 			if(doc.status!=="Ordered") {
-				cur_frm.add_custom_button(__('Set as Lost'),
-					cur_frm.cscript['Declare Order Lost'], "icon-exclamation", "btn-default");
+				cur_frm.add_custom_button(__('Lost'),
+					cur_frm.cscript['Declare Order Lost'], __("Mark"));
 			}
 
 		}
@@ -41,7 +42,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				}, "icon-download", "btn-default");
+				}, __("From"), "btn-default");
 		}
 
 		this.toggle_reqd_lead_customer();

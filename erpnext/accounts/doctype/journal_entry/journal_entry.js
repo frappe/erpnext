@@ -11,7 +11,7 @@ frappe.ui.form.on("Journal Entry", {
 		frm.cscript.voucher_type(frm.doc);
 
 		if(frm.doc.docstatus==1) {
-			frm.add_custom_button(__('View Ledger'), function() {
+			frm.add_custom_button(__('Ledger'), function() {
 				frappe.route_options = {
 					"voucher_no": frm.doc.name,
 					"from_date": frm.doc.posting_date,

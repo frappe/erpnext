@@ -22,19 +22,19 @@ frappe.ui.form.on("Item", {
 					"item_code": frm.doc.name
 				}
 				frappe.set_route("query-report", "Stock Balance");
-			});
+			}, __("View"));
 			frm.add_custom_button(__("Ledger"), function() {
 				frappe.route_options = {
 					"item_code": frm.doc.name
 				}
 				frappe.set_route("query-report", "Stock Ledger");
-			});
+			}, __("View"));
 			frm.add_custom_button(__("Projected"), function() {
 				frappe.route_options = {
 					"item_code": frm.doc.name
 				}
 				frappe.set_route("query-report", "Stock Projected Qty");
-			});
+			}, __("View"));
 		}
 
 		// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
@@ -48,11 +48,12 @@ frappe.ui.form.on("Item", {
 			frm.set_intro(__("This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set"), true);
 			frm.add_custom_button(__("Show Variants"), function() {
 				frappe.set_route("List", "Item", {"variant_of": frm.doc.name});
-			}, "icon-list", "btn-default");
+			}, __("View"));
 
-			frm.add_custom_button(__("Make Variant"), function() {
+			frm.add_custom_button(__("Variant"), function() {
 				erpnext.item.make_variant()
-			}, "icon-list", "btn-default");
+			}, __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(__("This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set", [frm.doc.variant_of]), true);
@@ -192,7 +193,7 @@ $.extend(erpnext.item, {
 	edit_prices_button: function(frm) {
 		frm.add_custom_button(__("Add / Edit Prices"), function() {
 			frappe.set_route("Report", "Item Price", {"item_code": frm.doc.name});
-		}, "icon-money", "btn-default");
+		}, __("View"));
 	},
 
 	weight_to_validate: function(frm){

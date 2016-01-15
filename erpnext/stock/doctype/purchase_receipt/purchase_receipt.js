@@ -38,7 +38,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 
 		if(!this.frm.doc.is_return && this.frm.doc.status!="Closed") {
 			if(this.frm.doc.docstatus==0) {
-				cur_frm.add_custom_button(__('From Purchase Order'),
+				cur_frm.add_custom_button(__('Purchase Order'),
 					function() {
 						frappe.model.map_current_doc({
 							method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
@@ -51,25 +51,27 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 								company: cur_frm.doc.company
 							}
 						})
-				});
+				}, __("From"));
 			}
 
 			if(this.frm.doc.docstatus == 1 && this.frm.doc.status!="Closed") {
-				cur_frm.add_custom_button(__('Return'), this.make_purchase_return);
+				if (this.frm.has_perm("submit") && 
+					this.frm.doc.__onload && this.frm.doc.__onload.has_return_entry) {
+						cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt, __("Status"))
+				}
+				
+				cur_frm.add_custom_button(__('Return'), this.make_purchase_return, __("Make"));
+				
 				if(this.frm.doc.__onload && !this.frm.doc.__onload.billing_complete) {
-					cur_frm.add_custom_button(__('Invoice'),
-						 this.make_purchase_invoice).addClass("btn-primary");
+					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice, __("Make"));
 				}
-				if (this.frm.has_perm("submit") &&
-					this.frm.doc.__onload && !this.frm.doc.__onload.has_return_entry) {
-						cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt)
-				}
+				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
 		}
 
 
 		if(this.frm.doc.docstatus==1 && this.frm.doc.status === "Closed" && this.frm.has_perm("submit")) {
-			cur_frm.add_custom_button(__('Reopen'), this.reopen_purchase_receipt)
+			cur_frm.add_custom_button(__('Reopen'), this.reopen_purchase_receipt, __("Status"))
 		}
 
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
