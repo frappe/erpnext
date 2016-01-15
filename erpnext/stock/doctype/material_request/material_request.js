@@ -34,23 +34,28 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 
 		if(doc.docstatus == 1 && doc.status != 'Stopped') {
-			if(doc.material_request_type === "Purchase")
-				cur_frm.add_custom_button(__("Make Supplier Quotation"),
-				this.make_supplier_quotation, __("Make"));
-			
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 
 			if(flt(doc.per_ordered, 2) < 100) {
+				// make
 				if(doc.material_request_type === "Material Transfer" && doc.status === "Submitted")
-					cur_frm.add_custom_button(__("Transfer Material"), this.make_stock_entry, __("Make"));
+					cur_frm.add_custom_button(__("Transfer Material"),
+					this.make_stock_entry, __("Make"));
 
 				if(doc.material_request_type === "Material Issue" && doc.status === "Submitted")
-					cur_frm.add_custom_button(__("Issue Material"), this.make_stock_entry, __("Make"));
+					cur_frm.add_custom_button(__("Issue Material"),
+					this.make_stock_entry, __("Make"));
 
 				if(doc.material_request_type === "Purchase")
-					cur_frm.add_custom_button(__('Make Purchase Order'),
+					cur_frm.add_custom_button(__('Purchase Order'),
 						this.make_purchase_order, __("Make"));
 
+				if(doc.material_request_type === "Purchase")
+					cur_frm.add_custom_button(__("Supplier Quotation"),
+					this.make_supplier_quotation, __("Make"));
+
+				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+
+				// stop
 				cur_frm.add_custom_button(__('Stop'),
 					cur_frm.cscript['Stop Material Request'], __("Status"));
 
@@ -70,7 +75,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 							company: cur_frm.doc.company
 						}
 					})
-				}, __("From"));
+				}, __("Get items from"));
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')

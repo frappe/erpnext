@@ -51,7 +51,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 								company: cur_frm.doc.company
 							}
 						})
-				}, __("From"));
+				}, __("Get items from"));
 			}
 
 			if(this.frm.doc.docstatus == 1 && this.frm.doc.status!="Closed") {

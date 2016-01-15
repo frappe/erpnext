@@ -44,7 +44,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, __("Get items from"));
 
 				cur_frm.add_custom_button(__('Purchase Receipt'), function() {
 					frappe.model.map_current_doc({
@@ -57,7 +57,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, __("Get items from"));
 			}
 		}
 	},
@@ -77,7 +77,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			me.apply_pricing_rule();
 		})
 	},
-	
+
 	credit_to: function() {
 		var me = this;
 		if(this.frm.doc.credit_to) {

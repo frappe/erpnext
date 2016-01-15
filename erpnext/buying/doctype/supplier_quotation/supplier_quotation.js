@@ -27,7 +27,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 							company: cur_frm.doc.company
 						}
 					})
-				}, __("From"));
+				}, __("Get items from"));
 		}
 	},
 

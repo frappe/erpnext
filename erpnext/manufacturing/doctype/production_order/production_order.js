@@ -61,7 +61,7 @@ erpnext.production_order = {
 	set_custom_buttons: function(frm) {
 		var doc = frm.doc;
 		if (doc.docstatus === 1) {
-			frm.add_custom_button(__("Show Stock Entries"), function() {
+			frm.add_custom_button(__("Stock Entries"), function() {
 				frappe.route_options = {
 					production_order: frm.doc.name
 				}
@@ -76,12 +76,12 @@ erpnext.production_order = {
 
 			// opertions
 			if ((doc.operations || []).length) {
-				frm.add_custom_button(__('Show Time Logs'), function() {
+				frm.add_custom_button(__('Time Logs'), function() {
 					frappe.route_options = {"production_order": frm.doc.name};
 					frappe.set_route("List", "Time Log");
 				}, __("View"));
 			}
-			
+
 			if (flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) {
 				frm.add_custom_button(__('Transfer Materials for Manufacture'),
 					cur_frm.cscript['Transfer Raw Materials'], __("Stock Entry"));

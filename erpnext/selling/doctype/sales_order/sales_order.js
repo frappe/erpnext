@@ -88,13 +88,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			} else {
 				if (this.frm.has_perm("submit")) {
 					// un-stop
-					cur_frm.add_custom_button(__('Re-open'), cur_frm.cscript['Unstop Sales Order']);
+					cur_frm.add_custom_button(__('Re-open'), cur_frm.cscript['Unstop Sales Order'], __("Status"));
 				}
 			}
 		}
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('From Quotation'),
+			cur_frm.add_custom_button(__('Quotation'),
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
@@ -107,7 +107,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, __("Get items from"));
 		}
 
 		this.order_type(doc);

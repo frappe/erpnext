@@ -21,8 +21,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				cur_frm.add_custom_button(__('Packing Slip'),
 					cur_frm.cscript['Make Packing Slip'], __("Make"));
 			}
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-			
+
+			if (!doc.__islocal && doc.docstatus==1) {
+				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}
+
 			if (this.frm.doc.docstatus===0) {
 				cur_frm.add_custom_button(__('Sales Order'),
 					function() {
@@ -38,7 +41,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 								company: cur_frm.doc.company
 							}
 						})
-					}, __("From"));
+					}, __("Get items from"));
 			}
 		}
 

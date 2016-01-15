@@ -92,13 +92,13 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			}, __("Status"));
 		}
 	}
-	
+
 	if(doc.status!=="Lost") {
 		if(doc.status!=="Quotation") {
-			cur_frm.add_custom_button(__('Opportunity Lost'),
-				cur_frm.cscript['Declare Opportunity Lost'], __("Mark"));
+			cur_frm.add_custom_button(__('Lost'),
+				cur_frm.cscript['Declare Opportunity Lost'], __("Status"));
 		}
-		
+
 		cur_frm.add_custom_button(__('Quotation'),cur_frm.cscript.create_quotation, __("Make"));
 		cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 	}

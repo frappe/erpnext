@@ -50,13 +50,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if(doc.update_stock) this.show_stock_ledger();
 
 		if(doc.docstatus==1 && !doc.is_return) {
-			
+
 			var is_delivered_by_supplier = false;
-			
+
 			is_delivered_by_supplier = cur_frm.doc.items.some(function(item){
 				return item.is_delivered_by_supplier ? true : false;
 			})
-			
+
 			cur_frm.add_custom_button(doc.update_stock ? __('Sales Return') : __('Credit Note'),
 				this.make_sales_return, __("Make"));
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
@@ -70,12 +70,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 
 				if(!from_delivery_note && !is_delivered_by_supplier) {
-					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Make Delivery Note'], __("Make"));
+					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Delivery Note'], __("Make"));
 				}
 			}
 
 			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
-				cur_frm.add_custom_button(__('Make Payment Request'), this.make_payment_request, __("Make"));
+				cur_frm.add_custom_button(__('Payment Request'), this.make_payment_request, __("Make"));
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry, __("Make"));
 			}
 
@@ -106,7 +106,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	sales_order_btn: function() {
-		this.$sales_order_btn = cur_frm.add_custom_button(__('From Sales Order'),
+		this.$sales_order_btn = cur_frm.add_custom_button(__('Sales Order'),
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
@@ -119,11 +119,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						company: cur_frm.doc.company
 					}
 				})
-			}, __("From"));
+			}, __("Get items from"));
 	},
 
 	delivery_note_btn: function() {
-		this.$delivery_note_btn = cur_frm.add_custom_button(__('From Delivery Note'),
+		this.$delivery_note_btn = cur_frm.add_custom_button(__('Delivery Note'),
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
@@ -139,7 +139,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						};
 					}
 				});
-			}, __("From"));
+			}, __("Get items from"));
 	},
 
 	tc_name: function() {

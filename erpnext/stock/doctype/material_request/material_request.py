@@ -11,7 +11,7 @@ from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
-
+from erpnext.stock.get_item_details import apply_price_list
 from erpnext.controllers.buying_controller import BuyingController
 
 
@@ -182,6 +182,10 @@ def update_item(obj, target, source_parent):
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
+	def postprocess(source, target_doc):
+		target_doc.update(apply_price_list(target_doc.as_dict(), as_doc = True))
+		set_missing_values(source, target_doc)
+
 	doclist = get_mapped_doc("Material Request", source_name, 	{
 		"Material Request": {
 			"doctype": "Purchase Order",
@@ -202,7 +206,7 @@ def make_purchase_order(source_name, target_doc=None):
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.qty
 		}
-	}, target_doc, set_missing_values)
+	}, target_doc, postprocess)
 
 	return doclist
 
@@ -218,11 +222,13 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 
 	def postprocess(source, target_doc):
 		target_doc.supplier = source_name
-		set_missing_values(source, target_doc)
+
 		target_doc.set("items", [d for d in target_doc.get("items")
 			if d.get("item_code") in supplier_items and d.get("qty") > 0])
 
-		return target_doc
+		target_doc.update(apply_price_list(target_doc.as_dict(), as_doc = True))
+
+		set_missing_values(source, target_doc)
 
 	for mr in material_requests:
 		target_doc = get_mapped_doc("Material Request", mr, 	{
@@ -264,6 +270,10 @@ def get_material_requests_based_on_supplier(supplier):
 
 @frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
+	def postprocess(source, target_doc):
+		target_doc.update(apply_price_list(target_doc.as_dict(), as_doc = True))
+		set_missing_values(source, target_doc)
+
 	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Supplier Quotation",
@@ -280,7 +290,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 				"parenttype": "prevdoc_doctype"
 			}
 		}
-	}, target_doc, set_missing_values)
+	}, target_doc, postprocess)
 
 	return doclist
 

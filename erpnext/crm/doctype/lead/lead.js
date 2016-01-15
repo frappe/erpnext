@@ -29,7 +29,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		if(!this.frm.doc.__islocal && this.frm.doc.__onload && !this.frm.doc.__onload.is_customer) {
 			this.frm.add_custom_button(__("Customer"), this.create_customer, __("Make"));
 			this.frm.add_custom_button(__("Opportunity"), this.create_opportunity, __("Make"));
-			this.frm.add_custom_button(__("Make Quotation"), this.make_quotation, __("Make"));
+			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __("Make"));
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 
@@ -53,7 +53,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			frm: cur_frm
 		})
 	},
-	
+
 	make_quotation: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_quotation",
