@@ -5,7 +5,7 @@ Algunos de los principales reportes contables son:
 El Libro Mayor está basada en la tabla de Entradas y puede ser filtrado por
 cuenta y por periodo específico de tiempo. Esto ayuda a tener un reporte
 actualizado de todas las entradas que existan para una cuetna dada en un 
-periodo determinado.
+periodo determinado. 
 
 <img alt="Libro Mayor" class="screenshot"
     src="{{docs_base_url}}/assets/img/accounts/general-ledger.png">

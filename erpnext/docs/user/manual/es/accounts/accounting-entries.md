@@ -1,6 +1,6 @@
 El concepto de contabilidad se explica con el siguiente ejemplo: Se toma a 
 "Tea Stall" como compañía y se observa como registrar entradas contables
-para el negocio.
+para el negocio. 
 
   * Mama (El propietario de Tea-stall) invierte $25000 para iniciar el negocio.
 
@@ -16,7 +16,7 @@ la compañía y debe ser debitado.
   azucar, leche, etc) de inmediato. Decide comprar en una tienda cercana "Super Bazaar"
   que pertenece a un amigo y le concede cierto crédito. Los equipos cuestan 2800 y las
   materias primas valen 2200. La compañía paga 2000 de un total de 5000.
-
+  
 ![A&L]({{docs_base_url}}/assets/old_images/erpnext/assets-2.png)
 
 __Análisis:__ Los equipos son "Activos Fijos" (porque tienen una larga vida útil) de la

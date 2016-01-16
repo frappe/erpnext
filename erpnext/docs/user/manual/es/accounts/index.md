@@ -4,7 +4,7 @@ por cuenta propia o quizás se tenga contratado un tercero que realice la tarea.
 En todos los casos, la contabilidad finaciera forma parte del núcleo de
 cualquier sistema de gestión del negocio tal como los ERP.
 
-En **ERPNext**, las operaciones contables consisten en 3 transacciones principales:
+En **ERPNext**, las operaciones contables consisten en 3 transacciones principales: 
 
   * Factura de ventas: Las facturas que se entregan al Cliente correspondientes a 
     los servicios o productos que se proveen.
