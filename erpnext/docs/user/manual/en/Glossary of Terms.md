@@ -6,6 +6,6 @@
 
 **Site** - [add definition here]
 
-**Like** (in Filter to filter list items) - same meaning as "Contains" (i.e you put in term 'SIN' the filter will find Sales Invoices (SINV). "Like" has no ability to find misstypoed terms like finding tasks, when searching for 'taks'
+**Like** (in Filter to filter list items) - same meaning as "Contains" (i.e you put in the term 'SIN' the Filter will find Sales Invoices (SINV). "Like" has no ability to find misstyped terms though. It will not find 'tasks', when searching for 'taks'
 
 **Filter** - [add definition here]
