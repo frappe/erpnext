@@ -1,5 +1,5 @@
 # Manual de Usuario (Español)
 
-### Contenido:
+### Contenido: 
 
 {index}
