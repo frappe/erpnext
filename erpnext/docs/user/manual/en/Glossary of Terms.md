@@ -1,6 +1,6 @@
-this is a stubb !
+## this is a stubb of a to be build **Glossary of Terms** for ERPNext
 
-The intention is to build a Glossary of terms (i.e. site, Form view, etc.) and what they exactly mean in the logic of ERPNext
+## The intention is to build a Glossary of terms (i.e. site, Form view, etc.) and what they exactly mean in the logic of ERPNext
 
 **Site** - [add definition here]
 
