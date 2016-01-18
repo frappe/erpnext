@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> ERPNext: Developer Docs </title>
+	<title> Payment Gateway </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -26,7 +26,7 @@
 
 </style>
 </head>
-<body data-path="current">
+<body data-path="current/models/accounts/payment_gateway">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -74,7 +74,7 @@
                         <div data-html-block="hero"></div>
                         <div class="container" data-html-block="content">
                         
-<div class="page-container" id="page-current" data-path="current"
+<div class="page-container" id="page-payment_gateway" data-path="current/models/accounts/payment_gateway"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
@@ -84,11 +84,22 @@
 	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
 	                    
     
+    
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/current/models/accounts">
+		Module accounts</a>
+	</li>
+	
+</ul>
+
+    
 
 	                </div>
 					
 	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>ERPNext: Developer Docs</h1>
+	                    <h1>Payment Gateway</h1>
 	        		</div>
                 </div>
 				
@@ -96,11 +107,13 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="current" styl
+	<article class="web-page-content" id="payment_gateway" styl
 
     e="text-align: Left">
-	<!-- title: ERPNext: Developer Docs -->
-<!-- no-breadcrumbs -->
+	<!-- title: Payment Gateway -->
+
+
+
 
 
 <div class="dev-header">
@@ -109,47 +122,91 @@
 	Version 6.x.x</a>
 
 
-	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext"
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/accounts/doctype/payment_gateway"
 		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
 
 </div>
 
+
+
+
+
+    <p><b>Table Name:</b> <code>tabPayment Gateway</code></p>
+
+
+
+
+<h3>Fields</h3>
+
 <table class="table table-bordered">
-	<tr>
-		<td style="width: 20%">
-			App Name
-		</td>
-		<td>
-			<code>erpnext</code>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			Publisher
-		</td>
-		<td>
-			<code>Frappe Technologies Pvt. Ltd.</code>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			Version
-		</td>
-		<td>
-			<code>6.17.0</code>
-		</td>
-	</tr>
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td class="danger" title="Mandatory"><code>gateway</code></td>
+            <td >
+                Data</td>
+            <td >
+                Gateway
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
 </table>
 
-<h3>Contents</h3>
-<ul>
-	<li>
-		<a href="models">Models (DocTypes)</a>
-	</li>
-	<li>
-		<a href="api">Server-side API</a>
-	</li>
-</ul>
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.accounts.doctype.payment_gateway.payment_gateway</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>PaymentGateway</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+
+    
+    
+        <h4>Linked In:</h4>
+        <ul>
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/payment_gateway_account">Payment Gateway Account</a>
+
+</li>
+			
+        
+        </ul>
+    
+
 
 <!-- autodoc -->
 <!-- jinja -->

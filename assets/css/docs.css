@@ -165,10 +165,12 @@ body {
   min-width: 24px;
   height: 24px;
   border-radius: 4px;
-  background-color: #ff5858;
   color: #fff;
   text-align: center;
   padding: 2px 5px;
+}
+.navbar-new-comments-true {
+  background-color: #ff5858;
 }
 #navbar-search {
   width: 300px;
