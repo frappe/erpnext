@@ -643,6 +643,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"parenttype": d.parenttype,
 					"parent": d.parent
 				});
+
+				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list
+				if (d.doctype == "Quotation Item" || d.doctype == "Sales Order Item"){
+					item_list[0]["type"] = d.type
+					item_list[0]["rate_or_amount"] = d.rate_or_amount
+				}	
 			}
 		};
 
@@ -957,5 +963,3 @@ frappe.ui.form.on(cur_frm.doctype, "discount_amount", function(frm) {
 
 	frm.cscript.calculate_taxes_and_totals();
 });
-
-
