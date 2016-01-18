@@ -23,23 +23,34 @@
         <a name="erpnext.stock.get_item_details.apply_price_list" href="#erpnext.stock.get_item_details.apply_price_list" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>apply_price_list</b>
-        <i class="text-muted">(args)</i>
+        <i class="text-muted">(args, as_doc=False)</i>
     </p>
-	<div class="docs-attr-desc"><p>args = {
-    "item<em>list": [{"doctype": "", "name": "", "item</em>code": "", "brand": "", "item<em>group": ""}, ...],
-    "conversion</em>rate": 1.0,
-    "selling<em>price</em>list": None,
-    "price<em>list</em>currency": None,
-    "plc<em>conversion</em>rate": 1.0,
-    "parenttype": "",
-    "parent": "",
+	<div class="docs-attr-desc"><p>Apply pricelist on a document-like dict object and return as
+{'parent': dict, 'children': list}</p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>args</code></strong> -  See below</li>
+<li><p><strong><code>as_doc</code></strong> -  Updates value in the passed dict</p>
+
+<p>args = {
+    "doctype": "",
+    "name": "",
+    "items": [{"doctype": "", "name": "", "item<em>code": "", "brand": "", "item</em>group": ""}, ...],
+    "conversion<em>rate": 1.0,
+    "selling</em>price<em>list": None,
+    "price</em>list<em>currency": None,
+    "plc</em>conversion<em>rate": 1.0,
+    "doctype": "",
+    "name": "",
     "supplier": None,
-    "transaction<em>date": None,
-    "conversion</em>rate": 1.0,
-    "buying<em>price</em>list": None,
-    "transaction<em>type": "selling",
+    "transaction</em>date": None,
+    "conversion<em>rate": 1.0,
+    "buying</em>price<em>list": None,
     "ignore</em>pricing_rule": 0/1
-}</p>
+}</p></li>
+</ul>
 </div>
 	<br>
 
@@ -251,16 +262,15 @@
     "selling<em>price</em>list": None,
     "price<em>list</em>currency": None,
     "plc<em>conversion</em>rate": 1.0,
-    "parenttype": "",
-    "parent": "",
+    "doctype": "",
+    "name": "",
     "supplier": None,
     "transaction<em>date": None,
     "conversion</em>rate": 1.0,
     "buying<em>price</em>list": None,
     "is<em>subcontracted": "Yes" / "No",
-    "transaction</em>type": "selling",
-    "ignore<em>pricing</em>rule": 0/1
-    "project_name": ""
+    "ignore</em>pricing<em>rule": 0/1
+    "project</em>name": ""
 }</p>
 </div>
 	<br>
@@ -373,7 +383,7 @@
         <a name="erpnext.stock.get_item_details.get_price_list_rate_for" href="#erpnext.stock.get_item_details.get_price_list_rate_for" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_price_list_rate_for</b>
-        <i class="text-muted">(args, item_code)</i>
+        <i class="text-muted">(price_list, item_code)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
