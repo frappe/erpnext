@@ -86,7 +86,75 @@ def get_item_details(args):
 		
 	get_gross_profit(out)
 
+	if args.document_type in ["Quotation Item", "Sales Order Item"]:
+		data = set_margin_fields(out.pricing_rule, out.price_list_rate)
+		out.update(data)
+
+		# calculate rate by appling discount to total_margin
+		if(args.total_margin):
+			out["rate"] = discount_on_total_margin(args.total_margin, out.discount_percentage);
+		else:
+			out["rate"] = discount_on_total_margin(data.get("total_margin"), out.discount_percentage)
+
 	return out
+
+def set_margin_fields(pricing_rule=None, price_list_rate=None):
+	"""
+		Todo: get the values of Margin (type and rate)
+		calculate the the Margin Amount, discount etc
+	"""
+	# margin_details dict will hold the all data variable regrading margin
+	margin_details = frappe._dict({})
+	if pricing_rule and price_list_rate:
+		margin_details.update(get_margin_details(pricing_rule))
+		margin_details.update(calculate_total_margin(margin_details.get("type"),margin_details.get("rate_or_amount"), price_list_rate))
+
+	return margin_details
+
+def get_margin_details(pricing_rule):
+	"""
+		get the margin details from pricing_rule
+	"""
+	margin_details = frappe._dict({
+			"type":"Percentage",
+			"rate_or_amount":0.0,
+		})
+
+	records = frappe.db.sql("""SELECT type, rate FROM `tabPricing Rule` WHERE name = '%s'""" % pricing_rule, as_dict = 1)
+	
+	for record in records:
+		margin_details["type"] = record.get("type")
+		margin_details["rate_or_amount"] = record.get("rate")
+
+	return margin_details
+
+def calculate_total_margin(margin_type,rate_or_amount,price_list_rate):
+	"""
+		calculate margin amount as follows
+		if type is percentage then calculate percentage of price_list_rate
+	"""
+
+	data = frappe._dict({
+			"total_margin":0.0,
+			"margin_amt":0.0,
+		})
+
+	if margin_type == "Amount":
+		data["margin_amt"] = rate_or_amount
+	else:
+		data["margin_amt"] = price_list_rate * ( rate_or_amount / 100 )
+
+	data["total_margin"] = price_list_rate + data["margin_amt"] 
+
+	return data
+
+def discount_on_total_margin(total_margin, discount):
+	"""
+		calculate the rate by appling discount on total_margin if any
+	"""
+	if discount:
+		total_margin = total_margin - (total_margin * (discount / 100))
+	return total_margin
 
 def process_args(args):
 	if isinstance(args, basestring):
