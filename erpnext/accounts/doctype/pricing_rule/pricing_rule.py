@@ -126,6 +126,12 @@ def get_pricing_rule_for_item(args):
 	})
 
 	if args.ignore_pricing_rule or not args.item_code:
+		# if ignore pricing rule then set the rate or amount field to zero
+		if item_details.doctype in ["Quotation Item", "Sales Order Item"]:
+			item_details.update({
+				"type":"Percentage",
+				"rate_or_amount": 0.00
+				})
 		return item_details
 
 	if not (args.item_group and args.brand):
