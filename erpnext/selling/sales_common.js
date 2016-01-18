@@ -307,6 +307,19 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			}
 		})
+	},
+	rate_or_amount: function(doc, cdt, cdn) {
+		// calculated the revised total margin and rate on margin rate changes
+		item = locals[cdt][cdn];
+		cur_frm.cscript.calculate_revised_margin_and_rate(item)
+		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
+		cur_frm.refresh_fields();
+	},
+	type: function(doc, cdt, cdn){
+		// calculate the revised total margin and rate on margin type changes
+		item = locals[cdt][cdn];
+		cur_frm.cscript.calculate_revised_margin_and_rate(item)	
+		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
 	}
 });
 
@@ -326,3 +339,18 @@ frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
 		})
 	}
 })
+
+cur_frm.cscript.calculate_revised_margin_and_rate = function(item){
+	// calculate rate
+
+	if(item.type == "Percentage")
+		item.total_margin = item.price_list_rate + item.price_list_rate * ( item.rate_or_amount / 100);
+	else
+		item.total_margin = item.price_list_rate + item.rate_or_amount;
+
+	// subtracting the discount from total margin
+	item.rate = item.total_margin - item.total_margin * ( item.discount_percentage / 100 );
+	item.amount = item.qty * item.rate
+
+	cur_frm.refresh_fields();
+}
