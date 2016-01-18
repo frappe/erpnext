@@ -138,6 +138,10 @@ class AccountsController(TransactionBase):
 			for fieldname in self.meta.get_valid_columns():
 				parent_dict[fieldname] = self.get(fieldname)
 
+			if self.doctype in ["Quotation", "Sales Order"]:
+				document_type = "Quotation Item" if self.doctype == "Quotation" else "Sales Order Item"
+				parent_dict.update({"document_type": document_type})
+
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
