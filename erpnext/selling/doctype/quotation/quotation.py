@@ -91,7 +91,9 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
-		target.ignore_pricing_rule = 1
+		# changed from 1 to 0, because margin is applied based on pricing rule. 
+		# User will manually disabled pricing rule on sales order.
+		target.ignore_pricing_rule = 0
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
