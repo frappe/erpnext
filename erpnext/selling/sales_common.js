@@ -129,9 +129,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
 		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate
-		if((cdt == "Quotation Item" || cdt == "Sales Order Item") && item.total_margin)
-			item.rate = flt(item.total_margin * (1 - item.discount_percentage / 100.0),
-				precision("rate", item));
+		if((cdt == "Quotation Item" || cdt == "Sales Order Item") && item.total_margin){
+			this.calculate_revised_margin_and_rate(item, doc,cdt, cdn);
+		}
 		else
 			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
 				precision("rate", item));
@@ -312,18 +312,45 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 		})
 	},
+
+	rate: function(doc, cdt, cdn){
+		// if user changes the rate then set margin Rate or amount to 0
+		item = locals[cdt][cdn];
+		item.type = "";
+		item.rate_or_amount = 0.0;
+		cur_frm.refresh_fields();
+	},
+
 	rate_or_amount: function(doc, cdt, cdn) {
 		// calculated the revised total margin and rate on margin rate changes
 		item = locals[cdt][cdn];
-		cur_frm.cscript.calculate_revised_margin_and_rate(item)
-		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
+		this.calculate_revised_margin_and_rate(item)
 		cur_frm.refresh_fields();
 	},
+
 	type: function(doc, cdt, cdn){
 		// calculate the revised total margin and rate on margin type changes
 		item = locals[cdt][cdn];
-		cur_frm.cscript.calculate_revised_margin_and_rate(item)	
-		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
+		this.calculate_revised_margin_and_rate(item, doc,cdt, cdn)
+		cur_frm.refresh_fields();
+	},
+
+	calculate_revised_margin_and_rate: function(item){
+		if(in_list(["Percentage", "Amount"], item.type)){
+			if(item.type == "Percentage")
+				item.total_margin = item.price_list_rate + item.price_list_rate * ( item.rate_or_amount / 100);
+			else
+				item.total_margin = item.price_list_rate + item.rate_or_amount;
+			item.rate = flt(item.total_margin * (1 - item.discount_percentage / 100.0),
+				precision("rate", item));
+			console.log(item.rate)
+		}
+		else{
+			item.rate_or_amount = 0.0;
+			item.total_margin = 0.0;
+			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
+				precision("rate", item));
+		}
 	}
 });
 
@@ -343,18 +370,3 @@ frappe.ui.form.on(cur_frm.doctype,"project_name", function(frm) {
 		})
 	}
 })
-
-cur_frm.cscript.calculate_revised_margin_and_rate = function(item){
-	// calculate rate
-
-	if(item.type == "Percentage")
-		item.total_margin = item.price_list_rate + item.price_list_rate * ( item.rate_or_amount / 100);
-	else
-		item.total_margin = item.price_list_rate + item.rate_or_amount;
-
-	// subtracting the discount from total margin
-	item.rate = item.total_margin - item.total_margin * ( item.discount_percentage / 100 );
-	item.amount = item.qty * item.rate
-
-	cur_frm.refresh_fields();
-}
