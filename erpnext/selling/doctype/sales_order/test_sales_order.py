@@ -334,15 +334,15 @@ class TestSalesOrder(unittest.TestCase):
 		existing_ordered_qty = bin[0].ordered_qty if bin else 0.0
 		existing_reserved_qty = bin[0].reserved_qty if bin else 0.0
 
-		bin = frappe.get_all("Bin", filters={"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"},
-			fields=["reserved_qty"])
+		bin = frappe.get_all("Bin", filters={"item_code": dn_item.item_code, 
+			"warehouse": "_Test Warehouse - _TC"}, fields=["reserved_qty"])
 
 		existing_reserved_qty_for_dn_item = bin[0].reserved_qty if bin else 0.0
 
 		#create so, po and partial dn
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
-
+		
 		po = make_purchase_order_for_drop_shipment(so.name, '_Test Supplier')
 		po.submit()
 
