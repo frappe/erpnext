@@ -170,7 +170,10 @@ class AccountsController(TransactionBase):
 								item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
-						item.set("discount_percentage", ret.get("discount_percentage"))
+						# if user changed the discount percentage then set user's discount percentage ?
+						discount_percentage = ret.get("discount_percentage") if item.get("discount_percentage") == \
+							ret.get("discount_percentage") else item.get("discount_percentage")
+						item.set("discount_percentage", discount_percentage)
 						if ret.get("pricing_rule_for") == "Price":
 							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
 
