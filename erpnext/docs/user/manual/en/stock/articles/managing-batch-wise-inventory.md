@@ -1,23 +1,35 @@
 #Managing Batch wise Inventory
 
-To maintain batches against an Item you need to mention 'has batch no' as yes in the Item Master. You can create a new Batch from:
+Set of items which has same properties and attributes can be group in a single Batch. For example, pharceuticals items are batch, so that it's manufacturing and expiry date can be tracked together. 
+
+To maintain batches against an Item you need to mention 'Has Batch No' as yes in the Item Master. 
+
+<img alt="Batch Item" class="screenshot" src="{{docs_base_url}}/assets/img/articles/batchwise-stock-1.png">
+
+You can create a new Batch from:
 
 `Stock > Documents > Batch > New`
 
-To learn more about batch check out the manual page at: https://manual.erpnext.com/contents/stock/batch
+To learn more about batch, click [here.]({{docs_base_url}}/user/manual/en/stock/batch.html)
 
-While making a purchase receipt or delivery note, mention the batch number against the item. 
+For the Batch item, updating Batch No. in the stock transactions (Purchase Receipt & Delivery Note) is mandatory.
 
-**Batch No. in Purchase Receipt**
+#### Purchase Receipt
 
-<img src="{{docs_base_path}}/assets/img/articles/Screen Shot 2015-06-23 at 5.33.37 pm.png">
+When creating Purchase Receipt, you should create new Batch, or select one of the existing Batch master. One Batch can be associated with one Batch Item.
 
-**Batch No. in Delivery Note**
+<img alt="Batch in Purchase Receipt" class="screenshot" src="{{docs_base_url}}/assets/img/articles/batchwise-stock-2.png">
 
-<img src="{{docs_base_path}}/assets/img/articles/Screen Shot 2015-06-23 at 5.35.28 pm.png"><br>
+#### Delivery Note
 
-Batch-wise Stock Balance Report 
+Define Batch in Delivery Note Item table. If Batch item is added under Product Bundle, you can update it's Batch No. in the Packing List table sa well.
+
+<img alt="Batch in Delivery Note" class="screenshot" src="{{docs_base_url}}/assets/img/articles/batchwise-stock-3.png">
+
+#### Batch-wise Stock Balance Report
 
 To check batch-wise stock balance report, go to:
 
-`Stock > Standard Reports > Batch-wise Balance History`
+Stock > Standard Reports > Batch-wise Balance History
+
+<img alt="Batchwise Stock Balance" class="screenshot" src="{{docs_base_url}}/assets/img/articles/batchwise-stock-4.png">
