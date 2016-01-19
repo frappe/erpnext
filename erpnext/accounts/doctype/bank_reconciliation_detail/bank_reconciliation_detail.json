@@ -16,7 +16,7 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
-   "in_list_view": 0, 
+   "in_list_view": 1, 
    "label": "Voucher ID", 
    "length": 0, 
    "no_copy": 0, 
@@ -31,7 +31,8 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 0
+   "unique": 0, 
+   "width": "50"
   }, 
   {
    "allow_on_submit": 0, 
@@ -56,7 +57,8 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 0
+   "unique": 0, 
+   "width": "15"
   }, 
   {
    "allow_on_submit": 0, 
@@ -67,7 +69,7 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Debit", 
    "length": 0, 
    "no_copy": 0, 
@@ -93,7 +95,7 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Credit", 
    "length": 0, 
    "no_copy": 0, 
@@ -143,7 +145,7 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
-   "in_list_view": 0, 
+   "in_list_view": 1, 
    "label": "Posting Date", 
    "length": 0, 
    "no_copy": 0, 
@@ -268,7 +270,7 @@
  "istable": 1, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2015-12-04 11:01:24.286320", 
+ "modified": "2016-01-19 12:06:17.568428", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Bank Reconciliation Detail", 
