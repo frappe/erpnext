@@ -6,7 +6,7 @@ import frappe, json
 from frappe.utils import flt
 import unittest
 
-test_dependencies = ["Sales BOM"]
+test_dependencies = ["Product Bundle"]
 
 class TestQuotation(unittest.TestCase):
 	def test_make_sales_order(self):

@@ -13,8 +13,9 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			this.apply_discount_amount();
 
 		// Advance calculation applicable to Sales /Purchase Invoice
-		if(in_list(["Sales Invoice", "Purchase Invoice"], this.frm.doc.doctype) && this.frm.doc.docstatus < 2) {
-			this.calculate_total_advance(update_paid_amount);
+		if(in_list(["Sales Invoice", "Purchase Invoice"], this.frm.doc.doctype)
+			 && this.frm.doc.docstatus < 2 && !this.frm.doc.is_return) {
+				 this.calculate_total_advance(update_paid_amount);
 		}
 
 		// Sales person's commission
@@ -255,7 +256,8 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 					me.round_off_totals(tax);
 
 					// adjust Discount Amount loss in last tax iteration
-					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied && me.frm.doc.apply_discount_on == "Grand Total")
+					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied 
+							&& me.frm.doc.apply_discount_on == "Grand Total" && me.frm.doc.discount_amount)
 						me.adjust_discount_amount_loss(tax);
 				}
 			});
@@ -364,9 +366,9 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				$.each(this.frm.doc["taxes"] || [], function(i, tax) {
 					if (in_list(["Valuation and Total", "Total"], tax.category)) {
 						if(tax.add_deduct_tax == "Add") {
-							me.frm.doc.taxes_and_charges_added += flt(tax.tax_amount);
+							me.frm.doc.taxes_and_charges_added += flt(tax.tax_amount_after_discount_amount);
 						} else {
-							me.frm.doc.taxes_and_charges_deducted += flt(tax.tax_amount);
+							me.frm.doc.taxes_and_charges_deducted += flt(tax.tax_amount_after_discount_amount);
 						}
 					}
 				})
@@ -489,5 +491,46 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		this.frm.doc.total_advance = flt(total_allocated_amount, precision("total_advance"));
 
 		this.calculate_outstanding_amount(update_paid_amount);
+	},
+	
+	calculate_outstanding_amount: function(update_paid_amount) {
+		// NOTE:
+		// paid_amount and write_off_amount is only for POS Invoice
+		// total_advance is only for non POS Invoice
+		if(this.frm.doc.is_return || this.frm.doc.docstatus > 0) return;
+		
+		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
+		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {	
+			var total_amount_to_pay = flt((this.frm.doc.grand_total - this.frm.doc.total_advance 
+				- this.frm.doc.write_off_amount), precision("grand_total"));
+		} else {
+			var total_amount_to_pay = flt((this.frm.doc.base_grand_total - this.frm.doc.total_advance 
+				- this.frm.doc.base_write_off_amount), precision("base_grand_total"));
+		}
+		
+		if(this.frm.doc.doctype == "Sales Invoice") {
+			frappe.model.round_floats_in(this.frm.doc, ["paid_amount"]);
+			
+			if(this.frm.doc.is_pos) {
+				if(!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount) {
+					this.frm.doc.paid_amount = flt(total_amount_to_pay);
+				}
+			} else {
+				this.frm.doc.paid_amount = 0
+			}
+			this.set_in_company_currency(this.frm.doc, ["paid_amount"]);
+			this.frm.refresh_field("paid_amount");
+			this.frm.refresh_field("base_paid_amount");
+			
+			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ? 
+				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
+			
+			var outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount), 
+				precision("outstanding_amount"));
+				
+		} else if(this.frm.doc.doctype == "Purchase Invoice") {
+			var outstanding_amount = flt(total_amount_to_pay, precision("outstanding_amount"));
+		}		
+		this.frm.set_value("outstanding_amount", outstanding_amount);
 	}
 })

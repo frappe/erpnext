@@ -12,8 +12,8 @@ from email.utils import parseaddr
 class NewsletterList(Document):
 	def onload(self):
 		singles = [d.name for d in frappe.db.get_all("DocType", "name", {"issingle": 1})]
-		self.get("__onload").import_types = [d.parent \
-			for d in frappe.db.get_all("DocField", "parent", {"options": "Email"}) if d.parent not in singles]
+		self.get("__onload").import_types = [{"value": d.parent, "label": "{0} ({1})".format(d.parent, d.label)} \
+			for d in frappe.db.get_all("DocField", ("parent", "label"), {"options": "Email"}) if d.parent not in singles]
 
 	def import_from(self, doctype):
 		"""Extract email ids from given doctype and add them to the current list"""
@@ -34,10 +34,8 @@ class NewsletterList(Document):
 					}).insert(ignore_permissions=True)
 
 					added += 1
-			except Exception, e:
-				# already added, ignore
-				if e.args[0]!=1062:
-					raise
+			except frappe.UniqueValidationError:
+				pass
 
 		frappe.msgprint(_("{0} subscribers added").format(added))
 

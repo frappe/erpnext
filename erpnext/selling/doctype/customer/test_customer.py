@@ -7,6 +7,7 @@ import frappe
 import unittest
 
 from frappe.test_runner import make_test_records
+from erpnext.exceptions import CustomerFrozen
 
 test_ignore = ["Price List"]
 
@@ -34,9 +35,9 @@ class TestCustomer(unittest.TestCase):
 
 		make_test_records("Address")
 		make_test_records("Contact")
-		frappe.db.set_value("Contact", "_Test Contact For _Test Customer-_Test Customer", 
+		frappe.db.set_value("Contact", "_Test Contact For _Test Customer-_Test Customer",
 			"is_primary_contact", 1)
-		
+
 		details = get_party_details("_Test Customer")
 
 		for key, value in to_check.iteritems():
@@ -66,4 +67,42 @@ class TestCustomer(unittest.TestCase):
 
 		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 
+	def test_freezed_customer(self):
+		make_test_records("Customer")
+		make_test_records("Item")
+		
+		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 1)
 
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(do_not_save= True)
+		
+		self.assertRaises(CustomerFrozen, so.save)
+
+		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 0)
+
+		so.save()
+	
+	def test_duplicate_customer(self):
+		if not frappe.db.get_value("Customer", "_Test Customer 1"):
+			test_customer_1 = frappe.get_doc({
+				 "customer_group": "_Test Customer Group",
+				 "customer_name": "_Test Customer 1",
+				 "customer_type": "Individual",
+				 "doctype": "Customer",
+				 "territory": "_Test Territory"
+			}).insert(ignore_permissions=True)
+		else:
+			test_customer_1 = frappe.get_doc("Customer", "_Test Customer 1")
+
+		duplicate_customer = frappe.get_doc({
+			 "customer_group": "_Test Customer Group",
+			 "customer_name": "_Test Customer 1",
+			 "customer_type": "Individual",
+			 "doctype": "Customer",
+			 "territory": "_Test Territory"
+		}).insert(ignore_permissions=True)
+
+		self.assertEquals("_Test Customer 1", test_customer_1.name)
+		self.assertEquals("_Test Customer 1 - 1", duplicate_customer.name)
+		self.assertEquals(test_customer_1.customer_name, duplicate_customer.customer_name)

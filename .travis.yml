@@ -15,7 +15,6 @@ install:
   - wget https://raw.githubusercontent.com/frappe/bench/master/install_scripts/setup_frappe.sh
   - sudo bash setup_frappe.sh --skip-setup-bench --mysql-root-password travis
   - sudo pip install --upgrade pip
-  - sudo service redis-server start
   - rm $TRAVIS_BUILD_DIR/.git/shallow
   - cd ~/ && bench init frappe-bench --frappe-path https://github.com/frappe/frappe.git --frappe-branch develop
   - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
@@ -24,9 +23,13 @@ script:
   - cd ~/frappe-bench
   - bench get-app erpnext $TRAVIS_BUILD_DIR
   - bench use test_site
+  - bench setup redis-cache
+  - bench setup redis-async-broker
+  - bench setup procfile --with-celery-broker
   - bench reinstall
+  - bench build
   - bench build-website
-  - bench serve &
+  - bench start &
   - sleep 10
   - bench --verbose run-tests --driver Firefox
 

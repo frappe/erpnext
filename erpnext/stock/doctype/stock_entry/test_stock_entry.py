@@ -4,16 +4,14 @@
 from __future__ import unicode_literals
 import frappe, unittest
 import frappe.defaults
-from frappe.utils import flt, nowdate, nowtime, getdate
+from frappe.utils import flt, nowdate, nowtime
 from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-	import set_perpetual_inventory, make_purchase_receipt
+	import set_perpetual_inventory
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order, create_dn_against_so
-from erpnext.stock.doctype.stock_entry.stock_entry import make_return_jv, NotUpdateStockError
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
+from frappe.tests.test_permissions import set_user_permission_doctypes
 
 def get_sle(**args):
 	condition, values = "", []
@@ -31,6 +29,10 @@ class TestStockEntry(unittest.TestCase):
 		frappe.set_user("Administrator")
 		set_perpetual_inventory(0)
 
+		for role in ("Stock User", "Sales User"):
+			set_user_permission_doctypes(doctype="Stock Entry", role=role,
+				apply_user_permissions=0, user_permission_doctypes=None)
+
 	def test_fifo(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 		item_code = "_Test Item 2"
@@ -39,12 +41,12 @@ class TestStockEntry(unittest.TestCase):
 		create_stock_reconciliation(item_code="_Test Item 2", warehouse="_Test Warehouse - _TC",
 			qty=0, rate=100)
 
-		make_stock_entry(item_code=item_code, target=warehouse, qty=1, incoming_rate=10)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=1, basic_rate=10)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 		self.assertEqual([[1, 10]], eval(sle.stock_queue))
 
 		# negative qty
-		make_stock_entry(item_code=item_code, source=warehouse, qty=2, incoming_rate=10)
+		make_stock_entry(item_code=item_code, source=warehouse, qty=2, basic_rate=10)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 
 		self.assertEqual([[-1, 10]], eval(sle.stock_queue))
@@ -56,12 +58,12 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual([[-2, 10]], eval(sle.stock_queue))
 
 		# move stock to positive
-		make_stock_entry(item_code=item_code, target=warehouse, qty=3, incoming_rate=20)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=3, basic_rate=20)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 		self.assertEqual([[1, 20]], eval(sle.stock_queue))
 
 		# incoming entry with diff rate
-		make_stock_entry(item_code=item_code, target=warehouse, qty=1, incoming_rate=30)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=1, basic_rate=30)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 
 		self.assertEqual([[1, 20],[1, 30]], eval(sle.stock_queue))
@@ -69,46 +71,38 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_default("allow_negative_stock", 0)
 
 	def test_auto_material_request(self):
+		from erpnext.stock.doctype.item.test_item import make_item_variant
+		make_item_variant()
 		self._test_auto_material_request("_Test Item")
+		self._test_auto_material_request("_Test Item", material_request_type="Transfer")
 
 	def test_auto_material_request_for_variant(self):
-		manage_variant = frappe.new_doc("Manage Variants")
-		manage_variant.update({
-			"item": "_Test Variant Item",
-			"attributes": [
-				{
-					"attribute": "Test Size",
-					"attribute_value": "Small"
-				}
-			]
-		})
-		manage_variant.generate_combinations()
-		manage_variant.create_variants()
 		self._test_auto_material_request("_Test Variant Item-S")
 
-	def _test_auto_material_request(self, item_code):
+	def _test_auto_material_request(self, item_code, material_request_type="Purchase"):
 		item = frappe.get_doc("Item", item_code)
 
 		if item.variant_of:
 			template = frappe.get_doc("Item", item.variant_of)
 		else:
 			template = item
-			
+
 		projected_qty, actual_qty = frappe.db.get_value("Bin", {"item_code": item_code,
 			"warehouse": "_Test Warehouse - _TC"}, ["projected_qty", "actual_qty"]) or [0, 0]
 
 		# stock entry reqd for auto-reorder
 		create_stock_reconciliation(item_code=item_code, warehouse="_Test Warehouse - _TC",
 			qty = actual_qty + abs(projected_qty) + 10, rate=100)
-			
+
 		projected_qty = frappe.db.get_value("Bin", {"item_code": item_code,
 			"warehouse": "_Test Warehouse - _TC"}, "projected_qty") or 0
-		
+
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
-		
+
 		# update re-level qty so that it is more than projected_qty
 		if projected_qty >= template.reorder_levels[0].warehouse_reorder_level:
 			template.reorder_levels[0].warehouse_reorder_level += projected_qty
+			template.reorder_levels[0].material_request_type = material_request_type
 			template.save()
 
 		from erpnext.stock.reorder_item import reorder_item
@@ -127,7 +121,7 @@ class TestStockEntry(unittest.TestCase):
 		set_perpetual_inventory()
 
 		mr = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, incoming_rate=100)
+			qty=50, basic_rate=100)
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
 			"warehouse": mr.get("items")[0].t_warehouse})
@@ -154,7 +148,7 @@ class TestStockEntry(unittest.TestCase):
 		set_perpetual_inventory()
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, incoming_rate=100)
+			qty=50, basic_rate=100)
 
 		mi = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC", qty=40)
 
@@ -219,9 +213,9 @@ class TestStockEntry(unittest.TestCase):
 	def test_repack_no_change_in_valuation(self):
 		set_perpetual_inventory(0)
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, incoming_rate=100)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
-			qty=50, incoming_rate=100)
+			qty=50, basic_rate=100)
 
 		repack = frappe.copy_doc(test_records[3])
 		repack.posting_date = nowdate()
@@ -240,15 +234,24 @@ class TestStockEntry(unittest.TestCase):
 
 		set_perpetual_inventory(0)
 
-	def test_repack_with_change_in_valuation(self):
+	def test_repack_with_additional_costs(self):
 		set_perpetual_inventory()
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, incoming_rate=100)
-
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		repack = frappe.copy_doc(test_records[3])
 		repack.posting_date = nowdate()
 		repack.posting_time = nowtime()
-		repack.additional_operating_cost = 1000.0
+
+		repack.set("additional_costs", [
+			{
+				"description": "Actual Oerating Cost",
+				"amount": 1000
+			},
+			{
+				"description": "additional operating costs",
+				"amount": 200
+			},
+		])
 		repack.insert()
 		repack.submit()
 
@@ -263,10 +266,12 @@ class TestStockEntry(unittest.TestCase):
 
 		stock_value_diff = flt(fg_stock_value_diff - rm_stock_value_diff, 2)
 
+		self.assertEqual(stock_value_diff, 1200)
+
 		self.check_gl_entries("Stock Entry", repack.name,
 			sorted([
-				[stock_in_hand_account, stock_value_diff, 0.0],
-				["Stock Adjustment - _TC", 0.0, stock_value_diff],
+				[stock_in_hand_account, 1200, 0.0],
+				["Expenses Included In Valuation - _TC", 0.0, 1200.0]
 			])
 		)
 		set_perpetual_inventory(0)
@@ -296,270 +301,10 @@ class TestStockEntry(unittest.TestCase):
 
 		self.assertTrue(gl_entries)
 		gl_entries.sort(key=lambda x: x[0])
-
 		for i, gle in enumerate(gl_entries):
 			self.assertEquals(expected_gl_entries[i][0], gle[0])
 			self.assertEquals(expected_gl_entries[i][1], gle[1])
 			self.assertEquals(expected_gl_entries[i][2], gle[2])
-
-	def _test_sales_invoice_return(self, item_code, delivered_qty, returned_qty):
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-
-		si = create_sales_invoice(item_code=item_code, qty=delivered_qty)
-
-		se = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=returned_qty,
-			purpose="Sales Return", sales_invoice_no=si.name, do_not_save=True)
-		self.assertRaises(NotUpdateStockError, se.insert)
-
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=200, incoming_rate=100)
-
-		# check currency available qty in bin
-		actual_qty_0 = get_qty_after_transaction()
-
-		# insert a pos invoice with update stock
-		si = create_sales_invoice(update_stock=1, item_code=item_code, qty=5)
-
-		# check available bin qty after invoice submission
-		actual_qty_1 = get_qty_after_transaction()
-
-		self.assertEquals(actual_qty_0 - delivered_qty, actual_qty_1)
-
-		# check if item is validated
-		se = make_stock_entry(item_code="_Test Item Home Desktop 200", target="_Test Warehouse - _TC",
-			qty=returned_qty, purpose="Sales Return", sales_invoice_no=si.name, do_not_save=True)
-
-		self.assertRaises(frappe.DoesNotExistError, se.insert)
-
-		# try again
-		se = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=returned_qty, purpose="Sales Return", sales_invoice_no=si.name)
-
-		# check if available qty is increased
-		actual_qty_2 = get_qty_after_transaction()
-
-		self.assertEquals(actual_qty_1 + returned_qty, actual_qty_2)
-
-		return se
-
-	def test_sales_invoice_return_of_non_packing_item(self):
-		self._test_sales_invoice_return("_Test Item", 5, 2)
-
-	def test_sales_invoice_return_of_packing_item(self):
-		self._test_sales_invoice_return("_Test Sales BOM Item", 25, 20)
-
-	def _test_delivery_note_return(self, item_code, delivered_qty, returned_qty):
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
-
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, incoming_rate=100)
-
-		actual_qty_0 = get_qty_after_transaction()
-		# make a delivery note based on this invoice
-		dn = create_delivery_note(item_code="_Test Item",
-			warehouse="_Test Warehouse - _TC", qty=delivered_qty)
-
-		actual_qty_1 = get_qty_after_transaction()
-
-		self.assertEquals(actual_qty_0 - delivered_qty, actual_qty_1)
-
-		si = make_sales_invoice(dn.name)
-		si.insert()
-		si.submit()
-
-		# insert and submit stock entry for sales return
-		se = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=returned_qty, purpose="Sales Return", delivery_note_no=dn.name)
-
-		actual_qty_2 = get_qty_after_transaction()
-		self.assertEquals(actual_qty_1 + returned_qty, actual_qty_2)
-
-		return se
-
-	def test_delivery_note_return_of_non_packing_item(self):
-		self._test_delivery_note_return("_Test Item", 5, 2)
-
-	def test_delivery_note_return_of_packing_item(self):
-		self._test_delivery_note_return("_Test Sales BOM Item", 25, 20)
-
-	def _test_sales_return_jv(self, se):
-		jv = make_return_jv(se.name)
-
-		self.assertEqual(len(jv.get("accounts")), 2)
-		self.assertEqual(jv.get("voucher_type"), "Credit Note")
-		self.assertEqual(jv.get("posting_date"), getdate(se.posting_date))
-		self.assertEqual(jv.get("accounts")[0].get("account"), "Debtors - _TC")
-		self.assertEqual(jv.get("accounts")[0].get("party_type"), "Customer")
-		self.assertEqual(jv.get("accounts")[0].get("party"), "_Test Customer")
-		self.assertTrue(jv.get("accounts")[0].get("against_invoice"))
-		self.assertEqual(jv.get("accounts")[1].get("account"), "Sales - _TC")
-
-	def test_make_return_jv_for_sales_invoice_non_packing_item(self):
-		se = self._test_sales_invoice_return("_Test Item", 5, 2)
-		self._test_sales_return_jv(se)
-
-	def test_make_return_jv_for_sales_invoice_packing_item(self):
-		se = self._test_sales_invoice_return("_Test Sales BOM Item", 25, 20)
-		self._test_sales_return_jv(se)
-
-	def test_make_return_jv_for_delivery_note_non_packing_item(self):
-		se = self._test_delivery_note_return("_Test Item", 5, 2)
-		self._test_sales_return_jv(se)
-
-		se = self._test_delivery_note_return_against_sales_order("_Test Item", 5, 2)
-		self._test_sales_return_jv(se)
-
-	def test_make_return_jv_for_delivery_note_packing_item(self):
-		se = self._test_delivery_note_return("_Test Sales BOM Item", 25, 20)
-		self._test_sales_return_jv(se)
-
-		se = self._test_delivery_note_return_against_sales_order("_Test Sales BOM Item", 25, 20)
-		self._test_sales_return_jv(se)
-
-	def _test_delivery_note_return_against_sales_order(self, item_code, delivered_qty, returned_qty):
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
-
-		actual_qty_0 = get_qty_after_transaction()
-
-		so = make_sales_order(qty=50)
-
-		dn = create_dn_against_so(so.name, delivered_qty)
-
-		actual_qty_1 = get_qty_after_transaction()
-		self.assertEquals(actual_qty_0 - delivered_qty, actual_qty_1)
-
-		si = make_sales_invoice(so.name)
-		si.insert()
-		si.submit()
-
-		# insert and submit stock entry for sales return
-		se = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=returned_qty, purpose="Sales Return", delivery_note_no=dn.name)
-
-		actual_qty_2 = get_qty_after_transaction()
-		self.assertEquals(actual_qty_1 + returned_qty, actual_qty_2)
-
-		return se
-
-	def test_purchase_receipt_return(self):
-		actual_qty_0 = get_qty_after_transaction()
-
-		# submit purchase receipt
-		pr = make_purchase_receipt(item_code="_Test Item", warehouse="_Test Warehouse - _TC", qty=5)
-
-		actual_qty_1 = get_qty_after_transaction()
-
-		self.assertEquals(actual_qty_0 + 5, actual_qty_1)
-
-		pi_doc = make_purchase_invoice(pr.name)
-
-		pi = frappe.get_doc(pi_doc)
-		pi.posting_date = pr.posting_date
-		pi.credit_to = "_Test Payable - _TC"
-		for d in pi.get("items"):
-			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
-			d.cost_center = "_Test Cost Center - _TC"
-
-		for d in pi.get("taxes"):
-			d.cost_center = "_Test Cost Center - _TC"
-
-		pi.insert()
-		pi.submit()
-
-		# submit purchase return
-		se = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC",
-			qty=5, purpose="Purchase Return", purchase_receipt_no=pr.name)
-
-		actual_qty_2 = get_qty_after_transaction()
-
-		self.assertEquals(actual_qty_1 - 5, actual_qty_2)
-
-		return se, pr.name
-
-	def test_over_stock_return(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry import StockOverReturnError
-
-		# out of 10, 5 gets returned
-		prev_se, pr_docname = self.test_purchase_receipt_return()
-
-		se = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC",
-			qty=6, purpose="Purchase Return", purchase_receipt_no=pr_docname, do_not_save=True)
-
-		self.assertRaises(StockOverReturnError, se.insert)
-
-	def _test_purchase_return_jv(self, se):
-		jv = make_return_jv(se.name)
-
-		self.assertEqual(len(jv.get("accounts")), 2)
-		self.assertEqual(jv.get("voucher_type"), "Debit Note")
-		self.assertEqual(jv.get("posting_date"), getdate(se.posting_date))
-		self.assertEqual(jv.get("accounts")[0].get("account"), "_Test Payable - _TC")
-		self.assertEqual(jv.get("accounts")[0].get("party"), "_Test Supplier")
-		self.assertEqual(jv.get("accounts")[1].get("account"), "_Test Account Cost for Goods Sold - _TC")
-		self.assertTrue(jv.get("accounts")[0].get("against_voucher"))
-
-	def test_make_return_jv_for_purchase_receipt(self):
-		se, pr_name = self.test_purchase_receipt_return()
-		self._test_purchase_return_jv(se)
-
-		se, pr_name = self._test_purchase_return_return_against_purchase_order()
-		self._test_purchase_return_jv(se)
-
-	def _test_purchase_return_return_against_purchase_order(self):
-
-		actual_qty_0 = get_qty_after_transaction()
-
-		from erpnext.buying.doctype.purchase_order.test_purchase_order \
-			import test_records as purchase_order_test_records
-
-		from erpnext.buying.doctype.purchase_order.purchase_order import \
-			make_purchase_receipt, make_purchase_invoice
-
-		# submit purchase receipt
-		po = frappe.copy_doc(purchase_order_test_records[0])
-		po.transaction_date = nowdate()
-		po.is_subcontracted = None
-		po.get("items")[0].item_code = "_Test Item"
-		po.get("items")[0].rate = 50
-		po.insert()
-		po.submit()
-
-		pr_doc = make_purchase_receipt(po.name)
-
-		pr = frappe.get_doc(pr_doc)
-		pr.posting_date = po.transaction_date
-		pr.insert()
-		pr.submit()
-
-		actual_qty_1 = get_qty_after_transaction()
-
-		self.assertEquals(actual_qty_0 + 10, actual_qty_1)
-
-		pi_doc = make_purchase_invoice(po.name)
-
-		pi = frappe.get_doc(pi_doc)
-		pi.posting_date = pr.posting_date
-		pi.credit_to = "_Test Payable - _TC"
-		for d in pi.get("items"):
-			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
-			d.cost_center = "_Test Cost Center - _TC"
-		for d in pi.get("taxes"):
-			d.cost_center = "_Test Cost Center - _TC"
-
-		pi.run_method("calculate_taxes_and_totals")
-		pi.bill_no = "NA"
-		pi.insert()
-		pi.submit()
-
-		# submit purchase return
-		se = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC",
-			qty=5, purpose="Purchase Return", purchase_receipt_no=pr.name)
-
-		actual_qty_2 = get_qty_after_transaction()
-
-		self.assertEquals(actual_qty_1 - 5, actual_qty_2)
-
-		return se, pr.name
 
 	def test_serial_no_not_reqd(self):
 		se = frappe.copy_doc(test_records[0])
@@ -705,7 +450,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_warehouse_company_validation(self):
 		set_perpetual_inventory(0)
 		frappe.get_doc("User", "test2@example.com")\
-			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+			.add_roles("Sales User", "Sales Manager", "Stock User", "Stock Manager")
 		frappe.set_user("test2@example.com")
 
 		from erpnext.stock.utils import InvalidWarehouseCompany
@@ -718,14 +463,18 @@ class TestStockEntry(unittest.TestCase):
 	def test_warehouse_user(self):
 		set_perpetual_inventory(0)
 
+		for role in ("Stock User", "Sales User"):
+			set_user_permission_doctypes(doctype="Stock Entry", role=role,
+				apply_user_permissions=1, user_permission_doctypes=["Warehouse"])
+
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "User Permission")
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "User Permission")
 		test_user = frappe.get_doc("User", "test@example.com")
-		test_user.add_roles("Sales User", "Sales Manager", "Material User")
-		test_user.remove_roles("Material Manager")
+		test_user.add_roles("Sales User", "Sales Manager", "Stock User")
+		test_user.remove_roles("Stock Manager")
 
 		frappe.get_doc("User", "test2@example.com")\
-			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+			.add_roles("Sales User", "Sales Manager", "Stock User", "Stock Manager")
 
 		frappe.set_user("test@example.com")
 		st1 = frappe.copy_doc(test_records[0])
@@ -764,6 +513,8 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
 
 	def test_production_order(self):
+		from erpnext.manufacturing.doctype.production_order.production_order \
+			import make_stock_entry as _make_stock_entry
 		bom_no, bom_operation_cost = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
 			"is_default": 1, "docstatus": 1}, ["name", "operating_cost"])
 
@@ -775,22 +526,15 @@ class TestStockEntry(unittest.TestCase):
 			"bom_no": bom_no,
 			"qty": 1.0,
 			"stock_uom": "_Test UOM",
-			"wip_warehouse": "_Test Warehouse - _TC"
+			"wip_warehouse": "_Test Warehouse - _TC",
+			"additional_operating_cost": 1000
 		})
 		production_order.insert()
 		production_order.submit()
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, incoming_rate=100)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 
-		stock_entry = frappe.new_doc("Stock Entry")
-		stock_entry.update({
-			"purpose": "Manufacture",
-			"production_order": production_order.name,
-			"bom_no": bom_no,
-			"fg_completed_qty": "1",
-			"additional_operating_cost": 1000
-		})
-		stock_entry.get_items()
+		stock_entry = _make_stock_entry(production_order.name, "Manufacture", 1)
 
 		rm_cost = 0
 		for d in stock_entry.get("items"):
@@ -798,8 +542,8 @@ class TestStockEntry(unittest.TestCase):
 				rm_cost += flt(d.amount)
 
 		fg_cost = filter(lambda x: x.item_code=="_Test FG Item 2", stock_entry.get("items"))[0].amount
-		self.assertEqual(fg_cost, 
-			flt(rm_cost + bom_operation_cost + stock_entry.additional_operating_cost, 2))
+		self.assertEqual(fg_cost,
+			flt(rm_cost + bom_operation_cost + production_order.additional_operating_cost, 2))
 
 
 	def test_variant_production_order(self):
@@ -824,6 +568,27 @@ class TestStockEntry(unittest.TestCase):
 		stock_entry = frappe.get_doc(make_stock_entry(production_order.name, "Manufacture", 1))
 		stock_entry.insert()
 		self.assertTrue("_Test Variant Item-S" in [d.item_code for d in stock_entry.items])
+
+	def test_same_serial_nos_in_repack_or_manufacture_entries(self):
+		s1 = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+		serial_nos = s1.get("items")[0].serial_no
+
+		s2 = make_stock_entry(item_code="_Test Serialized Item With Series", source="_Test Warehouse - _TC",
+			qty=2, basic_rate=100, purpose="Repack", serial_no=serial_nos, do_not_save=True)
+
+		s2.append("items", {
+			"item_code": "_Test Serialized Item",
+			"t_warehouse": "_Test Warehouse - _TC",
+			"qty": 2,
+			"basic_rate": 120,
+			"expense_account": "Stock Adjustment - _TC",
+			"conversion_factor": 1.0,
+			"cost_center": "_Test Cost Center - _TC",
+			"serial_no": serial_nos
+		})
+
+		s2.submit()
+		s2.cancel()
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
@@ -871,10 +636,11 @@ def make_stock_entry(**args):
 		"s_warehouse": args.from_warehouse or args.source,
 		"t_warehouse": args.to_warehouse or args.target,
 		"qty": args.qty,
-		"incoming_rate": args.incoming_rate,
+		"basic_rate": args.basic_rate,
 		"expense_account": args.expense_account or "Stock Adjustment - _TC",
 		"conversion_factor": 1.0,
-		"cost_center": "_Test Cost Center - _TC"
+		"cost_center": "_Test Cost Center - _TC",
+		"serial_no": args.serial_no
 	})
 
 	if not args.do_not_save:

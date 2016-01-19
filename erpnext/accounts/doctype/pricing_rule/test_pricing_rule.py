@@ -36,7 +36,6 @@ class TestPricingRule(unittest.TestCase):
 			"price_list_currency": "_Test Currency",
 			"plc_conversion_rate": 1,
 			"order_type": "Sales",
-			"transaction_type": "selling",
 			"customer": "_Test Customer",
 			"doctype": "Sales Order Item",
 			"name": None

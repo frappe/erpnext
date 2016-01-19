@@ -11,16 +11,10 @@ cur_frm.add_fetch("item_code", "brand", "brand")
 
 cur_frm.cscript.onload = function() {
 	cur_frm.set_query("item_code", function() {
-		return erpnext.queries.item({"is_stock_item": "Yes", "has_serial_no": "Yes"})
+		return erpnext.queries.item({"is_stock_item": 1, "has_serial_no": 1})
 	});
 };
 
 frappe.ui.form.on("Serial No", "refresh", function(frm) {
 	frm.toggle_enable("item_code", frm.doc.__islocal);
-
-	if(frm.doc.status == "Sales Returned" && frm.doc.warehouse)
-		cur_frm.add_custom_button(__('Set Status as Available'), function() {
-			cur_frm.set_value("status", "Available");
-			cur_frm.save();
-		}, "icon-ok", "btn-default");
 });

@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, cint
 from frappe import msgprint, _
+from calendar import monthrange
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -73,11 +74,17 @@ def get_conditions(filters):
 		msgprint(_("Please select month and year"), raise_exception=1)
 
 	filters["month"] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
-		"Dec"].index(filters["month"]) + 1
+		"Dec"].index(filters.month) + 1
 
-	from calendar import monthrange
-	filters["total_days_in_month"] = monthrange(cint(filters["fiscal_year"].split("-")[-1]),
-		filters["month"])[1]
+	year_start_date, year_end_date = frappe.db.get_value("Fiscal Year", filters.fiscal_year, 
+		["year_start_date", "year_end_date"])
+		
+	if filters.month >= year_start_date.strftime("%m"):
+		year = year_start_date.strftime("%Y")
+	else:
+		year = year_end_date.strftime("%Y")
+	
+	filters["total_days_in_month"] = monthrange(cint(year), filters.month)[1]
 
 	conditions = " and month(att_date) = %(month)s and fiscal_year = %(fiscal_year)s"
 

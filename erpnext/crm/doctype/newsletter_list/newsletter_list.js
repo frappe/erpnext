@@ -3,7 +3,7 @@ frappe.ui.form.on("Newsletter List", "refresh", function(frm) {
 		frm.add_custom_button(__("View Subscribers"), function() {
 			frappe.route_options = {"newsletter_list": frm.doc.name};
 			frappe.set_route("Report", "Newsletter List Subscriber");
-		});
+		}, __("View"));
 
 		frm.add_custom_button(__("Import Subscribers"), function() {
 			frappe.prompt({fieldtype:"Select", options: frm.doc.__onload.import_types,
@@ -19,7 +19,7 @@ frappe.ui.form.on("Newsletter List", "refresh", function(frm) {
 						}
 					})
 				}, __("Import Subscribers"), __("Import"));
-		});
+		}, __("Action"));
 
 		frm.add_custom_button(__("Add Subscribers"), function() {
 			frappe.prompt({fieldtype:"Text",
@@ -35,12 +35,12 @@ frappe.ui.form.on("Newsletter List", "refresh", function(frm) {
 						}
 					})
 				}, __("Add Subscribers"), __("Add"));
-		});
+		}, __("Action"));
 
 		frm.add_custom_button(__("New Newsletter"), function() {
 			frappe.route_options = {"newsletter_list": frm.doc.name};
 			new_doc("Newsletter");
-		});
+		}, __("Action"));
 
 	}
 });

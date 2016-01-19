@@ -45,6 +45,10 @@ class Employee(Document):
 		if self.user_id:
 			self.validate_for_enabled_user_id()
 			self.validate_duplicate_user_id()
+		else:
+			existing_user_id = frappe.db.get_value("Employee", self.name, "user_id")
+			if existing_user_id:
+				frappe.permissions.remove_user_permission("Employee", self.name, existing_user_id)
 
 	def on_update(self):
 		if self.user_id:
@@ -85,7 +89,7 @@ class Employee(Document):
 				user.user_image = self.image
 				try:
 					frappe.get_doc({
-						"doctype": "File Data",
+						"doctype": "File",
 						"file_name": self.image,
 						"attached_to_doctype": "User",
 						"attached_to_name": self.user_id
@@ -154,8 +158,13 @@ def get_retirement_date(date_of_birth=None):
 	import datetime
 	ret = {}
 	if date_of_birth:
-		dt = getdate(date_of_birth) + datetime.timedelta(21915)
-		ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
+		try:
+			dt = getdate(date_of_birth) + datetime.timedelta(21915)
+			ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
+		except ValueError:
+			# invalid date
+			ret = {}
+
 	return ret
 
 @frappe.whitelist()
@@ -199,15 +208,15 @@ def send_birthday_reminders():
 			users = [u.email_id or u.name for u in get_enabled_system_users()]
 
 		for e in birthdays:
-			frappe.sendmail(recipients=filter(lambda u: u not in (e.company_email, e.personal_email), users),
+			frappe.sendmail(recipients=filter(lambda u: u not in (e.company_email, e.personal_email, e.user_id), users),
 				subject=_("Birthday Reminder for {0}").format(e.employee_name),
 				message=_("""Today is {0}'s birthday!""").format(e.employee_name),
-				reply_to=e.company_email or e.personal_email,
+				reply_to=e.company_email or e.personal_email or e.user_id,
 				bulk=True)
 
 def get_employees_who_are_born_today():
 	"""Get Employee properties whose birthday is today."""
-	return frappe.db.sql("""select name, personal_email, company_email, employee_name
+	return frappe.db.sql("""select name, personal_email, company_email, user_id, employee_name
 		from tabEmployee where day(date_of_birth) = day(%(date)s)
 		and month(date_of_birth) = month(%(date)s)
 		and status = 'Active'""", {"date": today()}, as_dict=True)

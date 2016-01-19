@@ -7,7 +7,7 @@ erpnext.financial_statements = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": frappe.defaults.get_user_default("company"),
+			"default": frappe.defaults.get_user_default("Company"),
 			"reqd": 1
 		},
 		{
@@ -22,7 +22,12 @@ erpnext.financial_statements = {
 			"fieldname": "periodicity",
 			"label": __("Periodicity"),
 			"fieldtype": "Select",
-			"options": "Yearly\nHalf-yearly\nQuarterly\nMonthly",
+			"options": [
+				{ "value": "Monthly", "label": __("Monthly") },
+				{ "value": "Quarterly", "label": __("Quarterly") },
+				{ "value": "Half-Yearly", "label": __("Half-Yearly") },
+				{ "value": "Yearly", "label": __("Yearly") }
+			],
 			"default": "Yearly",
 			"reqd": 1
 		}

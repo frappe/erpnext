@@ -33,6 +33,11 @@ def get_data():
 					"description": _("Supplier database.")
 				},
 				{
+					"type": "doctype",
+					"name": "Payment Request",
+					"description": _("Payment Request")
+				},
+				{
 					"type": "page",
 					"name": "Accounts Browser",
 					"icon": "icon-sitemap",
@@ -75,8 +80,18 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Company",
+					"description": _("Company (not Customer or Supplier) master.")
+				},
+				{
+					"type": "doctype",
 					"name": "Fiscal Year",
 					"description": _("Financial / accounting year.")
+				},
+				{
+					"type": "doctype",
+					"name": "Payment Gateway Account",
+					"description": _("Setup Gateway accounts.")
 				},
 				{
 					"type": "page",
@@ -100,6 +115,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Accounts Settings",
 					"description": _("Default settings for accounting transactions.")
+				},
+				{
+					"type": "doctype",
+					"name": "Tax Rule",
+					"description": _("Tax Rule for transactions.")
 				},
 				{
 					"type": "doctype",
@@ -179,6 +199,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Trial Balance for Party",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
 					"name": "Gross Profit",
 					"doctype": "Sales Invoice",
 					"is_query_report": True
@@ -210,6 +236,12 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Balance Sheet",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Cash Flow",
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},

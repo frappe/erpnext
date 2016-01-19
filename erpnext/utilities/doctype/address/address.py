@@ -10,6 +10,9 @@ from frappe.utils import cstr
 from frappe.model.document import Document
 
 class Address(Document):
+	def __setup__(self):
+		self.flags.linked = False
+
 	def autoname(self):
 		if not self.address_title:
 			self.address_title = self.customer \
@@ -21,6 +24,8 @@ class Address(Document):
 			throw(_("Address Title is mandatory."))
 
 	def validate(self):
+		self.link_fields = ("customer", "supplier", "sales_partner", "lead")
+		self.link_address()
 		self.validate_primary_address()
 		self.validate_shipping_address()
 
@@ -30,13 +35,33 @@ class Address(Document):
 			self._unset_other("is_primary_address")
 
 		elif self.is_shipping_address != 1:
-			for fieldname in ["customer", "supplier", "sales_partner", "lead"]:
+			for fieldname in self.link_fields:
 				if self.get(fieldname):
 					if not frappe.db.sql("""select name from `tabAddress` where is_primary_address=1
-						and `%s`=%s and name!=%s""" % (fieldname, "%s", "%s"),
+						and `%s`=%s and name!=%s""" % (frappe.db.escape(fieldname), "%s", "%s"),
 						(self.get(fieldname), self.name)):
 							self.is_primary_address = 1
 					break
+
+	def link_address(self):
+		"""Link address based on owner"""
+		if not self.flags.linked:
+			self.check_if_linked()
+
+		if not self.flags.linked:
+			contact = frappe.db.get_value("Contact", {"email_id": self.owner},
+				("name", "customer", "supplier"), as_dict = True)
+			if contact:
+				self.customer = contact.customer
+				self.supplier = contact.supplier
+
+			self.lead = frappe.db.get_value("Lead", {"email_id": self.owner})
+
+	def check_if_linked(self):
+		for fieldname in self.link_fields:
+			if self.get(fieldname):
+				self.flags.linked = True
+				break
 
 	def validate_shipping_address(self):
 		"""Validate that there can only be one shipping address for particular customer, supplier"""
@@ -49,6 +74,9 @@ class Address(Document):
 				frappe.db.sql("""update `tabAddress` set `%s`=0 where `%s`=%s and name!=%s""" %
 					(is_address_type, fieldname, "%s", "%s"), (self.get(fieldname), self.name))
 				break
+
+	def get_display(self):
+		return get_address_display(self.as_dict())
 
 @frappe.whitelist()
 def get_address_display(address_dict):
@@ -103,5 +131,3 @@ def has_website_permission(doc, ptype, user, verbose=False):
 			return doc.lead == lead
 
 	return False
-
-

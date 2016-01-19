@@ -15,6 +15,8 @@ class TimeLogBatch(Document):
 
 	def validate(self):
 		self.set_status()
+		self.total_hours = 0.0
+		self.total_billing_amount = 0.0
 		for d in self.get("time_logs"):
 			tl = frappe.get_doc("Time Log", d.time_log)
 			self.update_time_log_values(d, tl)
@@ -26,13 +28,14 @@ class TimeLogBatch(Document):
 		d.update({
 			"hours": tl.hours,
 			"activity_type": tl.activity_type,
-			"billing_amount": tl.billing_amount
+			"billing_amount": tl.billing_amount,
+			"note": tl.note
 		})
 
 	def validate_time_log_is_submitted(self, tl):
 		if tl.status == "Batched for Billing":
 			frappe.throw(_("Time Log {0} already billed").format(tl.name))
-		elif tl.status != "Submitted":
+		elif tl.docstatus != 1:
 			frappe.throw(_("Time Log {0} must be 'Submitted'").format(tl.name))
 
 	def set_status(self):

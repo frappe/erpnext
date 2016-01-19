@@ -10,7 +10,6 @@ class ItemPriceDuplicateItem(frappe.ValidationError): pass
 from frappe.model.document import Document
 
 class ItemPrice(Document):
-
 	def validate(self):
 		self.validate_item()
 		self.validate_price_list()

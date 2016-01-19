@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import urllib
+from frappe.utils import nowdate
 from frappe.utils.nestedset import NestedSet
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
@@ -66,18 +67,21 @@ def get_product_list_for_group(product_group=None, start=0, limit=10):
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(product_group)])
 
 	# base query
-	query = """select name, item_name, page_name, website_image, item_group,
+	query = """select name, item_name, page_name, website_image, thumbnail, item_group,
 			web_long_description as website_description,
 			concat(parent_website_route, "/", page_name) as route
 		from `tabItem`
 		where show_in_website = 1
-			and (item_group in (%s)
-			or name in (select parent from `tabWebsite Item Group` where item_group in (%s)))
-			""" % (child_groups, child_groups)
+			and disabled=0
+			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)
+			and (variant_of = '' or variant_of is null)
+			and (item_group in ({child_groups})
+			or name in (select parent from `tabWebsite Item Group` where item_group in ({child_groups})))
+			""".format(child_groups=child_groups)
 
 	query += """order by weightage desc, modified desc limit %s, %s""" % (start, limit)
 
-	data = frappe.db.sql(query, {"product_group": product_group}, as_dict=1)
+	data = frappe.db.sql(query, {"product_group": product_group, "today": nowdate()}, as_dict=1)
 
 	return [get_item_for_list_in_html(r) for r in data]
 
@@ -107,7 +111,7 @@ def get_parent_item_groups(item_group_name):
 	item_group = frappe.get_doc("Item Group", item_group_name)
 	return frappe.db.sql("""select name, page_name from `tabItem Group`
 		where lft <= %s and rgt >= %s
-		and ifnull(show_in_website,0)=1
+		and show_in_website=1
 		order by lft asc""", (item_group.lft, item_group.rgt), as_dict=True)
 
 def invalidate_cache_for(doc, item_group=None):

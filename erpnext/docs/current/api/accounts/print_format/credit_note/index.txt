@@ -1,0 +1,1 @@
+erpnext.accounts.print_format.credit_note

@@ -11,7 +11,6 @@ from frappe.model.document import Document
 class POSProfile(Document):
 	def validate(self):
 		self.check_for_duplicate()
-		self.validate_expense_account()
 		self.validate_all_link_fields()
 
 	def check_for_duplicate(self):
@@ -25,11 +24,6 @@ class POSProfile(Document):
 			else:
 				msgprint(_("Global POS Profile {0} already created for company {1}").format(res[0][0],
 					self.company), raise_exception=1)
-
-	def validate_expense_account(self):
-		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \
-				and not self.expense_account:
-			msgprint(_("Expense Account is mandatory"), raise_exception=1)
 
 	def validate_all_link_fields(self):
 		accounts = {"Account": [self.cash_bank_account, self.income_account,

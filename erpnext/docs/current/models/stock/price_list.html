@@ -1,0 +1,426 @@
+<!-- title: Price List -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/stock/doctype/price_list"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+    <p><b>Table Name:</b> <code>tabPrice List</code></p>
+
+
+Price List Master
+
+<h3>Fields</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td ><code>enabled</code></td>
+            <td >
+                Check</td>
+            <td >
+                Enabled
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>2</td>
+            <td ><code>sb_1</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td class="danger" title="Mandatory"><code>price_list_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Price List Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td class="danger" title="Mandatory"><code>currency</code></td>
+            <td >
+                Link</td>
+            <td >
+                Currency
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/geo/currency">Currency</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>buying</code></td>
+            <td >
+                Check</td>
+            <td >
+                Buying
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>selling</code></td>
+            <td >
+                Check</td>
+            <td >
+                Selling
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
+            <td ><code>column_break_3</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>countries</code></td>
+            <td >
+                Table</td>
+            <td >
+                Applicable for Countries
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/price_list_country">Price List Country</a>
+
+
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.stock.doctype.price_list.price_list</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>PriceList</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_trash" href="#on_trash" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_trash</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_update" href="#on_update" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_update</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_default_if_missing" href="#set_default_if_missing" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_default_if_missing</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_item_price" href="#update_item_price" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_item_price</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate" href="#validate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+
+    
+    
+        <h4>Linked In:</h4>
+        <ul>
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/bom">BOM</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/buying_settings">Buying Settings</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/selling/customer">Customer</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/customer_group">Customer Group</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/delivery_note">Delivery Note</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/item_price">Item Price</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/pos_profile">POS Profile</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/pricing_rule">Pricing Rule</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/purchase_invoice">Purchase Invoice</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/purchase_order">Purchase Order</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/purchase_receipt">Purchase Receipt</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/selling/quotation">Quotation</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/sales_invoice">Sales Invoice</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/selling/sales_order">Sales Order</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/selling/selling_settings">Selling Settings</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/shopping_cart/shopping_cart_settings">Shopping Cart Settings</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/supplier">Supplier</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/supplier_quotation">Supplier Quotation</a>
+
+</li>
+			
+        
+        </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

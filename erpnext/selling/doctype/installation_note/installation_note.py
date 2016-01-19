@@ -39,24 +39,16 @@ class InstallationNote(TransactionBase):
 		check_active_sales_items(self)
 
 	def is_serial_no_added(self, item_code, serial_no):
-		ar_required = frappe.db.get_value("Item", item_code, "has_serial_no")
-		if ar_required == 'Yes' and not serial_no:
+		has_serial_no = frappe.db.get_value("Item", item_code, "has_serial_no")
+		if has_serial_no == 1 and not serial_no:
 			frappe.throw(_("Serial No is mandatory for Item {0}").format(item_code))
-		elif ar_required != 'Yes' and cstr(serial_no).strip():
+		elif has_serial_no != 1 and cstr(serial_no).strip():
 			frappe.throw(_("Item {0} is not a serialized Item").format(item_code))
 
 	def is_serial_no_exist(self, item_code, serial_no):
 		for x in serial_no:
 			if not frappe.db.exists("Serial No", x):
 				frappe.throw(_("Serial No {0} does not exist").format(x))
-
-	def is_serial_no_installed(self,cur_s_no,item_code):
-		for x in cur_s_no:
-			status = frappe.db.sql("select status from `tabSerial No` where name = %s", x)
-			status = status and status[0][0] or ''
-
-			if status == 'Installed':
-				frappe.throw(_("Item {0} with Serial No {1} is already installed").format(item_code, x))
 
 	def get_prevdoc_serial_no(self, prevdoc_detail_docname):
 		serial_nos = frappe.db.get_value("Delivery Note Item",
@@ -69,7 +61,7 @@ class InstallationNote(TransactionBase):
 				frappe.throw(_("Serial No {0} does not belong to Delivery Note {1}").format(sr, prevdoc_docname))
 
 	def validate_serial_no(self):
-		cur_s_no, prevdoc_s_no, sr_list = [], [], []
+		prevdoc_s_no, sr_list = [], []
 		for d in self.get('items'):
 			self.is_serial_no_added(d.item_code, d.serial_no)
 			if d.serial_no:
@@ -80,7 +72,6 @@ class InstallationNote(TransactionBase):
 				if prevdoc_s_no:
 					self.is_serial_no_match(sr_list, prevdoc_s_no, d.prevdoc_docname)
 
-				self.is_serial_no_installed(sr_list, d.item_code)
 
 	def validate_installation_date(self):
 		for d in self.get('items'):
@@ -102,11 +93,5 @@ class InstallationNote(TransactionBase):
 		frappe.db.set(self, 'status', 'Submitted')
 
 	def on_cancel(self):
-		for d in self.get('items'):
-			if d.serial_no:
-				d.serial_no = d.serial_no.replace(",", "\n")
-				for sr_no in d.serial_no.split("\n"):
-					frappe.db.set_value("Serial No", sr_no, "status", "Delivered")
-
 		self.update_prevdoc_status()
 		frappe.db.set(self, 'status', 'Cancelled')

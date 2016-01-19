@@ -11,16 +11,6 @@ from erpnext.utilities.transaction_base import TransactionBase, delete_events
 from erpnext.stock.utils import get_valid_serial_nos
 
 class MaintenanceSchedule(TransactionBase):
-
-	def get_item_details(self, item_code):
-		item = frappe.db.sql("""select item_name, description from `tabItem`
-			where name=%s""", (item_code), as_dict=1)
-		ret = {
-			'item_name': item and item[0]['item_name'] or '',
-			'description' : item and item[0]['description'] or ''
-		}
-		return ret
-
 	def generate_schedule(self):
 		self.set('schedules', [])
 		frappe.db.sql("""delete from `tabMaintenance Schedule Detail`
@@ -121,7 +111,7 @@ class MaintenanceSchedule(TransactionBase):
 				# check global holiday list
 				holiday_list = frappe.db.sql("""select h.holiday_date from
 					`tabHoliday` h, `tabHoliday List` hl
-					where h.parent=hl.name and ifnull(hl.is_default, 0) = 1
+					where h.parent=hl.name and hl.is_default = 1
 					and hl.fiscal_year=%s""", fy_details[0])
 
 			if not validated and holiday_list:
@@ -192,7 +182,7 @@ class MaintenanceSchedule(TransactionBase):
 	def validate_serial_no(self, serial_nos, amc_start_date):
 		for serial_no in serial_nos:
 			sr_details = frappe.db.get_value("Serial No", serial_no,
-				["warranty_expiry_date", "amc_expiry_date", "status", "delivery_date"], as_dict=1)
+				["warranty_expiry_date", "amc_expiry_date", "warehouse", "delivery_date"], as_dict=1)
 
 			if not sr_details:
 				frappe.throw(_("Serial No {0} not found").format(serial_no))
@@ -203,9 +193,10 @@ class MaintenanceSchedule(TransactionBase):
 			if sr_details.amc_expiry_date and sr_details.amc_expiry_date >= amc_start_date:
 				throw(_("Serial No {0} is under maintenance contract upto {1}").format(serial_no, sr_details.amc_start_date))
 
-			if sr_details.status=="Delivered" and sr_details.delivery_date and \
+			if not sr_details.warehouse and sr_details.delivery_date and \
 				sr_details.delivery_date >= amc_start_date:
-					throw(_("Maintenance start date can not be before delivery date for Serial No {0}").format(serial_no))
+					throw(_("Maintenance start date can not be before delivery date for Serial No {0}")
+						.format(serial_no))
 
 	def validate_schedule(self):
 		item_lst1 =[]

@@ -50,6 +50,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "SMS Log",
+					"description":_("Logs for maintaining sms delivery status"),
+				},
+				{
+					"type": "doctype",
 					"name": "Newsletter",
 					"description": _("Newsletters to contacts, leads."),
 				},
@@ -144,7 +149,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Sales BOM",
+					"name": "Product Bundle",
 					"description": _("Bundle items at time of sale."),
 				},
 				{
@@ -288,6 +293,16 @@ def get_data():
 					"type": "help",
 					"label": _("Customer and Supplier"),
 					"youtube_id": "anoGi_RpQ20"
+				},
+				{
+					"type": "help",
+					"label": _("Sales Order to Payment"),
+					"youtube_id": "7AMq4lqkN4A"
+				},
+				{
+					"type": "help",
+					"label": _("Point-of-Sale"),
+					"youtube_id": "4WkelWkbP_c"
 				},
 			]
 		},

@@ -1,7 +1,6 @@
 {
     "country_code": "de",
     "name": "Deutscher Kontenplan SKR03",
-	"is_active": "No",
 	"disabled": "Yes",
     "tree": {
         "Aktiva": {

@@ -8,6 +8,10 @@
     "holiday_date": "2013-01-01"
    },
    {
+    "description": "Republic Day", 
+    "holiday_date": "2013-01-26"
+   },
+   {
     "description": "Test Holiday", 
     "holiday_date": "2013-02-01"
    }

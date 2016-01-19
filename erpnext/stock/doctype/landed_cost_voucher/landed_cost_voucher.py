@@ -15,7 +15,7 @@ class LandedCostVoucher(Document):
 			pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.description,
 				pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name
 				from `tabPurchase Receipt Item` pr_item where parent = %s
-				and exists(select name from tabItem where name = pr_item.item_code and is_stock_item = 'Yes')""",
+				and exists(select name from tabItem where name = pr_item.item_code and is_stock_item = 1)""",
 				pr.purchase_receipt, as_dict=True)
 
 			for d in pr_items:
@@ -69,7 +69,7 @@ class LandedCostVoucher(Document):
 	def set_applicable_charges_for_item(self):
 		based_on = self.distribute_charges_based_on.lower()
 		total = sum([flt(d.get(based_on)) for d in self.get("items")])
-		
+
 		if not total:
 			frappe.throw(_("Total {0} for all items is zero, may you should change 'Distribute Charges Based On'").format(based_on))
 

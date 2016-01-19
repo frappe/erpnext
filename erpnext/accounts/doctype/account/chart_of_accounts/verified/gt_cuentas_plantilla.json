@@ -1,0 +1,92 @@
+{
+  "country_code": "gt",
+  "name": "Cuentas de Guatemala",
+  "tree": {
+    "Activos": {
+      "Activo Corriente": {
+        "Caja y Bancos": {},
+        "Cuentas por Cobrar": {},
+        "Impuestos por Cobrar": {
+          "IVA por Cobrar": {},
+          "Retenciones de IVA recibidas": {}
+        },
+        "Inventario": {
+          "is_group": 1,
+          "account_type": "Stock"
+        }
+      },
+      "No Corriente": {
+        "Activos Fijos": {},
+        "Cargos Diferidos": {}
+      },
+      "root_type": "Asset"
+    },
+    "Pasivos": {
+      "Pasivo Corriente": {
+        "Proveedores": {
+          "Inventario Recibido pero No Cobrado": {
+            "account_type": "Stock Received But Not Billed"
+          }
+        },
+        "Impuestos por Pagar": {},
+        "Sueldos por Liquidar": {},
+        "Prestaciones": {},
+        "Cuentas por Pagar": {},
+        "Otras Cuentas por Pagar": {},
+        "Acreedores": {}
+      },
+      "Pasivo No Corriente": {
+        "Provisión para Indemnizaciones": {},
+        "Acreedores": {}
+      },
+      "root_type": "Liability"
+    },
+    "Patrimonio": {
+      "Capital": {},
+      "Utilidades Retenidas": {},
+      "Resultados del Ejercicio": {},
+      "root_type": "Asset"
+    },
+    "Costos": {
+      "Costo de Ventas": {},
+      "Costos Incluidos en la Valuación": {
+        "account_type": "Expenses Included In Valuation"
+      },
+      "Stock Adjustment": {
+        "account_type": "Stock Adjustment"
+      },
+      "root_type": "Expense"
+    },
+    "Gastos": {
+      "Gastos de Personal": {},
+      "Honorarios Profesionales": {},
+      "Servicios Básicos": {},
+      "Alquileres": {},
+      "Seguros": {},
+      "Mantenimiento": {},
+      "Depreciaciones": {},
+      "Gastos Diversos": {},
+      "root_type": "Expense"
+    },
+    "Ingresos": {
+      "Productos": {},
+      "Servicios": {},
+      "root_type": "Income"
+    },
+    "Otros Gastos y Productos Financieros": {
+      "Otros Ingresos": {
+        "Otros Gastos y Productos Financieros": {
+          "Intereses": {},
+          "Otros Gastos Financieros": {}
+        }
+      },
+      "Otros Gastos": {
+        "Otros Gastos y Productos Financieros": {
+          "Intereses": {},
+          "Otros Gastos Financieros": {}
+        }
+      },
+      "root_type": "Expense"
+    }
+  }
+}

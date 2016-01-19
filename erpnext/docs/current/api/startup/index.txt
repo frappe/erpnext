@@ -1,0 +1,4 @@
+erpnext.startup.boot
+erpnext.startup
+erpnext.startup.notifications
+erpnext.startup.report_data_map

@@ -11,12 +11,19 @@ default_mail_footer = """<div style="padding: 7px; text-align: right; color: #88
 def after_install():
 	frappe.get_doc({'doctype': "Role", "role_name": "Analytics"}).insert()
 	set_single_defaults()
-	frappe.db.set_default('desktop:home_page', 'setup-wizard')
 	feature_setup()
-	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
+	from erpnext.setup.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
 	add_web_forms()
 	frappe.db.commit()
+
+def check_setup_wizard_not_completed():
+	if frappe.db.get_default('desktop:home_page') == 'desktop':
+		print
+		print "ERPNext can only be installed on a fresh site where the setup wizard is not completed"
+		print "You can reinstall this site (after saving your data) using: bench --site [sitename] reinstall"
+		print
+		return False
 
 def feature_setup():
 	"""save global defaults and features setup"""

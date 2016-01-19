@@ -15,8 +15,9 @@ erpnext.support.WarrantyClaim = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		if(!cur_frm.doc.__islocal &&
 			(cur_frm.doc.status=='Open' || cur_frm.doc.status == 'Work In Progress')) {
-			cur_frm.add_custom_button(__('Make Maintenance Visit'),
-				this.make_maintenance_visit, frappe.boot.doctype_icons["Maintenance Visit"], "btn-default")
+			cur_frm.add_custom_button(__('Maintenance Visit'),
+				this.make_maintenance_visit, __("Make"))
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 	},
 
@@ -50,8 +51,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
 	var cond = [];
 	var filter = [
-		['Serial No', 'docstatus', '!=', 2],
-		['Serial No', 'status', '=', "Delivered"]
+		['Serial No', 'docstatus', '!=', 2]
 	];
 	if(doc.item_code) {
 		cond = ['Serial No', 'item_code', '=', doc.item_code];

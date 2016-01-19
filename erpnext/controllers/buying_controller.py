@@ -26,8 +26,7 @@ class BuyingController(StockController):
 	def validate(self):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
-			self.supplier_name = frappe.db.get_value("Supplier",
-				self.supplier, "supplier_name")
+			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
 		self.is_item_table_empty()
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
@@ -52,15 +51,6 @@ class BuyingController(StockController):
 				if supplier:
 					self.supplier = supplier
 					break
-
-	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company
-
-		warehouses = list(set([d.warehouse for d in
-			self.get("items") if getattr(d, "warehouse", None)]))
-
-		for w in warehouses:
-			validate_warehouse_company(w, self.company)
 
 	def validate_stock_or_nonstock_items(self):
 		if self.meta.get_field("taxes") and not self.get_stock_items():
@@ -113,8 +103,8 @@ class BuyingController(StockController):
 					valuation_amount_adjustment -= item.item_tax_amount
 
 				self.round_floats_in(item)
-
-				item.conversion_factor = get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
+				if flt(item.conversion_factor)==0:
+					item.conversion_factor = get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
 
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
 				rm_supp_cost = flt(item.rm_supp_cost) if self.doctype=="Purchase Receipt" else 0.0
@@ -235,12 +225,12 @@ class BuyingController(StockController):
 
 	def get_items_from_bom(self, item_code, bom):
 		bom_items = frappe.db.sql("""select t2.item_code,
-			ifnull(t2.qty, 0) / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
+			t2.qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
 			t2.rate, t2.stock_uom, t2.name, t2.description
 			from `tabBOM` t1, `tabBOM Item` t2, tabItem t3
 			where t2.parent = t1.name and t1.item = %s
-			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s 
-			and t2.item_code = t3.name and ifnull(t3.is_stock_item, 'No') = 'Yes'""", (item_code, bom), as_dict=1)
+			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
+			and t2.item_code = t3.name and t3.is_stock_item = 1""", (item_code, bom), as_dict=1)
 
 		if not bom_items:
 			msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
@@ -255,7 +245,7 @@ class BuyingController(StockController):
 				self.get("items")))
 			if item_codes:
 				self._sub_contracted_items = [r[0] for r in frappe.db.sql("""select name
-					from `tabItem` where name in (%s) and is_sub_contracted_item='Yes'""" % \
+					from `tabItem` where name in (%s) and is_sub_contracted_item=1""" % \
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._sub_contracted_items

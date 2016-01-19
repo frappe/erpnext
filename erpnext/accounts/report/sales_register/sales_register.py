@@ -79,7 +79,7 @@ def get_columns(invoice_list):
 
 		tax_accounts = 	frappe.db.sql_list("""select distinct account_head
 			from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice'
-			and docstatus = 1 and ifnull(base_tax_amount_after_discount_amount, 0) != 0
+			and docstatus = 1 and base_tax_amount_after_discount_amount != 0
 			and parent in (%s) order by account_head""" %
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 

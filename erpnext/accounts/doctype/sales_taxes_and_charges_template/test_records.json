@@ -20,19 +20,7 @@
     "rate": 6.36
    }
   ],
-  "title": "_Test Sales Taxes and Charges Template",
-  "territories": [
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "All Territories"
-   },
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "_Test Territory Rest Of The World"
-   }
-  ]
+  "title": "_Test Sales Taxes and Charges Template"
  },
  {
   "company": "_Test Company",
@@ -115,14 +103,7 @@
     "row_id": 7
    }
   ],
-  "title": "_Test India Tax Master",
-  "territories": [
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "_Test Territory India"
-   }
-  ]
+  "title": "_Test India Tax Master"
  },
  {
   "company": "_Test Company",
@@ -145,13 +126,76 @@
     "rate": 4
    }
   ],
-  "title": "_Test Sales Taxes and Charges Template - Rest of the World",
-  "territories": [
+  "title": "_Test Sales Taxes and Charges Template - Rest of the World"
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Sales Taxes and Charges Template",
+  "taxes": [
    {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "_Test Territory Rest Of The World"
+    "account_head": "_Test Account VAT - _TC",
+    "charge_type": "On Net Total",
+    "description": "VAT",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 12
+   },
+   {
+    "account_head": "_Test Account Service Tax - _TC",
+    "charge_type": "On Net Total",
+    "description": "Service Tax",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 4
    }
-  ]
+  ],
+  "title": "_Test Sales Taxes and Charges Template 1"
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Sales Taxes and Charges Template",
+  "taxes": [
+   {
+    "account_head": "_Test Account VAT - _TC",
+    "charge_type": "On Net Total",
+    "description": "VAT",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 12
+   },
+   {
+    "account_head": "_Test Account Service Tax - _TC",
+    "charge_type": "On Net Total",
+    "description": "Service Tax",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 4
+   }
+  ],
+  "title": "_Test Sales Taxes and Charges Template 2"
+ },
+ {
+	"doctype" : "Sales Taxes and Charges Template",
+	"title": "_Test Tax 1",
+	"company": "_Test Company",
+	"taxes":[{
+		"charge_type": "Actual",
+		"account_head": "Sales Expenses - _TC",
+		"cost_center": "Main - _TC",
+		"description": "Test Shopping cart taxes with Tax Rule",
+		"tax_amount": 1000
+	}]
+ },
+ {
+	"doctype" : "Sales Taxes and Charges Template",
+	"title": "_Test Tax 2",
+	"company": "_Test Company",
+	"taxes":[{
+		"charge_type": "Actual",
+		"account_head": "Sales Expenses - _TC",
+		"cost_center": "Main - _TC",
+		"description": "Test Shopping cart taxes with Tax Rule",
+		"tax_amount": 200
+	}]
  }
 ]

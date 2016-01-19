@@ -7,10 +7,10 @@ from frappe import _
 from frappe.utils import flt, cint, getdate
 
 def execute(filters=None):
-	if not filters: filters = {}	
+	if not filters: filters = {}
 
 	float_precision = cint(frappe.db.get_default("float_precision")) or 3
-	
+
 	columns = get_columns(filters)
 	item_map = get_item_details(filters)
 	iwb_map = get_item_warehouse_batch_map(filters, float_precision)
@@ -20,10 +20,11 @@ def execute(filters=None):
 		for wh in sorted(iwb_map[item]):
 			for batch in sorted(iwb_map[item][wh]):
 				qty_dict = iwb_map[item][wh][batch]
-				data.append([item, item_map[item]["item_name"], item_map[item]["description"], wh, batch,
-					flt(qty_dict.opening_qty, float_precision), flt(qty_dict.in_qty, float_precision),
-					flt(qty_dict.out_qty, float_precision), flt(qty_dict.bal_qty, float_precision)
-				])
+				if qty_dict.opening_qty or qty_dict.in_qty or qty_dict.out_qty or qty_dict.bal_qty:
+					data.append([item, item_map[item]["item_name"], item_map[item]["description"], wh, batch,
+						flt(qty_dict.opening_qty, float_precision), flt(qty_dict.in_qty, float_precision),
+						flt(qty_dict.out_qty, float_precision), flt(qty_dict.bal_qty, float_precision)
+					])
 
 	return columns, data
 
@@ -31,8 +32,8 @@ def get_columns(filters):
 	"""return columns based on filters"""
 
 	columns = [_("Item") + ":Link/Item:100"] + [_("Item Name") + "::150"] + [_("Description") + "::150"] + \
-	[_("Warehouse") + ":Link/Warehouse:100"] + [_("Batch") + ":Link/Batch:100"] + [_("Opening Qty") + "::90"] + \
-	[_("In Qty") + "::80"] + [_("Out Qty") + "::80"] + [_("Balance Qty") + "::90"]
+	[_("Warehouse") + ":Link/Warehouse:100"] + [_("Batch") + ":Link/Batch:100"] + [_("Opening Qty") + ":Float:90"] + \
+	[_("In Qty") + ":Float:80"] + [_("Out Qty") + ":Float:80"] + [_("Balance Qty") + ":Float:90"]
 
 	return columns
 

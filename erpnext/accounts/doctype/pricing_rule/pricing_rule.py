@@ -59,7 +59,7 @@ class PricingRule(Document):
 					self.set(f, None)
 
 	def validate_price_or_discount(self):
-		for field in ["Price", "Discount Percentage"]:
+		for field in ["Price"]:
 			if flt(self.get(frappe.scrub(field))) < 0:
 				throw(_("{0} can not be negative").format(field))
 
@@ -76,7 +76,7 @@ class PricingRule(Document):
 def apply_pricing_rule(args):
 	"""
 		args = {
-			"item_list": [{"doctype": "", "name": "", "item_code": "", "brand": "", "item_group": ""}, ...],
+			"items": [{"doctype": "", "name": "", "item_code": "", "brand": "", "item_group": ""}, ...],
 			"customer": "something",
 			"customer_group": "something",
 			"territory": "something",
@@ -101,14 +101,10 @@ def apply_pricing_rule(args):
 	# list of dictionaries
 	out = []
 
-	if args.get("parenttype") == "Material Request": return out
+	if args.get("doctype") == "Material Request": return out
 
-	if not args.transaction_type:
-		args.transaction_type = "buying" if frappe.get_meta(args.parenttype).get_field("supplier") \
-			else "selling"
-
-	item_list = args.get("item_list")
-	args.pop("item_list")
+	item_list = args.get("items")
+	args.pop("items")
 
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
@@ -130,7 +126,11 @@ def get_pricing_rule_for_item(args):
 		return item_details
 
 	if not (args.item_group and args.brand):
-		args.item_group, args.brand = frappe.db.get_value("Item", args.item_code, ["item_group", "brand"])
+		try:
+			args.item_group, args.brand = frappe.db.get_value("Item", args.item_code, ["item_group", "brand"])
+		except TypeError:
+			# invalid item_code
+			return item_details
 		if not args.item_group:
 			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
 
@@ -147,6 +147,7 @@ def get_pricing_rule_for_item(args):
 
 	if pricing_rule:
 		item_details.pricing_rule = pricing_rule.name
+		item_details.pricing_rule_for = pricing_rule.price_or_discount
 		if pricing_rule.price_or_discount == "Price":
 			item_details.update({
 				"price_list_rate": pricing_rule.price/flt(args.conversion_rate) \
@@ -163,21 +164,28 @@ def get_pricing_rules(args):
 		field = frappe.scrub(parenttype)
 		condition = ""
 		if args.get(field):
-			lft, rgt = frappe.db.get_value(parenttype, args[field], ["lft", "rgt"])
+			try:
+				lft, rgt = frappe.db.get_value(parenttype, args[field], ["lft", "rgt"])
+			except TypeError:
+				frappe.throw(_("Invalid {0}").format(args[field]))
+
 			parent_groups = frappe.db.sql_list("""select name from `tab%s`
 				where lft<=%s and rgt>=%s""" % (parenttype, '%s', '%s'), (lft, rgt))
 
 			if parent_groups:
 				if allow_blank: parent_groups.append('')
 				condition = " ifnull("+field+", '') in ('" + \
-					"', '".join([d.replace("'", "\\'").replace('"', '\\"') for d in parent_groups])+"')"
+					"', '".join([frappe.db.escape(d) for d in parent_groups])+"')"
 		return condition
 
 
 	conditions = ""
+	values =  {"item_code": args.get("item_code"), "brand": args.get("brand")}
+
 	for field in ["company", "customer", "supplier", "supplier_type", "campaign", "sales_partner"]:
 		if args.get(field):
 			conditions += " and ifnull("+field+", '') in (%("+field+")s, '')"
+			values[field] = args.get(field)
 		else:
 			conditions += " and ifnull("+field+", '') = ''"
 
@@ -185,23 +193,27 @@ def get_pricing_rules(args):
 		group_condition = _get_tree_conditions(parenttype)
 		if group_condition:
 			conditions += " and " + group_condition
+
 	if not args.price_list: args.price_list = None
 	conditions += " and ifnull(for_price_list, '') in (%(price_list)s, '')"
+	values["price_list"] = args.get("price_list")
 
 	if args.get("transaction_date"):
 		conditions += """ and %(transaction_date)s between ifnull(valid_from, '2000-01-01')
 			and ifnull(valid_upto, '2500-12-31')"""
+		values['transaction_date'] = args.get('transaction_date')
 
 	item_group_condition = _get_tree_conditions("Item Group", False)
 	if item_group_condition: item_group_condition = " or " + item_group_condition
 
 	return frappe.db.sql("""select * from `tabPricing Rule`
 		where (item_code=%(item_code)s {item_group_condition} or brand=%(brand)s)
-			and docstatus < 2 and ifnull(disable, 0) = 0
-			and ifnull({transaction_type}, 0) = 1 {conditions}
+			and docstatus < 2 and disable = 0
+			and {transaction_type} = 1 {conditions}
 		order by priority desc, name desc""".format(
 			item_group_condition=item_group_condition,
-			transaction_type=args.transaction_type, conditions=conditions), args, as_dict=1)
+			transaction_type= "selling" if (args.customer or args.lead) else "buying",
+			conditions=conditions), values, as_dict=1)
 
 def filter_pricing_rules(args, pricing_rules):
 	# filter for qty

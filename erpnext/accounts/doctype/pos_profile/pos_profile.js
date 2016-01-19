@@ -6,6 +6,14 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 		return { filter: { selling: 1 } };
 	});
 
+	frm.set_query("print_format", function() {
+		return { filter: { doc_type: "Sales Invoice" } };
+	});
+
+	erpnext.queries.setup_queries(frm, "Warehouse", function() {
+		return erpnext.queries.warehouse(frm.doc);
+	});
+
 	frm.call({
 		method: "erpnext.accounts.doctype.pos_profile.pos_profile.get_series",
 		callback: function(r) {

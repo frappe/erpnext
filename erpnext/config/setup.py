@@ -110,43 +110,7 @@ def get_data():
 					"description": _("Setup SMS gateway settings")
 				},
 			]
-		},
-		{
-			"label": _("Masters"),
-			"icon": "icon-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Company",
-					"description": _("Company (not Customer or Supplier) master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Item",
-					"description": _("Item master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Customer",
-					"description": _("Customer master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Supplier",
-					"description": _("Supplier master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Contact",
-					"description": _("Contact master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Address",
-					"description": _("Address master.")
-				},
-			]
-		},
+		}
 	]
 
 	for module, label, icon in (

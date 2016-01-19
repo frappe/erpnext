@@ -1,8 +1,14 @@
+{% extends "templates/web.html" %}
+
 {% block header_actions %}
 {% include 'templates/includes/product_search_box.html' %}
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    {% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
+{% block page_content %}
 <div class="item-group-content">
 	<div>
 		{% if slideshow %}<!-- slideshow -->
@@ -27,17 +33,6 @@
 		{% endif %}
 	</div>
 </div>
-<script>
-$(function() {
-	if(window.logged_in && getCookie("system_user")==="yes") {
-		frappe.has_permission("Item Group", "{{ name }}", "write", function(r) {
-			frappe.require("/assets/frappe/js/frappe/website/editable.js");
-			frappe.make_editable($('[itemprop="description"]'), "Item Group", "{{ name }}", "description");
-		});
-	}
-});
-</script>
-
 {% endblock %}
 
 {% block style %}
