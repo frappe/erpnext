@@ -2827,7 +2827,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-01-27 15:16:00.560261", 
+ "modified": "2016-02-01 07:52:59.428084", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
@@ -2915,7 +2915,7 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -2931,6 +2931,7 @@
    "set_user_permissions": 0, 
    "share": 0, 
    "submit": 0, 
+   "user_permission_doctypes": "[\"Company\"]", 
    "write": 0
   }, 
   {
@@ -2979,5 +2980,6 @@
  "search_fields": "status,transaction_date,customer,customer_name, territory,order_type,company", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "timeline_field": "customer", 
  "title_field": "title"
 }

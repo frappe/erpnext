@@ -741,7 +741,7 @@
  "istable": 0, 
  "max_attachments": 5, 
  "menu_index": 0, 
- "modified": "2015-12-10 01:43:16.137084", 
+ "modified": "2016-02-03 01:11:46.043538", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Task", 
@@ -771,5 +771,7 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "subject", 
+ "sort_order": "DESC", 
+ "timeline_field": "project", 
  "title_field": "subject"
 }
