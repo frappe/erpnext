@@ -504,8 +504,11 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			var total_amount_to_pay = flt((this.frm.doc.grand_total - this.frm.doc.total_advance 
 				- this.frm.doc.write_off_amount), precision("grand_total"));
 		} else {
-			var total_amount_to_pay = flt((this.frm.doc.base_grand_total - this.frm.doc.total_advance 
-				- this.frm.doc.base_write_off_amount), precision("base_grand_total"));
+			var total_amount_to_pay = flt(
+				(flt(this.frm.doc.grand_total*this.frm.doc.conversion_rate, precision("grand_total")) 
+					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount), 
+				precision("base_grand_total")
+			);
 		}
 		
 		if(this.frm.doc.doctype == "Sales Invoice") {

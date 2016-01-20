@@ -531,14 +531,18 @@ class SalesInvoice(SellingController):
 
 	def make_customer_gl_entry(self, gl_entries):
 		if self.grand_total:
+			# Didnot use base_grand_total to book rounding loss gle
+			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate, 
+				self.precision("grand_total"))
+				
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
 					"party_type": "Customer",
 					"party": self.customer,
 					"against": self.against_income_account,
-					"debit": self.base_grand_total,
-					"debit_in_account_currency": self.base_grand_total \
+					"debit": grand_total_in_company_currency,
+					"debit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else self.grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype
