@@ -2,12 +2,12 @@
 
 Users can be added by the System Manager. If you are a System Manager, you can add Users via
 
+> Setup > User
+
 There are two main classes of users: Web Users and System Users. System Users are people using ERPNext in the company. Web users are customers or suppliers (or portal users).
   
 Under User a lot of info can be entered. For the sake of usability the information entered for webs users is minimal: First Name and email.
 Important is to realize that the email address is the unique key (ID) identifying the Users.
-
-> Setup > User
 
 ### 1. List of Users
 
@@ -26,8 +26,7 @@ After adding these details, save the user.
 
 ### 3. Setting Roles
 
-After saving, you will see a list of roles and a checkbox next to it. Just check the roles you want the
-the user to have and save the document. To click on what permissions translate into roles, click on the role
+After saving, you will see a list of roles and a checkbox next to it. Just check the roles you want the user to have and save the document. To click on what permissions translate into roles, click on the role
 name.
 
 <img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/user-2.png" alt="User Roles">
