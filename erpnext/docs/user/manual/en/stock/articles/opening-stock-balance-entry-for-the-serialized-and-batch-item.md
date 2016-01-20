@@ -1,14 +1,14 @@
-<h1>Opening Stock Balance Entry for the Serialized and Batch Item</h1>
+#Opening Stock Balance Entry for the Serialized and Batch Item
 
-<h1>Opening Stock Balance Entry for the Serialized and Batch Item</h1>
+Items for which Serial No. and Batch No. is maintained, opening stock balance entry for them is update via Stock Entry. [Click here to learn how serialized inventory is managed in ERPNext]({{docs_base_url}}/user/manual/en/stock/serial-no.html).
 
-Items for which Serial No. and Batch No. is maintained, opening stock balance entry for them will be update via Stock Entry. [Click here to learn how serialized inventory is managed in ERPNext](https://erpnext.com/user-guide/stock/serialized-inventory).
+**Question:** Why Opening Balance entry for the Serialized and Batch Item cannot be updated via Stock Reconciliation?
 
-Why Opening Balance entry for the Serialized and Batch Item cannot be updated via Stock Reconciliation?
+In the ERPNext, stock level of a serialized items is derived based on the count of Serial Nos for that item. Hence, unless Serial Nos. are created for the serialized item, its stock level is not be updated. In the Stock Reconciliation Tool, you can only update opening quantity of an item, but not their Serial No. and Batch No.
 
-In the ERPNext, stock level of a serialized items is derived based on the count of Serial Nos for that item. Hence, unless Serial Nos. are created for the serialized item, its stock level will not be updated. In the Stock Reconciliation Tool, you can only update opening quantity of an item, and not their Serial No. and Batch No.
+### Opening Balance for the Serialized Item
 
-Let's check steps for create opening stock balance entry for the Serialized and Batch item.
+Following are the steps to create opening stock balance entry for the Serialized and Batch item.
 
 #### Step 1: New Stock Entry
 
@@ -28,36 +28,33 @@ Target Warehouse will be one in which opening balance of an item will be updated
 
 #### Step 5: Select Items
 
-Select Items in the Stock Entry table.
+Select Items for which opening balance is to be updated.
 
 #### Step 6: Update Opening Qty
 
-For the serialized item, you should update as many Serial Nos as their Qty. If you have updated Prefix in the Item master, on the submission of Stock Entry Serial Nos. will be auto-created following that prefix.
+For the serialized item, update quantity as many Serial Nos are their.
 
-![Item Serial No. Prefix]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-02-19 at 5.13.50 pm.png)
+For the serialized item, mention Serial Nos. equivalent to it's Qty. Or if Serial Nos. are configured to be created based on Prefix, then no need to mention Serial Nos. manually. Click [here]({{docs_base_url}}/user/manual/en/stock/articles/serial-no-naming.html) to learn more about Serial No. naming.
 
-For a batch item, you should provide Batch ID in which opening balance will be updated. You should keep batch master ready, and updated it for the Batch Item. To create new Batch, go to:
+For a batch item, provide Batch ID in which opening balance will be updated. Keep batch master ready, and updated it for the Batch Item. To create new Batch, go to:
 
 `Stock > Setup > Batch > New`
 
-[Click here to learn how Batchwise inventory is managed in ERPNext](https://erpnext.com/user-guide/stock/batchwise-inventory).
+[Click here to learn how Batchwise inventory is managed in ERPNext.]({{docs_base_url}}/user/manual/en/stock/articles/managing-batch-wise-inventory.html)
 
 #### Step 7: Update Valuation Rate an Item
 
-Valuation Rate is the mandatory field, where you should update `per unit value of item`. If you have unit of items having different valuation rates, they should be updated in a separate row, with different Valuation Rate.
+Update valuation rate, which will be per unit value of item. If different units of the same items having different valuation rate, they should be updated in a separate row, with different Valuation Rates.
 
 #### Step 8: Difference Account
 
-As per perpetual inventory valuation system, accounting entry is created for every stock entry. Accounting system followed in the ERPNext requires Total Debit in an entry matching with Total Credit. On the submission of Stock Entry, system Debits accounting ledger of a Warehouse by total value of items. To balance the same, we use Temporary Liability account in the Difference Account field. [Click here to learn more about use of Temporary Accounts in updating opening balance](https://erpnext.com/kb/accounts/updating-opening-balance-in-accounts-using-temporary-account).
+As per perpetual inventory valuation system, accounting entry is created for every stock transaction. Double entry accounting system requires Total Debit matching with Total Credit in an entry. On the submission of Stock Entry, system debits Warehouse account by total value of items. To balance the same, we use Temporary Opening account as a Difference Account.
 
-![Difference Account]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-02-19 at 5.20.52 pm.png)
+<img alt="Difference Account" class="screenshot" src="{{docs_base_url}}/assets/img/articles/difference-account-1.png">
 
 #### Step 9: Save and Submit Stock Entry
 
-On submission of Stock Entry, stock ledger entry will be posted, and opening balance will be updated for the items on a given posting date.
+On submission of Stock Entry, stock ledger posting will be posted, and opening balance will be updated for the items on a given Posting Date.
 
-If Serial Nos. for your items are set to be created based on prefix, then on submission of Stock Entry, Serial Nos. will be created as well.
-
-![Serial No Creation]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-02-19 at 5.28.57 pm.png)
 
 <!-- markdown -->

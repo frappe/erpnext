@@ -1,24 +1,28 @@
-#Creating Depreciation For Item
+#Depreciation Entry
 
-**Question:** A Fixed Asset Item has been purchased and stored in a warehouse. How can the user create a depreciation for a Fixed Asset Item?<
+**Question:** A Fixed Asset Item has been purchased and stored in a warehouse. How to create a depreciation for a Fixed Asset Item?
 
-**Answer:**Though there is no direct, automated method to book Asset Depreciation. A suitable work around to achieve this is by creating a Stock Reconciliation Entry.
+**Answer:**You can post asset depreciation entry for the fixed asset item via [Stock Reconciliation]({{docs_base_url}}/user/manual/en/stock/opening-stock.html) Entry.
 
-####Step 1: In the Attachment file, fill in the appropriate columns;
+####Step 1:
 
-- _Item Code_ whose value is to be depreciated.
-- _Warehouse_ in which it is stored
-- _Qty_ Leave this column blank
-- _Valuation rate_ Enter the Value after Depreciation
+In the Attachment file, fill in the appropriate columns;
 
-<img src="{{docs_base_path}}/assets/img/articles/kb_deprec_csv.png"><br>
+- **Item Code** whose value is to be depreciated.
+- **Warehouse** in which item is stored.
+- **Qty (Quantity)** Leave this column blank.
+- **Valuation Rate** will be item's value after depreciation.
 
+<img alt="reorder level" class="screenshot" src="{{docs_base_url}}/assets/img/articles/fixed-asset-dep-1.gif">
 
-####Step 2: 
+After updating Valuation Rate for an item, come back to Stock Reconciliation and upload save .csv file.
 
-In the Stock Reconciliation Form, enter the Expense account for depreciation in <i>Difference Account</i>.</p>
-<img src="{{docs_base_path}}/assets/img/articles/kb_deprec_form.png" height="302" width="652">
+####Step 2:
 
-<div class="well">Note: For more information on Stock Reconciliation, see the <a href="https://erpnext.com/user-guide/setting-up/stock-reconciliation-for-non-serialized-item" target="_blank">User Guide</a>.</div>
+Select Expense account for depreciation in **Difference Account**. Value booked in the depreciation account will be the difference of old and next valuation rate of the fixed asset item, which will be actually the depreciation amount.
 
-<div class="well"> Note: An Automated Asset Depreciation feature in on our To-Do List. See this <a href="https://github.com/frappe/erpnext/issues/191" target="_blank">Github Issue</a>.</div>
+<img alt="reorder level" class="screenshot" src="{{docs_base_url}}/assets/img/articles/fixed-asset-dep-2.png">
+
+####Stock Reconciliation Help Video
+
+<iframe width="660" height="371" src="https://www.youtube.com/embed/0yPgrtfeCTs" frameborder="0" allowfullscreen></iframe>

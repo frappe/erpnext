@@ -1,14 +1,12 @@
-<h1>Is Stock Item field Frozen in the Item master</h1>
+#Maintain Stock field Frozen in the Item master
 
-<h1>Is Stock Item field Frozen in the Item master</h1>
+In the item master, you might witness values in the following fields to be frozen.
 
-In the item master, you might witness values in the following fields be frozen.
-
-1. Is Stock Item
+1. Maintain Stock
 1. Has Batch No.
 1. Has Serial No.
 
-![Item Field Frozen]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-02-16 at 2.52.56 pm.png)
+<img alt="Item Field Frozen" class="screenshot" src="{{docs_base_url}}/assets/img/articles/maintain-stock-1.png">
 
 For an item, once stock ledger entry is created, values in these fields will be froze. This is to prevent user from changing value which can lead to mis-match of actual stock, and stock level in the system of an item.
 
