@@ -25,7 +25,8 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				cur_frm.add_custom_button(__('Lost'),
 					cur_frm.cscript['Declare Order Lost'], __("Status"));
 			}
-
+			
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 
 		if (this.frm.doc.docstatus===0) {

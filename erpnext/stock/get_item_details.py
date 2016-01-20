@@ -6,7 +6,7 @@ import frappe
 from frappe import _, throw
 from frappe.utils import flt, cint, add_days, cstr
 import json
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 
@@ -84,6 +84,8 @@ def process_args(args):
 		args.item_code = get_item_code(barcode=args.barcode)
 	elif not args.item_code and args.serial_no:
 		args.item_code = get_item_code(serial_no=args.serial_no)
+	
+	set_transaction_type(args)
 
 	return args
 
@@ -107,7 +109,7 @@ def validate_item_details(args, item):
 	from erpnext.stock.doctype.item.item import validate_end_of_life
 	validate_end_of_life(item.name, item.end_of_life, item.disabled)
 
-	if args.customer or args.doctype=="Opportunity":
+	if args.transaction_type=="selling":
 		# validate if sales item or service item
 		if args.get("order_type") == "Maintenance":
 			if item.is_service_item != 1:
@@ -119,7 +121,7 @@ def validate_item_details(args, item):
 		if cint(item.has_variants):
 			throw(_("Item {0} is a template, please select one of its variants").format(item.name))
 
-	elif args.supplier and args.doctype != "Material Request":
+	elif args.transaction_type=="buying" and args.doctype != "Material Request":
 		# validate if purchase item or subcontracted item
 		if item.is_purchase_item != 1:
 			throw(_("Item {0} must be a Purchase Item").format(item.name))
@@ -219,7 +221,7 @@ def get_price_list_rate(args, item_doc, out):
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
 
-		if not out.price_list_rate and args.supplier:
+		if not out.price_list_rate and args.transaction_type=="buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 			out.update(get_last_purchase_details(item_doc.name,
 				args.name, args.conversion_rate))
@@ -251,7 +253,7 @@ def get_price_list_rate_for(price_list, item_code):
 def validate_price_list(args):
 	if args.get("price_list"):
 		if not frappe.db.get_value("Price List",
-			{"name": args.price_list, "selling" if (args.customer or args.lead) else "buying": 1, "enabled": 1}):
+			{"name": args.price_list, args.transaction_type: 1, "enabled": 1}):
 			throw(_("Price List {0} is disabled").format(args.price_list))
 	else:
 		throw(_("Price List not selected"))
@@ -283,10 +285,11 @@ def validate_conversion_rate(args, meta):
 			frappe._dict({"fields": args})))
 
 def get_party_item_code(args, item_doc, out):
-	if args.customer:
+	if args.transaction_type=="selling" and args.customer:
 		customer_item_code = item_doc.get("customer_items", {"customer_name": args.customer})
 		out.customer_item_code = customer_item_code[0].ref_code if customer_item_code else None
-	else:
+		
+	if args.transaction_type=="buying" and args.supplier:
 		item_supplier = item_doc.get("supplier_items", {"supplier": args.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
 

@@ -152,8 +152,8 @@ class AccountsController(TransactionBase):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
 
-					args["doctype"] = parent_dict.get("doctype")
-					args["name"] = parent_dict.get("name")
+					args["doctype"] = self.doctype
+					args["name"] = self.name
 
 					if not args.get("transaction_date"):
 						args["transaction_date"] = args.get("posting_date")

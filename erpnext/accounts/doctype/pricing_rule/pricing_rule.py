@@ -97,7 +97,10 @@ def apply_pricing_rule(args):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
-
+	
+	if not args.transaction_type:
+		set_transaction_type(args)
+				
 	# list of dictionaries
 	out = []
 
@@ -134,13 +137,17 @@ def get_pricing_rule_for_item(args):
 		if not args.item_group:
 			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
 
-	if args.customer and not (args.customer_group and args.territory):
-		customer = frappe.db.get_value("Customer", args.customer, ["customer_group", "territory"])
-		if customer:
-			args.customer_group, args.territory = customer
+	if args.transaction_type=="selling":
+		if args.customer and not (args.customer_group and args.territory):
+			customer = frappe.db.get_value("Customer", args.customer, ["customer_group", "territory"])
+			if customer:
+				args.customer_group, args.territory = customer
+				
+		args.supplier = args.supplier_type = None
 
 	elif args.supplier and not args.supplier_type:
 		args.supplier_type = frappe.db.get_value("Supplier", args.supplier, "supplier_type")
+		args.customer = args.customer_group = args.territory = None
 
 	pricing_rules = get_pricing_rules(args)
 	pricing_rule = filter_pricing_rules(args, pricing_rules)
@@ -212,7 +219,7 @@ def get_pricing_rules(args):
 			and {transaction_type} = 1 {conditions}
 		order by priority desc, name desc""".format(
 			item_group_condition=item_group_condition,
-			transaction_type= "selling" if (args.customer or args.lead) else "buying",
+			transaction_type= args.transaction_type,
 			conditions=conditions), values, as_dict=1)
 
 def filter_pricing_rules(args, pricing_rules):
@@ -270,3 +277,14 @@ def apply_internal_priority(pricing_rules, field_set, args):
 			if filtered_rules: break
 
 	return filtered_rules or pricing_rules
+
+def set_transaction_type(args):
+	if args.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
+		args.transaction_type = "selling"
+	elif args.doctype in ("Material Request", "Supplier Quotation", "Purchase Order", 
+		"Purchase Receipt", "Purchase Invoice"):
+			args.transaction_type = "buying"
+	elif args.customer:
+		args.transaction_type = "selling"
+	else:
+		args.transaction_type = "buying"
