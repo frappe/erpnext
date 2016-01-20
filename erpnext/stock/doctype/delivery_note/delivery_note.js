@@ -50,14 +50,12 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
 				this.show_general_ledger();
 			}
-			if (this.frm.has_perm("submit") && (doc.status !== "Closed")
-				&& this.frm.doc.__onload && this.frm.doc.__onload.has_return_entry) {
-					cur_frm.add_custom_button(__("Close"), this.close_delivery_note, __("Status"))
+			if (this.frm.has_perm("submit") && doc.status !== "Closed") {
+				cur_frm.add_custom_button(__("Close"), this.close_delivery_note, __("Status"))
 			}
 		}
 
-		if(doc.__onload && !doc.__onload.billing_complete && doc.docstatus==1
-				&& !doc.is_return && doc.status!="Closed") {
+		if(doc.docstatus==1 && !doc.is_return && doc.status!="Closed" && flt(doc.per_billed) < 100) {
 			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
 			var from_sales_invoice = false;
 			from_sales_invoice = cur_frm.doc.items.some(function(item) {
