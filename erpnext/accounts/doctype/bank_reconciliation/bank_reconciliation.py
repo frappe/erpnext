@@ -55,6 +55,11 @@ class BankReconciliation(Document):
 				frappe.db.sql("""update `tabJournal Entry` set clearance_date = %s, modified = %s
 					where name=%s""", (d.clearance_date, nowdate(), d.voucher_id))
 				vouchers.append(d.voucher_id)
+			else:
+				frappe.db.set_value("Journal Entry", d.voucher_id, "clearance_date", None)
+				frappe.db.sql("""update `tabJournal Entry` set clearance_date = NULL , modified = %s
+					where name=%s""", (nowdate(), d.voucher_id))
+				vouchers.append(d.voucher_id)
 
 		if vouchers:
 			msgprint("Clearance Date updated in: {0}".format(", ".join(vouchers)))
