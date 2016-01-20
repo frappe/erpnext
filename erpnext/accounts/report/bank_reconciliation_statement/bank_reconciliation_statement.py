@@ -39,18 +39,18 @@ def execute(filters=None):
 		+ amounts_not_reflected_in_system
 
 	data += [
-		get_balance_row(_("System Balance"), balance_as_per_system, account_currency),
+		get_balance_row(_("Bank Statement balance as per General Ledger"), balance_as_per_system, account_currency),
 		{},
 		{
-			"journal_entry": '"' + _("Amounts not reflected in bank") + '"',
+			"journal_entry": _("Outstanding Cheques and Deposits to clear"),
 			"debit": total_debit,
 			"credit": total_credit,
 			"account_currency": account_currency
 		},
-		get_balance_row(_("Amounts not reflected in system"), amounts_not_reflected_in_system, 
+		get_balance_row(_("Cheques and Deposits incorrectly cleared"), amounts_not_reflected_in_system, 
 			account_currency),
 		{},
-		get_balance_row(_("Expected balance as per bank"), bank_bal, account_currency)
+		get_balance_row(_("Calculated Bank Statement balance"), bank_bal, account_currency)
 	]
 
 	return columns, data
@@ -129,21 +129,21 @@ def get_entries(filters):
 			and jvd.account = %(account)s and jv.posting_date <= %(report_date)s
 			and ifnull(jv.clearance_date, '4000-01-01') > %(report_date)s
 			and ifnull(jv.is_opening, 'No') = 'No'
-		order by jv.name DESC""", filters, as_dict=1)
+		order by jv.posting_date DESC,jv.name DESC""", filters, as_dict=1)
 
 	return entries
 
 def get_balance_row(label, amount, account_currency):
 	if amount > 0:
 		return {
-			"journal_entry": '"' + label + '"',
+			"journal_entry": label,
 			"debit": amount,
 			"credit": 0,
 			"account_currency": account_currency
 		}
 	else:
 		return {
-			"journal_entry": '"' + label + '"',
+			"journal_entry": label,
 			"debit": 0,
 			"credit": abs(amount),
 			"account_currency": account_currency
