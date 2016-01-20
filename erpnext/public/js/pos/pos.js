@@ -416,9 +416,6 @@ erpnext.pos.PointOfSale = Class.extend({
 				var default_mode = me.frm.doc.mode_of_payment ? me.frm.doc.mode_of_payment :
 					me.modes_of_payment.indexOf(__("Cash"))!==-1 ? __("Cash") : undefined;
 					
-				var smallest_currency_fraction_value = flt(frappe.model.get_value(":Currency", 
-					me.frm.doc.currency, "smallest_currency_fraction_value"))
-
 				// show payment wizard
 				var dialog = new frappe.ui.Dialog({
 					width: 400,
@@ -439,8 +436,9 @@ erpnext.pos.PointOfSale = Class.extend({
 									precision("paid_amount"));
 								
 								if (actual_change > 0) {
-									var rounded_change = actual_change - remainder(actual_change, 
-										smallest_currency_fraction_value, precision("paid_amount"));
+									var rounded_change = 
+										round_based_on_smallest_currency_fraction(actual_change, 
+											me.frm.doc.currency, precision("paid_amount"));
 								} else {
 									var rounded_change = 0;
 								}
