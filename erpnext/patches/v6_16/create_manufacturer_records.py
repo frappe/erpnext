@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import cstr
 
 def execute():
-	frappe.reload_doctype("Manufacturer")
+	frappe.reload_doc("stock", "doctype", "manufacturer")
 	frappe.reload_doctype("Item")
 	
 	for d in frappe.db.sql("""select distinct manufacturer from tabItem 
