@@ -26,7 +26,7 @@ class BankReconciliation(Document):
 				t2.parent = t1.name and t2.account = %s
 				and t1.posting_date >= %s and t1.posting_date <= %s and t1.docstatus=1
 				and ifnull(t1.is_opening, 'No') = 'No' %s
-				order by t1.posting_date""" %
+				order by t1.posting_date DESC, t1.name DESC""" %
 				('%s', '%s', '%s', condition), (self.bank_account, self.from_date, self.to_date), as_dict=1)
 
 		self.set('journal_entries', [])
