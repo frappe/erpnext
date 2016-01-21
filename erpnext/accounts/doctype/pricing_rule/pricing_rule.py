@@ -168,7 +168,9 @@ def get_pricing_rule_for_item(args):
 				"discount_percentage": 0.0
 			})
 		else:
-			item_details.discount_percentage = pricing_rule.discount_percentage
+			# if user changed the discount percentage then set discount_percentage of user
+			item_details.discount_percentage = pricing_rule.discount_percentage if args.discount_percentage == pricing_rule.discount_percentage\
+				else args.discount_percentage
 
 	return item_details
 

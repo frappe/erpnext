@@ -478,7 +478,6 @@ def apply_price_list(args, as_doc=False):
 					# update the value
 					if fieldname in item and fieldname not in ("name", "doctype"):
 						item[fieldname] = children[i][fieldname]
-
 		return args
 	else:
 		return {
