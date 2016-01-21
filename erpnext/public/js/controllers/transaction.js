@@ -184,8 +184,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
 							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
-							doctype: me.frm.doctype,
-							name: me.frm.name,
+							doctype: me.frm.doc.doctype,
+							name: me.frm.doc.name,
 							project_name: item.project_name || me.frm.doc.project_name,
 							qty: item.qty
 						}
