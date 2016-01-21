@@ -459,6 +459,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+   "depends_on": "eval:doc.price_list_rate", 
    "fieldname": "type", 
    "fieldtype": "Select", 
    "hidden": 0, 
