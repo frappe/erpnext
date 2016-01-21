@@ -70,9 +70,7 @@ class MaterialRequest(BuyingController):
 
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
-
-		self.validate_value("material_request_type", "in", ["Purchase", "Material Transfer", "Material Issue"])
-
+		
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 
