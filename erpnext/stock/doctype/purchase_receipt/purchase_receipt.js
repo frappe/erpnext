@@ -55,14 +55,13 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			}
 
 			if(this.frm.doc.docstatus == 1 && this.frm.doc.status!="Closed") {
-				if (this.frm.has_perm("submit") && 
-					this.frm.doc.__onload && this.frm.doc.__onload.has_return_entry) {
-						cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt, __("Status"))
+				if (this.frm.has_perm("submit")) {
+					cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt, __("Status"))
 				}
 				
 				cur_frm.add_custom_button(__('Return'), this.make_purchase_return, __("Make"));
 				
-				if(this.frm.doc.__onload && !this.frm.doc.__onload.billing_complete) {
+				if(flt(this.frm.doc.per_billed) < 100) {
 					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice, __("Make"));
 				}
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));

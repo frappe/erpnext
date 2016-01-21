@@ -13,31 +13,22 @@ frappe.ui.form.on("Payment Request", "onload", function(frm, dt, dn){
 				set_field_options("print_format", r.message["print_format"])
 			}
 		})
-	}	
+	}
 })
 
 frappe.ui.form.on("Payment Request", "refresh", function(frm) {
 	frm.add_custom_button(__('Resend Payment Email'), function(){
 		frappe.call({
-			method:"erpnext.accounts.doctype.payment_request.payment_request.resend_payment_email",
+			method: "erpnext.accounts.doctype.payment_request.payment_request.resend_payment_email",
 			args: {"docname": frm.doc.name},
 			freeze: true,
 			freeze_message: __("Sending"),
-			callback:function(r){
+			callback: function(r){
 				if(!r.exc) {
-					frappe.msgprint(__("Message Sent"))
+					frappe.msgprint(__("Message Sent"));
 				}
 			}
-		})
-	})
-	
-	frm.add_custom_button(__("Show Paypal Express Payment"), function() {
-		frappe.route_options = {
-			"Paypal Express Payment.reference_doctype": frm.doc.doctype,
-			"Paypal Express Payment.reference_docname": frm.doc.name
-		};
-
-		frappe.set_route("List", "Paypal Express Payment");
+		});
 	});
-})
+});
 

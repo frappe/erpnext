@@ -1,8 +1,8 @@
-<div style="margin-bottom: 7px;" class="text-center">
+<div style="margin-bottom: 7px;">
 	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
 </div>
 <h2 class="text-center">{%= __("Bank Reconciliation Statement") %}</h2>
-<h4 class="text-center">{%= filters.account %}</h4>
+<h4 class="text-center">{%= filters.account && (filters.account + ", "+filters.report_date)  || "" %} {%= filters.company %}</h4>
 <hr>
 <table class="table table-bordered">
 	<thead>

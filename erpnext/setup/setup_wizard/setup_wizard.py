@@ -112,15 +112,17 @@ def create_fiscal_year_and_company(args):
 
 def create_bank_account(args):
 	if args.get("bank_account"):
+		company_name = args.get('company_name').strip()
 		bank_account_group =  frappe.db.get_value("Account",
-			{"account_type": "Bank", "is_group": 1, "root_type": "Asset"})
+			{"account_type": "Bank", "is_group": 1, "root_type": "Asset",
+				"company": company_name})
 		if bank_account_group:
 			bank_account = frappe.get_doc({
 				"doctype": "Account",
 				'account_name': args.get("bank_account"),
 				'parent_account': bank_account_group,
 				'is_group':0,
-				'company':args.get('company_name').strip(),
+				'company': company_name,
 				"account_type": "Bank",
 			})
 			try:

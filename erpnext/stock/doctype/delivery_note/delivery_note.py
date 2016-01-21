@@ -61,10 +61,6 @@ class DeliveryNote(SellingController):
 			'extra_cond': """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)"""
 		}]
 
-	def onload(self):
-		self.set_onload("has_return_entry", len(frappe.db.exists({"doctype": "Delivery Note",
-			"is_return": 1, "return_against": self.name, "docstatus": 1})))
-
 	def before_print(self):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)

@@ -1,0 +1,810 @@
+<!-- title: Payment Request -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/accounts/doctype/payment_request"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+    <p><b>Table Name:</b> <code>tabPayment Request</code></p>
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr class="info">
+            <td>1</td>
+            <td ><code>payment_details</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Payment Details
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Amount
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>currency</code></td>
+            <td >
+                Link</td>
+            <td >
+                Currency
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/geo/currency">Currency</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>make_sales_invoice</code></td>
+            <td >
+                Check</td>
+            <td >
+                Make Sales Invoice
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>column_break_5</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>status</code></td>
+            <td >
+                Select</td>
+            <td >
+                Status
+                
+            </td>
+            <td>
+                <pre>
+Draft
+Initiated
+Paid
+Failed
+Cancelled</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>7</td>
+            <td ><code>section_break_7</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>payment_gateway</code></td>
+            <td >
+                Link</td>
+            <td >
+                Payment Gateway
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/payment_gateway_account">Payment Gateway Account</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>payment_success_url</code></td>
+            <td >
+                Data</td>
+            <td >
+                Payment Success URL
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>column_break_9</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td ><code>gateway</code></td>
+            <td >
+                Read Only</td>
+            <td >
+                Gateway
+                
+            </td>
+            <td>
+                <pre>payment_gateway.gateway</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>payment_account</code></td>
+            <td >
+                Read Only</td>
+            <td >
+                Payment Account
+                
+            </td>
+            <td>
+                <pre>payment_gateway.payment_account</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>13</td>
+            <td ><code>recipient_and_message</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Recipient and Message
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>print_format</code></td>
+            <td >
+                Select</td>
+            <td >
+                Print Format
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td ><code>mute_email</code></td>
+            <td >
+                Check</td>
+            <td class="text-muted" title="Hidden">
+                Mute Email
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>16</td>
+            <td ><code>email_to</code></td>
+            <td >
+                Data</td>
+            <td >
+                Email To
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>subject</code></td>
+            <td >
+                Data</td>
+            <td >
+                Subject
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>message</code></td>
+            <td >
+                Text Editor</td>
+            <td >
+                Message
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>payment_url_message</code></td>
+            <td >
+                Data</td>
+            <td >
+                Payment URL Message
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
+            <td ><code>payment_url</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                payment_url
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>21</td>
+            <td ><code>reference_details</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Reference Details
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>22</td>
+            <td ><code>reference_doctype</code></td>
+            <td >
+                Link</td>
+            <td >
+                Reference Doctype
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/core/doctype">DocType</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>23</td>
+            <td ><code>reference_name</code></td>
+            <td >
+                Dynamic Link</td>
+            <td >
+                Reference Name
+                
+            </td>
+            <td>
+                <pre>reference_doctype</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>24</td>
+            <td ><code>amended_from</code></td>
+            <td >
+                Link</td>
+            <td >
+                Amended From
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/payment_request">Payment Request</a>
+
+
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.accounts.doctype.payment_request.payment_request</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>PaymentRequest</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="create_journal_entry" href="#create_journal_entry" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>create_journal_entry</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>create entry</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_message" href="#get_message" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_message</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>return message with payment gateway link</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_payment_success_url" href="#get_payment_success_url" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_payment_success_url</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_payment_url" href="#get_payment_url" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_payment_url</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="make_communication_entry" href="#make_communication_entry" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>make_communication_entry</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Make communication entry</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="make_invoice" href="#make_invoice" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>make_invoice</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_cancel" href="#on_cancel" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_cancel</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_submit" href="#on_submit" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_submit</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_update_after_submit" href="#on_update_after_submit" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_update_after_submit</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="send_email" href="#send_email" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>send_email</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>send email with payment link</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="send_payment_request" href="#send_payment_request" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>send_payment_request</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_as_cancelled" href="#set_as_cancelled" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_as_cancelled</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_as_paid" href="#set_as_paid" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_as_paid</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_failed" href="#set_failed" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_failed</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_status" href="#set_status" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_status</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate" href="#validate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_currency" href="#validate_currency" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_currency</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_payment_gateway" href="#validate_payment_gateway" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_payment_gateway</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_payment_gateway_account" href="#validate_payment_gateway_account" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_payment_gateway_account</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_payment_request" href="#validate_payment_request" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_payment_request</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.payment_request.payment_request.generate_payment_request</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_request.payment_request.generate_payment_request" href="#erpnext.accounts.doctype.payment_request.payment_request.generate_payment_request" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_request.payment_request.<b>generate_payment_request</b>
+        <i class="text-muted">(name)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_request.payment_request.get_amount" href="#erpnext.accounts.doctype.payment_request.payment_request.get_amount" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_request.payment_request.<b>get_amount</b>
+        <i class="text-muted">(ref_doc, dt)</i>
+    </p>
+	<div class="docs-attr-desc"><p>get amount based on doctype</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_request.payment_request.get_gateway_details" href="#erpnext.accounts.doctype.payment_request.payment_request.get_gateway_details" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_request.payment_request.<b>get_gateway_details</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p>return gateway and payment account of default payment gateway</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.payment_request.payment_request.get_print_format_list</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_request.payment_request.get_print_format_list" href="#erpnext.accounts.doctype.payment_request.payment_request.get_print_format_list" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_request.payment_request.<b>get_print_format_list</b>
+        <i class="text-muted">(ref_doctype)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_request.payment_request.make_payment_request" href="#erpnext.accounts.doctype.payment_request.payment_request.make_payment_request" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_request.payment_request.<b>make_payment_request</b>
+        <i class="text-muted">()</i>
+    </p>
+	<div class="docs-attr-desc"><p>Make payment request</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.payment_request.payment_request.resend_payment_email</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_request.payment_request.resend_payment_email" href="#erpnext.accounts.doctype.payment_request.payment_request.resend_payment_email" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_request.payment_request.<b>resend_payment_email</b>
+        <i class="text-muted">(docname)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+    
+    
+        <h4>Linked In:</h4>
+        <ul>
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/payment_request">Payment Request</a>
+
+</li>
+			
+        
+        </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

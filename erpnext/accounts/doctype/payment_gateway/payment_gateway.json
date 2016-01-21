@@ -37,13 +37,13 @@
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "idx": 0, 
- "in_create": 0, 
+ "in_create": 1, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2015-12-29 12:04:17.371619", 
+ "modified": "2016-01-18 03:58:22.588834", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Gateway", 
@@ -111,7 +111,7 @@
    "write": 0
   }
  ], 
- "read_only": 0, 
+ "read_only": 1, 
  "read_only_onload": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC"
