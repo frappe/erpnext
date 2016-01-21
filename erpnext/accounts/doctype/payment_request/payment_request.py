@@ -12,8 +12,6 @@ from erpnext.accounts.utils import get_account_currency, get_balance_on
 from erpnext.accounts.doctype.journal_entry.journal_entry import (get_payment_entry_against_invoice, 
 get_payment_entry_against_order)
 
-from itertools import chain
-
 class PaymentRequest(Document):		
 	def validate(self):
 		self.validate_payment_gateway_account()
@@ -207,11 +205,11 @@ def get_gateway_details(args):
 	"""return gateway and payment account of default payment gateway"""
 	if args.payemnt_gateway:
 		gateway_account = frappe.db.get_value("Payment Gateway Account", args.payemnt_gateway, 
-			["name", "gateway", "payment_account", "message", "payment_url_message", "payment_success_url"],
+			["name", "payment_gateway", "payment_account", "message", "payment_url_message"],
 			 as_dict=1)
 	
 	gateway_account = frappe.db.get_value("Payment Gateway Account", {"is_default": 1}, 
-		["name", "gateway", "payment_account", "message", "payment_url_message", "payment_success_url"], 
+		["name", "payment_gateway", "payment_account", "message", "payment_url_message"], 
 			as_dict=1)
 	
 	if not gateway_account:
