@@ -84,7 +84,7 @@ def process_args(args):
 		args.item_code = get_item_code(barcode=args.barcode)
 	elif not args.item_code and args.serial_no:
 		args.item_code = get_item_code(serial_no=args.serial_no)
-	
+
 	set_transaction_type(args)
 
 	return args
@@ -200,7 +200,7 @@ def get_default_cost_center(args, item):
 		or args.get("cost_center"))
 
 def get_price_list_rate(args, item_doc, out):
-	meta = frappe.get_meta(args.parenttype)
+	meta = frappe.get_meta(args.doctype)
 
 	if meta.get_field("currency"):
 		validate_price_list(args)
@@ -288,7 +288,7 @@ def get_party_item_code(args, item_doc, out):
 	if args.transaction_type=="selling" and args.customer:
 		customer_item_code = item_doc.get("customer_items", {"customer_name": args.customer})
 		out.customer_item_code = customer_item_code[0].ref_code if customer_item_code else None
-		
+
 	if args.transaction_type=="buying" and args.supplier:
 		item_supplier = item_doc.get("supplier_items", {"supplier": args.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
