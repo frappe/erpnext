@@ -135,7 +135,7 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Product Bundle"),
-					"youtube_id": "yk-7kPrRyRRc"
+					"youtube_id": "yk3kPrRyRRc"
 				},
 				{
 					"type": "help",

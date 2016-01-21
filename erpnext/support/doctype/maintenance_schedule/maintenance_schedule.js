@@ -16,7 +16,7 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		if (this.frm.doc.docstatus === 0) {
-			this.frm.add_custom_button(__('From Sales Order'),
+			this.frm.add_custom_button(__('Sales Order'),
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
@@ -28,7 +28,7 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 							company: me.frm.doc.company
 						}
 					});
-				}, "icon-download", "btn-default");
+				}, __("Get items from"));
 		} else if (this.frm.doc.docstatus === 1) {
 			this.frm.add_custom_button(__("Make Maintenance Visit"), function() {
 				frappe.model.open_mapped_doc({
@@ -36,7 +36,7 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 					source_name: me.frm.doc.name,
 					frm: me.frm
 				})
-			}, frappe.boot.doctype_icons["Maintenance Visit"]);
+			}, __("Make"));
 		}
 	},
 

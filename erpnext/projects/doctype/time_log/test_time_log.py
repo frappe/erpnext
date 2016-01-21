@@ -105,7 +105,7 @@ class TestTimeLog(unittest.TestCase):
 		task_name = frappe.db.get_value("Task",{"project": "_Test Project 1"})
 
 		time_log = make_time_log_test_record(employee="_T-Employee-0002", hours=2,
-			task=task_name)
+			task=task_name, simulate=1)
 		self.assertEqual(time_log.costing_rate, 50)
 		self.assertEqual(time_log.costing_amount, 100)
 		self.assertEqual(time_log.billing_rate, 100)
@@ -115,7 +115,7 @@ class TestTimeLog(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_billing_amount"), 200)
 
 		time_log2 = make_time_log_test_record(employee="_T-Employee-0002",
-			hours=2, task= task_name, from_time = now_datetime() + datetime.timedelta(hours= 3))
+			hours=2, task= task_name, from_time = now_datetime() + datetime.timedelta(hours= 3), simulate=1)
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_billing_amount"), 400)
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_billing_amount"), 400)
 

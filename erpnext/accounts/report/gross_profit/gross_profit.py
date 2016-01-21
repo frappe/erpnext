@@ -7,7 +7,9 @@ from frappe import _, scrub
 from frappe.utils import flt
 
 def execute(filters=None):
-	if not filters: filters = {}
+	if not filters: filters = frappe._dict()
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	
 	gross_profit_data = GrossProfitGenerator(filters)
 
 	data = []
@@ -43,6 +45,8 @@ def execute(filters=None):
 		row = []
 		for col in group_wise_columns.get(scrub(filters.group_by)):
 			row.append(src.get(col))
+			
+		row.append(company_currency)
 		data.append(row)
 
 	return columns, data
@@ -60,15 +64,15 @@ def get_columns(group_wise_columns, filters):
 		"description": _("Description"),
 		"warehouse": _("Warehouse") + ":Link/Warehouse",
 		"qty": _("Qty") + ":Float",
-		"base_rate": _("Avg. Selling Rate") + ":Currency",
-		"buying_rate": _("Avg. Buying Rate") + ":Currency",
-		"base_amount": _("Selling Amount") + ":Currency",
-		"buying_amount": _("Buying Amount") + ":Currency",
-		"gross_profit": _("Gross Profit") + ":Currency",
+		"base_rate": _("Avg. Selling Rate") + ":Currency/currency",
+		"buying_rate": _("Avg. Buying Rate") + ":Currency/currency",
+		"base_amount": _("Selling Amount") + ":Currency/currency",
+		"buying_amount": _("Buying Amount") + ":Currency/currency",
+		"gross_profit": _("Gross Profit") + ":Currency/currency",
 		"gross_profit_percent": _("Gross Profit %") + ":Percent",
 		"project": _("Project") + ":Link/Project",
 		"sales_person": _("Sales person"),
-		"allocated_amount": _("Allocated Amount") + ":Currency",
+		"allocated_amount": _("Allocated Amount") + ":Currency/currency",
 		"customer": _("Customer") + ":Link/Customer",
 		"customer_group": _("Customer Group") + ":Link/Customer Group",
 		"territory": _("Territory") + ":Link/Territory"
@@ -76,6 +80,13 @@ def get_columns(group_wise_columns, filters):
 
 	for col in group_wise_columns.get(scrub(filters.group_by)):
 		columns.append(column_map.get(col))
+				
+	columns.append({
+		"fieldname": "currency",
+		"label" : _("Currency"),
+		"fieldtype": "Link",
+		"options": "Currency"
+	})
 
 	return columns
 

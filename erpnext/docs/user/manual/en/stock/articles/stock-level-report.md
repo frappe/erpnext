@@ -1,6 +1,4 @@
-<h1>Stock Level Report</h1>
-
-<h1>Stock Level Report</h1>
+#Stock Level Report
 
 Stock Level report list stock item's quantity available in a particular warehouse.
 

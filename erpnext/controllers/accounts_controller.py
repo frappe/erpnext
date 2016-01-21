@@ -133,13 +133,13 @@ class AccountsController(TransactionBase):
 	def set_missing_item_details(self):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
-		
+
 		if self.doctype == "Purchase Invoice":
 			auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
 			if auto_accounting_for_stock:
 				stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
-				
+
 			stock_items = self.get_stock_items()
 
 		if hasattr(self, "items"):
@@ -151,6 +151,10 @@ class AccountsController(TransactionBase):
 				if item.get("item_code"):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
+
+					args["doctype"] = self.doctype
+					args["name"] = self.name
+
 					if not args.get("transaction_date"):
 						args["transaction_date"] = args.get("posting_date")
 
@@ -178,13 +182,13 @@ class AccountsController(TransactionBase):
 						if item.price_list_rate:
 							item.rate = flt(item.price_list_rate *
 								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
-								
+
 					if self.doctype == "Purchase Invoice":
 						if auto_accounting_for_stock and item.item_code in stock_items \
 							and self.is_opening == 'No' \
-							and (not item.po_detail or not frappe.db.get_value("Purchase Order Item", 
+							and (not item.po_detail or not frappe.db.get_value("Purchase Order Item",
 								item.po_detail, "delivered_by_supplier")):
-				
+
 								item.expense_account = stock_not_billed_account
 								item.cost_center = None
 

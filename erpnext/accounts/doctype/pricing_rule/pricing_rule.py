@@ -76,7 +76,7 @@ class PricingRule(Document):
 def apply_pricing_rule(args):
 	"""
 		args = {
-			"item_list": [{"doctype": "", "name": "", "item_code": "", "brand": "", "item_group": ""}, ...],
+			"items": [{"doctype": "", "name": "", "item_code": "", "brand": "", "item_group": ""}, ...],
 			"customer": "something",
 			"customer_group": "something",
 			"territory": "something",
@@ -97,18 +97,17 @@ def apply_pricing_rule(args):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
-
+	
+	if not args.transaction_type:
+		set_transaction_type(args)
+				
 	# list of dictionaries
 	out = []
 
-	if args.get("parenttype") == "Material Request": return out
+	if args.get("doctype") == "Material Request": return out
 
-	if not args.transaction_type:
-		args.transaction_type = "buying" if frappe.get_meta(args.parenttype).get_field("supplier") \
-			else "selling"
-
-	item_list = args.get("item_list")
-	args.pop("item_list")
+	item_list = args.get("items")
+	args.pop("items")
 
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
@@ -138,13 +137,17 @@ def get_pricing_rule_for_item(args):
 		if not args.item_group:
 			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
 
-	if args.customer and not (args.customer_group and args.territory):
-		customer = frappe.db.get_value("Customer", args.customer, ["customer_group", "territory"])
-		if customer:
-			args.customer_group, args.territory = customer
+	if args.transaction_type=="selling":
+		if args.customer and not (args.customer_group and args.territory):
+			customer = frappe.db.get_value("Customer", args.customer, ["customer_group", "territory"])
+			if customer:
+				args.customer_group, args.territory = customer
+				
+		args.supplier = args.supplier_type = None
 
 	elif args.supplier and not args.supplier_type:
 		args.supplier_type = frappe.db.get_value("Supplier", args.supplier, "supplier_type")
+		args.customer = args.customer_group = args.territory = None
 
 	pricing_rules = get_pricing_rules(args)
 	pricing_rule = filter_pricing_rules(args, pricing_rules)
@@ -184,9 +187,12 @@ def get_pricing_rules(args):
 
 
 	conditions = ""
+	values =  {"item_code": args.get("item_code"), "brand": args.get("brand")}
+
 	for field in ["company", "customer", "supplier", "supplier_type", "campaign", "sales_partner"]:
 		if args.get(field):
 			conditions += " and ifnull("+field+", '') in (%("+field+")s, '')"
+			values[field] = args.get(field)
 		else:
 			conditions += " and ifnull("+field+", '') = ''"
 
@@ -194,12 +200,15 @@ def get_pricing_rules(args):
 		group_condition = _get_tree_conditions(parenttype)
 		if group_condition:
 			conditions += " and " + group_condition
+
 	if not args.price_list: args.price_list = None
 	conditions += " and ifnull(for_price_list, '') in (%(price_list)s, '')"
+	values["price_list"] = args.get("price_list")
 
 	if args.get("transaction_date"):
 		conditions += """ and %(transaction_date)s between ifnull(valid_from, '2000-01-01')
 			and ifnull(valid_upto, '2500-12-31')"""
+		values['transaction_date'] = args.get('transaction_date')
 
 	item_group_condition = _get_tree_conditions("Item Group", False)
 	if item_group_condition: item_group_condition = " or " + item_group_condition
@@ -210,7 +219,8 @@ def get_pricing_rules(args):
 			and {transaction_type} = 1 {conditions}
 		order by priority desc, name desc""".format(
 			item_group_condition=item_group_condition,
-			transaction_type=args.transaction_type, conditions=conditions), args, as_dict=1)
+			transaction_type= args.transaction_type,
+			conditions=conditions), values, as_dict=1)
 
 def filter_pricing_rules(args, pricing_rules):
 	# filter for qty
@@ -267,3 +277,14 @@ def apply_internal_priority(pricing_rules, field_set, args):
 			if filtered_rules: break
 
 	return filtered_rules or pricing_rules
+
+def set_transaction_type(args):
+	if args.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
+		args.transaction_type = "selling"
+	elif args.doctype in ("Material Request", "Supplier Quotation", "Purchase Order", 
+		"Purchase Receipt", "Purchase Invoice"):
+			args.transaction_type = "buying"
+	elif args.customer:
+		args.transaction_type = "selling"
+	else:
+		args.transaction_type = "buying"

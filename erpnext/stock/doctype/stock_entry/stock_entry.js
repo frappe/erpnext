@@ -176,12 +176,13 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	add_excise_button: function() {
 		if(frappe.boot.sysdefaults.country === "India")
-			this.frm.add_custom_button(__("Make Excise Invoice"), function() {
+			this.frm.add_custom_button(__("Excise Invoice"), function() {
 				var excise = frappe.model.make_new_doc_and_get_name('Journal Entry');
 				excise = locals['Journal Entry'][excise];
 				excise.voucher_type = 'Excise Entry';
 				loaddoc('Journal Entry', excise.name);
-			}, frappe.boot.doctype_icons["Journal Entry"], "btn-default");
+			}, __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 	},
 
 	items_add: function(doc, cdt, cdn) {
@@ -235,11 +236,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	s_warehouse: function(doc, cdt, cdn) {
-
+		this.get_warehouse_details(doc, cdt, cdn)
 	},
 
 	t_warehouse: function(doc, cdt, cdn) {
-		this.s_warehouse(doc, cdt, cdn);
+		this.get_warehouse_details(doc, cdt, cdn)
 	},
 
 	get_warehouse_details: function(doc, cdt, cdn) {

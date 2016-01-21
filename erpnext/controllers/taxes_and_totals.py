@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import json
 import frappe
 from frappe import _, scrub
-from frappe.utils import cint, flt, rounded
+from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
@@ -319,9 +319,14 @@ class calculate_taxes_and_totals(object):
 		self.doc.round_floats_in(self.doc, ["grand_total", "base_grand_total"])
 
 		if self.doc.meta.get_field("rounded_total"):
-			self.doc.rounded_total = rounded(self.doc.grand_total)
+			self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total, 
+				self.doc.currency, self.doc.precision("rounded_total"))
 		if self.doc.meta.get_field("base_rounded_total"):
-			self.doc.base_rounded_total = rounded(self.doc.base_grand_total)
+			company_currency = get_company_currency(self.doc.company)
+			
+			self.doc.base_rounded_total = \
+				round_based_on_smallest_currency_fraction(self.doc.base_grand_total, 
+					company_currency, self.doc.precision("base_rounded_total"))
 
 	def _cleanup(self):
 		for tax in self.doc.get("taxes"):
@@ -408,8 +413,9 @@ class calculate_taxes_and_totals(object):
 			total_amount_to_pay = flt(self.doc.grand_total  - self.doc.total_advance 
 				- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
 		else:
-			total_amount_to_pay = flt(self.doc.base_grand_total  - self.doc.total_advance 
-				- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
+			total_amount_to_pay = flt(flt(self.doc.grand_total *
+				self.doc.conversion_rate, self.doc.precision("grand_total")) - self.doc.total_advance 
+					- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
 			
 		if self.doc.doctype == "Sales Invoice":
 			self.doc.round_floats_in(self.doc, ["paid_amount"])

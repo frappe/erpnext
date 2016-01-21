@@ -133,14 +133,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		if (in_list(["Purchase Invoice", "Sales Invoice"], this.frm.doctype)) {
 			if(this.frm.doc.outstanding_amount !== this.frm.doc.base_grand_total) {
-				this.frm.add_custom_button(__("Show Payments"), function() {
+				this.frm.add_custom_button(__("Payments"), function() {
 					frappe.route_options = {
 						"Journal Entry Account.reference_type": me.frm.doc.doctype,
 						"Journal Entry Account.reference_name": me.frm.doc.name
 					};
 
 					frappe.set_route("List", "Journal Entry");
-				});
+				}, __("View"));
 			}
 		}
 	},
@@ -559,7 +559,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	apply_pricing_rule: function(item, calculate_taxes_and_totals) {
 		var me = this;
 		var args = this._get_args(item);
-		if (!(args.item_list && args.item_list.length)) {
+		if (!(args.items && args.items.length)) {
 			if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
 			return;
 		}
@@ -579,7 +579,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	_get_args: function(item) {
 		var me = this;
 		return {
-			"item_list": this._get_item_list(item),
+			"items": this._get_item_list(item),
 			"customer": me.frm.doc.customer,
 			"customer_group": me.frm.doc.customer_group,
 			"territory": me.frm.doc.territory,
@@ -595,8 +595,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"campaign": me.frm.doc.campaign,
 			"sales_partner": me.frm.doc.sales_partner,
 			"ignore_pricing_rule": me.frm.doc.ignore_pricing_rule,
-			"parenttype": me.frm.doc.doctype,
-			"parent": me.frm.doc.name
+			"doctype": me.frm.doc.doctype,
+			"name": me.frm.doc.name
 		};
 	},
 
@@ -654,7 +654,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	apply_price_list: function(item) {
 		var me = this;
 		var args = this._get_args(item);
-		if (!((args.item_list && args.item_list.length) || args.price_list)) {
+		if (!((args.items && args.items.length) || args.price_list)) {
 			return;
 		}
 
@@ -668,7 +668,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate);
 					me.in_apply_price_list = false;
 
-					if(args.item_list.length) {
+					if(args.items.length) {
 						me._set_values_for_item_list(r.message.children);
 					}
 				}

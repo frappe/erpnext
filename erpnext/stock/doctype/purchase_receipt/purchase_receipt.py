@@ -46,16 +46,6 @@ class PurchaseReceipt(BuyingController):
 			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
 
-	def onload(self):
-		billed_qty = frappe.db.sql("""select sum(qty) from `tabPurchase Invoice Item`
-			where purchase_receipt=%s and docstatus=1""", self.name)
-		if billed_qty:
-			total_qty = sum((item.qty for item in self.get("items")))
-			self.set_onload("billing_complete", (billed_qty[0][0] == total_qty))
-
-		self.set_onload("has_return_entry", len(frappe.db.exists({"doctype": "Purchase Receipt",
-			"is_return": 1, "return_against": self.name, "docstatus": 1})))
-
 	def validate(self):
 		super(PurchaseReceipt, self).validate()
 

@@ -31,22 +31,22 @@ class TestPricingRule(unittest.TestCase):
 			"company": "_Test Company",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
-			"parenttype": "Sales Order",
+			"doctype": "Sales Order",
 			"conversion_rate": 1,
 			"price_list_currency": "_Test Currency",
 			"plc_conversion_rate": 1,
 			"order_type": "Sales",
-			"transaction_type": "selling",
 			"customer": "_Test Customer",
-			"doctype": "Sales Order Item",
 			"name": None
 		})
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 10)
-
+		
 		prule = frappe.get_doc(test_record.copy())
 		prule.applicable_for = "Customer"
+		prule.title = "_Test Pricing Rule for Customer"
 		self.assertRaises(MandatoryError, prule.insert)
+		
 		prule.customer = "_Test Customer"
 		prule.discount_percentage = 20
 		prule.insert()
@@ -56,16 +56,18 @@ class TestPricingRule(unittest.TestCase):
 		prule = frappe.get_doc(test_record.copy())
 		prule.apply_on = "Item Group"
 		prule.item_group = "All Item Groups"
+		prule.title = "_Test Pricing Rule for Item Group"
 		prule.discount_percentage = 15
 		prule.insert()
-
-		args.customer = None
+		
+		args.customer = "_Test Customer 1"
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 10)
 
 		prule = frappe.get_doc(test_record.copy())
 		prule.applicable_for = "Campaign"
 		prule.campaign = "_Test Campaign"
+		prule.title = "_Test Pricing Rule for Campaign"
 		prule.discount_percentage = 5
 		prule.priority = 8
 		prule.insert()

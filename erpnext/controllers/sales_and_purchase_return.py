@@ -96,6 +96,9 @@ def validate_returned_items(doc):
 							if s not in ref_serial_nos:
 								frappe.throw(_("Row # {0}: Serial No {1} does not match with {2} {3}")
 									.format(d.idx, s, doc.doctype, doc.return_against))
+									
+				if not d.warehouse:
+					frappe.throw(_("Warehouse is mandatory"))
 
 			items_returned = True
 

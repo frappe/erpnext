@@ -167,9 +167,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	set_from_product_bundle: function() {
 		var me = this;
-		this.frm.add_custom_button(__("From Product Bundle"), function() {
+		this.frm.add_custom_button(__("Product Bundle"), function() {
 			erpnext.buying.get_items_from_product_bundle(me.frm);
-		});
+		}, __("Get items from"));
 	}
 });
 

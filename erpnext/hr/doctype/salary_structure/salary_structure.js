@@ -12,8 +12,9 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 
 cur_frm.cscript.refresh = function(doc, dt, dn){
 	if((!doc.__islocal) && (doc.is_active == 'Yes')){
-		cur_frm.add_custom_button(__('Make Salary Slip'),
-			cur_frm.cscript['Make Salary Slip'], frappe.boot.doctype_icons["Salary Slip"]);
+		cur_frm.add_custom_button(__('Salary Slip'),
+			cur_frm.cscript['Make Salary Slip'], __("Make"));
+		cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 	}
 }
 
