@@ -70,7 +70,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 
 				if(!from_delivery_note && !is_delivered_by_supplier) {
-					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Delivery Note'], __("Make"));
+					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Make Delivery Note'], 
+						__("Make"));
 				}
 			}
 
