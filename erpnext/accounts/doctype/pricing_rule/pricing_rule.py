@@ -161,6 +161,8 @@ def get_pricing_rule_for_item(args):
 	if pricing_rule:
 		item_details.pricing_rule = pricing_rule.name
 		item_details.pricing_rule_for = pricing_rule.price_or_discount
+		item_details.type = pricing_rule.type
+		item_details.rate_or_amount = pricing_rule.rate
 		if pricing_rule.price_or_discount == "Price":
 			item_details.update({
 				"price_list_rate": pricing_rule.price/flt(args.conversion_rate) \
@@ -171,7 +173,6 @@ def get_pricing_rule_for_item(args):
 			# if user changed the discount percentage then set discount_percentage of user
 			item_details.discount_percentage = pricing_rule.discount_percentage if args.discount_percentage == pricing_rule.discount_percentage\
 				else args.discount_percentage
-
 	return item_details
 
 def get_pricing_rules(args):

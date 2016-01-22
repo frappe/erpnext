@@ -338,7 +338,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				item.total_margin = item.price_list_rate + item.rate_or_amount;
 			item.rate = flt(item.total_margin * (1 - item.discount_percentage / 100.0),
 				precision("rate", item));
-			console.log(item.rate)
 		}
 		else{
 			item.rate_or_amount = 0.0;
