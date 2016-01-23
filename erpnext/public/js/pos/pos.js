@@ -57,7 +57,7 @@ erpnext.pos.PointOfSale = Class.extend({
 				"fieldtype": "Link",
 				"options": this.party,
 				"label": this.party,
-				"fieldname": "pos_party",
+				"fieldname": this.party.toLowerCase(),
 				"placeholder": this.party
 			},
 			parent: this.wrapper.find(".party-area"),
@@ -415,15 +415,15 @@ erpnext.pos.PointOfSale = Class.extend({
 				// prefer cash payment!
 				var default_mode = me.frm.doc.mode_of_payment ? me.frm.doc.mode_of_payment :
 					me.modes_of_payment.indexOf(__("Cash"))!==-1 ? __("Cash") : undefined;
-
+					
 				// show payment wizard
 				var dialog = new frappe.ui.Dialog({
 					width: 400,
 					title: 'Payment',
 					fields: [
 						{fieldtype:'Currency',
-							fieldname:'total_amount', label: __('Total Amount'), read_only:1,
-							"default": me.frm.doc.grand_total, read_only: 1},
+							fieldname:'total_amount', label: __('Total Amount'),
+							"default": me.frm.doc.grand_total},
 						{fieldtype:'Select', fieldname:'mode_of_payment',
 							label: __('Mode of Payment'),
 							options: me.modes_of_payment.join('\n'), reqd: 1,
@@ -431,7 +431,19 @@ erpnext.pos.PointOfSale = Class.extend({
 						{fieldtype:'Currency', fieldname:'paid_amount', label:__('Amount Paid'),
 							reqd:1, "default": me.frm.doc.grand_total, hidden: 1, change: function() {
 								var values = dialog.get_values();
-								dialog.set_value("change", Math.round(values.paid_amount - values.total_amount));
+								
+								var actual_change = flt(values.paid_amount - values.total_amount, 
+									precision("paid_amount"));
+								
+								if (actual_change > 0) {
+									var rounded_change = 
+										round_based_on_smallest_currency_fraction(actual_change, 
+											me.frm.doc.currency, precision("paid_amount"));
+								} else {
+									var rounded_change = 0;
+								}
+								
+								dialog.set_value("change", rounded_change);
 								dialog.get_input("change").trigger("change");
 
 							}},

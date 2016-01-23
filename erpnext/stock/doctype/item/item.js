@@ -192,7 +192,7 @@ $.extend(erpnext.item, {
 
 	edit_prices_button: function(frm) {
 		frm.add_custom_button(__("Add / Edit Prices"), function() {
-			frappe.set_route("Report", "Item Price", {"item_code": frm.doc.name});
+			frappe.set_route("List", "Item Price", {"item_code": frm.doc.name});
 		}, __("View"));
 	},
 
@@ -321,7 +321,7 @@ $.extend(erpnext.item, {
 		frm.toggle_display("attributes", frm.doc.has_variants || frm.doc.variant_of);
 		frm.fields_dict.attributes.grid.toggle_reqd("attribute_value", frm.doc.variant_of ? 1 : 0);
 		frm.fields_dict.attributes.grid.set_column_disp("attribute_value", frm.doc.variant_of ? 1 : 0);
-		
+
 		frm.toggle_enable("attributes", !frm.doc.variant_of);
 		frm.fields_dict.attributes.grid.toggle_enable("attribute", !frm.doc.variant_of);
 		frm.fields_dict.attributes.grid.toggle_enable("attribute_value", !frm.doc.variant_of);

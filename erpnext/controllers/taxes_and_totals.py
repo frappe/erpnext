@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import json
 import frappe
 from frappe import _, scrub
-from frappe.utils import cint, flt, rounded
+from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
@@ -59,6 +59,11 @@ class calculate_taxes_and_totals(object):
 					item.rate = flt(item.price_list_rate *
 						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 
+				if item.doctype in ['Quotation Item', 'Sales Order Item']:
+					item.total_margin = self.calculate_margin(item)
+					item.rate = flt(item.total_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))\
+						if item.total_margin > 0 else item.rate
+					
 				item.net_rate = item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.net_amount = item.amount
@@ -319,9 +324,14 @@ class calculate_taxes_and_totals(object):
 		self.doc.round_floats_in(self.doc, ["grand_total", "base_grand_total"])
 
 		if self.doc.meta.get_field("rounded_total"):
-			self.doc.rounded_total = rounded(self.doc.grand_total)
+			self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total, 
+				self.doc.currency, self.doc.precision("rounded_total"))
 		if self.doc.meta.get_field("base_rounded_total"):
-			self.doc.base_rounded_total = rounded(self.doc.base_grand_total)
+			company_currency = get_company_currency(self.doc.company)
+			
+			self.doc.base_rounded_total = \
+				round_based_on_smallest_currency_fraction(self.doc.base_grand_total, 
+					company_currency, self.doc.precision("base_rounded_total"))
 
 	def _cleanup(self):
 		for tax in self.doc.get("taxes"):
@@ -408,8 +418,9 @@ class calculate_taxes_and_totals(object):
 			total_amount_to_pay = flt(self.doc.grand_total  - self.doc.total_advance 
 				- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
 		else:
-			total_amount_to_pay = flt(self.doc.base_grand_total  - self.doc.total_advance 
-				- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
+			total_amount_to_pay = flt(flt(self.doc.grand_total *
+				self.doc.conversion_rate, self.doc.precision("grand_total")) - self.doc.total_advance 
+					- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
 			
 		if self.doc.doctype == "Sales Invoice":
 			self.doc.round_floats_in(self.doc, ["paid_amount"])
@@ -419,3 +430,17 @@ class calculate_taxes_and_totals(object):
 				self.doc.precision("outstanding_amount"))
 		elif self.doc.doctype == "Purchase Invoice":
 			self.doc.outstanding_amount = flt(total_amount_to_pay, self.doc.precision("outstanding_amount"))
+
+	def calculate_margin(self, item):
+		total_margin = 0.0
+		if item.price_list_rate:
+			if item.pricing_rule: 
+				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
+				if not item.type: item.type = pricing_rule.type
+				if not item.rate_or_amount: item.rate_or_amount = pricing_rule.rate
+
+			if item.type and item.rate_or_amount:
+				margin_value = item.rate_or_amount if item.type == 'Amount' else flt(item.price_list_rate) * flt(item.rate_or_amount) / 100
+				total_margin = flt(item.price_list_rate) + flt(margin_value)
+
+		return total_margin 

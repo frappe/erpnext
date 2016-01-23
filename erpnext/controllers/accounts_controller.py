@@ -147,13 +147,17 @@ class AccountsController(TransactionBase):
 			for fieldname in self.meta.get_valid_columns():
 				parent_dict[fieldname] = self.get(fieldname)
 
+			if self.doctype in ["Quotation", "Sales Order"]:
+				document_type = "Quotation Item" if self.doctype == "Quotation" else "Sales Order Item"
+				parent_dict.update({"document_type": document_type})
+
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
 
-					args["doctype"] = parent_dict.get("doctype")
-					args["name"] = parent_dict.get("name")
+					args["doctype"] = self.doctype
+					args["name"] = self.name
 
 					if not args.get("transaction_date"):
 						args["transaction_date"] = args.get("posting_date")
@@ -175,7 +179,10 @@ class AccountsController(TransactionBase):
 								item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
-						item.set("discount_percentage", ret.get("discount_percentage"))
+						# if user changed the discount percentage then set user's discount percentage ?
+						discount_percentage = ret.get("discount_percentage") if item.get("discount_percentage") == \
+							ret.get("discount_percentage") else item.get("discount_percentage")
+						item.set("discount_percentage", discount_percentage)
 						if ret.get("pricing_rule_for") == "Price":
 							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
 

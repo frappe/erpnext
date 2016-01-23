@@ -141,6 +141,8 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 
 	round_off_gle.update({
 		"account": round_off_account,
+		"debit_in_account_currency": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
+		"credit_in_account_currency": debit_credit_diff if debit_credit_diff > 0 else 0,
 		"debit": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
 		"credit": debit_credit_diff if debit_credit_diff > 0 else 0,
 		"cost_center": round_off_cost_center,

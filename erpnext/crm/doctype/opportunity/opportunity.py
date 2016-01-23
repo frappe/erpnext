@@ -9,7 +9,6 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_party_account_currency
-from erpnext.stock.get_item_details import apply_price_list
 
 subject_field = "title"
 sender_field = "contact_email"
@@ -192,8 +191,6 @@ def make_quotation(source_name, target_doc=None):
 
 		quotation.currency = party_account_currency or company_currency
 		quotation.conversion_rate = exchange_rate
-
-		quotation.update(apply_price_list(quotation.as_dict(), as_doc = True))
 
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")

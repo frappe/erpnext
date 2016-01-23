@@ -6,7 +6,7 @@ import frappe
 from frappe import _, throw
 from frappe.utils import flt, cint, add_days, cstr
 import json
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 
@@ -69,7 +69,69 @@ def get_item_details(args):
 	if args.get("is_subcontracted") == "Yes":
 		out.bom = get_default_bom(args.item_code)
 
+	if args.document_type in ["Quotation Item", "Sales Order Item"]:
+		# calculate rate by appling discount to total_margin
+		if(args.total_margin):
+			out["rate"] = discount_on_total_margin(args.total_margin, out.discount_percentage);
+		elif not args.type:
+			data = set_margin_fields(out.pricing_rule, out.price_list_rate)
+			out["rate"] = discount_on_total_margin(data.get("total_margin"), out.discount_percentage)
+			out.update(data)
+
 	return out
+
+def set_margin_fields(pricing_rule=None, price_list_rate=None):
+	# margin_details dict will hold the all data variable regrading margin
+	margin_details = frappe._dict({
+		"type":"",
+		"rate_or_amount": 0.0,
+		"total_margin": 0.0
+	})
+
+	if pricing_rule and price_list_rate:
+		margin_details.update(get_margin_details(pricing_rule))
+		margin_details.update(calculate_total_margin(margin_details.get("type"),margin_details.get("rate_or_amount"), price_list_rate))
+
+	return margin_details
+
+def get_margin_details(pricing_rule):
+	"""
+		get the margin details from pricing_rule
+	"""
+	margin_details = frappe._dict({
+			"type":"",
+			"rate_or_amount":0.0,
+		})
+
+	records = frappe.db.get_values("Pricing Rule", pricing_rule, ["type", "rate"], as_dict=True)
+	
+	for record in records:
+		margin_details["type"] = record.get("type")
+		margin_details["rate_or_amount"] = record.get("rate")
+
+	return margin_details
+
+def calculate_total_margin(margin_type,rate_or_amount,price_list_rate):
+	"""
+		calculate margin amount as follows
+		if type is percentage then calculate percentage of price_list_rate
+	"""
+	default = frappe._dict({ "total_margin":0.0 })
+	if not margin_type:
+		return default
+	elif margin_type == "Amount":
+		default.total_margin = price_list_rate + rate_or_amount
+	else:
+		default.total_margin = price_list_rate + ( price_list_rate * ( rate_or_amount / 100 ) )
+	return default
+
+def discount_on_total_margin(total_margin, discount):
+	"""
+		calculate the rate by appling discount on total_margin if any
+	"""
+	if discount:
+		total_margin = total_margin - (total_margin * (discount / 100))
+	return total_margin
 
 def process_args(args):
 	if isinstance(args, basestring):
@@ -84,6 +146,8 @@ def process_args(args):
 		args.item_code = get_item_code(barcode=args.barcode)
 	elif not args.item_code and args.serial_no:
 		args.item_code = get_item_code(serial_no=args.serial_no)
+
+	set_transaction_type(args)
 
 	return args
 
@@ -107,7 +171,7 @@ def validate_item_details(args, item):
 	from erpnext.stock.doctype.item.item import validate_end_of_life
 	validate_end_of_life(item.name, item.end_of_life, item.disabled)
 
-	if args.customer or args.doctype=="Opportunity":
+	if args.transaction_type=="selling":
 		# validate if sales item or service item
 		if args.get("order_type") == "Maintenance":
 			if item.is_service_item != 1:
@@ -119,7 +183,7 @@ def validate_item_details(args, item):
 		if cint(item.has_variants):
 			throw(_("Item {0} is a template, please select one of its variants").format(item.name))
 
-	elif args.supplier and args.doctype != "Material Request":
+	elif args.transaction_type=="buying" and args.doctype != "Material Request":
 		# validate if purchase item or subcontracted item
 		if item.is_purchase_item != 1:
 			throw(_("Item {0} must be a Purchase Item").format(item.name))
@@ -198,7 +262,7 @@ def get_default_cost_center(args, item):
 		or args.get("cost_center"))
 
 def get_price_list_rate(args, item_doc, out):
-	meta = frappe.get_meta(args.parenttype)
+	meta = frappe.get_meta(args.doctype)
 
 	if meta.get_field("currency"):
 		validate_price_list(args)
@@ -219,7 +283,7 @@ def get_price_list_rate(args, item_doc, out):
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
 
-		if not out.price_list_rate and args.supplier:
+		if not out.price_list_rate and args.transaction_type=="buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 			out.update(get_last_purchase_details(item_doc.name,
 				args.name, args.conversion_rate))
@@ -251,7 +315,7 @@ def get_price_list_rate_for(price_list, item_code):
 def validate_price_list(args):
 	if args.get("price_list"):
 		if not frappe.db.get_value("Price List",
-			{"name": args.price_list, "selling" if (args.customer or args.lead) else "buying": 1, "enabled": 1}):
+			{"name": args.price_list, args.transaction_type: 1, "enabled": 1}):
 			throw(_("Price List {0} is disabled").format(args.price_list))
 	else:
 		throw(_("Price List not selected"))
@@ -283,10 +347,11 @@ def validate_conversion_rate(args, meta):
 			frappe._dict({"fields": args})))
 
 def get_party_item_code(args, item_doc, out):
-	if args.customer:
+	if args.transaction_type=="selling" and args.customer:
 		customer_item_code = item_doc.get("customer_items", {"customer_name": args.customer})
 		out.customer_item_code = customer_item_code[0].ref_code if customer_item_code else None
-	else:
+
+	if args.transaction_type=="buying" and args.supplier:
 		item_supplier = item_doc.get("supplier_items", {"supplier": args.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
 
@@ -413,7 +478,6 @@ def apply_price_list(args, as_doc=False):
 					# update the value
 					if fieldname in item and fieldname not in ("name", "doctype"):
 						item[fieldname] = children[i][fieldname]
-
 		return args
 	else:
 		return {

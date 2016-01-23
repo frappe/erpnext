@@ -70,7 +70,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 
 				if(!from_delivery_note && !is_delivered_by_supplier) {
-					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Delivery Note'], __("Make"));
+					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Make Delivery Note'], 
+						__("Make"));
 				}
 			}
 
@@ -437,9 +438,11 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	})
 
 	if(cur_frm.doc.is_pos) {
-		cur_frm.msgbox = frappe.msgprint('<a class="btn btn-primary" \
-			onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">Print</a>\
-			<a class="btn btn-default" href="#Form/Sales Invoice/New Sales Invoice">New</a>');
+		cur_frm.msgbox = frappe.msgprint(format('<a class="btn btn-primary" \
+			onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">{0}</a>\
+			<a class="btn btn-default" href="javascript:new_doc(cur_frm.doctype);">{1}</a>', [
+			__('Print'), __('New')
+		]));
 
 	} else if(cint(frappe.boot.notification_settings.sales_invoice)) {
 		cur_frm.email_doc(frappe.boot.notification_settings.sales_invoice_message);

@@ -170,8 +170,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							barcode: item.barcode,
 							serial_no: item.serial_no,
 							warehouse: item.warehouse,
-							parenttype: me.frm.doc.doctype,
-							parent: me.frm.doc.name,
 							customer: me.frm.doc.customer,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
@@ -186,10 +184,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
 							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
-							doctype: item.doctype,
-							name: item.name,
+							doctype: me.frm.doc.doctype,
+							name: me.frm.doc.name,
 							project_name: item.project_name || me.frm.doc.project_name,
-							qty: item.qty
+							qty: item.qty,
+							document_type: cdt
 						}
 					},
 
@@ -610,8 +609,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"item_code": d.item_code,
 					"item_group": d.item_group,
 					"brand": d.brand,
-					"qty": d.qty
+					"qty": d.qty,
+					"discount_percentage": d.discount_percentage || 0
 				});
+
+				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list
+				if (d.doctype == "Quotation Item" || d.doctype == "Sales Order Item"){
+					item_list[0]["type"] = d.type
+					item_list[0]["rate_or_amount"] = d.rate_or_amount
+				}	
 			}
 		};
 
@@ -908,5 +914,3 @@ frappe.ui.form.on(cur_frm.doctype, "discount_amount", function(frm) {
 
 	frm.cscript.calculate_taxes_and_totals();
 });
-
-

@@ -218,14 +218,14 @@ class StockController(AccountsController):
 
 		return serialized_items
 
-	def get_incoming_rate_for_sales_return(self, item_code, warehouse, against_document):
+	def get_incoming_rate_for_sales_return(self, item_code, against_document):
 		incoming_rate = 0.0
 		if against_document and item_code:
 			incoming_rate = frappe.db.sql("""select abs(stock_value_difference / actual_qty)
 				from `tabStock Ledger Entry`
 				where voucher_type = %s and voucher_no = %s
-					and item_code = %s and warehouse=%s limit 1""",
-				(self.doctype, against_document, item_code, warehouse))
+					and item_code = %s limit 1""",
+				(self.doctype, against_document, item_code))
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate
@@ -257,8 +257,7 @@ class StockController(AccountsController):
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
 				return_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
-					return_rate = self.get_incoming_rate_for_sales_return(d.item_code,
-						d.warehouse, self.return_against)
+					return_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
 
 				# On cancellation or if return entry submission, make stock ledger entry for
 				# target warehouse first, to update serial no values properly

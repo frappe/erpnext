@@ -236,11 +236,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	s_warehouse: function(doc, cdt, cdn) {
-
+		this.get_warehouse_details(doc, cdt, cdn)
 	},
 
 	t_warehouse: function(doc, cdt, cdn) {
-		this.s_warehouse(doc, cdt, cdn);
+		this.get_warehouse_details(doc, cdt, cdn)
 	},
 
 	get_warehouse_details: function(doc, cdt, cdn) {

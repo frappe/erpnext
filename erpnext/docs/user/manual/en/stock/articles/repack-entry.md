@@ -1,16 +1,14 @@
-<h1>Repack Entry</h1>
+#Repack Entry
 
-<h1>Repack Entry</h1>
-
-If you buy items in bulk to be repacked into smaller packs, you can create a **Stock Entry** of type "Repack". For example, item bought in tons can be repacked into Kgs. 
+Repack Entry is created for item bought in bulk, which is being packed into smaller packages. For example, item bought in tons can be repacked into Kgs. 
 
 Notes:
-1. Separate purchase and repacked Items must be made.
+1. Purchase Item and repack will be have different Item Codes.
 2. Repack entry can be made with or without BOM (Bill of Material).
 
-Let's check below scenario to understand this better.
+In a Repack Entry, there can be one or more than one repack items. Let's check below scenario to understand this better.
 
-Assume you buy crude oil in barrel, and get diesel and gasoline as its output. To create production entry, go to:
+Assume we are buying boxes of spray paint of specific colour (Green, Blue etc). And later re-bundling to create packs having multiple colours of spray paint (Blue-Green, Green-Yellow etc.) in them.
 
 #### 1. New Stock Entry
 
@@ -22,14 +20,16 @@ Select Purpose as 'Repack Entry'.
 
 For raw-material/input item, only Source Warehouse will be provided.
 
-For repacked/production item, only Target Warehouse will be entered. You will have to provide valuation for the repacked/production item.
+For repacked/output items, only Target Warehouse will be provided. You will have to provide valuation for the repack items.
 
-![New STE]({{docs_base_url}}/assets/img/articles/Selection_071.png)
+<img alt="Repack Entry" class="screenshot" src="{{docs_base_url}}/assets/img/articles/repack-1.png">
+
+Update Qty for all the items selected.
 
 #### 3. Submit Stock Entry
 
-On submitting Stock Entry, stock of input item will be reduced from Source Warehouse, and stock of repacked/production item will be added in the Target Warehouse.
+On submitting Stock Entry, stock of input item will be reduced from Source Warehouse, and stock of repack/output item will be added in the Target Warehouse.
 
-![New STE]({{docs_base_url}}/assets/img/articles/Selection_072.png)
+<img alt="Repack Stock Entry" class="screenshot" src="{{docs_base_url}}/assets/img/articles/repack-2.png">
 
 <!-- markdown --> 

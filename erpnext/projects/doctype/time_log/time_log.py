@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cstr, flt, get_datetime, get_time, getdate
+from frappe.utils import flt, get_datetime, get_time, getdate
 from dateutil.relativedelta import relativedelta
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 
@@ -93,14 +93,12 @@ class TimeLog(Document):
 				(%(from_time)s > from_time and %(from_time)s < to_time) or
 				(%(from_time)s = from_time and %(to_time)s = to_time))
 			and name!=%(name)s
-			and ifnull(task, "")=%(task)s
 			and docstatus < 2""".format(fieldname),
 			{
 				"val": self.get(fieldname),
 				"from_time": self.from_time,
 				"to_time": self.to_time,
-				"name": self.name or "No Name",
-				"task": cstr(self.task)
+				"name": self.name or "No Name"
 			}, as_dict=True)
 
 		return existing[0] if existing else None

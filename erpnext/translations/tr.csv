@@ -43,6 +43,7 @@ DocType: Purchase Order,% Billed,% Faturalanan
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +43,Exchange Rate must be same as {0} {1} ({2}),Döviz Kuru aynı olmalıdır {0} {1} ({2})
 DocType: Sales Invoice,Customer Name,Müşteri Adı
 DocType: Sales Invoice,Customer Name,Müşteri Adı
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +129,Bank account cannot be named as {0},Banka hesabı olarak adlandırılan olamaz {0}
 DocType: Features Setup,"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Para birimi, kur oranı,ihracat toplamı, bütün ihracat toplamı vb. İrsaliye'de, POS'da Fiyat Teklifinde, Satış Faturasında, Satış Emrinde vb. mevcuttur."
 DocType: Account,Heads (or groups) against which Accounting Entries are made and balances are maintained.,Kafaları (veya gruplar) kendisine karşı Muhasebe Girişler yapılır ve dengeler korunur.
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +177,Outstanding for {0} cannot be less than zero ({1}),{0} için bekleyen sıfırdan az olamaz ({1})
@@ -98,8 +99,8 @@ DocType: Production Order Operation,Work In Progress,Devam eden iş
 DocType: Employee,Holiday List,Tatil Listesi
 DocType: Employee,Holiday List,Tatil Listesi
 DocType: Time Log,Time Log,Günlük
-apps/erpnext/erpnext/public/js/setup_wizard.js +292,Accountant,Muhasebeci
-apps/erpnext/erpnext/public/js/setup_wizard.js +292,Accountant,Muhasebeci
+apps/erpnext/erpnext/public/js/setup_wizard.js +204,Accountant,Muhasebeci
+apps/erpnext/erpnext/public/js/setup_wizard.js +204,Accountant,Muhasebeci
 DocType: Cost Center,Stock User,Hisse Senedi Kullanıcı
 DocType: Company,Phone No,Telefon No
 DocType: Time Log,"Log of Activities performed by users against Tasks that can be used for tracking time, billing.","Etkinlikler Günlüğü, fatura zamanlı izleme için kullanılabilir Görevler karşı kullanıcılar tarafından seslendirdi."
@@ -116,8 +117,8 @@ apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +38,
 DocType: Bin,Quantity Requested for Purchase,Alım için İstenen miktar
 DocType: Rename Tool,"Attach .csv file with two columns, one for the old name and one for the new name","Iki sütun, eski adı diğeri yeni isim biriyle .csv dosya eklemek"
 DocType: Packed Item,Parent Detail docname,Ana Detay belgesi adı
-apps/erpnext/erpnext/public/js/setup_wizard.js +380,Kg,Kilogram
-apps/erpnext/erpnext/public/js/setup_wizard.js +380,Kg,Kilogram
+apps/erpnext/erpnext/public/js/setup_wizard.js +292,Kg,Kilogram
+apps/erpnext/erpnext/public/js/setup_wizard.js +292,Kg,Kilogram
 apps/erpnext/erpnext/config/hr.py +48,Opening for a Job.,İş Açılışı.
 DocType: Item Attribute,Increment,Artım
 apps/erpnext/erpnext/public/js/stock_analytics.js +63,Select Warehouse...,Warehouse Seçiniz ...
@@ -127,7 +128,7 @@ apps/erpnext/erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py +22,Sam
 DocType: Employee,Married,Evli
 DocType: Employee,Married,Evli
 apps/erpnext/erpnext/accounts/party.py +38,Not permitted for {0},Izin verilmez {0}
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +396,Stock cannot be updated against Delivery Note {0},Stok İrsaliye {0} karşısı güncellenmez
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +399,Stock cannot be updated against Delivery Note {0},Stok İrsaliye {0} karşısı güncellenmez
 DocType: Payment Reconciliation,Reconcile,Uzlaştırmak
 DocType: Payment Reconciliation,Reconcile,Uzlaştırmak
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +30,Grocery,Bakkal
@@ -185,7 +186,7 @@ apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +33,Su
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +33,Supplier Type / Supplier,Tedarikçi Türü / Tedarikçi
 DocType: Naming Series,Prefix,Önek
 DocType: Naming Series,Prefix,Önek
-apps/erpnext/erpnext/public/js/setup_wizard.js +377,Consumable,Tüketilir
+apps/erpnext/erpnext/public/js/setup_wizard.js +289,Consumable,Tüketilir
 DocType: Upload Attendance,Import Log,İthalat Günlüğü
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.js +19,Send,Gönder
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.js +19,Send,Gönder
@@ -223,7 +224,7 @@ apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +14,Broadcasting,Yayın
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +14,Broadcasting,Yayın
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +140,Execution,Yerine Getirme
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +140,Execution,Yerine Getirme
-apps/erpnext/erpnext/public/js/setup_wizard.js +114,The first user will become the System Manager (you can change this later).,Sistem Yöneticisi olacak ilk kullanıcı (bu daha sonra değiştirebilirsiniz).
+apps/erpnext/erpnext/public/js/setup_wizard.js +26,The first user will become the System Manager (you can change this later).,Sistem Yöneticisi olacak ilk kullanıcı (bu daha sonra değiştirebilirsiniz).
 apps/erpnext/erpnext/config/manufacturing.py +39,Details of the operations carried out.,Operasyonların detayları gerçekleştirdi.
 DocType: Serial No,Maintenance Status,Bakım Durumu
 DocType: Serial No,Maintenance Status,Bakım Durumu
@@ -335,7 +336,7 @@ DocType: Purchase Invoice Item,Expense Head,Gider Başlığı
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +86,Please select Charge Type first,İlk şarj türünü seçiniz
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41,Latest,Son
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41,Latest,Son
-apps/erpnext/erpnext/public/js/setup_wizard.js +143,Max 5 characters,En fazla 5 karakter
+apps/erpnext/erpnext/public/js/setup_wizard.js +55,Max 5 characters,En fazla 5 karakter
 DocType: Employee,The first Leave Approver in the list will be set as the default Leave Approver,İlk kullanıcı sistem yöneticisi olacaktır (daha sonra değiştirebilirsiniz)
 apps/erpnext/erpnext/config/desktop.py +73,Learn,Öğrenin
 apps/erpnext/erpnext/projects/doctype/activity_type/activity_type.js +3,Activity Cost per Employee,Çalışan başına Etkinlik Maliyeti
@@ -507,7 +508,7 @@ DocType: Journal Entry,Accounts Payable,Vadesi gelmiş hesaplar
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.js +24,Add Subscribers,Abone Ekle
 apps/erpnext/erpnext/public/js/feature_setup.js +220,""" does not exists",""" mevcut değildir"
 DocType: Pricing Rule,Valid Upto,Tarihine kadar geçerli
-apps/erpnext/erpnext/public/js/setup_wizard.js +322,List a few of your customers. They could be organizations or individuals.,Müşterilerinizin birkaçını listeleyin. Bunlar kuruluşlar veya bireyler olabilir.
+apps/erpnext/erpnext/public/js/setup_wizard.js +234,List a few of your customers. They could be organizations or individuals.,Müşterilerinizin birkaçını listeleyin. Bunlar kuruluşlar veya bireyler olabilir.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +143,Direct Income,Doğrudan Gelir
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +143,Direct Income,Doğrudan Gelir
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +33,"Can not filter based on Account, if grouped by Account","Hesap, olarak gruplandırıldı ise Hesaba dayalı filtreleme yapamaz"
@@ -659,7 +660,7 @@ DocType: Sales Person,Sales Person Targets,Satış Personeli Hedefleri
 DocType: Production Order Operation,In minutes,Dakika içinde
 DocType: Issue,Resolution Date,Karar Tarihi
 DocType: Issue,Resolution Date,Karar Tarihi
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +663,Please set default Cash or Bank account in Mode of Payment {0},{0} Ödeme şeklinde varsayılan nakit veya banka hesabı ayarlayınız
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +666,Please set default Cash or Bank account in Mode of Payment {0},{0} Ödeme şeklinde varsayılan nakit veya banka hesabı ayarlayınız
 DocType: Selling Settings,Customer Naming By,Adlandırılan Müşteri
 apps/erpnext/erpnext/accounts/doctype/account/account.js +67,Convert to Group,Gruba Dönüştürmek
 DocType: Activity Cost,Activity Type,Faaliyet Türü
@@ -830,11 +831,11 @@ DocType: Company,Default Bank Account,Varsayılan Banka Hesabı
 DocType: Company,Default Bank Account,Varsayılan Banka Hesabı
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +47,"To filter based on Party, select Party Type first",Parti dayalı filtrelemek için seçin Parti ilk yazınız
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +48,'Update Stock' can not be checked because items are not delivered via {0},'Stok Güncelle' seçilemez çünkü ürünler {0} ile teslim edilmemiş.
-apps/erpnext/erpnext/public/js/setup_wizard.js +380,Nos,Numaralar
+apps/erpnext/erpnext/public/js/setup_wizard.js +292,Nos,Numaralar
 DocType: Item,Items with higher weightage will be shown higher,Yüksek weightage Öğeler yüksek gösterilir
 DocType: Bank Reconciliation Detail,Bank Reconciliation Detail,Banka Uzlaşma Detay
 DocType: Bank Reconciliation Detail,Bank Reconciliation Detail,Banka Uzlaşma Detay
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +655,My Invoices,Benim Faturalar
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +658,My Invoices,Benim Faturalar
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py +43,No employee found,Çalışan bulunmadı
 DocType: Purchase Order,Stopped,Durduruldu
 DocType: Purchase Order,Stopped,Durduruldu
@@ -913,7 +914,7 @@ DocType: Salary Slip,Working Days,Çalışma Günleri
 DocType: Serial No,Incoming Rate,Gelen Oranı
 DocType: Packing Slip,Gross Weight,Brüt Ağırlık
 DocType: Packing Slip,Gross Weight,Brüt Ağırlık
-apps/erpnext/erpnext/public/js/setup_wizard.js +158,The name of your company for which you are setting up this system.,Bu sistemi kurduğunu şirketinizin adı
+apps/erpnext/erpnext/public/js/setup_wizard.js +70,The name of your company for which you are setting up this system.,Bu sistemi kurduğunu şirketinizin adı
 DocType: HR Settings,Include holidays in Total no. of Working Days,Çalışma günlerinin toplam sayısı ile tatilleri dahil edin
 DocType: Job Applicant,Hold,Muhafaza et
 DocType: Employee,Date of Joining,Katılma Tarihi
@@ -961,7 +962,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +173,Row {0
 DocType: Mode of Payment Account,Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,Bu mod seçildiğinde Varsayılan Banka / Kasa hesabı otomatik olarak POS Faturada güncellenecektir.
 DocType: Employee,Permanent Address Is,Kalıcı Adres
 DocType: Production Order Operation,Operation completed for how many finished goods?,Operasyon kaç mamul tamamlandı?
-apps/erpnext/erpnext/public/js/setup_wizard.js +252,The Brand,Marka
+apps/erpnext/erpnext/public/js/setup_wizard.js +164,The Brand,Marka
 apps/erpnext/erpnext/controllers/status_updater.py +165,Allowance for over-{0} crossed for Item {1}.,{1} den fazla Ürün için {0} üzerinde ödenek
 DocType: Employee,Exit Interview Details,Çıkış Görüşmesi Detayları
 DocType: Item,Is Purchase Item,Satın Alma Maddesi
@@ -1008,11 +1009,11 @@ DocType: Opportunity,Walk In,Rezervasyonsuz Müşteri
 DocType: Item,Inspection Criteria,Muayene Kriterleri
 apps/erpnext/erpnext/config/accounts.py +101,Tree of finanial Cost Centers.,Finansal Maliyet Merkezleri Ağacı
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Aktarılan
-apps/erpnext/erpnext/public/js/setup_wizard.js +253,Upload your letter head and logo. (you can edit them later).,Mektup baş ve logosu yükleyin. (Daha sonra bunları düzenleyebilirsiniz).
+apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Mektup baş ve logosu yükleyin. (Daha sonra bunları düzenleyebilirsiniz).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Beyaz
 DocType: SMS Center,All Lead (Open),Bütün Başlıklar (Açık)
 DocType: Purchase Invoice,Get Advances Paid,Avansları Öde
-apps/erpnext/erpnext/public/js/setup_wizard.js +112,Attach Your Picture,Resminizi Ekleyin
+apps/erpnext/erpnext/public/js/setup_wizard.js +24,Attach Your Picture,Resminizi Ekleyin
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +631,Make ,Yapmak
 DocType: Journal Entry,Total Amount in Words,Sözlü Toplam Tutar
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +7,There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,Hata oluştu. Bunun sebebi formu kaydetmemeniz olabilir. Sorun devam ederse support@erpnext.com adresi ile iltişime geçiniz
@@ -1070,8 +1071,8 @@ DocType: Tax Rule,Shipping State,Nakliye Devlet
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +61,Item must be added using 'Get Items from Purchase Receipts' button,Ürün düğmesi 'satın alma makbuzlarını Öğeleri alın' kullanılarak eklenmelidir
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +126,Sales Expenses,Satış Giderleri
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +126,Sales Expenses,Satış Giderleri
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +128,Standard Buying,Standart Satın Alma
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +128,Standard Buying,Standart Satın Alma
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +132,Standard Buying,Standart Satın Alma
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +132,Standard Buying,Standart Satın Alma
 DocType: GL Entry,Against,Karşı
 DocType: Item,Default Selling Cost Center,Standart Satış Maliyet Merkezi
 DocType: Item,Default Selling Cost Center,Standart Satış Maliyet Merkezi
@@ -1096,7 +1097,7 @@ DocType: Time Log Batch,updated via Time Logs,Zaman Kayıtlar üzerinden güncel
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Ortalama Yaş
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Ortalama Yaş
 DocType: Opportunity,Your sales person who will contact the customer in future,Müşteriyle ileride irtibat kuracak satış kişiniz
-apps/erpnext/erpnext/public/js/setup_wizard.js +344,List a few of your suppliers. They could be organizations or individuals.,Tedarikçilerinizin birkaçını listeleyin. Bunlar kuruluşlar veya bireyler olabilir.
+apps/erpnext/erpnext/public/js/setup_wizard.js +256,List a few of your suppliers. They could be organizations or individuals.,Tedarikçilerinizin birkaçını listeleyin. Bunlar kuruluşlar veya bireyler olabilir.
 DocType: Company,Default Currency,Varsayılan Para Birimi
 DocType: Contact,Enter designation of this Contact,Bu irtibatın görevini girin
 DocType: Expense Claim,From Employee,Çalışanlardan
@@ -1206,7 +1207,7 @@ apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41,Earliest,En e
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41,Earliest,En erken
 apps/erpnext/erpnext/stock/doctype/item/item.py +444,"An Item Group exists with same name, please change the item name or rename the item group","Bir Ürün grubu aynı isimle bulunuyorsa, lütfen Ürün veya Ürün grubu adını değiştirin"
 DocType: Production Order,Manufacture against Sales Order,Satış Emrine Karşı Üretim
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +444,Rest Of The World,Dünyanın geri kalanı
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +448,Rest Of The World,Dünyanın geri kalanı
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +81,The Item {0} cannot have Batch,Öğe {0} Toplu olamaz
 ,Budget Variance Report,Bütçe Fark Raporu
 DocType: Salary Slip,Gross Pay,Brüt Ödeme
@@ -1259,7 +1260,7 @@ apps/erpnext/erpnext/controllers/selling_controller.py +163,Row {0}: Qty is mand
 apps/erpnext/erpnext/controllers/selling_controller.py +163,Row {0}: Qty is mandatory,Satır {0}: Miktar zorunludur
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +8,Agriculture,Tarım
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +8,Agriculture,Tarım
-apps/erpnext/erpnext/public/js/setup_wizard.js +365,Your Products or Services,Ürünleriniz veya hizmetleriniz
+apps/erpnext/erpnext/public/js/setup_wizard.js +277,Your Products or Services,Ürünleriniz veya hizmetleriniz
 DocType: Mode of Payment,Mode of Payment,Ödeme Şekli
 DocType: Mode of Payment,Mode of Payment,Ödeme Şekli
 apps/erpnext/erpnext/stock/doctype/item/item.py +121,Website Image should be a public file or website URL,Web Sitesi Resim kamu dosya veya web sitesi URL olmalıdır
@@ -1275,7 +1276,7 @@ DocType: Serial No,Serial No Details,Seri No Detayları
 DocType: Purchase Invoice Item,Item Tax Rate,Ürün Vergi Oranı
 DocType: Purchase Invoice Item,Item Tax Rate,Ürün Vergi Oranı
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +119,"For {0}, only credit accounts can be linked against another debit entry","{0}, sadece kredi hesapları başka bir ödeme girişine karşı bağlantılı olabilir için"
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +481,Delivery Note {0} is not submitted,İrsaliye {0} teslim edilmedi
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +484,Delivery Note {0} is not submitted,İrsaliye {0} teslim edilmedi
 apps/erpnext/erpnext/stock/get_item_details.py +136,Item {0} must be a Sub-contracted Item,Ürün {0} bir taşeron ürünü olmalıdır
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +41,Capital Equipments,Sermaye Ekipmanları
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +41,Capital Equipments,Sermaye Ekipmanları
@@ -1429,7 +1430,7 @@ DocType: Journal Entry Account,Account Balance,Hesap Bakiyesi
 DocType: Journal Entry Account,Account Balance,Hesap Bakiyesi
 apps/erpnext/erpnext/config/accounts.py +112,Tax Rule for transactions.,Işlemler için vergi Kural.
 DocType: Rename Tool,Type of document to rename.,Yeniden adlandırılacak Belge Türü.
-apps/erpnext/erpnext/public/js/setup_wizard.js +384,We buy this Item,Bu ürünü alıyoruz
+apps/erpnext/erpnext/public/js/setup_wizard.js +296,We buy this Item,Bu ürünü alıyoruz
 DocType: Address,Billing,Faturalama
 DocType: Address,Billing,Faturalama
 DocType: Purchase Invoice,Total Taxes and Charges (Company Currency),Toplam Vergi ve Harçlar (Şirket Para Birimi)
@@ -1438,8 +1439,8 @@ DocType: Shipping Rule,Shipping Account,Nakliye Hesap
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +43,Scheduled to send to {0} recipients,{0} gönderilmek üzere programlandı
 DocType: Quality Inspection,Readings,Okumalar
 DocType: Stock Entry,Total Additional Costs,Toplam Ek Maliyetler
-apps/erpnext/erpnext/public/js/setup_wizard.js +377,Sub Assemblies,Alt Kurullar
-apps/erpnext/erpnext/public/js/setup_wizard.js +377,Sub Assemblies,Alt Kurullar
+apps/erpnext/erpnext/public/js/setup_wizard.js +289,Sub Assemblies,Alt Kurullar
+apps/erpnext/erpnext/public/js/setup_wizard.js +289,Sub Assemblies,Alt Kurullar
 DocType: Shipping Rule Condition,To Value,Değer Vermek
 DocType: Shipping Rule Condition,To Value,Değer Vermek
 DocType: Supplier,Stock Manager,Stok Müdürü
@@ -1470,15 +1471,15 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +105,Government,Devl
 apps/erpnext/erpnext/config/stock.py +263,Item Variants,Öğe Türevleri
 DocType: Company,Services,Servisler
 DocType: Company,Services,Servisler
-apps/erpnext/erpnext/accounts/report/financial_statements.py +151,Total ({0}),Toplam ({0})
-apps/erpnext/erpnext/accounts/report/financial_statements.py +151,Total ({0}),Toplam ({0})
+apps/erpnext/erpnext/accounts/report/financial_statements.py +154,Total ({0}),Toplam ({0})
+apps/erpnext/erpnext/accounts/report/financial_statements.py +154,Total ({0}),Toplam ({0})
 DocType: Cost Center,Parent Cost Center,Ana Maliyet Merkezi
 DocType: Sales Invoice,Source,Kaynak
 DocType: Sales Invoice,Source,Kaynak
 DocType: Leave Type,Is Leave Without Pay,Pay Yapmadan mı
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +129,No records found in the Payment table,Ödeme tablosunda kayıt bulunamadı
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +129,No records found in the Payment table,Ödeme tablosunda kayıt bulunamadı
-apps/erpnext/erpnext/public/js/setup_wizard.js +153,Financial Year Start Date,Mali Yıl Başlangıç Tarihi
+apps/erpnext/erpnext/public/js/setup_wizard.js +65,Financial Year Start Date,Mali Yıl Başlangıç Tarihi
 DocType: Employee External Work History,Total Experience,Toplam Deneyim
 DocType: Employee External Work History,Total Experience,Toplam Deneyim
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +265,Packing Slip(s) cancelled,Ambalaj Makbuzları İptal Edildi
@@ -1518,10 +1519,10 @@ apps/erpnext/erpnext/config/stock.py +115,Brand master.,Esas marka.
 DocType: Sales Invoice Item,Brand Name,Marka Adı
 DocType: Sales Invoice Item,Brand Name,Marka Adı
 DocType: Purchase Receipt,Transporter Details,Taşıyıcı Detayları
-apps/erpnext/erpnext/public/js/setup_wizard.js +380,Box,Kutu
-apps/erpnext/erpnext/public/js/setup_wizard.js +380,Box,Kutu
-apps/erpnext/erpnext/public/js/setup_wizard.js +137,The Organization,Organizasyon
-apps/erpnext/erpnext/public/js/setup_wizard.js +137,The Organization,Organizasyon
+apps/erpnext/erpnext/public/js/setup_wizard.js +292,Box,Kutu
+apps/erpnext/erpnext/public/js/setup_wizard.js +292,Box,Kutu
+apps/erpnext/erpnext/public/js/setup_wizard.js +49,The Organization,Organizasyon
+apps/erpnext/erpnext/public/js/setup_wizard.js +49,The Organization,Organizasyon
 DocType: Monthly Distribution,Monthly Distribution,Aylık Dağılımı
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +68,Receiver List is empty. Please create Receiver List,Alıcı listesi boş. Alıcı listesi oluşturunuz
 DocType: Production Plan Sales Order,Production Plan Sales Order,Üretim Planı Satış Siparişi
@@ -1569,7 +1570,7 @@ DocType: SMS Center,Receiver List,Alıcı Listesi
 DocType: Payment Tool Detail,Payment Amount,Ödeme Tutarı
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +46,Consumed Amount,Tüketilen Tutar
 apps/erpnext/erpnext/public/js/pos/pos.js +497,{0} View,{0} Görüntüle
-apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +89,Net Change in Cash,Nakit Net Değişim
+apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +93,Net Change in Cash,Nakit Net Değişim
 DocType: Salary Structure Deduction,Salary Structure Deduction,Maaş Yapısı Kesintisi
 DocType: Salary Structure Deduction,Salary Structure Deduction,Maaş Yapısı Kesintisi
 apps/erpnext/erpnext/stock/doctype/item/item.py +344,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Ölçü Birimi {0} Dönüşüm katsayısı tablosunda birden fazla kez girildi.
@@ -1663,8 +1664,8 @@ apps/erpnext/erpnext/config/support.py +43,Single unit of an Item.,Bir Ürünün
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +217,Time Log Batch {0} must be 'Submitted',Günlük Seri {0} 'Teslim edilmelidir'
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Her Stok Hareketi için Muhasebe kaydı oluştur
 DocType: Leave Allocation,Total Leaves Allocated,Ayrılan toplam izinler
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +391,Warehouse required at Row No {0},Satır No gerekli Depo {0}
-apps/erpnext/erpnext/public/js/setup_wizard.js +169,Please enter valid Financial Year Start and End Dates,Geçerli Mali Yılı Başlangıç ve Bitiş Tarihleri girin
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +394,Warehouse required at Row No {0},Satır No gerekli Depo {0}
+apps/erpnext/erpnext/public/js/setup_wizard.js +81,Please enter valid Financial Year Start and End Dates,Geçerli Mali Yılı Başlangıç ve Bitiş Tarihleri girin
 DocType: Employee,Date Of Retirement,Emeklilik Tarihiniz
 DocType: Employee,Date Of Retirement,Emeklilik Tarihiniz
 DocType: Upload Attendance,Get Template,Şablon alın
@@ -1678,8 +1679,8 @@ apps/erpnext/erpnext/public/js/templates/contact_list.html +2,New Contact,Yeni b
 DocType: Territory,Parent Territory,Ana Bölge
 DocType: Quality Inspection Reading,Reading 2,2 Okuma
 DocType: Stock Entry,Material Receipt,Malzeme Alındısı
-apps/erpnext/erpnext/public/js/setup_wizard.js +376,Products,Ürünler
-apps/erpnext/erpnext/public/js/setup_wizard.js +376,Products,Ürünler
+apps/erpnext/erpnext/public/js/setup_wizard.js +288,Products,Ürünler
+apps/erpnext/erpnext/public/js/setup_wizard.js +288,Products,Ürünler
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +47,Party Type and Party is required for Receivable / Payable account {0},Parti Tipi ve Parti Alacak / Borç hesabı için gereklidir {0}
 DocType: Item,"If this item has variants, then it cannot be selected in sales orders etc.","Bu öğeyi varyantları varsa, o zaman satış siparişleri vb seçilemez"
 DocType: Lead,Next Contact By,Sonraki İrtibat
@@ -1691,7 +1692,7 @@ DocType: Purchase Invoice,Notification Email Address,Bildirim E-posta Adresi
 DocType: Purchase Invoice,Notification Email Address,Bildirim E-posta Adresi
 DocType: Payment Tool,Find Invoices to Match,Maç için Faturalar bul
 ,Item-wise Sales Register,Ürün bilgisi Satış Kaydı
-apps/erpnext/erpnext/public/js/setup_wizard.js +147,"e.g. ""XYZ National Bank""","örneğin ""XYZ Ulusal Bankası """
+apps/erpnext/erpnext/public/js/setup_wizard.js +59,"e.g. ""XYZ National Bank""","örneğin ""XYZ Ulusal Bankası """
 DocType: Purchase Taxes and Charges,Is this Tax included in Basic Rate?,Bu Vergi Temel Br.Fiyata dahil mi?
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +61,Total Target,Toplam Hedef
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.js +29,Shopping Cart is enabled,Alışveriş Sepeti etkindir
@@ -1756,7 +1757,7 @@ apps/erpnext/erpnext/config/selling.py +153,Bundle items at time of sale.,Satı�
 DocType: Sales Order Item,Actual Qty,Gerçek Adet
 DocType: Sales Invoice Item,References,Kaynaklar
 DocType: Quality Inspection Reading,Reading 10,10 Okuma
-apps/erpnext/erpnext/public/js/setup_wizard.js +366,"List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.","Sattığınız veya satın aldığınız ürün veya hizmetleri listeleyin, başladığınızda Ürün grubunu, ölçü birimini ve diğer özellikleri işaretlediğinizden emin olun"
+apps/erpnext/erpnext/public/js/setup_wizard.js +278,"List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.","Sattığınız veya satın aldığınız ürün veya hizmetleri listeleyin, başladığınızda Ürün grubunu, ölçü birimini ve diğer özellikleri işaretlediğinizden emin olun"
 DocType: Hub Settings,Hub Node,Hub Düğüm
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +78,You have entered duplicate items. Please rectify and try again.,Yinelenen Ürünler girdiniz. Lütfen düzeltip yeniden deneyin.
 apps/erpnext/erpnext/controllers/item_variant.py +65,Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values,Değeri {0} özniteliği için {1} geçerli Öğe listesinde yok Değerler Özellik
@@ -1804,8 +1805,8 @@ DocType: Cost Center,Budget,Bütçe
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +41,"Budget cannot be assigned against {0}, as it's not an Income or Expense account","Bir gelir ya da gider hesabı değil gibi Bütçe, karşı {0} atanamaz"
 apps/erpnext/erpnext/selling/report/sales_person_target_variance_item_group_wise/sales_person_target_variance_item_group_wise.py +51,Achieved,Arşivlendi
 apps/erpnext/erpnext/selling/page/sales_analytics/sales_analytics.js +65,Territory / Customer,Bölge / Müşteri
-apps/erpnext/erpnext/public/js/setup_wizard.js +312,e.g. 5,örneğin 5
-apps/erpnext/erpnext/public/js/setup_wizard.js +312,e.g. 5,örneğin 5
+apps/erpnext/erpnext/public/js/setup_wizard.js +224,e.g. 5,örneğin 5
+apps/erpnext/erpnext/public/js/setup_wizard.js +224,e.g. 5,örneğin 5
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +150,Row {0}: Allocated amount {1} must be less than or equals to invoice outstanding amount {2},Satır {0}: Tahsis miktar {1} daha az ya da olağanüstü miktarda fatura eşit olmalıdır {2}
 DocType: Sales Invoice,In Words will be visible once you save the Sales Invoice.,Satış faturasını kaydettiğinizde görünür olacaktır.
 DocType: Item,Is Sales Item,Satış Maddesi
@@ -1815,7 +1816,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +69,Item {0} is not se
 DocType: Maintenance Visit,Maintenance Time,Bakım Zamanı
 DocType: Maintenance Visit,Maintenance Time,Bakım Zamanı
 ,Amount to Deliver,Tutar sunun
-apps/erpnext/erpnext/public/js/setup_wizard.js +374,A Product or Service,Ürün veya Hizmet
+apps/erpnext/erpnext/public/js/setup_wizard.js +286,A Product or Service,Ürün veya Hizmet
 DocType: Naming Series,Current Value,Mevcut değer
 DocType: Naming Series,Current Value,Mevcut değer
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +171,{0} created,{0} oluşturuldu
@@ -1860,8 +1861,8 @@ DocType: Quality Inspection Reading,Acceptance Criteria,Onaylanma Kriterleri
 DocType: Item Attribute,Attribute Name,Öznitelik Adı
 apps/erpnext/erpnext/controllers/selling_controller.py +236,Item {0} must be Sales or Service Item in {1},Ürün {0} {1} de Satış veya Hizmet ürünü olmalıdır
 DocType: Item Group,Show In Website,Web sitesinde Göster
-apps/erpnext/erpnext/public/js/setup_wizard.js +375,Group,Grup
-apps/erpnext/erpnext/public/js/setup_wizard.js +375,Group,Grup
+apps/erpnext/erpnext/public/js/setup_wizard.js +287,Group,Grup
+apps/erpnext/erpnext/public/js/setup_wizard.js +287,Group,Grup
 DocType: Task,Expected Time (in hours),(Saat) Beklenen Zaman
 ,Qty to Order,Sipariş Miktarı
 DocType: Features Setup,"To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Product Bundle, Sales Order, Serial No","Aşağıdaki belgeler İrsaliye, Fırsat, Malzeme Request, Öğe, Satınalma Siparişi, Satınalma Fiş, Makbuz Alıcı, Kotasyon, Satış Faturası, Ürün Paketi, Satış Sipariş, Seri No markası izlemek için"
@@ -1882,8 +1883,8 @@ DocType: Employee,Resignation Letter Date,İstifa Mektubu Tarihi
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +37,Pricing Rules are further filtered based on quantity.,Fiyatlandırma Kuralları miktara dayalı olarak tekrar filtrelenir.
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +61,Repeat Customer Revenue,Tekrar Müşteri Gelir
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +51,{0} ({1}) must have role 'Expense Approver',{0} ({1}) rolü 'Gider onaylayansanız' olmalıdır
-apps/erpnext/erpnext/public/js/setup_wizard.js +380,Pair,Çift
-apps/erpnext/erpnext/public/js/setup_wizard.js +380,Pair,Çift
+apps/erpnext/erpnext/public/js/setup_wizard.js +292,Pair,Çift
+apps/erpnext/erpnext/public/js/setup_wizard.js +292,Pair,Çift
 DocType: Bank Reconciliation Detail,Against Account,Hesap karşılığı
 DocType: Maintenance Schedule Detail,Actual Date,Gerçek Tarih
 DocType: Item,Has Batch No,Parti No Var
@@ -1893,7 +1894,7 @@ DocType: Employee,Personal Details,Kişisel Bilgiler
 ,Maintenance Schedules,Bakım Programları
 ,Quotation Trends,Teklif Trendleri
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +139,Item Group not mentioned in item master for item {0},Ürün {0} içim Ürün alanında Ürün grubu belirtilmemiş
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +307,Debit To account must be a Receivable account,Hesaba için Bankamatik bir Alacak hesabı olması gerekir
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +310,Debit To account must be a Receivable account,Hesaba için Bankamatik bir Alacak hesabı olması gerekir
 DocType: Shipping Rule Condition,Shipping Amount,Kargo Tutarı
 DocType: Shipping Rule Condition,Shipping Amount,Kargo Tutarı
 ,Pending Amount,Bekleyen Tutar
@@ -1913,7 +1914,7 @@ DocType: Bank Reconciliation,Include Reconciled Entries,Mutabık girdileri dahil
 apps/erpnext/erpnext/config/accounts.py +41,Tree of finanial accounts.,Finansal Hesaplar Ağacı
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Tüm çalışan tipleri için kabul ise boş bırakın
 DocType: Landed Cost Voucher,Distribute Charges Based On,Dağıt Masraflar Dayalı
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +317,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Hesap {0} Madde {1} Varlık Maddesi olmak üzere 'Sabit Varlık' türünde olmalıdır
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Hesap {0} Madde {1} Varlık Maddesi olmak üzere 'Sabit Varlık' türünde olmalıdır
 DocType: HR Settings,HR Settings,İK Ayarları
 DocType: HR Settings,HR Settings,İK Ayarları
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +114,Expense Claim is pending approval. Only the Expense Approver can update status.,Gider Talebi onay bekliyor. Yalnızca Gider yetkilisi durumu güncelleyebilir.
@@ -1923,14 +1924,14 @@ apps/erpnext/erpnext/setup/doctype/company/company.py +225,Abbr can not be blank
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +50,Sports,Spor
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +50,Sports,Spor
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +61,Total Actual,Gerçek Toplam
-apps/erpnext/erpnext/public/js/setup_wizard.js +380,Unit,Birim
-apps/erpnext/erpnext/public/js/setup_wizard.js +380,Unit,Birim
+apps/erpnext/erpnext/public/js/setup_wizard.js +292,Unit,Birim
+apps/erpnext/erpnext/public/js/setup_wizard.js +292,Unit,Birim
 apps/erpnext/erpnext/stock/get_item_details.py +113,Please specify Company,Şirket belirtiniz
 apps/erpnext/erpnext/stock/get_item_details.py +113,Please specify Company,Şirket belirtiniz
 ,Customer Acquisition and Loyalty,Müşteri Edinme ve Sadakat
 ,Customer Acquisition and Loyalty,Müşteri Edinme ve Sadakat
 DocType: Purchase Receipt,Warehouse where you are maintaining stock of rejected items,Reddedilen Ürün stoklarını muhafaza ettiğiniz depo
-apps/erpnext/erpnext/public/js/setup_wizard.js +156,Your financial year ends on,Mali yılınız şu tarihte sona eriyor:
+apps/erpnext/erpnext/public/js/setup_wizard.js +68,Your financial year ends on,Mali yılınız şu tarihte sona eriyor:
 DocType: POS Profile,Price List,Fiyat listesi
 DocType: POS Profile,Price List,Fiyat listesi
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +20,{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,{0} varsayılan Mali Yıldır. Değiştirmek için tarayıcınızı yenileyiniz
@@ -2011,7 +2012,7 @@ DocType: Email Digest,Note: Email will not be sent to disabled users,Not: E-post
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +36,Select Company...,Firma Seçin ...
 DocType: Leave Control Panel,Leave blank if considered for all departments,Tüm bölümler için kabul ise boş bırakın
 apps/erpnext/erpnext/config/hr.py +95,"Types of employment (permanent, contract, intern etc.).","İstihdam (daimi, sözleşmeli, stajyer vb) Türleri."
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +360,{0} is mandatory for Item {1},{0} Ürün {1} için zorunludur
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +363,{0} is mandatory for Item {1},{0} Ürün {1} için zorunludur
 DocType: Currency Exchange,From Currency,Para biriminden
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +154,"Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row","En az bir satırda Tahsis Tutar, Fatura Türü ve Fatura Numarası seçiniz"
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +98,Sales Order required for Item {0},Ürün {0}için Satış Sipariş  gerekli
@@ -2030,7 +2031,7 @@ apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.p
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +300,New Cost Center,Yeni Maliyet Merkezi
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +300,New Cost Center,Yeni Maliyet Merkezi
 DocType: Bin,Ordered Quantity,Sipariş Edilen Miktar
-apps/erpnext/erpnext/public/js/setup_wizard.js +145,"e.g. ""Build tools for builders""","örneğin """"İnşaatçılar için inşaat araçları"
+apps/erpnext/erpnext/public/js/setup_wizard.js +57,"e.g. ""Build tools for builders""","örneğin """"İnşaatçılar için inşaat araçları"
 DocType: Quality Inspection,In Process,Süreci
 DocType: Authorization Rule,Itemwise Discount,Ürün İndirimi
 DocType: Purchase Order Item,Reference Document Type,Referans Belge Türü
@@ -2066,6 +2067,7 @@ DocType: C-Form,Received Date,Alınan Tarih
 DocType: Delivery Note,"If you have created a standard template in Sales Taxes and Charges Template, select one and click on the button below.","Satış Vergi ve Harçlar Şablon standart bir şablon oluşturdu varsa, birini seçin ve aşağıdaki butona tıklayın."
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +29,Please specify a country for this Shipping Rule or check Worldwide Shipping,Bu Nakliye Kural için bir ülke belirtin ya da Dünya Denizcilik&#39;in kontrol edin
 DocType: Stock Entry,Total Incoming Value,Toplam Gelen Değeri
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +304,Debit To is required,Bankamatik To gereklidir
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +39,Purchase Price List,Satınalma Fiyat Listesi
 DocType: Offer Letter Term,Offer Term,Teklif Dönem
 DocType: Quality Inspection,Quality Manager,Kalite Müdürü
@@ -2110,8 +2112,8 @@ apps/erpnext/erpnext/hr/report/monthly_salary_register/monthly_salary_register.p
 DocType: Bin,Actual Quantity,Gerçek Miktar
 DocType: Shipping Rule,example: Next Day Shipping,Örnek: Bir sonraki gün sevkiyat
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +188,Serial No {0} not found,Bulunamadı Seri No {0}
-apps/erpnext/erpnext/public/js/setup_wizard.js +321,Your Customers,Müşterileriniz
-apps/erpnext/erpnext/public/js/setup_wizard.js +321,Your Customers,Müşterileriniz
+apps/erpnext/erpnext/public/js/setup_wizard.js +233,Your Customers,Müşterileriniz
+apps/erpnext/erpnext/public/js/setup_wizard.js +233,Your Customers,Müşterileriniz
 DocType: Leave Block List Date,Block Date,Blok Tarih
 DocType: Sales Order,Not Delivered,Teslim Edilmedi
 DocType: Sales Order,Not Delivered,Teslim Edilmedi
@@ -2174,8 +2176,8 @@ DocType: Naming Series,User must always select,Kullanıcı her zaman seçmelidir
 DocType: Stock Settings,Allow Negative Stock,Negatif Stok izni
 DocType: Installation Note,Installation Note,Kurulum Not
 DocType: Installation Note,Installation Note,Kurulum Not
-apps/erpnext/erpnext/public/js/setup_wizard.js +301,Add Taxes,Vergi Ekle
-apps/erpnext/erpnext/public/js/setup_wizard.js +301,Add Taxes,Vergi Ekle
+apps/erpnext/erpnext/public/js/setup_wizard.js +213,Add Taxes,Vergi Ekle
+apps/erpnext/erpnext/public/js/setup_wizard.js +213,Add Taxes,Vergi Ekle
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +38,Cash Flow from Financing,Finansman Nakit Akışı
 ,Financial Analytics,Mali Analitik
 DocType: Quality Inspection,Verified By,Onaylayan Kişi
@@ -2237,7 +2239,7 @@ DocType: Payment Tool,Total Payment Amount,Toplam Ödeme Tutarı
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +145,{0} ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3},{0} ({1}) planlanan quanitity daha büyük olamaz ({2}) Üretim Sipariş {3}
 DocType: Shipping Rule,Shipping Rule Label,Kargo Kural Etiketi
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +207,Raw Materials cannot be blank.,Hammaddeler boş olamaz.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +422,"Could not update stock, invoice contains drop shipping item.","Stok güncelleme olamazdı, fatura damla nakliye öğe içeriyor."
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +425,"Could not update stock, invoice contains drop shipping item.","Stok güncelleme olamazdı, fatura damla nakliye öğe içeriyor."
 DocType: Newsletter,Test,Test
 DocType: Newsletter,Test,Test
 apps/erpnext/erpnext/stock/doctype/item/item.py +407,"As there are existing stock transactions for this item, \
@@ -2482,8 +2484,8 @@ DocType: Payment Tool Detail,Payment Tool Detail,Ödeme Aracı Detayı
 ,Sales Browser,Satış Tarayıcı
 DocType: Journal Entry,Total Credit,Toplam Kredi
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +490,Warning: Another {0} # {1} exists against stock entry {2},Uyarı: Başka {0} # {1} stok girişi karşı var {2}
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +386,Local,Yerel
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +386,Local,Yerel
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +390,Local,Yerel
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +390,Local,Yerel
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +26,Loans and Advances (Assets),Krediler ve avanslar (Varlıklar)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +26,Loans and Advances (Assets),Krediler ve avanslar (Varlıklar)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +12,Debtors,Borçlular
@@ -2811,7 +2813,7 @@ DocType: Bank Reconciliation,Bank Reconciliation,Banka Uzlaşma
 DocType: Bank Reconciliation,Bank Reconciliation,Banka Uzlaşma
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +9,Get Updates,Güncellemeler Alın
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +135,Material Request {0} is cancelled or stopped,Malzeme Talebi {0} iptal edilmiş veya durdurulmuştur
-apps/erpnext/erpnext/public/js/setup_wizard.js +395,Add a few sample records,Birkaç örnek kayıtları ekle
+apps/erpnext/erpnext/public/js/setup_wizard.js +307,Add a few sample records,Birkaç örnek kayıtları ekle
 apps/erpnext/erpnext/config/hr.py +210,Leave Management,Yönetim bırakın
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +81,Group by Account,Hesap Grubu
 DocType: Sales Order,Fully Delivered,Tamamen Teslim Edilmiş
@@ -2833,12 +2835,12 @@ apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +141,Customer 
 DocType: Sales Order,Customer's Purchase Order,Müşterinin Sipariş
 DocType: Warranty Claim,From Company,Şirketten
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +95,Value or Qty,Değer veya Miktar
-apps/erpnext/erpnext/public/js/setup_wizard.js +381,Minute,Dakika
-apps/erpnext/erpnext/public/js/setup_wizard.js +381,Minute,Dakika
+apps/erpnext/erpnext/public/js/setup_wizard.js +293,Minute,Dakika
+apps/erpnext/erpnext/public/js/setup_wizard.js +293,Minute,Dakika
 DocType: Purchase Invoice,Purchase Taxes and Charges,Alım Vergi ve Harçları
 ,Qty to Receive,Alınacak Miktar
 DocType: Leave Block List,Leave Block List Allowed,Müsaade edilen izin engel listesi
-apps/erpnext/erpnext/public/js/setup_wizard.js +108,You will use it to Login,Giriş yapmak için kullanılacak
+apps/erpnext/erpnext/public/js/setup_wizard.js +20,You will use it to Login,Giriş yapmak için kullanılacak
 DocType: Sales Partner,Retailer,Perakendeci
 DocType: Sales Partner,Retailer,Perakendeci
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +100,Credit To account must be a Balance Sheet account,Hesabın için Kredi bir bilanço hesabı olmalıdır
@@ -2940,7 +2942,7 @@ DocType: POS Profile,Write Off Account,Hesabı Kapat
 DocType: Purchase Invoice,Return Against Purchase Invoice,Karşı Satınalma Fatura Dönüş
 DocType: Item,Warranty Period (in days),(Gün) Garanti Süresi
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +16,Net Cash from Operations,Faaliyetlerden Kaynaklanan Net Nakit
-apps/erpnext/erpnext/public/js/setup_wizard.js +310,e.g. VAT,Örneğin KDV
+apps/erpnext/erpnext/public/js/setup_wizard.js +222,e.g. VAT,Örneğin KDV
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +26,Item 4,Madde 4
 DocType: Journal Entry Account,Journal Entry Account,Kayıt Girdisi Hesabı
 DocType: Shopping Cart Settings,Quotation Series,Teklif Serisi
@@ -2993,7 +2995,7 @@ DocType: Territory,Territory Targets,Bölge Hedefleri
 DocType: Territory,Territory Targets,Bölge Hedefleri
 DocType: Delivery Note,Transporter Info,Taşıyıcı Bilgisi
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Tedarik edilen Satınalma Siparişi Ürünü
-apps/erpnext/erpnext/public/js/setup_wizard.js +174,Company Name cannot be Company,Şirket Adı olamaz
+apps/erpnext/erpnext/public/js/setup_wizard.js +86,Company Name cannot be Company,Şirket Adı olamaz
 apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Baskı şablonları için antetli kağıtlar
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Baskı Şablonları için başlıklar, örneğin Proforma Fatura"
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +140,Valuation type charges can not marked as Inclusive,Değerleme tipi ücretleri dahil olarak işaretlenmiş olamaz
@@ -3063,7 +3065,7 @@ apps/erpnext/erpnext/config/accounts.py +79,Company (not Customer or Supplier) m
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +100,Please enter 'Expected Delivery Date','Beklenen Teslim Tarihi' girin
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +100,Please enter 'Expected Delivery Date','Beklenen Teslim Tarihi' girin
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +182,Delivery Notes {0} must be cancelled before cancelling this Sales Order,Satış Emri iptal edilmeden önce İrsaliyeler {0} iptal edilmelidir
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +378,Paid amount + Write Off Amount can not be greater than Grand Total,Ödenen miktar + Borç İptali  Toplamdan fazla olamaz
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +381,Paid amount + Write Off Amount can not be greater than Grand Total,Ödenen miktar + Borç İptali  Toplamdan fazla olamaz
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +78,{0} is not a valid Batch Number for Item {1},{0} Ürün {1} için geçerli bir parti numarası değildir
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +126,Note: There is not enough leave balance for Leave Type {0},Not: İzin tipi {0} için yeterli izin günü kalmamış
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.js +9,"Note: If payment is not made against any reference, make Journal Entry manually.","Not: Ödeme herhangi bir referansa karşı yapılmış değilse, elle Kayıt Girdisi yap."
@@ -3090,13 +3092,13 @@ apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +20,Item 3,Madde 3
 DocType: Purchase Order,Customer Contact Email,Müşteri İletişim E-mail
 DocType: Sales Team,Contribution (%),Katkı Payı (%)
 DocType: Sales Team,Contribution (%),Katkı Payı (%)
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +468,Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,"'Nakit veya Banka Hesabı' belirtilmediğinden ötürü, Ödeme Girdisi oluşturulmayacaktır"
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +471,Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,"'Nakit veya Banka Hesabı' belirtilmediğinden ötürü, Ödeme Girdisi oluşturulmayacaktır"
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +171,Responsibilities,Sorumluluklar
 apps/erpnext/erpnext/stock/doctype/item/item_list.js +11,Template,Şablon
 apps/erpnext/erpnext/stock/doctype/item/item_list.js +11,Template,Şablon
 DocType: Sales Person,Sales Person Name,Satış Personeli Adı
 apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +54,Please enter atleast 1 invoice in the table,Tabloya en az 1 fatura girin
-apps/erpnext/erpnext/public/js/setup_wizard.js +273,Add Users,Kullanıcı Ekle
+apps/erpnext/erpnext/public/js/setup_wizard.js +185,Add Users,Kullanıcı Ekle
 DocType: Pricing Rule,Item Group,Ürün Grubu
 DocType: Pricing Rule,Item Group,Ürün Grubu
 DocType: Task,Actual Start Date (via Time Logs),Fiili Başlangıç Tarihi (Saat Kayıtlar üzerinden)
@@ -3120,7 +3122,7 @@ DocType: Notification Control,Custom Message,Özel Mesaj
 DocType: Notification Control,Custom Message,Özel Mesaj
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +33,Investment Banking,Yatırım Bankacılığı
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +33,Investment Banking,Yatırım Bankacılığı
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +374,Cash or Bank Account is mandatory for making payment entry,Kasa veya Banka Hesabı ödeme girişi yapmak için zorunludur
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +377,Cash or Bank Account is mandatory for making payment entry,Kasa veya Banka Hesabı ödeme girişi yapmak için zorunludur
 DocType: Purchase Invoice,Price List Exchange Rate,Fiyat Listesi Döviz Kuru
 DocType: Purchase Invoice Item,Rate,Br.Fiyat
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +62,Intern,Stajyer
@@ -3191,8 +3193,8 @@ apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +54,Total cannot be zero,
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +54,Total cannot be zero,Toplam sıfır olamaz
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +16,'Days Since Last Order' must be greater than or equal to zero,'Son Siparişten bu yana geçen süre' sıfırdan büyük veya sıfıra eşit olmalıdır
 DocType: C-Form,Amended From,İtibaren değiştirilmiş
-apps/erpnext/erpnext/public/js/setup_wizard.js +377,Raw Material,Hammadde
-apps/erpnext/erpnext/public/js/setup_wizard.js +377,Raw Material,Hammadde
+apps/erpnext/erpnext/public/js/setup_wizard.js +289,Raw Material,Hammadde
+apps/erpnext/erpnext/public/js/setup_wizard.js +289,Raw Material,Hammadde
 DocType: Leave Application,Follow via Email,E-posta ile takip
 DocType: Leave Application,Follow via Email,E-posta ile takip
 DocType: Purchase Taxes and Charges,Tax Amount After Discount Amount,İndirim Tutarından sonraki vergi miktarı
@@ -3211,9 +3213,9 @@ DocType: Item,Item Code for Suppliers,Tedarikçi Ürün Kodu
 DocType: Issue,Raised By (Email),(Email)  ile talep edilen
 apps/erpnext/erpnext/setup/setup_wizard/default_website.py +72,General,Genel
 apps/erpnext/erpnext/setup/setup_wizard/default_website.py +72,General,Genel
-apps/erpnext/erpnext/public/js/setup_wizard.js +256,Attach Letterhead,Antetli Kağıt Ekleyin
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Attach Letterhead,Antetli Kağıt Ekleyin
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +272,Cannot deduct when category is for 'Valuation' or 'Valuation and Total',Kategori 'Değerleme' veya 'Toplam ve Değerleme' olduğu zaman çıkarılamaz
-apps/erpnext/erpnext/public/js/setup_wizard.js +302,"List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.","Vergi kafaları Liste (örn KDV, gümrük vb; onlar benzersiz adlara sahip olmalıdır) ve bunların standart oranları. Bu düzenlemek ve daha sonra ekleyebilirsiniz standart bir şablon oluşturmak olacaktır."
+apps/erpnext/erpnext/public/js/setup_wizard.js +214,"List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.","Vergi kafaları Liste (örn KDV, gümrük vb; onlar benzersiz adlara sahip olmalıdır) ve bunların standart oranları. Bu düzenlemek ve daha sonra ekleyebilirsiniz standart bir şablon oluşturmak olacaktır."
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +230,Serial Nos Required for Serialized Item {0},Seri Ürün{0} için Seri numaraları gereklidir
 DocType: Journal Entry,Bank Entry,Banka Girişi
 DocType: Authorization Rule,Applicable To (Designation),(Görev) için uygulanabilir
@@ -3231,8 +3233,8 @@ DocType: Quality Inspection,Item Serial No,Ürün Seri No
 DocType: Quality Inspection,Item Serial No,Ürün Seri No
 apps/erpnext/erpnext/controllers/status_updater.py +145,{0} must be reduced by {1} or you should increase overflow tolerance,{0} değeri {1} oranında azaltılmalıdır veya tolerans durumu artırılmalıdır
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +57,Total Present,Toplam Mevcut
-apps/erpnext/erpnext/public/js/setup_wizard.js +381,Hour,Saat
-apps/erpnext/erpnext/public/js/setup_wizard.js +381,Hour,Saat
+apps/erpnext/erpnext/public/js/setup_wizard.js +293,Hour,Saat
+apps/erpnext/erpnext/public/js/setup_wizard.js +293,Hour,Saat
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +145,"Serialized Item {0} cannot be updated \
 					using Stock Reconciliation","Serileştirilmiş Öğe {0} Stok Uzlaşma kullanarak \
  güncellenmiş olamaz"
@@ -3277,7 +3279,7 @@ apps/erpnext/erpnext/setup/doctype/supplier_type/supplier_type.js +5,There is no
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +108,Summary for this month and pending activities,Bu ay ve bekleyen aktiviteler için Özet
 DocType: Customer Group,Customer Group Name,Müşteri Grup Adı
 DocType: Customer Group,Customer Group Name,Müşteri Grup Adı
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +415,Please remove this Invoice {0} from C-Form {1},C-Form bu Fatura {0} kaldırın lütfen {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +418,Please remove this Invoice {0} from C-Form {1},C-Form bu Fatura {0} kaldırın lütfen {1}
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Geçen mali yılın bakiyelerini bu mali yıla dahil etmek isterseniz Lütfen İleri Taşıyı seçin
 DocType: GL Entry,Against Voucher Type,Dekont  Tipi Karşılığı
 DocType: Item,Attributes,Nitelikler
@@ -3300,8 +3302,8 @@ apps/erpnext/erpnext/controllers/trends.py +257,Project-wise data is not availab
 DocType: Project,Expected End Date,Beklenen Bitiş Tarihi
 DocType: Project,Expected End Date,Beklenen Bitiş Tarihi
 DocType: Appraisal Template,Appraisal Template Title,Değerlendirme Şablonu Başlığı
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +367,Commercial,Ticari
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +367,Commercial,Ticari
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +371,Commercial,Ticari
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +371,Commercial,Ticari
 apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +23,Parent Item {0} must not be a Stock Item,Veli Öğe {0} Stok Öğe olmamalıdır
 DocType: Cost Center,Distribution Id,Dağıtım Kimliği
 DocType: Cost Center,Distribution Id,Dağıtım Kimliği
@@ -3362,8 +3364,8 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 DocType: Holiday List,Weekly Off,Haftalık İzin
 DocType: Fiscal Year,"For e.g. 2012, 2012-13","Örneğin 2012 için, 2012-13"
 DocType: Fiscal Year,"For e.g. 2012, 2012-13","Örneğin 2012 için, 2012-13"
-apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +32,Provisional Profit / Loss (Credit),Geçici Kar / Zarar (Kredi)
-apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +32,Provisional Profit / Loss (Credit),Geçici Kar / Zarar (Kredi)
+apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +33,Provisional Profit / Loss (Credit),Geçici Kar / Zarar (Kredi)
+apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +33,Provisional Profit / Loss (Credit),Geçici Kar / Zarar (Kredi)
 DocType: Sales Invoice,Return Against Sales Invoice,Karşı Satış Fatura Dönüş
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +32,Item 5,Madde 5
 apps/erpnext/erpnext/accounts/utils.py +278,Please set default value {0} in Company {1},Şirket varsayılan değeri {0} set Lütfen {1}
@@ -3454,7 +3456,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Planla
 apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +9,Make Time Log Batch,Günlük Parti oluşturun
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Veriliş
 DocType: Project,Total Billing Amount (via Time Logs),Toplam Fatura Tutarı (Zaman Kayıtlar üzerinden)
-apps/erpnext/erpnext/public/js/setup_wizard.js +383,We sell this Item,Bu ürünü satıyoruz
+apps/erpnext/erpnext/public/js/setup_wizard.js +295,We sell this Item,Bu ürünü satıyoruz
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +65,Supplier Id,Tedarikçi Kimliği
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +202,Quantity should be greater than 0,Miktar 0&#39;dan büyük olmalıdır
 DocType: Journal Entry,Cash Entry,Nakit Girişi
@@ -3472,7 +3474,7 @@ apps/erpnext/erpnext/config/crm.py +27,All Contacts.,Tüm Kişiler.
 apps/erpnext/erpnext/config/crm.py +27,All Contacts.,Tüm Kişiler.
 DocType: Newsletter,Test Email Id,Test E-posta Kimliği
 DocType: Newsletter,Test Email Id,Test E-posta Kimliği
-apps/erpnext/erpnext/public/js/setup_wizard.js +142,Company Abbreviation,Şirket Kısaltma
+apps/erpnext/erpnext/public/js/setup_wizard.js +54,Company Abbreviation,Şirket Kısaltma
 DocType: Features Setup,If you follow Quality Inspection. Enables Item QA Required and QA No in Purchase Receipt,Kalite Denetimini izlerseniz Alım Makbuzunda Ürünlerin Kalite Güvencesini ve Kalite Güvence numarasını verir.
 DocType: GL Entry,Party Type,Taraf Türü
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +68,Raw material cannot be same as main Item,Hammadde ana Malzeme ile aynı olamaz
@@ -3525,7 +3527,7 @@ apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Custom
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +27,Quick Entry,Hızlı Girişi
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +20,{0} is mandatory for Return,{0} Dönüş için zorunludur
 DocType: Purchase Order,To Receive,Almak
-apps/erpnext/erpnext/public/js/setup_wizard.js +284,user@example.com,user@example.com
+apps/erpnext/erpnext/public/js/setup_wizard.js +196,user@example.com,user@example.com
 DocType: Email Digest,Income / Expense,Gelir / Gider
 DocType: Email Digest,Income / Expense,Gelir / Gider
 DocType: Employee,Personal Email,Kişisel E-posta
@@ -3542,10 +3544,10 @@ DocType: Customer,From Lead,Baştan
 apps/erpnext/erpnext/config/manufacturing.py +19,Orders released for production.,Üretim için verilen emirler.
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +42,Select Fiscal Year...,Mali Yıl Seçin ...
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +42,Select Fiscal Year...,Mali Yıl Seçin ...
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +455,POS Profile required to make POS Entry,POS Profil POS Girişi yapmak için gerekli
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +458,POS Profile required to make POS Entry,POS Profil POS Girişi yapmak için gerekli
 DocType: Hub Settings,Name Token,İsim Jetonu
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +128,Standard Selling,Standart Satış
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +128,Standard Selling,Standart Satış
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +132,Standard Selling,Standart Satış
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +132,Standard Selling,Standart Satış
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +138,Atleast one warehouse is mandatory,En az bir depo zorunludur
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +138,Atleast one warehouse is mandatory,En az bir depo zorunludur
 DocType: Serial No,Out of Warranty,Garanti Dışı
@@ -3607,17 +3609,17 @@ DocType: Company,Domain,Etki Alanı
 DocType: Employee,Held On,Yapılan
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order_calendar.js +33,Production Item,Üretim Öğe
 ,Employee Information,Çalışan Bilgileri
-apps/erpnext/erpnext/public/js/setup_wizard.js +312,Rate (%),Oranı (%)
-apps/erpnext/erpnext/public/js/setup_wizard.js +312,Rate (%),Oranı (%)
+apps/erpnext/erpnext/public/js/setup_wizard.js +224,Rate (%),Oranı (%)
+apps/erpnext/erpnext/public/js/setup_wizard.js +224,Rate (%),Oranı (%)
 DocType: Stock Entry Detail,Additional Cost,Ek maliyet
-apps/erpnext/erpnext/public/js/setup_wizard.js +155,Financial Year End Date,Mali Yıl Bitiş Tarihi
-apps/erpnext/erpnext/public/js/setup_wizard.js +155,Financial Year End Date,Mali Yıl Bitiş Tarihi
+apps/erpnext/erpnext/public/js/setup_wizard.js +67,Financial Year End Date,Mali Yıl Bitiş Tarihi
+apps/erpnext/erpnext/public/js/setup_wizard.js +67,Financial Year End Date,Mali Yıl Bitiş Tarihi
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +36,"Can not filter based on Voucher No, if grouped by Voucher","Dekont, olarak gruplandırıldı ise Makbuz numarasına dayalı filtreleme yapamaz"
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +572,Make Supplier Quotation,Tedarikçi Teklifi Oluştur
 DocType: Quality Inspection,Incoming,Alınan
 DocType: BOM,Materials Required (Exploded),Gerekli Malzemeler (patlamış)
 DocType: Salary Structure Earning,Reduce Earning for Leave Without Pay (LWP),Ücretsiz İzin (Üİ) için Kazancı azalt
-apps/erpnext/erpnext/public/js/setup_wizard.js +274,"Add users to your organization, other than yourself",Kendiniz dışında kuruluşunuz kullanıcıları ekle
+apps/erpnext/erpnext/public/js/setup_wizard.js +186,"Add users to your organization, other than yourself",Kendiniz dışında kuruluşunuz kullanıcıları ekle
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +97,Row # {0}: Serial No {1} does not match with {2} {3},Satır # {0}: Seri No {1} ile eşleşmiyor {2} {3}
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +44,Casual Leave,Mazeret İzni
 DocType: Batch,Batch ID,Seri Kimliği
@@ -3668,14 +3670,14 @@ DocType: Task,Total Expense Claim (via Expense Claim),(Gider İstem aracılığ�
 apps/erpnext/erpnext/accounts/report/sales_register/sales_register.py +66,Customer Id,Müşteri Kimliği
 apps/erpnext/erpnext/projects/doctype/time_log/time_log.py +110,To Time must be greater than From Time,Zaman Zaman itibaren daha büyük olmalıdır için
 DocType: Journal Entry Account,Exchange Rate,Döviz Kuru
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +478,Sales Order {0} is not submitted,Satış Sipariş {0} teslim edilmedi
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +481,Sales Order {0} is not submitted,Satış Sipariş {0} teslim edilmedi
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +74,Warehouse {0}: Parent account {1} does not bolong to the company {2},Depo {0}: Ana hesap {1} Şirket {2} ye ait değildir
 DocType: BOM,Last Purchase Rate,Son Satış Fiyatı
 DocType: Account,Asset,Varlık
 DocType: Account,Asset,Varlık
 DocType: Project Task,Task ID,Görev Kimliği
-apps/erpnext/erpnext/public/js/setup_wizard.js +143,"e.g. ""MC""","örneğin ""MC """
-apps/erpnext/erpnext/public/js/setup_wizard.js +143,"e.g. ""MC""","örneğin ""MC """
+apps/erpnext/erpnext/public/js/setup_wizard.js +55,"e.g. ""MC""","örneğin ""MC """
+apps/erpnext/erpnext/public/js/setup_wizard.js +55,"e.g. ""MC""","örneğin ""MC """
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +84,Stock cannot exist for Item {0} since has variants,Ürün için var olamaz Stok {0} yana varyantları vardır
 ,Sales Person-wise Transaction Summary,Satış Personeli bilgisi İşlem Özeti
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +104,Warehouse {0} does not exist,Depo {0} yoktur
@@ -3805,7 +3807,7 @@ DocType: Sales Order Item,For Production,Üretim için
 DocType: Sales Order Item,For Production,Üretim için
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +103,Please enter sales order in the above table,Lütfen Yukarıdaki tabloya satış siparişi giriniz
 DocType: Project Task,View Task,Görevleri Göster
-apps/erpnext/erpnext/public/js/setup_wizard.js +154,Your financial year begins on,Mali yılınız şu tarihte başlıyor:
+apps/erpnext/erpnext/public/js/setup_wizard.js +66,Your financial year begins on,Mali yılınız şu tarihte başlıyor:
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +46,Please enter Purchase Receipts,Satınalma Makbuzlar giriniz
 DocType: Sales Invoice,Get Advances Received,Avansların alınmasını sağla
 DocType: Email Digest,Add/Remove Recipients,Alıcı Ekle/Kaldır
@@ -3926,7 +3928,7 @@ DocType: Sales Invoice,C-Form Applicable,Uygulanabilir C-Formu
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +340,Operation Time must be greater than 0 for Operation {0},Çalışma Süresi Çalışma için 0&#39;dan büyük olmalıdır {0}
 DocType: Supplier,Address and Contacts,Adresler ve Kontaklar
 DocType: UOM Conversion Detail,UOM Conversion Detail,Ölçü Birimi Dönüşüm Detayı
-apps/erpnext/erpnext/public/js/setup_wizard.js +257,Keep it web friendly 900px (w) by 100px (h),100px (yukseklik) ile 900 px (genislik) web dostu tutun
+apps/erpnext/erpnext/public/js/setup_wizard.js +169,Keep it web friendly 900px (w) by 100px (h),100px (yukseklik) ile 900 px (genislik) web dostu tutun
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +329,Production Order cannot be raised against a Item Template,Üretim siparişi Ürün Şablon karşı yükseltilmiş edilemez
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +44,Charges are updated in Purchase Receipt against each item,Ücretler her öğenin karşı Satınalma Fiş güncellenir
 DocType: Payment Tool,Get Outstanding Vouchers,Üstün Fişler alın
@@ -4009,8 +4011,8 @@ DocType: Naming Series,Help HTML,Yardım HTML
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +50,Total weightage assigned should be 100%. It is {0},Atanan toplam ağırlık % 100 olmalıdır. Bu {0} dır
 apps/erpnext/erpnext/controllers/status_updater.py +143,Allowance for over-{0} crossed for Item {1},{1} den fazla Ürün için {0} üzerinde ödenek
 DocType: Address,Name of person or organization that this address belongs to.,Bu adresin ait olduğu kişi veya kurumun adı.
-apps/erpnext/erpnext/public/js/setup_wizard.js +343,Your Suppliers,Tedarikçileriniz
-apps/erpnext/erpnext/public/js/setup_wizard.js +343,Your Suppliers,Tedarikçileriniz
+apps/erpnext/erpnext/public/js/setup_wizard.js +255,Your Suppliers,Tedarikçileriniz
+apps/erpnext/erpnext/public/js/setup_wizard.js +255,Your Suppliers,Tedarikçileriniz
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +58,Cannot set as Lost as Sales Order is made.,Satış Emri yapıldığında Kayıp olarak ayarlanamaz.
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +65,Another Salary Structure {0} is active for employee {1}. Please make its status 'Inactive' to proceed.,Başka Maaş Yapısı {0} çalışan için aktif {1}. Onun durumu 'Etkin değil' devam etmek olun.
 DocType: Purchase Invoice,Contact,İletişim
@@ -4035,8 +4037,8 @@ apps/erpnext/erpnext/accounts/doctype/account/account.py +90,You are not authori
 DocType: Payment Reconciliation,Get Unreconciled Entries,Mutabık olmayan girdileri alın
 DocType: Payment Reconciliation,From Invoice Date,Fatura Tarihinden İtibaren
 DocType: Cost Center,Budgets,Bütçeler
-apps/erpnext/erpnext/public/js/setup_wizard.js +144,What does it do?,Ne yapar?
-apps/erpnext/erpnext/public/js/setup_wizard.js +144,What does it do?,Ne yapar?
+apps/erpnext/erpnext/public/js/setup_wizard.js +56,What does it do?,Ne yapar?
+apps/erpnext/erpnext/public/js/setup_wizard.js +56,What does it do?,Ne yapar?
 DocType: Delivery Note,To Warehouse,Depoya
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +45,Account {0} has been entered more than once for fiscal year {1},Hesap {0} bir mali yıl içerisinde birden fazla girildi {1}
 ,Average Commission Rate,Ortalama Komisyon Oranı
@@ -4059,7 +4061,7 @@ DocType: Item,Customer Code,Müşteri Kodu
 DocType: Item,Customer Code,Müşteri Kodu
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +212,Birthday Reminder for {0},Için Doğum Günü Hatırlatıcı {0}
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +72,Days Since Last Order,Son siparişten bu yana geçen günler
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +304,Debit To account must be a Balance Sheet account,Hesabın için Bankamatik bir bilanço hesabı olmalıdır
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +307,Debit To account must be a Balance Sheet account,Hesabın için Bankamatik bir bilanço hesabı olmalıdır
 DocType: Buying Settings,Naming Series,Seri Adlandırma
 DocType: Leave Block List,Leave Block List Name,İzin engel listesi adı
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +32,Stock Assets,Hazır Varlıklar
@@ -4157,7 +4159,7 @@ DocType: Sales Order Item,Produced Quantity,Üretilen Miktar
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +84,Engineer,Mühendis
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +84,Engineer,Mühendis
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +38,Search Sub Assemblies,Arama Alt Kurullar
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +384,Item Code required at Row No {0},{0} Numaralı satırda Ürün Kodu gereklidir
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +387,Item Code required at Row No {0},{0} Numaralı satırda Ürün Kodu gereklidir
 DocType: Sales Partner,Partner Type,Ortak Türü
 DocType: Sales Partner,Partner Type,Ortak Türü
 DocType: Purchase Taxes and Charges,Actual,Gerçek
@@ -4192,8 +4194,8 @@ apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +45,Retail & Wholesale,
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +45,Retail & Wholesale,Toptan ve Perakende Satış
 DocType: Issue,First Responded On,İlk cevap verilen
 DocType: Website Item Group,Cross Listing of Item in multiple groups,Çoklu gruplarda Ürün Cross İlanı
-apps/erpnext/erpnext/public/js/setup_wizard.js +101,The First User: You,İlk Kullanıcı: Sen
-apps/erpnext/erpnext/public/js/setup_wizard.js +101,The First User: You,İlk Kullanıcı: Sen
+apps/erpnext/erpnext/public/js/setup_wizard.js +13,The First User: You,İlk Kullanıcı: Sen
+apps/erpnext/erpnext/public/js/setup_wizard.js +13,The First User: You,İlk Kullanıcı: Sen
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +49,Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0},Mali Yıl {0} da Mali Yıl Başlangıç Tarihi ve Mali Yıl Bitiş Tarihi zaten ayarlanmış
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +115,Successfully Reconciled,Başarıyla Uzlaştırıldı
 DocType: Production Order,Planned End Date,Planlanan Bitiş Tarihi
@@ -4227,7 +4229,7 @@ DocType: Customer Group,Parent Customer Group,Ana Müşteri Grubu
 apps/erpnext/erpnext/public/js/pos/pos.js +435,Change,Değişiklik
 DocType: Purchase Invoice,Contact Email,İletişim E-Posta
 DocType: Appraisal Goal,Score Earned,Kazanılan Puan
-apps/erpnext/erpnext/public/js/setup_wizard.js +141,"e.g. ""My Company LLC""","Örneğin ""Benim Şirketim LLC """
+apps/erpnext/erpnext/public/js/setup_wizard.js +53,"e.g. ""My Company LLC""","Örneğin ""Benim Şirketim LLC """
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +173,Notice Period,İhbar Süresi
 DocType: Bank Reconciliation Detail,Voucher ID,Föy Kimliği
 apps/erpnext/erpnext/setup/doctype/territory/territory.js +14,This is a root territory and cannot be edited.,Bu bir kök bölgedir ve düzenlenemez.
@@ -4329,7 +4331,7 @@ DocType: Item,"Selecting ""Yes"" will give a unique identity to each entity of t
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +39,Appraisal {0} created for Employee {1} in the given date range,Verilen aralıkta Çalışan {1} için oluşturulan değerlendirme {0}
 DocType: Employee,Education,Eğitim
 DocType: Employee,Education,Eğitim
-DocType: Selling Settings,Campaign Naming By,Tarafından Kampanya İsimlendirmesi
+DocType: Selling Settings,Campaign Naming By,Kampanya İsimlendirmesini yapan
 DocType: Employee,Current Address Is,Güncel Adresi
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +223,"Optional. Sets company's default currency, if not specified.","İsteğe bağlı. Eğer belirtilmemişse, şirketin varsayılan para birimini belirler."
 DocType: Address,Office,Ofis
@@ -4392,7 +4394,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.js +238,Row {0}:
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +46,Total Unpaid,Ödenmemiş Toplam
 apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +21,Time Log is not billable,Günlük faturalandırılamaz
 apps/erpnext/erpnext/stock/get_item_details.py +128,"Item {0} is a template, please select one of its variants","{0} Öğe bir şablon, türevleri birini seçiniz"
-apps/erpnext/erpnext/public/js/setup_wizard.js +290,Purchaser,Alıcı
+apps/erpnext/erpnext/public/js/setup_wizard.js +202,Purchaser,Alıcı
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +81,Net pay cannot be negative,Net ödeme negatif olamaz
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +81,Net pay cannot be negative,Net ödeme negatif olamaz
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.py +107,Please enter the Against Vouchers manually,El Karşı Fişler giriniz
@@ -4420,7 +4422,7 @@ apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py +19,Fr
 DocType: Stock Entry,Repack,Yeniden paketlemek
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +6,You must Save the form before proceeding,Devam etmeden önce formu kaydetmelisiniz
 DocType: Item Attribute,Numeric Values,Sayısal Değerler
-apps/erpnext/erpnext/public/js/setup_wizard.js +262,Attach Logo,Logo Ekleyin
+apps/erpnext/erpnext/public/js/setup_wizard.js +174,Attach Logo,Logo Ekleyin
 DocType: Customer,Commission Rate,Komisyon Oranı
 apps/erpnext/erpnext/stock/doctype/item/item.js +53,Make Variant,Variant olun
 apps/erpnext/erpnext/config/hr.py +145,Block leave applications by department.,Departman tarafından blok aralığı uygulamaları.

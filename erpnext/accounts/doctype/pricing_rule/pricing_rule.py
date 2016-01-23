@@ -97,7 +97,10 @@ def apply_pricing_rule(args):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
-
+	
+	if not args.transaction_type:
+		set_transaction_type(args)
+				
 	# list of dictionaries
 	out = []
 
@@ -123,6 +126,12 @@ def get_pricing_rule_for_item(args):
 	})
 
 	if args.ignore_pricing_rule or not args.item_code:
+		# if ignore pricing rule then set the rate or amount field to zero
+		if item_details.doctype in ["Quotation Item", "Sales Order Item"]:
+			item_details.update({
+				"type":"",
+				"rate_or_amount": 0.00
+			})
 		return item_details
 
 	if not (args.item_group and args.brand):
@@ -134,13 +143,17 @@ def get_pricing_rule_for_item(args):
 		if not args.item_group:
 			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
 
-	if args.customer and not (args.customer_group and args.territory):
-		customer = frappe.db.get_value("Customer", args.customer, ["customer_group", "territory"])
-		if customer:
-			args.customer_group, args.territory = customer
+	if args.transaction_type=="selling":
+		if args.customer and not (args.customer_group and args.territory):
+			customer = frappe.db.get_value("Customer", args.customer, ["customer_group", "territory"])
+			if customer:
+				args.customer_group, args.territory = customer
+				
+		args.supplier = args.supplier_type = None
 
 	elif args.supplier and not args.supplier_type:
 		args.supplier_type = frappe.db.get_value("Supplier", args.supplier, "supplier_type")
+		args.customer = args.customer_group = args.territory = None
 
 	pricing_rules = get_pricing_rules(args)
 	pricing_rule = filter_pricing_rules(args, pricing_rules)
@@ -148,6 +161,8 @@ def get_pricing_rule_for_item(args):
 	if pricing_rule:
 		item_details.pricing_rule = pricing_rule.name
 		item_details.pricing_rule_for = pricing_rule.price_or_discount
+		item_details.type = pricing_rule.type
+		item_details.rate_or_amount = pricing_rule.rate
 		if pricing_rule.price_or_discount == "Price":
 			item_details.update({
 				"price_list_rate": pricing_rule.price/flt(args.conversion_rate) \
@@ -155,8 +170,9 @@ def get_pricing_rule_for_item(args):
 				"discount_percentage": 0.0
 			})
 		else:
-			item_details.discount_percentage = pricing_rule.discount_percentage
-
+			# if user changed the discount percentage then set discount_percentage of user
+			item_details.discount_percentage = pricing_rule.discount_percentage if args.discount_percentage == pricing_rule.discount_percentage\
+				else args.discount_percentage
 	return item_details
 
 def get_pricing_rules(args):
@@ -212,7 +228,7 @@ def get_pricing_rules(args):
 			and {transaction_type} = 1 {conditions}
 		order by priority desc, name desc""".format(
 			item_group_condition=item_group_condition,
-			transaction_type= "selling" if (args.customer or args.lead) else "buying",
+			transaction_type= args.transaction_type,
 			conditions=conditions), values, as_dict=1)
 
 def filter_pricing_rules(args, pricing_rules):
@@ -270,3 +286,14 @@ def apply_internal_priority(pricing_rules, field_set, args):
 			if filtered_rules: break
 
 	return filtered_rules or pricing_rules
+
+def set_transaction_type(args):
+	if args.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
+		args.transaction_type = "selling"
+	elif args.doctype in ("Material Request", "Supplier Quotation", "Purchase Order", 
+		"Purchase Receipt", "Purchase Invoice"):
+			args.transaction_type = "buying"
+	elif args.customer:
+		args.transaction_type = "selling"
+	else:
+		args.transaction_type = "buying"

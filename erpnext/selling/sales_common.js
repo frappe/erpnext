@@ -128,8 +128,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
-		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-			precision("rate", item));
+		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate
+		if((cdt == "Quotation Item" || cdt == "Sales Order Item") && item.total_margin){
+			this.calculate_revised_margin_and_rate(item, doc,cdt, cdn);
+		}
+		else
+			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
+				precision("rate", item));
 
 		this.calculate_taxes_and_totals();
 	},
@@ -301,11 +306,49 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			callback: function(r) {
 				if(!r.exc){
 					var doc = frappe.model.sync(r.message);
-					console.log(r.message)
 					frappe.set_route("Form", r.message.doctype, r.message.name);
 				}
 			}
 		})
+	},
+
+	rate: function(doc, cdt, cdn){
+		// if user changes the rate then set margin Rate or amount to 0
+		item = locals[cdt][cdn];
+		item.type = "";
+		item.rate_or_amount = 0.0;
+		cur_frm.refresh_fields();
+	},
+
+	rate_or_amount: function(doc, cdt, cdn) {
+		// calculated the revised total margin and rate on margin rate changes
+		item = locals[cdt][cdn];
+		this.calculate_revised_margin_and_rate(item)
+		cur_frm.refresh_fields();
+	},
+
+	type: function(doc, cdt, cdn){
+		// calculate the revised total margin and rate on margin type changes
+		item = locals[cdt][cdn];
+		this.calculate_revised_margin_and_rate(item, doc,cdt, cdn)
+		cur_frm.refresh_fields();
+	},
+
+	calculate_revised_margin_and_rate: function(item){
+		if(in_list(["Percentage", "Amount"], item.type)){
+			if(item.type == "Percentage")
+				item.total_margin = item.price_list_rate + item.price_list_rate * ( item.rate_or_amount / 100);
+			else
+				item.total_margin = item.price_list_rate + item.rate_or_amount;
+			item.rate = flt(item.total_margin * (1 - item.discount_percentage / 100.0),
+				precision("rate", item));
+		}
+		else{
+			item.rate_or_amount = 0.0;
+			item.total_margin = 0.0;
+			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
+				precision("rate", item));
+		}
 	}
 });
 
