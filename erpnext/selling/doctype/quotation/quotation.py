@@ -155,6 +155,7 @@ def _make_customer(source_name, ignore_permissions=False):
 				else:
 					raise
 			except frappe.MandatoryError:
+				frappe.local.message_log = []
 				frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
 		else:
 			return customer_name
