@@ -47,12 +47,9 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 				where %s=%s and recurring_id=%s and docstatus=1"""
 				% (doctype, date_field, '%s', '%s'), (next_date, recurring_id)):
 			try:
-				ref_wrapper = frappe.get_doc(doctype, ref_document)
-				if hasattr(ref_wrapper, "before_recurring"):
-					ref_wrapper.before_recurring()
-
-				new_document_wrapper = make_new_document(ref_wrapper, date_field, next_date)
-				send_notification(new_document_wrapper)
+				reference_doc = frappe.get_doc(doctype, ref_document)
+				new_doc = make_new_document(reference_doc, date_field, next_date)
+				send_notification(new_doc)
 				if commit:
 					frappe.db.commit()
 			except:
@@ -63,8 +60,8 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 					frappe.db.sql("update `tab%s` \
 						set is_recurring = 0 where name = %s" % (doctype, '%s'),
 						(ref_document))
-					notify_errors(ref_document, doctype, ref_wrapper.get("customer") or ref_wrapper.get("supplier"),
-						ref_wrapper.owner)
+					notify_errors(ref_document, doctype, reference_doc.get("customer") or reference_doc.get("supplier"),
+						reference_doc.owner)
 					frappe.db.commit()
 
 				exception_list.append(frappe.get_traceback())
@@ -76,34 +73,42 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 		exception_message = "\n\n".join([cstr(d) for d in exception_list])
 		frappe.throw(exception_message)
 
-def make_new_document(ref_wrapper, date_field, posting_date):
+def make_new_document(reference_doc, date_field, posting_date):
 	from erpnext.accounts.utils import get_fiscal_year
-	new_document = frappe.copy_doc(ref_wrapper)
-	mcount = month_map[ref_wrapper.recurring_type]
+	new_document = frappe.copy_doc(reference_doc, ignore_no_copy=True)
+	mcount = month_map[reference_doc.recurring_type]
 
-	from_date = get_next_date(ref_wrapper.from_date, mcount)
+	from_date = get_next_date(reference_doc.from_date, mcount)
 
 	# get last day of the month to maintain period if the from date is first day of its own month
 	# and to date is the last day of its own month
-	if (cstr(get_first_day(ref_wrapper.from_date)) == cstr(ref_wrapper.from_date)) and \
-		(cstr(get_last_day(ref_wrapper.to_date)) == cstr(ref_wrapper.to_date)):
-			to_date = get_last_day(get_next_date(ref_wrapper.to_date, mcount))
+	if (cstr(get_first_day(reference_doc.from_date)) == cstr(reference_doc.from_date)) and \
+		(cstr(get_last_day(reference_doc.to_date)) == cstr(reference_doc.to_date)):
+			to_date = get_last_day(get_next_date(reference_doc.to_date, mcount))
 	else:
-		to_date = get_next_date(ref_wrapper.to_date, mcount)
+		to_date = get_next_date(reference_doc.to_date, mcount)
 
 	new_document.update({
 		date_field: posting_date,
 		"from_date": from_date,
 		"to_date": to_date,
-		"fiscal_year": get_fiscal_year(posting_date)[0],
-		"owner": ref_wrapper.owner,
+		"fiscal_year": get_fiscal_year(posting_date)[0]
 	})
 
-	if ref_wrapper.doctype == "Sales Order":
-		new_document.update({
-			"delivery_date": get_next_date(ref_wrapper.delivery_date, mcount,
-				cint(ref_wrapper.repeat_on_day_of_month))
-	})
+	# copy document fields
+	for fieldname in ("owner", "recurring_type", "repeat_on_day_of_month",
+		"recurring_id", "notification_email_address", "is_recurring", "end_date",
+		"title", "naming_series", "select_print_heading", "ignore_pricing_rule",
+		"posting_time", "remarks"):
+		if new_document.meta.get_field(fieldname):
+			new_document.set(fieldname, reference_doc.get(fieldname))
+
+	# copy item fields
+	for i, item in enumerate(new_document.items):
+		for fieldname in ("page_break",):
+			item.set(fieldname, reference_doc.items[i].get(fieldname))
+
+	new_document.run_method("on_recurring", reference_doc=reference_doc)
 
 	new_document.submit()
 
