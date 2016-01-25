@@ -10,7 +10,7 @@ from frappe.defaults import get_user_permissions
 from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
-from erpnext.exceptions import InvalidAccountCurrency
+from erpnext.exceptions import CustomerFrozen, InvalidCurrency, CustomerDisabled
 
 class DuplicatePartyAccountError(frappe.ValidationError): pass
 
@@ -308,3 +308,13 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 		args.update({"use_for_shopping_cart": use_for_shopping_cart})
 
 	return get_tax_template(posting_date, args)
+
+def validate_party_frozen_disabled(party, party_type):
+	if party_type and party:
+		frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
+		if not frozen_accounts_modifier in frappe.get_roles():
+			if frappe.db.get_value(party_type, party, "is_frozen"):
+				frappe.throw("{0} {1} is frozen".format(party_type, party), CustomerFrozen)
+
+		if frappe.db.get_value(party_type, party, "disabled"):
+			frappe.throw("{0} {1} is disabled".format(party_type, party), CustomerDisabled)

@@ -2,9 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import frappe
-import unittest
+
+import frappe, unittest
 from erpnext.accounts.party import get_due_date
+from erpnext.exceptions import CustomerFrozen, CustomerDisabled
+from frappe.test_runner import make_test_records
 
 test_records = frappe.get_test_records('Supplier')
 
@@ -52,3 +54,19 @@ class TestSupplier(unittest.TestCase):
         # Non Leap year
         due_date = get_due_date("2017-01-22", "Supplier", "_Test Supplier", "_Test Company")
         self.assertEqual(due_date, "2017-02-28")
+
+
+    def test_supplier_disabled(self):
+        make_test_records("Item")
+
+        frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 1)
+
+        from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+        po = create_purchase_order(do_not_save=True)
+
+        self.assertRaises(CustomerDisabled, po.save)
+
+        frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 0)
+
+        po.save()
