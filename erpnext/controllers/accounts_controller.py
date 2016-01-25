@@ -11,7 +11,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
-from erpnext.exceptions import CustomerFrozen, InvalidCurrency, CustomerDisabled
+from erpnext.exceptions import InvalidCurrency
 
 force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
 

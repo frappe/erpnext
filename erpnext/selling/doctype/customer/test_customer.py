@@ -7,7 +7,7 @@ import frappe
 import unittest
 
 from frappe.test_runner import make_test_records
-from erpnext.exceptions import CustomerFrozen, CustomerDisabled
+from erpnext.exceptions import PartyFrozen, PartyDisabled
 
 test_ignore = ["Price List"]
 
@@ -76,7 +76,7 @@ class TestCustomer(unittest.TestCase):
 
 		so = make_sales_order(do_not_save= True)
 
-		self.assertRaises(CustomerFrozen, so.save)
+		self.assertRaises(PartyFrozen, so.save)
 
 		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 0)
 
@@ -91,7 +91,7 @@ class TestCustomer(unittest.TestCase):
 
 		so = make_sales_order(do_not_save=True)
 
-		self.assertRaises(CustomerDisabled, so.save)
+		self.assertRaises(PartyDisabled, so.save)
 
 		frappe.db.set_value("Customer", "_Test Customer", "disabled", 0)
 

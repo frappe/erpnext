@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe, unittest
 from erpnext.accounts.party import get_due_date
-from erpnext.exceptions import CustomerFrozen, CustomerDisabled
+from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.test_runner import make_test_records
 
 test_records = frappe.get_test_records('Supplier')
@@ -65,7 +65,7 @@ class TestSupplier(unittest.TestCase):
 
         po = create_purchase_order(do_not_save=True)
 
-        self.assertRaises(CustomerDisabled, po.save)
+        self.assertRaises(PartyDisabled, po.save)
 
         frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 0)
 
