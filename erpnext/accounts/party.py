@@ -10,7 +10,7 @@ from frappe.defaults import get_user_permissions
 from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
-from erpnext.exceptions import CustomerFrozen, InvalidCurrency, CustomerDisabled
+from erpnext.exceptions import CustomerFrozen, InvalidCurrency, CustomerDisabled, InvalidAccountCurrency
 
 class DuplicatePartyAccountError(frappe.ValidationError): pass
 
