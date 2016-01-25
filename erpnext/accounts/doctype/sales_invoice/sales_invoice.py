@@ -532,9 +532,9 @@ class SalesInvoice(SellingController):
 	def make_customer_gl_entry(self, gl_entries):
 		if self.grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
-			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate, 
+			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
 				self.precision("grand_total"))
-				
+
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
@@ -655,6 +655,12 @@ class SalesInvoice(SellingController):
 
 		for dn in set(updated_delivery_notes):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
+
+	def on_recurring(self, reference_doc):
+		for fieldname in ("c_form_applicable", "c_form_no", "write_off_amount"):
+			self.set(fieldname, reference_doc.get(fieldname))
+
+		self.due_date = None
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
