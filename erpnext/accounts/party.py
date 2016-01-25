@@ -237,16 +237,11 @@ def get_due_date(posting_date, party_type, party, company):
 	due_date = None
 	if posting_date and party:
 		due_date = posting_date
-		if party_type=="Customer":
-			credit_days_based_on, credit_days = get_credit_days(party_type, party, company)
-			if credit_days_based_on == "Fixed Days" and credit_days:
-				due_date = add_days(posting_date, credit_days)
-			elif credit_days_based_on == "Last Day of the Next Month":
-				due_date = (get_first_day(posting_date, 0, 2) + datetime.timedelta(-1)).strftime("%Y-%m-%d")
-		else:
-			credit_days = get_credit_days(party_type, party, company)
-			if credit_days:
-				due_date = add_days(posting_date, credit_days)
+		credit_days_based_on, credit_days = get_credit_days(party_type, party, company)
+		if credit_days_based_on == "Fixed Days" and credit_days:
+			due_date = add_days(posting_date, credit_days)
+		elif credit_days_based_on == "Last Day of the Next Month":
+			due_date = (get_first_day(posting_date, 0, 2) + datetime.timedelta(-1)).strftime("%Y-%m-%d")
 
 	return due_date
 
@@ -255,20 +250,21 @@ def get_credit_days(party_type, party, company):
 		if party_type == "Customer":
 			credit_days_based_on, credit_days, customer_group = \
 				frappe.db.get_value(party_type, party, ["credit_days_based_on", "credit_days", "customer_group"])
-
-			if not credit_days_based_on:
-				credit_days_based_on, credit_days = \
-					frappe.db.get_value("Customer Group", customer_group, ["credit_days_based_on", "credit_days"]) \
-					or frappe.db.get_value("Company", company, ["credit_days_based_on", "credit_days"])
-
-			return credit_days_based_on, credit_days
 		else:
-			credit_days, supplier_type = frappe.db.get_value(party_type, party, ["credit_days", "supplier_type"])
-			if not credit_days:
-				credit_days = frappe.db.get_value("Supplier Type", supplier_type, "credit_days") \
-					or frappe.db.get_value("Company", company, "credit_days")
+			credit_days_based_on, credit_days, supplier_type = \
+				frappe.db.get_value(party_type, party, ["credit_days_based_on", "credit_days", "supplier_type"])
 
-			return credit_days
+	if not credit_days_based_on:
+		if party_type == "Customer":
+			credit_days_based_on, credit_days = \
+				frappe.db.get_value("Customer Group", customer_group, ["credit_days_based_on", "credit_days"]) \
+				or frappe.db.get_value("Company", company, ["credit_days_based_on", "credit_days"])
+		else:
+			credit_days_based_on, credit_days = \
+				frappe.db.get_value("Supplier Type", supplier_type, ["credit_days_based_on", "credit_days"])\
+				or frappe.db.get_value("Company", company, ["credit_days_based_on", "credit_days"] )
+
+	return credit_days_based_on, credit_days
 
 def validate_due_date(posting_date, due_date, party_type, party, company):
 	if getdate(due_date) < getdate(posting_date):
