@@ -111,11 +111,7 @@ def validate_item_details(args, item):
 
 	if args.transaction_type=="selling":
 		# validate if sales item or service item
-		if args.get("order_type") == "Maintenance":
-			if item.is_service_item != 1:
-				throw(_("Item {0} must be a Service Item.").format(item.name))
-
-		elif item.is_sales_item != 1:
+		if item.is_sales_item != 1:
 			throw(_("Item {0} must be a Sales Item").format(item.name))
 
 		if cint(item.has_variants):
