@@ -96,7 +96,7 @@ class GLEntry(Document):
 			frappe.throw(_("Cost Center {0} does not belong to Company {1}").format(self.cost_center, self.company))
 
 	def validate_party(self):
-		validate_party_frozen_disabled(self.party, self.party_type)
+		validate_party_frozen_disabled(self.party_type, self.party)
 
 	def validate_currency(self):
 		company_currency = get_company_currency(self.company)

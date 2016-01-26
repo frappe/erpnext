@@ -309,7 +309,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 
 	return get_tax_template(posting_date, args)
 
-def validate_party_frozen_disabled(party_name, party_type):
+def validate_party_frozen_disabled(party_type, party_name):
 	if party_type and party_name:
 		party = frappe.db.get_value(party_type, party_name, ["is_frozen", "disabled"], as_dict=True)
 		if party.disabled:

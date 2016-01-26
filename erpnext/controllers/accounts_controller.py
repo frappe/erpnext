@@ -417,15 +417,15 @@ class AccountsController(TransactionBase):
 
 	def validate_party(self):
 		party_type, party = self.get_party()
-		validate_party_frozen_disabled(party, party_type)
+		validate_party_frozen_disabled(party_type, party)
 
 	def get_party(self):
 		party_type = None
 		if self.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
-				party_type = 'Customer'
+			party_type = 'Customer'
 
 		elif self.doctype in ("Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"):
-				party_type = 'Supplier'
+			party_type = 'Supplier'
 
 		elif self.meta.get_field("customer"):
 			party_type = "Customer"
