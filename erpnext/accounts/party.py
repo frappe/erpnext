@@ -311,10 +311,10 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 
 def validate_party_frozen_disabled(party, party_type):
 	if party_type and party:
-		frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
-		if not frozen_accounts_modifier in frappe.get_roles():
-			if frappe.db.get_value(party_type, party, "is_frozen"):
-				frappe.throw("{0} {1} is frozen".format(party_type, party), PartyFrozen)
-
-		if frappe.db.get_value(party_type, party, "disabled"):
+		party = frappe.db.get_value(party_type, party, ["is_frozen", "disabled"], as_dict=True)
+		if party.disabled:
 			frappe.throw("{0} {1} is disabled".format(party_type, party), PartyDisabled)
+		elif party.is_frozen:
+			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
+			if not frozen_accounts_modifier in frappe.get_roles():
+				frappe.throw("{0} {1} is frozen".format(party_type, party), PartyFrozen)
