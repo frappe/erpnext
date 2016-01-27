@@ -386,27 +386,37 @@ class AccountsController(TransactionBase):
 	def set_total_advance_paid(self):
 		if self.doctype == "Sales Order":
 			dr_or_cr = "credit_in_account_currency"
+			party = self.customer
 		else:
 			dr_or_cr = "debit_in_account_currency"
+			party = self.supplier
 
-		advance_paid = frappe.db.sql("""
+		advance = frappe.db.sql("""
 			select
-				sum({dr_or_cr})
+				account_currency, sum({dr_or_cr}) as amount
 			from
 				`tabJournal Entry Account`
 			where
-				reference_type = %s and reference_name = %s
+				reference_type = %s and reference_name = %s and party=%s
 				and docstatus = 1 and is_advance = "Yes"
-		""".format(dr_or_cr=dr_or_cr), (self.doctype, self.name))
+		""".format(dr_or_cr=dr_or_cr), (self.doctype, self.name, party), as_dict=1)
 
-		if advance_paid:
-			advance_paid = flt(advance_paid[0][0], self.precision("advance_paid"))
-		if flt(self.base_grand_total) >= advance_paid:
-			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
-		else:
-			frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater \
-				than the Grand Total ({2})")
-			.format(advance_paid, self.name, self.base_grand_total))
+		if advance:
+			advance_paid = flt(advance[0].amount, self.precision("advance_paid"))
+			
+			frappe.db.set_value(self.doctype, self.name, "party_account_currency", 
+				advance[0].account_currency)
+			
+			if advance[0].account_currency == self.currency:
+				order_total = self.grand_total
+			else:
+				order_total = self.base_grand_total
+				
+			if order_total >= advance_paid:
+				frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
+			else:
+				frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2})")
+					.format(advance_paid, self.name, order_total))
 
 	@property
 	def company_abbr(self):
