@@ -1,4 +1,4 @@
-#ERPNext for Service Organizations
+#ERPNext for Service Organization
 
 **Question:** ERPNext looks primarily designed for the traders and manufacturers. Is ERPNext used by companies offering servies?
 
@@ -14,7 +14,7 @@ The setup for a Service company differs primarily for Items. They don't maintain
 
 To create a Service (non-stock) Item, in the item master, uncheck "Maintain Stock" field.
 
-<img alt="Service Item" class="screenshot"  src="{{docs_base_url}}/assets/image/articles/services-1.png">
+<img alt="Service Item" class="screenshot"  src="{{docs_base_url}}/assets/img/articles/services-1.png">
 
 When creating Sales Order for the services, select Order Type as **Maintenance**. Sales Order of Maintenance Type needs lesser details compared to stock item's order like Delivery Note, item warehouse etc.
 
