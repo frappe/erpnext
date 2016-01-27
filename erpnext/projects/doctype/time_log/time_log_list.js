@@ -18,12 +18,20 @@ frappe.listview_settings['Time Log'] = {
 			for(var i in selected) {
 				var d = selected[i];
 				if(!d.billable) {
-					msgprint(__("Time Log is not billable") + ": " + d.name);
+					msgprint(__("Time Log is not billable") + ": " + d.name + " - " + d.title);
+					return;
+				}
+				if(d.status=="Batched for Billing") {
+					msgprint(__("Time Log has been Batched for Billing") + ": " + d.name + " - " + d.title);
+					return;
+				}
+				if(d.status=="Billed") {
+					msgprint(__("Time Log has been Billed") + ": " + d.name + " - " + d.title);
 					return;
 				}
 				if(d.status!="Submitted") {
-					msgprint(__("Time Log Status must be Submitted."));
-					return
+					msgprint(__("Time Log Status must be Submitted.") + ": " + d.name + " - " + d.title);
+					return;
 				}
 			}
 
