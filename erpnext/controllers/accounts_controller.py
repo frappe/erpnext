@@ -10,8 +10,8 @@ from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year, get_ac
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return
-from erpnext.accounts.party import get_party_account_currency
-from erpnext.exceptions import CustomerFrozen, InvalidCurrency
+from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
+from erpnext.exceptions import InvalidCurrency
 
 force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
 
@@ -59,12 +59,6 @@ class AccountsController(TransactionBase):
 		if self.meta.get_field("is_recurring"):
 			validate_recurring_document(self)
 			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
-
-	def before_recurring(self):
-		if self.meta.get_field("fiscal_year"):
-			self.fiscal_year = None
-		if self.meta.get_field("due_date"):
-			self.due_date = None
 
 	def set_missing_values(self, for_validate=False):
 		for fieldname in ["posting_date", "transaction_date"]:
@@ -422,23 +416,22 @@ class AccountsController(TransactionBase):
 		return self._abbr
 
 	def validate_party(self):
-		frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
-		if frozen_accounts_modifier in frappe.get_roles():
-			return
-
 		party_type, party = self.get_party()
-
-		if party_type:
-			if frappe.db.get_value(party_type, party, "is_frozen"):
-				frappe.throw("{0} {1} is frozen".format(party_type, party), CustomerFrozen)
+		validate_party_frozen_disabled(party_type, party)
 
 	def get_party(self):
 		party_type = None
-		if self.meta.get_field("customer"):
+		if self.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
 			party_type = 'Customer'
 
-		elif self.meta.get_field("supplier"):
+		elif self.doctype in ("Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"):
 			party_type = 'Supplier'
+
+		elif self.meta.get_field("customer"):
+			party_type = "Customer"
+
+		elif self.meta.get_field("supplier"):
+			party_type = "Supplier"
 
 		party = self.get(party_type.lower()) if party_type else None
 
@@ -457,7 +450,9 @@ class AccountsController(TransactionBase):
 					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
 						.format(party_type, party, party_account_currency), InvalidCurrency)
 
-				# Note: not validating with gle account because we don't have the account at quotation / sales order level and we shouldn't stop someone from creating a sales invoice if sales order is already created
+				# Note: not validating with gle account because we don't have the account
+				# at quotation / sales order level and we shouldn't stop someone
+				# from creating a sales invoice if sales order is already created
 
 @frappe.whitelist()
 def get_tax_rate(account_head):

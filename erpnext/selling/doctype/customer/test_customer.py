@@ -7,7 +7,7 @@ import frappe
 import unittest
 
 from frappe.test_runner import make_test_records
-from erpnext.exceptions import CustomerFrozen
+from erpnext.exceptions import PartyFrozen, PartyDisabled
 
 test_ignore = ["Price List"]
 
@@ -68,22 +68,38 @@ class TestCustomer(unittest.TestCase):
 		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 
 	def test_freezed_customer(self):
-		make_test_records("Customer")
 		make_test_records("Item")
-		
+
 		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 1)
 
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		so = make_sales_order(do_not_save= True)
-		
-		self.assertRaises(CustomerFrozen, so.save)
+
+		self.assertRaises(PartyFrozen, so.save)
 
 		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 0)
 
 		so.save()
-	
+
+	def test_disabled_customer(self):
+		make_test_records("Item")
+
+		frappe.db.set_value("Customer", "_Test Customer", "disabled", 1)
+
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(do_not_save=True)
+
+		self.assertRaises(PartyDisabled, so.save)
+
+		frappe.db.set_value("Customer", "_Test Customer", "disabled", 0)
+
+		so.save()
+
 	def test_duplicate_customer(self):
+		frappe.db.sql("delete from `tabCustomer` where customer_name='_Test Customer 1'")
+
 		if not frappe.db.get_value("Customer", "_Test Customer 1"):
 			test_customer_1 = frappe.get_doc({
 				 "customer_group": "_Test Customer Group",

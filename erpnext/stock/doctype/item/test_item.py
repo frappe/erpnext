@@ -88,7 +88,7 @@ class TestItem(unittest.TestCase):
 			"company": "_Test Company",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
-			"parenttype": "Sales Order",
+			"doctype": "Sales Order",
 			"conversion_rate": 1,
 			"price_list_currency": "_Test Currency",
 			"plc_conversion_rate": 1,
