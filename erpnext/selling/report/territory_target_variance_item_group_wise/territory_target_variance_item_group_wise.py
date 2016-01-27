@@ -13,10 +13,10 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["fiscal_year"])
-	tim_map = get_territory_item_month_map(filters)
+	territory_item_group_dict = get_territory_item_month_map(filters)
 
 	data = []
-	for territory, territory_items in tim_map.items():
+	for territory, territory_items in territory_item_group_dict.items():
 		for item_group, monthwise_data in territory_items.items():
 			row = [territory, item_group]
 			totals = [0, 0, 0]
@@ -77,20 +77,37 @@ def get_target_distribution_details(filters):
 	return target_details
 
 #Get achieved details from sales order
-def get_achieved_details(filters):
+def get_achieved_details(filters, territory):
 	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 
-	item_details = frappe.db.sql("""select soi.item_code, soi.qty, soi.base_net_amount, so.transaction_date,
-		so.territory, MONTHNAME(so.transaction_date) as month_name
-		from `tabSales Order Item` soi, `tabSales Order` so
-		where soi.parent=so.name and so.docstatus=1 and so.transaction_date>=%s and
-		so.transaction_date<=%s""" % ('%s', '%s'),
-		(start_date, end_date), as_dict=1)
+	lft, rgt = frappe.db.get_value("Territory", territory, ["lft", "rgt"])
+
+	item_details = frappe.db.sql("""
+		select
+			soi.item_code, sum(soi.qty) as qty, sum(soi.base_net_amount) as amount,
+			MONTHNAME(so.transaction_date) as month_name
+		from
+			`tabSales Order Item` soi, `tabSales Order` so
+		where
+			soi.parent=so.name and so.docstatus=1
+			and so.transaction_date>=%s and so.transaction_date<=%s
+			and exists(select name from `tabTerritory` where lft >=%s and rgt <= %s and name=so.territory)
+		group by
+			month_name, item_code
+		""", (start_date, end_date, lft, rgt), as_dict=1)
 
 	item_actual_details = {}
 	for d in item_details:
-		item_actual_details.setdefault(d.territory, {}).setdefault(\
-			get_item_group(d.item_code), []).append(d)
+		item_group = get_item_group(d.item_code)
+		item_actual_details.setdefault(item_group, frappe._dict())\
+			.setdefault(d.month_name, frappe._dict({
+				"quantity": 0,
+				"amount": 0
+			}))
+
+		value_dict = item_actual_details[item_group][d.month_name]
+		value_dict.quantity += flt(d.qty)
+		value_dict.amount += flt(d.amount)
 
 	return item_actual_details
 
@@ -98,35 +115,34 @@ def get_territory_item_month_map(filters):
 	import datetime
 	territory_details = get_territory_details(filters)
 	tdd = get_target_distribution_details(filters)
-	achieved_details = get_achieved_details(filters)
 
-	tim_map = {}
+	territory_item_group_dict = {}
 
 	for td in territory_details:
+		achieved_details = get_achieved_details(filters, td.name)
+
 		for month_id in range(1, 13):
 			month = datetime.date(2013, month_id, 1).strftime('%B')
 
-			tim_map.setdefault(td.name, {}).setdefault(td.item_group, {})\
+			territory_item_group_dict.setdefault(td.name, {}).setdefault(td.item_group, {})\
 				.setdefault(month, frappe._dict({
 					"target": 0.0, "achieved": 0.0
 				}))
 
-			tav_dict = tim_map[td.name][td.item_group][month]
+			target_achieved = territory_item_group_dict[td.name][td.item_group][month]
 			month_percentage = tdd.get(td.distribution_id, {}).get(month, 0) \
 				if td.distribution_id else 100.0/12
 
-			for ad in achieved_details.get(td.name, {}).get(td.item_group, []):
-				if (filters["target_on"] == "Quantity"):
-					tav_dict.target = flt(td.target_qty) * month_percentage / 100
-					if ad.month_name == month:
-							tav_dict.achieved += ad.qty
 
-				if (filters["target_on"] == "Amount"):
-					tav_dict.target = flt(td.target_amount) * month_percentage / 100
-					if ad.month_name == month:
-							tav_dict.achieved += ad.base_net_amount
+			if (filters["target_on"] == "Quantity"):
+				target_achieved.target = flt(td.target_qty) * month_percentage / 100
+			else:
+				target_achieved.target = flt(td.target_amount) * month_percentage / 100
 
-	return tim_map
+			target_achieved.achieved = achieved_details.get(td.item_group, {}).get(month, {})\
+				.get(filters["target_on"].lower())
+
+	return territory_item_group_dict
 
 def get_item_group(item_name):
 	return frappe.db.get_value("Item", item_name, "item_group")

@@ -82,10 +82,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			});
 		}
-
-		if(this.frm.fields_dict.sales_team && this.frm.fields_dict.sales_team.grid.get_field("sales_person")) {
-			this.frm.set_query("sales_person", "sales_team", erpnext.queries.not_a_group_filter);
-		}
 	},
 
 	refresh: function() {
@@ -289,7 +285,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 		refresh_field('product_bundle_help');
 	},
-	
+
 	make_payment_request: function() {
 		frappe.call({
 			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
