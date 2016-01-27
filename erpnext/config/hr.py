@@ -179,6 +179,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"is_query_report": True,
+					"name": "Employee Holiday Attendance",
+					"doctype": "Employee"
+				},
+				{
+					"type": "report",
 					"name": "Employee Information",
 					"doctype": "Employee"
 				},
@@ -194,6 +200,7 @@ def get_data():
 					"name": "Monthly Attendance Sheet",
 					"doctype": "Attendance"
 				},
+
 			]
 		},
 		{
