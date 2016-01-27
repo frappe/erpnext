@@ -327,3 +327,23 @@ def make_stock_entry(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+
+@frappe.whitelist()
+def validate_production_item(item_code):
+	return frappe.db.get_value("Item", item_code, "is_pro_applicable")
+
+@frappe.whitelist()
+def make_production_order(source_name, item_code):
+	material_request= frappe.get_doc("Material Request", source_name)
+	prod_order = frappe.new_doc("Production Order")
+	prod_order.production_item = item_code
+	prod_order.qty = 0
+	for d in material_request.items:
+		if d.item_code == item_code:
+			prod_order.qty = d.qty - d.ordered_qty
+			prod_order.fg_warehouse = d.warehouse
+			prod_order.expected_delivery_date = d.schedule_date
+			prod_order.sales_order = d.sales_order_no
+	prod_order.material_request = material_request.name
+	return prod_order

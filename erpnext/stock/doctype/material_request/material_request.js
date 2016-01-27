@@ -52,7 +52,11 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				if(doc.material_request_type === "Purchase")
 					cur_frm.add_custom_button(__("Supplier Quotation"),
 					this.make_supplier_quotation, __("Make"));
-
+				
+				if(doc.material_request_type === "Manufacture" && doc.status === "Submitted")
+					cur_frm.add_custom_button(__("Production Order"),
+					this.make_production_order, __("Make"));
+				
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 
 				// stop
@@ -165,6 +169,64 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
 			frm: cur_frm
 		});
+	},
+	
+
+	make_production_order: function() {
+		var items = []
+		$.each(cur_frm.doc["items"] || [], function(i, d) {
+			items.push(d.item_code);
+		});
+		var d = new frappe.ui.Dialog({
+			title: __("Production Order"),
+			fields: [
+				{
+					"fieldtype": "Link",
+					"label": __("Production Item"),
+					"fieldname": "item",
+					"options": "Item",
+					"reqd": 1,
+					"get_query": function() {
+						return {
+							"filters": [
+								['item_code', 'in', items],
+							]
+						}
+					}
+				}
+			]
+			
+		});
+		
+		d.set_primary_action(__("Make"), function() {
+			frappe.call({
+				method:"erpnext.stock.doctype.material_request.material_request.validate_production_item",
+				args: {
+					"item_code": d.get_values().item
+				},
+				callback: function(r) {
+					if(!r.message) {
+						msgprint("Cannot create Production Order for selected Item.")
+					}
+					else {
+						frappe.call({
+							method:"erpnext.stock.doctype.material_request.material_request.make_production_order",
+							args: {
+								"source_name": cur_frm.doc.name,
+								"item_code": d.get_values().item,
+							},
+							callback: function(r) {
+								if(!r.exe) {
+									var doclist = frappe.model.sync(r.message);
+									frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+								}
+							}
+						});
+					}
+				}
+			});
+		});
+		d.show();
 	}
 });
 

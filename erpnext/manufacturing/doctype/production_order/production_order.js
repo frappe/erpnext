@@ -139,16 +139,18 @@ erpnext.production_order = {
 	},
 
 	set_default_warehouse: function(frm) {
-		frappe.call({
-			method: "erpnext.manufacturing.doctype.production_order.production_order.get_default_warehouse",
+		if (!(frm.doc.wip_warehouse || frm.doc.fg_warehouse)) {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.production_order.production_order.get_default_warehouse",
 
-			callback: function(r) {
-				if(!r.exe) {
-					frm.set_value("wip_warehouse", r.message.wip_warehouse);
-					frm.set_value("fg_warehouse", r.message.fg_warehouse)
+				callback: function(r) {
+					if(!r.exe) {
+						frm.set_value("wip_warehouse", r.message.wip_warehouse);
+						frm.set_value("fg_warehouse", r.message.fg_warehouse)
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 }
 
