@@ -60,9 +60,9 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Process Payroll",
-					"label": _("Process Payroll"),
-					"description":_("Generate Salary Slips"),
+					"name": "Employee Attendance Tool",
+					"label": _("Employee Attendance Tool"),
+					"description":_("Mark Employee Attendance in Bulk"),
 					"hide_count": True
 				},
 				{
@@ -71,6 +71,14 @@ def get_data():
 					"description":_("Upload attendance from a .csv file"),
 					"hide_count": True
 				},
+				{
+					"type": "doctype",
+					"name": "Process Payroll",
+					"label": _("Process Payroll"),
+					"description":_("Generate Salary Slips"),
+					"hide_count": True
+				},
+			
 				{
 					"type": "doctype",
 					"name": "Leave Control Panel",
