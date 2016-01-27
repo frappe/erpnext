@@ -4,7 +4,7 @@ There are several ways Discount can be applied on an items in the sales transact
 
 #### 1. Discount on "Price List Rate" of an item
 
-In the Item table, after Price List Rate field, you will find Discount (%) field. Discount Rate applied will be applicable on the Price List Rate of an item.
+You can find the Discount (%) field in the Item table. Discount is applied on the Price List Rate to get the selling Rate of the Item.
 
 <img alt="Discount Percentage" class="screenshot" src="{{docs_base_url}}/assets/image/articles/discount-1.png">
 
