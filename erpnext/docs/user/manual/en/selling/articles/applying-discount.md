@@ -1,31 +1,25 @@
-<h1>Applying Discount</h1>
+#Applying Discount
 
-There are two ways Discount can be applied on an items in the sales transactions.
+There are several ways Discount can be applied on an items in the sales transactions.
 
 #### 1. Discount on "Price List Rate" of an item
 
-In the Item table of transaction, after Price List Rate field, you will find Discount (%) field. Discount Rate applied in this field will be applicable on the Price List Rate of an item.
+In the Item table, after Price List Rate field, you will find Discount (%) field. Discount Rate applied will be applicable on the Price List Rate of an item.
 
-Before applying Discount (%). 
+<img alt="Discount Percentage" class="screenshot" src="{{docs_base_url}}/assets/image/articles/discount-1.png">
 
-![Before discount]({{docs_base_url}}/assets/img/articles/Selection_00616c670.png)
+The feature of % Discount is available in all the sales and purchase transactions.
 
-After applying Discount (%) under Discount on Price List Rate (%) field.
+You can also %Discount applied based on **Pricing Rule** as well. [Click here to learn how Pricing Rule functions.]({{docs_base_url}}/user/manual/en/accounts/pricing-rule.html)
 
-![After discount]({{docs_base_url}}/assets/img/articles/Selection_007f81dc2.png)
-     
-You can apply percent discount in all sales and purchase transactions.
+#### 2. Discount on Net Total and Grand Total
 
-#### 2. Discount on Grand Total
+From the "Additional Discount" section, you can apply flat discount, as amount or as percentage.
 
-In transactions, after Taxes and Charges table, you will find option to enter "Additional Discount Amount". Based on Amount entered in this field, item's Basic Rate and Taxes will be recalculated.
+<img alt="Discount Percentage" class="screenshot" src="{{docs_base_url}}/assets/image/articles/discount-2.png">
 
-Before applying Additional Discount Amount,
+If Discount Amount is applied based on the **Net Total**, then item's Net Rate and Net Amount is reduced as per the Discount Amount.
 
-![Discount]({{docs_base_url}}/assets/img/articles/Selection_0085ca13e.png)
-
-After applying Additional Discount Amount.
-
-![Discount Amount]({{docs_base_url}}/assets/img/articles/Selection_010496ae2.png)
+If Discount Amount is applied based on the **Grand Total**, then with item's Net Rate, Net Amount and taxes are also re-calculated as per Discount Amount.
 
 <!-- markdown -->
