@@ -130,30 +130,30 @@ def get_salesperson_item_month_map(filters):
 	tdd = get_target_distribution_details(filters)
 	item_groups = get_item_groups()
 
-	sim_map = {}
+	sales_person_achievement_dict = {}
 	for sd in salesperson_details:
 		achieved_details = get_achieved_details(filters, sd.name, item_groups)
 
 		for month_id in range(1, 13):
 			month = datetime.date(2013, month_id, 1).strftime('%B')
-			sim_map.setdefault(sd.name, {}).setdefault(sd.item_group, {})\
-				.setdefault(month, frappe._dict({
-					"target": 0.0, "achieved": 0.0
-				}))
+			sales_person_achievement_dict.setdefault(sd.name, {}).setdefault(sd.item_group, {})\
+					.setdefault(month, frappe._dict({
+							"target": 0.0, "achieved": 0.0
+						}))
 
-			tav_dict = sim_map[sd.name][sd.item_group][month]
+			sales_target_achieved = sales_person_achievement_dict[sd.name][sd.item_group][month]
 			month_percentage = tdd.get(sd.distribution_id, {}).get(month, 0) \
 				if sd.distribution_id else 100.0/12
 
 			if (filters["target_on"] == "Quantity"):
-				tav_dict.target = flt(sd.target_qty) * month_percentage / 100
+				sales_target_achieved.target = flt(sd.target_qty) * month_percentage / 100
 			else:
-				tav_dict.target = flt(sd.target_amount) * month_percentage / 100
+				sales_target_achieved.target = flt(sd.target_amount) * month_percentage / 100
 
-			tav_dict.achieved = achieved_details.get(sd.item_group, frappe._dict()).get(month,\
-				frappe._dict()).get(filters["target_on"].lower())
+			sales_target_achieved.achieved = achieved_details.get(sd.item_group, frappe._dict()).\
+					get(month, frappe._dict()).get(filters["target_on"].lower())
 
-	return sim_map
+	return sales_person_achievement_dict
 
 def get_item_groups():
 	return dict(frappe.get_all("Item", fields=["name", "item_group"], as_list=True))

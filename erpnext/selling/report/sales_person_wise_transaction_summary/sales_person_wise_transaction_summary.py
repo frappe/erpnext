@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
+from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -12,12 +13,21 @@ def execute(filters=None):
 	entries = get_entries(filters)
 	item_details = get_item_details()
 	data = []
+	total_contribution_amoount = 0
 	for d in entries:
+		total_contribution_amoount += flt(d.contribution_amt)
+
 		data.append([
 			d.name, d.customer, d.territory, d.posting_date, d.item_code,
 			item_details.get(d.item_code, {}).get("item_group"), item_details.get(d.item_code, {}).get("brand"),
 			d.qty, d.base_net_amount, d.sales_person, d.allocated_percentage, d.contribution_amt
 		])
+
+	if data:
+		total_row = [""]*len(data[0])
+		total_row[0] = _("Total")
+		total_row[-1] = total_contribution_amoount
+		data.append(total_row)
 
 	return columns, data
 
@@ -60,8 +70,8 @@ def get_conditions(filters, date_field):
 			values.append(filters[field])
 
 	if filters.get("sales_person"):
-		conditions.append("st.sales_person=%s")
-		values.append(filters["sales_person"])
+		lft, rgt = frappe.get_value("Sales Person", filters.get("sales_person"), ["lft", "rgt"])
+		conditions.append("exists(select name from `tabSales Person` where lft >= %s and rgt <= %s and name=st.sales_person)" % (lft, rgt))
 
 	if filters.get("from_date"):
 		conditions.append("dt.{0}>=%s".format(date_field))
