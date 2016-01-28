@@ -12,6 +12,7 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
 
 
 form_grid_templates = {
@@ -343,7 +344,10 @@ def make_production_order(source_name, item_code):
 		if d.item_code == item_code:
 			prod_order.qty = d.qty - d.ordered_qty
 			prod_order.fg_warehouse = d.warehouse
+			prod_order.description = d.description
+			prod_order.stock_uom = d.uom
 			prod_order.expected_delivery_date = d.schedule_date
 			prod_order.sales_order = d.sales_order_no
+	prod_order.bom_no = get_item_details(item_code).bom_no
 	prod_order.material_request = material_request.name
 	return prod_order
