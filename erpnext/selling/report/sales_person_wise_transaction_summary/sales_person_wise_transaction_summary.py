@@ -35,34 +35,38 @@ def get_columns(filters):
 def get_entries(filters):
 	date_field = filters["doc_type"] == "Sales Order" and "transaction_date" or "posting_date"
 	conditions, values = get_conditions(filters, date_field)
-	entries = frappe.db.sql("""select dt.name, dt.customer, dt.territory, dt.%s as posting_date,
-		dt_item.item_code, dt_item.qty, dt_item.base_net_amount, st.sales_person,
-		st.allocated_percentage, dt_item.base_net_amount*st.allocated_percentage/100 as contribution_amt
-		from `tab%s` dt, `tab%s Item` dt_item, `tabSales Team` st
-		where st.parent = dt.name and dt.name = dt_item.parent and st.parenttype = %s
-		and dt.docstatus = 1 %s order by st.sales_person, dt.name desc""" %
-		(date_field, filters["doc_type"], filters["doc_type"], '%s', conditions),
-		tuple([filters["doc_type"]] + values), as_dict=1)
+	entries = frappe.db.sql("""
+		select
+			dt.name, dt.customer, dt.territory, dt.%s as posting_date, dt_item.item_code,
+			dt_item.qty, dt_item.base_net_amount, st.sales_person, st.allocated_percentage,
+			dt_item.base_net_amount*st.allocated_percentage/100 as contribution_amt
+		from
+			`tab%s` dt, `tab%s Item` dt_item, `tabSales Team` st
+		where
+			st.parent = dt.name and dt.name = dt_item.parent and st.parenttype = %s
+			and dt.docstatus = 1 %s order by st.sales_person, dt.name desc
+		""" %(date_field, filters["doc_type"], filters["doc_type"], '%s', conditions),
+			tuple([filters["doc_type"]] + values), as_dict=1)
 
 	return entries
 
 def get_conditions(filters, date_field):
 	conditions = [""]
 	values = []
-	
+
 	for field in ["company", "customer", "territory"]:
 		if filters.get(field):
 			conditions.append("dt.{0}=%s".format(field))
 			values.append(filters[field])
-			
+
 	if filters.get("sales_person"):
 		conditions.append("st.sales_person=%s")
 		values.append(filters["sales_person"])
-		
+
 	if filters.get("from_date"):
 		conditions.append("dt.{0}>=%s".format(date_field))
 		values.append(filters["from_date"])
-		
+
 	if filters.get("to_date"):
 		conditions.append("dt.{0}<=%s".format(date_field))
 		values.append(filters["to_date"])
