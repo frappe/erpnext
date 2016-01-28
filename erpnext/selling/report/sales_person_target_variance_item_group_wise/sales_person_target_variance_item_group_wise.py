@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, pprint
+import frappe
 from frappe import _, msgprint
 from frappe.utils import flt
 from erpnext.accounts.utils import get_fiscal_year
