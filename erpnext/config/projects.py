@@ -53,6 +53,16 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Setup"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Project Settings",
+					"description": _("Project Settings.")
+				}
+			]
+		},
+		{
 			"label": _("Standard Reports"),
 			"icon": "icon-list",
 			"items": [
