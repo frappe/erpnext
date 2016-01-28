@@ -4,9 +4,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, get_datetime, get_time, getdate
+from frappe.utils import cstr, flt, get_datetime, get_time, getdate, cint
 from dateutil.relativedelta import relativedelta
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 class OverlapError(frappe.ValidationError): pass
 class OverProductionLoggedError(frappe.ValidationError): pass
@@ -19,7 +20,9 @@ class TimeLog(Document):
 	def validate(self):
 		self.set_status()
 		self.set_title()
-		self.validate_overlap()
+		mSimplified_time_log = cint(frappe.db.get_value("Project Settings", None, "simplified_time_log"))
+		if mSimplified_time_log == 1:
+			self.validate_overlap()
 		self.validate_timings()
 		self.calculate_total_hours()
 		self.validate_time_log_for()
@@ -58,16 +61,19 @@ class TimeLog(Document):
 
 	def set_title(self):
 		"""Set default title for the Time Log"""
-		if self.title:
-			return
 
 		from frappe.utils import get_fullname
 		if self.production_order:
 			self.title = _("{0} for {1}").format(self.operation, self.production_order)
-		elif self.activity_type and (self.task or self.project):
-			self.title = _("{0} for {1}").format(self.activity_type, self.task or self.project)
-		else:
-			self.title = self.task or self.project or get_fullname(frappe.session.user)
+		elif self.activity_type :
+ 			self.title = _("{0}").format(self.activity_type)
+ 		
+ 		if self.task:
+ 			self.title += " for " + self.task
+ 		if self.project:
+ 			self.title += " for " + self.project
+ 		if self.support_ticket:
+ 			self.title += " for " + self.support_ticket
 
 	def validate_overlap(self):
 		"""Checks if 'Time Log' entries overlap for a user, workstation. """
