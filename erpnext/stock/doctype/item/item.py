@@ -7,7 +7,7 @@ import json
 import urllib
 import itertools
 from frappe import msgprint, _
-from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate
+from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate, strip
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
@@ -45,6 +45,7 @@ class Item(WebsiteGenerator):
 		elif not self.item_code:
 			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
 
+		self.item_code = strip(self.item_code)
 		self.name = self.item_code
 
 	def before_insert(self):

@@ -263,9 +263,9 @@ class PurchaseInvoice(BuyingController):
 		# parent's gl entry
 		if self.grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
-			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate, 
+			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
 				self.precision("grand_total"))
-			
+
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_to,
@@ -453,6 +453,9 @@ class PurchaseInvoice(BuyingController):
 
 		for pr in set(updated_pr):
 			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)
+
+	def on_recurring(self, reference_doc):
+		self.due_date = None
 
 @frappe.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):

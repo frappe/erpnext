@@ -224,6 +224,7 @@ erpnext.patches.v6_4.email_digest_update
 execute:frappe.delete_doc_if_exists("DocType", "Applicable Territory")
 execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Price List")
 execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Taxes and Charges Master")
+
 erpnext.patches.v6_4.set_user_in_contact
 erpnext.patches.v6_4.make_image_thumbnail #2015-10-20
 erpnext.patches.v6_5.show_in_website_for_template_item
@@ -243,3 +244,5 @@ erpnext.patches.v5_8.tax_rule #2015-12-08
 erpnext.patches.v6_12.set_overdue_tasks
 erpnext.patches.v6_16.update_billing_status_in_dn_and_pr
 erpnext.patches.v6_16.create_manufacturer_records
+execute:frappe.db.sql("update `tabPricing Rule` set title=name where title='' or title is null") #2016-01-27
+erpnext.patches.v6_20.set_party_account_currency_in_orders
