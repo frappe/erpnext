@@ -209,9 +209,7 @@ class JournalEntry(AccountsController):
 			account = self.reference_accounts[reference_name]
 
 			if reference_type in ("Sales Order", "Purchase Order"):
-				order = frappe.db.get_value(reference_type, reference_name,
-					["docstatus", "per_billed", "status", "advance_paid",
-						"base_grand_total", "grand_total", "currency"], as_dict=1)
+				order = frappe.get_doc(reference_type, reference_name)
 
 				if order.docstatus != 1:
 					frappe.throw(_("{0} {1} is not submitted").format(reference_type, reference_name))
@@ -225,12 +223,16 @@ class JournalEntry(AccountsController):
 				account_currency = get_account_currency(account)
 				if account_currency == self.company_currency:
 					voucher_total = order.base_grand_total
+					formatted_voucher_total = fmt_money(voucher_total, order.precision("base_grand_total"),
+						currency=account_currency)
 				else:
 					voucher_total = order.grand_total
+					formatted_voucher_total = fmt_money(voucher_total, order.precision("grand_total"),
+						currency=account_currency)
 
 				if flt(voucher_total) < (flt(order.advance_paid) + total):
 					frappe.throw(_("Advance paid against {0} {1} cannot be greater \
-						than Grand Total {2}").format(reference_type, reference_name, voucher_total))
+						than Grand Total {2}").format(reference_type, reference_name, formatted_voucher_total))
 
 	def validate_invoices(self):
 		"""Validate totals and docstatus for invoices"""
@@ -797,7 +799,7 @@ def get_exchange_rate(account, account_currency=None, company=None,
 	company_currency = get_company_currency(company)
 
 	if account_currency != company_currency:
-		if reference_type in ("Sales Invoice", "Purchase Invoice") and reference_name:
+		if reference_type and reference_name and frappe.get_meta(reference_type).get_field("conversion_rate"):
 			exchange_rate = frappe.db.get_value(reference_type, reference_name, "conversion_rate")
 
 		elif account_details and account_details.account_type == "Bank" and \
