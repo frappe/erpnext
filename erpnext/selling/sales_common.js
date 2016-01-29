@@ -56,9 +56,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.set_query("item_code", "items", function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: (me.frm.doc.order_type === "Maintenance" ?
-						{'is_service_item': 1}:
-						{'is_sales_item': 1	})
+					filters: {'is_sales_item': 1}
 				}
 			});
 		}
@@ -289,7 +287,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 		refresh_field('product_bundle_help');
 	},
-	
+
 	make_payment_request: function() {
 		frappe.call({
 			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
