@@ -13,9 +13,9 @@ def execute(filters=None):
 	entries = get_entries(filters)
 	item_details = get_item_details()
 	data = []
-	total_contribution_amoount = 0
+	total_contribution_amount = 0
 	for d in entries:
-		total_contribution_amoount += flt(d.contribution_amt)
+		total_contribution_amount += flt(d.contribution_amt)
 
 		data.append([
 			d.name, d.customer, d.territory, d.posting_date, d.item_code,
@@ -26,7 +26,7 @@ def execute(filters=None):
 	if data:
 		total_row = [""]*len(data[0])
 		total_row[0] = _("Total")
-		total_row[-1] = total_contribution_amoount
+		total_row[-1] = total_contribution_amount
 		data.append(total_row)
 
 	return columns, data
@@ -71,7 +71,7 @@ def get_conditions(filters, date_field):
 
 	if filters.get("sales_person"):
 		lft, rgt = frappe.get_value("Sales Person", filters.get("sales_person"), ["lft", "rgt"])
-		conditions.append("exists(select name from `tabSales Person` where lft >= %s and rgt <= %s and name=st.sales_person)" % (lft, rgt))
+		conditions.append("exists(select name from `tabSales Person` where lft >= {0} and rgt <= {1} and name=st.sales_person)".format(lft, rgt))
 
 	if filters.get("from_date"):
 		conditions.append("dt.{0}>=%s".format(date_field))
