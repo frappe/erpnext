@@ -258,7 +258,8 @@ def get_material_requests_based_on_supplier(supplier):
 			and mr.material_request_type = 'Purchase'
 			and mr.per_ordered < 99.99
 			and mr.docstatus = 1
-			and mr.status != 'Stopped'""" % ', '.join(['%s']*len(supplier_items)),
+			and mr.status != 'Stopped'""" % ', '.join(['%s']*len(supplier_items)
+			order by mr_item.item_code ASC),
 			tuple(supplier_items))
 	else:
 		material_requests = []
