@@ -10,6 +10,7 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
+from erpnext.controllers.recurring_document import month_map, get_next_date
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -288,13 +289,13 @@ class SalesOrder(SellingController):
 
 		frappe.db.set_value("Sales Order", self.name, "per_delivered", flt(delivered_qty/tot_qty) * 100,
 		update_modified=False)
-	
+
 	def set_indicator(self):
 		"""Set indicator for portal"""
 		if self.per_billed < 100 and self.per_delivered < 100:
 			self.indicator_color = "orange"
 			self.indicator_title = _("Not Paid and Not Delivered")
-		
+
 		elif self.per_billed == 100 and self.per_delivered < 100:
 			self.indicator_color = "orange"
 			self.indicator_title = _("Paid and Not Delivered")
@@ -302,7 +303,12 @@ class SalesOrder(SellingController):
 		else:
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
-			
+
+	def on_recurring(self, reference_doc):
+		mcount = month_map[reference_doc.recurring_type]
+		self.set("delivery_date", get_next_date(reference_doc.delivery_date, mcount,
+						cint(reference_doc.repeat_on_day_of_month)))
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
@@ -327,17 +333,6 @@ def stop_or_unstop_sales_orders(names, status):
 					so.update_status('Draft')
 
 	frappe.local.message_log = []
-
-	def before_recurring(self):
-		super(SalesOrder, self).before_recurring()
-
-		for field in ("delivery_status", "per_delivered", "billing_status", "per_billed"):
-			self.set(field, None)
-
-		for d in self.get("items"):
-			for field in ("delivered_qty", "billed_amt", "planned_qty", "prevdoc_docname"):
-				d.set(field, None)
-
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):

@@ -7,6 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
+ "document_type": "Document", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -1155,7 +1156,7 @@
    "in_list_view": 0, 
    "label": "BOM", 
    "length": 0, 
-   "no_copy": 1, 
+   "no_copy": 0, 
    "options": "BOM", 
    "permlevel": 0, 
    "precision": "", 
@@ -1330,7 +1331,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-01-06 02:21:10.407871", 
+ "modified": "2016-01-25 05:39:52.405200", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order Item", 

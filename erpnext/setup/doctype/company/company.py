@@ -166,6 +166,9 @@ class Company(Document):
 
 		frappe.defaults.clear_cache()
 
+	def abbreviate(self):
+		self.abbr = ''.join([c[0].upper() for c in self.name.split()])
+
 	def on_trash(self):
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists

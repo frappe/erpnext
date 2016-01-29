@@ -31,10 +31,10 @@ def validate_filters(filters):
 	for f in ["Fiscal Year", "Based On", "Period", "Company"]:
 		if not filters.get(f.lower().replace(" ", "_")):
 			frappe.throw(_("{0} is mandatory").format(f))
-			
+
 	if not frappe.db.exists("Fiscal Year", filters.get("fiscal_year")):
 		frappe.throw(_("Fiscal Year: {0} does not exists").format(filters.get("fiscal_year")))
-		
+
 	if filters.get("based_on") == filters.get("group_by"):
 		frappe.throw(_("'Based On' and 'Group By' can not be same"))
 
@@ -98,7 +98,8 @@ def get_data(filters, conditions):
 						(filters.get("company"), filters.get("fiscal_year"), row[i][0],
 							data1[d][0]), as_list=1)
 
-				des[ind] = row[i]
+				des[ind] = row[i][0]
+
 				for j in range(1,len(conditions["columns"])-inc):
 					des[j+inc] = row1[0][j]
 
@@ -213,7 +214,7 @@ def based_wise_columns_query(based_on, trans):
 	elif based_on == "Customer":
 		based_on_details["based_on_cols"] = ["Customer:Link/Customer:120", "Territory:Link/Territory:120"]
 		based_on_details["based_on_select"] = "t1.customer_name, t1.territory, "
-		based_on_details["based_on_group_by"] = 't1.customer_name'
+		based_on_details["based_on_group_by"] = 't1.customer'
 		based_on_details["addl_tables"] = ''
 
 	elif based_on == "Customer Group":

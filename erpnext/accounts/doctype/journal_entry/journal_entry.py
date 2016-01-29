@@ -209,9 +209,7 @@ class JournalEntry(AccountsController):
 			account = self.reference_accounts[reference_name]
 
 			if reference_type in ("Sales Order", "Purchase Order"):
-				order = frappe.db.get_value(reference_type, reference_name,
-					["docstatus", "per_billed", "status", "advance_paid",
-						"base_grand_total", "grand_total", "currency"], as_dict=1)
+				order = frappe.get_doc(reference_type, reference_name)
 
 				if order.docstatus != 1:
 					frappe.throw(_("{0} {1} is not submitted").format(reference_type, reference_name))
@@ -225,12 +223,16 @@ class JournalEntry(AccountsController):
 				account_currency = get_account_currency(account)
 				if account_currency == self.company_currency:
 					voucher_total = order.base_grand_total
+					formatted_voucher_total = fmt_money(voucher_total, order.precision("base_grand_total"),
+						currency=account_currency)
 				else:
 					voucher_total = order.grand_total
+					formatted_voucher_total = fmt_money(voucher_total, order.precision("grand_total"),
+						currency=account_currency)
 
 				if flt(voucher_total) < (flt(order.advance_paid) + total):
 					frappe.throw(_("Advance paid against {0} {1} cannot be greater \
-						than Grand Total {2}").format(reference_type, reference_name, voucher_total))
+						than Grand Total {2}").format(reference_type, reference_name, formatted_voucher_total))
 
 	def validate_invoices(self):
 		"""Validate totals and docstatus for invoices"""
@@ -298,8 +300,11 @@ class JournalEntry(AccountsController):
 
 	def set_amounts_in_company_currency(self):
 		for d in self.get("accounts"):
-			d.debit = flt(flt(d.debit_in_account_currency)*flt(d.exchange_rate), d.precision("debit"))
-			d.credit = flt(flt(d.credit_in_account_currency)*flt(d.exchange_rate), d.precision("credit"))
+			d.debit_in_account_currency = flt(d.debit_in_account_currency, d.precision("debit_in_account_currency"))
+			d.credit_in_account_currency = flt(d.credit_in_account_currency, d.precision("credit_in_account_currency"))
+
+			d.debit = flt(d.debit_in_account_currency * flt(d.exchange_rate), d.precision("debit"))
+			d.credit = flt(d.credit_in_account_currency * flt(d.exchange_rate), d.precision("credit"))
 
 	def set_exchange_rate(self):
 		for d in self.get("accounts"):
@@ -361,10 +366,10 @@ class JournalEntry(AccountsController):
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
 				total_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				bank_account_currency = d.account_currency
-		
+
 		if not self.pay_to_recd_from:
 			total_amount = 0
-		
+
 		self.set_total_amount(total_amount, bank_account_currency)
 
 	def set_total_amount(self, amt, currency):
@@ -526,7 +531,7 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None, a
 			if not account:
 				account = frappe.db.get_value("Account",
 					{"company": company, "account_type": "Bank", "is_group": 0})
-				
+
 		elif voucher_type=="Cash Entry":
 			account = frappe.db.get_value("Company", company, "default_cash_account")
 			if not account:
@@ -645,7 +650,7 @@ def get_payment_entry(ref_doc, args):
 	})
 
 	bank_row = je.append("accounts")
-	
+
 	#make it bank_details
 	bank_account = get_default_bank_cash_account(ref_doc.company, "Bank Entry", account=args.get("bank_account"))
 	if bank_account:
@@ -667,7 +672,7 @@ def get_payment_entry(ref_doc, args):
 
 	je.set_amounts_in_company_currency()
 	je.set_total_debit_credit()
-	
+
 	return je if args.get("journal_entry") else je.as_dict()
 
 @frappe.whitelist()
@@ -794,7 +799,7 @@ def get_exchange_rate(account, account_currency=None, company=None,
 	company_currency = get_company_currency(company)
 
 	if account_currency != company_currency:
-		if reference_type in ("Sales Invoice", "Purchase Invoice") and reference_name:
+		if reference_type and reference_name and frappe.get_meta(reference_type).get_field("conversion_rate"):
 			exchange_rate = frappe.db.get_value(reference_type, reference_name, "conversion_rate")
 
 		elif account_details and account_details.account_type == "Bank" and \
