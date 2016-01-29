@@ -1,28 +1,45 @@
-<h1>ERPNext for Service Organizations</h1>
+#ERPNext for Service Organization
 
-**Question:** At first look, ERPNext looks primarily designed for the traders and manufacturers. Is ERPNext used by service companies as well?
+**Question:** ERPNext looks primarily designed for the traders and manufacturers. Is ERPNext used by companies offering servies?
 
 **Answer:**
-About 30% of ERPNext customers comes from services background. These are companies into software development, certification services, individual consultants and many more. Being into services business ourselves, we use ERPNext to manage our sales, accounting, support and HR operations.
 
-https://conf.erpnext.com/2014/videos/umair-sayyed
+About 30% of ERPNext customers are companies into services. These are companies into software development, certification services, individual consultants and many more. Being into service business ourselves, we use ERPNext to manage our sales, accounting, support and HR operations. Check following video to learn how ERPNext uses ERPNext.
+
+<iframe width="640" height="360" src="//www.youtube.com/embed/b6r7WxJMfFA" frameborder="0" allowfullscreen=""></iframe>
 
 ###Master Setup
 
-Between the service and trading company, the most differentiating master is an item master. While trading and manufacturing business has stock item, with warehouse and other stock details, service items will have none of these details.
+The setup for a Service company differs primarily for Items. They don't maintain the Stock for Items and thus, don't have Warehouses.
 
-To create a services item, which will be non-stock item, in the Item master, you should set "Is Stock Item" field as "No".
+To create a Service (non-stock) Item, in the item master, uncheck "Maintain Stock" field.
 
-![non-stock item]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-04-01 at 5.32.57 pm.png)
+<img alt="Service Item" class="screenshot"  src="{{docs_base_url}}/assets/img/articles/services-1.png">
+
+When creating Sales Order for the services, select Order Type as **Maintenance**. Sales Order of Maintenance Type needs lesser details compared to stock item's order like Delivery Note, item warehouse etc.
+
+Service company can still add stock items to mantain their fixed assets like computers, furniture and other office equipments.
 
 ###Hiding Non-required Features
 
+Since many modules like Manufacturing and Stock will not be required for the services company, you can hide those modules from:
+
+`Setup > Permissions > Show/Hide Modules`
+
+Modules unchecked here will be hidden from all the User.
+
 ####Feature Setup
 
-In Feature Setup, you can activate specific functionalities, and disable others. Based on this setting, forms and fields not required for your business will be hidden. [More on feature setup here](https://manual.erpnext.com/customize-erpnext/hiding-modules-and-features).
+Within the form, there are many fields only needed for companies into trading and manufacturing businesses. These fields can be hidden for the service company. Feature Setup is a tool where you can enable/disable specific feature. If a feature is disabled, then fields relevant to that feature is hidden from all the forms. For example, if Serial No. feature is disabled, then Serial. No. field from Item as well as from all the sales and purchase transaction will be hidden.
+
+[To learn more about Feature Setup, click here.]({{docs_base_url}}/user/manual/en/customize-erpnext/hiding-modules-and-features.html).
 
 ####Permissions
 
-ERPNext is the permission driven system. User will be able to access system based on permissions assigned to him/her. So, if user is not assigned Role related to Stock and Manufacturing module, it will be hidden from user. [More on permission management in ERPNext here](https://manual.erpnext.com/setting-up/users-and-permissions).
+ERPNext is the permission controlled system. Users access system based on permissions assigned to them. So, if user is not assigned Role related to Stock and Manufacturing module, it will be hidden from that User. [Click here to learn more about permission management.]({{docs_base_url}}/user/manual/en/setting-up/users-and-permissions.html).
+
+You can also refer to help video on User and Permissions setting in ERPNext.
+
+<iframe width="660" height="371" src="https://www.youtube.com/embed/fnBoRhBrwR4" frameborder="0" allowfullscreen></iframe>
 
 <!-- markdown -->
