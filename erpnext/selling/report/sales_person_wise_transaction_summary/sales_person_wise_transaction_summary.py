@@ -71,7 +71,7 @@ def get_conditions(filters, date_field):
 
 	if filters.get("sales_person"):
 		lft, rgt = frappe.get_value("Sales Person", filters.get("sales_person"), ["lft", "rgt"])
-		conditions.append("exists(select name from `tabSales Person` where lft >= %s and rgt <= %s and name=st.sales_person)" % (lft, rgt))
+		conditions.append("exists(select name from `tabSales Person` where lft >= {0} and rgt <= {1} and name=st.sales_person)".format(lft, rgt))
 
 	if filters.get("from_date"):
 		conditions.append("dt.{0}>=%s".format(date_field))

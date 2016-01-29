@@ -111,7 +111,6 @@ def get_achieved_details(filters, sales_person, item_groups):
 	item_actual_details = {}
 	for d in item_details:
 		item_group = item_groups[d.item_code]
-		print item_group
 		item_actual_details.setdefault(item_group, frappe._dict()).setdefault(d.month_name,\
 			frappe._dict({
 				"quantity" : 0,
