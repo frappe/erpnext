@@ -30,6 +30,6 @@
     <div class="col-sm-8">
         Watch video presentations from the ERPNext team and users from the 2014 ERPNext Conference.
         <br><br>
-		<a href="https://conf.erpnext.com">Join us at the ERPNext Conference on October 9th 2015 in Mumbai</a>
+		<a href="https://conf.erpnext.com">ERPNext Conference on October 9th 2015 in Mumbai</a>
     </div>
 </div>
