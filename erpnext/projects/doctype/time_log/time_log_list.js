@@ -4,6 +4,17 @@
 // render
 frappe.listview_settings['Time Log'] = {
 	add_fields: ["status", "billable", "activity_type", "task", "project", "hours", "for_manufacturing", "billing_amount"],
+	
+	get_indicator: function(doc) {
+		if (doc.status== "Batched for Billing") {
+			return [__("Batched for Billing"), "darkgrey", "status,=,Batched for Billing"]
+		} else if (doc.status== "Billed") {
+			return [__("Billed"), "green", "status,=,Billed"]
+		} else if (doc.status== "Submitted" && doc.billable) {
+			return [__("Billable"), "orange", "billable,=,1"]
+		}
+	},
+	
 	selectable: true,
 	onload: function(me) {
 		me.page.add_menu_item(__("Make Time Log Batch"), function() {
