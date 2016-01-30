@@ -33,15 +33,17 @@ def get_employees():
 	for holiday in holidays:
 		holidays_list.append(holiday.holiday_date)
 		holiday_names[holiday.holiday_date] = holiday.description
+	if(holidays_list):
+		employee_list = frappe.db.sql("""select
+		        employee, employee_name, att_date, status
+		    from tabAttendance
+		    where
+		        att_date in ({0})""".format(', '.join(["%s"]*len(holidays_list))),
+		    holidays_list, as_list=True)
 
-	employee_list = frappe.db.sql("""select
-	        employee, employee_name, att_date, status
-	    from tabAttendance
-	    where
-	        att_date in ({0})""".format(', '.join(["%s"]*len(holidays_list))),
-	    holidays_list, as_list=True)
+		for employee_data in employee_list:
+			employee_data.append(holiday_names[employee_data[2]])
 
-	for employee_data in employee_list:
-		employee_data.append(holiday_names[employee_data[2]])
-
-	return employee_list
+		return employee_list
+	else:
+		return None
