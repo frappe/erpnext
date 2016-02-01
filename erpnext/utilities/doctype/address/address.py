@@ -144,7 +144,6 @@ def get_address_templates(address):
 	else:
 		return name, template
 
-
 @frappe.whitelist()
 def get_shipping_address(company):
 	filters = {"company": company, "is_company_address":1}
@@ -156,5 +155,4 @@ def get_shipping_address(company):
 		frappe.throw(_("Please add addresses for the company"))
 	else:
 		name, address_template = get_address_templates(address_as_dict)
-
 		return address_as_dict.get("name"), frappe.render_template(address_template, address_as_dict)
