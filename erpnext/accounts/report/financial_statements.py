@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, _dict
-from frappe.utils import (flt, getdate, get_first_day, get_last_day,
+from frappe.utils import (cint, flt, getdate, get_first_day, get_last_day,
 	add_months, add_days, formatdate)
 
 def get_period_list(fiscal_year, periodicity, from_beginning=False):
@@ -22,7 +22,7 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 		period_list = [_dict({"to_date": end_date, "key": fiscal_year, "label": fiscal_year})]
 	else:
 		months_to_add = {
-			"Half-yearly": 6,
+			"Half-Yearly": 6,
 			"Quarterly": 3,
 			"Monthly": 1
 		}[periodicity]
@@ -58,7 +58,10 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 	# common processing
 	for opts in period_list:
 		key = opts["to_date"].strftime("%b_%Y").lower()
-		label = formatdate(opts["to_date"], "MMM YYYY")
+		if periodicity == "Monthly":
+			label = formatdate(opts["to_date"], "MMM YYYY")
+		else:
+			label = get_label(periodicity,opts["to_date"])
 		opts.update({
 			"key": key.replace(" ", "_").replace("-", "_"),
 			"label": label,
@@ -74,7 +77,24 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 
 	return period_list
 
-def get_data(company, root_type, balance_must_be, period_list, ignore_closing_entries=False):
+def get_label(periodicity,to_date):
+	if periodicity=="Yearly":
+		months_to_add=-11
+	elif periodicity=="Half-Yearly":
+		months_to_add=-5
+	elif periodicity=="Quarterly":
+		months_to_add=-2
+	from_date = add_months(to_date, months_to_add)
+	if periodicity=="Yearly":
+
+        	label = formatdate(from_date, "YYYY")+"-"+formatdate(to_date, "YYYY")
+	else:
+		label = from_date.strftime("%b")+"-"+formatdate(to_date, "MMM YYYY")
+
+	return label
+	
+def get_data(company, root_type, balance_must_be, period_list, accumulated_value, ignore_closing_entries=False):
+	accumulated_value_ischecked = cint(accumulated_value)
 	accounts = get_accounts(company, root_type)
 	if not accounts:
 		return None
@@ -90,7 +110,7 @@ def get_data(company, root_type, balance_must_be, period_list, ignore_closing_en
 			period_list[-1]["to_date"],root.lft, root.rgt, gl_entries_by_account,
 			ignore_closing_entries=ignore_closing_entries)
 
-	calculate_values(accounts_by_name, gl_entries_by_account, period_list)
+	calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_value_ischecked)
 	accumulate_values_into_parents(accounts, accounts_by_name, period_list)
 	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
 
@@ -108,13 +128,15 @@ def calculate_values(accounts_by_name, gl_entries_by_account, period_list):
 				if entry.posting_date <= period.to_date:
 					d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
 
-def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
+def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_value_ischecked):
 	"""accumulate children's values in parent accounts"""
 	for d in reversed(accounts):
 		if d.parent_account:
 			for period in period_list:
 				accounts_by_name[d.parent_account][period.key] = accounts_by_name[d.parent_account].get(period.key, 0.0) + \
 					d.get(period.key, 0.0)
+				if accumulated_value_ischecked == 0:
+							break
 
 def prepare_data(accounts, balance_must_be, period_list, company_currency):
 	out = []
@@ -124,6 +146,7 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 	for d in accounts:
 		# add to output
 		has_value = False
+		total_column=0
 		row = {
 			"account_name": d.account_name,
 			"account": d.name,
@@ -143,13 +166,16 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 			if abs(row[period.key]) >= 0.005:
 				# ignore zero values
 				has_value = True
+				total_column=total_column+row[period.key]
 
 		if has_value:
+			row["total"]=total_column
 			out.append(row)
 
 	return out
 
 def add_total_row(out, balance_must_be, period_list, company_currency):
+	total_column=0
 	total_row = {
 		"account_name": "'" + _("Total ({0})").format(balance_must_be) + "'",
 		"account": None,
@@ -161,8 +187,12 @@ def add_total_row(out, balance_must_be, period_list, company_currency):
 			for period in period_list:
 				total_row.setdefault(period.key, 0.0)
 				total_row[period.key] += row.get(period.key, 0.0)
-
-			row[period.key] = ""
+				total_column=total_column+total_row[period.key]
+				out[0][period.key] = ""
+				out[0]["total"] = ""
+	
+	total_row["total"]=total_column
+	out.append(total_row)
 
 	out.append(total_row)
 
@@ -245,7 +275,8 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, g
 
 	return gl_entries_by_account
 
-def get_columns(period_list, company=None):
+def get_columns(periodicity,period_list,accumulated_value):
+	accumulated_value_ischecked = cint(accumulated_value)
 	columns = [{
 		"fieldname": "account",
 		"label": _("Account"),
@@ -253,22 +284,20 @@ def get_columns(period_list, company=None):
 		"options": "Account",
 		"width": 300
 	}]
-	if company:
-		columns.append({
-			"fieldname": "currency",
-			"label": _("Currency"),
-			"fieldtype": "Link",
-			"options": "Currency",
-			"hidden": 1
-		})
-	
 	for period in period_list:
 		columns.append({
 			"fieldname": period.key,
 			"label": period.label,
 			"fieldtype": "Currency",
-			"options": "currency",
 			"width": 150
 		})
+	if periodicity!="Yearly":
+		if accumulated_value_ischecked == 0:
+			columns.append({
+				"fieldname": "total",
+				"label": _("Total"),
+				"fieldtype": "Currency",
+				"width": 150
+			})
 
 	return columns
