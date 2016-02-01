@@ -83,20 +83,12 @@ class Address(Document):
 def get_address_display(address_dict):
 	if not address_dict:
 		return
+		
 	if not isinstance(address_dict, dict):
 		address_dict = frappe.db.get_value("Address", address_dict, "*", as_dict=True) or {}
 
-	data = frappe.db.get_value("Address Template", \
-		{"country": address_dict.get("country")}, ["name", "template"])
-	if not data:
-		data = frappe.db.get_value("Address Template", \
-			{"is_default": 1}, ["name", "template"])
-
-	if not data:
-		frappe.throw(_("No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template."))
-
-	name, template = data
-
+	name, template = get_address_templates(address_dict)
+	
 	try:
 		return frappe.render_template(template, address_dict)
 	except TemplateSyntaxError:
@@ -138,3 +130,30 @@ def has_website_permission(doc, ptype, user, verbose=False):
 			return doc.lead == lead
 
 	return False
+
+def get_address_templates(address):
+	name, template = frappe.db.get_value("Address Template", \
+		{"country": address.get("country")}, ["name", "template"])
+		
+	if not template:
+		name, template = frappe.db.get_value("Address Template", \
+			{"is_default": 1}, ["name", "template"])
+
+	if not template:
+		frappe.throw(_("No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template."))
+	else:
+		return name, template
+
+
+@frappe.whitelist()
+def get_shipping_address(company):
+	filters = {"company": company, "is_company_address":1}
+	fieldname = ["name", "address_line1", "address_line2", "city", "state", "country"]
+
+	address_as_dict = frappe.db.get_value("Address", filters=filters, fieldname=fieldname, as_dict=True)
+
+	if not address_as_dict:
+		frappe.throw(_("Please add addresses for the company"))
+	else:
+		name, address_template = get_address_templates(address_as_dict)
+		return address_as_dict.get("name"), frappe.render_template(address_template, address_as_dict)
