@@ -20,18 +20,18 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 				price_list: frm.doc.buying_price_list
 			};
 		}
-		
+
 		if (args) {
 			args.posting_date = frm.doc.posting_date || frm.doc.transaction_date;
 		}
 	}
 	if(!args) return;
-	
+
 	if(frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
-		if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date", 
+		if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date",
 			args.posting_date, args.party_type=="Customer" ? "customer": "supplier")) return;
 	}
-	
+
 	args.currency = frm.doc.currency;
 	args.company = frm.doc.company;
 	args.doctype = frm.doc.doctype;
@@ -51,7 +51,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 
 erpnext.utils.get_address_display = function(frm, address_field, display_field) {
 	if(frm.updating_party_details) return;
-	
+
 	if(!address_field) {
 		if(frm.doctype != "Purchase Order" && frm.doc.customer) {
 			address_field = "customer_address";
@@ -59,7 +59,7 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 			address_field = "supplier_address";
 		} else return;
 	}
- 
+
 	if(!display_field) display_field = "address_display";
 	if(frm.doc[address_field]) {
 		frappe.call({
@@ -69,15 +69,15 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 				if(r.message){
 					frm.set_value(display_field, r.message)
 				}
-				
+
 				if(frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
-					if(!erpnext.utils.validate_mandatory(frm, "Customer/Supplier", 
+					if(!erpnext.utils.validate_mandatory(frm, "Customer/Supplier",
 						frm.doc.customer || frm.doc.supplier, address_field)) return;
-	
-					if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date", 
+
+					if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date",
 						frm.doc.posting_date || frm.doc.transaction_date, address_field)) return;
 				} else return;
-				
+
 				frappe.call({
 					method: "erpnext.accounts.party.set_taxes",
 					args: {
@@ -122,4 +122,19 @@ erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
 		return false;
 	}
 	return true;
+}
+
+erpnext.utils.get_shipping_address = function(doc){
+	if(doc.doctype === "Purchase Order"){
+		frappe.call({
+			method: "erpnext.utilities.doctype.address.address.get_shipping_address",
+			args: {company: doc.company},
+			callback: function(r){
+				if(r.message){
+					doc.customer_address = r.message[0] //Address title or name
+					doc.customer_address_display = r.message[1] //Address to be displayed on the page
+				}
+			}
+		});
+	}
 }
