@@ -4,7 +4,7 @@
 
 Opening Stock can be done for serialized Items as well as non-serialized Items.To update opening stock for non-serialized Item, you should perform Stock Reconciliation. For serialised Item, you can make Stock Entry of type Material Receipt.
 
-> Stock > Stock Reconciliation > New Stock Reconciliation
+> Stock > Tools > Stock Reconciliation > New Stock Reconciliation
 
 In both cases, you should enter "Difference/Expense Account" as **Temporary Opening** account. On submission of the document, system will debit Warehouse account which is an asset account and credit difference/expense account. Before making these entries, make sure you have enabled "Perpetual Inventory" by checking Stock Settings page.
 
