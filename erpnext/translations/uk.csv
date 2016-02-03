@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,Загальний до
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Упаковка ковзання (и) скасовується
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Потік грошових коштів від інвестиційної
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Вантажні та експедиторські Збори
-DocType: Material Request Item,Sales Order No,Продажі Замовити Немає
+DocType: Material Request Item,Sales Order,Продажі Замовити Немає
 DocType: Item Group,Item Group Name,Назва товару Група
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Взятий
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Передача матеріалів для виробництва

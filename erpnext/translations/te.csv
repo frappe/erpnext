@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,మొత్తం ఎ�
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,రద్దు ప్యాకింగ్ స్లిప్ (లు)
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,ఇన్వెస్టింగ్ నుండి నగదు ప్రవాహ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,ఫ్రైట్ మరియు ఫార్వార్డింగ్ ఛార్జీలు
-DocType: Material Request Item,Sales Order No,సేల్స్ ఆర్డర్ సంఖ్య
+DocType: Material Request Item,Sales Order,సేల్స్ ఆర్డర్ సంఖ్య
 DocType: Item Group,Item Group Name,అంశం గ్రూప్ పేరు
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,తీసుకోబడినది
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,తయారీకి ట్రాన్స్ఫర్ మెటీరియల్స్

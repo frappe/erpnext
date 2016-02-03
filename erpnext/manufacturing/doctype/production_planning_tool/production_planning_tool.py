@@ -383,7 +383,7 @@ class ProductionPlanningTool(Document):
 						"qty": requested_qty,
 						"schedule_date": add_days(nowdate(), cint(item_wrapper.lead_time_days)),
 						"warehouse": self.purchase_request_for_warehouse,
-						"sales_order_no": sales_order if sales_order!="No Sales Order" else None
+						"sales_order": sales_order if sales_order!="No Sales Order" else None
 					})
 
 				pr_doc.flags.ignore_permissions = 1

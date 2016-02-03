@@ -1226,7 +1226,7 @@ DocType: Employee External Work History,Total Experience,Tổng số kinh nghi�
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Đóng gói trượt (s) bị hủy bỏ
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Lưu chuyển tiền tệ từ đầu tư
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Vận tải hàng hóa và chuyển tiếp phí
-DocType: Material Request Item,Sales Order No,Không bán hàng đặt hàng
+DocType: Material Request Item,Sales Order,Không bán hàng đặt hàng
 DocType: Item Group,Item Group Name,Mục Group Name
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Lấy
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Chuyển Vật liệu cho sản xuất

@@ -29,20 +29,20 @@ class MaterialRequest(BuyingController):
 	def validate_qty_against_so(self):
 		so_items = {} # Format --> {'SO/00001': {'Item/001': 120, 'Item/002': 24}}
 		for d in self.get('items'):
-			if d.sales_order_no:
-				if not so_items.has_key(d.sales_order_no):
-					so_items[d.sales_order_no] = {d.item_code: flt(d.qty)}
+			if d.sales_order:
+				if not so_items.has_key(d.sales_order):
+					so_items[d.sales_order] = {d.item_code: flt(d.qty)}
 				else:
-					if not so_items[d.sales_order_no].has_key(d.item_code):
-						so_items[d.sales_order_no][d.item_code] = flt(d.qty)
+					if not so_items[d.sales_order].has_key(d.item_code):
+						so_items[d.sales_order][d.item_code] = flt(d.qty)
 					else:
-						so_items[d.sales_order_no][d.item_code] += flt(d.qty)
+						so_items[d.sales_order][d.item_code] += flt(d.qty)
 
 		for so_no in so_items.keys():
 			for item in so_items[so_no].keys():
 				already_indented = frappe.db.sql("""select sum(qty)
 					from `tabMaterial Request Item`
-					where item_code = %s and sales_order_no = %s and
+					where item_code = %s and sales_order = %s and
 					docstatus = 1 and parent != %s""", (item, so_no, self.name))
 				already_indented = already_indented and flt(already_indented[0][0]) or 0
 
@@ -347,7 +347,7 @@ def make_production_order(source_name, item_code):
 			prod_order.description = d.description
 			prod_order.stock_uom = d.uom
 			prod_order.expected_delivery_date = d.schedule_date
-			prod_order.sales_order = d.sales_order_no
+			prod_order.sales_order = d.sales_order
 	prod_order.bom_no = get_item_details(item_code).bom_no
 	prod_order.material_request = material_request.name
 	return prod_order

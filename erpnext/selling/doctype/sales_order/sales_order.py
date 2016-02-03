@@ -353,7 +353,7 @@ def make_material_request(source_name, target_doc=None):
 		item_table: {
 			"doctype": "Material Request Item",
 			"field_map": {
-				"parent": "sales_order_no",
+				"parent": "sales_order",
 				"stock_uom": "uom"
 			}
 		}
@@ -471,7 +471,7 @@ def make_maintenance_schedule(source_name, target_doc=None):
 			"Sales Order": {
 				"doctype": "Maintenance Schedule",
 				"field_map": {
-					"name": "sales_order_no"
+					"name": "sales_order"
 				},
 				"validation": {
 					"docstatus": ["=", 1]
@@ -500,7 +500,7 @@ def make_maintenance_visit(source_name, target_doc=None):
 			"Sales Order": {
 				"doctype": "Maintenance Visit",
 				"field_map": {
-					"name": "sales_order_no"
+					"name": "sales_order"
 				},
 				"validation": {
 					"docstatus": ["=", 1]

@@ -1495,8 +1495,8 @@ DocType: Employee External Work History,Total Experience,Toplam Deneyim
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Ambalaj Makbuzları İptal Edildi
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Yatırım Nakit Akışı
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Navlun ve Sevkiyat Ücretleri
-DocType: Material Request Item,Sales Order No,Satış Sipariş No
-DocType: Material Request Item,Sales Order No,Satış Sipariş No
+DocType: Material Request Item,Sales Order,Satış Sipariş No
+DocType: Material Request Item,Sales Order,Satış Sipariş No
 DocType: Item Group,Item Group Name,Ürün Grup Adı
 DocType: Item Group,Item Group Name,Ürün Grup Adı
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Alınmış
