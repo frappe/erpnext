@@ -13,12 +13,6 @@ frappe.ui.form.on("Purchase Order", {
 	}
 });
 
-frappe.ui.form.on_change("Purchase Order", "company", function(frm){
-		erpnext.utils.get_shipping_address(frm.doc)
-	}
-);
-
-
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc, cdt, cdn) {
 		var me = this;
@@ -284,4 +278,33 @@ frappe.ui.form.on("Purchase Order", "is_subcontracted", function(frm) {
 	if (frm.doc.is_subcontracted === "Yes") {
 		erpnext.buying.get_default_bom(frm);
 	}
+});
+
+frappe.ui.form.on("Purchase Order", "company", function(frm){
+		erpnext.utils.get_shipping_address(frm.doc)
+	}
+);
+
+frappe.ui.form.on("Purchase Order", "shipping_address", function(frm){
+	erpnext.utils.get_shipping_address(frm.doc)
+});
+
+frappe.ui.form.on("Purchase Order","shipping_address", function(frm){
+	frm.set_query("shipping_address", function(){
+		if(frm.doc.customer){
+			return{
+				filters:{
+					"customer": frm.doc.customer
+				}
+			}
+		}
+		else{
+			return{
+				filters:{
+					"is_company_address": 1,
+					"company": doc.company
+				}
+			}
+		}
+	});
 });

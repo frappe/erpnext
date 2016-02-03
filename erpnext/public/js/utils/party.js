@@ -131,8 +131,8 @@ erpnext.utils.get_shipping_address = function(doc){
 			args: {company: doc.company},
 			callback: function(r){
 				if(r.message){
-					doc.customer_address = r.message[0] //Address title or name
-					doc.customer_address_display = r.message[1] //Address to be displayed on the page
+					doc.shipping_address = r.message[0] //Address title or name
+					doc.shipping_address_display = r.message[1] //Address to be displayed on the page
 				}
 			}
 		});
