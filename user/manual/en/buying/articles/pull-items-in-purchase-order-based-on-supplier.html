@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Manage Shipping Rule </title>
+	<title> Pull Items In Purchase Order Based On Supplier </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -26,7 +26,7 @@
 
 </style>
 </head>
-<body data-path="user/manual/en/selling/articles/manage-shipping-rule">
+<body data-path="user/manual/en/buying/articles/pull-items-in-purchase-order-based-on-supplier">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -74,7 +74,7 @@
                         <div data-html-block="hero"></div>
                         <div class="container" data-html-block="content">
                         
-<div class="page-container" id="page-manage-shipping-rule" data-path="user/manual/en/selling/articles/manage-shipping-rule"
+<div class="page-container" id="page-pull-items-in-purchase-order-based-on-supplier" data-path="user/manual/en/buying/articles/pull-items-in-purchase-order-based-on-supplier"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
@@ -88,7 +88,7 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/manual/en/selling/articles">
+		<a href="https://frappe.github.io/erpnext/user/manual/en/buying/articles">
 		Articles</a>
 	</li>
 	
@@ -107,34 +107,44 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="manage-shipping-rule" styl
+	<article class="web-page-content" id="pull-items-in-purchase-order-based-on-supplier" styl
 
     e="text-align: Left">
-	<h1>Manage Shipping Rule</h1>
+	<h1>Pull Items in Purchase Order based on Supplier</h1>
 
-<p>Shipping Rule master help you define rules based on which shipping charge will be applied on sales transactions.</p>
+<p><strong>Question:</strong></p>
 
-<p>Most of the companies (mainly retail) have shipping charge applied based on invoice total. If invoice value is above certain range, then shipping charge applied will be lesser. If invoice total is less, then shipping charges applied will be higher. You can setup Shipping Rule to address the requirement of varying shipping charge based on total.</p>
+<p>Our Material Request has many items, each purchased from different suppliers. How to pull items from all open Material Request which are to be purchased from common Supplier?</p>
 
-<p>To setup Shipping Rule, go to:</p>
+<p><strong>Answer:</strong></p>
 
-<p>Selling/Accounts &gt;&gt; Setup &gt;&gt; Shipping Rule</p>
+<p>To pull items from Material Request for specific Supplier only, follow below given steps.</p>
 
-<p>Here is an example of Shipping Rule master:</p>
+<h4>Step 1:  Default Supplier</h4>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_258.png" alt="Shipping Rule Master" /></p>
+<p>Update Default Supplier in the Item master.</p>
 
-<p>Referring above, you will notice that shipping charges are reducing as range of total is increasing. This shipping charge will only be applied if transaction total falls under one of the above range, else not.</p>
+<p><img alt="Item Purchase UoM" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/for-supplier-2.png"></p>
 
-<p>If shipping charges are applied based on Shipping Rule, then more values like Shipping Account, Cost Center will be needed as well to add row in the Taxes and Other Charges table of sales transaction. Hence these details are tracked as well in the Shipping Rule itself.</p>
+<h4>Step 2:  New Purchase Order</h4>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_260.png" alt="Shipping Rule Filters" /></p>
+<p><code>Buying &gt; Document &gt; Purchase Order &gt; New</code></p>
 
-<p>Apart from price range, Shipping Rule will also validate if its territory and company matches with that of Customer's territory and company.</p>
+<h4>Step 3:  Select for Supplier</h4>
 
-<p>Following is an example of how shipping charges are auto-applied on sales order based on Shipping Rule.</p>
+<p>From the options available to pull data in the Purchase Order, click on <code>For Supplier</code>.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_261.png" alt="Shipping Rule Application" /></p>
+<p><img alt="Item Purchase UoM" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/for-supplier-1.gif"></p>
+
+<h4>Step 4: Get Items</h4>
+
+<p>Select Supplier name and click on <code>Get</code>.</p>
+
+<p><img alt="Item Purchase UoM" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/for-supplier-3.png"></p>
+
+<h4>Step 5: Edit Items</h4>
+
+<p>All the items associated with a Material Request and having the default Supplier will be fetched in the Items Table. You can further edit items to enter rate, qty etc. Also items which are not to be ordered can be removed from Item table.</p>
 	</article>
 	
 </div>
@@ -148,7 +158,7 @@
 	<div class="page-content">
 	<div class="edit-container text-center">
 		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/selling/articles/manage-shipping-rule.md">
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/buying/articles/pull-items-in-purchase-order-based-on-supplier.md">
 			Improve this page
 		</a>
 	</div>

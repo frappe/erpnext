@@ -112,17 +112,15 @@
     e="text-align: Left">
 	<h1>Repack Entry</h1>
 
-<h1>Repack Entry</h1>
-
-<p>If you buy items in bulk to be repacked into smaller packs, you can create a <strong>Stock Entry</strong> of type "Repack". For example, item bought in tons can be repacked into Kgs. </p>
+<p>Repack Entry is created for item bought in bulk, which is being packed into smaller packages. For example, item bought in tons can be repacked into Kgs. </p>
 
 <p>Notes:
-1. Separate purchase and repacked Items must be made.
+1. Purchase Item and repack will be have different Item Codes.
 2. Repack entry can be made with or without BOM (Bill of Material).</p>
 
-<p>Let's check below scenario to understand this better.</p>
+<p>In a Repack Entry, there can be one or more than one repack items. Let's check below scenario to understand this better.</p>
 
-<p>Assume you buy crude oil in barrel, and get diesel and gasoline as its output. To create production entry, go to:</p>
+<p>Assume we are buying boxes of spray paint of specific colour (Green, Blue etc). And later re-bundling to create packs having multiple colours of spray paint (Blue-Green, Green-Yellow etc.) in them.</p>
 
 <h4>1. New Stock Entry</h4>
 
@@ -134,15 +132,17 @@
 
 <p>For raw-material/input item, only Source Warehouse will be provided.</p>
 
-<p>For repacked/production item, only Target Warehouse will be entered. You will have to provide valuation for the repacked/production item.</p>
+<p>For repacked/output items, only Target Warehouse will be provided. You will have to provide valuation for the repack items.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_071.png" alt="New STE" /></p>
+<p><img alt="Repack Entry" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/repack-1.png"></p>
+
+<p>Update Qty for all the items selected.</p>
 
 <h4>3. Submit Stock Entry</h4>
 
-<p>On submitting Stock Entry, stock of input item will be reduced from Source Warehouse, and stock of repacked/production item will be added in the Target Warehouse.</p>
+<p>On submitting Stock Entry, stock of input item will be reduced from Source Warehouse, and stock of repack/output item will be added in the Target Warehouse.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_072.png" alt="New STE" /></p>
+<p><img alt="Repack Stock Entry" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/repack-2.png"></p>
 
 <!-- markdown --> 
 	</article>

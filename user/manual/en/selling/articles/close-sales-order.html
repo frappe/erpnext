@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Creating Depreciation For Item </title>
+	<title> Close Sales Order </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -26,7 +26,7 @@
 
 </style>
 </head>
-<body data-path="user/manual/en/stock/articles/creating-depreciation-for-item">
+<body data-path="user/manual/en/selling/articles/close-sales-order">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -74,7 +74,7 @@
                         <div data-html-block="hero"></div>
                         <div class="container" data-html-block="content">
                         
-<div class="page-container" id="page-creating-depreciation-for-item" data-path="user/manual/en/stock/articles/creating-depreciation-for-item"
+<div class="page-container" id="page-close-sales-order" data-path="user/manual/en/selling/articles/close-sales-order"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
@@ -88,7 +88,7 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/manual/en/stock/articles">
+		<a href="https://frappe.github.io/erpnext/user/manual/en/selling/articles">
 		Articles</a>
 	</li>
 	
@@ -107,34 +107,28 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="creating-depreciation-for-item" styl
+	<article class="web-page-content" id="close-sales-order" styl
 
     e="text-align: Left">
-	<h1>Creating Depreciation For Item</h1>
+	<h1>Close Sales Order</h1>
 
-<p><strong>Question:</strong> A Fixed Asset Item has been purchased and stored in a warehouse. How can the user create a depreciation for a Fixed Asset Item?&lt;</p>
+<p>In the submitted Sales Orders, you will find <strong>Stop</strong> option. Stopping Sales Order will restrict user from creating Delivery Note and Sales Invoice against it.</p>
 
-<p><strong>Answer:</strong>Though there is no direct, automated method to book Asset Depreciation. A suitable work around to achieve this is by creating a Stock Reconciliation Entry.</p>
+<p><img alt="Close SO" class="screenshot"  src="https://frappe.github.io/erpnext/assets/img/articles/close-1.png"></p>
 
-<h4>Step 1: In the Attachment file, fill in the appropriate columns;</h4>
+<h4>Scenario</h4>
 
-<ul>
-<li><em>Item Code</em> whose value is to be depreciated.</li>
-<li><em>Warehouse</em> in which it is stored</li>
-<li><em>Qty</em> Leave this column blank</li>
-<li><em>Valuation rate</em> Enter the Value after Depreciation</li>
-</ul>
+<p>An order is received for ten Wind Turbines. Sales Order is also created for ten units. Due to scarcity of stock, only seven units are delivered to the customer. Pending three units are to be delivered soon. Customer informs that they don't need to deliver pending item, as they have purchased it from other vendor.</p>
 
-<p><img src="{{ docs_base_path }}/assets/img/articles/kb_deprec_csv.png"><br></p>
+<p>In this case, create Delivery Note and Sales Invoice will be created only for the seven units. And the Sales Order should be set as stopped.</p>
 
-<h4>Step 2:</h4>
+<p><img alt="Closed SO" class="screenshot"  src="https://frappe.github.io/erpnext/assets/img/articles/close-2.png"></p>
 
-<p>In the Stock Reconciliation Form, enter the Expense account for depreciation in <i>Difference Account</i>.</p>
-<img src="{{ docs_base_path }}/assets/img/articles/kb_deprec_form.png" height="302" width="652"></p>
+<p>Once Sales Order is set as stopped, you will not have pending quantities (three in this case) reflecting in Pending to Deliver and Pending to Invoice reports. To make further transactions against Stopped Sales Order, you should first Unstop it.</p>
 
-<div class="well">Note: For more information on Stock Reconciliation, see the <a href="https://erpnext.com/user-guide/setting-up/stock-reconciliation-for-non-serialized-item" target="_blank">User Guide</a>.</div>
+<p>You will find same funtionality in the Purchase Order as well.</p>
 
-<div class="well"> Note: An Automated Asset Depreciation feature in on our To-Do List. See this <a href="https://github.com/frappe/erpnext/issues/191" target="_blank">Github Issue</a>.</div>
+<!-- markdown -->
 	</article>
 	
 </div>
@@ -148,7 +142,7 @@
 	<div class="page-content">
 	<div class="edit-container text-center">
 		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/stock/articles/creating-depreciation-for-item.md">
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/selling/articles/close-sales-order.md">
 			Improve this page
 		</a>
 	</div>

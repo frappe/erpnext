@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Stopping Sales Order </title>
+	<title> Shipping Rule </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -26,7 +26,7 @@
 
 </style>
 </head>
-<body data-path="user/manual/en/selling/articles/stopping-sales-order">
+<body data-path="user/manual/en/selling/articles/shipping-rule">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -74,7 +74,7 @@
                         <div data-html-block="hero"></div>
                         <div class="container" data-html-block="content">
                         
-<div class="page-container" id="page-stopping-sales-order" data-path="user/manual/en/selling/articles/stopping-sales-order"
+<div class="page-container" id="page-shipping-rule-1" data-path="user/manual/en/selling/articles/shipping-rule"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
@@ -107,26 +107,42 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="stopping-sales-order" styl
+	<article class="web-page-content" id="shipping-rule-1" styl
 
     e="text-align: Left">
-	<h1>Stopping a Sales Order</h1>
+	<h1>Shipping Rule</h1>
 
-<p>In the submitted Sales Orders, you will find <strong>Stop</strong> option. Stopping Sales Order will restrict user from creating Delivery Note and Sales Invoice against it.</p>
+<p>Shipping Rule master helps in defining a rule based on which shipping charge is applied on a sales transactions.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_439.png" alt="stop Sales Order" /></p>
+<p>Most of the companies (mainly retail) have shipping charge applied based on the invoice total. If invoice value is above certain value, then shipping charge applied are lesser. If invoice value is less, then shipping charges applied are bit more than high shipping charges applied on a high value invoice. You can setup Shipping Rule to address the requirement of varying shipping charge based on the Net Total of sales transaction.</p>
 
-<h4>Scenario</h4>
+<p>To setup Shipping Rule, go to:</p>
 
-<p>East Wind receives an order for ten laptops. Sales Order is also created for ten units. Due to scarcity of stock, only seven units are delivered to customer. Pending three units are to be delivered soon. Customer inform East Wind need not deliver pending item, as they have purchased it from other vendor.</p>
+<p><code>Selling &gt; Setup &gt; Shipping Rule</code> or <code>Accounts &gt; Setup &gt; Shipping Rule</code></p>
 
-<p>In this case, after East Wind will create Delivery Note and Sales Invoice only for the seven units of Laptop, and set Sales Order as stopped.</p>
+<h4>Shipping Rule Conditions</h4>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_440.png" alt="Sales Order Stopped" /></p>
+<p><img alt="Shipping Rule Prices" class="screenshot"  src="https://frappe.github.io/erpnext/assets/img/articles/shipping-charges-1.png"></p>
 
-<p>Once Sales Order is set as stopped, you will not have pending quantities (three in this case) reflecting in Pending to Deliver and Pending to Invoice reports. To make further transactions against Stopped Sales Order, you should first Unstop it.</p>
+<p>Referring above, you will notice that shipping charges are reducing as valye is increasing. This shipping charge will only be applied if transaction total falls under one of the above range.</p>
 
-<!-- markdown -->
+<h4>Valid for Countries</h4>
+
+<p>You can set Shipping Charges valid for all the countries, or specify specific Country. If specific countries mentioned, then Shipping Charges will be applied only if Customer's country matches Country mentioned in the Shipping Rule.</p>
+
+<p><img alt="Shipping Rule " class="screenshot"  src="https://frappe.github.io/erpnext/assets/img/articles/shipping-charges-2.gif"></p>
+
+<h4>Shipping Account</h4>
+
+<p>If shipping charges are applied based on Shipping Rule, then more values like Shipping Account, Cost Center will be needed as well to add row in the Taxes and Other Charges table of transaction. Hence these details are tracked as well in the Shipping Rule.</p>
+
+<p><img alt="Shipping Account" class="screenshot"  src="https://frappe.github.io/erpnext/assets/img/articles/shipping-charges-3.png"></p>
+
+<h4>Shipping Rule Application</h4>
+
+<p>Following is an example of how shipping charges is auto-applied on Sales Order based on Shipping Rule.</p>
+
+<p><img alt="Shipping Rule Application" class="screenshot"  src="https://frappe.github.io/erpnext/assets/img/articles/shipping-charges-4.gif"></p>
 	</article>
 	
 </div>
@@ -140,7 +156,7 @@
 	<div class="page-content">
 	<div class="edit-container text-center">
 		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/selling/articles/stopping-sales-order.md">
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/selling/articles/shipping-rule.md">
 			Improve this page
 		</a>
 	</div>

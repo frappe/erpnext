@@ -112,15 +112,15 @@
     e="text-align: Left">
 	<h1>Opening Stock Balance Entry for the Serialized and Batch Item</h1>
 
-<h1>Opening Stock Balance Entry for the Serialized and Batch Item</h1>
+<p>Items for which Serial No. and Batch No. is maintained, opening stock balance entry for them is update via Stock Entry. <a href="https://frappe.github.io/erpnext/user/manual/en/stock/serial-no.html">Click here to learn how serialized inventory is managed in ERPNext</a>.</p>
 
-<p>Items for which Serial No. and Batch No. is maintained, opening stock balance entry for them will be update via Stock Entry. <a href="https://erpnext.com/user-guide/stock/serialized-inventory">Click here to learn how serialized inventory is managed in ERPNext</a>.</p>
+<p><strong>Question:</strong> Why Opening Balance entry for the Serialized and Batch Item cannot be updated via Stock Reconciliation?</p>
 
-<p>Why Opening Balance entry for the Serialized and Batch Item cannot be updated via Stock Reconciliation?</p>
+<p>In the ERPNext, stock level of a serialized items is derived based on the count of Serial Nos for that item. Hence, unless Serial Nos. are created for the serialized item, its stock level is not be updated. In the Stock Reconciliation Tool, you can only update opening quantity of an item, but not their Serial No. and Batch No.</p>
 
-<p>In the ERPNext, stock level of a serialized items is derived based on the count of Serial Nos for that item. Hence, unless Serial Nos. are created for the serialized item, its stock level will not be updated. In the Stock Reconciliation Tool, you can only update opening quantity of an item, and not their Serial No. and Batch No.</p>
+<h3>Opening Balance for the Serialized Item</h3>
 
-<p>Let's check steps for create opening stock balance entry for the Serialized and Batch item.</p>
+<p>Following are the steps to create opening stock balance entry for the Serialized and Batch item.</p>
 
 <h4>Step 1: New Stock Entry</h4>
 
@@ -140,37 +140,33 @@
 
 <h4>Step 5: Select Items</h4>
 
-<p>Select Items in the Stock Entry table.</p>
+<p>Select Items for which opening balance is to be updated.</p>
 
 <h4>Step 6: Update Opening Qty</h4>
 
-<p>For the serialized item, you should update as many Serial Nos as their Qty. If you have updated Prefix in the Item master, on the submission of Stock Entry Serial Nos. will be auto-created following that prefix.</p>
+<p>For the serialized item, update quantity as many Serial Nos are their.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-19 at 5.13.50 pm.png" alt="Item Serial No. Prefix" /></p>
+<p>For the serialized item, mention Serial Nos. equivalent to it's Qty. Or if Serial Nos. are configured to be created based on Prefix, then no need to mention Serial Nos. manually. Click <a href="https://frappe.github.io/erpnext/user/manual/en/stock/articles/serial-no-naming.html">here</a> to learn more about Serial No. naming.</p>
 
-<p>For a batch item, you should provide Batch ID in which opening balance will be updated. You should keep batch master ready, and updated it for the Batch Item. To create new Batch, go to:</p>
+<p>For a batch item, provide Batch ID in which opening balance will be updated. Keep batch master ready, and updated it for the Batch Item. To create new Batch, go to:</p>
 
 <p><code>Stock &gt; Setup &gt; Batch &gt; New</code></p>
 
-<p><a href="https://erpnext.com/user-guide/stock/batchwise-inventory">Click here to learn how Batchwise inventory is managed in ERPNext</a>.</p>
+<p><a href="https://frappe.github.io/erpnext/user/manual/en/stock/articles/managing-batch-wise-inventory.html">Click here to learn how Batchwise inventory is managed in ERPNext.</a></p>
 
 <h4>Step 7: Update Valuation Rate an Item</h4>
 
-<p>Valuation Rate is the mandatory field, where you should update <code>per unit value of item</code>. If you have unit of items having different valuation rates, they should be updated in a separate row, with different Valuation Rate.</p>
+<p>Update valuation rate, which will be per unit value of item. If different units of the same items having different valuation rate, they should be updated in a separate row, with different Valuation Rates.</p>
 
 <h4>Step 8: Difference Account</h4>
 
-<p>As per perpetual inventory valuation system, accounting entry is created for every stock entry. Accounting system followed in the ERPNext requires Total Debit in an entry matching with Total Credit. On the submission of Stock Entry, system Debits accounting ledger of a Warehouse by total value of items. To balance the same, we use Temporary Liability account in the Difference Account field. <a href="https://erpnext.com/kb/accounts/updating-opening-balance-in-accounts-using-temporary-account">Click here to learn more about use of Temporary Accounts in updating opening balance</a>.</p>
+<p>As per perpetual inventory valuation system, accounting entry is created for every stock transaction. Double entry accounting system requires Total Debit matching with Total Credit in an entry. On the submission of Stock Entry, system debits Warehouse account by total value of items. To balance the same, we use Temporary Opening account as a Difference Account.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-19 at 5.20.52 pm.png" alt="Difference Account" /></p>
+<p><img alt="Difference Account" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/difference-account-1.png"></p>
 
 <h4>Step 9: Save and Submit Stock Entry</h4>
 
-<p>On submission of Stock Entry, stock ledger entry will be posted, and opening balance will be updated for the items on a given posting date.</p>
-
-<p>If Serial Nos. for your items are set to be created based on prefix, then on submission of Stock Entry, Serial Nos. will be created as well.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-19 at 5.28.57 pm.png" alt="Serial No Creation" /></p>
+<p>On submission of Stock Entry, stock ledger posting will be posted, and opening balance will be updated for the items on a given Posting Date.</p>
 
 <!-- markdown -->
 	</article>

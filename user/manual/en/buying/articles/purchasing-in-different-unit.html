@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Is Stock Item Field Frozen In Item Master </title>
+	<title> Purchasing In Different Unit </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -26,7 +26,7 @@
 
 </style>
 </head>
-<body data-path="user/manual/en/stock/articles/is-stock-item-field-frozen-in-item-master">
+<body data-path="user/manual/en/buying/articles/purchasing-in-different-unit">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -74,7 +74,7 @@
                         <div data-html-block="hero"></div>
                         <div class="container" data-html-block="content">
                         
-<div class="page-container" id="page-is-stock-item-field-frozen-in-item-master" data-path="user/manual/en/stock/articles/is-stock-item-field-frozen-in-item-master"
+<div class="page-container" id="page-purchasing-in-different-unit" data-path="user/manual/en/buying/articles/purchasing-in-different-unit"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
@@ -88,7 +88,7 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/manual/en/stock/articles">
+		<a href="https://frappe.github.io/erpnext/user/manual/en/buying/articles">
 		Articles</a>
 	</li>
 	
@@ -107,28 +107,51 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="is-stock-item-field-frozen-in-item-master" styl
+	<article class="web-page-content" id="purchasing-in-different-unit" styl
 
     e="text-align: Left">
-	<h1>Is Stock Item field Frozen in the Item master</h1>
+	<h1>Purchasing in Different Unit (UoM)</h1>
 
-<h1>Is Stock Item field Frozen in the Item master</h1>
+<p>Each item has stock unit of measument (UoM) associated to it. For example UoM of pen is nos. and sand stocked kgs. But item could be purchased in different UoM, like 1 set/box of pen, or one truck of sand. In ERPNex, you can create purchase transaction for an item having different UoM than item's stock UoM.</p>
 
-<p>In the item master, you might witness values in the following fields be frozen.</p>
+<h3>Scenario:</h3>
 
-<ol>
-<li>Is Stock Item</li>
-<li>Has Batch No.</li>
-<li>Has Serial No.</li>
-</ol>
+<p>Item <code>Pen</code> is stocked in Nos, but purchased in Box. Hence we will make Purchase Order for Pen in Box.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-16 at 2.52.56 pm.png" alt="Item Field Frozen" /></p>
+<h4>Step 1: Edit UoM in the Purchase Order</h4>
 
-<p>For an item, once stock ledger entry is created, values in these fields will be froze. This is to prevent user from changing value which can lead to mis-match of actual stock, and stock level in the system of an item.</p>
+<p>In the Purchase Order, you will find two UoM fied.</p>
 
-<p>For the serialized item, since its stock level is calculated based on count of available Serial Nos., setting Item as non-serialized mid-way will break the sync, and item's stock level shown in the report will not be accurate, hence Has Serial No. field is froze.</p>
+<ul>
+<li>UoM</li>
+<li>Stock UoM</li>
+</ul>
 
-<p>To make these fields editable once again, you should delete all the stock transactions made for this item. For the Serialized and Batch Item, you should also delete Serial No. and Batch No. record for this item.</p>
+<p>In both the fields, default UoM of an item will be fetched by default. You should edit UoM field, and select Purchase UoM (Box in this case). Updating Purchase UoM is mainly for the reference of the supplier. In the print format, you will see item qty in the Purchase UoM.</p>
+
+<p><img alt="Item Purchase UoM" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/editing-uom-in-po.gif"></p>
+
+<h4>Step 2: Update UoM Conversion Factors</h4>
+
+<p>In one Box, if you get 20 Nos. of Pen, UoM Conversion Factor would be 20. </p>
+
+<p><img alt="Item Conversion Factor" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/po-conversion-factor.png"></p>
+
+<p>Based on the Qty and Conversion Factor, qty will be calculated in the Stock UoM of an item. If you purchase just one Box, then Qty in the stock UoM will be set as 20.</p>
+
+<p><img alt="Purchase Qty in Default UoM" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/po-qty-in-stock-uom.png"></p>
+
+<h3>Stock Ledger Posting</h3>
+
+<p>Irrespective of the Purchase UoM selected, stock ledger posting will be done in the Default UoM of an item. Hence you should ensure that conversion factor is entered correctly while purchasing item in different UoM.</p>
+
+<p><img alt="Print Format in Purchase UoM" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/po-stock-uom-ledger.png"></p>
+
+<h3>Set Conversion Factor in Item</h3>
+
+<p>In the Item master, under Purchase section, you can list all the possible purchase UoM of an item, with its UoM Conversion Factor.</p>
+
+<p><img alt="Purchase UoM master" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/item-purchase-uom-conversion.png"></p>
 
 <!-- markdown -->
 	</article>
@@ -144,7 +167,7 @@
 	<div class="page-content">
 	<div class="edit-container text-center">
 		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/stock/articles/is-stock-item-field-frozen-in-item-master.md">
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/buying/articles/purchasing-in-different-unit.md">
 			Improve this page
 		</a>
 	</div>

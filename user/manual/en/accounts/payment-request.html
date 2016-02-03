@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Managing Purchase Uom And Stock Uom </title>
+	<title> Payment Request </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -26,7 +26,7 @@
 
 </style>
 </head>
-<body data-path="user/manual/en/buying/articles/managing-purchase-uom-and-stock-uom">
+<body data-path="user/manual/en/accounts/payment-request">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -74,7 +74,7 @@
                         <div data-html-block="hero"></div>
                         <div class="container" data-html-block="content">
                         
-<div class="page-container" id="page-managing-purchase-uom-and-stock-uom" data-path="user/manual/en/buying/articles/managing-purchase-uom-and-stock-uom"
+<div class="page-container" id="page-payment-request" data-path="user/manual/en/accounts/payment-request"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
@@ -88,8 +88,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/manual/en/buying/articles">
-		Articles</a>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/accounts">
+		Accounts</a>
 	</li>
 	
 </ul>
@@ -99,7 +99,7 @@
 	                </div>
 					
 	        		<div class="page-header-block" data-html-block="header">
-	                    
+	                    <h1>Payment Request</h1>
 	        		</div>
                 </div>
 				
@@ -107,57 +107,38 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="managing-purchase-uom-and-stock-uom" styl
+	<article class="web-page-content" id="payment-request" styl
 
     e="text-align: Left">
-	<h1>Managing Purchase UoM and Stock UoM</h1>
-
-<p>When purchasing an item, you can set purchase UoM (Unit of Measurement) which could be different from item's stock UoM.</p>
-
-<h3>Scenario:</h3>
-
-<p>Item ABC is stocked in Nos, but purchased in Cartons. Hence in the Purchase Order, you will need to update UoM as Carton.</p>
-
-<h3>1. Editing Purchase UoM</h3>
-
-<h4>Step 1.1: Edit UoM in the Purchase Order</h4>
-
-<p>In the Purchase Order, you will find two UoM fied.</p>
+	<p>Payment Request is sent via Email and will contain a link to a Payment Gateway if setup. You can create payment request via Sales Order or Sales Invoice.</p>
 
 <ul>
-<li>UoM</li>
-<li>Stock UoM</li>
+<li><p>Create Payment Request via Sales Order
+<img class="screenshot" alt="Payment Request" src="https://frappe.github.io/erpnext/assets/img/accounts/pr-from-so.png"></p></li>
+<li><p>Create payment Request via Sales Invoice
+<img class="screenshot" alt="Payment Request" src="https://frappe.github.io/erpnext/assets/img/accounts/pr-from-si.png"></p></li>
 </ul>
 
-<p>In both the fields, default UoM of an item will be updated. You should edit UoM field, and select Purchase UoM (Carton in this case).</p>
+<hr />
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-19 at 4.10.35 pm.png" alt="Item Purchase UoM" /></p>
+<p>Select appropriate Payment Gateway Account on Payment Request. Account head specified on payment gateway will 
+considered to create journal entry. </p>
 
-<h4>Step 1.2: Update UoM Conversion Factor</h4>
+<p>Note: Invoice/Order Currency and Payment Gateway Account corruncy should be same.</p>
 
-<p>In one Carton, if you get 20 Nos. of item ABC, then UoM Conversion Factor would be 20. </p>
+<p><img class="screenshot" alt="Payment Request" src="https://frappe.github.io/erpnext/assets/img/accounts/pr-details-1.png"></p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-19 at 4.11.58 pm.png" alt="Item Conversion Factor" /></p>
+<hr />
 
-<p>Based on the Qty and Conversion Factor, qty will be calculated in the Stock UoM of an item. If you purchase just one carton, then Qty in the stock UoM will be set as 20.</p>
+<h5>Notify Customer</h5>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-19 at 4.14.46 pm.png" alt="Purchase Qty in Default UoM" /></p>
+<p>You can notify customer from Payment Request with print format. If customer contact email is mentioned, it will automatically fetch email. If not so you can set email id on Payment Request. </p>
 
-<h3>2. Stock Ledger Posting</h3>
+<p><img class="screenshot" alt="Payment Request" src="https://frappe.github.io/erpnext/assets/img/accounts/pr-details-2.png"></p>
 
-<p>Irrespective of the Purchase UoM selected, stock ledger posting will be done in the Default UoM of an item only. Hence you should ensure that conversion factor is entered correctly while purchasing item in different UoM.</p>
+<h5>Request Mail</h5>
 
-<p>With this, we can conclude that, updating Purchase UoM is mainly for the reference of the supplier. In the print format, you will see item qty in the Purchase UoM.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-19 at 4.15.27 pm.png" alt="Print Format in Purchase UoM" /></p>
-
-<h3>3. Setting Conversion Factor in the Item master</h3>
-
-<p>In the Item master, under Purchase section, you can list all the possible purchase UoM of an item, with its UoM Conversion Factor.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-19 at 4.13.16 pm.png" alt="Purchase UoM master" /></p>
-
-<!-- markdown -->
+<p><img class="screenshot" alt="Payment Request" src="https://frappe.github.io/erpnext/assets/img/accounts/pr-email.png"></p>
 	</article>
 	
 </div>
@@ -171,7 +152,7 @@
 	<div class="page-content">
 	<div class="edit-container text-center">
 		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/buying/articles/managing-purchase-uom-and-stock-uom.md">
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/payment-request.md">
 			Improve this page
 		</a>
 	</div>

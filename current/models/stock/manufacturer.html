@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Select Material Requests Based On Supplier </title>
+	<title> Manufacturer </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -26,7 +26,7 @@
 
 </style>
 </head>
-<body data-path="user/manual/en/buying/articles/select-material-requests-based-on-supplier">
+<body data-path="current/models/stock/manufacturer">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -74,7 +74,7 @@
                         <div data-html-block="hero"></div>
                         <div class="container" data-html-block="content">
                         
-<div class="page-container" id="page-select-material-requests-based-on-supplier" data-path="user/manual/en/buying/articles/select-material-requests-based-on-supplier"
+<div class="page-container" id="page-manufacturer" data-path="current/models/stock/manufacturer"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
@@ -88,8 +88,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/manual/en/buying/articles">
-		Articles</a>
+		<a href="https://frappe.github.io/erpnext/current/models/stock">
+		Module stock</a>
 	</li>
 	
 </ul>
@@ -99,7 +99,7 @@
 	                </div>
 					
 	        		<div class="page-header-block" data-html-block="header">
-	                    
+	                    <h1>Manufacturer</h1>
 	        		</div>
                 </div>
 				
@@ -107,28 +107,180 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="select-material-requests-based-on-supplier" styl
+	<article class="web-page-content" id="manufacturer" styl
 
     e="text-align: Left">
-	<h1>Select Material Requests based on Supplier</h1>
+	<!-- title: Manufacturer -->
 
-<p><b>Question</b>: How to create a single Purchase Order from multiple Material Requests for all Items that are purchased from common Supplier?<br>
-<br><b>Answer</b>:
-<br>
-<br>Material Requests can be individually fetched from Purchase Orders using the 'From Material Request' button. However this procedure becomes tedious when there are multiple Material Requests for items that are purchased from a single supplier.<br>
-<br>A more efficient way;
-<br>
-<br><u><b>Step 1:</b></u> When creating a Purchase order use the <i>'For Supplier'</i> button in the form.
-<br>
-<br><img src="https://frappe.github.io/erpnext/assets/img/articles/kb_po_forsupp.png" height="238" width="747"><br>
-<br><u><b>Step 2:</b></u> In the 'Get From Supplier' pop-up enter the Supplier name and click on <i>'Get'</i>.
-<br>
-<br><img src="https://frappe.github.io/erpnext/assets/img/articles/kb_po_popup.png"><br>
-<br><u><b>Step 3:</b></u> All the items associated with a Material Request and having the default Supplier, will be fetched in the Items Table. Any Item that is not required can be deleted.
-<br>
-<br><img src="https://frappe.github.io/erpnext/assets/img/articles/kb_po_itemtable.png" height="388" width="645"><br>
-<br><div class="well">Note: For this feature to map the Items correctly, the Default Supplier field in the Item Master must be filled.</div>
-<br></p>
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/stock/doctype/manufacturer"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+    <p><b>Table Name:</b> <code>tabManufacturer</code></p>
+
+
+Manufacturers used in Items
+
+<h3>Fields</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td class="danger" title="Mandatory"><code>short_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Short Name
+                <p class="text-muted small">
+                    Limited to 12 characters</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>full_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Full Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>website</code></td>
+            <td >
+                Data</td>
+            <td >
+                Website
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>data_6</code></td>
+            <td >
+                Link</td>
+            <td >
+                Country
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/geo/country">Country</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>logo</code></td>
+            <td >
+                Attach Image</td>
+            <td >
+                Logo
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>notes</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Notes
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.stock.doctype.manufacturer.manufacturer</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>Manufacturer</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+
+    
+    
+        <h4>Linked In:</h4>
+        <ul>
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/item">Item</a>
+
+</li>
+			
+        
+        </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->
 	</article>
 	
 </div>
@@ -137,17 +289,7 @@
 	</div>
 </div>
 
-						
-<div class="page-container">
-	<div class="page-content">
-	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/buying/articles/select-material-requests-based-on-supplier.md">
-			Improve this page
-		</a>
-	</div>
-	</div>
-</div>
+						<!-- edit-link -->
                         </div>
                     </div>
 					<footer class="docs-footer">

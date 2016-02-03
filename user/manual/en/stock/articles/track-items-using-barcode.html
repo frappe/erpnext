@@ -110,22 +110,25 @@
 	<article class="web-page-content" id="track-items-using-barcode" styl
 
     e="text-align: Left">
-	<h1>Track items using Barcode</h1>
+	<h1>Track Items Using Barcode</h1>
 
-<p>A barcode, is a code using multiple lines and spaces of varying widths, designed to represent some alpha-numeric characters. For example, in retail, it generally represents item code / serial number. Most barcode scanners behave like an external keyboard. When it scans a barcode, the data appears in the computer screens at the point of cursor.</p>
+<p>A barcode is a value decoded into vertical spaced lines. Barcode scanners are the input medium, like Keyboard. When it scans a barcode, the data appears in the computer screens at the point of a cursor.</p>
 
-<p>To enable barcode feature in ERPNext go to <code>Setup –&gt; Customize –&gt; Features Setup</code> and check "Item Barcode" option.
-<img src="https://frappe.github.io/erpnext/assets/img/articles/feature-setup-barcode.png" alt="Features Setup" /></p>
+<p>To enable barcode feature in ERPNext go to:</p>
 
-<p>Now, a new field "Barcode" will be appear in Item master, enter barcode while creating a new item. You can update barcode field for existing items using "Data Import Tool".</p>
+<p><code>Setup &gt; Customize &gt; Features Setup</code></p>
 
-<p>If you are creating your own barcode, then you should print those same barcodes and attach to your products.
-<img src="https://frappe.github.io/erpnext/assets/img/articles/item-barcode.png" alt="Item Barcode" /></p>
+<p>Check "Item Barcode".</p>
 
-<p>Once you have updated barcode field in item master, you can fetch items using barcode in Delivery Note, Sales Invoice and Purchase Receipt document.</p>
+<p><img alt="Material Transfer" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/barcode-feature-setup.png"></p>
 
-<p>For example, in Delivery Note Item table, a new field "Barcode" will be appear and if you point your mouse cursor to that field and scan the barcode using Barcode Scanner, the code will appear in that field. At the same time, system will pull item details, based on the barcode.
-<img src="https://frappe.github.io/erpnext/assets/img/articles/delivery-note-barcode.png" alt="Delivery Note Barcode" /></p>
+<p>Now a new field "Barcode" will be appear in Item master. Enter barcode while creating a new item.</p>
+
+<p><img alt="Material Transfer" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/barcode-item-master.png"></p>
+
+<p>Once barcode field is updated in item master, items can be fetched using barcode. This feature will be availble in Delivery Note, Sales Invoice and Purchase Receipt transactions only.</p>
+
+<p><img alt="Material Transfer" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/barcode-item-selection.gif"></p>
 
 <!-- markdown -->
 	</article>

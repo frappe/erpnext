@@ -112,13 +112,11 @@
     e="text-align: Left">
 	<h1>Managing Fractions in UoM</h1>
 
-<h1>Managing Fractions in UoM</h1>
-
 <p>UoM stands for Unit of Measurement. Few examples of UoM are Numbers (Nos), Kgs, Litre, Meter, Box, Carton etc.</p>
 
-<p>There are few UoMs which cannot have value decimal places. For example, if we have television for an item, with Nos as its UoM, we cannot have 1.5 Nos. of television, or 3.7 Nos. of computer sets. The value of quantity for these items must be whole number.</p>
+<p>There are few UoMs which cannot have value in decimal places. For example, if we have television for an item, with Nos as its UoM, we cannot have 1.5 Nos. of television, or 3.7 Nos. of computer sets. The value of quantity for these items must be whole number.</p>
 
-<p>You can configure if particular UoM can have value in decimal place or no. Bydefault, decimal places will be allowed in all the UoMs. To restrict decimal places or value in fraction for any UoM, you should follow these steps.</p>
+<p>You can configure if particular UoM can have value in decimal place or no. By default, value in decimal places will be allowed for all the UoMs. To restrict decimal places or value in fraction for any UoM, you should follow these steps.</p>
 
 <h4>UoM List</h4>
 
@@ -126,21 +124,21 @@
 
 <p><code>Stock &gt; Setup &gt; UoM</code></p>
 
-<p>For the list of UoM, select one which you want to restrict value in fraction. Let's assume that UoM is Nos.</p>
+<p>From the list of UoM, select UoM for which value in decimal place is to be restricted. Let's assume that UoM is Nos.</p>
 
 <h4>Configure</h4>
 
-<p>In the UoM form, you will find a field called "Must be whole number". Check this field to restrict user from enter decimal places in quantity field for item with this UoM.</p>
+<p>In the UoM master, you will find a field called "Must be whole number". Check this field to restrict user from enter value in decimal places in quantity field, for item having this UoM.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_390.png" alt="UoM Whole No" /></p>
+<p><img alt="UoM Must be Whole No" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/uom-fraction-1.png"></p>
 
-<h4>While Creating Entry</h4>
+<h4>Validation</h4>
 
-<p>While creating transaction, if you enter value in fraction for item who's UoM has "Must be whole number" checked, you will get error message stating:</p>
+<p>While creating transaction, if you enter value in fraction for item whos UoM has "Must be whole number" checked, you will get error message stating:</p>
 
 <p><code>Quantity cannot be a fraction at row #</code></p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_389.png" alt="UoM Fraction Error" /></p>
+<p><img alt="UoM Validation Message" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/uom-fraction-2.png"></p>
 
 <!-- markdown -->
 	</article>

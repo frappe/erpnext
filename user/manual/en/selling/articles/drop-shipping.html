@@ -99,7 +99,7 @@
 	                </div>
 					
 	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Drop Shipping</h1>
+	                    
 	        		</div>
                 </div>
 				
@@ -110,7 +110,9 @@
 	<article class="web-page-content" id="drop-shipping" styl
 
     e="text-align: Left">
-	<p><strong>Drop shipping</strong> is a supply chain management technique in which the retailer does not keep goods in stock. Instead they transfer customer orders and shipment details to either the manufacturer, another retailer, or a wholesaler, who then ships the goods directly to the customer</p>
+	<h1>Drop Ship</h1>
+
+<p><strong>Drop shipping</strong> is a supply chain management technique in which the retailer does not keep goods in stock. Instead they transfer customer orders and shipment details to either the manufacturer, another retailer, or a wholesaler, who then ships the goods directly to the customer</p>
 
 <p>In ERPNext, you can create a Drop Shipping by creating Purchase Order against Sales Order.</p>
 
@@ -120,35 +122,45 @@
 
 <h4>Setup on Item Master</h4>
 
-<p>Set <strong><em>Delivered by Supplier (Drop Ship)</em></strong> and <strong><em>Default Supplier</em></strong> in Item Master.
-<img class="screenshot" alt="Setup Item Master" src="https://frappe.github.io/erpnext/assets/img/selling/setup-drop-ship-on-item-master.png"></p>
+<p>Set <strong><em>Delivered by Supplier (Drop Ship)</em></strong> and <strong><em>Default Supplier</em></strong> in Item Master.</p>
+
+<p><img class="screenshot" alt="Setup Item Master" src="https://frappe.github.io/erpnext/assets/img/selling/setup-drop-ship-on-item-master.png"></p>
 
 <h4>Setup on Sales Order</h4>
 
 <p>If Drop Shipping has set on Item master, it will automatically set <strong>Supplier delivers to Customer</strong> and <strong>Supplier</strong> on Salse Order Item.</p>
 
-<p>You can setup Drop Shipping, on Sales Order Item. Under <strong>Drop Ship</strong> section, set <strong>Supplier delivers to Customer</strong> and select <strong>Supplier</strong> agaist which Purchase Order will get created.
-<img class="screenshot" alt="Setup Drop Shipping on Sales Order Item" src="https://frappe.github.io/erpnext/assets/img/selling/setup-drop-ship-on-sales-order-item.png"></p>
+<p>You can setup Drop Shipping, on Sales Order Item. Under <strong>Drop Ship</strong> section, set <strong>Supplier delivers to Customer</strong> and select <strong>Supplier</strong> agaist which Purchase Order will get created.</p>
+
+<p><img class="screenshot" alt="Setup Drop Shipping on Sales Order Item" src="https://frappe.github.io/erpnext/assets/img/selling/setup-drop-ship-on-sales-order-item.png"></p>
 
 <h4>Create Purchase Order</h4>
 
-<p>After submitting a Sales Order, create Puchase Order.<br> 
-<img class="screenshot" alt="Setup Drop Shipping on Sales Order Item" src="https://frappe.github.io/erpnext/assets/img/selling/drop-ship-sales-order.png"></p>
+<p>After submitting a Sales Order, create Puchase Order.</p>
+
+<p><img class="screenshot" alt="Setup Drop Shipping on Sales Order Item" src="https://frappe.github.io/erpnext/assets/img/selling/drop-ship-sales-order.png"></p>
 
 <p>From Sales Order, all items, having <strong>Supplier delivers to Customer</strong>  checked or <strong>Supplier</strong>(matching with supplier selected on For Supplier popup) mentioned, will get mapped onto Purchase Order. </p>
 
 <p>It will automatically set Customer, Customer Address and Contact Person.</p>
 
-<p>After submitting Purchase Order, to update delivery status, use <strong>Mark as Delivered</strong> button on Purchase Order. It will update delivery percetage and delivered quantity on Sales Order.
-<img class="screenshot" alt="Purchase Order for Drop Shipping" src="https://frappe.github.io/erpnext/assets/img/selling/drop-ship-purchase-order.png"></p>
+<p>After submitting Purchase Order, to update delivery status, use <strong>Mark as Delivered</strong> button on Purchase Order. It will update delivery percetage and delivered quantity on Sales Order.</p>
 
-<p><span style="color:#18B52D"><strong><em>Close</em></strong></span>, is a new feature introduced on <strong>Purchase Order</strong> and <strong>Sales Order</strong>, to close or to mark fulfillment.
-<img class="screenshot" alt="Close Sales Order" src="https://frappe.github.io/erpnext/assets/img/selling/close-sales-order.png"></p>
+<p><img class="screenshot" alt="Purchase Order for Drop Shipping" src="https://frappe.github.io/erpnext/assets/img/selling/drop-ship-purchase-order.png"></p>
+
+<p><span style="color:#18B52D"><strong><em>Close</em></strong></span>, is a new feature introduced on <strong>Purchase Order</strong> and <strong>Sales Order</strong>, to close or to mark fulfillment.</p>
+
+<p><img class="screenshot" alt="Close Sales Order" src="https://frappe.github.io/erpnext/assets/img/selling/close-sales-order.png"></p>
 
 <h3>Drop Shipping Print Format</h3>
 
-<p>You can notify, Suppliers by sending a email after submitting Purchase Order by attaching Drop Shipping print format.
-<img class="screenshot" alt="Drop Dhip Print Format" src="https://frappe.github.io/erpnext/assets/img/selling/drop-ship-print-format.png"></p>
+<p>You can notify, Suppliers by sending a email after submitting Purchase Order by attaching Drop Shipping print format.</p>
+
+<p><img class="screenshot" alt="Drop Dhip Print Format" src="https://frappe.github.io/erpnext/assets/img/selling/drop-ship-print-format.png"></p>
+
+<h3>Video Help on Drop Ship</h3>
+
+<iframe width="660" height="371" src="https://www.youtube.com/embed/hUc0hu_XLdo" frameborder="0" allowfullscreen></iframe>
 	</article>
 	
 </div>

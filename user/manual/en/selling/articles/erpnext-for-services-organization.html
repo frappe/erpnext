@@ -110,32 +110,49 @@
 	<article class="web-page-content" id="erpnext-for-services-organization" styl
 
     e="text-align: Left">
-	<h1>ERPNext for Service Organizations</h1>
+	<h1>ERPNext for Service Organization</h1>
 
-<p><strong>Question:</strong> At first look, ERPNext looks primarily designed for the traders and manufacturers. Is ERPNext used by service companies as well?</p>
+<p><strong>Question:</strong> ERPNext looks primarily designed for the traders and manufacturers. Is ERPNext used by companies offering servies?</p>
 
-<p><strong>Answer:</strong>
-About 30% of ERPNext customers comes from services background. These are companies into software development, certification services, individual consultants and many more. Being into services business ourselves, we use ERPNext to manage our sales, accounting, support and HR operations.</p>
+<p><strong>Answer:</strong></p>
 
-<p>https://conf.erpnext.com/2014/videos/umair-sayyed</p>
+<p>About 30% of ERPNext customers are companies into services. These are companies into software development, certification services, individual consultants and many more. Being into service business ourselves, we use ERPNext to manage our sales, accounting, support and HR operations. Check following video to learn how ERPNext uses ERPNext.</p>
+
+<iframe width="640" height="360" src="//www.youtube.com/embed/b6r7WxJMfFA" frameborder="0" allowfullscreen=""></iframe>
 
 <h3>Master Setup</h3>
 
-<p>Between the service and trading company, the most differentiating master is an item master. While trading and manufacturing business has stock item, with warehouse and other stock details, service items will have none of these details.</p>
+<p>The setup for a Service company differs primarily for Items. They don't maintain the Stock for Items and thus, don't have Warehouses.</p>
 
-<p>To create a services item, which will be non-stock item, in the Item master, you should set "Is Stock Item" field as "No".</p>
+<p>To create a Service (non-stock) Item, in the item master, uncheck "Maintain Stock" field.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-04-01 at 5.32.57 pm.png" alt="non-stock item" /></p>
+<p><img alt="Service Item" class="screenshot"  src="https://frappe.github.io/erpnext/assets/img/articles/services-1.png"></p>
+
+<p>When creating Sales Order for the services, select Order Type as <strong>Maintenance</strong>. Sales Order of Maintenance Type needs lesser details compared to stock item's order like Delivery Note, item warehouse etc.</p>
+
+<p>Service company can still add stock items to mantain their fixed assets like computers, furniture and other office equipments.</p>
 
 <h3>Hiding Non-required Features</h3>
 
+<p>Since many modules like Manufacturing and Stock will not be required for the services company, you can hide those modules from:</p>
+
+<p><code>Setup &gt; Permissions &gt; Show/Hide Modules</code></p>
+
+<p>Modules unchecked here will be hidden from all the User.</p>
+
 <h4>Feature Setup</h4>
 
-<p>In Feature Setup, you can activate specific functionalities, and disable others. Based on this setting, forms and fields not required for your business will be hidden. <a href="https://manual.erpnext.com/customize-erpnext/hiding-modules-and-features">More on feature setup here</a>.</p>
+<p>Within the form, there are many fields only needed for companies into trading and manufacturing businesses. These fields can be hidden for the service company. Feature Setup is a tool where you can enable/disable specific feature. If a feature is disabled, then fields relevant to that feature is hidden from all the forms. For example, if Serial No. feature is disabled, then Serial. No. field from Item as well as from all the sales and purchase transaction will be hidden.</p>
+
+<p><a href="https://frappe.github.io/erpnext/user/manual/en/customize-erpnext/hiding-modules-and-features.html">To learn more about Feature Setup, click here.</a>.</p>
 
 <h4>Permissions</h4>
 
-<p>ERPNext is the permission driven system. User will be able to access system based on permissions assigned to him/her. So, if user is not assigned Role related to Stock and Manufacturing module, it will be hidden from user. <a href="https://manual.erpnext.com/setting-up/users-and-permissions">More on permission management in ERPNext here</a>.</p>
+<p>ERPNext is the permission controlled system. Users access system based on permissions assigned to them. So, if user is not assigned Role related to Stock and Manufacturing module, it will be hidden from that User. <a href="https://frappe.github.io/erpnext/user/manual/en/setting-up/users-and-permissions.html">Click here to learn more about permission management.</a>.</p>
+
+<p>You can also refer to help video on User and Permissions setting in ERPNext.</p>
+
+<iframe width="660" height="371" src="https://www.youtube.com/embed/fnBoRhBrwR4" frameborder="0" allowfullscreen></iframe>
 
 <!-- markdown -->
 	</article>

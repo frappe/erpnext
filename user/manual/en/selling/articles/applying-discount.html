@@ -112,33 +112,35 @@
     e="text-align: Left">
 	<h1>Applying Discount</h1>
 
-<p>There are two ways Discount can be applied on an items in the sales transactions.</p>
+<p>There are several ways Discount can be applied on an item in the sales transactions.</p>
 
 <h4>1. Discount on "Price List Rate" of an item</h4>
 
-<p>In the Item table of transaction, after Price List Rate field, you will find Discount (%) field. Discount Rate applied in this field will be applicable on the Price List Rate of an item.</p>
+<p>You can find the Discount (%) field in the Item table. Discount (%) is applied on the Price List Rate to get the selling Rate of the Item.</p>
 
-<p>Before applying Discount (%). </p>
+<p><img alt="Discount Percentage" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/discount-1.png"></p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_00616c670.png" alt="Before discount" /></p>
+<p>The feature of Discount (%) is available in all sales and purchase transactions.</p>
 
-<p>After applying Discount (%) under Discount on Price List Rate (%) field.</p>
+<p>You can use Pricing Rule for auto-application of Discount (%). <a href="https://frappe.github.io/erpnext/user/manual/en/accounts/pricing-rule.html">Click here to learn how Pricing Rule functions.</a></p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_007f81dc2.png" alt="After discount" /></p>
+<h4>2. Discount on Net Total and Grand Total</h4>
 
-<p>You can apply percent discount in all sales and purchase transactions.</p>
+<p>In the "Additional Discount" section, you can apply discount as amount or as percentage.</p>
 
-<h4>2. Discount on Grand Total</h4>
+<p><img alt="Discount Percentage" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/discount-2.png"></p>
 
-<p>In transactions, after Taxes and Charges table, you will find option to enter "Additional Discount Amount". Based on Amount entered in this field, item's Basic Rate and Taxes will be recalculated.</p>
+<h5>Discount on Net Total</h5>
 
-<p>Before applying Additional Discount Amount,</p>
+<p>If Discount Amount is applied on <strong>Net Total</strong>, then item's Net Rate and Net Amount is calculated as per the Discount Amount. Net Rate and Amount field will be visible only if Discount is applied using this feature.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_0085ca13e.png" alt="Discount" /></p>
+<p><img alt="Discount Percentage" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/discount-on-net-total.png"></p>
 
-<p>After applying Additional Discount Amount.</p>
+<h5>Discount on Grand Total</h5>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_010496ae2.png" alt="Discount Amount" /></p>
+<p>If Discount Amount is applied based on the <strong>Grand Total</strong>, then with item's Net Rate, Net Amount as well as taxes are also re-calculated as per Discount Amount.</p>
+
+<p><img alt="Discount Percentage" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/discount-on-grand-total.png"></p>
 
 <!-- markdown -->
 	</article>

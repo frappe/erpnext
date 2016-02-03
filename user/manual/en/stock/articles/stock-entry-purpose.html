@@ -112,55 +112,51 @@
     e="text-align: Left">
 	<h1>Stock Entry Purpose</h1>
 
-<h1>Stock Entry Purpose</h1>
+<p>Stock Entry is a stock transaction, which can be used for multiple purposes. Let's learn about each Stock Entry Purpose below.</p>
 
-<p>Stock Entry document records Item movement from a Warehouse, to a Warehouse and between Warehouses. And in stock entry form selection of 'Purpose' belongs to type of item movement. Following are the uses of Stock Entry Purposes in stock entry form.</p>
+<h4>1.Purpose: Material Issue</h4>
 
-<h4>1.Purpose = Material Issue</h4>
+<p>Material Issue entry create to issue item(s) from a warehouse. On submission of Material Issue, stock of item is deducated from the Source Warehouse. </p>
 
-<p>This purpose is selected to issue item from a warehouse. In this stock entry, you should define Source Warehouse only. This type of stock entry can be perform for adjustment of serialized inventory.</p>
+<p>Material Issue is generally made for the low value consumable items like office stationary, product consumables etc. Also you can create Material Issue to reconcile serialized and batched item's stock.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_440.png" alt="Material Issue" /></p>
+<p><img alt="Material Issue" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/stock-entry-issue.png"></p>
 
-<h4>2.Purpose = Material Receipt</h4>
+<h4>2.Purpose: Material Receipt</h4>
 
-<p>This purpose is selected to receive item in a warehouse. In this stock entry, you should define Target Warehouse only. This type of stock entry can be perform for adjustment of serialized inventory.</p>
+<p>Material Receipt entry is created to inward stock of item(s) in a warehouse. This type of stock entry can be created for updating opening balance of serialized and batched item. Also items purchased without Purchase Order can be inwarded from Material Receipt entry.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_442.png" alt="Material Receipt" /></p>
+<p>For the stock valuation purpose, provided Item Valuation becomes a mandatory field in the Material Receipt entry.</p>
 
-<h4>3.Purpose = Material Transfer</h4>
+<p><img alt="Material Receipt" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/stock-entry-receipt.png"></p>
 
-<p>This purpose is selected to transfer item from warehouse to warehouse or to transfer raw material for production. In this stock entry, you should define Source Warehouse and Target Warehouse also.</p>
+<h4>3.Purpose: Material Transfer</h4>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_443.png" alt="Material Transfer" /></p>
+<p>Material Transfer entry is created for the inter-warehouse Material Transfer.</p>
 
-<h4>4.Purpose = Manufacture</h4>
+<p><img alt="Material Transfer" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/stock-entry-transfer.png"></p>
 
-<p>This purpose is selected to perform finished goods entry. This purpose is auto selected in stock entry form, when you Update Finished Goods entry from Submitted Production Order. <img src="https://erpnext.com/user-guide/guide-books/engineer-to-order/stock-entry" alt="Check this page to know more about Manufacturing" /></p>
+<h4>4.Purpose: Material Transfer for Manufacture</h4>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_444.png" alt="Manufacture" /> </p>
+<p>In the manufacturing process, raw-materials are issued from the stores to the production department (generally WIP warehouse). This Material Transfer entry is created from Production Order. Items in this entry are fetched from the BOM of production Item, as selected in Production Order.</p>
 
-<h4>5.Purpose = Repack</h4>
+<p><img alt="Transfer for Manufacture" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/stock-entry-manufacture-transfer.gif"></p>
 
-<p>This purpose is selected to perform repack of item. <img src="https://erpnext.com/kb/stock/repack-entry" alt="Check this page to know more about Repack entry" /></p>
+<h4>4.Purpose: Manufacture</h4>
 
-<h4>6.Purpose = Subcontract</h4>
+<p>Manufacture is created from Production Order. In this entry, both raw-material item as well as production item are fetched from the BOM, selected in the Production Order. For the raw-material items, only Source Warehouse (generally WIP warehouse) is mentioned. For the production item, only target warehouse as mentioned in the Production Order is updated. On submission, stock of raw-material items are deducted from Source Warehouse, which indicates that raw-material items were consumed in the manufacturing process. Production Item is added to the Target Warehouse marking the completion of production cycle.</p>
 
-<p>This purpose is selected to transfer row material to supplier for manufacturing subcontracting item.<img src="https://erpnext.com/user-guide/manufacturing/subcontracting" alt="Check this page to know more about Subcontracting" /></p>
+<p><img alt="Manufacture" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/stock-entry-manufacture.gif"></p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_445.png" alt="Subcontract" /></p>
+<h4>5.Purpose: Repack</h4>
 
-<h4>6.Purpose = Sales Return</h4>
+<p>Repack Entry is created when items purchases in bulk is repacked under smaller packs. <img src="https://frappe.github.io/erpnext/user/manual/en/stock/articles/repack-entry.html" alt="Check this page to know more about Repack entry." /></p>
 
-<p>This purpose is selected to receive returned item by customer. <img src="https://erpnext.com/user-guide/stock/sales-return" alt="Check this page to know more about Sales Return" /></p>
+<h4>6.Purpose: Subcontract</h4>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_446.png" alt="Sales Return" /></p>
+<p>Subcontracting transaction involves company transfer raw-material items to the sub-contractors warehouse. This requires adding a warehouse for the sub-contractor as well. Sub-contract entry transfers stock from the companies warehouse to the sub-contractors warehouse.<img src="https://frappe.github.io/erpnext/user/manual/en/manufacturing/subcontracting.html" alt="Check this page to know more about Subcontracting" />.</p>
 
-<h4>6.Purpose = Purchase Return</h4>
-
-<p>This purpose is selected to issue purchased item to supplier. <img src="https://erpnext.com/user-guide/stock/purchase-return" alt="Check this page to know more about Purchase Return" /></p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_447.png" alt="Purchase Return" /></p>
+<p><img alt="Subcontract" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/stock-entry-subcontract.gif"></p>
 
 <!-- markdown -->
 	</article>

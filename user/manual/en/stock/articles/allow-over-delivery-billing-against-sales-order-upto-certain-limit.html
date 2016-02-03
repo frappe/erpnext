@@ -110,20 +110,25 @@
 	<article class="web-page-content" id="allow-over-delivery-billing-against-sales-order-upto-certain-limit" styl
 
     e="text-align: Left">
-	<h1>Allow over delivery / billing against Sales Order upto certain limit</h1>
+	<h1>Allow Over Delivery/Billing</h1>
 
-<h1>Allow over delivery / billing against Sales Order upto certain limit</h1>
+<p>While creating Delivery Note, system validates if item's Qty mentined is same as in the Sales Order. It Item Qty has been increased, you will get over-delivery validation. If you want to be able to deliver more items than mentioned in the Sales Order, you should update "Allow over delivery or receipt upto this percent" in the Item master.</p>
 
-<p>To setup over delivery / receipt / billing against a Sales / Purchase Order upto certain limit:</p>
+<p><img alt="Item wise Allowance percentage" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/allowance-percentage-1.png"></p>
+
+<p>Item's and Rate is also validated when creating Sales Invoice from Sales Order. Also when creating Purchase Receipt and Purchaes Invoice from Purchase Order. Updating "Allow over delivery or receipt upto this percent" will be affective in all sales and purchase transactions.</p>
+
+<p>For example, if you have ordered 100 units of an item, and if item's over receipt percent is 50%, then you are allowed to make Purchase Receipt for upto 150 units.</p>
+
+<p>Update global value for "Allow over delivery or receipt upto this percent" from Stock Settings. Value updated here will be applicable for all the items.</p>
 
 <ol>
-<li>Go to <code>Stock &gt; Setup &gt; Stock Settings</code>.</li>
-<li>Set <code>Allowance Percentage</code> and save the Stock Settings.
-<img src="https://frappe.github.io/erpnext/assets/img/articles/allowance_percentage.png" alt="Allowance Percentage" />
-For example: If you have ordered 100 units. and your Allowance is 50% then you are allowed to receive 150 units.</li>
-<li>To set item-specific limit, set <code>Allowance Percentage</code> in <code>Item</code> master.
-<img src="https://frappe.github.io/erpnext/assets/img/articles/allowance_percentage_item.png" alt="Allowance Percentage in Item" /></li>
+<li><p>Go to <code>Stock &gt; Setup &gt; Stock Settings</code></p></li>
+<li><p>Set <code>Allowance Percentage</code>.</p></li>
+<li><p>Save Stock Settings.</p></li>
 </ol>
+
+<p><img alt="Item wise Allowance percentage" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/allowance-percentage-2.png"></p>
 
 <!-- markdown -->
 	</article>
