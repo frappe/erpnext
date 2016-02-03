@@ -13,12 +13,6 @@ frappe.ui.form.on("Purchase Order", {
 	}
 });
 
-frappe.ui.form.on_change("Purchase Order", "company", function(frm){
-		erpnext.utils.get_shipping_address(frm.doc)
-	}
-);
-
-
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc, cdt, cdn) {
 		var me = this;
