@@ -252,21 +252,23 @@ def get_items(warehouse, posting_date, posting_time):
 	items = frappe.get_list("Bin", fields=["item_code"], filters={"warehouse": warehouse}, as_list=1)
 
 	items += frappe.get_list("Item", fields=["name"], filters= {"is_stock_item": 1, "has_serial_no": 0,
-		"has_batch_no": 0, "has_variants": 0, "default_warehouse": warehouse}, as_list=1)
+		"has_batch_no": 0, "has_variants": 0, "disabled": 0, "default_warehouse": warehouse}, as_list=1)
 
 	res = []
 	for item in set(items):
 		stock_bal = get_stock_balance(item[0], warehouse, posting_date, posting_time,
 			with_valuation_rate=True)
 
-		res.append({
-			"item_code": item[0],
-			"warehouse": warehouse,
-			"qty": stock_bal[0],
-			"valuation_rate": stock_bal[1],
-			"current_qty": stock_bal[0],
-			"current_valuation_rate": stock_bal[1]
-		})
+		if frappe.db.get_value("Item",item[0],"disabled") == 0:
+
+			res.append({
+				"item_code": item[0],
+				"warehouse": warehouse,
+				"qty": stock_bal[0],
+				"valuation_rate": stock_bal[1],
+				"current_qty": stock_bal[0],
+				"current_valuation_rate": stock_bal[1]
+			})
 
 	return res
 

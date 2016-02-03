@@ -4,7 +4,7 @@ import frappe
 
 def execute():
 	fields = ("is_stock_item", "is_asset_item", "has_batch_no", "has_serial_no",
-		"is_purchase_item", "is_sales_item", "is_service_item", "inspection_required",
+		"is_purchase_item", "is_sales_item", "inspection_required",
 		"is_pro_applicable", "is_sub_contracted_item")
 
 
