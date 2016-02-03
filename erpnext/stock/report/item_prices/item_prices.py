@@ -11,6 +11,7 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 	item_map = get_item_details()
+	sn = get_supplier_name()
 	pl = get_price_list()
 	last_purchase_rate = get_last_purchase_rate()
 	bom_rate = get_item_bom_rate()
@@ -20,24 +21,47 @@ def execute(filters=None):
 	precision = get_currency_precision() or 2
 	data = []
 	for item in sorted(item_map):
-		data.append([item, item_map[item]["item_name"],
-			item_map[item]["description"], item_map[item]["stock_uom"],
+		data.append([item, item_map[item]["item_name"],item_map[item]["item_group"],
+			item_map[item]["description"],
 			flt(last_purchase_rate.get(item, 0), precision),
-			flt(val_rate_map.get(item, 0), precision),
+			sn.get(item, {}).get("supplier"),
+			sn.get(item, {}).get("supplier_name"),
+			sn.get(item, {}).get("supplier_part_no"),
 			pl.get(item, {}).get("Selling"),
 			pl.get(item, {}).get("Buying"),
-			flt(bom_rate.get(item, 0), precision)
+			item_map[item]["manufacturer"],
+			item_map[item]["manufacturer_part_no"],
+			item_map[item]["stock_uom"],
+			flt(val_rate_map.get(item, {}).get("balance_qty"), precision),
+            flt(val_rate_map.get(item, {}).get("val_rate"), precision),
+			flt(bom_rate.get(item, 0), precision),
+            item_map[item]["parent_website_route"]
 		])
+
 
 	return columns, data
 
 def get_columns(filters):
 	"""return columns based on filters"""
 
-	columns = [_("Item") + ":Link/Item:100", _("Item Name") + "::150", _("Description") + "::150", _("UOM") + ":Link/UOM:80",
-		_("Last Purchase Rate") + ":Currency:90", _("Valuation Rate") + ":Currency:80",	_("Sales Price List") + "::80",
-		_("Purchase Price List") + "::80", _("BOM Rate") + ":Currency:90"]
-
+	columns = [_("Item") + ":Link/Item:125",
+		_("Item Name") + "::150",
+		_("Item Group") + ":Link/Item Group:125",
+		_("Description") + "::200",
+		_("Last Purchase Rate") + ":Currency:90",
+		_("Supplier") + ":Link/Supplier:100",
+		_("Supplier Name") + "::150",
+		_("Supplier Part No") + "::125",
+		_("Sales Price List") + "::80",
+		_("Purchase Price List") + "::80",
+		_("Manufacturer") + "::100",
+		_("Manufacturer Part No") + "::100",
+		_("UOM") + ":Link/UOM:80",
+		_("Balance Qty") + ":Float:80",
+		_("Valuation Rate") + ":Currency:90",
+		_("BOM Rate") + ":Currency:90",
+		_("Parent Website Route") + "::200"]
+	
 	return columns
 
 def get_item_details():
@@ -45,9 +69,10 @@ def get_item_details():
 
 	item_map = {}
 
-	for i in frappe.db.sql("select name, item_name, description, \
-		stock_uom from tabItem \
-		order by item_code", as_dict=1):
+	for i in frappe.db.sql("select it.item_group as item_group, it.name as name, item_name, it.description as description, \
+		stock_uom, manufacturer, manufacturer_part_no, itg.parent_website_route as parent_website_route from tabItem it, `tabItem Group` itg \
+        where it.item_group = itg.name \
+		order by it.item_group, item_code", as_dict=1):
 			item_map.setdefault(i.name, i)
 
 	return item_map
@@ -127,8 +152,23 @@ def get_valuation_rate():
 	item_val_rate_map = {}
 
 	for d in frappe.db.sql("""select item_code,
-		sum(actual_qty*valuation_rate)/sum(actual_qty) as val_rate
+		sum(actual_qty*valuation_rate)/sum(actual_qty) as val_rate, sum(actual_qty) as balance_qty
 		from tabBin where actual_qty > 0 group by item_code""", as_dict=1):
-			item_val_rate_map.setdefault(d.item_code, d.val_rate)
+			item_val_rate_map.setdefault(d.item_code, {}).setdefault("val_rate",d.val_rate)
+			item_val_rate_map.setdefault(d.item_code, {}).setdefault("balance_qty",d.balance_qty)
 
 	return item_val_rate_map
+
+def get_supplier_name():
+	"""returns supplier name"""
+
+	supplier_name_map = {}
+
+	for i in frappe.db.sql("""select it.parent, it.supplier, su.supplier_name, it.supplier_part_no \
+		from `tabItem Supplier` it, `tabSupplier` su where it.supplier=su.name\
+		order by parent, supplier""", as_dict=1):
+			supplier_name_map.setdefault(i.parent, {}).setdefault("supplier", i.supplier)
+			supplier_name_map.setdefault(i.parent, {}).setdefault("supplier_name", i.supplier_name)
+			supplier_name_map.setdefault(i.parent, {}).setdefault("supplier_part_no", i.supplier_part_no)
+
+	return supplier_name_map
