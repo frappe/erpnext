@@ -1,2 +1,2 @@
-erpnext.hr.utils
 erpnext.hr
+erpnext.hr.utils

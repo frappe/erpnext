@@ -1,3 +1,3 @@
-erpnext.utilities.transaction_base
 erpnext.utilities.address_and_contact
 erpnext.utilities
+erpnext.utilities.transaction_base
