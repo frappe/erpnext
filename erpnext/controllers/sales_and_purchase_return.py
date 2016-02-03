@@ -97,7 +97,7 @@ def validate_returned_items(doc):
 								frappe.throw(_("Row # {0}: Serial No {1} does not match with {2} {3}")
 									.format(d.idx, s, doc.doctype, doc.return_against))
 									
-				if not d.warehouse:
+				if doc.doctype != "Purchase Invoice" and not d.get("warehouse"):
 					frappe.throw(_("Warehouse is mandatory"))
 
 			items_returned = True
