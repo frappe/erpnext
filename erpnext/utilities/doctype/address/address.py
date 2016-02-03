@@ -156,4 +156,5 @@ def get_shipping_address(company):
 		frappe.throw(_("Please add addresses for the company"))
 	else:
 		name, address_template = get_address_templates(address_as_dict)
+
 		return address_as_dict.get("name"), frappe.render_template(address_template, address_as_dict)
