@@ -47,20 +47,38 @@ class StockController(AccountsController):
 						# from warehouse account
 
 						self.check_expense_account(detail)
-
+						account_report_type = frappe.db.get_value("Account", warehouse_account[sle.warehouse]["name"], "report_type")
+                        			if account_report_type == "Profit and Loss":
+                            				project_name=self.get("project_name")
+                            				support_ticket=self.get("support_ticket")
+                        			else:
+                            				project_name=''
+                            				support_ticket=''
+                            				
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["name"],
 							"against": detail.expense_account,
 							"cost_center": detail.cost_center,
+							"project_name": project_name,
+                            				"support_ticket": support_ticket,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2),
 						}, warehouse_account[sle.warehouse]["account_currency"]))
 
 						# to target warehouse / expense account
+						account_report_type = frappe.db.get_value("Account", detail.expense_account, "report_type")
+                        			if account_report_type == "Profit and Loss":
+                            				project_name=self.get("project_name")
+                            				support_ticket=self.get("support_ticket")
+                        			else:
+                            				project_name=''
+                            				support_ticket=''
 						gl_list.append(self.get_gl_dict({
 							"account": detail.expense_account,
 							"against": warehouse_account[sle.warehouse]["name"],
 							"cost_center": detail.cost_center,
+							"project_name": project_name,
+							"support_ticket": support_ticket,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
 						}))
