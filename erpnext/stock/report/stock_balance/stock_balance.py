@@ -35,11 +35,25 @@ def execute(filters=None):
 def get_columns(filters):
 	"""return columns based on filters"""
 
-	columns = ["Item:Link/Item:100", "Item Name::150", "Item Group::100", "Brand::90", \
-	"Description::140", "Warehouse:Link/Warehouse:100", "Stock UOM:Link/UOM:90", "Opening Qty:Float:100", \
-	"Opening Value:Float:110", "In Qty:Float:80", "In Value:Float:80", "Out Qty:Float:80", \
-	"Out Value:Float:80", "Balance Qty:Float:100", "Balance Value:Float:100", \
-	"Valuation Rate:Float:90", "Company:Link/Company:100"]
+	columns = [
+		_("Item")+":Link/Item:100", 
+		_("Item Name")+"::150", 
+		_("Item Group")+"::100", 
+		_("Brand")+"::90", 
+		_("Description")+"::140", 
+		_("Warehouse")+":Link/Warehouse:100", 
+		_("Stock UOM")+":Link/UOM:90", 
+		_("Opening Qty")+":Float:100", 
+		_("Opening Value")+":Float:110", 
+		_("In Qty")+":Float:80", 
+		_("In Value")+":Float:80", 
+		_("Out Qty")+":Float:80", 
+		_("Out Value")+":Float:80", 
+		_("Balance Qty")+":Float:100", 
+		_("Balance Value")+":Float:100", 
+		_("Valuation Rate")+":Float:90", 
+		_("Company")+":Link/Company:100"
+	]
 
 	return columns
 
