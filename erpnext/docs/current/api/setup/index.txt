@@ -1,3 +1,0 @@
-erpnext.setup
-erpnext.setup.install
-erpnext.setup.utils
