@@ -107,13 +107,15 @@ def get_gl_entries(filters):
 		if filters.get("show_in_account_currency") else ""
 
 	group_by_condition = "group by voucher_type, voucher_no, account, cost_center" \
-		if filters.get("group_by_voucher") else "group by name"
+		if filters.get("group_by_voucher") else "group by `tabGL Entry`.name"
 
 	gl_entries = frappe.db.sql("""select posting_date, account, party_type, party,
-			sum(debit) as debit, sum(credit) as credit,
-			voucher_type, voucher_no, cost_center, remarks, against, is_opening {select_fields}
-		from `tabGL Entry`
-		where company=%(company)s {conditions}
+			sum(ifnull(debit, 0)) as debit, sum(ifnull(credit, 0)) as credit,
+			voucher_type, voucher_no, cost_center, project_name, support_ticket, remarks, against, is_opening {select_fields},
+			root_type, report_type
+		from `tabGL Entry`, `tabAccount`
+		where `tabGL Entry`.account = `tabAccount`.name
+		and `tabGL Entry`.company=%(company)s {conditions}
 		{group_by_condition}
 		order by posting_date, account"""\
 		.format(select_fields=select_fields, conditions=get_conditions(filters),
@@ -283,7 +285,8 @@ def get_result_as_list(data, filters):
 			row += [d.get("debit_in_account_currency"), d.get("credit_in_account_currency")]
 
 		row += [d.get("voucher_type"), d.get("voucher_no"), d.get("against"),
-			d.get("party_type"), d.get("party"), d.get("cost_center"), d.get("remarks")
+			d.get("party_type"), d.get("party"), d.get("cost_center"),  d.get("project_name"),
+            d.get("support_ticket"),d.get("remarks"),d.get("root_type"),d.get("report_type")
 		]
 
 		result.append(row)
