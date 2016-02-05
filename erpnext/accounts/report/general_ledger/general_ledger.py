@@ -85,9 +85,10 @@ def get_columns(filters):
 		]
 
 	columns += [
-		_("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/"+_("Voucher Type")+":160",
-		_("Against Account") + "::120", _("Party Type") + "::80", _("Party") + "::150",
-		_("Cost Center") + ":Link/Cost Center:100", _("Remarks") + "::400"
+		_("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/Voucher Type:120",
+		_("Against Account") + ":Link/Account:200", _("Party Type") + "::80", _("Party") + "::150",
+		_("Cost Center") + ":Link/Cost Center:200", _("Project Name") + ":Link/Project:200",
+        _("Issue") + ":Link/Issue:120",_("Remarks") + "::400",_("Root Type") + "::100",_("Report Type") + "::120"
 	]
 
 	return columns
