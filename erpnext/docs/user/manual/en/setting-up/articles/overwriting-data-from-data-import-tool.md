@@ -34,7 +34,7 @@ Columns of other field which won't have any impact can be removed, even if they 
 
 ####Step 3: Browse Template
 
-After updating Item Groups in spreadheet, come back to Data Import Tool in ERPNext. Browser and select the File/template which has data to be overwritten.
+After updating Item Groups in spreadheet, come back to Data Import Tool in ERPNext. Browse and select the File/template which has data to be overwritten.
 
 <img alt="Browse template" class="screenshot" src="{{docs_base_url}}/assets/img/articles/overwrite-3.gif">
 
