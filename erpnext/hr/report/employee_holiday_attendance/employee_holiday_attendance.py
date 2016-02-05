@@ -26,12 +26,10 @@ def get_columns():
 
 
 def get_employees(filters):
-	holidays = frappe.get_all("Holiday",
-							  fields=["holiday_date", "description"],
-							  filters=[["holiday_date", ">",
-										filters.from_date],
-									   ["holiday_date", "<", filters.to_date]])
-	print holidays
+	holidays = frappe.get_all("Holiday", fields=["holiday_date", "description"],
+				filters=[["holiday_date", ">=",
+				filters.from_date],
+				["holiday_date", "<=", filters.to_date]])
 	holiday_names = {}
 	holidays_list = []
 
@@ -44,7 +42,7 @@ def get_employees(filters):
 			from tabAttendance
 			where
 				att_date in ({0})""".format(', '.join(["%s"] * len(holidays_list))),
-			holidays_list, as_list=True)
+				holidays_list, as_list=True)
 
 		for employee_data in employee_list:
 			employee_data.append(holiday_names[employee_data[2]])
