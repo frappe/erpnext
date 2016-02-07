@@ -114,6 +114,15 @@ doc_events = {
 	},
 	"Address": {
 		"validate": "erpnext.shopping_cart.cart.set_customer_in_address"
+	},
+	"Customer":{
+		"before_save": "erpnext.selling.doctype.customer.custom.get_customer_series"
+	},
+	"Supplier":{
+		"before_save": "erpnext.selling.doctype.customer.custom.get_customer_series"
+	},
+	"Contact":{
+		"before_save": "erpnext.selling.doctype.customer.custom.get_customer_series"
 	}
 }
 
