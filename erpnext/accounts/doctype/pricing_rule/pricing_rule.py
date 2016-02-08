@@ -129,8 +129,8 @@ def get_pricing_rule_for_item(args):
 		# if ignore pricing rule then set the rate or amount field to zero
 		if item_details.doctype in ["Quotation Item", "Sales Order Item"]:
 			item_details.update({
-				"type":"",
-				"rate_or_amount": 0.00
+				"margin_type":"",
+				"margin_rate_or_amount": 0.00
 			})
 		return item_details
 
@@ -161,8 +161,8 @@ def get_pricing_rule_for_item(args):
 	if pricing_rule:
 		item_details.pricing_rule = pricing_rule.name
 		item_details.pricing_rule_for = pricing_rule.price_or_discount
-		item_details.type = pricing_rule.type
-		item_details.rate_or_amount = pricing_rule.rate
+		item_details.margin_type = pricing_rule.margin_type
+		item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 		if pricing_rule.price_or_discount == "Price":
 			item_details.update({
 				"price_list_rate": pricing_rule.price/flt(args.conversion_rate) \

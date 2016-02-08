@@ -14,6 +14,6 @@ This action will wipe out all the data related to that company like Quotation, I
 
 <img alt="Delete Transactions" class="screenshot" src="{{docs_base_url}}/assets/img/articles/delete-company.png">
 
-**Note:** If you want to delete the company record itself, the use the normal "Delete" button from Menu options. It will also delete Chart of Accounts, Chart of Cost Centers and Warehouse records for that company.
+**Note:** If you want to delete the company record itself, use the normal "Delete" button from Menu options. It will also delete Chart of Accounts, Chart of Cost Centers and Warehouse records for that company.
 
 <!-- markdown -->

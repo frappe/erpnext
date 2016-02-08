@@ -95,11 +95,11 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 		if(doc.docstatus==0 && doc.exp_approver==user && doc.approval_status=="Approved")
 			 cur_frm.savesubmit();
 
-		if(doc.docstatus==1 && frappe.model.can_create("Journal Entry") &&
+		if(doc.docstatus==1 && frappe.model.can_create("Journal Entry") && doc.approval_status=="Approved" &&
 			cint(doc.total_amount_reimbursed) < cint(doc.total_sanctioned_amount))
-			 cur_frm.add_custom_button(__("Bank Entry"),
-			 	cur_frm.cscript.make_bank_entry, __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+				cur_frm.add_custom_button(__("Bank Entry"),
+				 	cur_frm.cscript.make_bank_entry, __("Make"));
+				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 	}
 }
 

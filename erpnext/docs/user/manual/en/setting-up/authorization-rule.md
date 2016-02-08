@@ -24,7 +24,7 @@ Select Based On. Authorization Rule will be applied based on value selected in t
 
 **Step 4:**
 
-Select Role on whom this Authorization Rule will be applicable. As per the example considered, Sales User will be selected as Application To (Role). To be more specific you can also select Applicale To User, if you wish to apply to rule for specific Sales User, and not all Sales User. Its okay to not select Sales User, as its not mandatory.
+Select Role on whom this Authorization Rule will be applicable. As per the example considered, Sales User will be selected as Application To (Role). To be more specific you can also select Applicable To User, if you wish to apply the rule for specific Sales User, and not all Sales User. Its okay to not select Sales User, as its not mandatory.
 
 **Step 5:**
 

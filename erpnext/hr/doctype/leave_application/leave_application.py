@@ -133,7 +133,7 @@ class LeaveApplication(Document):
 		if not self.name:
 			self.name = "New Leave Application"
 
-		for d in frappe.db.sql("""select name, leave_type, posting_date, from_date, to_date
+		for d in frappe.db.sql("""select name, leave_type, posting_date, from_date, to_date, total_leave_days
 			from `tabLeave Application`
 			where employee = %(employee)s and docstatus < 2 and status in ("Open", "Approved")
 			and to_date >= %(from_date)s and from_date <= %(to_date)s
@@ -144,12 +144,29 @@ class LeaveApplication(Document):
 				"name": self.name
 			}, as_dict = 1):
 
-			frappe.msgprint(_("Employee {0} has already applied for {1} between {2} and {3}")
-				.format(self.employee, cstr(d['leave_type']),
-					formatdate(d['from_date']), formatdate(d['to_date'])))
+			if d['total_leave_days']==0.5 and cint(self.half_day)==1:
+                    		sum_leave_days=frappe.db.sql("""select sum(total_leave_days) from `tabLeave Application`
+			                        where employee = %(employee)s
+			                        and docstatus < 2
+			                        and status in ("Open", "Approved")
+			                        and (from_date between %(from_date)s and %(to_date)s
+				                    or to_date between %(from_date)s and %(to_date)s
+				                    or %(from_date)s between from_date and to_date)
+			                        and name != %(name)s""", {
+				                        "employee": self.employee,
+				                        "from_date": self.from_date,
+				                        "to_date": self.to_date,
+				                        "name": self.name
+			                            })[0][0]
+                        	if sum_leave_days==1:
+                                	frappe.msgprint(_("Employee {0} has already applied this day").format(self.employee))
+			        	frappe.throw('<a href="#Form/Leave Application/{0}">{0}</a>'.format(d["name"]), OverlapError)
+                    	else:
+			        frappe.msgprint(_("Employee {0} has already applied for {1} between {2} and {3}")
+					.format(self.employee, cstr(d['leave_type']),formatdate(d['from_date']), formatdate(d['to_date'])))
 
-			frappe.throw("""Exising Application: <a href="#Form/Leave Application/{0}">{0}</a>"""
-				.format(d["name"]), OverlapError)
+				frappe.throw("""Exising Application: <a href="#Form/Leave Application/{0}">{0}</a>""".format(d["name"]), OverlapError)
+
 
 	def validate_max_days(self):
 		max_days = frappe.db.get_value("Leave Type", self.leave_type, "max_days_allowed")
@@ -311,7 +328,7 @@ def get_holidays(employee, from_date, to_date):
 		and h1.holiday_date between %s and %s""", (employee, from_date, to_date))[0][0]
 
 	if not tot_hol:
-		tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2
+		tot_hol = frappe.db.sql("""select count(distinct holiday_date) from `tabHoliday` h1, `tabHoliday List` h2
 			where h1.parent = h2.name and h1.holiday_date between %s and %s
 			and h2.is_default = 1""", (from_date, to_date))[0][0]
 

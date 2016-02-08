@@ -4,3 +4,9 @@
 frappe.require("assets/erpnext/js/financial_statements.js");
 
 frappe.query_reports["Cash Flow"] = erpnext.financial_statements;
+
+frappe.query_reports["Cash Flow"]["filters"].push({
+	"fieldname": "accumulated_values",
+	"label": __("Accumulated Values"),
+	"fieldtype": "Check"
+})

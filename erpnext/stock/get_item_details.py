@@ -83,14 +83,14 @@ def get_item_details(args):
 def set_margin_fields(pricing_rule=None, price_list_rate=None):
 	# margin_details dict will hold the all data variable regrading margin
 	margin_details = frappe._dict({
-		"type":"",
-		"rate_or_amount": 0.0,
+		"margin_type":"",
+		"margin_rate_or_amount": 0.0,
 		"total_margin": 0.0
 	})
 
 	if pricing_rule and price_list_rate:
 		margin_details.update(get_margin_details(pricing_rule))
-		margin_details.update(calculate_total_margin(margin_details.get("type"),margin_details.get("rate_or_amount"), price_list_rate))
+		margin_details.update(calculate_total_margin(margin_details.get("margin_type"),margin_details.get("margin_rate_or_amount"), price_list_rate))
 
 	return margin_details
 
@@ -99,19 +99,19 @@ def get_margin_details(pricing_rule):
 		get the margin details from pricing_rule
 	"""
 	margin_details = frappe._dict({
-			"type":"",
-			"rate_or_amount":0.0,
+			"margin_type":"",
+			"margin_rate_or_amount":0.0,
 		})
 
-	records = frappe.db.get_values("Pricing Rule", pricing_rule, ["type", "rate"], as_dict=True)
+	records = frappe.db.get_values("Pricing Rule", pricing_rule, ["margin_type", "margin_rate_or_amount"], as_dict=True)
 	
 	for record in records:
-		margin_details["type"] = record.get("type")
-		margin_details["rate_or_amount"] = record.get("rate")
+		margin_details["margin_type"] = record.get("margin_type")
+		margin_details["margin_rate_or_amount"] = record.get("margin_rate_or_amount")
 
 	return margin_details
 
-def calculate_total_margin(margin_type,rate_or_amount,price_list_rate):
+def calculate_total_margin(margin_type,margin_rate_or_amount,price_list_rate):
 	"""
 		calculate margin amount as follows
 		if type is percentage then calculate percentage of price_list_rate
@@ -120,9 +120,9 @@ def calculate_total_margin(margin_type,rate_or_amount,price_list_rate):
 	if not margin_type:
 		return default
 	elif margin_type == "Amount":
-		default.total_margin = price_list_rate + rate_or_amount
+		default.total_margin = price_list_rate + margin_rate_or_amount
 	else:
-		default.total_margin = price_list_rate + ( price_list_rate * ( rate_or_amount / 100 ) )
+		default.total_margin = price_list_rate + ( price_list_rate * ( margin_rate_or_amount / 100 ) )
 	return default
 
 def discount_on_total_margin(total_margin, discount):
