@@ -97,10 +97,10 @@ def apply_pricing_rule(args):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
-	
+
 	if not args.transaction_type:
 		set_transaction_type(args)
-				
+
 	# list of dictionaries
 	out = []
 
@@ -142,7 +142,7 @@ def get_pricing_rule_for_item(args):
 			customer = frappe.db.get_value("Customer", args.customer, ["customer_group", "territory"])
 			if customer:
 				args.customer_group, args.territory = customer
-				
+
 		args.supplier = args.supplier_type = None
 
 	elif args.supplier and not args.supplier_type:
@@ -186,7 +186,7 @@ def get_pricing_rules(args):
 		return condition
 
 
-	conditions = ""
+	conditions = item_variant_condition = ""
 	values =  {"item_code": args.get("item_code"), "brand": args.get("brand")}
 
 	for field in ["company", "customer", "supplier", "supplier_type", "campaign", "sales_partner"]:
@@ -211,22 +211,37 @@ def get_pricing_rules(args):
 		values['transaction_date'] = args.get('transaction_date')
 
 	item_group_condition = _get_tree_conditions("Item Group", False)
-	if item_group_condition: item_group_condition = " or " + item_group_condition
+	if item_group_condition:
+		item_group_condition = " or " + item_group_condition
+
+	# load variant of if not defined
+	if "variant_of" not in args:
+		args.variant_of = frappe.db.get_value("Item", args.item_code, "variant_of")
+
+	if args.variant_of:
+		item_variant_condition = ' or item_code=%(variant_of)s '
+		values['variant_of'] = args.variant_of
 
 	return frappe.db.sql("""select * from `tabPricing Rule`
-		where (item_code=%(item_code)s {item_group_condition} or brand=%(brand)s)
+		where (item_code=%(item_code)s {item_variant_condition} {item_group_condition} or brand=%(brand)s)
 			and docstatus < 2 and disable = 0
 			and {transaction_type} = 1 {conditions}
 		order by priority desc, name desc""".format(
-			item_group_condition=item_group_condition,
-			transaction_type= args.transaction_type,
-			conditions=conditions), values, as_dict=1)
+			item_group_condition = item_group_condition,
+			item_variant_condition = item_variant_condition,
+			transaction_type = args.transaction_type,
+			conditions = conditions), values, as_dict=1)
 
 def filter_pricing_rules(args, pricing_rules):
 	# filter for qty
 	if pricing_rules:
 		pricing_rules = filter(lambda x: (flt(args.get("qty"))>=flt(x.min_qty)
 			and (flt(args.get("qty"))<=x.max_qty if x.max_qty else True)), pricing_rules)
+
+		# add variant_of property in pricing rule
+		for p in pricing_rules:
+			if p.item_code and args.variant_of:
+				p.variant_of = args.variant_of
 
 	# find pricing rule with highest priority
 	if pricing_rules:
@@ -239,7 +254,7 @@ def filter_pricing_rules(args, pricing_rules):
 		"supplier", "supplier_type", "campaign", "sales_partner"]
 
 	if len(pricing_rules) > 1:
-		for field_set in [["item_code", "item_group", "brand"],
+		for field_set in [["item_code", "variant_of", "item_group", "brand"],
 			["customer", "customer_group", "territory"], ["supplier", "supplier_type"]]:
 				remaining_fields = list(set(all_fields) - set(field_set))
 				if if_all_rules_same(pricing_rules, remaining_fields):
@@ -253,8 +268,7 @@ def filter_pricing_rules(args, pricing_rules):
 				or pricing_rules
 
 	if len(pricing_rules) > 1:
-		frappe.throw(_("Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}")
+		frappe.throw(_("Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}")
 			.format("\n".join([d.name for d in pricing_rules])), MultiplePricingRuleConflict)
 	elif pricing_rules:
 		return pricing_rules[0]
@@ -281,7 +295,7 @@ def apply_internal_priority(pricing_rules, field_set, args):
 def set_transaction_type(args):
 	if args.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
 		args.transaction_type = "selling"
-	elif args.doctype in ("Material Request", "Supplier Quotation", "Purchase Order", 
+	elif args.doctype in ("Material Request", "Supplier Quotation", "Purchase Order",
 		"Purchase Receipt", "Purchase Invoice"):
 			args.transaction_type = "buying"
 	elif args.customer:
