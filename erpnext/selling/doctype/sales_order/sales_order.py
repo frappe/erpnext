@@ -432,6 +432,9 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Sales Invoice",
+			"field_map": {
+				"party_account_currency": "party_account_currency"
+			},
 			"validation": {
 				"docstatus": ["=", 1]
 			}
