@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, formatdate, flt, getdate
+from frappe.utils import cstr, cint, formatdate, flt, getdate
 from frappe import msgprint, _, throw
 from erpnext.setup.utils import get_company_currency
 import frappe.defaults
@@ -12,6 +12,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
+
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -45,6 +46,22 @@ class PurchaseInvoice(BuyingController):
 			self.validate_supplier_invoice()
 			self.validate_advance_jv("Purchase Order")
 
+		# validate cash purchase
+		if (self.is_cash == 1):
+			self.validate_cash()
+
+		# validate stock items
+		if (self.make_receipt == 1):
+			self.validate_purchase_return()
+			self.validate_rejected_warehouse()
+			self.validate_accepted_rejected_qty()
+
+		# sub-contracting
+		# self.validate_for_subcontracting()
+		# self.create_raw_materials_supplied("supplied_items")
+		# self.set_landed_cost_voucher_amount()
+		# self.update_valuation_rate("items")
+
 		self.check_active_purchase_items()
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
@@ -58,6 +75,45 @@ class PurchaseInvoice(BuyingController):
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount",
 			"items")
 		self.create_remarks()
+
+	def validate_cash(self):
+		if not self.cash_bank_account and flt(self.paid_amount):
+			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
+
+		if flt(self.paid_amount) + flt(self.write_off_amount) \
+				- flt(self.base_grand_total) > 1/(10**(self.precision("base_grand_total") + 1)):
+			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
+
+	def validate_purchase_return(self):
+		for d in self.get("items"):
+			if self.is_return and flt(d.rejected_qty) != 0:
+				frappe.throw(_("Row #{0}: Rejected Qty can not be entered in Purchase Return").format(d.idx))
+
+			# validate rate with ref PR
+
+	def validate_rejected_warehouse(self):
+		for d in self.get("items"):
+			if flt(d.rejected_qty) and not d.rejected_warehouse:
+				d.rejected_warehouse = self.rejected_warehouse
+				if not d.rejected_warehouse:
+					frappe.throw(_("Row #{0}: Rejected Warehouse is mandatory against rejected Item {1}").format(d.idx, d.item_code))
+
+	# validate accepted and rejected qty
+	def validate_accepted_rejected_qty(self):
+		for d in self.get("items"):
+			if not flt(d.received_qty) and flt(d.qty):
+				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
+
+			elif not flt(d.qty) and flt(d.rejected_qty):
+				d.qty = flt(d.received_qty) - flt(d.rejected_qty)
+
+			elif not flt(d.rejected_qty):
+				d.rejected_qty = flt(d.received_qty) -  flt(d.qty)
+
+			# Check Received Qty = Accepted Qty + Rejected Qty
+			if ((flt(d.qty) + flt(d.rejected_qty)) != flt(d.received_qty)):
+				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
+
 
 	def create_remarks(self):
 		if not self.remarks:
@@ -233,6 +289,75 @@ class PurchaseInvoice(BuyingController):
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
 
+	def update_status_updater_args(self):
+		if cint(self.make_receipt):
+			self.status_updater.extend([{
+				'source_dt': 'Purchase Invoice Item',
+				'target_dt': 'Purchase Order Item',
+				'join_field': 'po_detail',
+				'target_field': 'received_qty',
+				'target_parent_dt': 'Purchase Order',
+				'target_parent_field': 'per_received',
+				'target_ref_field': 'qty',
+				'source_field': 'qty',
+				'percent_join_field':'purchase_order',
+				# 'percent_join_field': 'prevdoc_docname',
+				'overflow_type': 'receipt',
+				'extra_cond': """ and exists(select name from `tabPurchase Invoice`
+					where name=`tabPurchase Invoice Item`.parent and make_receipt = 1)"""
+			},
+			{
+				'source_dt': 'Purchase Invoice Item',
+				'target_dt': 'Purchase Order Item',
+				'join_field': 'po_detail',
+				'target_field': 'returned_qty',
+				'target_parent_dt': 'Purchase Order',
+				# 'target_parent_field': 'per_received',
+				# 'target_ref_field': 'qty',
+				'source_field': '-1 * qty',
+				# 'percent_join_field': 'prevdoc_docname',
+				# 'overflow_type': 'receipt',
+				'extra_cond': """ and exists (select name from `tabPurchase Invoice` where name=`tabPurchase Invoice Item`.parent and is_return=1)"""
+			}
+		])
+
+	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
+		sl_entries = []
+		stock_items = self.get_stock_items()
+
+		for d in self.get('items'):
+			if d.item_code in stock_items and d.warehouse:
+				pr_qty = flt(d.qty) * flt(d.conversion_factor)
+
+				if pr_qty:
+					val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
+					rate = flt(d.valuation_rate, val_rate_db_precision)
+					sle = self.get_sl_entries(d, {
+						"actual_qty": flt(pr_qty),
+						"serial_no": cstr(d.serial_no).strip()
+					})
+					if self.is_return:
+						sle.update({
+							"outgoing_rate": rate
+						})
+					else:
+						sle.update({
+							"incoming_rate": rate
+						})
+					sl_entries.append(sle)
+
+				if flt(d.rejected_qty) > 0:
+					sl_entries.append(self.get_sl_entries(d, {
+						"warehouse": d.rejected_warehouse,
+						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
+						"serial_no": cstr(d.rejected_serial_no).strip(),
+						"incoming_rate": 0.0
+					}))
+
+		# self.bk_flush_supp_wh(sl_entries)
+		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock,
+			via_landed_cost_voucher=via_landed_cost_voucher)
+
 	def on_submit(self):
 		super(PurchaseInvoice, self).on_submit()
 
@@ -241,8 +366,18 @@ class PurchaseInvoice(BuyingController):
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 
+                # make purchase receipt
+		if (self.make_receipt == 1):
+			# from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_stock_ledger
+			self.update_stock_ledger()
+			self.make_gl_entries()
+			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
+			update_serial_nos_after_submit(self, "items")
+			self.update_status_updater_args()
+			self.update_prevdoc_status()
+
 		# this sequence because outstanding may get -negative
-		self.make_gl_entries()
+		self.make_gl_entries1()
 		if not self.is_return:
 			self.update_against_document_in_jv()
 			self.update_prevdoc_status()
@@ -251,7 +386,22 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_project()
 
-	def make_gl_entries(self):
+	def on_cancel(self):
+		self.check_for_stopped_or_closed_status()
+
+		if not self.is_return:
+			from erpnext.accounts.utils import remove_against_link_from_jv
+			remove_against_link_from_jv(self.doctype, self.name)
+
+			self.update_prevdoc_status()
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
+			self.update_billing_status_in_pr()
+
+		self.update_stock_ledger()
+		self.make_gl_entries_on_cancel()
+		self.update_project()
+
+	def make_gl_entries1(self):
 		auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
@@ -259,6 +409,33 @@ class PurchaseInvoice(BuyingController):
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		gl_entries = []
+
+		# Make Cash GL Entries
+		if cint(self.is_cash) and self.cash_bank_account and self.paid_amount:
+			bank_account_currency = get_account_currency(self.cash_bank_account)
+			# CASH, make payment entries
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.credit_to,
+					"party_type": "Supplier",
+					"party": self.supplier,
+					"against": self.cash_bank_account,
+					"debit": self.base_paid_amount,
+					"debit_in_account_currency": self.base_paid_amount \
+						if self.party_account_currency==self.company_currency else self.paid_amount,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher_type": self.doctype,
+				}, self.party_account_currency)
+			)
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.cash_bank_account,
+					"against": self.supplier,
+					"credit": self.base_paid_amount,
+					"credit_in_account_currency": self.base_paid_amount \
+						if bank_account_currency==self.company_currency else self.paid_amount
+				}, bank_account_currency)
+			)
 
 		# parent's gl entry
 		if self.grand_total:
@@ -404,19 +581,6 @@ class PurchaseInvoice(BuyingController):
 			from erpnext.accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2))
 
-	def on_cancel(self):
-		self.check_for_stopped_or_closed_status()
-
-		if not self.is_return:
-			from erpnext.accounts.utils import remove_against_link_from_jv
-			remove_against_link_from_jv(self.doctype, self.name)
-
-			self.update_prevdoc_status()
-			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-			self.update_billing_status_in_pr()
-
-		self.make_gl_entries_on_cancel()
-		self.update_project()
 
 	def update_project(self):
 		project_list = []
