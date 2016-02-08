@@ -7,6 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
+ "document_type": "Document", 
  "fields": [
   {
    "allow_on_submit": 1, 
@@ -2487,7 +2488,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-01-25 05:18:57.728258", 
+ "modified": "2016-02-01 08:04:57.220678", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
@@ -2619,5 +2620,6 @@
  "search_fields": "posting_date, supplier, fiscal_year, bill_no, base_grand_total, outstanding_amount", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "timeline_field": "supplier", 
  "title_field": "title"
 }

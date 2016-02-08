@@ -38,8 +38,8 @@ class TestQuotation(unittest.TestCase):
 			import make_material_request, make_delivery_note, make_sales_invoice
 
 		test_records[0]['items'][0]['price_list_rate'] = 1500
-		test_records[0]['items'][0]['type'] = 'Percentage'
-		test_records[0]['items'][0]['rate_or_amount'] = 20
+		test_records[0]['items'][0]['margin_type'] = 'Percentage'
+		test_records[0]['items'][0]['margin_rate_or_amount'] = 20
 		quotation = frappe.copy_doc(test_records[0])
 		quotation.insert()
 

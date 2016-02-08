@@ -650,7 +650,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-01-14 07:45:55.840256", 
+ "modified": "2016-02-03 01:08:48.180242", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Issue", 
@@ -700,5 +700,7 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "status,customer,subject,raised_by", 
+ "sort_order": "ASC", 
+ "timeline_field": "customer", 
  "title_field": "subject"
 }

@@ -2026,7 +2026,7 @@
  "istable": 0, 
  "max_attachments": 1, 
  "menu_index": 0, 
- "modified": "2015-12-17 16:19:06.964646", 
+ "modified": "2016-02-01 07:53:40.052648", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 
@@ -2223,6 +2223,6 @@
  "search_fields": "status,transaction_date,customer,lead,order_type", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
- "title_field": "title", 
- "version": 0
+ "timeline_field": "customer", 
+ "title_field": "title"
 }

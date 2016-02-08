@@ -16,7 +16,7 @@ Enter standard page like, index, login, products, blog, about, contact etc. as H
 
 #### **Step 3: Save Website Settings Form.**
 
-After setting up Home Page Press 'Save' button from website settings page and refresh the system from Help menu.Like this you can set any standard page as your default website home page. When some one visited to your website, he/she will see home page as default landing page on your website.
+After setting up Home Page Press 'Save' button from website settings page and refresh the system from Help menu. Like this you can set any standard page as your default website home page. When some one visited to your website, he/she will see home page as default landing page on your website.
 
 ![Website Home Page]({{docs_base_url}}/assets/img/articles/Selection_022.png)    
 

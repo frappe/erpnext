@@ -2302,7 +2302,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-01-15 04:14:16.311445", 
+ "modified": "2016-02-01 08:05:13.841099", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt", 
@@ -2434,5 +2434,6 @@
  "search_fields": "status, posting_date, supplier", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "timeline_field": "supplier", 
  "title_field": "title"
 }

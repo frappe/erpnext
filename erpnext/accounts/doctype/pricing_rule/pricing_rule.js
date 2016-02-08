@@ -89,8 +89,3 @@ cur_frm.cscript.selling = function() {
 cur_frm.cscript.buying = function() {
 	cur_frm.cscript.set_options_for_applicable_for();
 }
-
-//Dynamically change the description based on type of margin
-cur_frm.cscript.type = function(doc){
-	cur_frm.set_df_property('rate', 'description', doc.type=='Percentage'?'In Percentage %':'In Amount')
-}

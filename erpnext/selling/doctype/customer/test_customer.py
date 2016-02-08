@@ -45,16 +45,11 @@ class TestCustomer(unittest.TestCase):
 
 	def test_rename(self):
 		for name in ("_Test Customer 1", "_Test Customer 1 Renamed"):
-			frappe.db.sql("""delete from `tabComment` where comment_doctype=%s and comment_docname=%s""",
+			frappe.db.sql("""delete from `tabCommunication`
+				where communication_type='Comment' and reference_doctype=%s and reference_name=%s""",
 				("Customer", name))
 
-		comment = frappe.new_doc("Comment")
-		comment.update({
-			"comment": "Test Comment for Rename",
-			"comment_doctype": "Customer",
-			"comment_docname": "_Test Customer 1"
-		})
-		comment.insert()
+		comment = frappe.get_doc("Customer", "_Test Customer 1").add_comment("Comment", "Test Comment for Rename")
 
 		frappe.rename_doc("Customer", "_Test Customer 1", "_Test Customer 1 Renamed")
 
@@ -62,8 +57,11 @@ class TestCustomer(unittest.TestCase):
 		self.assertFalse(frappe.db.exists("Customer", "_Test Customer 1"))
 
 		# test that comment gets renamed
-		self.assertEquals(frappe.db.get_value("Comment",
-			{"comment_doctype": "Customer", "comment_docname": "_Test Customer 1 Renamed"}), comment.name)
+		self.assertEquals(frappe.db.get_value("Communication", {
+			"communication_type": "Comment",
+			"reference_doctype": "Customer",
+			"reference_name": "_Test Customer 1 Renamed"
+		}), comment.name)
 
 		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 
