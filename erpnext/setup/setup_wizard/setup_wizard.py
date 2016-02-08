@@ -129,6 +129,9 @@ def create_bank_account(args):
 				return bank_account.insert()
 			except RootNotEditable:
 				frappe.throw(_("Bank account cannot be named as {0}").format(args.get("bank_account")))
+			except frappe.DuplicateEntryError:
+				# bank account same as a CoA entry
+				pass
 
 def create_price_lists(args):
 	for pl_type, pl_name in (("Selling", _("Standard Selling")), ("Buying", _("Standard Buying"))):
