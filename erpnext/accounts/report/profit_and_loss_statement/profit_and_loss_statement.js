@@ -4,9 +4,3 @@
 frappe.require("assets/erpnext/js/financial_statements.js");
 
 frappe.query_reports["Profit and Loss Statement"] = erpnext.financial_statements;
-
-frappe.query_reports["Profit and Loss Statement"]["filters"].push({
-	"fieldname": "accumulated_values",
-	"label": __("Accumulated Values"),
-	"fieldtype": "Check"
-})
