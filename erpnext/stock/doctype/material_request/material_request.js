@@ -102,6 +102,8 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			fields: [
 				{"fieldname":"bom", "fieldtype":"Link", "label":__("BOM"),
 					options:"BOM", reqd: 1},
+				{"fieldname":"warehouse", "fieldtype":"Link", "label":__("Warehouse"),
+					options:"Warehouse", reqd: 1, label:"For Warehouse"},
 				{"fieldname":"fetch_exploded", "fieldtype":"Check",
 					"label":__("Fetch exploded BOM (including sub-assemblies)"), "default":1},
 				{fieldname:"fetch", "label":__("Get Items from BOM"), "fieldtype":"Button"}
@@ -119,7 +121,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
 						d.item_code = item.item_code;
 						d.description = item.description;
-						d.warehouse = item.default_warehouse;
+						d.warehouse = d.warehouse;
 						d.uom = item.stock_uom;
 						d.qty = item.qty;
 					});
