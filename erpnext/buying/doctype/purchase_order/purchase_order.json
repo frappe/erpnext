@@ -2534,7 +2534,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-01-29 01:41:08.478575", 
+ "modified": "2016-02-01 08:04:50.067590", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 
@@ -2646,5 +2646,6 @@
  "search_fields": "status, transaction_date, supplier,grand_total", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "timeline_field": "supplier", 
  "title_field": "title"
 }
