@@ -6,7 +6,6 @@ import unittest
 import frappe
 
 from frappe.test_runner import make_test_records
-from erpnext.stock.doctype.item.item import WarehouseNotSet
 from erpnext.controllers.item_variant import create_variant, ItemVariantExistsError, InvalidItemAttributeValueError
 
 test_ignore = ["BOM"]
@@ -44,18 +43,6 @@ class TestItem(unittest.TestCase):
 		else:
 			item = frappe.get_doc("Item", item_code)
 		return item
-
-	# def test_template_cannot_have_stock(self):
-	# 		item = self.get_item(10)
-	# 		make_stock_entry(item_code=item.name, target="Stores - _TC", qty=1, basic_rate=1)
-	# 		item.has_variants = 1
-	# 		self.assertRaises(ItemTemplateCannotHaveStock, item.save)
-
-	def test_default_warehouse(self):
-		item = frappe.copy_doc(test_records[0])
-		item.is_stock_item = 1
-		item.default_warehouse = None
-		self.assertRaises(WarehouseNotSet, item.insert)
 
 	def test_get_item_details(self):
 		from erpnext.stock.get_item_details import get_item_details

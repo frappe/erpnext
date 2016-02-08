@@ -42,19 +42,15 @@ def get_data(filters):
 
 		re_order_level = re_order_qty = 0
 
-		if bin.warehouse==item.default_warehouse:
-			re_order_level = item.re_order_level or 0
-			re_order_qty = item.re_order_qty or 0
-
 		for d in item.get("reorder_levels"):
 			if d.warehouse == bin.warehouse:
 				re_order_level = d.warehouse_reorder_level
 				re_order_qty = d.warehouse_reorder_qty
-				
+
 		shortage_qty = re_order_level - flt(bin.projected_qty) if re_order_level else 0
 
-		data.append([item.name, item.item_name, item.description, item.item_group, item.brand, bin.warehouse, 
-			item.stock_uom, bin.actual_qty, bin.planned_qty, bin.indented_qty, bin.ordered_qty, 
+		data.append([item.name, item.item_name, item.description, item.item_group, item.brand, bin.warehouse,
+			item.stock_uom, bin.actual_qty, bin.planned_qty, bin.indented_qty, bin.ordered_qty,
 			bin.reserved_qty, bin.projected_qty, re_order_level, re_order_qty, shortage_qty])
 
 	return data
