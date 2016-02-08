@@ -314,6 +314,13 @@ class PurchaseInvoice(BuyingController):
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
+				account_report_type = frappe.db.get_value("Account", item.expense_account, "report_type")
+				if account_report_type == "Profit and Loss":
+					project_name=item.project_name
+					support_ticket=item.support_ticket
+				else:
+					project_name=''
+					support_ticket=''
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.expense_account,
@@ -321,7 +328,9 @@ class PurchaseInvoice(BuyingController):
 						"debit": item.base_net_amount,
 						"debit_in_account_currency": item.base_net_amount \
 							if account_currency==self.company_currency else item.net_amount,
-						"cost_center": item.cost_center
+						"cost_center": item.cost_center,
+                        			"project_name": project_name,
+						"support_ticket": support_ticket
 					}, account_currency)
 				)
 

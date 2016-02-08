@@ -383,6 +383,13 @@ class JournalEntry(AccountsController):
 		gl_map = []
 		for d in self.get("accounts"):
 			if d.debit or d.credit:
+				account_report_type = frappe.db.get_value("Account", d.account, "report_type")
+				if account_report_type == "Profit and Loss":
+					project_name=d.project_name
+                    			support_ticket=d.support_ticket
+                    		else:
+                    			project_name=''
+                    			support_ticket=''
 				gl_map.append(
 					self.get_gl_dict({
 						"account": d.account,
@@ -397,7 +404,9 @@ class JournalEntry(AccountsController):
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
-						"cost_center": d.cost_center
+						"cost_center": d.cost_center,
+						"project_name": project_name,
+						"support_ticket": support_ticket
 					})
 				)
 

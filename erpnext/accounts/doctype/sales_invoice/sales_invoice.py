@@ -569,6 +569,13 @@ class SalesInvoice(SellingController):
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.income_account)
+				account_report_type = frappe.db.get_value("Account", item.income_account, "report_type")
+				if account_report_type == "Profit and Loss":
+					project_name=self.project_name
+					support_ticket=self.support_ticket
+				else:
+					project_name=''
+					support_ticket=''
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.income_account,
@@ -576,7 +583,9 @@ class SalesInvoice(SellingController):
 						"credit": item.base_net_amount,
 						"credit_in_account_currency": item.base_net_amount \
 							if account_currency==self.company_currency else item.net_amount,
-						"cost_center": item.cost_center
+						"cost_center": item.cost_center,
+                        			"project_name": project_name,
+						"support_ticket": support_ticket
 					}, account_currency)
 				)
 
