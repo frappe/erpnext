@@ -101,6 +101,4 @@ by:
 
 > Note : In order to make a Production Order against an Item you must specify 'Yes' to "Allow Production Order" on the Item form.
 
-> Note : In order to make a Production Order against an Item you must specify 'Yes' to "Allow Production Order" on the Item form.
-
 {next}
