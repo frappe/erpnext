@@ -52,6 +52,8 @@ class BankReconciliation(Document):
 					frappe.throw(_("Clearance date cannot be before check date in row {0}").format(d.idx))
 
 			if d.clearance_date or self.include_reconciled_entries:
+				if not d.clearance_date:
+					d.clearance_date = None
 				frappe.db.set_value("Journal Entry", d.voucher_id, "clearance_date", d.clearance_date)
 				frappe.db.sql("""update `tabJournal Entry` set clearance_date = %s, modified = %s
 					where name=%s""", (d.clearance_date, nowdate(), d.voucher_id))
