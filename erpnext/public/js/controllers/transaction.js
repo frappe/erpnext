@@ -243,7 +243,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	company: function() {
 		var me = this;
-		var fn = function() {
+		var set_pricing = function() {
 			if(me.frm.doc.company && me.frm.fields_dict.currency) {
 				var company_currency = me.get_company_currency();
 				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
@@ -270,10 +270,40 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				me.apply_pricing_rule();
 			}
 		}
+		
+		var set_party_account = function(set_pricing) {
+			if (in_list(["Sales Invoice", "Purchase Invoice"], me.frm.doc.doctype)) {
+				if(me.frm.doc.doctype=="Sales Invoice") {
+					var party_type = "Customer";
+					var party_account_field = 'debit_to';
+				} else {
+					var party_type = "Supplier";
+					var party_account_field = 'credit_to';
+				}
+				
+				return frappe.call({
+					method: "erpnext.accounts.party.get_party_account",
+					args: {
+						company: me.frm.doc.company,
+						party_type: party_type,
+						party: me.frm.doc[frappe.model.scrub(party_type)]
+					},
+					callback: function(r) {
+						if(!r.exc && r.message) {
+							me.frm.set_value(party_account_field, r.message);
+							set_pricing();
+						}
+					}
+				});
+			} else {
+				set_pricing();
+			}
+			
+		}
 
 		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
 		else var date = this.frm.doc.transaction_date;
-		erpnext.get_fiscal_year(this.frm.doc.company, date, fn);
+		erpnext.get_fiscal_year(this.frm.doc.company, date, function() { set_party_account(set_pricing); });
 
 		if(this.frm.doc.company) {
 			erpnext.last_selected_company = this.frm.doc.company;
