@@ -18,6 +18,12 @@ Employee Information Report shows Report View of important information recorded 
 
 <img alt="Employee Information" class="screenshot" src="{{docs_base_url}}/assets/img/human-resources/employee-information-report.png">
 
+### Employee Holiday Attendance
+
+Employee Holiday Attendance shows the list of Employees who attended on Holidays.
+
+<img alt="Employee Information" class="screenshot" src="{{docs_base_url}}/assets/img/human-resources/employee-holiday-report.png">
+
 ### Monthly Salary Register
 
 Monthly Salary Register shows net pay and its components of employee(s) at a glance.

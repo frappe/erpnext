@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import flt, cstr, nowdate, add_days, cint
+from frappe.utils import flt, nowdate, add_days, cint
 from frappe import _
 
 def reorder_item():
@@ -26,10 +26,9 @@ def _reorder_item():
 			and (is_purchase_item=1 or is_sub_contracted_item=1)
 			and disabled=0
 			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)
-			and ((re_order_level is not null and re_order_level > 0)
-				or exists (select name from `tabItem Reorder` ir where ir.parent=item.name)
+			and (exists (select name from `tabItem Reorder` ir where ir.parent=item.name)
 				or (variant_of is not null and variant_of != ''
-					and exists (select name from `tabItem Reorder` ir where ir.parent=item.variant_of))
+				and exists (select name from `tabItem Reorder` ir where ir.parent=item.variant_of))
 			)""",
 		{"today": nowdate()})
 
@@ -72,10 +71,6 @@ def _reorder_item():
 			for d in item.get("reorder_levels"):
 				add_to_material_request(item_code, d.warehouse, d.warehouse_reorder_level,
 					d.warehouse_reorder_qty, d.material_request_type)
-
-		else:
-			# raise for default warehouse
-			add_to_material_request(item_code, item.default_warehouse, item.re_order_level, item.re_order_qty, "Purchase")
 
 	if material_requests:
 		return create_material_request(material_requests)

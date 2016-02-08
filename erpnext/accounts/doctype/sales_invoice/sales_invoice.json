@@ -3233,7 +3233,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2015-12-17 16:19:15.963267", 
+ "modified": "2016-02-08 16:23:46.560153", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
@@ -3281,7 +3281,7 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -3297,6 +3297,7 @@
    "set_user_permissions": 0, 
    "share": 0, 
    "submit": 0, 
+   "user_permission_doctypes": "[\"Company\"]", 
    "write": 0
   }, 
   {
@@ -3318,6 +3319,26 @@
    "share": 0, 
    "submit": 0, 
    "write": 1
+  }, 
+  {
+   "amend": 0, 
+   "apply_user_permissions": 0, 
+   "cancel": 0, 
+   "create": 0, 
+   "delete": 0, 
+   "email": 0, 
+   "export": 0, 
+   "if_owner": 0, 
+   "import": 0, 
+   "permlevel": 1, 
+   "print": 0, 
+   "read": 1, 
+   "report": 0, 
+   "role": "All", 
+   "set_user_permissions": 0, 
+   "share": 0, 
+   "submit": 0, 
+   "write": 0
   }
  ], 
  "read_only": 0, 
@@ -3325,6 +3346,6 @@
  "search_fields": "posting_date, due_date, customer, fiscal_year, base_grand_total, outstanding_amount", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
- "title_field": "title", 
- "version": 0
+ "timeline_field": "customer", 
+ "title_field": "title"
 }

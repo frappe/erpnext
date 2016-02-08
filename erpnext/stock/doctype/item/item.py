@@ -14,7 +14,7 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.controllers.item_variant import get_variant, copy_attributes_to_variant, ItemVariantExistsError
 
-class WarehouseNotSet(frappe.ValidationError): pass
+class DuplicateReorderRows(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	website = frappe._dict(
@@ -58,7 +58,6 @@ class Item(WebsiteGenerator):
 		if not self.stock_uom:
 			msgprint(_("Please enter default Unit of Measure"), raise_exception=1)
 
-		self.check_warehouse_is_set_for_stock_item()
 		self.validate_uom()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
@@ -303,11 +302,6 @@ class Item(WebsiteGenerator):
 				if not find_variant(combination):
 					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
 
-	def check_warehouse_is_set_for_stock_item(self):
-		if self.is_stock_item==1 and not self.default_warehouse and frappe.get_all("Warehouse"):
-			frappe.msgprint(_("Default Warehouse is mandatory for stock Item."),
-				raise_exception=WarehouseNotSet)
-
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
 		if self.stock_uom not in uom_conv_list:
@@ -409,21 +403,13 @@ class Item(WebsiteGenerator):
 							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'"))
 
 	def validate_reorder_level(self):
-		if cint(self.apply_warehouse_wise_reorder_level):
-			self.re_order_level, self.re_order_qty = 0, 0
-		else:
-			self.set("reorder_levels", [])
-
-		if self.re_order_level or len(self.get("reorder_levels", {"material_request_type": "Purchase"})):
+		if len(self.get("reorder_levels", {"material_request_type": "Purchase"})):
 			if not (self.is_purchase_item or self.is_pro_applicable):
 				frappe.throw(_("""To set reorder level, item must be a Purchase Item or Manufacturing Item"""))
 
-		if self.re_order_level and not self.re_order_qty:
-			frappe.throw(_("Please set reorder quantity"))
 		for d in self.get("reorder_levels"):
 			if d.warehouse_reorder_level and not d.warehouse_reorder_qty:
 				frappe.throw(_("Row #{0}: Please set reorder quantity").format(d.idx))
-
 
 	def validate_warehouse_for_reorder(self):
 		warehouse = []
@@ -432,7 +418,7 @@ class Item(WebsiteGenerator):
 				warehouse += [i.get("warehouse")]
 			else:
 				frappe.throw(_("Row {0}: An Reorder entry already exists for this warehouse {1}")
-					.format(i.idx, i.warehouse))
+					.format(i.idx, i.warehouse), DuplicateReorderRows)
 
 	def check_if_sle_exists(self):
 		sle = frappe.db.sql("""select name from `tabStock Ledger Entry`

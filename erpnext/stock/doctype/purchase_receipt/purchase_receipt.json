@@ -2302,7 +2302,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-01-15 04:14:16.311445", 
+ "modified": "2016-02-08 16:26:44.585800", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt", 
@@ -2427,6 +2427,26 @@
    "share": 0, 
    "submit": 0, 
    "write": 1
+  }, 
+  {
+   "amend": 0, 
+   "apply_user_permissions": 0, 
+   "cancel": 0, 
+   "create": 0, 
+   "delete": 0, 
+   "email": 0, 
+   "export": 0, 
+   "if_owner": 0, 
+   "import": 0, 
+   "permlevel": 1, 
+   "print": 0, 
+   "read": 1, 
+   "report": 0, 
+   "role": "All", 
+   "set_user_permissions": 0, 
+   "share": 0, 
+   "submit": 0, 
+   "write": 0
   }
  ], 
  "read_only": 0, 
@@ -2434,5 +2454,6 @@
  "search_fields": "status, posting_date, supplier", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "timeline_field": "supplier", 
  "title_field": "title"
 }

@@ -28,7 +28,7 @@ by:
 
 <img class="screenshot" alt="PO Opeartions" src="{{docs_base_url}}/assets/img/manufacturing/PO-operations.png">
 
-* If you wish to reassign the wrokstation for a particular opeeration in the Production Order, you can do so before submitting the Production Order.
+* If you wish to reassign the workstation for a particular opeeration in the Production Order, you can do so before submitting the Production Order.
 
 <img class="screenshot" alt="PO reassigning Operations" src="{{docs_base_url}}/assets/img/manufacturing/PO-reassigning-operations.png">
 
@@ -98,8 +98,6 @@ by:
 <img class="screenshot" alt="PO - stop" src="{{docs_base_url}}/assets/img/manufacturing/PO-stop.png">
 
 * You can Also re-start a stopped Production Order.
-
-> Note : In order to make a Production Order against an Item you must specify 'Yes' to "Allow Production Order" on the Item form.
 
 > Note : In order to make a Production Order against an Item you must specify 'Yes' to "Allow Production Order" on the Item form.
 

@@ -11,7 +11,7 @@ def execute(filters=None):
 		filters = {}
 
 	columns = get_columns()
-	data = get_employees()
+	data = get_employees(filters)
 	return columns, data
 
 
@@ -19,14 +19,17 @@ def get_columns():
 	return [
 		_("Employee") + ":Link/Employee:120",
 		_("Name") + ":Data:200",
-		_("Date")+ ":Date:100",
+		_("Date") + ":Date:100",
 		_("Status") + ":Data:70",
 		_("Holiday") + ":Data:200"
 	]
 
 
-def get_employees():
-	holidays = frappe.get_all("Holiday", fields=["holiday_date", "description"])
+def get_employees(filters):
+	holidays = frappe.get_all("Holiday", fields=["holiday_date", "description"],
+				filters=[["holiday_date", ">=",
+				filters.from_date],
+				["holiday_date", "<=", filters.to_date]])
 	holiday_names = {}
 	holidays_list = []
 
@@ -35,15 +38,15 @@ def get_employees():
 		holiday_names[holiday.holiday_date] = holiday.description
 	if(holidays_list):
 		employee_list = frappe.db.sql("""select
-		        employee, employee_name, att_date, status
-		    from tabAttendance
-		    where
-		        att_date in ({0})""".format(', '.join(["%s"]*len(holidays_list))),
-		    holidays_list, as_list=True)
+				employee, employee_name, att_date, status
+			from tabAttendance
+			where
+				att_date in ({0})""".format(', '.join(["%s"] * len(holidays_list))),
+				holidays_list, as_list=True)
 
 		for employee_data in employee_list:
 			employee_data.append(holiday_names[employee_data[2]])
 
 		return employee_list
 	else:
-		return None
+		return []
