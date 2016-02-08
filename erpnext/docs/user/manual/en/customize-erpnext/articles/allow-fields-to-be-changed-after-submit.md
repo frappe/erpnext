@@ -24,6 +24,6 @@ In the fields section, click on the Custom field and check the **Allow On Submit
 
 <img alt="Update" class="screenshot" src="{{docs_base_url}}/assets/img/articles/allow-on-submit-3.png">
 
-After updating Customize Form, you should reload your ERPNext account. Then check form, and field to confirm it its editbale in submitted form as well.
+After updating Customize Form, you should reload your ERPNext account. Then check form, and field to confirm its editable in submitted form as well.
 
 <!-- markdown -->
