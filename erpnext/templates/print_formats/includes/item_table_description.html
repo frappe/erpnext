@@ -1,11 +1,15 @@
+{%- set std_fields = ("item_code", "item_name", "description", "qty", "rate", "amount", "stock_uom", "uom") -%}
+{%- set customised_print_preview = frappe.utils.cint(frappe.db.get_value("Features Setup", None, "customised_print_preview")) -%}
+
 {% if doc.in_format_data("image") and doc.get("image") and not doc.is_print_hide("image")-%}
 <div class="pull-left" style="max-width: 38.2%; margin-right: 10px;">
     <img src="{{ doc.image }}" class="img-responsive">
 </div>
 {%- endif %}
 <div>
+	
     {% if doc.in_format_data("item_code") and not doc.is_print_hide("item_code") -%}
-    	<div class="primary">{{ doc.item_code }}</div>
+    	<div class="primary"><strong>{{ doc.item_code }}</strong></div>
     {%- endif %}
     {% if (doc.in_format_data("item_name") and not doc.is_print_hide("item_name") and
     	(not doc.in_format_data("item_code") or doc.is_print_hide("item_code")
@@ -21,5 +25,14 @@
 		))
 	-%}
     <p>{{ doc.get_formatted("description") }}</p>
-    {%- endif %}
+      {%- endif %}
+	{% if (customised_print_preview == 1) -%}
+		{%- for field in doc.hide_in_print_layout -%}
+			{%- if (field not in std_fields) and
+            		(doc.get(field) not in (None, "", 0)) -%}
+				<div><strong>{{ doc.meta.get_label(field) }}:</strong>
+            			{{ doc.get_formatted(field)  }}</div>
+        		{%- endif -%}
+    		{%- endfor -%}
+	{%- endif %}
 </div>
