@@ -12,21 +12,24 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from erpnext.utilities.transaction_base import delete_events
 
-class EmployeeUserDisabledError(frappe.ValidationError): pass
+
+class EmployeeUserDisabledError(frappe.ValidationError):
+	pass
+
 
 class Employee(Document):
 	def onload(self):
 		self.get("__onload").salary_structure_exists = frappe.db.get_value("Salary Structure",
-			{"employee": self.name, "is_active": "Yes", "docstatus": ["!=", 2]})
+				{"employee": self.name, "is_active": "Yes", "docstatus": ["!=", 2]})
 
 	def autoname(self):
 		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:
 			throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
 		else:
-			if naming_method=='Naming Series':
+			if naming_method == 'Naming Series':
 				self.name = make_autoname(self.naming_series + '.####')
-			elif naming_method=='Employee Number':
+			elif naming_method == 'Employee Number':
 				self.name = self.employee_number
 
 		self.employee = self.name
@@ -48,7 +51,8 @@ class Employee(Document):
 		else:
 			existing_user_id = frappe.db.get_value("Employee", self.name, "user_id")
 			if existing_user_id:
-				frappe.permissions.remove_user_permission("Employee", self.name, existing_user_id)
+				frappe.permissions.remove_user_permission(
+					"Employee", self.name, existing_user_id)
 
 	def on_update(self):
 		if self.user_id:
@@ -113,7 +117,7 @@ class Employee(Document):
 		elif self.relieving_date and self.date_of_joining and (getdate(self.relieving_date) <= getdate(self.date_of_joining)):
 			throw(_("Relieving Date must be greater than Date of Joining"))
 
-		elif self.contract_end_date and self.date_of_joining and (getdate(self.contract_end_date)<=getdate(self.date_of_joining)):
+		elif self.contract_end_date and self.date_of_joining and (getdate(self.contract_end_date) <= getdate(self.date_of_joining)):
 			throw(_("Contract End Date must be greater than Date of Joining"))
 
 	def validate_email(self):
@@ -132,19 +136,20 @@ class Employee(Document):
 		enabled = frappe.db.sql("""select name from `tabUser` where
 			name=%s and enabled=1""", self.user_id)
 		if not enabled:
-			throw(_("User {0} is disabled").format(self.user_id), EmployeeUserDisabledError)
+			throw(_("User {0} is disabled").format(
+				self.user_id), EmployeeUserDisabledError)
 
 	def validate_duplicate_user_id(self):
 		employee = frappe.db.sql_list("""select name from `tabEmployee` where
 			user_id=%s and status='Active' and name!=%s""", (self.user_id, self.name))
 		if employee:
-			throw(_("User {0} is already assigned to Employee {1}").format(self.user_id, employee[0]), frappe.DuplicateEntryError)
+			throw(_("User {0} is already assigned to Employee {1}").format(
+				self.user_id, employee[0]), frappe.DuplicateEntryError)
 
 	def validate_employee_leave_approver(self):
 		for l in self.get("leave_approvers")[:]:
 			if "Leave Approver" not in frappe.get_roles(l.leave_approver):
 				frappe.get_doc("User", l.leave_approver).add_roles("Leave Approver")
-
 
 	def validate_reports_to(self):
 		if self.reports_to == self.name:
@@ -152,6 +157,7 @@ class Employee(Document):
 
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
+
 
 @frappe.whitelist()
 def get_retirement_date(date_of_birth=None):
@@ -167,18 +173,33 @@ def get_retirement_date(date_of_birth=None):
 
 	return ret
 
+
 @frappe.whitelist()
 def make_salary_structure(source_name, target=None):
 	target = get_mapped_doc("Employee", source_name, {
 		"Employee": {
 			"doctype": "Salary Structure",
 			"field_map": {
-				"name": "employee"
+				"name": "employee",
 			}
 		}
 	})
 	target.make_earn_ded_table()
 	return target
+
+
+@frappe.whitelist()
+def make_employee(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.personal_email = frappe.db.get_value("Job Applicant", source.job_applicant, "email_id")
+	doclist = get_mapped_doc("Offer Letter", source_name, {
+			"Offer Letter": {
+				"doctype": "Employee",
+				"field_map": {
+					"applicant_name": "employee_name",
+				}}
+		}, target_doc, set_missing_values)
+	return doclist
 
 def validate_employee_role(doc, method):
 	# called via User hook
