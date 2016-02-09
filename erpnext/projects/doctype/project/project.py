@@ -64,6 +64,7 @@ class Project(Document):
 
 			task.flags.ignore_links = True
 			task.flags.from_project = True
+			task.flags.ignore_feed = True
 			task.save(ignore_permissions = True)
 			task_names.append(task.name)
 
