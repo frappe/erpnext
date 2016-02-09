@@ -404,7 +404,7 @@ class calculate_taxes_and_totals(object):
 				invoice_total = flt(self.doc.grand_total * self.doc.conversion_rate, 
 					self.doc.precision("grand_total"))
 			
-			if self.doc.total_advance > invoice_total:
+			if invoice_total > 0 and self.doc.total_advance > invoice_total:
 				frappe.throw(_("Advance amount cannot be greater than {0} {1}")
 					.format(self.doc.party_account_currency, invoice_total))
 
