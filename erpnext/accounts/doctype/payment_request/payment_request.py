@@ -67,6 +67,7 @@ class PaymentRequest(Document):
 	def send_payment_request(self):
 		self.payment_url = get_url("/api/method/erpnext.accounts.doctype.payment_request.payment_request.generate_payment_request?name={0}".format(self.name))
 		if self.payment_url:
+			frappe.db.set_value(self.doctype, self.name, "payment_url", self.payment_url)
 			frappe.db.set_value(self.doctype, self.name, "status", "Initiated")
 			
 	def set_as_paid(self):
@@ -114,6 +115,7 @@ class PaymentRequest(Document):
 						
 	def get_message(self):
 		"""return message with payment gateway link"""
+		print self.payment_url
 		return  cstr(self.message) + " <a href='{0}'>{1}</a>".format(self.payment_url, \
 			self.payment_url_message or _(" Click here to pay"))
 		
@@ -209,18 +211,23 @@ def get_amount(ref_doc, dt):
 def get_gateway_details(args):
 	"""return gateway and payment account of default payment gateway"""
 	if args.payemnt_gateway:
-		gateway_account = frappe.db.get_value("Payment Gateway Account", args.payemnt_gateway, 
-			["name", "payment_gateway", "payment_account", "message", "payment_url_message"],
-			 as_dict=1)
+		return get_payment_gateway_account(args.payemnt_gateway)
+		
+	if args.cart:
+		payment_gateway_account = frappe.get_doc("Shopping Cart Settings").payment_gateway_account
+		return get_payment_gateway_account(payment_gateway_account)
 	
-	gateway_account = frappe.db.get_value("Payment Gateway Account", {"is_default": 1}, 
-		["name", "payment_gateway", "payment_account", "message", "payment_url_message"], 
-			as_dict=1)
+	gateway_account = get_payment_gateway_account({"is_default": 1})
 	
 	if not gateway_account:
 		frappe.throw(_("Payment Gateway Account is not configured"))
 	
 	return gateway_account
+	
+def get_payment_gateway_account(args):
+	return frappe.db.get_value("Payment Gateway Account", args, 
+		["name", "payment_gateway", "payment_account", "message", "payment_url_message"], 
+			as_dict=1)
 
 @frappe.whitelist()
 def get_print_format_list(ref_doctype):
