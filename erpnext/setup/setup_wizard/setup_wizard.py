@@ -48,6 +48,10 @@ def setup_complete(args=None):
 			make_sample_data()
 			frappe.clear_cache()
 		except FiscalYearError:
+			# clear message
+			if frappe.message_log:
+				frappe.message_log.pop()
+
 			pass
 
 
