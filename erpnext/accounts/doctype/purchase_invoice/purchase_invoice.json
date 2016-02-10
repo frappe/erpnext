@@ -3004,6 +3004,11 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "timeline_field": "supplier", 
+<<<<<<< f2ba6af60b37b968f1aff340a88765a917c3f133
  "title_field": "title", 
  "track_seen": 0
 }
+=======
+ "title_field": "title"
+}
+>>>>>>> Added posting_time in purchase invoice
