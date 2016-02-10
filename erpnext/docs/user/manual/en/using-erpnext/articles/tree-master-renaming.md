@@ -1,4 +1,4 @@
-<h1>Tree Master Renaming</h1>
+#Tree Master Renaming
 
 There are various master which are maintained in tree structure. Click [here](https://erpnext.com/kb/setup/managing-tree-structure-masters) to learn more about tree structured masters in ERPNext.
 

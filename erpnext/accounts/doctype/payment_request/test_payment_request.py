@@ -28,7 +28,7 @@ payment_method = [
 	{
 		"doctype": "Payment Gateway Account",
 		"gateway": "_Test Gateway",
-		"payment_account": "_Test Bank - _TC",
+		"payment_account": "_Test Bank USD - _TC",
 		"currency": "USD"
 	}
 ]

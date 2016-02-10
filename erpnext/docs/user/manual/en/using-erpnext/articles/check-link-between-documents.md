@@ -1,4 +1,4 @@
-<h1>Checking Link Between Documents</h1>
+#Checking Link Between Documents
 
 Linked With function in ERPNext allows you checking a document is linked with which other documents. You will find Linked With function in the every document.
 
