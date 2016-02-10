@@ -1,4 +1,4 @@
-<h1>Rename Tool</h1>
+#Rename Tool
 
 ERPNext has Renaming Tool which allows you to rectify/change record id for existing records. This facility can be only performed by User with System Manager's role.
 

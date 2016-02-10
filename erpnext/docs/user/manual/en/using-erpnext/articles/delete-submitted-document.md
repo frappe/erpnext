@@ -1,4 +1,4 @@
-<h1>Delete Submitted Document</h1>
+#Delete Submitted Document
 
 ERPNext allows you to assign deletion permission exclusively to User. Only those users will be able to delete records. Click [here](/user-guide/setting-up/permissions/role-based-permissions) to learn more about permissions.
 

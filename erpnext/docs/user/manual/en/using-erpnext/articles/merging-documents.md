@@ -1,4 +1,4 @@
-<h1>Merging Documents </h1>
+#Merging Documents
 
 Document merging feature is available in ERPNext. You can done this via 'Rename' feature in ERPNext. 
 
