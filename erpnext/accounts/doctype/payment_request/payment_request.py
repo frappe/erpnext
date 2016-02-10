@@ -23,7 +23,7 @@ class PaymentRequest(Document):
 	def validate_payment_request(self):
 		if frappe.db.get_value("Payment Request", {"reference_name": self.reference_name, 
 			"name": ("!=", self.name), "status": ("not in", ["Initiated", "Paid"]), "docstatus": 1}, "name"):
-			frappe.throw(_("Payment Request already exists {0}".fomart(self.reference_name)))
+			frappe.throw(_("Payment Request already exists {0}".format(self.reference_name)))
 	
 	def validate_currency(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
@@ -150,37 +150,43 @@ def make_payment_request(**args):
 	ref_doc = frappe.get_doc(args.dt, args.dn)
 	gateway_account = get_gateway_details(args)
 	
-	pr = frappe.new_doc("Payment Request")
-	pr.update({
-		"payment_gateway": gateway_account.name,
-		"gateway": gateway_account.gateway,
-		"payment_account": gateway_account.payment_account,
-		"currency": ref_doc.currency,
-		"make_sales_invoice": args.cart or 0,
-		"amount": get_amount(ref_doc, args.dt),
-		"mute_email": args.mute_email or 0,
-		"email_to": args.recipient_id or "",
-		"subject": "Payment Request for %s"%args.dn,
-		"message": gateway_account.message,
-		"payment_url_message": gateway_account.payment_url_message,
-		"payment_success_url": gateway_account.payment_success_url,
-		"reference_doctype": args.dt,
-		"reference_name": args.dn
-	})
+	existing_payment_request = frappe.db.get_value("Payment Request", 
+		{"reference_doctype": args.dt, "reference_name": args.dn})
+	if existing_payment_request:
+		pr = frappe.get_doc("Payment Request", existing_payment_request)
+	else:
+		pr = frappe.new_doc("Payment Request")
+
+		pr.update({
+			"payment_gateway": gateway_account.name,
+			"gateway": gateway_account.gateway,
+			"payment_account": gateway_account.payment_account,
+			"currency": ref_doc.currency,
+			"make_sales_invoice": args.cart or 0,
+			"amount": get_amount(ref_doc, args.dt),
+			"mute_email": args.mute_email or 0,
+			"email_to": args.recipient_id or "",
+			"subject": "Payment Request for %s"%args.dn,
+			"message": gateway_account.message,
+			"payment_url_message": gateway_account.payment_url_message,
+			"payment_success_url": gateway_account.payment_success_url,
+			"reference_doctype": args.dt,
+			"reference_name": args.dn
+		})
 	
-	if args.return_doc:
-		return pr
-		
-	if args.submit_doc:
-		pr.insert(ignore_permissions=True)
-		pr.submit()
-		
-		if args.cart:
-			generate_payment_request(pr.name)
-			frappe.db.commit()
-		
-		if not args.cart:	
+		if args.return_doc:
 			return pr
+		
+		if args.submit_doc:
+			pr.insert(ignore_permissions=True)
+			pr.submit()
+	
+	if args.cart:
+		generate_payment_request(pr.name)
+		frappe.db.commit()
+	
+	if not args.cart:	
+		return pr
 			
 	return pr.as_dict()
 
