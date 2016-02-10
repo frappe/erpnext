@@ -280,14 +280,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					var party_type = "Supplier";
 					var party_account_field = 'credit_to';
 				}
-
-				if(me.frm.doc[frappe.model.scrub(party_type)]) {
+				
+				var party = me.frm.doc[frappe.model.scrub(party_type)];
+				if(party) {
 					return frappe.call({
 						method: "erpnext.accounts.party.get_party_account",
 						args: {
 							company: me.frm.doc.company,
 							party_type: party_type,
-							party: me.frm.doc[frappe.model.scrub(party_type)]
+							party: party
 						},
 						callback: function(r) {
 							if(!r.exc && r.message) {
@@ -296,6 +297,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							}
 						}
 					});
+				} else {
+					set_pricing();
 				}
 			} else {
 				set_pricing();
