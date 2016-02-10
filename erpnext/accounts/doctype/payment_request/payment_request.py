@@ -8,7 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate, get_url, cstr
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_account_currency, get_balance_on
+from erpnext.accounts.utils import get_balance_on
 from erpnext.accounts.doctype.journal_entry.journal_entry import (get_payment_entry_against_invoice, 
 get_payment_entry_against_order)
 
@@ -80,29 +80,27 @@ class PaymentRequest(Document):
 		
 	def create_journal_entry(self):
 		"""create entry"""
-		payment_details = {
-			"amount": self.amount,
-			"journal_entry": True,
-			"bank_account": self.payment_account
-		}
-		
 		frappe.flags.ignore_account_permission = True
 				
 		if self.reference_doctype == "Sales Order":
 			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name,\
-			 amount=self.amount, journal_entry=True, bank_account=self.payment_account)
+			 base_rounded_total=self.base_rounded_total, rounded_total= self.rounded_total,\
+			 journal_entry=True, bank_account=self.payment_account)
 			
 		if self.reference_doctype == "Sales Invoice":
 			jv = get_payment_entry_against_invoice(self.reference_doctype, self.reference_name,\
-			 amount=self.amount, journal_entry=True, bank_account=self.payment_account)
+			 base_rounded_total=self.base_rounded_total, rounded_total= self.rounded_total, \
+			 journal_entry=True, bank_account=self.payment_account)
 			
 		jv.update({
 			"voucher_type": "Journal Entry",
 			"posting_date": nowdate()
-		})		
+		})
+		
+		print jv.as_dict()
 		jv.insert(ignore_permissions=True)
 		jv.submit()
-		
+
 		#set status as paid for Payment Request
 		frappe.db.set_value(self.doctype, self.name, "status", "Paid")
 		
@@ -148,20 +146,23 @@ def make_payment_request(**args):
 	ref_doc = frappe.get_doc(args.dt, args.dn)
 	gateway_account = get_gateway_details(args)
 	
+	base_rounded_total, rounded_total = get_amount(ref_doc, args.dt)
 	existing_payment_request = frappe.db.get_value("Payment Request", 
 		{"reference_doctype": args.dt, "reference_name": args.dn})
+	
 	if existing_payment_request:
 		pr = frappe.get_doc("Payment Request", existing_payment_request)
-	else:
+		
+	else:	
 		pr = frappe.new_doc("Payment Request")
-
 		pr.update({
-			"payment_gateway": gateway_account.name,
-			"gateway": gateway_account.gateway,
+			"payment_gateway_account": gateway_account.name,
+			"payment_gateway": gateway_account.payment_gateway,
 			"payment_account": gateway_account.payment_account,
 			"currency": ref_doc.currency,
 			"make_sales_invoice": args.cart or 0,
-			"amount": get_amount(ref_doc, args.dt),
+			"base_rounded_total": base_rounded_total,
+			"rounded_total": rounded_total,
 			"mute_email": args.mute_email or 0,
 			"email_to": args.recipient_id or "",
 			"subject": "Payment Request for %s"%args.dn,
@@ -178,11 +179,12 @@ def make_payment_request(**args):
 		if args.submit_doc:
 			pr.insert(ignore_permissions=True)
 			pr.submit()
-	
+
+		
 	if args.cart:
 		generate_payment_request(pr.name)
 		frappe.db.commit()
-	
+		
 	if not args.cart:	
 		return pr
 			
@@ -191,13 +193,16 @@ def make_payment_request(**args):
 def get_amount(ref_doc, dt):
 	"""get amount based on doctype"""
 	if dt == "Sales Order":
-		amount = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
+		base_rounded_total = flt(ref_doc.base_grand_total)
+		rounded_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 
 	if dt == "Sales Invoice":
-		amount = abs(ref_doc.outstanding_amount)
+		base_rounded_total = flt(ref_doc.base_grand_total)
+		rounded_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 	
-	if amount > 0:
-		return amount
+	if base_rounded_total > 0 and rounded_total > 0 :
+		return base_rounded_total, rounded_total
+		
 	else:
 		frappe.throw(_("Payment Entry is already created"))
 		

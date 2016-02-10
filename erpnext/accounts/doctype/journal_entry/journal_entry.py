@@ -551,7 +551,7 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None, a
 		}
 
 @frappe.whitelist()
-def get_payment_entry_against_order(dt, dn, amount=None, journal_entry=False, bank_account=None):
+def get_payment_entry_against_order(dt, dn, base_rounded_total=None, rounded_total=None, journal_entry=False, bank_account=None):
 	ref_doc = frappe.get_doc(dt, dn)
 
 	if flt(ref_doc.per_billed, 2) > 0:
@@ -569,7 +569,7 @@ def get_payment_entry_against_order(dt, dn, amount=None, journal_entry=False, ba
 	party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
 	party_account_currency = get_account_currency(party_account)
 
-	if not amount:
+	if not base_rounded_total or not rounded_total:
 		if party_account_currency == ref_doc.company_currency:
 			amount = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
 		else:
@@ -581,7 +581,8 @@ def get_payment_entry_against_order(dt, dn, amount=None, journal_entry=False, ba
 		"party_account_currency": party_account_currency,
 		"amount_field_party": amount_field_party,
 		"amount_field_bank": amount_field_bank,
-		"amount": amount,
+		"amount": base_rounded_total or amount,
+		"rounded_total": rounded_total,
 		"remarks": 'Advance Payment received against {0} {1}'.format(dt, dn),
 		"is_advance": "Yes",
 		"bank_account": bank_account,
@@ -589,7 +590,7 @@ def get_payment_entry_against_order(dt, dn, amount=None, journal_entry=False, ba
 	})
 
 @frappe.whitelist()
-def get_payment_entry_against_invoice(dt, dn, amount=None, journal_entry=False, bank_account=None):
+def get_payment_entry_against_invoice(dt, dn, base_rounded_total=None, rounded_total=None, journal_entry=False, bank_account=None):
 	ref_doc = frappe.get_doc(dt, dn)
 	if dt == "Sales Invoice":
 		party_type = "Customer"
@@ -613,7 +614,8 @@ def get_payment_entry_against_invoice(dt, dn, amount=None, journal_entry=False, 
 		"party_account_currency": ref_doc.party_account_currency,
 		"amount_field_party": amount_field_party,
 		"amount_field_bank": amount_field_bank,
-		"amount": amount if amount else abs(ref_doc.outstanding_amount),
+		"amount": base_rounded_total if base_rounded_total else abs(ref_doc.outstanding_amount),
+		"rounded_total": rounded_total,
 		"remarks": 'Payment received against {0} {1}. {2}'.format(dt, dn, ref_doc.remarks),
 		"is_advance": "No",
 		"bank_account": bank_account,
@@ -662,10 +664,11 @@ def get_payment_entry(ref_doc, args):
 
 	bank_row.cost_center = cost_center
 
+	amount = args.get("rounded_total") or args.get("amount")
 	if bank_row.account_currency == args.get("party_account_currency"):
-		bank_row.set(args.get("amount_field_bank"), args.get("amount"))
+		bank_row.set(args.get("amount_field_bank"), amount)
 	else:
-		bank_row.set(args.get("amount_field_bank"), args.get("amount") * exchange_rate)
+		bank_row.set(args.get("amount_field_bank"), amount * exchange_rate)
 
 	# set multi currency check
 	if party_row.account_currency != ref_doc.company_currency \
