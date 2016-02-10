@@ -2662,11 +2662,8 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
-<<<<<<< HEAD
  "modified": "2016-02-08 16:27:10.669373", 
-=======
  "modified": "2016-02-08 07:55:41.815111", 
->>>>>>> 023ea20... Added Make Receipt (Update Stock) and IsCash option on Purchase Invoice
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
@@ -2776,7 +2773,6 @@
    "share": 0, 
    "submit": 0, 
    "write": 0
-<<<<<<< HEAD
   }, 
   {
    "amend": 0, 
@@ -2817,8 +2813,6 @@
    "share": 0, 
    "submit": 0, 
    "write": 0
-=======
->>>>>>> 023ea20... Added Make Receipt (Update Stock) and IsCash option on Purchase Invoice
   }
  ], 
  "read_only": 0, 
