@@ -15,7 +15,7 @@ def make_sample_data():
 	selling_items = frappe.get_all("Item", filters = {"is_sales_item": 1})
 	buying_items = frappe.get_all("Item", filters = {"is_purchase_item": 1})
 	customers = frappe.get_all("Customer")
-	
+
 	if selling_items and customers:
 		for i in range(3):
 			customer = random.choice(customers).name
@@ -45,7 +45,7 @@ def make_opportunity(selling_items, customer):
 
 	b.insert(ignore_permissions=True)
 
-	b.add_comment("This is a dummy record")
+	b.add_comment('Comment', text="This is a dummy record")
 
 def make_quote(selling_items, customer):
 	qtn = frappe.get_doc({
@@ -62,7 +62,7 @@ def make_quote(selling_items, customer):
 
 	qtn.insert(ignore_permissions=True)
 
-	qtn.add_comment("This is a dummy record")
+	qtn.add_comment('Comment', text="This is a dummy record")
 
 def make_material_request(buying_items):
 	for i in buying_items:
@@ -78,7 +78,7 @@ def make_material_request(buying_items):
 		mr.insert()
 		mr.submit()
 
-		mr.add_comment("This is a dummy record")
+		mr.add_comment('Comment', text="This is a dummy record")
 
 
 def make_issue():
