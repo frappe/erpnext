@@ -516,10 +516,10 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			);
 		}
 		
-		if(this.frm.doc.doctype == "Sales Invoice") {
+		if(this.frm.doc.doctype == "Sales Invoice" || this.frm.doc.doctype == "Purchase Invoice") {
 			frappe.model.round_floats_in(this.frm.doc, ["paid_amount"]);
 			
-			if(this.frm.doc.is_pos) {
+			if(this.frm.doc.is_pos || this.frm.doc.is_cash) {
 				if(!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount) {
 					this.frm.doc.paid_amount = flt(total_amount_to_pay);
 				}
