@@ -7,8 +7,8 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt, getdate
-from frappe import _
+from frappe.utils import cstr, flt, getdate, comma_and
+from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
@@ -107,35 +107,41 @@ class MaterialRequest(BuyingController):
 
 		frappe.db.set(self,'status','Cancelled')
 
-	def update_completed_qty(self, mr_items=None):
+	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
 			return
 
 		if not mr_items:
 			mr_items = [d.name for d in self.get("items")]
 
-		per_ordered = 0.0
 		for d in self.get("items"):
 			if d.name in mr_items:
-				d.ordered_qty =  flt(frappe.db.sql("""select sum(transfer_qty)
-					from `tabStock Entry Detail` where material_request = %s
-					and material_request_item = %s and docstatus = 1""",
-					(self.name, d.name))[0][0])
+				if self.material_request_type in ("Material Issue", "Material Transfer"):
+					d.ordered_qty =  flt(frappe.db.sql("""select sum(transfer_qty)
+						from `tabStock Entry Detail` where material_request = %s
+						and material_request_item = %s and docstatus = 1""",
+						(self.name, d.name))[0][0])
 
-				if d.ordered_qty and d.ordered_qty > d.qty:
-					frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1} cannot be greater than requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, d.qty, d.item_code))
+					if d.ordered_qty and d.ordered_qty > d.qty:
+						frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1}  \
+							cannot be greater than requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, d.qty, d.item_code))
+					
+				elif self.material_request_type == "Manufacture":
+					d.ordered_qty = flt(frappe.db.sql("""select sum(qty)
+						from `tabProduction Order` where material_request = %s
+						and material_request_item = %s and docstatus = 1""",
+						(self.name, d.name))[0][0])
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
-
-			# note: if qty is 0, its row is still counted in len(self.get("items"))
-			# hence adding 1 to per_ordered
-			if (d.ordered_qty > d.qty) or not d.qty:
-				per_ordered += 1.0
-			elif d.qty > 0:
-				per_ordered += flt(d.ordered_qty / flt(d.qty))
-
-		self.per_ordered = flt((per_ordered / flt(len(self.get("items")))) * 100.0, 2)
-		frappe.db.set_value(self.doctype, self.name, "per_ordered", self.per_ordered)
+		
+		self._update_percent_field({
+			"target_dt": "Material Request Item",
+			"target_parent_dt": self.doctype,
+			"target_parent_field": "per_ordered",
+			"target_ref_field": "qty",
+			"target_field": "ordered_qty",
+			"name": self.name,
+		}, update_modified)
 
 	def update_requested_qty(self, mr_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
@@ -329,25 +335,33 @@ def make_stock_entry(source_name, target_doc=None):
 
 	return doclist
 
-
 @frappe.whitelist()
-def validate_production_item(item_code):
-	return frappe.db.get_value("Item", item_code, "is_pro_applicable")
-
-@frappe.whitelist()
-def make_production_order(source_name, item_code):
+def raise_production_orders(source_name):
 	material_request= frappe.get_doc("Material Request", source_name)
-	prod_order = frappe.new_doc("Production Order")
-	prod_order.production_item = item_code
-	prod_order.qty = 0
+	errors =[]
+	production_orders = []
 	for d in material_request.items:
-		if d.item_code == item_code:
-			prod_order.qty = d.qty - d.ordered_qty
-			prod_order.fg_warehouse = d.warehouse
-			prod_order.description = d.description
-			prod_order.stock_uom = d.uom
-			prod_order.expected_delivery_date = d.schedule_date
-			prod_order.sales_order = d.sales_order
-	prod_order.bom_no = get_item_details(item_code).bom_no
-	prod_order.material_request = material_request.name
-	return prod_order
+		if (d.qty - d.ordered_qty) >0 :
+			if frappe.db.get_value("Item", d.item_code, "is_pro_applicable"):
+				prod_order = frappe.new_doc("Production Order")
+				prod_order.production_item = d.item_code
+				prod_order.qty = d.qty - d.ordered_qty
+				prod_order.fg_warehouse = d.warehouse
+				prod_order.description = d.description
+				prod_order.stock_uom = d.uom
+				prod_order.expected_delivery_date = d.schedule_date
+				prod_order.sales_order = d.sales_order
+				prod_order.bom_no = get_item_details(d.item_code).bom_no
+				prod_order.material_request = material_request.name
+				prod_order.material_request_item = d.name
+				prod_order.planned_start_date = material_request.transaction_date
+				prod_order.save()
+				production_orders.append(prod_order.name)
+			else:
+				errors.append(d.item_code + " in Row " + cstr(d.idx))
+	if production_orders: 
+		message = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
+			(p, p) for p in production_orders]
+		msgprint(_("Production Orders {0} created").format(comma_and(message)))
+	if errors:
+		msgprint(_("Could not Raise Production Orders for {0}").format(comma_and(errors)))

@@ -152,17 +152,19 @@ class ProductionOrder(Document):
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
+			
 		frappe.db.set(self,'status', 'Submitted')
 		self.make_time_logs()
 		self.update_planned_qty()
-
+		self.update_completed_qty_in_material_request()
 
 	def on_cancel(self):
 		self.validate_cancel()
 
 		frappe.db.set(self,'status', 'Cancelled')
-		self.update_planned_qty()
 		self.delete_time_logs()
+		self.update_planned_qty()
+		self.update_completed_qty_in_material_request()
 
 	def validate_cancel(self):
 		if self.status == "Stopped":
@@ -178,6 +180,14 @@ class ProductionOrder(Document):
 		update_bin_qty(self.production_item, self.fg_warehouse, {
 			"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)
 		})
+		
+		if self.material_request:
+			mr_obj = frappe.get_doc("Material Request", self.material_request)
+			mr_obj.update_requested_qty([self.material_request_item])
+			
+	def update_completed_qty_in_material_request(self):
+		if self.material_request:
+			frappe.get_doc("Material Request", self.material_request).update_completed_qty([self.material_request_item])
 
 	def set_production_order_operations(self):
 		"""Fetch operations from BOM and set in 'Production Order'"""
