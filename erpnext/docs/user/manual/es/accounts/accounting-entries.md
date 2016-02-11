@@ -1,3 +1,7 @@
+<!---
+WORK IN PROGRESS
+-->
+
 El concepto de contabilidad se explica con el siguiente ejemplo: Se toma a 
 "Tea Stall" como compañía y se observa como registrar entradas contables
 para el negocio. 

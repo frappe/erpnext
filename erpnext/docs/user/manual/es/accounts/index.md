@@ -1,3 +1,6 @@
+<!---
+WORK IN PROGRESS
+-->
 Al final del ciclo de compra y venta viene la facturación y los pagos.
 Quizás se tenga un contador en el equipo, quizás se haga la contabilidad
 por cuenta propia o quizás se tenga contratado un tercero que realice la tarea.

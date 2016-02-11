@@ -1,3 +1,7 @@
+<!---
+WORK IN PROGRESS
+-->
+
 Algunos de los principales reportes contables son:
 
 ### Libro Mayor
