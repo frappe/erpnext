@@ -69,10 +69,12 @@ def send_sms(receiver_list, msg, sender_name = ''):
 
 def send_via_gateway(arg):
 	ss = frappe.get_doc('SMS Settings', 'SMS Settings')
+	print ss.parameters
 	args = {ss.message_parameter : arg.get('message')}
 	for d in ss.get("parameters"):
 		args[d.parameter] = d.value
 
+	print args
 	success_list = []
 	for d in arg.get('receiver_list'):
 		args[ss.receiver_parameter] = d
@@ -88,23 +90,21 @@ def send_via_gateway(arg):
 # Send Request
 # =========================================================
 def send_request(gateway_url, args):
-	import httplib, urllib
-	server, api_url = scrub_gateway_url(gateway_url)
-	conn = httplib.HTTPConnection(server)  # open connection
-	headers = {}
-	headers['Accept'] = "text/plain, text/html, */*"
-	conn.request('GET', api_url + urllib.urlencode(args), headers = headers)    # send request
-	resp = conn.getresponse()     # get response
-	return resp.status
+	import requests, urllib
+	r = requests.post(gateway_url + "?" + urllib.urlencode(args))
+	return r.status_code
 
 # Split gateway url to server and api url
 # =========================================================
 def scrub_gateway_url(url):
 	url = url.replace('http://', '').strip().split('/')
+	print url
 	server = url.pop(0)
 	api_url = '/' + '/'.join(url)
 	if not api_url.endswith('?'):
 		api_url += '?'
+
+	print server, api_url
 	return server, api_url
 
 
