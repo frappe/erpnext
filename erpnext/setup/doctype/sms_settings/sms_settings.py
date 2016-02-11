@@ -88,21 +88,23 @@ def send_via_gateway(arg):
 # Send Request
 # =========================================================
 def send_request(gateway_url, args):
-	import requests, urllib
-	r = requests.post(gateway_url + "?" + urllib.urlencode(args))
-	return r.status_code
+	import httplib, urllib
+	server, api_url = scrub_gateway_url(gateway_url)
+	conn = httplib.HTTPConnection(server)  # open connection
+	headers = {}
+	headers['Accept'] = "text/plain, text/html, */*"
+	conn.request('GET', api_url + urllib.urlencode(args), headers = headers)    # send request
+	resp = conn.getresponse()     # get response
+	return resp.status
 
 # Split gateway url to server and api url
 # =========================================================
 def scrub_gateway_url(url):
 	url = url.replace('http://', '').strip().split('/')
-	print url
 	server = url.pop(0)
 	api_url = '/' + '/'.join(url)
 	if not api_url.endswith('?'):
 		api_url += '?'
-
-	print server, api_url
 	return server, api_url
 
 
