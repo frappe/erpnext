@@ -4,12 +4,17 @@
 frappe.provide("erpnext.support");
 frappe.require("assets/erpnext/js/utils.js");
 
-frappe.ui.form.on_change("Warranty Claim", "customer", function(frm) {
-	erpnext.utils.get_party_details(frm) });
-frappe.ui.form.on_change("Warranty Claim", "customer_address",
-	erpnext.utils.get_address_display);
-frappe.ui.form.on_change("Warranty Claim", "contact_person",
-	erpnext.utils.get_contact_details);
+frappe.ui.form.on("Warranty Claim", {
+	customer: function(frm) {
+		erpnext.utils.get_party_details(frm);
+	},
+	customer_address: function(frm) {
+		erpnext.utils.get_address_display(frm);
+	},
+	contact_person: function(frm) {
+		erpnext.utils.get_contact_details(frm);
+	}
+});
 
 erpnext.support.WarrantyClaim = frappe.ui.form.Controller.extend({
 	refresh: function() {
