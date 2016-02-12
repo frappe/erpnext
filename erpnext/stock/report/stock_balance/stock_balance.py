@@ -14,21 +14,19 @@ def execute(filters=None):
 	iwb_map = get_item_warehouse_map(filters)
 
 	data = []
-	for company in sorted(iwb_map):
-		for item in sorted(iwb_map[company]):
-			for wh in sorted(iwb_map[company][item]):
-				qty_dict = iwb_map[company][item][wh]
-				data.append([item, item_map[item]["item_name"],
-					item_map[item]["item_group"],
-					item_map[item]["brand"],
-					item_map[item]["description"], wh,
-					item_map[item]["stock_uom"], qty_dict.opening_qty,
-					qty_dict.opening_val, qty_dict.in_qty,
-					qty_dict.in_val, qty_dict.out_qty,
-					qty_dict.out_val, qty_dict.bal_qty,
-					qty_dict.bal_val, qty_dict.val_rate,
-					company
-				])
+	for (company, item, warehouse) in sorted(iwb_map):
+		qty_dict = iwb_map[(company, item, warehouse)]
+		data.append([item, item_map[item]["item_name"],
+			item_map[item]["item_group"],
+			item_map[item]["brand"],
+			item_map[item]["description"], warehouse,
+			item_map[item]["stock_uom"], qty_dict.opening_qty,
+			qty_dict.opening_val, qty_dict.in_qty,
+			qty_dict.in_val, qty_dict.out_qty,
+			qty_dict.out_val, qty_dict.bal_qty,
+			qty_dict.bal_val, qty_dict.val_rate,
+			company
+		])
 
 	return columns, data
 
@@ -36,22 +34,22 @@ def get_columns(filters):
 	"""return columns based on filters"""
 
 	columns = [
-		_("Item")+":Link/Item:100", 
-		_("Item Name")+"::150", 
-		_("Item Group")+"::100", 
-		_("Brand")+"::90", 
-		_("Description")+"::140", 
-		_("Warehouse")+":Link/Warehouse:100", 
-		_("Stock UOM")+":Link/UOM:90", 
-		_("Opening Qty")+":Float:100", 
-		_("Opening Value")+":Float:110", 
-		_("In Qty")+":Float:80", 
-		_("In Value")+":Float:80", 
-		_("Out Qty")+":Float:80", 
-		_("Out Value")+":Float:80", 
-		_("Balance Qty")+":Float:100", 
-		_("Balance Value")+":Float:100", 
-		_("Valuation Rate")+":Float:90", 
+		_("Item")+":Link/Item:100",
+		_("Item Name")+"::150",
+		_("Item Group")+"::100",
+		_("Brand")+"::90",
+		_("Description")+"::140",
+		_("Warehouse")+":Link/Warehouse:100",
+		_("Stock UOM")+":Link/UOM:90",
+		_("Opening Qty")+":Float:100",
+		_("Opening Value")+":Float:110",
+		_("In Qty")+":Float:80",
+		_("In Value")+":Float:80",
+		_("Out Qty")+":Float:80",
+		_("Out Value")+":Float:80",
+		_("Balance Qty")+":Float:100",
+		_("Balance Value")+":Float:100",
+		_("Valuation Rate")+":Float:90",
 		_("Company")+":Link/Company:100"
 	]
 
@@ -63,7 +61,7 @@ def get_conditions(filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if filters.get("to_date"):
-		conditions += " and posting_date <= '%s'" % filters["to_date"]
+		conditions += " and posting_date <= '%s'" % frappe.db.escape(filters["to_date"])
 	else:
 		frappe.throw(_("'To Date' is required"))
 
@@ -76,25 +74,30 @@ def get_conditions(filters):
 def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select item_code, warehouse, posting_date, actual_qty, valuation_rate,
-	company, voucher_type, qty_after_transaction, stock_value_difference
-		from `tabStock Ledger Entry`
+			company, voucher_type, qty_after_transaction, stock_value_difference
+		from `tabStock Ledger Entry` force index (posting_sort_index)
 		where docstatus < 2 %s order by posting_date, posting_time, name""" %
 		conditions, as_dict=1)
 
 def get_item_warehouse_map(filters):
-	sle = get_stock_ledger_entries(filters)
 	iwb_map = {}
+	from_date = getdate(filters["from_date"])
+	to_date = getdate(filters["to_date"])
+
+	sle = get_stock_ledger_entries(filters)
 
 	for d in sle:
-		iwb_map.setdefault(d.company, {}).setdefault(d.item_code, {}).\
-		setdefault(d.warehouse, frappe._dict({\
+		key = (d.company, d.item_code, d.warehouse)
+		if key not in iwb_map:
+			iwb_map[key] = frappe._dict({
 				"opening_qty": 0.0, "opening_val": 0.0,
 				"in_qty": 0.0, "in_val": 0.0,
 				"out_qty": 0.0, "out_val": 0.0,
 				"bal_qty": 0.0, "bal_val": 0.0,
 				"val_rate": 0.0, "uom": None
-			}))
-		qty_dict = iwb_map[d.company][d.item_code][d.warehouse]
+			})
+
+		qty_dict = iwb_map[(d.company, d.item_code, d.warehouse)]
 
 		if d.voucher_type == "Stock Reconciliation":
 			qty_diff = flt(d.qty_after_transaction) - qty_dict.bal_qty
@@ -102,18 +105,19 @@ def get_item_warehouse_map(filters):
 			qty_diff = flt(d.actual_qty)
 
 		value_diff = flt(d.stock_value_difference)
-		
-		if d.posting_date < getdate(filters["from_date"]):
+
+		if d.posting_date < from_date:
 			qty_dict.opening_qty += qty_diff
 			qty_dict.opening_val += value_diff
-		elif d.posting_date >= getdate(filters["from_date"]) and d.posting_date <= getdate(filters["to_date"]):
+
+		elif d.posting_date >= from_date and d.posting_date <= to_date:
 			if qty_diff > 0:
 				qty_dict.in_qty += qty_diff
 				qty_dict.in_val += value_diff
 			else:
 				qty_dict.out_qty += abs(qty_diff)
 				qty_dict.out_val += abs(value_diff)
-				
+
 		qty_dict.val_rate = d.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
