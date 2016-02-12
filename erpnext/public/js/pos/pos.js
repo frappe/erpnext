@@ -238,6 +238,10 @@ erpnext.pos.PointOfSale = Class.extend({
 	},
 	refresh_fields: function() {
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
+		this.party_field.frm = this.frm;
+		this.party_field.doctype = this.frm.doctype;
+		this.party_field.docname = this.frm.docname;
+
 		this.wrapper.find('input.discount-percentage').val(this.frm.doc.additional_discount_percentage);
 		this.wrapper.find('input.discount-amount').val(this.frm.doc.discount_amount);
 
@@ -415,7 +419,7 @@ erpnext.pos.PointOfSale = Class.extend({
 				// prefer cash payment!
 				var default_mode = me.frm.doc.mode_of_payment ? me.frm.doc.mode_of_payment :
 					me.modes_of_payment.indexOf(__("Cash"))!==-1 ? __("Cash") : undefined;
-					
+
 				// show payment wizard
 				var dialog = new frappe.ui.Dialog({
 					width: 400,
@@ -431,18 +435,18 @@ erpnext.pos.PointOfSale = Class.extend({
 						{fieldtype:'Currency', fieldname:'paid_amount', label:__('Amount Paid'),
 							reqd:1, "default": me.frm.doc.grand_total, hidden: 1, change: function() {
 								var values = dialog.get_values();
-								
-								var actual_change = flt(values.paid_amount - values.total_amount, 
+
+								var actual_change = flt(values.paid_amount - values.total_amount,
 									precision("paid_amount"));
-								
+
 								if (actual_change > 0) {
-									var rounded_change = 
-										round_based_on_smallest_currency_fraction(actual_change, 
+									var rounded_change =
+										round_based_on_smallest_currency_fraction(actual_change,
 											me.frm.doc.currency, precision("paid_amount"));
 								} else {
 									var rounded_change = 0;
 								}
-								
+
 								dialog.set_value("change", rounded_change);
 								dialog.get_input("change").trigger("change");
 

@@ -356,18 +356,20 @@ class JournalEntry(AccountsController):
 	def set_print_format_fields(self):
 		total_amount = 0.0
 		bank_account_currency = None
-		self.pay_to_recd_from = None
+		pay_to_recd_from = None
 		for d in self.get('accounts'):
 			if d.party_type and d.party:
-				if not self.pay_to_recd_from:
-					self.pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
+				if not pay_to_recd_from:
+					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
 
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
 				total_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				bank_account_currency = d.account_currency
 
-		if not self.pay_to_recd_from:
+		if pay_to_recd_from:
+			self.pay_to_recd_from = pay_to_recd_from
+		else:
 			total_amount = 0
 
 		self.set_total_amount(total_amount, bank_account_currency)
