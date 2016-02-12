@@ -5,24 +5,25 @@ frappe.require("assets/erpnext/js/utils.js");
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	cur_frm.set_value("company", frappe.defaults.get_user_default("Company"))
-	cur_frm.set_value("use_multi_level_bom", 1)
 }
 
 cur_frm.cscript.refresh = function(doc) {
 	cur_frm.disable_save();
 }
 
-cur_frm.cscript.sales_order = function(doc,cdt,cdn) {
-	var d = locals[cdt][cdn];
-	if (d.sales_order) {
-		return get_server_fields('get_so_details', d.sales_order, 'sales_orders', doc, cdt, cdn, 1);
-	}
-}
-
 cur_frm.cscript.item_code = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		return get_server_fields('get_item_details', d.item_code, 'items', doc, cdt, cdn, 1);
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
+			args: {
+				"item" : d.item_code
+			},
+			callback: function(r) {
+				$.extend(d, r.message);
+				refresh_field("items");
+			}
+		});
 	}
 }
 
