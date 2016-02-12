@@ -11,13 +11,13 @@ def print_settings_for_item_table(doc):
 		"description": "templates/print_formats/includes/item_table_description.html",
 		"qty": "templates/print_formats/includes/item_table_qty.html"
 	}
-	customised_print_preview = cint(frappe.db.get_value("Features Setup", None, "customised_print_preview"))
+	compact_item_view = cint(frappe.db.get_value("Features Setup", None, "compact_item_view"))
 	
 	doc.hide_in_print_layout = ["item_code", "item_name", "image", "uom", "stock_uom"]
 
 	std_fields = ["item_code", "item_name", "description", "qty", "rate", "amount", "stock_uom", "uom"] 
 
-	if customised_print_preview:
+	if compact_item_view:
 		
 		for df in doc.meta.fields:
 			if df.fieldtype not in ("Section Break", "Column Break", "Button"):
