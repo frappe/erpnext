@@ -196,8 +196,9 @@ def set_defaults(args):
 def create_feed_and_todo():
 	"""update Activity feed and create todo for creation of item, customer, vendor"""
 	frappe.get_doc({
-		"doctype": "Feed",
-		"feed_type": "Comment",
+		"doctype": "Communication",
+		"communication_type": "Comment",
+		"comment_type": "Comment",
 		"subject": "ERPNext Setup Complete!"
 	}).insert(ignore_permissions=True)
 
