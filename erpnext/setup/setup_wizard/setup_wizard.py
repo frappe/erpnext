@@ -367,7 +367,7 @@ def create_customers(args):
 		customer = args.get("customer_" + str(i))
 		if customer:
 			try:
-				frappe.get_doc({
+				newCustomer = frappe.get_doc({
 					"doctype":"Customer",
 					"customer_name": customer,
 					"customer_type": "Company",
@@ -378,7 +378,7 @@ def create_customers(args):
 
 				if args.get("customer_contact_" + str(i)):
 					create_contact(args.get("customer_contact_" + str(i)),
-						"customer", customer)
+						"customer", newCustomer.name)
 			except frappe.NameError:
 				pass
 
@@ -387,7 +387,7 @@ def create_suppliers(args):
 		supplier = args.get("supplier_" + str(i))
 		if supplier:
 			try:
-				frappe.get_doc({
+				newSupplier = frappe.get_doc({
 					"doctype":"Supplier",
 					"supplier_name": supplier,
 					"supplier_type": _("Local"),
@@ -396,7 +396,7 @@ def create_suppliers(args):
 
 				if args.get("supplier_contact_" + str(i)):
 					create_contact(args.get("supplier_contact_" + str(i)),
-						"supplier", supplier)
+						"supplier", newSupplier.name)
 			except frappe.NameError:
 				pass
 
