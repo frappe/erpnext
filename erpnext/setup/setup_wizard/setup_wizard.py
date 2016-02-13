@@ -382,6 +382,7 @@ def create_customers(args):
 			except frappe.NameError:
 				pass
 
+
 def create_suppliers(args):
 	for i in xrange(1,6):
 		supplier = args.get("supplier_" + str(i))
