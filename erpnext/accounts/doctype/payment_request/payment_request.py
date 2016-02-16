@@ -8,7 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate, get_url, cstr
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_balance_on
+from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.journal_entry.journal_entry import (get_payment_entry_against_invoice, 
 get_payment_entry_against_order)
 
@@ -82,16 +82,31 @@ class PaymentRequest(Document):
 	def create_journal_entry(self):
 		"""create entry"""
 		frappe.flags.ignore_account_permission = True
+		
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		
+		party_account = get_party_account("Customer", ref_doc.get("customer"), ref_doc.company)
+		party_account_currency = get_account_currency(party_account)
+		
+		debit_in_account_currency = 0.0
+		
+		if party_account_currency == ref_doc.company_currency:
+			amount = self.base_rounded_total
+			if self.currency != ref_doc.company_currency:
+				debit_in_account_currency = self.rounded_total
+			
+		else:
+			amount = self.rounded_total
 				
 		if self.reference_doctype == "Sales Order":
-			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name,\
-			 base_rounded_total=self.base_rounded_total, rounded_total= self.rounded_total,\
-			 journal_entry=True, bank_account=self.payment_account)
+			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name,
+			 amount=amount, debit_in_account_currency=debit_in_account_currency , journal_entry=True, 
+			 bank_account=self.payment_account)
 			
 		if self.reference_doctype == "Sales Invoice":
-			jv = get_payment_entry_against_invoice(self.reference_doctype, self.reference_name,\
-			 base_rounded_total=self.base_rounded_total, rounded_total= self.rounded_total, \
-			 journal_entry=True, bank_account=self.payment_account)
+			jv = get_payment_entry_against_invoice(self.reference_doctype, self.reference_name,
+			 amount=amount, debit_in_account_currency=debit_in_account_currency, journal_entry=True,
+			 bank_account=self.payment_account)
 			
 		jv.update({
 			"voucher_type": "Journal Entry",
