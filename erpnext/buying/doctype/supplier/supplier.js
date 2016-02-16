@@ -88,3 +88,22 @@ cur_frm.fields_dict['accounts'].grid.get_field('account').get_query = function(d
 		}
 	}
 }
+
+cur_frm.cscript.before_load = function(doc, dt, dn, callback) {
+	var update_language_select = function(user_language) {
+		cur_frm.set_df_property("print_language", "options", frappe.languages || ["", "English"]);
+		callback && callback();
+	}
+
+	if(!frappe.languages) {
+		frappe.call({
+			method: "frappe.core.doctype.user.user.get_languages",
+			callback: function(r) {
+				frappe.languages = r.message.languages;
+				update_language_select();
+			}
+		});
+	} else {
+		update_language_select();
+	}
+}
