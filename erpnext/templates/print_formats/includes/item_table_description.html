@@ -1,38 +1,46 @@
-{%- set std_fields = ("item_code", "item_name", "description", "qty", "rate", "amount", "stock_uom", "uom") -%}
-{%- set compact_item_view = frappe.utils.cint(frappe.db.get_value("Features Setup", None, "compact_item_view")) -%}
+{%- set compact = doc.flags.compact_item_print -%}
+{%- set compact_fields = doc.flags.compact_item_fields -%}
 
 {% if doc.in_format_data("image") and doc.get("image") and not doc.is_print_hide("image")-%}
 <div class="pull-left" style="max-width: 38.2%; margin-right: 10px;">
-    <img src="{{ doc.image }}" class="img-responsive">
+	<img src="{{ doc.image }}" class="img-responsive">
 </div>
 {%- endif %}
+
 <div>
-	
-    {% if doc.in_format_data("item_code") and not doc.is_print_hide("item_code") -%}
-    	<div class="primary"><strong>{{ doc.item_code }}</strong></div>
-    {%- endif %}
-    {% if (doc.in_format_data("item_name") and not doc.is_print_hide("item_name") and
-    	(not doc.in_format_data("item_code") or doc.is_print_hide("item_code")
+	{% if doc.in_format_data("item_code") and not doc.is_print_hide("item_code") -%}
+		<div class="primary">
+			{% if compact %}<strong>{% endif %}
+				{{ doc.item_code }}
+			{% if compact %}</strong>{% endif %}
+		</div>
+	{%- endif %}
+
+	{% if (doc.in_format_data("item_name") and not doc.is_print_hide("item_name") and
+		(not doc.in_format_data("item_code") or doc.is_print_hide("item_code")
 			or doc.item_code != doc.item_name)) -%}
-    	<div class="primary">{{ doc.get_formatted("item_name") }}</div>
-    {%- endif %}
-    {% if (doc.in_format_data("description") and doc.description and
-    	(
+		<div class="primary">{{ doc.get_formatted("item_name") }}</div>
+	{%- endif %}
+
+	{% if (doc.in_format_data("description") and doc.description and
+		(
 			(
 				(not doc.in_format_data("item_code") or doc.is_print_hide("item_code")) and
 				(not doc.in_format_data("item_name") or doc.is_print_hide("item_name"))
 			) or not (doc.item_code == doc.item_name == doc.description)
 		))
 	-%}
-    <p>{{ doc.get_formatted("description") }}</p>
-      {%- endif %}
-	{% if (compact_item_view == 1) -%}
-		{%- for field in doc.hide_in_print_layout -%}
-			{%- if (field not in std_fields) and
-            		(doc.get(field) not in (None, "", 0)) -%}
-				<div><strong>{{ doc.meta.get_label(field) }}:</strong>
-            			{{ doc.get_formatted(field)  }}</div>
-        		{%- endif -%}
-    		{%- endfor -%}
+	<p>{{ doc.get_formatted("description") }}</p>
+	{%- endif %}
+
+	{% if compact -%}
+		{%- for fieldname in doc.flags.show_in_description -%}
+			{% if doc.get(fieldname) -%}
+			<p>
+				<strong>{{ doc.meta.get_label(fieldname) }}:</strong>
+				{{ doc.get_formatted(fieldname)  }}
+			</p>
+			{% endif %}
+		{%- endfor -%}
 	{%- endif %}
 </div>
