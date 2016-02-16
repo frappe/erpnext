@@ -187,20 +187,6 @@ def make_salary_structure(source_name, target=None):
 	target.make_earn_ded_table()
 	return target
 
-
-@frappe.whitelist()
-def make_employee(source_name, target_doc=None):
-	def set_missing_values(source, target):
-		target.personal_email = frappe.db.get_value("Job Applicant", source.job_applicant, "email_id")
-	doc = get_mapped_doc("Offer Letter", source_name, {
-			"Offer Letter": {
-				"doctype": "Employee",
-				"field_map": {
-					"applicant_name": "employee_name",
-				}}
-		}, target_doc, set_missing_values)
-	return doc
-
 def validate_employee_role(doc, method):
 	# called via User hook
 	if "Employee" in [d.role for d in doc.get("user_roles")]:

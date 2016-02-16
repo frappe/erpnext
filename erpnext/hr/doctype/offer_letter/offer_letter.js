@@ -18,14 +18,13 @@ frappe.ui.form.on("Offer Letter", {
 				}
 			);
 		}
-	}		
+	}
 
 });
 
-
-erpnext.offer_letter.make_employee = function(frm) { 
+erpnext.offer_letter.make_employee = function(frm) {
 	frappe.model.open_mapped_doc({
-		method: "erpnext.hr.doctype.employee.employee.make_employee",
-		frm : frm
+		method: "erpnext.hr.doctype.offer_letter.offer_letter.make_employee",
+		frm: frm
 	});
-}
+};
