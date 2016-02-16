@@ -11,7 +11,7 @@ Payment Request is sent via Email and will contain a link to a Payment Gateway i
 Select appropriate Payment Gateway Account on Payment Request. Account head specified on payment gateway will 
 considered to create journal entry. 
 
-Note: Invoice/Order Currency and Payment Gateway Account corruncy should be same.
+Note: Invoice/Order currency and Payment Gateway Account currency should be same.
 
 <img class="screenshot" alt="Payment Request" src="{{docs_base_url}}/assets/img/accounts/pr-details-1.png">
 
