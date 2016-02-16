@@ -17,11 +17,14 @@ def execute(filters=None):
 
 def validate_filters(filters):
 	if not filters.fiscal_year:
-		frappe.throw(_("Fiscal Year {0} is required"))
-	filters.year_start_date, filters.year_end_date = frappe.db.get_value("Fiscal Year", filters.fiscal_year,
-		["year_start_date", "year_end_date"])
-	filters.year_start_date = getdate(filters.year_start_date)
-	filters.year_end_date = getdate(filters.year_end_date)
+		frappe.throw(_("Fiscal Year {0} is required").format(filters.fiscal_year))
+
+	fiscal_year = frappe.db.get_value("Fiscal Year", filters.fiscal_year, ["year_start_date", "year_end_date"], as_dict=True)
+	if not fiscal_year:
+		frappe.throw(_("Fiscal Year {0} does not exist").format(filters.fiscal_year))
+	else:
+		filters.year_start_date = getdate(fiscal_year.year_start_date)
+		filters.year_end_date = getdate(fiscal_year.year_end_date)
 
 	if not filters.from_date:
 		filters.from_date = filters.year_start_date
