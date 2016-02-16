@@ -7,6 +7,7 @@
 from __future__ import unicode_literals
 import frappe, unittest
 from frappe.utils import flt
+from erpnext.stock.doctype.material_request.material_request import raise_production_orders
 
 class TestMaterialRequest(unittest.TestCase):
 	def setUp(self):
@@ -436,6 +437,25 @@ class TestMaterialRequest(unittest.TestCase):
 
 		#testing bin requested qty after issuing stock against material request
 		self.assertEquals(_get_requested_qty(), existing_requested_qty)
+		
+	def test_completed_qty_for__manufacture(self):
+		mr = frappe.copy_doc(test_records[1]).insert()
+		mr = frappe.get_doc("Material Request", mr.name)
+		mr.submit()
+		completed_qty = mr.items[0].ordered_qty
+		
+		prod_order = raise_production_orders(mr.name)
+		po = frappe.get_doc("Production Order", prod_order[0])
+		po.wip_warehouse = "_Test Warehouse 1 - _TC"
+		po.submit()
+		
+		mr = frappe.get_doc("Material Request", mr.name)
+		self.assertEquals(completed_qty + po.qty, mr.items[0].ordered_qty)
+		
+		po.cancel()
 
+		mr = frappe.get_doc("Material Request", mr.name)
+		self.assertEquals(completed_qty, mr.items[0].ordered_qty)
+		
 test_dependencies = ["Currency Exchange"]
 test_records = frappe.get_test_records('Material Request')

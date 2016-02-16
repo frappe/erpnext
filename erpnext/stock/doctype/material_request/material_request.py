@@ -355,6 +355,7 @@ def raise_production_orders(source_name):
 				prod_order.material_request = material_request.name
 				prod_order.material_request_item = d.name
 				prod_order.planned_start_date = material_request.transaction_date
+				prod_order.company = material_request.company
 				prod_order.save()
 				production_orders.append(prod_order.name)
 			else:
@@ -365,3 +366,4 @@ def raise_production_orders(source_name):
 		msgprint(_("Production Orders {0} created").format(comma_and(message)))
 	if errors:
 		msgprint(_("Could not Raise Production Orders for {0}").format(comma_and(errors)))
+	return production_orders
