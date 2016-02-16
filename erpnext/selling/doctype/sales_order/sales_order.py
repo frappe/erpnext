@@ -10,6 +10,7 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
+from erpnext.controllers.recurring_document import month_map, get_next_date
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -111,14 +112,14 @@ class SalesOrder(SellingController):
 
 	def validate_warehouse(self):
 		super(SalesOrder, self).validate_warehouse()
-		
+
 		for d in self.get("items"):
 			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
 				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
 				and not d.warehouse and not cint(d.delivered_by_supplier):
 				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
 					WarehouseRequired)
-			
+
 	def validate_with_previous_doc(self):
 		super(SalesOrder, self).validate_with_previous_doc({
 			"Quotation": {
@@ -265,32 +266,54 @@ class SalesOrder(SellingController):
 		if exc_list:
 			frappe.throw('\n'.join(exc_list))
 
-	def update_delivery_status(self, po_name):
+	def update_delivery_status(self):
 		"""Update delivery status from Purchase Order for drop shipping"""
 		tot_qty, delivered_qty = 0.0, 0.0
 
 		for item in self.items:
 			if item.delivered_by_supplier:
-				item_delivered_qty  = frappe.db.sql("""select qty
+				item_delivered_qty  = frappe.db.sql("""select sum(qty)
 					from `tabPurchase Order Item` poi, `tabPurchase Order` po
-					where poi.prevdoc_docname = %s
+					where poi.prevdoc_detail_docname = %s
 						and poi.prevdoc_doctype = 'Sales Order'
 						and poi.item_code = %s
 						and poi.parent = po.name
-						and po.status = 'Delivered'""", (self.name, item.item_code))
+						and po.docstatus = 1
+						and po.status = 'Delivered'""", (item.name, item.item_code))
 
 				item_delivered_qty = item_delivered_qty[0][0] if item_delivered_qty else 0
-				item.db_set("delivered_qty", item_delivered_qty)
+				item.db_set("delivered_qty", flt(item_delivered_qty), update_modified=False)
 
 			delivered_qty += item.delivered_qty
 			tot_qty += item.qty
 
-		frappe.db.set_value("Sales Order", self.name, "per_delivered", flt(delivered_qty/tot_qty) * 100)
+		frappe.db.set_value("Sales Order", self.name, "per_delivered", flt(delivered_qty/tot_qty) * 100,
+		update_modified=False)
+
+	def set_indicator(self):
+		"""Set indicator for portal"""
+		if self.per_billed < 100 and self.per_delivered < 100:
+			self.indicator_color = "orange"
+			self.indicator_title = _("Not Paid and Not Delivered")
+
+		elif self.per_billed == 100 and self.per_delivered < 100:
+			self.indicator_color = "orange"
+			self.indicator_title = _("Paid and Not Delivered")
+
+		else:
+			self.indicator_color = "green"
+			self.indicator_title = _("Paid")
+
+	def on_recurring(self, reference_doc):
+		mcount = month_map[reference_doc.recurring_type]
+		self.set("delivery_date", get_next_date(reference_doc.delivery_date, mcount,
+						cint(reference_doc.repeat_on_day_of_month)))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
 	list_context["title"] = _("My Orders")
+	list_context["parents"] = [{"title": _("My Account"), "name": "me"}]
 	return list_context
 
 @frappe.whitelist()
@@ -310,17 +333,6 @@ def stop_or_unstop_sales_orders(names, status):
 					so.update_status('Draft')
 
 	frappe.local.message_log = []
-
-	def before_recurring(self):
-		super(SalesOrder, self).before_recurring()
-
-		for field in ("delivery_status", "per_delivered", "billing_status", "per_billed"):
-			self.set(field, None)
-
-		for d in self.get("items"):
-			for field in ("delivered_qty", "billed_amt", "planned_qty", "prevdoc_docname"):
-				d.set(field, None)
-
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
@@ -399,7 +411,7 @@ def make_delivery_note(source_name, target_doc=None):
 	return target_doc
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None):
+def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Sales Invoice Advance
@@ -408,6 +420,7 @@ def make_sales_invoice(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.is_pos = 0
 		target.ignore_pricing_rule = 1
+		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
@@ -419,6 +432,9 @@ def make_sales_invoice(source_name, target_doc=None):
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Sales Invoice",
+			"field_map": {
+				"party_account_currency": "party_account_currency"
+			},
 			"validation": {
 				"docstatus": ["=", 1]
 			}
@@ -440,7 +456,7 @@ def make_sales_invoice(source_name, target_doc=None):
 			"doctype": "Sales Team",
 			"add_if_empty": True
 		}
-	}, target_doc, postprocess)
+	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
 
 	return doclist
 
@@ -516,7 +532,9 @@ def get_events(start, end, filters=None):
 	data = frappe.db.sql("""select name, customer_name, delivery_status, billing_status, delivery_date
 		from `tabSales Order`
 		where (ifnull(delivery_date, '0000-00-00')!= '0000-00-00') \
-				and (delivery_date between %(start)s and %(end)s) {conditions}
+				and (delivery_date between %(start)s and %(end)s)
+				and docstatus < 2
+				{conditions}
 		""".format(conditions=conditions), {
 			"start": start,
 			"end": end
@@ -532,7 +550,23 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		if default_price_list:
 			target.buying_price_list = default_price_list
 
-		target.delivered_by_supplier = 1
+		if any( item.delivered_by_supplier==1 for item in source.items):
+			if source.shipping_address_name:
+				target.customer_address = source.shipping_address_name
+				target.customer_address_display = source.shipping_address
+			else:
+				target.customer_address = source.customer_address
+				target.customer_address_display = source.address_display
+
+			target.customer_contact_person = source.contact_person
+			target.customer_contact_display = source.contact_display
+			target.customer_contact_mobile = source.contact_mobile
+			target.customer_contact_email = source.contact_email
+
+		else:
+			target.customer = ""
+			target.customer_name = ""
+
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
@@ -543,14 +577,6 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Purchase Order",
-			"field_map": {
-				"customer_address": "customer_address",
-				"contact_person": "customer_contact_person",
-				"address_display": "customer_address_display",
-				"contact_display": "customer_contact_display",
-				"contact_mobile": "customer_contact_mobile",
-				"contact_email": "customer_contact_email",
-			},
 			"field_no_map": [
 				"address_display",
 				"contact_display",

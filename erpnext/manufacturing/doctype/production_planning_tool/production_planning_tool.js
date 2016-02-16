@@ -4,7 +4,7 @@
 frappe.require("assets/erpnext/js/utils.js");
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	cur_frm.set_value("company", frappe.defaults.get_user_default("company"))
+	cur_frm.set_value("company", frappe.defaults.get_user_default("Company"))
 	cur_frm.set_value("use_multi_level_bom", 1)
 }
 

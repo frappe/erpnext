@@ -1,7 +1,6 @@
 {
     "country_code": "ca",
     "name": "Chart of Accounts for english-speaking provinces",
-	"is_active": "Yes",
     "tree": {
         "ASSETS": {
             "CURRENT ASSETS": {

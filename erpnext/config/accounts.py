@@ -33,6 +33,11 @@ def get_data():
 					"description": _("Supplier database.")
 				},
 				{
+					"type": "doctype",
+					"name": "Payment Request",
+					"description": _("Payment Request")
+				},
+				{
 					"type": "page",
 					"name": "Accounts Browser",
 					"icon": "icon-sitemap",
@@ -82,6 +87,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Fiscal Year",
 					"description": _("Financial / accounting year.")
+				},
+				{
+					"type": "doctype",
+					"name": "Payment Gateway Account",
+					"description": _("Setup Gateway accounts.")
 				},
 				{
 					"type": "page",
@@ -226,6 +236,12 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Balance Sheet",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Cash Flow",
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},

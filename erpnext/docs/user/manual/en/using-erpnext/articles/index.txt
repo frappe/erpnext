@@ -8,3 +8,4 @@ rename-tool
 renaming-documents
 search-filters
 tree-master-renaming
+pos-view

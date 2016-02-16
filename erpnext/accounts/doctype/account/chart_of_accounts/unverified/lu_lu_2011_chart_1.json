@@ -1,6 +1,7 @@
 {
     "country_code": "lu", 
     "name": "PCMN Luxembourg", 
+	"disabled": "Yes",
     "tree": {
         "TOTAL CLASSES 1 A 5": {
             "CLASSE 1 - COMPTES DE CAPITAUX, DE PROVISIONS ET DE DETTES FINANCIERES": {

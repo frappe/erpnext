@@ -11,6 +11,7 @@ import frappe.defaults
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -150,14 +151,14 @@ class PurchaseInvoice(BuyingController):
 		against_accounts = []
 		stock_items = self.get_stock_items()
 		for item in self.get("items"):
-			# in case of auto inventory accounting, 
+			# in case of auto inventory accounting,
 			# against expense account is always "Stock Received But Not Billed"
 			# for a stock item and if not epening entry and not drop-ship entry
-			
+
 			if auto_accounting_for_stock and item.item_code in stock_items \
-				and self.is_opening == 'No' and (not item.po_detail or 
+				and self.is_opening == 'No' and (not item.po_detail or
 					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
-				
+
 				item.expense_account = stock_not_billed_account
 				item.cost_center = None
 
@@ -246,6 +247,7 @@ class PurchaseInvoice(BuyingController):
 			self.update_against_document_in_jv()
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
+			self.update_billing_status_in_pr()
 
 		self.update_project()
 
@@ -259,15 +261,19 @@ class PurchaseInvoice(BuyingController):
 		gl_entries = []
 
 		# parent's gl entry
-		if self.base_grand_total:
+		if self.grand_total:
+			# Didnot use base_grand_total to book rounding loss gle
+			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
+				self.precision("grand_total"))
+
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_to,
 					"party_type": "Supplier",
 					"party": self.supplier,
 					"against": self.against_expense_account,
-					"credit": self.base_grand_total,
-					"credit_in_account_currency": self.base_grand_total \
+					"credit": grand_total_in_company_currency,
+					"credit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else self.grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
@@ -407,6 +413,8 @@ class PurchaseInvoice(BuyingController):
 
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
+			self.update_billing_status_in_pr()
+
 		self.make_gl_entries_on_cancel()
 		self.update_project()
 
@@ -430,6 +438,24 @@ class PurchaseInvoice(BuyingController):
 					"fiscal_year": self.fiscal_year, "name": ("!=", self.name), "docstatus": ("<", 2)})
 				if pi:
 					frappe.throw("Supplier Invoice No exists in Purchase Invoice {0}".format(pi))
+
+	def update_billing_status_in_pr(self, update_modified=True):
+		updated_pr = []
+		for d in self.get("items"):
+			if d.pr_detail:
+				billed_amt = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
+					where pr_detail=%s and docstatus=1""", d.pr_detail)
+				billed_amt = billed_amt and billed_amt[0][0] or 0
+				frappe.db.set_value("Purchase Receipt Item", d.pr_detail, "billed_amt", billed_amt, update_modified=update_modified)
+				updated_pr.append(d.purchase_receipt)
+			elif d.po_detail:
+				updated_pr += update_billed_amount_based_on_po(d.po_detail, update_modified)
+
+		for pr in set(updated_pr):
+			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)
+
+	def on_recurring(self, reference_doc):
+		self.due_date = None
 
 @frappe.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):

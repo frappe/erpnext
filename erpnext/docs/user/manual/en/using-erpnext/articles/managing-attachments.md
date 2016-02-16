@@ -1,4 +1,4 @@
-<h1>Adding Attachments in a Documents</h1>
+#Adding Attachments in a Documents
 
 ERPNext allows to attach files with documents like Order, Invoices, Items etc. User with a read permission on particular document will also be able to access files attached with it. For example, Sales Order can have text file attached detailing item description and specification as decided with customers. Also it can be image file of drawing as per which product is to be manufactured.
 

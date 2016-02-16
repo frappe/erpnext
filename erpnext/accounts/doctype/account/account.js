@@ -48,13 +48,13 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 
 cur_frm.cscript.add_toolbar_buttons = function(doc) {
 	cur_frm.add_custom_button(__('Chart of Accounts'),
-		function() { frappe.set_route("Accounts Browser", "Account"); }, 'icon-sitemap')
+		function() { frappe.set_route("Accounts Browser", "Account"); }, __("View"))
 
 	if (doc.is_group == 1) {
-		cur_frm.add_custom_button(__('Convert to non-Group'),
+		cur_frm.add_custom_button(__('Group to Non-Group'),
 			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet', 'btn-default');
 	} else if (cint(doc.is_group) == 0) {
-		cur_frm.add_custom_button(__('View Ledger'), function() {
+		cur_frm.add_custom_button(__('Ledger'), function() {
 			frappe.route_options = {
 				"account": doc.name,
 				"from_date": sys_defaults.year_start_date,
@@ -62,9 +62,9 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 				"company": doc.company
 			};
 			frappe.set_route("query-report", "General Ledger");
-		}, "icon-table");
+		}, __("View"));
 
-		cur_frm.add_custom_button(__('Convert to Group'),
+		cur_frm.add_custom_button(__('Group to Group'),
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet', 'btn-default')
 	}
 }

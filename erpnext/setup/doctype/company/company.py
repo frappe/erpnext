@@ -27,15 +27,21 @@ class Company(Document):
 		return exists
 
 	def validate(self):
+		self.validate_abbr()
+		self.validate_default_accounts()
+		self.validate_currency()
+		
+	def validate_abbr(self):
 		self.abbr = self.abbr.strip()
+		
 		if self.get('__islocal') and len(self.abbr) > 5:
 			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
 
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
-
-		self.validate_default_accounts()
-		self.validate_currency()
+			
+		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
+			frappe.throw(_("Abbreviation already used for another company"))
 
 	def validate_default_accounts(self):
 		for field in ["default_bank_account", "default_cash_account", "default_receivable_account", "default_payable_account",
@@ -100,19 +106,6 @@ class Company(Document):
 			{"company": self.name, "account_type": "Receivable"}))
 		frappe.db.set(self, "default_payable_account", frappe.db.get_value("Account",
 			{"company": self.name, "account_type": "Payable"}))
-
-	def add_acc(self, lst):
-		account = frappe.get_doc({
-			"doctype": "Account",
-			"freeze_account": "No",
-			"company": self.name
-		})
-
-		for d in self.fld_dict.keys():
-			account.set(d, (d == 'parent_account' and lst[self.fld_dict[d]]) and lst[self.fld_dict[d]] +' - '+ self.abbr or lst[self.fld_dict[d]])
-		if not account.parent_account:
-			account.flags.ignore_mandatory = True
-		account.insert()
 
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
@@ -179,6 +172,9 @@ class Company(Document):
 
 		frappe.defaults.clear_cache()
 
+	def abbreviate(self):
+		self.abbr = ''.join([c[0].upper() for c in self.company_name.split()])
+
 	def on_trash(self):
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists
@@ -216,13 +212,15 @@ class Company(Document):
 			frappe.db.sql("""delete from `tabItem Reorder` where warehouse in (%s)"""
 				% ', '.join(['%s']*len(warehouses)), tuple(warehouses))
 
-		for f in ["income_account", "expense_account"]:
-			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-				% (f, f, ', '.join(['%s']*len(accounts))), tuple(accounts))
+		if accounts:
+			for f in ["income_account", "expense_account"]:
+				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
+					% (f, f, ', '.join(['%s']*len(accounts))), tuple(accounts))
 
-		for f in ["selling_cost_center", "buying_cost_center"]:
-			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-				% (f, f, ', '.join(['%s']*len(cost_centers))), tuple(cost_centers))
+		if cost_centers:
+			for f in ["selling_cost_center", "buying_cost_center"]:
+				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
+					% (f, f, ', '.join(['%s']*len(cost_centers))), tuple(cost_centers))
 
 		# reset default company
 		frappe.db.sql("""update `tabSingles` set value=""

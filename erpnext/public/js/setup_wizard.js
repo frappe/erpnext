@@ -9,94 +9,6 @@ frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
 
 function load_erpnext_slides() {
 	$.extend(erpnext.wiz, {
-		region: {
-			title: __("Region"),
-			icon: "icon-flag",
-			help: __("Select your Country, Time Zone and Currency"),
-			fields: [
-				{ fieldname: "country", label: __("Country"), reqd:1,
-					fieldtype: "Select" },
-				{ fieldname: "timezone", label: __("Time Zone"), reqd:1,
-					fieldtype: "Select" },
-				{ fieldname: "currency", label: __("Currency"), reqd:1,
-					fieldtype: "Select" },
-			],
-
-			onload: function(slide) {
-				frappe.call({
-					method:"frappe.geo.country_info.get_country_timezone_info",
-					callback: function(data) {
-						erpnext.wiz.region.data = data.message;
-						erpnext.wiz.region.setup_fields(slide);
-						erpnext.wiz.region.bind_events(slide);
-					}
-				});
-			},
-			css_class: "single-column",
-			setup_fields: function(slide) {
-				var data = erpnext.wiz.region.data;
-
-				slide.get_input("country").empty()
-					.add_options([""].concat(keys(data.country_info).sort()));
-
-				slide.get_input("currency").empty()
-					.add_options(frappe.utils.unique([""].concat($.map(data.country_info,
-						function(opts, country) { return opts.currency; }))).sort());
-
-				slide.get_input("timezone").empty()
-					.add_options([""].concat(data.all_timezones));
-
-				if (data.default_country) {
-					slide.set_input("country", data.default_country);
-				}
-			},
-
-			bind_events: function(slide) {
-				slide.get_input("country").on("change", function() {
-					var country = slide.get_input("country").val();
-					var $timezone = slide.get_input("timezone");
-					var data = erpnext.wiz.region.data;
-
-					$timezone.empty();
-
-					// add country specific timezones first
-					if(country) {
-						var timezone_list = data.country_info[country].timezones || [];
-						$timezone.add_options(timezone_list.sort());
-						slide.get_field("currency").set_input(data.country_info[country].currency);
-						slide.get_field("currency").$input.trigger("change");
-					}
-
-					// add all timezones at the end, so that user has the option to change it to any timezone
-					$timezone.add_options([""].concat(data.all_timezones));
-
-					slide.get_field("timezone").set_input($timezone.val());
-
-					// temporarily set date format
-					frappe.boot.sysdefaults.date_format = (data.country_info[country].date_format
-						|| "dd-mm-yyyy");
-				});
-
-				slide.get_input("currency").on("change", function() {
-					var currency = slide.get_input("currency").val();
-					if (!currency) return;
-					frappe.model.with_doc("Currency", currency, function() {
-						frappe.provide("locals.:Currency." + currency);
-						var currency_doc = frappe.model.get_doc("Currency", currency);
-						var number_format = currency_doc.number_format;
-						if (number_format==="#.###") {
-							number_format = "#.###,##";
-						} else if (number_format==="#,###") {
-							number_format = "#,###.##"
-						}
-
-						frappe.boot.sysdefaults.number_format = number_format;
-						locals[":Currency"][currency] = $.extend({}, currency_doc);
-					});
-				});
-			}
-		},
-
 		user: {
 			title: __("The First User: You"),
 			icon: "icon-user",
@@ -109,7 +21,7 @@ function load_erpnext_slides() {
 				{"fieldname": "password", "label": __("Password"), "fieldtype": "Password",
 					reqd:1},
 				{fieldtype:"Attach Image", fieldname:"attach_user",
-					label: __("Attach Your Picture")},
+					label: __("Attach Your Picture"), is_private: 0},
 			],
 			help: __('The first user will become the System Manager (you can change this later).'),
 			onload: function(slide) {
@@ -254,12 +166,15 @@ function load_erpnext_slides() {
 			fields: [
 				{fieldtype:"Attach Image", fieldname:"attach_letterhead",
 					label: __("Attach Letterhead"),
-					description: __("Keep it web friendly 900px (w) by 100px (h)")
+					description: __("Keep it web friendly 900px (w) by 100px (h)"),
+					is_private: 0
 				},
 				{fieldtype: "Column Break"},
 				{fieldtype:"Attach Image", fieldname:"attach_logo",
 					label:__("Attach Logo"),
-					description: __("100px by 100px")},
+					description: __("100px by 100px"),
+					is_private: 0
+				},
 			],
 
 			css_class: "two-column"
@@ -381,7 +296,7 @@ function load_erpnext_slides() {
 						{fieldtype: "Check", fieldname: "is_purchase_item_" + i, label:__("We buy this Item")},
 						{fieldtype:"Column Break"},
 						{fieldtype:"Currency", fieldname:"item_price_" + i, label:__("Rate")},
-						{fieldtype:"Attach Image", fieldname:"item_img_" + i, label:__("Attach Image")},
+						{fieldtype:"Attach Image", fieldname:"item_img_" + i, label:__("Attach Image"), is_private: 0},
 					])
 				}
 				slide.fields[1].reqd = 1;

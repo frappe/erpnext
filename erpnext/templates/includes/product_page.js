@@ -49,21 +49,6 @@ frappe.ready(function() {
 		});
 	});
 
-	$("#item-update-cart button").on("click", function() {
-		shopping_cart.update_cart({
-			item_code: get_item_code(),
-			qty: $("#item-update-cart input").val(),
-			btn: this,
-			callback: function(r) {
-				if(r.exc) {
-					$("#item-update-cart input").val(qty);
-				} else {
-					qty = $("#item-update-cart input").val();
-				}
-			},
-		});
-	});
-
 	$("[itemscope] .item-view-attribute .form-control").on("change", function() {
 		try {
 			var item_code = encodeURIComponent(get_item_code());
@@ -86,7 +71,7 @@ frappe.ready(function() {
 			return;
 		}
 
-		frappe.load_via_ajax(window.location.pathname + "?variant=" + item_code);
+		window.location.href = window.location.pathname + "?variant=" + item_code;
 	});
 });
 

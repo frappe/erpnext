@@ -1,5 +1,5 @@
 <p><button class="btn btn-xs btn-default btn-contact">
-    New Contact</button></p>
+    {{ __("New Contact") }}</button></p>
     <div class="clearfix"></div>
 
 {% for(var i=0, l=contact_list.length; i<l; i++) { %}
@@ -9,7 +9,7 @@
             <span class="text-muted">({%= __("Primary") %})</span>
         {% } %}
 
-        <a href="#Form/Contact/{%= contact_list[i].name %}"
+        <a href="#Form/Contact/{%= encodeURIComponent(contact_list[i].name) %}"
             class="btn btn-xs btn-default pull-right">
             {%= __("Edit") %}</a>
     </p>

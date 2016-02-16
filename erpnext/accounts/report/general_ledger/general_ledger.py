@@ -85,7 +85,7 @@ def get_columns(filters):
 		]
 
 	columns += [
-		_("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/Voucher Type:160",
+		_("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/"+_("Voucher Type")+":160",
 		_("Against Account") + "::120", _("Party Type") + "::80", _("Party") + "::150",
 		_("Cost Center") + ":Link/Cost Center:100", _("Remarks") + "::400"
 	]
@@ -178,7 +178,8 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 
 	else:
 		for gl in gl_entries:
-			if gl.posting_date >= getdate(filters.from_date) and gl.posting_date <= getdate(filters.to_date):
+			if gl.posting_date >= getdate(filters.from_date) and gl.posting_date <= getdate(filters.to_date) \
+					and gl.is_opening == "No":
 				data.append(gl)
 
 

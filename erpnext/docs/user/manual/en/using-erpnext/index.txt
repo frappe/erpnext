@@ -6,3 +6,4 @@ calendar
 assignment
 tags
 articles
+pos-view

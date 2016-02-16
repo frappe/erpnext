@@ -52,4 +52,5 @@ def get_items(price_list, sales_or_purchase, item=None):
 			{condition}
 		order by
 			{order_by}
-			i.name""".format(condition=condition, order_by=order_by), args, as_dict=1)
+			i.name
+		limit 24""".format(condition=condition, order_by=order_by), args, as_dict=1)

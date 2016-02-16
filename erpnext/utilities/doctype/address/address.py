@@ -8,8 +8,12 @@ from frappe import throw, _
 from frappe.utils import cstr
 
 from frappe.model.document import Document
+from jinja2 import TemplateSyntaxError
 
 class Address(Document):
+	def __setup__(self):
+		self.flags.linked = False
+
 	def autoname(self):
 		if not self.address_title:
 			self.address_title = self.customer \
@@ -42,13 +46,10 @@ class Address(Document):
 
 	def link_address(self):
 		"""Link address based on owner"""
-		linked = False
-		for fieldname in self.link_fields:
-			if self.get(fieldname):
-				linked = True
-				break
+		if not self.flags.linked:
+			self.check_if_linked()
 
-		if not linked:
+		if not self.flags.linked:
 			contact = frappe.db.get_value("Contact", {"email_id": self.owner},
 				("name", "customer", "supplier"), as_dict = True)
 			if contact:
@@ -57,6 +58,11 @@ class Address(Document):
 
 			self.lead = frappe.db.get_value("Lead", {"email_id": self.owner})
 
+	def check_if_linked(self):
+		for fieldname in self.link_fields:
+			if self.get(fieldname):
+				self.flags.linked = True
+				break
 
 	def validate_shipping_address(self):
 		"""Validate that there can only be one shipping address for particular customer, supplier"""
@@ -80,16 +86,22 @@ def get_address_display(address_dict):
 	if not isinstance(address_dict, dict):
 		address_dict = frappe.db.get_value("Address", address_dict, "*", as_dict=True) or {}
 
-	template = frappe.db.get_value("Address Template", \
-		{"country": address_dict.get("country")}, "template")
-	if not template:
-		template = frappe.db.get_value("Address Template", \
-			{"is_default": 1}, "template")
+	data = frappe.db.get_value("Address Template", \
+		{"country": address_dict.get("country")}, ["name", "template"])
+	if not data:
+		data = frappe.db.get_value("Address Template", \
+			{"is_default": 1}, ["name", "template"])
 
-	if not template:
+	if not data:
 		frappe.throw(_("No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template."))
 
-	return frappe.render_template(template, address_dict)
+	name, template = data
+
+	try:
+		return frappe.render_template(template, address_dict)
+	except TemplateSyntaxError:
+		frappe.throw(_("There is an error in your Address Template {0}").format(name))
+
 
 def get_territory_from_address(address):
 	"""Tries to match city, state and country of address to existing territory"""

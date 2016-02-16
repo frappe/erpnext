@@ -25,13 +25,14 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		if(!doc.is_return) {
 			if(doc.docstatus==1) {
 				if(doc.outstanding_amount != 0) {
-					this.frm.add_custom_button(__('Payment'), this.make_bank_entry).addClass("btn-primary");
+					this.frm.add_custom_button(__('Payment'), this.make_bank_entry, __("Make"));
+					cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 				}
-				cur_frm.add_custom_button(__('Debit Note'), this.make_debit_note);
+				cur_frm.add_custom_button(__('Debit Note'), this.make_debit_note, __("Make"));
 			}
 
 			if(doc.docstatus===0) {
-				cur_frm.add_custom_button(__('From Purchase Order'), function() {
+				cur_frm.add_custom_button(__('Purchase Order'), function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
 						source_doctype: "Purchase Order",
@@ -43,9 +44,9 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, __("Get items from"));
 
-				cur_frm.add_custom_button(__('From Purchase Receipt'), function() {
+				cur_frm.add_custom_button(__('Purchase Receipt'), function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 						source_doctype: "Purchase Receipt",
@@ -56,7 +57,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, __("Get items from"));
 			}
 		}
 	},
@@ -76,7 +77,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			me.apply_pricing_rule();
 		})
 	},
-	
+
 	credit_to: function() {
 		var me = this;
 		if(this.frm.doc.credit_to) {

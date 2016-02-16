@@ -144,3 +144,9 @@ def set_multiple_status(names, status):
 		task = frappe.get_doc("Task", name)
 		task.status = status
 		task.save()
+
+def set_tasks_as_overdue():
+	frappe.db.sql("""update tabTask set `status`='Overdue'
+		where exp_end_date is not null
+		and exp_end_date < CURDATE()
+		and `status` not in ('Closed', 'Cancelled')""")

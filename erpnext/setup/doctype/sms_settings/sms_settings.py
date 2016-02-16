@@ -119,4 +119,5 @@ def create_sms_log(args, sent_to):
 	sl.requested_numbers = "\n".join(args['receiver_list'])
 	sl.no_of_sent_sms = len(sent_to)
 	sl.sent_to = "\n".join(sent_to)
+	sl.flags.ignore_permissions = True
 	sl.save()

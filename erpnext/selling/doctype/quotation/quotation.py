@@ -28,14 +28,9 @@ class Quotation(SellingController):
 	def validate_order_type(self):
 		super(Quotation, self).validate_order_type()
 
-		if self.order_type in ['Maintenance', 'Service']:
-			for d in self.get('items'):
-				if not frappe.db.get_value("Item", d.item_code, "is_service_item"):
-					frappe.throw(_("Item {0} must be Service Item").format(d.item_code))
-		else:
-			for d in self.get('items'):
-				if not frappe.db.get_value("Item", d.item_code, "is_sales_item"):
-					frappe.throw(_("Item {0} must be Sales Item").format(d.item_code))
+		for d in self.get('items'):
+			if not frappe.db.get_value("Item", d.item_code, "is_sales_item"):
+				frappe.throw(_("Item {0} must be Sales Item").format(d.item_code))
 
 	def validate_quotation_to(self):
 		if self.customer:
@@ -155,6 +150,7 @@ def _make_customer(source_name, ignore_permissions=False):
 				else:
 					raise
 			except frappe.MandatoryError:
+				frappe.local.message_log = []
 				frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
 		else:
 			return customer_name

@@ -8,6 +8,7 @@ from frappe.utils import cstr, flt
 from frappe import msgprint, _, throw
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
 
@@ -84,6 +85,34 @@ class PurchaseOrder(BuyingController):
 				d.schedule_date = frappe.db.get_value("Material Request Item",
 						d.prevdoc_detail_docname, "schedule_date")
 
+
+	def get_last_purchase_rate(self):
+		"""get last purchase rates for all items"""
+
+		conversion_rate = flt(self.get('conversion_rate')) or 1.0
+
+		for d in self.get("items"):
+			if d.item_code:
+				last_purchase_details = get_last_purchase_details(d.item_code, self.name)
+
+				if last_purchase_details:
+					d.base_price_list_rate = (last_purchase_details['base_price_list_rate'] *
+						(flt(d.conversion_factor) or 1.0))
+					d.discount_percentage = last_purchase_details['discount_percentage']
+					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
+					d.price_list_rate = d.base_price_list_rate / conversion_rate
+					d.rate = d.base_rate / conversion_rate
+				else:
+					# if no last purchase found, reset all values to 0
+					for field in ("base_price_list_rate", "base_rate",
+						"price_list_rate", "rate", "discount_percentage"):
+							d.set(field, 0)
+
+					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
+					if item_last_purchase_rate:
+						d.base_price_list_rate = d.base_rate = d.price_list_rate \
+							= d.rate = item_last_purchase_rate
+
 	# Check for Stopped status
 	def check_for_stopped_or_closed_status(self, pc_obj):
 		check_list =[]
@@ -140,7 +169,7 @@ class PurchaseOrder(BuyingController):
 		clear_doctype_notifications(self)
 
 	def on_submit(self):
-		if self.has_drop_ship_item():
+		if self.is_against_so():
 			self.update_status_updater()
 
 		super(PurchaseOrder, self).on_submit()
@@ -157,8 +186,11 @@ class PurchaseOrder(BuyingController):
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
-		if self.has_drop_ship_item():
+		if self.is_against_so():
 			self.update_status_updater()
+
+		if self.has_drop_ship_item():
+			self.update_delivered_qty_in_sales_order()
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_stopped_or_closed_status(pc_obj)
@@ -187,17 +219,6 @@ class PurchaseOrder(BuyingController):
 	def on_update(self):
 		pass
 
-	def before_recurring(self):
-		super(PurchaseOrder, self).before_recurring()
-
-		for field in ("per_received", "per_billed"):
-			self.set(field, None)
-
-		for d in self.get("items"):
-			for field in ("received_qty", "billed_amt", "prevdoc_doctype", "prevdoc_docname",
-				"prevdoc_detail_docname", "supplier_quotation", "supplier_quotation_item"):
-					d.set(field, None)
-
 	def update_status_updater(self):
 		self.status_updater[0].update({
 			"target_parent_dt": "Sales Order",
@@ -216,18 +237,15 @@ class PurchaseOrder(BuyingController):
 
 		for so_name in sales_orders_to_update:
 			so = frappe.get_doc("Sales Order", so_name)
-			so.update_delivery_status(self.name)
+			so.update_delivery_status()
 			so.set_status(update=True)
 			so.notify_update()
 
 	def has_drop_ship_item(self):
-		is_drop_ship = False
+		return any([d.delivered_by_supplier for d in self.items])
 
-		for item in self.items:
-			if item.delivered_by_supplier == 1:
-				is_drop_ship = True
-
-		return is_drop_ship
+	def is_against_so(self):
+		return any([d.prevdoc_doctype for d in self.items if d.prevdoc_doctype=="Sales Order"])
 
 	def set_received_qty_for_drop_ship_items(self):
 		for item in self.items:

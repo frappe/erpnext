@@ -8,7 +8,7 @@ from unidecode import unidecode
 
 def create_charts(chart_name, company):
 	chart = get_chart(chart_name)
-
+	
 	if chart:
 		accounts = []
 
@@ -40,9 +40,9 @@ def create_charts(chart_name, company):
 						"account_currency": frappe.db.get_value("Company", company, "default_currency")
 					})
 
-					if root_account:
+					if root_account or frappe.local.flags.allow_unverified_charts:
 						account.flags.ignore_mandatory = True
-
+						
 					account.insert()
 
 					accounts.append(account_name_in_db)
@@ -67,13 +67,17 @@ def get_chart(chart_name):
 		from erpnext.accounts.doctype.account.chart_of_accounts.verified import standard_chart_of_accounts
 		return standard_chart_of_accounts.get()
 	else:
-		path = os.path.join(os.path.dirname(__file__), "verified")
-		for fname in os.listdir(path):
-			if fname.endswith(".json"):
-				with open(os.path.join(path, fname), "r") as f:
-					chart = f.read()
-					if chart and json.loads(chart).get("name") == chart_name:
-						return json.loads(chart).get("tree")
+		folders = ("verified",)
+		if frappe.local.flags.allow_unverified_charts:
+			folders = ("verified", "unverified")
+		for folder in folders:
+			path = os.path.join(os.path.dirname(__file__), folder)
+			for fname in os.listdir(path):
+				if fname.endswith(".json"):
+					with open(os.path.join(path, fname), "r") as f:
+						chart = f.read()
+						if chart and json.loads(chart).get("name") == chart_name:
+							return json.loads(chart).get("tree")
 
 @frappe.whitelist()
 def get_charts_for_country(country):
@@ -82,24 +86,22 @@ def get_charts_for_country(country):
 	def _get_chart_name(content):
 		if content:
 			content = json.loads(content)
-			if content and content.get("is_active", "No") == "Yes" and content.get("disabled", "No") == "No":
+			if content and content.get("disabled", "No") == "No":
 				charts.append(content["name"])
 
 	country_code = frappe.db.get_value("Country", country, "code")
 	if country_code:
-		path = os.path.join(os.path.dirname(__file__), "verified")
-		for fname in os.listdir(path):
-			if fname.startswith(country_code) and fname.endswith(".json"):
-				with open(os.path.join(path, fname), "r") as f:
-					_get_chart_name(f.read())
+		folders = ("verified",)
+		if frappe.local.flags.allow_unverified_charts:
+			folders = ("verified", "unverified")
 
-	# countries_use_OHADA_system = ["Benin", "Burkina Faso", "Cameroon", "Central African Republic", "Comoros",
-	# 	"Congo", "Ivory Coast", "Gabon", "Guinea", "Guinea Bissau", "Equatorial Guinea", "Mali", "Niger",
-	# 	"Replica of Democratic Congo", "Senegal", "Chad", "Togo"]
-	#
-	# if country in countries_use_OHADA_system:
-	# 	with open(os.path.join(os.path.dirname(__file__), "syscohada_syscohada_chart_template.json"), "r") as f:
-	# 		_get_chart_name(f.read())
+		for folder in folders:
+			path = os.path.join(os.path.dirname(__file__), folder)
+
+			for fname in os.listdir(path):
+				if fname.startswith(country_code) and fname.endswith(".json"):
+					with open(os.path.join(path, fname), "r") as f:
+						_get_chart_name(f.read())
 
 	if len(charts) != 1:
 		charts.append("Standard")

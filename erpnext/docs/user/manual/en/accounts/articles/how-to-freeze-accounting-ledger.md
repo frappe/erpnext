@@ -1,4 +1,4 @@
-<h1>How To Freeze Accounting Ledger?</h1>
+#How To Freeze Accounting Ledger?
 
 You can freeze any accounting ledger in ERPNext. So that frozen accounting ledger became unsearchable in accounting transaction. Follow below step to understand the process.
 

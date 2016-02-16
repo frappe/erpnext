@@ -7,14 +7,14 @@ import json
 import urllib
 import itertools
 from frappe import msgprint, _
-from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate
+from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate, strip
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.controllers.item_variant import get_variant, copy_attributes_to_variant, ItemVariantExistsError
 
-class WarehouseNotSet(frappe.ValidationError): pass
+class DuplicateReorderRows(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	website = frappe._dict(
@@ -30,12 +30,22 @@ class Item(WebsiteGenerator):
 		self.get("__onload").sle_exists = self.check_if_sle_exists()
 
 	def autoname(self):
-		if frappe.db.get_default("item_naming_by")=="Naming Series" and not self.variant_of:
-			from frappe.model.naming import make_autoname
-			self.item_code = make_autoname(self.naming_series+'.#####')
+		if frappe.db.get_default("item_naming_by")=="Naming Series":
+			if self.variant_of:
+				if not self.item_code:
+					item_code_suffix = ""
+					for attribute in self.attributes:
+						attribute_abbr = frappe.db.get_value("Item Attribute Value",
+							{"parent": attribute.attribute, "attribute_value": attribute.attribute_value}, "abbr")
+						item_code_suffix += "-" + str(attribute_abbr or attribute.attribute_value)
+					self.item_code = str(self.variant_of) + item_code_suffix
+			else:
+				from frappe.model.naming import make_autoname
+				self.item_code = make_autoname(self.naming_series+'.#####')
 		elif not self.item_code:
 			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
 
+		self.item_code = strip(self.item_code)
 		self.name = self.item_code
 
 	def before_insert(self):
@@ -47,10 +57,7 @@ class Item(WebsiteGenerator):
 
 		if not self.stock_uom:
 			msgprint(_("Please enter default Unit of Measure"), raise_exception=1)
-		if self.image and not self.website_image:
-			self.website_image = self.image
 
-		self.check_warehouse_is_set_for_stock_item()
 		self.validate_uom()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
@@ -68,6 +75,7 @@ class Item(WebsiteGenerator):
 		self.validate_has_variants()
 		self.validate_attributes()
 		self.validate_variant_attributes()
+		self.validate_website_image()
 		self.make_thumbnail()
 
 		if not self.get("__islocal"):
@@ -82,6 +90,37 @@ class Item(WebsiteGenerator):
 		self.update_item_price()
 		self.update_variants()
 		self.update_template_item()
+
+	def validate_website_image(self):
+		"""Validate if the website image is a public file"""
+		auto_set_website_image = False
+		if not self.website_image and self.image:
+			auto_set_website_image = True
+			self.website_image = self.image
+
+		if not self.website_image:
+			return
+
+		# find if website image url exists as public
+		file = frappe.get_all("File", filters={
+			"file_url": self.website_image
+		}, fields=["name", "is_private"], order_by="is_private asc", limit_page_length=1)
+
+		if file:
+			file = file[0]
+
+		if not file:
+			if not auto_set_website_image:
+				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found")
+					.format(self.website_image, self.name))
+
+			self.website_image = None
+
+		elif file.is_private:
+			if not auto_set_website_image:
+				frappe.msgprint(_("Website Image should be a public file or website URL"))
+
+			self.website_image = None
 
 	def make_thumbnail(self):
 		"""Make a thumbnail of `website_image`"""
@@ -263,11 +302,6 @@ class Item(WebsiteGenerator):
 				if not find_variant(combination):
 					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
 
-	def check_warehouse_is_set_for_stock_item(self):
-		if self.is_stock_item==1 and not self.default_warehouse and frappe.get_all("Warehouse"):
-			frappe.msgprint(_("Default Warehouse is mandatory for stock Item."),
-				raise_exception=WarehouseNotSet)
-
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
 		if self.stock_uom not in uom_conv_list:
@@ -369,21 +403,13 @@ class Item(WebsiteGenerator):
 							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'"))
 
 	def validate_reorder_level(self):
-		if cint(self.apply_warehouse_wise_reorder_level):
-			self.re_order_level, self.re_order_qty = 0, 0
-		else:
-			self.set("reorder_levels", [])
-
-		if self.re_order_level or len(self.get("reorder_levels", {"material_request_type": "Purchase"})):
+		if len(self.get("reorder_levels", {"material_request_type": "Purchase"})):
 			if not (self.is_purchase_item or self.is_pro_applicable):
 				frappe.throw(_("""To set reorder level, item must be a Purchase Item or Manufacturing Item"""))
 
-		if self.re_order_level and not self.re_order_qty:
-			frappe.throw(_("Please set reorder quantity"))
 		for d in self.get("reorder_levels"):
 			if d.warehouse_reorder_level and not d.warehouse_reorder_qty:
 				frappe.throw(_("Row #{0}: Please set reorder quantity").format(d.idx))
-					
 
 	def validate_warehouse_for_reorder(self):
 		warehouse = []
@@ -392,7 +418,7 @@ class Item(WebsiteGenerator):
 				warehouse += [i.get("warehouse")]
 			else:
 				frappe.throw(_("Row {0}: An Reorder entry already exists for this warehouse {1}")
-					.format(i.idx, i.warehouse))
+					.format(i.idx, i.warehouse), DuplicateReorderRows)
 
 	def check_if_sle_exists(self):
 		sle = frappe.db.sql("""select name from `tabStock Ledger Entry`
@@ -511,7 +537,8 @@ class Item(WebsiteGenerator):
 		if self.variant_of:
 			template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
 			if template_uom != self.stock_uom:
-				frappe.throw(_("Default Unit of Measure for Variant must be same as Template"))
+				frappe.throw(_("Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'")
+					.format(self.stock_uom, template_uom))
 
 	def validate_attributes(self):
 		if self.has_variants or self.variant_of:
@@ -532,11 +559,10 @@ class Item(WebsiteGenerator):
 					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
 				args[d.attribute] = d.attribute_value
 
-			if self.variant_of:
-				# test this during insert because naming is based on item_code and we cannot use condition like self.name != variant
-				variant = get_variant(self.variant_of, args)
-				if variant and self.get("__islocal"):
-					frappe.throw(_("Item variant {0} exists with same attributes").format(variant), ItemVariantExistsError)
+			variant = get_variant(self.variant_of, args, self.name)
+			if variant:
+				frappe.throw(_("Item variant {0} exists with same attributes")
+					.format(variant), ItemVariantExistsError)
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
 	if (not end_of_life) or (disabled is None):

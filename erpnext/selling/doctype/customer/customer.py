@@ -229,9 +229,15 @@ def get_customer_outstanding(customer, company):
 
 
 def get_credit_limit(customer, company):
-	credit_limit, customer_group = frappe.db.get_value("Customer", customer, ["credit_limit", "customer_group"])
-	if not credit_limit:
-		credit_limit = frappe.db.get_value("Customer Group", customer_group, "credit_limit") or \
-			frappe.db.get_value("Company", company, "credit_limit")
+	credit_limit = None
 
-	return credit_limit
+	if customer:
+		credit_limit, customer_group = frappe.db.get_value("Customer", customer, ["credit_limit", "customer_group"])
+
+		if not credit_limit:
+			credit_limit = frappe.db.get_value("Customer Group", customer_group, "credit_limit")
+
+	if not credit_limit:
+		credit_limit = frappe.db.get_value("Company", company, "credit_limit")
+
+	return flt(credit_limit)

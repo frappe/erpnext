@@ -56,9 +56,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.set_query("item_code", "items", function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: (me.frm.doc.order_type === "Maintenance" ?
-						{'is_service_item': 1}:
-						{'is_sales_item': 1	})
+					filters: {'is_sales_item': 1}
 				}
 			});
 		}
@@ -81,10 +79,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					}
 				}
 			});
-		}
-
-		if(this.frm.fields_dict.sales_team && this.frm.fields_dict.sales_team.grid.get_field("sales_person")) {
-			this.frm.set_query("sales_person", "sales_team", erpnext.queries.not_a_group_filter);
 		}
 	},
 
@@ -288,6 +282,24 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 		}
 		refresh_field('product_bundle_help');
+	},
+
+	make_payment_request: function() {
+		frappe.call({
+			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
+			args: {
+				"dt": cur_frm.doc.doctype,
+				"dn": cur_frm.doc.name,
+				"recipient_id": cur_frm.doc.contact_email
+			},
+			callback: function(r) {
+				if(!r.exc){
+					var doc = frappe.model.sync(r.message);
+					console.log(r.message)
+					frappe.set_route("Form", r.message.doctype, r.message.name);
+				}
+			}
+		})
 	}
 });
 

@@ -11,6 +11,7 @@ from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
 from erpnext.stock.get_item_details import get_available_qty, get_default_cost_center, get_conversion_factor
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.accounts.utils import validate_fiscal_year
+import json
 
 class IncorrectValuationRateError(frappe.ValidationError): pass
 class DuplicateEntryForProductionOrderError(frappe.ValidationError): pass
@@ -232,6 +233,7 @@ class StockEntry(StockController):
 					self.posting_date, self.posting_time, d.actual_qty, d.transfer_qty), NegativeStockError)
 
 	def get_stock_and_rate(self):
+		self.set_transfer_qty()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 
@@ -293,7 +295,9 @@ class StockEntry(StockController):
 	def update_valuation_rate(self):
 		for d in self.get("items"):
 			d.amount = flt(d.basic_amount + flt(d.additional_cost), d.precision("amount"))
-			d.valuation_rate = flt(flt(d.basic_rate) + flt(d.additional_cost) / flt(d.transfer_qty),
+			d.valuation_rate = flt(
+				flt(d.basic_rate)
+				+ (flt(d.additional_cost) / flt(d.transfer_qty)),
 				d.precision("valuation_rate"))
 
 	def set_total_incoming_outgoing_value(self):
@@ -473,7 +477,10 @@ class StockEntry(StockController):
 		if not ret["expense_account"]:
 			ret["expense_account"] = frappe.db.get_value("Company", self.company, "stock_adjustment_account")
 
-		stock_and_rate = args.get('warehouse') and self.get_warehouse_details(args) or {}
+		args['posting_date'] = self.posting_date
+		args['posting_time'] = self.posting_time
+
+		stock_and_rate = args.get('warehouse') and get_warehouse_details(args) or {}
 		ret.update(stock_and_rate)
 
 		return ret
@@ -492,21 +499,6 @@ class StockEntry(StockController):
 			ret = {
 				'conversion_factor'		: flt(conversion_factor),
 				'transfer_qty'			: flt(args.get("qty")) * flt(conversion_factor)
-			}
-		return ret
-
-	def get_warehouse_details(self, args):
-		ret = {}
-		if args.get('warehouse') and args.get('item_code'):
-			args.update({
-				"posting_date": self.posting_date,
-				"posting_time": self.posting_time,
-			})
-			args = frappe._dict(args)
-
-			ret = {
-				"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
-				"basic_rate" : get_incoming_rate(args)
 			}
 		return ret
 
@@ -806,3 +798,23 @@ def get_operating_cost_per_unit(production_order=None, bom_no=None):
 		operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
 
 	return operating_cost_per_unit
+
+@frappe.whitelist()
+def get_warehouse_details(args):
+	if isinstance(args, basestring):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
+
+	ret = {}
+	if args.warehouse and args.item_code:
+		args.update({
+			"posting_date": args.posting_date,
+			"posting_time": args.posting_time,
+		})
+		ret = {
+			"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
+			"basic_rate" : get_incoming_rate(args)
+		}
+
+	return ret

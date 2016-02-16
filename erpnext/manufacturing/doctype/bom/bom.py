@@ -4,17 +4,15 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr, flt
-
 from frappe import _
 from frappe.model.document import Document
 
 from operator import itemgetter
 
 class BOM(Document):
-
 	def autoname(self):
 		last_name = frappe.db.sql("""select max(name) from `tabBOM`
-			where name like "BOM/%s/%%" """ % frappe.db.escape(self.item))
+			where name like "BOM/{0}/%%" and item=%s""".format(frappe.db.escape(self.item)), self.item)
 		if last_name:
 			idx = cint(cstr(last_name[0][0]).split('/')[-1].split('-')[0]) + 1
 		else:
@@ -197,6 +195,9 @@ class BOM(Document):
 			self.description = ret[0]
 			self.uom = ret[1]
 			self.item_name= ret[2]
+
+		if not self.quantity:
+			frappe.throw(_("Quantity should be greater than 0"))
 
 	def validate_materials(self):
 		""" Validate raw material entries """

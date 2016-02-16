@@ -7,7 +7,7 @@ app_publisher = "Frappe Technologies Pvt. Ltd."
 app_description = """ERP made simple"""
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "6.12.3"
+app_version = "6.21.6"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
@@ -23,6 +23,7 @@ web_include_css = "assets/erpnext/css/website.css"
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_complete"
 
+before_install = "erpnext.setup.install.check_setup_wizard_not_completed"
 after_install = "erpnext.setup.install.after_install"
 
 boot_session = "erpnext.startup.boot.boot_session"
@@ -111,6 +112,9 @@ doc_events = {
 	"Price List": {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
+	"Address": {
+		"validate": "erpnext.shopping_cart.cart.set_customer_in_address"
+	}
 }
 
 scheduler_events = {
@@ -122,7 +126,8 @@ scheduler_events = {
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
-		"erpnext.hr.doctype.employee.employee.send_birthday_reminders"
+		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
+		"erpnext.projects.doctype.task.task.set_tasks_as_overdue"
 	]
 }
 

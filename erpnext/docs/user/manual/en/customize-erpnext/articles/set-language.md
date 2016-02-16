@@ -1,6 +1,6 @@
-<h1>Change the Language</h1>
+#Change the Language
 
-ERPNext is an multi-lingual application, which means user can select a preferred language for one's ERPNext account.
+ERPNext is an multi-lingual application. It allows each user to select preferred lannguage. Following is how User can customize language in one's account.
 
 ### 1. Setting Language in User's Account
 
@@ -8,11 +8,13 @@ Following are the steps to set language in your ERPNext account.
 
 #### 1.1 Go to My Setting
 
-![My Setting]({{docs_base_url}}/assets/img/articles/$SGrab_428.png)
+<img alt="My Setting" class="screenshot" src="{{docs_base_url}}/assets/img/articles/change-language-1.png">
 
 #### 1.2 Select Language
 
-![Select Language]({{docs_base_url}}/assets/img/articles/$SGrab_429.png)
+<img alt="Select Language" class="screenshot" src="{{docs_base_url}}/assets/img/articles/change-language-2.png">
+
+<img alt="Select Language" class="screenshot" src="{{docs_base_url}}/assets/img/articles/set-language-1.gif">
 
 #### 1.3 Save User
 
@@ -28,11 +30,13 @@ Being a System Manager, you can set language in other user's master as well.
 
 #### Set Language
 
-![Global Language]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-02-05 at 4.35.12 pm.png)
+<img alt="Global Language" class="screenshot" src="{{docs_base_url}}/assets/img/articles/change-language-3.png">
 
 #### Save
 
 Save System Settings, and refresh your EPRNext account. On refreshing, you should language in your ERPNext account changed as per your preference.
 
-Note: For now, we have translation available only for few languages. You can contribute to make translation better, and add new languages from [here](https://frappe.io/translator).
+<img alt="Select Language" class="screenshot" src="{{docs_base_url}}/assets/img/articles/set-language-2.gif">
+
+Note: For now, we have translation available only for few languages. You can contribute to make translation better, and add new languages from [here](https://translate.erpnext.com).
 <!-- markdown -->

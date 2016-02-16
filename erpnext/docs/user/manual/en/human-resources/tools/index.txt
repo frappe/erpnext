@@ -1,2 +1,2 @@
+employee-attendance-tool
 upload-attendance
-leave-allocation-tool

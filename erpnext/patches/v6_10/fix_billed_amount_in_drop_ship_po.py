@@ -13,6 +13,6 @@ def execute():
 			where purchase_order=%s and docstatus=1""", po[0])
 		if invoices:
 			for inv in invoices:
-				frappe.get_doc("Purchase Invoice", inv[0]).update_qty(change_modified=False)
+				frappe.get_doc("Purchase Invoice", inv[0]).update_qty(update_modified=False)
 		else:
 			frappe.db.sql("""update `tabPurchase Order` set per_billed=0 where name=%s""", po[0])
