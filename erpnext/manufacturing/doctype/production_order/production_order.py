@@ -314,7 +314,8 @@ class ProductionOrder(Document):
 
 	def set_actual_dates(self):
 		if self.get("operations"):
-			actual_date = frappe.db.sql("""select min(actual_start_time) as start_date, max(actual_end_time) as end_date from `tabProduction Order Operation`
+			actual_date = frappe.db.sql("""select min(actual_start_time) as start_date,
+				max(actual_end_time) as end_date from `tabProduction Order Operation`
 				where parent = %s and docstatus=1""", self.name, as_dict=1)[0]
 			self.actual_start_date = actual_date.start_date
 			self.actual_end_date = actual_date.end_date

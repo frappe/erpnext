@@ -115,9 +115,9 @@ class ProductionPlanningTool(Document):
 				mr.material_request_date = cstr(r['transaction_date'])
 
 	def get_items(self):
-		if self.plan_using == "Sales Order":
+		if self.get_items_from == "Sales Order":
 			self.get_so_items()
-		elif self.plan_using == "Material Request":
+		elif self.get_items_from == "Material Request":
 			self.get_mr_items()
 		
 	def get_so_items(self):
@@ -191,9 +191,9 @@ class ProductionPlanningTool(Document):
 			pi.planned_qty				= flt(p['pending_qty'])
 			pi.pending_qty				= flt(p['pending_qty'])
 			
-			if self.plan_using == "Sales Order":
+			if self.get_items_from == "Sales Order":
 				pi.sales_order		= p['parent']
-			elif self.plan_using == "Material Request":
+			elif self.get_items_from == "Material Request":
 				pi.material_request		= p['parent']
 				pi.material_request_item = p['name']
 			
@@ -252,18 +252,18 @@ class ProductionPlanningTool(Document):
 			}
 			
 			""" Club similar BOM and item for processing in case of Sales Orders """
-			if self.plan_using == "Sales Order":
+			if self.get_items_from == "Material Request":
+				item_details.update({
+					"qty": d.planned_qty
+				})
+				item_dict[(d.item_code, d.material_request_item, d.warehouse)] = item_details
+			
+			else:
 				item_details.update({
 					"qty":flt(item_dict.get((d.item_code, d.sales_order, d.warehouse),{})
 						.get("qty")) + flt(d.planned_qty)
 				})
 				item_dict[(d.item_code, d.sales_order, d.warehouse)] = item_details
-			
-			elif self.plan_using == "Material Request":
-				item_details.update({
-					"qty": d.planned_qty
-				})
-				item_dict[(d.item_code, d.material_request_item, d.warehouse)] = item_details
 
 		return item_dict
 
@@ -293,11 +293,12 @@ class ProductionPlanningTool(Document):
 		"""
 		bom_dict = {}
 		for d in self.get("items"):
-			if self.plan_using == "Sales Order":
-				bom_dict.setdefault(d.bom_no, []).append({d.sales_order: flt(d.planned_qty)})
-			elif self.plan_using == "Material Request":
-				bom_dict.setdefault(d.bom_no, []).append({d.material_request_item: flt(d.planned_qty)})
-	
+			if self.get_items_from == "Material Request":
+				bom_dict.setdefault(d.bom_no, []).append([d.material_request_item, flt(d.planned_qty)])
+			else:
+				bom_dict.setdefault(d.bom_no, []).append([d.sales_order, flt(d.planned_qty)])
+		return bom_dict
+		
 	def download_raw_materials(self):
 		""" Create csv data for required raw material to produce finished goods"""
 		self.validate_data()
@@ -341,7 +342,6 @@ class ProductionPlanningTool(Document):
 					and item.is_stock_item = 1
 					group by item_code""", bom, as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
-
 			for item, item_details in bom_wise_item_details.items():
 				for so_qty in so_wise_qty:
 					item_list.append([item, flt(item_details.qty) * so_qty[1], item_details.description,
@@ -405,7 +405,7 @@ class ProductionPlanningTool(Document):
 			for item_details in so_item_qty:
 				if requested_qty:
 					sales_order = item_details[4] or "No Sales Order"
-					if self.plan_using == "Material Request":
+					if self.get_items_from == "Material Request":
 						sales_order = "No Sales Order"
 					if requested_qty <= item_details[0]:
 						adjusted_qty = requested_qty
