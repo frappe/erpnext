@@ -106,7 +106,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			"Quotation Item": {
 				"doctype": "Sales Order Item",
 				"field_map": {
-					"parent": "prevdoc_docname"
+					"parent": "prevdoc_docname",
+					"warehouse": "warehouse"
 				}
 			},
 			"Sales Taxes and Charges": {
