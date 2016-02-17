@@ -283,5 +283,3 @@ frappe.ui.form.on("Purchase Order", "is_subcontracted", function(frm) {
 		erpnext.buying.get_default_bom(frm);
 	}
 });
-
-cur_frm.add_fetch('supplier', 'print_language', 'print_language');
