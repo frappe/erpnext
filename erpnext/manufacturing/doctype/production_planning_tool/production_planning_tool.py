@@ -61,7 +61,7 @@ class ProductionPlanningTool(Document):
 				and so.company = %(company)s
 				and so_item.qty > so_item.delivered_qty {0}
 				and (exists (select name from `tabItem` item where item.name=so_item.item_code
-					and (item.is_pro_applicable = 1 or item.is_sub_contracted_item = 1 {1}))
+					and ((item.is_pro_applicable = 1 or item.is_sub_contracted_item = 1) {1}))
 					or exists (select name from `tabPacked Item` pi
 						where pi.parent = so.name and pi.parent_item = so_item.item_code
 							and exists (select name from `tabItem` item where item.name=pi.item_code
