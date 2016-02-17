@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.require("assets/erpnext/js/controllers/load_languages.js")
+
 frappe.ui.form.on("Supplier", {
 	refresh: function(frm) {
 		frm.cscript.make_dashboard(frm.doc);
@@ -86,24 +88,5 @@ cur_frm.fields_dict['accounts'].grid.get_field('account').get_query = function(d
 			'company': d.company,
 			"is_group": 0
 		}
-	}
-}
-
-cur_frm.cscript.before_load = function(doc, dt, dn, callback) {
-	var update_language_select = function(user_language) {
-		cur_frm.set_df_property("print_language", "options", frappe.languages || ["", "English"]);
-		callback && callback();
-	}
-
-	if(!frappe.languages) {
-		frappe.call({
-			method: "frappe.core.doctype.user.user.get_languages",
-			callback: function(r) {
-				frappe.languages = r.message.languages;
-				update_language_select();
-			}
-		});
-	} else {
-		update_language_select();
 	}
 }
