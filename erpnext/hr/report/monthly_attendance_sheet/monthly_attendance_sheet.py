@@ -95,7 +95,7 @@ def get_conditions(filters):
 def get_employee_details():
 	emp_map = frappe._dict()
 	for d in frappe.db.sql("""select name, employee_name, designation,
-		department, branch, company, status
+		department, branch, company
 		from tabEmployee""", as_dict=1):
 		emp_map.setdefault(d.name, d)
 
