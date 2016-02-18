@@ -165,7 +165,7 @@ def get_basic_details(args, item):
 		"discount_percentage": 0.0,
 		"supplier": item.default_supplier,
 		"delivered_by_supplier": item.delivered_by_supplier,
-		"actual_qty": get_item_balance_qty_for_default_warehouse(item)
+		"actual_qty": get_available_qty(item.name, user_default_warehouse or args.warehouse or item.default_warehouse)
 	})
 
 	# if default specified in item is for another company, fetch from company
@@ -464,10 +464,3 @@ def get_default_bom(item_code=None):
 			return bom
 		else:
 			frappe.throw(_("No default BOM exists for Item {0}").format(item_code))
-			
-			
-def get_item_balance_qty_for_default_warehouse(item):
-	item = frappe.get_doc("Item", item.name)
-	
-	return frappe.db.get_value("Bin", {"item_code": item.name, "warehouse": item.default_warehouse},
-		["actual_qty"], as_dict=True) or {"actual_qty": 0}	
