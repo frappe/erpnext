@@ -239,7 +239,7 @@ class AccountsController(TransactionBase):
 
 		if self.doctype not in ["Journal Entry", "Period Closing Voucher"]:
 			self.validate_account_currency(gl_dict.account, account_currency)
-			self.set_balance_in_account_currency(gl_dict, account_currency)
+			set_balance_in_account_currency(gl_dict, account_currency, self.conversion_rate, self.company_currency)
 
 		return gl_dict
 
@@ -525,7 +525,7 @@ def validate_inclusive_tax(tax, doc):
 		elif tax.get("category") == "Valuation":
 			frappe.throw(_("Valuation type charges can not marked as Inclusive"))
 
-def set_balance_in_account_currency(gl_dict, conversion_rate=None, company_currency=None, account_currency=None):
+def set_balance_in_account_currency(gl_dict, account_currency=None, conversion_rate=None, company_currency=None):
 	if (not conversion_rate) and (account_currency!=company_currency):
 			frappe.throw(_("Account: {0} with currency: {1} can not be selected")
 				.format(gl_dict.account, account_currency))
