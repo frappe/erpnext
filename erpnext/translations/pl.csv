@@ -833,7 +833,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Nie wysyłaj przypom
 DocType: Opportunity,Walk In,Wejście
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Zbiory Wpisy
 DocType: Item,Inspection Criteria,Kryteria kontrolne
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,"Centrum kosztów, czyli Miejsca Powstawania Kosztów."
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,"Centrum kosztów, czyli Miejsca Powstawania Kosztów."
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Przeniesione
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Prześlij nagłówek firmowy i logo. (Można je edytować później).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Biały
@@ -1580,7 +1580,7 @@ DocType: Journal Entry,Accounts Receivable,Należności
 DocType: Address Template,This format is used if country specific format is not found,"Format ten jest używany, jeśli Format danego kraju nie znaleziono"
 DocType: Production Order,Use Multi-Level BOM,Używaj wielopoziomowych zestawień materiałowych
 DocType: Bank Reconciliation,Include Reconciled Entries,Dołącz uzgodnione wpisy
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Rejestr operacji gospodarczych.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Rejestr operacji gospodarczych.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Zostaw puste jeśli jest to rozważane dla wszystkich typów pracowników
 DocType: Landed Cost Voucher,Distribute Charges Based On,Rozpowszechnianie opłat na podstawie
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Konto {0} musi być typu ""trwałego"" jak Pozycja {1} dla pozycji aktywów"

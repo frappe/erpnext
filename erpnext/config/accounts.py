@@ -43,7 +43,7 @@ def get_data():
 					"icon": "icon-sitemap",
 					"label": _("Chart of Accounts"),
 					"route": "Accounts Browser/Account",
-					"description": _("Tree of finanial accounts."),
+					"description": _("Tree of financial accounts."),
 					"doctype": "Account",
 				},
 			]

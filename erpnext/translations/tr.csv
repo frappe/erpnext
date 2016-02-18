@@ -1019,7 +1019,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Çalışanların Do�
 DocType: Opportunity,Walk In,Rezervasyonsuz Müşteri
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Stok Girişler
 DocType: Item,Inspection Criteria,Muayene Kriterleri
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Finansal Maliyet Merkezleri Ağacı
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Finansal Maliyet Merkezleri Ağacı
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Aktarılan
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Mektup baş ve logosu yükleyin. (Daha sonra bunları düzenleyebilirsiniz).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Beyaz
@@ -1919,7 +1919,7 @@ DocType: Journal Entry,Accounts Receivable,Alacak hesapları
 DocType: Address Template,This format is used if country specific format is not found,Ülkeye özgü format bulunamazsa bu format kullanılır
 DocType: Production Order,Use Multi-Level BOM,Çok Seviyeli BOM kullan
 DocType: Bank Reconciliation,Include Reconciled Entries,Mutabık girdileri dahil edin
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Finansal Hesaplar Ağacı
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Finansal Hesaplar Ağacı
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Tüm çalışan tipleri için kabul ise boş bırakın
 DocType: Landed Cost Voucher,Distribute Charges Based On,Dağıt Masraflar Dayalı
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Hesap {0} Madde {1} Varlık Maddesi olmak üzere 'Sabit Varlık' türünde olmalıdır

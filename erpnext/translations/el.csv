@@ -831,7 +831,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Μην στέλνε�
 DocType: Opportunity,Walk In,Προχωρήστε
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Χρηματιστήριο Καταχωρήσεις
 DocType: Item,Inspection Criteria,Κριτήρια ελέγχου
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Δέντρο οικονομικών κεντρών κόστους.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Δέντρο οικονομικών κεντρών κόστους.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Μεταφέρονται
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Ανεβάστε την κεφαλίδα επιστολόχαρτου και το λογότυπό σας. (Μπορείτε να τα επεξεργαστείτε αργότερα).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Λευκό
@@ -1576,7 +1576,7 @@ DocType: Journal Entry,Accounts Receivable,Εισπρακτέοι λογαρια
 DocType: Address Template,This format is used if country specific format is not found,Αυτή η μορφοποίηση χρησιμοποιείται εάν δεν βρεθεί ειδική μορφοποίηση χώρας
 DocType: Production Order,Use Multi-Level BOM,Χρησιμοποιήστε Λ.Υ. πολλαπλών επιπέδων.
 DocType: Bank Reconciliation,Include Reconciled Entries,Συμπεριέλαβε συμφωνημένες καταχωρήσεις
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Δέντρο οικονομικών λογαριασμών.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Δέντρο οικονομικών λογαριασμών.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Άφησε το κενό αν ισχύει για όλους τους τύπους των υπαλλήλων
 DocType: Landed Cost Voucher,Distribute Charges Based On,Επιμέρησε τα κόστη μεταφοράς σε όλα τα είδη.
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Ο λογαριασμός {0} πρέπει να είναι του τύπου 'παγίων' καθώς το είδος {1} είναι ένα περιουσιακό στοιχείο

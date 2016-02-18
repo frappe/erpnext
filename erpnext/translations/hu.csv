@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Ne küldjön dolgoz�
 DocType: Opportunity,Walk In,Utcáról
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Stock bejegyzések
 DocType: Item,Inspection Criteria,Vizsgálati szempontok
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Tree of finanial költség központok.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Tree of financial költség központok.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,TRANSFERED
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Töltsd fel fejléces és logo. (Ezeket lehet szerkeszteni később).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Fehér
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,VEVÔKÖVETELÉSEK
 DocType: Address Template,This format is used if country specific format is not found,"Ezt a formátumot használják, ha ország-specifikus formátumban nem található"
 DocType: Production Order,Use Multi-Level BOM,Többszíntű anyagjegyzék
 DocType: Bank Reconciliation,Include Reconciled Entries,Közé Egyeztetett bejegyzések
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Fája finanial számlák.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Fája financial számlák.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,"Hagyja üresen, ha figyelembe munkavállalói típusok"
 DocType: Landed Cost Voucher,Distribute Charges Based On,Terjesztheti alapuló díjak
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Account {0} típusú legyen ""Fixed Asset"" tételként {1} egy eszköz tétele"
