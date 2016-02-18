@@ -832,7 +832,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Ne šaljite podsjetn
 DocType: Opportunity,Walk In,Šetnja u
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Stock tekstova
 DocType: Item,Inspection Criteria,Inspekcijski Kriteriji
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Drvo finanial troška .
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Drvo financial troška .
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Prenose
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Upload Vaše pismo glavu i logotip. (Možete ih uređivati kasnije).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Bijela
@@ -1579,7 +1579,7 @@ DocType: Journal Entry,Accounts Receivable,Potraživanja
 DocType: Address Template,This format is used if country specific format is not found,Ovaj format se koristi ako država specifičan format nije pronađena
 DocType: Production Order,Use Multi-Level BOM,Koristite multi-level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Uključi pomirio objave
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Drvo finanial račune .
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Drvo financial račune .
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Ostavite prazno ako se odnosi na sve tipove zaposlenika
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuirati optužbi na temelju
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Račun {0} mora biti tipa 'Nepokretne imovine' kao što je proizvod {1} imovina proizvoda

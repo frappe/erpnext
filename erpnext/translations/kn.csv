@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,ನೌಕರರ ಜ�
 DocType: Opportunity,Walk In,ವಲ್ಕ್
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,ಸ್ಟಾಕ್ ನಮೂದುಗಳು
 DocType: Item,Inspection Criteria,ಇನ್ಸ್ಪೆಕ್ಷನ್ ಮಾನದಂಡ
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Finanial ವೆಚ್ಚ ಕೇಂದ್ರದ ಟ್ರೀ .
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,financial ವೆಚ್ಚ ಕೇಂದ್ರದ ಟ್ರೀ .
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,ವರ್ಗಾವಣೆಯ
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,ನಿಮ್ಮ ಪತ್ರ ತಲೆ ಮತ್ತು ಲೋಗೋ ಅಪ್ಲೋಡ್. (ನೀವು ಅವುಗಳನ್ನು ನಂತರ ಸಂಪಾದಿಸಬಹುದು).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,ಬಿಳಿ
@@ -1581,7 +1581,7 @@ DocType: Journal Entry,Accounts Receivable,ಸ್ವೀಕರಿಸುವಂ�
 DocType: Address Template,This format is used if country specific format is not found,ದೇಶದ ನಿರ್ದಿಷ್ಟ ಸ್ವರೂಪ ದೊರೆಯಲಿಲ್ಲ ವೇಳೆ ಈ ವಿನ್ಯಾಸವನ್ನು ಬಳಸಿದಾಗ
 DocType: Production Order,Use Multi-Level BOM,ಬಹು ಮಟ್ಟದ BOM ಬಳಸಿ
 DocType: Bank Reconciliation,Include Reconciled Entries,ಮರುಕೌನ್ಸಿಲ್ ನಮೂದುಗಳು ಸೇರಿಸಿ
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Finanial ಖಾತೆಗಳ ಟ್ರೀ .
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,financial ಖಾತೆಗಳ ಟ್ರೀ .
 DocType: Leave Control Panel,Leave blank if considered for all employee types,ಎಲ್ಲಾ ನೌಕರ ರೀತಿಯ ಪರಿಗಣಿಸಲಾಗಿದೆ ವೇಳೆ ಖಾಲಿ ಬಿಡಿ
 DocType: Landed Cost Voucher,Distribute Charges Based On,ವಿತರಿಸಲು ಆರೋಪಗಳ ಮೇಲೆ
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,ಐಟಂ {1} ಆಸ್ತಿ ಐಟಂ ಖಾತೆ {0} ಬಗೆಯ ' ಸ್ಥಿರ ಆಸ್ತಿ ' ಇರಬೇಕು

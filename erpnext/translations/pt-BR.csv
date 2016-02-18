@@ -831,7 +831,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Não envie aos empre
 DocType: Opportunity,Walk In,Caminhe em
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Entradas de Stock
 DocType: Item,Inspection Criteria,Critérios de Inspeção
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Árvore de Centros de custo finanial .
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Árvore de Centros de custo financial .
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Transferido
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Publique sua cabeça letra e logotipo. (Você pode editá-las mais tarde).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Branco
@@ -1578,7 +1578,7 @@ DocType: Journal Entry,Accounts Receivable,Contas a Receber
 DocType: Address Template,This format is used if country specific format is not found,Este formato é usado se o formato específico país não é encontrado
 DocType: Production Order,Use Multi-Level BOM,Utilize LDM de Vários Níveis
 DocType: Bank Reconciliation,Include Reconciled Entries,Incluir entradas Reconciliados
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Árvore de contas finanial .
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Árvore de contas financial .
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Deixe em branco se considerado para todos os tipos de empregados
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuir taxas sobre
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"A Conta {0} deve ser do tipo ""Ativo Fixo"" pois o item {1} é um item de ativos"

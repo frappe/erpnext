@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Không gửi nhân v
 DocType: Opportunity,Walk In,Trong đi bộ
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Cổ Entries
 DocType: Item,Inspection Criteria,Tiêu chuẩn kiểm tra
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Cây của Trung tâm Chi phí finanial.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Cây của Trung tâm Chi phí financial.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Nhận chuyển nhượng
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Tải lên đầu thư của bạn và logo. (Bạn có thể chỉnh sửa chúng sau này).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Trắng
@@ -1581,7 +1581,7 @@ DocType: Journal Entry,Accounts Receivable,Tài khoản Phải thu
 DocType: Address Template,This format is used if country specific format is not found,Định dạng này được sử dụng nếu định dạng quốc gia cụ thể không được tìm thấy
 DocType: Production Order,Use Multi-Level BOM,Sử dụng Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Bao gồm Entries hòa giải
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Cây tài khoản finanial.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Cây tài khoản financial.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Để trống nếu xem xét tất cả các loại nhân viên
 DocType: Landed Cost Voucher,Distribute Charges Based On,Phân phối Phí Dựa Trên
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Tài khoản {0} phải là loại 'tài sản cố định ""như mục {1} là một khoản tài sản"

@@ -833,7 +833,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Ne pas envoyer des e
 DocType: Opportunity,Walk In,Walk In
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Stock entrées
 DocType: Item,Inspection Criteria,Critères d&#39;inspection
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Il ne faut pas mettre à jour les entrées de plus que {0}
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Il ne faut pas mettre à jour les entrées de plus que {0}
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Transféré
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Téléchargez votre tête et le logo lettre. (Vous pouvez les modifier ultérieurement).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Blanc
@@ -1580,7 +1580,7 @@ DocType: Journal Entry,Accounts Receivable,Débiteurs
 DocType: Address Template,This format is used if country specific format is not found,Ce format est utilisé si le format spécifique au pays n'est pas trouvé
 DocType: Production Order,Use Multi-Level BOM,Utilisez Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Inclure les entrées rapprochées
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Arborescence des comptes financiers.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Arborescence des comptes financiers.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Laisser vide si cela est jugé pour tous les types d&#39;employés
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuer accusations fondées sur
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Le compte {0} doit être de type 'Actif ', l'objet {1} étant un article Actif"

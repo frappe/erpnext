@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,직원 생일 알림
 DocType: Opportunity,Walk In,걷다
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,재고 항목
 DocType: Item,Inspection Criteria,검사 기준
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,finanial 코스트 센터의 나무.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,financial 코스트 센터의 나무.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,옮겨진
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,편지의 머리와 로고를 업로드합니다. (나중에 편집 할 수 있습니다).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,화이트
@@ -1581,7 +1581,7 @@ DocType: Journal Entry,Accounts Receivable,미수금
 DocType: Address Template,This format is used if country specific format is not found,국가 별 형식을 찾을 수없는 경우이 형식이 사용됩니다
 DocType: Production Order,Use Multi-Level BOM,사용 다중 레벨 BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,조정 됨 항목을 포함
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,재무계정트리
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,재무계정트리
 DocType: Leave Control Panel,Leave blank if considered for all employee types,모든 직원의 유형을 고려하는 경우 비워 둡니다
 DocType: Landed Cost Voucher,Distribute Charges Based On,배포 요금을 기준으로
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,품목은 {1} 자산 상품이기 때문에 계정 {0} 형식의 '고정 자산'이어야합니다
