@@ -21,13 +21,13 @@ payment_method = [
 	{
 		"doctype": "Payment Gateway Account",
 		"is_default": 1,
-		"gateway": "_Test Gateway",
+		"payment_gateway": "_Test Gateway",
 		"payment_account": "_Test Bank - _TC",
 		"currency": "INR"
 	},
 	{
 		"doctype": "Payment Gateway Account",
-		"gateway": "_Test Gateway",
+		"payment_gateway": "_Test Gateway",
 		"payment_account": "_Test Bank USD - _TC",
 		"currency": "USD"
 	}
@@ -39,7 +39,7 @@ class TestPaymentRequest(unittest.TestCase):
 			frappe.get_doc(payment_gateway).insert(ignore_permissions=True)
 			
 		for method in payment_method:
-			if not frappe.db.get_value("Payment Gateway Account", {"payment_gateway": method["gateway"], 
+			if not frappe.db.get_value("Payment Gateway Account", {"payment_gateway": method["payment_gateway"], 
 				"currency": method["currency"]}, "name"):
 				frappe.get_doc(method).insert(ignore_permissions=True)
 			
