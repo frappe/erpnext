@@ -62,17 +62,18 @@ def before_tests():
 	frappe.db.commit()
 
 @frappe.whitelist()
-def get_exchange_rate(from_currency, to_currency):
+def get_exchange_rate(from_currency, to_currency, posting_date):	
 	if from_currency == to_currency:
 		return 1
-	
-	exchange = "%s-%s" % (from_currency, to_currency)
-	value = flt(frappe.db.get_value("Currency Exchange", exchange, "exchange_rate"))
+		
+	value = flt(frappe.db.get_value("Currency Exchange", 
+		{"from_currency": from_currency, "to_currency": to_currency,
+			"date": posting_date}, "exchange_rate"))
 
 	if not value:
 		try:
 			cache = frappe.cache()
-			key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
+			key = "currency_exchange_rate:{0}:{1}:{2}".format(from_currency, to_currency, posting_date)
 			value = cache.get(key)
 
 			if not value:
