@@ -239,7 +239,7 @@ class AccountsController(TransactionBase):
 
 		if self.doctype not in ["Journal Entry", "Period Closing Voucher"]:
 			self.validate_account_currency(gl_dict.account, account_currency)
-			set_balance_in_account_currency(gl_dict, account_currency, self.get("conversion_rate"), self.get("company_currency"))
+			set_balance_in_account_currency(gl_dict, account_currency, self.get("conversion_rate"), self.company_currency)
 
 		return gl_dict
 
