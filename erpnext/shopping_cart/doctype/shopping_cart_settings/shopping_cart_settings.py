@@ -6,7 +6,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
-from frappe.utils import comma_and
 from frappe.model.document import Document
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
@@ -34,20 +33,16 @@ class ShoppingCartSettings(Document):
 		for price_list, currency in price_list_currency_map.items():
 			if not currency:
 				frappe.throw(_("Currency is required for Price List {0}").format(price_list))
-
-		expected_to_exist = [currency + "-" + company_currency
-			for currency in price_list_currency_map.values()
-			if currency != company_currency]
-
-		if expected_to_exist:
+		
 			exists = frappe.db.sql_list("""select name from `tabCurrency Exchange`
-				where name in (%s)""" % (", ".join(["%s"]*len(expected_to_exist)),),
-				tuple(expected_to_exist))
-
-			missing = list(set(expected_to_exist).difference(exists))
-
-			if missing:
-				msgprint(_("Missing Currency Exchange Rates for {0}").format(comma_and(missing)),
+					where from_currency = %s and to_currency = %s
+					order by date desc limit 1""", (currency, company_currency))
+					
+			if currency == company_currency:
+				exists = [1]
+			
+			if not exists:
+				msgprint(_("Missing Currency Exchange Rates for {0}").format(' - '.join([currency, company_currency])),
 					raise_exception=ShoppingCartSetupError)
 
 	def validate_tax_rule(self):
