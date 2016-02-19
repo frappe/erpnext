@@ -47,14 +47,10 @@ class PaymentRequest(Document):
 	
 	def on_cancel(self):
 		self.set_as_cancelled()
-		
-	def on_update_after_submit(self):
-		pass
-	
-	def set_status(self):
-		pass
 	
 	def get_payment_url(self):
+		""" This is blanck method to trigger hooks call from individual payment gateway app
+		  which will return respective payment gateway"""
 		pass
 	
 	def make_invoice(self):
@@ -161,6 +157,7 @@ def make_payment_request(**args):
 	
 	args = frappe._dict(args)
 	ref_doc = frappe.get_doc(args.dt, args.dn)
+	
 	gateway_account = get_gateway_details(args)
 	
 	base_rounded_total, rounded_total = get_amount(ref_doc, args.dt)
