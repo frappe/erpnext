@@ -831,7 +831,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Stuur geen Werknemer
 DocType: Opportunity,Walk In,Walk In
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Stock Inzendingen
 DocType: Item,Inspection Criteria,Inspectie Criteria
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Boom van financiële kostenplaatsen.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Boom van financiële kostenplaatsen.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Overgebrachte
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Upload uw brief hoofd en logo. (Je kunt ze later bewerken).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Wit
@@ -1578,7 +1578,7 @@ DocType: Journal Entry,Accounts Receivable,Debiteuren
 DocType: Address Template,This format is used if country specific format is not found,Dit formaat wordt gebruikt als landspecifiek formaat niet kan worden gevonden
 DocType: Production Order,Use Multi-Level BOM,Gebruik Multi-Level Stuklijst
 DocType: Bank Reconciliation,Include Reconciled Entries,Omvatten Reconciled Entries
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Boom van financiële rekeningen
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Boom van financiële rekeningen
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Laat leeg indien overwogen voor alle werknemer soorten
 DocType: Landed Cost Voucher,Distribute Charges Based On,Verdeel Toeslagen op basis van
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Rekening {0} moet van het type 'vaste activa', omdat Artikel {1} een Activa Artikel is"

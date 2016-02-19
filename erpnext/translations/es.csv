@@ -830,7 +830,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,No enviar recordator
 DocType: Opportunity,Walk In,Entrar
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Entradas de archivo
 DocType: Item,Inspection Criteria,Criterios de inspección
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Árbol de centros de costos financieros.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Árbol de centros de costos financieros.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Transferido
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Cargue su membrete y el logotipo. (Estos pueden editarse más tarde).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Blanco
@@ -1575,7 +1575,7 @@ DocType: Journal Entry,Accounts Receivable,Cuentas por cobrar
 DocType: Address Template,This format is used if country specific format is not found,Este formato será utilizado para todos los documentos si no se encuentra un formato específico para el país.
 DocType: Production Order,Use Multi-Level BOM,Utilizar Lista de Materiales (LdM)  Multi-Nivel
 DocType: Bank Reconciliation,Include Reconciled Entries,Incluir las entradas conciliadas
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Árbol de cuentas financieras
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Árbol de cuentas financieras
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Dejar en blanco si es considerada para todos los tipos de empleados
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuir los cargos basados en
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Cuenta {0} debe ser de tipo 'Activos Fijos' porque Artículo {1} es un Elemento de Activo Fijo

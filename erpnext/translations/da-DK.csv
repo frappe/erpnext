@@ -721,7 +721,7 @@ DocType: Workstation,Electricity Cost,Elektricitet Omkostninger
 DocType: HR Settings,Don't send Employee Birthday Reminders,Send ikke Medarbejder Fødselsdag Påmindelser
 DocType: Opportunity,Walk In,Walk In
 DocType: Item,Inspection Criteria,Inspektion Kriterier
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Tree of finanial Cost Centers.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Tree of financial Cost Centers.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Overført
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Upload dit brev hoved og logo. (Du kan redigere dem senere).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Hvid
@@ -1390,7 +1390,7 @@ DocType: Journal Entry,Accounts Receivable,Tilgodehavender
 DocType: Address Template,This format is used if country specific format is not found,"Dette format bruges, hvis landespecifikke format ikke findes"
 DocType: Production Order,Use Multi-Level BOM,Brug Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Medtag Afstemt Angivelser
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Tree of finanial konti.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Tree of financial konti.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Lad stå tomt hvis det anses for alle typer medarbejderaktier
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuere afgifter baseret på
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Konto {0} skal være af typen 'Anlægskonto' da enheden {1} er et aktiv

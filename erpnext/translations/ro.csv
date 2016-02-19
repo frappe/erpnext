@@ -830,7 +830,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Nu trimiteți Mement
 DocType: Opportunity,Walk In,Walk In
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Stoc Entries
 DocType: Item,Inspection Criteria,Criteriile de inspecție
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Arborele de centre de cost finanial.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Arborele de centre de cost financial.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Transferat
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Încărcați capul scrisoare și logo-ul. (Le puteți edita mai târziu).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Alb
@@ -1573,7 +1573,7 @@ DocType: Journal Entry,Accounts Receivable,Conturi de Incasare
 DocType: Address Template,This format is used if country specific format is not found,Acest format este utilizat în cazul în format specific țării nu este găsit
 DocType: Production Order,Use Multi-Level BOM,Utilizarea Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Includ intrările împăcat
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Arborele de conturi finanial.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Arborele de conturi financial.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Lăsați necompletat dacă se consideră pentru toate tipurile de angajați
 DocType: Landed Cost Voucher,Distribute Charges Based On,Împărțiți taxelor pe baza
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Contul {0} trebuie să fie de tipul 'valoare stabilită' deoarece articolul {1} este un articol de valoare
