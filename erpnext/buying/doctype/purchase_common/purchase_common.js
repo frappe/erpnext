@@ -18,8 +18,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	setup_queries: function() {
 		var me = this;
-		
-		this.frm.add_fetch('supplier', 'language', 'print_language');
+
 		if(this.frm.fields_dict.buying_price_list) {
 			this.frm.set_query("buying_price_list", function() {
 				return{
