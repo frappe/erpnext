@@ -7,7 +7,7 @@ cur_frm.cscript.before_load = function(doc, dt, dn, callback) {
 	}
 
 	if(!frappe.languages) {
-		frappe.languages = frappe.boot.languages;
+		frappe.languages = frappe.get_languages_dict();
 		update_language_select();
 	} else {
 		update_language_select();
