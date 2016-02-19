@@ -12,7 +12,8 @@ from operator import itemgetter
 class BOM(Document):
 	def autoname(self):
 		last_name = frappe.db.sql("""select max(name) from `tabBOM`
-			where name like "BOM/{0}/%%" and item=%s""".format(frappe.db.escape(self.item)), self.item)
+			where name like "BOM/{0}/%%" and item=%s
+		""".format(frappe.db.escape(self.item, percent=False)), self.item)
 		if last_name:
 			idx = cint(cstr(last_name[0][0]).split('/')[-1].split('-')[0]) + 1
 		else:
