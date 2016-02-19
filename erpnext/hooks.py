@@ -68,6 +68,13 @@ website_route_rules = [
 			"doctype": "Delivery Note",
 			"parents": [{"title": _("Shipments"), "name": "shipments"}]
 		}
+	},
+	{"from_route": "/jobs", "to_route": "Job Opening"},
+	{"from_route": "/jobs/<path:name>", "to_route": "job_opening",
+		"defaults": {
+			"doctype": "Job Opening",
+			"parents": [{"title": _("Job Opening"), "name": "jobs"}]
+		}
 	}
 ]
 
