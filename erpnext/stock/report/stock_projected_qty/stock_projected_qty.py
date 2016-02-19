@@ -73,7 +73,7 @@ def get_item_map(item_code):
 
 	condition = ""
 	if item_code:
-		condition = 'and item_code = "{0}"'.format(frappe.db.escape(item_code))
+		condition = 'and item_code = "{0}"'.format(frappe.db.escape(item_code, percent=False))
 
 	items = frappe.db.sql("""select * from `tabItem` item
 		where is_stock_item = 1
@@ -85,7 +85,7 @@ def get_item_map(item_code):
 
 	condition = ""
 	if item_code:
-		condition = 'where parent="{0}"'.format(frappe.db.escape(item_code))
+		condition = 'where parent="{0}"'.format(frappe.db.escape(item_code, percent=False))
 
 	reorder_levels = frappe._dict()
 	for ir in frappe.db.sql("""select * from `tabItem Reorder` {condition}""".format(condition=condition), as_dict=1):

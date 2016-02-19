@@ -105,11 +105,11 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 			if acc.account_currency == frappe.db.get_value("Company", acc.company, "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account), ))
-
+			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+	
 	if party_type and party:
 		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
-			(frappe.db.escape(party_type), frappe.db.escape(party)))
+			(frappe.db.escape(party_type), frappe.db.escape(party, percent=False)))
 
 	if account or (party_type and party):
 		if in_account_currency:
