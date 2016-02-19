@@ -313,7 +313,8 @@ class JournalEntry(AccountsController):
 			elif not d.exchange_rate or d.exchange_rate == 1 or \
 				(d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name):
 					d.exchange_rate = get_exchange_rate(d.account, d.account_currency, self.company,
-						d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
+						d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate, 
+						self.posting_date)
 
 			if not d.exchange_rate:
 				frappe.throw(_("Row {0}: Exchange Rate is mandatory").format(d.idx))
@@ -625,9 +626,12 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 def get_payment_entry(ref_doc, args):
 	cost_center = frappe.db.get_value("Company", ref_doc.company, "cost_center")
 	exchange_rate = 1
+	
+	posting_date = ref_doc.get("posting_date") or ref_doc.get("transaction_date")
+	
 	if args.get("party_account"):
 		exchange_rate = get_exchange_rate(args.get("party_account"), args.get("party_account_currency"),
-			ref_doc.company, ref_doc.doctype, ref_doc.name)
+			ref_doc.company, ref_doc.doctype, ref_doc.name, posting_date=posting_date)
 
 	je = frappe.new_doc("Journal Entry")
 	je.update({
@@ -660,7 +664,7 @@ def get_payment_entry(ref_doc, args):
 	if bank_account:
 		bank_row.update(bank_account)
 		bank_row.exchange_rate = get_exchange_rate(bank_account["account"],
-			bank_account["account_currency"], ref_doc.company)
+			bank_account["account_currency"], ref_doc.company, posting_date=posting_date)
 
 	bank_row.cost_center = cost_center
 
@@ -788,7 +792,8 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 
 @frappe.whitelist()
 def get_exchange_rate(account, account_currency=None, company=None,
-		reference_type=None, reference_name=None, debit=None, credit=None, exchange_rate=None):
+		reference_type=None, reference_name=None, debit=None, credit=None, exchange_rate=None, 
+		posting_date=None):
 	from erpnext.setup.utils import get_exchange_rate
 	account_details = frappe.db.get_value("Account", account,
 		["account_type", "root_type", "account_currency", "company"], as_dict=1)
@@ -814,7 +819,10 @@ def get_exchange_rate(account, account_currency=None, company=None,
 			exchange_rate = get_average_exchange_rate(account)
 
 		if not exchange_rate and account_currency:
-			exchange_rate = get_exchange_rate(account_currency, company_currency)
+			if not posting_date:
+				posting_date = frappe.utils.today()
+				
+			exchange_rate = get_exchange_rate(account_currency, company_currency, posting_date)
 
 	else:
 		exchange_rate = 1
