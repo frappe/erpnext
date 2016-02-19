@@ -1,5 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
+frappe.require("assets/erpnext/js/controllers/load_languages.js")
 
 frappe.ui.form.on("Customer", {
 	refresh: function(frm) {
