@@ -33,7 +33,7 @@ DocType: Department,Department,قسم
 DocType: Purchase Order,% Billed,% فوترت
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +43,Exchange Rate must be same as {0} {1} ({2}),سعر الصرف يجب أن يكون نفس {0} {1} ({2})
 DocType: Sales Invoice,Customer Name,اسم العميل
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +132,Bank account cannot be named as {0},لا يمكن تسمية حساب مصرفي ب {0}
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +136,Bank account cannot be named as {0},لا يمكن تسمية حساب مصرفي ب {0}
 DocType: Features Setup,"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.",هي المجالات ذات الصلة عن تصدير مثل العملة ، ومعدل التحويل ، ومجموع التصدير، تصدير الخ المجموع الكلي المتاحة في توصيل ملاحظة ، ونقاط البيع ، اقتباس، فاتورة المبيعات ، ترتيب المبيعات الخ
 DocType: Account,Heads (or groups) against which Accounting Entries are made and balances are maintained.,رؤساء (أو مجموعات) التي تتم ضد القيود المحاسبية ويتم الاحتفاظ التوازنات.
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +173,Outstanding for {0} cannot be less than zero ({1}),غير المسددة ل {0} لا يمكن أن يكون أقل من الصفر ( {1} )
@@ -49,7 +49,6 @@ apps/erpnext/erpnext/projects/doctype/project/project.py +43,Expected End Date c
 apps/erpnext/erpnext/utilities/transaction_base.py +107,Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ,الصف # {0}: تقييم يجب أن يكون نفس {1} {2} ({3} / {4})
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +226,New Leave Application,إجازة جديدة التطبيق
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +134,Bank Draft,مسودة بنك
-DocType: Features Setup,1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. لضمان منطقية ترميز البنود ولتمكين البحث فيها بناءً على ذلك الترميز استخدم هذا الخيار
 DocType: Mode of Payment Account,Mode of Payment Account,طريقة حساب الدفع
 apps/erpnext/erpnext/stock/doctype/item/item.js +49,Show Variants,مشاهدة المتغيرات
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +479,Quantity,كمية
@@ -58,7 +57,7 @@ DocType: Employee Education,Year of Passing,اجتياز سنة
 apps/erpnext/erpnext/public/js/pos/pos_bill_item.html +12,In Stock,في الأوراق المالية
 DocType: Designation,Designation,تعيين
 DocType: Production Plan Item,Production Plan Item,خطة إنتاج السلعة
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +141,User {0} is already assigned to Employee {1},المستخدم {0} تم تعيينه بالفعل إلى موظف {1}
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +146,User {0} is already assigned to Employee {1},المستخدم {0} تم تعيينه بالفعل إلى موظف {1}
 apps/erpnext/erpnext/accounts/page/pos/pos_page.html +13,Make new POS Profile,جعل الملف الجديد POS
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +31,Health Care,الرعاية الصحية
 DocType: Purchase Invoice,Monthly,شهريا
@@ -72,7 +71,7 @@ DocType: Appraisal Goal,Score (0-5),نقاط (0-5)
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +199,Row {0}: {1} {2} does not match with {3},صف {0} {1} {2} لا يتطابق مع {3}
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +74,Row # {0}:,الصف # {0}
 DocType: Delivery Note,Vehicle No,السيارة لا
-apps/erpnext/erpnext/public/js/pos/pos.js +549,Please select Price List,الرجاء اختيار قائمة الأسعار
+apps/erpnext/erpnext/public/js/pos/pos.js +553,Please select Price List,الرجاء اختيار قائمة الأسعار
 DocType: Production Order Operation,Work In Progress,التقدم في العمل
 DocType: Employee,Holiday List,عطلة قائمة
 DocType: Time Log,Time Log,وقت دخول
@@ -114,7 +113,7 @@ DocType: Lead,Person Name,اسم الشخص
 DocType: Sales Order,"Check if recurring order, uncheck to stop recurring or put proper End Date",تحقق ما اذا كان النظام المتكررة، قم بإلغاء لوقف المتكررة أو وضع مناسب تاريخ الانتهاء
 DocType: Sales Invoice Item,Sales Invoice Item,فاتورة مبيعات السلعة
 DocType: Account,Credit,ائتمان
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource > HR Settings,يرجى الموظف الإعداد نظام التسمية في الموارد البشرية&gt; إعدادات HR
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +28,Please setup Employee Naming System in Human Resource > HR Settings,يرجى الموظف الإعداد نظام التسمية في الموارد البشرية&gt; إعدادات HR
 DocType: POS Profile,Write Off Cost Center,شطب مركز التكلفة
 DocType: Warehouse,Warehouse Detail,تفاصيل المستودع
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +181,Credit limit has been crossed for customer {0} {1}/{2},وقد عبرت الحد الائتماني للعميل {0} {1} / {2}
@@ -178,13 +177,14 @@ apps/erpnext/erpnext/config/projects.py +28,Batch Time Logs for billing.,دفع�
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +30,Newsletter has already been sent,وقد تم بالفعل أرسلت الرسالة الإخبارية
 DocType: Lead,Request Type,طلب نوع
 DocType: Leave Application,Reason,سبب
+apps/erpnext/erpnext/hr/doctype/offer_letter/offer_letter.js +15,Make Employee,جعل الموظف
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +14,Broadcasting,إذاعة
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +140,Execution,إعدام
 apps/erpnext/erpnext/public/js/setup_wizard.js +26,The first user will become the System Manager (you can change this later).,المستخدم الأول سوف تصبح مدير النظام (يمكنك تغيير هذا لاحقا).
 apps/erpnext/erpnext/config/manufacturing.py +39,Details of the operations carried out.,حملت تفاصيل العمليات بها.
 DocType: Serial No,Maintenance Status,حالة الصيانة
 apps/erpnext/erpnext/config/stock.py +258,Items and Pricing,البنود والتسعير
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +39,From Date should be within the Fiscal Year. Assuming From Date = {0},من التسجيل ينبغي أن يكون ضمن السنة المالية. على افتراض من التسجيل = {0}
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +42,From Date should be within the Fiscal Year. Assuming From Date = {0},من التسجيل ينبغي أن يكون ضمن السنة المالية. على افتراض من التسجيل = {0}
 DocType: Appraisal,Select the Employee for whom you are creating the Appraisal.,حدد موظف الذين تقوم بإنشاء تقييم.
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +96,Cost Center {0} does not belong to Company {1},مركز تكلف {0} لا تنتمي إلى شركة {1}
 DocType: Customer,Individual,فرد
@@ -196,7 +196,7 @@ apps/erpnext/erpnext/stock/doctype/price_list/price_list.py +14,Price List must 
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +81,Installation date cannot be before delivery date for Item {0},تاريخ التثبيت لا يمكن أن يكون قبل تاريخ التسليم القطعة ل {0}
 DocType: Pricing Rule,Discount on Price List Rate (%),معدل الخصم على قائمة الأسعار (٪)
 DocType: Offer Letter,Select Terms and Conditions,اختر الشروط والأحكام
-apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +51,Out Value,القيمة خارج
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +49,Out Value,القيمة خارج
 DocType: Production Planning Tool,Sales Orders,أوامر البيع
 DocType: Purchase Taxes and Charges,Valuation,تقييم
 ,Purchase Order Trends,شراء اتجاهات ترتيب
@@ -230,7 +230,7 @@ DocType: Process Payroll,Creates salary slip for above mentioned criteria.,يخ�
 apps/erpnext/erpnext/templates/generators/item.html +30,No description given,لا يوجد وصف معين
 apps/erpnext/erpnext/config/buying.py +18,Request for purchase.,طلب للشراء.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +193,Only the selected Leave Approver can submit this Leave Application,و اترك الموافق المحددة فقط يمكن أن يقدم هذا التطبيق اترك
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +114,Relieving Date must be greater than Date of Joining,تخفيف التسجيل يجب أن يكون أكبر من تاريخ الالتحاق بالعمل
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +118,Relieving Date must be greater than Date of Joining,تخفيف التسجيل يجب أن يكون أكبر من تاريخ الالتحاق بالعمل
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +172,Leaves per Year,يترك في السنة
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +187,Please set Naming Series for {0} via Setup > Settings > Naming Series,الرجاء تعيين تسمية Series لل{0} عبر إعداد&gt; إعدادات&gt; تسمية السلسلة
 DocType: Time Log,Will be updated when batched.,سيتم تحديث عندما دفعات.
@@ -240,6 +240,7 @@ DocType: Item Website Specification,Item Website Specification,البند موا
 DocType: Payment Tool,Reference No,المرجع لا
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +418,Leave Blocked,ترك الممنوع
 apps/erpnext/erpnext/stock/doctype/item/item.py +572,Item {0} has reached its end of life on {1},البند {0} قد بلغ نهايته من الحياة على {1}
+apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +105,Bank Entries,مقالات البنك
 apps/erpnext/erpnext/accounts/utils.py +341,Annual,سنوي
 DocType: Stock Reconciliation Item,Stock Reconciliation Item,الأسهم المصالحة البند
 DocType: Stock Entry,Sales Invoice No,فاتورة مبيعات لا
@@ -458,7 +459,7 @@ DocType: Purchase Receipt,Add / Edit Taxes and Charges,إضافة / تعديل �
 DocType: Purchase Invoice,Supplier Invoice No,رقم فاتورة المورد
 DocType: Territory,For reference,للرجوع إليها
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +154,"Cannot delete Serial No {0}, as it is used in stock transactions",لا يمكن حذف الرقم التسلسلي {0}، كما يتم استخدامه في المعاملات الأسهم
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +231,Closing (Cr),إغلاق (الكروم)
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +234,Closing (Cr),إغلاق (الكروم)
 DocType: Serial No,Warranty Period (Days),فترة الضمان (أيام)
 DocType: Installation Note Item,Installation Note Item,ملاحظة تثبيت الإغلاق
 ,Pending Qty,في انتظار الكمية
@@ -567,7 +568,7 @@ apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +57,Please enter ite
 DocType: Purchase Receipt,Other Details,تفاصيل أخرى
 DocType: Account,Accounts,حسابات
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +67,Marketing,تسويق
-apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +198,Payment Entry is already created,يتم إنشاء دفع الاشتراك بالفعل
+apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +204,Payment Entry is already created,يتم إنشاء دفع الاشتراك بالفعل
 DocType: Features Setup,To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,لتتبع البند في المبيعات وثائق الشراء على أساس غ من المسلسل. ويمكن أيضا استخدام هذه المعلومات لتعقب الضمان للمنتج.
 DocType: Purchase Receipt Item Supplied,Current Stock,الأسهم الحالية
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +64,Total billing this year,مجموع الفواتير هذا العام
@@ -589,7 +590,7 @@ apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +7,Aerospace,الفضا
 DocType: Journal Entry,Credit Card Entry,الدخول بطاقة الائتمان
 apps/erpnext/erpnext/projects/report/daily_time_log_summary/daily_time_log_summary.py +18,Task Subject,مهمة موضوع
 apps/erpnext/erpnext/config/stock.py +33,Goods received from Suppliers.,تلقى السلع من الموردين.
-apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +49,In Value,في القيمة
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +47,In Value,في القيمة
 DocType: Lead,Campaign Name,اسم الحملة
 ,Reserved,محجوز
 DocType: Purchase Order,Supply Raw Materials,توريد المواد الخام
@@ -774,7 +775,7 @@ DocType: Purchase Receipt Item Supplied,Required Qty,مطلوب الكمية
 DocType: Bank Reconciliation,Total Amount,المبلغ الكلي لل
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +32,Internet Publishing,نشر الإنترنت
 DocType: Production Planning Tool,Production Orders,أوامر الإنتاج
-apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +53,Balance Value,توازن القيمة
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +51,Balance Value,توازن القيمة
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +38,Sales Price List,قائمة مبيعات الأسعار
 apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +69,Publish to sync items,نشر لمزامنة العناصر
 DocType: Bank Reconciliation,Account Currency,عملة الحساب
@@ -831,7 +832,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,لا ترسل تذك
 DocType: Opportunity,Walk In,عميل غير مسجل
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,الأسهم مقالات
 DocType: Item,Inspection Criteria,التفتيش معايير
-apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,شجرة مراكز التكلفة finanial .
+apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,شجرة مراكز التكلفة financial .
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,نقلها
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,تحميل رئيس رسالتكم والشعار. (يمكنك تحريرها لاحقا).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,أبيض
@@ -856,6 +857,7 @@ DocType: Company,If Monthly Budget Exceeded (for expense account),إذا تجا�
 DocType: Workstation,Net Hour Rate,صافي معدل ساعة
 DocType: Landed Cost Purchase Receipt,Landed Cost Purchase Receipt,هبطت استلام تكلفة الشراء
 DocType: Company,Default Terms,شروط الافتراضية
+DocType: Features Setup,"If checked, only Description, Quantity, Rate and Amount are shown in print of Item table. Any extra field is shown under 'Description' column.",إذا تحققت، وتظهر فقط الوصف، الكمية، السعر والمبلغ في طباعة الجدول البند. يظهر أي حقل إضافي تحت عمود &quot;الوصف&quot;.
 DocType: Packing Slip Item,Packing Slip Item,التعبئة الإغلاق زلة
 DocType: POS Profile,Cash/Bank Account,النقد / البنك حساب
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +70,Removed items with no change in quantity or value.,العناصر إزالتها مع أي تغيير في كمية أو قيمة.
@@ -876,7 +878,7 @@ DocType: Landed Cost Item,Purchase Receipt Item,شراء السلعة استلا
 DocType: Production Plan Item,Reserved Warehouse in Sales Order / Finished Goods Warehouse,مستودع محجوزة في ترتيب المبيعات / السلع تامة الصنع في معرض النماذج
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +69,Selling Amount,كمية البيع
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +79,Time Logs,سجلات الوقت
-apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +113,You are the Expense Approver for this record. Please Update the 'Status' and Save,"كنت الموافق المصروفات لهذا السجل . يرجى تحديث ""الحالة"" و فروا"
+apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +125,You are the Expense Approver for this record. Please Update the 'Status' and Save,"كنت الموافق المصروفات لهذا السجل . يرجى تحديث ""الحالة"" و فروا"
 DocType: Serial No,Creation Document No,إنشاء وثيقة لا
 DocType: Issue,Issue,قضية
 apps/erpnext/erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py +28,Account does not match with Company,الحساب لا يتطابق مع الشركة
@@ -888,7 +890,7 @@ DocType: Lead,Organization Name,اسم المنظمة
 DocType: Tax Rule,Shipping State,الدولة الشحن
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +61,Item must be added using 'Get Items from Purchase Receipts' button,"يجب إضافة البند باستخدام ""الحصول على السلع من شراء إيصالات 'زر"
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +126,Sales Expenses,مصاريف المبيعات
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +138,Standard Buying,شراء القياسية
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +142,Standard Buying,شراء القياسية
 DocType: GL Entry,Against,ضد
 DocType: Item,Default Selling Cost Center,الافتراضي البيع مركز التكلفة
 DocType: Sales Partner,Implementation Partner,تنفيذ الشريك
@@ -930,7 +932,7 @@ DocType: Company,Company registration numbers for your reference. Tax numbers et
 DocType: Sales Partner,Distributor,موزع
 DocType: Shopping Cart Shipping Rule,Shopping Cart Shipping Rule,التسوق شحن العربة القاعدة
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +210,Production Order {0} must be cancelled before cancelling this Sales Order,إنتاج النظام {0} يجب أن يتم إلغاء هذا الأمر قبل إلغاء المبيعات
-apps/erpnext/erpnext/public/js/controllers/transaction.js +909,Please set 'Apply Additional Discount On',الرجاء تعيين &#39;تطبيق خصم إضافي على&#39;
+apps/erpnext/erpnext/public/js/controllers/transaction.js +916,Please set 'Apply Additional Discount On',الرجاء تعيين &#39;تطبيق خصم إضافي على&#39;
 ,Ordered Items To Be Billed,أمرت البنود التي يتعين صفت
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,من المدى يجب أن يكون أقل من أن تتراوح
 apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,حدد وقت السجلات وتقديمها إلى إنشاء فاتورة مبيعات جديدة.
@@ -986,7 +988,7 @@ DocType: Payment Reconciliation,Unreconciled Payment Details,لم تتم تسو�
 DocType: Global Defaults,Current Fiscal Year,السنة المالية الحالية
 DocType: Global Defaults,Disable Rounded Total,تعطيل إجمالي مدور
 DocType: Lead,Call,دعوة
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +409,'Entries' cannot be empty,' المدخلات ' لا يمكن أن تكون فارغة
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +411,'Entries' cannot be empty,' المدخلات ' لا يمكن أن تكون فارغة
 apps/erpnext/erpnext/utilities/transaction_base.py +78,Duplicate row {0} with same {1},صف مكررة {0} مع نفسه {1}
 ,Trial Balance,ميزان المراجعة
 apps/erpnext/erpnext/config/hr.py +220,Setting up Employees,إعداد الموظفين
@@ -1000,7 +1002,7 @@ apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +132,Vie
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41,Earliest,أقرب
 apps/erpnext/erpnext/stock/doctype/item/item.py +431,"An Item Group exists with same name, please change the item name or rename the item group",يوجد اسم مجموعة أصناف بنفس الاسم، الرجاء تغيير اسم الصنف أو إعادة تسمية المجموعة
 DocType: Production Order,Manufacture against Sales Order,تصنيع ضد ترتيب المبيعات
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +452,Rest Of The World,بقية العالم
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +456,Rest Of The World,بقية العالم
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +81,The Item {0} cannot have Batch,العنصر {0} لا يمكن أن يكون دفعة
 ,Budget Variance Report,تقرير الفرق الميزانية
 DocType: Salary Slip,Gross Pay,إجمالي الأجور
@@ -1171,7 +1173,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 DocType: Purchase Invoice Item,"Tax detail table fetched from item master as a string and stored in this field.
 Used for Taxes and Charges","التفاصيل الضرائب الجدول المنال من سيده البند كسلسلة وتخزينها في هذا المجال.
  المستخدمة للضرائب والرسوم"
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +151,Employee cannot report to himself.,الموظف لا يمكن أن يقدم تقريرا إلى نفسه.
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +156,Employee cannot report to himself.,الموظف لا يمكن أن يقدم تقريرا إلى نفسه.
 DocType: Account,"If the account is frozen, entries are allowed to restricted users.",إذا تم تجميد الحساب، ويسمح للمستخدمين إدخالات مقيدة.
 DocType: Email Digest,Bank Balance,الرصيد المصرفي
 apps/erpnext/erpnext/controllers/accounts_controller.py +467,Accounting Entry for {0}: {1} can only be made in currency: {2},القيد المحاسبي ل{0}: {1} يمكن إجراؤه بالعملة: {2} فقط
@@ -1201,7 +1203,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +83,Analyst,محلل
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +145,Row {0}: Allocated amount {1} must be less than or equals to JV amount {2},يجب أن يكون المبلغ المخصص {1} أقل من أو يساوي مبلغ JV {2} الصف {0}
 DocType: Item,Inventory,جرد
 DocType: Features Setup,"To enable ""Point of Sale"" view",لتمكين &quot;نقطة البيع&quot; وجهة نظر
-apps/erpnext/erpnext/public/js/pos/pos.js +411,Payment cannot be made for empty cart,لا يمكن أن يتم السداد للسلة فارغة
+apps/erpnext/erpnext/public/js/pos/pos.js +415,Payment cannot be made for empty cart,لا يمكن أن يتم السداد للسلة فارغة
 DocType: Item,Sales Details,تفاصيل المبيعات
 DocType: Opportunity,With Items,مع الأصناف
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py +36,In Qty,في الكمية
@@ -1242,7 +1244,7 @@ DocType: Time Log Batch Detail,Time Log Batch Detail,وقت دخول دفعة ا
 DocType: Landed Cost Voucher,Landed Cost Help,هبطت التكلفة مساعدة
 DocType: Leave Block List,Block Holidays on important days.,عطلات كتلة في الأيام الهامة.
 ,Accounts Receivable Summary,حسابات المقبوضات ملخص
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +187,Please set User ID field in an Employee record to set Employee Role,الرجاء تعيين حقل معرف المستخدم في سجل الموظف لتحديد دور موظف
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +194,Please set User ID field in an Employee record to set Employee Role,الرجاء تعيين حقل معرف المستخدم في سجل الموظف لتحديد دور موظف
 DocType: UOM,UOM Name,UOM اسم
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +43,Contribution Amount,مبلغ المساهمة
 DocType: Sales Invoice,Shipping Address,عنوان الشحن
@@ -1292,7 +1294,7 @@ DocType: HR Settings,Stop Birthday Reminders,توقف عيد ميلاد تذكي
 DocType: SMS Center,Receiver List,استقبال قائمة
 DocType: Payment Tool Detail,Payment Amount,دفع مبلغ
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +46,Consumed Amount,الكمية المستهلكة
-apps/erpnext/erpnext/public/js/pos/pos.js +512,{0} View,{0} مشاهدة
+apps/erpnext/erpnext/public/js/pos/pos.js +516,{0} View,{0} مشاهدة
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +96,Net Change in Cash,صافي التغير في النقد
 DocType: Salary Structure Deduction,Salary Structure Deduction,هيكل المرتبات / الخصومات
 apps/erpnext/erpnext/stock/doctype/item/item.py +339,Unit of Measure {0} has been entered more than once in Conversion Factor Table,وحدة القياس {0} تم إدخال أكثر من مرة واحدة في معامل التحويل الجدول
@@ -1302,7 +1304,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js 
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +41,Age (Days),العمر (أيام)
 DocType: Quotation Item,Quotation Item,عنصر تسعيرة
 DocType: Account,Account Name,اسم الحساب
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +36,From Date cannot be greater than To Date,من تاريخ لا يمكن أن يكون أكبر من إلى تاريخ
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +39,From Date cannot be greater than To Date,من تاريخ لا يمكن أن يكون أكبر من إلى تاريخ
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +194,Serial No {0} quantity {1} cannot be a fraction,المسلسل لا {0} كمية {1} لا يمكن أن يكون جزء
 apps/erpnext/erpnext/config/buying.py +59,Supplier Type master.,المورد الرئيسي نوع .
 DocType: Purchase Order Item,Supplier Part Number,المورد رقم الجزء
@@ -1377,7 +1379,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +81,Please enter valid Financial 
 DocType: Employee,Date Of Retirement,تاريخ التقاعد
 DocType: Upload Attendance,Get Template,الحصول على قالب
 DocType: Address,Postal,بريدي
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +203,ERPNext Setup Complete!,إعداد ERPNext كامل!
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +207,ERPNext Setup Complete!,إعداد ERPNext كامل!
 DocType: Item,Weightage,الوزن
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +91,A Customer Group exists with same name please change the Customer name or rename the Customer Group,يوجد مجموعة العملاء بنفس الاسم الرجاء تغيير اسم العميل أو إعادة تسمية مجموعة العملاء
 apps/erpnext/erpnext/public/js/pos/pos.js +155,Please select {0} first.,الرجاء اختيار {0} أولا.
@@ -1464,7 +1466,7 @@ DocType: Purchase Receipt Item Supplied,Consumed Qty,تستهلك الكمية
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +52,Telecommunications,الاتصالات السلكية واللاسلكية
 DocType: Packing Slip,Indicates that the package is a part of this delivery (Only Draft),يشير إلى أن الحزمة هو جزء من هذا التسليم (مشروع فقط)
 DocType: Payment Tool,Make Payment Entry,جعل الدفع الاشتراك
-apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +119,Quantity for Item {0} must be less than {1},كمية القطعة ل {0} يجب أن يكون أقل من {1}
+apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +126,Quantity for Item {0} must be less than {1},كمية القطعة ل {0} يجب أن يكون أقل من {1}
 ,Sales Invoice Trends,اتجاهات فاتورة المبيعات
 DocType: Leave Application,Apply / Approve Leaves,تقديم / الموافقة على أجازة
 apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html +23,For,ل
@@ -1577,12 +1579,12 @@ DocType: Journal Entry,Accounts Receivable,حسابات القبض
 DocType: Address Template,This format is used if country specific format is not found,ويستخدم هذا الشكل إذا لم يتم العثور على صيغة محددة البلاد
 DocType: Production Order,Use Multi-Level BOM,استخدام متعدد المستويات BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,وتشمل مقالات التوفيق
-apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,شجرة حسابات finanial .
+apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,شجرة حسابات financial .
 DocType: Leave Control Panel,Leave blank if considered for all employee types,ترك فارغا إذا نظرت لجميع أنواع موظف
 DocType: Landed Cost Voucher,Distribute Charges Based On,توزيع الرسوم بناء على
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,يجب أن يكون نوع الحساب {0} 'أصول ثابتة' حيث أن الصنف {1} من ضمن الأصول
 DocType: HR Settings,HR Settings,إعدادات HR
-apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +115,Expense Claim is pending approval. Only the Expense Approver can update status.,حساب المطالبة بانتظار الموافقة. فقط الموافق المصروفات يمكن تحديث الحالة.
+apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +127,Expense Claim is pending approval. Only the Expense Approver can update status.,حساب المطالبة بانتظار الموافقة. فقط الموافق المصروفات يمكن تحديث الحالة.
 DocType: Purchase Invoice,Additional Discount Amount,مقدار الخصم الاضافي
 DocType: Leave Block List Allow,Leave Block List Allow,ترك قائمة الحظر السماح
 apps/erpnext/erpnext/setup/doctype/company/company.py +234,Abbr can not be blank or space,"الاسم المختصر لا يمكن أن يكون فارغاً أو ""مسافة"""
@@ -1655,7 +1657,7 @@ apps/erpnext/erpnext/controllers/stock_controller.py +166,Expense or Difference 
 apps/erpnext/erpnext/controllers/accounts_controller.py +370,"Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings",لا يمكن overbill ل{0} البند في الصف {1} أكثر من {2}. للسماح بالمغالاة في الفواتير، يرجى ضبط إعدادات في الأوراق المالية
 DocType: Employee,Bank Name,اسم البنك
 apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +27,-Above,-أعلى
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +135,User {0} is disabled,المستخدم {0} تم تعطيل
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +139,User {0} is disabled,المستخدم {0} تم تعطيل
 DocType: Leave Application,Total Leave Days,مجموع أيام الإجازة
 DocType: Email Digest,Note: Email will not be sent to disabled users,ملاحظة: لن يتم إرسالها إلى البريد الإلكتروني للمستخدمين ذوي الاحتياجات الخاصة
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +36,Select Company...,حدد الشركة ...
@@ -1689,7 +1691,7 @@ apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_re
 apps/erpnext/erpnext/config/selling.py +299,Sales Order to Payment,ترتيب مبيعات لدفع
 DocType: Expense Claim Detail,Expense Claim Detail,حساب المطالبة التفاصيل
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +271,Time Logs created:,الوقت سجلات خلق:
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +791,Please select correct account,يرجى تحديد الحساب الصحيح
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +793,Please select correct account,يرجى تحديد الحساب الصحيح
 DocType: Item,Weight UOM,وحدة قياس الوزن
 DocType: Employee,Blood Group,فصيلة الدم
 DocType: Purchase Invoice Item,Page Break,فاصل الصفحة
@@ -1893,7 +1895,7 @@ DocType: Stock Entry Detail,Basic Rate (as per Stock UOM),أسعار الأسا�
 DocType: SMS Log,No of Requested SMS,لا للSMS مطلوب
 DocType: Campaign,Campaign-.####,حملة # # # #
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +21,Next Steps,خطوات القادمة
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +117,Contract End Date must be greater than Date of Joining,يجب أن يكون تاريخ الانتهاء العقد أكبر من تاريخ الالتحاق بالعمل
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +121,Contract End Date must be greater than Date of Joining,يجب أن يكون تاريخ الانتهاء العقد أكبر من تاريخ الالتحاق بالعمل
 DocType: Sales Partner,A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,موزع طرف ثالث / وكيل / دلّال / شريك / بائع التجزئة الذي يبيع منتجات الشركات مقابل عمولة.
 DocType: Customer Group,Has Child Node,وعقدة الطفل
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +347,{0} against Purchase Order {1},{0} مقابل طلب شراء {1}
@@ -1944,7 +1946,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
  10. إضافة أو اقتطاع: إذا كنت ترغب في إضافة أو خصم الضرائب."
 DocType: Purchase Receipt Item,Recd Quantity,Recd الكمية
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +104,Cannot produce more Item {0} than Sales Order quantity {1},لا يمكن أن تنتج أكثر تفاصيل {0} من المبيعات كمية الطلب {1}
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +496,Stock Entry {0} is not submitted,الحركة المخزنية {0} غير مسجلة
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +498,Stock Entry {0} is not submitted,الحركة المخزنية {0} غير مسجلة
 DocType: Payment Reconciliation,Bank / Cash Account,البنك حساب / النقدية
 DocType: Tax Rule,Billing City,مدينة الفوترة
 DocType: Global Defaults,Hide Currency Symbol,إخفاء رمز العملة
@@ -2053,8 +2055,8 @@ DocType: Bank Reconciliation Detail,Cheque Number,عدد الشيكات
 DocType: Payment Tool Detail,Payment Tool Detail,دفع أداة التفاصيل
 ,Sales Browser,متصفح المبيعات
 DocType: Journal Entry,Total Credit,إجمالي الائتمان
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +499,Warning: Another {0} # {1} exists against stock entry {2},موجود آخر {0} # {1} ضد حركة مخزنية {2}: تحذير
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +394,Local,محلي
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +501,Warning: Another {0} # {1} exists against stock entry {2},موجود آخر {0} # {1} ضد حركة مخزنية {2}: تحذير
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +398,Local,محلي
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +26,Loans and Advances (Assets),القروض والسلفيات (الأصول )
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +12,Debtors,المدينين
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +147,Large,كبير
@@ -2178,7 +2180,7 @@ DocType: Company,Legal Entity / Subsidiary with a separate Chart of Accounts bel
 DocType: Payment Request,Mute Email,كتم البريد الإلكتروني
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +29,"Food, Beverage & Tobacco",الغذاء و المشروبات و التبغ
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +20,PL or BS,PL أو BS
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +556,Can only make payment against unbilled {0},ان تجعل دفع فواتير فقط ضد {0}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +558,Can only make payment against unbilled {0},ان تجعل دفع فواتير فقط ضد {0}
 apps/erpnext/erpnext/controllers/selling_controller.py +122,Commission rate cannot be greater than 100,معدل العمولة لا يمكن أن يكون أكبر من 100
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +41,Minimum Inventory Level,الحد الأدنى مستوى المخزون
 DocType: Stock Entry,Subcontract,قام بمقاولة فرعية
@@ -2228,7 +2230,7 @@ DocType: Customer Group,Only leaf nodes are allowed in transaction,ويسمح ا
 DocType: Expense Claim,Expense Approver,حساب الموافق
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +110,Row {0}: Advance against Customer must be credit,الصف {0}: يجب أن يكون مقدما ضد العملاء الائتمان
 DocType: Purchase Receipt Item Supplied,Purchase Receipt Item Supplied,شراء السلعة استلام الموردة
-apps/erpnext/erpnext/public/js/pos/pos.js +352,Pay,دفع
+apps/erpnext/erpnext/public/js/pos/pos.js +356,Pay,دفع
 apps/erpnext/erpnext/projects/report/daily_time_log_summary/daily_time_log_summary.py +17,To Datetime,إلى التاريخ والوقت
 DocType: SMS Settings,SMS Gateway URL,SMS بوابة URL
 apps/erpnext/erpnext/config/crm.py +53,Logs for maintaining sms delivery status,سجلات للحفاظ على حالة تسليم الرسائل القصيرة
@@ -2236,7 +2238,7 @@ apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +36,Pendi
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +166,Confirmed,مؤكد
 DocType: Payment Gateway,Gateway,بوابة
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier > Supplier Type,المورد> نوع مورد
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +127,Please enter relieving date.,من فضلك ادخل تاريخ التخفيف .
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +131,Please enter relieving date.,من فضلك ادخل تاريخ التخفيف .
 apps/erpnext/erpnext/controllers/trends.py +138,Amt,AMT
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +51,Only Leave Applications with status 'Approved' can be submitted,اترك فقط مع وضع تطبيقات ' وافق ' يمكن تقديم
 apps/erpnext/erpnext/utilities/doctype/address/address.py +25,Address Title is mandatory.,عنوان عنوانها إلزامية.
@@ -2268,6 +2270,7 @@ DocType: Pricing Rule,Discount Percentage,نسبة الخصم
 DocType: Payment Reconciliation Invoice,Invoice Number,رقم الفاتورة
 apps/erpnext/erpnext/hooks.py +55,Orders,أوامر
 DocType: Leave Control Panel,Employee Type,نوع الموظف
+DocType: Features Setup,To maintain the customer wise item code and to make them searchable based on their code use this option,للحفاظ على العملاء من الحكمة رمز البند وجعلها قابلة للبحث على أساس استخدام مدوناتها هذا الخيار
 DocType: Employee Leave Approver,Leave Approver,الموافق علي الاجازة
 DocType: Manufacturing Settings,Material Transferred for Manufacture,المواد المنقولة لغرض صناعة
 DocType: Expense Claim,"A user with ""Expense Approver"" role","مستخدم يقوم بدور ""معتمد التكاليف"""
@@ -2315,7 +2318,7 @@ DocType: Serial No,Warranty / AMC Details,الضمان / AMC تفاصيل
 DocType: Journal Entry,User Remark,ملاحظة المستخدم
 DocType: Lead,Market Segment,سوق القطاع
 DocType: Employee Internal Work History,Employee Internal Work History,التاريخ الموظف العمل الداخلية
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +225,Closing (Dr),إغلاق (الدكتور)
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +228,Closing (Dr),إغلاق (الدكتور)
 DocType: Contact,Passive,سلبي
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +228,Serial No {0} not in stock,المسلسل لا {0} ليس في الأوراق المالية
 apps/erpnext/erpnext/config/selling.py +127,Tax template for selling transactions.,قالب الضريبية لبيع صفقة.
@@ -2485,7 +2488,7 @@ DocType: Stock Settings,Auto Material Request,السيارات مادة طلب
 DocType: Time Log,Will be updated when billed.,سيتم تحديث عندما توصف.
 DocType: Delivery Note Item,Available Batch Qty at From Warehouse,تتوفر الكمية دفعة من مستودع في
 apps/erpnext/erpnext/manufacturing/doctype/bom_replace_tool/bom_replace_tool.py +25,Current BOM and New BOM can not be same,BOM BOM الحالية و الجديدة لا يمكن أن يكون نفس
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +111,Date Of Retirement must be greater than Date of Joining,تاريخ التقاعد يجب أن يكون أكبر من تاريخ الالتحاق بالعمل
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +115,Date Of Retirement must be greater than Date of Joining,تاريخ التقاعد يجب أن يكون أكبر من تاريخ الالتحاق بالعمل
 DocType: Sales Invoice,Against Income Account,مقابل حساب الدخل
 apps/erpnext/erpnext/controllers/website_list_for_contact.py +69,{0}% Delivered,{0} سلمت٪
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +79,Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).,البند {0} الكمية المطلوبة {1} لا يمكن أن يكون أقل من الحد الأدنى من الكمية ترتيب {2} (المحددة في البند).
@@ -2522,7 +2525,7 @@ apps/erpnext/erpnext/templates/pages/order.html +67,Rate: {0},معدل: {0}
 DocType: Salary Slip Deduction,Salary Slip Deduction,زلة الراتب خصم
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +202,Select a group node first.,حدد عقدة المجموعة أولا.
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +75,Purpose must be one of {0},يجب أن يكون هدف واحد من {0}
-apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +109,Fill the form and save it,تعبئة النموذج وحفظه
+apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +121,Fill the form and save it,تعبئة النموذج وحفظه
 DocType: Production Planning Tool,Download a report containing all raw materials with their latest inventory status,تحميل تقريرا يتضمن جميع المواد الخام معاخر حالة المخزون
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +26,Community Forum,منتديات
 DocType: Leave Application,Leave Balance Before Application,رصيد الاجازات قلب الطلب
@@ -2543,7 +2546,7 @@ apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +211,Nam
 DocType: BOM Replace Tool,BOM Replace Tool,BOM استبدال أداة
 apps/erpnext/erpnext/config/setup.py +37,Country wise default Address Templates,قوالب بلد الحكمة العنوان الافتراضي
 DocType: Sales Order Item,Supplier delivers to Customer,المورد يسلم للعميل
-apps/erpnext/erpnext/public/js/controllers/transaction.js +763,Show tax break-up,مشاهدة الضرائب تفكك
+apps/erpnext/erpnext/public/js/controllers/transaction.js +770,Show tax break-up,مشاهدة الضرائب تفكك
 apps/erpnext/erpnext/accounts/party.py +283,Due / Reference Date cannot be after {0},المقرر / المرجع تاريخ لا يمكن أن يكون بعد {0}
 apps/erpnext/erpnext/config/setup.py +51,Data Import and Export,استيراد وتصدير البيانات
 DocType: Features Setup,If you involve in manufacturing activity. Enables Item 'Is Manufactured',إذا كنت تنطوي في نشاط الصناعات التحويلية . تمكن السلعة ' يتم تصنيعها '
@@ -2571,7 +2574,7 @@ apps/erpnext/erpnext/setup/doctype/company/delete_company_transactions.py +17,Tr
 apps/erpnext/erpnext/accounts/general_ledger.py +21,Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction.,عدد غير صحيح من دفتر الأستاذ العام التسجيلات وجد. كنت قد قمت بتحديد حساب خاطئ في المعاملة.
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +31,To create a Bank Account,لإنشاء حساب مصرفي
 DocType: Hub Settings,Publish Availability,نشر توافر
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +105,Date of Birth cannot be greater than today.,تاريخ الميلاد لا يمكن أن يكون أكبر مما هو عليه اليوم.
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +109,Date of Birth cannot be greater than today.,تاريخ الميلاد لا يمكن أن يكون أكبر مما هو عليه اليوم.
 ,Stock Ageing,الأسهم شيخوخة
 apps/erpnext/erpnext/controllers/accounts_controller.py +216,{0} '{1}' is disabled,{0} '{1}' معطل
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity_list.js +13,Set as Open,على النحو المفتوحة
@@ -2581,6 +2584,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +231,"Row {0}: Qty
  المتاحة الكمية: {4}، نقل الكمية: {5}"
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +20,Item 3,البند 3
 DocType: Purchase Order,Customer Contact Email,العملاء الاتصال البريد الإلكتروني
+DocType: Warranty Claim,Item and Warranty Details,البند والضمان تفاصيل
 DocType: Sales Team,Contribution (%),مساهمة (٪)
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +471,Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,"ملاحظة : لن يتم إنشاء الدفع منذ دخول ' النقد أو البنك الحساب "" لم يتم تحديد"
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +171,Responsibilities,المسؤوليات
@@ -2618,8 +2622,8 @@ apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.p
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.js +61,To Date should be same as From Date for Half Day leave,إلى التسجيل يجب أن يكون نفس التاريخ من ل إجازة نصف يوم
 apps/erpnext/erpnext/config/stock.py +105,"e.g. Kg, Unit, Nos, m",على سبيل المثال كجم، وحدة، غ م أ، م
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +96,Reference No is mandatory if you entered Reference Date,المرجعية لا إلزامي إذا كنت دخلت التاريخ المرجعي
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +108,Date of Joining must be greater than Date of Birth,يجب أن يكون تاريخ الالتحاق بالعمل أكبر من تاريخ الميلاد
-apps/erpnext/erpnext/hr/doctype/employee/employee.js +27,Salary Structure,هيكل المرتبات
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +112,Date of Joining must be greater than Date of Birth,يجب أن يكون تاريخ الالتحاق بالعمل أكبر من تاريخ الميلاد
+apps/erpnext/erpnext/hr/doctype/employee/employee.js +26,Salary Structure,هيكل المرتبات
 DocType: Account,Bank,مصرف
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +9,Airline,شركة الطيران
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +579,Issue Material,قضية المواد
@@ -2747,7 +2751,7 @@ DocType: Leave Allocation,New Leaves Allocated,الجديد يترك المخص�
 apps/erpnext/erpnext/controllers/trends.py +258,Project-wise data is not available for Quotation,بيانات المشروع من الحكمة ليست متاحة لل اقتباس
 DocType: Project,Expected End Date,تاريخ الإنتهاء المتوقع
 DocType: Appraisal Template,Appraisal Template Title,تقييم قالب عنوان
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +375,Commercial,تجاري
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +379,Commercial,تجاري
 apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +23,Parent Item {0} must not be a Stock Item,الأم البند {0} لا يجب أن يكون البند الأسهم
 DocType: Cost Center,Distribution Id,توزيع رقم
 apps/erpnext/erpnext/setup/setup_wizard/data/sample_home_page.html +14,Awesome Services,خدمات رهيبة
@@ -2830,7 +2834,7 @@ DocType: Shipping Rule,Specify conditions to calculate shipping amount,تحدي�
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +121,Add Child,إضافة الطفل
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,دور السماح للتعيين الحسابات المجمدة وتحرير مقالات المجمدة
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +52,Cannot convert Cost Center to ledger as it has child nodes,لا يمكن تحويل مركز التكلفة إلى دفتر الأستاذ كما فعلت العقد التابعة
-apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +47,Opening Value,القيمة افتتاح
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +45,Opening Value,القيمة افتتاح
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +37,Serial #,المسلسل #
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +87,Commission on Sales,عمولة على المبيعات
 DocType: Offer Letter Term,Value / Description,قيمة / الوصف
@@ -2950,7 +2954,7 @@ apps/erpnext/erpnext/config/manufacturing.py +19,Orders released for production.
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +42,Select Fiscal Year...,اختر السنة المالية ...
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +458,POS Profile required to make POS Entry,POS الملف المطلوب لجعل الدخول POS
 DocType: Hub Settings,Name Token,اسم رمز
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +138,Standard Selling,البيع القياسية
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +142,Standard Selling,البيع القياسية
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +138,Atleast one warehouse is mandatory,واحدة على الاقل مستودع إلزامي
 DocType: Serial No,Out of Warranty,لا تغطيه الضمان
 DocType: BOM Replace Tool,Replace,استبدل
@@ -2974,7 +2978,6 @@ DocType: Production Order,Operation Cost,التكلفة العملية
 apps/erpnext/erpnext/config/hr.py +71,Upload attendance from a .csv file,تحميل الحضور من ملف CSV.
 apps/erpnext/erpnext/selling/report/customer_credit_balance/customer_credit_balance.py +39,Outstanding Amt,آمت المتميز
 DocType: Sales Person,Set targets Item Group-wise for this Sales Person.,تحديد أهداف المجموعة السلعة الحكيم لهذا الشخص المبيعات.
-DocType: Warranty Claim,"To assign this issue, use the ""Assign"" button in the sidebar.",لتعيين هذه المشكلة، استخدم &quot;تعيين&quot; الموجود في الشريط الجانبي.
 DocType: Stock Settings,Freeze Stocks Older Than [Days],تجميد الأرصدة أقدم من [ أيام]
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +40,"If two or more Pricing Rules are found based on the above conditions, Priority is applied. Priority is a number between 0 to 20 while default value is zero (blank). Higher number means it will take precedence if there are multiple Pricing Rules with same conditions.",إذا تم العثور على أساس دولتين أو أكثر من قواعد التسعير على الشروط المذكورة أعلاه، يتم تطبيق الأولوية. الأولوية هو رقم بين 0-20 في حين القيمة الافتراضية هي صفر (فارغة). عدد العالي يعني ان الامر سيستغرق الأسبقية إذا كانت هناك قواعد التسعير متعددة مع نفس الظروف.
 apps/erpnext/erpnext/controllers/trends.py +36,Fiscal Year: {0} does not exists,السنة المالية: {0} لا موجود
@@ -3067,6 +3070,7 @@ apps/erpnext/erpnext/hub_node/page/hub/register_in_hub.html +2,Register For ERPN
 DocType: Monthly Distribution,Monthly Distribution Percentages,النسب المئوية لتوزيع الشهرية
 apps/erpnext/erpnext/stock/doctype/batch/batch.py +16,The selected item cannot have Batch,العنصر المحدد لا يمكن أن يكون دفعة
 DocType: Delivery Note,% of materials delivered against this Delivery Note,٪ من المواد الموردة  سلمت من أمر التوصيل
+DocType: Features Setup,Compact Item Print,مدمجة البند طباعة
 DocType: Customer,Customer Details,تفاصيل العملاء
 DocType: Employee,Reports to,تقارير إلى
 DocType: SMS Settings,Enter url parameter for receiver nos,أدخل عنوان URL لمعلمة NOS استقبال
@@ -3130,7 +3134,7 @@ DocType: Workstation,per hour,كل ساعة
 DocType: Warehouse,Account for the warehouse (Perpetual Inventory) will be created under this Account.,سيتم إنشاء حساب المستودع (الجرد الدائم) تحت هذا الحساب.
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +95,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,مستودع لا يمكن حذف كما يوجد مدخل الأسهم دفتر الأستاذ لهذا المستودع.
 DocType: Company,Distribution,التوزيع
-apps/erpnext/erpnext/public/js/pos/pos.js +431,Amount Paid,المبلغ المدفوع
+apps/erpnext/erpnext/public/js/pos/pos.js +435,Amount Paid,المبلغ المدفوع
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +91,Project Manager,مدير المشروع
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +72,Dispatch,إيفاد
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +70,Max discount allowed for item: {0} is {1}%,ماكس الخصم المسموح به لمادة: {0} {1}٪
@@ -3155,12 +3159,12 @@ apps/erpnext/erpnext/support/page/support_analytics/support_analytics.js +21,Sup
 apps/erpnext/erpnext/hr/doctype/employee_attendance_tool/employee_attendance_tool.js +141,Uncheck all,الغاءالكل
 apps/erpnext/erpnext/accounts/doctype/accounts_settings/accounts_settings.py +27,Company is missing in warehouses {0},شركة مفقود في المستودعات {0}
 DocType: POS Profile,Terms and Conditions,الشروط والأحكام
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +45,To Date should be within the Fiscal Year. Assuming To Date = {0},إلى التسجيل يجب أن يكون ضمن السنة المالية. على افتراض إلى تاريخ = {0}
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +48,To Date should be within the Fiscal Year. Assuming To Date = {0},إلى التسجيل يجب أن يكون ضمن السنة المالية. على افتراض إلى تاريخ = {0}
 DocType: Employee,"Here you can maintain height, weight, allergies, medical concerns etc",هنا يمكنك الحفاظ على الطول والوزن، والحساسية، الخ المخاوف الطبية
 DocType: Leave Block List,Applies to Company,ينطبق على شركة
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +175,Cannot cancel because submitted Stock Entry {0} exists,لا يمكن إلغاء الاشتراك بسبب الحركة المخزنية {0} موجود
 DocType: Purchase Invoice,In Words,في كلمات
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +213,Today is {0}'s birthday!,اليوم هو {0} 'عيد ميلاد!
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +220,Today is {0}'s birthday!,اليوم هو {0} 'عيد ميلاد!
 DocType: Production Planning Tool,Material Request For Warehouse,طلب للحصول على المواد مستودع
 DocType: Sales Order Item,For Production,للإنتاج
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +103,Please enter sales order in the above table,يرجى إدخال أمر المبيعات في الجدول أعلاه
@@ -3185,7 +3189,7 @@ DocType: Features Setup,Item Advanced,البند المتقدم
 DocType: Notification Control,"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.",عند &quot;المقدمة&quot; أي من المعاملات تم، بريد الكتروني المنبثقة تلقائيا فتح لإرسال بريد الكتروني الى &quot;الاتصال&quot; المرتبطة في تلك المعاملة، مع الصفقة كمرفق. يجوز للمستخدم أو قد لا إرسال البريد الإلكتروني.
 apps/erpnext/erpnext/config/setup.py +14,Global Settings,إعدادات العالمية
 DocType: Employee Education,Employee Education,تعليم الموظف
-apps/erpnext/erpnext/public/js/controllers/transaction.js +779,It is needed to fetch Item Details.,هناك حاجة لجلب البند التفاصيل.
+apps/erpnext/erpnext/public/js/controllers/transaction.js +786,It is needed to fetch Item Details.,هناك حاجة لجلب البند التفاصيل.
 DocType: Salary Slip,Net Pay,صافي الراتب
 DocType: Account,Account,حساب
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +213,Serial No {0} has already been received,المسلسل لا {0} وقد وردت بالفعل
@@ -3320,6 +3324,7 @@ DocType: Industry Type,Industry Type,صناعة نوع
 apps/erpnext/erpnext/templates/includes/cart.js +136,Something went wrong!,حدث خطأ!
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +101,Warning: Leave application contains following block dates,يحتوي التطبيق اترك التواريخ الكتلة التالية: تحذير
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +241,Sales Invoice {0} has already been submitted,{0} سبق أن قدمت فاتورة المبيعات
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +24,Fiscal Year {0} does not exist,السنة المالية {0} غير موجود
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +30,Completion Date,تاريخ الانتهاء
 DocType: Purchase Invoice Item,Amount (Company Currency),المبلغ (عملة الشركة)
 apps/erpnext/erpnext/config/hr.py +113,Organization unit (department) master.,وحدة المؤسسة ( قسم) الرئيسي.
@@ -3379,7 +3384,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +319,Row {0
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +27,User ID not set for Employee {0},هوية المستخدم لم يتم تعيين موظف ل {0}
 DocType: Stock Entry,Default Source Warehouse,المصدر الافتراضي مستودع
 DocType: Item,Customer Code,قانون العملاء
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +212,Birthday Reminder for {0},تذكير عيد ميلاد ل{0}
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +219,Birthday Reminder for {0},تذكير عيد ميلاد ل{0}
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +72,Days Since Last Order,منذ أيام طلب آخر
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +307,Debit To account must be a Balance Sheet account,يجب أن يكون الخصم لحساب حساب الميزانية العمومية
 DocType: Buying Settings,Naming Series,تسمية السلسلة
@@ -3514,7 +3519,7 @@ DocType: Company,Round Off Account,جولة قبالة حساب
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +84,Administrative Expenses,المصاريف الإدارية
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +18,Consulting,الاستشارات
 DocType: Customer Group,Parent Customer Group,الأم العملاء مجموعة
-apps/erpnext/erpnext/public/js/pos/pos.js +450,Change,تغيير
+apps/erpnext/erpnext/public/js/pos/pos.js +454,Change,تغيير
 DocType: Purchase Invoice,Contact Email,عنوان البريد الإلكتروني
 DocType: Appraisal Goal,Score Earned,نقاط المكتسبة
 apps/erpnext/erpnext/public/js/setup_wizard.js +53,"e.g. ""My Company LLC""","على سبيل المثال ""شركتي ذ.م.م. """
@@ -3588,7 +3593,7 @@ DocType: Purchase Receipt Item,Accepted Quantity,كمية مقبولة
 apps/erpnext/erpnext/accounts/party.py +25,{0}: {1} does not exists,{0} {1} غير موجود
 apps/erpnext/erpnext/config/accounts.py +18,Bills raised to Customers.,رفعت فواتير للعملاء.
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Project Id,معرف المشروع
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +491,Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2},الصف لا {0}: مبلغ لا يمكن أن يكون أكبر من ريثما المبلغ من النفقات المطالبة {1}. في انتظار المبلغ {2}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +493,Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2},الصف لا {0}: مبلغ لا يمكن أن يكون أكبر من ريثما المبلغ من النفقات المطالبة {1}. في انتظار المبلغ {2}
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.py +40,{0} subscribers added,{0}  مشتركين تم اضافتهم
 DocType: Maintenance Schedule,Schedule,جدول
 DocType: Cost Center,"Define Budget for this Cost Center. To set budget action, see ""Company List""",تحديد الميزانية لهذا مركز التكلفة. لمجموعة العمل الميزانية، انظر &quot;قائمة الشركات&quot;
