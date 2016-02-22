@@ -1,15 +1,22 @@
-<h1>Allow over delivery / billing against Sales Order upto certain limit</h1>
+#Allow Over Delivery/Billing
 
-<h1>Allow over delivery / billing against Sales Order upto certain limit</h1>
+While creating Delivery Note, system validates if item's Qty mentined is same as in the Sales Order. It Item Qty has been increased, you will get over-delivery validation. If you want to be able to deliver more items than mentioned in the Sales Order, you should update "Allow over delivery or receipt upto this percent" in the Item master.
 
-To setup over delivery / receipt / billing against a Sales / Purchase Order upto certain limit:
+<img alt="Item wise Allowance percentage" class="screenshot" src="{{docs_base_url}}/assets/img/articles/allowance-percentage-1.png">
 
-1. Go to `Stock > Setup > Stock Settings`.
-2. Set `Allowance Percentage` and save the Stock Settings.
-![Allowance Percentage]({{docs_base_url}}/assets/img/articles/allowance_percentage.png)
-For example: If you have ordered 100 units. and your Allowance is 50% then you are allowed to receive 150 units.
-3. To set item-specific limit, set `Allowance Percentage` in `Item` master.
-![Allowance Percentage in Item]({{docs_base_url}}/assets/img/articles/allowance_percentage_item.png)
+Item's and Rate is also validated when creating Sales Invoice from Sales Order. Also when creating Purchase Receipt and Purchaes Invoice from Purchase Order. Updating "Allow over delivery or receipt upto this percent" will be affective in all sales and purchase transactions.
+
+For example, if you have ordered 100 units of an item, and if item's over receipt percent is 50%, then you are allowed to make Purchase Receipt for upto 150 units.
+
+Update global value for "Allow over delivery or receipt upto this percent" from Stock Settings. Value updated here will be applicable for all the items.
+
+1. Go to `Stock > Setup > Stock Settings`
+
+2. Set `Allowance Percentage`.
+
+3. Save Stock Settings.
+
+<img alt="Item wise Allowance percentage" class="screenshot" src="{{docs_base_url}}/assets/img/articles/allowance-percentage-2.png">
 
 
 <!-- markdown -->

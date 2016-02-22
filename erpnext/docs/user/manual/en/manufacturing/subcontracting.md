@@ -37,4 +37,8 @@ correct stock is maintained at the Supplier’s end.
 > Note 2: ERPNext will automatically add the raw material rate for your
 valuation purpose when you receive the finished Item in your stock.
 
+### Video Help
+
+<iframe width="660" height="371" src="https://www.youtube.com/embed/ThiMCC2DtKo" frameborder="0" allowfullscreen></iframe>
+
 {next}

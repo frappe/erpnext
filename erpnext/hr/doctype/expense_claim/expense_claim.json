@@ -7,6 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -582,7 +583,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2015-12-07 10:38:37.072229", 
+ "modified": "2016-02-03 01:17:32.673216", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim", 
@@ -677,6 +678,6 @@
  "search_fields": "approval_status,employee,employee_name", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
- "title_field": "title", 
- "version": 0
+ "timeline_field": "employee", 
+ "title_field": "title"
 }

@@ -1,4 +1,4 @@
-<h1>Adding Attachments to Outgoing Messages</h1>
+#Adding Attachments to Outgoing Messages
 
 ERPNext has in-built file manage system. Click [here](https://erpnext.com/kb/tools/managing-attachments) to learn more on how attachments are managed in ERPNext.
 

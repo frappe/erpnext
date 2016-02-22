@@ -65,11 +65,11 @@ $.extend(shopping_cart, {
 					if(!r.exc) {
 						$(".cart-items").html(r.message.items);
 						$(".cart-tax-items").html(r.message.taxes);
+						$(".cart-icon").hide();
 					}
 				},
 			});
 		});
-
 	},
 
 	render_tax_row: function($cart_taxes, doc, shipping_rules) {
@@ -144,5 +144,6 @@ $.extend(shopping_cart, {
 });
 
 $(document).ready(function() {
+	$(".cart-icon").hide();
 	shopping_cart.bind_events();
 });

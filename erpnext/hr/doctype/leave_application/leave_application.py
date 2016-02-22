@@ -62,7 +62,7 @@ class LeaveApplication(Document):
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
 			frappe.throw(_("To date cannot be before from date"))
-		
+
 		if not is_lwp(self.leave_type):
 			self.validate_dates_acorss_allocation()
 			self.validate_back_dated_application()
@@ -118,7 +118,7 @@ class LeaveApplication(Document):
 				frappe.throw(_("The day(s) on which you are applying for leave are holidays. You need not apply for leave."))
 
 			if not is_lwp(self.leave_type):
-				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date, 
+				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date,
 					consider_all_leaves_in_the_allocation_period=True)
 
 				if self.status != "Rejected" and self.leave_balance < self.total_leave_days:
@@ -133,7 +133,7 @@ class LeaveApplication(Document):
 		if not self.name:
 			self.name = "New Leave Application"
 
-		for d in frappe.db.sql("""select name, leave_type, posting_date, from_date, to_date
+		for d in frappe.db.sql("""select name, leave_type, posting_date, from_date, to_date, total_leave_days
 			from `tabLeave Application`
 			where employee = %(employee)s and docstatus < 2 and status in ("Open", "Approved")
 			and to_date >= %(from_date)s and from_date <= %(to_date)s
@@ -144,12 +144,32 @@ class LeaveApplication(Document):
 				"name": self.name
 			}, as_dict = 1):
 
-			frappe.msgprint(_("Employee {0} has already applied for {1} between {2} and {3}")
-				.format(self.employee, cstr(d['leave_type']),
-					formatdate(d['from_date']), formatdate(d['to_date'])))
+			if d['total_leave_days']==0.5 and cint(self.half_day)==1:
+				sum_leave_days = self.get_total_leaves_on_half_day()
+				if sum_leave_days==1:
+					self.throw_overlap_error(d)
+			else:
+				self.throw_overlap_error(d)
 
-			frappe.throw("""Exising Application: <a href="#Form/Leave Application/{0}">{0}</a>"""
-				.format(d["name"]), OverlapError)
+	def throw_overlap_error(self, d):
+		msg = _("Employee {0} has already applied for {1} between {2} and {3}").format(self.employee,
+			d['leave_type'], formatdate(d['from_date']), formatdate(d['to_date'])) \
+			+ """ <br><b><a href="#Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
+		frappe.throw(msg, OverlapError)
+
+	def get_total_leaves_on_half_day(self):
+		return frappe.db.sql("""select sum(total_leave_days) from `tabLeave Application`
+			where employee = %(employee)s
+			and docstatus < 2
+			and status in ("Open", "Approved")
+			and from_date = %(from_date)s
+			and to_date = %(to_date)s
+			and name != %(name)s""", {
+				"employee": self.employee,
+				"from_date": self.from_date,
+				"to_date": self.to_date,
+				"name": self.name
+			})[0][0]
 
 	def validate_max_days(self):
 		max_days = frappe.db.get_value("Leave Type", self.leave_type, "max_days_allowed")
@@ -242,13 +262,13 @@ def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day=
 	return number_of_days
 
 @frappe.whitelist()
-def get_leave_balance_on(employee, leave_type, date, allocation_records=None, 
+def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
 		consider_all_leaves_in_the_allocation_period=False):
 	if allocation_records == None:
 		allocation_records = get_leave_allocation_records(date, employee).get(employee, frappe._dict())
 
 	allocation = allocation_records.get(leave_type, frappe._dict())
-	
+
 	if consider_all_leaves_in_the_allocation_period:
 		date = allocation.to_date
 	leaves_taken = get_approved_leaves_for_period(employee, leave_type, allocation.from_date, date)
@@ -311,7 +331,7 @@ def get_holidays(employee, from_date, to_date):
 		and h1.holiday_date between %s and %s""", (employee, from_date, to_date))[0][0]
 
 	if not tot_hol:
-		tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2
+		tot_hol = frappe.db.sql("""select count(distinct holiday_date) from `tabHoliday` h1, `tabHoliday List` h2
 			where h1.parent = h2.name and h1.holiday_date between %s and %s
 			and h2.is_default = 1""", (from_date, to_date))[0][0]
 

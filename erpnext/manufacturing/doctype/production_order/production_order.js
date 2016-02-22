@@ -61,38 +61,35 @@ erpnext.production_order = {
 	set_custom_buttons: function(frm) {
 		var doc = frm.doc;
 		if (doc.docstatus === 1) {
-
-			if (flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) {
-				frm.add_custom_button(__('Transfer Materials for Manufacture'),
-					cur_frm.cscript['Transfer Raw Materials'], frappe.boot.doctype_icons["Stock Entry"]);
-			}
-
-			if (flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) {
-				frm.add_custom_button(__('Update Finished Goods'),
-					cur_frm.cscript['Update Finished Goods'], frappe.boot.doctype_icons["Stock Entry"]);
-			}
-
-			frm.add_custom_button(__("Show Stock Entries"), function() {
+			frm.add_custom_button(__("Stock Entries"), function() {
 				frappe.route_options = {
 					production_order: frm.doc.name
 				}
 				frappe.set_route("List", "Stock Entry");
-			});
+			}, __("View"));
 
 			if (doc.status != 'Stopped' && doc.status != 'Completed') {
-				frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Production Order'],
-					"icon-exclamation", "btn-default");
+				frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Production Order'], __("Status"));
 			} else if (doc.status == 'Stopped') {
-				frm.add_custom_button(__('Re-open'), cur_frm.cscript['Unstop Production Order'],
-				"icon-check", "btn-default");
+				frm.add_custom_button(__('Re-open'), cur_frm.cscript['Unstop Production Order'], __("Status"));
 			}
 
 			// opertions
 			if ((doc.operations || []).length) {
-				frm.add_custom_button(__('Show Time Logs'), function() {
+				frm.add_custom_button(__('Time Logs'), function() {
 					frappe.route_options = {"production_order": frm.doc.name};
 					frappe.set_route("List", "Time Log");
-				});
+				}, __("View"));
+			}
+
+			if (flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) {
+				frm.add_custom_button(__('Transfer Materials for Manufacture'),
+					cur_frm.cscript['Transfer Raw Materials'], __("Stock Entry"));
+			}
+
+			if (flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) {
+				frm.add_custom_button(__('Update Finished Goods'),
+					cur_frm.cscript['Update Finished Goods'], __("Stock Entry"));
 			}
 		}
 
@@ -256,11 +253,10 @@ cur_frm.cscript['Update Finished Goods'] = function() {
 
 cur_frm.fields_dict['production_item'].get_query = function(doc) {
 	return {
-		filters:[
-			['Item', 'is_pro_applicable', '=', 1],
-			['Item', 'has_variants', '=', 0],
-			['Item', 'end_of_life', '>=', frappe.datetime.nowdate()]
-		]
+		query: "erpnext.controllers.queries.item_query",
+		filters:{
+			'is_pro_applicable': 1,
+		}
 	}
 }
 

@@ -24,8 +24,12 @@ def delete_company_transactions(company_name):
 		tabDocField where fieldtype='Link' and options='Company'"""):
 		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget Detail",
 			"Party Account", "Employee", "Sales Taxes and Charges Template",
-			"Purchase Taxes and Charges Template", "POS Profile"):
+			"Purchase Taxes and Charges Template", "POS Profile", 'BOM'):
 				delete_for_doctype(doctype, company_name)
+
+		else:
+			# un-set company
+			frappe.db.sql('update `tab{0}` set company="" where company=%s', company_name)
 
 	# Clear notification counts
 	clear_notifications()
@@ -49,7 +53,7 @@ def delete_for_doctype(doctype, company_name):
 
 		# reset series
 		naming_series = meta.get_field("naming_series")
-		if naming_series:
+		if naming_series and naming_series.options:
 			prefixes = sorted(naming_series.options.split("\n"), lambda a, b: len(b) - len(a))
 
 			for prefix in prefixes:

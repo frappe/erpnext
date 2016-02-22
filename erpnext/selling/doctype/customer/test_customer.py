@@ -7,7 +7,7 @@ import frappe
 import unittest
 
 from frappe.test_runner import make_test_records
-from erpnext.exceptions import CustomerFrozen
+from erpnext.exceptions import PartyFrozen, PartyDisabled
 
 test_ignore = ["Price List"]
 
@@ -45,16 +45,11 @@ class TestCustomer(unittest.TestCase):
 
 	def test_rename(self):
 		for name in ("_Test Customer 1", "_Test Customer 1 Renamed"):
-			frappe.db.sql("""delete from `tabComment` where comment_doctype=%s and comment_docname=%s""",
+			frappe.db.sql("""delete from `tabCommunication`
+				where communication_type='Comment' and reference_doctype=%s and reference_name=%s""",
 				("Customer", name))
 
-		comment = frappe.new_doc("Comment")
-		comment.update({
-			"comment": "Test Comment for Rename",
-			"comment_doctype": "Customer",
-			"comment_docname": "_Test Customer 1"
-		})
-		comment.insert()
+		comment = frappe.get_doc("Customer", "_Test Customer 1").add_comment("Comment", "Test Comment for Rename")
 
 		frappe.rename_doc("Customer", "_Test Customer 1", "_Test Customer 1 Renamed")
 
@@ -62,28 +57,47 @@ class TestCustomer(unittest.TestCase):
 		self.assertFalse(frappe.db.exists("Customer", "_Test Customer 1"))
 
 		# test that comment gets renamed
-		self.assertEquals(frappe.db.get_value("Comment",
-			{"comment_doctype": "Customer", "comment_docname": "_Test Customer 1 Renamed"}), comment.name)
+		self.assertEquals(frappe.db.get_value("Communication", {
+			"communication_type": "Comment",
+			"reference_doctype": "Customer",
+			"reference_name": "_Test Customer 1 Renamed"
+		}), comment.name)
 
 		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 
 	def test_freezed_customer(self):
-		make_test_records("Customer")
 		make_test_records("Item")
-		
+
 		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 1)
 
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		so = make_sales_order(do_not_save= True)
-		
-		self.assertRaises(CustomerFrozen, so.save)
+
+		self.assertRaises(PartyFrozen, so.save)
 
 		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 0)
 
 		so.save()
-	
+
+	def test_disabled_customer(self):
+		make_test_records("Item")
+
+		frappe.db.set_value("Customer", "_Test Customer", "disabled", 1)
+
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(do_not_save=True)
+
+		self.assertRaises(PartyDisabled, so.save)
+
+		frappe.db.set_value("Customer", "_Test Customer", "disabled", 0)
+
+		so.save()
+
 	def test_duplicate_customer(self):
+		frappe.db.sql("delete from `tabCustomer` where customer_name='_Test Customer 1'")
+
 		if not frappe.db.get_value("Customer", "_Test Customer 1"):
 			test_customer_1 = frappe.get_doc({
 				 "customer_group": "_Test Customer Group",

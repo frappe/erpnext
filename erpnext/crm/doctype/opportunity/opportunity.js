@@ -52,8 +52,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		this.frm.set_query("item_code", "items", function() {
 			return {
 				query: "erpnext.controllers.queries.item_query",
-				filters: me.frm.doc.enquiry_type === "Maintenance" ?
-					{"is_service_item": 1} : {"is_sales_item":1}
+				filters: {"is_sales_item": 1}
 			};
 		});
 
@@ -78,28 +77,29 @@ $.extend(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	erpnext.toggle_naming_series();
 
-	if(doc.status!=="Lost") {
-		cur_frm.add_custom_button(__('Create Quotation'),
-			cur_frm.cscript.create_quotation, frappe.boot.doctype_icons["Quotation"],
-			"btn-default");
-		if(doc.status!=="Quotation")
-			cur_frm.add_custom_button(__('Opportunity Lost'),
-				cur_frm.cscript['Declare Opportunity Lost'], "icon-remove", "btn-default");
-	}
-
 	var frm = cur_frm;
 	if(frm.perm[0].write && doc.docstatus==0) {
 		if(frm.doc.status==="Open") {
 			frm.add_custom_button(__("Close"), function() {
 				frm.set_value("status", "Closed");
 				frm.save();
-			});
+			}, __("Status"));
 		} else {
 			frm.add_custom_button(__("Reopen"), function() {
 				frm.set_value("status", "Open");
 				frm.save();
-			});
+			}, __("Status"));
 		}
+	}
+
+	if(doc.status!=="Lost") {
+		if(doc.status!=="Quotation") {
+			cur_frm.add_custom_button(__('Lost'),
+				cur_frm.cscript['Declare Opportunity Lost'], __("Status"));
+		}
+
+		cur_frm.add_custom_button(__('Quotation'),cur_frm.cscript.create_quotation, __("Make"));
+		cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 	}
 
 }

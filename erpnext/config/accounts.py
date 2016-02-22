@@ -33,12 +33,17 @@ def get_data():
 					"description": _("Supplier database.")
 				},
 				{
+					"type": "doctype",
+					"name": "Payment Request",
+					"description": _("Payment Request")
+				},
+				{
 					"type": "page",
 					"name": "Accounts Browser",
 					"icon": "icon-sitemap",
 					"label": _("Chart of Accounts"),
 					"route": "Accounts Browser/Account",
-					"description": _("Tree of finanial accounts."),
+					"description": _("Tree of financial accounts."),
 					"doctype": "Account",
 				},
 			]
@@ -84,12 +89,17 @@ def get_data():
 					"description": _("Financial / accounting year.")
 				},
 				{
+					"type": "doctype",
+					"name": "Payment Gateway Account",
+					"description": _("Setup Gateway accounts.")
+				},
+				{
 					"type": "page",
 					"name": "Accounts Browser",
 					"icon": "icon-sitemap",
 					"label": _("Chart of Accounts"),
 					"route": "Accounts Browser/Account",
-					"description": _("Tree of finanial accounts."),
+					"description": _("Tree of financial accounts."),
 					"doctype": "Account",
 				},
 				{
@@ -98,7 +108,7 @@ def get_data():
 					"icon": "icon-sitemap",
 					"label": _("Chart of Cost Centers"),
 					"route": "Accounts Browser/Cost Center",
-					"description": _("Tree of finanial Cost Centers."),
+					"description": _("Tree of financial Cost Centers."),
 					"doctype": "Cost Center",
 				},
 				{

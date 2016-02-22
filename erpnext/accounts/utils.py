@@ -105,11 +105,11 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 			if acc.account_currency == frappe.db.get_value("Company", acc.company, "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account), ))
-
+			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+	
 	if party_type and party:
 		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
-			(frappe.db.escape(party_type), frappe.db.escape(party)))
+			(frappe.db.escape(party_type), frappe.db.escape(party, percent=False)))
 
 	if account or (party_type and party):
 		if in_account_currency:
@@ -247,7 +247,7 @@ def update_against_doc(d, jv_obj):
 
 	# will work as update after submit
 	jv_obj.flags.ignore_validate_update_after_submit = True
-	jv_obj.save()
+	jv_obj.save(ignore_permissions=True)
 
 def remove_against_link_from_jv(ref_type, ref_no):
 	linked_jv = frappe.db.sql_list("""select parent from `tabJournal Entry Account`

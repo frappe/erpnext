@@ -42,6 +42,10 @@ frappe.ui.form.on("Payment Tool", "refresh", function(frm) {
 	frappe.ui.form.trigger("Payment Tool", "party_type");
 });
 
+frappe.ui.form.on("Payment Tool", "party_type", function(frm) {
+	frm.set_value("received_or_paid", frm.doc.party_type=="Customer" ? "Received" : "Paid");
+});
+
 frappe.ui.form.on("Payment Tool", "party", function(frm) {
 	if(frm.doc.party_type && frm.doc.party) {
 		return frappe.call({

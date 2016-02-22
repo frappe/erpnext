@@ -8,6 +8,7 @@ from frappe import throw, _
 from frappe.utils import cstr
 
 from frappe.model.document import Document
+from jinja2 import TemplateSyntaxError
 
 class Address(Document):
 	def __setup__(self):
@@ -85,16 +86,22 @@ def get_address_display(address_dict):
 	if not isinstance(address_dict, dict):
 		address_dict = frappe.db.get_value("Address", address_dict, "*", as_dict=True) or {}
 
-	template = frappe.db.get_value("Address Template", \
-		{"country": address_dict.get("country")}, "template")
-	if not template:
-		template = frappe.db.get_value("Address Template", \
-			{"is_default": 1}, "template")
+	data = frappe.db.get_value("Address Template", \
+		{"country": address_dict.get("country")}, ["name", "template"])
+	if not data:
+		data = frappe.db.get_value("Address Template", \
+			{"is_default": 1}, ["name", "template"])
 
-	if not template:
+	if not data:
 		frappe.throw(_("No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template."))
 
-	return frappe.render_template(template, address_dict)
+	name, template = data
+
+	try:
+		return frappe.render_template(template, address_dict)
+	except TemplateSyntaxError:
+		frappe.throw(_("There is an error in your Address Template {0}").format(name))
+
 
 def get_territory_from_address(address):
 	"""Tries to match city, state and country of address to existing territory"""

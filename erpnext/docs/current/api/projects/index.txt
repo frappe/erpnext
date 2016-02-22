@@ -1,2 +1,0 @@
-erpnext.projects
-erpnext.projects.utils

@@ -61,10 +61,6 @@ class DeliveryNote(SellingController):
 			'extra_cond': """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)"""
 		}]
 
-	def onload(self):
-		self.set_onload("has_return_entry", len(frappe.db.exists({"doctype": "Delivery Note",
-			"is_return": 1, "return_against": self.name, "docstatus": 1})))
-
 	def before_print(self):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)
@@ -128,8 +124,8 @@ class DeliveryNote(SellingController):
 				})
 
 		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')) and not self.is_return:
-			self.validate_rate_with_reference_doc([["Sales Order", "sales_order", "so_detail"],
-				["Sales Invoice", "sales_invoice", "si_detail"]])
+			self.validate_rate_with_reference_doc([["Sales Order", "against_sales_order", "so_detail"],
+				["Sales Invoice", "against_sales_invoice", "si_detail"]])
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""

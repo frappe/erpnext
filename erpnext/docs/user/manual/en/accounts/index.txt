@@ -1,9 +1,11 @@
 journal-entry
 sales-invoice
 purchase-invoice
+payment-request
 chart-of-accounts
 making-payments
 advance-payment-entry
+payment-request
 credit-limit
 opening-entry
 accounting-reports

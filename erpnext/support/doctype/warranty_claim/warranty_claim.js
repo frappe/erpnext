@@ -4,19 +4,25 @@
 frappe.provide("erpnext.support");
 frappe.require("assets/erpnext/js/utils.js");
 
-frappe.ui.form.on_change("Warranty Claim", "customer", function(frm) {
-	erpnext.utils.get_party_details(frm) });
-frappe.ui.form.on_change("Warranty Claim", "customer_address",
-	erpnext.utils.get_address_display);
-frappe.ui.form.on_change("Warranty Claim", "contact_person",
-	erpnext.utils.get_contact_details);
+frappe.ui.form.on("Warranty Claim", {
+	customer: function(frm) {
+		erpnext.utils.get_party_details(frm);
+	},
+	customer_address: function(frm) {
+		erpnext.utils.get_address_display(frm);
+	},
+	contact_person: function(frm) {
+		erpnext.utils.get_contact_details(frm);
+	}
+});
 
 erpnext.support.WarrantyClaim = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		if(!cur_frm.doc.__islocal &&
 			(cur_frm.doc.status=='Open' || cur_frm.doc.status == 'Work In Progress')) {
-			cur_frm.add_custom_button(__('Make Maintenance Visit'),
-				this.make_maintenance_visit, frappe.boot.doctype_icons["Maintenance Visit"], "btn-default")
+			cur_frm.add_custom_button(__('Maintenance Visit'),
+				this.make_maintenance_visit, __("Make"))
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 	},
 

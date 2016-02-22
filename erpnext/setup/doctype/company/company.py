@@ -27,15 +27,21 @@ class Company(Document):
 		return exists
 
 	def validate(self):
+		self.validate_abbr()
+		self.validate_default_accounts()
+		self.validate_currency()
+		
+	def validate_abbr(self):
 		self.abbr = self.abbr.strip()
+		
 		if self.get('__islocal') and len(self.abbr) > 5:
 			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
 
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
-
-		self.validate_default_accounts()
-		self.validate_currency()
+			
+		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
+			frappe.throw(_("Abbreviation already used for another company"))
 
 	def validate_default_accounts(self):
 		for field in ["default_bank_account", "default_cash_account", "default_receivable_account", "default_payable_account",
@@ -165,6 +171,9 @@ class Company(Document):
 			where defkey='Company' and defvalue=%s""", (newdn, olddn))
 
 		frappe.defaults.clear_cache()
+
+	def abbreviate(self):
+		self.abbr = ''.join([c[0].upper() for c in self.company_name.split()])
 
 	def on_trash(self):
 		"""

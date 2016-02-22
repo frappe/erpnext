@@ -84,11 +84,11 @@ class PurchaseOrder(BuyingController):
 			if d.prevdoc_detail_docname and not d.schedule_date:
 				d.schedule_date = frappe.db.get_value("Material Request Item",
 						d.prevdoc_detail_docname, "schedule_date")
-						
+
 
 	def get_last_purchase_rate(self):
 		"""get last purchase rates for all items"""
-		
+
 		conversion_rate = flt(self.get('conversion_rate')) or 1.0
 
 		for d in self.get("items"):
@@ -96,7 +96,7 @@ class PurchaseOrder(BuyingController):
 				last_purchase_details = get_last_purchase_details(d.item_code, self.name)
 
 				if last_purchase_details:
-					d.base_price_list_rate = (last_purchase_details['base_price_list_rate'] * 
+					d.base_price_list_rate = (last_purchase_details['base_price_list_rate'] *
 						(flt(d.conversion_factor) or 1.0))
 					d.discount_percentage = last_purchase_details['discount_percentage']
 					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
@@ -104,7 +104,7 @@ class PurchaseOrder(BuyingController):
 					d.rate = d.base_rate / conversion_rate
 				else:
 					# if no last purchase found, reset all values to 0
-					for field in ("base_price_list_rate", "base_rate", 
+					for field in ("base_price_list_rate", "base_rate",
 						"price_list_rate", "rate", "discount_percentage"):
 							d.set(field, 0)
 
@@ -188,7 +188,7 @@ class PurchaseOrder(BuyingController):
 	def on_cancel(self):
 		if self.is_against_so():
 			self.update_status_updater()
-			
+
 		if self.has_drop_ship_item():
 			self.update_delivered_qty_in_sales_order()
 
@@ -219,17 +219,6 @@ class PurchaseOrder(BuyingController):
 	def on_update(self):
 		pass
 
-	def before_recurring(self):
-		super(PurchaseOrder, self).before_recurring()
-
-		for field in ("per_received", "per_billed"):
-			self.set(field, None)
-
-		for d in self.get("items"):
-			for field in ("received_qty", "billed_amt", "prevdoc_doctype", "prevdoc_docname",
-				"prevdoc_detail_docname", "supplier_quotation", "supplier_quotation_item"):
-					d.set(field, None)
-
 	def update_status_updater(self):
 		self.status_updater[0].update({
 			"target_parent_dt": "Sales Order",
@@ -254,7 +243,7 @@ class PurchaseOrder(BuyingController):
 
 	def has_drop_ship_item(self):
 		return any([d.delivered_by_supplier for d in self.items])
-		
+
 	def is_against_so(self):
 		return any([d.prevdoc_doctype for d in self.items if d.prevdoc_doctype=="Sales Order"])
 

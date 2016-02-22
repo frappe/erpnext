@@ -27,6 +27,7 @@ class Account(Document):
 			return
 		self.validate_parent()
 		self.validate_root_details()
+		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
 		self.validate_mandatory()
 		self.validate_warehouse_account()
@@ -80,6 +81,20 @@ class Account(Document):
 				
 		if not self.parent_account and not self.is_group:
 			frappe.throw(_("Root Account must be a group"))
+			
+	def validate_group_or_ledger(self):
+		if self.get("__islocal"):
+			return
+		
+		existing_is_group = frappe.db.get_value("Account", self.name, "is_group")
+		if self.is_group != existing_is_group:
+			if self.check_gle_exists():
+				throw(_("Account with existing transaction cannot be converted to ledger"))
+			elif self.is_group:
+				if self.account_type:
+					throw(_("Cannot covert to Group because Account Type is selected."))
+			elif self.check_if_child_exists():
+				throw(_("Account with child nodes cannot be set as ledger"))
 
 	def validate_frozen_accounts_modifier(self):
 		old_value = frappe.db.get_value("Account", self.name, "freeze_account")

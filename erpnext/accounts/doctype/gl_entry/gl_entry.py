@@ -6,10 +6,10 @@ import frappe
 from frappe import _
 from frappe.utils import flt, fmt_money, getdate, formatdate
 from frappe.model.document import Document
-from erpnext.accounts.party import validate_party_gle_currency
+from erpnext.accounts.party import validate_party_gle_currency, validate_party_frozen_disabled
 from erpnext.accounts.utils import get_account_currency
 from erpnext.setup.doctype.company.company import get_company_currency
-from erpnext.exceptions import InvalidAccountCurrency, CustomerFrozen
+from erpnext.exceptions import InvalidAccountCurrency
 
 exclude_from_linked_with = True
 
@@ -96,11 +96,7 @@ class GLEntry(Document):
 			frappe.throw(_("Cost Center {0} does not belong to Company {1}").format(self.cost_center, self.company))
 
 	def validate_party(self):
-		if self.party_type and self.party:
-			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
-			if not frozen_accounts_modifier in frappe.get_roles():
-				if frappe.db.get_value(self.party_type, self.party, "is_frozen"):
-					frappe.throw("{0} {1} is frozen".format(self.party_type, self.party), CustomerFrozen)
+		validate_party_frozen_disabled(self.party_type, self.party)
 
 	def validate_currency(self):
 		company_currency = get_company_currency(self.company)

@@ -180,7 +180,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
-   "description": "The account head under Liability, in which Profit/Loss will be booked", 
+   "description": "The account head under Liability or Equity, in which Profit/Loss will be booked", 
    "fieldname": "closing_account_head", 
    "fieldtype": "Link", 
    "hidden": 0, 

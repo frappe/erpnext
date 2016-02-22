@@ -233,6 +233,7 @@ class StockEntry(StockController):
 					self.posting_date, self.posting_time, d.actual_qty, d.transfer_qty), NegativeStockError)
 
 	def get_stock_and_rate(self):
+		self.set_transfer_qty()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 
