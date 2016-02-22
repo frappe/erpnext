@@ -70,7 +70,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						source_doctype: "Sales Order",
 						get_query_filters: {
 							docstatus: 1,
-							status: ["!=", "Stopped"],
+							status: ["!=", "Closed"],
 							per_delivered: ["<", 99.99],
 							company: cur_frm.doc.company
 						}

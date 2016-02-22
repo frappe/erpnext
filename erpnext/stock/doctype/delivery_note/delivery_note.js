@@ -34,7 +34,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 							source_doctype: "Sales Order",
 							get_query_filters: {
 								docstatus: 1,
-								status: ["not in", ["Stopped", "Closed"]],
+								status: ["!=", "Closed"],
 								per_delivered: ["<", 99.99],
 								project_name: cur_frm.doc.project_name || undefined,
 								customer: cur_frm.doc.customer || undefined,

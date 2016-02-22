@@ -92,7 +92,7 @@ def get_reserved_qty(item_code, warehouse):
 					and parenttype="Sales Order"
 					and item_code != parent_item
 					and exists (select * from `tabSales Order` so
-					where name = dnpi_in.parent and docstatus = 1 and status not in ('Stopped','Closed'))
+					where name = dnpi_in.parent and docstatus = 1 and status not in ('Closed'))
 				) dnpi)
 			union
 				(select qty as dnpi_qty, qty as so_item_qty,
@@ -102,7 +102,7 @@ def get_reserved_qty(item_code, warehouse):
 				and (so_item.delivered_by_supplier is null or so_item.delivered_by_supplier = 0)
 				and exists(select * from `tabSales Order` so
 					where so.name = so_item.parent and so.docstatus = 1
-					and so.status not in ('Stopped','Closed')))
+					and so.status not in ('Closed')))
 			) tab
 		where
 			so_item_qty >= so_item_delivered_qty
@@ -125,7 +125,7 @@ def get_ordered_qty(item_code, warehouse):
 		from `tabPurchase Order Item` po_item, `tabPurchase Order` po
 		where po_item.item_code=%s and po_item.warehouse=%s
 		and po_item.qty > po_item.received_qty and po_item.parent=po.name
-		and po.status not in ('Stopped', 'Closed', 'Delivered') and po.docstatus=1
+		and po.status not in ('Closed', 'Delivered') and po.docstatus=1
 		and po_item.delivered_by_supplier = 0""", (item_code, warehouse))
 
 	return flt(ordered_qty[0][0]) if ordered_qty else 0
