@@ -209,11 +209,11 @@ def get_amount(ref_doc, dt):
 	"""get amount based on doctype"""
 	if dt == "Sales Order":
 		base_grand_total = flt(ref_doc.base_grand_total)
-		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
+		grand_total = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid) / flt(ref_doc.conversion_rate)
 
 	if dt == "Sales Invoice":
 		base_grand_total = flt(ref_doc.base_grand_total)
-		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
+		grand_total = flt(ref_doc.base_grand_total) - flt(ref_doc.outstanding_amount) / flt(ref_doc.conversion_rate)
 	
 	if base_grand_total > 0 and grand_total > 0 :
 		return base_grand_total, grand_total
