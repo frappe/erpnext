@@ -87,12 +87,12 @@ class PaymentRequest(Document):
 		debit_in_account_currency = 0.0
 		
 		if party_account_currency == ref_doc.company_currency:
-			amount = self.base_rounded_total
+			amount = self.base_grand_total
 			if self.currency != ref_doc.company_currency:
-				debit_in_account_currency = self.rounded_total
+				debit_in_account_currency = self.grand_total
 			
 		else:
-			amount = self.rounded_total
+			amount = self.grand_total
 				
 		if self.reference_doctype == "Sales Order":
 			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name,
@@ -160,7 +160,8 @@ def make_payment_request(**args):
 	
 	gateway_account = get_gateway_details(args)
 	
-	base_rounded_total, rounded_total = get_amount(ref_doc, args.dt)
+	base_grand_total, grand_total = get_amount(ref_doc, args.dt)
+	
 	existing_payment_request = frappe.db.get_value("Payment Request", 
 		{"reference_doctype": args.dt, "reference_name": args.dn})
 	
@@ -175,8 +176,8 @@ def make_payment_request(**args):
 			"payment_account": gateway_account.payment_account,
 			"currency": ref_doc.currency,
 			"make_sales_invoice": args.cart or 0,
-			"base_rounded_total": base_rounded_total,
-			"rounded_total": rounded_total,
+			"base_grand_total": base_grand_total,
+			"grand_total": grand_total,
 			"mute_email": args.mute_email or 0,
 			"email_to": args.recipient_id or "",
 			"subject": "Payment Request for %s"%args.dn,
@@ -207,15 +208,15 @@ def make_payment_request(**args):
 def get_amount(ref_doc, dt):
 	"""get amount based on doctype"""
 	if dt == "Sales Order":
-		base_rounded_total = flt(ref_doc.base_grand_total)
-		rounded_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
+		base_grand_total = flt(ref_doc.base_grand_total)
+		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 
 	if dt == "Sales Invoice":
-		base_rounded_total = flt(ref_doc.base_grand_total)
-		rounded_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
+		base_grand_total = flt(ref_doc.base_grand_total)
+		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 	
-	if base_rounded_total > 0 and rounded_total > 0 :
-		return base_rounded_total, rounded_total
+	if base_grand_total > 0 and grand_total > 0 :
+		return base_grand_total, grand_total
 		
 	else:
 		frappe.throw(_("Payment Entry is already created"))

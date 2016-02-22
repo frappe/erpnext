@@ -9,6 +9,7 @@ from frappe.utils import cint, flt, get_fullname, cstr
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
 from frappe.utils.nestedset import get_root_of
+from erpnext.accounts.utils import get_account
 
 class WebsitePriceListMissingError(frappe.ValidationError): pass
 
@@ -280,7 +281,13 @@ def get_customer(user=None):
 		user = frappe.session.user
 
 	customer = frappe.db.get_value("Contact", {"email_id": user}, "customer")
-
+	cart_settings = frappe.get_doc("Shopping Cart Settings")
+	
+	debtors_account = ''
+	
+	if cart_settings.enable_checkout:
+		debtors_account = get_debtors_account(cart_settings)
+	
 	if customer:
 		return frappe.get_doc("Customer", customer)
 
@@ -293,6 +300,15 @@ def get_customer(user=None):
 			"customer_group": get_shopping_cart_settings().default_customer_group,
 			"territory": get_root_of("Territory")
 		})
+		
+		if debtors_account:
+			customer.update({
+				"accounts": [{
+					"company": cart_settings.company,
+					"account": debtors_account.name
+				}]
+			})
+		
 		customer.flags.ignore_mandatory = True
 		customer.insert(ignore_permissions=True)
 
@@ -306,6 +322,32 @@ def get_customer(user=None):
 		contact.insert(ignore_permissions=True)
 
 		return customer
+
+def get_debtors_account(cart_settings):
+	payment_gateway_account_currency = \
+		frappe.get_doc("Payment Gateway Account", cart_settings.payment_gateway_account).currency
+	
+	account_name = _("Debtors ({0})".format(payment_gateway_account_currency))
+	
+	debtors_account = get_account("Receivable", "Asset", is_group=0, account_name=account_name)
+	
+	if not debtors_account:
+		debtors_account = frappe.get_doc({
+			"doctype": "Account",
+			"account_type": "Receivable",
+			"root_type": "Asset",
+			"is_group": 0,
+			"parent_account": get_account(root_type="Asset", is_group=1, \
+				account_name=_("Accounts Receivable")).name,
+			"account_name": account_name,
+			"currency": payment_gateway_account_currency	
+		}).insert(ignore_permissions=True)
+		
+		return debtors_account
+		
+	else:
+		return debtors_account
+		
 
 def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None):
 	if not party:
