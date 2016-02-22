@@ -7,3 +7,4 @@ assignment
 tags
 articles
 pos-view
+multilingual_print_format
