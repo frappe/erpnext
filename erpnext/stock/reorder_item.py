@@ -48,8 +48,7 @@ def _reorder_item():
 		# projected_qty will be 0 if Bin does not exist
 		projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse))
 
-		if ((reorder_level and projected_qty <= reorder_level) 
-				or (not reorder_level and reorder_qty and projected_qty < 0)):
+		if (reorder_level or reorder_qty) and projected_qty < reorder_level:
 			deficiency = reorder_level - projected_qty
 			if deficiency > reorder_qty:
 				reorder_qty = deficiency
