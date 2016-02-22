@@ -132,6 +132,7 @@ def install(country=None):
 		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Credit Card')},
 		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Wire Transfer')},
 		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Bank Draft')},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Stripe')},
 
 		# Activity Type
 		{'doctype': 'Activity Type', 'activity_type': _('Planning')},
