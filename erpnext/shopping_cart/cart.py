@@ -329,7 +329,8 @@ def get_debtors_account(cart_settings):
 	
 	account_name = _("Debtors ({0})".format(payment_gateway_account_currency))
 	
-	debtors_account = get_account("Receivable", "Asset", is_group=0, account_name=account_name)
+	debtors_account = get_account("Receivable", "Asset", is_group=0,\
+	 account_currency=payment_gateway_account_currency, company=cart_settings.company)
 	
 	if not debtors_account:
 		debtors_account = frappe.get_doc({
@@ -337,8 +338,7 @@ def get_debtors_account(cart_settings):
 			"account_type": "Receivable",
 			"root_type": "Asset",
 			"is_group": 0,
-			"parent_account": get_account(root_type="Asset", is_group=1, \
-				account_name=_("Accounts Receivable")).name,
+			"parent_account": get_account(root_type="Asset", is_group=1, company=cart_settings.company),
 			"account_name": account_name,
 			"currency": payment_gateway_account_currency	
 		}).insert(ignore_permissions=True)
