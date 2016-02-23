@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt, getdate, comma_and
+from frappe.utils import cstr, flt, getdate, new_line_sep
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
@@ -336,11 +336,11 @@ def make_stock_entry(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def raise_production_orders(source_name):
-	material_request= frappe.get_doc("Material Request", source_name)
+def raise_production_orders(material_request):
+	mr= frappe.get_doc("Material Request", material_request)
 	errors =[]
 	production_orders = []
-	for d in material_request.items:
+	for d in mr.items:
 		if (d.qty - d.ordered_qty) >0 :
 			if frappe.db.get_value("Item", d.item_code, "is_pro_applicable"):
 				prod_order = frappe.new_doc("Production Order")
@@ -352,10 +352,10 @@ def raise_production_orders(source_name):
 				prod_order.expected_delivery_date = d.schedule_date
 				prod_order.sales_order = d.sales_order
 				prod_order.bom_no = get_item_details(d.item_code).bom_no
-				prod_order.material_request = material_request.name
+				prod_order.material_request = mr.name
 				prod_order.material_request_item = d.name
-				prod_order.planned_start_date = material_request.transaction_date
-				prod_order.company = material_request.company
+				prod_order.planned_start_date = mr.transaction_date
+				prod_order.company = mr.company
 				prod_order.save()
 				production_orders.append(prod_order.name)
 			else:
@@ -363,7 +363,7 @@ def raise_production_orders(source_name):
 	if production_orders: 
 		message = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
 			(p, p) for p in production_orders]
-		msgprint(_("Production Orders {0} created").format(comma_and(message)))
+		msgprint(_("The following Production Orders were created : \n {0} ").format(new_line_sep(message)))
 	if errors:
-		msgprint(_("Could not Raise Production Orders for {0}").format(comma_and(errors)))
+		msgprint(_("Productions Orders cannot be raised for : \n {0}").format(new_line_sep(errors)))
 	return production_orders

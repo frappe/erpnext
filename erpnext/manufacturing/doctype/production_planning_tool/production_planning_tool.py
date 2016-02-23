@@ -63,7 +63,7 @@ class ProductionPlanningTool(Document):
 		""" Add sales orders in the table"""
 		self.clear_table("sales_orders")
 
-		so_list = [d.sales_order for d in self.get('sales_orders')]
+		so_list = []
 		for r in open_so:
 			if cstr(r['name']) not in so_list:
 				pp_so = self.append('sales_orders', {})
@@ -107,7 +107,7 @@ class ProductionPlanningTool(Document):
 		""" Add Material Requests in the table"""
 		self.clear_table("material_requests")
 
-		mr_list = [d.material_request for d in self.get('material_requests')]
+		mr_list = []
 		for r in pending_mr:
 			if cstr(r['name']) not in mr_list:
 				mr = self.append('material_requests', {})
@@ -121,7 +121,7 @@ class ProductionPlanningTool(Document):
 			self.get_mr_items()
 		
 	def get_so_items(self):
-		so_list = filter(None, [d.sales_order for d in self.get('sales_orders')])
+		so_list = [d.sales_order for d in self.get('sales_orders') if d.sales_order]
 		if not so_list:
 			msgprint(_("Please enter Sales Orders in the above table"))
 			return []
@@ -157,14 +157,14 @@ class ProductionPlanningTool(Document):
 		self.add_items(items + packed_items)
 	
 	def get_mr_items(self):
-		mr_list = filter(None, [d.material_request for d in self.get('material_requests')])
+		mr_list = [d.material_request for d in self.get('material_requests') if d.material_request]
 		if not mr_list:
 			msgprint(_("Please enter Material Requests in the above table"))
 			return []
 
 		item_condition = ""
 		if self.fg_item:
-			item_condition = ' and mr_item.item_code = "' + self.fg_item + '"'
+			item_condition = ' and mr_item.item_code = "' + frappe.db.escape(self.fg_item, percent=False) + '"'
 
 		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse,
 			(qty - ordered_qty) as pending_qty
@@ -371,7 +371,7 @@ class ProductionPlanningTool(Document):
 
 		return item_list
 
-	def raise_purchase_request(self):
+	def raise_material_requests(self):
 		"""
 			Raise Material Request if projected qty is less than qty required
 			Requested qty should be shortage qty considering minimum order qty
@@ -384,7 +384,7 @@ class ProductionPlanningTool(Document):
 		self.get_raw_materials(bom_dict)
 
 		if self.item_dict:
-			self.insert_purchase_request()
+			self.create_material_request()
 
 	def get_requested_items(self):
 		item_projected_qty = self.get_projected_qty()
@@ -433,7 +433,7 @@ class ProductionPlanningTool(Document):
 
 		return dict(item_projected_qty)
 
-	def insert_purchase_request(self):
+	def create_material_request(self):
 		items_to_be_requested = self.get_requested_items()
 
 		material_request_list = []

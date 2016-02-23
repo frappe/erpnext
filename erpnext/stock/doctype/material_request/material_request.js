@@ -176,7 +176,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		frappe.call({
 			method:"erpnext.stock.doctype.material_request.material_request.raise_production_orders",
 			args: {
-				"source_name": cur_frm.doc.name
+				"material_request": cur_frm.doc.name
 			}
 		});
 	}

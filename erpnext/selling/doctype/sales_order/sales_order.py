@@ -193,7 +193,7 @@ class SalesOrder(SellingController):
 		#check maintenance schedule
 		submit_ms = frappe.db.sql_list("""select t1.name from `tabMaintenance Schedule` t1,
 			`tabMaintenance Schedule Item` t2
-			where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1""", self.name)
+			where t2.parent=t1.name and t2.sales_order = %s and t1.docstatus = 1""", self.name)
 		if submit_ms:
 			frappe.throw(_("Maintenance Schedule {0} must be cancelled before cancelling this Sales Order").format(comma_and(submit_ms)))
 
@@ -464,15 +464,12 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 def make_maintenance_schedule(source_name, target_doc=None):
 	maint_schedule = frappe.db.sql("""select t1.name
 		from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2
-		where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1""", source_name)
+		where t2.parent=t1.name and t2.sales_order=%s and t1.docstatus=1""", source_name)
 
 	if not maint_schedule:
 		doclist = get_mapped_doc("Sales Order", source_name, {
 			"Sales Order": {
 				"doctype": "Maintenance Schedule",
-				"field_map": {
-					"name": "sales_order"
-				},
 				"validation": {
 					"docstatus": ["=", 1]
 				}
@@ -480,7 +477,7 @@ def make_maintenance_schedule(source_name, target_doc=None):
 			"Sales Order Item": {
 				"doctype": "Maintenance Schedule Item",
 				"field_map": {
-					"parent": "prevdoc_docname"
+					"parent": "sales_order"
 				},
 				"add_if_empty": True
 			}
@@ -499,9 +496,6 @@ def make_maintenance_visit(source_name, target_doc=None):
 		doclist = get_mapped_doc("Sales Order", source_name, {
 			"Sales Order": {
 				"doctype": "Maintenance Visit",
-				"field_map": {
-					"name": "sales_order"
-				},
 				"validation": {
 					"docstatus": ["=", 1]
 				}

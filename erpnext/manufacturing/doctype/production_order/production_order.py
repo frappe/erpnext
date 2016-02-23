@@ -155,16 +155,16 @@ class ProductionOrder(Document):
 			
 		frappe.db.set(self,'status', 'Submitted')
 		self.make_time_logs()
-		self.update_planned_qty()
 		self.update_completed_qty_in_material_request()
+		self.update_planned_qty()
 
 	def on_cancel(self):
 		self.validate_cancel()
 
 		frappe.db.set(self,'status', 'Cancelled')
 		self.delete_time_logs()
-		self.update_planned_qty()
 		self.update_completed_qty_in_material_request()
+		self.update_planned_qty()
 
 	def validate_cancel(self):
 		if self.status == "Stopped":
