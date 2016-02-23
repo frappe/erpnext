@@ -47,6 +47,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		}
 
 		this.toggle_reqd_lead_customer();
+		
 	},
 
 	quotation_to: function() {
@@ -161,4 +162,10 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 
 frappe.ui.form.on("Quotation Item", "items_on_form_rendered", function(frm, cdt, cdn) {
 	// enable tax_amount field if Actual
+})
+
+frappe.ui.form.on("Quotation Item", "stock_balance", function(frm, cdt, cdn) {
+	var d = frappe.model.get_doc(cdt, cdn);
+	frappe.route_options = {"item_code": d.item_code}; 
+	frappe.set_route("query-report", "Stock Balance");
 })
