@@ -164,8 +164,7 @@ def get_basic_details(args, item):
 		"net_amount": 0.0,
 		"discount_percentage": 0.0,
 		"supplier": item.default_supplier,
-		"delivered_by_supplier": item.delivered_by_supplier,
-		"actual_qty": get_available_qty(item.name, user_default_warehouse or args.warehouse or item.default_warehouse)
+		"delivered_by_supplier": item.delivered_by_supplier
 	})
 
 	# if default specified in item is for another company, fetch from company
