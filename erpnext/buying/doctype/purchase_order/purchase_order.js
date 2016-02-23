@@ -64,7 +64,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 		}
 
-		if(doc.docstatus == 1 && !in_list(["Closed"], doc.status)) {
+		if(doc.docstatus == 1 && doc.status != "Closed") {
 			if(flt(doc.per_received, 2) < 100 && allow_receipt) {
 				cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt, __("Make"));
 

@@ -46,7 +46,7 @@ frappe.listview_settings['Sales Order'] = {
 		});
 
 		listview.page.add_menu_item(__("Re-open"), function() {
-			listview.call_for_selected_items(method, {"status": "Unclose"});
+			listview.call_for_selected_items(method, {"status": "Submitted"});
 		});
 
 	}
