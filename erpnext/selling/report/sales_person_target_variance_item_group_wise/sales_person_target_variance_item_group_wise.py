@@ -87,14 +87,12 @@ def get_target_distribution_details(filters):
 	return target_details
 
 #Get achieved details from sales order
-def get_achieved_details(filters, sales_person, item_groups):
+def get_achieved_details(filters, sales_person, all_sales_persons, target_item_group, item_groups):
 	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
-
-	lft, rgt = frappe.get_value("Sales Person", sales_person, ["lft", "rgt"])
 
 	item_details = frappe.db.sql("""
 		select
-			soi.item_code, sum(soi.qty * (st.allocated_percentage/100)) as qty,
+			sum(soi.qty * (st.allocated_percentage/100)) as qty,
 			sum(soi.base_net_amount * (st.allocated_percentage/100)) as amount,
 			st.sales_person, MONTHNAME(so.transaction_date) as month_name
 		from
@@ -103,35 +101,36 @@ def get_achieved_details(filters, sales_person, item_groups):
 			soi.parent=so.name and so.docstatus=1 and st.parent=so.name
 			and so.transaction_date>=%s and so.transaction_date<=%s
 			and exists(select name from `tabSales Person` where lft >= %s and rgt <= %s and name=st.sales_person)
+			and exists(select name from `tabItem Group` where lft >= %s and rgt <= %s and name=soi.item_group)
 		group by
-			sales_person, item_code, month_name
+			sales_person, month_name
 			""",
-		(start_date, end_date, lft, rgt), as_dict=1)
+		(start_date, end_date, all_sales_persons[sales_person].lft, all_sales_persons[sales_person].rgt, 
+			item_groups[target_item_group].lft, item_groups[target_item_group].rgt), as_dict=1)
 
-	item_actual_details = {}
+	actual_details = {}
 	for d in item_details:
-		item_group = item_groups[d.item_code]
-		item_actual_details.setdefault(item_group, frappe._dict()).setdefault(d.month_name,\
-			frappe._dict({
-				"quantity" : 0,
-				"amount" : 0
-			}))
+		actual_details.setdefault(d.month_name, frappe._dict({
+			"quantity" : 0,
+			"amount" : 0
+		}))
 
-		value_dict = item_actual_details[item_group][d.month_name]
+		value_dict = actual_details[d.month_name]
 		value_dict.quantity += flt(d.qty)
 		value_dict.amount += flt(d.amount)
 
-	return item_actual_details
+	return actual_details
 
 def get_salesperson_item_month_map(filters):
 	import datetime
 	salesperson_details = get_salesperson_details(filters)
 	tdd = get_target_distribution_details(filters)
 	item_groups = get_item_groups()
+	sales_persons = get_sales_persons()
 
 	sales_person_achievement_dict = {}
 	for sd in salesperson_details:
-		achieved_details = get_achieved_details(filters, sd.name, item_groups)
+		achieved_details = get_achieved_details(filters, sd.name, sales_persons, sd.item_group, item_groups)
 
 		for month_id in range(1, 13):
 			month = datetime.date(2013, month_id, 1).strftime('%B')
@@ -149,10 +148,26 @@ def get_salesperson_item_month_map(filters):
 			else:
 				sales_target_achieved.target = flt(sd.target_amount) * month_percentage / 100
 
-			sales_target_achieved.achieved = achieved_details.get(sd.item_group, frappe._dict()).\
-					get(month, frappe._dict()).get(filters["target_on"].lower())
+			sales_target_achieved.achieved = achieved_details.get(month, frappe._dict())\
+				.get(filters["target_on"].lower())
 
 	return sales_person_achievement_dict
 
 def get_item_groups():
-	return dict(frappe.get_all("Item", fields=["name", "item_group"], as_list=True))
+	item_groups = frappe._dict()
+	for d in frappe.get_all("Item Group", fields=["name", "lft", "rgt"]):
+		item_groups.setdefault(d.name, frappe._dict({
+			"lft": d.lft,
+			"rgt": d.rgt
+		}))
+	return item_groups
+
+def get_sales_persons():
+	sales_persons = frappe._dict()
+	for d in frappe.get_all("Sales Person", fields=["name", "lft", "rgt"]):
+		sales_persons.setdefault(d.name, frappe._dict({
+			"lft": d.lft,
+			"rgt": d.rgt
+		}))
+	return sales_persons	
+	
