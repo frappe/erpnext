@@ -33,7 +33,7 @@ class PaymentRequest(Document):
 			frappe.throw(_("Payment Gateway Account is not configured"))
 			
 	def validate_payment_gateway(self):
-		if self.gateway == "PayPal":
+		if self.payment_gateway == "PayPal":
 			if not frappe.db.get_value("PayPal Settings", None, "api_username"):
 				if not frappe.conf.paypal_username:
 					frappe.throw(_("PayPal Settings missing"))
@@ -109,7 +109,6 @@ class PaymentRequest(Document):
 			"posting_date": nowdate()
 		})
 		
-		print jv.as_dict()
 		jv.insert(ignore_permissions=True)
 		jv.submit()
 
@@ -126,7 +125,6 @@ class PaymentRequest(Document):
 						
 	def get_message(self):
 		"""return message with payment gateway link"""
-		print self.payment_url
 		return  cstr(self.message) + " <a href='{0}'>{1}</a>".format(self.payment_url, \
 			self.payment_url_message or _(" Click here to pay"))
 		
@@ -209,11 +207,11 @@ def get_amount(ref_doc, dt):
 	"""get amount based on doctype"""
 	if dt == "Sales Order":
 		base_grand_total = flt(ref_doc.base_grand_total)
-		grand_total = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid) / flt(ref_doc.conversion_rate)
-
+		grand_total = (flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)) / flt(ref_doc.conversion_rate, 2)
+		
 	if dt == "Sales Invoice":
 		base_grand_total = flt(ref_doc.base_grand_total)
-		grand_total = flt(ref_doc.base_grand_total) - flt(ref_doc.outstanding_amount) / flt(ref_doc.conversion_rate)
+		grand_total = (flt(ref_doc.base_grand_total) - flt(ref_doc.outstanding_amount)) / flt(ref_doc.conversion_rate, 2)
 	
 	if base_grand_total > 0 and grand_total > 0 :
 		return base_grand_total, grand_total

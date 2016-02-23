@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request, get_gateway_details
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 # test_records = frappe.get_test_records('Payment Request')
 
@@ -74,6 +74,18 @@ class TestPaymentRequest(unittest.TestCase):
 		pr = make_payment_request(dt="Sales Invoice", dn=SI_USD.name, recipient_id="saurabh@erpnext.com",
 			mute_email=1, return_doc=1, payemnt_gateway="_Test Gateway - USD")
 		
-		self.assertRaises(frappe.ValidationError, pr.save)
+		jv = pr.set_as_paid()
+		
+		payemnt_gateway_details = get_gateway_details({"payemnt_gateway": "_Test Gateway - USD"})
+		
+		accounts = jv.accounts.as_dict()
+		
+		self.assertEquals(accounts[0].account, "_Test Receivable USD - _TC")
+		self.assertEquals(accounts[0].account, payemnt_gateway_details.payment_account)
+		
+		
+			
+			
+			
 		
 		

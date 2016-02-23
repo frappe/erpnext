@@ -626,8 +626,6 @@ def get_payment_entry(ref_doc, args):
 	cost_center = frappe.db.get_value("Company", ref_doc.company, "cost_center")
 	exchange_rate = 1
 	if args.get("party_account"):
-		print "here..."
-		print args.get("party_account"), args.get("party_account_currency")
 		exchange_rate = get_exchange_rate(args.get("party_account"), args.get("party_account_currency"),
 			ref_doc.company, ref_doc.doctype, ref_doc.name)
 
