@@ -145,7 +145,6 @@ class PurchaseOrder(BuyingController):
 				and frappe.db.get_value("Item", d.item_code, "is_stock_item") \
 				and d.warehouse and not d.delivered_by_supplier:
 					item_wh_list.append([d.item_code, d.warehouse])
-
 		for item_code, warehouse in item_wh_list:
 			update_bin_qty(item_code, warehouse, {
 				"ordered_qty": get_ordered_qty(item_code, warehouse)

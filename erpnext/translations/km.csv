@@ -1200,7 +1200,7 @@ DocType: Employee External Work History,Total Experience,បទពិសោធ�
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,គ្រូពេទ្យប្រហែលជាវេចខ្ចប់ (s) បានត្រូវបានលុបចោល
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,លំហូរសាច់ប្រាក់ចេញពីការវិនិយោគ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,ការចោទប្រកាន់ការដឹកជញ្ជូននិងការបញ្ជូនបន្ត
-DocType: Material Request Item,Sales Order No,គ្មានការលក់សណ្តាប់ធ្នាប់
+DocType: Material Request Item,Sales Order,គ្មានការលក់សណ្តាប់ធ្នាប់
 DocType: Item Group,Item Group Name,ធាតុឈ្មោះក្រុម
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,គេយក
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,ផ្ទេរសម្រាប់ការផលិតសម្ភារៈ

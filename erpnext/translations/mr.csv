@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,एकूण अनु�
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,रद्द पॅकिंग स्लिप (चे)
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,गुंतवणूक रोख प्रवाह
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,वाहतुक आणि अग्रेषित शुल्क
-DocType: Material Request Item,Sales Order No,विक्री ऑर्डर नाही
+DocType: Material Request Item,Sales Order,विक्री ऑर्डर नाही
 DocType: Item Group,Item Group Name,आयटम गट नाव
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,घेतले
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,उत्पादन हस्तांतरण सामुग्री

@@ -30,5 +30,26 @@
   "material_request_type": "Purchase", 
   "naming_series": "_T-Material Request-", 
   "transaction_date": "2013-02-18"
+ },
+ {
+  "company": "_Test Company", 
+  "doctype": "Material Request", 
+  "fiscal_year": "_Test Fiscal Year 2013", 
+  "items": [
+   {
+    "description": "_Test FG Item", 
+    "doctype": "Material Request Item", 
+    "item_code": "_Test FG Item", 
+    "item_name": "_Test FG Item", 
+    "parentfield": "items", 
+    "qty": 5, 
+    "schedule_date": "2013-02-18", 
+    "uom": "_Test UOM 1", 
+    "warehouse": "_Test Warehouse - _TC"
+   }
+  ], 
+  "material_request_type": "Manufacture", 
+  "naming_series": "_T-Material Request-", 
+  "transaction_date": "2013-02-18"
  }
 ]

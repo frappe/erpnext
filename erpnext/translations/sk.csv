@@ -1224,7 +1224,7 @@ DocType: Employee External Work History,Total Experience,Celková zkušenost
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Balení Slip (y) zrušeno
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Peňažný tok z investičných
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Nákladní a Spediční Poplatky
-DocType: Material Request Item,Sales Order No,Prodejní objednávky No
+DocType: Material Request Item,Sales Order,Prodejní objednávky No
 DocType: Item Group,Item Group Name,Položka Název skupiny
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Zaujatý
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Přenos Materiály pro výrobu

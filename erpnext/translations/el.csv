@@ -1222,7 +1222,7 @@ DocType: Employee External Work History,Total Experience,Συνολική εμπ
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Το(α) δελτίο(α) συσκευασίας ακυρώθηκε(αν)
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Ταμειακές ροές από επενδυτικές
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Χρεώσεις μεταφοράς και προώθησης
-DocType: Material Request Item,Sales Order No,Αρ. παραγγελίας πώλησης
+DocType: Material Request Item,Sales Order,Αρ. παραγγελίας πώλησης
 DocType: Item Group,Item Group Name,Όνομα ομάδας ειδών
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Πάρθηκε
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Μεταφορά υλικών για μεταποίηση

@@ -1212,7 +1212,7 @@ DocType: Employee External Work History,Total Experience,总经验
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,装箱单（ S）取消
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,从投资现金流
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,货运及转运费
-DocType: Material Request Item,Sales Order No,销售订单编号
+DocType: Material Request Item,Sales Order,销售订单编号
 DocType: Item Group,Item Group Name,品目群组名称
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,已经过
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,转移制造材料

@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,Skupaj Izkušnje
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Dobavnico (e) odpovedan
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Denarni tokovi iz naložbenja
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Tovorni in Forwarding Stroški
-DocType: Material Request Item,Sales Order No,Prodaja Zaporedna številka
+DocType: Material Request Item,Sales Order,Prodaja Zaporedna številka
 DocType: Item Group,Item Group Name,Item Name Group
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Taken
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Transferji Materiali za Izdelava

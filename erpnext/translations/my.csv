@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,စုစုပေါ�
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,ထုပ်ပိုးစလစ်ဖြတ်ပိုင်းပုံစံ (s) ဖျက်သိမ်း
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,ရင်းနှီးမြုပ်နှံထံမှငွေကြေးစီးဆင်းမှု
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,ကုန်တင်နှင့် Forwarding စွပ်စွဲချက်
-DocType: Material Request Item,Sales Order No,အရောင်းအမိန့်မရှိပါ
+DocType: Material Request Item,Sales Order,အရောင်းအမိန့်မရှိပါ
 DocType: Item Group,Item Group Name,item Group မှအမည်
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,ယူ
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Manufacturing သည်ပစ္စည်းများလွှဲပြောင်း

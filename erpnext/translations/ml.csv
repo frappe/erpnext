@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,ആകെ അനുഭ�
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,പായ്ക്കിംഗ് ജി (കൾ) റദ്ദാക്കി
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,നിക്ഷേപം മുതൽ ക്യാഷ് ഫ്ളോ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,ചരക്കുഗതാഗതം കൈമാറലും ചുമത്തിയിട്ടുള്ള
-DocType: Material Request Item,Sales Order No,സെയിൽസ് ഓർഡർ ഇല്ല
+DocType: Material Request Item,Sales Order,സെയിൽസ് ഓർഡർ ഇല്ല
 DocType: Item Group,Item Group Name,ഇനം ഗ്രൂപ്പ് പേര്
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,എടുത്ത
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,ഉല്പാദനത്തിനുള്ള മെറ്റീരിയൽസ് കൈമാറുക

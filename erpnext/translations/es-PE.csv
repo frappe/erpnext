@@ -1099,7 +1099,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +65,Financial Year Start Date,Ini
 DocType: Employee External Work History,Total Experience,Experiencia Total
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Lista(s) de embalaje cancelada(s)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Cargos por transporte de mercancías y transito
-DocType: Material Request Item,Sales Order No,Orden de Venta No
+DocType: Material Request Item,Sales Order,Orden de Venta No
 DocType: Item Group,Item Group Name,Nombre del grupo de artículos
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Tomado
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Transferenca de Materiales para Fabricación

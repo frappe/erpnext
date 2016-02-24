@@ -1225,7 +1225,7 @@ DocType: Employee External Work History,Total Experience,Total Experience
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Bordereau(x) annulé
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Flux de trésorerie d&#39;investissement
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Fret et d'envoi en sus
-DocType: Material Request Item,Sales Order No,Ordonnance n ° de vente
+DocType: Material Request Item,Sales Order,Ordonnance n ° de vente
 DocType: Item Group,Item Group Name,Nom du groupe d&#39;article
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Pris
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Matériaux de transfert pour la fabrication
