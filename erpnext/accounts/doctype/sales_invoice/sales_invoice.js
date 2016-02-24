@@ -57,10 +57,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				return item.is_delivered_by_supplier ? true : false;
 			})
 
-			cur_frm.add_custom_button(doc.update_stock ? __('Sales Return') : __('Credit Note'),
-				this.make_sales_return, __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-
+			if(Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
+				cur_frm.add_custom_button(doc.update_stock ? __('Sales Return') : __('Credit Note'),
+					this.make_sales_return, __("Make"));
+				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}
+			
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
 				var from_delivery_note = false;
@@ -75,7 +77,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			}
 
-			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
+			if(doc.outstanding_amount>0 && !cint(doc.is_return)) {
 				cur_frm.add_custom_button(__('Payment Request'), this.make_payment_request, __("Make"));
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry, __("Make"));
 			}
@@ -114,7 +116,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					source_doctype: "Sales Order",
 					get_query_filters: {
 						docstatus: 1,
-						status: ["not in", ["Stopped", "Closed"]],
+						status: ["!=", "Closed"],
 						per_billed: ["<", 99.99],
 						customer: cur_frm.doc.customer || undefined,
 						company: cur_frm.doc.company

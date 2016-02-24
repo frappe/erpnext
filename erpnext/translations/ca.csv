@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,No envieu Empleat re
 DocType: Opportunity,Walk In,Walk In
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Entrades d&#39;arxiu
 DocType: Item,Inspection Criteria,Criteris d'Inspecció
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Arbre de Centres de Cost financial.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Arbre de Centres de Cost finanial.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Transferit
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Puja el teu cap lletra i logotip. (Pots editar més tard).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Blanc
@@ -1581,7 +1581,7 @@ DocType: Journal Entry,Accounts Receivable,Comptes Per Cobrar
 DocType: Address Template,This format is used if country specific format is not found,Aquest format s'utilitza si no hi ha el format específic de cada país
 DocType: Production Order,Use Multi-Level BOM,Utilitzeu Multi-Nivell BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Inclogui els comentaris conciliades
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Arbre dels comptes financers
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Arbre dels comptes financers
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Deixar en blanc si es considera per a tot tipus d'empleats
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuir els càrrecs en base a
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,El compte {0} ha de ser del tipus 'd'actius fixos' perquè l'article {1} és un element d'actiu

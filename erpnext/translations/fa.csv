@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,آیا کارمند 
 DocType: Opportunity,Walk In,راه رفتن در
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,مطالب سهام
 DocType: Item,Inspection Criteria,معیار بازرسی
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,درخت مراکز هزینه financial.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,درخت مراکز هزینه finanial.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,انتقال
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,آپلود سر نامه و آرم خود را. (شما می توانید آنها را بعد از ویرایش).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,سفید
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,حسابهای دریافتنی
 DocType: Address Template,This format is used if country specific format is not found,این قالب استفاده شده است اگر قالب خاص کشور یافت نشد
 DocType: Production Order,Use Multi-Level BOM,استفاده از چند سطح BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,شامل مطالب آشتی
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,درخت حساب financial.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,درخت حساب finanial.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,خالی بگذارید اگر برای همه نوع کارمند در نظر گرفته
 DocType: Landed Cost Voucher,Distribute Charges Based On,توزیع اتهامات بر اساس
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,حساب {0} باید از نوع &#39;دارائی های ثابت&#39; به عنوان مورد {1} مورد دارایی است

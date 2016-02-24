@@ -158,12 +158,12 @@ class MaintenanceSchedule(TransactionBase):
 
 	def validate_sales_order(self):
 		for d in self.get('items'):
-			if d.prevdoc_docname:
+			if d.sales_order:
 				chk = frappe.db.sql("""select ms.name from `tabMaintenance Schedule` ms,
 					`tabMaintenance Schedule Item` msi where msi.parent=ms.name and
-					msi.prevdoc_docname=%s and ms.docstatus=1""", d.prevdoc_docname)
+					msi.sales_order=%s and ms.docstatus=1""", d.sales_order)
 				if chk:
-					throw(_("Maintenance Schedule {0} exists against {0}").format(chk[0][0], d.prevdoc_docname))
+					throw(_("Maintenance Schedule {0} exists against {0}").format(chk[0][0], d.sales_order))
 
 	def validate(self):
 		self.validate_maintenance_detail()

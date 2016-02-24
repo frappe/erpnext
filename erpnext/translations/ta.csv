@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,பணியாள�
 DocType: Opportunity,Walk In,ல் நடக்க
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,பங்கு பதிவுகள்
 DocType: Item,Inspection Criteria,ஆய்வு வரையறைகள்
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,financial செலவு மையங்கள் மரம் .
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Finanial செலவு மையங்கள் மரம் .
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,மாற்றப்பட்டால்
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,உங்கள் கடிதம் தலை மற்றும் சின்னம் பதிவேற்ற. (நீங்கள் பின்னர் அவர்களை திருத்த முடியும்).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,வெள்ளை
@@ -1581,7 +1581,7 @@ DocType: Journal Entry,Accounts Receivable,கணக்குகள்
 DocType: Address Template,This format is used if country specific format is not found,நாட்டின் குறிப்பிட்ட வடிவமைப்பில் இல்லை என்றால் இந்த வடிவமைப்பு பயன்படுத்தப்படும்
 DocType: Production Order,Use Multi-Level BOM,மல்டி லெவல் BOM பயன்படுத்த
 DocType: Bank Reconciliation,Include Reconciled Entries,ஆர தழுவி பதிவுகள் சேர்க்கிறது
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,financial கணக்குகளின் மரம் .
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Finanial கணக்குகளின் மரம் .
 DocType: Leave Control Panel,Leave blank if considered for all employee types,அனைத்து பணியாளர் வகையான கருதப்படுகிறது என்றால் வெறுமையாக
 DocType: Landed Cost Voucher,Distribute Charges Based On,விநியோகிக்க குற்றச்சாட்டுக்களை அடிப்படையாகக் கொண்டு
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,பொருள் {1} சொத்து பொருள் என கணக்கு {0} வகை ' நிலையான சொத்து ' இருக்க வேண்டும்

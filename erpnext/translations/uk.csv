@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Не посилат�
 DocType: Opportunity,Walk In,Заходити
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Сток Записи
 DocType: Item,Inspection Criteria,Інспекційні Критерії
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Дерево financial МВЗ.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Дерево finanial МВЗ.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Всі передані
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Завантажити лист голову і логотип. (ви можете редагувати їх пізніше).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Білий
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,Дебіторська заборго
 DocType: Address Template,This format is used if country specific format is not found,"Цей формат використовується, якщо певний формат країна не знайдений"
 DocType: Production Order,Use Multi-Level BOM,Використовувати багаторівневе специфікації
 DocType: Bank Reconciliation,Include Reconciled Entries,Включити примиритися Записи
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Дерево financial рахунків.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Дерево finanial рахунків.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,"Залиште порожнім, якщо розглядати для всіх типів працівників"
 DocType: Landed Cost Voucher,Distribute Charges Based On,Розподілити плату на основі
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Рахунок {0} повинен бути типу &quot;основний актив&quot;, як товару {1} є активом товару"

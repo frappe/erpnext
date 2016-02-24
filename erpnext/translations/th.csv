@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,อย่าส่�
 DocType: Opportunity,Walk In,Walk In
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,หุ้นรายการ
 DocType: Item,Inspection Criteria,เกณฑ์การตรวจสอบ
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,ต้นไม้ ของ ศูนย์ ต้นทุน financial
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,ต้นไม้ ของ ศูนย์ ต้นทุน finanial
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,โอน
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,อัปโหลดหัวจดหมายของคุณและโลโก้ (คุณสามารถแก้ไขได้ในภายหลัง)
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,ขาว
@@ -1581,7 +1581,7 @@ DocType: Journal Entry,Accounts Receivable,ลูกหนี้
 DocType: Address Template,This format is used if country specific format is not found,รูปแบบนี้ใช้ในกรณีที่รูปแบบเฉพาะของประเทศจะไม่พบ
 DocType: Production Order,Use Multi-Level BOM,ใช้ BOM หลายระดับ
 DocType: Bank Reconciliation,Include Reconciled Entries,รวมถึง คอมเมนต์ Reconciled
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,ผังต้นไม้ของบัญชีการเงิน
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,ผังต้นไม้ของบัญชีการเงิน
 DocType: Leave Control Panel,Leave blank if considered for all employee types,เว้นไว้หากพิจารณาให้พนักงานทุกประเภท
 DocType: Landed Cost Voucher,Distribute Charges Based On,กระจายค่าใช้จ่ายขึ้นอยู่กับ
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,บัญชี {0} ต้องเป็นชนิด ' สินทรัพย์ถาวร ' เป็น รายการ {1} เป็น รายการสินทรัพย์

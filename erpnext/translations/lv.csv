@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Nesūtiet darbinieku
 DocType: Opportunity,Walk In,Walk In
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Krājumu
 DocType: Item,Inspection Criteria,Pārbaudes kritēriji
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Koks financial izmaksu centriem.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Koks finanial izmaksu centriem.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Nodota
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Augšupielādēt jūsu vēstules galva un logo. (Jūs varat rediģēt tos vēlāk).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Balts
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,Debitoru parādi
 DocType: Address Template,This format is used if country specific format is not found,"Šis formāts tiek izmantots, ja valstij īpašs formāts nav atrasts"
 DocType: Production Order,Use Multi-Level BOM,Lietojiet Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Iekļaut jāsaskaņo Ieraksti
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Koks financial kontiem.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Koks finanial kontiem.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,"Atstājiet tukšu, ja uzskatīja visus darbinieku tipiem"
 DocType: Landed Cost Voucher,Distribute Charges Based On,Izplatīt Maksa Based On
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Konts {0} ir jābūt tipa ""pamatlīdzeklis"", kā postenis {1} ir Asset postenis"

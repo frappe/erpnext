@@ -35,7 +35,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +114,
 DocType: C-Form,Customer,Müşteri
 DocType: C-Form,Customer,Müşteri
 DocType: Purchase Receipt Item,Required By,Gerekli
-DocType: Delivery Note,Return Against Delivery Note,İrsaliye Karşı dön
+DocType: Delivery Note,Return Against Delivery Note,İrsaliye Karşılığı İade
 DocType: Department,Department,Departman
 DocType: Department,Department,Departman
 DocType: Purchase Order,% Billed,% Faturalanan
@@ -221,7 +221,7 @@ apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +30,Newsletter has alr
 DocType: Lead,Request Type,İstek Türü
 DocType: Lead,Request Type,İstek Türü
 DocType: Leave Application,Reason,Nedeni
-apps/erpnext/erpnext/hr/doctype/offer_letter/offer_letter.js +15,Make Employee,Çalışan olun
+apps/erpnext/erpnext/hr/doctype/offer_letter/offer_letter.js +15,Make Employee,Çalışan Girişi Yap
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +14,Broadcasting,Yayın
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +14,Broadcasting,Yayın
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +140,Execution,Yerine Getirme
@@ -354,7 +354,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 DocType: Period Closing Voucher,Closing Account Head,Kapanış Hesap Başkanı
 DocType: Employee,External Work History,Dış Çalışma Geçmişi
 apps/erpnext/erpnext/projects/doctype/task/task.py +86,Circular Reference Error,Dairesel Referans Hatası
-DocType: Delivery Note,In Words (Export) will be visible once you save the Delivery Note.,Sözlü (İhracat) İrsaliyeyi kaydettiğinizde görünür olacaktır.
+DocType: Delivery Note,In Words (Export) will be visible once you save the Delivery Note.,Tutarın Yazılı Hali (İhracat) İrsaliyeyi kaydettiğinizde görünür olacaktır.
 DocType: Lead,Industry,Sanayi
 DocType: Employee,Job Profile,İş Profili
 DocType: Employee,Job Profile,İş Profili
@@ -1019,7 +1019,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Çalışanların Do�
 DocType: Opportunity,Walk In,Rezervasyonsuz Müşteri
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Stok Girişler
 DocType: Item,Inspection Criteria,Muayene Kriterleri
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Finansal Maliyet Merkezleri Ağacı
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Finansal Maliyet Merkezleri Ağacı
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Aktarılan
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Mektup baş ve logosu yükleyin. (Daha sonra bunları düzenleyebilirsiniz).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Beyaz
@@ -1524,7 +1524,7 @@ DocType: UOM,UOM Name,Ölçü Birimi
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +43,Contribution Amount,Katkı Tutarı
 DocType: Sales Invoice,Shipping Address,Teslimat Adresi
 DocType: Stock Reconciliation,This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,"Bu araç, güncellemek veya sistemde stok miktarı ve değerleme düzeltmek için yardımcı olur. Genellikle sistem değerlerini ve ne aslında depolarda var eşitlemek için kullanılır."
-DocType: Delivery Note,In Words will be visible once you save the Delivery Note.,Sözlü İrsaliyeyi kaydettiğinizde görünür olacaktır
+DocType: Delivery Note,In Words will be visible once you save the Delivery Note.,Tutarın Yazılı Hali İrsaliyeyi kaydettiğinizde görünür olacaktır
 apps/erpnext/erpnext/config/stock.py +115,Brand master.,Esas marka.
 DocType: Sales Invoice Item,Brand Name,Marka Adı
 DocType: Sales Invoice Item,Brand Name,Marka Adı
@@ -1919,7 +1919,7 @@ DocType: Journal Entry,Accounts Receivable,Alacak hesapları
 DocType: Address Template,This format is used if country specific format is not found,Ülkeye özgü format bulunamazsa bu format kullanılır
 DocType: Production Order,Use Multi-Level BOM,Çok Seviyeli BOM kullan
 DocType: Bank Reconciliation,Include Reconciled Entries,Mutabık girdileri dahil edin
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Finansal Hesaplar Ağacı
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Finansal Hesaplar Ağacı
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Tüm çalışan tipleri için kabul ise boş bırakın
 DocType: Landed Cost Voucher,Distribute Charges Based On,Dağıt Masraflar Dayalı
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Hesap {0} Madde {1} Varlık Maddesi olmak üzere 'Sabit Varlık' türünde olmalıdır
@@ -2161,7 +2161,7 @@ DocType: Item,"Allow in Sales Order of type ""Service""","Satış Siparişi tür
 apps/erpnext/erpnext/setup/doctype/company/company.py +86,Stores,Mağazalar
 apps/erpnext/erpnext/setup/doctype/company/company.py +86,Stores,Mağazalar
 DocType: Time Log,Projects Manager,Proje Yöneticisi
-DocType: Serial No,Delivery Time,Teslimat süresi
+DocType: Serial No,Delivery Time,İrsaliye Zamanı
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +27,Ageing Based On,Dayalı Yaşlanma
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +27,Ageing Based On,Dayalı Yaşlanma
 DocType: Item,End of Life,Kullanım süresi Sonu
@@ -2430,7 +2430,7 @@ DocType: Landed Cost Voucher,Purchase Receipt Items,Satın alma makbuzu Ürünle
 apps/erpnext/erpnext/config/learn.py +21,Customizing Forms,Özelleştirme Formları
 DocType: Account,Income Account,Gelir Hesabı
 DocType: Account,Income Account,Gelir Hesabı
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +645,Delivery,Teslimat
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +645,Delivery,İrsaliye
 DocType: Stock Reconciliation Item,Current Qty,Güncel Adet
 DocType: BOM Item,"See ""Rate Of Materials Based On"" in Costing Section","Maliyetlendirme Bölümünde ""Dayalı Ürünler Br.Fiyatına"" bakınız"
 DocType: Appraisal Goal,Key Responsibility Area,Kilit Sorumluluk Alanı
@@ -3028,7 +3028,7 @@ DocType: Buying Settings,Purchase Order Required,gerekli Satın alma Siparişi
 ,Item-wise Sales History,Ürün bilgisi Satış Geçmişi
 DocType: Expense Claim,Total Sanctioned Amount,Toplam Tasdiklenmiş Tutar
 ,Purchase Analytics,Satın alma analizleri
-DocType: Sales Invoice Item,Delivery Note Item,Ürün İrsaliyesi
+DocType: Sales Invoice Item,Delivery Note Item,İrsaliye Ürünleri
 DocType: Expense Claim,Task,Görev
 DocType: Expense Claim,Task,Görev
 DocType: Purchase Taxes and Charges,Reference Row #,Referans Satırı #
@@ -3639,7 +3639,7 @@ apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +104,This Week's
 apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +74,{0} must be a Purchased or Sub-Contracted Item in row {1},{0} satır {1} de Alınan veya Taşerona verilen bir Ürün olmalıdır.
 apps/erpnext/erpnext/accounts/general_ledger.py +106,Account: {0} can only be updated via Stock Transactions,Hesap: {0} sadece Stok İşlemleri üzerinden güncellenebilir
 DocType: GL Entry,Party,Taraf
-DocType: Sales Order,Delivery Date,Teslimat Tarihi
+DocType: Sales Order,Delivery Date,İrsaliye Tarihi
 DocType: Opportunity,Opportunity Date,Fırsat tarihi
 DocType: Purchase Receipt,Return Against Purchase Receipt,Satınalma Makbuzu Karşı dön
 DocType: Purchase Order,To Bill,Faturala

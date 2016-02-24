@@ -29,7 +29,7 @@ def delete_company_transactions(company_name):
 
 		else:
 			# un-set company
-			frappe.db.sql('update `tab{0}` set company="" where company=%s', company_name)
+			frappe.db.sql('update `tab{0}` set company="" where company=%s'.format(doctype), company_name)
 
 	# Clear notification counts
 	clear_notifications()

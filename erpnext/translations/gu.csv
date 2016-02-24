@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,કર્મચા�
 DocType: Opportunity,Walk In,ચાલવા
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,સ્ટોક પ્રવેશો
 DocType: Item,Inspection Criteria,નિરીક્ષણ માપદંડ
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,financial કિંમત કેન્દ્રો ખાસ ભેટ અને.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Finanial કિંમત કેન્દ્રો ખાસ ભેટ અને.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,ટ્રાન્સફર
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,તમારો પત્ર વડા અને લોગો અપલોડ કરો. (જો તમે પછીથી તેમને ફેરફાર કરી શકો છો).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,વ્હાઇટ
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,મળવાપાત્ર હિસ
 DocType: Address Template,This format is used if country specific format is not found,દેશમાં ચોક્કસ ફોર્મેટ ન મળી આવે છે તો આ ફોર્મેટનો ઉપયોગ થાય છે
 DocType: Production Order,Use Multi-Level BOM,મલ્ટી લેવલ BOM વાપરો
 DocType: Bank Reconciliation,Include Reconciled Entries,અનુરૂપ પ્રવેશ સમાવેશ થાય છે
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,financial એકાઉન્ટ્સ ખાસ ભેટ અને.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Finanial એકાઉન્ટ્સ ખાસ ભેટ અને.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,બધા કર્મચારી પ્રકારો માટે ગણવામાં તો ખાલી છોડી દો
 DocType: Landed Cost Voucher,Distribute Charges Based On,વિતરિત ખર્ચ પર આધારિત
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"વસ્તુ {1} અસેટ વસ્તુ છે, કારણ કે એકાઉન્ટ {0} &#39;સ્થિર એસેટ&#39; પ્રકાર હોવા જ જોઈએ"

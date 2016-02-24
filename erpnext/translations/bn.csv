@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,কর্মচা�
 DocType: Opportunity,Walk In,প্রবেশ
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,শেয়ার সাজপোশাকটি
 DocType: Item,Inspection Criteria,ইন্সপেকশন নির্ণায়ক
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,financial খরচ কেন্দ্র বৃক্ষ.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Finanial খরচ কেন্দ্র বৃক্ষ.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,স্থানান্তরিত
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,আপনার চিঠি মাথা এবং লোগো আপলোড করুন. (আপনি তাদের পরে সম্পাদনা করতে পারেন).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,সাদা
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,গ্রহনযোগ্য অ্
 DocType: Address Template,This format is used if country specific format is not found,দেশ নির্দিষ্ট ফরম্যাটে পাওয়া না গেলে এই বিন্যাস ব্যবহার করা হয়েছে
 DocType: Production Order,Use Multi-Level BOM,মাল্টি লেভেল BOM ব্যবহার
 DocType: Bank Reconciliation,Include Reconciled Entries,মীমাংসা দাখিলা অন্তর্ভুক্ত
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,financial অ্যাকাউন্টের বৃক্ষ.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Finanial অ্যাকাউন্টের বৃক্ষ.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,সব কর্মচারী ধরনের জন্য বিবেচিত হলে ফাঁকা ছেড়ে দিন
 DocType: Landed Cost Voucher,Distribute Charges Based On,বিতরণ অভিযোগে নির্ভরশীল
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,আইটেম {1} একটি অ্যাসেট আইটেম হিসাবে অ্যাকাউন্ট {0} &#39;স্থায়ী সম্পদ&#39; ধরনের হতে হবে

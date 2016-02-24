@@ -809,7 +809,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,កុំផ្ញ�
 DocType: Opportunity,Walk In,ដើរក្នុង
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,ធាតុភាគហ៊ុន
 DocType: Item,Inspection Criteria,លក្ខណៈវិនិច្ឆ័យអធិការកិច្ច
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,មែកធាងនៃមជ្ឈមណ្ឌលការចំណាយ financial ។
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,មែកធាងនៃមជ្ឈមណ្ឌលការចំណាយ finanial ។
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,ផ្ទេរប្រាក់
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,ផ្ទុកឡើងក្បាលលិខិតនិងស្លាកសញ្ញារបស់អ្នក។ (អ្នកអាចកែសម្រួលពួកវានៅពេលក្រោយ) ។
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,សេត
@@ -1553,7 +1553,7 @@ DocType: Journal Entry,Accounts Receivable,គណនីអ្នកទទួល
 DocType: Address Template,This format is used if country specific format is not found,ទ្រង់ទ្រាយនេះត្រូវបានប្រើប្រសិនបើទ្រង់ទ្រាយជាក់លាក់គឺមិនត្រូវបានរកឃើញថាប្រទេស
 DocType: Production Order,Use Multi-Level BOM,ប្រើពហុកម្រិត Bom
 DocType: Bank Reconciliation,Include Reconciled Entries,រួមបញ្ចូលធាតុសំរុះសំរួល
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,មែកធាងនៃគណនីរបស់ financial ។
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,មែកធាងនៃគណនីរបស់ finanial ។
 DocType: Leave Control Panel,Leave blank if considered for all employee types,ប្រសិនបើអ្នកទុកវាឱ្យទទេអស់ទាំងប្រភេទពិចារណាសម្រាប់បុគ្គលិក
 DocType: Landed Cost Voucher,Distribute Charges Based On,ដោយផ្អែកលើការចែកចាយការចោទប្រកាន់
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,គណនី {0} ត្រូវតែមានប្រភេទ &quot;ទ្រព្យ&quot; ដែលជាធាតុ {1} ជាធាតុធាតុសកម្មមួយ

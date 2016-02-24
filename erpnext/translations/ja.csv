@@ -840,7 +840,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,従業員の誕生�
 DocType: Opportunity,Walk In,立入
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,ストックエントリ
 DocType: Item,Inspection Criteria,検査基準
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,財務コストセンターのツリー
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,財務コストセンターのツリー
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,移転済
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,レターヘッドとロゴをアップロードします（後で編集可能です）
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,ホワイト
@@ -1593,7 +1593,7 @@ DocType: Journal Entry,Accounts Receivable,売掛金
 DocType: Address Template,This format is used if country specific format is not found,国別の書式が無い場合は、この書式が使用されます
 DocType: Production Order,Use Multi-Level BOM,マルチレベルの部品表を使用
 DocType: Bank Reconciliation,Include Reconciled Entries,照合済のエントリを含む
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,財務アカウントのツリー
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,財務アカウントのツリー
 DocType: Leave Control Panel,Leave blank if considered for all employee types,全従業員タイプを対象にする場合は空白のままにします
 DocType: Landed Cost Voucher,Distribute Charges Based On,支払按分基準
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,アイテム{1}が資産アイテムである場合、アカウントアイテム{0}は「固定資産」でなければなりません

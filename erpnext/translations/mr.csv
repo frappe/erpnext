@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,कर्मचा�
 DocType: Opportunity,Walk In,मध्ये चाला
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,शेअर नोंदी
 DocType: Item,Inspection Criteria,तपासणी निकष
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,financial खर्च केंद्रांची वृक्ष.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Finanial खर्च केंद्रांची वृक्ष.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,हस्तांतरण
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,आपले पत्र डोके आणि लोगो अपलोड करा. (आपण नंतर संपादित करू शकता).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,व्हाइट
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,प्राप्तीयोग्�
 DocType: Address Template,This format is used if country specific format is not found,"देशातील विशिष्ट स्वरूप सापडले नाही, तर हे स्वरूप वापरले जाते"
 DocType: Production Order,Use Multi-Level BOM,मल्टी लेव्हल BOM वापरा
 DocType: Bank Reconciliation,Include Reconciled Entries,समेट नोंदी समाविष्ट
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,financial खाती वृक्ष.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Finanial खाती वृक्ष.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,सर्व कर्मचारी प्रकार विचार तर रिक्त सोडा
 DocType: Landed Cost Voucher,Distribute Charges Based On,वितरण शुल्क आधारित
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,आयटम {1} मालमत्ता आयटम आहे म्हणून खाते {0} &#39;मुदत मालमत्ता&#39; प्रकारच्या असणे आवश्यक आहे

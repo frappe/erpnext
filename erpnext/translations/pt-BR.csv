@@ -213,7 +213,7 @@ apps/erpnext/erpnext/controllers/taxes_and_totals.py +408,Advance amount cannot 
 DocType: Naming Series,Series List for this Transaction,Lista de séries para esta transação
 DocType: Sales Invoice,Is Opening Entry,Está abrindo Entry
 DocType: Customer Group,Mention if non-standard receivable account applicable,Mencione se não padronizado conta a receber aplicável
-apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +154,For Warehouse is required before Submit,Para for necessário Armazém antes Enviar
+apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +154,For Warehouse is required before Submit,Almoxarifado de destino necessário antes de enviar
 apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html +8,Received On,"Recebeu, em"
 DocType: Sales Partner,Reseller,Revendedor
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +41,Please enter Company,"Por favor, indique Empresa"
@@ -831,7 +831,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Não envie aos empre
 DocType: Opportunity,Walk In,Caminhe em
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Entradas de Stock
 DocType: Item,Inspection Criteria,Critérios de Inspeção
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Árvore de Centros de custo financial .
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Árvore de Centros de custo finanial .
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Transferido
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Publique sua cabeça letra e logotipo. (Você pode editá-las mais tarde).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Branco
@@ -1373,7 +1373,7 @@ apps/erpnext/erpnext/config/support.py +43,Single unit of an Item.,Unidade únic
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +217,Time Log Batch {0} must be 'Submitted',Tempo Log Batch {0} deve ser ' enviado '
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Faça Contabilidade entrada para cada Banco de Movimento
 DocType: Leave Allocation,Total Leaves Allocated,Total de licenças alocadas
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +394,Warehouse required at Row No {0},Armazém necessário na Coluna No {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +394,Warehouse required at Row No {0},Almoxarifado necessário na Coluna No {0}
 apps/erpnext/erpnext/public/js/setup_wizard.js +81,Please enter valid Financial Year Start and End Dates,"Por favor, indique Ano válido Financial datas inicial e final"
 DocType: Employee,Date Of Retirement,Data da aposentadoria
 DocType: Upload Attendance,Get Template,Obter Modelo
@@ -1470,7 +1470,7 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +126,Quantity fo
 DocType: Leave Application,Apply / Approve Leaves,Aplicar / Aprovar Leaves
 apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html +23,For,Para
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +90,Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',Pode se referir linha apenas se o tipo de acusação é 'On Anterior Valor Row ' ou ' Previous Row Total'
-DocType: Sales Order Item,Delivery Warehouse,Armazém de entrega
+DocType: Sales Order Item,Delivery Warehouse,Almoxarifado de entrega
 DocType: Stock Settings,Allowance Percent,Percentual de tolerância
 DocType: SMS Settings,Message Parameter,Parâmetro da mensagem
 DocType: Serial No,Delivery Document No,Nº do Documento de Entrega
@@ -1578,7 +1578,7 @@ DocType: Journal Entry,Accounts Receivable,Contas a Receber
 DocType: Address Template,This format is used if country specific format is not found,Este formato é usado se o formato específico país não é encontrado
 DocType: Production Order,Use Multi-Level BOM,Utilize LDM de Vários Níveis
 DocType: Bank Reconciliation,Include Reconciled Entries,Incluir entradas Reconciliados
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Árvore de contas financial .
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Árvore de contas finanial .
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Deixe em branco se considerado para todos os tipos de empregados
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuir taxas sobre
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"A Conta {0} deve ser do tipo ""Ativo Fixo"" pois o item {1} é um item de ativos"
@@ -1870,7 +1870,7 @@ DocType: Delivery Note,Transporter Name,Nome da Transportadora
 DocType: Authorization Rule,Authorized Value,Valor Autorizado
 DocType: Contact,Enter department to which this Contact belongs,Entre com o departamento a que este contato pertence
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +57,Total Absent,Total de Faltas
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +736,Item or Warehouse for row {0} does not match Material Request,Item ou Armazém para linha {0} não corresponde Pedido de materiais
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +736,Item or Warehouse for row {0} does not match Material Request,Item ou Almoxarifado para linha {0} não corresponde Pedido de materiais
 apps/erpnext/erpnext/config/stock.py +104,Unit of Measure,Unidade de Medida
 DocType: Fiscal Year,Year End Date,Data final do ano
 DocType: Task Depends On,Task Depends On,Tarefa depende de
@@ -2264,7 +2264,7 @@ apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +55,Venture Capital,Cap
 DocType: UOM,Must be Whole Number,Deve ser Número inteiro
 DocType: Leave Control Panel,New Leaves Allocated (In Days),Novas Licenças alocadas (em dias)
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +51,Serial No {0} does not exist,Serial Não {0} não existe
-DocType: Sales Invoice Item,Customer Warehouse (Optional),Armazém Cliente (Opcional)
+DocType: Sales Invoice Item,Customer Warehouse (Optional),Almoxarifado Cliente (Opcional)
 DocType: Pricing Rule,Discount Percentage,Percentagem de Desconto
 DocType: Payment Reconciliation Invoice,Invoice Number,Número da Fatura
 apps/erpnext/erpnext/hooks.py +55,Orders,Encomendas
@@ -2402,7 +2402,7 @@ DocType: Item,Inspection Required,Inspeção Obrigatória
 DocType: Purchase Invoice Item,PR Detail,Detalhe PR
 DocType: Sales Order,Fully Billed,Totalmente Anunciado
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +20,Cash In Hand,Dinheiro na mão
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +120,Delivery warehouse required for stock item {0},Armazém de entrega necessário para estoque item {0}
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +120,Delivery warehouse required for stock item {0},Almoxarifado de entrega necessário para estoque item {0}
 DocType: Packing Slip,The gross weight of the package. Usually net weight + packaging material weight. (for print),O peso bruto do pacote. Normalmente peso líquido + peso do material de embalagem. (Para impressão)
 DocType: Accounts Settings,Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,Os usuários com esta função são autorizados a estabelecer contas congeladas e criar / modificar lançamentos contábeis contra contas congeladas
 DocType: Serial No,Is Cancelled,É cancelado
@@ -2648,7 +2648,7 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +46,Securities & Commodity Exchanges,Valores Mobiliários e Bolsas de Mercadorias
 apps/erpnext/erpnext/stock/doctype/item/item.py +540,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',Unidade de medida padrão para a variante &#39;{0}&#39; deve ser o mesmo que no modelo &#39;{1}&#39;
 DocType: Shipping Rule,Calculate Based On,Calcule Baseado em
-DocType: Delivery Note Item,From Warehouse,Do Armazém
+DocType: Delivery Note Item,From Warehouse,Almoxarifado de origem
 DocType: Purchase Taxes and Charges,Valuation and Total,Valorização e Total
 DocType: Tax Rule,Shipping City,O envio da Cidade
 apps/erpnext/erpnext/stock/doctype/item/item.js +59,This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set,"Este artigo é um Variant de {0} (modelo). Atributos serão copiados a partir do modelo, a menos que 'No Copy' é definido"
@@ -3271,7 +3271,7 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +25,Root cannot
 apps/erpnext/erpnext/public/js/stock_analytics.js +59,Select Brand...,Selecione o cadastro ...
 DocType: Sales Invoice,C-Form Applicable,Formulário-C Aplicável
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +340,Operation Time must be greater than 0 for Operation {0},Tempo de Operação deve ser maior que 0 para a operação {0}
-apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +101,Warehouse is mandatory,Armazém é obrigatória
+apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +101,Warehouse is mandatory,Almoxarifado é obrigatório
 DocType: Supplier,Address and Contacts,Endereços e Contatos
 DocType: UOM Conversion Detail,UOM Conversion Detail,Detalhe da Conversão de UDM
 apps/erpnext/erpnext/public/js/setup_wizard.js +169,Keep it web friendly 900px (w) by 100px (h),Mantenha- web 900px amigável (w) por 100px ( h )
@@ -3455,7 +3455,7 @@ apps/erpnext/erpnext/config/hr.py +53,Offer candidate a Job.,Oferta candidato a 
 DocType: Notification Control,Prompt for Email on Submission of,Solicitar e-mail no envio da
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +81,Total allocated leaves are more than days in the period,Total de folhas alocados são mais do que dias no período
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +70,Item {0} must be a stock Item,Item {0} deve ser um item de estoque
-DocType: Manufacturing Settings,Default Work In Progress Warehouse,Padrão trabalho no armazém Progresso
+DocType: Manufacturing Settings,Default Work In Progress Warehouse,Trabalho padrão em progresso no almoxarifado
 apps/erpnext/erpnext/config/accounts.py +117,Default settings for accounting transactions.,As configurações padrão para as transações contábeis.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +58,Expected Date cannot be before Material Request Date,Data prevista não pode ser antes de Material Data do Pedido
 apps/erpnext/erpnext/stock/get_item_details.py +115,Item {0} must be a Sales Item,Item {0} deve ser um item de vendas

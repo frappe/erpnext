@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Neposílejte zaměst
 DocType: Opportunity,Walk In,Vejít
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Sklad Příspěvky
 DocType: Item,Inspection Criteria,Inspekční Kritéria
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Strom financial nákladových středisek.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Strom finanial nákladových středisek.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Převedené
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Nahrajte svůj dopis hlavu a logo. (Můžete je upravit později).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Bílá
@@ -1581,7 +1581,7 @@ DocType: Journal Entry,Accounts Receivable,Pohledávky
 DocType: Address Template,This format is used if country specific format is not found,"Tento formát se používá, když specifický formát země není nalezen"
 DocType: Production Order,Use Multi-Level BOM,Použijte Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Zahrnout odsouhlasené zápisy
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Strom financial účtů.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Strom finanial účtů.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,"Ponechte prázdné, pokud se to považuje za ubytování ve všech typech zaměstnanců"
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuovat poplatků na základě
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Účet {0} musí být typu ""dlouhodobého majetku"", protože položka {1} je majetková položka"

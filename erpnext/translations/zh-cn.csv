@@ -821,7 +821,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,不要发送员工�
 DocType: Opportunity,Walk In,主动上门
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,库存条目
 DocType: Item,Inspection Criteria,检验标准
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,树financial成本中心。
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,树finanial成本中心。
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,转移
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,上传你的信头和logo。(您可以在以后对其进行编辑）。
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,白
@@ -1567,7 +1567,7 @@ DocType: Journal Entry,Accounts Receivable,应收帐款
 DocType: Address Template,This format is used if country specific format is not found,此格式用于如果找不到特定国家的格式
 DocType: Production Order,Use Multi-Level BOM,采用多级物料清单
 DocType: Bank Reconciliation,Include Reconciled Entries,包括核销分录
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,会计科目树
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,会计科目树
 DocType: Leave Control Panel,Leave blank if considered for all employee types,如果针对所有雇员类型请留空
 DocType: Landed Cost Voucher,Distribute Charges Based On,费用分配基于
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,因为账项{1}是一个资产条目，所以科目{0}的类型必须为“固定资产”

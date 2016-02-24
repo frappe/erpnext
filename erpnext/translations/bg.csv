@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Не изпраща�
 DocType: Opportunity,Walk In,Влизам
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Сток влизания
 DocType: Item,Inspection Criteria,Критериите за инспекция
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Дърво на financial разходни центрове.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Дърво на finanial разходни центрове.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Прехвърлят
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Качете вашето писмо главата и лого. (Можете да ги редактирате по-късно).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Бял
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,Вземания
 DocType: Address Template,This format is used if country specific format is not found,"Този формат се използва, ако не се намери специфичен формат за държавата"
 DocType: Production Order,Use Multi-Level BOM,Използвайте Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Включи примирени влизания
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Дърво на financial сметки.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Дърво на finanial сметки.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,"Оставете празно, ако считат за всички видове наети лица"
 DocType: Landed Cost Voucher,Distribute Charges Based On,Разпредели такси на базата на
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Account {0} трябва да е от тип ""Дълготраен Актив"" като елемент {1} е Актив,"

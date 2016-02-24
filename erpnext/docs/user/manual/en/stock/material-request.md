@@ -23,6 +23,7 @@ A Material Request can be of type:
 * Purchase - If the request material is to be purchased.
 * Material Transfer - If the requested material is to be shifted from one warehouse to another.
 * Material Issue - If the requested material is to be Issued.
+* Manufacture - If the requested material is to be Produced.
 
 > Info: Material Request is not mandatory. It is ideal if you have centralized
 buying so that you can collect this information from various departments.
