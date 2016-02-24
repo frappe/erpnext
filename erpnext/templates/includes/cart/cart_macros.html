@@ -1,5 +1,6 @@
-{% macro show_address(address, doc, fieldname) %}
+{% macro show_address(address, doc, fieldname, select_address=False) %}
 {% set selected=address.name==doc.get(fieldname) %}
+
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<div class="row">

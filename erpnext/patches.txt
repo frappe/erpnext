@@ -246,6 +246,6 @@ erpnext.patches.v6_16.update_billing_status_in_dn_and_pr
 erpnext.patches.v6_16.create_manufacturer_records
 execute:frappe.db.sql("update `tabPricing Rule` set title=name where title='' or title is null") #2016-01-27
 erpnext.patches.v6_20.set_party_account_currency_in_orders
-erpnext.patches.v6_19.comment_feed_communication
+#erpnext.patches.v6_19.comment_feed_communication
 erpnext.patches.v6_21.fix_reorder_level
 erpnext.patches.v6_21.rename_material_request_fields

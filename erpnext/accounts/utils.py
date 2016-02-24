@@ -477,3 +477,15 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		})
 
 	return outstanding_invoices
+
+
+def get_account(account_type=None, root_type=None, is_group=None, account_currency=None, company=None):
+	"""return account based on matching conditions"""
+	return frappe.db.get_value("Account", {
+		"account_type": account_type or '',
+		"root_type": root_type or '',
+		"is_group": is_group or 0,
+		"account_currency": account_currency or frappe.defaults.get_defaults().currency,
+		"company": company or frappe.defaults.get_defaults().company
+	}, "name")
+	
