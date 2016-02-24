@@ -8,6 +8,7 @@ import unittest
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request, get_gateway_details
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.setup.utils import get_exchange_rate
 # test_records = frappe.get_test_records('Payment Request')
 
 test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
@@ -44,48 +45,44 @@ class TestPaymentRequest(unittest.TestCase):
 				frappe.get_doc(method).insert(ignore_permissions=True)
 			
 	def test_payment_request_linkings(self):
-		SO_INR = make_sales_order(currency="INR")
-		pr = make_payment_request(dt="Sales Order", dn=SO_INR.name, recipient_id="saurabh@erpnext.com")
-		
+		so_inr = make_sales_order(currency="INR")
+		pr = make_payment_request(dt="Sales Order", dn=so_inr.name, recipient_id="saurabh@erpnext.com")
+
 		self.assertEquals(pr.reference_doctype, "Sales Order")
-		self.assertEquals(pr.reference_name, SO_INR.name)
+		self.assertEquals(pr.reference_name, so_inr.name)
 		self.assertEquals(pr.currency, "INR")
-		
-		SI_USD = create_sales_invoice(currency="USD", conversion_rate=50)
-		pr = make_payment_request(dt="Sales Invoice", dn=SI_USD.name, recipient_id="saurabh@erpnext.com")
+
+		conversion_rate = get_exchange_rate("USD", "INR")
+
+		si_usd = create_sales_invoice(currency="USD", conversion_rate=conversion_rate)
+		pr = make_payment_request(dt="Sales Invoice", dn=si_usd.name, recipient_id="saurabh@erpnext.com")
 
 		self.assertEquals(pr.reference_doctype, "Sales Invoice")
-		self.assertEquals(pr.reference_name, SI_USD.name)
+		self.assertEquals(pr.reference_name, si_usd.name)
 		self.assertEquals(pr.currency, "USD")
-	
-	def test_payment_entry(self):
-		SO_INR = make_sales_order(currency="INR")
-		pr = make_payment_request(dt="Sales Order", dn=SO_INR.name, recipient_id="saurabh@erpnext.com", 
-			mute_email=1, submit_doc=1)	 
-		jv = pr.set_as_paid()
-		
-		SO_INR = frappe.get_doc("Sales Order", SO_INR.name)
-		
-		self.assertEquals(SO_INR.advance_paid, jv.total_debit)
-		
-		SI_USD = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
-			currency="USD", conversion_rate=50)
 
-		pr = make_payment_request(dt="Sales Invoice", dn=SI_USD.name, recipient_id="saurabh@erpnext.com",
-			mute_email=1, return_doc=1, payemnt_gateway="_Test Gateway - USD")
-		
+	def test_payment_entry(self):
+		so_inr = make_sales_order(currency="INR")
+		pr = make_payment_request(dt="Sales Order", dn=so_inr.name, recipient_id="saurabh@erpnext.com",
+			mute_email=1, submit_doc=1)
 		jv = pr.set_as_paid()
-		
-		payemnt_gateway_details = get_gateway_details({"payemnt_gateway": "_Test Gateway - USD"})
-		
-		accounts = jv.accounts.as_dict()
-		
-		self.assertEquals(accounts[0].account, "_Test Receivable USD - _TC")
-		self.assertEquals(accounts[0].account, payemnt_gateway_details.payment_account)
-		
-		
-			
-			
-			
-		
+
+		so_inr = frappe.get_doc("Sales Order", so_inr.name)
+
+		self.assertEquals(so_inr.advance_paid, jv.total_debit)
+
+		conversion_rate = get_exchange_rate("USD", "INR")
+
+		si_usd = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+			currency="USD", conversion_rate=conversion_rate)
+
+		pr = make_payment_request(dt="Sales Invoice", dn=si_usd.name, recipient_id="saurabh@erpnext.com",
+			mute_email=1, return_doc=1, payment_gateway="_Test Gateway - USD")
+
+		jv = pr.set_as_paid()
+
+		payment_gateway_details = get_gateway_details({"payment_gateway": "_Test Gateway - USD"})
+				
+		self.assertEquals(jv.accounts[0].account, "_Test Receivable USD - _TC")
+		self.assertEquals(jv.accounts[1].account, payment_gateway_details.payment_account)
 		

@@ -83,23 +83,23 @@ class PaymentRequest(Document):
 		
 		party_account = get_party_account("Customer", ref_doc.get("customer"), ref_doc.company)
 		party_account_currency = get_account_currency(party_account)
-		
+				
 		debit_in_account_currency = 0.0
-		
+				
 		if party_account_currency == ref_doc.company_currency:
 			amount = self.base_grand_total
 			if self.currency != ref_doc.company_currency:
 				debit_in_account_currency = self.grand_total
 			
 		else:
-			amount = self.grand_total
+			amount = debit_in_account_currency = self.grand_total
 				
 		if self.reference_doctype == "Sales Order":
 			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name,
 			 amount=amount, debit_in_account_currency=debit_in_account_currency , journal_entry=True, 
 			 bank_account=self.payment_account)
 			
-		if self.reference_doctype == "Sales Invoice":
+		if self.reference_doctype == "Sales Invoice":			
 			jv = get_payment_entry_against_invoice(self.reference_doctype, self.reference_name,
 			 amount=amount, debit_in_account_currency=debit_in_account_currency, journal_entry=True,
 			 bank_account=self.payment_account)
@@ -211,8 +211,8 @@ def get_amount(ref_doc, dt):
 		
 	if dt == "Sales Invoice":
 		base_grand_total = flt(ref_doc.base_grand_total)
-		grand_total = (flt(ref_doc.base_grand_total) - flt(ref_doc.outstanding_amount)) / flt(ref_doc.conversion_rate, 2)
-	
+		grand_total = flt(ref_doc.outstanding_amount)
+		
 	if base_grand_total > 0 and grand_total > 0 :
 		return base_grand_total, grand_total
 		
@@ -221,8 +221,8 @@ def get_amount(ref_doc, dt):
 		
 def get_gateway_details(args):
 	"""return gateway and payment account of default payment gateway"""
-	if args.payemnt_gateway:
-		return get_payment_gateway_account(args.payemnt_gateway)
+	if args.get("payment_gateway"):
+		return get_payment_gateway_account(args.get("payment_gateway"))
 		
 	if args.cart:
 		payment_gateway_account = frappe.get_doc("Shopping Cart Settings").payment_gateway_account
