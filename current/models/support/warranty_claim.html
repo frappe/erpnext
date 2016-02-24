@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -150,22 +150,8 @@
     </thead>
     <tbody>
         
-        <tr class="info">
-            <td>1</td>
-            <td ><code>customer_section</code></td>
-            <td >
-                Section Break</td>
-            <td >
-                
-                
-            </td>
-            <td>
-                <pre>icon-user</pre>
-            </td>
-        </tr>
-        
         <tr >
-            <td>2</td>
+            <td>1</td>
             <td class="danger" title="Mandatory"><code>naming_series</code></td>
             <td >
                 Select</td>
@@ -179,7 +165,7 @@
         </tr>
         
         <tr >
-            <td>3</td>
+            <td>2</td>
             <td class="danger" title="Mandatory"><code>status</code></td>
             <td >
                 Select</td>
@@ -197,7 +183,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>4</td>
+            <td>3</td>
             <td class="danger" title="Mandatory"><code>complaint_date</code></td>
             <td >
                 Date</td>
@@ -209,7 +195,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>5</td>
+            <td>4</td>
             <td ><code>column_break0</code></td>
             <td class="info">
                 Column Break</td>
@@ -221,7 +207,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>5</td>
             <td ><code>serial_no</code></td>
             <td >
                 Link</td>
@@ -242,7 +228,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>7</td>
+            <td>6</td>
             <td class="danger" title="Mandatory"><code>customer</code></td>
             <td >
                 Link</td>
@@ -262,55 +248,37 @@ Cancelled</pre>
             </td>
         </tr>
         
-        <tr >
-            <td>8</td>
-            <td ><code>customer_address</code></td>
-            <td >
-                Link</td>
-            <td >
-                Customer Address
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/utilities/address">Address</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>9</td>
-            <td ><code>contact_person</code></td>
-            <td >
-                Link</td>
-            <td >
-                Contact Person
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/utilities/contact">Contact</a>
-
-
-                
-            </td>
-        </tr>
-        
         <tr class="info">
-            <td>10</td>
-            <td ><code>issue_details</code></td>
+            <td>7</td>
+            <td ><code>section_break_7</code></td>
             <td >
                 Section Break</td>
             <td >
                 
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td class="danger" title="Mandatory"><code>complaint</code></td>
+            <td >
+                Text Editor</td>
+            <td >
+                Issue
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>9</td>
+            <td ><code>issue_details</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Item and Warranty Details
                 
             </td>
             <td>
@@ -319,19 +287,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>11</td>
-            <td class="danger" title="Mandatory"><code>complaint</code></td>
-            <td >
-                Small Text</td>
-            <td >
-                Issue
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>12</td>
+            <td>10</td>
             <td ><code>item_code</code></td>
             <td >
                 Link</td>
@@ -352,6 +308,30 @@ Cancelled</pre>
         </tr>
         
         <tr >
+            <td>11</td>
+            <td ><code>item_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Item Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>description</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Description
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
             <td>13</td>
             <td ><code>column_break1</code></td>
             <td class="info">
@@ -365,30 +345,6 @@ Cancelled</pre>
         
         <tr >
             <td>14</td>
-            <td ><code>item_name</code></td>
-            <td >
-                Data</td>
-            <td >
-                Item Name
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>15</td>
-            <td ><code>description</code></td>
-            <td >
-                Small Text</td>
-            <td >
-                Description
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>16</td>
             <td ><code>warranty_amc_status</code></td>
             <td >
                 Select</td>
@@ -406,7 +362,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>15</td>
             <td ><code>warranty_expiry_date</code></td>
             <td >
                 Date</td>
@@ -418,7 +374,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>16</td>
             <td ><code>amc_expiry_date</code></td>
             <td >
                 Date</td>
@@ -430,14 +386,13 @@ Out of AMC</pre>
         </tr>
         
         <tr class="info">
-            <td>19</td>
+            <td>17</td>
             <td ><code>resolution_section</code></td>
             <td >
                 Section Break</td>
             <td >
                 Resolution
-                <p class="text-muted small">
-                    To assign this issue, use the "Assign" button in the sidebar.</p>
+                
             </td>
             <td>
                 <pre>icon-thumbs-up</pre>
@@ -445,7 +400,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>18</td>
             <td ><code>resolution_date</code></td>
             <td >
                 Datetime</td>
@@ -457,7 +412,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>19</td>
             <td ><code>resolved_by</code></td>
             <td >
                 Link</td>
@@ -478,7 +433,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>20</td>
             <td ><code>resolution_details</code></td>
             <td >
                 Text</td>
@@ -490,12 +445,12 @@ Out of AMC</pre>
         </tr>
         
         <tr class="info">
-            <td>23</td>
+            <td>21</td>
             <td ><code>contact_info</code></td>
             <td >
                 Section Break</td>
             <td >
-                Contact Info
+                Customer Details
                 
             </td>
             <td>
@@ -504,19 +459,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>24</td>
-            <td ><code>col_break3</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>25</td>
+            <td>22</td>
             <td ><code>customer_name</code></td>
             <td >
                 Data</td>
@@ -528,12 +471,12 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>26</td>
-            <td ><code>customer_group</code></td>
+            <td>23</td>
+            <td ><code>contact_person</code></td>
             <td >
                 Link</td>
             <td >
-                Customer Group
+                Contact Person
                 
             </td>
             <td>
@@ -541,11 +484,47 @@ Out of AMC</pre>
                 
 
 
-<a href="https://frappe.github.io/erpnext/current/models/setup/customer_group">Customer Group</a>
+<a href="https://frappe.github.io/erpnext/current/models/utilities/contact">Contact</a>
 
 
                 
             </td>
+        </tr>
+        
+        <tr >
+            <td>24</td>
+            <td ><code>contact_display</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Contact
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>25</td>
+            <td ><code>contact_mobile</code></td>
+            <td >
+                Data</td>
+            <td >
+                Mobile No
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>26</td>
+            <td ><code>contact_email</code></td>
+            <td >
+                Data</td>
+            <td >
+                Contact Email
+                
+            </td>
+            <td></td>
         </tr>
         
         <tr >
@@ -571,23 +550,32 @@ Out of AMC</pre>
         
         <tr >
             <td>28</td>
-            <td ><code>contact_display</code></td>
+            <td ><code>customer_group</code></td>
             <td >
-                Small Text</td>
+                Link</td>
             <td >
-                Contact
+                Customer Group
                 
             </td>
-            <td></td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/customer_group">Customer Group</a>
+
+
+                
+            </td>
         </tr>
         
         <tr >
             <td>29</td>
-            <td ><code>contact_mobile</code></td>
+            <td ><code>col_break4</code></td>
+            <td class="info">
+                Column Break</td>
             <td >
-                Data</td>
-            <td >
-                Mobile No
+                
                 
             </td>
             <td></td>
@@ -595,23 +583,32 @@ Out of AMC</pre>
         
         <tr >
             <td>30</td>
-            <td ><code>contact_email</code></td>
+            <td ><code>customer_address</code></td>
             <td >
-                Data</td>
+                Link</td>
             <td >
-                Contact Email
+                Customer Address
                 
             </td>
-            <td></td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/utilities/address">Address</a>
+
+
+                
+            </td>
         </tr>
         
         <tr >
             <td>31</td>
-            <td ><code>col_break4</code></td>
-            <td class="info">
-                Column Break</td>
+            <td ><code>address_display</code></td>
             <td >
-                
+                Small Text</td>
+            <td >
+                Address
                 
             </td>
             <td></td>
@@ -630,20 +627,8 @@ Out of AMC</pre>
             <td></td>
         </tr>
         
-        <tr >
-            <td>33</td>
-            <td ><code>address_display</code></td>
-            <td >
-                Small Text</td>
-            <td >
-                Address
-                
-            </td>
-            <td></td>
-        </tr>
-        
         <tr class="info">
-            <td>34</td>
+            <td>33</td>
             <td ><code>more_info</code></td>
             <td >
                 Section Break</td>
@@ -657,19 +642,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>35</td>
-            <td ><code>col_break5</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>36</td>
+            <td>34</td>
             <td class="danger" title="Mandatory"><code>company</code></td>
             <td >
                 Link</td>
@@ -690,7 +663,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>37</td>
+            <td>35</td>
             <td class="danger" title="Mandatory"><code>fiscal_year</code></td>
             <td >
                 Link</td>
@@ -711,7 +684,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>38</td>
+            <td>36</td>
             <td ><code>col_break6</code></td>
             <td class="info">
                 Column Break</td>
@@ -723,7 +696,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>39</td>
+            <td>37</td>
             <td ><code>complaint_raised_by</code></td>
             <td >
                 Data</td>
@@ -735,7 +708,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>40</td>
+            <td>38</td>
             <td ><code>from_company</code></td>
             <td >
                 Data</td>
@@ -747,7 +720,7 @@ Out of AMC</pre>
         </tr>
         
         <tr >
-            <td>41</td>
+            <td>39</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -904,7 +877,7 @@ Out of AMC</pre>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -952,11 +925,11 @@ Out of AMC</pre>
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>

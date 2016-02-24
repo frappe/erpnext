@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -148,26 +148,29 @@
     </thead>
     <tbody>
         
-        <tr class="info">
+        <tr >
             <td>1</td>
-            <td ><code>select_sales_orders</code></td>
+            <td ><code>get_items_from</code></td>
+            <td >
+                Select</td>
+            <td >
+                Get Items From
+                
+            </td>
+            <td>
+                <pre>
+Sales Order
+Material Request</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>2</td>
+            <td ><code>filters</code></td>
             <td >
                 Section Break</td>
             <td >
-                Select Sales Orders
-                <p class="text-muted small">
-                    Select Sales Orders from which you want to create Production Orders.</p>
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>2</td>
-            <td ><code>column_break0</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
+                Filters
                 
             </td>
             <td></td>
@@ -179,7 +182,7 @@
             <td >
                 Link</td>
             <td >
-                Filter based on item
+                Item
                 
             </td>
             <td>
@@ -200,7 +203,7 @@
             <td >
                 Link</td>
             <td >
-                Filter based on customer
+                Customer
                 
             </td>
             <td>
@@ -217,7 +220,28 @@
         
         <tr >
             <td>5</td>
-            <td class="danger" title="Mandatory"><code>company</code></td>
+            <td ><code>warehouse</code></td>
+            <td >
+                Link</td>
+            <td >
+                Warehouse
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/warehouse">Warehouse</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>company</code></td>
             <td >
                 Link</td>
             <td >
@@ -237,7 +261,7 @@
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>7</td>
             <td ><code>column_break1</code></td>
             <td class="info">
                 Column Break</td>
@@ -249,7 +273,7 @@
         </tr>
         
         <tr >
-            <td>7</td>
+            <td>8</td>
             <td ><code>from_date</code></td>
             <td >
                 Date</td>
@@ -261,7 +285,7 @@
         </tr>
         
         <tr >
-            <td>8</td>
+            <td>9</td>
             <td ><code>to_date</code></td>
             <td >
                 Date</td>
@@ -273,7 +297,7 @@
         </tr>
         
         <tr class="info">
-            <td>9</td>
+            <td>10</td>
             <td ><code>section_break1</code></td>
             <td >
                 Section Break</td>
@@ -281,13 +305,11 @@
                 
                 
             </td>
-            <td>
-                <pre>Simple</pre>
-            </td>
+            <td></td>
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>11</td>
             <td ><code>get_sales_orders</code></td>
             <td >
                 Button</td>
@@ -296,13 +318,11 @@
                 <p class="text-muted small">
                     Pull sales orders (pending to deliver) based on the above criteria</p>
             </td>
-            <td>
-                <pre>get_open_sales_orders</pre>
-            </td>
+            <td></td>
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>12</td>
             <td ><code>sales_orders</code></td>
             <td >
                 Table</td>
@@ -323,7 +343,53 @@
         </tr>
         
         <tr class="info">
-            <td>12</td>
+            <td>13</td>
+            <td ><code>section_break_16</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>get_material_request</code></td>
+            <td >
+                Button</td>
+            <td >
+                Get Material Request
+                <p class="text-muted small">
+                    Pull Material Request of type Manufacture based on the above criteria</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td ><code>material_requests</code></td>
+            <td >
+                Table</td>
+            <td >
+                Material Requests
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_plan_material_request">Production Plan Material Request</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>16</td>
             <td ><code>items_for_production</code></td>
             <td >
                 Section Break</td>
@@ -335,21 +401,19 @@
         </tr>
         
         <tr >
-            <td>13</td>
-            <td ><code>get_items_from_so</code></td>
+            <td>17</td>
+            <td ><code>get_items</code></td>
             <td >
                 Button</td>
             <td >
-                Get Items From Sales Orders
+                Get Items
                 
             </td>
-            <td>
-                <pre>get_items_from_so</pre>
-            </td>
+            <td></td>
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>18</td>
             <td ><code>use_multi_level_bom</code></td>
             <td >
                 Check</td>
@@ -362,7 +426,7 @@
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>19</td>
             <td ><code>items</code></td>
             <td >
                 Table</td>
@@ -383,7 +447,7 @@
         </tr>
         
         <tr class="info">
-            <td>16</td>
+            <td>20</td>
             <td ><code>create_production_orders</code></td>
             <td >
                 Section Break</td>
@@ -396,8 +460,8 @@
         </tr>
         
         <tr >
-            <td>17</td>
-            <td ><code>raise_production_order</code></td>
+            <td>21</td>
+            <td ><code>create_production_order</code></td>
             <td >
                 Button</td>
             <td >
@@ -405,13 +469,11 @@
                 <p class="text-muted small">
                     Separate production order will be created for each finished good item.</p>
             </td>
-            <td>
-                <pre>raise_production_order</pre>
-            </td>
+            <td></td>
         </tr>
         
         <tr class="info">
-            <td>18</td>
+            <td>22</td>
             <td ><code>sb5</code></td>
             <td >
                 Section Break</td>
@@ -423,7 +485,7 @@
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>23</td>
             <td ><code>purchase_request_for_warehouse</code></td>
             <td >
                 Link</td>
@@ -444,8 +506,8 @@
         </tr>
         
         <tr >
-            <td>20</td>
-            <td ><code>raise_purchase_request</code></td>
+            <td>24</td>
+            <td ><code>create_material_requests</code></td>
             <td >
                 Button</td>
             <td >
@@ -457,7 +519,7 @@
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>25</td>
             <td ><code>download_materials_required</code></td>
             <td >
                 Button</td>
@@ -523,6 +585,20 @@
     
     
 	<p class="docs-attr-name">
+        <a name="add_mr_in_table" href="#add_mr_in_table" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>add_mr_in_table</b>
+        <i class="text-muted">(self, pending_mr)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Add Material Requests in the table</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="add_so_in_table" href="#add_so_in_table" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>add_so_in_table</b>
@@ -537,10 +613,10 @@
     
     
 	<p class="docs-attr-name">
-        <a name="clear_item_table" href="#clear_item_table" class="text-muted small">
+        <a name="clear_table" href="#clear_table" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>clear_item_table</b>
-        <i class="text-muted">(self)</i>
+		<b>clear_table</b>
+        <i class="text-muted">(self, table_name)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -551,9 +627,9 @@
     
     
 	<p class="docs-attr-name">
-        <a name="clear_so_table" href="#clear_so_table" class="text-muted small">
+        <a name="create_material_request" href="#create_material_request" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>clear_so_table</b>
+		<b>create_material_request</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -568,7 +644,7 @@
         <a name="create_production_order" href="#create_production_order" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>create_production_order</b>
-        <i class="text-muted">(self, items)</i>
+        <i class="text-muted">(self, item_dict)</i>
     </p>
 	<div class="docs-attr-desc"><p>Create production order. Called from Production Planning Tool</p>
 </div>
@@ -607,37 +683,6 @@
     
     
 	<p class="docs-attr-name">
-        <a name="get_distinct_items_and_boms" href="#get_distinct_items_and_boms" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>get_distinct_items_and_boms</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p>Club similar BOM and item for processing
-bom<em>dict {
-    bom</em>no: ['sales_order', 'qty']
-}</p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="get_item_details" href="#get_item_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>get_item_details</b>
-        <i class="text-muted">(self, item_code)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
         <a name="get_items" href="#get_items" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>get_items</b>
@@ -652,14 +697,12 @@ bom<em>dict {
     
     
 	<p class="docs-attr-name">
-        <a name="get_items_from_so" href="#get_items_from_so" class="text-muted small">
+        <a name="get_mr_items" href="#get_mr_items" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>get_items_from_so</b>
+		<b>get_mr_items</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Pull items from Sales Order, only proction item
-and subcontracted item will be pulled from Packing item
-and add items in the table</p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -674,6 +717,34 @@ and add items in the table</p>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p>Pull sales orders  which are pending to deliver based on criteria selected</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_pending_material_requests" href="#get_pending_material_requests" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_pending_material_requests</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Pull Material Requests that are pending based on criteria selected</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_production_items" href="#get_production_items" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_production_items</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -727,12 +798,12 @@ and add items in the table</p>
     
     
 	<p class="docs-attr-name">
-        <a name="get_so_details" href="#get_so_details" class="text-muted small">
+        <a name="get_so_items" href="#get_so_items" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>get_so_details</b>
-        <i class="text-muted">(self, so)</i>
+		<b>get_so_items</b>
+        <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Pull other details from so</p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -741,12 +812,14 @@ and add items in the table</p>
     
     
 	<p class="docs-attr-name">
-        <a name="insert_purchase_request" href="#insert_purchase_request" class="text-muted small">
+        <a name="get_so_wise_planned_qty" href="#get_so_wise_planned_qty" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>insert_purchase_request</b>
+		<b>get_so_wise_planned_qty</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+	<div class="docs-attr-desc"><p>bom<em>dict {
+    bom</em>no: ['sales_order', 'qty']
+}</p>
 </div>
 	<br>
 
@@ -769,12 +842,13 @@ and add items in the table</p>
     
     
 	<p class="docs-attr-name">
-        <a name="raise_production_order" href="#raise_production_order" class="text-muted small">
+        <a name="raise_material_requests" href="#raise_material_requests" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>raise_production_order</b>
+		<b>raise_material_requests</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>It will raise production order (Draft) for all distinct FG items</p>
+	<div class="docs-attr-desc"><p>Raise Material Request if projected qty is less than qty required
+Requested qty should be shortage qty considering minimum order qty</p>
 </div>
 	<br>
 
@@ -783,13 +857,12 @@ and add items in the table</p>
     
     
 	<p class="docs-attr-name">
-        <a name="raise_purchase_request" href="#raise_purchase_request" class="text-muted small">
+        <a name="raise_production_orders" href="#raise_production_orders" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>raise_purchase_request</b>
+		<b>raise_production_orders</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Raise Material Request if projected qty is less than qty required
-Requested qty should be shortage qty considering minimum order qty</p>
+	<div class="docs-attr-desc"><p>It will raise production order (Draft) for all distinct FG items</p>
 </div>
 	<br>
 
@@ -849,7 +922,7 @@ Requested qty should be shortage qty considering minimum order qty</p>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -897,11 +970,11 @@ Requested qty should be shortage qty considering minimum order qty</p>
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>

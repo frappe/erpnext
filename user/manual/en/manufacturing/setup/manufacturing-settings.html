@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -99,7 +99,7 @@
 	                </div>
 					
 	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Manufacturing Settings</h1>
+	                    
 	        		</div>
                 </div>
 				
@@ -110,24 +110,59 @@
 	<article class="web-page-content" id="manufacturing-settings-1" styl
 
     e="text-align: Left">
-	<ul>
-<li>Manufacturing Settings can be found at </li>
-</ul>
+	<h1>Manufacturing Settings</h1>
 
-<blockquote>
-  <p>Manufacturing &gt; Production Order &gt; Setup &gt; Manufacturing Settings</p>
-</blockquote>
+<p>Manufacturing Settings can be found at:</p>
 
-<p><img class="screenshot" alt="Manufacturing Settings" src="https://frappe.github.io/erpnext/assets/img/manufacturing/manufacturing-settings.png"></p>
+<p><code>Manufacturing &gt; Setup &gt; Manufacturing Settings</code></p>
 
-<ul>
-<li><p>Allow Overtime - Specify if workstations are to allow overtime.(schedule operations outside working hours)</p></li>
-<li><p>Allow Production on Holidays - Specify if system is to allow scheduling of operations on Holidays.</p></li>
-<li><p>Capacity Planning for (Days) - Specify no. of Days for Capacity Planning.</p></li>
-<li><p>Time Between Operations (in mins) - Specify the gap between two Production Operations.</p></li>
-</ul>
+<p><img alt="Manufacturing Settings" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/manufacturing/manufacturing-settings-1.png"></p>
 
-<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="../articles">Articles</a></p></p>
+<h4>Disable Capacity Planning and Time Tracking</h4>
+
+<p>As per Capacity Planning feature, when Production Order is created for an item, for each Operation, Time Log is created. Based on actual Operation Time, Time Logs is updated. This also provides total Operations Cost against Production Order.</p>
+
+<p>If you don't track actual operations time, and want to disable creation of Time Log based on Operations, you should check "Disable Capacity Planning and Time Tracking" in the Manufacturing Settings.</p>
+
+<h4>Allow Overtime</h4>
+
+<p>In the Workstation master, actual working hours are defined (say 101m to 6pm). As per the Capacity Planning, Time Logs are created against Workstation, for tracking actual operations hour. It also considers working hours of a Workstation when scheduling job (via Time Log). </p>
+
+<p><img alt="Manufacturing Settings" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/manufacturing-settings-2.png"></p>
+
+<p>As per the standard validation, if Operation cannot be completed within working hours of Workstation, then user is asked to divide an Operation into multiple and smaller Operations. However, if <code>Allow Overtime</code> field is checked, while creating Time Logs for Operation, working hours of Workstation will not be validated. In this case, Time Logs for Operation will be created beyond working hours of Workstation as well.</p>
+
+<h4>Allow Production on Holidays</h4>
+
+<p>Holiday of a company can be recorded in the <a href="https://frappe.github.io/erpnext/user/manual/en/human-resources/">Holiday List</a> master. While scheduling production job on workstation, system doesn't consider a day listed in the Holiday list. If you want production job to be scheduled on holidays as well, <code>Allow Production on Holidays</code> field should be checked.</p>
+
+<p><img alt="Manufacturing Settings" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/manufacturing-settings-3.png"></p>
+
+<h4>Over Production Allowance Percentage</h4>
+
+<p>In Production Order, <code>Qty to Manufacture</code> is set. When creating Manufacture entry against Production Order, it validates <code>Qty to Manufature</code> entered in production order, and doesn't allow creating Manufacture Entry for more qty and Production Order qty. If you want to create Manufacture Qty than Production Order qty, mention Over Production Allowance Qty in the Manufacturing Settings. Based on Allowance Percentage mentioned, you will be able to create Manufacture Entry for more Qty than in Production Order.</p>
+
+<h4>Back-flush Raw Materials Based On</h4>
+
+<p>When creating Manufacture Entry, raw-material items are back-flush based on BOM of production item. If you want raw-material items to be back-flushed based on Material Transfer entry made against that Production Order instead, then you should set Back-flush Raw Materials Based On "Material Transferred for Manufacture".</p>
+
+<p><img alt="Manufacturing Settings" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/manufacturing-settings-4.png"></p>
+
+<h4>Capacity Planning For (Days)</h4>
+
+<p>Define no. of days for which system will do production job allocation in advance.</p>
+
+<h4>Time Between Operations (in mins)</h4>
+
+<p>Time gap between two production operations.</p>
+
+<h4>Default Work In Progress Warehouse</h4>
+
+<p>This Warehouse will be auto-updated in the Work In Progress Warehouse field of Production Order.</p>
+
+<h4>Default Finished Goods Warehouse</h4>
+
+<p>This Warehouse will be auto-updated in the Work In Progress Warehouse field of Production Order.</p>
 	</article>
 	
 </div>
@@ -152,7 +187,7 @@
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -200,11 +235,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>

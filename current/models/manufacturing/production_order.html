@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -619,6 +619,27 @@ Cancelled</pre>
         
         <tr >
             <td>33</td>
+            <td class="danger" title="Mandatory"><code>company</code></td>
+            <td >
+                Link</td>
+            <td >
+                Company
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>34</td>
             <td ><code>column_break2</code></td>
             <td class="info">
                 Column Break</td>
@@ -630,7 +651,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>34</td>
+            <td>35</td>
             <td ><code>project_name</code></td>
             <td >
                 Link</td>
@@ -651,7 +672,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>35</td>
+            <td>36</td>
             <td ><code>sales_order</code></td>
             <td >
                 Link</td>
@@ -673,20 +694,21 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>36</td>
-            <td class="danger" title="Mandatory"><code>company</code></td>
+            <td>37</td>
+            <td ><code>material_request</code></td>
             <td >
                 Link</td>
             <td >
-                Company
-                
+                Material Request
+                <p class="text-muted small">
+                    Manufacture against Material Request</p>
             </td>
             <td>
                 
                 
 
 
-<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
+<a href="https://frappe.github.io/erpnext/current/models/stock/material_request">Material Request</a>
 
 
                 
@@ -694,7 +716,19 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>37</td>
+            <td>38</td>
+            <td ><code>material_request_item</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                Material Request Item
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>39</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -963,6 +997,20 @@ before manufacturing entry can be made.</p>
         <i class="text-muted">(self, status)</i>
     </p>
 	<div class="docs-attr-desc"><p>Called from client side on Stop/Unstop event</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_completed_qty_in_material_request" href="#update_completed_qty_in_material_request" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_completed_qty_in_material_request</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -1322,7 +1370,7 @@ based on Stock Entry</p>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -1370,11 +1418,11 @@ based on Stock Entry</p>
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>

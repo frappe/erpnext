@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -113,7 +113,7 @@
 	<p>Production Planning Tool helps you plan production and purchase of Items for a
 period (usually a week or a month).</p>
 
-<p>This list of Items can be generated from the open Sales Orders in the system
+<p>This list of Items can be generated from the open Sales Orders or pending Material Requests that can be Manufactured in the system
 and will generate:</p>
 
 <ul>
@@ -127,42 +127,52 @@ and will generate:</p>
   <p>Manufacturing &gt; Tools &gt; Production Planning Tool</p>
 </blockquote>
 
-<p><img class="screenshot" alt="Production Planing Tool" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt.png"></p>
+<p><img alt="Production Planing Tool" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt.png"></p>
 
-<h4>Step 1: Select and get Sales Order</h4>
+<h4>Step 1: Specify source to get Production Items</h4>
 
 <ul>
-<li>Select sales orders for MRP using filters (Time, Item, and Customer)</li>
-<li>Click on Get Sales Order to generate a list.</li>
+<li>You can select Sales Order or Material Request according to where you want to source the items from</li>
+<li>If you plan to add items manually, keep the "Get items from" field empty</li>
 </ul>
 
-<p><img class="screenshot" alt="Production Planing Tool" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-get-sales-orders.png"></p>
+<h4>Step 2: Select and get Sales Order / Material Request</h4>
 
-<h4>Step 2: Get Item from Sales Orders.</h4>
+<ul>
+<li>Use filters to get the Sales Order / Material Request</li>
+<li>Click on Get Sales Order / Get Material Requests to generate a list.</li>
+</ul>
 
-<p>You can add/remove or change quantity of these Items.</p>
+<p><img alt="Production Planing Tool" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-get-sales-orders.png"></p>
 
-<p><img class="screenshot" alt="Production Planing Tool" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-get-item.png"></p>
+<h4>Step 3: Get Items</h4>
 
-<h4>Step 3: Create Production Orders</h4>
+<ul>
+<li>Get the items for the Sales Order / Material request list</li>
+<li>You can add/remove or change quantity of these Items.</li>
+</ul>
 
-<p><img class="screenshot" alt="Production Planing Tool" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-create-production-order.png"></p>
+<p><img alt="Production Planing Tool" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-get-item.png"></p>
 
-<h4>Step 4: Create Material Request</h4>
+<h4>Step 4: Create Production Orders</h4>
+
+<p><img alt="Production Planing Tool" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-create-production-order.png"></p>
+
+<h4>Step 5: Create Material Request</h4>
 
 <p>Create Material Request for Items with projected shortfall.</p>
 
-<p><img class="screenshot" alt="Production Planing Tool" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-create-material-request.png"></p>
+<p><img alt="Production Planing Tool" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-create-material-request.png"></p>
 
 <p>The Production Planning Tool is used in two stages:</p>
 
 <ul>
-<li>Selection of Open Sales Orders for the period based on “Expected Delivery Date”.</li>
-<li>Selection of Items from those Sales Orders.</li>
+<li>Selection of open Sales Orders / pending Material Request for the period based on “Expected Delivery Date”.</li>
+<li>Selection of Items from those Sales Orders / Material Requests</li>
 </ul>
 
-<p>The tool will update if you have already created Production Orders for a
-particular Item against its Sales Order (“Planned Quantity”).</p>
+<p>The tool will update if you have already created Production Orde rs for a
+particular Item against its Sales Order (“Planned Quantity”) or Material Request.</p>
 
 <p>You can always edit the Item list and increase / reduce quantities to plan
 your production.</p>
@@ -198,7 +208,7 @@ your production.</p>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -246,11 +256,11 @@ your production.</p>
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>

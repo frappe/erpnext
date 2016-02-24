@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -134,7 +134,7 @@ upcoming release.</p>
   <p>Setup &gt; Printing &gt; Print Formats</p>
 </blockquote>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-format.png" alt="Print Format" /></p>
+<p><img alt="Print Format" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-format.png"></p>
 
 <p>Select the type of Print Format you want to edit and click on the “Copy”
 button on the right column. A new Print Format will open up with “Is Standard”
@@ -167,22 +167,26 @@ HTML, CSS, Python to learn this. For help, please post on our forum.</p>
   <p>Setup &gt; Printing and Branding &gt; Print Settings</p>
 </blockquote>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-settings.png" alt="Print Format" /></p>
+<p><img alt="Print Format" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-settings.png"></p>
 
 <h4>Example</h4>
 
-<p></p>
+<p><p></p>
 
-<pre><code>&lt;h3&gt;{{ doc.select&lt;em&gt;print&lt;/em&gt;heading or &#34;Invoice&#34; }}&lt;/h3&gt;
+<pre><code>&lt;/p&gt;&lt;h3&gt;{{ doc.select&lt;em&gt;print&lt;/em&gt;heading or &#34;Invoice&#34; }}&lt;/h3&gt;
     &lt;div class=&#34;row&#34;&gt;
         &lt;div class=&#34;col-md-3 text-right&#34;&gt;Customer Name&lt;/div&gt;
-        &lt;div class=&#34;col-md-9&#34;&gt;{{ doc.customer&lt;em&gt;name }}&lt;/div&gt;
-    &lt;/div&gt;
-    &lt;div class=&#34;row&#34;&gt;
+        &lt;div class=&#34;col-md-9&#34;&gt;{{ doc.customer&lt;em&gt;name }}&lt;/em&gt;&lt;/div&gt;&lt;em&gt;
+    &lt;/em&gt;&lt;/div&gt;&lt;em&gt;
+    &lt;/em&gt;&lt;div class=&#34;row&#34;&gt;&lt;em&gt;
         &lt;div class=&#34;col-md-3 text-right&#34;&gt;Date&lt;/div&gt;
-        &lt;div class=&#34;col-md-9&#34;&gt;{{ doc.get&lt;/em&gt;formatted(&#34;invoice&lt;em&gt;date&#34;) }}&lt;/div&gt;
-    &lt;/div&gt;
-    &lt;table class=&#34;table table-bordered&#34;&gt;
+        &lt;/em&gt;&lt;div class=&#34;col-md-9&#34;&gt;&lt;em&gt;{{ doc.get&lt;/em&gt;formatted(&#34;invoice&lt;em&gt;date&#34;) }}&lt;/em&gt;&lt;/div&gt;&lt;em&gt;
+    &lt;/em&gt;&lt;/div&gt;&lt;em&gt;
+    
+            {%- for row in doc.items -%}
+            
+            {%- endfor -%}
+        &lt;table class=&#34;table table-bordered&#34;&gt;
         &lt;tbody&gt;
             &lt;tr&gt;
                 &lt;th&gt;Sr&lt;/th&gt;
@@ -191,26 +195,22 @@ HTML, CSS, Python to learn this. For help, please post on our forum.</p>
                 &lt;th class=&#34;text-right&#34;&gt;Qty&lt;/th&gt;
                 &lt;th class=&#34;text-right&#34;&gt;Rate&lt;/th&gt;
                 &lt;th class=&#34;text-right&#34;&gt;Amount&lt;/th&gt;
-            &lt;/tr&gt;
-            {%- for row in doc.items -%}
-            &lt;tr&gt;
+            &lt;/tr&gt;&lt;tr&gt;
                 &lt;td style=&#34;width: 3%;&#34;&gt;{{ row.idx }}&lt;/td&gt;
                 &lt;td style=&#34;width: 20%;&#34;&gt;
-                    {{ row.item&lt;/em&gt;name }}
+                    {{ row.itemname }}
                     {% if row.item&lt;em&gt;code != row.item&lt;/em&gt;name -%}
                     &lt;br&gt;Item Code: {{ row.item&lt;em&gt;code}}
                     {%- endif %}
-                &lt;/td&gt;
+                &lt;/em&gt;&lt;/td&gt;
                 &lt;td style=&#34;width: 37%;&#34;&gt;
                     &lt;div style=&#34;border: 0px;&#34;&gt;{{ row.description }}&lt;/div&gt;&lt;/td&gt;
-                &lt;td style=&#34;width: 10%; text-align: right;&#34;&gt;{{ row.qty }} {{ row.uom or row.stock&lt;/em&gt;uom }}&lt;/td&gt;
+                &lt;td style=&#34;width: 10%; text-align: right;&#34;&gt;{{ row.qty }} {{ row.uom or row.stockuom }}&lt;/td&gt;
                 &lt;td style=&#34;width: 15%; text-align: right;&#34;&gt;{{
-                    row.get&lt;em&gt;formatted(&#34;rate&#34;, doc) }}&lt;/td&gt;
+                    row.get&lt;em&gt;formatted(&#34;rate&#34;, doc) }}&lt;/em&gt;&lt;/td&gt;
                 &lt;td style=&#34;width: 15%; text-align: right;&#34;&gt;{{
-                    row.get&lt;/em&gt;formatted(&#34;amount&#34;, doc) }}&lt;/td&gt;
-            &lt;/tr&gt;
-            {%- endfor -%}
-        &lt;/tbody&gt;
+                    row.getformatted(&#34;amount&#34;, doc) }}&lt;/td&gt;
+            &lt;/tr&gt;&lt;/tbody&gt;
     &lt;/table&gt;
 </code></pre>
 
@@ -229,6 +229,7 @@ support in HTML pages, it is not possible unless you get it scripted. Either
 you can use pre-printed stationary or add this information in your header.</p>
 
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="articles">Articles</a></p></p>
+</em>
 	</article>
 	
 </div>
@@ -253,7 +254,7 @@ you can use pre-printed stationary or add this information in your header.</p>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -301,11 +302,11 @@ you can use pre-printed stationary or add this information in your header.</p>
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>

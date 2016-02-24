@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -275,12 +275,14 @@
             <td>10</td>
             <td ><code>contact_email</code></td>
             <td >
-                Small Text</td>
+                Code</td>
             <td class="text-muted" title="Hidden">
                 Contact Email
                 
             </td>
-            <td></td>
+            <td>
+                <pre>Email</pre>
+            </td>
         </tr>
         
         <tr >
@@ -1487,7 +1489,6 @@ To Deliver and Bill
 To Bill
 To Deliver
 Completed
-Stopped
 Cancelled
 Closed</pre>
             </td>
@@ -1811,13 +1812,15 @@ Yearly</pre>
             <td>111</td>
             <td ><code>notification_email_address</code></td>
             <td >
-                Small Text</td>
+                Code</td>
             <td >
                 Notification Email Address
                 <p class="text-muted small">
                     Enter email id separated by commas, order will be mailed automatically on particular date</p>
             </td>
-            <td></td>
+            <td>
+                <pre>Email</pre>
+            </td>
         </tr>
         
         <tr >
@@ -2265,6 +2268,24 @@ Yearly</pre>
         
     
     <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.selling.doctype.sales_order.sales_order.close_or_unclose_sales_orders</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.selling.doctype.sales_order.sales_order.close_or_unclose_sales_orders" href="#erpnext.selling.doctype.sales_order.sales_order.close_or_unclose_sales_orders" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.selling.doctype.sales_order.sales_order.<b>close_or_unclose_sales_orders</b>
+        <i class="text-muted">(names, status)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.selling.doctype.sales_order.sales_order.get_events</code>
     </p>
 	<p class="docs-attr-name">
@@ -2433,24 +2454,6 @@ Yearly</pre>
         
     
     <p><span class="label label-info">Public API</span>
-        <br><code>/api/method/erpnext.selling.doctype.sales_order.sales_order.stop_or_unstop_sales_orders</code>
-    </p>
-	<p class="docs-attr-name">
-        <a name="erpnext.selling.doctype.sales_order.sales_order.stop_or_unstop_sales_orders" href="#erpnext.selling.doctype.sales_order.sales_order.stop_or_unstop_sales_orders" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.selling.doctype.sales_order.sales_order.<b>stop_or_unstop_sales_orders</b>
-        <i class="text-muted">(names, status)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-	
-
-	
-        
-    
-    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.selling.doctype.sales_order.sales_order.update_status</code>
     </p>
 	<p class="docs-attr-name">
@@ -2476,6 +2479,15 @@ Yearly</pre>
 
 
 <a href="https://frappe.github.io/erpnext/current/models/stock/delivery_note_item">Delivery Note Item</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/support/maintenance_schedule_item">Maintenance Schedule Item</a>
 
 </li>
 			
@@ -2564,7 +2576,7 @@ Yearly</pre>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -2612,11 +2624,11 @@ Yearly</pre>
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>

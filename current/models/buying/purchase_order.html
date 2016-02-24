@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -290,12 +290,14 @@ Yes</pre>
             <td>11</td>
             <td ><code>contact_email</code></td>
             <td >
-                Small Text</td>
+                Code</td>
             <td class="text-muted" title="Hidden">
                 Contact Email
                 
             </td>
-            <td></td>
+            <td>
+                <pre>Email</pre>
+            </td>
         </tr>
         
         <tr >
@@ -503,12 +505,14 @@ Yes</pre>
             <td>25</td>
             <td ><code>customer_contact_email</code></td>
             <td >
-                Small Text</td>
+                Code</td>
             <td class="text-muted" title="Hidden">
                 Customer Contact Email
                 
             </td>
-            <td></td>
+            <td>
+                <pre>Email</pre>
+            </td>
         </tr>
         
         <tr class="info">
@@ -1269,7 +1273,6 @@ To Receive and Bill
 To Bill
 To Receive
 Completed
-Stopped
 Cancelled
 Closed
 Delivered</pre>
@@ -1603,13 +1606,15 @@ Yearly</pre>
             <td>100</td>
             <td ><code>notification_email_address</code></td>
             <td >
-                Small Text</td>
+                Code</td>
             <td >
                 Notification Email Address
                 <p class="text-muted small">
                     Enter email id separated by commas, order will be mailed automatically on particular date</p>
             </td>
-            <td></td>
+            <td>
+                <pre>Email</pre>
+            </td>
         </tr>
         
         <tr >
@@ -1673,9 +1678,9 @@ Yearly</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="check_for_stopped_or_closed_status" href="#check_for_stopped_or_closed_status" class="text-muted small">
+        <a name="check_for_closed_status" href="#check_for_closed_status" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>check_for_stopped_or_closed_status</b>
+		<b>check_for_closed_status</b>
         <i class="text-muted">(self, pc_obj)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -1930,6 +1935,24 @@ Yearly</pre>
         
     
     <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.buying.doctype.purchase_order.purchase_order.close_or_unclose_purchase_orders</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.buying.doctype.purchase_order.purchase_order.close_or_unclose_purchase_orders" href="#erpnext.buying.doctype.purchase_order.purchase_order.close_or_unclose_purchase_orders" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.buying.doctype.purchase_order.purchase_order.<b>close_or_unclose_purchase_orders</b>
+        <i class="text-muted">(names, status)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice</code>
     </p>
 	<p class="docs-attr-name">
@@ -1989,24 +2012,6 @@ Yearly</pre>
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.buying.doctype.purchase_order.purchase_order.<b>set_missing_values</b>
         <i class="text-muted">(source, target)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-	
-
-	
-        
-    
-    <p><span class="label label-info">Public API</span>
-        <br><code>/api/method/erpnext.buying.doctype.purchase_order.purchase_order.stop_or_unstop_purchase_orders</code>
-    </p>
-	<p class="docs-attr-name">
-        <a name="erpnext.buying.doctype.purchase_order.purchase_order.stop_or_unstop_purchase_orders" href="#erpnext.buying.doctype.purchase_order.purchase_order.stop_or_unstop_purchase_orders" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.buying.doctype.purchase_order.purchase_order.<b>stop_or_unstop_purchase_orders</b>
-        <i class="text-muted">(names, status)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -2095,7 +2100,7 @@ Yearly</pre>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -2143,11 +2148,11 @@ Yearly</pre>
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>

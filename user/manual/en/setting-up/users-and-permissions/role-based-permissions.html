@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -144,57 +144,57 @@
 </blockquote></li>
 </ul>
 
-<hr />
+<hr>
 
 <p><strong>To add a new rule</strong>, click on "Add a New Rule" button and a pop-up box will ask you to select a Role and a Permission Level. Once you select this and click on "Add", this will add a new row to your rules table.</p>
 
-<hr />
+<hr>
 
 <p>Leave Application is a good <strong>example</strong> that encompasses all areas of Permission System.</p>
 
-<p><img class="screenshot" alt="Leave Application Form should be created by an Employee, and approved by Leave Approver or HR User" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-leave-application-form.png"></p>
+<p><img alt="Leave Application Form should be created by an Employee, and approved by Leave Approver or HR User" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-leave-application-form.png"></p>
 
 <ol>
 <li><strong>It should be created by an Employee.</strong>
  For this, Employee Role should be given Read, Write, Create permissions.</li>
 </ol>
 
-<p><img class="screenshot" alt="Giving Read, Write and Create Permissions to Employee for Leave Application"  src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-employee-role.png"></p>
+<p><img alt="Giving Read, Write and Create Permissions to Employee for Leave Application" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-employee-role.png"></p>
 
 <ol>
 <li><strong>An Employee should only be able to access his/her Leave Application.</strong>
  Hence, Apply User Permissions should be enabled for Employee Role, and a User Permission record should be created for each User Employee combination. (This effort is reduced for Employee Document Type, by programmatically creating User Permission records.)</li>
 </ol>
 
-<p><img class="screenshot" alt="Limiting access to Leave Applications for a user with Employee Role via User Permissions Manager" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/setting-up-permissions-employee-user-permissions.png"></p>
+<p><img alt="Limiting access to Leave Applications for a user with Employee Role via User Permissions Manager" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/setting-up-permissions-employee-user-permissions.png"></p>
 
 <ol>
 <li><strong>HR Manager should be able to see all Leave Applications.</strong>
  Create a Permission Rule for HR Manager at Level 0, with Read permissions. Apply User Permissions should be disabled.</li>
 </ol>
 
-<p><img class="screenshot" alt="Giving Submit and Cancel permissions to HR Manager for Leave Applications. 'Apply User Permissions' is unchecked to give full access." src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-hr-manager-role.png"></p>
+<p><img alt="Giving Submit and Cancel permissions to HR Manager for Leave Applications. 'Apply User Permissions' is unchecked to give full access." class="screenshot" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-hr-manager-role.png"></p>
 
 <ol>
 <li><strong>Leave Approver should be able to see and update Leave Applications applicable to him/her.</strong>
  Leave Approver is given Read and Write access at Level 0, with Apply User Permissions enabled. Relevant Employee Documents should be enlisted in the User Permissions of Leave Approvers. (This effort is reduced for Leave Approvers mentioned in Employee Documents, by programmatically creating User Permission records.)</li>
 </ol>
 
-<p><img class="screenshot" alt="Giving Read, Write and Submit permissions to Leave Approver for Leave Applications.'Apply User Permissions' is checked to limit access based on Employee." src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-leave-approver-role.png"></p>
+<p><img alt="Giving Read, Write and Submit permissions to Leave Approver for Leave Applications.'Apply User Permissions' is checked to limit access based on Employee." class="screenshot" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-leave-approver-role.png"></p>
 
 <ol>
 <li><strong>It should be Approved / Rejected only by HR User or Leave Approver.</strong>
  The Status field of Leave Application is set at Level 1. HR User and Leave Approver are given Read and Write permissions for Level 1, while everyone else (All) are given Read permission for Level 1.</li>
 </ol>
 
-<p><img class="screenshot" alt="Limiting read access for a set of fields to certain Roles" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/setting-up-permissions-level-1.png"></p>
+<p><img alt="Limiting read access for a set of fields to certain Roles" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/setting-up-permissions-level-1.png"></p>
 
 <ol>
 <li><strong>HR User should be able to delegate Leave Applications to his/her subordinates</strong>
  HR User is given the right to Set User Permissions. A User with HR User role would be able to defined User Permissions on Leave Application for other users.</li>
 </ol>
 
-<p><img class="screenshot" alt="Let HR User delegate access to Leave Applications by checking 'Set User Permissions'. This will allow HR User to access User Permissions Manager for 'Leave Application'" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-hr-user-role.png"></p>
+<p><img alt="Let HR User delegate access to Leave Applications by checking 'Set User Permissions'. This will allow HR User to access User Permissions Manager for 'Leave Application'" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-hr-user-role.png"></p>
 
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="user-permissions.html">User Permissions</a></p></p>
 	</article>
@@ -221,7 +221,7 @@
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -269,11 +269,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>

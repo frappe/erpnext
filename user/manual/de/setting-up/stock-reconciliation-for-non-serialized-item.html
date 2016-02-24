@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -138,18 +138,18 @@
 
 <p>Sie sollten sich an eine spezielle Vorlage eines Tabellenblattes halten um den Bestand und den Wert eines Artikels zu importieren. Öffnen Sie ein neues Formular zum Bestandsabgleich um die Optionen für den Download zu sehen.</p>
 
-<p><img class="screenshot" alt="Bestandsabgleich" src="https://frappe.github.io/erpnext/assets/img/setup/stock-recon-1.png"></p>
+<p><img alt="Bestandsabgleich" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/stock-recon-1.png"></p>
 
 <h4>Schritt 2: Geben Sie Daten in die CSV-Datei ein.</h4>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/stock-reco-data.png" alt="Lagerabgleichsdaten" /></p>
+<p><img alt="Lagerabgleichsdaten" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/stock-reco-data.png"></p>
 
 <p>Das CSV-Format beachtet Groß- und Kleinschreibung. Verändern Sie nicht die Kopfbezeichnungen, die in der Vorlage vordefiniert wurden. In den Spalten "Artikelnummer" und "Lager" geben Sie bitte die richtige Artikelnummer und das Lager ein, so wie es in ERPNext bezeichnet wird. Für die Menge geben Sie den Lagerbestand, den Sie für diesen Artikel erfassen wollen, in einem bestimmten Lager ein. Wenn Sie die Menge oder den wertmäßigen Betrag eines Artikels nicht ändern wollen, dann lassen Sie den Eintrag leer.
 Anmerkung: Geben Sie keine "0" ein, wenn sie die Menge oder den wertmäßigen Betrag nicht ändern wollen. Sonst kalkuliert das System eine Menge von "0". Lassen Sie also das Feld leer!</p>
 
 <h4>Schritt 3: Laden Sie die Datei hoch und geben Sie in das Formular "Bestandsableich" Werte ein.</h4>
 
-<p><img class="screenshot" alt="Bestandsabgleich" src="https://frappe.github.io/erpnext/assets/img/setup/stock-recon-2.png"></p>
+<p><img alt="Bestandsabgleich" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/stock-recon-2.png"></p>
 
 <h5>Buchungsdatum</h5>
 
@@ -167,11 +167,11 @@ Anmerkung: Geben Sie keine "0" ein, wenn sie die Menge oder den wertmäßigen Be
 
 <h4>Schritt 4: Überprüfen Sie die Daten zum Bestandsabgleich</h4>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/stock-reco-upload.png" alt="Bestandsabgleich Überprüfung" /></p>
+<p><img alt="Bestandsabgleich Überprüfung" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/stock-reco-upload.png"></p>
 
 <h3>Bericht zum Lagerbuch</h3>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/stock-reco-ledger.png" alt="Bestandsabgleich Hauptbuch" /></p>
+<p><img alt="Bestandsabgleich Hauptbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/stock-reco-ledger.png"></p>
 
 <h5>So arbeitet der Bestandsabgleich</h5>
 
@@ -181,8 +181,8 @@ Anmerkung: Geben Sie keine "0" ein, wenn sie die Menge oder den wertmäßigen Be
 
 <p>Artikelnummer: ABC001, Lager: Mumbai. Nehmen wir an, dass der Lagerbestand zum 10. Januar 100 Stück beträgt. Zum 12. Januar wird ein Bestandsabgleich durchgeführt um den Bestand auf 150 Stück anzuheben. Das Lagerbuch sieht dann wie folgt aus:</p>
 
-<p><html>
- <table border="1" cellspacing="0px">
+<p>&lt;html&gt;
+ </p><table border="1" cellspacing="0px">
             <tbody>
                 <tr align="center" bgcolor="#EEE">
                     <td><b>Buchungsdatum</b>
@@ -197,7 +197,7 @@ Anmerkung: Geben Sie keine "0" ein, wenn sie die Menge oder den wertmäßigen Be
                 <tr>
                     <td>10.01.2014</td>
                     <td align="center">100</td>
-                    <td>100&nbsp;</td>
+                    <td>100 </td>
                     <td>Kaufbeleg</td>
                 </tr>
                 <tr>
@@ -208,12 +208,12 @@ Anmerkung: Geben Sie keine "0" ein, wenn sie die Menge oder den wertmäßigen Be
                 </tr>
             </tbody>
         </table>
-</html></p>
+&lt;/html&gt;<p></p>
 
 <p>Nehmen wir an, dass zum 5. Januar 2014 eine Buchung zu einem Kaufbeleg erfolgt. Das liegt vor dem Bestandsabgleich.</p>
 
-<p><html>
-    <table border="1" cellspacing="0px">
+<p>&lt;html&gt;
+    </p><table border="1" cellspacing="0px">
         <tbody>
             <tr align="center" bgcolor="#EEE">
                 <td><b>Buchungsdatum</b></td>
@@ -241,7 +241,7 @@ Anmerkung: Geben Sie keine "0" ein, wenn sie die Menge oder den wertmäßigen Be
             </tr>
         </tbody>
     </table>
-</html></p>
+&lt;/html&gt;<p></p>
 
 <p>Nach der Aktualisierungslogik wird der Kontostand, der durch den Bestandsabgleich ermittelt wurde, nicht beeinträchtigt, ungeachtet der Zugangsbuchung für den Artikel.</p>
 
@@ -274,7 +274,7 @@ Anmerkung: Geben Sie keine "0" ein, wenn sie die Menge oder den wertmäßigen Be
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -322,11 +322,11 @@ Anmerkung: Geben Sie keine "0" ein, wenn sie die Menge oder den wertmäßigen Be
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>

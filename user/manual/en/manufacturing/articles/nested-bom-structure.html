@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -114,30 +114,34 @@
 
 <p><strong>Question:</strong> Our manufacturing process involves producing sub-assembly items before final product. How should we manage BOM master in this scenario?</p>
 
-<p><strong>Answer:</strong> You should create BOM for item in the order of their production. Let's consider an example to understand this better.</p>
+<p><strong>Answer:</strong> You should create BOM for item in the order of their production. BOM for the sub-assembly item should be created first. BOM for the Product Order item should be created last. Let's consider an example to understand this better.</p>
 
-<p>If Computer manufacturer assembles Hard Disk and DVD Drive (sub-assemblies) themselves, they should first create BOM for Hard Disk and DVD Drive. After that BOM for Computer will be created, which is finished and saleable item. BOM of computer will have&nbsp;
-Hard Disk and DVD Drive (sub-assemblies) will be selected as raw-material items in it. BOM ID will be fetched for the respective sub-assembly item.</p>
+<p>A computer assembler is creating a BOM for PC. They also manufacture Hard Disk and DVD Drive themselve. They should first create BOM for Hard Disk and DVD Drive. After that BOM for the PC should be created.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-04-02 at 3.58.19 pm.png"></p>
+<p>BOM of PC will have all the raw-material items selected in it. Hard Disk and DVD Drive (sub-assemblies) will also be selected as raw-material items. For the sib-assembly items, respective BOM no. will be fetched as well.</p>
 
-<p><br>Following is how the structure of nested BOM will look:
-<br>
-<br><b>Computer (FG Item)</b>
-<br><b>---</b> Mother Board
-<br><b>---</b> SMTP
-<br><b>---</b> Accessories and wires
-<br><b>---</b>  <i>Hard Disk (sub-assembly)</i>
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ------ Item A
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ------ Item B
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ------ Item C
-<br><b>---</b>  <i>DVD Drive (sub-assembly)</i>
-<br>&nbsp;&nbsp;&nbsp; &nbsp; ------ Item X
-<br>&nbsp; &nbsp; &nbsp; ------ Item Y
-<br>&nbsp;&nbsp; &nbsp;&nbsp; ------ Item Z
-<br></p>
+<p><img alt="Nested BOM" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/nested-bom-1.png"></p>
 
-<!-- markdown -->
+<p>Following is how the structure of nested BOM will look:</p>
+
+<div class="well">
+
+<b>-Personal Computer (FG Item)</b><br>
+<b>---- Mother Board</b><br>
+<b>---- SMTP</b><br>
+<b>---- Accessories and wires</b><br>
+<b>----<i>Hard Disk (sub-assembly)</i></b><br>
+ ------- Item A<br>
+ ------- Item B<br>
+ ------- Item C<br>
+<b>----<i>DVD Drive (sub-assembly)</i></b><br>
+ ------- Item X<br>
+ ------- Item Y<br>
+ ------- Item Z
+
+</div>
+
+
 	</article>
 	
 </div>
@@ -162,7 +166,7 @@ Hard Disk and DVD Drive (sub-assemblies) will be selected as raw-material items 
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -210,11 +214,11 @@ Hard Disk and DVD Drive (sub-assemblies) will be selected as raw-material items 
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Partial Production Entry </title>
+	<title> Production Plan Material Request </title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -26,7 +26,7 @@
 
 </style>
 </head>
-<body data-path="user/manual/en/manufacturing/articles/partial-production-entry">
+<body data-path="current/models/manufacturing/production_plan_material_request">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -58,11 +58,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
@@ -74,7 +74,7 @@
                         <div data-html-block="hero"></div>
                         <div class="container" data-html-block="content">
                         
-<div class="page-container" id="page-partial-production-entry" data-path="user/manual/en/manufacturing/articles/partial-production-entry"
+<div class="page-container" id="page-production_plan_material_request" data-path="current/models/manufacturing/production_plan_material_request"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
@@ -88,8 +88,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/manual/en/manufacturing/articles">
-		Articles</a>
+		<a href="https://frappe.github.io/erpnext/current/models/manufacturing">
+		Module manufacturing</a>
 	</li>
 	
 </ul>
@@ -99,7 +99,7 @@
 	                </div>
 					
 	        		<div class="page-header-block" data-html-block="header">
-	                    
+	                    <h1>Production Plan Material Request</h1>
 	        		</div>
                 </div>
 				
@@ -107,34 +107,117 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="partial-production-entry" styl
+	<article class="web-page-content" id="production_plan_material_request" styl
 
     e="text-align: Left">
-	<h1>Partial Production Entry</h1>
+	<!-- title: Production Plan Material Request -->
 
-<p>If you completed production for few items, then you can make Partial Production Entry for that items in system. For example, your production order is for 15 quantity and you completed production for 10 quantity only. Then you can make production entry for 5 quantity. Following are step to make Partial Production Entry</p>
 
-<h4>1. Stock Entry</h4>
 
-<p>Click on Update Finish Goods button from submitted Product Order, You will land on new Stock entry form.</p>
 
-<h4>2. Edit Manufacturing Quantity</h4>
 
-<p>In the Update Finished Goods entry, check "From Bill of Material section", and edit Manufacturing Quantity to actual quantity produced.  Production Order quantity will be fetched as Manufacturing Quantity by default.</p>
+<div class="dev-header">
 
-<h4>3. Update Qty of Items</h4>
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.x.x</a>
 
-<p>Click on <strong>Get Items</strong>. With this, quantity will be updated for both raw-material as well as finish good item. </p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_078.png" alt="FGE STE" /></p>
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/manufacturing/doctype/production_plan_material_request"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
 
-<h4>4. Save and Submit</h4>
+</div>
 
-<p>After updating quantity in stock entry form, save and submit the stock entry. On submit stock will update for quantity entered in this stock entry.</p>
 
-<p>When will you create another finish goods entry against this Production Order, system will only fetch pending quantity to be produced.</p>
+<span class="label label-info">Child Table</span>
 
-<!-- markdown -->
+
+    <p><b>Table Name:</b> <code>tabProduction Plan Material Request</code></p>
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td ><code>material_request</code></td>
+            <td >
+                Link</td>
+            <td >
+                Material Request
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/material_request">Material Request</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>col_break1</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>material_request_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Material Request Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    
+    
+    <h4>Child Table Of</h4>
+    <ul>
+    
+        <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_planning_tool">Production Planning Tool</a>
+
+</li>
+    
+    </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->
 	</article>
 	
 </div>
@@ -143,23 +226,13 @@
 	</div>
 </div>
 
-						
-<div class="page-container">
-	<div class="page-content">
-	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/manufacturing/articles/partial-production-entry.md">
-			Improve this page
-		</a>
-	</div>
-	</div>
-</div>
+						<!-- edit-link -->
                         </div>
                     </div>
 					<footer class="docs-footer">
 						<div class="container"><div class="built-with-frappe text-center">
                             <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies</h3>
+                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
                         </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
@@ -207,11 +280,11 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='Developer Docs' >
+	Videos</a></li><li data-label='API Documentation' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	Developer Docs</a></li>
+	API Documentation</a></li>
 	<!-- post login tools -->
 
 </ul>
