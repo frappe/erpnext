@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,န်ထမ်း�
 DocType: Opportunity,Walk In,ခုနှစ်တွင် Walk
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,စတော့အိတ် Entries
 DocType: Item,Inspection Criteria,စစ်ဆေးရေးလိုအပ်ချက်
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,financial ကုန်ကျစရိတ်စင်တာများ၏ပင်လည်းရှိ၏။
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,finanial ကုန်ကျစရိတ်စင်တာများ၏ပင်လည်းရှိ၏။
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Transferable
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,သင့်ရဲ့စာကိုဦးခေါင်းနှင့်လိုဂို upload ။ (သင်နောက်ပိုင်းမှာသူတို့ကိုတည်းဖြတ်နိုင်သည်) ။
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,အဖြူ
@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,စုစုပေါ�
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,ထုပ်ပိုးစလစ်ဖြတ်ပိုင်းပုံစံ (s) ဖျက်သိမ်း
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,ရင်းနှီးမြုပ်နှံထံမှငွေကြေးစီးဆင်းမှု
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,ကုန်တင်နှင့် Forwarding စွပ်စွဲချက်
-DocType: Material Request Item,Sales Order,အရောင်းအမိန့်မရှိပါ
+DocType: Material Request Item,Sales Order No,အရောင်းအမိန့်မရှိပါ
 DocType: Item Group,Item Group Name,item Group မှအမည်
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,ယူ
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Manufacturing သည်ပစ္စည်းများလွှဲပြောင်း
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,ငွေစာရင်းရရန�
 DocType: Address Template,This format is used if country specific format is not found,တိုင်းပြည်တိကျတဲ့ format ကိုမတွေ့ရှိပါကဤ format ကိုအသုံးပြုပါတယ်
 DocType: Production Order,Use Multi-Level BOM,Multi-Level BOM ကိုသုံးပါ
 DocType: Bank Reconciliation,Include Reconciled Entries,ပြန်. Entries Include
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,financial အကောင့်အသစ်များ၏ပင်လည်းရှိ၏။
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,finanial အကောင့်အသစ်များ၏ပင်လည်းရှိ၏။
 DocType: Leave Control Panel,Leave blank if considered for all employee types,အားလုံးန်ထမ်းအမျိုးအစားစဉ်းစားလျှင်အလွတ် Leave
 DocType: Landed Cost Voucher,Distribute Charges Based On,တွင် အခြေခံ. စွပ်စွဲချက်ဖြန့်ဝေ
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,အကောင့်ဖွင့် Item {1} အဖြစ် {0} အမျိုးအစားဖြစ်ရမည် &#39;&#39; Fixed Asset &#39;&#39; တစ်ဦး Asset Item ဖြစ်ပါတယ်

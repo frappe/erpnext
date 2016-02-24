@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,कर्मचा�
 DocType: Opportunity,Walk In,में चलो
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,स्टॉक प्रविष्टियां
 DocType: Item,Inspection Criteria,निरीक्षण मानदंड
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,financial लागत केन्द्रों का पेड़ .
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Finanial लागत केन्द्रों का पेड़ .
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,तबादला
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,अपने पत्र सिर और लोगो अपलोड करें। (आप उन्हें बाद में संपादित कर सकते हैं)।
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,सफेद
@@ -1226,7 +1226,7 @@ DocType: Employee External Work History,Total Experience,कुल अनुभ�
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,पैकिंग पर्ची (ओं ) को रद्द कर दिया
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,निवेश से कैश फ्लो
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,फ्रेट और अग्रेषण शुल्क
-DocType: Material Request Item,Sales Order,बिक्री आदेश नहीं
+DocType: Material Request Item,Sales Order No,बिक्री आदेश नहीं
 DocType: Item Group,Item Group Name,आइटम समूह का नाम
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,में ले ली
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,निर्माण के लिए हस्तांतरण सामग्री
@@ -1581,7 +1581,7 @@ DocType: Journal Entry,Accounts Receivable,लेखा प्राप्य
 DocType: Address Template,This format is used if country specific format is not found,"देश विशिष्ट प्रारूप नहीं मिला है, तो यह प्रारूप प्रयोग किया जाता है"
 DocType: Production Order,Use Multi-Level BOM,मल्टी लेवल बीओएम का उपयोग करें
 DocType: Bank Reconciliation,Include Reconciled Entries,मेल मिलाप प्रविष्टियां शामिल करें
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,financial खातों का पेड़ .
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Finanial खातों का पेड़ .
 DocType: Leave Control Panel,Leave blank if considered for all employee types,रिक्त छोड़ दो अगर सभी कर्मचारी प्रकार के लिए विचार
 DocType: Landed Cost Voucher,Distribute Charges Based On,बांटो आरोपों पर आधारित
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,आइटम {1} एक एसेट आइटम के रूप में खाते {0} प्रकार की ' फिक्स्ड एसेट ' होना चाहिए

@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,älä lähetä työn
 DocType: Opportunity,Walk In,kävele sisään
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Stock Viestit
 DocType: Item,Inspection Criteria,tarkastuskriteerit
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,kustannuspaikkapuu
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,kustannuspaikkapuu
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,siirretty
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,lataa kirjeen ylätunniste ja logo. (voit muokata niitä myöhemmin)
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,valkoinen
@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,kustannukset yhteensä
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,pakkauslaput peruttu
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Investointien rahavirta
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,rahdin ja huolinnan maksut
-DocType: Material Request Item,Sales Order,"myyntitilaus, numero"
+DocType: Material Request Item,Sales Order No,"myyntitilaus, numero"
 DocType: Item Group,Item Group Name,"tuoteryhmä, nimi"
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,otettu
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,materiaalisiirto tuotantoon
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,saatava tilit
 DocType: Address Template,This format is used if country specific format is not found,tätä muotoa käytetään ellei alueelle määriteltyä muotoa löydy
 DocType: Production Order,Use Multi-Level BOM,käytä useampi asteista BOM:ia
 DocType: Bank Reconciliation,Include Reconciled Entries,sisällytä täsmätyt kirjaukset
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,tilipuu
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,tilipuu
 DocType: Leave Control Panel,Leave blank if considered for all employee types,tyhjä mikäli se pidetään vaihtoehtona  kaikissa työntekijä tyypeissä
 DocType: Landed Cost Voucher,Distribute Charges Based On,toimitusmaksut perustuen
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,tili {0} tulee olla 'pitkaikaiset vastaavat' tili sillä tuotella {1} on tasearvo

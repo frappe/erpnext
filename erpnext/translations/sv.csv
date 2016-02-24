@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Skicka inte anställ
 DocType: Opportunity,Walk In,Gå In
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Stock Inlägg
 DocType: Item,Inspection Criteria,Inspektionskriterier
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Tree of financial kostnadsställen.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Tree of finanial kostnadsställen.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Överfört
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Ladda upp din brevhuvud och logotyp. (Du kan redigera dem senare).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Vit
@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,Total Experience
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Följesedlar avbryts
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Kassaflöde från investeringsverksamheten
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,"Frakt, spedition Avgifter"
-DocType: Material Request Item,Sales Order,Kundorder Ingen
+DocType: Material Request Item,Sales Order No,Kundorder Ingen
 DocType: Item Group,Item Group Name,Produkt  Gruppnamn
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Taken
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Överför Material Tillverkning
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,Kundreskontra
 DocType: Address Template,This format is used if country specific format is not found,Det här formatet används om landsspecifika format inte hittas
 DocType: Production Order,Use Multi-Level BOM,Använd Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Inkludera avstämnignsanteckningar
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Träd financial konton.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Träd finanial konton.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Lämna tomt om det anses vara för alla typer  av anställda
 DocType: Landed Cost Voucher,Distribute Charges Based On,Fördela avgifter som grundas på
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Kontot {0} måste vara av typen ""Fast tillgång"" som punkt {1} är en tillgångspost"

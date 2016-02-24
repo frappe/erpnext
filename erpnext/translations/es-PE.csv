@@ -742,7 +742,7 @@ DocType: Workstation,Electricity Cost,Coste de electricidad
 DocType: HR Settings,Don't send Employee Birthday Reminders,En enviar recordatorio de cumpleaños del empleado
 DocType: Opportunity,Walk In,Entrar
 DocType: Item,Inspection Criteria,Criterios de Inspección
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Árbol de Centros de Costos Financieros.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Árbol de Centros de Costos Financieros.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Transferido
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Carge su membrete y su logotipo. (Puede editarlos más tarde).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Blanco
@@ -1099,7 +1099,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +65,Financial Year Start Date,Ini
 DocType: Employee External Work History,Total Experience,Experiencia Total
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Lista(s) de embalaje cancelada(s)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Cargos por transporte de mercancías y transito
-DocType: Material Request Item,Sales Order,Orden de Venta No
+DocType: Material Request Item,Sales Order No,Orden de Venta No
 DocType: Item Group,Item Group Name,Nombre del grupo de artículos
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Tomado
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Transferenca de Materiales para Fabricación
@@ -1416,7 +1416,7 @@ DocType: Journal Entry,Accounts Receivable,Cuentas por Cobrar
 DocType: Address Template,This format is used if country specific format is not found,Este formato se utiliza si no se encuentra un formato específico del país
 DocType: Production Order,Use Multi-Level BOM,Utilizar Lista de Materiales (LdM)  Multi-Nivel
 DocType: Bank Reconciliation,Include Reconciled Entries,Incluir las entradas conciliadas
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Árbol de las cuentas financieras
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Árbol de las cuentas financieras
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Dejar en blanco si es considerada para todos los tipos de empleados
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuir los cargos basados en
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Cuenta {0} debe ser de tipo 'Activos Fijos' porque Artículo {1} es un Elemento de Activo Fijo

@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Ne šaljite podsjetn
 DocType: Opportunity,Walk In,Ulaz u
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Stock unosi
 DocType: Item,Inspection Criteria,Inspekcijski Kriteriji
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Drvo financial troška .
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Drvo finanial troška .
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Prenose
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Unos glavu pismo i logo. (Možete ih kasnije uređivanje).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Bijel
@@ -1226,7 +1226,7 @@ DocType: Employee External Work History,Total Experience,Ukupno Iskustvo
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Pakiranje proklizavanja ( s) otkazan
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Novčani tok iz ulagačkih
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Teretni i Forwarding Optužbe
-DocType: Material Request Item,Sales Order,Narudžba kupca br
+DocType: Material Request Item,Sales Order No,Narudžba kupca br
 DocType: Item Group,Item Group Name,Naziv grupe artikla
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Taken
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Transfer Materijali za Proizvodnja
@@ -1581,7 +1581,7 @@ DocType: Journal Entry,Accounts Receivable,Konto potraživanja
 DocType: Address Template,This format is used if country specific format is not found,Ovaj format se koristi ako država specifičan format nije pronađena
 DocType: Production Order,Use Multi-Level BOM,Koristite multi-level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Uključi pomirio objave
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Drvo financial račune .
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Drvo finanial račune .
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Ostavite prazno ako smatra za sve tipove zaposlenika
 DocType: Landed Cost Voucher,Distribute Charges Based On,Podijelite Optužbe na osnovu
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Konto {0} mora biti tipa 'Nepokretne imovine' jer je proizvod {1} imovina proizvoda
@@ -1697,7 +1697,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +793,Please
 DocType: Item,Weight UOM,Težina UOM
 DocType: Employee,Blood Group,Krvna grupa
 DocType: Purchase Invoice Item,Page Break,Prijelom stranice
-DocType: Production Order Operation,Pending,Čekanju
+DocType: Production Order Operation,Pending,Čekanje
 DocType: Employee Leave Approver,Users who can approve a specific employee's leave applications,Korisnici koji može odobriti odsustvo aplikacije određenu zaposlenog
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +50,Office Equipments,uredske opreme
 DocType: Purchase Invoice Item,Qty,Kol
@@ -2236,7 +2236,7 @@ apps/erpnext/erpnext/public/js/pos/pos.js +356,Pay,Platiti
 apps/erpnext/erpnext/projects/report/daily_time_log_summary/daily_time_log_summary.py +17,To Datetime,To datuma i vremena
 DocType: SMS Settings,SMS Gateway URL,SMS Gateway URL
 apps/erpnext/erpnext/config/crm.py +53,Logs for maintaining sms delivery status,Dnevnici za održavanje sms statusa isporuke
-apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +36,Pending Activities,Aktivnostima na čekanju
+apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +36,Pending Activities,Aktivnosti na čekanju
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +166,Confirmed,Potvrđen
 DocType: Payment Gateway,Gateway,Gateway
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier > Supplier Type,Dobavljač> proizvođač tip
@@ -2857,7 +2857,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Sales Partner,Logo,Logo
 DocType: Naming Series,Check this if you want to force the user to select a series before saving. There will be no default if you check this.,Označite ovo ako želite prisiliti korisniku odabir seriju prije spremanja. Tu će biti zadana ako to provjerili.
 apps/erpnext/erpnext/stock/get_item_details.py +101,No Item with Serial No {0},No Stavka s rednim brojem {0}
-apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +95,Open Notifications,Open Obavijesti
+apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +95,Open Notifications,Otvorena obavjestenja
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +68,Direct Expenses,Direktni troškovi
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,New Customer prihoda
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +132,Travel Expenses,putni troškovi
@@ -3444,7 +3444,7 @@ DocType: Manufacturing Settings,Manufacturing Settings,Proizvodnja Settings
 apps/erpnext/erpnext/config/setup.py +56,Setting up Email,Postavljanje e-pošte
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +91,Please enter default currency in Company Master,Unesite zadanu valutu u tvrtki Master
 DocType: Stock Entry Detail,Stock Entry Detail,Kataloški Stupanje Detalj
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +101,Daily Reminders,Daily Podsjetnici
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +101,Daily Reminders,Dnevni podsjetnik
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +82,Tax Rule Conflicts with {0},Porez pravilo sukoba sa {0}
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +210,New Account Name,Naziv novog računa
 DocType: Purchase Invoice Item,Raw Materials Supplied Cost,Sirovine Isporuka Troškovi

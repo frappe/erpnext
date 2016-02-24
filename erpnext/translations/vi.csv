@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Không gửi nhân v
 DocType: Opportunity,Walk In,Trong đi bộ
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Cổ Entries
 DocType: Item,Inspection Criteria,Tiêu chuẩn kiểm tra
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Cây của Trung tâm Chi phí financial.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Cây của Trung tâm Chi phí finanial.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Nhận chuyển nhượng
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Tải lên đầu thư của bạn và logo. (Bạn có thể chỉnh sửa chúng sau này).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Trắng
@@ -1226,7 +1226,7 @@ DocType: Employee External Work History,Total Experience,Tổng số kinh nghi�
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Đóng gói trượt (s) bị hủy bỏ
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Lưu chuyển tiền tệ từ đầu tư
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Vận tải hàng hóa và chuyển tiếp phí
-DocType: Material Request Item,Sales Order,Không bán hàng đặt hàng
+DocType: Material Request Item,Sales Order No,Không bán hàng đặt hàng
 DocType: Item Group,Item Group Name,Mục Group Name
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Lấy
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Chuyển Vật liệu cho sản xuất
@@ -1581,7 +1581,7 @@ DocType: Journal Entry,Accounts Receivable,Tài khoản Phải thu
 DocType: Address Template,This format is used if country specific format is not found,Định dạng này được sử dụng nếu định dạng quốc gia cụ thể không được tìm thấy
 DocType: Production Order,Use Multi-Level BOM,Sử dụng Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Bao gồm Entries hòa giải
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Cây tài khoản financial.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Cây tài khoản finanial.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Để trống nếu xem xét tất cả các loại nhân viên
 DocType: Landed Cost Voucher,Distribute Charges Based On,Phân phối Phí Dựa Trên
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Tài khoản {0} phải là loại 'tài sản cố định ""như mục {1} là một khoản tài sản"

@@ -808,7 +808,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,ملازم سالگ�
 DocType: Opportunity,Walk In,میں چلنے
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,اسٹاک میں لکھے
 DocType: Item,Inspection Criteria,معائنہ کا کلیہ
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,financial لاگت کے مراکز کا درخت.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,finanial لاگت کے مراکز کا درخت.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,transfered کیا
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,اپنے خط سر اور علامت (لوگو). (آپ کو بعد ان میں ترمیم کر سکتے ہیں).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,وائٹ
@@ -1199,7 +1199,7 @@ DocType: Employee External Work History,Total Experience,کل تجربہ
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,منسوخ پیکنگ پرچی (ے)
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,سرمایہ کاری سے کیش فلو
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,فریٹ فارورڈنگ اور چارجز
-DocType: Material Request Item,Sales Order,سیلز آرڈر نہیں
+DocType: Material Request Item,Sales Order No,سیلز آرڈر نہیں
 DocType: Item Group,Item Group Name,آئٹم گروپ کا نام
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,لیا
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,تیاری کے لئے کی منتقلی کی معدنیات
@@ -1553,7 +1553,7 @@ DocType: Journal Entry,Accounts Receivable,وصولی اکاؤنٹس
 DocType: Address Template,This format is used if country specific format is not found,ملک مخصوص شکل نہیں ملا ہے تو یہ فارمیٹ استعمال کیا جاتا ہے
 DocType: Production Order,Use Multi-Level BOM,ملٹی لیول BOM استعمال
 DocType: Bank Reconciliation,Include Reconciled Entries,Reconciled میں لکھے گئے مراسلے شامل
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,financial اکاؤنٹس کا درخت.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,finanial اکاؤنٹس کا درخت.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,تمام ملازم اقسام کے لئے تصور کیا جاتا ہے تو خالی چھوڑ دیں
 DocType: Landed Cost Voucher,Distribute Charges Based On,تقسیم الزامات کی بنیاد پر
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,آئٹم {1} ایک اثاثہ ہے آئٹم کے طور پر اکاؤنٹ {0} &#39;فکسڈ اثاثہ&#39; قسم کا ہونا چاہیے

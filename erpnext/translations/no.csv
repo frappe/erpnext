@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Ikke send Employee b
 DocType: Opportunity,Walk In,Gå Inn
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Aksje Entries
 DocType: Item,Inspection Criteria,Inspeksjon Kriterier
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Tree of financial Kostnadssteder.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Tree of finanial Kostnadssteder.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Overført
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Last opp din brevhode og logo. (Du kan redigere dem senere).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Hvit
@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,Total Experience
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Pakking Slip (s) kansellert
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Kontantstrøm fra investerings
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Spedisjons- og Kostnader
-DocType: Material Request Item,Sales Order,Salgsordre Nei
+DocType: Material Request Item,Sales Order No,Salgsordre Nei
 DocType: Item Group,Item Group Name,Sak Gruppenavn
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Tatt
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Transfer Materialer for produksjon
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,Kundefordringer
 DocType: Address Template,This format is used if country specific format is not found,Dette formatet brukes hvis landet bestemt format ikke er funnet
 DocType: Production Order,Use Multi-Level BOM,Bruk Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Inkluder forsonet Entries
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Tree of financial kontoer.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Tree of finanial kontoer.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,La stå tom hvis vurderes for alle typer medarbeider
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuere Kostnader Based On
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Konto {0} må være av typen &quot;Fixed Asset &#39;som Element {1} er en ressurs Element

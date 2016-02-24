@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Jangan Kirim Penging
 DocType: Opportunity,Walk In,Walk In
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Entri Stok
 DocType: Item,Inspection Criteria,Kriteria Inspeksi
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Tingkat Pusat Biaya Finansial
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Tingkat Pusat Biaya Finansial
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Ditransfer
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Upload kop surat dan logo. (Anda dapat mengeditnya nanti).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Putih
@@ -1226,7 +1226,7 @@ DocType: Employee External Work History,Total Experience,Jumlah Pengalaman
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Packing slip (s) dibatalkan
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Arus Kas dari Investasi
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Pengangkutan dan Forwarding Biaya
-DocType: Material Request Item,Sales Order,Sales Order
+DocType: Material Request Item,Sales Order No,No Order Penjualan
 DocType: Item Group,Item Group Name,Nama Item Grup
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Diambil
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Transfer Material untuk Produksi
@@ -1581,7 +1581,7 @@ DocType: Journal Entry,Accounts Receivable,Piutang
 DocType: Address Template,This format is used if country specific format is not found,Format ini digunakan jika format khusus negara tidak ditemukan
 DocType: Production Order,Use Multi-Level BOM,Gunakan Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Termasuk Entri Rekonsiliasi
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Tree Rekening Akun Finansial
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Tree Rekening Akun Finansial
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Biarkan kosong jika dipertimbangkan untuk semua jenis karyawan
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribusi Biaya Berdasarkan
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Akun {0} harus bertipe 'Aset Tetap' dikarenakan Stok Barang {1} adalah merupakan sebuah Aset Tetap

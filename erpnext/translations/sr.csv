@@ -834,7 +834,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Немојте сл�
 DocType: Opportunity,Walk In,Шетња у
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Сток Записи
 DocType: Item,Inspection Criteria,Инспекцијски Критеријуми
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Дерево financial центры Стоимость .
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Дерево finanial центры Стоимость .
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Преносе
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Уплоад главу писмо и лого. (Можете их уредити касније).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Бео
@@ -1226,7 +1226,7 @@ DocType: Employee External Work History,Total Experience,Укупно Искус
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Упаковочный лист (ы) отменяется
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Новчани ток од Инвестирање
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Грузовые и экспедиторские Сборы
-DocType: Material Request Item,Sales Order,Продаја Наручите Нема
+DocType: Material Request Item,Sales Order No,Продаја Наручите Нема
 DocType: Item Group,Item Group Name,Ставка Назив групе
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Такен
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Трансфер материјал за производњу
@@ -1580,7 +1580,7 @@ DocType: Journal Entry,Accounts Receivable,Потраживања
 DocType: Address Template,This format is used if country specific format is not found,Овај формат се користи ако земља специфична формат није пронађен
 DocType: Production Order,Use Multi-Level BOM,Користите Мулти-Левел бом
 DocType: Bank Reconciliation,Include Reconciled Entries,Укључи помирили уносе
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Дерево financial счетов.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Дерево finanial счетов.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Оставите празно ако се сматра за све типове запослених
 DocType: Landed Cost Voucher,Distribute Charges Based On,Дистрибуирају пријава по
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Счет {0} должен быть типа "" Fixed Asset "", как товара {1} является активом Пункт"

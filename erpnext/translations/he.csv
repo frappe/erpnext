@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,אל תשלחו לע
 DocType: Opportunity,Walk In,ללכת ב
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,ערכי מניות
 DocType: Item,Inspection Criteria,קריטריונים לבדיקה
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,עץ של מרכזי עלות financial.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,עץ של מרכזי עלות finanial.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,הועבר
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,העלה ראש המכתב ואת הלוגו שלך. (אתה יכול לערוך אותם מאוחר יותר).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,לבן
@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,"ניסיון סה""כ"
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Slip אריזה (ים) בוטל
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,תזרים מזומנים מהשקעות
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,הוצאות הובלה והשילוח
-DocType: Material Request Item,Sales Order,להזמין ללא מכירות
+DocType: Material Request Item,Sales Order No,להזמין ללא מכירות
 DocType: Item Group,Item Group Name,שם קבוצת פריט
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,לקחתי
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,העברת חומרים לייצור
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,חשבונות חייבים
 DocType: Address Template,This format is used if country specific format is not found,פורמט זה משמש אם פורמט ספציפי למדינה לא נמצא
 DocType: Production Order,Use Multi-Level BOM,השתמש Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,כוללים ערכים מפוייס
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,עץ של חשבונות financial.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,עץ של חשבונות finanial.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,שאר ריק אם נחשב לכל סוגי העובדים
 DocType: Landed Cost Voucher,Distribute Charges Based On,חיובים להפיץ מבוסס על
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"חשבון {0} חייב להיות מסוג 'נכסים קבועים ""כפריט {1} הוא פריט רכוש"

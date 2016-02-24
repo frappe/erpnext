@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Employee జన్�
 DocType: Opportunity,Walk In,లో వల్క్
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,స్టాక్ ఎంట్రీలు
 DocType: Item,Inspection Criteria,ఇన్స్పెక్షన్ ప్రమాణం
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,financial ఖర్చు సెంటర్స్ చెట్టు.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Finanial ఖర్చు సెంటర్స్ చెట్టు.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,బదిలీ
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,మీ లేఖ తల మరియు లోగో అప్లోడ్. (మీరు తర్వాత వాటిని సవరించవచ్చు).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,వైట్
@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,మొత్తం ఎ�
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,రద్దు ప్యాకింగ్ స్లిప్ (లు)
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,ఇన్వెస్టింగ్ నుండి నగదు ప్రవాహ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,ఫ్రైట్ మరియు ఫార్వార్డింగ్ ఛార్జీలు
-DocType: Material Request Item,Sales Order,సేల్స్ ఆర్డర్ సంఖ్య
+DocType: Material Request Item,Sales Order No,సేల్స్ ఆర్డర్ సంఖ్య
 DocType: Item Group,Item Group Name,అంశం గ్రూప్ పేరు
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,తీసుకోబడినది
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,తయారీకి ట్రాన్స్ఫర్ మెటీరియల్స్
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,స్వీకరించదగి�
 DocType: Address Template,This format is used if country specific format is not found,దేశం నిర్దిష్ట ఫార్మాట్ దొరకలేదు ఒకవేళ ఈ ఫార్మాట్ ఉపయోగిస్తారు
 DocType: Production Order,Use Multi-Level BOM,బహుళస్థాయి BOM ఉపయోగించండి
 DocType: Bank Reconciliation,Include Reconciled Entries,అనుకూలీకరించబడిన ఎంట్రీలు చేర్చండి
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,financial ఖాతాల యొక్క చెట్టు.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Finanial ఖాతాల యొక్క చెట్టు.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,అన్ని ఉద్యోగి రకాల భావిస్తారు ఉంటే ఖాళీ వదిలి
 DocType: Landed Cost Voucher,Distribute Charges Based On,పంపిణీ ఆరోపణలపై బేస్డ్
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,అంశం {1} నిధుల అంశం గా ఖాతా {0} &#39;స్థిర ఆస్తి&#39; రకం ఉండాలి

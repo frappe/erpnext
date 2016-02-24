@@ -810,7 +810,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,എംപ്ലേ�
 DocType: Opportunity,Walk In,നടപ്പാൻ
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,സ്റ്റോക്ക് എൻട്രികളിൽ
 DocType: Item,Inspection Criteria,ഇൻസ്പെക്ഷൻ മാനദണ്ഡം
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,financial ചെലവ് സെന്റേഴ്സ് ട്രീ.
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Finanial ചെലവ് സെന്റേഴ്സ് ട്രീ.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,ട്രാൻസ്ഫർ
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,നിങ്ങളുടെ കത്ത് തലയും ലോഗോ അപ്ലോഡ്. (നിങ്ങൾക്ക് പിന്നീട് എഡിറ്റ് ചെയ്യാൻ കഴിയും).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,വൈറ്റ്
@@ -1201,7 +1201,7 @@ DocType: Employee External Work History,Total Experience,ആകെ അനുഭ�
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,പായ്ക്കിംഗ് ജി (കൾ) റദ്ദാക്കി
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,നിക്ഷേപം മുതൽ ക്യാഷ് ഫ്ളോ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,ചരക്കുഗതാഗതം കൈമാറലും ചുമത്തിയിട്ടുള്ള
-DocType: Material Request Item,Sales Order,സെയിൽസ് ഓർഡർ ഇല്ല
+DocType: Material Request Item,Sales Order No,സെയിൽസ് ഓർഡർ ഇല്ല
 DocType: Item Group,Item Group Name,ഇനം ഗ്രൂപ്പ് പേര്
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,എടുത്ത
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,ഉല്പാദനത്തിനുള്ള മെറ്റീരിയൽസ് കൈമാറുക
@@ -1555,7 +1555,7 @@ DocType: Journal Entry,Accounts Receivable,സ്വീകാരയോഗ്�
 DocType: Address Template,This format is used if country specific format is not found,രാജ്യ നിർദ്ദിഷ്ട ഫോർമാറ്റ് കണ്ടെത്തിയില്ല ഇല്ലെങ്കിൽ ഈ ഫോർമാറ്റ് ഉപയോഗിക്കുന്നു
 DocType: Production Order,Use Multi-Level BOM,മൾട്ടി-ലെവൽ BOM ഉപയോഗിക്കുക
 DocType: Bank Reconciliation,Include Reconciled Entries,പൊരുത്തപ്പെട്ട എൻട്രികൾ ഉൾപ്പെടുത്തുക
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,financial അക്കൌണ്ടുകളുടെ ട്രീ.
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Finanial അക്കൌണ്ടുകളുടെ ട്രീ.
 DocType: Leave Control Panel,Leave blank if considered for all employee types,എല്ലാ ജീവനക്കാരുടെ തരം പരിഗണിക്കില്ല എങ്കിൽ ശൂന്യമായിടൂ
 DocType: Landed Cost Voucher,Distribute Charges Based On,അടിസ്ഥാനമാക്കി നിരക്കുകൾ വിതരണം
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,അക്കൗണ്ട് ഇനം {1} പോലെ {0} തരത്തിലുള്ള ആയിരിക്കണം &#39;നിശ്ചിത അസറ്റ്&#39; ഒരു അസറ്റ് ഇനം ആണ്

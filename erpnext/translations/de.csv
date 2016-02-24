@@ -831,7 +831,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Keine Mitarbeitergeb
 DocType: Opportunity,Walk In,Laufkundschaft
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +64,Stock Entries,Lizenz Einträge
 DocType: Item,Inspection Criteria,Prüfkriterien
-apps/erpnext/erpnext/config/accounts.py +111,Tree of financial Cost Centers.,Finanz-Kostenstellen-Struktur
+apps/erpnext/erpnext/config/accounts.py +111,Tree of finanial Cost Centers.,Finanz-Kostenstellen-Struktur
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Übergeben
 apps/erpnext/erpnext/public/js/setup_wizard.js +165,Upload your letter head and logo. (you can edit them later).,Briefkopf und Logo hochladen. (Beides kann später noch bearbeitet werden.)
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Weiß
@@ -1222,7 +1222,7 @@ DocType: Employee External Work History,Total Experience,Gesamterfahrung
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +261,Packing Slip(s) cancelled,Packzettel storniert
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +29,Cash Flow from Investing,Cashflow aus Investitionen
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +96,Freight and Forwarding Charges,Fracht- und Versandkosten
-DocType: Material Request Item,Sales Order,Kundenauftrags-Nr.
+DocType: Material Request Item,Sales Order No,Kundenauftrags-Nr.
 DocType: Item Group,Item Group Name,Name der Artikelgruppe
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Genommen
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +86,Transfer Materials for Manufacture,Material der Fertigung übergeben
@@ -1576,7 +1576,7 @@ DocType: Journal Entry,Accounts Receivable,Forderungen
 DocType: Address Template,This format is used if country specific format is not found,"Dieses Format wird verwendet, wenn ein länderspezifisches Format nicht gefunden werden kann"
 DocType: Production Order,Use Multi-Level BOM,Mehrstufige Stückliste verwenden
 DocType: Bank Reconciliation,Include Reconciled Entries,Abgeglichene Buchungen einbeziehen
-apps/erpnext/erpnext/config/accounts.py +46,Tree of financial accounts.,Finanzkontenstruktur
+apps/erpnext/erpnext/config/accounts.py +46,Tree of finanial accounts.,Finanzkontenstruktur
 DocType: Leave Control Panel,Leave blank if considered for all employee types,"Freilassen, wenn für alle Mitarbeitertypen gültig"
 DocType: Landed Cost Voucher,Distribute Charges Based On,Kosten auf folgender Grundlage verteilen
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +320,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Konto {0} muss vom Typ ""Anlagegut"" sein, weil der Artikel {1} ein Anlagegut ist"
