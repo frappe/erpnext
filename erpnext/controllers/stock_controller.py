@@ -243,8 +243,8 @@ class StockController(AccountsController):
 			if so and so_item_rows:
 				sales_order = frappe.get_doc("Sales Order", so)
 
-				if sales_order.status in ["Stopped", "Cancelled"]:
-					frappe.throw(_("{0} {1} is cancelled or stopped").format(_("Sales Order"), so),
+				if sales_order.status in ["Closed", "Cancelled"]:
+					frappe.throw(_("{0} {1} is cancelled or closed").format(_("Sales Order"), so),
 						frappe.InvalidStatusError)
 
 				sales_order.update_reserved_qty(so_item_rows)

@@ -203,7 +203,7 @@ class JournalEntry(AccountsController):
 		self.validate_invoices()
 
 	def validate_orders(self):
-		"""Validate totals, stopped and docstatus for orders"""
+		"""Validate totals, closed and docstatus for orders"""
 		for reference_name, total in self.reference_totals.iteritems():
 			reference_type = self.reference_types[reference_name]
 			account = self.reference_accounts[reference_name]
@@ -217,8 +217,8 @@ class JournalEntry(AccountsController):
 				if flt(order.per_billed) >= 100:
 					frappe.throw(_("{0} {1} is fully billed").format(reference_type, reference_name))
 
-				if cstr(order.status) == "Stopped":
-					frappe.throw(_("{0} {1} is stopped").format(reference_type, reference_name))
+				if cstr(order.status) == "Closed":
+					frappe.throw(_("{0} {1} is closed").format(reference_type, reference_name))
 
 				account_currency = get_account_currency(account)
 				if account_currency == self.company_currency:

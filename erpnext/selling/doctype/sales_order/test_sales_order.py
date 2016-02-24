@@ -93,12 +93,12 @@ class TestSalesOrder(unittest.TestCase):
 		dn = create_dn_against_so(so.name)
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 5)
 
-		# stop so
+		# close so
 		so.load_from_db()
-		so.update_status("Stopped")
+		so.update_status("Closed")
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
 
-		# unstop so
+		# unclose so
 		so.load_from_db()
 		so.update_status('Draft')
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 5)
@@ -143,14 +143,14 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
 			existing_reserved_qty_item2 + 10)
 
-		# stop so
+		# close so
 		so.load_from_db()
-		so.update_status("Stopped")
+		so.update_status("Closed")
 
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), existing_reserved_qty_item2)
 
-		# unstop so
+		# unclose so
 		so.load_from_db()
 		so.update_status('Draft')
 

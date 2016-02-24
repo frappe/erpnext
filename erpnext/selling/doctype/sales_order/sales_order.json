@@ -2201,7 +2201,7 @@
    "no_copy": 1, 
    "oldfieldname": "status", 
    "oldfieldtype": "Select", 
-   "options": "\nDraft\nTo Deliver and Bill\nTo Bill\nTo Deliver\nCompleted\nStopped\nCancelled\nClosed", 
+   "options": "\nDraft\nTo Deliver and Bill\nTo Bill\nTo Deliver\nCompleted\nCancelled\nClosed", 
    "permlevel": 0, 
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 

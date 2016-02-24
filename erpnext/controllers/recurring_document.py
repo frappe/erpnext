@@ -34,7 +34,7 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 
 	date_field = date_field_map[doctype]
 
-	condition = " and ifnull(status, '') != 'Stopped'" if doctype in ("Sales Order", "Purchase Order") else ""
+	condition = " and ifnull(status, '') != 'Closed'" if doctype in ("Sales Order", "Purchase Order") else ""
 
 	recurring_documents = frappe.db.sql("""select name, recurring_id
 		from `tab{0}` where is_recurring=1

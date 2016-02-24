@@ -160,9 +160,9 @@ class SalesOrder(SellingController):
 		self.update_prevdoc_status('submit')
 
 	def on_cancel(self):
-		# Cannot cancel stopped SO
-		if self.status == 'Stopped':
-			frappe.throw(_("Stopped order cannot be cancelled. Unstop to cancel."))
+		# Cannot cancel closed SO
+		if self.status == 'Closed':
+			frappe.throw(_("Closed order cannot be cancelled. Unclose to cancel."))
 
 		self.check_nextdoc_docstatus()
 		self.update_reserved_qty()
@@ -317,7 +317,7 @@ def get_list_context(context=None):
 	return list_context
 
 @frappe.whitelist()
-def stop_or_unstop_sales_orders(names, status):
+def close_or_unclose_sales_orders(names, status):
 	if not frappe.has_permission("Sales Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -325,11 +325,11 @@ def stop_or_unstop_sales_orders(names, status):
 	for name in names:
 		so = frappe.get_doc("Sales Order", name)
 		if so.docstatus == 1:
-			if status in ("Stopped", "Closed"):
-				if so.status not in ("Stopped", "Cancelled", "Closed") and (so.per_delivered < 100 or so.per_billed < 100):
+			if status == "Closed":
+				if so.status not in ("Cancelled", "Closed") and (so.per_delivered < 100 or so.per_billed < 100):
 					so.update_status(status)
 			else:
-				if so.status in ("Stopped", "Closed"):
+				if so.status == "Closed":
 					so.update_status('Draft')
 
 	frappe.local.message_log = []
