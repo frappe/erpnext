@@ -87,7 +87,10 @@ class PaymentRequest(Document):
 		debit_in_account_currency = 0.0
 				
 		if party_account_currency == ref_doc.company_currency:
-			amount = self.base_grand_total
+			amount = flt(flt(self.grand_total) * \
+				flt(ref_doc.conversion_rate, ref_doc.precision("conversion_rate")), \
+				ref_doc.precision("base_grand_total"))
+			
 			if self.currency != ref_doc.company_currency:
 				debit_in_account_currency = self.grand_total
 			
@@ -158,7 +161,7 @@ def make_payment_request(**args):
 	
 	gateway_account = get_gateway_details(args)
 	
-	base_grand_total, grand_total = get_amount(ref_doc, args.dt)
+	grand_total = get_amount(ref_doc, args.dt)
 	
 	existing_payment_request = frappe.db.get_value("Payment Request", 
 		{"reference_doctype": args.dt, "reference_name": args.dn})
@@ -174,7 +177,6 @@ def make_payment_request(**args):
 			"payment_account": gateway_account.payment_account,
 			"currency": ref_doc.currency,
 			"make_sales_invoice": args.cart or 0,
-			"base_grand_total": base_grand_total,
 			"grand_total": grand_total,
 			"mute_email": args.mute_email or 0,
 			"email_to": args.recipient_id or "",
@@ -206,15 +208,13 @@ def make_payment_request(**args):
 def get_amount(ref_doc, dt):
 	"""get amount based on doctype"""
 	if dt == "Sales Order":
-		base_grand_total = flt(ref_doc.base_grand_total)
-		grand_total = (flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)) / flt(ref_doc.conversion_rate, 2)
+		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 		
 	if dt == "Sales Invoice":
-		base_grand_total = flt(ref_doc.base_grand_total)
 		grand_total = flt(ref_doc.outstanding_amount)
 		
-	if base_grand_total > 0 and grand_total > 0 :
-		return base_grand_total, grand_total
+	if grand_total > 0 :
+		return grand_total
 		
 	else:
 		frappe.throw(_("Payment Entry is already created"))
