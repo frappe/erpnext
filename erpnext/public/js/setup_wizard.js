@@ -9,43 +9,8 @@ frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
 
 function load_erpnext_slides() {
 	$.extend(erpnext.wiz, {
-		user: {
-			title: __("The First User: You"),
-			icon: "icon-user",
-			fields: [
-				{"fieldname": "first_name", "label": __("First Name"), "fieldtype": "Data",
-					reqd:1},
-				{"fieldname": "last_name", "label": __("Last Name"), "fieldtype": "Data"},
-				{"fieldname": "email", "label": __("Email Address"), "fieldtype": "Data",
-					reqd:1, "description": __("You will use it to Login"), "options":"Email"},
-				{"fieldname": "password", "label": __("Password"), "fieldtype": "Password",
-					reqd:1},
-				{fieldtype:"Attach Image", fieldname:"attach_user",
-					label: __("Attach Your Picture"), is_private: 0},
-			],
-			help: __('The first user will become the System Manager (you can change this later).'),
-			onload: function(slide) {
-				if(user!=="Administrator") {
-					slide.form.fields_dict.password.$wrapper.toggle(false);
-					slide.form.fields_dict.email.$wrapper.toggle(false);
-					slide.form.fields_dict.first_name.set_input(frappe.boot.user.first_name);
-					slide.form.fields_dict.last_name.set_input(frappe.boot.user.last_name);
-
-					var user_image = frappe.get_cookie("user_image");
-					if(user_image) {
-						var $attach_user = slide.form.fields_dict.attach_user.$wrapper;
-						$attach_user.find(".missing-image").toggle(false);
-						$attach_user.find("img").attr("src", decodeURIComponent(user_image)).toggle(true);
-					}
-
-					delete slide.form.fields_dict.email;
-					delete slide.form.fields_dict.password;
-				}
-			},
-			css_class: "single-column"
-		},
-
 		org: {
+			app_name: "erpnext",
 			title: __("The Organization"),
 			icon: "icon-building",
 			fields: [
@@ -160,6 +125,7 @@ function load_erpnext_slides() {
 		},
 
 		branding: {
+			app_name: "erpnext",
 			icon: "icon-bookmark",
 			title: __("The Brand"),
 			help: __('Upload your letter head and logo. (you can edit them later).'),
@@ -181,10 +147,11 @@ function load_erpnext_slides() {
 		},
 
 		users: {
+			app_name: "erpnext",
 			icon: "icon-money",
-			"title": __("Add Users"),
-			"help": __("Add users to your organization, other than yourself"),
-			"fields": [],
+			title: __("Add Users"),
+			help: __("Add users to your organization, other than yourself"),
+			fields: [],
 			before_load: function(slide) {
 				slide.fields = [];
 				for(var i=1; i<5; i++) {
@@ -209,9 +176,10 @@ function load_erpnext_slides() {
 		},
 
 		taxes: {
+			app_name: "erpnext",
 			icon: "icon-money",
-			"title": __("Add Taxes"),
-			"help": __("List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
+			title: __("Add Taxes"),
+			help: __("List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
 			"fields": [],
 			before_load: function(slide) {
 				slide.fields = [];
@@ -229,10 +197,11 @@ function load_erpnext_slides() {
 		},
 
 		customers: {
+			app_name: "erpnext",
 			icon: "icon-group",
-			"title": __("Your Customers"),
-			"help": __("List a few of your customers. They could be organizations or individuals."),
-			"fields": [],
+			title: __("Your Customers"),
+			help: __("List a few of your customers. They could be organizations or individuals."),
+			fields: [],
 			before_load: function(slide) {
 				slide.fields = [];
 				for(var i=1; i<6; i++) {
@@ -251,10 +220,11 @@ function load_erpnext_slides() {
 		},
 
 		suppliers: {
+			app_name: "erpnext",
 			icon: "icon-group",
-			"title": __("Your Suppliers"),
-			"help": __("List a few of your suppliers. They could be organizations or individuals."),
-			"fields": [],
+			title: __("Your Suppliers"),
+			help: __("List a few of your suppliers. They could be organizations or individuals."),
+			fields: [],
 			before_load: function(slide) {
 				slide.fields = [];
 				for(var i=1; i<6; i++) {
@@ -273,10 +243,11 @@ function load_erpnext_slides() {
 		},
 
 		items: {
+			app_name: "erpnext",
 			icon: "icon-barcode",
-			"title": __("Your Products or Services"),
-			"help": __("List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
-			"fields": [],
+			title: __("Your Products or Services"),
+			help: __("List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
+			fields: [],
 			before_load: function(slide) {
 				slide.fields = [];
 				for(var i=1; i<6; i++) {
@@ -336,7 +307,6 @@ function load_erpnext_slides() {
 
 frappe.wiz.on("before_load", function() {
 	load_erpnext_slides();
-	frappe.wiz.add_slide(erpnext.wiz.user);
 	frappe.wiz.add_slide(erpnext.wiz.org);
 	frappe.wiz.add_slide(erpnext.wiz.branding);
 	frappe.wiz.add_slide(erpnext.wiz.users);

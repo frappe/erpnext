@@ -19,8 +19,7 @@ def setup_complete(args=None):
 		frappe.throw(_("Setup Already Complete!!"))
 
 	install_fixtures.install(args.get("country"))
-
-	update_user_name(args)
+	
 	create_fiscal_year_and_company(args)
 	create_users(args)
 	set_defaults(args)
@@ -54,67 +53,32 @@ def setup_complete(args=None):
 
 			pass
 
-
-def update_user_name(args):
-	if args.get("email"):
-		args['name'] = args.get("email")
-
-		_mute_emails, frappe.flags.mute_emails = frappe.flags.mute_emails, True
-		doc = frappe.get_doc({
-			"doctype":"User",
-			"email": args.get("email"),
-			"first_name": args.get("first_name"),
-			"last_name": args.get("last_name")
-		})
-		doc.flags.no_welcome_mail = True
-		doc.insert()
-		frappe.flags.mute_emails = _mute_emails
-		from frappe.auth import _update_password
-		_update_password(args.get("email"), args.get("password"))
-
-	else:
-		args['name'] = frappe.session.user
-
-		# Update User
-		if not args.get('last_name') or args.get('last_name')=='None':
-				args['last_name'] = None
-		frappe.db.sql("""update `tabUser` SET first_name=%(first_name)s,
-			last_name=%(last_name)s WHERE name=%(name)s""", args)
-
-	if args.get("attach_user"):
-		attach_user = args.get("attach_user").split(",")
-		if len(attach_user)==3:
-			filename, filetype, content = attach_user
-			fileurl = save_file(filename, content, "User", args.get("name"), decode=True).file_url
-			frappe.db.set_value("User", args.get("name"), "user_image", fileurl)
-
-	add_all_roles_to(args.get("name"))
-
 def create_fiscal_year_and_company(args):
-	curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
-	frappe.get_doc({
+	if (args.get('fy_start_date')):
+		curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
+		frappe.get_doc({
 		"doctype":"Fiscal Year",
 		'year': curr_fiscal_year,
 		'year_start_date': args.get('fy_start_date'),
 		'year_end_date': args.get('fy_end_date'),
-	}).insert()
-
+		}).insert()
+		args["curr_fiscal_year"] = curr_fiscal_year
+		
 	# Company
-	frappe.get_doc({
-		"doctype":"Company",
-		'domain': args.get("industry"),
-		'company_name':args.get('company_name').strip(),
-		'abbr':args.get('company_abbr'),
-		'default_currency':args.get('currency'),
-		'country': args.get('country'),
-		'chart_of_accounts': args.get(('chart_of_accounts')),
-	}).insert()
+	if (args.get('company_name')):	
+		frappe.get_doc({
+			"doctype":"Company",
+			'domain': args.get("industry"),
+			'company_name':args.get('company_name').strip(),
+			'abbr':args.get('company_abbr'),
+			'default_currency':args.get('currency'),
+			'country': args.get('country'),
+			'chart_of_accounts': args.get(('chart_of_accounts')),
+		}).insert()
 
-	# Bank Account
-	create_bank_account(args)
-
-	args["curr_fiscal_year"] = curr_fiscal_year
-
+		# Bank Account
+		create_bank_account(args)
+	
 def create_bank_account(args):
 	if args.get("bank_account"):
 		company_name = args.get('company_name').strip()
@@ -439,14 +403,6 @@ def create_logo(args):
 				decode=True).file_url
 			frappe.db.set_value("Website Settings", "Website Settings", "brand_html",
 				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name").strip()))
-
-def add_all_roles_to(name):
-	user = frappe.get_doc("User", name)
-	for role in frappe.db.sql("""select name from tabRole"""):
-		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner", "Employee"]:
-			d = user.append("user_roles")
-			d.role = role[0]
-	user.save()
 
 def create_territories():
 	"""create two default territories, one for home country and one named Rest of the World"""
