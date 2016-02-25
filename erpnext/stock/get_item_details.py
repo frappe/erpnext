@@ -43,8 +43,7 @@ def get_item_details(args):
 	get_party_item_code(args, item_doc, out)
 
 	if out.get("warehouse"):
-		out.update(get_available_qty(args.item_code, out.warehouse))
-		out.update(get_projected_qty(item.name, out.warehouse))
+		out.update(get_bin_details(args.item_code, out.warehouse))
 
 	get_price_list_rate(args, item_doc, out)
 
@@ -68,6 +67,8 @@ def get_item_details(args):
 
 	if args.get("is_subcontracted") == "Yes":
 		out.bom = get_default_bom(args.item_code)
+		
+	get_goss_profit(out)
 
 	return out
 
@@ -136,13 +137,15 @@ def get_basic_details(args, item):
 	user_default_warehouse_list = get_user_default_as_list('Warehouse')
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list)==1 else ""
+	
+	warehouse = user_default_warehouse or args.warehouse or item.default_warehouse
 
 	out = frappe._dict({
 		"item_code": item.name,
 		"item_name": item.item_name,
 		"description": cstr(item.description).strip(),
 		"image": cstr(item.image).strip(),
-		"warehouse": user_default_warehouse or args.warehouse or item.default_warehouse,
+		"warehouse": warehouse,
 		"income_account": get_default_income_account(args, item),
 		"expense_account": get_default_expense_account(args, item),
 		"cost_center": get_default_cost_center(args, item),
@@ -164,7 +167,8 @@ def get_basic_details(args, item):
 		"net_amount": 0.0,
 		"discount_percentage": 0.0,
 		"supplier": item.default_supplier,
-		"delivered_by_supplier": item.delivered_by_supplier
+		"delivered_by_supplier": item.delivered_by_supplier,
+		"valuation_rate": get_bin_details(item.name, warehouse)
 	})
 
 	# if default specified in item is for another company, fetch from company
@@ -302,7 +306,7 @@ def get_pos_profile_item_details(company, args, pos_profile=None):
 				res[fieldname] = pos_profile.get(fieldname)
 
 		if res.get("warehouse"):
-			res.actual_qty = get_available_qty(args.item_code,
+			res.actual_qty = get_bin_details(args.item_code,
 				res.warehouse).get("actual_qty")
 
 	return res
@@ -353,9 +357,9 @@ def get_projected_qty(item_code, warehouse):
 		{"item_code": item_code, "warehouse": warehouse}, "projected_qty")}
 
 @frappe.whitelist()
-def get_available_qty(item_code, warehouse):
+def get_bin_details(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
-		["projected_qty", "actual_qty"], as_dict=True) or {"projected_qty": 0, "actual_qty": 0}
+		["projected_qty", "actual_qty", "valuation_rate"], as_dict=True) or {"projected_qty": 0, "actual_qty": 0}
 
 @frappe.whitelist()
 def get_batch_qty(batch_no,warehouse,item_code):
@@ -464,3 +468,10 @@ def get_default_bom(item_code=None):
 			return bom
 		else:
 			frappe.throw(_("No default BOM exists for Item {0}").format(item_code))
+			
+			
+def get_goss_profit(out):
+	out.update({
+		"gross_profit": ((out.price_list_rate - out.valuation_rate) * out.qty) * (out.conversio_rate or 1)
+	})
+	return out

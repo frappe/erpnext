@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import cint, flt, cstr, comma_or
 from erpnext.setup.utils import get_company_currency
 from frappe import _, throw
-from erpnext.stock.get_item_details import get_available_qty
+from erpnext.stock.get_item_details import get_bin_details
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -24,7 +24,7 @@ class SellingController(StockController):
 	def onload(self):
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get("items"):
-				item.update(get_available_qty(item.item_code,
+				item.update(get_bin_details(item.item_code,
 					item.warehouse))
 
 	def validate(self):

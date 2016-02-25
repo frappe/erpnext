@@ -124,7 +124,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
 			precision("rate", item));
-
+		
+		this.gross_profit(item);
 		this.calculate_taxes_and_totals();
 	},
 
@@ -135,6 +136,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		} else {
 			this.price_list_rate(doc, cdt, cdn);
 		}
+		this.gross_profit(item);
 	},
 
 	commission_rate: function() {
@@ -177,16 +179,21 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	warehouse: function(doc, cdt, cdn) {
 		var me = this;
-		this.batch_no(doc, cdt, cdn);
 		var item = frappe.get_doc(cdt, cdn);
+		
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_available_qty",
+				method: "erpnext.stock.get_item_details.get_bin_details",
 				child: item,
 				args: {
 					item_code: item.item_code,
 					warehouse: item.warehouse,
 				},
+				callback:function(r){
+					if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+						me.batch_no(doc, cdt, cdn);
+					}
+				}
 			});
 		}
 	},
