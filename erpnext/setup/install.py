@@ -12,7 +12,7 @@ def after_install():
 	frappe.get_doc({'doctype': "Role", "role_name": "Analytics"}).insert()
 	set_single_defaults()
 	feature_setup()
-	from erpnext.setup.setup_wizard.setup_wizard import add_all_roles_to
+	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
 	add_web_forms()
 	frappe.db.commit()
