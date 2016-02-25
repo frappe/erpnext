@@ -121,7 +121,7 @@ def _test_recurring_document(obj, base_doc, date_field, first_and_last_day):
 		manage_recurring_documents(base_doc.doctype, next_date=next_date, commit=False)
 
 		recurred_documents = frappe.db.sql("""select name from `tab%s`
-			where recurring_id=%s and docstatus=1 order by name desc"""
+			where recurring_id=%s and (docstatus=1 or docstatus=0) order by name desc"""
 			% (base_doc.doctype, '%s'), (base_doc.recurring_id))
 
 		obj.assertEquals(i+2, len(recurred_documents))
