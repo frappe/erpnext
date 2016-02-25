@@ -164,23 +164,11 @@
         
         <tr >
             <td>2</td>
-            <td ><code>amount</code></td>
-            <td >
-                Currency</td>
-            <td >
-                Amount
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>3</td>
             <td ><code>currency</code></td>
             <td >
                 Link</td>
             <td >
-                Currency
+                Transaction Currency
                 
             </td>
             <td>
@@ -196,19 +184,22 @@
         </tr>
         
         <tr >
-            <td>4</td>
-            <td ><code>make_sales_invoice</code></td>
+            <td>3</td>
+            <td ><code>grand_total</code></td>
             <td >
-                Check</td>
+                Currency</td>
             <td >
-                Make Sales Invoice
-                
+                Grand Total
+                <p class="text-muted small">
+                    Amount in customer's currency</p>
             </td>
-            <td></td>
+            <td>
+                <pre>currency</pre>
+            </td>
         </tr>
         
         <tr >
-            <td>5</td>
+            <td>4</td>
             <td ><code>column_break_5</code></td>
             <td class="info">
                 Column Break</td>
@@ -220,7 +211,7 @@
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>5</td>
             <td ><code>status</code></td>
             <td >
                 Select</td>
@@ -238,6 +229,18 @@ Cancelled</pre>
             </td>
         </tr>
         
+        <tr >
+            <td>6</td>
+            <td ><code>make_sales_invoice</code></td>
+            <td >
+                Check</td>
+            <td >
+                Make Sales Invoice
+                
+            </td>
+            <td></td>
+        </tr>
+        
         <tr class="info">
             <td>7</td>
             <td ><code>section_break_7</code></td>
@@ -252,11 +255,11 @@ Cancelled</pre>
         
         <tr >
             <td>8</td>
-            <td ><code>payment_gateway</code></td>
+            <td ><code>payment_gateway_account</code></td>
             <td >
                 Link</td>
             <td >
-                Payment Gateway
+                Payment Gateway Account
                 
             </td>
             <td>
@@ -273,18 +276,6 @@ Cancelled</pre>
         
         <tr >
             <td>9</td>
-            <td ><code>payment_success_url</code></td>
-            <td >
-                Data</td>
-            <td >
-                Payment Success URL
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>10</td>
             <td ><code>column_break_9</code></td>
             <td class="info">
                 Column Break</td>
@@ -296,21 +287,21 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>11</td>
-            <td ><code>gateway</code></td>
+            <td>10</td>
+            <td ><code>payment_gateway</code></td>
             <td >
                 Read Only</td>
             <td >
-                Gateway
+                Payment Gateway
                 
             </td>
             <td>
-                <pre>payment_gateway.gateway</pre>
+                <pre>payment_gateway_account.payment_gateway</pre>
             </td>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>11</td>
             <td ><code>payment_account</code></td>
             <td >
                 Read Only</td>
@@ -319,12 +310,12 @@ Cancelled</pre>
                 
             </td>
             <td>
-                <pre>payment_gateway.payment_account</pre>
+                <pre>payment_gateway_account.payment_account</pre>
             </td>
         </tr>
         
         <tr class="info">
-            <td>13</td>
+            <td>12</td>
             <td ><code>recipient_and_message</code></td>
             <td >
                 Section Break</td>
@@ -336,7 +327,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>13</td>
             <td ><code>print_format</code></td>
             <td >
                 Select</td>
@@ -348,7 +339,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>14</td>
             <td ><code>mute_email</code></td>
             <td >
                 Check</td>
@@ -360,7 +351,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>15</td>
             <td ><code>email_to</code></td>
             <td >
                 Data</td>
@@ -372,7 +363,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>16</td>
             <td ><code>subject</code></td>
             <td >
                 Data</td>
@@ -384,7 +375,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>17</td>
             <td ><code>message</code></td>
             <td >
                 Text Editor</td>
@@ -396,7 +387,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>18</td>
             <td ><code>payment_url_message</code></td>
             <td >
                 Data</td>
@@ -408,7 +399,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>19</td>
             <td ><code>payment_url</code></td>
             <td >
                 Data</td>
@@ -420,7 +411,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>21</td>
+            <td>20</td>
             <td ><code>reference_details</code></td>
             <td >
                 Section Break</td>
@@ -432,7 +423,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>21</td>
             <td ><code>reference_doctype</code></td>
             <td >
                 Link</td>
@@ -453,7 +444,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>23</td>
+            <td>22</td>
             <td ><code>reference_name</code></td>
             <td >
                 Dynamic Link</td>
@@ -467,7 +458,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>24</td>
+            <td>23</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -560,7 +551,8 @@ Cancelled</pre>
 		<b>get_payment_url</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+	<div class="docs-attr-desc"><p>This is blanck method to trigger hooks call from individual payment gateway app
+which will return respective payment gateway</p>
 </div>
 	<br>
 
@@ -614,20 +606,6 @@ Cancelled</pre>
         <a name="on_submit" href="#on_submit" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>on_submit</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="on_update_after_submit" href="#on_update_after_submit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>on_update_after_submit</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -698,20 +676,6 @@ Cancelled</pre>
         <a name="set_failed" href="#set_failed" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>set_failed</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="set_status" href="#set_status" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>set_status</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -839,6 +803,22 @@ Cancelled</pre>
         <i class="text-muted">(args)</i>
     </p>
 	<div class="docs-attr-desc"><p>return gateway and payment account of default payment gateway</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_request.payment_request.get_payment_gateway_account" href="#erpnext.accounts.doctype.payment_request.payment_request.get_payment_gateway_account" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_request.payment_request.<b>get_payment_gateway_account</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
