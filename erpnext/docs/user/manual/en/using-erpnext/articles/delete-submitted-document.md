@@ -1,27 +1,29 @@
 #Delete Submitted Document
 
-ERPNext allows you to assign deletion permission exclusively to User. Only those users will be able to delete records. Click [here](/user-guide/setting-up/permissions/role-based-permissions) to learn more about permissions.
+To be able to delete Submitted document, you should first Cancel. Once canceled, you can delete that document from Menu or from the List View of that Document Type.
 
-To delete any document from system you should cancel all linked documents. For example if you need to delete Sales Order, but Delivery Note and Sales Invoice has already been created against that Sales Order. Then you should cancel and delete documents in reverse order, i.e. Sales Invoice, Delivery Note and then Sales Order. If payment entry was also made against Sales Invoice, then you should first Cancel and Delete that Journal Voucher, and then come to Sales Invoice.
+If document which needs to be deleted is also linked to other documents, then you should first Cancel document those document as well. For example if you need to delete Sales Order, but Delivery Note and Sales Invoice has already been created against it. Then you should first cancel and delete documents in reverse order, i.e. Sales Invoice, Delivery Note and then Sales Order.
+
+Delete option is only visible to user having related permission. From Role Permission Manager, you can control and define Delete permission and Role for each Document Type.
 
 Following are step to delete submitted documents.
 
-####1. Cancel Document
+####Step 1: Cancel Document
 
-To be able to delete Submitted document, it must be cancelled first. After document is cancelled, you will find option to delete it.
+You will find option to Cancel in the submitted document. If document is at draft stage, it can delete directly. Also if document is not submittable, but only save, it can be deleted directly.
 
-![Cancel Sales Order]({{docs_base_url}}/assets/img/articles/Selection_064.png)
+<img alt="Cancel Doc" class="screenshot" src="{{docs_base_url}}/assets/img/articles/delete-submitted-doc-1.png">
 
-####2. Delete Document
+####Step 2: Delete Document
 
-After cancellation, go to File menu and click on Delete option.
+After cancellation, go to Menu and click on Delete.
 
-![Cancel Sales Order]({{docs_base_url}}/assets/img/articles/Selection_066.png)
+<img alt="Delete Doc" class="screenshot" src="{{docs_base_url}}/assets/img/articles/delete-submitted-doc-2.png">
 
-#### Deleting from List
+####Step 3: Deleting from List
 
-For bulk deletion, you can select multiple Cancelled records and delete them at once from the list.
+For bulk deletion, you can select multiple Cancelled records and delete at once from the List View.
 
-![Cancel Sales Order List]({{docs_base_url}}/assets/img/articles/Selection_069.png)
+<img alt="Delete Doc from List" class="screenshot" src="{{docs_base_url}}/assets/img/articles/delete-submitted-doc-3.gif">
 
 <!-- markdown -->
