@@ -880,7 +880,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 	
 	set_gross_profit: function(item) {
-		if (this.frm.doc.doctype == "Sales Order") {
+		if (this.frm.doc.doctype == "Sales Order" && item.valuation_rate) {
 			item.gross_profit = flt((((item.rate - item.valuation_rate) * item.qty) * (this.frm.doc.conversion_rate || 1)), precision("amount", item));
 		}
 	}

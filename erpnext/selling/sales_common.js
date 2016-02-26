@@ -136,7 +136,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		} else {
 			this.price_list_rate(doc, cdt, cdn);
 		}
-		this.gross_profit(item);
+		this.set_gross_profit(item);
 	},
 
 	commission_rate: function() {

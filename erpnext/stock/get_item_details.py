@@ -44,6 +44,8 @@ def get_item_details(args):
 
 	if out.get("warehouse"):
 		out.update(get_bin_details(args.item_code, out.warehouse))
+	else:
+		out.update(get_valuation_rate(args.item_code))
 
 	get_price_list_rate(args, item_doc, out)
 
@@ -167,8 +169,7 @@ def get_basic_details(args, item):
 		"net_amount": 0.0,
 		"discount_percentage": 0.0,
 		"supplier": item.default_supplier,
-		"delivered_by_supplier": item.delivered_by_supplier,
-		"valuation_rate": get_bin_details(item.name, warehouse)
+		"delivered_by_supplier": item.delivered_by_supplier
 	})
 
 	# if default specified in item is for another company, fetch from company
@@ -359,7 +360,8 @@ def get_projected_qty(item_code, warehouse):
 @frappe.whitelist()
 def get_bin_details(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
-		["projected_qty", "actual_qty", "valuation_rate"], as_dict=True) or {"projected_qty": 0, "actual_qty": 0}
+		["projected_qty", "actual_qty", "valuation_rate"], as_dict=True) \
+		or {"projected_qty": 0, "actual_qty": 0, "valuation_rate": 0}
 
 @frappe.whitelist()
 def get_batch_qty(batch_no,warehouse,item_code):
@@ -469,11 +471,17 @@ def get_default_bom(item_code=None):
 		else:
 			frappe.throw(_("No default BOM exists for Item {0}").format(item_code))
 			
+def get_valuation_rate(item_code):
+	valuation_rate =frappe.db.sql("""select sum(base_net_amount) / sum(qty) from `tabPurchase Invoice Item` 
+		where item_code = %s and docstatus=1""", item_code)
+		
+	if valuation_rate:
+		return {"valuation_rate": valuation_rate[0][0]}
 			
 def get_gross_profit(out):
-	if isinstance(out.valuation_rate, dict): return out
+	if out.valuation_rate:
+		out.update({
+			"gross_profit": ((out.base_rate - out.valuation_rate) * out.qty)
+		})
 	
-	out.update({
-		"gross_profit": ((out.base_rate - out.valuation_rate) * out.qty)
-	})
 	return out
