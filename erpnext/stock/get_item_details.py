@@ -68,7 +68,7 @@ def get_item_details(args):
 	if args.get("is_subcontracted") == "Yes":
 		out.bom = get_default_bom(args.item_code)
 		
-	get_goss_profit(out)
+	get_gross_profit(out)
 
 	return out
 
@@ -470,8 +470,10 @@ def get_default_bom(item_code=None):
 			frappe.throw(_("No default BOM exists for Item {0}").format(item_code))
 			
 			
-def get_goss_profit(out):
+def get_gross_profit(out):
+	if isinstance(out.valuation_rate, dict): return out
+	
 	out.update({
-		"gross_profit": ((out.price_list_rate - out.valuation_rate) * out.qty) * (out.conversio_rate or 1)
+		"gross_profit": ((out.base_rate - out.valuation_rate) * out.qty)
 	})
 	return out
