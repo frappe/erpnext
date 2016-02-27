@@ -460,11 +460,7 @@ erpnext.pos.PointOfSale = Class.extend({
 							}
 						},
 						{fieldtype:'Currency', fieldname:'write_off_amount',
-							label: __('Write Off'), "default": 0.0, hidden: 1},
-						{fieldtype:'Data', fieldname:'stripe_checkout_id',
-							label: __('Stripe Checkout ID'), "default": "", hidden: 1
-							, "disabled": true
-						},
+							label: __('Write Off'), "default": 0.0, hidden: 1}
 					]
 				});
 				me.dialog = dialog;
@@ -473,7 +469,6 @@ erpnext.pos.PointOfSale = Class.extend({
 				// make read only
 				dialog.get_input("total_amount").prop("disabled", true);
 				dialog.get_input("write_off_amount").prop("disabled", true);
-				dialog.get_input("stripe_checkout_id").prop("disabled", true);
 
 				// toggle amount paid and change
 				dialog.get_input("mode_of_payment").on("change", function() {
@@ -482,7 +477,6 @@ erpnext.pos.PointOfSale = Class.extend({
 
 					dialog.get_field("paid_amount").toggle(is_cash);
 					dialog.get_field("change").toggle(is_cash);
-					dialog.get_field("stripe_checkout_id").toggle(is_stripe);
 
 					if (is_cash && !dialog.get_value("change")) {
 						// set to nearest 5
