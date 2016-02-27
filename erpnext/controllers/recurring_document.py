@@ -38,7 +38,7 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 
 	recurring_documents = frappe.db.sql("""select name, recurring_id
 		from `tab{0}` where is_recurring=1
-		and docstatus=1 and next_date=%s
+		and (docstatus=1 or docstatus=0) and next_date=%s
 		and next_date <= ifnull(end_date, '2199-12-31') {1}""".format(doctype, condition), next_date)
 
 	exception_list = []
