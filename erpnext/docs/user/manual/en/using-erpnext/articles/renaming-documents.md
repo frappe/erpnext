@@ -1,24 +1,14 @@
-#Renaming Documents
+#Renaming a Document
 
-ERPNext has Renaming feature which allows you to correct primary id of a record. 
-	
-Following are step to rename document in ERPNext. Let's assume we are renaming Item Code for existing Item.
+Using Renaming feature, you can change ID of a master documents like Item, Warehouse, Accounts etc. Following are the steps to rename Item Code. Following same steps, you can rename other masters as well.
  
 #### 1. Go to Item
 
-`Stock > Documents > Item List > (Open Item)`
+`Stock > Documents > Item List > (Open Item to be renamed)`
 
-Open Item for which Item Code needs to be renamed.
+#### 2. Rename
 
-#### 2. Go to File
-
-![Item]({{docs_base_url}}/assets/img/articles/Selection_013.png)
-
-#### 3. Rename
-
-Enter desired Item Code, and click on "Rename".
-
-![Renamed Item]({{docs_base_url}}/assets/img/articles/Selection_0149d98bf.png)
+<img alt="Renamed Item" class="screenshot" src="{{docs_base_url}}/assets/img/articles/rename-a-doc.gif">
 
 ###Effect of Renaming
 
@@ -26,8 +16,8 @@ Renaming document affects existing transaction where this record is selected. Co
 
 ###See Also
 
-1. [Bulk Renaming](https://erpnext.com/kb/tools/rename-tool)
-2. [Document Merging](https://erpnext.com/kb/tools/merging-documents)
+1. [Bulk Renaming]({{docs_base_url}}/user/manual/en/using-erpnext/articles/bulk-rename.html)
+2. [Document Merging]({{docs_base_url}}/user/manual/en/using-erpnext/articles/merging-documents.html)
 
 **List of Renamable Documents**
 
