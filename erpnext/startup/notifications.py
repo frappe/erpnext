@@ -27,7 +27,10 @@ def get_notification_config():
 			"Purchase Receipt": {"docstatus": 0},
 			"Delivery Note": {"docstatus": 0},
 			"Stock Entry": {"docstatus": 0},
-			"Material Request": {"docstatus": 0},
+			"Material Request": {
+				"status": ("not in", ("Stopped",)),
+				"per_ordered": ("<", 100)
+			},
 			"Purchase Order": {
 				"status": ("not in", ("Completed", "Closed")),
 				"docstatus": ("<", 2)
