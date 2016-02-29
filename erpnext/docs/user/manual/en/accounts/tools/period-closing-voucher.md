@@ -21,7 +21,7 @@ In ERPNext after making all the special entries via Journal Entry for the curren
 
 <img class="screenshot" alt="Period Closing Voucher" src="{{docs_base_url}}/assets/img/accounts/period-closing-voucher.png">
 
-This voucher will transfer Profit or Loss (availed from P&L statment) to Closing Account Head. You should select a libility account like Reserves and Surplus, or Capital Fund account as Closing Account.
+This voucher will transfer Profit or Loss (availed from P&L statment) to Closing Account Head. You should select a liability account like Reserves and Surplus, or Capital Fund account as Closing Account.
 
 The Period Closing Voucher will make accounting entries (GL Entry) making all your Income and Expense Accounts zero and transferring Profit/Loss balance to the Closing Account.
 

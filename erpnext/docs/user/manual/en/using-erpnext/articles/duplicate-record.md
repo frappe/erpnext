@@ -1,17 +1,15 @@
 #Duplicate a Record
 
-ERPNext allows you to duplicate existing record. With this, you get values of existing record into new form, and create entries faster.
+Duplicate feature helps you to copy values of existing document into new document.
 
 ####Scenario
 
-An electronic supplier receives a repeat order from an existing customer. Since new order will have details just like previous order, you can open previous order, and Copy it to create new order faster. On copying, details of the previous transaction will be updated in the new form. You can make changes where needed and submit the transaction.
+An electronic supplier receives a repeat order from an existing customer. Since new order will have details just like previous order, you should open previous order, and Duplciate it to create new order faster. On Duplicating, values of the previous transaction will be updated in a new document. You can make changes where needed and submit the document.
 
 You will find Copy option under:
 
-File > Copy
+`Menu > Copy`
 
-![Copy]({{docs_base_url}}/assets/img/articles/Order Copy.png)
-
-When Copy function is executed, values are mapped field-by-field from existing to new form.
+<img alt="Duplicate" class="screenshot" src="{{docs_base_url}}/assets/img/articles/duplicate.gif">
 
 <!-- markdown -->

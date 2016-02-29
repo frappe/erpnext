@@ -9,6 +9,10 @@ from frappe.model.document import Document
 
 from operator import itemgetter
 
+form_grid_templates = {
+	"items": "templates/form_grid/item_grid.html"
+}
+
 class BOM(Document):
 	def autoname(self):
 		last_name = frappe.db.sql("""select max(name) from `tabBOM`

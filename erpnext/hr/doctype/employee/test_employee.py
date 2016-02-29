@@ -12,7 +12,7 @@ test_records = frappe.get_test_records('Employee')
 class TestEmployee(unittest.TestCase):
 	def test_birthday_reminders(self):
 		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
-		employee.date_of_birth = "1990" + frappe.utils.nowdate()[4:]
+		employee.date_of_birth = "1992" + frappe.utils.nowdate()[4:]
 		employee.company_email = "test@example.com"
 		employee.save()
 

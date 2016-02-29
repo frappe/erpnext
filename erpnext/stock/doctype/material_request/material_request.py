@@ -71,7 +71,7 @@ class MaterialRequest(BuyingController):
 
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
-		
+
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 
@@ -125,7 +125,7 @@ class MaterialRequest(BuyingController):
 					if d.ordered_qty and d.ordered_qty > d.qty:
 						frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1}  \
 							cannot be greater than requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, d.qty, d.item_code))
-					
+
 				elif self.material_request_type == "Manufacture":
 					d.ordered_qty = flt(frappe.db.sql("""select sum(qty)
 						from `tabProduction Order` where material_request = %s
@@ -133,7 +133,7 @@ class MaterialRequest(BuyingController):
 						(self.name, d.name))[0][0])
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
-		
+
 		self._update_percent_field({
 			"target_dt": "Material Request Item",
 			"target_parent_dt": self.doctype,
@@ -228,7 +228,7 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 
 		target_doc.set("items", [d for d in target_doc.get("items")
 			if d.get("item_code") in supplier_items and d.get("qty") > 0])
-		
+
 		set_missing_values(source, target_doc)
 
 	for mr in material_requests:
@@ -263,7 +263,7 @@ def get_material_requests_based_on_supplier(supplier):
 			and mr.material_request_type = 'Purchase'
 			and mr.per_ordered < 99.99
 			and mr.docstatus = 1
-			and mr.status != 'Stopped' 
+			and mr.status != 'Stopped'
                         order by mr_item.item_code ASC""" % ', '.join(['%s']*len(supplier_items)),
 			tuple(supplier_items))
 	else:
@@ -360,10 +360,10 @@ def raise_production_orders(material_request):
 				production_orders.append(prod_order.name)
 			else:
 				errors.append(d.item_code + " in Row " + cstr(d.idx))
-	if production_orders: 
+	if production_orders:
 		message = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
 			(p, p) for p in production_orders]
-		msgprint(_("The following Production Orders were created : \n {0} ").format(new_line_sep(message)))
+		msgprint(_("The following Production Orders were created:" + '\n' + new_line_sep(message)))
 	if errors:
-		msgprint(_("Productions Orders cannot be raised for : \n {0}").format(new_line_sep(errors)))
+		msgprint(_("Productions Orders cannot be raised for:" + '\n' + new_line_sep(errors)))
 	return production_orders

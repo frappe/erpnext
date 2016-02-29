@@ -20,6 +20,22 @@ class TestTimeLog(unittest.TestCase):
 			from_time= tl1.from_time, to_time= tl1.to_time, do_not_save= 1)
 
 		self.assertRaises(OverlapError, tl2.insert)
+		
+		tl3 = make_time_log_test_record(user= "test@example.com", employee= "_T-Employee-0002",
+			from_time= tl1.from_time - datetime.timedelta(hours=1), 
+			to_time= tl1.to_time + datetime.timedelta(hours=1), do_not_save= 1)
+
+		self.assertRaises(OverlapError, tl3.insert)
+		
+		tl4 = make_time_log_test_record(user= "test@example.com", employee= "_T-Employee-0002",
+			from_time= tl1.from_time + datetime.timedelta(minutes=20), 
+			to_time= tl1.to_time + datetime.timedelta(minutes=30), do_not_save= 1)
+
+		self.assertRaises(OverlapError, tl4.insert)
+		
+		make_time_log_test_record(user= "test@example.com", employee= "_T-Employee-0002",
+			from_time= tl1.to_time, 
+			to_time= tl1.to_time + datetime.timedelta(hours=1))
 
 	def test_production_order_status(self):
 		prod_order = make_prod_order_test_record(item= "_Test FG Item 2", qty= 1, do_not_submit= True)
