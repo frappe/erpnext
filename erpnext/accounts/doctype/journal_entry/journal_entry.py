@@ -399,7 +399,9 @@ class JournalEntry(AccountsController):
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
-						"cost_center": d.cost_center
+						"cost_center": d.cost_center,
+						"project_name": d.project_name,
+						"support_ticket": d.support_ticket
 					})
 				)
 
