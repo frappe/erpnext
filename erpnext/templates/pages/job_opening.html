@@ -1,0 +1,20 @@
+
+<head>
+<title>{{doc.job_title}}</title>
+</head>
+{% extends "templates/web.html" %}
+{% block header %}
+<h1>{{ doc.job_title }}</h1>
+{% endblock %}
+
+{% block breadcrumbs %}
+	{% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
+{% block page_content %}
+
+<p>{{ doc.description }}</p>
+
+<input class="btn btn-large btn-primary" type="button" onclick="location.href='/job_application?job_title={{ doc.job_title }}';" value="Apply Now" />
+
+{% endblock %}
