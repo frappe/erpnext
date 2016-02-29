@@ -43,4 +43,6 @@ tabla de Impuestos y Contribuciones,
 
 <img alt="Sales Register" class="screenshot" src="{{docs_base_url}}/assets/img/accounts/sales-register.png">
 
+**Trabajo en progreso.**
+
 {next}

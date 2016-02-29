@@ -68,4 +68,6 @@ la cuenta "Pérdidas y Ganancias" debe ser debitada y la cuenta "Capital"
 debe ser acreditada. El balance neto de caja es 44000 y existe alguna materia
 prima que vale $1000.
 
+**Trabajo en progreso.**
+
 {next}
