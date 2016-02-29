@@ -313,6 +313,8 @@ class PurchaseReceipt(BuyingController):
 						"account": warehouse_account[d.warehouse]["name"],
 						"against": stock_rbnb,
 						"cost_center": d.cost_center,
+						"project_name": d.project_name,
+                        			"support_ticket": d.support_ticket,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"debit": stock_value_diff
 					}, warehouse_account[d.warehouse]["account_currency"]))
@@ -323,6 +325,8 @@ class PurchaseReceipt(BuyingController):
 						"account": stock_rbnb,
 						"against": warehouse_account[d.warehouse]["name"],
 						"cost_center": d.cost_center,
+						"project_name": d.project_name,
+                        			"support_ticket": d.support_ticket,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
 						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
@@ -337,6 +341,8 @@ class PurchaseReceipt(BuyingController):
 							"account": expenses_included_in_valuation,
 							"against": warehouse_account[d.warehouse]["name"],
 							"cost_center": d.cost_center,
+							"project_name": d.project_name,
+                        				"support_ticket": d.support_ticket,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.landed_cost_voucher_amount)
 						}))
@@ -347,6 +353,8 @@ class PurchaseReceipt(BuyingController):
 							"account": warehouse_account[self.supplier_warehouse]["name"],
 							"against": warehouse_account[d.warehouse]["name"],
 							"cost_center": d.cost_center,
+							"project_name": d.project_name,
+                        				"support_ticket": d.support_ticket,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
@@ -364,6 +372,8 @@ class PurchaseReceipt(BuyingController):
 							"account": stock_rbnb,
 							"against": warehouse_account[d.warehouse]["name"],
 							"cost_center": d.cost_center,
+							"project_name": d.project_name,
+                        				"support_ticket": d.support_ticket,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"debit": divisional_loss
 						}, stock_rbnb_currency))
