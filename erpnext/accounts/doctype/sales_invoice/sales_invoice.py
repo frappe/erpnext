@@ -576,7 +576,9 @@ class SalesInvoice(SellingController):
 						"credit": item.base_net_amount,
 						"credit_in_account_currency": item.base_net_amount \
 							if account_currency==self.company_currency else item.net_amount,
-						"cost_center": item.cost_center
+						"cost_center": item.cost_center,
+						"project_name": self.project_name,
+						"support_ticket": self.support_ticket
 					}, account_currency)
 				)
 
