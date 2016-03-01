@@ -40,6 +40,8 @@ email_append_to = ["Job Applicant", "Opportunity", "Issue"]
 
 calendars = ["Task", "Production Order", "Time Log", "Leave Application", "Sales Order", "Holiday List"]
 
+fixtures = ["Web Form"]
+
 website_generators = ["Item Group", "Item", "Sales Partner"]
 
 website_context = {
