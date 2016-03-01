@@ -92,9 +92,9 @@ def set_contact_details(out, party, party_type):
 def set_other_values(out, party, party_type):
 	# copy
 	if party_type=="Customer":
-		to_copy = ["customer_name", "customer_group", "territory"]
+		to_copy = ["customer_name", "customer_group", "territory", "language"]
 	else:
-		to_copy = ["supplier_name", "supplier_type"]
+		to_copy = ["supplier_name", "supplier_type", "language"]
 	for f in to_copy:
 		out[f] = party.get(f)
 

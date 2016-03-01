@@ -11,7 +11,7 @@
 	{% if doc.in_format_data("item_code") and not doc.is_print_hide("item_code") -%}
 		<div class="primary">
 			{% if compact %}<strong>{% endif %}
-				{{ doc.item_code }}
+				{{ _(doc.item_code) }}
 			{% if compact %}</strong>{% endif %}
 		</div>
 	{%- endif %}
@@ -19,7 +19,7 @@
 	{% if (doc.in_format_data("item_name") and not doc.is_print_hide("item_name") and
 		(not doc.in_format_data("item_code") or doc.is_print_hide("item_code")
 			or doc.item_code != doc.item_name)) -%}
-		<div class="primary">{{ doc.get_formatted("item_name") }}</div>
+		<div class="primary">{{ _(doc.get_formatted("item_name")) }}</div>
 	{%- endif %}
 
 	{% if (doc.in_format_data("description") and doc.description and
@@ -30,15 +30,15 @@
 			) or not (doc.item_code == doc.item_name == doc.description)
 		))
 	-%}
-	<p>{{ doc.get_formatted("description") }}</p>
+	<p>{{ _(doc.get_formatted("description")) }}</p>
 	{%- endif %}
 
 	{% if compact -%}
 		{%- for fieldname in doc.flags.show_in_description -%}
 			{% if doc.get(fieldname) -%}
 			<p>
-				<strong>{{ doc.meta.get_label(fieldname) }}:</strong>
-				{{ doc.get_formatted(fieldname)  }}
+				<strong>{{ _(doc.meta.get_label(fieldname)) }}:</strong>
+				{{ _(doc.get_formatted(fieldname))  }}
 			</p>
 			{% endif %}
 		{%- endfor -%}

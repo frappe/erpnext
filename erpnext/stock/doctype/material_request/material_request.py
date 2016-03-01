@@ -71,7 +71,7 @@ class MaterialRequest(BuyingController):
 
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
-
+		
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 
@@ -125,7 +125,7 @@ class MaterialRequest(BuyingController):
 					if d.ordered_qty and d.ordered_qty > d.qty:
 						frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1}  \
 							cannot be greater than requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, d.qty, d.item_code))
-
+					
 				elif self.material_request_type == "Manufacture":
 					d.ordered_qty = flt(frappe.db.sql("""select sum(qty)
 						from `tabProduction Order` where material_request = %s
@@ -133,7 +133,7 @@ class MaterialRequest(BuyingController):
 						(self.name, d.name))[0][0])
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
-
+		
 		self._update_percent_field({
 			"target_dt": "Material Request Item",
 			"target_parent_dt": self.doctype,
@@ -210,6 +210,30 @@ def make_purchase_order(source_name, target_doc=None):
 			"condition": lambda doc: doc.ordered_qty < doc.qty
 		}
 	}, target_doc, postprocess)
+
+	return doclist
+    
+@frappe.whitelist()
+def make_request_for_quotation(source_name, target_doc=None):
+	doclist = get_mapped_doc("Material Request", source_name, 	{
+		"Material Request": {
+			"doctype": "Request for Quotation",
+			"validation": {
+				"docstatus": ["=", 1],
+				"material_request_type": ["=", "Purchase"]
+			}
+		},
+		"Material Request Item": {
+			"doctype": "Request for Quotation Item",
+			"field_map": [
+				["name", "material_request_item"],
+				["parent", "material_request"],
+				["uom", "uom"]
+			],
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.qty
+		}
+	}, target_doc)
 
 	return doclist
 
