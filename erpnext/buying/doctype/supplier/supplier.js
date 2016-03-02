@@ -1,9 +1,10 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.require("assets/erpnext/js/controllers/load_languages.js")
-
 frappe.ui.form.on("Supplier", {
+	before_load: function(frm) {
+		frappe.setup_language_field(frm);
+	},
 	refresh: function(frm) {
 		frm.cscript.make_dashboard(frm.doc);
 
