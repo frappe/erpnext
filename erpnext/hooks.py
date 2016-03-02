@@ -42,7 +42,7 @@ calendars = ["Task", "Production Order", "Time Log", "Leave Application", "Sales
 
 fixtures = ["Web Form"]
 
-website_generators = ["Item Group", "Item", "Sales Partner"]
+website_generators = ["Item Group", "Item", "Sales Partner", "Job Opening"]
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
@@ -72,12 +72,6 @@ website_route_rules = [
 		}
 	},
 	{"from_route": "/jobs", "to_route": "Job Opening"},
-	{"from_route": "/jobs/<path:name>", "to_route": "job_opening",
-		"defaults": {
-			"doctype": "Job Opening",
-			"parents": [{"title": _("Job Opening"), "name": "jobs"}]
-		}
-	}
 ]
 
 has_website_permission = {
