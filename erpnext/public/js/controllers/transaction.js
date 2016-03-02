@@ -839,6 +839,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	is_recurring: function() {
 		// set default values for recurring documents
+		if(!this.frm.doc.recurring_id) {
+			this.frm.set_value('recurring_id', this.frm.doc.name);
+		}
+
 		if(this.frm.doc.is_recurring) {
 			var owner_email = this.frm.doc.owner=="Administrator"
 				? frappe.user_info("Administrator").email

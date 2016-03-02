@@ -101,7 +101,7 @@ def make_new_document(reference_doc, date_field, posting_date):
 	for fieldname in ("owner", "recurring_type", "repeat_on_day_of_month",
 		"recurring_id", "notification_email_address", "is_recurring", "end_date",
 		"title", "naming_series", "select_print_heading", "ignore_pricing_rule",
-		"posting_time", "remarks"):
+		"posting_time", "remarks", 'submit_on_creation'):
 		if new_document.meta.get_field(fieldname):
 			new_document.set(fieldname, reference_doc.get(fieldname))
 
@@ -112,11 +112,11 @@ def make_new_document(reference_doc, date_field, posting_date):
 
 	new_document.run_method("on_recurring", reference_doc=reference_doc)
 
-	if not reference_doc.notify_by_email:
+	if reference_doc.submit_on_creation:
+		new_document.submit()
+	else:
 		new_document.docstatus=0
 		new_document.insert()
-	else:
-		new_document.submit()
 
 	return new_document
 
@@ -190,7 +190,7 @@ def validate_notification_email_id(doc):
 	if doc.notify_by_email:
 		if doc.notification_email_address:
 			email_list = split_emails(doc.notification_email_address.replace("\n", ""))
-	
+
 			from frappe.utils import validate_email_add
 			for email in email_list:
 				if not validate_email_add(email):
