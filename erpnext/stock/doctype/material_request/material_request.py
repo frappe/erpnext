@@ -229,9 +229,7 @@ def make_request_for_quotation(source_name, target_doc=None):
 				["name", "material_request_item"],
 				["parent", "material_request"],
 				["uom", "uom"]
-			],
-			"postprocess": update_item,
-			"condition": lambda doc: doc.ordered_qty < doc.qty
+			]
 		}
 	}, target_doc)
 
