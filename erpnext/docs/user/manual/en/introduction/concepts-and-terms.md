@@ -16,7 +16,7 @@ share the Customer, Supplier and Item records.
 
 #### Customer
 
-Represents a customer. A Customer can be an individual or an organizations.
+Represents a customer. A Customer can be an individual or an organization.
 You can create multiple Contacts and Addresses for each Customer.
 
 > Selling > Customer
