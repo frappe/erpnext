@@ -15,6 +15,7 @@ def test_recurring_document(obj, test_records):
 
 	base_doc.update({
 		"is_recurring": 1,
+		"submit_on_create": 1,
 		"recurring_type": "Monthly",
 		"notification_email_address": "test@example.com, test1@example.com, test2@example.com",
 		"repeat_on_day_of_month": getdate(today).day,
