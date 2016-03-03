@@ -188,7 +188,6 @@ class StockController(AccountsController):
 			"stock_uom": frappe.db.get_value("Item", args.get("item_code") or d.get("item_code"), "stock_uom"),
 			"incoming_rate": 0,
 			"company": self.company,
-			"fiscal_year": self.fiscal_year,
 			"batch_no": cstr(d.get("batch_no")).strip(),
 			"serial_no": d.get("serial_no"),
 			"project": d.get("project_name"),

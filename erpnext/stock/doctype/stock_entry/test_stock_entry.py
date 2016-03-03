@@ -605,8 +605,6 @@ def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	return se
 
 def make_stock_entry(**args):
-	from erpnext.accounts.utils import get_fiscal_year
-
 	s = frappe.new_doc("Stock Entry")
 	args = frappe._dict(args)
 	if args.posting_date:
@@ -625,7 +623,6 @@ def make_stock_entry(**args):
 		s.purpose = args.purpose
 
 	s.company = args.company or "_Test Company"
-	s.fiscal_year = get_fiscal_year(s.posting_date)[0]
 	s.purchase_receipt_no = args.purchase_receipt_no
 	s.delivery_note_no = args.delivery_note_no
 	s.sales_invoice_no = args.sales_invoice_no

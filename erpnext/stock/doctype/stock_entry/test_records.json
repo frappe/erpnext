@@ -25,7 +25,6 @@
  {
   "company": "_Test Company",
   "doctype": "Stock Entry",
-  "fiscal_year": "_Test Fiscal Year 2013",
   "items": [
    {
     "conversion_factor": 1.0,
@@ -50,7 +49,6 @@
  {
   "company": "_Test Company",
   "doctype": "Stock Entry",
-  "fiscal_year": "_Test Fiscal Year 2013",
   "items": [
    {
     "conversion_factor": 1.0,
@@ -76,7 +74,6 @@
  {
   "company": "_Test Company",
   "doctype": "Stock Entry",
-  "fiscal_year": "_Test Fiscal Year 2013",
   "items": [
    {
     "conversion_factor": 1.0,
