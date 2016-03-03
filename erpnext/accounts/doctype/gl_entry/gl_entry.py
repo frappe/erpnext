@@ -18,7 +18,6 @@ class GLEntry(Document):
 		self.flags.ignore_submit_comment = True
 		self.check_mandatory()
 		self.pl_must_have_cost_center()
-		self.validate_posting_date()
 		self.check_pl_account()
 		self.validate_cost_center()
 		self.validate_party()
@@ -37,7 +36,7 @@ class GLEntry(Document):
 					self.against_voucher)
 
 	def check_mandatory(self):
-		mandatory = ['account','remarks','voucher_type','voucher_no','fiscal_year','company']
+		mandatory = ['account','remarks','voucher_type','voucher_no','company']
 		for k in mandatory:
 			if not self.get(k):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
@@ -56,10 +55,6 @@ class GLEntry(Document):
 				frappe.throw(_("Cost Center is required for 'Profit and Loss' account {0}").format(self.account))
 		elif self.cost_center:
 			self.cost_center = None
-
-	def validate_posting_date(self):
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year, _("Posting Date"), self)
 
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \
