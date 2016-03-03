@@ -6,26 +6,30 @@
 
 frappe.require("assets/erpnext/js/utils.js");
 
-erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.extend({
-	refresh: function() {
-		this._super();
-
-		if (this.frm.doc.docstatus === 1) {
-			cur_frm.add_custom_button(__("Supplier Quotation"), this.make_suppplier_quotation,
-				__("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+frappe.ui.form.on("Request for Quotation",{
+	setup: function(frm){
+		frm.fields_dict["suppliers"].grid.get_field("contact_person").get_query = function(doc, cdt, cdn){
+			var d =locals[cdt][cdn];
+			return {
+				filters: {'supplier': d.supplier}
+			}
 		}
 	},
-	
-	calculate_taxes_and_totals: function() {
-		return;
+
+	onload: function(frm){
+		frm.add_fetch('standard_reply', 'response', 'response');
 	},
 	
-	tc_name: function() {
-		this.get_terms();
+	refresh: function(frm, cdt, cdn){
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(__("Supplier Quotation"), function(){ frm.trigger("make_suppplier_quotation") },
+				__("Make"));
+			frm.page.set_inner_btn_group_as_primary(__("Make"));
+		}
 	},
-	
-	make_suppplier_quotation: function() {
+
+	make_suppplier_quotation: function(frm){
+		var doc = frm.doc;
 		var dialog = new frappe.ui.Dialog({
 			title: __("For Supplier"),
 			fields: [
@@ -33,13 +37,13 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 					"get_query": function () {
 						return {
 							query:"erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier",
-							filters: {'parent': cur_frm.doc.name}
+							filters: {'parent': doc.name}
 						}
 					}, "reqd": 1 },
 				{"fieldtype": "Button", "label": __("Make Supplier Quotation"), "fieldname": "make_supplier_quotation", "cssClass": "btn-primary"},
 			]
 		});
-		
+
 		dialog.fields_dict.make_supplier_quotation.$input.click(function(){
 			args = dialog.get_values();
 			if(!args) return;
@@ -48,7 +52,7 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 				type: "GET",
 				method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation",
 				args: {
-					"source_name": cur_frm.doc.name,
+					"source_name": doc.name,
 					"for_supplier": args.supplier
 				},
 				freeze: true,
@@ -62,8 +66,22 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 		});
 		dialog.show()
 	}
+})
 
+erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.extend({
+	refresh: function() {
+		this._super();
+	},
+
+	calculate_taxes_and_totals: function() {
+		return;
+	},
+
+	tc_name: function() {
+		this.get_terms();
+	}
 });
+
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.RequestforQuotationController({frm: cur_frm}));

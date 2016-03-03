@@ -32,6 +32,9 @@ def get_notification_config():
 				"status": ("not in", ("Stopped",)),
 				"per_ordered": ("<", 100)
 			},
+			"Request for Quotation": {
+				"docstatus": 0
+			},
 			"Purchase Order": {
 				"status": ("not in", ("Completed", "Closed")),
 				"docstatus": ("<", 2)
