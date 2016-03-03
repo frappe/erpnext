@@ -166,6 +166,9 @@ def validate_recurring_document(doc):
 	if doc.is_recurring:
 		validate_notification_email_id(doc)
 
+		if not doc.recurring_id:
+			doc.recurring_id = doc.name
+
 		if not doc.recurring_type:
 			msgprint(_("Please select {0}").format(doc.meta.get_label("recurring_type")),
 			raise_exception=1)
@@ -176,9 +179,6 @@ def validate_recurring_document(doc):
 #
 def convert_to_recurring(doc, posting_date):
     if doc.is_recurring:
-        if not doc.recurring_id:
-            frappe.db.set(doc, "recurring_id", doc.name)
-
         set_next_date(doc, posting_date)
 
     elif doc.recurring_id:

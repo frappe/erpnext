@@ -839,6 +839,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	is_recurring: function() {
 		// set default values for recurring documents
+		if(this.frm.doc.is_recurring && this.frm.doc.__islocal) {
+			frappe.msgprint(__("Please set recurring after saving"));
+			this.frm.set_value('is_recurring', 0);
+			return;
+		}
+
 		if(!this.frm.doc.recurring_id) {
 			this.frm.set_value('recurring_id', this.frm.doc.name);
 		}
