@@ -2,6 +2,9 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Customer", {
+	before_load: function(frm) {
+		frappe.setup_language_field(frm);
+	},
 	refresh: function(frm) {
 		frm.cscript.setup_dashboard(frm.doc);
 

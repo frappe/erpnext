@@ -7,7 +7,7 @@ app_publisher = "Frappe Technologies Pvt. Ltd."
 app_description = """ERP made simple"""
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "6.23.7"
+app_version = "6.24.0"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
@@ -40,7 +40,9 @@ email_append_to = ["Job Applicant", "Opportunity", "Issue"]
 
 calendars = ["Task", "Production Order", "Time Log", "Leave Application", "Sales Order", "Holiday List"]
 
-website_generators = ["Item Group", "Item", "Sales Partner"]
+fixtures = ["Web Form"]
+
+website_generators = ["Item Group", "Item", "Sales Partner", "Job Opening"]
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
@@ -68,7 +70,8 @@ website_route_rules = [
 			"doctype": "Delivery Note",
 			"parents": [{"title": _("Shipments"), "name": "shipments"}]
 		}
-	}
+	},
+	{"from_route": "/jobs", "to_route": "Job Opening"},
 ]
 
 has_website_permission = {

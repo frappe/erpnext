@@ -211,25 +211,24 @@ class update_entries_after(object):
 		if incoming_rate < 0:
 			# wrong incoming rate
 			incoming_rate = self.valuation_rate
+			
+		stock_value_change = 0
+		if incoming_rate:
+			stock_value_change = actual_qty * incoming_rate
+		elif actual_qty < 0:
+			# In case of delivery/stock issue, get average purchase rate
+			# of serial nos of current entry
+			stock_value_change = -1 * flt(frappe.db.sql("""select sum(purchase_rate)
+				from `tabSerial No` where name in (%s)""" % (", ".join(["%s"]*len(serial_no))),
+				tuple(serial_no))[0][0])
 
-		elif incoming_rate == 0:
-			if flt(sle.actual_qty) < 0:
-				# In case of delivery/stock issue, get average purchase rate
-				# of serial nos of current entry
-				incoming_rate = flt(frappe.db.sql("""select avg(purchase_rate)
-					from `tabSerial No` where name in (%s)""" % (", ".join(["%s"]*len(serial_no))),
-					tuple(serial_no))[0][0])
-
-		if incoming_rate and not self.valuation_rate:
-			self.valuation_rate = incoming_rate
-		else:
-			new_stock_qty = self.qty_after_transaction + actual_qty
-			if new_stock_qty > 0:
-				new_stock_value = self.qty_after_transaction * self.valuation_rate + actual_qty * incoming_rate
-				if new_stock_value > 0:
-					# calculate new valuation rate only if stock value is positive
-					# else it remains the same as that of previous entry
-					self.valuation_rate = new_stock_value / new_stock_qty
+		new_stock_qty = self.qty_after_transaction + actual_qty
+		if new_stock_qty > 0:
+			new_stock_value = (self.qty_after_transaction * self.valuation_rate) + stock_value_change
+			if new_stock_value > 0:
+				# calculate new valuation rate only if stock value is positive
+				# else it remains the same as that of previous entry
+				self.valuation_rate = new_stock_value / new_stock_qty
 
 	def get_moving_average_values(self, sle):
 		actual_qty = flt(sle.actual_qty)
