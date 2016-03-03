@@ -3,13 +3,10 @@ import frappe
 import frappe.utils
 import frappe.defaults
 
-from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
-	get_first_day, get_last_day, comma_and, split_emails
-from frappe.model.naming import make_autoname
+from frappe.utils import cint, cstr, getdate, nowdate, \
+	get_first_day, get_last_day, split_emails
 
 from frappe import _, msgprint, throw
-from erpnext.accounts.party import get_party_account, get_due_date, get_party_details
-from frappe.model.mapper import get_mapped_doc
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 date_field_map = {
@@ -166,7 +163,7 @@ def validate_recurring_document(doc):
 	if doc.is_recurring:
 		validate_notification_email_id(doc)
 
-		if not doc.recurring_id:
+		if not doc.recurring_id and not doc.is_new():
 			doc.recurring_id = doc.name
 
 		if not doc.recurring_type:
