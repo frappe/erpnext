@@ -72,7 +72,6 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 		frappe.throw(exception_message)
 
 def make_new_document(reference_doc, date_field, posting_date):
-	from erpnext.accounts.utils import get_fiscal_year
 	new_document = frappe.copy_doc(reference_doc, ignore_no_copy=True)
 	mcount = month_map[reference_doc.recurring_type]
 
@@ -90,8 +89,7 @@ def make_new_document(reference_doc, date_field, posting_date):
 		date_field: posting_date,
 		"from_date": from_date,
 		"to_date": to_date,
-		"fiscal_year": get_fiscal_year(posting_date)[0],
-        	"next_date": get_next_date(from_date, mcount,cint(reference_doc.repeat_on_day_of_month))
+        "next_date": get_next_date(from_date, mcount,cint(reference_doc.repeat_on_day_of_month))
 	})
 
 	# copy document fields
