@@ -34,7 +34,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 							source_doctype: "Sales Order",
 							get_query_filters: {
 								docstatus: 1,
-								status: ["not in", ["Stopped", "Closed"]],
+								status: ["!=", "Closed"],
 								per_delivered: ["<", 99.99],
 								project_name: cur_frm.doc.project_name || undefined,
 								customer: cur_frm.doc.customer || undefined,
@@ -191,48 +191,6 @@ erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){
 
 cur_frm.cscript.print_without_amount = function(doc, cdt, cdn) {
 	erpnext.stock.delivery_note.set_print_hide(doc, cdt, cdn);
-}
-
-
-//****************** For print sales order no and date*************************
-cur_frm.pformat.sales_order_no= function(doc, cdt, cdn){
-	//function to make row of table
-
-	var make_row = function(title,val1, val2, bold){
-		var bstart = '<b>'; var bend = '</b>';
-
-		return '<tr><td style="width:39%;">'+(bold?bstart:'')+title+(bold?bend:'')+'</td>'
-		 +'<td style="width:61%;text-align:left;">'+val1+(val2?' ('+dateutil.str_to_user(val2)+')':'')+'</td>'
-		 +'</tr>'
-	}
-
-	out ='';
-
-	var cl = doc.items || [];
-
-	// outer table
-	var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 50%"></td><td>';
-
-	// main table
-	out +='<table class="noborder" style="width:100%">';
-
-	// add rows
-	if(cl.length){
-		prevdoc_list = new Array();
-		for(var i=0;i<cl.length;i++){
-			if(cl[i].against_sales_order && prevdoc_list.indexOf(cl[i].against_sales_order) == -1) {
-				prevdoc_list.push(cl[i].against_sales_order);
-				if(prevdoc_list.length ==1)
-					out += make_row("Sales Order", cl[i].against_sales_order, null, 0);
-				else
-					out += make_row('', cl[i].against_sales_order, null,0);
-			}
-		}
-	}
-
-	out +='</table></td></tr></table></div>';
-
-	return out;
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {

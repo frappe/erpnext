@@ -88,10 +88,9 @@ class TimeLog(Document):
 		existing = frappe.db.sql("""select name, from_time, to_time from `tabTime Log`
 			where `{0}`=%(val)s and
 			(
-				(from_time > %(from_time)s and from_time < %(to_time)s) or
-				(to_time > %(from_time)s and to_time < %(to_time)s) or
-				(%(from_time)s > from_time and %(from_time)s < to_time) or
-				(%(from_time)s = from_time and %(to_time)s = to_time))
+				(%(from_time)s > from_time and %(from_time)s < to_time) or 
+				(%(to_time)s > from_time and %(to_time)s < to_time) or 
+				(%(from_time)s <= from_time and %(to_time)s >= to_time))
 			and name!=%(name)s
 			and docstatus < 2""".format(fieldname),
 			{

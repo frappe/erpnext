@@ -16,7 +16,8 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	website = frappe._dict(
 		condition_field = "show_in_website",
 		template = "templates/generators/item_group.html",
-		parent_website_route_field = "parent_item_group"
+		parent_website_route_field = "parent_item_group",
+		no_cache = 1
 	)
 
 	def autoname(self):
@@ -52,8 +53,11 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			frappe.throw(frappe._("An item exists with same name ({0}), please change the item group name or rename the item").format(self.name))
 
 	def get_context(self, context):
+		start = int(frappe.form_dict.start or 0)
+		if start < 0:
+			start = 0
 		context.update({
-			"items": get_product_list_for_group(product_group = self.name, limit=100),
+			"items": get_product_list_for_group(product_group = self.name, start=start, limit=24),
 			"parent_groups": get_parent_item_groups(self.name),
 			"title": self.name
 		})
@@ -63,6 +67,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 		return context
 
+@frappe.whitelist(allow_guest=True)
 def get_product_list_for_group(product_group=None, start=0, limit=10):
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(product_group)])
 

@@ -105,11 +105,11 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 			if acc.account_currency == frappe.db.get_value("Company", acc.company, "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account), ))
-
+			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+	
 	if party_type and party:
 		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
-			(frappe.db.escape(party_type), frappe.db.escape(party)))
+			(frappe.db.escape(party_type), frappe.db.escape(party, percent=False)))
 
 	if account or (party_type and party):
 		if in_account_currency:
@@ -477,3 +477,15 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		})
 
 	return outstanding_invoices
+
+
+def get_account(account_type=None, root_type=None, is_group=None, account_currency=None, company=None):
+	"""return account based on matching conditions"""
+	return frappe.db.get_value("Account", {
+		"account_type": account_type or '',
+		"root_type": root_type or '',
+		"is_group": is_group or 0,
+		"account_currency": account_currency or frappe.defaults.get_defaults().currency,
+		"company": company or frappe.defaults.get_defaults().company
+	}, "name")
+	

@@ -42,6 +42,7 @@ This field will allow selecting document id, based on value selected in the Doct
 <div class="well">
 **Customizing options in the Doctype Link field**
 
-Bydefault, Docytpe link field will provide all the forms/doctypes for selection. If you wish this field to show certain specific doctypes in the search result, you will need to write Custom Script for it.</div>
+By default, Docytpe link field will provide all the forms/doctypes for selection. If you wish this field to show certain specific doctypes in the search result, you will need to write Custom Script for it.
+</div>
 
 <!-- markdown -->

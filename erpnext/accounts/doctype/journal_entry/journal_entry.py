@@ -203,7 +203,7 @@ class JournalEntry(AccountsController):
 		self.validate_invoices()
 
 	def validate_orders(self):
-		"""Validate totals, stopped and docstatus for orders"""
+		"""Validate totals, closed and docstatus for orders"""
 		for reference_name, total in self.reference_totals.iteritems():
 			reference_type = self.reference_types[reference_name]
 			account = self.reference_accounts[reference_name]
@@ -217,8 +217,8 @@ class JournalEntry(AccountsController):
 				if flt(order.per_billed) >= 100:
 					frappe.throw(_("{0} {1} is fully billed").format(reference_type, reference_name))
 
-				if cstr(order.status) == "Stopped":
-					frappe.throw(_("{0} {1} is stopped").format(reference_type, reference_name))
+				if cstr(order.status) == "Closed":
+					frappe.throw(_("{0} {1} is closed").format(reference_type, reference_name))
 
 				account_currency = get_account_currency(account)
 				if account_currency == self.company_currency:
@@ -356,18 +356,20 @@ class JournalEntry(AccountsController):
 	def set_print_format_fields(self):
 		total_amount = 0.0
 		bank_account_currency = None
-		self.pay_to_recd_from = None
+		pay_to_recd_from = None
 		for d in self.get('accounts'):
 			if d.party_type and d.party:
-				if not self.pay_to_recd_from:
-					self.pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
+				if not pay_to_recd_from:
+					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
 
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
 				total_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				bank_account_currency = d.account_currency
 
-		if not self.pay_to_recd_from:
+		if pay_to_recd_from:
+			self.pay_to_recd_from = pay_to_recd_from
+		else:
 			total_amount = 0
 
 		self.set_total_amount(total_amount, bank_account_currency)
@@ -549,7 +551,7 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None, a
 		}
 
 @frappe.whitelist()
-def get_payment_entry_against_order(dt, dn, amount=None, journal_entry=False, bank_account=None):
+def get_payment_entry_against_order(dt, dn, amount=None, debit_in_account_currency=None, journal_entry=False, bank_account=None):
 	ref_doc = frappe.get_doc(dt, dn)
 
 	if flt(ref_doc.per_billed, 2) > 0:
@@ -580,6 +582,7 @@ def get_payment_entry_against_order(dt, dn, amount=None, journal_entry=False, ba
 		"amount_field_party": amount_field_party,
 		"amount_field_bank": amount_field_bank,
 		"amount": amount,
+		"debit_in_account_currency": debit_in_account_currency,
 		"remarks": 'Advance Payment received against {0} {1}'.format(dt, dn),
 		"is_advance": "Yes",
 		"bank_account": bank_account,
@@ -587,7 +590,7 @@ def get_payment_entry_against_order(dt, dn, amount=None, journal_entry=False, ba
 	})
 
 @frappe.whitelist()
-def get_payment_entry_against_invoice(dt, dn, amount=None, journal_entry=False, bank_account=None):
+def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_currency=None, journal_entry=False, bank_account=None):
 	ref_doc = frappe.get_doc(dt, dn)
 	if dt == "Sales Invoice":
 		party_type = "Customer"
@@ -612,6 +615,7 @@ def get_payment_entry_against_invoice(dt, dn, amount=None, journal_entry=False, 
 		"amount_field_party": amount_field_party,
 		"amount_field_bank": amount_field_bank,
 		"amount": amount if amount else abs(ref_doc.outstanding_amount),
+		"debit_in_account_currency": debit_in_account_currency,
 		"remarks": 'Payment received against {0} {1}. {2}'.format(dt, dn, ref_doc.remarks),
 		"is_advance": "No",
 		"bank_account": bank_account,
@@ -660,10 +664,12 @@ def get_payment_entry(ref_doc, args):
 
 	bank_row.cost_center = cost_center
 
+	amount = args.get("debit_in_account_currency") or args.get("amount")
+	
 	if bank_row.account_currency == args.get("party_account_currency"):
-		bank_row.set(args.get("amount_field_bank"), args.get("amount"))
+		bank_row.set(args.get("amount_field_bank"), amount)
 	else:
-		bank_row.set(args.get("amount_field_bank"), args.get("amount") * exchange_rate)
+		bank_row.set(args.get("amount_field_bank"), amount * exchange_rate)
 
 	# set multi currency check
 	if party_row.account_currency != ref_doc.company_currency \

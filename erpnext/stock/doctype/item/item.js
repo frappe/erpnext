@@ -72,8 +72,6 @@ frappe.ui.form.on("Item", {
 				(frm.doc.__onload && frm.doc.__onload.sle_exists=="exists") ? false : true);
 		}
 
-		erpnext.item.toggle_reqd(frm);
-
 		erpnext.item.toggle_attributes(frm);
 	},
 
@@ -102,7 +100,6 @@ frappe.ui.form.on("Item", {
 	},
 
 	is_stock_item: function(frm) {
-		erpnext.item.toggle_reqd(frm);
 		if(frm.doc.is_pro_applicable && !frm.doc.is_stock_item)
 			frm.set_value("is_pro_applicable", 0);
 	},
@@ -178,10 +175,6 @@ $.extend(erpnext.item, {
 			return { query: "erpnext.controllers.queries.supplier_query" }
 		}
 
-	},
-
-	toggle_reqd: function(frm) {
-		frm.toggle_reqd("default_warehouse", frm.doc.is_stock_item);
 	},
 
 	make_dashboard: function(frm) {

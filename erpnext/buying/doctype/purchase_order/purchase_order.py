@@ -39,7 +39,7 @@ class PurchaseOrder(BuyingController):
 		self.set_status()
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
-		self.check_for_stopped_or_closed_status(pc_obj)
+		self.check_for_closed_status(pc_obj)
 
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", ["qty", "required_qty"])
@@ -113,13 +113,13 @@ class PurchaseOrder(BuyingController):
 						d.base_price_list_rate = d.base_rate = d.price_list_rate \
 							= d.rate = item_last_purchase_rate
 
-	# Check for Stopped status
-	def check_for_stopped_or_closed_status(self, pc_obj):
+	# Check for Closed status
+	def check_for_closed_status(self, pc_obj):
 		check_list =[]
 		for d in self.get('items'):
 			if d.meta.get_field('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
 				check_list.append(d.prevdoc_docname)
-				pc_obj.check_for_stopped_or_closed_status( d.prevdoc_doctype, d.prevdoc_docname)
+				pc_obj.check_for_closed_status( d.prevdoc_doctype, d.prevdoc_docname)
 
 	def update_requested_qty(self):
 		material_request_map = {}
@@ -145,7 +145,6 @@ class PurchaseOrder(BuyingController):
 				and frappe.db.get_value("Item", d.item_code, "is_stock_item") \
 				and d.warehouse and not d.delivered_by_supplier:
 					item_wh_list.append([d.item_code, d.warehouse])
-
 		for item_code, warehouse in item_wh_list:
 			update_bin_qty(item_code, warehouse, {
 				"ordered_qty": get_ordered_qty(item_code, warehouse)
@@ -193,7 +192,7 @@ class PurchaseOrder(BuyingController):
 			self.update_delivered_qty_in_sales_order()
 
 		pc_obj = frappe.get_doc('Purchase Common')
-		self.check_for_stopped_or_closed_status(pc_obj)
+		self.check_for_closed_status(pc_obj)
 
 		# Check if Purchase Receipt has been submitted against current Purchase Order
 		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.name, detail_doctype = 'Purchase Receipt Item')
@@ -253,7 +252,7 @@ class PurchaseOrder(BuyingController):
 				item.received_qty = item.qty
 
 @frappe.whitelist()
-def stop_or_unstop_purchase_orders(names, status):
+def close_or_unclose_purchase_orders(names, status):
 	if not frappe.has_permission("Purchase Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -261,11 +260,11 @@ def stop_or_unstop_purchase_orders(names, status):
 	for name in names:
 		po = frappe.get_doc("Purchase Order", name)
 		if po.docstatus == 1:
-			if status in ("Stopped", "Closed"):
-				if po.status not in ("Stopped", "Cancelled", "Closed") and (po.per_received < 100 or po.per_billed < 100):
+			if status == "Closed":
+				if po.status not in ( "Cancelled", "Closed") and (po.per_received < 100 or po.per_billed < 100):
 					po.update_status(status)
 			else:
-				if po.status in ("Stopped", "Closed"):
+				if po.status == "Closed":
 					po.update_status("Draft")
 
 	frappe.local.message_log = []

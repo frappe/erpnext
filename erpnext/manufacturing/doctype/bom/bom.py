@@ -9,10 +9,15 @@ from frappe.model.document import Document
 
 from operator import itemgetter
 
+form_grid_templates = {
+	"items": "templates/form_grid/item_grid.html"
+}
+
 class BOM(Document):
 	def autoname(self):
 		last_name = frappe.db.sql("""select max(name) from `tabBOM`
-			where name like "BOM/{0}/%%" and item=%s""".format(frappe.db.escape(self.item)), self.item)
+			where name like "BOM/{0}/%%" and item=%s
+		""".format(frappe.db.escape(self.item, percent=False)), self.item)
 		if last_name:
 			idx = cint(cstr(last_name[0][0]).split('/')[-1].split('-')[0]) + 1
 		else:

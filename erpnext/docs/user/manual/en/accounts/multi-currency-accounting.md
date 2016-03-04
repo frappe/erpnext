@@ -27,7 +27,7 @@ In case of multi-company setup, accounting currency of Party must be same for al
 
 In Sales Invoice, transaction currency must be same as accounting currency of Customer if Customer's accounting currency is other than Company Currency. Otherwise, you can select any currency in Invoice. On selection of Customer, system will fetch Receivable account from Customer / Company. The currency of receivable account must be same as Customer's accounting currency.
 
-Now, in POS, Paid Amount will be enetered in transaction currency, instead of earlier Company Currency. Write Off Amount will also be entered in transaction currency.
+Now, in POS, Paid Amount will be entered in transaction currency, instead of earlier Company Currency. Write Off Amount will also be entered in transaction currency.
 
 Outstanding Amount and Advance Amount will always be calculated and shown in Customer's Account Currency.
 

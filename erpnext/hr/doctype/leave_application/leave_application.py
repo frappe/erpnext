@@ -62,7 +62,7 @@ class LeaveApplication(Document):
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
 			frappe.throw(_("To date cannot be before from date"))
-		
+
 		if not is_lwp(self.leave_type):
 			self.validate_dates_acorss_allocation()
 			self.validate_back_dated_application()
@@ -118,7 +118,7 @@ class LeaveApplication(Document):
 				frappe.throw(_("The day(s) on which you are applying for leave are holidays. You need not apply for leave."))
 
 			if not is_lwp(self.leave_type):
-				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date, 
+				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date,
 					consider_all_leaves_in_the_allocation_period=True)
 
 				if self.status != "Rejected" and self.leave_balance < self.total_leave_days:
@@ -145,28 +145,31 @@ class LeaveApplication(Document):
 			}, as_dict = 1):
 
 			if d['total_leave_days']==0.5 and cint(self.half_day)==1:
-                    		sum_leave_days=frappe.db.sql("""select sum(total_leave_days) from `tabLeave Application`
-			                        where employee = %(employee)s
-			                        and docstatus < 2
-			                        and status in ("Open", "Approved")
-			                        and (from_date between %(from_date)s and %(to_date)s
-				                    or to_date between %(from_date)s and %(to_date)s
-				                    or %(from_date)s between from_date and to_date)
-			                        and name != %(name)s""", {
-				                        "employee": self.employee,
-				                        "from_date": self.from_date,
-				                        "to_date": self.to_date,
-				                        "name": self.name
-			                            })[0][0]
-                        	if sum_leave_days==1:
-                                	frappe.msgprint(_("Employee {0} has already applied this day").format(self.employee))
-			        	frappe.throw('<a href="#Form/Leave Application/{0}">{0}</a>'.format(d["name"]), OverlapError)
-                    	else:
-			        frappe.msgprint(_("Employee {0} has already applied for {1} between {2} and {3}")
-					.format(self.employee, cstr(d['leave_type']),formatdate(d['from_date']), formatdate(d['to_date'])))
+				sum_leave_days = self.get_total_leaves_on_half_day()
+				if sum_leave_days==1:
+					self.throw_overlap_error(d)
+			else:
+				self.throw_overlap_error(d)
 
-				frappe.throw("""Exising Application: <a href="#Form/Leave Application/{0}">{0}</a>""".format(d["name"]), OverlapError)
+	def throw_overlap_error(self, d):
+		msg = _("Employee {0} has already applied for {1} between {2} and {3}").format(self.employee,
+			d['leave_type'], formatdate(d['from_date']), formatdate(d['to_date'])) \
+			+ """ <br><b><a href="#Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
+		frappe.throw(msg, OverlapError)
 
+	def get_total_leaves_on_half_day(self):
+		return frappe.db.sql("""select sum(total_leave_days) from `tabLeave Application`
+			where employee = %(employee)s
+			and docstatus < 2
+			and status in ("Open", "Approved")
+			and from_date = %(from_date)s
+			and to_date = %(to_date)s
+			and name != %(name)s""", {
+				"employee": self.employee,
+				"from_date": self.from_date,
+				"to_date": self.to_date,
+				"name": self.name
+			})[0][0]
 
 	def validate_max_days(self):
 		max_days = frappe.db.get_value("Leave Type", self.leave_type, "max_days_allowed")
@@ -259,13 +262,13 @@ def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day=
 	return number_of_days
 
 @frappe.whitelist()
-def get_leave_balance_on(employee, leave_type, date, allocation_records=None, 
+def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
 		consider_all_leaves_in_the_allocation_period=False):
 	if allocation_records == None:
 		allocation_records = get_leave_allocation_records(date, employee).get(employee, frappe._dict())
 
 	allocation = allocation_records.get(leave_type, frappe._dict())
-	
+
 	if consider_all_leaves_in_the_allocation_period:
 		date = allocation.to_date
 	leaves_taken = get_approved_leaves_for_period(employee, leave_type, allocation.from_date, date)
