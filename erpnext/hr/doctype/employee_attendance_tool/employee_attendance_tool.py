@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import frappe
-import copy
 import json
 from frappe.model.document import Document
 
