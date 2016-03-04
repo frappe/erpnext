@@ -55,7 +55,6 @@ class SalesInvoice(SellingController):
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.check_close_sales_order("sales_order")
 		self.validate_debit_to_acc()
-		self.validate_fixed_asset_account()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		self.validate_advance_jv("Sales Order")
 		self.add_remarks()
@@ -308,14 +307,6 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Debit To account must be a Receivable account"))
 
 		self.party_account_currency = account.account_currency
-
-	def validate_fixed_asset_account(self):
-		"""Validate Fixed Asset and whether Income Account Entered Exists"""
-		for d in self.get('items'):
-			is_asset_item = frappe.db.get_value("Item", d.item_code, "is_asset_item")
-			account_type = frappe.db.get_value("Account", d.income_account, "account_type")
-			if is_asset_item == 1 and account_type != 'Fixed Asset':
-				msgprint(_("Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item").format(d.income_account, d.item_code), raise_exception=True)
 
 	def validate_with_previous_doc(self):
 		super(SalesInvoice, self).validate_with_previous_doc({

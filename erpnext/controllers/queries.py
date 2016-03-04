@@ -341,3 +341,27 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				'txt': "%%%s%%" % frappe.db.escape(txt),
 				'company': filters.get("company", "")
 			})
+
+
+@frappe.whitelist()
+def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
+	from erpnext.controllers.queries import get_match_cond
+	
+	if not filters: filters = {}
+
+	condition = ""
+	if filters.get("company"):
+		condition += "and tabAccount.company = %(company)s"
+		
+	return frappe.db.sql("""select tabAccount.name from `tabAccount`
+		where (tabAccount.report_type = "Profit and Loss"
+				or tabAccount.account_type in ("Expense Account", "Fixed Asset", "Temporary"))
+			and tabAccount.is_group=0
+			and tabAccount.docstatus!=2
+			and tabAccount.{key} LIKE %(txt)s
+			{condition} {match_condition}"""
+		.format(condition=condition, key=frappe.db.escape(searchfield), 
+			match_condition=get_match_cond(doctype)), {
+			'company': filters['company'], 
+			'txt': "%%%s%%" % frappe.db.escape(txt)
+		})

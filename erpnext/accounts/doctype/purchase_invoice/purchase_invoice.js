@@ -196,7 +196,7 @@ cur_frm.fields_dict['credit_to'].get_query = function(doc) {
 
 // Get Print Heading
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
-return{
+	return {
 		filters:[
 			['Print Heading', 'docstatus', '!=', 2]
 		]
@@ -204,8 +204,8 @@ return{
 }
 
 cur_frm.set_query("expense_account", "items", function(doc) {
-	return{
-		query: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.get_expense_account",
+	return {
+		query: "erpnext.controllers.queries.get_expense_account",
 		filters: {'company': doc.company}
 	}
 });
