@@ -86,6 +86,54 @@ class TestPricingRule(unittest.TestCase):
 
 		frappe.db.sql("delete from `tabPricing Rule`")
 
+	def test_pricing_rule_for_margin(self):
+		from erpnext.stock.get_item_details import get_item_details
+		from frappe import MandatoryError
+
+		frappe.db.sql("delete from `tabPricing Rule`")
+
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"item_code": "_Test FG Item 2",
+			"selling": 1,
+			"price_or_discount": "Discount Percentage",
+			"price": 0,
+			"margin_type": "Percentage",
+			"margin_rate_or_amount": 10,
+			"company": "_Test Company"
+		}
+		frappe.get_doc(test_record.copy()).insert()
+		
+		item_price = frappe.get_doc({
+			"doctype": "Item Price",
+			"price_list": "_Test Price List 2",
+			"item_code": "_Test FG Item 2",
+			"price_list_rate": 100
+		})
+		
+		item_price.insert(ignore_permissions=True)
+
+		args = frappe._dict({
+			"item_code": "_Test FG Item 2",
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "_Test Currency",
+			"doctype": "Sales Order",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"order_type": "Sales",
+			"customer": "_Test Customer",
+			"name": None
+		})
+		details = get_item_details(args)
+		self.assertEquals(details.get("margin_type"), "Percentage")
+		self.assertEquals(details.get("margin_rate_or_amount"), 10)
+
+		frappe.db.sql("delete from `tabPricing Rule`")
+
 	def test_pricing_rule_for_variants(self):
 		from erpnext.stock.get_item_details import get_item_details
 		from frappe import MandatoryError

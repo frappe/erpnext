@@ -86,69 +86,7 @@ def get_item_details(args):
 		
 	get_gross_profit(out)
 
-	if args.document_type in ["Quotation Item", "Sales Order Item"]:
-		# calculate rate by appling discount to total_margin
-		if(args.total_margin):
-			out["rate"] = discount_on_total_margin(args.total_margin, out.discount_percentage);
-		elif not args.type:
-			data = set_margin_fields(out.pricing_rule, out.price_list_rate)
-			out["rate"] = discount_on_total_margin(data.get("total_margin"), out.discount_percentage)
-			out.update(data)
-
 	return out
-
-def set_margin_fields(pricing_rule=None, price_list_rate=None):
-	# margin_details dict will hold the all data variable regrading margin
-	margin_details = frappe._dict({
-		"type":"",
-		"rate_or_amount": 0.0,
-		"total_margin": 0.0
-	})
-
-	if pricing_rule and price_list_rate:
-		margin_details.update(get_margin_details(pricing_rule))
-		margin_details.update(calculate_total_margin(margin_details.get("type"),margin_details.get("rate_or_amount"), price_list_rate))
-
-	return margin_details
-
-def get_margin_details(pricing_rule):
-	"""
-		get the margin details from pricing_rule
-	"""
-	margin_details = frappe._dict({
-			"type":"",
-			"rate_or_amount":0.0,
-		})
-
-	records = frappe.db.get_values("Pricing Rule", pricing_rule, ["type", "rate"], as_dict=True)
-	
-	for record in records:
-		margin_details["type"] = record.get("type")
-		margin_details["rate_or_amount"] = record.get("rate")
-
-	return margin_details
-
-def calculate_total_margin(margin_type,rate_or_amount,price_list_rate):
-	"""
-		calculate margin amount as follows
-		if type is percentage then calculate percentage of price_list_rate
-	"""
-	default = frappe._dict({ "total_margin":0.0 })
-	if not margin_type:
-		return default
-	elif margin_type == "Amount":
-		default.total_margin = price_list_rate + rate_or_amount
-	else:
-		default.total_margin = price_list_rate + ( price_list_rate * ( rate_or_amount / 100 ) )
-	return default
-
-def discount_on_total_margin(total_margin, discount):
-	"""
-		calculate the rate by appling discount on total_margin if any
-	"""
-	if discount:
-		total_margin = total_margin - (total_margin * (discount / 100))
-	return total_margin
 
 def process_args(args):
 	if isinstance(args, basestring):
@@ -165,9 +103,6 @@ def process_args(args):
 		args.item_code = get_item_code(serial_no=args.serial_no)
 	
 	set_transaction_type(args)
-
-	set_transaction_type(args)
-
 	return args
 
 @frappe.whitelist()

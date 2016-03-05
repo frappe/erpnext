@@ -645,9 +645,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				});
 
 				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list
-				if (d.doctype == "Quotation Item" || d.doctype == "Sales Order Item"){
-					item_list[0]["type"] = d.type
-					item_list[0]["rate_or_amount"] = d.rate_or_amount
+				if (in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]), d.doctype){
+					item_list[0]["margin_type"] = d.margin_type
+					item_list[0]["margin_rate_or_amount"] = d.margin_rate_or_amount
 				}	
 			}
 		};

@@ -138,8 +138,8 @@ class AccountsController(TransactionBase):
 			for fieldname in self.meta.get_valid_columns():
 				parent_dict[fieldname] = self.get(fieldname)
 
-			if self.doctype in ["Quotation", "Sales Order"]:
-				document_type = "Quotation Item" if self.doctype == "Quotation" else "Sales Order Item"
+			if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+				document_type = "{} Item".format(self.doctype)
 				parent_dict.update({"document_type": document_type})
 
 			for item in self.get("items"):
@@ -171,9 +171,7 @@ class AccountsController(TransactionBase):
 
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
-						discount_percentage = ret.get("discount_percentage") if item.get("discount_percentage") == \
-							ret.get("discount_percentage") else item.get("discount_percentage")
-						item.set("discount_percentage", discount_percentage)
+						item.set("discount_percentage", ret.get("discount_percentage"))
 						if ret.get("pricing_rule_for") == "Price":
 							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
 
