@@ -14,7 +14,7 @@ class PackedItem(Document):
 	pass
 
 def get_product_bundle_items(item_code):
-	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom
+	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom, t1.description
 		from `tabProduct Bundle Item` t1, `tabProduct Bundle` t2
 		where t2.new_item_code=%s and t1.parent = t2.name""", item_code, as_dict=1)
 
@@ -27,14 +27,14 @@ def get_bin_qty(item, warehouse):
 		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
 	return det and det[0] or frappe._dict()
 
-def update_packing_list_item(doc, packing_item_code, qty, main_item_row):
+def update_packing_list_item(doc, packing_item_code, qty, main_item_row, description):
 	bin = get_bin_qty(packing_item_code, main_item_row.warehouse)
 	item = get_packing_item_details(packing_item_code)
 
 	# check if exists
 	exists = 0
 	for d in doc.get("packed_items"):
-		if d.parent_item == main_item_row.item_code and d.item_code == packing_item_code and d.parent_detail_docname == main_item_row.name:
+		if d.parent_item == main_item_row.item_code and d.item_code == packing_item_code and d.parent_detail_docname == main_item_row.name and d.description == description:
 			pi, exists = d, 1
 			break
 
@@ -50,6 +50,7 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row):
 	pi.qty = flt(qty)
 	pi.actual_qty = flt(bin.get("actual_qty"))
 	pi.projected_qty = flt(bin.get("projected_qty"))
+	pi.description = description
 	if not pi.warehouse:
 		pi.warehouse = main_item_row.warehouse
 	if not pi.batch_no:
@@ -66,7 +67,7 @@ def make_packing_list(doc):
 	for d in doc.get("items"):
 		if frappe.db.get_value("Product Bundle", {"new_item_code": d.item_code}):
 			for i in get_product_bundle_items(d.item_code):
-				update_packing_list_item(doc, i.item_code, flt(i.qty)*flt(d.qty), d)
+				update_packing_list_item(doc, i.item_code, flt(i.qty)*flt(d.qty), d, i.description)
 
 			if [d.item_code, d.name] not in parent_items:
 				parent_items.append([d.item_code, d.name])

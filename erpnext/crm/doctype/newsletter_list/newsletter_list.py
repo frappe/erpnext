@@ -67,9 +67,9 @@ def add_subscribers(name, email_list):
 	count = 0
 	for email in email_list:
 		email = email.strip()
-		validate_email_add(email, True)
+		valid = validate_email_add(email, False)
 
-		if email:
+		if valid:
 			if not frappe.db.get_value("Newsletter List Subscriber",
 				{"newsletter_list": name, "email": email}):
 				frappe.get_doc({
@@ -81,6 +81,8 @@ def add_subscribers(name, email_list):
 				count += 1
 			else:
 				pass
+		else:
+			frappe.msgprint(_("{0} is not a valid email id").format(email))
 
 	frappe.msgprint(_("{0} subscribers added").format(count))
 

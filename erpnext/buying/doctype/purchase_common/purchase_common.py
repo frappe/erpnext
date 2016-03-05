@@ -80,10 +80,10 @@ class PurchaseCommon(BuyingController):
 			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
 
 
-	def check_for_stopped_or_closed_status(self, doctype, docname):
+	def check_for_closed_status(self, doctype, docname):
 		status = frappe.db.get_value(doctype, docname, "status")
 		
-		if status in ("Stopped", "Closed"):
+		if status == "Closed":
 			frappe.throw(_("{0} {1} status is {2}").format(doctype, docname, status), frappe.InvalidStatusError)
 		
 	def check_docstatus(self, check, doctype, docname, detail_doctype = ''):

@@ -6,7 +6,8 @@ import frappe
 from frappe import _, throw
 from frappe.utils import flt, cint, add_days, cstr
 import json
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import (get_pricing_rule_for_item, set_transaction_type,
+	get_margin_details, calculate_total_margin, discount_on_total_margin)
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 
@@ -69,11 +70,11 @@ def get_item_details(args):
 	if args.get("is_subcontracted") == "Yes":
 		out.bom = get_default_bom(args.item_code)
 
-	if args.document_type in ["Quotation Item", "Sales Order Item"]:
+	if args.document_type in ["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]:
 		# calculate rate by appling discount to total_margin
 		if(args.total_margin):
 			out["rate"] = discount_on_total_margin(args.total_margin, out.discount_percentage);
-		elif not args.type:
+		elif not args.margin_type:
 			data = set_margin_fields(out.pricing_rule, out.price_list_rate)
 			out["rate"] = discount_on_total_margin(data.get("total_margin"), out.discount_percentage)
 			out.update(data)
@@ -93,45 +94,6 @@ def set_margin_fields(pricing_rule=None, price_list_rate=None):
 		margin_details.update(calculate_total_margin(margin_details.get("margin_type"),margin_details.get("margin_rate_or_amount"), price_list_rate))
 
 	return margin_details
-
-def get_margin_details(pricing_rule):
-	"""
-		get the margin details from pricing_rule
-	"""
-	margin_details = frappe._dict({
-			"margin_type":"",
-			"margin_rate_or_amount":0.0,
-		})
-
-	records = frappe.db.get_values("Pricing Rule", pricing_rule, ["margin_type", "margin_rate_or_amount"], as_dict=True)
-	
-	for record in records:
-		margin_details["margin_type"] = record.get("margin_type")
-		margin_details["margin_rate_or_amount"] = record.get("margin_rate_or_amount")
-
-	return margin_details
-
-def calculate_total_margin(margin_type,margin_rate_or_amount,price_list_rate):
-	"""
-		calculate margin amount as follows
-		if type is percentage then calculate percentage of price_list_rate
-	"""
-	default = frappe._dict({ "total_margin":0.0 })
-	if not margin_type:
-		return default
-	elif margin_type == "Amount":
-		default.total_margin = price_list_rate + margin_rate_or_amount
-	else:
-		default.total_margin = price_list_rate + ( price_list_rate * ( margin_rate_or_amount / 100 ) )
-	return default
-
-def discount_on_total_margin(total_margin, discount):
-	"""
-		calculate the rate by appling discount on total_margin if any
-	"""
-	if discount:
-		total_margin = total_margin - (total_margin * (discount / 100))
-	return total_margin
 
 def process_args(args):
 	if isinstance(args, basestring):
@@ -226,11 +188,12 @@ def get_basic_details(args, item):
 		"net_amount": 0.0,
 		"discount_percentage": 0.0,
 		"supplier": item.default_supplier,
-		"delivered_by_supplier": item.delivered_by_supplier,
+		"delivered_by_supplier": item.delivered_by_supplier
 	})
 
 	# if default specified in item is for another company, fetch from company
-	for d in [["Account", "income_account", "default_income_account"], ["Account", "expense_account", "default_expense_account"],
+	for d in [["Account", "income_account", "default_income_account"], 
+		["Account", "expense_account", "default_expense_account"], 
 		["Cost Center", "cost_center", "cost_center"], ["Warehouse", "warehouse", ""]]:
 			company = frappe.db.get_value(d[0], out.get(d[1]), "company")
 			if not out[d[1]] or (company and args.company != company):
@@ -258,7 +221,7 @@ def get_default_cost_center(args, item):
 		or args.get("cost_center"))
 
 def get_price_list_rate(args, item_doc, out):
-	meta = frappe.get_meta(args.doctype)
+	meta = frappe.get_meta(args.parenttype or args.doctype)
 
 	if meta.get_field("currency"):
 		validate_price_list(args)

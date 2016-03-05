@@ -1,6 +1,4 @@
-Expense Claim is made when Employee’s make expenses out of their pocket on
-behalf of the company. For example, if they take a customer out for lunch,
-they can make a request for reimbursement via the Expense Claim form.
+Expense Claim is made when Employee’s make expenses out of their pocket on behalf of the company. For example, if they take a customer out for lunch, they can make a request for reimbursement via the Expense Claim form.
 
 To make a new Expense Claim, go to:
 
@@ -13,16 +11,12 @@ Set the Employee ID, date and the list of expenses that are to be claimed and
 
 ### Approving Expenses
 
-The person making the claim must also set the id of the user who will
-“Approve” these expenses and set the “Assign To” to notify the user of the
-request Approve.
+Approver for the Expense Claim is selected by an Employee himself. Users to whom `Expense Approver` role is assigned will shown in the Expense Claim Approver field.
 
-If the Approver sees the “form”, she or he can update the “Approved Amounts”
-and click on “Approve”. To cancel the claim, they can click on the “Reject”
-button.
+After saving Expense Claim, Employee should [Assign document to Approver]({{docs_base_url}}/user/manual/en/using-eprnext/assignment.html). On assignment, approving user will also receive email notification. To automate email notification, you can also setup [Email Alert]({{docs_base_url}}/user/manual/en/setting-up/email/email-alerts.html).
 
-Comments can be added in the Comments section explaining why the claim was
-approved or rejected.
+Expense Claim Approver can update the “Sanctioned Amounts” against Claimed Amount of an Employee. If submitting, Approval Status should be submitted to Approved or Rejected. If Approved, then Expense Claim gets submitted. If rejected, then Expen
+Comments can be added in the Comments section explaining why the claim was approved or rejected.
 
 ### Booking the Expense and Reimbursement
 

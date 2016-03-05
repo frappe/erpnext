@@ -23,6 +23,10 @@ class BOMReplaceTool(Document):
 	def validate_bom(self):
 		if cstr(self.current_bom) == cstr(self.new_bom):
 			frappe.throw(_("Current BOM and New BOM can not be same"))
+			
+		if frappe.db.get_value("BOM", self.current_bom, "item") \
+			!= frappe.db.get_value("BOM", self.new_bom, "item"):
+				frappe.throw(_("The selected BOMs are not for the same item"))
 
 	def update_new_bom(self):
 		current_bom_unitcost = frappe.db.sql("""select total_cost/quantity

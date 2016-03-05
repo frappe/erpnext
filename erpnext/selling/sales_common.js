@@ -123,9 +123,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
 		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate
-		if((cdt == "Quotation Item" || cdt == "Sales Order Item") && item.total_margin){
+		if(in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]), cdt)
 			this.calculate_revised_margin_and_rate(item, doc,cdt, cdn);
-		}
 		else
 			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
 				precision("rate", item));
@@ -318,6 +317,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		// calculated the revised total margin and rate on margin rate changes
 		item = locals[cdt][cdn];
 		this.calculate_revised_margin_and_rate(item)
+		this.calculate_taxes_and_totals();
 		cur_frm.refresh_fields();
 	},
 
@@ -325,6 +325,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		// calculate the revised total margin and rate on margin type changes
 		item = locals[cdt][cdn];
 		this.calculate_revised_margin_and_rate(item, doc,cdt, cdn)
+		this.calculate_taxes_and_totals();
 		cur_frm.refresh_fields();
 	},
 

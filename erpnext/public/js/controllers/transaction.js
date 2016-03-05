@@ -271,7 +271,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				me.apply_pricing_rule();
 			}
 		}
-		
+
 		var set_party_account = function(set_pricing) {
 			if (in_list(["Sales Invoice", "Purchase Invoice"], me.frm.doc.doctype)) {
 				if(me.frm.doc.doctype=="Sales Invoice") {
@@ -281,25 +281,30 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					var party_type = "Supplier";
 					var party_account_field = 'credit_to';
 				}
-				
-				return frappe.call({
-					method: "erpnext.accounts.party.get_party_account",
-					args: {
-						company: me.frm.doc.company,
-						party_type: party_type,
-						party: me.frm.doc[frappe.model.scrub(party_type)]
-					},
-					callback: function(r) {
-						if(!r.exc && r.message) {
-							me.frm.set_value(party_account_field, r.message);
-							set_pricing();
+
+				var party = me.frm.doc[frappe.model.scrub(party_type)];
+				if(party) {
+					return frappe.call({
+						method: "erpnext.accounts.party.get_party_account",
+						args: {
+							company: me.frm.doc.company,
+							party_type: party_type,
+							party: party
+						},
+						callback: function(r) {
+							if(!r.exc && r.message) {
+								me.frm.set_value(party_account_field, r.message);
+								set_pricing();
+							}
 						}
-					}
-				});
+					});
+				} else {
+					set_pricing();
+				}
 			} else {
 				set_pricing();
 			}
-			
+
 		}
 
 		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
@@ -640,11 +645,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"item_group": d.item_group,
 					"brand": d.brand,
 					"qty": d.qty,
-					"discount_percentage": d.discount_percentage || 0
+					"discount_percentage": d.discount_percentage || 0,
+					"parenttype": d.parenttype,
+					"parent": d.parent
 				});
 
 				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list
-				if (d.doctype == "Quotation Item" || d.doctype == "Sales Order Item"){
+				if (in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]), cdt){
 					item_list[0]["margin_type"] = d.margin_type
 					item_list[0]["margin_rate_or_amount"] = d.margin_rate_or_amount
 				}	
@@ -840,6 +847,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	is_recurring: function() {
 		// set default values for recurring documents
+		if(this.frm.doc.is_recurring && this.frm.doc.__islocal) {
+			frappe.msgprint(__("Please set recurring after saving"));
+			this.frm.set_value('is_recurring', 0);
+			return;
+		}
+
+		if(!this.frm.doc.recurring_id) {
+			this.frm.set_value('recurring_id', this.frm.doc.name);
+		}
+
 		if(this.frm.doc.is_recurring) {
 			var owner_email = this.frm.doc.owner=="Administrator"
 				? frappe.user_info("Administrator").email
