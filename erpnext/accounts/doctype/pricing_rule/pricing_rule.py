@@ -127,7 +127,7 @@ def get_pricing_rule_for_item(args):
 
 	if args.ignore_pricing_rule or not args.item_code:
 		# if ignore pricing rule then set the rate or amount field to zero
-		if item_details.doctype in ["Quotation Item", "Sales Order Item"]:
+		if item_details.doctype in ["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]:
 			item_details.update({
 				"margin_type":"",
 				"margin_rate_or_amount": 0.00
@@ -311,3 +311,43 @@ def set_transaction_type(args):
 		args.transaction_type = "selling"
 	else:
 		args.transaction_type = "buying"
+
+def get_margin_details(pricing_rule):
+	"""
+		get the margin details from pricing_rule
+	"""
+	margin_details = frappe._dict({
+			"margin_type":"",
+			"margin_rate_or_amount":0.0,
+		})
+
+	records = frappe.db.get_values("Pricing Rule", pricing_rule, 
+					["margin_type", "margin_rate_or_amount"], as_dict=True)
+	
+	for record in records:
+		margin_details["margin_type"] = record.get("margin_type")
+		margin_details["margin_rate_or_amount"] = record.get("margin_rate_or_amount")
+
+	return margin_details
+
+def calculate_total_margin(margin_type,margin_rate_or_amount,price_list_rate):
+	"""
+		calculate margin amount as follows
+		if type is percentage then calculate percentage of price_list_rate
+	"""
+	default = frappe._dict({ "total_margin":0.0 })
+	if not margin_type:
+		return default
+	elif margin_type == "Amount":
+		default.total_margin = price_list_rate + margin_rate_or_amount
+	else:
+		default.total_margin = price_list_rate + ( price_list_rate * ( margin_rate_or_amount / 100 ) )
+	return default
+
+def discount_on_total_margin(total_margin, discount):
+	"""
+		calculate the rate by appling discount on total_margin if any
+	"""
+	if discount:
+		total_margin = total_margin - (total_margin * (discount / 100))
+	return total_margin
