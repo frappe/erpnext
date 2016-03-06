@@ -482,7 +482,7 @@ DocType: Sales Order,Billing and Delivery Status,Abrechnungs- und Lieferstatus
 DocType: Job Applicant,Resume Attachment,Resume-Anlage
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +58,Repeat Customers,Bestandskunden
 DocType: Leave Control Panel,Allocate,Zuweisen
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +633,Sales Return,Umsatzrendite
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +633,Sales Return,Rücklieferung
 DocType: Item,Delivered by Supplier (Drop Ship),Geliefert von Lieferant (Streckengeschäft)
 apps/erpnext/erpnext/config/hr.py +128,Salary components.,Gehaltskomponenten
 apps/erpnext/erpnext/config/crm.py +12,Database of potential customers.,Datenbank von potentiellen Kunden
