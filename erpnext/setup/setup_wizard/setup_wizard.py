@@ -19,7 +19,7 @@ def setup_complete(args=None):
 		frappe.throw(_("Setup Already Complete!!"))
 
 	install_fixtures.install(args.get("country"))
-	
+
 	create_fiscal_year_and_company(args)
 	create_users(args)
 	set_defaults(args)
@@ -63,12 +63,11 @@ def create_fiscal_year_and_company(args):
 		'year_end_date': args.get('fy_end_date'),
 		}).insert()
 		args["curr_fiscal_year"] = curr_fiscal_year
-		
+
 	# Company
-	if (args.get('company_name')):	
+	if (args.get('company_name')):
 		frappe.get_doc({
 			"doctype":"Company",
-			'domain': args.get("industry"),
 			'company_name':args.get('company_name').strip(),
 			'abbr':args.get('company_abbr'),
 			'default_currency':args.get('currency'),
@@ -79,7 +78,7 @@ def create_fiscal_year_and_company(args):
 
 		# Bank Account
 		create_bank_account(args)
-	
+
 def create_bank_account(args):
 	if args.get("bank_account"):
 		company_name = args.get('company_name').strip()
