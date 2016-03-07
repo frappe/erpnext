@@ -252,3 +252,4 @@ erpnext.patches.v6_21.rename_material_request_fields
 erpnext.patches.v6_23.update_stopped_status_to_closed
 erpnext.patches.v6_24.repost_valuation_rate_for_serialized_items
 erpnext.patches.v6_24.set_recurring_id
+erpnext.patches.v6_20x.set_compact_print
