@@ -124,17 +124,15 @@ erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
 	return true;
 }
 
-erpnext.utils.get_shipping_address = function(doc){
-	if(doc.doctype === "Purchase Order"){
-		frappe.call({
-			method: "erpnext.utilities.doctype.address.address.get_shipping_address",
-			args: {company: doc.company},
-			callback: function(r){
-				if(r.message){
-					doc.shipping_address = r.message[0] //Address title or name
-					doc.shipping_address_display = r.message[1] //Address to be displayed on the page
-				}
+erpnext.utils.get_shipping_address = function(frm){
+	frappe.call({
+		method: "erpnext.utilities.doctype.address.address.get_shipping_address",
+		args: {company: frm.doc.company},
+		callback: function(r){
+			if(r.message){
+				frm.set_value("shipping_address", r.message[0]) //Address title or name
+				frm.set_value("shipping_address_display", r.message[1]) //Address to be displayed on the page
 			}
-		});
-	}
+		}
+	});
 }
