@@ -69,23 +69,15 @@ def get_attendance_list(conditions, filters):
 	return att_map
 
 def get_conditions(filters):
-	if not (filters.get("month") and filters.get("fiscal_year")):
+	if not (filters.get("month") and filters.get("year")):
 		msgprint(_("Please select month and year"), raise_exception=1)
 
 	filters["month"] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
 		"Dec"].index(filters.month) + 1
-
-	year_start_date, year_end_date = frappe.db.get_value("Fiscal Year", filters.fiscal_year, 
-		["year_start_date", "year_end_date"])
-		
-	if filters.month >= year_start_date.strftime("%m"):
-		year = year_start_date.strftime("%Y")
-	else:
-		year = year_end_date.strftime("%Y")
 	
-	filters["total_days_in_month"] = monthrange(cint(year), filters.month)[1]
+	filters["total_days_in_month"] = monthrange(cint(filters.year), filters.month)[1]
 
-	conditions = " and month(att_date) = %(month)s and fiscal_year = %(fiscal_year)s"
+	conditions = " and month(att_date) = %(month)s and year(att_date) = %(year)s"
 
 	if filters.get("company"): conditions += " and company = %(company)s"
 	if filters.get("employee"): conditions += " and employee = %(employee)s"
@@ -100,3 +92,8 @@ def get_employee_details():
 		emp_map.setdefault(d.name, d)
 
 	return emp_map
+
+@frappe.whitelist()
+def get_attendance_years():
+	year_list = frappe.db.sql_list("""select distinct YEAR(att_date) from tabAttendance ORDER BY YEAR(att_date)""")
+	return "\n".join(str(year) for year in year_list)
