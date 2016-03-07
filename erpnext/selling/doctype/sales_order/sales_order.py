@@ -546,11 +546,11 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 
 		if any( item.delivered_by_supplier==1 for item in source.items):
 			if source.shipping_address_name:
-				target.customer_address = source.shipping_address_name
-				target.customer_address_display = source.shipping_address
+				target.shipping_address = source.shipping_address_name
+				target.shipping_address_display = source.shipping_address
 			else:
-				target.customer_address = source.customer_address
-				target.customer_address_display = source.address_display
+				target.shipping_address = source.customer_address
+				target.shipping_address_display = source.address_display
 
 			target.customer_contact_person = source.contact_person
 			target.customer_contact_display = source.contact_display
