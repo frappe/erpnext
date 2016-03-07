@@ -66,9 +66,8 @@ def create_fiscal_year_and_company(args):
 		
 	# Company
 	if (args.get('company_name')):	
-		frappe.get_doc({
+		company = frappe.get_doc({
 			"doctype":"Company",
-			'domain': args.get("industry"),
 			'company_name':args.get('company_name').strip(),
 			'abbr':args.get('company_abbr'),
 			'default_currency':args.get('currency'),
@@ -76,7 +75,11 @@ def create_fiscal_year_and_company(args):
 			'chart_of_accounts': args.get(('chart_of_accounts')),
 			'domain': args.get('domain')
 		}).insert()
-
+		
+		if "schools" in frappe.get_installed_apps():
+			company.domain = "Education"
+			company.save()
+		
 		# Bank Account
 		create_bank_account(args)
 	
