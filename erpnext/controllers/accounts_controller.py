@@ -135,7 +135,7 @@ class AccountsController(TransactionBase):
 				stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
 
 			stock_items = self.get_stock_items()
-
+		
 		if hasattr(self, "items"):
 			parent_dict = {}
 			for fieldname in self.meta.get_valid_columns():
@@ -154,6 +154,8 @@ class AccountsController(TransactionBase):
 
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
+						
+					
 
 					ret = get_item_details(args)
 
@@ -486,7 +488,7 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 	"""common validation for currency and price list currency"""
 
 	company_currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
-
+	
 	if not conversion_rate:
 		throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(
 			conversion_rate_label, currency, company_currency))

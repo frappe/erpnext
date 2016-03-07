@@ -198,7 +198,7 @@ def get_default_cost_center(args, item):
 
 def get_price_list_rate(args, item_doc, out):
 	meta = frappe.get_meta(args.parenttype or args.doctype)
-
+		
 	if meta.get_field("currency"):
 		validate_price_list(args)
 		validate_conversion_rate(args, meta)
@@ -449,8 +449,7 @@ def get_price_list_currency_and_exchange_rate(args):
 
 	if (not plc_conversion_rate) or (price_list_currency and args.price_list_currency \
 		and price_list_currency != args.price_list_currency):
-			plc_conversion_rate = get_exchange_rate(price_list_currency, args.currency) or plc_conversion_rate
-
+			plc_conversion_rate = get_exchange_rate(price_list_currency, args.currency, args.transaction_date) or plc_conversion_rate
 	return frappe._dict({
 		"price_list_currency": price_list_currency,
 		"plc_conversion_rate": plc_conversion_rate
