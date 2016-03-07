@@ -44,8 +44,20 @@ def get_item_details(args):
 
 	if out.get("warehouse"):
 		out.update(get_bin_details(args.item_code, out.warehouse))
+
+	if is_item_product_bundle(args.item_code):
+		bundled_items = get_bundled_items(args.item_code)
+		valuation_rate = 0.0
+				
+		for item in bundled_items:
+			valuation_rate += flt(get_valuation_rate(item.item_code, out).get("valuation_rate") * item.qty)
+
+		out.update({
+			"valuation_rate": valuation_rate
+		})
+		
 	else:
-		out.update(get_valuation_rate(args.item_code))
+		out.update(get_valuation_rate(args.item_code, out))
 
 	get_price_list_rate(args, item_doc, out)
 
@@ -360,7 +372,7 @@ def get_projected_qty(item_code, warehouse):
 @frappe.whitelist()
 def get_bin_details(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
-		["projected_qty", "actual_qty", "valuation_rate"], as_dict=True) \
+		["projected_qty", "actual_qty"], as_dict=True) \
 		or {"projected_qty": 0, "actual_qty": 0, "valuation_rate": 0}
 
 @frappe.whitelist()
@@ -471,12 +483,48 @@ def get_default_bom(item_code=None):
 		else:
 			frappe.throw(_("No default BOM exists for Item {0}").format(item_code))
 			
-def get_valuation_rate(item_code):
-	valuation_rate =frappe.db.sql("""select sum(base_net_amount) / sum(qty) from `tabPurchase Invoice Item` 
-		where item_code = %s and docstatus=1""", item_code)
+def get_valuation_rate(item_code, out):
+	item = frappe.get_doc("Item", item_code)
+	if item.is_stock_item:
+		warehouse = out.get("warehouse")
 		
-	if valuation_rate:
-		return {"valuation_rate": valuation_rate[0][0]}
+		if not warehouse:
+			warehouse = item.default_warehouse
+			
+		return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, 
+			["valuation_rate"], as_dict=True) or {"valuation_rate": 0}
+			
+	elif not item.is_stock_item:
+		valuation_rate =frappe.db.sql("""select sum(base_net_amount) / sum(qty) 
+			from `tabPurchase Invoice Item` 
+			where item_code = %s and docstatus=1""", item_code)
+		
+		if valuation_rate:
+			return {"valuation_rate": valuation_rate[0][0] or 0.0}
+	else:
+		return {"valuation_rate": 0.0}
+			
+def is_item_product_bundle(item_code):
+	if frappe.db.get_value("Product Bundle", item_code):
+		return True
+	return False
+	
+def get_bundled_items(item_code, bundled_items=None):
+	if not bundled_items:
+		bundled_items = []
+	
+	doc = frappe.get_doc("Product Bundle", item_code)
+	
+	for item in doc.items:
+		if is_item_product_bundle(item.item_code):
+			get_bundled_items(item.item_code, bundled_items)
+			
+		bundled_items.append(frappe._dict({
+			"item_code": item.item_code,
+			"qty": item.qty
+		}))
+		
+	return bundled_items
 			
 def get_gross_profit(out):
 	if out.valuation_rate:
@@ -485,3 +533,4 @@ def get_gross_profit(out):
 		})
 	
 	return out
+	
