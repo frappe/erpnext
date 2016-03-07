@@ -36,7 +36,7 @@ def feature_setup():
 		'fs_exports', 'fs_imports', 'fs_discounts', 'fs_purchase_discounts',
 		'fs_after_sales_installations', 'fs_projects', 'fs_sales_extras',
 		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
-		'fs_page_break', 'fs_more_info', 'fs_pos_view'
+		'fs_page_break', 'fs_more_info', 'fs_pos_view', 'compact_item_print'
 	]
 	for f in flds:
 		doc.set(f, 1)
