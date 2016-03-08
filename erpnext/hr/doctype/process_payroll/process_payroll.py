@@ -188,7 +188,7 @@ class ProcessPayroll(Document):
 
 		return journal_entry.as_dict()
 
-
+@frappe.whitelist()
 def get_month_details(year, month):
 	ysd = frappe.db.get_value("Fiscal Year", year, "year_start_date")
 	if ysd:
