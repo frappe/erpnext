@@ -212,6 +212,30 @@ def make_purchase_order(source_name, target_doc=None):
 	}, target_doc, postprocess)
 
 	return doclist
+    
+@frappe.whitelist()
+def make_request_for_quotation(source_name, target_doc=None):
+	doclist = get_mapped_doc("Material Request", source_name, 	{
+		"Material Request": {
+			"doctype": "Request for Quotation",
+			"validation": {
+				"docstatus": ["=", 1],
+				"material_request_type": ["=", "Purchase"]
+			}
+		},
+		"Material Request Item": {
+			"doctype": "Request for Quotation Item",
+			"field_map": [
+				["name", "material_request_item"],
+				["parent", "material_request"],
+				["uom", "uom"]
+			],
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.qty
+		}
+	}, target_doc)
+
+	return doclist
 
 @frappe.whitelist()
 def make_purchase_order_based_on_supplier(source_name, target_doc=None):
