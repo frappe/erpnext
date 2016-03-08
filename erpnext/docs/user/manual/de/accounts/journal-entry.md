@@ -10,6 +10,7 @@ Um einen neuen Buchungssatz zu erstellen, gehen Sie zu:
 <img class="screenshot" alt="Buchungssatz" src="{{docs_base_url}}/assets/img/accounts/journal-entry.png">
 
 In einem Buchungssatz müssen Sie folgendes tun:
+
 * Die Belegart über das DropDown-Menü auswählen.
 * Zeilen für die einzelnen Buchungen hinzufügen. In jeder Zeile müssen Sie folgendes Angeben:
     * Das Konto, das betroffen ist.

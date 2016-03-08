@@ -50,36 +50,32 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 		erpnext.account_chart && erpnext.account_chart.make_new();
 	}, "octicon octicon-plus");
 
+	var company_list = $.map(locals[':Company'], function(c) { return c.name; }).sort();
+
 	// company-select
-	wrapper.$company_select = wrapper.page.add_select("Company", [])
+	wrapper.$company_select = wrapper.page.add_select("Company", company_list)
 		.change(function() {
 			var ctype = frappe.get_route()[1] || 'Account';
 			erpnext.account_chart = new erpnext.AccountsChart(ctype, $(this).val(),
 				chart_area.get(0), wrapper.page);
 		})
 
-	// load up companies
-	return frappe.call({
-		method: 'erpnext.accounts.page.accounts_browser.accounts_browser.get_companies',
-		callback: function(r) {
-			wrapper.$company_select.empty();
-			$.each(r.message, function(i, v) {
-				$('<option>').html(v).attr('value', v).appendTo(wrapper.$company_select);
-			});
-			wrapper.$company_select.val(frappe.defaults.get_user_default("Company") || r.message[0]).change();
-		}
-	});
+	wrapper.$company_select.change();
 }
 
 frappe.pages["Accounts Browser"].on_page_show = function(wrapper){
 	// set route
 	var ctype = frappe.get_route()[1] || 'Account';
 
-
-
-	if(erpnext.account_chart && erpnext.account_chart.ctype != ctype) {
+	if(frappe.route_options) {
+		if(frappe.route_options.company) {
+			wrapper.$company_select.val(frappe.route_options.company).change();
+		}
+		frappe.route_options = null;
+	} else if(erpnext.account_chart && erpnext.account_chart.ctype != ctype) {
 		wrapper.$company_select.change();
 	}
+
 }
 
 erpnext.AccountsChart = Class.extend({

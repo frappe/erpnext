@@ -52,7 +52,11 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				if(doc.material_request_type === "Purchase")
 					cur_frm.add_custom_button(__("Supplier Quotation"),
 					this.make_supplier_quotation, __("Make"));
-
+				
+				if(doc.material_request_type === "Manufacture" && doc.status === "Submitted")
+					cur_frm.add_custom_button(__("Production Order"),
+					this.raise_production_orders, __("Make"));
+				
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 
 				// stop
@@ -70,7 +74,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						source_doctype: "Sales Order",
 						get_query_filters: {
 							docstatus: 1,
-							status: ["!=", "Stopped"],
+							status: ["!=", "Closed"],
 							per_delivered: ["<", 99.99],
 							company: cur_frm.doc.company
 						}
@@ -164,6 +168,16 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
 			frm: cur_frm
+		});
+	},
+	
+
+	raise_production_orders: function() {		
+		frappe.call({
+			method:"erpnext.stock.doctype.material_request.material_request.raise_production_orders",
+			args: {
+				"material_request": cur_frm.doc.name
+			}
 		});
 	}
 });

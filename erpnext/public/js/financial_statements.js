@@ -36,7 +36,7 @@ erpnext.financial_statements = {
 		if (columnDef.df.fieldname=="account") {
 			value = dataContext.account_name;
 
-			columnDef.df.link_onclick = 
+			columnDef.df.link_onclick =
 				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(dataContext) + ")";
 			columnDef.df.is_tree = true;
 		}
@@ -60,8 +60,8 @@ erpnext.financial_statements = {
 		frappe.route_options = {
 			"account": data.account,
 			"company": frappe.query_report.filters_by_name.company.get_value(),
-			"from_date": data.year_start_date,
-			"to_date": data.year_end_date
+			"from_date": data.from_date || data.year_start_date,
+			"to_date": data.to_date || data.year_end_date
 		};
 		frappe.set_route("query-report", "General Ledger");
 	},

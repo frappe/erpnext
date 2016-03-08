@@ -1,27 +1,23 @@
 #Checking Link Between Documents
 
-Linked With function in ERPNext allows you checking a document is linked with which other documents. You will find Linked With function in the every document.
+Links option shows one document is linked to which other documents. Check Menu for the Links options.
 
-![linked with icon]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-02-10 at 5.32.56 pm.png)
+<img alt="Cancel Doc" class="screenshot" src="{{docs_base_url}}/assets/img/articles/links-1.gif">
 
 ####Scenario
 
-If you need to check which Delivery Note and Sales Invoice has been created against Sales Order, you should open Sales Order document, and click on Linked With in it.
-
-![Sales Order Links]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-02-10 at 5.35.44 pm.png)
-
-Since Sales Order is a centralize transaction, using linked-with option in the Sales Order, you can track complete deal, like billing done, purchases made, manufacturing development against this particular order.
+If you need that against Sales Order, which Delivery Note and Sales Invoice has been created, you should open Sales Order document, and check Links. Same way, you can also check Purchase Order, and find which Purchase Receipt and Purchase Ivoice is linked with it.
 
 ####How It Works?
 
-When you check Linked With in for a Sales Order, it lists all the record where this Sales Order ID is updated. It will not show documents where this Sales Order Id is entered as text, and not in the link field.
+When you check Links for a Sales Order, it lists all the record where this Sales Order ID is linked. When Delivery Note is created against Sales Order, then Sales Order link is updated in the Delivery Note Item table.
 
 ####Backward Links
 
-If I check Linked With in the Delivery Note, will it list Sales Order created before this delivery  note?
+If I check Links in the Purchase Receipt, will it list Purchase Order from which this Purchase Receipt was created?
 
-Linked With function works only for the forward linkages. For the backward linkages, you should check current document itself. In the Delivery Note, you can check Item table to see which Sales Order it is linked with.
+Links only shows forward linkages. For the backward links, you should check current document itself. In the Purchase Receipt Item table table, you can check which Purchase Order it is linked to.
 
-![Linked With Backward]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-02-10 at 5.36.23 pm.png)
+<img alt="Cancel Doc" class="screenshot" src="{{docs_base_url}}/assets/img/articles/links-2.gif">
 
 <!-- markdown -->

@@ -8,11 +8,9 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate, get_url, cstr
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_account_currency, get_balance_on
+from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.journal_entry.journal_entry import (get_payment_entry_against_invoice, 
 get_payment_entry_against_order)
-
-from itertools import chain
 
 class PaymentRequest(Document):		
 	def validate(self):
@@ -35,7 +33,7 @@ class PaymentRequest(Document):
 			frappe.throw(_("Payment Gateway Account is not configured"))
 			
 	def validate_payment_gateway(self):
-		if self.gateway == "PayPal":
+		if self.payment_gateway == "PayPal":
 			if not frappe.db.get_value("PayPal Settings", None, "api_username"):
 				if not frappe.conf.paypal_username:
 					frappe.throw(_("PayPal Settings missing"))
@@ -49,14 +47,10 @@ class PaymentRequest(Document):
 	
 	def on_cancel(self):
 		self.set_as_cancelled()
-		
-	def on_update_after_submit(self):
-		pass
-	
-	def set_status(self):
-		pass
 	
 	def get_payment_url(self):
+		""" This is blanck method to trigger hooks call from individual payment gateway app
+		  which will return respective payment gateway"""
 		pass
 	
 	def make_invoice(self):
@@ -69,6 +63,7 @@ class PaymentRequest(Document):
 	def send_payment_request(self):
 		self.payment_url = get_url("/api/method/erpnext.accounts.doctype.payment_request.payment_request.generate_payment_request?name={0}".format(self.name))
 		if self.payment_url:
+			frappe.db.set_value(self.doctype, self.name, "payment_url", self.payment_url)
 			frappe.db.set_value(self.doctype, self.name, "status", "Initiated")
 			
 	def set_as_paid(self):
@@ -82,29 +77,44 @@ class PaymentRequest(Document):
 		
 	def create_journal_entry(self):
 		"""create entry"""
-		payment_details = {
-			"amount": self.amount,
-			"journal_entry": True,
-			"bank_account": self.payment_account
-		}
-		
 		frappe.flags.ignore_account_permission = True
+		
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		
+		party_account = get_party_account("Customer", ref_doc.get("customer"), ref_doc.company)
+		party_account_currency = get_account_currency(party_account)
+				
+		debit_in_account_currency = 0.0
+				
+		if party_account_currency == ref_doc.company_currency:
+			amount = flt(flt(self.grand_total) * \
+				flt(ref_doc.conversion_rate, ref_doc.precision("conversion_rate")), \
+				ref_doc.precision("base_grand_total"))
+			
+			if self.currency != ref_doc.company_currency:
+				debit_in_account_currency = self.grand_total
+			
+		else:
+			amount = debit_in_account_currency = self.grand_total
 				
 		if self.reference_doctype == "Sales Order":
-			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name,\
-			 amount=self.amount, journal_entry=True, bank_account=self.payment_account)
+			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name,
+			 amount=amount, debit_in_account_currency=debit_in_account_currency , journal_entry=True, 
+			 bank_account=self.payment_account)
 			
-		if self.reference_doctype == "Sales Invoice":
-			jv = get_payment_entry_against_invoice(self.reference_doctype, self.reference_name,\
-			 amount=self.amount, journal_entry=True, bank_account=self.payment_account)
+		if self.reference_doctype == "Sales Invoice":			
+			jv = get_payment_entry_against_invoice(self.reference_doctype, self.reference_name,
+			 amount=amount, debit_in_account_currency=debit_in_account_currency, journal_entry=True,
+			 bank_account=self.payment_account)
 			
 		jv.update({
 			"voucher_type": "Journal Entry",
 			"posting_date": nowdate()
-		})		
+		})
+		
 		jv.insert(ignore_permissions=True)
 		jv.submit()
-		
+
 		#set status as paid for Payment Request
 		frappe.db.set_value(self.doctype, self.name, "status", "Paid")
 		
@@ -148,22 +158,26 @@ def make_payment_request(**args):
 	
 	args = frappe._dict(args)
 	ref_doc = frappe.get_doc(args.dt, args.dn)
+	
 	gateway_account = get_gateway_details(args)
+	
+	grand_total = get_amount(ref_doc, args.dt)
 	
 	existing_payment_request = frappe.db.get_value("Payment Request", 
 		{"reference_doctype": args.dt, "reference_name": args.dn})
+	
 	if existing_payment_request:
 		pr = frappe.get_doc("Payment Request", existing_payment_request)
-	else:
+		
+	else:	
 		pr = frappe.new_doc("Payment Request")
-
 		pr.update({
-			"payment_gateway": gateway_account.name,
-			"gateway": gateway_account.gateway,
+			"payment_gateway_account": gateway_account.name,
+			"payment_gateway": gateway_account.payment_gateway,
 			"payment_account": gateway_account.payment_account,
 			"currency": ref_doc.currency,
 			"make_sales_invoice": args.cart or 0,
-			"amount": get_amount(ref_doc, args.dt),
+			"grand_total": grand_total,
 			"mute_email": args.mute_email or 0,
 			"email_to": args.recipient_id or "",
 			"subject": "Payment Request for %s"%args.dn,
@@ -180,11 +194,12 @@ def make_payment_request(**args):
 		if args.submit_doc:
 			pr.insert(ignore_permissions=True)
 			pr.submit()
-	
+
+		
 	if args.cart:
 		generate_payment_request(pr.name)
 		frappe.db.commit()
-	
+		
 	if not args.cart:	
 		return pr
 			
@@ -193,31 +208,37 @@ def make_payment_request(**args):
 def get_amount(ref_doc, dt):
 	"""get amount based on doctype"""
 	if dt == "Sales Order":
-		amount = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
-
+		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
+		
 	if dt == "Sales Invoice":
-		amount = abs(ref_doc.outstanding_amount)
-	
-	if amount > 0:
-		return amount
+		grand_total = flt(ref_doc.outstanding_amount)
+		
+	if grand_total > 0 :
+		return grand_total
+		
 	else:
 		frappe.throw(_("Payment Entry is already created"))
 		
 def get_gateway_details(args):
 	"""return gateway and payment account of default payment gateway"""
-	if args.payemnt_gateway:
-		gateway_account = frappe.db.get_value("Payment Gateway Account", args.payemnt_gateway, 
-			["name", "gateway", "payment_account", "message", "payment_url_message", "payment_success_url"],
-			 as_dict=1)
+	if args.get("payment_gateway"):
+		return get_payment_gateway_account(args.get("payment_gateway"))
+		
+	if args.cart:
+		payment_gateway_account = frappe.get_doc("Shopping Cart Settings").payment_gateway_account
+		return get_payment_gateway_account(payment_gateway_account)
 	
-	gateway_account = frappe.db.get_value("Payment Gateway Account", {"is_default": 1}, 
-		["name", "gateway", "payment_account", "message", "payment_url_message", "payment_success_url"], 
-			as_dict=1)
+	gateway_account = get_payment_gateway_account({"is_default": 1})
 	
 	if not gateway_account:
 		frappe.throw(_("Payment Gateway Account is not configured"))
 	
 	return gateway_account
+	
+def get_payment_gateway_account(args):
+	return frappe.db.get_value("Payment Gateway Account", args, 
+		["name", "payment_gateway", "payment_account", "message", "payment_url_message"], 
+			as_dict=1)
 
 @frappe.whitelist()
 def get_print_format_list(ref_doctype):

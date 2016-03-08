@@ -1,32 +1,31 @@
 #Merging Documents
 
-Document merging feature is available in ERPNext. You can done this via 'Rename' feature in ERPNext. 
+For a document, of you have two records which are identical, and meant for common purpose, you can merge them into one record.
 
-Following are step to merge document in existing document. Let's assume we are merging Account Ledger.
+Following are step to merge documents. Let's assume we are merging two Accounts.
 
-#### 1: Go to Chart of Account
+#### Step 1: Go to Chart of Account
 
-`Accounts > Setup > Chart of Accounts`
+`Accounts > Documents > Chart of Accounts`
 
-#### 2: Go to Account 
+#### Step 2: Go to Account 
 
-Click on Rename option of that account, which you want to merge in existing account.
+For an Account to be merge, click on "Rename" option.
 
-#### 3: Merge Account
+<img alt="Sales Order File Attachment" class="screenshot" src="{{docs_base_url}}/assets/img/articles/merge-docs-1.png">
 
-Enter existing account name in New Name field and check Mark on "Merge with existing" option. Then press 'Rename' button to merge.
+#### Step 3: Merge Account
 
-![Account]({{docs_base_url}}/assets/img/articles/Selection_043.png)
+In the New Name field, enter another account name with which this account will be merged. Check "Merge with existing" option. Then press 'Rename' button to merge.
 
 Following is how merged account will appear in the Chart of Account master.
 
-![New Account]({{docs_base_url}}/assets/img/articles/Selection_044.png)
+<img alt="Sales Order File Attachment" class="screenshot" src="{{docs_base_url}}/assets/img/articles/merge-docs-2.gif">
 
-###Effect of Merging 
+###Effect of Merging
 
-Merging document affects existing transaction where this record is selected. As well as it will affected on existing document balance.
+After Account is merged, new name is updated in the existing transactions where old account was selected.
 
-<div class="well"> Note: You can't merge Group into Ledger documents. As well as Ledger into Group documents. Also this feature is applicable for few documents only.</div>
-
+<div class="well"> Note: Group Account cannot be merged into Child Account and vice versa.</div>
 
 <!-- markdown -->

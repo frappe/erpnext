@@ -7,6 +7,10 @@ from frappe.utils import flt, getdate, nowdate
 from frappe import msgprint, _
 from frappe.model.document import Document
 
+form_grid_templates = {
+	"journal_entries": "templates/form_grid/bank_reconciliation_grid.html"
+}
+
 class BankReconciliation(Document):
 	def get_details(self):
 		if not (self.bank_account and self.from_date and self.to_date):

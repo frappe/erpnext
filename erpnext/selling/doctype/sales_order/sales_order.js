@@ -19,7 +19,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		var allow_delivery = false;
 
 		if(doc.docstatus==1) {
-			if(doc.status != 'Stopped' && doc.status != 'Closed') {
+			if(doc.status != 'Closed') {
 
 				for (var i in cur_frm.doc.items) {
 					var item = cur_frm.doc.items[i];
@@ -42,13 +42,10 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				if (this.frm.has_perm("submit")) {
-					// stop
+					// close
 					if(flt(doc.per_delivered, 2) < 100 || flt(doc.per_billed) < 100) {
-							cur_frm.add_custom_button(__('Stop'), this.stop_sales_order, __("Status"))
+							cur_frm.add_custom_button(__('Close'), this.close_sales_order, __("Status"))
 						}
-
-
-					cur_frm.add_custom_button(__('Close'), this.close_sales_order, __("Status"))
 				}
 
 				// delivery note
@@ -87,8 +84,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 			} else {
 				if (this.frm.has_perm("submit")) {
-					// un-stop
-					cur_frm.add_custom_button(__('Re-open'), cur_frm.cscript['Unstop Sales Order'], __("Status"));
+					// un-close
+					cur_frm.add_custom_button(__('Re-open'), cur_frm.cscript['Unclose Sales Order'], __("Status"));
 				}
 			}
 		}
@@ -220,9 +217,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		});
 		dialog.show();
 	},
-	stop_sales_order: function(){
-		cur_frm.cscript.update_status("Stop", "Stopped")
-	},
 	close_sales_order: function(){
 		cur_frm.cscript.update_status("Close", "Closed")
 	}
@@ -263,7 +257,7 @@ cur_frm.cscript.update_status = function(label, status){
 	});
 }
 
-cur_frm.cscript['Unstop Sales Order'] = function() {
+cur_frm.cscript['Unclose Sales Order'] = function() {
 	cur_frm.cscript.update_status('Re-open', 'Draft')
 }
 
