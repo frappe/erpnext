@@ -52,7 +52,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				if(doc.material_request_type === "Purchase")
 					cur_frm.add_custom_button(__("Supplier Quotation"),
 					this.make_supplier_quotation, __("Make"));
-
+				
 				if(doc.material_request_type === "Manufacture" && doc.status === "Submitted")
 					cur_frm.add_custom_button(__("Production Order"),
 					this.raise_production_orders, __("Make"));
