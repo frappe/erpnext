@@ -4,8 +4,7 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
-			"icon": "icon-star",
+			"label": _("Employee and Attendance"),
 			"items": [
 				{
 					"type": "doctype",
@@ -14,13 +13,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Leave Application",
-					"description": _("Applications for leave."),
-				},
-				{
-					"type": "doctype",
-					"name": "Expense Claim",
-					"description": _("Claims for company expense."),
+					"name": "Employee Attendance Tool",
+					"label": _("Employee Attendance Tool"),
+					"description":_("Mark Employee Attendance in Bulk"),
+					"hide_count": True
 				},
 				{
 					"type": "doctype",
@@ -29,14 +25,15 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Salary Slip",
-					"description": _("Monthly salary statement."),
+					"name": "Upload Attendance",
+					"description":_("Upload attendance from a .csv file"),
+					"hide_count": True
 				},
-				{
-					"type": "doctype",
-					"name": "Appraisal",
-					"description": _("Performance appraisal."),
-				},
+			]
+		},
+		{
+			"label": _("Recruitment"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Job Applicant",
@@ -55,21 +52,50 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
+			"label": _("Leaves and Holiday"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Employee Attendance Tool",
-					"label": _("Employee Attendance Tool"),
-					"description":_("Mark Employee Attendance in Bulk"),
+					"name": "Leave Application",
+					"description": _("Applications for leave."),
+				},
+				{
+					"type": "doctype",
+					"name":"Leave Type",
+					"description": _("Type of leaves like casual, sick etc."),
+				},
+				{
+					"type": "doctype",
+					"name": "Holiday List",
+					"description": _("Holiday master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Allocation",
+					"description": _("Allocate leaves for a period.")
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Control Panel",
+					"label": _("Leave Allocation Tool"),
+					"description":_("Allocate leaves for the year."),
 					"hide_count": True
 				},
 				{
 					"type": "doctype",
-					"name": "Upload Attendance",
-					"description":_("Upload attendance from a .csv file"),
-					"hide_count": True
+					"name": "Leave Block List",
+					"description": _("Block leave applications by department.")
+				},
+
+			]
+		},
+		{
+			"label": _("Payroll"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Salary Slip",
+					"description": _("Monthly salary statement."),
 				},
 				{
 					"type": "doctype",
@@ -78,14 +104,60 @@ def get_data():
 					"description":_("Generate Salary Slips"),
 					"hide_count": True
 				},
-			
 				{
 					"type": "doctype",
-					"name": "Leave Control Panel",
-					"label": _("Leave Allocation Tool"),
-					"description":_("Allocate leaves for the year."),
-					"hide_count": True
+					"name": "Salary Structure",
+					"description": _("Salary template master.")
 				},
+				{
+					"type": "doctype",
+					"name": "Earning Type",
+					"description": _("Salary components.")
+				},
+				{
+					"type": "doctype",
+					"name": "Deduction Type",
+					"description": _("Tax and other salary deductions.")
+				},
+
+			]
+		},
+		{
+			"label": _("Expense Claims"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Expense Claim",
+					"description": _("Claims for company expense."),
+				},
+				{
+					"type": "doctype",
+					"name": "Expense Claim Type",
+					"description": _("Types of Expense Claim.")
+				},
+			]
+		},
+		{
+			"label": _("Appraisals"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Appraisal",
+					"description": _("Performance appraisal."),
+				},
+				{
+					"type": "doctype",
+					"name": "Appraisal Template",
+					"description": _("Template for performance appraisals.")
+				},
+			]
+		},
+
+		{
+			"label": _("Tools"),
+			"icon": "icon-wrench",
+			"items": [
+
 			]
 		},
 		{
@@ -117,60 +189,10 @@ def get_data():
 					"name": "Designation",
 					"description": _("Employee designation (e.g. CEO, Director etc.).")
 				},
-				{
-					"type": "doctype",
-					"name": "Salary Structure",
-					"description": _("Salary template master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Earning Type",
-					"description": _("Salary components.")
-				},
-				{
-					"type": "doctype",
-					"name": "Deduction Type",
-					"description": _("Tax and other salary deductions.")
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Allocation",
-					"description": _("Allocate leaves for a period.")
-				},
-				{
-					"type": "doctype",
-					"name":"Leave Type",
-					"description": _("Type of leaves like casual, sick etc."),
-				},
-				{
-					"type": "doctype",
-					"name": "Holiday List",
-					"description": _("Holiday master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Block List",
-					"description": _("Block leave applications by department.")
-				},
-				{
-					"type": "doctype",
-					"name": "Appraisal Template",
-					"description": _("Template for performance appraisals.")
-				},
-				{
-					"type": "doctype",
-					"name": "Expense Claim Type",
-					"description": _("Types of Expense Claim.")
-				},
-				{
-					"type": "doctype",
-					"name": "Email Account",
-					"description": _("Setup incoming server for jobs email id. (e.g. jobs@example.com)")
-				},
 			]
 		},
 		{
-			"label": _("Standard Reports"),
+			"label": _("Reports"),
 			"icon": "icon-list",
 			"items": [
 				{

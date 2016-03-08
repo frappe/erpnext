@@ -4,19 +4,31 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
+			"label": _("Projects"),
 			"icon": "icon-star",
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Project",
+					"description": _("Project master."),
+				},
 				{
 					"type": "doctype",
 					"name": "Task",
 					"description": _("Project activity / task."),
 				},
 				{
-					"type": "doctype",
-					"name": "Project",
-					"description": _("Project master."),
+					"type": "report",
+					"route": "Gantt/Task",
+					"doctype": "Task",
+					"name": "Gantt Chart",
+					"description": _("Gantt chart of all tasks.")
 				},
+			]
+		},
+		{
+			"label": _("Time Tracking"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Time Log",
@@ -40,20 +52,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
-			"items": [
-				{
-					"type": "report",
-					"route": "Gantt/Task",
-					"doctype": "Task",
-					"name": "Gantt Chart",
-					"description": _("Gantt chart of all tasks.")
-				},
-			]
-		},
-		{
-			"label": _("Standard Reports"),
+			"label": _("Reports"),
 			"icon": "icon-list",
 			"items": [
 				{
