@@ -4,16 +4,45 @@ frappe.ui.form.on("Issue", {
 	},
 
 	"refresh": function(frm) {
-		if(frm.doc.status==="Open") {
-			frm.add_custom_button(__("Close"), function() {
-				frm.set_value("status", "Closed");
-				frm.save();
-			}, __("Status"));
-		} else {
-			frm.add_custom_button(__("Reopen"), function() {
-				frm.set_value("status", "Open");
-				frm.save();
-			}, __("Status"));
-		}
-	}
+        last_status = frm.doc.status;
+	},
+    "status": function(frm) {dialog(frm)}
 });
+function dialog(frm){
+    var d = new frappe.ui.Dialog({
+                    title: __("Details for "+ frm.doc.status),
+                    fields: [
+                        {
+                            "fieldtype": "Text",
+                            "label": __("Resolution Details"),
+                            "reqd": 1,
+							"name":"resolution_details"
+                        },
+                        {
+                            "fieldtype": "Button",
+                            "label": __("Submit")
+                        }
+                    ]
+                });
+                d.set_value("resolution_details",cur_frm.doc.resolution_details)
+                d.get_input("submit").on("click", function () {
+                    if (d.get_value("resolution_details")===""){
+                        show_alert("Resolution Details are Required",5)
+                        return
+                    }
+                    cur_frm.doc.resolution_details = d.get_value("resolution_details")
+                    frappe.call({
+                        method: 'create_resolution',
+                        doc: cur_frm.doc,
+			            args:{
+				            "text": d.get_value("resolution_details")
+			            },
+                        callback: function(frm){
+                            d.hide();
+                            cur_frm.save()
+                            cur_frm.refresh()
+                        }
+                    })
+                });
+                d.show();
+}
