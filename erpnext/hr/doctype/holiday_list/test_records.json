@@ -1,7 +1,8 @@
 [
  {
   "doctype": "Holiday List",
-  "fiscal_year": "_Test Fiscal Year 2013", 
+  "from_date": "2013-01-01",
+  "to_date":"2013-12-31",
   "holidays": [
    {
     "description": "New Year", 
