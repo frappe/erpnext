@@ -9,7 +9,7 @@ from frappe.utils import flt
 def execute(filters=None):
 	if not filters: filters = frappe._dict()
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
-	
+
 	gross_profit_data = GrossProfitGenerator(filters)
 
 	data = []
@@ -19,7 +19,7 @@ def execute(filters=None):
 		"invoice": ["parent", "customer", "posting_date","item_code", "item_name","item_group", "brand", "description", \
 			"warehouse", "qty", "base_rate", "buying_rate", "base_amount",
 			"buying_amount", "gross_profit", "gross_profit_percent", "project_name"],
-		"item_code": ["item_code", "item_name", "brand", "description", "warehouse", "qty", "base_rate",
+		"item_code": ["item_code", "item_name", "brand", "description", "qty", "base_rate",
 			"buying_rate", "base_amount", "buying_amount", "gross_profit", "gross_profit_percent"],
 		"warehouse": ["warehouse", "qty", "base_rate", "buying_rate", "base_amount", "buying_amount",
 			"gross_profit", "gross_profit_percent"],
@@ -45,7 +45,7 @@ def execute(filters=None):
 		row = []
 		for col in group_wise_columns.get(scrub(filters.group_by)):
 			row.append(src.get(col))
-			
+
 		row.append(company_currency)
 		data.append(row)
 
@@ -80,7 +80,7 @@ def get_columns(group_wise_columns, filters):
 
 	for col in group_wise_columns.get(scrub(filters.group_by)):
 		columns.append(column_map.get(col))
-				
+
 	columns.append({
 		"fieldname": "currency",
 		"label" : _("Currency"),
