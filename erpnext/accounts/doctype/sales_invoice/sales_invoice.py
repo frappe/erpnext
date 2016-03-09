@@ -13,6 +13,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.accounts.doctype.asset.depreciation import get_gl_entries_on_asset_disposal
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -59,6 +60,7 @@ class SalesInvoice(SellingController):
 		self.validate_advance_jv("Sales Order")
 		self.add_remarks()
 		self.validate_write_off_account()
+		self.set_income_account_for_fixed_assets()
 
 		if cint(self.is_pos):
 			self.validate_pos()
@@ -447,6 +449,17 @@ class SalesInvoice(SellingController):
 				msgprint(_("POS Profile required to make POS Entry"), raise_exception=True)
 
 		return warehouse
+		
+	def set_income_account_for_fixed_assets(self):
+		disposal_account = None
+		for d in self.get("items"):
+			if frappe.db.get_value("Item", d.item_code, "is_fixed_asset"):
+				if not disposal_account:
+					disposal_account = frappe.db.get_value("Company", self.company, "disposal_account")
+					if not disposal_account:
+						frappe.throw(_("Please mention 'Gain/Loss Account on Asset Disposal' in Company"))
+				
+				d.income_account = disposal_account
 
 	def on_update(self):
 		if cint(self.is_pos) == 1:
@@ -557,17 +570,31 @@ class SalesInvoice(SellingController):
 		# income account gl entries
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
-				account_currency = get_account_currency(item.income_account)
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": item.income_account,
-						"against": self.customer,
-						"credit": item.base_net_amount,
-						"credit_in_account_currency": item.base_net_amount \
-							if account_currency==self.company_currency else item.net_amount,
-						"cost_center": item.cost_center
-					}, account_currency)
-				)
+				if frappe.db.get_value("Item", item.item_code, "is_fixed_asset"):
+					if not item.asset:
+						frappe.throw(_("Row #{0}: Asset is mandatory against a Fixed Asset Item")
+							.format(item.idx))
+					else:
+						asset = frappe.get_doc("Asset", item.asset)
+						self.validate_asset(asset, item)
+					
+						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, item.base_net_amount)
+						for gle in fixed_asset_gl_entries:
+							gl_entries.append(self.get_gl_dict(gle))
+						
+						frappe.db.set_value("Asset", asset.name, "status", "Sold")
+				else:
+					account_currency = get_account_currency(item.income_account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": item.income_account,
+							"against": self.customer,
+							"credit": item.base_net_amount,
+							"credit_in_account_currency": item.base_net_amount \
+								if account_currency==self.company_currency else item.net_amount,
+							"cost_center": item.cost_center
+						}, account_currency)
+					)
 
 		# expense account gl entries
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \

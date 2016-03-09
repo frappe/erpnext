@@ -136,8 +136,12 @@ erpnext.company.setup_queries = function(frm) {
 		["default_expense_account", {"root_type": "Expense"}],
 		["default_income_account", {"root_type": "Income"}],
 		["round_off_account", {"root_type": "Expense"}],
+		["accumulated_depreciation_account", {"root_type": "Asset"}],
+		["depreciation_expense_account", {"root_type": "Expense"}],
+		["disposal_account", {"report_type": "Profit and Loss"}],
 		["cost_center", {}],
-		["round_off_cost_center", {}]
+		["round_off_cost_center", {}],
+		["disposal_cost_center", {}]
 	], function(i, v) {
 		erpnext.company.set_custom_query(frm, v);
 	});

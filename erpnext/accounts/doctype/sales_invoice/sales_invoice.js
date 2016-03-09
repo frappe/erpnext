@@ -471,3 +471,15 @@ cur_frm.set_query("debit_to", function(doc) {
 		}
 	}
 });
+
+cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	return {
+		filters: {
+			'item_code': d.item_code,
+			'docstatus': 1,
+			'company': doc.company,
+			'status': 'Available'
+		}
+	}
+});

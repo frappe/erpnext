@@ -253,19 +253,28 @@ class PurchaseInvoice(BuyingController):
 		self.update_project()
 		
 	def post_asset_depreciation(self):
-		from erpnext.accounts.doctype.asset.asset import depreciate_asset
 		for d in self.get("items"):
 			if frappe.db.get_value("Item", d.item_code, "is_fixed_asset"):
 				if not d.asset:
 					frappe.throw(_("Row #{0}: Asset is mandatory against a Fixed Asset Item").format(d.idx))
 				else:
 					asset = frappe.get_doc("Asset", d.asset)
-					if asset.start_depreciation_from_purchase_date:
-						for schedule in asset.get("schedules"):
-							if schedule.depreciation_date == asset.purchase_date:
-								depreciate_asset(asset.name, schedule.depreciation_amount, schedule.name)
-								break
-
+					self.validate_asset(asset, d)
+					
+					frappe.db.set_value("Asset", asset.name, "purchase_invoice", 
+						(self.name if self.docstatus==1 else None))
+							
+	def validate_asset(self, asset, item_row):
+		super(PurchaseInvoice, self).validate_asset(asset, item_row)
+		
+		if getdate(asset.purchase_date) != getdate(self.posting_date):
+			frappe.throw(_("Purchase Date of asset {0} does not match with Purchase Invoice date")
+				.format(item_row.asset))
+				
+		if asset.supplier != self.supplier:
+			frappe.throw(_("Supplier of asset {0} does not match with the supplier in the Purchase Invoice")
+				.format(item_row.asset))
+		
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
@@ -432,6 +441,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_gl_entries_on_cancel()
 		self.update_project()
+		self.post_asset_depreciation()
 
 	def update_project(self):
 		project_list = []

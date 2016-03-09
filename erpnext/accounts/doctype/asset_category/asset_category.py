@@ -4,7 +4,12 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 class AssetCategory(Document):
-	pass
+	def validate(self):
+		for field in ("depreciation_method", "number_of_depreciations", 
+				"number_of_months_in_a_period", "accounts"):
+			if not self.get(field):
+				frappe.throw(_("{0} is mandatory").format(self.meta.get_label(field)))
