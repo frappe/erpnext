@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cint
+from frappe.utils import cint, get_datetime
 from frappe import throw, _
 from frappe.model.document import Document
 
@@ -18,7 +18,6 @@ class HolidayList(Document):
 
 	def get_weekly_off_dates(self):
 		self.validate_values()
-		self.validate_weekly_days()
 		date_list = self.get_weekly_off_date_list(self.from_date, self.to_date)
 		last_idx = max([cint(d.idx) for d in self.get("holidays")] or [0,])
 		for i, d in enumerate(date_list):
@@ -65,18 +64,23 @@ class HolidayList(Document):
 
 	def get_weekly_off_date_list(self, start_date, end_date):
 		from frappe.utils import getdate
-		year_start_date, year_end_date = getdate(start_date), getdate(end_date)
+		start_date, end_date = getdate(start_date), getdate(end_date)
 
 		from dateutil import relativedelta
 		from datetime import timedelta
 		import calendar
 
 		date_list = []
+		existing_date_list = []
 		weekday = getattr(calendar, (self.weekly_off).upper())
-		reference_date = year_start_date + relativedelta.relativedelta(weekday=weekday)
+		reference_date = start_date + relativedelta.relativedelta(weekday=weekday)
+		
+		for holiday in self.get("holidays"):
+			existing_date_list.append(get_datetime(holiday.holiday_date).date())
 
-		while reference_date <= year_end_date:
-			date_list.append(reference_date)
+		while reference_date <= end_date:
+			if reference_date not in existing_date_list:
+				date_list.append(reference_date)
 			reference_date += timedelta(days=7)
 
 		return date_list
