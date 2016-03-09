@@ -139,8 +139,8 @@ class SerialNo(StockController):
 		return sle_dict
 
 	def on_trash(self):
-		sl_entries = frappe.db.sql("""select serial_no from `tabStock Ledger Entry` 
-			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No'""", 
+		sl_entries = frappe.db.sql("""select serial_no from `tabStock Ledger Entry`
+			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No'""",
 			("%%%s%%" % self.name, self.item_code), as_dict=True)
 
 		# Find the exact match
@@ -149,7 +149,7 @@ class SerialNo(StockController):
 			if self.name.upper() in get_serial_nos(d.serial_no):
 				sle_exists = True
 				break
-			
+
 		if sle_exists:
 			frappe.throw(_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name))
 
@@ -208,9 +208,9 @@ def validate_serial_no(sle, item_det):
 						if not allow_serial_nos_with_different_item(serial_no, sle):
 							frappe.throw(_("Serial No {0} does not belong to Item {1}").format(serial_no,
 								sle.item_code), SerialNoItemError)
-								
+
 					if sr.warehouse and sle.actual_qty > 0:
-						frappe.throw(_("Serial No {0} has already been received").format(sr.name),
+						frappe.throw(_("Serial No {0} has already been received").format(serial_no),
 							SerialNoDuplicateError)
 
 					if sle.actual_qty < 0:
@@ -229,10 +229,10 @@ def validate_serial_no(sle, item_det):
 		elif sle.actual_qty < 0 or not item_det.serial_no_series:
 			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
 				SerialNoRequiredError)
-				
+
 def allow_serial_nos_with_different_item(sle_serial_no, sle):
 	"""
-		Allows same serial nos for raw materials and finished goods 
+		Allows same serial nos for raw materials and finished goods
 		in Manufacture / Repack type Stock Entry
 	"""
 	allow_serial_nos = False
@@ -244,9 +244,9 @@ def allow_serial_nos_with_different_item(sle_serial_no, sle):
 					serial_nos = get_serial_nos(d.serial_no)
 					if sle_serial_no in serial_nos:
 						allow_serial_nos = True
-	
+
 	return allow_serial_nos
-			
+
 def update_serial_nos(sle, item_det):
 	if sle.is_cancelled == "No" and not sle.serial_no and sle.actual_qty > 0 \
 			and item_det.has_serial_no == 1 and item_det.serial_no_series:

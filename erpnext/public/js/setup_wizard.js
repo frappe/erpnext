@@ -22,6 +22,15 @@ function load_erpnext_slides() {
 					placeholder:__('e.g. "Build tools for builders"'), reqd:1},
 				{fieldname:'bank_account', label: __('Bank Account'), fieldtype:'Data',
 					placeholder: __('e.g. "XYZ National Bank"'), reqd:1 },
+				{fieldname:'domain', label: __('Domain'), fieldtype:'Select',
+					options: [
+						__("Distribution"),
+						__("Manufacturing"),
+						__("Retail"),
+						__("Services"),
+						__("Education"),
+						__("Other")
+					], reqd:1},
 				{fieldname:'chart_of_accounts', label: __('Chart of Accounts'),
 					options: "", fieldtype: 'Select'},
 

@@ -28,6 +28,7 @@ def get_notification_config():
 			"Delivery Note": {"docstatus": 0},
 			"Stock Entry": {"docstatus": 0},
 			"Material Request": {
+				"docstatus": ("<", 2),
 				"status": ("not in", ("Stopped",)),
 				"per_ordered": ("<", 100)
 			},

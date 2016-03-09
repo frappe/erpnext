@@ -9,7 +9,7 @@ from frappe.utils import flt, getdate
 def execute(filters=None):
 	if not filters: filters = {}
 
-	columns = get_columns(filters)
+	columns = get_columns()
 	item_map = get_item_details(filters)
 	iwb_map = get_item_warehouse_map(filters)
 
@@ -30,8 +30,8 @@ def execute(filters=None):
 
 	return columns, data
 
-def get_columns(filters):
-	"""return columns based on filters"""
+def get_columns():
+	"""return columns"""
 
 	columns = [
 		_("Item")+":Link/Item:100",
@@ -68,9 +68,11 @@ def get_conditions(filters):
 	if filters.get("item_code"):
 		conditions += " and item_code = '%s'" % frappe.db.escape(filters.get("item_code"), percent=False)
 
+	if filters.get("warehouse"):
+		conditions += " and warehouse = '%s'" % frappe.db.escape(filters.get("warehouse"), percent=False)
+
 	return conditions
 
-#get all details
 def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select item_code, warehouse, posting_date, actual_qty, valuation_rate,
@@ -125,9 +127,13 @@ def get_item_warehouse_map(filters):
 	return iwb_map
 
 def get_item_details(filters):
-	item_map = {}
-	for d in frappe.db.sql("select name, item_name, stock_uom, item_group, brand, \
-		description from tabItem", as_dict=1):
-		item_map.setdefault(d.name, d)
+	condition = ''
+	value = ()
+	if filters.get("item_code"):
+		condition = "where item_code=%s"
+		value = (filters["item_code"],)
 
-	return item_map
+	items = frappe.db.sql("""select name, item_name, stock_uom, item_group, brand, description
+		from tabItem {condition}""".format(condition=condition), value, as_dict=1)
+
+	return dict((d.name, d) for d in items)

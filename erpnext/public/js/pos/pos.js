@@ -433,7 +433,8 @@ erpnext.pos.PointOfSale = Class.extend({
 							options: me.modes_of_payment.join('\n'), reqd: 1,
 							"default": default_mode},
 						{fieldtype:'Currency', fieldname:'paid_amount', label:__('Amount Paid'),
-							reqd:1, "default": me.frm.doc.grand_total, hidden: 1, change: function() {
+							reqd:1, "default": me.frm.doc.grand_total,
+							change: function() {
 								var values = dialog.get_values();
 
 								var actual_change = flt(values.paid_amount - values.total_amount,
@@ -480,6 +481,9 @@ erpnext.pos.PointOfSale = Class.extend({
 						// set to nearest 5
 						dialog.set_value("paid_amount", dialog.get_value("total_amount"));
 						dialog.get_input("paid_amount").trigger("change");
+					} else if (!is_cash) {
+						dialog.set_value("paid_amount", dialog.get_value("total_amount"));
+						dialog.set_value("change", 0);
 					}
 				}).trigger("change");
 

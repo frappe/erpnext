@@ -92,7 +92,7 @@ def get_data(company, root_type, balance_must_be, period_list,
 	if not accounts:
 		return None
 
-	accounts, accounts_by_name = filter_accounts(accounts)
+	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 	
 	company_currency = frappe.db.get_value("Company", company, "default_currency")
 
@@ -109,6 +109,7 @@ def get_data(company, root_type, balance_must_be, period_list,
 	calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values)
 	accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values)
 	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
+	out = filter_out_zero_value_rows(out, parent_children_map)
 	
 	if out:
 		add_total_row(out, balance_must_be, period_list, company_currency)
@@ -134,15 +135,15 @@ def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accu
 					d.get(period.key, 0.0)
 
 def prepare_data(accounts, balance_must_be, period_list, company_currency):
-	out = []
+	data = []
 	year_start_date = period_list[0]["year_start_date"].strftime("%Y-%m-%d")
 	year_end_date = period_list[-1]["year_end_date"].strftime("%Y-%m-%d")
-
+	
 	for d in accounts:
 		# add to output
 		has_value = False
 		total = 0
-		row = {
+		row = frappe._dict({
 			"account_name": d.account_name,
 			"account": d.name,
 			"parent_account": d.parent_account,
@@ -150,7 +151,7 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 			"year_start_date": year_start_date,
 			"year_end_date": year_end_date,
 			"currency": company_currency
-		}
+		})
 		for period in period_list:
 			if d.get(period.key):
 				# change sign based on Debit or Credit, since calculation is done using (debit - credit)
@@ -163,11 +164,25 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 				has_value = True
 				total += flt(row[period.key])
 
-		if has_value:
-			row["total"] = total
-			out.append(row)
+		row["has_value"] = has_value
+		row["total"] = total
+		data.append(row)
+		
+	return data
+	
+def filter_out_zero_value_rows(data, parent_children_map):
+	data_with_value = []
+	for d in data:
+		if d.get("has_value"):
+			data_with_value.append(d)
+		else:
+			children = [child.name for child in parent_children_map.get(d.account) or []]
+			for row in data:
+				if row.account in children and row.get("has_value"):
+					data_with_value.append(d)
+					break
 
-	return out
+	return data_with_value
 
 def add_total_row(out, balance_must_be, period_list, company_currency):
 	total_row = {
@@ -187,10 +202,11 @@ def add_total_row(out, balance_must_be, period_list, company_currency):
 			total_row["total"] += flt(row["total"])
 			row["total"] = ""
 	
-	out.append(total_row)
+	if total_row.has_key("total"):
+		out.append(total_row)
 
-	# blank row after Total
-	out.append({})
+		# blank row after Total
+		out.append({})
 
 def get_accounts(company, root_type):
 	return frappe.db.sql("""select name, parent_account, lft, rgt, root_type, report_type, account_name from `tabAccount`
@@ -218,7 +234,7 @@ def filter_accounts(accounts, depth=10):
 
 	add_to_list(None, 0)
 
-	return filtered_accounts, accounts_by_name
+	return filtered_accounts, accounts_by_name, parent_children_map
 
 def sort_root_accounts(roots):
 	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
