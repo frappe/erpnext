@@ -18,7 +18,9 @@ class ShoppingCartSettings(Document):
 	def validate(self):
 		if self.enabled:
 			self.validate_exchange_rates_exist()
-
+			self.validate_payment_account_currency()
+			self.validate_cart_price_list_currency()
+			
 	def validate_exchange_rates_exist(self):
 		"""check if exchange rates exist for all Price List currencies (to company's currency)"""
 		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
@@ -61,6 +63,13 @@ class ShoppingCartSettings(Document):
 
 	def get_shipping_rules(self, shipping_territory):
 		return self.get_name_from_territory(shipping_territory, "shipping_rules", "shipping_rule")
+		
+	def validate_payment_account_currency(self):
+		if self.enable_checkout:
+			pass
+	
+	def validate_cart_price_list_currency(self):
+		pass
 
 def validate_cart_settings(doc, method):
 	frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings").run_method("validate")
