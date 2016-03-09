@@ -310,11 +310,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	}
 });
 
-frappe.ui.form.on(cur_frm.doctype,"project_name", function(frm) {
+frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
 	if(in_list(["Delivery Note", "Sales Invoice"], frm.doc.doctype)) {
 		frappe.call({
 			method:'erpnext.projects.doctype.project.project.get_cost_center_name' ,
-			args: {	project_name: frm.doc.project_name	},
+			args: {	project: frm.doc.project	},
 			callback: function(r, rt) {
 				if(!r.exc) {
 					$.each(frm.doc["items"] || [], function(i, row) {

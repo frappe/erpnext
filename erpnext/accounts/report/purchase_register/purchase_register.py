@@ -27,11 +27,11 @@ def execute(filters=None):
 		# invoice details
 		purchase_order = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_order", [])))
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
-		project_name = list(set(invoice_po_pr_map.get(inv.name, {}).get("project_name", [])))
+		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
 
 		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name,
 			supplier_details.get(inv.supplier),
-			inv.credit_to, ", ".join(project_name), inv.bill_no, inv.bill_date, inv.remarks,
+			inv.credit_to, ", ".join(project), inv.bill_no, inv.bill_date, inv.remarks,
 			", ".join(purchase_order), ", ".join(purchase_receipt)]
 
 		# map expense values
@@ -146,7 +146,7 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 
 def get_invoice_po_pr_map(invoice_list):
 	pi_items = frappe.db.sql("""select parent, purchase_order, purchase_receipt, po_detail,
-		project_name from `tabPurchase Invoice Item` where parent in (%s)
+		project from `tabPurchase Invoice Item` where parent in (%s)
 		and (ifnull(purchase_order, '') != '' or ifnull(purchase_receipt, '') != '')""" %
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
@@ -166,9 +166,9 @@ def get_invoice_po_pr_map(invoice_list):
 		if pr_list:
 			invoice_po_pr_map.setdefault(d.parent, frappe._dict()).setdefault("purchase_receipt", pr_list)
 
-		if d.project_name:
+		if d.project:
 			invoice_po_pr_map.setdefault(d.parent, frappe._dict()).setdefault(
-				"project_name", []).append(d.project_name)
+				"project", []).append(d.project)
 
 	return invoice_po_pr_map
 

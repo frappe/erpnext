@@ -142,14 +142,14 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	project_name: function(doc, cdt, cdn) {
+	project: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
-		if(item.project_name) {
+		if(item.project) {
 			$.each(this.frm.doc["items"] || [],
 				function(i, other_item) {
-					if(!other_item.project_name) {
-						other_item.project_name = item.project_name;
-						refresh_field("project_name", other_item.name, other_item.parentfield);
+					if(!other_item.project) {
+						other_item.project = item.project;
+						refresh_field("project", other_item.name, other_item.parentfield);
 					}
 				});
 		}
@@ -173,7 +173,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	}
 });
 
-cur_frm.add_fetch('project_name', 'cost_center', 'cost_center');
+cur_frm.add_fetch('project', 'cost_center', 'cost_center');
 
 erpnext.buying.get_default_bom = function(frm) {
 	$.each(frm.doc["items"] || [], function(i, d) {

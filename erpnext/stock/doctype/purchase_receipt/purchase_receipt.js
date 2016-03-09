@@ -184,7 +184,7 @@ cur_frm.cscript.new_contact = function() {
 	loaddoc('Contact', tn);
 }
 
-cur_frm.fields_dict['items'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('project').get_query = function(doc, cdt, cdn) {
 	return {
 		filters: [
 			['Project', 'status', 'not in', 'Completed, Cancelled']

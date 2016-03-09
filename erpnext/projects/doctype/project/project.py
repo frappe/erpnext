@@ -120,10 +120,10 @@ class Project(Document):
 
 	def update_purchase_costing(self):
 		total_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
-			from `tabPurchase Invoice Item` where project_name = %s and docstatus=1""", self.name)
+			from `tabPurchase Invoice Item` where project = %s and docstatus=1""", self.name)
 
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
 
 @frappe.whitelist()
-def get_cost_center_name(project_name):
-	return frappe.db.get_value("Project", project_name, "cost_center")
+def get_cost_center_name(project):
+	return frappe.db.get_value("Project", project, "cost_center")

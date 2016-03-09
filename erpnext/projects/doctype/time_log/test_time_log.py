@@ -83,11 +83,11 @@ class TestTimeLog(unittest.TestCase):
 		activity_type.costing_rate = 15
 		activity_type.save()
 
-		project_name = "_Test Project for Activity Type"
+		project = "_Test Project for Activity Type"
 
-		frappe.db.sql("delete from `tabTime Log` where project=%s or employee='_T-Employee-0002'", project_name)
-		frappe.delete_doc("Project", project_name)
-		project = frappe.get_doc({"doctype": "Project", "project_name": project_name}).insert()
+		frappe.db.sql("delete from `tabTime Log` where project=%s or employee='_T-Employee-0002'", project)
+		frappe.delete_doc("Project", project)
+		project = frappe.get_doc({"doctype": "Project", "project_name": project}).insert()
 
 		make_time_log_test_record(employee="_T-Employee-0002", hours=2,
 			activity_type = "_Test Activity Type", project = project.name)

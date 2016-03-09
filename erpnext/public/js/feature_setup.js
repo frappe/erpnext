@@ -5,27 +5,27 @@
 Dictionary Format
 	'projects': {
 		'Sales Order': {
-			'fields':['project_name'],
+			'fields':['project'],
 			'items':['projected_qty']
 		},
 		'Purchase Order': {
-			'fields':['project_name']
+			'fields':['project']
 		}
 	}
 // ====================================================================*/
 frappe.provide("erpnext.feature_setup");
 erpnext.feature_setup.feature_dict = {
 	'fs_projects': {
-		'BOM': {'fields':['project_name']},
-		'Delivery Note': {'fields':['project_name']},
-		'Purchase Invoice': {'items':['project_name']},
-		'Production Order': {'fields':['project_name']},
-		'Purchase Order': {'items':['project_name']},
-		'Purchase Receipt': {'items':['project_name']},
-		'Sales Invoice': {'fields':['project_name']},
-		'Sales Order': {'fields':['project_name']},
-		'Stock Entry': {'fields':['project_name']},
-		'Timesheet': {'timesheet_details':['project_name']}
+		'BOM': {'fields':['project']},
+		'Delivery Note': {'fields':['project']},
+		'Purchase Invoice': {'items':['project']},
+		'Production Order': {'fields':['project']},
+		'Purchase Order': {'items':['project']},
+		'Purchase Receipt': {'items':['project']},
+		'Sales Invoice': {'fields':['project']},
+		'Sales Order': {'fields':['project']},
+		'Stock Entry': {'fields':['project']},
+		'Timesheet': {'timesheet_details':['project']}
 	},
 	'fs_discounts': {
 		'Delivery Note': {'items':['discount_percentage']},

@@ -186,7 +186,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
 							doctype: me.frm.doc.doctype,
 							name: me.frm.doc.name,
-							project_name: item.project_name || me.frm.doc.project_name,
+							project: item.project || me.frm.doc.project,
 							qty: item.qty
 						}
 					},

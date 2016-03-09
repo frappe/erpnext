@@ -278,7 +278,7 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc) {
-	par_flds = ['project_name', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances_received',
+	par_flds = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances_received',
 		'advances', 'sales_partner', 'commission_rate', 'total_commission', 'advances', 'from_date', 'to_date'];
 
 	if(cint(doc.is_pos) == 1) {
@@ -381,9 +381,9 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 
 //project name
 //--------------------------
-cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['project'].get_query = function(doc, cdt, cdn) {
 	return{
-		query: "erpnext.controllers.queries.get_project_name",
+		query: "erpnext.controllers.queries.get_project",
 		filters: {'customer': doc.customer}
 	}
 }
