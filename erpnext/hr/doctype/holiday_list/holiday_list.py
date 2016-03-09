@@ -30,10 +30,6 @@ class HolidayList(Document):
 		if not self.weekly_off:
 			throw(_("Please select weekly off day"))
 
-	def validate_weekly_days(self):
-		for day in self.get("holidays"):
-			if (self.weekly_off or "").upper() == (day.description or "").upper():
-				frappe.throw("Records already exist for mentioned weekly off")
 
 	def validate_days(self):
 		for day in self.get("holidays"):
