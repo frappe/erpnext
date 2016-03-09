@@ -45,19 +45,21 @@ def get_item_details(args):
 	if out.get("warehouse"):
 		out.update(get_bin_details(args.item_code, out.warehouse))
 
-	if is_item_product_bundle(args.item_code):
-		bundled_items = get_bundled_items(args.item_code)
+	if frappe.db.exists("Product Bundle", args.item_code):
 		valuation_rate = 0.0
-				
-		for item in bundled_items:
-			valuation_rate += flt(get_valuation_rate(item.item_code, out).get("valuation_rate") * item.qty)
+		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
+		
+		for bundle_item in bundled_items.items:
+			valuation_rate += \
+				flt(get_valuation_rate(bundle_item.item_code, out.get("warehouse")).get("valuation_rate") \
+					* bundle_item.qty)
 
 		out.update({
 			"valuation_rate": valuation_rate
 		})
-		
+
 	else:
-		out.update(get_valuation_rate(args.item_code, out))
+		out.update(get_valuation_rate(args.item_code, out.get("warehouse")))
 
 	get_price_list_rate(args, item_doc, out)
 
@@ -483,11 +485,9 @@ def get_default_bom(item_code=None):
 		else:
 			frappe.throw(_("No default BOM exists for Item {0}").format(item_code))
 			
-def get_valuation_rate(item_code, out):
+def get_valuation_rate(item_code, warehouse=None):
 	item = frappe.get_doc("Item", item_code)
 	if item.is_stock_item:
-		warehouse = out.get("warehouse")
-		
 		if not warehouse:
 			warehouse = item.default_warehouse
 			
@@ -503,29 +503,7 @@ def get_valuation_rate(item_code, out):
 			return {"valuation_rate": valuation_rate[0][0] or 0.0}
 	else:
 		return {"valuation_rate": 0.0}
-			
-def is_item_product_bundle(item_code):
-	if frappe.db.get_value("Product Bundle", item_code):
-		return True
-	return False
-	
-def get_bundled_items(item_code, bundled_items=None):
-	if not bundled_items:
-		bundled_items = []
-	
-	doc = frappe.get_doc("Product Bundle", item_code)
-	
-	for item in doc.items:
-		if is_item_product_bundle(item.item_code):
-			get_bundled_items(item.item_code, bundled_items)
-			
-		bundled_items.append(frappe._dict({
-			"item_code": item.item_code,
-			"qty": item.qty
-		}))
 		
-	return bundled_items
-			
 def get_gross_profit(out):
 	if out.valuation_rate:
 		out.update({
