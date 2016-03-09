@@ -24,12 +24,12 @@ function load_erpnext_slides() {
 					placeholder: __('e.g. "XYZ National Bank"'), reqd:1 },
 				{fieldname:'domain', label: __('Domain'), fieldtype:'Select',
 					options: [
-						__("Distribution"),
-						__("Manufacturing"),
-						__("Retail"),
-						__("Services"),
-						__("Education"),
-						__("Other")
+						{"label": __("Distribution"), "value": "Distribution"},
+						{"label": __("Manufacturing"), "value": "Manufacturing"},
+						{"label": __("Retail"), "value": "Retail"},
+						{"label": __("Services"), "value": "Services"},
+						{"label": __("Education"), "value": "Education"},
+						{"label": __("Other"), "value": "Other"},
 					], reqd:1},
 				{fieldname:'chart_of_accounts', label: __('Chart of Accounts'),
 					options: "", fieldtype: 'Select'},
