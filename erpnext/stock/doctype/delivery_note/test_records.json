@@ -23,7 +23,6 @@
    }
   ],
   "doctype": "Delivery Note",
-  "fiscal_year": "_Test Fiscal Year 2013",
   "base_grand_total": 100.0,
   "grand_total": 100.0,
   "naming_series": "_T-Delivery Note-",

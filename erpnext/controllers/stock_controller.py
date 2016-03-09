@@ -6,6 +6,7 @@ import frappe
 from frappe.utils import cint, flt, cstr
 from frappe import msgprint, _
 import frappe.defaults
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 from erpnext.stock.utils import get_incoming_rate
 
@@ -181,6 +182,7 @@ class StockController(AccountsController):
 			"warehouse": d.get("warehouse", None),
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
+			'fiscal_year': get_fiscal_year(self.posting_date, company=self.company)[0],
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
 			"voucher_detail_no": d.name,
@@ -188,7 +190,6 @@ class StockController(AccountsController):
 			"stock_uom": frappe.db.get_value("Item", args.get("item_code") or d.get("item_code"), "stock_uom"),
 			"incoming_rate": 0,
 			"company": self.company,
-			"fiscal_year": self.fiscal_year,
 			"batch_no": cstr(d.get("batch_no")).strip(),
 			"serial_no": d.get("serial_no"),
 			"project": d.get("project_name"),

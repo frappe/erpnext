@@ -9,7 +9,6 @@
   "customer_name": "_Test Customer", 
   "delivery_date": "2013-02-23", 
   "doctype": "Sales Order", 
-  "fiscal_year": "_Test Fiscal Year 2013", 
   "base_grand_total": 1000.0, 
   "grand_total": 1000.0, 
   "naming_series": "_T-Sales Order-", 

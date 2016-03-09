@@ -40,8 +40,6 @@ class Opportunity(TransactionBase):
 		if not self.title:
 			self.title = self.customer_name
 
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.transaction_date, self.fiscal_year, _("Opportunity Date"), self)
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""

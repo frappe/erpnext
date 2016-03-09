@@ -197,7 +197,6 @@ class StockReconciliation(StockController):
 			"voucher_no": self.name,
 			"company": self.company,
 			"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
-			"fiscal_year": self.fiscal_year,
 			"is_cancelled": "No",
 			"qty_after_transaction": row.qty,
 			"valuation_rate": row.valuation_rate

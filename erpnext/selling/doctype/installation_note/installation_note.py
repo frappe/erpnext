@@ -10,7 +10,6 @@ from frappe import _
 from erpnext.stock.utils import get_valid_serial_nos
 
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.utils import validate_fiscal_year
 
 class InstallationNote(TransactionBase):
 	def __init__(self, arg1, arg2=None):
@@ -31,7 +30,6 @@ class InstallationNote(TransactionBase):
 		}]
 
 	def validate(self):
-		validate_fiscal_year(self.inst_date, self.fiscal_year, _("Installation Date"), self)
 		self.validate_installation_date()
 		self.check_item_table()
 
