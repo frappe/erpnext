@@ -53,6 +53,9 @@ class Issue(Document):
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config
 			self.resolution_date = None
 
+	def create_resolution(self,text):
+		self.add_comment("Label", _(self.status))
+		
 def get_list_context(context=None):
 	return {
 		"title": _("My Issues"),
