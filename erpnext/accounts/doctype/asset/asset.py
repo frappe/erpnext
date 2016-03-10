@@ -30,6 +30,9 @@ class Asset(Document):
 		if flt(self.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
 			frappe.throw(_("Expected Value After Useful Life must be less than Gross Purchase Amount"))
 			
+		if not flt(self.gross_purchase_amount):
+			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
+			
 		if not self.current_value:
 			self.current_value = flt(self.gross_purchase_amount)
 		else:

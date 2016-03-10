@@ -12,4 +12,4 @@ class AssetCategory(Document):
 		for field in ("depreciation_method", "number_of_depreciations", 
 				"number_of_months_in_a_period", "accounts"):
 			if not self.get(field):
-				frappe.throw(_("{0} is mandatory").format(self.meta.get_label(field)))
+				frappe.throw(_("{0} is mandatory").format(self.meta.get_label(field)), frappe.MandatoryError)
