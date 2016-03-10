@@ -15,5 +15,16 @@ frappe.query_reports["Daily Time Log Summary"] = {
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today()
 		},
+		{
+			"fieldtype": "Link",
+			"fieldname": "employee",
+			"options": "Employee",
+			"label": __("Employee"),
+			"get_query": function() {
+				return {
+					query: "erpnext.controllers.queries.employee_query"
+				}
+			}
+		}
 	]
 }
