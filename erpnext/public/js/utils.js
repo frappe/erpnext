@@ -49,18 +49,6 @@ $.extend(erpnext, {
 		}
 	},
 
-	add_applicable_territory: function() {
-		if(cur_frm.doc.__islocal && (cur_frm.doc.territories || []).length===0) {
-				var default_territory = frappe.defaults.get_user_default("territory");
-				if(default_territory) {
-					var territory = frappe.model.add_child(cur_frm.doc, "Applicable Territory",
-						"territories");
-					territory.territory = default_territory;
-				}
-
-		}
-	},
-
 	setup_serial_no: function() {
 		var grid_row = cur_frm.open_grid_row();
 		if(!grid_row.fields_dict.serial_no ||
@@ -112,6 +100,11 @@ $.extend(erpnext, {
 
 
 $.extend(erpnext.utils, {
+	clear_address_and_contact: function(frm) {
+		$(frm.fields_dict['address_html'].wrapper).html("");
+		frm.fields_dict['contact_html'] && $(frm.fields_dict['contact_html'].wrapper).html("");
+	},
+	
 	render_address_and_contact: function(frm) {
 		// render address
 		$(frm.fields_dict['address_html'].wrapper)
@@ -131,8 +124,8 @@ $.extend(erpnext.utils, {
 				}
 			);
 		}
-	}, 
-	
+	},
+
 	copy_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname) {
 		var d = locals[dt][dn];
 		if(d[fieldname]){

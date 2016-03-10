@@ -32,13 +32,13 @@ class CostCenter(NestedSet):
 		for d in self.get('budgets'):
 			if d.account:
 				account_details = frappe.db.get_value("Account", d.account, 
-					["is_group", "company", "root_type"], as_dict=1)
+					["is_group", "company", "report_type"], as_dict=1)
 				if account_details.is_group:
 					frappe.throw(_("Budget cannot be assigned against Group Account {0}").format(d.account))
 				elif account_details.company != self.company:
 					frappe.throw(_("Account {0} does not belongs to company {1}").format(d.account, self.company))
-				elif account_details.root_type != "Expense":
-					frappe.throw(_("Budget cannot be assigned against {0}, as it's not an Expense account")
+				elif account_details.report_type != "Profit and Loss":
+					frappe.throw(_("Budget cannot be assigned against {0}, as it's not an Income or Expense account")
 						.format(d.account))
 
 				if [d.account, d.fiscal_year] in check_acc_list:

@@ -1,8 +1,14 @@
+{% extends "templates/web.html" %}
+
 {% block header_actions %}
 {% include 'templates/includes/product_search_box.html' %}
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    {% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
+{% block page_content %}
 <div class="item-group-content">
 	<div>
 		{% if slideshow %}<!-- slideshow -->
@@ -19,25 +25,19 @@
 				{{ item }}
 			{% endfor %}
 		</div>
-			{% if (items|length)==100 %}
-				<div class="text-muted info">Showing top 100 items.</div>
-			{% endif %}
+			<div class="text-center">
+				{% if frappe.form_dict.start|int > 0 %}
+				<a class="btn btn-default" href="{{ pathname }}?start={{ frappe.form_dict.start|int - 24 }}">Prev</a>
+				{% endif %}
+				{% if items|length == 24 %}
+				<a class="btn btn-default" href="{{ pathname }}?start={{ frappe.form_dict.start|int + 24 }}">Next</a>
+				{% endif %}
+			</div>
 		{% else %}
 			<div class="text-muted">No items listed.</div>
 		{% endif %}
 	</div>
 </div>
-<script>
-$(function() {
-	if(window.logged_in && getCookie("system_user")==="yes") {
-		frappe.has_permission("Item Group", "{{ name }}", "write", function(r) {
-			frappe.require("/assets/frappe/js/frappe/website/editable.js");
-			frappe.make_editable($('[itemprop="description"]'), "Item Group", "{{ name }}", "description");
-		});
-	}
-});
-</script>
-
 {% endblock %}
 
 {% block style %}

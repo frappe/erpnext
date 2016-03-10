@@ -22,14 +22,6 @@ class ProductBundle(Document):
 		if frappe.db.get_value("Item", self.new_item_code, "is_stock_item"):
 			frappe.throw(_("Parent Item {0} must not be a Stock Item").format(self.new_item_code))
 
-	def get_item_details(self, name):
-		det = frappe.db.sql("""select description, stock_uom from `tabItem`
-			where name = %s""", name)
-		return {
-			'description' : det and det[0][0] or '',
-			'uom': det and det[0][1] or ''
-		}
-
 def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
 

@@ -20,14 +20,15 @@ class FiscalYear(Document):
 		msgprint(_("{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.").format(self.name))
 
 	def validate(self):
-		year_start_end_dates = frappe.db.sql("""select year_start_date, year_end_date
-			from `tabFiscal Year` where name=%s""", (self.name))
-
 		self.validate_dates()
 
-		if year_start_end_dates:
-			if getdate(self.year_start_date) != year_start_end_dates[0][0] or getdate(self.year_end_date) != year_start_end_dates[0][1]:
-				frappe.throw(_("Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved."))
+		if not self.is_new():
+			year_start_end_dates = frappe.db.sql("""select year_start_date, year_end_date
+				from `tabFiscal Year` where name=%s""", (self.name))
+
+			if year_start_end_dates:
+				if getdate(self.year_start_date) != year_start_end_dates[0][0] or getdate(self.year_end_date) != year_start_end_dates[0][1]:
+					frappe.throw(_("Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved."))
 
 	def validate_dates(self):
 		if getdate(self.year_start_date) > getdate(self.year_end_date):
@@ -63,6 +64,6 @@ def auto_create_fiscal_year():
 			end_year = cstr(new_fy.year_end_date.year)
 			new_fy.year = start_year if start_year==end_year else (start_year + "-" + end_year)
 
-			new_fy.insert()
+			new_fy.insert(ignore_permissions=True)
 		except frappe.NameError:
 			pass

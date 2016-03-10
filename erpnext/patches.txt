@@ -20,6 +20,7 @@ execute:frappe.reload_doc('stock', 'doctype', 'purchase_receipt') # 2014-01-29
 execute:frappe.reload_doc('accounts', 'doctype', 'pos_setting') # 2014-01-29
 execute:frappe.reload_doc('selling', 'doctype', 'customer') # 2014-01-29
 execute:frappe.reload_doc('buying', 'doctype', 'supplier') # 2014-01-29
+execute:frappe.reload_doctype('Item')
 erpnext.patches.v4_0.map_charge_to_taxes_and_charges
 execute:frappe.reload_doc('support', 'doctype', 'newsletter') # 2014-01-31
 execute:frappe.reload_doc('hr', 'doctype', 'employee') # 2014-02-03
@@ -164,6 +165,7 @@ erpnext.patches.v5_0.set_footer_address
 execute:frappe.db.set_value("Backup Manager", None, "send_backups_to_dropbox", 1 if frappe.db.get_value("Backup Manager", None, "upload_backups_to_dropbox") in ("Daily", "Weekly") else 0)
 execute:frappe.db.sql_list("delete from `tabDocPerm` where parent='Issue' and modified_by='Administrator' and role='Guest'")
 erpnext.patches.v5_0.update_item_and_description_again
+erpnext.patches.v6_0.multi_currency
 erpnext.patches.v5_0.repost_gle_for_jv_with_multiple_party
 erpnext.patches.v5_0.portal_fixes
 erpnext.patches.v5_0.reset_values_in_tools
@@ -201,3 +203,53 @@ execute:frappe.delete_doc_if_exists("Print Format", "Credit Note - Negative Invo
 
 # V6.0
 erpnext.patches.v6_0.set_default_title # 2015-09-03
+erpnext.patches.v6_0.default_activity_rate
+execute:frappe.db.set_value("Stock Settings", None, "automatically_set_serial_nos_based_on_fifo", 1)
+execute:frappe.db.sql("""update `tabProject` set percent_complete=round(percent_complete, 2) where percent_complete is not null""")
+erpnext.patches.v6_0.fix_outstanding_amount
+erpnext.patches.v6_0.fix_planned_qty
+erpnext.patches.v6_2.remove_newsletter_duplicates
+erpnext.patches.v6_2.fix_missing_default_taxes_and_lead
+erpnext.patches.v6_3.convert_applicable_territory
+erpnext.patches.v6_4.round_status_updater_percentages
+erpnext.patches.v6_4.repost_gle_for_journal_entries_where_reference_name_missing
+erpnext.patches.v6_4.fix_journal_entries_due_to_reconciliation
+erpnext.patches.v6_4.fix_status_in_sales_and_purchase_order
+erpnext.patches.v6_4.fix_modified_in_sales_order_and_purchase_order
+erpnext.patches.v6_4.fix_duplicate_bins
+erpnext.patches.v6_4.fix_sales_order_maintenance_status
+erpnext.patches.v6_4.email_digest_update
+
+# delete shopping cart doctypes
+execute:frappe.delete_doc_if_exists("DocType", "Applicable Territory")
+execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Price List")
+execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Taxes and Charges Master")
+
+erpnext.patches.v6_4.set_user_in_contact
+erpnext.patches.v6_4.make_image_thumbnail #2015-10-20
+erpnext.patches.v6_5.show_in_website_for_template_item
+erpnext.patches.v6_4.fix_expense_included_in_valuation
+execute:frappe.delete_doc_if_exists("Report", "Item-wise Last Purchase Rate")
+erpnext.patches.v6_6.fix_website_image
+erpnext.patches.v6_6.remove_fiscal_year_from_leave_allocation
+execute:frappe.delete_doc_if_exists("DocType", "Stock UOM Replace Utility")
+erpnext.patches.v6_8.make_webform_standard #2015-11-23
+erpnext.patches.v6_8.move_drop_ship_to_po_items
+erpnext.patches.v6_10.fix_ordered_received_billed
+erpnext.patches.v6_10.fix_jv_total_amount #2015-11-30
+erpnext.patches.v6_10.email_digest_default_quote
+erpnext.patches.v6_10.fix_billed_amount_in_drop_ship_po
+erpnext.patches.v6_10.fix_delivery_status_of_drop_ship_item #2015-12-08
+erpnext.patches.v5_8.tax_rule #2015-12-08
+erpnext.patches.v6_12.set_overdue_tasks
+erpnext.patches.v6_16.update_billing_status_in_dn_and_pr
+erpnext.patches.v6_16.create_manufacturer_records
+execute:frappe.db.sql("update `tabPricing Rule` set title=name where title='' or title is null") #2016-01-27
+erpnext.patches.v6_20.set_party_account_currency_in_orders
+erpnext.patches.v6_19.comment_feed_communication
+erpnext.patches.v6_21.fix_reorder_level
+erpnext.patches.v6_21.rename_material_request_fields
+erpnext.patches.v6_23.update_stopped_status_to_closed
+erpnext.patches.v6_24.repost_valuation_rate_for_serialized_items
+erpnext.patches.v6_24.set_recurring_id
+erpnext.patches.v6_20x.set_compact_print

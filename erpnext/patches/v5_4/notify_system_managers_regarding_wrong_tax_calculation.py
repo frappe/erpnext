@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.email import sendmail_to_system_managers
-from frappe.utils import get_url_to_form
+from frappe.utils import get_link_to_form
 
 def execute():
 	wrong_records = []
@@ -15,7 +15,7 @@ def execute():
 				and modified >= '2015-02-17' and docstatus=1""".format(dt))
 		
 			if records:
-				records = [get_url_to_form(dt, d) for d in records]
+				records = [get_link_to_form(dt, d) for d in records]
 				wrong_records.append([dt, records])
 				
 	if wrong_records:

@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe
 
-from frappe.utils import flt, nowdate, get_datetime, getdate, date_diff, cint
+from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate
 from frappe import _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
@@ -14,6 +14,7 @@ from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHol
 from erpnext.projects.doctype.time_log.time_log import OverlapError
 from erpnext.stock.doctype.stock_entry.stock_entry import get_additional_costs
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
+from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
@@ -106,10 +107,9 @@ class ProductionOrder(Document):
 	def stop_unstop(self, status):
 		""" Called from client side on Stop/Unstop event"""
 		self.update_status(status)
-		qty = (flt(self.qty)-flt(self.produced_qty)) * ((status == 'Stopped') and -1 or 1)
-		self.update_planned_qty(qty)
+		self.update_planned_qty()
 		frappe.msgprint(_("Production Order status is {0}").format(status))
-		self.notify_modified()
+		self.notify_update()
 
 
 	def update_status(self, status=None):
@@ -152,32 +152,42 @@ class ProductionOrder(Document):
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
+			
 		frappe.db.set(self,'status', 'Submitted')
 		self.make_time_logs()
-		self.update_planned_qty(self.qty)
-
+		self.update_completed_qty_in_material_request()
+		self.update_planned_qty()
 
 	def on_cancel(self):
+		self.validate_cancel()
+
+		frappe.db.set(self,'status', 'Cancelled')
+		self.delete_time_logs()
+		self.update_completed_qty_in_material_request()
+		self.update_planned_qty()
+
+	def validate_cancel(self):
+		if self.status == "Stopped":
+			frappe.throw(_("Stopped Production Order cannot be cancelled, Unstop it first to cancel"))
+
 		# Check whether any stock entry exists against this Production Order
 		stock_entry = frappe.db.sql("""select name from `tabStock Entry`
 			where production_order = %s and docstatus = 1""", self.name)
 		if stock_entry:
 			frappe.throw(_("Cannot cancel because submitted Stock Entry {0} exists").format(stock_entry[0][0]))
 
-		frappe.db.set(self,'status', 'Cancelled')
-		self.update_planned_qty(-self.qty)
-		self.delete_time_logs()
-
-	def update_planned_qty(self, qty):
-		"""update planned qty in bin"""
-		args = {
-			"item_code": self.production_item,
-			"warehouse": self.fg_warehouse,
-			"posting_date": nowdate(),
-			"planned_qty": flt(qty)
-		}
-		from erpnext.stock.utils import update_bin
-		update_bin(args)
+	def update_planned_qty(self):
+		update_bin_qty(self.production_item, self.fg_warehouse, {
+			"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)
+		})
+		
+		if self.material_request:
+			mr_obj = frappe.get_doc("Material Request", self.material_request)
+			mr_obj.update_requested_qty([self.material_request_item])
+			
+	def update_completed_qty_in_material_request(self):
+		if self.material_request:
+			frappe.get_doc("Material Request", self.material_request).update_completed_qty([self.material_request_item])
 
 	def set_production_order_operations(self):
 		"""Fetch operations from BOM and set in 'Production Order'"""
@@ -304,7 +314,8 @@ class ProductionOrder(Document):
 
 	def set_actual_dates(self):
 		if self.get("operations"):
-			actual_date = frappe.db.sql("""select min(actual_start_time) as start_date, max(actual_end_time) as end_date from `tabProduction Order Operation`
+			actual_date = frappe.db.sql("""select min(actual_start_time) as start_date,
+				max(actual_end_time) as end_date from `tabProduction Order Operation`
 				where parent = %s and docstatus=1""", self.name, as_dict=1)[0]
 			self.actual_start_date = actual_date.start_date
 			self.actual_end_date = actual_date.end_date
@@ -342,8 +353,8 @@ class ProductionOrder(Document):
 @frappe.whitelist()
 def get_item_details(item):
 	res = frappe.db.sql("""select stock_uom, description
-		from `tabItem` where (ifnull(end_of_life, "0000-00-00")="0000-00-00" or end_of_life > now())
-		and name=%s""", item, as_dict=1)
+		from `tabItem` where disabled=0 and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)
+		and name=%s""", (nowdate(), item), as_dict=1)
 	if not res:
 		return {}
 
@@ -423,6 +434,8 @@ def make_time_log(name, operation, from_time=None, to_time=None, qty=None,  proj
 
 @frappe.whitelist()
 def get_default_warehouse():
-	wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
-	fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+	wip_warehouse = frappe.db.get_single_value("Manufacturing Settings",
+		"default_wip_warehouse")
+	fg_warehouse = frappe.db.get_single_value("Manufacturing Settings",
+		"default_fg_warehouse")
 	return {"wip_warehouse": wip_warehouse, "fg_warehouse": fg_warehouse}

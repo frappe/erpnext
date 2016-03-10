@@ -12,6 +12,8 @@ from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 
 class StockFreezeError(frappe.ValidationError): pass
 
+exclude_from_linked_with = True
+
 class StockLedgerEntry(Document):
 	def validate(self):
 		self.flags.ignore_submit_comment = True

@@ -19,6 +19,14 @@ frappe.ui.form.on("BOM", {
 				frappe.set_route("bom-browser", frm.doc.name);
 			});
 		}
+
+		if(frm.doc.docstatus==2) {
+			// show duplicate button when BOM is cancelled,
+			// its not very intuitive
+			frm.add_custom_button(__("Duplicate"), function() {
+				frm.copy_doc();
+			});
+		}
 	},
 	update_cost: function(frm) {
 		return frappe.call({
@@ -147,9 +155,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc) {
 	return{
 		query: "erpnext.controllers.queries.item_query",
-		filters: {
-			"name": "!" + cstr(doc.item)
-		}
+		filters: [["Item", "name", "!=", cur_frm.doc.item]]
 	}
 }
 

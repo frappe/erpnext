@@ -56,9 +56,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.set_query("item_code", "items", function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: (me.frm.doc.order_type === "Maintenance" ?
-						{'is_service_item': 1}:
-						{'is_sales_item': 1	})
+					filters: {'is_sales_item': 1}
 				}
 			});
 		}
@@ -81,10 +79,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					}
 				}
 			});
-		}
-
-		if(this.frm.fields_dict.sales_team && this.frm.fields_dict.sales_team.grid.get_field("sales_person")) {
-			this.frm.set_query("sales_person", "sales_team", erpnext.queries.not_a_group_filter);
 		}
 	},
 
@@ -206,30 +200,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	calculate_outstanding_amount: function(update_paid_amount) {
-		// NOTE:
-		// paid_amount and write_off_amount is only for POS Invoice
-		// total_advance is only for non POS Invoice
-		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.docstatus==0 && !this.frm.doc.is_return) {
-			frappe.model.round_floats_in(this.frm.doc, ["base_grand_total", "total_advance", "write_off_amount",
-				"paid_amount"]);
-			var total_amount_to_pay = this.frm.doc.base_grand_total - this.frm.doc.write_off_amount
-				- this.frm.doc.total_advance;
-			if(this.frm.doc.is_pos) {
-				if(!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount) {
-					this.frm.doc.paid_amount = flt(total_amount_to_pay);
-					this.frm.refresh_field("paid_amount");
-				}
-			} else {
-				this.frm.doc.paid_amount = 0
-				this.frm.refresh_field("paid_amount");
-			}
-
-			this.frm.set_value("outstanding_amount", flt(total_amount_to_pay
-				- this.frm.doc.paid_amount, precision("outstanding_amount")));
-		}
-	},
-
 	calculate_commission: function() {
 		if(this.frm.fields_dict.commission_rate) {
 			if(this.frm.doc.commission_rate > 100) {
@@ -312,6 +282,24 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 		}
 		refresh_field('product_bundle_help');
+	},
+
+	make_payment_request: function() {
+		frappe.call({
+			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
+			args: {
+				"dt": cur_frm.doc.doctype,
+				"dn": cur_frm.doc.name,
+				"recipient_id": cur_frm.doc.contact_email
+			},
+			callback: function(r) {
+				if(!r.exc){
+					var doc = frappe.model.sync(r.message);
+					console.log(r.message)
+					frappe.set_route("Form", r.message.doctype, r.message.name);
+				}
+			}
+		})
 	}
 });
 

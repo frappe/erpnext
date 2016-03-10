@@ -42,44 +42,40 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 		wrapper.page.add_menu_item(__('New Company'), function() { newdoc('Company'); }, true);
 	}
 
-	wrapper.page.set_secondary_action(__('Refresh'), function() {
+	wrapper.page.add_menu_item(__('Refresh'), function() {
 			wrapper.$company_select.change();
 		});
 
 	wrapper.page.set_primary_action(__('New'), function() {
 		erpnext.account_chart && erpnext.account_chart.make_new();
-	});
+	}, "octicon octicon-plus");
+
+	var company_list = $.map(locals[':Company'], function(c) { return c.name; }).sort();
 
 	// company-select
-	wrapper.$company_select = wrapper.page.add_select("Company", [])
+	wrapper.$company_select = wrapper.page.add_select("Company", company_list)
 		.change(function() {
 			var ctype = frappe.get_route()[1] || 'Account';
 			erpnext.account_chart = new erpnext.AccountsChart(ctype, $(this).val(),
 				chart_area.get(0), wrapper.page);
 		})
 
-	// load up companies
-	return frappe.call({
-		method: 'erpnext.accounts.page.accounts_browser.accounts_browser.get_companies',
-		callback: function(r) {
-			wrapper.$company_select.empty();
-			$.each(r.message, function(i, v) {
-				$('<option>').html(v).attr('value', v).appendTo(wrapper.$company_select);
-			});
-			wrapper.$company_select.val(frappe.defaults.get_user_default("company") || r.message[0]).change();
-		}
-	});
+	wrapper.$company_select.change();
 }
 
 frappe.pages["Accounts Browser"].on_page_show = function(wrapper){
 	// set route
 	var ctype = frappe.get_route()[1] || 'Account';
 
-
-
-	if(erpnext.account_chart && erpnext.account_chart.ctype != ctype) {
+	if(frappe.route_options) {
+		if(frappe.route_options.company) {
+			wrapper.$company_select.val(frappe.route_options.company).change();
+		}
+		frappe.route_options = null;
+	} else if(erpnext.account_chart && erpnext.account_chart.ctype != ctype) {
 		wrapper.$company_select.change();
 	}
+
 }
 
 erpnext.AccountsChart = Class.extend({
@@ -117,11 +113,12 @@ erpnext.AccountsChart = Class.extend({
 					}
 				},
 				{
-					condition: function(node) { return !node.root && node.expandable; },
+					condition: function(node) { return node.expandable; },
 					label: __("Add Child"),
 					click: function() {
 						me.make_new()
-					}
+					},
+					btnClass: "hidden-xs"
 				},
 				{
 					condition: function(node) {
@@ -137,17 +134,18 @@ erpnext.AccountsChart = Class.extend({
 							"company": me.company
 						};
 						frappe.set_route("query-report", "General Ledger");
-					}
-
+					},
+					btnClass: "hidden-xs"
 				},
 				{
 					condition: function(node) { return !node.root && me.can_write },
 					label: __("Rename"),
 					click: function(node) {
 						frappe.model.rename_doc(me.ctype, node.label, function(new_name) {
-							node.reload();
+							node.reload_parent();
 						});
-					}
+					},
+					btnClass: "hidden-xs"
 				},
 				{
 					condition: function(node) { return !node.root && me.can_delete },
@@ -156,14 +154,18 @@ erpnext.AccountsChart = Class.extend({
 						frappe.model.delete_doc(me.ctype, node.label, function() {
 							node.parent.remove();
 						});
-					}
+					},
+					btnClass: "hidden-xs"
 				}
 			],
 			onrender: function(node) {
 				var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
 				if (me.ctype == 'Account' && node.data && node.data.balance!==undefined) {
 					$('<span class="balance-area pull-right text-muted small">'
-						+ format_currency(Math.abs(node.data.balance), node.data.currency)
+						+ (node.data.balance_in_account_currency ?
+							(format_currency(Math.abs(node.data.balance_in_account_currency),
+								node.data.account_currency) + " / ") : "")
+						+ format_currency(Math.abs(node.data.balance), node.data.company_currency)
 						+ " " + dr_or_cr
 						+ '</span>').insertBefore(node.$ul);
 				}
@@ -205,13 +207,16 @@ erpnext.AccountsChart = Class.extend({
 					description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers")},
 				{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 					description: __('Further accounts can be made under Groups, but entries can be made against non-Groups')},
+				{fieldtype:'Select', fieldname:'root_type', label:__('Root Type'),
+					options: ['Asset', 'Liability', 'Equity', 'Income', 'Expense'].join('\n'),
+				},
 				{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
-					options: ['', 'Bank', 'Cash', 'Warehouse', 'Receivable', 'Payable',
-						'Equity', 'Cost of Goods Sold', 'Fixed Asset', 'Expense Account',
-						'Income Account', 'Tax', 'Chargeable', 'Temporary'].join('\n'),
+					options: ['', 'Bank', 'Cash', 'Warehouse', 'Tax', 'Chargeable'].join('\n'),
 					description: __("Optional. This setting will be used to filter in various transactions.") },
 				{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate')},
-				{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse"}
+				{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse"},
+				{fieldtype:'Link', fieldname:'account_currency', label:__('Currency'), options:"Currency",
+					description: __("Optional. Sets company's default currency, if not specified.")}
 			]
 		})
 
@@ -235,6 +240,9 @@ erpnext.AccountsChart = Class.extend({
 			$(fd.warehouse.wrapper).toggle(fd.account_type.get_value()==='Warehouse');
 		})
 
+		// root type if root
+		$(fd.root_type.wrapper).toggle(node.root);
+
 		// create
 		d.set_primary_action(__("Create New"), function() {
 			var btn = this;
@@ -250,6 +258,14 @@ erpnext.AccountsChart = Class.extend({
 			v.parent_account = node.label;
 			v.company = me.company;
 
+			if(node.root) {
+				v.is_root = true;
+				v.parent_account = null;
+			} else {
+				v.is_root = false;
+				v.root_type = null;
+			}
+
 			return frappe.call({
 				args: v,
 				method: 'erpnext.accounts.utils.add_ac',
@@ -258,7 +274,7 @@ erpnext.AccountsChart = Class.extend({
 					if(node.expanded) {
 						node.toggle_node();
 					}
-					node.reload();
+					node.load();
 				}
 			});
 		});
@@ -304,7 +320,7 @@ erpnext.AccountsChart = Class.extend({
 					if(node.expanded) {
 						node.toggle_node();
 					}
-					node.reload();
+					node.load();
 				}
 			});
 		});

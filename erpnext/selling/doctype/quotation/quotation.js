@@ -18,17 +18,19 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this._super(doc, dt, dn);
 
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
-			cur_frm.add_custom_button(__('Make Sales Order'),
-				cur_frm.cscript['Make Sales Order'], frappe.boot.doctype_icons["Sales Order"]);
-			if(doc.status!=="Ordered") {
-				cur_frm.add_custom_button(__('Set as Lost'),
-					cur_frm.cscript['Declare Order Lost'], "icon-exclamation", "btn-default");
-			}
+			cur_frm.add_custom_button(__('Sales Order'),
+				cur_frm.cscript['Make Sales Order'], __("Make"));
 
+			if(doc.status!=="Ordered") {
+				cur_frm.add_custom_button(__('Lost'),
+					cur_frm.cscript['Declare Order Lost'], __("Status"));
+			}
+			
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('From Opportunity'),
+			cur_frm.add_custom_button(__('Opportunity'),
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
@@ -41,10 +43,11 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				}, "icon-download", "btn-default");
+				}, __("Get items from"), "btn-default");
 		}
 
 		this.toggle_reqd_lead_customer();
+		
 	},
 
 	quotation_to: function() {
@@ -159,4 +162,10 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 
 frappe.ui.form.on("Quotation Item", "items_on_form_rendered", function(frm, cdt, cdn) {
 	// enable tax_amount field if Actual
+})
+
+frappe.ui.form.on("Quotation Item", "stock_balance", function(frm, cdt, cdn) {
+	var d = frappe.model.get_doc(cdt, cdn);
+	frappe.route_options = {"item_code": d.item_code}; 
+	frappe.set_route("query-report", "Stock Balance");
 })

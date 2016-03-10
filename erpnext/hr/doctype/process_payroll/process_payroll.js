@@ -25,8 +25,8 @@ cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
 
 cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 	cur_frm.cscript.display_activity_log("");
-	var check = confirm(__("Do you really want to Submit all Salary Slip for month {0} and year {1}", [doc.month, doc.fiscal_year]));
-	if(check){
+
+	frappe.confirm(__("Do you really want to Submit all Salary Slip for month {0} and year {1}", [doc.month, doc.fiscal_year]), function() {
 		// clear all in locals
 		if(locals["Salary Slip"]) {
 			$.each(locals["Salary Slip"], function(name, d) {
@@ -40,7 +40,7 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 		}
 
 		return $c('runserverobj', args={'method':'submit_salary_slip','docs':doc},callback);
-	}
+	});
 }
 
 cur_frm.cscript.make_bank_entry = function(doc,cdt,cdn){

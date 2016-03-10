@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 import frappe
 import unittest
-from frappe.utils import getdate
+from frappe.utils import getdate, nowdate, add_days
 
 # test_records = frappe.get_test_records('Task')
 
@@ -177,3 +177,18 @@ class TestTask(unittest.TestCase):
 		todo = get_owner_and_status()
 		self.assertEquals(todo.owner, "test@example.com")
 		self.assertEquals(todo.status, "Closed")
+
+	def test_overdue(self):
+		task = frappe.get_doc({
+			"doctype":"Task",
+			"subject": "Testing Overdue",
+			"status": "Open",
+			"exp_end_date": add_days(nowdate(), -1)
+		})
+
+		task.insert()
+
+		from erpnext.projects.doctype.task.task import set_tasks_as_overdue
+		set_tasks_as_overdue()
+
+		self.assertEquals(frappe.db.get_value("Task", task.name, "status"), "Overdue")

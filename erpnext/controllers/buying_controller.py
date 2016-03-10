@@ -52,15 +52,6 @@ class BuyingController(StockController):
 					self.supplier = supplier
 					break
 
-	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company
-
-		warehouses = list(set([d.warehouse for d in
-			self.get("items") if getattr(d, "warehouse", None)]))
-
-		for w in warehouses:
-			validate_warehouse_company(w, self.company)
-
 	def validate_stock_or_nonstock_items(self):
 		if self.meta.get_field("taxes") and not self.get_stock_items():
 			tax_for_valuation = [d.account_head for d in self.get("taxes")
@@ -234,7 +225,7 @@ class BuyingController(StockController):
 
 	def get_items_from_bom(self, item_code, bom):
 		bom_items = frappe.db.sql("""select t2.item_code,
-			ifnull(t2.qty, 0) / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
+			t2.qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
 			t2.rate, t2.stock_uom, t2.name, t2.description
 			from `tabBOM` t1, `tabBOM Item` t2, tabItem t3
 			where t2.parent = t1.name and t1.item = %s

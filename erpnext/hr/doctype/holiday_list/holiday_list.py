@@ -16,7 +16,8 @@ class HolidayList(Document):
 
 	def get_weekly_off_dates(self):
 		self.validate_values()
-		yr_start_date, yr_end_date = self.get_fy_start_end_dates()
+		self.validate_days()
+		yr_start_date, yr_end_date = get_fy_start_end_dates(self.fiscal_year)
 		date_list = self.get_weekly_off_date_list(yr_start_date, yr_end_date)
 		last_idx = max([cint(d.idx) for d in self.get("holidays")] or [0,])
 		for i, d in enumerate(date_list):
@@ -31,9 +32,10 @@ class HolidayList(Document):
 		if not self.weekly_off:
 			throw(_("Please select weekly off day"))
 
-	def get_fy_start_end_dates(self):
-		return frappe.db.sql("""select year_start_date, year_end_date
-			from `tabFiscal Year` where name=%s""", (self.fiscal_year,))[0]
+	def validate_days(self):
+		for day in self.get("holidays"):
+			if (self.weekly_off or "").upper() == (day.description or "").upper():
+				frappe.throw("Records already exist for mentioned weekly off")
 
 	def get_weekly_off_date_list(self, year_start_date, year_end_date):
 		from frappe.utils import getdate
@@ -58,4 +60,40 @@ class HolidayList(Document):
 
 	def update_default_holiday_list(self):
 		frappe.db.sql("""update `tabHoliday List` set is_default = 0
-			where ifnull(is_default, 0) = 1 and fiscal_year = %s""", (self.fiscal_year,))
+			where is_default = 1 and fiscal_year = %s""", (self.fiscal_year,))
+
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	import json
+	"""Returns events for Gantt / Calendar view rendering.
+
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Holiday List", filters)
+
+	fiscal_year = None
+	if filters:
+		fiscal_year = json.loads(filters).get("fiscal_year")
+
+	if not fiscal_year:
+		fiscal_year = frappe.db.get_value("Global Defaults", None, "current_fiscal_year")
+
+	yr_start_date, yr_end_date = get_fy_start_end_dates(fiscal_year)
+
+	data = frappe.db.sql("""select hl.name, hld.holiday_date, hld.description
+		from `tabHoliday List` hl, tabHoliday hld
+		where hld.parent = hl.name
+		and (ifnull(hld.holiday_date, "0000-00-00") != "0000-00-00"
+			and hld.holiday_date between %(start)s and %(end)s)
+		{conditions}""".format(conditions=conditions), {
+			"start": yr_start_date,
+			"end": yr_end_date
+		}, as_dict=True, update={"allDay": 1})
+
+	return data
+
+def get_fy_start_end_dates(fiscal_year):
+	return frappe.db.get_value("Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"])

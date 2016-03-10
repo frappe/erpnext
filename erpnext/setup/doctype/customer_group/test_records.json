@@ -4,5 +4,11 @@
   "doctype": "Customer Group",
   "is_group": "No",
   "parent_customer_group": "All Customer Groups"
+ },
+ {
+  "customer_group_name": "_Test Customer Group 1",
+  "doctype": "Customer Group",
+  "is_group": "No",
+  "parent_customer_group": "All Customer Groups"
  }
 ]

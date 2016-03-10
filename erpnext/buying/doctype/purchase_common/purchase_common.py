@@ -42,6 +42,8 @@ class PurchaseCommon(BuyingController):
 		items = []
 		for d in obj.get("items"):
 			if not d.qty:
+				if obj.doctype == "Purchase Receipt" and d.rejected_qty:
+					continue
 				frappe.throw(_("Please enter quantity for Item {0}").format(d.item_code))
 
 			# udpate with latest quantities
@@ -56,11 +58,11 @@ class PurchaseCommon(BuyingController):
 					d.set(x, f_lst[x])
 
 			item = frappe.db.sql("""select is_stock_item, is_purchase_item,
-				is_sub_contracted_item, end_of_life from `tabItem` where name=%s""",
+				is_sub_contracted_item, end_of_life, disabled from `tabItem` where name=%s""",
 				d.item_code, as_dict=1)[0]
 
 			from erpnext.stock.doctype.item.item import validate_end_of_life
-			validate_end_of_life(d.item_code, item.end_of_life)
+			validate_end_of_life(d.item_code, item.end_of_life, item.disabled)
 
 			# validate stock item
 			if item.is_stock_item==1 and d.qty and not d.warehouse:
@@ -72,17 +74,18 @@ class PurchaseCommon(BuyingController):
 					frappe.throw(_("{0} must be a Purchased or Sub-Contracted Item in row {1}").format(d.item_code, d.idx))
 
 			items.append(cstr(d.item_code))
+
 		if items and len(items) != len(set(items)) and \
 			not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items") or 0):
 			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
 
 
-	def check_for_stopped_status(self, doctype, docname):
-		stopped = frappe.db.sql("""select name from `tab%s` where name = %s and
-			status = 'Stopped'""" % (doctype, '%s'), docname)
-		if stopped:
-			frappe.throw(_("{0} {1} status is 'Stopped'").format(doctype, docname), frappe.InvalidStatusError)
-
+	def check_for_closed_status(self, doctype, docname):
+		status = frappe.db.get_value(doctype, docname, "status")
+		
+		if status == "Closed":
+			frappe.throw(_("{0} {1} status is {2}").format(doctype, docname, status), frappe.InvalidStatusError)
+		
 	def check_docstatus(self, check, doctype, docname, detail_doctype = ''):
 		if check == 'Next':
 			submitted = frappe.db.sql("""select t1.name from `tab%s` t1,`tab%s` t2

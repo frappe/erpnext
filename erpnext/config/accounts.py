@@ -33,12 +33,17 @@ def get_data():
 					"description": _("Supplier database.")
 				},
 				{
+					"type": "doctype",
+					"name": "Payment Request",
+					"description": _("Payment Request")
+				},
+				{
 					"type": "page",
 					"name": "Accounts Browser",
 					"icon": "icon-sitemap",
 					"label": _("Chart of Accounts"),
 					"route": "Accounts Browser/Account",
-					"description": _("Tree of finanial accounts."),
+					"description": _("Tree of financial accounts."),
 					"doctype": "Account",
 				},
 			]
@@ -84,12 +89,17 @@ def get_data():
 					"description": _("Financial / accounting year.")
 				},
 				{
+					"type": "doctype",
+					"name": "Payment Gateway Account",
+					"description": _("Setup Gateway accounts.")
+				},
+				{
 					"type": "page",
 					"name": "Accounts Browser",
 					"icon": "icon-sitemap",
 					"label": _("Chart of Accounts"),
 					"route": "Accounts Browser/Account",
-					"description": _("Tree of finanial accounts."),
+					"description": _("Tree of financial accounts."),
 					"doctype": "Account",
 				},
 				{
@@ -98,13 +108,18 @@ def get_data():
 					"icon": "icon-sitemap",
 					"label": _("Chart of Cost Centers"),
 					"route": "Accounts Browser/Cost Center",
-					"description": _("Tree of finanial Cost Centers."),
+					"description": _("Tree of financial Cost Centers."),
 					"doctype": "Cost Center",
 				},
 				{
 					"type": "doctype",
 					"name": "Accounts Settings",
 					"description": _("Default settings for accounting transactions.")
+				},
+				{
+					"type": "doctype",
+					"name": "Tax Rule",
+					"description": _("Tax Rule for transactions.")
 				},
 				{
 					"type": "doctype",
@@ -184,6 +199,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Trial Balance for Party",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
 					"name": "Gross Profit",
 					"doctype": "Sales Invoice",
 					"is_query_report": True
@@ -215,6 +236,12 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Balance Sheet",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Cash Flow",
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},

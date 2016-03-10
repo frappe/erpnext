@@ -1,7 +1,7 @@
 {
     "country_code": "de",
     "name": "Deutscher Kontenplan SKR04",
-	"is_active": "Yes",
+	"disabled": "Yes",
     "tree": {
         "Bilanz - Aktiva": {
             "Anlageverm\u00f6gen": {

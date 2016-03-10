@@ -17,14 +17,20 @@ def delete_company_transactions(company_name):
 		frappe.throw(_("Transactions can only be deleted by the creator of the Company"), frappe.PermissionError)
 
 	delete_bins(company_name)
-	
 	delete_time_logs(company_name)
+	delete_lead_addresses(company_name)
 
 	for doctype in frappe.db.sql_list("""select parent from
 		tabDocField where fieldtype='Link' and options='Company'"""):
-		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget Detail", "Party Account", "Employee"):
-			delete_for_doctype(doctype, company_name)
-			
+		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget Detail",
+			"Party Account", "Employee", "Sales Taxes and Charges Template",
+			"Purchase Taxes and Charges Template", "POS Profile", 'BOM'):
+				delete_for_doctype(doctype, company_name)
+
+		else:
+			# un-set company
+			frappe.db.sql('update `tab{0}` set company="" where company=%s'.format(doctype), company_name)
+
 	# Clear notification counts
 	clear_notifications()
 
@@ -47,7 +53,7 @@ def delete_for_doctype(doctype, company_name):
 
 		# reset series
 		naming_series = meta.get_field("naming_series")
-		if naming_series:
+		if naming_series and naming_series.options:
 			prefixes = sorted(naming_series.options.split("\n"), lambda a, b: len(b) - len(a))
 
 			for prefix in prefixes:
@@ -71,15 +77,23 @@ def delete_time_logs(company_name):
 	# Delete Time Logs as it is linked to Production Order / Project / Task, which are linked to company
 	frappe.db.sql("""
 		delete from `tabTime Log`
-		where 
-			(ifnull(project, '') != '' 
+		where
+			(ifnull(project, '') != ''
 				and exists(select name from `tabProject` where name=`tabTime Log`.project and company=%(company)s))
-			or (ifnull(task, '') != '' 
+			or (ifnull(task, '') != ''
 				and exists(select name from `tabTask` where name=`tabTime Log`.task and company=%(company)s))
-			or (ifnull(production_order, '') != '' 
-				and exists(select name from `tabProduction Order` 
+			or (ifnull(production_order, '') != ''
+				and exists(select name from `tabProduction Order`
 					where name=`tabTime Log`.production_order and company=%(company)s))
-			or (ifnull(sales_invoice, '') != '' 
-				and exists(select name from `tabSales Invoice` 
+			or (ifnull(sales_invoice, '') != ''
+				and exists(select name from `tabSales Invoice`
 					where name=`tabTime Log`.sales_invoice and company=%(company)s))
 	""", {"company": company_name})
+
+def delete_lead_addresses(company_name):
+	"""Delete addresses to which leads are linked"""
+	for lead in frappe.get_all("Lead", filters={"company": company_name}):
+		frappe.db.sql("""delete from `tabAddress`
+			where lead=%s and (customer='' or customer is null) and (supplier='' or supplier is null)""", lead.name)
+
+		frappe.db.sql("""update `tabAddress` set lead=null, lead_name=null where lead=%s""", lead.name)

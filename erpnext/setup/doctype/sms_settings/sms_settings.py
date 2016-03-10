@@ -42,7 +42,7 @@ def get_sender_name():
 def get_contact_number(contact_name, value, key):
 	"returns mobile number of the contact"
 	number = frappe.db.sql("""select mobile_no, phone from tabContact where name=%s and %s=%s""" %
-		('%s', key, '%s'), (contact_name, value))
+		('%s', frappe.db.escape(key), '%s'), (contact_name, value))
 	return number and (number[0][0] or number[0][1]) or ''
 
 @frappe.whitelist()
@@ -94,7 +94,7 @@ def send_request(gateway_url, args):
 	headers = {}
 	headers['Accept'] = "text/plain, text/html, */*"
 	conn.request('GET', api_url + urllib.urlencode(args), headers = headers)    # send request
-	resp = conn.getresponse()     # get response		
+	resp = conn.getresponse()     # get response
 	return resp.status
 
 # Split gateway url to server and api url
@@ -119,4 +119,5 @@ def create_sms_log(args, sent_to):
 	sl.requested_numbers = "\n".join(args['receiver_list'])
 	sl.no_of_sent_sms = len(sent_to)
 	sl.sent_to = "\n".join(sent_to)
+	sl.flags.ignore_permissions = True
 	sl.save()

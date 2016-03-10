@@ -78,7 +78,7 @@ class HubSettings(Document):
 			if item.image:
 				item.image = expand_relative_urls(item.image)
 
-		item_list = frappe.db.sql_list("select name from tabItem where ifnull(publish_in_hub,0)=1")
+		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
 
 		if items:
 			response = requests.post(self.hub_url + "/api/method/hub.hub.api.sync", data={

@@ -25,37 +25,41 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		if(!doc.is_return) {
 			if(doc.docstatus==1) {
 				if(doc.outstanding_amount > 0) {
-					this.frm.add_custom_button(__('Payment'), this.make_bank_entry).addClass("btn-primary");
+					this.frm.add_custom_button(__('Payment'), this.make_bank_entry, __("Make"));
+					cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 				}
-				cur_frm.add_custom_button(__('Debit Note'), this.make_debit_note);
+				if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
+					cur_frm.add_custom_button(__('Debit Note'), this.make_debit_note, __("Make"));
+				}
 			}
 
 			if(doc.docstatus===0) {
-				cur_frm.add_custom_button(__('From Purchase Order'), function() {
+				cur_frm.add_custom_button(__('Purchase Order'), function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
 						source_doctype: "Purchase Order",
 						get_query_filters: {
 							supplier: cur_frm.doc.supplier || undefined,
 							docstatus: 1,
-							status: ["!=", "Stopped"],
+							status: ["!=", "Closed"],
 							per_billed: ["<", 99.99],
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, __("Get items from"));
 
-				cur_frm.add_custom_button(__('From Purchase Receipt'), function() {
+				cur_frm.add_custom_button(__('Purchase Receipt'), function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 						source_doctype: "Purchase Receipt",
 						get_query_filters: {
 							supplier: cur_frm.doc.supplier || undefined,
 							docstatus: 1,
+							status: ["!=", "Closed"],
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, __("Get items from"));
 			}
 		}
 	},
@@ -76,7 +80,28 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		})
 	},
 
+	credit_to: function() {
+		var me = this;
+		if(this.frm.doc.credit_to) {
+			me.frm.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "Account",
+					fieldname: "account_currency",
+					filters: { name: me.frm.doc.credit_to },
+				},
+				callback: function(r, rt) {
+					if(r.message) {
+						me.frm.set_value("party_account_currency", r.message.account_currency);
+						me.set_dynamic_labels();
+					}
+				}
+			});
+		}
+	},
+
 	write_off_amount: function() {
+		this.set_in_company_currency(this.frm.doc, ["write_off_amount"]);
 		this.calculate_outstanding_amount();
 		this.frm.refresh_fields();
 	},
@@ -114,9 +139,10 @@ cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 
 cur_frm.cscript.make_bank_entry = function() {
 	return frappe.call({
-		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_purchase_invoice",
+		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice",
 		args: {
-			"purchase_invoice": cur_frm.doc.name,
+			"dt": "Purchase Invoice",
+			"dn": cur_frm.doc.name
 		},
 		callback: function(r) {
 			var doclist = frappe.model.sync(r.message);

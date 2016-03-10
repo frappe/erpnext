@@ -10,6 +10,17 @@ frappe.listview_settings['Task'] = {
 		listview.page.add_menu_item(__("Set as Closed"), function() {
 			listview.call_for_selected_items(method, {"status": "Closed"});
 		});
+	},
+	get_indicator: function(doc) {
+		var colors = {
+			"Open": "orange",
+			"Overdue": "red",
+			"Pending Review": "orange",
+			"Working": "orange",
+			"Closed": "green",
+			"Cancelled": "dark grey"
+		}
+		return [__(doc.status), colors[doc.status], "status,=," + doc.status];
 	}
 
 };

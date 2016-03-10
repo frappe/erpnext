@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils.jinja import validate_template
 from frappe import _
 
 class AddressTemplate(Document):
@@ -13,6 +14,8 @@ class AddressTemplate(Document):
 			if not self.defaults:
 				self.is_default = 1
 				frappe.msgprint(_("Setting this Address Template as default as there is no other default"))
+
+		validate_template(self.template)
 
 	def on_update(self):
 		if self.is_default and self.defaults:

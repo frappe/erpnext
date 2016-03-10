@@ -37,14 +37,31 @@ $.extend(cur_frm.cscript, {
 	}
 });
 
-frappe.ui.form.on("Time Log Batch Detail", "time_log", function(frm, cdt, cdn) {
+frappe.ui.form.on("Time Log Batch Detail", "time_log", function(frm) {
+	calculate_time_and_amount(frm);
+});
+
+frappe.ui.form.on("Time Log Batch Detail", "time_logs_remove", function(frm) {
+	calculate_time_and_amount(frm);
+});
+
+frappe.ui.form.on("Time Log Batch", "onload", function(frm) {
+	if (frm.doc.__islocal && frm.doc.time_logs) {
+		calculate_time_and_amount(frm);
+	}
+});
+
+var calculate_time_and_amount = function(frm) {
 	var tl = frm.doc.time_logs || [];
 	total_hr = 0;
 	total_amt = 0;
 	for(var i=0; i<tl.length; i++) {
-		total_hr += tl[i].hours;
-		total_amt += tl[i].billing_amount;
+		if (tl[i].time_log) {
+			total_hr += tl[i].hours;
+			total_amt += tl[i].billing_amount;
+		}
 	}
 	cur_frm.set_value("total_hours", total_hr);
 	cur_frm.set_value("total_billing_amount", total_amt);
-});
+	
+}

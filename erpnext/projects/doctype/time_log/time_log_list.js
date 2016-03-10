@@ -4,6 +4,17 @@
 // render
 frappe.listview_settings['Time Log'] = {
 	add_fields: ["status", "billable", "activity_type", "task", "project", "hours", "for_manufacturing", "billing_amount"],
+	
+	get_indicator: function(doc) {
+		if (doc.status== "Batched for Billing") {
+			return [__("Batched for Billing"), "darkgrey", "status,=,Batched for Billing"]
+		} else if (doc.status== "Billed") {
+			return [__("Billed"), "green", "status,=,Billed"]
+		} else if (doc.status== "Submitted" && doc.billable) {
+			return [__("Billable"), "orange", "billable,=,1"]
+		}
+	},
+	
 	selectable: true,
 	onload: function(me) {
 		me.page.add_menu_item(__("Make Time Log Batch"), function() {
@@ -18,12 +29,20 @@ frappe.listview_settings['Time Log'] = {
 			for(var i in selected) {
 				var d = selected[i];
 				if(!d.billable) {
-					msgprint(__("Time Log is not billable") + ": " + d.name);
+					msgprint(__("Time Log is not billable") + ": " + d.name + " - " + d.title);
+					return;
+				}
+				if(d.status=="Batched for Billing") {
+					msgprint(__("Time Log has been Batched for Billing") + ": " + d.name + " - " + d.title);
+					return;
+				}
+				if(d.status=="Billed") {
+					msgprint(__("Time Log has been Billed") + ": " + d.name + " - " + d.title);
 					return;
 				}
 				if(d.status!="Submitted") {
-					msgprint(__("Time Log Status must be Submitted."));
-					return
+					msgprint(__("Time Log Status must be Submitted.") + ": " + d.name + " - " + d.title);
+					return;
 				}
 			}
 

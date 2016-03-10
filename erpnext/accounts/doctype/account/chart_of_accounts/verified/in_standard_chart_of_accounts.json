@@ -1,7 +1,6 @@
 {
     "country_code": "in",
     "name": "Chart of Accounts - India",
-	"is_active": "Yes",
     "tree": {
 	    "Application of Funds (Assets)": {
 	        "Current Assets": {

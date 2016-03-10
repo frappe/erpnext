@@ -60,9 +60,9 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Process Payroll",
-					"label": _("Process Payroll"),
-					"description":_("Generate Salary Slips"),
+					"name": "Employee Attendance Tool",
+					"label": _("Employee Attendance Tool"),
+					"description":_("Mark Employee Attendance in Bulk"),
 					"hide_count": True
 				},
 				{
@@ -71,6 +71,14 @@ def get_data():
 					"description":_("Upload attendance from a .csv file"),
 					"hide_count": True
 				},
+				{
+					"type": "doctype",
+					"name": "Process Payroll",
+					"label": _("Process Payroll"),
+					"description":_("Generate Salary Slips"),
+					"hide_count": True
+				},
+			
 				{
 					"type": "doctype",
 					"name": "Leave Control Panel",
@@ -179,6 +187,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"is_query_report": True,
+					"name": "Employee Holiday Attendance",
+					"doctype": "Employee"
+				},
+				{
+					"type": "report",
 					"name": "Employee Information",
 					"doctype": "Employee"
 				},
@@ -194,6 +208,33 @@ def get_data():
 					"name": "Monthly Attendance Sheet",
 					"doctype": "Attendance"
 				},
+
 			]
 		},
+		{
+			"label": _("Help"),
+			"icon": "icon-facetime-video",
+			"items": [
+				{
+					"type": "help",
+					"label": _("Setting up Employees"),
+					"youtube_id": "USfIUdZlUhw"
+				},
+				{
+					"type": "help",
+					"label": _("Leave Management"),
+					"youtube_id": "fc0p_AXebc8"
+				},
+				{
+					"type": "help",
+					"label": _("Expense Claims"),
+					"youtube_id": "5SZHJF--ZFY"
+				},
+				{
+					"type": "help",
+					"label": _("Processing Payroll"),
+					"youtube_id": "apgE-f25Rm0"
+				},
+			]
+		}
 	]
