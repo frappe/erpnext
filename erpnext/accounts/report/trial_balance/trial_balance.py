@@ -4,8 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate, formatdate, cstr
-from erpnext.accounts.report.financial_statements import filter_accounts, set_gl_entries_by_account
+from frappe.utils import flt, getdate, formatdate, cstr
+from erpnext.accounts.report.financial_statements \
+	import filter_accounts, set_gl_entries_by_account, filter_out_zero_value_rows
 
 value_fields = ("opening_debit", "opening_credit", "debit", "credit", "closing_debit", "closing_credit")
 
@@ -56,7 +57,7 @@ def get_data(filters):
 	if not accounts:
 		return None
 
-	accounts, accounts_by_name = filter_accounts(accounts)
+	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 
 	min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabAccount`
 		where company=%s""", (filters.company,))[0]
@@ -71,8 +72,10 @@ def get_data(filters):
 	total_row = calculate_values(accounts, gl_entries_by_account, opening_balances, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
-	data = prepare_data(accounts, filters, total_row)
-
+	data = prepare_data(accounts, filters, total_row, parent_children_map)
+	data = filter_out_zero_value_rows(data, parent_children_map, 
+		show_zero_values=filters.get("show_zero_values"))
+		
 	return data
 
 def get_opening_balances(filters):
@@ -156,10 +159,8 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 			for key in value_fields:
 				accounts_by_name[d.parent_account][key] += d[key]
 
-def prepare_data(accounts, filters, total_row):
-	show_zero_values = cint(filters.show_zero_values)
+def prepare_data(accounts, filters, total_row, parent_children_map):
 	data = []
-	accounts_with_zero_value = []
 	for d in accounts:
 		has_value = False
 		row = {
@@ -174,18 +175,15 @@ def prepare_data(accounts, filters, total_row):
 		prepare_opening_and_closing(d)
 
 		for key in value_fields:
-			row[key] = d.get(key, 0.0)
-			if row[key]:
+			row[key] = flt(d.get(key, 0.0), 3)
+			
+			if abs(row[key]) >= 0.005:
+				# ignore zero values
 				has_value = True
 
-		if show_zero_values:
-			data.append(row)
-		else:
-			if not has_value:
-				accounts_with_zero_value.append(d.name)
-			elif d.parent_account not in accounts_with_zero_value:
-				data.append(row)
-
+		row["has_value"] = has_value
+		data.append(row)
+		
 	data.extend([{},total_row])
 
 	return data

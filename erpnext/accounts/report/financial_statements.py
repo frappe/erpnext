@@ -170,17 +170,19 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 		
 	return data
 	
-def filter_out_zero_value_rows(data, parent_children_map):
+def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False):
 	data_with_value = []
 	for d in data:
-		if d.get("has_value"):
+		if show_zero_values or d.get("has_value"):
 			data_with_value.append(d)
 		else:
-			children = [child.name for child in parent_children_map.get(d.account) or []]
-			for row in data:
-				if row.account in children and row.get("has_value"):
-					data_with_value.append(d)
-					break
+			# show group with zero balance, if there are balances against child
+			children = [child.name for child in parent_children_map.get(d.get("account")) or []]
+			if children:
+				for row in data:
+					if row.get("account") in children and row.get("has_value"):
+						data_with_value.append(d)
+						break
 
 	return data_with_value
 
