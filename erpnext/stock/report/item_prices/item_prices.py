@@ -20,7 +20,7 @@ def execute(filters=None):
 	precision = get_currency_precision() or 2
 	data = []
 	for item in sorted(item_map):
-		data.append([item, item_map[item]["item_name"],
+		data.append([item, item_map[item]["item_name"],item_map[item]["item_group"],
 			item_map[item]["description"], item_map[item]["stock_uom"],
 			flt(last_purchase_rate.get(item, 0), precision),
 			flt(val_rate_map.get(item, 0), precision),
@@ -34,9 +34,9 @@ def execute(filters=None):
 def get_columns(filters):
 	"""return columns based on filters"""
 
-	columns = [_("Item") + ":Link/Item:100", _("Item Name") + "::150", _("Description") + "::150", _("UOM") + ":Link/UOM:80",
-		_("Last Purchase Rate") + ":Currency:90", _("Valuation Rate") + ":Currency:80",	_("Sales Price List") + "::80",
-		_("Purchase Price List") + "::80", _("BOM Rate") + ":Currency:90"]
+	columns = [_("Item") + ":Link/Item:100", _("Item Name") + "::150",_("Item Group") + ":Link/Item Group:125", _("Description") + "::150", _("UOM") + ":Link/UOM:80",
+		_("Last Purchase Rate") + ":Currency:90", _("Valuation Rate") + ":Currency:80",	_("Sales Price List") + "::180",
+		_("Purchase Price List") + "::180", _("BOM Rate") + ":Currency:90"]
 
 	return columns
 
@@ -45,9 +45,10 @@ def get_item_details():
 
 	item_map = {}
 
-	for i in frappe.db.sql("select name, item_name, description, \
-		stock_uom from tabItem \
-		order by item_code", as_dict=1):
+	for i in frappe.db.sql("select it.item_group as item_group, it.name as name, item_name, it.description as description, \
+		stock_uom from tabItem it, `tabItem Group` itg \
+		where it.item_group = itg.name \
+		order by it.item_group, item_code", as_dict=1):
 			item_map.setdefault(i.name, i)
 
 	return item_map
@@ -58,9 +59,9 @@ def get_price_list():
 	rate = {}
 
 	price_list = frappe.db.sql("""select ip.item_code, ip.buying, ip.selling,
-		concat(ip.price_list, " - ", ip.currency, " ", ip.price_list_rate) as price
-		from `tabItem Price` ip, `tabPrice List` pl
-		where ip.price_list=pl.name and pl.enabled=1""", as_dict=1)
+		concat(cu.symbol, " ", round(ip.price_list_rate,2), " - ", ip.price_list) as price
+		from `tabItem Price` ip, `tabPrice List` pl, `tabCurrency` cu
+		where ip.price_list=pl.name and pl.currency=cu.name and pl.enabled=1""", as_dict=1)
 
 	for j in price_list:
 		if j.price:
