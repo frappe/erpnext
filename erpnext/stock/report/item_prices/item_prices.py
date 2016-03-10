@@ -47,7 +47,7 @@ def get_item_details():
 
 	for i in frappe.db.sql("select it.item_group as item_group, it.name as name, item_name, it.description as description, \
 		stock_uom from tabItem it, `tabItem Group` itg \
-		where it.item_group = itg.name \
+		where it.item_group = itg.name and it.disabled = 0\
 		order by it.item_group, item_code", as_dict=1):
 			item_map.setdefault(i.name, i)
 
