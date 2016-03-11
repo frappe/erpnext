@@ -40,6 +40,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, employee_name), locate(%(_txt)s, employee_name), 99999),
+			idx desc,
 			name, employee_name
 		limit %(start)s, %(page_len)s""".format(**{
 			'key': searchfield,
@@ -64,6 +65,7 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, lead_name), locate(%(_txt)s, lead_name), 99999),
 			if(locate(%(_txt)s, company_name), locate(%(_txt)s, company_name), 99999),
+			idx desc,
 			name, lead_name
 		limit %(start)s, %(page_len)s""".format(**{
 			'key': searchfield,
@@ -94,6 +96,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, customer_name), locate(%(_txt)s, customer_name), 99999),
+			idx desc,
 			name, customer_name
 		limit %(start)s, %(page_len)s""".format(**{
 			"fields": fields,
@@ -123,6 +126,7 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),
+			idx desc,
 			name, supplier_name
 		limit %(start)s, %(page_len)s """.format(**{
 			'field': fields,
@@ -142,6 +146,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 			and is_group = 0
 			and company = %s
 			and `%s` LIKE %s
+		order by idx desc, name
 		limit %s, %s""" %
 		(", ".join(['%s']*len(filters.get("account_type"))), "%s", searchfield, "%s", "%s", "%s"),
 		tuple(filters.get("account_type") + [filters.get("company"), "%%%s%%" % txt,
@@ -176,6 +181,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
+			idx desc,
 			name, item_name
 		limit %(start)s, %(page_len)s """.format(key=searchfield,
 			fcond=get_filters_cond(doctype, filters, conditions),
@@ -197,9 +203,16 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 			and tabBOM.is_active=1
 			and tabBOM.%(key)s like "%(txt)s"
 			%(fcond)s  %(mcond)s
-		limit %(start)s, %(page_len)s """ %  {'key': searchfield, 'txt': "%%%s%%" % frappe.db.escape(txt),
-		'fcond': get_filters_cond(doctype, filters, conditions),
-		'mcond':get_match_cond(doctype), 'start': start, 'page_len': page_len})
+		order_by
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			idx desc, name
+		limit %(start)s, %(page_len)s """ %  {
+			'key': searchfield,
+			'txt': "%%%s%%" % frappe.db.escape(txt),
+			'_txt': txt.replace("%", ""),
+			'fcond': get_filters_cond(doctype, filters, conditions),
+			'mcond':get_match_cond(doctype), 'start': start, 'page_len': page_len
+		})
 
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
@@ -208,10 +221,19 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql("""select `tabProject`.name from `tabProject`
 		where `tabProject`.status not in ("Completed", "Cancelled")
-			and {cond} `tabProject`.name like %s {match_cond}
-		order by `tabProject`.name asc
-		limit {start}, {page_len}""".format(cond=cond, match_cond=get_match_cond(doctype),
-			start=start, page_len=page_len), "%{0}%".format(txt))
+			and {cond} `tabProject`.name like %(txt)s {match_cond}
+		order by
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			idx desc,
+			`tabProject`.name asc
+		limit {start}, {page_len}""".format(
+			cond=cond,
+			match_cond=get_match_cond(doctype),
+			start=start,
+			page_len=page_len), {
+				"txt": "%{0}%".format(txt),
+				"_txt": txt.relace('%', '')
+			})
 
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select `tabDelivery Note`.name, `tabDelivery Note`.customer_name
@@ -310,7 +332,8 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 					or tabAccount.account_type in ("Income Account", "Temporary"))
 				and tabAccount.is_group=0
 				and tabAccount.`{key}` LIKE %(txt)s
-				{condition} {match_condition}"""
+				{condition} {match_condition}
+			order by idx desc, name"""
 			.format(condition=condition, match_condition=get_match_cond(doctype), key=searchfield), {
 				'txt': "%%%s%%" % frappe.db.escape(txt),
 				'company': filters.get("company", "")
