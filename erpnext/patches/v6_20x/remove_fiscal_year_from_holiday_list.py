@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doctype("Holiday List")
+
 	default_holiday_list = frappe.db.get_value("Holiday List", {"is_default": 1})
 	if default_holiday_list:
 		for company in frappe.get_all("Company", fields=["name", "default_holiday_list"]):
