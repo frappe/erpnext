@@ -20,3 +20,5 @@ Bei der Ausgabe eines Reklamations-Kaufbelegs vermindert das System die Menge de
 Wenn die Ständige Inventur aktiviert wurde, verbucht das System weiterhin Buchungssätze zum Lagerkonto um den Lagersaldo  mit dem Lagerbestand des Lagerbuchs zu synchronisieren.
 
 <img class="screenshot" alt="Reklamation und Lagerbuch" src="{{docs_base_url}}/assets/img/stock/purchase-return-general-ledger.png">
+
+{next}
