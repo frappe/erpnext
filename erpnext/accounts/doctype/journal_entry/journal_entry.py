@@ -22,7 +22,6 @@ class JournalEntry(AccountsController):
 			self.is_opening='No'
 		self.clearance_date = None
 
-		super(JournalEntry, self).validate_date_with_fiscal_year()
 		self.validate_party()
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()

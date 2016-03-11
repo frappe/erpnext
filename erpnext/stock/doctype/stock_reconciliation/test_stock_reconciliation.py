@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 import frappe, unittest
 from frappe.utils import flt, nowdate, nowtime
-from erpnext.accounts.utils import get_fiscal_year, get_stock_and_account_difference
+from erpnext.accounts.utils import get_stock_and_account_difference
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import EmptyStockReconciliationItemsError
@@ -97,7 +97,6 @@ def create_stock_reconciliation(**args):
 	sr.posting_date = args.posting_date or nowdate()
 	sr.posting_time = args.posting_time or nowtime()
 	sr.company = args.company or "_Test Company"
-	sr.fiscal_year = get_fiscal_year(sr.posting_date)[0]
 	sr.expense_account = args.expense_account or \
 		("Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC")
 	sr.cost_center = args.cost_center or "_Test Cost Center - _TC"

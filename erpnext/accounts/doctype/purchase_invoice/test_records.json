@@ -40,7 +40,6 @@
     "uom": "_Test UOM"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "grand_total": 0,
   "naming_series": "_T-BILL",
   "taxes": [
@@ -166,7 +165,6 @@
     "uom": "_Test UOM"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "grand_total": 0,
   "naming_series": "_T-Purchase Invoice-",
   "taxes": [

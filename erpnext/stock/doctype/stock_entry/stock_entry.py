@@ -10,7 +10,6 @@ from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
 from erpnext.stock.get_item_details import get_available_qty, get_default_cost_center, get_conversion_factor
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
-from erpnext.accounts.utils import validate_fiscal_year
 import json
 
 class IncorrectValuationRateError(frappe.ValidationError): pass
@@ -39,7 +38,6 @@ class StockEntry(StockController):
 
 		self.validate_posting_time()
 		self.validate_purpose()
-		validate_fiscal_year(self.posting_date, self.fiscal_year, self.meta.get_label("posting_date"), self)
 		self.validate_item()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")

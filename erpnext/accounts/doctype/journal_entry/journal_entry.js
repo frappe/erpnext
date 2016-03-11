@@ -217,16 +217,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 cur_frm.script_manager.make(erpnext.accounts.JournalEntry);
 
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	cur_frm.refresh_fields();
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}
-
-cur_frm.cscript.posting_date = function(doc, cdt, cdn){
-	cur_frm.posting_date = cur_frm.doc.posting_date;
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}
-
 cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;
 	var accounts = doc.accounts || [];
