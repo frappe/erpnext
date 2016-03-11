@@ -9,6 +9,7 @@ from frappe.utils import add_days, getdate, cint, cstr
 from frappe import throw, _
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
 from erpnext.stock.utils import get_valid_serial_nos
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class MaintenanceSchedule(TransactionBase):
 	def generate_schedule(self):
@@ -92,22 +93,19 @@ class MaintenanceSchedule(TransactionBase):
 	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person):
 		validated = False
 
-		# check holiday list in employee master
-		holiday_list = frappe.db.sql_list("""select h.holiday_date from `tabEmployee` emp,
-			`tabSales Person` sp, `tabHoliday` h, `tabHoliday List` hl
-			where h.parent=hl.name and sp.name=%s and emp.name=sp.employee
-			and hl.name=emp.holiday_list
-			""", (sales_person))
-		if not holiday_list:
-			# check global holiday list
-			holiday_list = frappe.db.sql_list("""select h.holiday_date from
-				`tabHoliday` h, `tabHoliday List` hl
-				where h.parent=hl.name and hl.is_default = 1""")
-		if not validated and holiday_list:
-			if schedule_date in holiday_list:
-				schedule_date = add_days(schedule_date, -1)
-			else:
-				validated = True
+		employee = frappe.db.get_value("Sales Person", sales_person, "employee")
+		holiday_list = get_holiday_list_for_employee(employee)
+		holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday` where parent=%s''', holiday_list)
+
+		if not validated and holidays:
+
+			# max iterations = len(holidays)
+			for i in xrange(len(holidays)):
+				if schedule_date in holidays:
+					schedule_date = add_days(schedule_date, -1)
+				else:
+					validated = True
+					break
 
 		return schedule_date
 

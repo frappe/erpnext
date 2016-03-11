@@ -9,5 +9,13 @@ frappe.views.calendar["Holiday List"] = {
 		"title": "description",
 		"allDay": "allDay"
 	},
-	get_events_method: "erpnext.hr.doctype.holiday_list.holiday_list.get_events"
+	get_events_method: "erpnext.hr.doctype.holiday_list.holiday_list.get_events",
+	filters: [
+		{
+			'fieldtype': 'Link',
+			'fieldname': 'holiday_list',
+			'options': 'Holiday List',
+			'label': __('Holiday List')
+		}
+	]
 }

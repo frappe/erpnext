@@ -11,7 +11,7 @@ from frappe import msgprint, _
 from erpnext.setup.utils import get_company_currency
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
-
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 
 class SalarySlip(TransactionBase):
@@ -20,11 +20,11 @@ class SalarySlip(TransactionBase):
 
 	def get_emp_and_leave_details(self):
 		if self.employee:
-			joining_date, relieving_date = frappe.db.get_value("Employee", self.employee, 
+			joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
 				["date_of_joining", "relieving_date"])
-				
+
 			self.get_leave_details(joining_date, relieving_date)
-			
+
 			struct = self.check_sal_struct(joining_date, relieving_date)
 			if struct:
 				self.set("earnings", [])
@@ -33,10 +33,10 @@ class SalarySlip(TransactionBase):
 
 	def check_sal_struct(self, joining_date, relieving_date):
 		m = get_month_details(self.fiscal_year, self.month)
-		
+
 		struct = frappe.db.sql("""select name from `tabSalary Structure`
 			where employee=%s and is_active = 'Yes'
-			and (from_date <= %s or from_date <= %s) 
+			and (from_date <= %s or from_date <= %s)
 			and (to_date is null or to_date >= %s or to_date >= %s)""",
 			(self.employee, m.month_start_date, joining_date, m.month_end_date, relieving_date))
 
@@ -62,9 +62,9 @@ class SalarySlip(TransactionBase):
 			self.fiscal_year = frappe.db.get_default("fiscal_year")
 		if not self.month:
 			self.month = "%02d" % getdate(nowdate()).month
-			
+
 		if not joining_date:
-			joining_date, relieving_date = frappe.db.get_value("Employee", self.employee, 
+			joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
 				["date_of_joining", "relieving_date"])
 
 		m = get_month_details(self.fiscal_year, self.month)
@@ -82,7 +82,7 @@ class SalarySlip(TransactionBase):
 		self.leave_without_pay = lwp
 		payment_days = flt(self.get_payment_days(m, joining_date, relieving_date)) - flt(lwp)
 		self.payment_days = payment_days > 0 and payment_days or 0
-		
+
 	def get_payment_days(self, month, joining_date, relieving_date):
 		start_date = month['month_start_date']
 		if joining_date:
@@ -90,15 +90,15 @@ class SalarySlip(TransactionBase):
 				start_date = joining_date
 			elif joining_date > month['month_end_date']:
 				return
-				
+
 		end_date = month['month_end_date']
 		if relieving_date:
 			if relieving_date > start_date and relieving_date < month['month_end_date']:
 				end_date = relieving_date
 			elif relieving_date < month['month_start_date']:
 				frappe.throw(_("Employee relieved on {0} must be set as 'Left'")
-					.format(relieving_date))			
-			
+					.format(relieving_date))
+
 		payment_days = date_diff(end_date, start_date) + 1
 
 		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
@@ -108,20 +108,19 @@ class SalarySlip(TransactionBase):
 		return payment_days
 
 	def get_holidays_for_employee(self, start_date, end_date):
-		holidays = frappe.db.sql("""select t1.holiday_date
-			from `tabHoliday` t1, tabEmployee t2
-			where t1.parent = t2.holiday_list and t2.name = %s
-			and t1.holiday_date between %s and %s""",
-			(self.employee, start_date, end_date))
-			
-		if not holidays:
-			holidays = frappe.db.sql("""select t1.holiday_date
-				from `tabHoliday` t1, `tabHoliday List` t2
-				where t1.parent = t2.name and t2.is_default = 1
-				and t1.holiday_date between %s and %s""", 
-				(start_date, end_date))
-		
-		holidays = [cstr(i[0]) for i in holidays]
+		holiday_list = get_holiday_list_for_employee(self.employee)
+		holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
+			where
+				parent=%(holiday_list)s
+				and holiday_date >= %(start_date)s
+				and holiday_date <= %(end_date)s''', {
+					"holiday_list": holiday_list,
+					"start_date": start_date,
+					"end_date": end_date
+				})
+
+		holidays = [cstr(i) for i in holidays]
+
 		return holidays
 
 	def calculate_lwp(self, holidays, m):

@@ -8,6 +8,7 @@ from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_li
 	comma_or, get_fullname
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
@@ -422,7 +423,7 @@ def add_block_dates(events, start, end, employee, company):
 		cnt+=1
 
 def add_holidays(events, start, end, employee, company):
-	applicable_holiday_list = frappe.db.get_value("Employee", employee, "holiday_list")
+	applicable_holiday_list = get_holiday_list_for_employee(employee, company)
 	if not applicable_holiday_list:
 		return
 
