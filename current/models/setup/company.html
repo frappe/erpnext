@@ -107,9 +107,7 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="company" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="company" style="text-align: Left">
 	<!-- title: Company -->
 
 
@@ -224,7 +222,8 @@ Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Org
 Manufacturing
 Retail
 Services
-Education</pre>
+Education
+Other</pre>
             </td>
         </tr>
         
@@ -284,11 +283,11 @@ Education</pre>
         
         <tr >
             <td>10</td>
-            <td class="danger" title="Mandatory"><code>country</code></td>
+            <td ><code>default_terms</code></td>
             <td >
                 Link</td>
             <td >
-                Country
+                Default Terms
                 
             </td>
             <td>
@@ -296,7 +295,7 @@ Education</pre>
                 
 
 
-<a href="https://frappe.github.io/erpnext/current/models/geo/country">Country</a>
+<a href="https://frappe.github.io/erpnext/current/models/setup/terms_and_conditions">Terms and Conditions</a>
 
 
                 
@@ -317,6 +316,27 @@ Education</pre>
         
         <tr >
             <td>12</td>
+            <td class="danger" title="Mandatory"><code>country</code></td>
+            <td >
+                Link</td>
+            <td >
+                Country
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/geo/country">Country</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
             <td class="danger" title="Mandatory"><code>default_currency</code></td>
             <td >
                 Link</td>
@@ -337,7 +357,7 @@ Education</pre>
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>14</td>
             <td ><code>chart_of_accounts</code></td>
             <td >
                 Select</td>
@@ -346,27 +366,6 @@ Education</pre>
                 
             </td>
             <td></td>
-        </tr>
-        
-        <tr >
-            <td>14</td>
-            <td ><code>default_terms</code></td>
-            <td >
-                Link</td>
-            <td >
-                Default Terms
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/setup/terms_and_conditions">Terms and Conditions</a>
-
-
-                
-            </td>
         </tr>
         
         <tr class="info">

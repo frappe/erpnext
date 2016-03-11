@@ -107,9 +107,7 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="sms-setting" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="sms-setting" style="text-align: Left">
 	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
 
 <p>Um SMS-Dienste in ERPNext zu integrieren, wenden Sie sich an einen Anbieter eines SMS-Gateways der Ihnen eine HTTP-Schnittstelle (API) zur Verfügung stellt. Er wird Ihnen ein Konto erstellen und Ihnen eindeutige Zugangsdaten zukommen lassen.</p>
@@ -121,7 +119,7 @@
 <pre><code>http://instant.smses.com/web2sms.php?username=&lt;USERNAME&gt;&amp;password;=&lt;PASSWORD&gt;&amp;to;=&lt;MOBILENUMBER&gt;&amp;sender;=&lt;SENDERID&gt;&amp;message;=&lt;MESSAGE&gt;
 </code></pre>
 
-<p><img alt="SMS-Einstellungen" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/sms-setting2.jpg"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/sms-setting2.jpg" alt="SMS-Einstellungen" /></p>
 
 <blockquote>
   <p>Anmerkung: Die Zeichenfolge bis zum "?" ist die URL des SMS-Gateways.</p>
@@ -129,15 +127,16 @@
 
 <p>Beispiel:</p>
 
-<p>http://instant.smses.com/web2sms.php?username=abcd&amp;password;=abcd&amp;to;=9900XXXXXX&amp;sender;=DEMO&amp;message;=THIS+IS+A+TEST+SMS</p>
+<p>http://instant.smses.com/web2sms.php?username=abcd&password;=abcd&to;=9900XXXXXX&sender;=DEMO&message;=THIS+IS+A+TEST+SMS</p>
 
 <p>Die oben angegebene URL verschickt SMS über das Konto "abcd" an Mobilnummern "9900XXXXXX" mit der Sender-ID "DEMO" und der Textnachricht "THIS IS A TEST SMS".</p>
 
 <p>Beachten Sie, dass einige Parameter in der URL statisch sind. Sie bekommen von Ihrem SMS-Anbieter statische Werte wie Benutzername, Passwort usw. Diese statischen Werte sollten in die Tabelle der statischen Parameter eingetragen werden.</p>
 
-<p><img alt="SMS-Einstellungen" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/sms-settings1.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/sms-settings1.png" alt="SMS-Einstellungen" /></p>
 
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="stock-reconciliation-for-non-serialized-item.html">Bestandsabgleich bei nichtserialisierten Artikeln</a></p></p>
+
 	</article>
 	
 </div>

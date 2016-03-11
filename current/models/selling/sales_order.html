@@ -107,9 +107,7 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="sales_order" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="sales_order" style="text-align: Left">
 	<!-- title: Sales Order -->
 
 
@@ -275,7 +273,7 @@
             <td>10</td>
             <td ><code>contact_email</code></td>
             <td >
-                Code</td>
+                Data</td>
             <td class="text-muted" title="Hidden">
                 Contact Email
                 
@@ -1299,27 +1297,6 @@ Net Total</pre>
         
         <tr >
             <td>78</td>
-            <td class="danger" title="Mandatory"><code>fiscal_year</code></td>
-            <td >
-                Link</td>
-            <td >
-                Fiscal Year
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/accounts/fiscal_year">Fiscal Year</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>79</td>
             <td ><code>party_account_currency</code></td>
             <td >
                 Link</td>
@@ -1340,7 +1317,7 @@ Net Total</pre>
         </tr>
         
         <tr >
-            <td>80</td>
+            <td>79</td>
             <td ><code>column_break_77</code></td>
             <td class="info">
                 Column Break</td>
@@ -1352,7 +1329,7 @@ Net Total</pre>
         </tr>
         
         <tr >
-            <td>81</td>
+            <td>80</td>
             <td ><code>source</code></td>
             <td >
                 Select</td>
@@ -1375,7 +1352,7 @@ Campaign</pre>
         </tr>
         
         <tr >
-            <td>82</td>
+            <td>81</td>
             <td ><code>campaign</code></td>
             <td >
                 Link</td>
@@ -1396,12 +1373,24 @@ Campaign</pre>
         </tr>
         
         <tr class="info">
-            <td>83</td>
+            <td>82</td>
             <td ><code>printing_details</code></td>
             <td >
                 Section Break</td>
             <td >
                 Printing Details
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>83</td>
+            <td ><code>language</code></td>
+            <td >
+                Data</td>
+            <td >
+                Print Language
                 
             </td>
             <td></td>
@@ -1689,26 +1678,57 @@ Closed</pre>
         
         <tr >
             <td>102</td>
-            <td ><code>is_recurring</code></td>
+            <td ><code>settings</code></td>
+            <td class="info">
+                Column Break</td>
             <td >
-                Check</td>
-            <td >
-                Is Recurring
-                <p class="text-muted small">
-                    Check if recurring order, uncheck to stop recurring or put proper End Date</p>
+                Settings
+                
             </td>
             <td></td>
         </tr>
         
         <tr >
             <td>103</td>
+            <td ><code>is_recurring</code></td>
+            <td >
+                Check</td>
+            <td >
+                Is Recurring
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>104</td>
+            <td ><code>recurring_id</code></td>
+            <td >
+                Link</td>
+            <td >
+                Reference Document
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/selling/sales_order">Sales Order</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>105</td>
             <td ><code>recurring_type</code></td>
             <td >
                 Select</td>
             <td >
-                Recurring Type
-                <p class="text-muted small">
-                    Select the period when the invoice will be generated automatically</p>
+                Frequency
+                
             </td>
             <td>
                 <pre>
@@ -1720,40 +1740,13 @@ Yearly</pre>
         </tr>
         
         <tr >
-            <td>104</td>
-            <td ><code>from_date</code></td>
-            <td >
-                Date</td>
-            <td >
-                From Date
-                <p class="text-muted small">
-                    Start date of current order's period</p>
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>105</td>
-            <td ><code>to_date</code></td>
-            <td >
-                Date</td>
-            <td >
-                To Date
-                <p class="text-muted small">
-                    End date of current order's period</p>
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
             <td>106</td>
             <td ><code>repeat_on_day_of_month</code></td>
             <td >
                 Int</td>
             <td >
                 Repeat on Day of Month
-                <p class="text-muted small">
-                    The day of the month on which auto order will be generated e.g. 05, 28 etc </p>
+                
             </td>
             <td></td>
         </tr>
@@ -1764,20 +1757,19 @@ Yearly</pre>
             <td >
                 Date</td>
             <td >
-                End Date
-                <p class="text-muted small">
-                    The date on which recurring order will be stop</p>
+                Recurring Upto
+                
             </td>
             <td></td>
         </tr>
         
         <tr >
             <td>108</td>
-            <td ><code>column_break83</code></td>
-            <td class="info">
-                Column Break</td>
+            <td ><code>submit_on_creation</code></td>
             <td >
-                
+                Check</td>
+            <td >
+                Submit on creation
                 
             </td>
             <td></td>
@@ -1785,38 +1777,24 @@ Yearly</pre>
         
         <tr >
             <td>109</td>
-            <td ><code>next_date</code></td>
+            <td ><code>notify_by_email</code></td>
             <td >
-                Date</td>
+                Check</td>
             <td >
-                Next Date
-                <p class="text-muted small">
-                    The date on which next invoice will be generated. It is generated on submit.</p>
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>110</td>
-            <td ><code>recurring_id</code></td>
-            <td >
-                Data</td>
-            <td >
-                Recurring Id
+                Notify by email
                 
             </td>
             <td></td>
         </tr>
         
         <tr >
-            <td>111</td>
+            <td>110</td>
             <td ><code>notification_email_address</code></td>
             <td >
                 Code</td>
             <td >
                 Notification Email Address
-                <p class="text-muted small">
-                    Enter email id separated by commas, order will be mailed automatically on particular date</p>
+                
             </td>
             <td>
                 <pre>Email</pre>
@@ -1824,7 +1802,7 @@ Yearly</pre>
         </tr>
         
         <tr >
-            <td>112</td>
+            <td>111</td>
             <td ><code>recurring_print_format</code></td>
             <td >
                 Link</td>
@@ -1842,6 +1820,54 @@ Yearly</pre>
 
                 
             </td>
+        </tr>
+        
+        <tr >
+            <td>112</td>
+            <td ><code>column_break83</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                This Document
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>113</td>
+            <td ><code>to_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                To Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>114</td>
+            <td ><code>from_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                From Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>115</td>
+            <td ><code>next_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Next Date
+                
+            </td>
+            <td></td>
         </tr>
         
     </tbody>

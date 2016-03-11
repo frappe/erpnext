@@ -107,9 +107,7 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="date-validation-1" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="date-validation-1" style="text-align: Left">
 	<pre><code>frappe.ui.form.on("Task", "validate", function(frm) {
     if (frm.doc.from_date &lt; get_today()) {
         msgprint(__("You can not select past date in From Date"));

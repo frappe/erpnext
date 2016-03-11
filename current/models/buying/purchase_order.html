@@ -107,9 +107,7 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="purchase_order" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="purchase_order" style="text-align: Left">
 	<!-- title: Purchase Order -->
 
 
@@ -290,7 +288,7 @@ Yes</pre>
             <td>11</td>
             <td ><code>contact_email</code></td>
             <td >
-                Code</td>
+                Data</td>
             <td class="text-muted" title="Hidden">
                 Contact Email
                 
@@ -1281,27 +1279,6 @@ Delivered</pre>
         
         <tr >
             <td>78</td>
-            <td class="danger" title="Mandatory"><code>fiscal_year</code></td>
-            <td >
-                Link</td>
-            <td >
-                Fiscal Year
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/accounts/fiscal_year">Fiscal Year</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>79</td>
             <td ><code>ref_sq</code></td>
             <td >
                 Data</td>
@@ -1313,7 +1290,7 @@ Delivered</pre>
         </tr>
         
         <tr >
-            <td>80</td>
+            <td>79</td>
             <td ><code>party_account_currency</code></td>
             <td >
                 Link</td>
@@ -1334,7 +1311,7 @@ Delivered</pre>
         </tr>
         
         <tr >
-            <td>81</td>
+            <td>80</td>
             <td ><code>column_break_74</code></td>
             <td class="info">
                 Column Break</td>
@@ -1346,7 +1323,7 @@ Delivered</pre>
         </tr>
         
         <tr >
-            <td>82</td>
+            <td>81</td>
             <td ><code>per_received</code></td>
             <td >
                 Percent</td>
@@ -1358,7 +1335,7 @@ Delivered</pre>
         </tr>
         
         <tr >
-            <td>83</td>
+            <td>82</td>
             <td ><code>per_billed</code></td>
             <td >
                 Percent</td>
@@ -1370,7 +1347,7 @@ Delivered</pre>
         </tr>
         
         <tr class="info">
-            <td>84</td>
+            <td>83</td>
             <td ><code>column_break5</code></td>
             <td >
                 Section Break</td>
@@ -1382,7 +1359,7 @@ Delivered</pre>
         </tr>
         
         <tr >
-            <td>85</td>
+            <td>84</td>
             <td ><code>letter_head</code></td>
             <td >
                 Link</td>
@@ -1403,7 +1380,7 @@ Delivered</pre>
         </tr>
         
         <tr >
-            <td>86</td>
+            <td>85</td>
             <td ><code>select_print_heading</code></td>
             <td >
                 Link</td>
@@ -1421,6 +1398,18 @@ Delivered</pre>
 
                 
             </td>
+        </tr>
+        
+        <tr >
+            <td>86</td>
+            <td ><code>language</code></td>
+            <td >
+                Data</td>
+            <td >
+                Print Language
+                
+            </td>
+            <td></td>
         </tr>
         
         <tr class="info">
@@ -1478,7 +1467,7 @@ Delivered</pre>
             <td class="info">
                 Column Break</td>
             <td >
-                
+                Settings
                 
             </td>
             <td></td>
@@ -1498,11 +1487,32 @@ Delivered</pre>
         
         <tr >
             <td>92</td>
+            <td ><code>recurring_id</code></td>
+            <td >
+                Link</td>
+            <td >
+                Reference Document
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/purchase_order">Purchase Order</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>93</td>
             <td ><code>recurring_type</code></td>
             <td >
                 Select</td>
             <td >
-                Recurring Type
+                Frequency
                 
             </td>
             <td>
@@ -1514,64 +1524,48 @@ Yearly</pre>
         </tr>
         
         <tr >
-            <td>93</td>
-            <td ><code>from_date</code></td>
-            <td >
-                Date</td>
-            <td >
-                From Date
-                <p class="text-muted small">
-                    Start date of current order's period</p>
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
             <td>94</td>
-            <td ><code>to_date</code></td>
+            <td ><code>repeat_on_day_of_month</code></td>
             <td >
-                Date</td>
+                Int</td>
             <td >
-                To Date
-                <p class="text-muted small">
-                    End date of current order's period</p>
+                Repeat on Day of Month
+                
             </td>
             <td></td>
         </tr>
         
         <tr >
             <td>95</td>
-            <td ><code>repeat_on_day_of_month</code></td>
+            <td ><code>end_date</code></td>
             <td >
-                Int</td>
+                Date</td>
             <td >
-                Repeat on Day of Month
-                <p class="text-muted small">
-                    The day of the month on which auto order will be generated e.g. 05, 28 etc</p>
+                End Date
+                
             </td>
             <td></td>
         </tr>
         
         <tr >
             <td>96</td>
-            <td ><code>end_date</code></td>
+            <td ><code>submit_on_creation</code></td>
             <td >
-                Date</td>
+                Check</td>
             <td >
-                End Date
-                <p class="text-muted small">
-                    The date on which recurring order will be stop</p>
+                Submit on creation
+                
             </td>
             <td></td>
         </tr>
         
         <tr >
             <td>97</td>
-            <td ><code>column_break83</code></td>
-            <td class="info">
-                Column Break</td>
+            <td ><code>notify_by_email</code></td>
             <td >
-                
+                Check</td>
+            <td >
+                Notify by email
                 
             </td>
             <td></td>
@@ -1579,38 +1573,12 @@ Yearly</pre>
         
         <tr >
             <td>98</td>
-            <td ><code>next_date</code></td>
-            <td >
-                Date</td>
-            <td >
-                Next Date
-                <p class="text-muted small">
-                    The date on which next invoice will be generated. It is generated on submit.</p>
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>99</td>
-            <td ><code>recurring_id</code></td>
-            <td >
-                Data</td>
-            <td >
-                Recurring Id
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>100</td>
             <td ><code>notification_email_address</code></td>
             <td >
                 Code</td>
             <td >
                 Notification Email Address
-                <p class="text-muted small">
-                    Enter email id separated by commas, order will be mailed automatically on particular date</p>
+                
             </td>
             <td>
                 <pre>Email</pre>
@@ -1618,7 +1586,7 @@ Yearly</pre>
         </tr>
         
         <tr >
-            <td>101</td>
+            <td>99</td>
             <td ><code>recurring_print_format</code></td>
             <td >
                 Link</td>
@@ -1636,6 +1604,54 @@ Yearly</pre>
 
                 
             </td>
+        </tr>
+        
+        <tr >
+            <td>100</td>
+            <td ><code>column_break83</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                This Document
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>101</td>
+            <td ><code>from_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                From Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>102</td>
+            <td ><code>to_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                To Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>103</td>
+            <td ><code>next_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Next Date
+                
+            </td>
+            <td></td>
         </tr>
         
     </tbody>

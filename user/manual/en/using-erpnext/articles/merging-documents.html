@@ -107,39 +107,38 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="merging-documents" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="merging-documents" style="text-align: Left">
 	<h1>Merging Documents</h1>
 
-<p>Document merging feature is available in ERPNext. You can done this via 'Rename' feature in ERPNext. </p>
+<p>For a document, of you have two records which are identical, and meant for common purpose, you can merge them into one record.</p>
 
-<p>Following are step to merge document in existing document. Let's assume we are merging Account Ledger.</p>
+<p>Following are step to merge documents. Let's assume we are merging two Accounts.</p>
 
-<h4>1: Go to Chart of Account</h4>
+<h4>Step 1: Go to Chart of Account</h4>
 
-<p><code>Accounts &gt; Setup &gt; Chart of Accounts</code></p>
+<p><code>Accounts &gt; Documents &gt; Chart of Accounts</code></p>
 
-<h4>2: Go to Account</h4>
+<h4>Step 2: Go to Account</h4>
 
-<p>Click on Rename option of that account, which you want to merge in existing account.</p>
+<p>For an Account to be merge, click on "Rename" option.</p>
 
-<h4>3: Merge Account</h4>
+<p><img alt="Sales Order File Attachment" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/merge-docs-1.png"></p>
 
-<p>Enter existing account name in New Name field and check Mark on "Merge with existing" option. Then press 'Rename' button to merge.</p>
+<h4>Step 3: Merge Account</h4>
 
-<p><img alt="Account" src="https://frappe.github.io/erpnext/assets/img/articles/Selection_043.png"></p>
+<p>In the New Name field, enter another account name with which this account will be merged. Check "Merge with existing" option. Then press 'Rename' button to merge.</p>
 
 <p>Following is how merged account will appear in the Chart of Account master.</p>
 
-<p><img alt="New Account" src="https://frappe.github.io/erpnext/assets/img/articles/Selection_044.png"></p>
+<p><img alt="Sales Order File Attachment" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/merge-docs-2.gif"></p>
 
 <h3>Effect of Merging</h3>
 
-<p>Merging document affects existing transaction where this record is selected. As well as it will affected on existing document balance.</p>
+<p>After Account is merged, new name is updated in the existing transactions where old account was selected.</p>
 
-<div class="well"> Note: You can't merge Group into Ledger documents. As well as Ledger into Group documents. Also this feature is applicable for few documents only.</div>
+<div class="well"> Note: Group Account cannot be merged into Child Account and vice versa.</div>
 
+<!-- markdown -->
 
 	</article>
 	

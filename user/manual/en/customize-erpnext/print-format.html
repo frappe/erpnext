@@ -107,9 +107,7 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="print-format-1" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="print-format-1" style="text-align: Left">
 	<!-- no-jinja -->
 
 <p>Print Formats are the layouts that are generated when you want to Print or
@@ -134,7 +132,7 @@ upcoming release.</p>
   <p>Setup &gt; Printing &gt; Print Formats</p>
 </blockquote>
 
-<p><img alt="Print Format" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-format.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-format.png" alt="Print Format" /></p>
 
 <p>Select the type of Print Format you want to edit and click on the “Copy”
 button on the right column. A new Print Format will open up with “Is Standard”
@@ -167,51 +165,49 @@ HTML, CSS, Python to learn this. For help, please post on our forum.</p>
   <p>Setup &gt; Printing and Branding &gt; Print Settings</p>
 </blockquote>
 
-<p><img alt="Print Format" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-settings.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-settings.png" alt="Print Format" /></p>
 
 <h4>Example</h4>
 
-<p><p></p>
-
-<pre><code>&lt;/p&gt;&lt;h3&gt;{{ doc.select&lt;em&gt;print&lt;/em&gt;heading or &#34;Invoice&#34; }}&lt;/h3&gt;
-    &lt;div class=&#34;row&#34;&gt;
-        &lt;div class=&#34;col-md-3 text-right&#34;&gt;Customer Name&lt;/div&gt;
-        &lt;div class=&#34;col-md-9&#34;&gt;{{ doc.customer&lt;em&gt;name }}&lt;/em&gt;&lt;/div&gt;&lt;em&gt;
-    &lt;/em&gt;&lt;/div&gt;&lt;em&gt;
-    &lt;/em&gt;&lt;div class=&#34;row&#34;&gt;&lt;em&gt;
-        &lt;div class=&#34;col-md-3 text-right&#34;&gt;Date&lt;/div&gt;
-        &lt;/em&gt;&lt;div class=&#34;col-md-9&#34;&gt;&lt;em&gt;{{ doc.get&lt;/em&gt;formatted(&#34;invoice&lt;em&gt;date&#34;) }}&lt;/em&gt;&lt;/div&gt;&lt;em&gt;
-    &lt;/em&gt;&lt;/div&gt;&lt;em&gt;
-    
-            {%- for row in doc.items -%}
-            
-            {%- endfor -%}
-        &lt;table class=&#34;table table-bordered&#34;&gt;
-        &lt;tbody&gt;
-            &lt;tr&gt;
-                &lt;th&gt;Sr&lt;/th&gt;
-                &lt;th&gt;Item Name&lt;/th&gt;
-                &lt;th&gt;Description&lt;/th&gt;
-                &lt;th class=&#34;text-right&#34;&gt;Qty&lt;/th&gt;
-                &lt;th class=&#34;text-right&#34;&gt;Rate&lt;/th&gt;
-                &lt;th class=&#34;text-right&#34;&gt;Amount&lt;/th&gt;
-            &lt;/tr&gt;&lt;tr&gt;
-                &lt;td style=&#34;width: 3%;&#34;&gt;{{ row.idx }}&lt;/td&gt;
-                &lt;td style=&#34;width: 20%;&#34;&gt;
-                    {{ row.itemname }}
-                    {% if row.item&lt;em&gt;code != row.item&lt;/em&gt;name -%}
-                    &lt;br&gt;Item Code: {{ row.item&lt;em&gt;code}}
-                    {%- endif %}
-                &lt;/em&gt;&lt;/td&gt;
-                &lt;td style=&#34;width: 37%;&#34;&gt;
-                    &lt;div style=&#34;border: 0px;&#34;&gt;{{ row.description }}&lt;/div&gt;&lt;/td&gt;
-                &lt;td style=&#34;width: 10%; text-align: right;&#34;&gt;{{ row.qty }} {{ row.uom or row.stockuom }}&lt;/td&gt;
-                &lt;td style=&#34;width: 15%; text-align: right;&#34;&gt;{{
-                    row.get&lt;em&gt;formatted(&#34;rate&#34;, doc) }}&lt;/em&gt;&lt;/td&gt;
-                &lt;td style=&#34;width: 15%; text-align: right;&#34;&gt;{{
-                    row.getformatted(&#34;amount&#34;, doc) }}&lt;/td&gt;
-            &lt;/tr&gt;&lt;/tbody&gt;
-    &lt;/table&gt;
+<pre><code>&amp;lt;h3&amp;gt;{{ doc.select_print_heading or &amp;#34;Invoice&amp;#34; }}&amp;lt;/h3&amp;gt;
+&amp;lt;div class=&amp;#34;row&amp;#34;&amp;gt;
+    &amp;lt;div class=&amp;#34;col-md-3 text-right&amp;#34;&amp;gt;Customer Name&amp;lt;/div&amp;gt;
+    &amp;lt;div class=&amp;#34;col-md-9&amp;#34;&amp;gt;{{ doc.customer_name }}&amp;lt;/div&amp;gt;
+&amp;lt;/div&amp;gt;
+&amp;lt;div class=&amp;#34;row&amp;#34;&amp;gt;
+    &amp;lt;div class=&amp;#34;col-md-3 text-right&amp;#34;&amp;gt;Date&amp;lt;/div&amp;gt;
+    &amp;lt;div class=&amp;#34;col-md-9&amp;#34;&amp;gt;{{ doc.get_formatted(&amp;#34;invoice_date&amp;#34;) }}&amp;lt;/div&amp;gt;
+&amp;lt;/div&amp;gt;
+&amp;lt;table class=&amp;#34;table table-bordered&amp;#34;&amp;gt;
+    &amp;lt;tbody&amp;gt;
+        &amp;lt;tr&amp;gt;
+            &amp;lt;th&amp;gt;Sr&amp;lt;/th&amp;gt;
+            &amp;lt;th&amp;gt;Item Name&amp;lt;/th&amp;gt;
+            &amp;lt;th&amp;gt;Description&amp;lt;/th&amp;gt;
+            &amp;lt;th class=&amp;#34;text-right&amp;#34;&amp;gt;Qty&amp;lt;/th&amp;gt;
+            &amp;lt;th class=&amp;#34;text-right&amp;#34;&amp;gt;Rate&amp;lt;/th&amp;gt;
+            &amp;lt;th class=&amp;#34;text-right&amp;#34;&amp;gt;Amount&amp;lt;/th&amp;gt;
+        &amp;lt;/tr&amp;gt;
+        {%- for row in doc.items -%}
+        &amp;lt;tr&amp;gt;
+            &amp;lt;td style=&amp;#34;width: 3%;&amp;#34;&amp;gt;{{ row.idx }}&amp;lt;/td&amp;gt;
+            &amp;lt;td style=&amp;#34;width: 20%;&amp;#34;&amp;gt;
+                {{ row.item_name }}
+                {% if row.item_code != row.item_name -%}
+                &amp;lt;br&amp;gt;Item Code: {{ row.item_code}}
+                {%- endif %}
+            &amp;lt;/td&amp;gt;
+            &amp;lt;td style=&amp;#34;width: 37%;&amp;#34;&amp;gt;
+                &amp;lt;div style=&amp;#34;border: 0px;&amp;#34;&amp;gt;{{ row.description }}&amp;lt;/div&amp;gt;&amp;lt;/td&amp;gt;
+            &amp;lt;td style=&amp;#34;width: 10%; text-align: right;&amp;#34;&amp;gt;{{ row.qty }} {{ row.uom or row.stock_uom }}&amp;lt;/td&amp;gt;
+            &amp;lt;td style=&amp;#34;width: 15%; text-align: right;&amp;#34;&amp;gt;{{
+                row.get_formatted(&amp;#34;rate&amp;#34;, doc) }}&amp;lt;/td&amp;gt;
+            &amp;lt;td style=&amp;#34;width: 15%; text-align: right;&amp;#34;&amp;gt;{{
+                row.get_formatted(&amp;#34;amount&amp;#34;, doc) }}&amp;lt;/td&amp;gt;
+        &amp;lt;/tr&amp;gt;
+        {%- endfor -%}
+    &amp;lt;/tbody&amp;gt;
+&amp;lt;/table&amp;gt;
 </code></pre>
 
 <h4>Notes</h4>
@@ -229,7 +225,7 @@ support in HTML pages, it is not possible unless you get it scripted. Either
 you can use pre-printed stationary or add this information in your header.</p>
 
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="articles">Articles</a></p></p>
-</em>
+
 	</article>
 	
 </div>

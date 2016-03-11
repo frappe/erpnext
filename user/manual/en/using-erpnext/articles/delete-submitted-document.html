@@ -107,35 +107,36 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="delete-submitted-document" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="delete-submitted-document" style="text-align: Left">
 	<h1>Delete Submitted Document</h1>
 
-<p>ERPNext allows you to assign deletion permission exclusively to User. Only those users will be able to delete records. Click <a href="/user-guide/setting-up/permissions/role-based-permissions">here</a> to learn more about permissions.</p>
+<p>To be able to delete Submitted document, you should first Cancel. Once canceled, you can delete that document from Menu or from the List View of that Document Type.</p>
 
-<p>To delete any document from system you should cancel all linked documents. For example if you need to delete Sales Order, but Delivery Note and Sales Invoice has already been created against that Sales Order. Then you should cancel and delete documents in reverse order, i.e. Sales Invoice, Delivery Note and then Sales Order. If payment entry was also made against Sales Invoice, then you should first Cancel and Delete that Journal Voucher, and then come to Sales Invoice.</p>
+<p>If document which needs to be deleted is also linked to other documents, then you should first Cancel document those document as well. For example if you need to delete Sales Order, but Delivery Note and Sales Invoice has already been created against it. Then you should first cancel and delete documents in reverse order, i.e. Sales Invoice, Delivery Note and then Sales Order.</p>
+
+<p>Delete option is only visible to user having related permission. From Role Permission Manager, you can control and define Delete permission and Role for each Document Type.</p>
 
 <p>Following are step to delete submitted documents.</p>
 
-<h4>1. Cancel Document</h4>
+<h4>Step 1: Cancel Document</h4>
 
-<p>To be able to delete Submitted document, it must be cancelled first. After document is cancelled, you will find option to delete it.</p>
+<p>You will find option to Cancel in the submitted document. If document is at draft stage, it can delete directly. Also if document is not submittable, but only save, it can be deleted directly.</p>
 
-<p><img alt="Cancel Sales Order" src="https://frappe.github.io/erpnext/assets/img/articles/Selection_064.png"></p>
+<p><img alt="Cancel Doc" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/delete-submitted-doc-1.png"></p>
 
-<h4>2. Delete Document</h4>
+<h4>Step 2: Delete Document</h4>
 
-<p>After cancellation, go to File menu and click on Delete option.</p>
+<p>After cancellation, go to Menu and click on Delete.</p>
 
-<p><img alt="Cancel Sales Order" src="https://frappe.github.io/erpnext/assets/img/articles/Selection_066.png"></p>
+<p><img alt="Delete Doc" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/delete-submitted-doc-2.png"></p>
 
-<h4>Deleting from List</h4>
+<h4>Step 3: Deleting from List</h4>
 
-<p>For bulk deletion, you can select multiple Cancelled records and delete them at once from the list.</p>
+<p>For bulk deletion, you can select multiple Cancelled records and delete at once from the List View.</p>
 
-<p><img alt="Cancel Sales Order List" src="https://frappe.github.io/erpnext/assets/img/articles/Selection_069.png"></p>
+<p><img alt="Delete Doc from List" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/delete-submitted-doc-3.gif"></p>
 
+<!-- markdown -->
 
 	</article>
 	

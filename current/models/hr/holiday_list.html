@@ -107,9 +107,7 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="holiday_list" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="holiday_list" style="text-align: Left">
 	<!-- title: Holiday List -->
 
 
@@ -164,11 +162,11 @@
         
         <tr >
             <td>2</td>
-            <td ><code>is_default</code></td>
+            <td class="danger" title="Mandatory"><code>from_date</code></td>
             <td >
-                Check</td>
+                Date</td>
             <td >
-                Default
+                From Date
                 
             </td>
             <td></td>
@@ -176,23 +174,14 @@
         
         <tr >
             <td>3</td>
-            <td class="danger" title="Mandatory"><code>fiscal_year</code></td>
+            <td class="danger" title="Mandatory"><code>to_date</code></td>
             <td >
-                Link</td>
+                Date</td>
             <td >
-                Fiscal Year
+                To Date
                 
             </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/accounts/fiscal_year">Fiscal Year</a>
-
-
-                
-            </td>
+            <td></td>
         </tr>
         
         <tr >
@@ -308,7 +297,7 @@ Saturday</pre>
         <a name="get_weekly_off_date_list" href="#get_weekly_off_date_list" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>get_weekly_off_date_list</b>
-        <i class="text-muted">(self, year_start_date, year_end_date)</i>
+        <i class="text-muted">(self, start_date, end_date)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -322,20 +311,6 @@ Saturday</pre>
         <a name="get_weekly_off_dates" href="#get_weekly_off_dates" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>get_weekly_off_dates</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="update_default_holiday_list" href="#update_default_holiday_list" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>update_default_holiday_list</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -392,6 +367,21 @@ Saturday</pre>
 
 	
         
+	<h3 style="font-weight: normal;">Class <b>OverlapError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
     
     <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.hr.doctype.holiday_list.holiday_list.get_events</code>
@@ -402,23 +392,15 @@ Saturday</pre>
 		erpnext.hr.doctype.holiday_list.holiday_list.<b>get_events</b>
         <i class="text-muted">(start, end, filters=None)</i>
     </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
+	<div class="docs-attr-desc"><p>Returns events for Gantt / Calendar view rendering.</p>
 
-	
+<p><strong>Parameters:</strong></p>
 
-	
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="erpnext.hr.doctype.holiday_list.holiday_list.get_fy_start_end_dates" href="#erpnext.hr.doctype.holiday_list.holiday_list.get_fy_start_end_dates" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.hr.doctype.holiday_list.holiday_list.<b>get_fy_start_end_dates</b>
-        <i class="text-muted">(fiscal_year)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+<ul>
+<li><strong><code>start</code></strong> -  Start date-time.</li>
+<li><strong><code>end</code></strong> -  End date-time.</li>
+<li><strong><code>filters</code></strong> -  Filters (JSON).</li>
+</ul>
 </div>
 	<br>
 

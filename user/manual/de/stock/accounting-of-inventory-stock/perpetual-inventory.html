@@ -107,9 +107,7 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="perpetual-inventory" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="perpetual-inventory" style="text-align: Left">
 	<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
 
 <p>In der Ständigen Inventur erstellt das System Buchungen für jede Lagertransaktion, so dass das Lager und der Kontostand immer synchron bleiben. Der Kontostand wird für jedes Lager mit der zutreffenden  Kontobezeichnung verbucht. Wenn das Lager gespeichert wird, erstellt das System automatisch eine Kontobezeichnung mit dem selben Namen wie das Lager. Da für jedes Lager ein Kontostand verwaltet wird, sollten Sie Lager auf Basis der in ihnen eingelagerten Artikel (Umlaufvermögen/Anlagevermögen) erstellen.</p>
@@ -135,7 +133,7 @@
   <p>Einstellungen &gt; Rechnungswesen &gt; Kontoeinstellungen &gt; Eine Buchung für jede Lagerbewegung erstellen</p>
 </blockquote>
 
-<hr>
+<hr />
 
 <h3>Beispiel:</h3>
 
@@ -280,15 +278,15 @@
 <p><strong>Lagerbuch</strong>
 </p>
 
-<p><img alt="Lagerbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-2.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-2.png" alt="Lagerbuch" /></p>
 
 <p><strong>Hauptbuch:</strong></p>
 
-<p><img alt="Hauptbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-3.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-3.png" alt="Hauptbuch" /></p>
 
 <p>Um ein System der doppelten Buchhaltung zu erhalten, werden dadurch, dass sich der Kontensaldo durch den Kaufbeleg erhöht, die Konten "In Verkaufsstellen" und "Anlagevermögen im Lager" belastet und das temporäre Konto "Lagerware erhalten aber noch nicht abgerechnet" entlastet. Zum selben Zeitpunkt wird eine negative Aufwendung auf das Konto "In der Bewertung enthaltene Kosten" verbucht, um die Bewertung hinzuzufügen und um eine doppelte Aufwandsverbuchung zu vermeiden.</p>
 
-<hr>
+<hr />
 
 <h3>Eingangsrechnung</h3>
 
@@ -296,11 +294,11 @@
 
 <h4>Hauptbuch</h4>
 
-<p><img alt="Hauptbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-4.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-4.png" alt="Hauptbuch" /></p>
 
 <p>Hier wird das Konto "Lagerware erhalten aber noch nicht bewertet" belastet und hebt den Effekt des Kaufbeleges auf.</p>
 
-<hr>
+<hr />
 
 <h3>Lieferschein</h3>
 
@@ -355,11 +353,11 @@
 
 <p><strong>Lagerbuch</strong></p>
 
-<p><img alt="Lagerbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-5.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-5.png" alt="Lagerbuch" /></p>
 
 <p><strong>Hauptbuch</strong></p>
 
-<p><img alt="Hauptbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-6.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-6.png" alt="Hauptbuch" /></p>
 
 <p>Da der Artikel aus dem Lager "In Verkaufsstellen" geliefert wird, wird das Konto "In Verkaufsstellen" entlastet und ein Betrag in gleicher Höhe dem Aufwandskonto "Selbstkosten" belastet. Der belastete/entlastete Betrag ist gleich dem Gesamtwert (Einkaufskosten) des Verkaufsartikels. Und der Wert wird gemäß der bevorzugten Bewertungsmethode (FIFO/Gleitender Durchschnitt) oder den tatsächlichen Kosten eines serialisierten Artikels kalkuliert.</p>
 
@@ -371,7 +369,7 @@ Gesamtsumme der Bewertung = 220 * 5
                         = 1100
 </code></pre>
 
-<hr>
+<hr />
 
 <h3>Ausgangsrechnung mit Lageraktualisierung</h3>
 
@@ -379,15 +377,15 @@ Gesamtsumme der Bewertung = 220 * 5
 
 <p><strong>Lagerbuch</strong></p>
 
-<p><img alt="Lagerbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-7.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-7.png" alt="Lagerbuch" /></p>
 
 <p><strong>Hauptbuch</strong></p>
 
-<p><img alt="Hauptbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-8.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-8.png" alt="Hauptbuch" /></p>
 
 <p>Hier werden, im Gegensatz zu den normalen Buchungen für Rechnungen, die Konten "In Verkaufsstellen" und "Selbstkosten" basierend auf der Bewertung beeinflusst.</p>
 
-<hr>
+<hr />
 
 <h3>Lagerbuchung (Materialschein)</h3>
 
@@ -396,8 +394,8 @@ Gesamtsumme der Bewertung = 220 * 5
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>Artikel/th&gt;
-            </th><th>Eingangslager</th>
+            <th>Artikel/th>
+            <th>Eingangslager</th>
             <th>Menge</th>
             <th>Preis</th>
             <th>Summe</th>
@@ -416,13 +414,13 @@ Gesamtsumme der Bewertung = 220 * 5
 
 <p><strong>Lagerbuch</strong></p>
 
-<p><img alt="Lagerbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-9.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-9.png" alt="Lagerbuch" /></p>
 
 <p><strong>Hauptbuch</strong></p>
 
-<p><img alt="Hauptbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-10.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-10.png" alt="Hauptbuch" /></p>
 
-<hr>
+<hr />
 
 <h3>Lagerbuchung (Materialanfrage)</h3>
 
@@ -451,13 +449,13 @@ Gesamtsumme der Bewertung = 220 * 5
 
 <p><strong>Lagerbuch</strong></p>
 
-<p><img alt="Lagerbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-11.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-11.png" alt="Lagerbuch" /></p>
 
 <p><strong>Hauptbuch</strong></p>
 
-<p><img alt="Hauptbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-12.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-12.png" alt="Hauptbuch" /></p>
 
-<hr>
+<hr />
 
 <h3>Lagerbuchung (Materialübertrag)</h3>
 
@@ -488,11 +486,12 @@ Gesamtsumme der Bewertung = 220 * 5
 
 <p><strong>Lagerbuch</strong></p>
 
-<p><img alt="Lagerbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-13.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-13.png" alt="Lagerbuch" /></p>
 
 <p><strong>Hauptbuch</strong></p>
 
-<p><img alt="Hauptbuch" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-14.png"></p>
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-14.png" alt="Hauptbuch" /></p>
+
 	</article>
 	
 </div>

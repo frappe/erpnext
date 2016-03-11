@@ -107,9 +107,7 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="job_opening" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="job_opening" style="text-align: Left">
 	<!-- title: Job Opening -->
 
 
@@ -164,6 +162,18 @@ Description of a Job Opening
         
         <tr >
             <td>2</td>
+            <td ><code>publish</code></td>
+            <td >
+                Check</td>
+            <td >
+                Publish on website
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
             <td ><code>status</code></td>
             <td >
                 Select</td>
@@ -178,7 +188,7 @@ Closed</pre>
         </tr>
         
         <tr >
-            <td>3</td>
+            <td>4</td>
             <td ><code>description</code></td>
             <td >
                 Text Editor</td>
@@ -186,6 +196,30 @@ Closed</pre>
                 Description
                 <p class="text-muted small">
                     Job profile, qualifications required etc.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>page_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Page Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>parent_website_route</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                Parent Website Route
+                
             </td>
             <td></td>
         </tr>
@@ -206,14 +240,44 @@ Closed</pre>
         
 	<h3 style="font-weight: normal;">Class <b>JobOpening</b></h3>
     
-    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    <p style="padding-left: 30px;"><i>Inherits from frappe.website.website_generator.WebsiteGenerator</i></h4>
     
     <div class="docs-attr-desc"><p></p>
 </div>
     <div style="padding-left: 30px;">
         
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_context" href="#get_context" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_context</b>
+        <i class="text-muted">(self, context)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
     </div>
     <hr>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.job_opening.job_opening.get_list_context" href="#erpnext.hr.doctype.job_opening.job_opening.get_list_context" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.job_opening.job_opening.<b>get_list_context</b>
+        <i class="text-muted">(context)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
 
 	
 

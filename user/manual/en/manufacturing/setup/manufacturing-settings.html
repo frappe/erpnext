@@ -107,16 +107,14 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="manufacturing-settings-1" styl
-
-    e="text-align: Left">
+	<article class="web-page-content" id="manufacturing-settings-1" style="text-align: Left">
 	<h1>Manufacturing Settings</h1>
 
 <p>Manufacturing Settings can be found at:</p>
 
 <p><code>Manufacturing &gt; Setup &gt; Manufacturing Settings</code></p>
 
-<p><img alt="Manufacturing Settings" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/manufacturing/manufacturing-settings-1.png"></p>
+<p><img class="screenshot" alt="Manufacturing Settings" src="https://frappe.github.io/erpnext/assets/img/manufacturing/manufacturing-settings-1.png"></p>
 
 <h4>Disable Capacity Planning and Time Tracking</h4>
 
@@ -128,7 +126,7 @@
 
 <p>In the Workstation master, actual working hours are defined (say 101m to 6pm). As per the Capacity Planning, Time Logs are created against Workstation, for tracking actual operations hour. It also considers working hours of a Workstation when scheduling job (via Time Log). </p>
 
-<p><img alt="Manufacturing Settings" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/manufacturing-settings-2.png"></p>
+<p><img class="screenshot" alt="Manufacturing Settings" src="https://frappe.github.io/erpnext/assets/img/articles/manufacturing-settings-2.png"></p>
 
 <p>As per the standard validation, if Operation cannot be completed within working hours of Workstation, then user is asked to divide an Operation into multiple and smaller Operations. However, if <code>Allow Overtime</code> field is checked, while creating Time Logs for Operation, working hours of Workstation will not be validated. In this case, Time Logs for Operation will be created beyond working hours of Workstation as well.</p>
 
@@ -136,7 +134,7 @@
 
 <p>Holiday of a company can be recorded in the <a href="https://frappe.github.io/erpnext/user/manual/en/human-resources/">Holiday List</a> master. While scheduling production job on workstation, system doesn't consider a day listed in the Holiday list. If you want production job to be scheduled on holidays as well, <code>Allow Production on Holidays</code> field should be checked.</p>
 
-<p><img alt="Manufacturing Settings" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/manufacturing-settings-3.png"></p>
+<p><img class="screenshot" alt="Manufacturing Settings" src="https://frappe.github.io/erpnext/assets/img/articles/manufacturing-settings-3.png"></p>
 
 <h4>Over Production Allowance Percentage</h4>
 
@@ -146,7 +144,7 @@
 
 <p>When creating Manufacture Entry, raw-material items are back-flush based on BOM of production item. If you want raw-material items to be back-flushed based on Material Transfer entry made against that Production Order instead, then you should set Back-flush Raw Materials Based On "Material Transferred for Manufacture".</p>
 
-<p><img alt="Manufacturing Settings" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/articles/manufacturing-settings-4.png"></p>
+<p><img class="screenshot" alt="Manufacturing Settings" src="https://frappe.github.io/erpnext/assets/img/articles/manufacturing-settings-4.png"></p>
 
 <h4>Capacity Planning For (Days)</h4>
 
@@ -163,6 +161,7 @@
 <h4>Default Finished Goods Warehouse</h4>
 
 <p>This Warehouse will be auto-updated in the Work In Progress Warehouse field of Production Order.</p>
+
 	</article>
 	
 </div>
