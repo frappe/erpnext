@@ -131,6 +131,7 @@ class LeaveApplication(Document):
 
 	def validate_leave_overlap(self):
 		if not self.name:
+			# hack! if name is null, it could cause problems with !=
 			self.name = "New Leave Application"
 
 		for d in frappe.db.sql("""select name, leave_type, posting_date, from_date, to_date, total_leave_days
