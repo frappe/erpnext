@@ -90,35 +90,24 @@ class MaintenanceSchedule(TransactionBase):
 		return schedule_list
 
 	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person):
-		from erpnext.accounts.utils import get_fiscal_year
 		validated = False
-		fy_details = ""
 
-		try:
-			fy_details = get_fiscal_year(date=schedule_date, verbose=0)
-		except Exception:
-			pass
-
-		if fy_details and fy_details[0]:
-			# check holiday list in employee master
-			holiday_list = frappe.db.sql_list("""select h.holiday_date from `tabEmployee` emp,
-				`tabSales Person` sp, `tabHoliday` h, `tabHoliday List` hl
-				where sp.name=%s and emp.name=sp.employee
-				and hl.name=emp.holiday_list and
-				h.parent=hl.name and
-				hl.fiscal_year=%s""", (sales_person, fy_details[0]))
-			if not holiday_list:
-				# check global holiday list
-				holiday_list = frappe.db.sql("""select h.holiday_date from
-					`tabHoliday` h, `tabHoliday List` hl
-					where h.parent=hl.name and hl.is_default = 1
-					and hl.fiscal_year=%s""", fy_details[0])
-
-			if not validated and holiday_list:
-				if schedule_date in holiday_list:
-					schedule_date = add_days(schedule_date, -1)
-				else:
-					validated = True
+		# check holiday list in employee master
+		holiday_list = frappe.db.sql_list("""select h.holiday_date from `tabEmployee` emp,
+			`tabSales Person` sp, `tabHoliday` h, `tabHoliday List` hl
+			where h.parent=hl.name and sp.name=%s and emp.name=sp.employee
+			and hl.name=emp.holiday_list
+			""", (sales_person))
+		if not holiday_list:
+			# check global holiday list
+			holiday_list = frappe.db.sql_list("""select h.holiday_date from
+				`tabHoliday` h, `tabHoliday List` hl
+				where h.parent=hl.name and hl.is_default = 1""")
+		if not validated and holiday_list:
+			if schedule_date in holiday_list:
+				schedule_date = add_days(schedule_date, -1)
+			else:
+				validated = True
 
 		return schedule_date
 

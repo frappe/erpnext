@@ -118,9 +118,8 @@ class SalarySlip(TransactionBase):
 			holidays = frappe.db.sql("""select t1.holiday_date
 				from `tabHoliday` t1, `tabHoliday List` t2
 				where t1.parent = t2.name and t2.is_default = 1
-				and t2.fiscal_year = %s
 				and t1.holiday_date between %s and %s""", 
-				(self.fiscal_year, start_date, end_date))
+				(start_date, end_date))
 		
 		holidays = [cstr(i[0]) for i in holidays]
 		return holidays
