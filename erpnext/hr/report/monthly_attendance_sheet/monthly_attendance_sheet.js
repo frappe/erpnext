@@ -9,7 +9,7 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 			"label": __("Month"),
 			"fieldtype": "Select",
 			"options": "Jan\nFeb\nMar\nApr\nMay\nJun\nJul\nAug\nSep\nOct\nNov\nDec",
-			"default": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", 
+			"default": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
 				"Dec"][frappe.datetime.str_to_obj(frappe.datetime.get_today()).getMonth()],
 		},
 		{
@@ -40,8 +40,9 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 			callback: function(r) {
 				var year_filter = me.filters_by_name.year;
 				year_filter.df.options = r.message;
-				year_filter.set_options(r.message.split("\n")[0]);
+				year_filter.df.default = r.message.split("\n")[0];
 				year_filter.refresh();
+				year_filter.set_input(year_filter.df.default);
 			}
 		});
 	}

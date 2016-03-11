@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, cint
+from frappe.utils import cstr, cint, getdate
 from frappe import msgprint, _
 from calendar import monthrange
 
@@ -74,7 +74,7 @@ def get_conditions(filters):
 
 	filters["month"] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
 		"Dec"].index(filters.month) + 1
-	
+
 	filters["total_days_in_month"] = monthrange(cint(filters.year), filters.month)[1]
 
 	conditions = " and month(att_date) = %(month)s and year(att_date) = %(year)s"
@@ -95,5 +95,8 @@ def get_employee_details():
 
 @frappe.whitelist()
 def get_attendance_years():
-	year_list = frappe.db.sql_list("""select distinct YEAR(att_date) from tabAttendance ORDER BY YEAR(att_date)""")
+	year_list = frappe.db.sql_list("""select distinct YEAR(att_date) from tabAttendance ORDER BY YEAR(att_date) DESC""")
+	if not year_list:
+		year_list = [getdate().year]
+
 	return "\n".join(str(year) for year in year_list)
