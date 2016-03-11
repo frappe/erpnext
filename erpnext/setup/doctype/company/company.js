@@ -141,7 +141,7 @@ erpnext.company.setup_queries = function(frm) {
 		["disposal_account", {"report_type": "Profit and Loss"}],
 		["cost_center", {}],
 		["round_off_cost_center", {}],
-		["disposal_cost_center", {}]
+		["depreciation_cost_center", {}]
 	], function(i, v) {
 		erpnext.company.set_custom_query(frm, v);
 	});

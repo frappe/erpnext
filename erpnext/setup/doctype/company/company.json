@@ -1091,14 +1091,14 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
-   "fieldname": "disposal_cost_center", 
+   "fieldname": "depreciation_cost_center", 
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_list_view": 0, 
-   "label": "Asset Disposal Cost Center", 
+   "label": "Asset Depreciation Cost Center", 
    "length": 0, 
    "no_copy": 1, 
    "options": "Cost Center", 
@@ -1387,7 +1387,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-03-09 12:06:12.189968", 
+ "modified": "2016-03-10 04:34:43.440914", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
@@ -1536,6 +1536,5 @@
  ], 
  "read_only": 0, 
  "read_only_onload": 0, 
- "sort_order": "ASC", 
- "version": 0
+ "sort_order": "ASC"
 }

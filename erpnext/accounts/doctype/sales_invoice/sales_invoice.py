@@ -484,6 +484,13 @@ class SalesInvoice(SellingController):
 
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
+				
+	def validate_asset(self, asset, item_row):
+		super(SalesInvoice, self).validate_asset(asset, item_row)
+		
+		if self.docstatus == 1 and asset.status in ("Scrapped", "Cancelled", "Sold"):
+			frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
+				.format(item_row.idx, asset.name, asset.status))
 
 	def make_gl_entries(self, repost_future_gle=True):
 		gl_entries = self.get_gl_entries()
@@ -582,7 +589,7 @@ class SalesInvoice(SellingController):
 						for gle in fixed_asset_gl_entries:
 							gl_entries.append(self.get_gl_dict(gle))
 						
-						frappe.db.set_value("Asset", asset.name, "status", "Sold")
+						asset.set_status("Sold" if self.docstatus==1 else None)
 				else:
 					account_currency = get_account_currency(item.income_account)
 					gl_entries.append(

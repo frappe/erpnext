@@ -17,7 +17,8 @@ def get_depreciable_assets(date):
 	return frappe.db.sql_list("""select a.name
 		from tabAsset a, `tabDepreciation Schedule` ds
 		where a.name = ds.parent and a.docstatus=1 and ds.schedule_date<=%s 
-			and a.status = 'Available' and ifnull(ds.journal_entry, '')=''""", date)
+			and a.status in ('Submitted', 'Partially Depreciated') 
+			and ifnull(ds.journal_entry, '')=''""", date)
 
 def make_depreciation_entry(asset_name, date=None):
 	if not date:
@@ -26,6 +27,8 @@ def make_depreciation_entry(asset_name, date=None):
 	asset = frappe.get_doc("Asset", asset_name)
 	fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account = \
 		get_depreciation_accounts(asset)
+		
+	depreciation_cost_center = frappe.db.get_value("Company", asset.company, "depreciation_cost_center")
 	
 	for d in asset.get("schedules"):
 		if not d.journal_entry and getdate(d.schedule_date) <= getdate(date):
@@ -34,7 +37,7 @@ def make_depreciation_entry(asset_name, date=None):
 			je.posting_date = d.schedule_date
 			je.company = asset.company
 			je.remark = "Depreciation Entry against {0} worth {1}".format(asset_name, d.depreciation_amount)
-	
+			
 			je.append("accounts", {
 				"account": accumulated_depreciation_account,
 				"credit_in_account_currency": d.depreciation_amount,
@@ -46,15 +49,18 @@ def make_depreciation_entry(asset_name, date=None):
 				"account": depreciation_expense_account,
 				"debit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
-				"reference_name": asset.name
+				"reference_name": asset.name,
+				"cost_center": depreciation_cost_center
 			})
-	
+			
 			je.flags.ignore_permissions = True
 			je.submit()
 	
 			d.db_set("journal_entry", je.name)
 			asset.current_value -= d.depreciation_amount
-			frappe.db.set_value("Asset", asset_name, "current_value", asset.current_value)			
+			
+		asset.db_set("current_value", asset.current_value)
+		asset.set_status()
 	
 def get_depreciation_accounts(asset):
 	accounts = frappe.db.sql("""select fixed_asset_account, accumulated_depreciation_account, 
@@ -84,8 +90,10 @@ def get_depreciation_accounts(asset):
 def scrap_asset(asset_name):
 	asset = frappe.get_doc("Asset", asset_name)
 	
-	if asset.docstatus != 1 or asset.status != 'Available':
-		frappe.throw(_("Asset {0} must be submitted and available").format(asset.name))
+	if asset.docstatus != 1:
+		frappe.throw(_("Asset {0} must be submitted").format(asset.name))
+	elif asset.status in ("Cancelled", "Sold", "Scrapped"):
+		frappe.throw(_("Asset {0} cannot be scrapped, as it is already {1}").format(asset.name, asset.status))
 
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = "Journal Entry"
@@ -103,12 +111,23 @@ def scrap_asset(asset_name):
 	je.flags.ignore_permissions = True
 	je.submit()
 	
-	frappe.db.set_value("Asset", asset_name, "status", "Scrapped")
+	frappe.db.set_value("Asset", asset_name, "journal_entry_for_scrap", je.name)
+	asset.set_status("Scrapped")
 	
+@frappe.whitelist()
+def restore_asset(asset_name):
+	asset = frappe.get_doc("Asset", asset_name)
+	
+	je = asset.journal_entry_for_scrap
+	asset.db_set("journal_entry_for_scrap", None)
+	frappe.get_doc("Journal Entry", je).cancel()
+	
+	asset.set_status()
+		
 @frappe.whitelist()
 def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
 	fixed_asset_account, accumulated_depr_account, depr_expense_account = get_depreciation_accounts(asset)
-	disposal_account, disposal_cost_center = get_disposal_account_and_cost_center(asset.company)
+	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
 	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(asset.current_value)
 	
 	gl_entries = [
@@ -129,7 +148,7 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
 		debit_or_credit = "debit" if profit_amount < 0 else "credit"
 		gl_entries.append({
 			"account": disposal_account,
-			"cost_center": disposal_cost_center,
+			"cost_center": depreciation_cost_center,
 			debit_or_credit: abs(profit_amount),
 			debit_or_credit + "_in_account_currency": abs(profit_amount)
 		})
@@ -137,8 +156,12 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
 	return gl_entries
 	
 def get_disposal_account_and_cost_center(company):
-	disposal_account, disposal_cost_center = frappe.db.get_value("Company", company, 
-		["disposal_account", "disposal_cost_center"])
-	if not disposal_account or not disposal_cost_center:
-		frappe.throw(_("Please set 'Asset Disposal Account' and 'Asset Disposal Cost Center' in Company {0}").format(company))
-	return disposal_account, disposal_cost_center
+	disposal_account, depreciation_cost_center = frappe.db.get_value("Company", company, 
+		["disposal_account", "depreciation_cost_center"])
+		
+	if not disposal_account:
+		frappe.throw(_("Please set 'Asset Disposal Account' in Company {0}").format(company))
+	if not depreciation_cost_center:
+		frappe.throw(_("Please set 'Asset Depreciation Cost Center' in Company {0}").format(company))
+		
+	return disposal_account, depreciation_cost_center

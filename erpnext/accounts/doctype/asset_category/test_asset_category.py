@@ -18,7 +18,7 @@ class TestAssetCategory(unittest.TestCase):
 		asset_category.append("accounts", {
 			"company": "_Test Company",
 			"fixed_asset_account": "_Test Fixed Asset - _TC",
-			"accumulated_depreciation_account": "_Test Accoumulated Depreciations - _TC",
+			"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
 			"depreciation_expense_account": "_Test Depreciations - _TC"
 		})
 		

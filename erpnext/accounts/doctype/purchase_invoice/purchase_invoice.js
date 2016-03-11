@@ -217,7 +217,7 @@ cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
 			'item_code': d.item_code,
 			'docstatus': 1,
 			'company': doc.company,
-			'status': 'Available'
+			'status': 'Submitted'
 		}
 	}
 });
