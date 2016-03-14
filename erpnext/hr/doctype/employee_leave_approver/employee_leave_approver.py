@@ -10,3 +10,10 @@ from frappe.model.document import Document
 
 class EmployeeLeaveApprover(Document):
 	pass
+
+def get_approvers(doctype, txt, searchfield, start, page_len, filters):
+		return frappe.db.sql("""select user.name, user.first_name, user.last_name from
+		tabUser user, tabUserRole user_role where
+		user.name != %s 
+		and user_role.role = "Leave Approver"
+		and user_role.parent = user.name""", filters.get("user"))
