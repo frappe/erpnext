@@ -211,7 +211,7 @@ def get_amount(ref_doc, dt):
 		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 		
 	if dt == "Sales Invoice":
-		grand_total = flt(ref_doc.outstanding_amount)
+		grand_total = flt(ref_doc.grand_total)
 		
 	if grand_total > 0 :
 		return grand_total
