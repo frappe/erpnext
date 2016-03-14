@@ -2369,7 +2369,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "depends_on": "is_recurring", 
@@ -2694,7 +2694,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-04 01:04:14.729764", 
+ "modified": "2016-03-14 19:00:26.271371", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 

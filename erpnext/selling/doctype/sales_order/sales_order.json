@@ -2693,7 +2693,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "depends_on": "is_recurring", 
@@ -3018,7 +3018,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-04 01:39:38.279978", 
+ "modified": "2016-03-14 18:36:19.317513", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
