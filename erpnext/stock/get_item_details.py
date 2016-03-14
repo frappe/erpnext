@@ -6,7 +6,8 @@ import frappe
 from frappe import _, throw
 from frappe.utils import flt, cint, add_days, cstr
 import json
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import (get_pricing_rule_for_item, set_transaction_type,
+	get_margin_details, calculate_total_margin, discount_on_total_margin)
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 
@@ -69,7 +70,30 @@ def get_item_details(args):
 	if args.get("is_subcontracted") == "Yes":
 		out.bom = get_default_bom(args.item_code)
 
+	if args.document_type in ["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]:
+		# calculate rate by appling discount to total_margin
+		if(args.total_margin):
+			out["rate"] = discount_on_total_margin(args.total_margin, out.discount_percentage);
+		elif not args.margin_type:
+			data = set_margin_fields(out.pricing_rule, out.price_list_rate)
+			out["rate"] = discount_on_total_margin(data.get("total_margin"), out.discount_percentage)
+			out.update(data)
+
 	return out
+
+def set_margin_fields(pricing_rule=None, price_list_rate=None):
+	# margin_details dict will hold the all data variable regrading margin
+	margin_details = frappe._dict({
+		"margin_type":"",
+		"margin_rate_or_amount": 0.0,
+		"total_margin": 0.0
+	})
+
+	if pricing_rule and price_list_rate:
+		margin_details.update(get_margin_details(pricing_rule))
+		margin_details.update(calculate_total_margin(margin_details.get("margin_type"),margin_details.get("margin_rate_or_amount"), price_list_rate))
+
+	return margin_details
 
 def process_args(args):
 	if isinstance(args, basestring):
@@ -413,7 +437,6 @@ def apply_price_list(args, as_doc=False):
 					# update the value
 					if fieldname in item and fieldname not in ("name", "doctype"):
 						item[fieldname] = children[i][fieldname]
-
 		return args
 	else:
 		return {
