@@ -12,7 +12,7 @@ If not configured otherwise, ERPNext uses the Supplier's Name as the unique name
 
 You can define or select the Naming Series pattern from:
 
-> Setup > Settings > Naming Series
+`Setup > Data > Naming Series`
 
 [Click here to know more about defining a Naming Series.]({{docs_base_url}}/user/manual/en/setting-up/settings/naming-series.html)
 

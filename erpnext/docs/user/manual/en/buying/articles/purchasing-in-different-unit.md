@@ -1,6 +1,6 @@
 #Purchasing in Different Unit (UoM)
 
-Each item has stock unit of measument (UoM) associated to it. For example UoM of pen is nos. and sand stocked kgs. But item could be purchased in different UoM, like 1 set/box of pen, or one truck of sand. In ERPNex, you can create purchase transaction for an item having different UoM than item's stock UoM.
+Each item has stock unit of measument (UoM) associated to it. For example UoM of pen could be numbers (Nos) and sand could be stocked kgs. However, when we place an order with Supplier, UoM for an item could change. Like we can order 1 set/box of Pen, or one truck of sand to our Supplier. When creating purchase transacton, you can change Purchase UoM for an item.
 
 ### Scenario:
 
@@ -19,7 +19,7 @@ In both the fields, default UoM of an item will be fetched by default. You shoul
 
 #### Step 2: Update UoM Conversion Factors
 
-In one Box, if you get 20 Nos. of Pen, UoM Conversion Factor would be 20. 
+In one Box, if you get 20 Nos. of Pen, UoM Conversion Factor would be 20.
 
 <img alt="Item Conversion Factor" class="screenshot" src="{{docs_base_url}}/assets/img/articles/po-conversion-factor.png">
 
