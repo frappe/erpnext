@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
-from erpnext.stock.get_item_details import get_available_qty, get_default_cost_center, get_conversion_factor
+from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 import json
 
@@ -29,7 +29,7 @@ class StockEntry(StockController):
 	def onload(self):
 		if self.docstatus==1:
 			for item in self.get("items"):
-				item.update(get_available_qty(item.item_code, item.s_warehouse))
+				item.update(get_bin_details(item.item_code, item.s_warehouse))
 
 	def validate(self):
 		self.pro_doc = None

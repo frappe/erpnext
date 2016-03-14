@@ -603,6 +603,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			callback: function(r) {
 				if (!r.exc && r.message) {
 					me._set_values_for_item_list(r.message);
+					if(item) me.set_gross_profit(item);
 					if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
 				}
 			}
@@ -876,6 +877,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				refresh_field('to_date');
 			}
 		}
+	},
+	
+	set_gross_profit: function(item) {
+		if (this.frm.doc.doctype == "Sales Order" && item.valuation_rate) {
+			rate = flt(item.rate) * flt(this.frm.doc.conversion_rate || 1);
+			item.gross_profit = flt(((rate - item.valuation_rate) * item.qty), precision("amount", item));
+		}
 	}
 });
 
@@ -888,7 +896,8 @@ frappe.ui.form.on(cur_frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 	} else {
 		item.discount_percentage = 0.0;
 	}
-
+	
+	cur_frm.cscript.set_gross_profit(item);
 	cur_frm.cscript.calculate_taxes_and_totals();
 })
 
