@@ -105,7 +105,9 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			title: __("Get Items from BOM"),
 			fields: [
 				{"fieldname":"bom", "fieldtype":"Link", "label":__("BOM"),
-					options:"BOM", reqd: 1},
+					options:"BOM", reqd: 1, get_query: function(){
+						return {filters: { docstatus:1 }}
+					}},
 				{"fieldname":"warehouse", "fieldtype":"Link", "label":__("Warehouse"),
 					options:"Warehouse", reqd: 1, label:"For Warehouse"},
 				{"fieldname":"fetch_exploded", "fieldtype":"Check",
