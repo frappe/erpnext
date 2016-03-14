@@ -50,7 +50,7 @@ class PaymentRequest(Document):
 	
 	def get_payment_url(self):
 		""" This is blanck method to trigger hooks call from individual payment gateway app
-		  which will return respective payment gateway"""
+		which will return respective payment gateway"""
 		pass
 	
 	def make_invoice(self):
@@ -211,7 +211,7 @@ def get_amount(ref_doc, dt):
 		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 		
 	if dt == "Sales Invoice":
-		grand_total = flt(ref_doc.outstanding_amount)
+		grand_total = flt(ref_doc.grand_total)
 		
 	if grand_total > 0 :
 		return grand_total
