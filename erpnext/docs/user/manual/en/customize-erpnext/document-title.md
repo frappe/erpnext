@@ -12,7 +12,7 @@ To edit a default title, go to
 
 1. Setup > Customize > Customize Form
 2. Select your transaction
-3. Edit the **Default** field in your form
+3. Edit the **Default** field in your forms
 
 #### Defining Titles
 
@@ -31,3 +31,5 @@ If your title is generated as a default title, it can be edited by the user by c
     src="{{docs_base_url}}/assets/img/customize/editable-title.gif">
 
 If you want a fixed title, you can set the rule in the **Options** property. In this way, the title will be automatically updated everytime the document is updated.
+
+{next}

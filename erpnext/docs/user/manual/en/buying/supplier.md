@@ -1,37 +1,35 @@
-Suppliers are companies or individuals who provide you with products or
-services. They are treated in exactly the same manner as Customers in ERPNext.
+Suppliers are companies or individuals who provide you with products or services.
 
-You can create a new Supplier via:
+You can create a new Supplier from:
 
-> Buying > Documents > Supplier > New Supplier
+`Buying > Documents > Supplier > New Supplier`
 
 <img class="screenshot" alt="Supplier Master" src="{{docs_base_url}}/assets/img/buying/supplier-master.png">
 
 ### Contacts and Addresses
 
-Contacts and Addresses in ERPNext are stored separately so that you can attach
-multiple Contacts or Addresses to Customers and Suppliers. To add a Contact or
-Address go to Buying and click on “New Contact” or “New Address”.
+Contacts and Addresses in ERPNext are stored separately so that you can create multiple Contacts and Addresses for a Suppliers. Once Supplier is saved, you will find option to create Contact and Address for that Supplier.
 
-> Tip: When you select a Supplier in any transaction, one Contact and Address
-gets pre-selected. This is the “Default Contact or Address”. So make sure you
-set your defaults correctly!
+<img class="screenshot" alt="Supplier Master" src="{{docs_base_url}}/assets/img/buying/supplier-new-address-contact.png">
+
+> Tip: When you select a Supplier in any transaction, Contact for which "Is Primary" field id checked, it will auto-fetch with the Supplier details.
 
 ### Integration with Accounts
 
-In ERPNext, there is a separate Account record for each Supplier, of Each
-company.
+For all the Supplier, "Creditor" account is set as default payable Account. When Purchase Invoice is created, payable towards the supplier is booked against "Creditors" account.
 
-When you create a new Supplier, ERPNext will automatically create an Account
-Ledger for the Supplier under “Accounts Payable” in the Company set in the
-Supplier record.
+If you want to customize payable account for the Supplier, you should first add a payable Account in the Chart of Account, and then select that Payable Account in the Supplier master.
 
-> Advanced Tip: If you want to change the Account Group under which the
-Supplier Account is created, you can set it in the Company master.
+<img class="screenshot" alt="Supplier Master" src="{{docs_base_url}}/assets/img/buying/supplier-payable-account.png">
 
-If you want to create an Account in another Company, just change the Company
-value and “Save” the Supplier again.
+If you don't want to customize payable account, and proceed with default payable account "Creditor", then do not update any value in the Default Supplier Account's table.
 
-> Tip: You can also import from the Data Import Tool
+> Advanced Tip: Default Payable Account is set in the Company master. If you want to set another account as Account as default for payable instead of Creditors Account, go to Company master, and set that account as "Default Payable Account".
+
+You can add multiple companies in your ERPNext instance, and one Supplier can be used across multiple companies. In this case, you should define Companywise Payable Account for the Supplier in the "Default Payable Accounts" table.
+
+<iframe width="660" height="371" src="https://www.youtube.com/embed/anoGi_RpQ20" frameborder="0" allowfullscreen></iframe>
+
+(Check from 2:20)
 
 {next}
