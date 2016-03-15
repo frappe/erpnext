@@ -2,7 +2,7 @@
 	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
 </div>
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
-<h4 class="text-center">{%= filters.account && (filters.account + ", ")  || "" %} {%= filters.company %}</h4>
+<h4 class="text-center">{%= filters.customer || filters.supplier %} </h4>
 <h5 class="text-center">
 	{%= filters.ageing_based_on %}
 	{%= __("Until") %}
@@ -35,7 +35,7 @@
 					<td>{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
 					<td>{%= data[i][__("Voucher Type")] %}
 						<br>{%= data[i][__("Voucher No")] %}</td>
-					<td>{%= data[i][__("Customer")] || data[i][__("Supplier")] %}
+					<td>{%= data[i][__("Customer Name")] || data[i][__("Customer")] || data[i][__("Supplier Name")] || data[i][__("Supplier")] %}
 						{% if(__(report.report_name) == "Accounts Receivable") { %}
 							<br>{%= __("Territory") %}: {%= data[i][__("Territory")] %}
 						{% } else { %}
