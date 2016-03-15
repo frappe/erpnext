@@ -65,5 +65,6 @@ def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		select u.name, concat(u.first_name, ' ', u.last_name)
 		from tabUser u, tabUserRole r
-		where u.name = r.parent and r.role = 'Expense Approver' and u.name like %s
+		where u.name = r.parent and r.role = 'Expense Approver' 
+		and u.enabled = 1 and u.name like %s
 	""", ("%" + txt + "%"))
