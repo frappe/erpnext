@@ -7,8 +7,8 @@
   "accounts": [
    {
     "account": "_Test Receivable - _TC",
-	"party_type": "Customer",
-	"party": "_Test Customer",
+	  "party_type": "Customer",
+	  "party": "_Test Customer",
     "credit_in_account_currency": 400.0,
     "debit_in_account_currency": 0.0,
     "doctype": "Journal Entry Account",
@@ -22,7 +22,6 @@
     "parentfield": "accounts"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "naming_series": "_T-Journal Entry-",
   "posting_date": "2013-02-14",
   "user_remark": "test",
@@ -38,8 +37,8 @@
   "accounts": [
    {
     "account": "_Test Payable - _TC",
-	"party_type": "Supplier",
-	"party": "_Test Supplier",
+  	"party_type": "Supplier",
+	  "party": "_Test Supplier",
     "credit_in_account_currency": 0.0,
     "debit_in_account_currency": 400.0,
     "doctype": "Journal Entry Account",
@@ -53,7 +52,6 @@
     "parentfield": "accounts"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "naming_series": "_T-Journal Entry-",
   "posting_date": "2013-02-14",
   "user_remark": "test",
@@ -69,8 +67,8 @@
   "accounts": [
    {
     "account": "_Test Receivable - _TC",
-	"party_type": "Customer",
-	"party": "_Test Customer",
+	  "party_type": "Customer",
+  	"party": "_Test Customer",
     "credit_in_account_currency": 0.0,
     "debit_in_account_currency": 400.0,
     "doctype": "Journal Entry Account",
@@ -85,7 +83,6 @@
     "parentfield": "accounts"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "naming_series": "_T-Journal Entry-",
   "posting_date": "2013-02-14",
   "user_remark": "test",

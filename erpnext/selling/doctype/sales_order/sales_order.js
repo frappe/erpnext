@@ -117,21 +117,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	tc_name: function() {
 		this.get_terms();
 	},
-
-	warehouse: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		if(item.item_code && item.warehouse) {
-			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_available_qty",
-				child: item,
-				args: {
-					item_code: item.item_code,
-					warehouse: item.warehouse,
-				},
-			});
-		}
-	},
-
+	
 	make_material_request: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",

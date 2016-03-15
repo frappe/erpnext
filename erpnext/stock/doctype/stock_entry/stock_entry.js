@@ -460,18 +460,13 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
 
 cur_frm.cscript.company = function(doc, cdt, cdn) {
 	if(doc.company) {
-		erpnext.get_fiscal_year(doc.company, doc.posting_date, function() {
-			var company_doc = frappe.get_doc(":Company", doc.company);
-			if(company_doc.default_letter_head) {
-				cur_frm.set_value("letter_head", company_doc.default_letter_head);
-			}
-		});
+		var company_doc = frappe.get_doc(":Company", doc.company);
+		if(company_doc.default_letter_head) {
+			cur_frm.set_value("letter_head", company_doc.default_letter_head);
+		}
 	}
 }
 
-cur_frm.cscript.posting_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}
 
 frappe.ui.form.on('Landed Cost Taxes and Charges', {
 	amount: function(frm) {

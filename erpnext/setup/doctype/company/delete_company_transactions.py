@@ -27,10 +27,6 @@ def delete_company_transactions(company_name):
 			"Purchase Taxes and Charges Template", "POS Profile", 'BOM'):
 				delete_for_doctype(doctype, company_name)
 
-		else:
-			# un-set company
-			frappe.db.sql('update `tab{0}` set company="" where company=%s'.format(doctype), company_name)
-
 	# Clear notification counts
 	clear_notifications()
 

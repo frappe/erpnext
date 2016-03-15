@@ -10,7 +10,7 @@ import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
 
 form_grid_templates = {
@@ -432,11 +432,25 @@ class PurchaseInvoice(BuyingController):
 		if self.bill_date:
 			if getdate(self.bill_date) > getdate(self.posting_date):
 				frappe.throw("Supplier Invoice Date cannot be greater than Posting Date")
+
 		if self.bill_no:
 			if cint(frappe.db.get_single_value("Accounts Settings", "check_supplier_invoice_uniqueness")):
-				pi = frappe.db.exists("Purchase Invoice", {"bill_no": self.bill_no,
-					"fiscal_year": self.fiscal_year, "name": ("!=", self.name), "docstatus": ("<", 2)})
+				fiscal_year = get_fiscal_year(self.posting_date, company=self.company, as_dict=True)
+
+				pi = frappe.db.sql('''select name from `tabPurchase Invoice`
+					where
+						bill_no = %(bill_no)s
+						and name != %(name)s
+						and docstatus < 2
+						and posting_date between %(year_start_date)s and %(year_end_date)s''', {
+							"bill_no": self.bill_no,
+							"name": self.name,
+							"year_start_date": fiscal_year.year_start_date,
+							"year_end_date": fiscal_year.year_end_date
+						})
+
 				if pi:
+					pi = pi[0][0]
 					frappe.throw("Supplier Invoice No exists in Purchase Invoice {0}".format(pi))
 
 	def update_billing_status_in_pr(self, update_modified=True):

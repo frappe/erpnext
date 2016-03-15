@@ -16,10 +16,10 @@ class FiscalYearError(frappe.ValidationError): pass
 class BudgetError(frappe.ValidationError): pass
 
 @frappe.whitelist()
-def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, company=None):
-	return get_fiscal_years(date, fiscal_year, label, verbose, company)[0]
+def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False):
+	return get_fiscal_years(date, fiscal_year, label, verbose, company, as_dict=as_dict)[0]
 
-def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verbose=1, company=None):
+def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 	cond = " disabled = 0"
 	if fiscal_year:
@@ -36,10 +36,10 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 			"fiscal_year": fiscal_year,
 			"transaction_date": transaction_date,
 			"company": company
-		})
+		}, as_dict=as_dict)
 
 	if not fy:
-		error_msg = _("""{0} {1} not in any active Fiscal Year. For more details check {2}.""").format(label, formatdate(transaction_date), "https://erpnext.com/kb/accounts/fiscal-year-error")
+		error_msg = _("""{0} {1} not in any active Fiscal Year. For more details check {2}.""").format(label, formatdate(transaction_date), "https://frappe.github.io/erpnext/user/manual/en/accounts/articles/fiscal-year-error")
 		if verbose==1: frappe.msgprint(error_msg)
 		raise FiscalYearError, error_msg
 	return fy
@@ -106,7 +106,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 				in_account_currency = False
 		else:
 			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
-	
+
 	if party_type and party:
 		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
 			(frappe.db.escape(party_type), frappe.db.escape(party, percent=False)))
@@ -488,4 +488,3 @@ def get_account(account_type=None, root_type=None, is_group=None, account_curren
 		"account_currency": account_currency or frappe.defaults.get_defaults().currency,
 		"company": company or frappe.defaults.get_defaults().company
 	}, "name")
-	

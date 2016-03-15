@@ -220,10 +220,10 @@ class AccountsController(TransactionBase):
 		gl_dict = frappe._dict({
 			'company': self.company,
 			'posting_date': self.posting_date,
+			'fiscal_year': get_fiscal_year(self.posting_date, company=self.company)[0],
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,
 			'remarks': self.get("remarks"),
-			'fiscal_year': self.fiscal_year,
 			'debit': 0,
 			'credit': 0,
 			'debit_in_account_currency': 0,

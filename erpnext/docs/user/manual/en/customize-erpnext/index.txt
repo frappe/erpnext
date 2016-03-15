@@ -1,8 +1,8 @@
 custom-field
-custom-doctype
-custom-scripts
 customize-form
+custom-doctype
 document-title
 hiding-modules-and-features
 print-format
+custom-scripts
 articles

@@ -8,6 +8,8 @@ from frappe.utils import flt, getdate
 
 def execute(filters=None):
 	if not filters: filters = {}
+	
+	validate_filters(filters)
 
 	columns = get_columns()
 	item_map = get_item_details(filters)
@@ -137,3 +139,10 @@ def get_item_details(filters):
 		from tabItem {condition}""".format(condition=condition), value, as_dict=1)
 
 	return dict((d.name, d) for d in items)
+
+def validate_filters(filters):
+	if not (filters.get("item_code") or filters.get("warehouse")):
+		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
+		if sle_count > 500000:
+			frappe.throw(_("Please set filter based on Item or Warehouse"))
+	

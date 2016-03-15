@@ -7,7 +7,6 @@ from frappe import _
 from frappe.utils import get_fullname, flt
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
-from erpnext.accounts.utils import validate_fiscal_year
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 
@@ -17,7 +16,6 @@ class ExpenseClaim(Document):
 			self.employee_name, self.total_claimed_amount)
 
 	def validate(self):
-		validate_fiscal_year(self.posting_date, self.fiscal_year, _("Posting Date"), self)
 		self.validate_sanctioned_amount()
 		self.validate_expense_approver()
 		self.calculate_total_amount()
@@ -67,5 +65,6 @@ def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		select u.name, concat(u.first_name, ' ', u.last_name)
 		from tabUser u, tabUserRole r
-		where u.name = r.parent and r.role = 'Expense Approver' and u.name like %s
+		where u.name = r.parent and r.role = 'Expense Approver' 
+		and u.enabled = 1 and u.name like %s
 	""", ("%" + txt + "%"))
