@@ -45,10 +45,9 @@ def get_item_details():
 
 	item_map = {}
 
-	for i in frappe.db.sql("select it.item_group as item_group, it.name as name, item_name, it.description as description, \
-		stock_uom from tabItem it, `tabItem Group` itg \
-		where it.item_group = itg.name and it.disabled = 0\
-		order by it.item_group, item_code", as_dict=1):
+	for i in frappe.db.sql("select name, item_group, item_name, description, \
+		stock_uom from tabItem \
+		order by item_code, item_group", as_dict=1):
 			item_map.setdefault(i.name, i)
 
 	return item_map
@@ -59,7 +58,7 @@ def get_price_list():
 	rate = {}
 
 	price_list = frappe.db.sql("""select ip.item_code, ip.buying, ip.selling,
-		concat(cu.symbol, " ", round(ip.price_list_rate,2), " - ", ip.price_list) as price
+		concat(ifnull(cu.symbol,ip.currency), " ", round(ip.price_list_rate,2), " - ", ip.price_list) as price
 		from `tabItem Price` ip, `tabPrice List` pl, `tabCurrency` cu
 		where ip.price_list=pl.name and pl.currency=cu.name and pl.enabled=1""", as_dict=1)
 
