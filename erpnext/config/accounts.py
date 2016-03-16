@@ -4,14 +4,8 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
-			"icon": "icon-star",
+			"label": _("Billing"),
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Journal Entry",
-					"description": _("Accounting journal entries.")
-				},
 				{
 					"type": "doctype",
 					"name": "Sales Invoice",
@@ -24,6 +18,59 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Payment Request",
+					"description": _("Payment Request")
+				},
+				{
+					"type": "report",
+					"name": "Accounts Receivable",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Accounts Payable",
+					"doctype": "Purchase Invoice",
+					"is_query_report": True
+				},
+			]
+
+		},
+		{
+			"label": _("Company and Accounts"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Company",
+					"description": _("Company (not Customer or Supplier) master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Journal Entry",
+					"description": _("Accounting journal entries.")
+				},
+				{
+					"type": "page",
+					"name": "Accounts Browser",
+					"icon": "icon-sitemap",
+					"label": _("Chart of Accounts"),
+					"route": "Accounts Browser/Account",
+					"description": _("Tree of financial accounts."),
+					"doctype": "Account",
+				},
+				{
+					"type": "report",
+					"name":"General Ledger",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+			]
+		},
+		{
+			"label": _("Masters"),
+			"items": [
+				{
+					"type": "doctype",
 					"name": "Customer",
 					"description": _("Customer database.")
 				},
@@ -34,93 +81,76 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Payment Request",
-					"description": _("Payment Request")
-				},
-				{
-					"type": "page",
-					"name": "Accounts Browser",
-					"icon": "icon-sitemap",
-					"label": _("Chart of Accounts"),
-					"route": "Accounts Browser/Account",
-					"description": _("Tree of financial accounts."),
-					"doctype": "Account",
+					"name": "Item",
 				},
 			]
 		},
 		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
+			"label": _("Accounting Statements"),
 			"items": [
 				{
-					"type": "doctype",
-					"name": "Bank Reconciliation",
-					"description": _("Update bank payment dates with journals.")
+					"type": "report",
+					"name": "Trial Balance",
+					"doctype": "GL Entry",
+					"is_query_report": True,
 				},
 				{
-					"type": "doctype",
-					"name": "Payment Reconciliation",
-					"description": _("Match non-linked Invoices and Payments.")
+					"type": "report",
+					"name": "Balance Sheet",
+					"doctype": "GL Entry",
+					"is_query_report": True
 				},
 				{
-					"type": "doctype",
-					"name": "Period Closing Voucher",
-					"description": _("Close Balance Sheet and book Profit or Loss.")
+					"type": "report",
+					"name": "Cash Flow",
+					"doctype": "GL Entry",
+					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Profit and Loss Statement",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+			]
+		},
+		{
+			"label": _("Banking and Payments"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Payment Tool",
 					"description": _("Create Payment Entries against Orders or Invoices.")
 				},
+				{
+					"type": "doctype",
+					"label": _("Update Bank Transaction Dates"),
+					"name": "Bank Reconciliation",
+					"description": _("Update bank payment dates with journals.")
+				},
+				{
+					"type": "doctype",
+					"label": _("Match Payments with Invoices"),
+					"name": "Payment Reconciliation",
+					"description": _("Match non-linked Invoices and Payments.")
+				},
+				{
+					"type": "report",
+					"name": "Bank Reconciliation Statement",
+					"is_query_report": True,
+					"doctype": "Journal Entry"
+				},
+				{
+					"type": "report",
+					"name": "Bank Clearance Summary",
+					"is_query_report": True,
+					"doctype": "Journal Entry"
+				},
 			]
 		},
 		{
-			"label": _("Setup"),
-			"icon": "icon-cog",
+			"label": _("Taxes"),
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Company",
-					"description": _("Company (not Customer or Supplier) master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Fiscal Year",
-					"description": _("Financial / accounting year.")
-				},
-				{
-					"type": "doctype",
-					"name": "Payment Gateway Account",
-					"description": _("Setup Gateway accounts.")
-				},
-				{
-					"type": "page",
-					"name": "Accounts Browser",
-					"icon": "icon-sitemap",
-					"label": _("Chart of Accounts"),
-					"route": "Accounts Browser/Account",
-					"description": _("Tree of financial accounts."),
-					"doctype": "Account",
-				},
-				{
-					"type": "page",
-					"name": "Accounts Browser",
-					"icon": "icon-sitemap",
-					"label": _("Chart of Cost Centers"),
-					"route": "Accounts Browser/Cost Center",
-					"description": _("Tree of financial Cost Centers."),
-					"doctype": "Cost Center",
-				},
-				{
-					"type": "doctype",
-					"name": "Accounts Settings",
-					"description": _("Default settings for accounting transactions.")
-				},
-				{
-					"type": "doctype",
-					"name": "Tax Rule",
-					"description": _("Tax Rule for transactions.")
-				},
 				{
 					"type": "doctype",
 					"name": "Sales Taxes and Charges Template",
@@ -133,19 +163,71 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "POS Profile",
-					"label": _("Point-of-Sale Profile"),
-					"description": _("Rules to calculate shipping amount for a sale")
+					"name": "Tax Rule",
+					"description": _("Tax Rule for transactions.")
+				},
+				{
+					"type": "report",
+					"name": "Sales Register",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Purchase Register",
+					"doctype": "Purchase Invoice",
+					"is_query_report": True
+				},
+			]
+		},
+		{
+			"label": _("Budget and Cost Center"),
+			"items": [
+				{
+					"type": "page",
+					"name": "Accounts Browser",
+					"icon": "icon-sitemap",
+					"label": _("Chart of Cost Centers"),
+					"route": "Accounts Browser/Cost Center",
+					"description": _("Tree of financial Cost Centers."),
+					"doctype": "Cost Center",
+				},
+				{
+					"type": "report",
+					"name": "Budget Variance Report",
+					"is_query_report": True,
+					"doctype": "Cost Center"
+				},
+				{
+					"type":"doctype",
+					"name": "Monthly Distribution",
+					"description": _("Seasonality for setting budgets, targets etc.")
+				},
+			]
+		},
+		{
+			"label": _("Tools"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Period Closing Voucher",
+					"description": _("Close Balance Sheet and book Profit or Loss.")
+				},
+			]
+		},
+		{
+			"label": _("Setup"),
+			"icon": "icon-cog",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Accounts Settings",
+					"description": _("Default settings for accounting transactions.")
 				},
 				{
 					"type": "doctype",
-					"name": "Shipping Rule",
-					"description": _("Rules for adding shipping costs.")
-				},
-				{
-					"type": "doctype",
-					"name": "Pricing Rule",
-					"description": _("Rules for applying pricing and discount.")
+					"name": "Fiscal Year",
+					"description": _("Financial / accounting year.")
 				},
 				{
 					"type": "doctype",
@@ -158,9 +240,15 @@ def get_data():
 					"description": _("Currency exchange rate master.")
 				},
 				{
-					"type":"doctype",
-					"name": "Monthly Distribution",
-					"description": _("Seasonality for setting budgets, targets etc.")
+					"type": "doctype",
+					"name": "Payment Gateway Account",
+					"description": _("Setup Gateway accounts.")
+				},
+				{
+					"type": "doctype",
+					"name": "POS Profile",
+					"label": _("Point-of-Sale Profile"),
+					"description": _("Rules to calculate shipping amount for a sale")
 				},
 				{
 					"type": "doctype",
@@ -182,93 +270,8 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Main Reports"),
-			"icon": "icon-table",
+			"label": _("To Bill"),
 			"items": [
-				{
-					"type": "report",
-					"name":"General Ledger",
-					"doctype": "GL Entry",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
-					"name": "Trial Balance",
-					"doctype": "GL Entry",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
-					"name": "Trial Balance for Party",
-					"doctype": "GL Entry",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
-					"name": "Gross Profit",
-					"doctype": "Sales Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Accounts Receivable",
-					"doctype": "Sales Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Accounts Payable",
-					"doctype": "Purchase Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Sales Register",
-					"doctype": "Sales Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Purchase Register",
-					"doctype": "Purchase Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Balance Sheet",
-					"doctype": "GL Entry",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Cash Flow",
-					"doctype": "GL Entry",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Profit and Loss Statement",
-					"doctype": "GL Entry",
-					"is_query_report": True
-				},
-				{
-					"type": "page",
-					"name": "financial-analytics",
-					"label": _("Financial Analytics"),
-					"icon": "icon-bar-chart",
-				}
-			]
-		},
-		{
-			"label": _("Standard Reports"),
-			"icon": "icon-list",
-			"items": [
-				{
-					"type": "report",
-					"name": "Bank Reconciliation Statement",
-					"is_query_report": True,
-					"doctype": "Journal Entry"
-				},
 				{
 					"type": "report",
 					"name": "Ordered Items To Be Billed",
@@ -293,11 +296,47 @@ def get_data():
 					"is_query_report": True,
 					"doctype": "Purchase Invoice"
 				},
+			]
+
+		},
+		{
+			"label": _("Analytics"),
+			"items": [
+				{
+					"type": "page",
+					"name": "financial-analytics",
+					"label": _("Financial Analytics"),
+					"icon": "icon-bar-chart",
+				},
 				{
 					"type": "report",
-					"name": "Bank Clearance Summary",
+					"name": "Gross Profit",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Purchase Invoice Trends",
 					"is_query_report": True,
-					"doctype": "Journal Entry"
+					"doctype": "Purchase Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Sales Invoice Trends",
+					"is_query_report": True,
+					"doctype": "Sales Invoice"
+				},
+			]
+		},
+		{
+			"label": _("Other Reports"),
+			"icon": "icon-table",
+			"items": [
+				{
+					"type": "report",
+					"name": "Trial Balance for Party",
+					"doctype": "GL Entry",
+					"is_query_report": True,
 				},
 				{
 					"type": "report",
@@ -322,24 +361,6 @@ def get_data():
 					"name": "Item-wise Purchase Register",
 					"is_query_report": True,
 					"doctype": "Purchase Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Budget Variance Report",
-					"is_query_report": True,
-					"doctype": "Cost Center"
-				},
-				{
-					"type": "report",
-					"name": "Purchase Invoice Trends",
-					"is_query_report": True,
-					"doctype": "Purchase Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Sales Invoice Trends",
-					"is_query_report": True,
-					"doctype": "Sales Invoice"
 				},
 				{
 					"type": "report",

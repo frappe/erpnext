@@ -4,19 +4,8 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
-			"icon": "icon-star",
+			"label": _("Stock Transactions"),
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Item",
-					"description": _("All Products or Services."),
-				},
-				{
-					"type": "doctype",
-					"name": "Material Request",
-					"description": _("Requests for items."),
-				},
 				{
 					"type": "doctype",
 					"name": "Stock Entry",
@@ -34,14 +23,90 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Installation Note",
-					"description": _("Installation record for a Serial No.")
+					"name": "Material Request",
+					"description": _("Requests for items."),
+				},
+			]
+		},
+		{
+			"label": _("Stock Reports"),
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Stock Ledger",
+					"doctype": "Stock Ledger Entry",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Stock Balance",
+					"doctype": "Stock Ledger Entry"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Stock Projected Qty",
+					"doctype": "Item",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Stock Ageing",
+					"doctype": "Item",
+				},
+
+			]
+		},
+		{
+			"label": _("Items and Pricing"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Item",
+					"description": _("All Products or Services."),
 				},
 				{
 					"type": "doctype",
-					"name": "Warehouse",
-					"description": _("Where items are stored."),
+					"name": "Product Bundle",
+					"description": _("Bundle items at time of sale."),
 				},
+				{
+					"type": "doctype",
+					"name": "Price List",
+					"description": _("Price List master.")
+				},
+				{
+					"type": "page",
+					"name": "Sales Browser",
+					"icon": "icon-sitemap",
+					"label": _("Item Group"),
+					"link": "Sales Browser/Item Group",
+					"description": _("Tree of Item Groups."),
+					"doctype": "Item Group",
+				},
+				{
+					"type": "doctype",
+					"name": "Item Price",
+					"description": _("Multiple Item prices."),
+					"route": "Report/Item Price"
+				},
+				{
+					"type": "doctype",
+					"name": "Shipping Rule",
+					"description": _("Rules for adding shipping costs.")
+				},
+				{
+					"type": "doctype",
+					"name": "Pricing Rule",
+					"description": _("Rules for applying pricing and discount.")
+				},
+
+			]
+		},
+		{
+			"label": _("Serial No and Batch"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Serial No",
@@ -51,6 +116,26 @@ def get_data():
 					"type": "doctype",
 					"name": "Batch",
 					"description": _("Batch (lot) of an Item."),
+				},
+				{
+					"type": "doctype",
+					"name": "Installation Note",
+					"description": _("Installation record for a Serial No.")
+				},
+				{
+					"type": "report",
+					"name": "Serial No Service Contract Expiry",
+					"doctype": "Serial No"
+				},
+				{
+					"type": "report",
+					"name": "Serial No Status",
+					"doctype": "Serial No"
+				},
+				{
+					"type": "report",
+					"name": "Serial No Warranty Expiry",
+					"doctype": "Serial No"
 				},
 			]
 		},
@@ -90,13 +175,9 @@ def get_data():
 					"description": _("Default settings for stock transactions.")
 				},
 				{
-					"type": "page",
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"label": _("Item Group Tree"),
-					"link": "Sales Browser/Item Group",
-					"description": _("Tree of Item Groups."),
-					"doctype": "Item Group",
+					"type": "doctype",
+					"name": "Warehouse",
+					"description": _("Where items are stored."),
 				},
 				{
 					"type": "doctype",
@@ -106,60 +187,20 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Warehouse",
-					"description": _("Warehouses.")
+					"name": "Item Attribute",
+					"description": _("Attributes for Item Variants. e.g Size, Color etc."),
 				},
 				{
 					"type": "doctype",
 					"name": "Brand",
 					"description": _("Brand master.")
 				},
-				{
-					"type": "doctype",
-					"name": "Price List",
-					"description": _("Price List master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Item Price",
-					"description": _("Multiple Item prices."),
-					"route": "Report/Item Price"
-				},
-				{
-					"type": "doctype",
-					"name": "Item Attribute",
-					"description": _("Attributes for Item Variants. e.g Size, Color etc."),
-				},
 			]
 		},
 		{
-			"label": _("Main Reports"),
+			"label": _("Analytics"),
 			"icon": "icon-table",
 			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Stock Ledger",
-					"doctype": "Stock Ledger Entry",
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Stock Balance",
-					"doctype": "Stock Ledger Entry"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Stock Projected Qty",
-					"doctype": "Item",
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Stock Ageing",
-					"doctype": "Item",
-				},
 				{
 					"type": "report",
 					"is_query_report": False,
@@ -171,11 +212,24 @@ def get_data():
 					"name": "stock-analytics",
 					"label": _("Stock Analytics"),
 					"icon": "icon-bar-chart"
-				}
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Delivery Note Trends",
+					"doctype": "Delivery Note"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Purchase Receipt Trends",
+					"doctype": "Purchase Receipt"
+				},
+
 			]
 		},
 		{
-			"label": _("Standard Reports"),
+			"label": _("Reports"),
 			"icon": "icon-list",
 			"items": [
 				{
@@ -195,21 +249,6 @@ def get_data():
 					"name": "Item Shortage Report",
 					"route": "Report/Bin/Item Shortage Report",
 					"doctype": "Purchase Receipt"
-				},
-				{
-					"type": "report",
-					"name": "Serial No Service Contract Expiry",
-					"doctype": "Serial No"
-				},
-				{
-					"type": "report",
-					"name": "Serial No Status",
-					"doctype": "Serial No"
-				},
-				{
-					"type": "report",
-					"name": "Serial No Warranty Expiry",
-					"doctype": "Serial No"
 				},
 				{
 					"type": "report",
@@ -234,18 +273,6 @@ def get_data():
 					"is_query_report": True,
 					"name": "Itemwise Recommended Reorder Level",
 					"doctype": "Item"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Delivery Note Trends",
-					"doctype": "Delivery Note"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Purchase Receipt Trends",
-					"doctype": "Purchase Receipt"
 				},
 			]
 		},
