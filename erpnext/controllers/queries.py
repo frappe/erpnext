@@ -232,7 +232,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 			start=start,
 			page_len=page_len), {
 				"txt": "%{0}%".format(txt),
-				"_txt": txt.relace('%', '')
+				"_txt": txt.replace('%', '')
 			})
 
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters):
