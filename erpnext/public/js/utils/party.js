@@ -49,7 +49,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	});
 }
 
-erpnext.utils.get_address_display = function(frm, address_field, display_field) {
+erpnext.utils.get_address_display = function(frm, address_field, display_field, is_your_company_address) {
 	if(frm.updating_party_details) return;
 
 	if(!address_field) {
@@ -66,11 +66,11 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 			method: "erpnext.utilities.doctype.address.address.get_address_display",
 			args: {"address_dict": frm.doc[address_field] },
 			callback: function(r) {
-				if(r.message){
+				if(r.message) {
 					frm.set_value(display_field, r.message)
 				}
-
-				if(frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
+				
+				if(frappe.meta.get_docfield(frm.doc.doctype, "taxes") && !is_your_company_address) {
 					if(!erpnext.utils.validate_mandatory(frm, "Customer/Supplier",
 						frm.doc.customer || frm.doc.supplier, address_field)) return;
 
@@ -96,7 +96,10 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 				});
 			}
 		})
+	} else {
+		frm.set_value(display_field, null);
 	}
+	
 }
 
 erpnext.utils.get_contact_details = function(frm) {

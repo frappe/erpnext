@@ -201,17 +201,20 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		from tabBOM
 		where tabBOM.docstatus=1
 			and tabBOM.is_active=1
-			and tabBOM.%(key)s like "%(txt)s"
-			%(fcond)s  %(mcond)s
-		order_by
+			and tabBOM.`{key}` like %(txt)s
+			{fcond} {mcond}
+		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			idx desc, name
-		limit %(start)s, %(page_len)s """ %  {
-			'key': searchfield,
+		limit %(start)s, %(page_len)s """.format(
+			fcond=get_filters_cond(doctype, filters, conditions),
+			mcond=get_match_cond(doctype),
+			key=frappe.db.escape(searchfield)), 
+		{
 			'txt': "%%%s%%" % frappe.db.escape(txt),
 			'_txt': txt.replace("%", ""),
-			'fcond': get_filters_cond(doctype, filters, conditions),
-			'mcond':get_match_cond(doctype), 'start': start, 'page_len': page_len
+			'start': start, 
+			'page_len': page_len
 		})
 
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):

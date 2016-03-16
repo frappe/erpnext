@@ -193,14 +193,15 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			else{
 				return{
 					filters:{
-						"is_company_address": 1,
+						"is_your_company_address": 1,
 						"company": me.frm.doc.company
 					}
 				}
 			}
 		});
 		
-		erpnext.utils.get_address_display(this.frm, "shipping_address", "shipping_address_display")
+		erpnext.utils.get_address_display(this.frm, "shipping_address", 
+			"shipping_address_display", is_your_company_address=true)
 	}
 });
 
