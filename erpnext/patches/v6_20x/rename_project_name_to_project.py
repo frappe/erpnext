@@ -12,6 +12,6 @@ def execute():
 		"Purchase Receipt Item", "Supplier Quotation Item"]
 	
 	for doctype in doc_list:
-		frappe.reload_doctype(doctype)
+		frappe.reload_doctype(doctype, force=True)
 		rename_field(doctype, "project_name", "project")
 	
