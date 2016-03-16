@@ -256,3 +256,4 @@ erpnext.patches.v6_24.set_recurring_id
 erpnext.patches.v6_20x.set_compact_print
 execute:frappe.delete_doc_if_exists("Web Form", "contact") #2016-03-10
 erpnext.patches.v6_20x.remove_fiscal_year_from_holiday_list
+erpnext.patches.v6_24.map_customer_address_to_shipping_address_on_po

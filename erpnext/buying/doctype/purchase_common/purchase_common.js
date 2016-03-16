@@ -170,6 +170,37 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.frm.add_custom_button(__("Product Bundle"), function() {
 			erpnext.buying.get_items_from_product_bundle(me.frm);
 		}, __("Get items from"));
+	},
+	
+	company: function() {
+		var me = this;
+		if (!this.frm.doc.shipping_address) {
+			erpnext.utils.get_shipping_address(this.frm)
+		}
+	},
+	
+	shipping_address: function(){
+		var me = this;
+		
+		this.frm.set_query("shipping_address", function(){
+			if(me.frm.doc.customer){
+				return{
+					filters:{
+						"customer": me.frm.doc.customer
+					}
+				}
+			}
+			else{
+				return{
+					filters:{
+						"is_company_address": 1,
+						"company": me.frm.doc.company
+					}
+				}
+			}
+		});
+		
+		erpnext.utils.get_address_display(this.frm, "shipping_address", "shipping_address_display")
 	}
 });
 
