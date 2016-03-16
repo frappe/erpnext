@@ -222,14 +222,14 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_total_purchase_cost_for_project(self):
 		existing_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
-			from `tabPurchase Invoice Item` where project_name = '_Test Project' and docstatus=1""")
+			from `tabPurchase Invoice Item` where project = '_Test Project' and docstatus=1""")
 		existing_purchase_cost = existing_purchase_cost and existing_purchase_cost[0][0] or 0
 
-		pi = make_purchase_invoice(currency="USD", conversion_rate=60, project_name="_Test Project")
+		pi = make_purchase_invoice(currency="USD", conversion_rate=60, project="_Test Project")
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"),
 			existing_purchase_cost + 15000)
 
-		pi1 = make_purchase_invoice(qty=10, project_name="_Test Project")
+		pi1 = make_purchase_invoice(qty=10, project="_Test Project")
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"),
 			existing_purchase_cost + 15500)
 
@@ -338,7 +338,7 @@ def make_purchase_invoice(**args):
 		"serial_no": args.serial_no,
 		"stock_uom": "_Test UOM",
 		"cost_center": "_Test Cost Center - _TC",
-		"project_name": args.project_name
+		"project": args.project
 	})
 	if not args.do_not_save:
 		pi.insert()

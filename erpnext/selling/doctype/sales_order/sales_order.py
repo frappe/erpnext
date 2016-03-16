@@ -103,12 +103,12 @@ class SalesOrder(SellingController):
 		self.validate_sales_mntc_quotation()
 
 	def validate_proj_cust(self):
-		if self.project_name and self.customer_name:
+		if self.project and self.customer_name:
 			res = frappe.db.sql("""select name from `tabProject` where name = %s
 				and (customer = %s or ifnull(customer,'')='')""",
-					(self.project_name, self.customer))
+					(self.project, self.customer))
 			if not res:
-				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project_name))
+				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
 	def validate_warehouse(self):
 		super(SalesOrder, self).validate_warehouse()

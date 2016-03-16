@@ -236,7 +236,7 @@ class ProductionOrder(Document):
 			self.set_operation_start_end_time(i, d)
 
 			time_log = make_time_log(self.name, d.operation, d.planned_start_time, d.planned_end_time,
-				flt(self.qty) - flt(d.completed_qty), self.project_name, d.workstation, operation_id=d.name)
+				flt(self.qty) - flt(d.completed_qty), self.project, d.workstation, operation_id=d.name)
 
 			if d.workstation:
 				# validate operating hours if workstation [not mandatory] is specified

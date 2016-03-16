@@ -54,6 +54,7 @@ erpnext.patches.v4_0.fix_address_template
 
 # WATCHOUT: This patch reload's documents
 erpnext.patches.v4_0.reset_permissions_for_masters
+erpnext.patches.v6_20x.rename_project_name_to_project #2016-03-14
 
 erpnext.patches.v4_0.update_tax_amount_after_discount
 execute:frappe.permissions.reset_perms("GL Entry") #2014-06-09

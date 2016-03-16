@@ -29,7 +29,7 @@ def get_item_details(args):
 			"buying_price_list": None,
 			"is_subcontracted": "Yes" / "No",
 			"ignore_pricing_rule": 0/1
-			"project_name": ""
+			"project": ""
 		}
 	"""
 	args = process_args(args)
@@ -210,7 +210,7 @@ def get_default_expense_account(args, item):
 		or frappe.db.get_value("Item Group", item.item_group, "default_expense_account"))
 
 def get_default_cost_center(args, item):
-	return (frappe.db.get_value("Project", args.get("project_name"), "cost_center")
+	return (frappe.db.get_value("Project", args.get("project"), "cost_center")
 		or (item.selling_cost_center if args.get("customer") else item.buying_cost_center)
 		or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 		or args.get("cost_center"))
