@@ -1,0 +1,20 @@
+<div class="project-search">
+	<input type="text" id="project-search"
+	placeholder="Search..."><span style="position:relative;
+	left:-19px;"> <a href="/projects?project={{doc.name}}" class="octicon octicon-x text-extra-muted" title="Clear" ></a> </span>
+</div>
+
+<script>
+frappe.ready(function() {
+	var thread = null;
+	function findResult(t) {
+		window.location.href="/projects?project={{doc.name}}&q=" + t;
+	}
+
+	$("#project-search").keyup(function() {
+		clearTimeout(thread);
+		var $this = $(this); thread = setTimeout(function(){findResult($this.val())}, 1000);
+	});
+	$(".form-search").on("submit", function() { return false; });
+});
+</script>
