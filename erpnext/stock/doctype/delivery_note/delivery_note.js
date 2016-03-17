@@ -36,7 +36,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 								docstatus: 1,
 								status: ["!=", "Closed"],
 								per_delivered: ["<", 99.99],
-								project_name: cur_frm.doc.project_name || undefined,
+								project: cur_frm.doc.project || undefined,
 								customer: cur_frm.doc.customer || undefined,
 								company: cur_frm.doc.company
 							}
@@ -142,7 +142,7 @@ cur_frm.cscript.update_status = function(status) {
 }
 
 // ***************** Get project name *****************
-cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['project'].get_query = function(doc, cdt, cdn) {
 	return {
 		query: "erpnext.controllers.queries.get_project_name",
 		filters: {

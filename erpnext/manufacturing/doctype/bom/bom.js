@@ -144,7 +144,7 @@ cur_frm.fields_dict['item'].get_query = function(doc) {
 	}
 }
 
-cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
+cur_frm.fields_dict['project'].get_query = function(doc, dt, dn) {
 	return{
 		filters:[
 			['Project', 'status', 'not in', 'Completed, Cancelled']

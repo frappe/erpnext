@@ -91,7 +91,7 @@ class StockEntry(StockController):
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
 
 			item_details = self.get_item_details(frappe._dict({"item_code": item.item_code,
-				"company": self.company, "project_name": self.project_name, "uom": item.uom}), for_update=True)
+				"company": self.company, "project": self.project, "uom": item.uom}), for_update=True)
 
 			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
 				"cost_center", "conversion_factor"):

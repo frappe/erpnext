@@ -103,12 +103,12 @@ class SalesOrder(SellingController):
 		self.validate_sales_mntc_quotation()
 
 	def validate_proj_cust(self):
-		if self.project_name and self.customer_name:
+		if self.project and self.customer_name:
 			res = frappe.db.sql("""select name from `tabProject` where name = %s
 				and (customer = %s or ifnull(customer,'')='')""",
-					(self.project_name, self.customer))
+					(self.project, self.customer))
 			if not res:
-				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project_name))
+				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
 	def validate_warehouse(self):
 		super(SalesOrder, self).validate_warehouse()
@@ -546,11 +546,11 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 
 		if any( item.delivered_by_supplier==1 for item in source.items):
 			if source.shipping_address_name:
-				target.customer_address = source.shipping_address_name
-				target.customer_address_display = source.shipping_address
+				target.shipping_address = source.shipping_address_name
+				target.shipping_address_display = source.shipping_address
 			else:
-				target.customer_address = source.customer_address
-				target.customer_address_display = source.address_display
+				target.shipping_address = source.customer_address
+				target.shipping_address_display = source.address_display
 
 			target.customer_contact_person = source.contact_person
 			target.customer_contact_display = source.contact_display

@@ -323,12 +323,12 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).validate_with_previous_doc({
 			"Sales Order": {
 				"ref_dn_field": "sales_order",
-				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
+				"compare_fields": [["customer", "="], ["company", "="], ["project", "="],
 					["currency", "="]],
 			},
 			"Delivery Note": {
 				"ref_dn_field": "delivery_note",
-				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
+				"compare_fields": [["customer", "="], ["company", "="], ["project", "="],
 					["currency", "="]],
 			},
 		})
@@ -365,12 +365,12 @@ class SalesInvoice(SellingController):
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
-		if self.project_name and self.customer:
+		if self.project and self.customer:
 			res = frappe.db.sql("""select name from `tabProject`
 				where name = %s and (customer = %s or customer is null or customer = '')""",
-				(self.project_name, self.customer))
+				(self.project, self.customer))
 			if not res:
-				throw(_("Customer {0} does not belong to project {1}").format(self.customer,self.project_name))
+				throw(_("Customer {0} does not belong to project {1}").format(self.customer,self.project))
 
 	def validate_pos(self):
 		if not self.cash_bank_account and flt(self.paid_amount):

@@ -121,7 +121,7 @@ class PurchaseInvoice(BuyingController):
 			},
 			"Purchase Order Item": {
 				"ref_dn_field": "po_detail",
-				"compare_fields": [["project_name", "="], ["item_code", "="], ["uom", "="]],
+				"compare_fields": [["project", "="], ["item_code", "="], ["uom", "="]],
 				"is_child_table": True,
 				"allow_duplicate_prev_row_id": True
 			},
@@ -131,7 +131,7 @@ class PurchaseInvoice(BuyingController):
 			},
 			"Purchase Receipt Item": {
 				"ref_dn_field": "pr_detail",
-				"compare_fields": [["project_name", "="], ["item_code", "="], ["uom", "="]],
+				"compare_fields": [["project", "="], ["item_code", "="], ["uom", "="]],
 				"is_child_table": True
 			}
 		})
@@ -421,12 +421,12 @@ class PurchaseInvoice(BuyingController):
 	def update_project(self):
 		project_list = []
 		for d in self.items:
-			if d.project_name and d.project_name not in project_list:
-				project = frappe.get_doc("Project", d.project_name)
+			if d.project and d.project not in project_list:
+				project = frappe.get_doc("Project", d.project)
 				project.flags.dont_sync_tasks = True
 				project.update_purchase_costing()
 				project.save()
-				project_list.append(d.project_name)
+				project_list.append(d.project)
 
 	def validate_supplier_invoice(self):
 		if self.bill_date:

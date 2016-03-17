@@ -43,7 +43,7 @@ def get_data(filters, conditions):
 	inc, cond= '',''
 	query_details =  conditions["based_on_select"] + conditions["period_wise_select"]
 
-	if conditions["based_on_select"] in ["t1.project_name,", "t2.project_name,"]:
+	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
 		cond = 'and '+ conditions["based_on_select"][:-1] +' IS Not NULL'
 
 	if filters.get("group_by"):
@@ -246,13 +246,13 @@ def based_wise_columns_query(based_on, trans):
 	elif based_on == "Project":
 		if trans in ['Sales Invoice', 'Delivery Note', 'Sales Order']:
 			based_on_details["based_on_cols"] = ["Project:Link/Project:120"]
-			based_on_details["based_on_select"] = "t1.project_name,"
-			based_on_details["based_on_group_by"] = 't1.project_name'
+			based_on_details["based_on_select"] = "t1.project,"
+			based_on_details["based_on_group_by"] = 't1.project'
 			based_on_details["addl_tables"] = ''
 		elif trans in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
 			based_on_details["based_on_cols"] = ["Project:Link/Project:120"]
-			based_on_details["based_on_select"] = "t2.project_name,"
-			based_on_details["based_on_group_by"] = 't2.project_name'
+			based_on_details["based_on_select"] = "t2.project,"
+			based_on_details["based_on_group_by"] = 't2.project'
 			based_on_details["addl_tables"] = ''
 		else:
 			frappe.throw(_("Project-wise data is not available for Quotation"))
