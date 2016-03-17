@@ -140,17 +140,17 @@ def has_website_permission(doc, ptype, user, verbose=False):
 	return False
 
 def get_address_templates(address):
-	name, template = frappe.db.get_value("Address Template", \
+	result = frappe.db.get_value("Address Template", \
 		{"country": address.get("country")}, ["name", "template"])
 		
-	if not template:
-		name, template = frappe.db.get_value("Address Template", \
+	if not result:
+		result = frappe.db.get_value("Address Template", \
 			{"is_default": 1}, ["name", "template"])
 
-	if not template:
+	if not result:
 		frappe.throw(_("No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template."))
 	else:
-		return name, template
+		return result
 
 @frappe.whitelist()
 def get_shipping_address(company):
