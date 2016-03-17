@@ -72,7 +72,7 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 		frappe.throw(exception_message)
 
 def make_new_document(reference_doc, date_field, posting_date):
-	new_document = frappe.copy_doc(reference_doc, ignore_no_copy=True)
+	new_document = frappe.copy_doc(reference_doc, ignore_no_copy=False)
 	mcount = month_map[reference_doc.recurring_type]
 
 	from_date = get_next_date(reference_doc.from_date, mcount)
@@ -89,7 +89,7 @@ def make_new_document(reference_doc, date_field, posting_date):
 		date_field: posting_date,
 		"from_date": from_date,
 		"to_date": to_date,
-		"next_date": get_next_date(from_date, mcount,cint(reference_doc.repeat_on_day_of_month))
+		"next_date": get_next_date(reference_doc.next_date, mcount,cint(reference_doc.repeat_on_day_of_month))
 	})
 
 	# copy document fields
@@ -202,7 +202,7 @@ def set_next_date(doc, posting_date):
 	if not doc.repeat_on_day_of_month:
 		msgprint(_("Please enter 'Repeat on Day of Month' field value"), raise_exception=1)
 
-	next_date = doc.next_date or get_next_date(doc.from_date, month_map[doc.recurring_type],
+	next_date = get_next_date(posting_date, month_map[doc.recurring_type],
 		cint(doc.repeat_on_day_of_month))
 
 	frappe.db.set(doc, 'next_date', next_date)

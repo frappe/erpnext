@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import today, flt, cint, fmt_money
+from frappe.utils import today, flt, cint, fmt_money, getdate
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -30,6 +30,9 @@ class AccountsController(TransactionBase):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 		self.validate_date_with_fiscal_year()
+
+		if self.meta.get_field('next_date') and self.next_date:
+			self.validate_recurring_next_date()
 
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
@@ -87,6 +90,14 @@ class AccountsController(TransactionBase):
 			if date_field and self.get(date_field):
 				validate_fiscal_year(self.get(date_field), self.fiscal_year,
 					self.meta.get_label(date_field), self)
+
+	def validate_recurring_next_date(self):
+		posting_date = self.get("posting_date") or self.get("transaction_date")
+		if getdate(posting_date) > getdate(self.next_date):
+			frappe.throw(_("Next Date must be greater than Posting Date"))
+
+		if getdate(self.next_date).day != self.repeat_on_day_of_month:
+			frappe.throw(_("Next Date's day and Repeat on Day of Month must be equal"))
 
 	def validate_due_date(self):
 		from erpnext.accounts.party import validate_due_date
