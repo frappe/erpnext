@@ -6,8 +6,8 @@ import frappe
 
 @frappe.whitelist()
 def get_children(parent):
-	return frappe.db.sql("""select item_code as value,
-		bom_no as parent, qty,
+	return frappe.db.sql("""select item_code,
+		bom_no as value, qty,
 		if(ifnull(bom_no, "")!="", 1, 0) as expandable
 		from `tabBOM Item`
 		where parent=%s
