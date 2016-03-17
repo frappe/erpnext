@@ -174,8 +174,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	
 	company: function() {
 		var me = this;
-		if (!this.frm.doc.shipping_address) {
-			erpnext.utils.get_shipping_address(this.frm)
+		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") 
+			&& !this.frm.doc.shipping_address) {
+				erpnext.utils.get_shipping_address(this.frm)
 		}
 	},
 	
