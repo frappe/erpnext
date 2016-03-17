@@ -9,6 +9,7 @@ from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_li
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.doctype.employee_leave_approver.employee_leave_approver import get_approver_list
 
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
@@ -247,11 +248,17 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 	if not filters.get("employee"):
 		frappe.throw(_("Please select Employee Record first."))
 
-	return frappe.db.sql("""select user.name, user.first_name, user.last_name from
+	employee_user = frappe.get_value("Employee", filters.get("employee"), "user_id")
+
+	approvers_list = frappe.db.sql("""select user.name, user.first_name, user.last_name from
 		tabUser user, `tabEmployee Leave Approver` approver where
 		approver.parent = %s
 		and user.name like %s
 		and approver.leave_approver=user.name""", (filters.get("employee"), "%" + txt + "%"))
+
+	if not approvers_list:
+		approvers_list = get_approver_list(employee_user)
+	return approvers_list
 
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day=None):
