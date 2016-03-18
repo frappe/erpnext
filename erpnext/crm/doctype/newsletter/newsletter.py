@@ -10,7 +10,8 @@ from frappe.model.document import Document
 from frappe.email.bulk import check_bulk_limit
 from frappe.utils.verified_command import get_signed_params, verify_request
 from frappe.utils.background_jobs import enqueue
-from erpnext.tasks import send_newsletter
+from frappe.utils.scheduler import log
+from frappe.email.bulk import send
 from erpnext.crm.doctype.newsletter_list.newsletter_list import add_subscribers
 
 class Newsletter(Document):
@@ -34,7 +35,10 @@ class Newsletter(Document):
 
 		if getattr(frappe.local, "is_ajax", False):
 			self.validate_send()
-			enqueue(send_newsletter, newsletter=self.name)
+
+			# using default queue with a longer timeout as this isn't a scheduled task
+			enqueue(send_newsletter, queue='default', timeout=1500, event='send_newsletter', newsletter=self.name)
+
 		else:
 			self.send_bulk()
 
@@ -50,8 +54,6 @@ class Newsletter(Document):
 		self.validate_send()
 
 		sender = self.send_from or frappe.utils.get_formatted_email(self.owner)
-
-		from frappe.email.bulk import send
 
 		if not frappe.flags.in_test:
 			frappe.db.auto_commit_on_many_writes = True
@@ -162,6 +164,26 @@ def confirm_subscription(email):
 	frappe.db.commit()
 
 	frappe.respond_as_web_page(_("Confirmed"), _("{0} has been successfully added to our Newsletter list.").format(email))
+
+
+def send_newsletter(newsletter):
+	try:
+		doc = frappe.get_doc("Newsletter", newsletter)
+		doc.send_bulk()
+
+	except:
+		frappe.db.rollback()
+
+		# wasn't able to send emails :(
+		doc.db_set("email_sent", 0)
+		frappe.db.commit()
+
+		log("send_newsletter")
+
+		raise
+
+	else:
+		frappe.db.commit()
 
 
 
