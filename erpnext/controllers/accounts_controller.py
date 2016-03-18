@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import today, flt, cint, fmt_money, getdate
+from frappe.utils import today, flt, cint, fmt_money
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -31,9 +31,6 @@ class AccountsController(TransactionBase):
 			self.set_missing_values(for_validate=True)
 		self.validate_date_with_fiscal_year()
 
-		if self.meta.get_field('next_date') and self.next_date:
-			self.validate_recurring_next_date()
-
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
 			if not self.meta.get_field("is_return") or not self.is_return:
@@ -45,17 +42,14 @@ class AccountsController(TransactionBase):
 		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
 			self.validate_due_date()
 
-		if self.meta.get_field("is_recurring"):
-			validate_recurring_document(self)
-
 		if self.meta.get_field("taxes_and_charges"):
 			self.validate_enabled_taxes_and_charges()
 
 		self.validate_party()
 		self.validate_currency()
-
-	def on_submit(self):
-		if self.meta.get_field("is_recurring"):
+		
+		if self.meta.get_field("is_recurring") and not self.get("__islocal"):
+			validate_recurring_document(self)
 			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
 
 	def on_update_after_submit(self):
@@ -90,14 +84,6 @@ class AccountsController(TransactionBase):
 			if date_field and self.get(date_field):
 				validate_fiscal_year(self.get(date_field), self.fiscal_year,
 					self.meta.get_label(date_field), self)
-
-	def validate_recurring_next_date(self):
-		posting_date = self.get("posting_date") or self.get("transaction_date")
-		if getdate(posting_date) > getdate(self.next_date):
-			frappe.throw(_("Next Date must be greater than Posting Date"))
-
-		if getdate(self.next_date).day != self.repeat_on_day_of_month:
-			frappe.throw(_("Next Date's day and Repeat on Day of Month must be equal"))
 
 	def validate_due_date(self):
 		from erpnext.accounts.party import validate_due_date

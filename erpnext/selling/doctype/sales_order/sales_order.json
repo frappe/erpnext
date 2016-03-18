@@ -2799,7 +2799,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "depends_on": "eval:doc.is_recurring && doc.recurring_id === doc.name", 
@@ -3018,7 +3018,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-18 02:03:43.706326", 
+ "modified": "2016-03-18 13:11:32.654873", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 

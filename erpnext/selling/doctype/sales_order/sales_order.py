@@ -150,8 +150,6 @@ class SalesOrder(SellingController):
 				frappe.throw(_("Row #{0}: Set Supplier for item {1}").format(d.idx, d.item_code))
 
 	def on_submit(self):
-		super(SalesOrder, self).on_submit()
-
 		self.check_credit_limit()
 		self.update_reserved_qty()
 
