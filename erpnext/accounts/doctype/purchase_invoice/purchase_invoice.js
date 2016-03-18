@@ -25,99 +25,50 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		// Show / Hide button
 		this.show_general_ledger();
 
-		if(!doc.is_return) {
-			if(doc.docstatus==1) {
-				if(doc.outstanding_amount > 0) {
-					this.frm.add_custom_button(__('Payment'), this.make_bank_entry, __("Make"));
-					cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-				}
+		if(!doc.is_return && doc.docstatus==1) {
+			if(doc.outstanding_amount > 0) {
+				this.frm.add_custom_button(__('Payment'), this.make_bank_entry, __("Make"));
+				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}
 				
-				if (!doc.make_receipt) {
-					if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
-						cur_frm.add_custom_button(__('Debit Note'), this.make_debit_note, __("Make"));
-					}
-				}
-				else {
-					cur_frm.add_custom_button(__('Return'), this.make_debit_note, __("Make"));
-				}
-
+			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
+				cur_frm.add_custom_button(doc.update_stock ? __('Purchase Return') : __('Debit Note'), 
+					this.make_debit_note, __("Make"));
 			}
-
-			if(doc.docstatus===0) {
-				cur_frm.add_custom_button(__('Purchase Order'), function() {
-					frappe.model.map_current_doc({
-						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
-						source_doctype: "Purchase Order",
-						get_query_filters: {
-							supplier: cur_frm.doc.supplier || undefined,
-							docstatus: 1,
-							status: ["!=", "Closed"],
-							per_billed: ["<", 99.99],
-							company: cur_frm.doc.company
-						}
-					})
-				}, __("Get items from"));
-
-				cur_frm.add_custom_button(__('Purchase Receipt'), function() {
-					frappe.model.map_current_doc({
-						method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
-						source_doctype: "Purchase Receipt",
-						get_query_filters: {
-							supplier: cur_frm.doc.supplier || undefined,
-							docstatus: 1,
-							status: ["!=", "Closed"],
-							company: cur_frm.doc.company
-						}
-					})
-				}, __("Get items from"));
-			}
-		}
-		if(doc.docstatus==1 && doc.make_receipt==1) {
+			
+			if(doc.update_stock==1) {
 				this.show_stock_ledger();
 			}
-
-	},
-
-	received_qty: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		frappe.model.round_floats_in(item, ["qty", "received_qty"]);
-
-		item.qty = (item.qty < item.received_qty) ? item.qty : item.received_qty;
-		this.qty(doc, cdt, cdn);
-	},
-
-	qty: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		frappe.model.round_floats_in(item, ["qty", "received_qty"]);
-
-		if(!(item.received_qty || item.rejected_qty) && item.qty) {
-			item.received_qty = item.qty;
 		}
+		
+		if(doc.docstatus===0) {
+			cur_frm.add_custom_button(__('Purchase Order'), function() {
+				frappe.model.map_current_doc({
+					method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
+					source_doctype: "Purchase Order",
+					get_query_filters: {
+						supplier: cur_frm.doc.supplier || undefined,
+						docstatus: 1,
+						status: ["!=", "Closed"],
+						per_billed: ["<", 99.99],
+						company: cur_frm.doc.company
+					}
+				})
+			}, __("Get items from"));
 
-		if(item.qty > item.received_qty) {
-			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "qty", item.name)),
-						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]))
-			item.qty = item.rejected_qty = 0.0;
-		} else {
-			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
+			cur_frm.add_custom_button(__('Purchase Receipt'), function() {
+				frappe.model.map_current_doc({
+					method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+					source_doctype: "Purchase Receipt",
+					get_query_filters: {
+						supplier: cur_frm.doc.supplier || undefined,
+						docstatus: 1,
+						status: ["!=", "Closed"],
+						company: cur_frm.doc.company
+					}
+				})
+			}, __("Get items from"));
 		}
-
-		this._super(doc, cdt, cdn);
-	},
-
-	rejected_qty: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
-
-		if(item.rejected_qty > item.received_qty) {
-			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "rejected_qty", item.name)),
-						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]));
-			item.qty = item.rejected_qty = 0.0;
-		} else {
-			item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
-		}
-
-		this.qty(doc, cdt, cdn);
 	},
 
 	supplier: function() {
@@ -156,11 +107,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		}
 	},
 
-	is_cash: function() {
+	is_paid: function() {
 		cur_frm.cscript.hide_fields(this.frm.doc);
-		if(cint(this.frm.doc.is_cash)) {
+		if(cint(this.frm.doc.is_paid)) {
 			if(!this.frm.doc.company) {
-				this.frm.set_value("is_cash", 0);
+				this.frm.set_value("x", 0);
 				msgprint(__("Please specify Company to proceed"));
 			}
 		}
@@ -216,7 +167,7 @@ cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 cur_frm.cscript.hide_fields = function(doc) {
 	par_flds = ['due_date', 'is_opening', 'advances_section', 'from_date', 'to_date'];
 
-	if(cint(doc.is_cash) == 1) {
+	if(cint(doc.is_paid) == 1) {
 		hide_field(par_flds);
 	} else {
 		for (i in par_flds) {
@@ -226,21 +177,21 @@ cur_frm.cscript.hide_fields = function(doc) {
 	
 	}
 
-	item_flds_stock = ['sc_wh', 'received_qty', 'rejected_qty'];
+	item_flds_stock = ['warehouse_section', 'received_qty', 'rejected_qty'];
 
 	//item_flds_stock = ['serial_no', 'batch_no', 'actual_qty', 'expense_account', 'warehouse', 'expense_account', 'warehouse']
 	cur_frm.fields_dict['items'].grid.set_column_disp(item_flds_stock,
-		(cint(doc.make_receipt)==1 ? true : false));	
+		(cint(doc.update_stock)==1 ? true : false));	
 
 	cur_frm.refresh_fields();
 }
 
-cur_frm.cscript.make_receipt = function(doc, dt, dn) {
+cur_frm.cscript.update_stock = function(doc, dt, dn) {
 	cur_frm.cscript.hide_fields(doc, dt, dn);
 }
 
 cur_frm.cscript.mode_of_payment = function(doc) {
-	if(doc.is_cash) {
+	if(doc.is_paid) {
 		return cur_frm.call({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 			args: {
