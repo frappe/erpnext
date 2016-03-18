@@ -12,6 +12,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
+from erpnext.controllers.stock_controller import get_warehouse_account
 
 
 form_grid_templates = {
@@ -269,7 +270,7 @@ class PurchaseInvoice(BuyingController):
 			reconcile_against_document(lst)
 
 	def update_status_updater_args(self):
-		if cint(self.make_receipt):
+		if cint(self.update_stock):
 			self.status_updater.extend([{
 				'source_dt': 'Purchase Invoice Item',
 				'target_dt': 'Purchase Order Item',
@@ -283,7 +284,7 @@ class PurchaseInvoice(BuyingController):
 				# 'percent_join_field': 'prevdoc_docname',
 				'overflow_type': 'receipt',
 				'extra_cond': """ and exists(select name from `tabPurchase Invoice`
-					where name=`tabPurchase Invoice Item`.parent and make_receipt = 1)"""
+					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)"""
 			},
 			{
 				'source_dt': 'Purchase Invoice Item',
@@ -345,17 +346,17 @@ class PurchaseInvoice(BuyingController):
 			self.company, self.base_grand_total)
 
                 # make purchase receipt
-		if (self.make_receipt == 1):
+		if (self.update_stock == 1):
 			# from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_stock_ledger
 			self.update_stock_ledger()
-			self.make_gl_entries()
 			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 			update_serial_nos_after_submit(self, "items")
 			self.update_status_updater_args()
 			self.update_prevdoc_status()
 
 		# this sequence because outstanding may get -negative
-		self.make_gl_entries1()
+		self.make_gl_entries()
+		
 		if not self.is_return:
 			self.update_against_document_in_jv()
 			self.update_prevdoc_status()
@@ -391,6 +392,7 @@ class PurchaseInvoice(BuyingController):
 					if self.docstatus==1 and not asset.supplier:
 						frappe.db.set_value("Asset", asset.name, "supplier", self.supplier)
 					
+
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
@@ -401,7 +403,7 @@ class PurchaseInvoice(BuyingController):
 		gl_entries = []
 
 		# Make Cash GL Entries
-		if cint(self.is_cash) and self.cash_bank_account and self.paid_amount:
+		if cint(self.is_paid) and self.cash_bank_account and self.paid_amount:
 			bank_account_currency = get_account_currency(self.cash_bank_account)
 			# CASH, make payment entries
 			gl_entries.append(
@@ -417,6 +419,7 @@ class PurchaseInvoice(BuyingController):
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)
+						
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.cash_bank_account,
@@ -426,7 +429,7 @@ class PurchaseInvoice(BuyingController):
 						if bank_account_currency==self.company_currency else self.paid_amount
 				}, bank_account_currency)
 			)
-
+			
 		# parent's gl entry
 		if self.grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
@@ -446,7 +449,6 @@ class PurchaseInvoice(BuyingController):
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)
-
 		# tax table gl entries
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -466,7 +468,6 @@ class PurchaseInvoice(BuyingController):
 						"cost_center": tax.cost_center
 					}, account_currency)
 				)
-
 			# accumulate valuation tax
 			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
 				if auto_accounting_for_stock and not tax.cost_center:
@@ -474,16 +475,17 @@ class PurchaseInvoice(BuyingController):
 				valuation_tax.setdefault(tax.cost_center, 0)
 				valuation_tax[tax.cost_center] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
-
 		# item gl entries
 		negative_expense_to_be_booked = 0.0
 		stock_items = self.get_stock_items()
+		warehouse_account = get_warehouse_account()
+		
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
 				gl_entries.append(
 					self.get_gl_dict({
-						"account": item.expense_account,
+						"account": item.expense_account if not self.update_stock else warehouse_account[item.warehouse]["name"],
 						"against": self.supplier,
 						"debit": item.base_net_amount,
 						"debit_in_account_currency": item.base_net_amount \
@@ -491,7 +493,7 @@ class PurchaseInvoice(BuyingController):
 						"cost_center": item.cost_center
 					}, account_currency)
 				)
-
+				
 			if auto_accounting_for_stock and self.is_opening == "No" and \
 				item.item_code in stock_items and item.item_tax_amount:
 					# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
@@ -566,7 +568,7 @@ class PurchaseInvoice(BuyingController):
 					"cost_center": self.write_off_cost_center
 				})
 			)
-
+			
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2))

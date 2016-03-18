@@ -42,7 +42,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 		this.frm.set_query("item_code", "items", function() {
 			if(me.frm.doc.is_subcontracted == "Yes") {
-				 return{
+				return{
 					query: "erpnext.controllers.queries.item_query",
 					filters:{ 'is_sub_contracted_item': 1 }
 				}
@@ -114,8 +114,49 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	qty: function(doc, cdt, cdn) {
+		if ((doc.doctype == "Purchase Receipt") || (doc.doctype == "Purchase Invoice" && doc.update_stock)) {
+			var item = frappe.get_doc(cdt, cdn);
+			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
+
+			if(!(item.received_qty || item.rejected_qty) && item.qty) {
+				item.received_qty = item.qty;
+			}
+
+			if(item.qty > item.received_qty) {
+				msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "qty", item.name)),
+							__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]))
+				item.qty = item.rejected_qty = 0.0;
+			} else {
+				item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
+			}
+		}
+		
 		this._super(doc, cdt, cdn);
 		this.conversion_factor(doc, cdt, cdn);
+		
+	},
+	
+	received_qty: function(doc, cdt, cdn) {
+		var item = frappe.get_doc(cdt, cdn);
+		frappe.model.round_floats_in(item, ["qty", "received_qty"]);
+
+		item.qty = (item.qty < item.received_qty) ? item.qty : item.received_qty;
+		this.qty(doc, cdt, cdn);
+	},
+	
+	rejected_qty: function(doc, cdt, cdn) {
+		var item = frappe.get_doc(cdt, cdn);
+		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
+
+		if(item.rejected_qty > item.received_qty) {
+			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "rejected_qty", item.name)),
+						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]));
+			item.qty = item.rejected_qty = 0.0;
+		} else {
+			item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
+		}
+
+		this.qty(doc, cdt, cdn);
 	},
 
 	conversion_factor: function(doc, cdt, cdn) {
