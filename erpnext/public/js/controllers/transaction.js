@@ -308,7 +308,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
 		else var date = this.frm.doc.transaction_date;
-		erpnext.get_fiscal_year(this.frm.doc.company, date, function() { set_party_account(set_pricing); });
+		set_party_account(set_pricing);
 
 		if(this.frm.doc.company) {
 			erpnext.last_selected_company = this.frm.doc.company;
@@ -319,8 +319,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if (this.frm.doc.transaction_date) {
 			this.frm.transaction_date = this.frm.doc.transaction_date;
 		}
-
-		erpnext.get_fiscal_year(this.frm.doc.company, this.frm.doc.transaction_date);
 	},
 
 	posting_date: function() {
@@ -342,11 +340,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						if(r.message) {
 							me.frm.set_value("due_date", r.message);
 						}
-						erpnext.get_fiscal_year(me.frm.doc.company, me.frm.doc.posting_date);
 					}
 				})
-			} else {
-				erpnext.get_fiscal_year(me.frm.doc.company, me.frm.doc.posting_date);
 			}
 		}
 	},
