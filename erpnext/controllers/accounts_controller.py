@@ -42,17 +42,14 @@ class AccountsController(TransactionBase):
 		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
 			self.validate_due_date()
 
-		if self.meta.get_field("is_recurring"):
-			validate_recurring_document(self)
-
 		if self.meta.get_field("taxes_and_charges"):
 			self.validate_enabled_taxes_and_charges()
 
 		self.validate_party()
 		self.validate_currency()
-
-	def on_submit(self):
-		if self.meta.get_field("is_recurring"):
+		
+		if self.meta.get_field("is_recurring") and not self.get("__islocal"):
+			validate_recurring_document(self)
 			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
 
 	def on_update_after_submit(self):

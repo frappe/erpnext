@@ -9,7 +9,7 @@ from frappe.utils import cint, flt, get_fullname, cstr
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
 from frappe.utils.nestedset import get_root_of
-from erpnext.accounts.utils import get_account
+from erpnext.accounts.utils import get_account_name
 
 class WebsitePriceListMissingError(frappe.ValidationError): pass
 
@@ -305,7 +305,7 @@ def get_customer(user=None):
 			customer.update({
 				"accounts": [{
 					"company": cart_settings.company,
-					"account": debtors_account.name
+					"account": debtors_account
 				}]
 			})
 		
@@ -329,24 +329,24 @@ def get_debtors_account(cart_settings):
 	
 	account_name = _("Debtors ({0})".format(payment_gateway_account_currency))
 	
-	debtors_account = get_account("Receivable", "Asset", is_group=0,\
-	 account_currency=payment_gateway_account_currency, company=cart_settings.company)
+	debtors_account_name = get_account_name("Receivable", "Asset", is_group=0,\
+		account_currency=payment_gateway_account_currency, company=cart_settings.company)
 	
-	if not debtors_account:
+	if not debtors_account_name:
 		debtors_account = frappe.get_doc({
 			"doctype": "Account",
 			"account_type": "Receivable",
 			"root_type": "Asset",
 			"is_group": 0,
-			"parent_account": get_account(root_type="Asset", is_group=1, company=cart_settings.company),
+			"parent_account": get_account_name(root_type="Asset", is_group=1, company=cart_settings.company),
 			"account_name": account_name,
 			"currency": payment_gateway_account_currency	
 		}).insert(ignore_permissions=True)
 		
-		return debtors_account
+		return debtors_account.name
 		
 	else:
-		return debtors_account
+		return debtors_account_name
 		
 
 def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None):

@@ -81,8 +81,6 @@ class SalesInvoice(SellingController):
 		self.update_packing_list()
 
 	def on_submit(self):
-		super(SalesInvoice, self).on_submit()
-
 		if cint(self.update_stock) == 1:
 			self.update_stock_ledger()
 		else:
@@ -473,7 +471,7 @@ class SalesInvoice(SellingController):
 			frappe.db.set(self,'paid_amount',0)
 
 		frappe.db.set(self, 'base_paid_amount',
-			flt(self.paid_amount*self.conversion_rate, self.precision("base_paid_amount")))
+			flt(self.paid_amount*self.conversion_rate, self.precision("base_paid_amount")))		
 
 	def check_prev_docstatus(self):
 		for d in self.get('items'):

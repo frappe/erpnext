@@ -234,8 +234,6 @@ class PurchaseInvoice(BuyingController):
 			reconcile_against_document(lst)
 
 	def on_submit(self):
-		super(PurchaseInvoice, self).on_submit()
-
 		self.check_prev_docstatus()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,

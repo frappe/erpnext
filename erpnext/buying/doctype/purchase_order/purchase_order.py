@@ -171,8 +171,6 @@ class PurchaseOrder(BuyingController):
 		if self.is_against_so():
 			self.update_status_updater()
 
-		super(PurchaseOrder, self).on_submit()
-
 		purchase_controller = frappe.get_doc("Purchase Common")
 
 		self.update_prevdoc_status()
