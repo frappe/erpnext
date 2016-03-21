@@ -337,7 +337,7 @@ class PurchaseInvoice(BuyingController):
 		# self.bk_flush_supp_wh(sl_entries)
 		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher)
-
+		
 	def on_submit(self):
 		self.check_prev_docstatus()
 		self.validate_asset()
@@ -391,7 +391,6 @@ class PurchaseInvoice(BuyingController):
 						
 					if self.docstatus==1 and not asset.supplier:
 						frappe.db.set_value("Asset", asset.name, "supplier", self.supplier)
-					
 
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \

@@ -278,20 +278,20 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc) {
-	par_flds = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances_received',
+	parent_fields = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances_received',
 		'advances', 'sales_partner', 'commission_rate', 'total_commission', 'advances', 'from_date', 'to_date'];
 
 	if(cint(doc.is_pos) == 1) {
-		hide_field(par_flds);
+		hide_field(parent_fields);
 	} else {
-		for (i in par_flds) {
-			var docfield = frappe.meta.docfield_map[doc.doctype][par_flds[i]];
-			if(!docfield.hidden) unhide_field(par_flds[i]);
+		for (i in parent_fields) {
+			var docfield = frappe.meta.docfield_map[doc.doctype][parent_fields[i]];
+			if(!docfield.hidden) unhide_field(parent_fields[i]);
 		}
 	}
 
-	item_flds_stock = ['serial_no', 'batch_no', 'actual_qty', 'expense_account', 'warehouse', 'expense_account', 'warehouse']
-	cur_frm.fields_dict['items'].grid.set_column_disp(item_flds_stock,
+	item_fields_stock = ['serial_no', 'batch_no', 'actual_qty', 'expense_account', 'warehouse', 'expense_account', 'warehouse']
+	cur_frm.fields_dict['items'].grid.set_column_disp(item_fields_stock,
 		(cint(doc.update_stock)==1 ? true : false));
 
 	// India related fields
@@ -301,25 +301,6 @@ cur_frm.cscript.hide_fields = function(doc) {
 	this.frm.toggle_enable("write_off_amount", !!!cint(doc.write_off_outstanding_amount_automatically));
 
 	cur_frm.refresh_fields();
-}
-
-
-cur_frm.cscript.mode_of_payment = function(doc) {
-	if(doc.is_pos) {
-		return cur_frm.call({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
-			args: {
-				"mode_of_payment": doc.mode_of_payment,
-				"company": doc.company
-			 },
-			 callback: function(r, rt) {
-				if(r.message) {
-					cur_frm.set_value("cash_bank_account", r.message["account"]);
-				}
-
-			 }
-		});
-	 }
 }
 
 cur_frm.cscript.update_stock = function(doc, dt, dn) {

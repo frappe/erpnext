@@ -54,6 +54,26 @@ class AccountsController(TransactionBase):
 			if not self.get("__islocal"):
 				validate_recurring_document(self)
 				convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
+		
+		self.validate_paid_amount()
+	
+	def validate_paid_amount(self):
+		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
+			is_paid = self.get("is_pos") or self.get("is_paid")
+			if cint(is_paid) == 1:
+				if flt(self.paid_amount) == 0:
+					if self.cash_bank_account:
+						frappe.db.set(self, 'paid_amount',
+							flt(flt(self.grand_total) - flt(self.write_off_amount), self.precision("paid_amount")))
+					else:
+						# show message that the amount is not paid
+						frappe.db.set(self,'paid_amount',0)
+						frappe.msgprint(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
+			else:
+				frappe.db.set(self,'paid_amount',0)
+
+			frappe.db.set(self, 'base_paid_amount',
+				flt(self.paid_amount*self.conversion_rate, self.precision("base_paid_amount")))
 
 	def on_update_after_submit(self):
 		if self.meta.get_field("is_recurring"):
