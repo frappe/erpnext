@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import throw, _
 import frappe.defaults
-from frappe.utils import cint, flt, get_fullname, cstr
+from frappe.utils import cint, flt, get_fullname, cstr, get_url
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
 from frappe.utils.nestedset import get_root_of
@@ -282,12 +282,12 @@ def get_customer(user=None):
 
 	customer = frappe.db.get_value("Contact", {"email_id": user}, "customer")
 	cart_settings = frappe.get_doc("Shopping Cart Settings")
-	
+
 	debtors_account = ''
-	
+
 	if cart_settings.enable_checkout:
 		debtors_account = get_debtors_account(cart_settings)
-	
+
 	if customer:
 		return frappe.get_doc("Customer", customer)
 
@@ -300,7 +300,7 @@ def get_customer(user=None):
 			"customer_group": get_shopping_cart_settings().default_customer_group,
 			"territory": get_root_of("Territory")
 		})
-		
+
 		if debtors_account:
 			customer.update({
 				"accounts": [{
@@ -308,7 +308,7 @@ def get_customer(user=None):
 					"account": debtors_account
 				}]
 			})
-		
+
 		customer.flags.ignore_mandatory = True
 		customer.insert(ignore_permissions=True)
 
@@ -326,12 +326,12 @@ def get_customer(user=None):
 def get_debtors_account(cart_settings):
 	payment_gateway_account_currency = \
 		frappe.get_doc("Payment Gateway Account", cart_settings.payment_gateway_account).currency
-	
+
 	account_name = _("Debtors ({0})".format(payment_gateway_account_currency))
-	
+
 	debtors_account_name = get_account_name("Receivable", "Asset", is_group=0,\
 		account_currency=payment_gateway_account_currency, company=cart_settings.company)
-	
+
 	if not debtors_account_name:
 		debtors_account = frappe.get_doc({
 			"doctype": "Account",
@@ -340,14 +340,14 @@ def get_debtors_account(cart_settings):
 			"is_group": 0,
 			"parent_account": get_account_name(root_type="Asset", is_group=1, company=cart_settings.company),
 			"account_name": account_name,
-			"currency": payment_gateway_account_currency	
+			"currency": payment_gateway_account_currency
 		}).insert(ignore_permissions=True)
-		
+
 		return debtors_account.name
-		
+
 	else:
 		return debtors_account_name
-		
+
 
 def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None):
 	if not party:
@@ -437,3 +437,38 @@ def get_address_territory(address_name):
 				break
 
 	return territory
+
+def set_redirect(paypal_express_payment, method):
+	"""Set Paypal Express Payment.flags.redirect_to on status change. Called via hooks."""
+	if not paypal_express_payment.flags.status_changed_to:
+		return
+
+	reference_doctype = paypal_express_payment.reference_doctype
+	reference_docname = paypal_express_payment.reference_docname
+
+	if not (reference_doctype and reference_docname):
+		return
+
+	reference_doc = frappe.get_doc(reference_doctype,  reference_docname)
+	shopping_cart_settings = frappe.get_doc("Shopping Cart Settings")
+
+	if paypal_express_payment.flags.status_changed_to == "Completed":
+		reference_doc.run_method("set_as_paid")
+
+		# if shopping cart enabled and in session
+		if (shopping_cart_settings.enabled
+			and hasattr(frappe.local, "session")
+			and frappe.local.session.user != "Guest"):
+
+			success_url = shopping_cart_settings.payment_success_url
+			if success_url:
+				paypal_express_payment.flags.redirect_to = ({
+					"Orders": "orders",
+					"Invoices": "invoices",
+					"My Account": "me"
+				}).get(success_url, "me")
+			else:
+				paypal_express_payment.flags.redirect_to = get_url("/orders/{0}".format(reference_doc.reference_name))
+
+	elif paypal_express_payment.flags.status_changed_to == "Cancelled":
+		reference_doc.run_method("set_as_cancelled")
