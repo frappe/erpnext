@@ -1,6 +1,6 @@
 #Allow Over Delivery/Billing
 
-While creating Delivery Note, system validates if item's Qty mentined is same as in the Sales Order. It Item Qty has been increased, you will get over-delivery validation. If you want to be able to deliver more items than mentioned in the Sales Order, you should update "Allow over delivery or receipt upto this percent" in the Item master.
+While creating Delivery Note, system validates if item's Qty mentined is same as in the Sales Order. If Item Qty has been increased, you will get over-delivery validation. If you want to be able to deliver more items than mentioned in the Sales Order, you should update "Allow over delivery or receipt upto this percent" in the Item master.
 
 <img alt="Item wise Allowance percentage" class="screenshot" src="{{docs_base_url}}/assets/img/articles/allowance-percentage-1.png">
 
