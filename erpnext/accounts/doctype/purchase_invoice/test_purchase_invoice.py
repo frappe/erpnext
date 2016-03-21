@@ -314,6 +314,33 @@ class TestPurchaseInvoice(unittest.TestCase):
 			where voucher_type='Sales Invoice' and voucher_no=%s""", pi.name)
 
 		self.assertFalse(gle)
+	
+	def purchase_invoice_gl_entry_with_perpetual_inventory(self):
+		"""
+			1. create purchase invoice with update stock as true
+			2. get gl entry against purchase invoice
+			3. check accounts
+		"""
+		set_perpetual_inventory()
+		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(), 
+			posting_time=frappe.utils.nowtime())
+		
+		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""", pi.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+		
+		expected_gl_entries = dict((d[0], d) for d in [
+			[pi.credit_to, 0.0, 250.0],
+			[pi.get("items")[0]["warehouse"], 250.0, 0.0]
+		])
+		
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals(expected_gl_entries[gle.account][0], gle.account)
+			self.assertEquals(expected_gl_entries[gle.account][1], gle.debit)
+			self.assertEquals(expected_gl_entries[gle.account][2], gle.credit)
 
 def make_purchase_invoice(**args):
 	pi = frappe.new_doc("Purchase Invoice")
@@ -322,6 +349,8 @@ def make_purchase_invoice(**args):
 		pi.posting_date = args.posting_date
 	if args.posting_time:
 		pi.posting_time = args.posting_time
+	if args.update_stock:
+		pi.update_stock = 1
 	pi.company = args.company or "_Test Company"
 	pi.supplier = args.supplier or "_Test Supplier"
 	pi.currency = args.currency or "INR"
