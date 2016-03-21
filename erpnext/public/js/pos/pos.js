@@ -496,6 +496,8 @@ erpnext.pos.PointOfSale = Class.extend({
 		dialog.set_primary_action(__("Pay"), function() {
 			var values = dialog.get_values();
 			var is_cash = values.mode_of_payment === __("Cash");
+			var is_paypal_here = values.mode_of_payment === __("PayPal Here");
+			
 			if (!is_cash) {
 				values.write_off_amount = values.change = 0.0;
 				values.paid_amount = values.total_amount;
@@ -508,6 +510,37 @@ erpnext.pos.PointOfSale = Class.extend({
 			// specifying writeoff amount here itself, so as to avoid recursion issue
 			me.frm.set_value("write_off_amount", me.frm.doc.grand_total - paid_amount);
 			me.frm.set_value("outstanding_amount", 0);
+
+            if (is_paypal_here) {
+                var invoice = {
+                    "merchantEmail": "test@test.com",
+                    "itemList": {
+                        "item": [{
+                            "name": "Credit Card Sale",
+                            "quantity": "1",
+                            "unitPrice": values.total_amount,
+                            }]
+                    },
+                    "currencyCode": "AUD",
+                    "discountPercent": "0"
+                }
+                // Convert it into URL-encoded JSON
+                invoice = escape(JSON.stringify(invoice));
+
+                //  var returnUrl = 'http://www.example.com';
+                //  var retUrl = encodeURIComponent(returnUrl + "?{result}?Type={Type}&InvoiceId={InvoiceId}&Tip={Tip}&Email={Email}&TxId={TxId}");
+                var iOS = /(iPad|iPhone|iPod)/g.test( navigator.userAgent );
+                var ppalAPI = "";
+                if (!iOS) {
+                    ppalAPI = encodeURIComponent("/v2");
+                } 
+
+                // var retUrl = encodeURIComponent("&returnUrl=http://insert-return-url-here");
+                var retUrl = "";
+                var hereHelperUrl = "paypalhere://takePayment" + ppalAPI +"?accepted=card" + retUrl + "&step=choosePayment&invoice=" + invoice ;
+                window.location = hereHelperUrl;
+            }
+
 
 			me.frm.savesubmit(this);
 			dialog.hide();
