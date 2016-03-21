@@ -461,7 +461,7 @@ erpnext.pos.PointOfSale = Class.extend({
 							}
 						},
 						{fieldtype:'Currency', fieldname:'write_off_amount',
-							label: __('Write Off'), "default": 0.0, hidden: 1},
+							label: __('Write Off'), "default": 0.0, hidden: 1}
 					]
 				});
 				me.dialog = dialog;
@@ -474,6 +474,8 @@ erpnext.pos.PointOfSale = Class.extend({
 				// toggle amount paid and change
 				dialog.get_input("mode_of_payment").on("change", function() {
 					var is_cash = dialog.get_value("mode_of_payment") === __("Cash");
+					var is_stripe = dialog.get_value("mode_of_payment") === __("Stripe");
+
 					dialog.get_field("paid_amount").toggle(is_cash);
 					dialog.get_field("change").toggle(is_cash);
 
@@ -493,13 +495,35 @@ erpnext.pos.PointOfSale = Class.extend({
 	},
 	set_pay_button: function(dialog) {
 		var me = this;
+
+		var stripe_handler = StripeCheckout.configure({
+			key: 'pk_test_6pRNASCoBOKtIshFeQd4XMUh',
+			locale: 'auto',
+			token: function(token) {
+				me.frm.set_value("stripe_checkout_id", token.id);
+			}
+		});
+
+
 		dialog.set_primary_action(__("Pay"), function() {
 			var values = dialog.get_values();
 			var is_cash = values.mode_of_payment === __("Cash");
+			var is_stripe = values.mode_of_payment === __("Stripe");
+
 			if (!is_cash) {
 				values.write_off_amount = values.change = 0.0;
 				values.paid_amount = values.total_amount;
+
+				if (is_stripe) {
+				    stripe_handler.open({
+				      name: me.frm.docname,
+				      email: me.frm.doc.contact_email,
+				      amount: values.total_amount * 100,
+				      allowRememberMe: false
+				    });
+				}
 			}
+
 			me.frm.set_value("mode_of_payment", values.mode_of_payment);
 
 			var paid_amount = flt((flt(values.paid_amount) - flt(values.change)), precision("paid_amount"));
