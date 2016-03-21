@@ -841,11 +841,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return;
 		}
 
-		if(!this.frm.doc.recurring_id) {
-			this.frm.set_value('recurring_id', this.frm.doc.name);
-		}
-
 		if(this.frm.doc.is_recurring) {
+			if(!this.frm.doc.recurring_id) {
+				this.frm.set_value('recurring_id', this.frm.doc.name);
+			}
+			
 			var owner_email = this.frm.doc.owner=="Administrator"
 				? frappe.user_info("Administrator").email
 				: this.frm.doc.owner;
