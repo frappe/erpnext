@@ -16,6 +16,8 @@ def execute(filters=None):
 	
 	provisional_profit_loss = get_provisional_profit_loss(asset, liability, equity, 
 		period_list, filters.company)
+		
+	message = check_opening_balance(asset, liability, equity)
 
 	data = []
 	data.extend(asset or [])
@@ -26,7 +28,7 @@ def execute(filters=None):
 
 	columns = get_columns(filters.periodicity, period_list, company=filters.company)
 
-	return columns, data
+	return columns, data, message
 
 def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 	if asset and (liability or equity):
@@ -57,3 +59,14 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 
 		if has_value:
 			return provisional_profit_loss
+
+def check_opening_balance(asset, liability, equity):
+	# Check if previous year balance sheet closed
+	opening_balance = flt(asset[0].get("opening_balance", 0))
+	if liability:
+		opening_balance -= flt(liability[0].get("opening_balance", 0))
+	if equity:
+		opening_balance -= flt(asset[0].get("opening_balance", 0))
+		
+	if opening_balance:
+		return _("Previous Financial Year is not closed")
