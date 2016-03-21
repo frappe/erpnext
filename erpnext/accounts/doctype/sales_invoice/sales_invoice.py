@@ -461,21 +461,6 @@ class SalesInvoice(SellingController):
 				
 				d.income_account = disposal_account
 
-	def on_update(self):
-		if cint(self.is_pos) == 1:
-			if flt(self.paid_amount) == 0:
-				if self.cash_bank_account:
-					frappe.db.set(self, 'paid_amount',
-						flt(flt(self.grand_total) - flt(self.write_off_amount), self.precision("paid_amount")))
-				else:
-					# show message that the amount is not paid
-					frappe.db.set(self,'paid_amount',0)
-					frappe.msgprint(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
-		else:
-			frappe.db.set(self,'paid_amount',0)
-
-		frappe.db.set(self, 'base_paid_amount',
-			flt(self.paid_amount*self.conversion_rate, self.precision("base_paid_amount")))
 
 	def check_prev_docstatus(self):
 		for d in self.get('items'):

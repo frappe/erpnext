@@ -354,7 +354,7 @@ class PurchaseInvoice(BuyingController):
 		# self.bk_flush_supp_wh(sl_entries)
 		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher)
-
+		
 	def on_submit(self):
 		self.check_prev_docstatus()
 		self.validate_asset()
@@ -381,7 +381,6 @@ class PurchaseInvoice(BuyingController):
 			self.update_billing_status_in_pr()
 
 		self.update_project()
-<<<<<<< 1b49ed56bdbd4a6cdf93ede3bfa252e5a954ed41
 		
 	def validate_asset(self):
 		for d in self.get("items"):
@@ -409,23 +408,7 @@ class PurchaseInvoice(BuyingController):
 						
 					if self.docstatus==1 and not asset.supplier:
 						frappe.db.set_value("Asset", asset.name, "supplier", self.supplier)
-					
-=======
 
-	def on_cancel(self):
-		if not self.is_return:
-			from erpnext.accounts.utils import remove_against_link_from_jv
-			remove_against_link_from_jv(self.doctype, self.name)
-
-			self.update_prevdoc_status()
-			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-			self.update_billing_status_in_pr()
-
-		self.update_stock_ledger()
-		self.make_gl_entries_on_cancel()
-		self.update_project()
-
->>>>>>> [fixes] fix perpetual inventory
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))

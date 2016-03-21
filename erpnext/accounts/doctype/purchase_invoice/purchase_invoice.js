@@ -111,7 +111,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		cur_frm.cscript.hide_fields(this.frm.doc);
 		if(cint(this.frm.doc.is_paid)) {
 			if(!this.frm.doc.company) {
-				this.frm.set_value("x", 0);
 				msgprint(__("Please specify Company to proceed"));
 			}
 		}
@@ -165,22 +164,21 @@ cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc) {
-	par_flds = ['due_date', 'is_opening', 'advances_section', 'from_date', 'to_date'];
+	parent_fields = ['due_date', 'is_opening', 'advances_section', 'from_date', 'to_date'];
 
 	if(cint(doc.is_paid) == 1) {
-		hide_field(par_flds);
+		hide_field(parent_fields);
 	} else {
-		for (i in par_flds) {
-			var docfield = frappe.meta.docfield_map[doc.doctype][par_flds[i]];
-			if(!docfield.hidden) unhide_field(par_flds[i]);
+		for (i in parent_fields) {
+			var docfield = frappe.meta.docfield_map[doc.doctype][parent_fields[i]];
+			if(!docfield.hidden) unhide_field(parent_fields[i]);
 		}
 	
 	}
 
-	item_flds_stock = ['warehouse_section', 'received_qty', 'rejected_qty'];
+	item_fields_stock = ['warehouse_section', 'received_qty', 'rejected_qty'];
 
-	//item_flds_stock = ['serial_no', 'batch_no', 'actual_qty', 'expense_account', 'warehouse', 'expense_account', 'warehouse']
-	cur_frm.fields_dict['items'].grid.set_column_disp(item_flds_stock,
+	cur_frm.fields_dict['items'].grid.set_column_disp(item_fields_stock,
 		(cint(doc.update_stock)==1 ? true : false));	
 
 	cur_frm.refresh_fields();
@@ -188,24 +186,6 @@ cur_frm.cscript.hide_fields = function(doc) {
 
 cur_frm.cscript.update_stock = function(doc, dt, dn) {
 	cur_frm.cscript.hide_fields(doc, dt, dn);
-}
-
-cur_frm.cscript.mode_of_payment = function(doc) {
-	if(doc.is_paid) {
-		return cur_frm.call({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
-			args: {
-				"mode_of_payment": doc.mode_of_payment,
-				"company": doc.company
-			 },
-			 callback: function(r, rt) {
-				if(r.message) {
-					cur_frm.set_value("cash_bank_account", r.message["account"]);
-				}
-
-			 }
-		});
-	 }
 }
 
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
