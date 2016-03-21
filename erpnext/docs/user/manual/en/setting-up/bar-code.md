@@ -47,4 +47,21 @@ Go to Item and click on Add new row.
 The cursor will automatically be placed in the bar-code field. Thus you can
 immediately scan the bar-code and proceed with your operations.
 
+###### Barcode in Print formats.
+
+If you want to print barcode on print format you can create a custom print format .
+
+Add following sample code in print format where you want to print barcode image .
+
+Sample Code 
+
+<img id="barcode"/>
+<script> 
+    		$("#barcode").JsBarcode("{{ doc.name | string }}" ,{  width: 2,  height: 80}) 
+</script>
+
+In above example We are printing the "doc.name" (transaction number like SINV-00001). You can add any field name here to generate barcode from it.
+
+<img class="screenshot" alt="Barcode" src="{{docs_base_url}}/assets/erpnext/images/barcode-in-pos.png">
+
 {next}
