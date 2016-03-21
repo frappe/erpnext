@@ -285,8 +285,11 @@ class StatusUpdater(Document):
 				from `tab%s Item` where %s=%s and docstatus=1""" %
 				(self.doctype, ref_fieldname, '%s'), (ref_dn))[0][0])
 
-			per_billed = ((ref_doc_qty if billed_qty > ref_doc_qty else billed_qty)\
-				/ ref_doc_qty)*100
+			if (billed_qty > ref_doc_qty) or (ref_doc_qty == 0):
+				per_billed = 100
+			else:
+				per_billed =  (billed_qty / ref_doc_qty)*100
+			
 			frappe.db.set_value(ref_dt, ref_dn, "per_billed", per_billed)
 
 			if frappe.get_meta(ref_dt).get_field("billing_status"):
