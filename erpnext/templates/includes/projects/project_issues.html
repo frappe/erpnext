@@ -3,7 +3,7 @@
 			<div class='row project-item'>
 				<div class='col-xs-9'>
 					<a class="no-decoration" href="/issues-view?name={{ issue.name}}">
-						<span class="indicator {{ "green" if issue.status=="Open" else "darkgrey" }}">
+						<span class="indicator {{ "red" if issue.status=="Open" else "green" }}">
 							{% if issue.status == "Closed" %} 
 							{{ issue.subject }} resolved {{ frappe.utils.pretty_date(issue.resolution_date) }}
 							{% else %}

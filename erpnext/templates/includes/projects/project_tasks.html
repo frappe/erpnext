@@ -3,7 +3,7 @@
 		<div class='row project-item'>
 			<div class='col-xs-9'>
 				<a class="no-decoration" href="/tasks-view?name={{ task.name}}">
-					<span class="indicator {{ "green" if task.status=="Open" else "darkgrey" }}">
+					<span class="indicator {{ "orange" if task.status=="Open" else "green" }}">
 						{% if task.status == "Closed" %}
 						{{ task.subject }} completed on {{ task.closing_date }}
 						{% else %}

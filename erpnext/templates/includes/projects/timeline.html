@@ -1,44 +1,17 @@
 {% for timeline in doc.timelines %}
-<div class='timeline'>
-	<div class="row project-item">
-		<div class="col-xs-12">
-			<span class="avatar avatar-small" title="{{ timeline.modified_by }}"> <img src="{{ timeline.user_image }}"></span>
-		<span class='indicator'>
-		{{timeline.reference_name}} {{timeline.subject }}
-		</span>
-		<span class='indicator pull-right'>
-		{{ frappe.utils.pretty_date(timeline.creation) }}
-		</span>
+	<article class="timeline-entry">
+		<div class="timeline-entry-inner">
+			<div class="timeline-icon {{ "bg-danger" if ((timeline.reference_name).startswith('ISS') and (timeline.subject).startswith('Open')) else "bg-warning" if ((timeline.reference_name).startswith('TASK') and (timeline.subject).startswith('Open')) else "bg-success" if (timeline.subject).startswith('Closed') else "bg-info"}}">		
+			</div>
+			<div class="timeline-label">
+				<span class="avatar avatar-small" title="{{ timeline.modified_by }}"> <img src="{{ timeline.user_image }}"></span>
+				<span class='indicator'>
+				{{timeline.reference_name}} {{timeline.subject }}
+				</span>
+				<span class='indicator pull-right'>
+				{{ frappe.utils.pretty_date(timeline.creation) }}
+				</span>
+			</div>
 		</div>
-	</div>
-</div>
+	</article>
 {% endfor %}
-<!-- <div class="timeline-centered">
-{% for timeline in doc.timelines %}
-
-
-
-                        <article class="timeline-entry">
-
-                            <div class="timeline-entry-inner">
-
-                                <div class="timeline-icon bg-warning">
-                                    <i class="entypo-camera"></i>
-                                </div>
-
-                                <div class="timeline-label">
-						   			<span class="avatar avatar-small" title="{{ timeline.modified_by }}"> <img src="{{ timeline.user_image }}"></span>
-						   		<span class='indicator'>
-						   		{{timeline.reference_name}} {{timeline.subject }}
-						   		</span>
-						   		<span class='indicator pull-right'>
-						   		{{ frappe.utils.pretty_date(timeline.creation) }}
-						   		</span>
-                                </div>
-                            </div>
-
-                        </article>
-
-
-{% endfor %}
-</div> -->

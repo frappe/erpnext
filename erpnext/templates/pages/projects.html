@@ -2,6 +2,17 @@
 
 {% block title %}{{ doc.project_name }}{% endblock %}
 
+{% block breadcrumbs %}
+   <div class="page-breadcrumbs" data-html-block="breadcrumbs">	                    
+   	<ul class="breadcrumb">
+   		<li>
+   			<span class="icon icon-angle-left"></span>
+   			<a href="/project">Projects</a>
+   		</li>	
+   	</ul>
+   </div>
+{% endblock %}
+
 {% block header %}
 <h1 class= "title">
 {{ doc.project_name }}
@@ -24,7 +35,7 @@
 	Filtered by "{{ frappe.form_dict.q }}" Clear</a></p>
 {% else %}
 	<h3>{{ _("Activity Feed") }}</h3>
-	<div class='project-timeline'>
+	<div class='project-timelines timeline-centered'>
 	{% include "erpnext/templates/includes/projects/timeline.html" %}
 	</div>
 		{% if doc.timelines|length > 9 %}
@@ -40,7 +51,7 @@
 			<h3>{{ _("Tasks") }}</h3>
 		</div>
 		<div class="btn-group btn-toggle"> 	
-			<button class="btn btn-xs btn-open-tasks btn-primary active" style="float:left;">Open</button>
+			<button class="btn btn-xs btn-open-tasks" style="float:left;">Open</button>
 			<button class="btn btn-xs btn-closed-tasks">Close</button>	
 		</div>
 		<div class='project-tasks'>
