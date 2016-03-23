@@ -9,19 +9,19 @@ from erpnext.accounts.report.financial_statements import (get_period_list, get_c
 
 def execute(filters=None):
 	period_list = get_period_list(filters.fiscal_year, filters.periodicity)
-	
+
 	asset = get_data(filters.company, "Asset", "Debit", period_list, only_current_fiscal_year=False)
 	liability = get_data(filters.company, "Liability", "Credit", period_list, only_current_fiscal_year=False)
 	equity = get_data(filters.company, "Equity", "Credit", period_list, only_current_fiscal_year=False)
-	
-	provisional_profit_loss = get_provisional_profit_loss(asset, liability, equity, 
+
+	provisional_profit_loss = get_provisional_profit_loss(asset, liability, equity,
 		period_list, filters.company)
-		
+
 	message = check_opening_balance(asset, liability, equity)
 
 	data = []
 	data.extend(asset or [])
-	data.extend(liability or [])	
+	data.extend(liability or [])
 	data.extend(equity or [])
 	if provisional_profit_loss:
 		data.append(provisional_profit_loss)
@@ -53,7 +53,7 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 
 			if provisional_profit_loss[period.key]:
 				has_value = True
-			
+
 			total += flt(provisional_profit_loss[period.key])
 			provisional_profit_loss["total"] = total
 
@@ -67,6 +67,6 @@ def check_opening_balance(asset, liability, equity):
 		opening_balance -= flt(liability[0].get("opening_balance", 0))
 	if equity:
 		opening_balance -= flt(asset[0].get("opening_balance", 0))
-		
+
 	if opening_balance:
 		return _("Previous Financial Year is not closed")

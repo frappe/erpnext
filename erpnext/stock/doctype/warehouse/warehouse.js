@@ -5,8 +5,8 @@ frappe.ui.form.on("Warehouse", {
 	refresh: function(frm) {
 		frm.toggle_display('warehouse_name', frm.doc.__islocal);
 
-		frm.add_custom_button(__("Stock Ledger"), function() {
-			frappe.set_route("query-report", "Stock Ledger", {"warehouse": frm.doc.name});
+		frm.add_custom_button(__("Stock Balance"), function() {
+			frappe.set_route("query-report", "Stock Balance", {"warehouse": frm.doc.name});
 		});
  		if(frm.doc.__onload && frm.doc.__onload.account) {
 	 		frm.add_custom_button(__("General Ledger"), function() {

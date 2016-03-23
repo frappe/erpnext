@@ -1,8 +1,10 @@
+{%- from "templates/includes/projects/macros.html" import back_link -%}
+
 {% for task in doc.tasks %}
 	<div class='task'>
 		<div class='row project-item'>
 			<div class='col-xs-9'>
-				<a class="no-decoration" href="/tasks-view?name={{ task.name}}">
+				<a class="no-decoration" href="/tasks?name={{ task.name }}{{ back_link(doc) }}">
 					<span class="indicator {{ "orange" if task.status=="Open" else "green" }}">
 						{% if task.status == "Closed" %}
 						{{ task.subject }} completed on {{ task.closing_date }}
