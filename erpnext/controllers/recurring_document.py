@@ -181,14 +181,13 @@ def convert_to_recurring(doc, posting_date):
 			doc.db_set("recurring_id", doc.name)
 
 		set_next_date(doc, posting_date)
-
+		
+		if doc.next_date:
+			validate_recurring_next_date(doc)
+		
 	elif doc.recurring_id:
-		frappe.db.sql("""update `tab%s` set is_recurring = 0
-			where recurring_id = %s""" % (doc.doctype, '%s'), (doc.recurring_id))
-			
-	if doc.next_date:
-		validate_recurring_next_date(doc)
-
+		doc.db_set("recurring_id", None)
+	
 def validate_notification_email_id(doc):
 	if doc.notify_by_email:
 		if doc.notification_email_address:
