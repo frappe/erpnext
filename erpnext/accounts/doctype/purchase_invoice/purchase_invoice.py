@@ -429,7 +429,7 @@ class PurchaseInvoice(BuyingController):
 	def validate_supplier_invoice(self):
 		if self.bill_date:
 			if getdate(self.bill_date) > getdate(self.posting_date):
-				frappe.throw("Supplier Invoice Date cannot be greater than Posting Date")
+				frappe.throw(_("Supplier Invoice Date cannot be greater than Posting Date"))
 
 		if self.bill_no:
 			if cint(frappe.db.get_single_value("Accounts Settings", "check_supplier_invoice_uniqueness")):
@@ -449,7 +449,7 @@ class PurchaseInvoice(BuyingController):
 
 				if pi:
 					pi = pi[0][0]
-					frappe.throw("Supplier Invoice No exists in Purchase Invoice {0}".format(pi))
+					frappe.throw(_("Supplier Invoice No exists in Purchase Invoice {0}".format(pi)))
 
 	def update_billing_status_in_pr(self, update_modified=True):
 		updated_pr = []
