@@ -20,9 +20,9 @@
 {% endblock %}
 
 {% block style %}
-<style>
-{% include "templates/includes/projects.css" %}
-</style>
+	<style>
+		{% include "templates/includes/projects.css" %}
+	</style>
 {% endblock %} 
 
 
@@ -50,15 +50,15 @@
 			href='/tasks?new=1&project={{ doc.project_name }}'>New</a>
 			<h3>{{ _("Tasks") }}</h3>
 		</div>
-		<div class="btn-group btn-toggle"> 	
-			<button class="btn btn-xs btn-open-tasks" style="float:left;">Open</button>
-			<button class="btn btn-xs btn-closed-tasks">Close</button>	
+		<div class="btn-group btn-toggle"> 
+			<button class="btn btn-link btn-open-tasks"><span class="indicator orange"></span>Open</button>
+			<button class="btn btn-link btn-closed-tasks"><span class="indicator green"></span>Closed</button>	
 		</div>
 		<div class='project-tasks'>
 		{% include "erpnext/templates/includes/projects/project_tasks.html" %}
 		</div>
 
-		{% if doc.tasks|length > 4 %}
+		{% if doc.tasks|length > 9 %}
 			<p><a id= 'more-tasks' class='more-tasks small underline'>{{ _("More") }}</a><p>
 		{% endif %}
 	</div>
@@ -73,15 +73,15 @@
 			href='/issues?new=1&project={{ doc.project_name }}'>New</a>
 			<h3>{{ _("Issues") }}</h3>
 		</div>
-		<div class="btn-group btn-toggle"> 	
-			<button class="btn btn-xs btn-open-issues" style="float:left;">Open</button>
-			<button class="btn btn-xs btn-closed-issues">Close</button>	
+		<div class="btn-group btn-toggle"> 
+			<button class="btn btn-link btn-open-issues"><span class="indicator red"></span>Open</button>
+			<button class="btn btn-link btn-closed-issues"><span class="indicator green"></span>Closed</button>	
 		</div>
 		<div class='project-issues'>
 		{% include "erpnext/templates/includes/projects/project_issues.html" %}
 		</div>
 
-		{% if doc.issues|length > 4 %}
+		{% if doc.issues|length > 9 %}
 			<p><a id='more-issues' class='more-issues small underline'>{{ _("More") }}</a><p>
 		{% endif %}
 	</div>	
@@ -94,7 +94,7 @@
 	<div class='project-timelogs'>
 	{% include "erpnext/templates/includes/projects/project_timelogs.html" %}
 	</div>
-	{% if doc.timelogs|length > 1 %}
+	{% if doc.timelogs|length > 9 %}
 		<p><a class='more-timelogs small underline'>{{ _("More") }}</a><p>
 	{% endif %}
 {% else %}

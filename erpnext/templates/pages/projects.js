@@ -61,8 +61,8 @@ frappe.ready(function() {
 			success: function(data) {
 				$('.project-'+ item).html(data.message);
 				
-				$('.project-'+ item +'-section .btn-group .btn-primary').removeClass('btn-primary');
-				$('.btn-'+ item_status +'-'+ item).addClass( "btn-primary" );
+				$('.project-'+ item +'-section .btn-group .bold').removeClass('bold');
+				$('.btn-'+ item_status +'-'+ item).addClass( "bold" );
 				$(".more-"+ item).toggle(true);
 			}
 		});	

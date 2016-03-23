@@ -23,7 +23,28 @@
 
 .content_display{
   padding: 5px;
+  font-weight: normal;
+  font-size: 12px;
+  vertical-align: middle;
+  color: #6c7680;
 }
+
+.close-btn{
+  display: none;
+}
+
+.content_display:hover .close-btn{
+	display : block;
+}
+
+.btn-link{
+	padding: 0 10px 0 0;
+}
+
+.bold {
+	font-weight: bold;
+}
+
 
 .task-btn, .issue-btn, .timelog-btn{
 	padding: 8px;
