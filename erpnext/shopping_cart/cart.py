@@ -437,3 +437,6 @@ def get_address_territory(address_name):
 				break
 
 	return territory
+
+def show_terms(doc):
+	return doc.tc_name	

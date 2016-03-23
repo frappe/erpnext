@@ -61,6 +61,15 @@
         </div>
     	<div id="cart-totals">
     	</div>
+        {% if doc.tc_name %}
+          <div class="cart-terms" style="display: none;" title={{doc.tc_name}}>
+          {{doc.tc_name}}
+          {{doc.terms}}
+          </div>
+          <div class="cart-link">
+            <a href="#" onclick="show_terms();return false;">*Terms and Conditions</a>
+          </div>  
+        {% endif %}
     	<div class="cart-addresses">
             {% include "templates/includes/cart/cart_address.html" %}
     	</div>
