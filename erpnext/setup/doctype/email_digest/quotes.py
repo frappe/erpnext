@@ -28,6 +28,7 @@ def get_random_quote():
 		("A small body of determined spirits fired by an unquenchable faith in their mission can alter the course of history.", "Mahatma Gandhi"),
 		("If two wrongs don't make a right, try three.", "Laurence J. Peter"),
 		("Inspiration exists, but it has to find you working.", "Pablo Picasso"),
+		("The world’s first speeding ticket was given to a man going 4 times the speed limit! Walter Arnold was traveling at a breakneck 8 miles an hour in a 2mph zone, and was caught by a policeman on bicycle and fined one shilling!"),
 	]
 
 	return random.choice(quotes)
