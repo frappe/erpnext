@@ -117,15 +117,6 @@ doc_events = {
 	},
 	"Address": {
 		"validate": "erpnext.shopping_cart.cart.set_customer_in_address"
-	},
-
-	# From Paypal Integration app
-	"PayPal Settings": {
-		"on_update": "erpnext.accounts.doctype.payment_gateway.fixtures.paypal.create_payment_gateway_and_account"
-	},
-
-	"Paypal Express Payment": {
-		"on_update": "erpnext.shopping_cart.cart.set_redirect"
 	}
 }
 
