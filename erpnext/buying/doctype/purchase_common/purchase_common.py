@@ -69,7 +69,7 @@ class PurchaseCommon(BuyingController):
 				frappe.throw(_("Warehouse is mandatory for stock Item {0} in row {1}").format(d.item_code, d.idx))
 
 			# validate purchase item
-			if not (obj.doctype=="Material Request" and getattr(obj, "material_request_type", None)=="Material Transfer"):
+			if obj.doctype=="Material Request" and getattr(obj, "material_request_type", None)=="Purchase":
 				if item.is_purchase_item != 1 and item.is_sub_contracted_item != 1:
 					frappe.throw(_("{0} must be a Purchased or Sub-Contracted Item in row {1}").format(d.item_code, d.idx))
 
