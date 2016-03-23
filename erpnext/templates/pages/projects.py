@@ -71,12 +71,14 @@ def get_tasks(project, start=0, search=None, item_status=None):
 		limit_start=start, limit_page_length=10)	
 		
 	for task in tasks:
+		print task._comments
 		task.todo = frappe.get_all('ToDo',filters={'reference_name':task.name, 'reference_type':'Task'},
 		fields=["assigned_by", "owner", "modified", "modified_by"])
 		if task.todo:
 			task.todo=task.todo[0]
 			task.todo.user_image = frappe.db.get_value('User', task.todo.owner, 'user_image')
-			
+		if task._comments:
+			task.comment_count = len(json.loads(_comments or "[]"))				
 	return tasks
 
 @frappe.whitelist()
