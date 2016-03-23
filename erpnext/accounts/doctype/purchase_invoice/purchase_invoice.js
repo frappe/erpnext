@@ -111,6 +111,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		cur_frm.cscript.hide_fields(this.frm.doc);
 		if(cint(this.frm.doc.is_paid)) {
 			if(!this.frm.doc.company) {
+				cur_frm.set_value("is_paid", 0)
 				msgprint(__("Please specify Company to proceed"));
 			}
 		}
