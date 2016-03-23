@@ -32,6 +32,8 @@ class ProductionPlanningTool(Document):
 			so_filter += " and so.transaction_date <= %(to_date)s"
 		if self.customer:
 			so_filter += " and so.customer = %(customer)s"
+		if self.project:
+			so_filter += " and so.project = %(project)s"
 
 		if self.fg_item:
 			item_filter += " and item.name = %(item)s"
@@ -53,6 +55,7 @@ class ProductionPlanningTool(Document):
 				"from_date": self.from_date,
 				"to_date": self.to_date,
 				"customer": self.customer,
+				"project": self.project,
 				"item": self.fg_item,
 				"company": self.company
 			}, as_dict=1)

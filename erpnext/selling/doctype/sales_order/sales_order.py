@@ -336,6 +336,10 @@ def close_or_unclose_sales_orders(names, status):
 def make_material_request(source_name, target_doc=None):
 	def postprocess(source, doc):
 		doc.material_request_type = "Purchase"
+		
+	def update_item(source, target, source_parent):
+		target.project = source_parent.project
+		
 
 	so = frappe.get_doc("Sales Order", source_name)
 
@@ -353,7 +357,8 @@ def make_material_request(source_name, target_doc=None):
 			"field_map": {
 				"parent": "sales_order",
 				"stock_uom": "uom"
-			}
+			},
+			"postprocess": update_item
 		}
 	}, target_doc, postprocess)
 
