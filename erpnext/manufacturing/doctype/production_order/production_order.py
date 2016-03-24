@@ -51,12 +51,14 @@ class ProductionOrder(Document):
 
 	def validate_sales_order(self):
 		if self.sales_order:
-			so = frappe.db.sql("""select name, delivery_date from `tabSales Order`
+			so = frappe.db.sql("""select name, delivery_date, project from `tabSales Order`
 				where name=%s and docstatus = 1""", self.sales_order, as_dict=1)
 
 			if len(so):
 				if not self.expected_delivery_date:
 					self.expected_delivery_date = so[0].delivery_date
+				
+				self.project = so[0].project
 
 				self.validate_production_order_against_so()
 			else:
@@ -236,7 +238,7 @@ class ProductionOrder(Document):
 			self.set_operation_start_end_time(i, d)
 
 			time_log = make_time_log(self.name, d.operation, d.planned_start_time, d.planned_end_time,
-				flt(self.qty) - flt(d.completed_qty), self.project_name, d.workstation, operation_id=d.name)
+				flt(self.qty) - flt(d.completed_qty), self.project, d.workstation, operation_id=d.name)
 
 			if d.workstation:
 				# validate operating hours if workstation [not mandatory] is specified

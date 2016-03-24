@@ -32,7 +32,7 @@ def execute(filters=None):
 		row = [inv.name, inv.posting_date, inv.customer, inv.customer_name,
 		customer_map.get(inv.customer, {}).get("customer_group"), 
 		customer_map.get(inv.customer, {}).get("territory"),
-		inv.debit_to, inv.project_name, inv.remarks, ", ".join(sales_order), ", ".join(delivery_note)]
+		inv.debit_to, inv.project, inv.remarks, ", ".join(sales_order), ", ".join(delivery_note)]
 
 		# map income values
 		base_net_total = 0
@@ -107,7 +107,7 @@ def get_conditions(filters):
 
 def get_invoices(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, posting_date, debit_to, project_name, customer,
+	return frappe.db.sql("""select name, posting_date, debit_to, project, customer,
 		customer_name, remarks, base_net_total, base_grand_total, base_rounded_total, outstanding_amount
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date desc, name desc""" %

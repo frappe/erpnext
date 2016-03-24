@@ -58,7 +58,7 @@ class PurchaseOrder(BuyingController):
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
-				"compare_fields": [["rate", "="], ["project_name", "="], ["item_code", "="]],
+				"compare_fields": [["rate", "="], ["project", "="], ["item_code", "="]],
 				"is_child_table": True
 			}
 		})
@@ -170,8 +170,6 @@ class PurchaseOrder(BuyingController):
 	def on_submit(self):
 		if self.is_against_so():
 			self.update_status_updater()
-
-		super(PurchaseOrder, self).on_submit()
 
 		purchase_controller = frappe.get_doc("Purchase Common")
 

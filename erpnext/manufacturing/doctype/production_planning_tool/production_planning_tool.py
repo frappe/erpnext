@@ -32,6 +32,8 @@ class ProductionPlanningTool(Document):
 			so_filter += " and so.transaction_date <= %(to_date)s"
 		if self.customer:
 			so_filter += " and so.customer = %(customer)s"
+		if self.project:
+			so_filter += " and so.project = %(project)s"
 
 		if self.fg_item:
 			item_filter += " and item.name = %(item)s"
@@ -53,6 +55,7 @@ class ProductionPlanningTool(Document):
 				"from_date": self.from_date,
 				"to_date": self.to_date,
 				"customer": self.customer,
+				"project": self.project,
 				"item": self.fg_item,
 				"company": self.company
 			}, as_dict=1)
@@ -135,8 +138,7 @@ class ProductionPlanningTool(Document):
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and qty > delivered_qty
 			and exists (select * from `tabItem` item where item.name=so_item.item_code
-				and (item.is_pro_applicable = 1
-					or item.is_sub_contracted_item = 1)) %s""" % \
+				and item.is_pro_applicable = 1) %s""" % \
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		if self.fg_item:
@@ -150,8 +152,7 @@ class ProductionPlanningTool(Document):
 			and pi.parent_item = so_item.item_code
 			and so_item.parent in (%s) and so_item.qty > so_item.delivered_qty
 			and exists (select * from `tabItem` item where item.name=pi.item_code
-				and (item.is_pro_applicable = 1
-					or item.is_sub_contracted_item = 1)) %s""" % \
+				and item.is_pro_applicable = 1) %s""" % \
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		self.add_items(items + packed_items)
@@ -171,8 +172,7 @@ class ProductionPlanningTool(Document):
 			from `tabMaterial Request Item` mr_item
 			where parent in (%s) and docstatus = 1 and qty > ordered_qty
 			and exists (select * from `tabItem` item where item.name=mr_item.item_code
-				and (item.is_pro_applicable = 1
-					or item.is_sub_contracted_item = 1)) %s""" % \
+				and item.is_pro_applicable = 1) %s""" % \
 			(", ".join(["%s"] * len(mr_list)), item_condition), tuple(mr_list), as_dict=1)
 
 		self.add_items(items)

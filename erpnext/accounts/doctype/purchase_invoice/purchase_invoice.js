@@ -118,7 +118,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row,
-			["expense_account", "cost_center", "project_name"]);
+			["expense_account", "cost_center", "project"]);
 	},
 
 	on_submit: function() {
@@ -242,7 +242,7 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	refresh_field('items');
 }
 
-cur_frm.fields_dict['items'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('project').get_query = function(doc, cdt, cdn) {
 	return{
 		filters:[
 			['Project', 'status', 'not in', 'Completed, Cancelled']

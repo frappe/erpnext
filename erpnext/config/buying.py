@@ -4,14 +4,9 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
+			"label": _("Purchasing"),
 			"icon": "icon-star",
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Supplier",
-					"description": _("Supplier database."),
-				},
 				{
 					"type": "doctype",
 					"name": "Material Request",
@@ -27,6 +22,21 @@ def get_data():
 					"name": "Purchase Order",
 					"description": _("Purchase Orders given to Suppliers."),
 				},
+			]
+		},
+		{
+			"label": _("Supplier"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Supplier",
+					"description": _("Supplier database."),
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Type",
+					"description": _("Supplier Type master.")
+				},
 				{
 					"type": "doctype",
 					"name": "Contact",
@@ -37,11 +47,7 @@ def get_data():
 					"name": "Address",
 					"description": _("All Addresses."),
 				},
-				{
-					"type": "doctype",
-					"name": "Item",
-					"description": _("All Products or Services."),
-				},
+
 			]
 		},
 		{
@@ -55,20 +61,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Supplier Type",
-					"description": _("Supplier Type master.")
-				},
-				{
-					"type": "page",
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"label": _("Item Group Tree"),
-					"link": "Sales Browser/Item Group",
-					"description": _("Tree of Item Groups."),
-					"doctype": "Item Group",
-				},
-				{
-					"type": "doctype",
 					"name":"Terms and Conditions",
 					"label": _("Terms and Conditions Template"),
 					"description": _("Template of terms or contract.")
@@ -78,10 +70,34 @@ def get_data():
 					"name": "Purchase Taxes and Charges Template",
 					"description": _("Tax template for buying transactions.")
 				},
+			]
+		},
+		{
+			"label": _("Items and Pricing"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Item",
+					"description": _("All Products or Services."),
+				},
+				{
+					"type": "doctype",
+					"name": "Product Bundle",
+					"description": _("Bundle items at time of sale."),
+				},
 				{
 					"type": "doctype",
 					"name": "Price List",
 					"description": _("Price List master.")
+				},
+				{
+					"type": "page",
+					"name": "Sales Browser",
+					"icon": "icon-sitemap",
+					"label": _("Item Group"),
+					"link": "Sales Browser/Item Group",
+					"description": _("Tree of Item Groups."),
+					"doctype": "Item Group",
 				},
 				{
 					"type": "doctype",
@@ -94,10 +110,11 @@ def get_data():
 					"name": "Pricing Rule",
 					"description": _("Rules for applying pricing and discount.")
 				},
+
 			]
 		},
 		{
-			"label": _("Main Reports"),
+			"label": _("Analytics"),
 			"icon": "icon-table",
 			"items": [
 				{
@@ -106,10 +123,22 @@ def get_data():
 					"label": _("Purchase Analytics"),
 					"icon": "icon-bar-chart",
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Supplier-Wise Sales Analytics",
+					"doctype": "Stock Ledger Entry"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Purchase Order Trends",
+					"doctype": "Purchase Order"
+				},
 			]
 		},
 		{
-			"label": _("Standard Reports"),
+			"label": _("Other Reports"),
 			"icon": "icon-list",
 			"items": [
 				{
@@ -139,21 +168,9 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Purchase Order Trends",
-					"doctype": "Purchase Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
 					"name": "Supplier Addresses and Contacts",
 					"doctype": "Supplier"
 				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Supplier-Wise Sales Analytics",
-					"doctype": "Stock Ledger Entry"
-				}
 			]
 		},
 		{

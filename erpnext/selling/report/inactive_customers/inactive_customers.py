@@ -1,5 +1,5 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-# License: GNU General Public License v3. See license.txt
+# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
 
 from __future__ import unicode_literals
 import frappe
@@ -11,7 +11,7 @@ def execute(filters=None):
 
 	days_since_last_order = filters.get("days_since_last_order")
 	doctype = filters.get("doctype")
-	
+
 	if cint(days_since_last_order) <= 0:
 		frappe.throw(_("'Days Since Last Order' must be greater than or equal to zero"))
 
@@ -35,7 +35,7 @@ def get_sales_details(doctype):
 				so.base_net_total)) as 'total_order_considered',
 			max(so.transaction_date) as 'last_order_date',
 			DATEDIFF(CURDATE(), max(so.transaction_date)) as 'days_since_last_order'"""
-	
+
 	return frappe.db.sql("""select
 			cust.name,
 			cust.customer_name,

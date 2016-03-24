@@ -1,0 +1,165 @@
+/* CSS used here will be applied after bootstrap.css */
+
+.underline {
+	text-decoration: underline;
+}
+
+.page-container .indicator {
+	font-weight: normal;
+}
+
+.page-container .project-item {
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.row-header {
+    font-size: 14px;
+    font-weight: 500;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #d1d8dd;
+    margin: 0!important;
+}
+
+.content_display{
+  padding: 5px;
+  font-weight: normal;
+  font-size: 12px;
+  vertical-align: middle;
+  color: #6c7680;
+}
+
+.close-btn{
+  display: none;
+}
+
+.content_display:hover .close-btn{
+	display : block;
+}
+
+.btn-link{
+	padding: 0 10px 0 0;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+
+.task-btn, .issue-btn, .timelog-btn{
+	padding: 8px;
+}
+
+.timeline-centered {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.timeline-centered:before {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 3px;
+    background: #f5f5f6;
+    /*left: 50%;*/
+    top: 0px;
+    bottom: 0px;
+    margin-left: 10px;
+}
+
+.timeline-centered .timeline-entry {
+    position: relative;
+    /*width: 50%;
+float: right;*/
+    margin-top: 5px;
+    margin-left: 10px;
+    margin-bottom: 5px;
+    clear: both;
+}
+
+
+.timeline-centered .timeline-entry .timeline-entry-inner {
+    position: relative;
+    margin-left: -3px;
+}
+
+
+.timeline-centered .timeline-entry .timeline-entry-inner .timeline-icon {
+	margin-top:10px;
+    background: #fff;
+    color: #737881;
+    display: block;
+    width: 10px;
+    height: 10px;
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 20px;
+    text-align: center;
+    -moz-box-shadow: 0 0 0 2px #f5f5f6;
+    -webkit-box-shadow: 0 0 0 2px #f5f5f6;
+    box-shadow: 0 0 0 2px #f5f5f6;
+    line-height: 30px;
+    float: left;
+}
+
+
+.timeline-centered .timeline-entry .timeline-entry-inner .timeline-icon.bg-primary {
+    background-color: #303641;
+    color: #fff;
+}
+
+.timeline-centered .timeline-entry .timeline-entry-inner .timeline-icon.bg-secondary {
+    background-color: #ee4749;
+    color: #fff;
+}
+
+.timeline-centered .timeline-entry .timeline-entry-inner .timeline-icon.bg-success {
+    background-color: #98d85b;
+    color: #fff;
+}
+
+.timeline-centered .timeline-entry .timeline-entry-inner .timeline-icon.bg-info {
+    background-color: #21a9e1;
+    color: #fff;
+}
+
+.timeline-centered .timeline-entry .timeline-entry-inner .timeline-icon.bg-warning {
+    background-color: #ffa00a;
+    color: #fff;
+}
+
+.timeline-centered .timeline-entry .timeline-entry-inner .timeline-icon.bg-danger {
+    background-color: #ff5858;
+    color: #fff;
+}
+
+   
+.timeline-centered .timeline-entry .timeline-entry-inner .timeline-label {
+    position: relative;
+    background: #f5f5f6;
+    padding: 1em;
+    margin-left: 40px;
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.timeline-centered .timeline-entry .timeline-entry-inner .timeline-label:after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 9px 9px 9px 0;
+    border-color: transparent #f5f5f6 transparent transparent;
+    left: 0;
+    top: 10px;
+    margin-left: -9px;
+}

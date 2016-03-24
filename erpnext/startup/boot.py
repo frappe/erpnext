@@ -38,7 +38,8 @@ def load_country_and_currency(bootinfo):
 	if country and frappe.db.exists("Country", country):
 		bootinfo.docs += [frappe.get_doc("Country", country)]
 
-	bootinfo.docs += frappe.db.sql("""select * from tabCurrency
+	bootinfo.docs += frappe.db.sql("""select name, fraction, fraction_units,
+		number_format, smallest_currency_fraction_value, symbol from tabCurrency
 		where enabled=1""", as_dict=1, update={"doctype":":Currency"})
 
 def get_letter_heads():

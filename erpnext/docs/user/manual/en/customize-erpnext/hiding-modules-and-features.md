@@ -1,16 +1,11 @@
-### Hiding Unused Features
-
-As you have seen from this manual that ERPNext contains tons of features which
-you may not use. We have observed that most users start with using 20% of the
-features, though a different 20%. To hide fields belonging to features you
+As you have seen from this manual that ERPNext contains tons of features which you may not use. We have observed that most users start with using 20% of the features, though a different 20%. To hide fields belonging to features you
 dont require, go to:
 
-> Setup > Tools > Hide/Unhide Features
+`Setup > Customize > Features Setup`
 
-![Hide Features]({{docs_base_url}}/assets/old_images/erpnext/hide-features.png)
+<img alt="Hide Features" class="screenshot" src="{{docs_base_url}}/assets/img/customize/feature-setup.png">
 
-Check / uncheck the features you want to use and refresh your page for the
-changes to take effect.
+Check the features you want to use. The features which are not checked, relevant fields will get hidden from the forms.
 
 * * *
 
@@ -18,13 +13,12 @@ changes to take effect.
 
 To hide modules (icons) from the home page, go to:
 
-Setup > Tools> Modules Setup
+`Setup > Permissions > Show / Hide Modules`
 
-![Hide/Unhide Modules]({{docs_base_url}}/assets/old_images/erpnext/hide-module.png)
+<img alt="Hide Features" class="screenshot" src="{{docs_base_url}}/assets/img/customize/show-hide-modules.png">
 
-> Note: Modules are automatically hidden for users that have no permissions on
-the documents within that module. For example, if a user has no permissions on
-Purchase Order, Purchase Request, Supplier, the “Buying” module will
-automatically be hidden.
+Click [here]({{docs_base_url}}/user/manual/en/customize-erpnext/articles/module-visibility.html) to learn about other features from where icons from the desktop can be hidden.
+
+> Note: Modules are automatically hidden for users that have no permissions on the documents within that module. For example, if a User has no permissions on Purchase Order, Purchase Request, Supplier, the “Buying” module will automatically hidden for that User.
 
 {next}

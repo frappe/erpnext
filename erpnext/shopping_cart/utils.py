@@ -30,9 +30,10 @@ def update_website_context(context):
 
 def update_my_account_context(context):
 	context["my_account_list"].extend([
+		{"label": _("Projects"), "url": "project"},
 		{"label": _("Orders"), "url": "orders"},
 		{"label": _("Invoices"), "url": "invoices"},
 		{"label": _("Shipments"), "url": "shipments"},
 		{"label": _("Issues"), "url": "issues"},
-		{"label": _("Addresses"), "url": "addresses"},
+		{"label": _("Addresses"), "url": "addresses"}
 	])

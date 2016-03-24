@@ -20,18 +20,18 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 				price_list: frm.doc.buying_price_list
 			};
 		}
-		
+
 		if (args) {
 			args.posting_date = frm.doc.posting_date || frm.doc.transaction_date;
 		}
 	}
 	if(!args) return;
-	
+
 	if(frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
-		if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date", 
+		if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date",
 			args.posting_date, args.party_type=="Customer" ? "customer": "supplier")) return;
 	}
-	
+
 	args.currency = frm.doc.currency;
 	args.company = frm.doc.company;
 	args.doctype = frm.doc.doctype;
@@ -49,9 +49,9 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	});
 }
 
-erpnext.utils.get_address_display = function(frm, address_field, display_field) {
+erpnext.utils.get_address_display = function(frm, address_field, display_field, is_your_company_address) {
 	if(frm.updating_party_details) return;
-	
+
 	if(!address_field) {
 		if(frm.doctype != "Purchase Order" && frm.doc.customer) {
 			address_field = "customer_address";
@@ -59,25 +59,25 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 			address_field = "supplier_address";
 		} else return;
 	}
- 
+
 	if(!display_field) display_field = "address_display";
 	if(frm.doc[address_field]) {
 		frappe.call({
 			method: "erpnext.utilities.doctype.address.address.get_address_display",
 			args: {"address_dict": frm.doc[address_field] },
 			callback: function(r) {
-				if(r.message){
+				if(r.message) {
 					frm.set_value(display_field, r.message)
 				}
 				
-				if(frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
-					if(!erpnext.utils.validate_mandatory(frm, "Customer/Supplier", 
+				if(frappe.meta.get_docfield(frm.doc.doctype, "taxes") && !is_your_company_address) {
+					if(!erpnext.utils.validate_mandatory(frm, "Customer/Supplier",
 						frm.doc.customer || frm.doc.supplier, address_field)) return;
-	
-					if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date", 
+
+					if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date",
 						frm.doc.posting_date || frm.doc.transaction_date, address_field)) return;
 				} else return;
-				
+
 				frappe.call({
 					method: "erpnext.accounts.party.set_taxes",
 					args: {
@@ -96,7 +96,10 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 				});
 			}
 		})
+	} else {
+		frm.set_value(display_field, null);
 	}
+	
 }
 
 erpnext.utils.get_contact_details = function(frm) {
@@ -122,4 +125,17 @@ erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
 		return false;
 	}
 	return true;
+}
+
+erpnext.utils.get_shipping_address = function(frm){
+	frappe.call({
+		method: "erpnext.utilities.doctype.address.address.get_shipping_address",
+		args: {company: frm.doc.company},
+		callback: function(r){
+			if(r.message){
+				frm.set_value("shipping_address", r.message[0]) //Address title or name
+				frm.set_value("shipping_address_display", r.message[1]) //Address to be displayed on the page
+			}
+		}
+	});
 }

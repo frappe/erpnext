@@ -120,10 +120,22 @@ class Project(Document):
 
 	def update_purchase_costing(self):
 		total_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
-			from `tabPurchase Invoice Item` where project_name = %s and docstatus=1""", self.name)
+			from `tabPurchase Invoice Item` where project = %s and docstatus=1""", self.name)
 
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
+		
+	
 
+def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20):
+	from frappe.templates.pages.list import get_list
+	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=True)
+		
+def get_list_context(context=None):
+	return {
+		"title": _("My Projects"),
+		"get_list": get_project_list,
+		"row_template": "templates/includes/project_row.html"
+	}
 @frappe.whitelist()
-def get_cost_center_name(project_name):
-	return frappe.db.get_value("Project", project_name, "cost_center")
+def get_cost_center_name(project):
+	return frappe.db.get_value("Project", project, "cost_center")

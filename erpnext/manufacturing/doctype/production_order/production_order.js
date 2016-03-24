@@ -6,6 +6,7 @@ frappe.ui.form.on("Production Order", "onload", function(frm) {
 		frm.doc.status = 'Draft';
 
 	frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
+	frm.add_fetch("sales_order", "project", "project");
 
 	if(frm.doc.__islocal) {
 		frm.set_value({
@@ -262,7 +263,7 @@ cur_frm.fields_dict['production_item'].get_query = function(doc) {
 	}
 }
 
-cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
+cur_frm.fields_dict['project'].get_query = function(doc, dt, dn) {
 	return{
 		filters:[
 			['Project', 'status', 'not in', 'Completed, Cancelled']

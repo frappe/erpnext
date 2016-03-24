@@ -249,7 +249,6 @@ def make_journal_entry(account1, account2, amount, cost_center=None, exchange_ra
 	jv = frappe.new_doc("Journal Entry")
 	jv.posting_date = "2013-02-14"
 	jv.company = "_Test Company"
-	jv.fiscal_year = "_Test Fiscal Year 2013"
 	jv.user_remark = "test"
 	jv.multi_currency = 1
 	jv.set("accounts", [

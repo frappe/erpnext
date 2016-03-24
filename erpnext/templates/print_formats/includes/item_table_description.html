@@ -35,7 +35,7 @@
 
 	{% if compact -%}
 		{%- for fieldname in doc.flags.show_in_description -%}
-			{% if doc.get(fieldname) -%}
+			{% if doc.get(fieldname) and doc.in_format_data(fieldname) -%}
 			<p>
 				<strong>{{ _(doc.meta.get_label(fieldname)) }}:</strong>
 				{{ doc.get_formatted(fieldname, translated=True)  }}

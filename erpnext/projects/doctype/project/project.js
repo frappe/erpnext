@@ -60,7 +60,7 @@ cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 
 cur_frm.fields_dict['sales_order'].get_query = function(doc) {
 	var filters = {
-		'project_name': ["in", doc.__islocal ? [""] : [doc.name, ""]]
+		'project': ["in", doc.__islocal ? [""] : [doc.name, ""]]
 	};
 
 	if (doc.customer) {

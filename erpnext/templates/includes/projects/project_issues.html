@@ -1,0 +1,33 @@
+{%- from "templates/includes/projects/macros.html" import back_link -%}
+
+{% for issue in doc.issues %}
+		<div class='issue'>
+			<div class='row project-item'>
+				<div class='col-xs-9'>
+					<a class="no-decoration" href="/issues?name={{ issue.name}}{{ back_link(doc) }}">
+						<span class="indicator {{ "red" if issue.status=="Open" else "green" }}">
+							{% if issue.status == "Closed" %}
+							{{ issue.subject }} resolved {{ frappe.utils.pretty_date(issue.resolution_date) }}
+							{% else %}
+							{{ issue.subject }} raised on {{ issue.opening_date }}
+							{% endif %}
+						</span>
+					</a>
+				</div>
+				<div class='col-xs-3'>
+					<div class='pull-right'>
+						{% if issue.todo %}
+						<span class="avatar avatar-small" title="{{ issue.todo.owner }}"> <img src="{{ 				issue.todo.user_image }}"></span>
+						{% else %}
+						<span class="avatar avatar-small avatar-empty"></span>
+						{% endif %}
+					</div>
+					<div class='pull-right' style='padding-right:10px;'>
+						{% if issue.status != "Closed" %}
+						<span class="text-extra-muted "> <i class="octicon octicon-x issue-x" title="Close" id = "{{issue.name}}"></i> 				</span>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+{% endfor %}

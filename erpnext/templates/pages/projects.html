@@ -1,0 +1,115 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ doc.project_name }}{% endblock %}
+
+{%- from "templates/includes/projects/macros.html" import back_link -%}
+
+{% block breadcrumbs %}
+   <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+   	<ul class="breadcrumb">
+   		<li>
+   			<span class="icon icon-angle-left"></span>
+   			<a href="/project">Projects</a>
+   		</li>
+   	</ul>
+   </div>
+{% endblock %}
+
+{% block header %}
+<h1 class= "title">
+{{ doc.project_name }}
+</h1>
+{% endblock %}
+
+{% block style %}
+	<style>
+		{% include "templates/includes/projects.css" %}
+	</style>
+{% endblock %}
+
+
+{% block page_content %}
+
+{% include 'templates/includes/project_search_box.html' %}
+
+{% if frappe.form_dict.q %}
+	<p class="text-muted"> <a href="/projects?project={{doc.name}}" class="text-muted">
+	Filtered by "{{ frappe.form_dict.q }}" Clear</a></p>
+{% else %}
+	<h3>{{ _("Activity Feed") }}</h3>
+	<div class='project-timelines timeline-centered'>
+	{% include "erpnext/templates/includes/projects/timeline.html" %}
+	</div>
+		{% if doc.timelines|length > 9 %}
+		<p><a class='more-timelines small underline'>{{ _("More") }}</a><p>
+		{% endif %}
+{% endif %}
+
+<div class='padding'></div>
+
+<h3>{{ _("Tasks") }}</h3>
+
+{% if doc.tasks %}
+	<div class='project-tasks-section'>
+		<div class="btn-group btn-toggle">
+			<button class="btn btn-link btn-open-tasks"><span class="indicator orange"></span>Open</button>
+			<button class="btn btn-link btn-closed-tasks"><span class="indicator green"></span>Closed</button>
+		</div>
+		<div class='project-tasks'>
+		{% include "erpnext/templates/includes/projects/project_tasks.html" %}
+		</div>
+
+		{% if doc.tasks|length > 9 %}
+			<p><a id= 'more-tasks' class='more-tasks small underline'>{{ _("More") }}</a><p>
+		{% endif %}
+	</div>
+{% else %}
+	<p class="text-muted">No tasks</p>
+{% endif %}
+
+<p><a href='/tasks?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>Add a new task</a></p>
+
+<div class='padding'></div>
+<h3>{{ _("Issues") }}</h3>
+
+{% if doc.issues %}
+	<div class='project-issues-section'>
+		<div class="btn-group btn-toggle">
+			<button class="btn btn-link btn-open-issues"><span class="indicator red"></span>Open</button>
+			<button class="btn btn-link btn-closed-issues"><span class="indicator green"></span>Closed</button>
+		</div>
+		<div class='project-issues'>
+		{% include "erpnext/templates/includes/projects/project_issues.html" %}
+		</div>
+
+		{% if doc.issues|length > 9 %}
+			<p><a id='more-issues' class='more-issues small underline'>{{ _("More") }}</a><p>
+		{% endif %}
+	</div>
+{% else %}
+	<p class="text-muted">No Issues</p>
+{% endif %}
+
+<p>	<a href='/issues?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>Add a new issue</a></p>
+
+<div class='padding'></div>
+
+<h3>{{ _("Time Logs") }}</h3>
+
+{% if doc.timelogs %}
+	<div class='project-timelogs'>
+	{% include "erpnext/templates/includes/projects/project_timelogs.html" %}
+	</div>
+	{% if doc.timelogs|length > 9 %}
+		<p><a class='more-timelogs small underline'>{{ _("More") }}</a><p>
+	{% endif %}
+{% else %}
+	<p class="text-muted">No time logs</p>
+{% endif %}
+</div>
+
+<script>
+	{% include "erpnext/templates/pages/projects.js" %}
+</script>
+
+{% endblock %}

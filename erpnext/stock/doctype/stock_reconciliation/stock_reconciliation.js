@@ -27,14 +27,6 @@ frappe.ui.form.on("Stock Reconciliation", {
 		}
 	},
 
-	company: function(frm) {
-		erpnext.get_fiscal_year(frm.doc.company, frm.doc.posting_date);
-	},
-
-	posting_date: function(frm) {
-		erpnext.get_fiscal_year(frm.doc.company, frm.doc.posting_date);
-	},
-
 	get_items: function(frm) {
 		frappe.prompt({label:"Warehouse", fieldtype:"Link", options:"Warehouse", reqd: 1},
 			function(data) {

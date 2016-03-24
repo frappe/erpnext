@@ -41,9 +41,7 @@ class Attendance(Document):
 
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
-		from erpnext.accounts.utils import validate_fiscal_year
 		validate_status(self.status, ["Present", "Absent", "Half Day"])
-		validate_fiscal_year(self.att_date, self.fiscal_year, _("Attendance Date"), self)
 		self.validate_att_date()
 		self.validate_duplicate_record()
 		self.check_leave_record()

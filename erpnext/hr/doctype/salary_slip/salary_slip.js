@@ -3,6 +3,16 @@
 
 cur_frm.add_fetch('employee', 'company', 'company');
 
+frappe.ui.form.on("Salary Slip", {
+	company: function(frm) {
+		var company = locals[':Company'][frm.doc.company];
+		if(!frm.doc.letter_head && company.default_letter_head) {
+			frm.set_value('letter_head', company.default_letter_head);
+		}
+	}
+})
+
+
 // On load
 // -------------------------------------------------------------------
 cur_frm.cscript.onload = function(doc,dt,dn){
@@ -75,8 +85,8 @@ var calculate_earning_total = function(doc, dt, dn, reset_amount) {
 	var total_earn = 0;
 	for(var i = 0; i < tbl.length; i++){
 		if(cint(tbl[i].e_depends_on_lwp) == 1) {
-			tbl[i].e_modified_amount =  Math.round(tbl[i].e_amount)*(flt(doc.payment_days) / 
-				cint(doc.total_days_in_month)*100)/100;			
+			tbl[i].e_modified_amount =  Math.round(tbl[i].e_amount)*(flt(doc.payment_days) /
+				cint(doc.total_days_in_month)*100)/100;
 			refresh_field('e_modified_amount', tbl[i].name, 'earnings');
 		} else if(reset_amount) {
 			tbl[i].e_modified_amount = tbl[i].e_amount;
@@ -105,7 +115,7 @@ var calculate_ded_total = function(doc, dt, dn, reset_amount) {
 		total_ded += flt(tbl[i].d_modified_amount);
 	}
 	doc.total_deduction = total_ded;
-	refresh_field('total_deduction');	
+	refresh_field('total_deduction');
 }
 
 // Calculate net payable amount
@@ -136,5 +146,5 @@ cur_frm.cscript.validate = function(doc, dt, dn) {
 cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
 	return{
 		query: "erpnext.controllers.queries.employee_query"
-	}		
+	}
 }

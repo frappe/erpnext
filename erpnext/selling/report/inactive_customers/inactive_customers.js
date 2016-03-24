@@ -1,7 +1,7 @@
-// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-// License: GNU General Public License v3. See license.txt
+// Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
+// For license information, please see license.txt
 
-frappe.query_reports["Customers Not Buying Since Long Time"] = {
+frappe.query_reports["Inactive Customers"] = {
 	"filters": [
 		{
 			"fieldname":"days_since_last_order",

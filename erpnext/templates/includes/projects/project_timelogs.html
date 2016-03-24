@@ -1,0 +1,22 @@
+{%- from "templates/includes/projects/macros.html" import back_link -%}
+
+{% for timelog in doc.timelogs %}
+<div class='timelog'>
+  <div class='row project-item'>
+    <div class='col-xs-9'>
+      <a class="no-decoration" href="/timelog_info?timelog={{ timelog.name}}">
+        <span class="indicator {{ "green" if timelog.status=="Draft" else "blue" if timelog.status=="Submitted" else 			"darkgrey"}}">
+
+			{{ timelog.title }}: From {{ frappe.format_date(timelog.from_time) }} to {{ 				frappe.format_date(timelog.to_time) }}
+
+</span>
+      </a>
+    </div>
+    <div class='col-xs-3'>
+	    <div class='pull-right'>
+	       <span class="avatar avatar-small" title="{{ timelog.modified_by }}"> <img src="{{ timelog.user_image }}"></span>
+	    </div>
+	</div>
+  </div>
+</div>
+{% endfor %}
