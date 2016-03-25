@@ -229,14 +229,13 @@ def get_employees_who_are_born_today():
 		and status = 'Active'""", {"date": today()}, as_dict=True)
 
 def get_holiday_list_for_employee(employee, raise_exception=True):
-	employee = frappe.db.get_value("Employee", employee, ["holiday_list", "company"], as_dict=True)
-	holiday_list = employee.holiday_list
+	holiday_list, company = frappe.db.get_value("Employee", employee, ["holiday_list", "company"])
 
 	if not holiday_list:
-		holiday_list = frappe.db.get_value("Company", employee.company, "default_holiday_list")
+		holiday_list = frappe.db.get_value("Company", company, "default_holiday_list")
 
 	if not holiday_list and raise_exception:
-		frappe.throw(_("Please set a Holiday List for either the Employee or the Company"))
+		frappe.throw(_('Please set a default Holiday List for Employee {0} or Company {0}').format(employee, company))
 
 	return holiday_list
 
