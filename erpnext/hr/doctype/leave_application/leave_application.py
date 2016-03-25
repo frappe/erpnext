@@ -335,16 +335,25 @@ def get_leave_allocation_records(date, employee=None):
 
 
 def get_holidays(employee, from_date, to_date):
-	tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1
-		where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name
-		and h1.holiday_date between %s and %s""", (employee, from_date, to_date))[0][0]
-
-	if not tot_hol:
-		tot_hol = frappe.db.sql("""select count(distinct holiday_date) from `tabHoliday` h1, `tabHoliday List` h2
+	'''get holidays between two dates for the given employee'''
+	def get_from_holiday_list(from_date, to_date, holiday_list):
+		return frappe.db.sql("""select count(distinct holiday_date) from `tabHoliday` h1, `tabHoliday List` h2
 			where h1.parent = h2.name and h1.holiday_date between %s and %s
-			and h2.is_default = 1""", (from_date, to_date))[0][0]
+			and h2.name = %s""", (from_date, to_date, default_holiday_list))[0][0]
 
-	return tot_hol
+	holiday_list, company = frappe.db.get_value('Employee', employee, ['holiday_list', 'company'])
+	if holiday_list:
+		holidays = get_from_holiday_list(from_date, to_date, holiday_list)
+
+	else:
+		default_holiday_list = frappe.db.get_value('Company', company, 'default_holiday_list')
+
+		if default_holiday_list:
+			holidays = get_from_holiday_list(from_date, to_date, default_holiday_list)
+		else:
+			frappe.throw(_('Please set a default holiday list for Employee {0} or Company {0}').format(employee, company))
+
+	return holidays
 
 def is_lwp(leave_type):
 	lwp = frappe.db.sql("select is_lwp from `tabLeave Type` where name = %s", leave_type)
