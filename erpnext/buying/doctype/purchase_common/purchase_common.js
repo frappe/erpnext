@@ -178,6 +178,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			&& !this.frm.doc.shipping_address) {
 				erpnext.utils.get_shipping_address(this.frm)
 		}
+
+		var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
+		me.frm.set_value("letter_head", company_doc.default_letter_head);
 	},
 	
 	shipping_address: function(){
