@@ -338,11 +338,9 @@ def get_holidays(employee, from_date, to_date):
 	tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1
 		where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name
 		and h1.holiday_date between %s and %s""", (employee, from_date, to_date))[0][0]
-
 	if not tot_hol:
 		tot_hol = frappe.db.sql("""select count(distinct holiday_date) from `tabHoliday` h1, `tabHoliday List` h2
-			where h1.parent = h2.name and h1.holiday_date between %s and %s
-			and h2.is_default = 1""", (from_date, to_date))[0][0]
+			where h1.parent = h2.name and h1.holiday_date between %s and %s""", (from_date, to_date))[0][0]
 
 	return tot_hol
 
