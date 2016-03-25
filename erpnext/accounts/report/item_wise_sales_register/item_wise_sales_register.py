@@ -25,7 +25,7 @@ def execute(filters=None):
 			from `tabDelivery Note Item` where docstatus=1 and so_detail=%s""", d.so_detail))
 
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.customer, d.customer_name,
-			d.customer_group, d.debit_to, d.territory, d.project_name, d.company, d.sales_order,
+			d.customer_group, d.debit_to, d.territory, d.project, d.company, d.sales_order,
 			delivery_note, d.income_account, d.qty, d.base_net_rate, d.base_net_amount]
 
 		for tax in tax_accounts:
@@ -66,7 +66,7 @@ def get_conditions(filters):
 
 def get_items(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project_name,
+	return frappe.db.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project,
 		si.customer, si.remarks, si.territory, si.company, si.base_net_total, si_item.item_code, si_item.item_name,
 		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account,
 		si_item.qty, si_item.base_net_rate, si_item.base_net_amount, si.customer_name,
@@ -86,7 +86,7 @@ def get_tax_accounts(item_list, columns):
 	tax_details = frappe.db.sql("""select parent, account_head, item_wise_tax_detail,
 		charge_type, base_tax_amount_after_discount_amount
 		from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice'
-		and docstatus = 1 and ifnull(account_head, '') != ''
+		and docstatus = 1 and (account_head is not null and account_head != '')
 		and parent in (%s)""" % ', '.join(['%s']*len(invoice_wise_items)),
 		tuple(invoice_wise_items.keys()))
 

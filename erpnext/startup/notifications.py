@@ -2,19 +2,22 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
 
 def get_notification_config():
 	return { "for_doctype":
 		{
 			"Issue": {"status": "Open"},
 			"Warranty Claim": {"status": "Open"},
-			"Task": {"status": "Open"},
+			"Task": {"status": "Overdue"},
+			"Project": {"status": "Open"},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
 			"Opportunity": {"status": "Open"},
 			"Quotation": {"docstatus": 0},
-			"Sales Order": { "per_billed": ("<", 100), "status": ("!=", "Stopped"), "docstatus": ("<", 2) },
+			"Sales Order": {
+				"status": ("not in", ("Completed", "Closed")),
+				"docstatus": ("<", 2)
+			},
 			"Journal Entry": {"docstatus": 0},
 			"Sales Invoice": { "outstanding_amount": (">", 0), "docstatus": ("<", 2) },
 			"Purchase Invoice": {"docstatus": 0},
@@ -24,12 +27,19 @@ def get_notification_config():
 			"Purchase Receipt": {"docstatus": 0},
 			"Delivery Note": {"docstatus": 0},
 			"Stock Entry": {"docstatus": 0},
-			"Material Request": {"docstatus": 0},
-			"Purchase Order": { "per_billed": ("<", 100), "status": ("!=", "Stopped"), "docstatus": ("<", 2) },
+			"Material Request": {
+				"docstatus": ("<", 2),
+				"status": ("not in", ("Stopped",)),
+				"per_ordered": ("<", 100)
+			},
+			"Purchase Order": {
+				"status": ("not in", ("Completed", "Closed")),
+				"docstatus": ("<", 2)
+			},
 			"Production Order": { "status": "In Process" },
 			"BOM": {"docstatus": 0},
 			"Timesheet": {"docstatus": 0},
 			"Time Log": {"status": "Draft"},
-			"Time Log Batch": {"status": "Draft"},
+			"Time Log Batch": {"status": "Draft"}
 		}
 	}

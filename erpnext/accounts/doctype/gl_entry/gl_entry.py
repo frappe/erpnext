@@ -3,20 +3,27 @@
 
 from __future__ import unicode_literals
 import frappe
-
-from frappe.utils import flt, fmt_money, getdate, formatdate, cstr
 from frappe import _
-
+from frappe.utils import flt, fmt_money, getdate, formatdate
 from frappe.model.document import Document
+from erpnext.accounts.party import validate_party_gle_currency, validate_party_frozen_disabled
+from erpnext.accounts.utils import get_account_currency
+from erpnext.setup.doctype.company.company import get_company_currency
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext.exceptions import InvalidAccountCurrency
+
+exclude_from_linked_with = True
 
 class GLEntry(Document):
 	def validate(self):
 		self.flags.ignore_submit_comment = True
 		self.check_mandatory()
 		self.pl_must_have_cost_center()
-		self.validate_posting_date()
 		self.check_pl_account()
 		self.validate_cost_center()
+		self.validate_party()
+		self.validate_currency()
+		self.validate_and_set_fiscal_year()
 
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes'):
 		self.validate_account_details(adv_adj)
@@ -31,7 +38,7 @@ class GLEntry(Document):
 					self.against_voucher)
 
 	def check_mandatory(self):
-		mandatory = ['account','remarks','voucher_type','voucher_no','fiscal_year','company']
+		mandatory = ['account','remarks','voucher_type','voucher_no','company']
 		for k in mandatory:
 			if not self.get(k):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
@@ -50,10 +57,6 @@ class GLEntry(Document):
 				frappe.throw(_("Cost Center is required for 'Profit and Loss' account {0}").format(self.account))
 		elif self.cost_center:
 			self.cost_center = None
-
-	def validate_posting_date(self):
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year, _("Posting Date"), self)
 
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \
@@ -89,11 +92,34 @@ class GLEntry(Document):
 		if self.cost_center and _get_cost_center_company() != self.company:
 			frappe.throw(_("Cost Center {0} does not belong to Company {1}").format(self.cost_center, self.company))
 
+	def validate_party(self):
+		validate_party_frozen_disabled(self.party_type, self.party)
+
+	def validate_currency(self):
+		company_currency = get_company_currency(self.company)
+		account_currency = get_account_currency(self.account)
+
+		if not self.account_currency:
+			self.account_currency = company_currency
+
+		if account_currency != self.account_currency:
+			frappe.throw(_("Accounting Entry for {0} can only be made in currency: {1}")
+				.format(self.account, (account_currency or company_currency)), InvalidAccountCurrency)
+
+		if self.party_type and self.party:
+			validate_party_gle_currency(self.party_type, self.party, self.company, self.account_currency)
+
+
+	def validate_and_set_fiscal_year(self):
+		if not self.fiscal_year:
+			self.fiscal_year = get_fiscal_year(self.posting_date, company=self.company)[0]
+
+
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
 		balance_must_be = frappe.db.get_value("Account", account, "balance_must_be")
 		if balance_must_be:
-			balance = frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+			balance = frappe.db.sql("""select sum(debit) - sum(credit)
 				from `tabGL Entry` where account = %s""", account)[0][0]
 
 			if (balance_must_be=="Debit" and flt(balance) < 0) or \
@@ -114,22 +140,28 @@ def check_freezing_date(posting_date, adv_adj=False):
 				frappe.throw(_("You are not authorized to add or update entries before {0}").format(formatdate(acc_frozen_upto)))
 
 def update_outstanding_amt(account, party_type, party, against_voucher_type, against_voucher, on_cancel=False):
+	if party_type and party:
+		party_condition = " and party_type='{0}' and party='{1}'"\
+			.format(frappe.db.escape(party_type), frappe.db.escape(party))
+	else:
+		party_condition = ""
+
 	# get final outstanding amt
-	bal = flt(frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+	bal = flt(frappe.db.sql("""
+		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
 		where against_voucher_type=%s and against_voucher=%s
-		and account = %s and ifnull(party_type, '')=%s and ifnull(party, '')=%s""",
-		(against_voucher_type, against_voucher, account, party_type, party))[0][0] or 0.0)
+		and account = %s {0}""".format(party_condition),
+		(against_voucher_type, against_voucher, account))[0][0] or 0.0)
 
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal
 	elif against_voucher_type == "Journal Entry":
 		against_voucher_amount = flt(frappe.db.sql("""
-			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+			select sum(debit_in_account_currency) - sum(credit_in_account_currency)
 			from `tabGL Entry` where voucher_type = 'Journal Entry' and voucher_no = %s
-			and account = %s and ifnull(party_type, '')=%s and ifnull(party, '')=%s
-			and ifnull(against_voucher, '') = ''""",
-			(against_voucher, account, cstr(party_type), cstr(party)))[0][0])
+			and account = %s and (against_voucher is null or against_voucher='') {0}"""
+			.format(party_condition), (against_voucher, account))[0][0])
 
 		if not against_voucher_amount:
 			frappe.throw(_("Against Journal Entry {0} is already adjusted against some other voucher")
@@ -139,9 +171,9 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		if against_voucher_amount < 0:
 			bal = -bal
 
-	# Validation : Outstanding can not be negative
-	if bal < 0 and not on_cancel:
-		frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
+		# Validation : Outstanding can not be negative for JV
+		if bal < 0 and not on_cancel:
+			frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
 
 	# Update outstanding amt on against voucher
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:

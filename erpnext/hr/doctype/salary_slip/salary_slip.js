@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee', 'company', 'company');
+cur_frm.add_fetch('company', 'default_letter_head', 'letter_head');
 
 // On load
 // -------------------------------------------------------------------
@@ -32,7 +33,7 @@ cur_frm.cscript.month = cur_frm.cscript.employee = cur_frm.cscript.fiscal_year;
 
 cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 	if (doc.employee && doc.fiscal_year && doc.month) {
-		return $c_obj(doc, 'get_leave_details',doc.leave_without_pay,function(r, rt) {
+		return $c_obj(doc, 'get_leave_details', {"lwp": doc.leave_without_pay}, function(r, rt) {
 			var doc = locals[dt][dn];
 			cur_frm.refresh();
 			calculate_all(doc, dt, dn);

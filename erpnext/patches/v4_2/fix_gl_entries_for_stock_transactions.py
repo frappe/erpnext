@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import flt
 
 def execute():
-	from erpnext.utilities.repost_stock import repost
+	from erpnext.stock.stock_balance import repost
 	repost(allow_zero_rate=True, only_actual=True)
 	
 	frappe.reload_doctype("Account")

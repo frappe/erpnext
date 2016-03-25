@@ -9,7 +9,7 @@ import frappe.defaults
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import is_cart_enabled
 
 def show_cart_count():
-	if (frappe.db.get_default("shopping_cart_enabled") and
+	if (is_cart_enabled() and
 		frappe.db.get_value("User", frappe.session.user, "user_type") == "Website User"):
 		return True
 
@@ -28,17 +28,7 @@ def update_website_context(context):
 	cart_enabled = is_cart_enabled()
 	context["shopping_cart_enabled"] = cart_enabled
 
-	if cart_enabled:
-		post_login = [
-			{"label": _("Cart"), "url": "cart", "class": "cart-count"},
-			{"class": "divider"}
-		]
-		context["post_login"] = post_login + context.get("post_login", [])
-
 def update_my_account_context(context):
-	if is_cart_enabled():
-		context["my_account_list"].append({"label": _("Cart"), "url": "cart"})
-
 	context["my_account_list"].extend([
 		{"label": _("Orders"), "url": "orders"},
 		{"label": _("Invoices"), "url": "invoices"},

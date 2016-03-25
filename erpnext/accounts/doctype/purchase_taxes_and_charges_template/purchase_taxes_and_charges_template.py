@@ -4,10 +4,9 @@
 
 from __future__ import unicode_literals
 from frappe.model.document import Document
-from erpnext.controllers.accounts_controller import validate_taxes_and_charges, validate_inclusive_tax
+from erpnext.accounts.doctype.sales_taxes_and_charges_template.sales_taxes_and_charges_template \
+	import valdiate_taxes_and_charges_template
 
 class PurchaseTaxesandChargesTemplate(Document):
 	def validate(self):
-		for tax in self.get("taxes"):
-			validate_taxes_and_charges(tax)
-			validate_inclusive_tax(tax, self)
+		valdiate_taxes_and_charges_template(self)

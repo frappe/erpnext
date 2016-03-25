@@ -1,6 +1,6 @@
 {% var visible_columns = row.get_visible_columns(["item_code",
 	"item_name", "amount", "stock_uom", "uom", "qty",
-	"s_warehouse", "t_warehouse", "incoming_rate"]);
+	"s_warehouse", "t_warehouse", "valuation_rate"]);
 %}
 
 {% if(!doc) { %}
@@ -43,7 +43,7 @@
 		<div class="col-sm-2 col-xs-2 text-right">
 			{%= doc.get_formatted("amount") %}
 			<div class="small text-muted">
-				{%= doc.get_formatted("incoming_rate") %}
+				{%= doc.get_formatted("valuation_rate") %}
 			</div>
 		</div>
 	</div>

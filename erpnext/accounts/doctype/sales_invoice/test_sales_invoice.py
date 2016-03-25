@@ -4,11 +4,12 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest, copy
-import time
-from erpnext.accounts.utils import get_stock_and_account_difference
+from frappe.utils import nowdate, add_days, flt
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
-from erpnext.projects.doctype.time_log_batch.test_time_log_batch import *
-
+from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
+from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
+from frappe.model.naming import make_autoname
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -393,7 +394,8 @@ class TestSalesInvoice(unittest.TestCase):
 			import test_records as jv_test_records
 
 		jv = frappe.get_doc(frappe.copy_doc(jv_test_records[0]))
-		jv.get("accounts")[0].against_invoice = w.name
+		jv.get("accounts")[0].reference_type = w.doctype
+		jv.get("accounts")[0].reference_name = w.name
 		jv.insert()
 		jv.submit()
 
@@ -402,33 +404,7 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.cancel()
 		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 561.8)
 
-	def test_time_log_batch(self):
-		delete_time_log_and_batch()
-		time_log = create_time_log()
-		tlb = create_time_log_batch(time_log)
-
-		tlb = frappe.get_doc("Time Log Batch", tlb.name)
-		tlb.submit()
-
-		si = frappe.get_doc(frappe.copy_doc(test_records[0]))
-		si.get("items")[0].time_log_batch = tlb.name
-		si.insert()
-		si.submit()
-
-		self.assertEquals(frappe.db.get_value("Time Log Batch", tlb.name, "status"), "Billed")
-
-		self.assertEquals(frappe.db.get_value("Time Log", time_log, "status"), "Billed")
-
-		si.cancel()
-
-		self.assertEquals(frappe.db.get_value("Time Log Batch", tlb.name, "status"), "Submitted")
-
-		self.assertEquals(frappe.db.get_value("Time Log", time_log, "status"), "Batched for Billing")
-
-		frappe.delete_doc("Sales Invoice", si.name)
-		delete_time_log_and_batch()
-
-	def test_sales_invoice_gl_entry_without_aii(self):
+	def test_sales_invoice_gl_entry_without_perpetual_inventory(self):
 		set_perpetual_inventory(0)
 		si = frappe.copy_doc(test_records[1])
 		si.insert()
@@ -460,7 +436,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertFalse(gle)
 
-	def test_pos_gl_entry_with_aii(self):
+	def test_pos_gl_entry_with_perpetual_inventory(self):
 		set_perpetual_inventory()
 		self.make_pos_profile()
 
@@ -469,8 +445,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pos = copy.deepcopy(test_records[1])
 		pos["is_pos"] = 1
 		pos["update_stock"] = 1
-		# pos["posting_time"] = "12:05"
-		pos["cash_bank_account"] = "_Test Account Bank Account - _TC"
+		pos["cash_bank_account"] = "_Test Bank - _TC"
 		pos["paid_amount"] = 600.0
 
 		si = frappe.copy_doc(pos)
@@ -501,7 +476,7 @@ class TestSalesInvoice(unittest.TestCase):
 			[stock_in_hand, 0.0, abs(sle.stock_value_difference)],
 			[pos["items"][0]["expense_account"], abs(sle.stock_value_difference), 0.0],
 			[si.debit_to, 0.0, 600.0],
-			["_Test Account Bank Account - _TC", 600.0, 0.0]
+			["_Test Bank - _TC", 600.0, 0.0]
 		])
 
 		for i, gle in enumerate(sorted(gl_entries, key=lambda gle: gle.account)):
@@ -521,7 +496,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def make_pos_profile(self):
 		pos_profile = frappe.get_doc({
-			"cash_bank_account": "_Test Account Bank Account - _TC",
+			"cash_bank_account": "_Test Bank - _TC",
 			"company": "_Test Company",
 			"cost_center": "_Test Cost Center - _TC",
 			"currency": "INR",
@@ -540,7 +515,7 @@ class TestSalesInvoice(unittest.TestCase):
 		if not frappe.db.exists("POS Profile", "_Test POS Profile"):
 			pos_profile.insert()
 
-	def test_si_gl_entry_with_aii_and_update_stock_with_warehouse_but_no_account(self):
+	def test_si_gl_entry_with_perpetual_inventory_and_update_stock_with_warehouse_but_no_account(self):
 		set_perpetual_inventory()
 		frappe.delete_doc("Account", "_Test Warehouse No Account - _TC")
 
@@ -594,7 +569,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(gle)
 		set_perpetual_inventory(0)
 
-	def test_sales_invoice_gl_entry_with_aii_no_item_code(self):
+	def test_sales_invoice_gl_entry_with_perpetual_inventory_no_item_code(self):
 		set_perpetual_inventory()
 
 		si = frappe.get_doc(test_records[1])
@@ -620,7 +595,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		set_perpetual_inventory(0)
 
-	def test_sales_invoice_gl_entry_with_aii_non_stock_item(self):
+	def test_sales_invoice_gl_entry_with_perpetual_inventory_non_stock_item(self):
 		set_perpetual_inventory()
 		si = frappe.get_doc(test_records[1])
 		si.get("items")[0].item_code = "_Test Non Stock Item"
@@ -684,17 +659,17 @@ class TestSalesInvoice(unittest.TestCase):
 		si.load_from_db()
 
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
-			where against_invoice=%s""", si.name))
+			where reference_name=%s""", si.name))
 
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
-			where against_invoice=%s and credit=300""", si.name))
+			where reference_name=%s and credit_in_account_currency=300""", si.name))
 
 		self.assertEqual(si.outstanding_amount, 261.8)
 
 		si.cancel()
 
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
-			where against_invoice=%s""", si.name))
+			where reference_name=%s""", si.name))
 
 	def test_recurring_invoice(self):
 		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
@@ -715,7 +690,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 
-		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Delivered")
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"), si.name)
@@ -729,53 +703,235 @@ class TestSalesInvoice(unittest.TestCase):
 
 		serial_nos = get_serial_nos(si.get("items")[0].serial_no)
 
-		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Available")
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"))
 
 	def test_serialize_status(self):
-		from erpnext.stock.doctype.serial_no.serial_no import SerialNoStatusError, get_serial_nos, SerialNoDuplicateError
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
-
-		se = make_serialized_item()
-		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
-
-		sr = frappe.get_doc("Serial No", serial_nos[0])
-		sr.status = "Not Available"
-		sr.save()
+		serial_no = frappe.get_doc({
+			"doctype": "Serial No",
+			"item_code": "_Test Serialized Item With Series",
+			"serial_no": make_autoname("SR", "Serial No")
+		})
+		serial_no.save()
 
 		si = frappe.copy_doc(test_records[0])
 		si.update_stock = 1
 		si.get("items")[0].item_code = "_Test Serialized Item With Series"
 		si.get("items")[0].qty = 1
-		si.get("items")[0].serial_no = serial_nos[0]
+		si.get("items")[0].serial_no = serial_no.name
 		si.insert()
 
-		self.assertRaises(SerialNoStatusError, si.submit)
+		self.assertRaises(SerialNoWarehouseError, si.submit)
 
-		# hack! because stock ledger entires are already inserted and are not rolled back!
-		self.assertRaises(SerialNoDuplicateError, si.cancel)
+	def test_invoice_due_date_against_customers_credit_days(self):
+		# set customer's credit days
+		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Fixed Days")
+		frappe.db.set_value("Customer", "_Test Customer", "credit_days", 10)
+
+		si = create_sales_invoice()
+		self.assertEqual(si.due_date, add_days(nowdate(), 10))
+
+		# set customer's credit days is last day of the next month
+		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Last Day of the Next Month")
+
+		si1 = create_sales_invoice(posting_date="2015-07-05")
+		self.assertEqual(si1.due_date, "2015-08-31")
+
+	def test_return_sales_invoice(self):
+		set_perpetual_inventory()
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+
+		actual_qty_0 = get_qty_after_transaction()
+
+		si = create_sales_invoice(qty=5, rate=500, update_stock=1)
+
+		actual_qty_1 = get_qty_after_transaction()
+		self.assertEquals(actual_qty_0 - 5, actual_qty_1)
+
+		# outgoing_rate
+		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Sales Invoice",
+			"voucher_no": si.name}, "stock_value_difference") / 5
+
+		# return entry
+		si1 = create_sales_invoice(is_return=1, return_against=si.name, qty=-2, rate=500, update_stock=1)
+
+		actual_qty_2 = get_qty_after_transaction()
+
+		self.assertEquals(actual_qty_1 + 2, actual_qty_2)
+
+		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
+			{"voucher_type": "Sales Invoice", "voucher_no": si1.name},
+			["incoming_rate", "stock_value_difference"])
+
+		self.assertEquals(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
+
+
+		# Check gl entry
+		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice",
+			"voucher_no": si1.name, "account": "_Test Warehouse - _TC"}, "debit")
+
+		self.assertEquals(gle_warehouse_amount, stock_value_difference)
+
+		party_credited = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice",
+			"voucher_no": si1.name, "account": "Debtors - _TC", "party": "_Test Customer"}, "credit")
+
+		self.assertEqual(party_credited, 1000)
+
+		# Check outstanding amount
+		self.assertFalse(si1.outstanding_amount)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 1500)
+
+		set_perpetual_inventory(0)
+
+	def test_discount_on_net_total(self):
+		si = frappe.copy_doc(test_records[2])
+		si.apply_discount_on = "Net Total"
+		si.discount_amount = 625
+		si.insert()
+
+		expected_values = {
+			"keys": ["price_list_rate", "discount_percentage", "rate", "amount",
+				"base_price_list_rate", "base_rate", "base_amount",
+				"net_rate", "base_net_rate", "net_amount", "base_net_amount"],
+			"_Test Item Home Desktop 100": [50, 0, 50, 500, 50, 50, 500, 25, 25, 250, 250],
+			"_Test Item Home Desktop 200": [150, 0, 150, 750, 150, 150, 750, 75, 75, 375, 375],
+		}
+
+		# check if children are saved
+		self.assertEquals(len(si.get("items")),
+			len(expected_values)-1)
+
+		# check if item values are calculated
+		for d in si.get("items"):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.get(k), expected_values[d.item_code][i])
+
+		# check net total
+		self.assertEquals(si.base_total, 1250)
+		self.assertEquals(si.total, 1250)
+		self.assertEquals(si.base_net_total, 625)
+		self.assertEquals(si.net_total, 625)
+
+		# check tax calculation
+		expected_values = {
+			"keys": ["tax_amount", "tax_amount_after_discount_amount",
+				"base_tax_amount_after_discount_amount"],
+			"_Test Account Shipping Charges - _TC": [100, 100, 100],
+			"_Test Account Customs Duty - _TC": [62.5, 62.5, 62.5],
+			"_Test Account Excise Duty - _TC": [70, 70, 70],
+			"_Test Account Education Cess - _TC": [1.4, 1.4, 1.4],
+			"_Test Account S&H Education Cess - _TC": [.7, 0.7, 0.7],
+			"_Test Account CST - _TC": [17.2, 17.2, 17.2],
+			"_Test Account VAT - _TC": [78.13, 78.13, 78.13],
+			"_Test Account Discount - _TC": [-95.49, -95.49, -95.49]
+		}
+
+		for d in si.get("taxes"):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.get(k), expected_values[d.account_head][i])
+
+
+		self.assertEquals(si.total_taxes_and_charges, 234.44)
+		self.assertEquals(si.base_grand_total, 859.44)
+		self.assertEquals(si.grand_total, 859.44)
+
+	def test_multi_currency_gle(self):
+		set_perpetual_inventory(0)
+		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+			currency="USD", conversion_rate=50)
+
+		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		expected_values = {
+			"_Test Receivable USD - _TC": {
+				"account_currency": "USD",
+				"debit": 5000,
+				"debit_in_account_currency": 100,
+				"credit": 0,
+				"credit_in_account_currency": 0
+			},
+			"Sales - _TC": {
+				"account_currency": "INR",
+				"debit": 0,
+				"debit_in_account_currency": 0,
+				"credit": 5000,
+				"credit_in_account_currency": 5000
+			}
+		}
+
+		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
+			for i, gle in enumerate(gl_entries):
+				self.assertEquals(expected_values[gle.account][field], gle[field])
+
+		# cancel
+		si.cancel()
+
+		gle = frappe.db.sql("""select name from `tabGL Entry`
+			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
+
+		self.assertFalse(gle)
+
+	def test_invalid_currency(self):
+		# Customer currency = USD
+
+		# Transaction currency cannot be INR
+		si1 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+			do_not_save=True)
+
+		self.assertRaises(InvalidCurrency, si1.save)
+
+		# Transaction currency cannot be EUR
+		si2 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+			currency="EUR", conversion_rate=80, do_not_save=True)
+
+		self.assertRaises(InvalidCurrency, si2.save)
+
+		# Transaction currency only allowed in USD
+		si3 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+			currency="USD", conversion_rate=50)
+
+		# Party Account currency must be in USD, as there is existing GLE with USD
+		si4 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TC",
+			currency="USD", conversion_rate=50, do_not_submit=True)
+
+		self.assertRaises(InvalidAccountCurrency, si4.submit)
+
+		# Party Account currency must be in USD, force customer currency as there is no GLE
+
+		si3.cancel()
+		si5 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TC",
+			currency="USD", conversion_rate=50, do_not_submit=True)
+
+		self.assertRaises(InvalidAccountCurrency, si5.submit)
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
 	if args.posting_date:
-		si.posting_date = args.posting_date
-	if args.posting_time:
-		si.posting_time = args.posting_time
+		si.posting_date = args.posting_date or nowdate()
 
 	si.company = args.company or "_Test Company"
 	si.customer = args.customer or "_Test Customer"
 	si.debit_to = args.debit_to or "Debtors - _TC"
 	si.update_stock = args.update_stock
 	si.is_pos = args.is_pos
+	si.is_return = args.is_return
+	si.return_against = args.return_against
+	si.currency=args.currency or "INR"
+	si.conversion_rate = args.conversion_rate or 1
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
 		"rate": args.rate or 100,
+		"income_account": "Sales - _TC",
 		"expense_account": "Cost of Goods Sold - _TC",
 		"cost_center": "_Test Cost Center - _TC",
 		"serial_no": args.serial_no

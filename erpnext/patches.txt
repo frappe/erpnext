@@ -20,10 +20,14 @@ execute:frappe.reload_doc('stock', 'doctype', 'purchase_receipt') # 2014-01-29
 execute:frappe.reload_doc('accounts', 'doctype', 'pos_setting') # 2014-01-29
 execute:frappe.reload_doc('selling', 'doctype', 'customer') # 2014-01-29
 execute:frappe.reload_doc('buying', 'doctype', 'supplier') # 2014-01-29
+execute:frappe.reload_doctype('Item')
 erpnext.patches.v4_0.map_charge_to_taxes_and_charges
 execute:frappe.reload_doc('support', 'doctype', 'newsletter') # 2014-01-31
 execute:frappe.reload_doc('hr', 'doctype', 'employee') # 2014-02-03
 execute:frappe.db.sql("update tabPage set module='Core' where name='Setup'")
+
+# inserted this patch here since Item types are being changed
+erpnext.patches.v5_2.change_item_selects_to_checks
 erpnext.patches.v4_0.fields_to_be_renamed
 erpnext.patches.v4_0.rename_sitemap_to_route
 erpnext.patches.v4_0.fix_contact_address
@@ -44,11 +48,13 @@ erpnext.patches.v4_0.update_account_root_type
 execute:frappe.delete_doc("Report", "Purchase In Transit")
 erpnext.patches.v4_0.new_address_template
 execute:frappe.delete_doc("DocType", "SMS Control")
+execute:frappe.delete_doc_if_exists("DocType", "Bulk SMS") #2015-08-18
 erpnext.patches.v4_0.fix_case_of_hr_module_def
 erpnext.patches.v4_0.fix_address_template
 
 # WATCHOUT: This patch reload's documents
 erpnext.patches.v4_0.reset_permissions_for_masters
+erpnext.patches.v6_20x.rename_project_name_to_project #2016-03-14
 
 erpnext.patches.v4_0.update_tax_amount_after_discount
 execute:frappe.permissions.reset_perms("GL Entry") #2014-06-09
@@ -96,10 +102,10 @@ execute:frappe.db.sql("update `tabMaterial Request` set material_request_type = 
 execute:frappe.reload_doc('stock', 'doctype', 'item')
 execute:frappe.db.sql("update `tabItem` i set apply_warehouse_wise_reorder_level=1, re_order_level=0, re_order_qty=0 where exists(select name from `tabItem Reorder` where parent=i.name)")
 erpnext.patches.v5_0.set_default_company_in_bom
-erpnext.patches.v5_0.capacity_planning
 execute:frappe.reload_doc('crm', 'doctype', 'lead')
 execute:frappe.reload_doc('crm', 'doctype', 'opportunity')
 erpnext.patches.v5_0.rename_taxes_and_charges_master
+erpnext.patches.v5_1.sales_bom_rename
 erpnext.patches.v5_0.rename_table_fieldnames
 execute:frappe.db.sql("update `tabJournal Entry` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
 erpnext.patches.v5_0.is_group
@@ -133,7 +139,6 @@ erpnext.patches.v5_0.update_account_types
 erpnext.patches.v5_0.update_sms_sender
 erpnext.patches.v5_0.set_appraisal_remarks
 erpnext.patches.v5_0.update_time_log_title
-erpnext.patches.v4_2.repost_reserved_qty
 erpnext.patches.v4_2.repost_sle_for_si_with_no_warehouse
 erpnext.patches.v5_0.newsletter
 execute:frappe.delete_doc("DocType", "Chart of Accounts")
@@ -161,6 +166,7 @@ erpnext.patches.v5_0.set_footer_address
 execute:frappe.db.set_value("Backup Manager", None, "send_backups_to_dropbox", 1 if frappe.db.get_value("Backup Manager", None, "upload_backups_to_dropbox") in ("Daily", "Weekly") else 0)
 execute:frappe.db.sql_list("delete from `tabDocPerm` where parent='Issue' and modified_by='Administrator' and role='Guest'")
 erpnext.patches.v5_0.update_item_and_description_again
+erpnext.patches.v6_0.multi_currency
 erpnext.patches.v5_0.repost_gle_for_jv_with_multiple_party
 erpnext.patches.v5_0.portal_fixes
 erpnext.patches.v5_0.reset_values_in_tools
@@ -168,6 +174,87 @@ execute:frappe.delete_doc("Page", "users")
 erpnext.patches.v5_0.update_material_transferred_for_manufacturing_again
 erpnext.patches.v5_0.index_on_account_and_gl_entry
 execute:frappe.db.sql("""delete from `tabProject Task`""")
-erpnext.patches.v5_0.item_variants
 erpnext.patches.v5_0.update_item_desc_in_invoice
 erpnext.patches.v5_1.fix_against_account
+erpnext.patches.v5_1.fix_credit_days_based_on
+execute:frappe.rename_doc("DocType", "Salary Manager", "Process Payroll", force=True)
+erpnext.patches.v5_1.rename_roles
+erpnext.patches.v5_1.default_bom
+execute:frappe.delete_doc("DocType", "Party Type")
+execute:frappe.delete_doc("Module Def", "Contacts")
+erpnext.patches.v5_4.fix_reserved_qty_and_sle_for_packed_items # 30-07-2015
+execute:frappe.reload_doctype("Leave Type")
+execute:frappe.db.sql("update `tabLeave Type` set include_holiday=0")
+erpnext.patches.v5_4.set_root_and_report_type
+erpnext.patches.v5_4.notify_system_managers_regarding_wrong_tax_calculation
+erpnext.patches.v5_4.fix_invoice_outstanding
+execute:frappe.db.sql("update `tabStock Ledger Entry` set stock_queue = '[]' where voucher_type = 'Stock Reconciliation' and ifnull(qty_after_transaction, 0) = 0")
+erpnext.patches.v5_4.fix_missing_item_images
+erpnext.patches.v5_4.stock_entry_additional_costs
+erpnext.patches.v5_4.cleanup_journal_entry #2015-08-14
+execute:frappe.db.sql("update `tabProduction Order` pro set description = (select description from tabItem where name=pro.production_item) where ifnull(description, '') = ''")
+erpnext.patches.v5_7.item_template_attributes
+execute:frappe.delete_doc_if_exists("DocType", "Manage Variants")
+execute:frappe.delete_doc_if_exists("DocType", "Manage Variants Item")
+erpnext.patches.v4_2.repost_reserved_qty #2015-08-20
+erpnext.patches.v5_4.update_purchase_cost_against_project
+erpnext.patches.v5_8.update_order_reference_in_return_entries
+erpnext.patches.v5_8.add_credit_note_print_heading
+execute:frappe.delete_doc_if_exists("Print Format", "Credit Note - Negative Invoice")
+
+# V6.0
+erpnext.patches.v6_0.set_default_title # 2015-09-03
+erpnext.patches.v6_0.default_activity_rate
+execute:frappe.db.set_value("Stock Settings", None, "automatically_set_serial_nos_based_on_fifo", 1)
+execute:frappe.db.sql("""update `tabProject` set percent_complete=round(percent_complete, 2) where percent_complete is not null""")
+erpnext.patches.v6_0.fix_outstanding_amount
+erpnext.patches.v6_0.fix_planned_qty
+erpnext.patches.v6_2.remove_newsletter_duplicates
+erpnext.patches.v6_2.fix_missing_default_taxes_and_lead
+erpnext.patches.v6_3.convert_applicable_territory
+erpnext.patches.v6_4.round_status_updater_percentages
+erpnext.patches.v6_4.repost_gle_for_journal_entries_where_reference_name_missing
+erpnext.patches.v6_4.fix_journal_entries_due_to_reconciliation
+erpnext.patches.v6_4.fix_status_in_sales_and_purchase_order
+erpnext.patches.v6_4.fix_modified_in_sales_order_and_purchase_order
+erpnext.patches.v6_4.fix_duplicate_bins
+erpnext.patches.v6_4.fix_sales_order_maintenance_status
+erpnext.patches.v6_4.email_digest_update
+
+# delete shopping cart doctypes
+execute:frappe.delete_doc_if_exists("DocType", "Applicable Territory")
+execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Price List")
+execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Taxes and Charges Master")
+
+erpnext.patches.v6_4.set_user_in_contact
+erpnext.patches.v6_4.make_image_thumbnail #2015-10-20
+erpnext.patches.v6_5.show_in_website_for_template_item
+erpnext.patches.v6_4.fix_expense_included_in_valuation
+execute:frappe.delete_doc_if_exists("Report", "Item-wise Last Purchase Rate")
+erpnext.patches.v6_6.fix_website_image
+erpnext.patches.v6_6.remove_fiscal_year_from_leave_allocation
+execute:frappe.delete_doc_if_exists("DocType", "Stock UOM Replace Utility")
+erpnext.patches.v6_8.make_webform_standard #2015-11-23
+erpnext.patches.v6_8.move_drop_ship_to_po_items
+erpnext.patches.v6_10.fix_ordered_received_billed
+erpnext.patches.v6_10.fix_jv_total_amount #2015-11-30
+erpnext.patches.v6_10.email_digest_default_quote
+erpnext.patches.v6_10.fix_billed_amount_in_drop_ship_po
+erpnext.patches.v6_10.fix_delivery_status_of_drop_ship_item #2015-12-08
+erpnext.patches.v5_8.tax_rule #2015-12-08
+erpnext.patches.v6_12.set_overdue_tasks
+erpnext.patches.v6_16.update_billing_status_in_dn_and_pr
+erpnext.patches.v6_16.create_manufacturer_records
+execute:frappe.db.sql("update `tabPricing Rule` set title=name where title='' or title is null") #2016-01-27
+erpnext.patches.v6_20.set_party_account_currency_in_orders
+erpnext.patches.v6_19.comment_feed_communication
+erpnext.patches.v6_21.fix_reorder_level
+erpnext.patches.v6_21.rename_material_request_fields
+erpnext.patches.v6_23.update_stopped_status_to_closed
+erpnext.patches.v6_24.repost_valuation_rate_for_serialized_items
+erpnext.patches.v6_24.set_recurring_id
+erpnext.patches.v6_20x.set_compact_print
+execute:frappe.delete_doc_if_exists("Web Form", "contact") #2016-03-10
+erpnext.patches.v6_20x.remove_fiscal_year_from_holiday_list
+erpnext.patches.v6_24.map_customer_address_to_shipping_address_on_po
+erpnext.patches.v6_27.fix_recurring_order_status

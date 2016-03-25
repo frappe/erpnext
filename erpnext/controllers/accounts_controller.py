@@ -4,44 +4,58 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import today, flt, cint
+from frappe.utils import today, flt, cint, fmt_money
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
-from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
+from erpnext.controllers.sales_and_purchase_return import validate_return
+from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
+from erpnext.exceptions import InvalidCurrency
+
+force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
 
 class AccountsController(TransactionBase):
+	def __init__(self, arg1, arg2=None):
+		super(AccountsController, self).__init__(arg1, arg2)
+
+	@property
+	def company_currency(self):
+		if not hasattr(self, "__company_currency"):
+			self.__company_currency = get_company_currency(self.company)
+
+		return self.__company_currency
+
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 		self.validate_date_with_fiscal_year()
+
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
-			self.validate_value("base_grand_total", ">=", 0)
+			if not self.meta.get_field("is_return") or not self.is_return:
+				self.validate_value("base_grand_total", ">=", 0)
+
+			validate_return(self)
 			self.set_total_in_words()
 
-		self.validate_due_date()
-
-		if self.meta.get_field("is_recurring"):
-			validate_recurring_document(self)
+		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
+			self.validate_due_date()
 
 		if self.meta.get_field("taxes_and_charges"):
 			self.validate_enabled_taxes_and_charges()
 
-	def on_submit(self):
-		if self.meta.get_field("is_recurring"):
+		self.validate_party()
+		self.validate_currency()
+		
+		if self.meta.get_field("is_recurring") and not self.get("__islocal"):
+			validate_recurring_document(self)
 			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
 
 	def on_update_after_submit(self):
 		if self.meta.get_field("is_recurring"):
 			validate_recurring_document(self)
 			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
-
-	def before_recurring(self):
-		if self.meta.get_field("fiscal_year"):
-			self.fiscal_year = None
-		if self.meta.get_field("due_date"):
-			self.due_date = None
 
 	def set_missing_values(self, for_validate=False):
 		for fieldname in ["posting_date", "transaction_date"]:
@@ -74,14 +88,15 @@ class AccountsController(TransactionBase):
 	def validate_due_date(self):
 		from erpnext.accounts.party import validate_due_date
 		if self.doctype == "Sales Invoice":
+			if not self.due_date:
+				frappe.throw(_("Due Date is mandatory"))
+
 			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer, self.company)
 		elif self.doctype == "Purchase Invoice":
 			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
 
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("currency"):
-			company_currency = get_company_currency(self.company)
-
 			# price list part
 			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
 				else "buying_price_list"
@@ -89,26 +104,34 @@ class AccountsController(TransactionBase):
 				self.price_list_currency = frappe.db.get_value("Price List",
 					self.get(fieldname), "currency")
 
-				if self.price_list_currency == company_currency:
+				if self.price_list_currency == self.company_currency:
 					self.plc_conversion_rate = 1.0
 
 				elif not self.plc_conversion_rate:
 					self.plc_conversion_rate = get_exchange_rate(
-						self.price_list_currency, company_currency)
+						self.price_list_currency, self.company_currency)
 
 			# currency
 			if not self.currency:
 				self.currency = self.price_list_currency
 				self.conversion_rate = self.plc_conversion_rate
-			elif self.currency == company_currency:
+			elif self.currency == self.company_currency:
 				self.conversion_rate = 1.0
 			elif not self.conversion_rate:
 				self.conversion_rate = get_exchange_rate(self.currency,
-					company_currency)
+					self.company_currency)
 
 	def set_missing_item_details(self):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
+
+		if self.doctype == "Purchase Invoice":
+			auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
+
+			if auto_accounting_for_stock:
+				stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
+
+			stock_items = self.get_stock_items()
 
 		if hasattr(self, "items"):
 			parent_dict = {}
@@ -119,6 +142,10 @@ class AccountsController(TransactionBase):
 				if item.get("item_code"):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
+
+					args["doctype"] = self.doctype
+					args["name"] = self.name
+
 					if not args.get("transaction_date"):
 						args["transaction_date"] = args.get("posting_date")
 
@@ -128,18 +155,33 @@ class AccountsController(TransactionBase):
 					ret = get_item_details(args)
 
 					for fieldname, value in ret.items():
-						if item.meta.get_field(fieldname) and \
-							item.get(fieldname) is None and value is not None:
+						if item.meta.get_field(fieldname) and value is not None:
+							if (item.get(fieldname) is None or fieldname in force_item_fields):
 								item.set(fieldname, value)
 
-						if fieldname == "cost_center" and item.meta.get_field("cost_center") \
-							and not item.get("cost_center") and value is not None:
+							elif fieldname == "cost_center" and not item.get("cost_center"):
+								item.set(fieldname, value)
+
+							elif fieldname == "conversion_factor" and not item.get("conversion_factor"):
 								item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
-						for field in ["base_price_list_rate", "price_list_rate",
-							"discount_percentage", "base_rate", "rate"]:
-								item.set(field, ret.get(field))
+						item.set("discount_percentage", ret.get("discount_percentage"))
+						if ret.get("pricing_rule_for") == "Price":
+							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
+
+						if item.price_list_rate:
+							item.rate = flt(item.price_list_rate *
+								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
+
+					if self.doctype == "Purchase Invoice":
+						if auto_accounting_for_stock and item.item_code in stock_items \
+							and self.is_opening == 'No' \
+							and (not item.po_detail or not frappe.db.get_value("Purchase Order Item",
+								item.po_detail, "delivered_by_supplier")):
+
+								item.expense_account = stock_not_billed_account
+								item.cost_center = None
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):
@@ -170,54 +212,75 @@ class AccountsController(TransactionBase):
 		if frappe.db.get_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
 			frappe.throw(_("{0} '{1}' is disabled").format(taxes_and_charges_doctype, self.taxes_and_charges))
 
-	def get_gl_dict(self, args):
+	def get_gl_dict(self, args, account_currency=None):
 		"""this method populates the common properties of a gl entry record"""
 		gl_dict = frappe._dict({
 			'company': self.company,
 			'posting_date': self.posting_date,
+			'fiscal_year': get_fiscal_year(self.posting_date, company=self.company)[0],
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,
 			'remarks': self.get("remarks"),
-			'fiscal_year': self.fiscal_year,
 			'debit': 0,
 			'credit': 0,
+			'debit_in_account_currency': 0,
+			'credit_in_account_currency': 0,
 			'is_opening': self.get("is_opening") or "No",
 			'party_type': None,
 			'party': None
 		})
 		gl_dict.update(args)
+
+		if not account_currency:
+			account_currency = get_account_currency(gl_dict.account)
+
+		if self.doctype not in ["Journal Entry", "Period Closing Voucher"]:
+			self.validate_account_currency(gl_dict.account, account_currency)
+			set_balance_in_account_currency(gl_dict, account_currency, self.get("conversion_rate"), self.company_currency)
+
 		return gl_dict
+
+	def validate_account_currency(self, account, account_currency=None):
+		valid_currency = [self.company_currency]
+		if self.get("currency") and self.currency != self.company_currency:
+			valid_currency.append(self.currency)
+
+		if account_currency not in valid_currency:
+			frappe.throw(_("Account {0} is invalid. Account Currency must be {1}")
+				.format(account, _(" or ").join(valid_currency)))
 
 	def clear_unallocated_advances(self, childtype, parentfield):
 		self.set(parentfield, self.get(parentfield, {"allocated_amount": ["not in", [0, None, ""]]}))
 
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s
-			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
+			and allocated_amount = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
 	def get_advances(self, account_head, party_type, party, child_doctype, parentfield, dr_or_cr, against_order_field):
-		so_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
-		cond = ""
-		if so_list:
-			cond = "or (ifnull(t2.%s, '')  in (%s))" % ("against_" + against_order_field, ', '.join(['%s']*len(so_list)))
+		"""Returns list of advances against Account, Party, Reference"""
+		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
+
+		# conver sales_order to "Sales Order"
+		reference_type = against_order_field.replace("_", " ").title()
+
+		condition = ""
+		if order_list:
+			in_placeholder = ', '.join(['%s'] * len(order_list))
+			condition = "or (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))"\
+				.format(reference_type, in_placeholder)
 
 		res = frappe.db.sql("""
 			select
-				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no, `against_{1}` as against_order
+				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no,
+				reference_name as against_order
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
 				t1.name = t2.parent and t2.account = %s
-				and t2.party_type=%s and t2.party=%s
+				and t2.party_type = %s and t2.party = %s
 				and t2.is_advance = 'Yes' and t1.docstatus = 1
-				and ((
-						ifnull(t2.against_voucher, '')  = ''
-						and ifnull(t2.against_invoice, '')  = ''
-						and ifnull(t2.against_jv, '')  = ''
-						and ifnull(t2.against_sales_order, '')  = ''
-						and ifnull(t2.against_purchase_order, '')  = ''
-				) {2})
-			order by t1.posting_date""".format(dr_or_cr, against_order_field, cond),
-			[account_head, party_type, party] + so_list, as_dict=1)
+				and (ifnull(t2.reference_type, '')='' {1})
+			order by t1.posting_date""".format(dr_or_cr, condition),
+			[account_head, party_type, party] + order_list, as_dict=1)
 
 		self.set(parentfield, [])
 		for d in res:
@@ -230,25 +293,26 @@ class AccountsController(TransactionBase):
 				"allocated_amount": flt(d.amount) if d.against_order else 0
 			})
 
-	def validate_advance_jv(self, advance_table_fieldname, against_order_field):
+	def validate_advance_jv(self, reference_type):
+		against_order_field = frappe.scrub(reference_type)
 		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
 		if order_list:
 			account = self.get("debit_to" if self.doctype=="Sales Invoice" else "credit_to")
 
-			jv_against_order = frappe.db.sql("""select parent, %s as against_order
+			jv_against_order = frappe.db.sql("""select parent, reference_name as against_order
 				from `tabJournal Entry Account`
 				where docstatus=1 and account=%s and ifnull(is_advance, 'No') = 'Yes'
-				and ifnull(against_sales_order, '') in (%s)
-				group by parent, against_sales_order""" %
-				("against_" + against_order_field, '%s', ', '.join(['%s']*len(order_list))),
-				tuple([account] + order_list), as_dict=1)
+				and reference_type=%s
+				and ifnull(reference_name, '') in ({0})
+				group by parent, reference_name""".format(', '.join(['%s']*len(order_list))),
+					tuple([account, reference_type] + order_list), as_dict=1)
 
 			if jv_against_order:
 				order_jv_map = {}
 				for d in jv_against_order:
 					order_jv_map.setdefault(d.against_order, []).append(d.parent)
 
-				advance_jv_against_si = [d.journal_entry for d in self.get(advance_table_fieldname)]
+				advance_jv_against_si = [d.journal_entry for d in self.get("advances")]
 
 				for order, jv_list in order_jv_map.items():
 					for jv in jv_list:
@@ -294,36 +358,52 @@ class AccountsController(TransactionBase):
 		item_codes = list(set(item.item_code for item in self.get("items")))
 		if item_codes:
 			stock_items = [r[0] for r in frappe.db.sql("""select name
-				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
+				from `tabItem` where name in (%s) and is_stock_item=1""" % \
 				(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return stock_items
 
 	def set_total_advance_paid(self):
 		if self.doctype == "Sales Order":
-			dr_or_cr = "credit"
-			against_field = "against_sales_order"
+			dr_or_cr = "credit_in_account_currency"
+			party = self.customer
 		else:
-			dr_or_cr = "debit"
-			against_field = "against_purchase_order"
+			dr_or_cr = "debit_in_account_currency"
+			party = self.supplier
 
-		advance_paid = frappe.db.sql("""
+		advance = frappe.db.sql("""
 			select
-				sum(ifnull({dr_or_cr}, 0))
+				account_currency, sum({dr_or_cr}) as amount
 			from
 				`tabJournal Entry Account`
 			where
-				{against_field} = %s and docstatus = 1 and is_advance = "Yes" """.format(dr_or_cr=dr_or_cr, \
-					against_field=against_field), self.name)
+				reference_type = %s and reference_name = %s and party=%s
+				and docstatus = 1 and is_advance = "Yes"
+		""".format(dr_or_cr=dr_or_cr), (self.doctype, self.name, party), as_dict=1)
 
-		if advance_paid:
-			advance_paid = flt(advance_paid[0][0], self.precision("advance_paid"))
-		if flt(self.base_grand_total) >= advance_paid:
-			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
-		else:
-			frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater \
-				than the Grand Total ({2})")
-			.format(advance_paid, self.name, self.base_grand_total))
+		if advance:
+			advance = advance[0]
+			advance_paid = flt(advance.amount, self.precision("advance_paid"))
+			formatted_advance_paid = fmt_money(advance_paid, precision=self.precision("advance_paid"),
+				currency=advance.account_currency)
+
+			frappe.db.set_value(self.doctype, self.name, "party_account_currency",
+				advance.account_currency)
+
+			if advance.account_currency == self.currency:
+				order_total = self.grand_total
+				formatted_order_total = fmt_money(order_total, precision=self.precision("grand_total"),
+					currency=advance.account_currency)
+			else:
+				order_total = self.base_grand_total
+				formatted_order_total = fmt_money(order_total, precision=self.precision("base_grand_total"),
+					currency=advance.account_currency)
+
+			if order_total >= advance_paid:
+				frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
+			else:
+				frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2})")
+					.format(formatted_advance_paid, self.name, formatted_order_total))
 
 	@property
 	def company_abbr(self):
@@ -331,6 +411,45 @@ class AccountsController(TransactionBase):
 			self._abbr = frappe.db.get_value("Company", self.company, "abbr")
 
 		return self._abbr
+
+	def validate_party(self):
+		party_type, party = self.get_party()
+		validate_party_frozen_disabled(party_type, party)
+
+	def get_party(self):
+		party_type = None
+		if self.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
+			party_type = 'Customer'
+
+		elif self.doctype in ("Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"):
+			party_type = 'Supplier'
+
+		elif self.meta.get_field("customer"):
+			party_type = "Customer"
+
+		elif self.meta.get_field("supplier"):
+			party_type = "Supplier"
+
+		party = self.get(party_type.lower()) if party_type else None
+
+		return party_type, party
+
+	def validate_currency(self):
+		if self.get("currency"):
+			party_type, party = self.get_party()
+			if party_type and party:
+				party_account_currency = get_party_account_currency(party_type, party, self.company)
+
+				if (party_account_currency
+					and party_account_currency != self.company_currency
+					and self.currency != party_account_currency):
+
+					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
+						.format(party_type, party, party_account_currency), InvalidCurrency)
+
+				# Note: not validating with gle account because we don't have the account
+				# at quotation / sales order level and we shouldn't stop someone
+				# from creating a sales invoice if sales order is already created
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
@@ -402,3 +521,20 @@ def validate_inclusive_tax(tax, doc):
 			_on_previous_row_error("1 - %d" % (tax.row_id,))
 		elif tax.get("category") == "Valuation":
 			frappe.throw(_("Valuation type charges can not marked as Inclusive"))
+
+def set_balance_in_account_currency(gl_dict, account_currency=None, conversion_rate=None, company_currency=None):
+	if (not conversion_rate) and (account_currency!=company_currency):
+			frappe.throw(_("Account: {0} with currency: {1} can not be selected")
+				.format(gl_dict.account, account_currency))
+
+	gl_dict["account_currency"] = company_currency if account_currency==company_currency \
+		else account_currency
+
+	# set debit/credit in account currency if not provided
+	if flt(gl_dict.debit) and not flt(gl_dict.debit_in_account_currency):
+		gl_dict.debit_in_account_currency = gl_dict.debit if account_currency==company_currency \
+			else flt(gl_dict.debit / conversion_rate, 2)
+
+	if flt(gl_dict.credit) and not flt(gl_dict.credit_in_account_currency):
+		gl_dict.credit_in_account_currency = gl_dict.credit if account_currency==company_currency \
+			else flt(gl_dict.credit / conversion_rate, 2)

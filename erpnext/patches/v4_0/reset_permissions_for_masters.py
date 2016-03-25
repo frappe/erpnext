@@ -7,9 +7,9 @@ from frappe.permissions import reset_perms
 def execute():
 	for doctype in ("About Us Settings", "Accounts Settings", "Activity Type",
 		"Blog Category", "Blog Settings", "Blogger", "Branch", "Brand", "Buying Settings",
-		"Comment", "Communication", "Company", "Contact Us Settings",
+		"Communication", "Company", "Contact Us Settings",
 		"Country", "Currency", "Currency Exchange", "Deduction Type", "Department",
-		"Designation", "Earning Type", "Event", "Feed", "File Data", "Fiscal Year",
+		"Designation", "Earning Type", "Event", "Feed", "File", "Fiscal Year",
 		"HR Settings", "Industry Type", "Leave Type", "Letter Head",
 		"Mode of Payment", "Module Def", "Naming Series", "POS Setting", "Print Heading",
 		"Report", "Role", "Selling Settings", "Stock Settings", "Supplier Type", "UOM"):

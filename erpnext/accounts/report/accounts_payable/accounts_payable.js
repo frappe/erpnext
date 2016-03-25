@@ -8,7 +8,7 @@ frappe.query_reports["Accounts Payable"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": frappe.defaults.get_user_default("company")
+			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
 			"fieldname":"supplier",
@@ -18,7 +18,7 @@ frappe.query_reports["Accounts Payable"] = {
 		},
 		{
 			"fieldname":"report_date",
-			"label": __("Date"),
+			"label": __("As on Date"),
 			"fieldtype": "Date",
 			"default": get_today()
 		},

@@ -13,24 +13,6 @@ $.extend(erpnext, {
 			return frappe.boot.sysdefaults.currency;
 	},
 
-	get_fiscal_year: function(company, date, fn) {
-		if(frappe.meta.get_docfield(cur_frm.doctype, "fiscal_year")) {
-			frappe.call({
-				type:"GET",
-				method: "erpnext.accounts.utils.get_fiscal_year",
-				args: {
-					"company": company,
-					"date": date,
-					"verbose": 0
-				},
-				callback: function(r) {
-					if (r.message)	cur_frm.set_value("fiscal_year", r.message[0]);
-					if (fn) fn();
-				}
-			});
-		}
-	},
-
 	toggle_naming_series: function() {
 		if(cur_frm.fields_dict.naming_series) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
@@ -46,18 +28,6 @@ $.extend(erpnext, {
 			} else if(erpnext.last_selected_company) {
 				if(!cur_frm.doc.company) cur_frm.set_value("company", erpnext.last_selected_company);
 			}
-		}
-	},
-
-	add_applicable_territory: function() {
-		if(cur_frm.doc.__islocal && (cur_frm.doc.territories || []).length===0) {
-				var default_territory = frappe.defaults.get_user_default("territory");
-				if(default_territory) {
-					var territory = frappe.model.add_child(cur_frm.doc, "Applicable Territory",
-						"territories");
-					territory.territory = default_territory;
-				}
-
 		}
 	},
 
@@ -83,7 +53,7 @@ $.extend(erpnext, {
 							return {
 								filters: {
 									item_code:grid_row.doc.item_code ,
-									warehouse:grid_row.doc.warehouse
+									warehouse:cur_frm.doc.is_return ? null : grid_row.doc.warehouse
 								}
 							}
 						}
@@ -112,6 +82,11 @@ $.extend(erpnext, {
 
 
 $.extend(erpnext.utils, {
+	clear_address_and_contact: function(frm) {
+		$(frm.fields_dict['address_html'].wrapper).html("");
+		frm.fields_dict['contact_html'] && $(frm.fields_dict['contact_html'].wrapper).html("");
+	},
+	
 	render_address_and_contact: function(frm) {
 		// render address
 		$(frm.fields_dict['address_html'].wrapper)
@@ -131,6 +106,17 @@ $.extend(erpnext.utils, {
 				}
 			);
 		}
+	},
+
+	copy_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname) {
+		var d = locals[dt][dn];
+		if(d[fieldname]){
+			var cl = doc[table_fieldname] || [];
+			for(var i = 0; i < cl.length; i++) {
+				if(!cl[i][fieldname]) cl[i][fieldname] = d[fieldname];
+			}
+		}
+		refresh_field(table_fieldname);
 	}
 });
 

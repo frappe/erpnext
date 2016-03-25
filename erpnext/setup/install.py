@@ -11,12 +11,18 @@ default_mail_footer = """<div style="padding: 7px; text-align: right; color: #88
 def after_install():
 	frappe.get_doc({'doctype': "Role", "role_name": "Analytics"}).insert()
 	set_single_defaults()
-	frappe.db.set_default('desktop:home_page', 'setup-wizard')
 	feature_setup()
-	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
+	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
-	add_web_forms()
 	frappe.db.commit()
+
+def check_setup_wizard_not_completed():
+	if frappe.db.get_default('desktop:home_page') == 'desktop':
+		print
+		print "ERPNext can only be installed on a fresh site where the setup wizard is not completed"
+		print "You can reinstall this site (after saving your data) using: bench --site [sitename] reinstall"
+		print
+		return False
 
 def feature_setup():
 	"""save global defaults and features setup"""
@@ -29,7 +35,7 @@ def feature_setup():
 		'fs_exports', 'fs_imports', 'fs_discounts', 'fs_purchase_discounts',
 		'fs_after_sales_installations', 'fs_projects', 'fs_sales_extras',
 		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
-		'fs_page_break', 'fs_more_info', 'fs_pos_view'
+		'fs_page_break', 'fs_more_info', 'fs_pos_view', 'compact_item_print'
 	]
 	for f in flds:
 		doc.set(f, 1)
@@ -50,11 +56,3 @@ def set_single_defaults():
 
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
 
-def add_web_forms():
-	"""Import web forms for Issues and Addresses"""
-	from frappe.modules.import_file import import_file_by_path
-
-	import_file_by_path(frappe.get_app_path("erpnext", "setup/fixtures/web_form/issues.json"),
-		data_import=True)
-	import_file_by_path(frappe.get_app_path("erpnext", "setup/fixtures/web_form/addresses.json"),
-		data_import=True)

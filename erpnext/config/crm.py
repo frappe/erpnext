@@ -3,7 +3,7 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
+			"label": _("Sales Pipeline"),
 			"icon": "icon-star",
 			"items": [
 				{
@@ -13,34 +13,64 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Customer",
-					"description": _("Customer database."),
+					"name": "Opportunity",
+					"description": _("Potential opportunities for selling."),
 				},
 				{
 					"type": "doctype",
-					"name": "Opportunity",
-					"description": _("Potential opportunities for selling."),
+					"name": "Customer",
+					"description": _("Customer database."),
 				},
 				{
 					"type": "doctype",
 					"name": "Contact",
 					"description": _("All Contacts."),
 				},
+			]
+		},
+		{
+			"label": _("Reports"),
+			"icon": "icon-list",
+			"items": [
+				{
+					"type": "page",
+					"name": "sales-funnel",
+					"label": _("Sales Funnel"),
+					"icon": "icon-bar-chart",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Lead Details",
+					"doctype": "Lead"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Customer Addresses and Contacts",
+					"doctype": "Contact"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Inactive Customers",
+					"doctype": "Sales Order"
+				},
+			]
+		},
+		{
+			"label": _("Communication"),
+			"icon": "icon-star",
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Newsletter",
 					"description": _("Newsletters to contacts, leads."),
 				},
-			]
-		},
-		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
-			"items": [
 				{
 					"type": "doctype",
-					"name": "SMS Center",
-					"description":_("Send mass SMS to your contacts"),
+					"name": "Communication",
+					"description": _("Record of all communications of type email, phone, chat, visit, etc."),
 				},
 			]
 		},
@@ -85,47 +115,27 @@ def get_data():
 					"name": "Newsletter List",
 					"description": _("Newsletter Mailing List"),
 				},
+			]
+		},
+		{
+			"label": _("SMS"),
+			"icon": "icon-wrench",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "SMS Center",
+					"description":_("Send mass SMS to your contacts"),
+				},
+				{
+					"type": "doctype",
+					"name": "SMS Log",
+					"description":_("Logs for maintaining sms delivery status"),
+				},
 				{
 					"type": "doctype",
 					"name": "SMS Settings",
 					"description": _("Setup SMS gateway settings")
-				},
-			]
-		},
-		{
-			"label": _("Main Reports"),
-			"icon": "icon-table",
-			"items": [
-				{
-					"type": "page",
-					"name": "sales-funnel",
-					"label": _("Sales Funnel"),
-					"icon": "icon-bar-chart",
-				},
-			]
-		},
-		{
-			"label": _("Standard Reports"),
-			"icon": "icon-list",
-			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Lead Details",
-					"doctype": "Lead"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Customer Addresses and Contacts",
-					"doctype": "Contact"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Customers Not Buying Since Long Time",
-					"doctype": "Sales Order"
-				},
+				}
 			]
 		},
 		{
@@ -135,6 +145,11 @@ def get_data():
 					"type": "help",
 					"label": _("Lead to Quotation"),
 					"youtube_id": "TxYX4r4JAKA"
+				},
+				{
+					"type": "help",
+					"label": _("Newsletters"),
+					"youtube_id": "muLKsCrrDRo"
 				},
 			]
 		},

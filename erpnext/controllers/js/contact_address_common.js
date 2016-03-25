@@ -33,7 +33,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 							cur_frm.set_value("address_title", cur_frm.doc.customer_name);
 				}
 			}
-			if(["Supplier", "Supplier Quotation", "Purchase Order", "Purchase Invoice", "Purchase Receipt"]
+			else if(["Supplier", "Supplier Quotation", "Purchase Order", "Purchase Invoice", "Purchase Receipt"]
 				.indexOf(doctype)!==-1) {
 				var refdoc = frappe.get_doc(doctype, docname);
 				cur_frm.set_value("supplier", refdoc.supplier || refdoc.name);
@@ -41,7 +41,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 				if(cur_frm.doc.doctype==="Address")
 					cur_frm.set_value("address_title", cur_frm.doc.supplier_name);
 			}
-			if(["Lead", "Opportunity", "Quotation"]
+			else if(["Lead", "Opportunity", "Quotation"]
 				.indexOf(doctype)!==-1) {
 				var refdoc = frappe.get_doc(doctype, docname);
 
@@ -52,6 +52,9 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 						if(cur_frm.doc.doctype==="Address")
 							cur_frm.set_value("address_title", cur_frm.doc.lead_name);
 				}
+			}
+			else if(doctype == "Sales Partner") {
+				cur_frm.set_value("sales_partner", docname);
 			}
 		}
 	}

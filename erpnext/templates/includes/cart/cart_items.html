@@ -1,0 +1,23 @@
+{% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description %}
+
+{% for d in doc.items %}
+<div class="cart-item">
+    <div class="row">
+        <div class="col-sm-8 col-xs-6" style="margin-bottom: 10px;">
+            {{ item_name_and_description(d) }}
+        </div>
+        <div class="col-sm-2 col-xs-3 text-right">
+            <span style="max-width: 50px; display: inline-block">
+                <input class="form-control text-right cart-qty"
+                value = "{{ d.get_formatted('qty') }}"
+                data-item-code="{{ d.item_code }}"></span>
+    		<p class="text-muted small" style="margin-top: 10px;">
+                {{ _("Rate") + ': ' + d.get_formatted("rate") }}
+            </p>
+    	</div>
+        <div class="col-sm-2 col-xs-3 text-right">
+            {{ d.get_formatted("amount") }}
+        </div>
+    </div>
+</div>
+{% endfor %}

@@ -12,6 +12,7 @@ frappe.ui.form.on("Production Order", "onload", function(frm) {
 			"actual_start_date": "",
 			"actual_end_date": ""
 		});
+		erpnext.production_order.set_default_warehouse(frm);
 	}
 
 	erpnext.production_order.set_custom_buttons(frm);
@@ -60,38 +61,35 @@ erpnext.production_order = {
 	set_custom_buttons: function(frm) {
 		var doc = frm.doc;
 		if (doc.docstatus === 1) {
-
-			if (flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) {
-				frm.add_custom_button(__('Transfer Materials for Manufacture'),
-					cur_frm.cscript['Transfer Raw Materials'], frappe.boot.doctype_icons["Stock Entry"]);
-			}
-
-			if (flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) {
-				frm.add_custom_button(__('Update Finished Goods'),
-					cur_frm.cscript['Update Finished Goods'], frappe.boot.doctype_icons["Stock Entry"]);
-			}
-
-			frm.add_custom_button(__("Show Stock Entries"), function() {
+			frm.add_custom_button(__("Stock Entries"), function() {
 				frappe.route_options = {
 					production_order: frm.doc.name
 				}
 				frappe.set_route("List", "Stock Entry");
-			});
+			}, __("View"));
 
 			if (doc.status != 'Stopped' && doc.status != 'Completed') {
-				frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Production Order'],
-					"icon-exclamation", "btn-default");
+				frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Production Order'], __("Status"));
 			} else if (doc.status == 'Stopped') {
-				frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Production Order'],
-				"icon-check", "btn-default");
+				frm.add_custom_button(__('Re-open'), cur_frm.cscript['Unstop Production Order'], __("Status"));
 			}
 
 			// opertions
 			if ((doc.operations || []).length) {
-				frm.add_custom_button(__('Show Time Logs'), function() {
+				frm.add_custom_button(__('Time Logs'), function() {
 					frappe.route_options = {"production_order": frm.doc.name};
 					frappe.set_route("List", "Time Log");
-				});
+				}, __("View"));
+			}
+
+			if (flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) {
+				frm.add_custom_button(__('Transfer Materials for Manufacture'),
+					cur_frm.cscript['Transfer Raw Materials'], __("Stock Entry"));
+			}
+
+			if (flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) {
+				frm.add_custom_button(__('Update Finished Goods'),
+					cur_frm.cscript['Update Finished Goods'], __("Stock Entry"));
 			}
 		}
 
@@ -138,9 +136,23 @@ erpnext.production_order = {
 				}
 			} else msgprint(__("Please enter Production Item first"));
 		});
+	},
+
+	set_default_warehouse: function(frm) {
+		if (!(frm.doc.wip_warehouse || frm.doc.fg_warehouse)) {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.production_order.production_order.get_default_warehouse",
+
+				callback: function(r) {
+					if(!r.exe) {
+						frm.set_value("wip_warehouse", r.message.wip_warehouse);
+						frm.set_value("fg_warehouse", r.message.fg_warehouse)
+					}
+				}
+			});
+		}
 	}
 }
-
 
 $.extend(cur_frm.cscript, {
 	before_submit: function() {
@@ -152,7 +164,9 @@ $.extend(cur_frm.cscript, {
 			method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
 			args: { item: doc.production_item },
 			callback: function(r) {
-				cur_frm.set_value(r.message);
+				$.each(["description", "stock_uom", "bom_no"], function(i, field) {
+					cur_frm.set_value(field, r.message[field]);
+				});
 			}
 		});
 	},
@@ -160,7 +174,7 @@ $.extend(cur_frm.cscript, {
 	make_se: function(purpose) {
 		var me = this;
 		var max = (purpose === "Manufacture") ?
-			flt(this.frm.doc.qty) - flt(this.frm.doc.produced_qty) :
+			flt(this.frm.doc.material_transferred_for_manufacturing) - flt(this.frm.doc.produced_qty) :
 			flt(this.frm.doc.qty) - flt(this.frm.doc.material_transferred_for_manufacturing);
 
 		frappe.prompt({fieldtype:"Int", label: __("Qty for {0}", [purpose]), fieldname:"qty",
@@ -191,11 +205,10 @@ $.extend(cur_frm.cscript, {
 			method: "set_production_order_operations"
 		});
 	},
-	
+
 	qty: function() {
 		frappe.ui.form.trigger("Production Order", 'bom_no')
 	},
-
 	show_time_logs: function(doc, cdt, cdn) {
 		var child = locals[cdt][cdn]
 		frappe.route_options = {"operation_id": child.name};
@@ -225,18 +238,11 @@ $.extend(cur_frm.cscript, {
 });
 
 cur_frm.cscript['Stop Production Order'] = function() {
-	var doc = cur_frm.doc;
-	var check = confirm(__("Do you really want to stop production order: " + doc.name));
-	if (check) {
-		return $c_obj(doc, 'stop_unstop', 'Stopped', function(r, rt) {cur_frm.refresh();});
-	}
+	$c_obj(cur_frm.doc, 'stop_unstop', 'Stopped', function(r, rt) {cur_frm.refresh();});
 }
 
 cur_frm.cscript['Unstop Production Order'] = function() {
-	var doc = cur_frm.doc;
-	var check = confirm(__("Do really want to unstop production order: " + doc.name));
-	if (check)
-		return $c_obj(doc, 'stop_unstop', 'Unstopped', function(r, rt) {cur_frm.refresh();});
+	$c_obj(cur_frm.doc, 'stop_unstop', 'Unstopped', function(r, rt) {cur_frm.refresh();});
 }
 
 cur_frm.cscript['Transfer Raw Materials'] = function() {
@@ -249,20 +255,17 @@ cur_frm.cscript['Update Finished Goods'] = function() {
 
 cur_frm.fields_dict['production_item'].get_query = function(doc) {
 	return {
-		filters:[
-			['Item', 'is_pro_applicable', '=', 'Yes']
-		]
+		query: "erpnext.controllers.queries.item_query",
+		filters:{
+			'is_pro_applicable': 1,
+		}
 	}
 }
 
-cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
+cur_frm.fields_dict['project'].get_query = function(doc, dt, dn) {
 	return{
 		filters:[
 			['Project', 'status', 'not in', 'Completed, Cancelled']
 		]
 	}
 }
-
-
-
-

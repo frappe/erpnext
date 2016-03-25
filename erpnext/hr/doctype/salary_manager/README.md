@@ -1,1 +1,0 @@
-Tool to issue monthly Salary Slips to all Employees.

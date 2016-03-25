@@ -8,7 +8,6 @@ frappe.ui.form.on("Rename Tool", {
 			method: "erpnext.utilities.doctype.rename_tool.rename_tool.get_doctypes",
 			callback: function(r) {
 				frm.set_df_property("select_doctype", "options", r.message);
-				frm.cscript.setup_upload();
 			}
 		});
 	},
@@ -22,7 +21,7 @@ frappe.ui.form.on("Rename Tool", {
 					select_doctype: frm.doc.select_doctype
 				},
 				callback: function(r) {
-					frm.get_field("rename_log").$wrapper.html(r.message);
+					frm.get_field("rename_log").$wrapper.html(r.message.join("<br>"));
 				}
 			});
 		});

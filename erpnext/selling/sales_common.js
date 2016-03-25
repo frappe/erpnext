@@ -56,9 +56,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.set_query("item_code", "items", function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: (me.frm.doc.order_type === "Maintenance" ?
-						{'is_service_item': 'Yes'}:
-						{'is_sales_item': 'Yes'	})
+					filters: {'is_sales_item': 1}
 				}
 			});
 		}
@@ -81,10 +79,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					}
 				}
 			});
-		}
-
-		if(this.frm.fields_dict.sales_team && this.frm.fields_dict.sales_team.grid.get_field("sales_person")) {
-			this.frm.set_query("sales_person", "sales_team", erpnext.queries.not_a_group_filter);
 		}
 	},
 
@@ -112,10 +106,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		erpnext.utils.get_address_display(this.frm, "shipping_address_name", "shipping_address");
 	},
 
-	contact_person: function() {
-		erpnext.utils.get_contact_details(this.frm);
-	},
-
 	sales_partner: function() {
 		this.apply_pricing_rule();
 	},
@@ -134,7 +124,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
 			precision("rate", item));
-
+		
+		this.set_gross_profit(item);
 		this.calculate_taxes_and_totals();
 	},
 
@@ -145,6 +136,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		} else {
 			this.price_list_rate(doc, cdt, cdn);
 		}
+		this.set_gross_profit(item);
 	},
 
 	commission_rate: function() {
@@ -187,16 +179,21 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	warehouse: function(doc, cdt, cdn) {
 		var me = this;
-		this.batch_no(doc, cdt, cdn);
 		var item = frappe.get_doc(cdt, cdn);
+		
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_available_qty",
+				method: "erpnext.stock.get_item_details.get_bin_details",
 				child: item,
 				args: {
 					item_code: item.item_code,
 					warehouse: item.warehouse,
 				},
+				callback:function(r){
+					if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+						me.batch_no(doc, cdt, cdn);
+					}
+				}
 			});
 		}
 	},
@@ -207,30 +204,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		if(df && editable_price_list_rate) {
 			df.read_only = 0;
-		}
-	},
-
-	calculate_outstanding_amount: function(update_paid_amount) {
-		// NOTE:
-		// paid_amount and write_off_amount is only for POS Invoice
-		// total_advance is only for non POS Invoice
-		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.docstatus==0) {
-			frappe.model.round_floats_in(this.frm.doc, ["base_grand_total", "total_advance", "write_off_amount",
-				"paid_amount"]);
-			var total_amount_to_pay = this.frm.doc.base_grand_total - this.frm.doc.write_off_amount
-				- this.frm.doc.total_advance;
-			if(this.frm.doc.is_pos) {
-				if(!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount) {
-					this.frm.doc.paid_amount = flt(total_amount_to_pay);
-					this.frm.refresh_field("paid_amount");
-				}
-			} else {
-				this.frm.doc.paid_amount = 0
-				this.frm.refresh_field("paid_amount");
-			}
-
-			this.frm.set_value("outstanding_amount", flt(total_amount_to_pay
-				- this.frm.doc.paid_amount, precision("outstanding_amount")));
 		}
 	},
 
@@ -295,35 +268,53 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	set_dynamic_labels: function() {
 		this._super();
-		this.set_sales_bom_help(this.frm.doc);
+		this.set_product_bundle_help(this.frm.doc);
 	},
 
-	set_sales_bom_help: function(doc) {
+	set_product_bundle_help: function(doc) {
 		if(!cur_frm.fields_dict.packing_list) return;
 		if ((doc.packed_items || []).length) {
 			$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
 
 			if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
 				help_msg = "<div class='alert alert-warning'>" +
-					__("For 'Sales BOM' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Sales BOM' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.")+
+					__("For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.")+
 				"</div>";
-				frappe.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
+				frappe.meta.get_docfield(doc.doctype, 'product_bundle_help', doc.name).options = help_msg;
 			}
 		} else {
 			$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(false);
 			if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-				frappe.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = '';
+				frappe.meta.get_docfield(doc.doctype, 'product_bundle_help', doc.name).options = '';
 			}
 		}
-		refresh_field('sales_bom_help');
+		refresh_field('product_bundle_help');
+	},
+
+	make_payment_request: function() {
+		frappe.call({
+			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
+			args: {
+				"dt": cur_frm.doc.doctype,
+				"dn": cur_frm.doc.name,
+				"recipient_id": cur_frm.doc.contact_email
+			},
+			callback: function(r) {
+				if(!r.exc){
+					var doc = frappe.model.sync(r.message);
+					console.log(r.message)
+					frappe.set_route("Form", r.message.doctype, r.message.name);
+				}
+			}
+		})
 	}
 });
 
-frappe.ui.form.on(cur_frm.doctype,"project_name", function(frm) {
+frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
 	if(in_list(["Delivery Note", "Sales Invoice"], frm.doc.doctype)) {
 		frappe.call({
 			method:'erpnext.projects.doctype.project.project.get_cost_center_name' ,
-			args: {	project_name: frm.doc.project_name	},
+			args: {	project: frm.doc.project	},
 			callback: function(r, rt) {
 				if(!r.exc) {
 					$.each(frm.doc["items"] || [], function(i, row) {

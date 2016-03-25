@@ -7,7 +7,7 @@ frappe.pages["Sales Browser"].on_page_load = function(wrapper){
 		single_column: true,
 	});
 
-	wrapper.page.set_secondary_action(__('Refresh'), function() {
+	wrapper.page.add_menu_item(__('Refresh'), function() {
 			wrapper.make_tree();
 		});
 
@@ -57,7 +57,7 @@ erpnext.SalesChart = Class.extend({
 
 		me.page.set_primary_action(__("New"), function() {
 			me.new_node();
-		});
+		}, "octicon octicon-plus");
 
 		this.tree = new frappe.ui.Tree({
 			parent: $(parent),
@@ -80,7 +80,8 @@ erpnext.SalesChart = Class.extend({
 					condition: function(node) { return me.can_create && node.expandable; },
 					click: function(node) {
 						me.new_node();
-					}
+					},
+					btnClass: "hidden-xs"
 				},
 				{
 					label:__("Rename"),
@@ -89,7 +90,8 @@ erpnext.SalesChart = Class.extend({
 						frappe.model.rename_doc(me.ctype, node.label, function(new_name) {
 							node.$a.html(new_name);
 						});
-					}
+					},
+					btnClass: "hidden-xs"
 				},
 				{
 					label:__("Delete"),
@@ -98,7 +100,8 @@ erpnext.SalesChart = Class.extend({
 						frappe.model.delete_doc(me.ctype, node.label, function() {
 							node.parent.remove();
 						});
-					}
+					},
+					btnClass: "hidden-xs"
 				}
 
 			]

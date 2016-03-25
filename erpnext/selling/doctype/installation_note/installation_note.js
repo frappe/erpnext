@@ -54,7 +54,7 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 						source_doctype: "Delivery Note",
 						get_query_filters: {
 							docstatus: 1,
-							status: ["!=", "Stopped"],
+							status: ["not in", ["Stopped", "Closed"]],
 							per_installed: ["<", 99.99],
 							customer: cur_frm.doc.customer || undefined,
 							company: cur_frm.doc.company
@@ -67,11 +67,3 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 });
 
 $.extend(cur_frm.cscript, new erpnext.selling.InstallationNote({frm: cur_frm}));
-
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.inst_date);
-}
-
-cur_frm.cscript.inst_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.inst_date);
-}

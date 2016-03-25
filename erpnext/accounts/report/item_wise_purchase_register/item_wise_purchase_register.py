@@ -27,7 +27,7 @@ def execute(filters=None):
 
 		expense_account = d.expense_account or aii_account_map.get(d.company)
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.supplier,
-			d.supplier_name, d.credit_to, d.project_name, d.company, d.purchase_order,
+			d.supplier_name, d.credit_to, d.project, d.company, d.purchase_order,
 			purchase_receipt, expense_account, d.qty, d.base_net_rate, d.base_net_amount]
 
 		for tax in tax_accounts:
@@ -69,7 +69,7 @@ def get_items(filters):
 
 	return frappe.db.sql("""select pi_item.parent, pi.posting_date, pi.credit_to, pi.company,
 		pi.supplier, pi.remarks, pi.base_net_total, pi_item.item_code, pi_item.item_name, pi_item.item_group,
-		pi_item.project_name, pi_item.purchase_order, pi_item.purchase_receipt, pi_item.po_detail,
+		pi_item.project, pi_item.purchase_order, pi_item.purchase_receipt, pi_item.po_detail,
 		pi_item.expense_account, pi_item.qty, pi_item.base_net_rate, pi_item.base_net_amount, pi.supplier_name
 		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item
 		where pi.name = pi_item.parent and pi.docstatus = 1 %s %s
@@ -88,7 +88,7 @@ def get_tax_accounts(item_list, columns):
 
 	tax_details = frappe.db.sql("""select parent, account_head, item_wise_tax_detail, charge_type, base_tax_amount_after_discount_amount
 		from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice'
-		and docstatus = 1 and ifnull(account_head, '') != '' and category in ('Total', 'Valuation and Total')
+		and docstatus = 1 and (account_head is not null and account_head != '') and category in ('Total', 'Valuation and Total')
 		and parent in (%s)""" % ', '.join(['%s']*len(invoice_wise_items)), tuple(invoice_wise_items.keys()))
 
 	for parent, account_head, item_wise_tax_detail, charge_type, tax_amount in tax_details:

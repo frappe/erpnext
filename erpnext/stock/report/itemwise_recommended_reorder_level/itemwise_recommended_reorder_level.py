@@ -72,7 +72,7 @@ def get_delivered_items(condition):
 	si_items = frappe.db.sql("""select si_item.item_name, sum(si_item.qty) as si_qty
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 and
-		ifnull(si.update_stock, 0) = 1 and ifnull(si.is_pos, 0) = 1 %s
+		si.update_stock = 1 and si.is_pos = 1 %s
 		group by si_item.item_name""" % (condition), as_dict=1)
 
 	dn_item_map = {}

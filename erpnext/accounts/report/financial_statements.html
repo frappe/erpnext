@@ -45,7 +45,7 @@
 					<td class="text-right">
 						{% var fieldname = report.columns[i].field; %}
 						{% if (!is_null(row[fieldname])) { %}
-							{%= format_currency(row[fieldname]) %}
+							{%= format_currency(row[fieldname], row.currency) %}
 						{% } %}
 					</td>
 				{% } %}

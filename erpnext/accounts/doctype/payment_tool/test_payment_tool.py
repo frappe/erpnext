@@ -23,10 +23,11 @@ class TestPaymentTool(unittest.TestCase):
 
 		# Create SO with partial outstanding
 		so1 = make_sales_order(customer="_Test Customer 3", qty=10, rate=100)
-		
+
 		self.create_against_jv(jv_test_records[0], {
 			"party": "_Test Customer 3",
-			"against_sales_order": so1.name,
+			"reference_type": "Sales Order",
+			"reference_name": so1.name,
 			"is_advance": "Yes"
 		})
 
@@ -36,8 +37,9 @@ class TestPaymentTool(unittest.TestCase):
 
 		self.create_against_jv(jv_test_records[0], {
 			"party": "_Test Customer 3",
-			"against_sales_order": so2.name,
-			"credit": 1000,
+			"reference_type": "Sales Order",
+			"reference_name": so2.name,
+			"credit_in_account_currency": 1000,
 			"is_advance": "Yes"
 		})
 
@@ -52,7 +54,8 @@ class TestPaymentTool(unittest.TestCase):
 
 		self.create_against_jv(jv_test_records[0], {
 			"party": "_Test Customer 3",
-			"against_invoice": si1.name
+			"reference_type": si1.doctype,
+			"reference_name": si1.name
 		})
 		#Create SI with no outstanding
 		si2 = self.create_voucher(si_test_records[0], {
@@ -62,8 +65,9 @@ class TestPaymentTool(unittest.TestCase):
 
 		self.create_against_jv(jv_test_records[0], {
 			"party": "_Test Customer 3",
-			"against_invoice": si2.name,
-			"credit": 561.80
+			"reference_type": si2.doctype,
+			"reference_name": si2.name,
+			"credit_in_account_currency": 561.80
 		})
 
 		pi = self.create_voucher(pi_test_records[0], {
@@ -87,7 +91,7 @@ class TestPaymentTool(unittest.TestCase):
 			"party": "_Test Customer 3",
 			"party_account": "_Test Receivable - _TC",
 			"payment_mode": "Cheque",
-			"payment_account": "_Test Account Bank Account - _TC",
+			"payment_account": "_Test Bank - _TC",
 			"reference_no": "123456",
 			"reference_date": "2013-02-14"
 		}
@@ -113,10 +117,10 @@ class TestPaymentTool(unittest.TestCase):
 	def create_against_jv(self, test_record, args):
 		jv = frappe.copy_doc(test_record)
 		jv.get("accounts")[0].update(args)
-		if args.get("debit"):
-			jv.get("accounts")[1].credit = args["debit"]
-		elif args.get("credit"):
-			jv.get("accounts")[1].debit = args["credit"]
+		if args.get("debit_in_account_currency"):
+			jv.get("accounts")[1].credit_in_account_currency = args["debit_in_account_currency"]
+		elif args.get("credit_in_account_currency"):
+			jv.get("accounts")[1].debit_in_account_currency = args["credit_in_account_currency"]
 
 		jv.insert()
 		jv.submit()
@@ -125,7 +129,7 @@ class TestPaymentTool(unittest.TestCase):
 	def make_voucher_for_party(self, args, expected_outstanding):
 		#Make Journal Entry for Party
 		payment_tool_doc = frappe.new_doc("Payment Tool")
-		
+
 		for k, v in args.items():
 			payment_tool_doc.set(k, v)
 
@@ -137,7 +141,8 @@ class TestPaymentTool(unittest.TestCase):
 		outstanding_entries = get_outstanding_vouchers(json.dumps(args))
 
 		for d in outstanding_entries:
-			self.assertEquals(flt(d.get("outstanding_amount"), 2), expected_outstanding.get(d.get("voucher_type"))[1])
+			self.assertEquals(flt(d.get("outstanding_amount"), 2), 
+				expected_outstanding.get(d.get("voucher_type"))[1])
 
 		self.check_jv_entries(doc, outstanding_entries, expected_outstanding)
 
@@ -152,30 +157,12 @@ class TestPaymentTool(unittest.TestCase):
 		paytool.total_payment_amount = 300
 
 		new_jv = paytool.make_journal_entry()
-
-		#Create a list of expected values as [party account, payment against, against_jv, against_invoice,
-		#against_voucher, against_sales_order, against_purchase_order]
-		expected_values = [
-			[paytool.party_account, paytool.party, 100.00, expected_outstanding.get("Journal Entry")[0], None, None, None, None],
-			[paytool.party_account, paytool.party, 100.00, None, expected_outstanding.get("Sales Invoice")[0], None, None, None],
-			[paytool.party_account, paytool.party, 100.00, None, None, expected_outstanding.get("Purchase Invoice")[0], None, None],
-			[paytool.party_account, paytool.party, 100.00, None, None, None, expected_outstanding.get("Sales Order")[0], None],
-			[paytool.party_account, paytool.party, 100.00, None, None, None, None, expected_outstanding.get("Purchase Order")[0]]
-		]
-
 		for jv_entry in new_jv.get("accounts"):
 			if paytool.party_account == jv_entry.get("account") and paytool.party == jv_entry.get("party"):
-				row = [
-					jv_entry.get("account"),
-					jv_entry.get("party"),
-					jv_entry.get("debit" if paytool.party_type=="Supplier" else "credit"),
-					jv_entry.get("against_jv"),
-					jv_entry.get("against_invoice"),
-					jv_entry.get("against_voucher"),
-					jv_entry.get("against_sales_order"),
-					jv_entry.get("against_purchase_order"),
-				]
-				self.assertTrue(row in expected_values)
+				self.assertEquals(100.00, jv_entry.get("debit_in_account_currency" 
+					if paytool.party_type=="Supplier" else "credit_in_account_currency"))
+				self.assertEquals(jv_entry.reference_name,
+					expected_outstanding[jv_entry.reference_type][0])
 
 		self.assertEquals(new_jv.get("cheque_no"), paytool.reference_no)
 		self.assertEquals(new_jv.get("cheque_date"), paytool.reference_date)
@@ -183,4 +170,6 @@ class TestPaymentTool(unittest.TestCase):
 	def clear_table_entries(self):
 		frappe.db.sql("""delete from `tabGL Entry` where party in ("_Test Customer 3", "_Test Supplier 1")""")
 		frappe.db.sql("""delete from `tabSales Order` where customer = "_Test Customer 3" """)
+		frappe.db.sql("""delete from `tabSales Invoice` where customer = "_Test Customer 3" """)
 		frappe.db.sql("""delete from `tabPurchase Order` where supplier = "_Test Supplier 1" """)
+		frappe.db.sql("""delete from `tabPurchase Invoice` where supplier = "_Test Supplier 1" """)
