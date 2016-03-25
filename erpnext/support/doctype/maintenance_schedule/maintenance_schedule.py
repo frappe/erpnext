@@ -94,6 +94,10 @@ class MaintenanceSchedule(TransactionBase):
 		validated = False
 
 		employee = frappe.db.get_value("Sales Person", sales_person, "employee")
+
+		if not employee:
+			frappe.throw(_("Employee link is missing for the Sales Person : {0}. To correct, go to Sales Person master and select employee".format(sales_person)))
+
 		holiday_list = get_holiday_list_for_employee(employee)
 		holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday` where parent=%s''', holiday_list)
 
