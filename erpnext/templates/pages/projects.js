@@ -59,8 +59,13 @@ frappe.ready(function() {
 			},
 			dataType: "json",
 			success: function(data) {
+
+				console.log(data.message);
+				if(typeof data.message == 'undefined') {	
+					$('.project-'+ item).html("No "+ item_status +" "+ item);	
+					$(".more-"+ item).toggle(false);
+				}
 				$('.project-'+ item).html(data.message);
-				
 				$('.project-'+ item +'-section .btn-group .bold').removeClass('bold');
 				$('.btn-'+ item_status +'-'+ item).addClass( "bold" );
 				$(".more-"+ item).toggle(true);
@@ -72,7 +77,7 @@ frappe.ready(function() {
 	var more_items = function(item, item_status){
 		if(item_status)
 		{
-			var item_status = $('.project-'+ item +'-section .btn-group .btn-primary').hasClass('btn-closed-'+ item) 
+			var item_status = $('.project-'+ item +'-section .btn-group .bold').hasClass('btn-closed-'+ item) 
 				? 'closed' : 'open';
 		}
 		$.ajax({
@@ -87,6 +92,7 @@ frappe.ready(function() {
 			},
 			dataType: "json",
 			success: function(data) {
+				
 				$(data.message).appendTo('.project-'+ item);
 				if(typeof data.message == 'undefined') {	
 					$(".more-"+ item).toggle(false);	
