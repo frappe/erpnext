@@ -43,6 +43,7 @@
 		{% if doc.timelines|length > 9 %}
 		<p><a class='more-timelines small underline'>{{ _("More") }}</a><p>
 		{% endif %}
+		
 {% endif %}
 
 <div class='padding'></div>
@@ -51,46 +52,47 @@
 
 {% if doc.tasks %}
 	<div class='project-tasks-section'>
-		<div class="btn-group btn-toggle">
-			<button class="btn btn-link btn-open-tasks"><span class="indicator orange"></span>Open</button>
-			<button class="btn btn-link btn-closed-tasks"><span class="indicator green"></span>Closed</button>
+		<div>
+			<div class="btn-group btn-toggle">
+				<button class="btn btn-link btn-open-tasks"><span class="indicator orange"></span>Open</button>
+				<button class="btn btn-link btn-closed-tasks"><span class="indicator green"></span>Closed</button>
+			</div>
+			<div class="pull-right">
+				<a class='small underline' href='/tasks?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New 							task</a>
+			</div>
 		</div>
 		<div class='project-tasks'>
 		{% include "erpnext/templates/includes/projects/project_tasks.html" %}
 		</div>
-
-		{% if doc.tasks|length > 9 %}
-			<p><a id= 'more-tasks' class='more-tasks small underline'>{{ _("More") }}</a><p>
-		{% endif %}
+		<p><a id= 'more-tasks' style='display: none;' class='more-tasks small underline'>{{ _("More") }}</a><p>
 	</div>
 {% else %}
 	<p class="text-muted">No tasks</p>
 {% endif %}
 
-<p><a href='/tasks?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>Add a new task</a></p>
 
 <div class='padding'></div>
 <h3>{{ _("Issues") }}</h3>
 
 {% if doc.issues %}
 	<div class='project-issues-section'>
-		<div class="btn-group btn-toggle">
-			<button class="btn btn-link btn-open-issues"><span class="indicator red"></span>Open</button>
-			<button class="btn btn-link btn-closed-issues"><span class="indicator green"></span>Closed</button>
+		<div>
+			<div class="btn-group btn-toggle">
+				<button class="btn btn-link btn-open-issues"><span class="indicator red"></span>Open</button>
+				<button class="btn btn-link btn-closed-issues"><span class="indicator green"></span>Closed</button>
+			</div>
+			<div class="pull-right">
+				<a class='small underline' href='/issues?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New issue</a>
+			</div>
 		</div>
 		<div class='project-issues'>
-		{% include "erpnext/templates/includes/projects/project_issues.html" %}
+			{% include "erpnext/templates/includes/projects/project_issues.html" %}
 		</div>
-
-		{% if doc.issues|length > 9 %}
-			<p><a id='more-issues' class='more-issues small underline'>{{ _("More") }}</a><p>
-		{% endif %}
+		<p><a id='more-issues' style='display: none;' class='more-issues small underline'>{{ _("More") }}</a><p>	
 	</div>
 {% else %}
 	<p class="text-muted">No Issues</p>
 {% endif %}
-
-<p>	<a href='/issues?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>Add a new issue</a></p>
 
 <div class='padding'></div>
 

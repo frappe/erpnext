@@ -70,7 +70,7 @@ def get_tasks(project, start=0, search=None, item_status=None):
 	if search:
 		filters["subject"] = ("like", "%{0}%".format(search))
 	if item_status:
-		filters = {"status": item_status}
+		filters["status"] = item_status
 	tasks = frappe.get_all("Task", filters=filters,
 		fields=["name", "subject", "status", "exp_start_date", "exp_end_date", "priority"],
 		limit_start=start, limit_page_length=10)
@@ -97,7 +97,7 @@ def get_issues(project, start=0, search=None, item_status=None):
 	if search:
 		filters["subject"] = ("like", "%{0}%".format(search))
 	if item_status:
-		filters = {"status": item_status}
+		filters["status"] = item_status
 	issues = frappe.get_all("Issue", filters=filters,
 		fields=["name", "subject", "status", "opening_date", "resolution_date", "resolution_details"],
 		order_by='modified desc',
