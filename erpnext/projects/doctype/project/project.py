@@ -123,19 +123,30 @@ class Project(Document):
 			from `tabPurchase Invoice Item` where project = %s and docstatus=1""", self.name)
 
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
-		
-	
+
+
 
 def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20):
-	from frappe.templates.pages.list import get_list
-	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=True)
-		
+	return frappe.db.sql('''select distinct project.*
+		from tabProject project, `tabProject User` project_user
+		where
+			(project_user.user = %(user)s
+			and project_user.parent = project.name)
+			or project.owner = %(user)s
+			order by project.modified desc
+			limit {0}, {1}
+		'''.format(limit_start, limit_page_length),
+			{'user':frappe.session.user},
+			as_dict=True,
+			update={'doctype':'Project'})
+
 def get_list_context(context=None):
 	return {
 		"title": _("My Projects"),
 		"get_list": get_project_list,
 		"row_template": "templates/includes/project_row.html"
 	}
+
 @frappe.whitelist()
 def get_cost_center_name(project):
 	return frappe.db.get_value("Project", project, "cost_center")

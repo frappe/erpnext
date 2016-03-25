@@ -13,6 +13,18 @@
 	padding-bottom: 5px;
 }
 
+#project-search {
+	border: none;
+}
+
+.task-link {
+	font-weight: bold;
+}
+
+.task-link.seen {
+	font-weight: normal;
+}
+
 .row-header {
     font-size: 14px;
     font-weight: 500;
@@ -136,7 +148,7 @@ float: right;*/
     color: #fff;
 }
 
-   
+
 .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label {
     position: relative;
     background: #f5f5f6;

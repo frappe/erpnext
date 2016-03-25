@@ -15,11 +15,14 @@ def get_context(context):
 	context.issues = frappe.get_all('Issue', filters={'project': project.project_name},
 	fields=['subject', 'opening_date', 'resolution_date', 'status', 'name', 'resolution_details','modified','modified_by'])
 
-	project.tasks = get_tasks(project.name, start=0, search=frappe.form_dict.get("q"))
+	project.tasks = get_tasks(project.name, start=0, item_status='open',
+		search=frappe.form_dict.get("q"))
 
-	project.timelogs = get_timelogs(project.name, start=0, search=frappe.form_dict.get("q"))
+	project.issues = get_issues(project.name, start=0, item_status='open',
+		search=frappe.form_dict.get("q"))
 
-	project.issues = get_issues(project.name, start=0, search=frappe.form_dict.get("q"))
+	project.timelogs = get_timelogs(project.name, start=0,
+		search=frappe.form_dict.get("q"))
 
 	project.timelines = get_timeline(project.project_name, start=0)
 
@@ -60,10 +63,14 @@ def get_timeline(project, start=10):
 @frappe.whitelist()
 def get_timelines_html(project, start=0):
 	return frappe.render_template("erpnext/templates/includes/projects/timeline.html",
-		{"doc": {"timelines": get_timeline(project, start)}}, is_path=True)
+		{"doc": {
+			"timelines": get_timeline(project, start)}
+		}, is_path=True)
 
 def get_issue_list(project):
 	return [issue.name for issue in get_issues(project)]
+
+
 
 def get_tasks(project, start=0, search=None, item_status=None):
 	filters = {"project": project}
@@ -72,24 +79,37 @@ def get_tasks(project, start=0, search=None, item_status=None):
 	if item_status:
 		filters["status"] = item_status
 	tasks = frappe.get_all("Task", filters=filters,
-		fields=["name", "subject", "status", "exp_start_date", "exp_end_date", "priority"],
+		fields=["name", "subject", "status", "exp_start_date", "exp_end_date", "priority", "_seen"],
 		limit_start=start, limit_page_length=10)
 
 	for task in tasks:
-		print task._comments
 		task.todo = frappe.get_all('ToDo',filters={'reference_name':task.name, 'reference_type':'Task'},
 		fields=["assigned_by", "owner", "modified", "modified_by"])
+
 		if task.todo:
 			task.todo=task.todo[0]
 			task.todo.user_image = frappe.db.get_value('User', task.todo.owner, 'user_image')
+
 		if task._comments:
 			task.comment_count = len(json.loads(task._comments or "[]"))
+
+		task.css_seen = ''
+		if task._seen:
+			if frappe.session.user in json.loads(task._seen):
+				task.css_seen = 'seen'
+
 	return tasks
 
 @frappe.whitelist()
-def get_tasks_html(project, start=0, item_status=None):
+def get_task_html(project, start=0, item_status=None):
 	return frappe.render_template("erpnext/templates/includes/projects/project_tasks.html",
-		{"doc": {"tasks": get_tasks(project, start, item_status=item_status)}}, is_path=True)
+		{"doc": {
+			"name": project,
+			"project_name": project,
+			"tasks": get_tasks(project, start, item_status=item_status)}
+		}, is_path=True)
+
+
 
 
 def get_issues(project, start=0, search=None, item_status=None):
@@ -113,9 +133,17 @@ def get_issues(project, start=0, search=None, item_status=None):
 	return issues
 
 @frappe.whitelist()
-def get_issues_html(project, start=0, item_status=None):
+def get_issue_html(project, start=0, item_status=None):
 	return frappe.render_template("erpnext/templates/includes/projects/project_issues.html",
-		{"doc": {"issues": get_issues(project, start, item_status=item_status)}}, is_path=True)
+		{"doc": {
+			"name": project,
+			"project_name": project,
+			"issues": get_issues(project, start, item_status=item_status)}
+		}, is_path=True)
+
+
+
+
 
 def get_timelogs(project, start=0, search=None):
 	filters = {"project": project}
@@ -130,19 +158,7 @@ def get_timelogs(project, start=0, search=None):
 	return timelogs
 
 @frappe.whitelist()
-def get_timelogs_html(project, start=0):
+def get_timelog_html(project, start=0):
 	return frappe.render_template("erpnext/templates/includes/projects/project_timelogs.html",
 		{"doc": {"timelogs": get_timelogs(project, start)}}, is_path=True)
-
-@frappe.whitelist()
-def set_task_status(project, item_name):
-	task = frappe.get_doc("Task", item_name)
-	task.status = 'Closed'
-	task.save(ignore_permissions=True)
-
-@frappe.whitelist()
-def set_issue_status(project, item_name):
-	issue = frappe.get_doc("Issue", item_name)
-	issue.status = 'Closed'
-	issue.save(ignore_permissions=True)
 

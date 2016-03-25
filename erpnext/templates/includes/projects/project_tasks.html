@@ -4,23 +4,20 @@
 	<div class='task'>
 		<div class='row project-item'>
 			<div class='col-xs-9'>
-				<a class="no-decoration" href="/tasks?name={{ task.name }}{{ back_link(doc) }}">
-					<span class="indicator {{ "orange" if task.status=="Open" else "green" }}">
-						{% if task.status == "Closed" %}
-						{{ task.subject }} completed on {{ task.closing_date }}
-						{% else %}
-						{{ task.subject }}
-						{% endif %}
-					</span>
-				</a>
-			</div>
-			<div class='col-xs-3'>
-				<div class='pull-right'>
-					{% if task.todo %} <span class="avatar avatar-small" title="{{ task.todo.owner }}"> <img src="{{ 				task.todo.user_image }}"></span>
+				{% if task.todo %}
+				<span class="avatar avatar-small" title="{{ task.todo.owner }}">
+					<img src="{{ task.todo.user_image }}">
+				</span>
+				{% else %}
+				<span class="avatar avatar-small avatar-empty"></span>
+				{% endif %}
+				<a class="no-decoration task-link {{ task.css_seen }}" href="/tasks?name={{ task.name }}{{ back_link(doc) }}">
+					{% if task.status == "Closed" %}
+					{{ task.subject }} completed on {{ task.closing_date }}
 					{% else %}
-					<span class="avatar avatar-small avatar-empty"></span>
+					{{ task.subject }}
 					{% endif %}
-				</div>
+				</a>
 			</div>
 		</div>
 	</div>

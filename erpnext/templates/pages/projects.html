@@ -30,9 +30,9 @@
 
 {% block page_content %}
 
-{% include 'templates/includes/project_search_box.html' %}
+{% include 'templates/includes/projects/project_search_box.html' %}
 
-{% if frappe.form_dict.q %}
+<!-- {% if frappe.form_dict.q %}
 	<p class="text-muted"> <a href="/projects?project={{doc.name}}" class="text-muted">
 	Filtered by "{{ frappe.form_dict.q }}" Clear</a></p>
 {% else %}
@@ -43,56 +43,48 @@
 		{% if doc.timelines|length > 9 %}
 		<p><a class='more-timelines small underline'>{{ _("More") }}</a><p>
 		{% endif %}
-		
-{% endif %}
+
+{% endif %} -->
 
 <div class='padding'></div>
 
 <h3>{{ _("Tasks") }}</h3>
 
+<p>
+<a class='small underline' href='/tasks?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New task</a>
+<a class='small underline task-status-switch' data-status='Open'>{{ _("Show closed") }}</a>
+</p>
+
 {% if doc.tasks %}
-	<div class='project-tasks-section'>
-		<div>
-			<div class="btn-group btn-toggle">
-				<button class="btn btn-link btn-open-tasks"><span class="indicator orange"></span>Open</button>
-				<button class="btn btn-link btn-closed-tasks"><span class="indicator green"></span>Closed</button>
-			</div>
-			<div class="pull-right">
-				<a class='small underline' href='/tasks?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New 							task</a>
-			</div>
-		</div>
-		<div class='project-tasks'>
+	<div class='project-task-section'>
+		<div class='project-task'>
 		{% include "erpnext/templates/includes/projects/project_tasks.html" %}
 		</div>
-		<p><a id= 'more-tasks' style='display: none;' class='more-tasks small underline'>{{ _("More") }}</a><p>
+		<p><a id= 'more-task' style='display: none;' class='more-tasks small underline'>{{ _("More") }}</a><p>
 	</div>
 {% else %}
 	<p class="text-muted">No tasks</p>
 {% endif %}
 
 
-<div class='padding'></div>
+<!-- <div class='padding'></div>
 <h3>{{ _("Issues") }}</h3>
 
+<p>
+	<a class='small underline' href='/issues?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New issue</a>
+	<a class='small underline issue-status-switch' data-status='Open'>{{ _("Show closed") }}</a>
+</p>
+
 {% if doc.issues %}
-	<div class='project-issues-section'>
-		<div>
-			<div class="btn-group btn-toggle">
-				<button class="btn btn-link btn-open-issues"><span class="indicator red"></span>Open</button>
-				<button class="btn btn-link btn-closed-issues"><span class="indicator green"></span>Closed</button>
-			</div>
-			<div class="pull-right">
-				<a class='small underline' href='/issues?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New issue</a>
-			</div>
-		</div>
-		<div class='project-issues'>
+	<div class='project-issue-section'>
+		<div class='project-issue'>
 			{% include "erpnext/templates/includes/projects/project_issues.html" %}
 		</div>
-		<p><a id='more-issues' style='display: none;' class='more-issues small underline'>{{ _("More") }}</a><p>	
+		<p><a id='more-issue' style='display: none;' class='more-issues small underline'>{{ _("More") }}</a><p>
 	</div>
 {% else %}
 	<p class="text-muted">No Issues</p>
-{% endif %}
+{% endif %} -->
 
 <div class='padding'></div>
 
