@@ -11,48 +11,35 @@ do not get out of hand, at any point, as per your plans.
 You can define it in the Cost Center. If you have seasonal sales you can also
 define a budget distribution that the budget will follow.
 
-In order to allocate budget, go to Accounts > Setup > Chart of Cost Centers and click on Chart of Cost Center.
-Select a Cost Center and click on Open.
+In order to allocate budget, go to:
 
-#### Step 1: Click on Edit.
+> Accounts > Setup > Chart of Cost Centers 
 
-![]({{docs_base_url}}/assets/old_images/erpnext/budgeting-1.png)  
+and click on Chart of Cost Center. Select a Cost Center and click on Open.
 
-<img alt="Accounts Receivable" class="screenshot" src="{{docs_base_url}}/assets/img/accounts/accounts-receivable.png">
+#### Step 1: Click on Edit.	 
 
-#### Step 2: Enter Monthly Distribution.
+<img alt="Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/accounts/cost-center-1.gif">
 
-![]({{docs_base_url}}/assets/old_images/erpnext/budgeting-2-1.png)
+#### Step 3:Add New Row and select budget account.  
 
+<img alt="Cost Center Account" class="screenshot" src="{{docs_base_url}}/assets/img/accounts/cost-center-2.png"> 
+
+#### Step 3: Enter Monthly Distribution (optional)
+
+<img alt="Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/accounts/cost-center-distribution.gif">
 
 If you leave the** **distribution ID blank, ERPNext will calculate on a yearly
 basis or in equal proportion for every month.
 
-#### Step 3:Add New Row and select budget account.  
-
-
-
-![]({{docs_base_url}}/assets/old_images/erpnext/budgeting-3.png)  
-
-
-
 ### To Create New Distribution ID
 
-ERPNext allows you to take a few budget actions. It signifies whether to stop
-, warn or Ignore  if you exceed budgets.  
-
-![]({{docs_base_url}}/assets/old_images/erpnext/budgeting-4.png)
-
-
+ERPNext allows you to take a few budget actions. It signifies whether to stop, warn or Ignore  if you exceed budgets.
 
 These can be defined from the Company record.
 
-![]({{docs_base_url}}/assets/old_images/erpnext/budgeting-4-1.png)  
+<img alt="Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/accounts/cost-center-company.gif">
 
-
-
-Even if you choose to “ignore” budget overruns, you will get a wealth of
-information from the “Budget vs Actual” variance report. This report shows
-month wise actual expenses as compared to the budgeted expenses.
+Even if you choose to “ignore” budget overruns, you will get a wealth of information from the “Budget vs Actual” variance report. This report shows month wise actual expenses as compared to the budgeted expenses.
 
 {next}
