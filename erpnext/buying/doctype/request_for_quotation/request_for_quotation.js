@@ -22,9 +22,7 @@ frappe.ui.form.on("Request for Quotation",{
 	
 	refresh: function(frm, cdt, cdn){
 		if (frm.doc.docstatus === 1) {
-			frm.add_custom_button(__("Supplier Quotation"), function(){ frm.trigger("make_suppplier_quotation") },
-				__("Make"));
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
+			frm.add_custom_button(__("Make Supplier Quotation"), function(){ frm.trigger("make_suppplier_quotation") });
 		}
 	},
 
@@ -33,13 +31,8 @@ frappe.ui.form.on("Request for Quotation",{
 		var dialog = new frappe.ui.Dialog({
 			title: __("For Supplier"),
 			fields: [
-				{"fieldtype": "Link", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier",
-					"get_query": function () {
-						return {
-							query:"erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier",
-							filters: {'parent': doc.name}
-						}
-					}, "reqd": 1 },
+				{"fieldtype": "Select", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier",
+					"options": $.map(doc.suppliers, function(d){ return d.supplier }), "reqd": 1 },
 				{"fieldtype": "Button", "label": __("Make Supplier Quotation"), "fieldname": "make_supplier_quotation", "cssClass": "btn-primary"},
 			]
 		});
