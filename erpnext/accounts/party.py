@@ -16,7 +16,7 @@ class DuplicatePartyAccountError(frappe.ValidationError): pass
 
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None,
-	posting_date=None, price_list=None, currency=None, doctype=None):
+	posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
 
 	if not party:
 		return {}
@@ -25,7 +25,7 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 
 	return _get_party_details(party, account, party_type,
-		company, posting_date, price_list, currency, doctype)
+		company, posting_date, price_list, currency, doctype, ignore_permissions)
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None,
 	posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):

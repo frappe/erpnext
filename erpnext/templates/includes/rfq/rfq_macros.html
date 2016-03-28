@@ -1,0 +1,21 @@
+{% from "erpnext/templates/includes/macros.html" import product_image_square %}
+
+{% macro item_name_and_description(d, doc) %}
+    <div class="row">
+        <div class="col-xs-4 col-sm-2 order-image-col">
+            <div class="order-image">
+                {{ product_image_square(d.image) }}
+            </div>
+        </div>
+        <div class="col-xs-8 col-sm-10">
+            {{ d.item_code }}
+            <p class="text-muted small">{{ d.description }}</p>
+			{% set supplier_part_no = frappe.db.get_value("Item Supplier", {'parent': d.item_code, 'supplier': doc.supplier}, "supplier_part_no") %}
+			<p class="text-muted small supplier-part-no">
+				{% if supplier_part_no %}
+					{{_("Supplier Part No") + ": "+ supplier_part_no}}
+				{% endif %}
+			</p>
+        </div>
+    </div>
+{% endmacro %}
