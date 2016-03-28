@@ -143,3 +143,7 @@ default_mail_footer = """<div style="text-align: center;">
 get_translated_dict = {
 	("doctype", "Global Defaults"): "frappe.geo.country_info.get_translated_dict"
 }
+
+bot_parsers = [
+	'erpnext.utilities.bot.FindItemBot',
+]
