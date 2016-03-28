@@ -12,6 +12,7 @@ def post_depreciation_entries(date=None):
 		date = today()
 	for asset in get_depreciable_assets(date):
 		make_depreciation_entry(asset, date)
+		frappe.db.commit()
 	
 def get_depreciable_assets(date):
 	return frappe.db.sql_list("""select a.name

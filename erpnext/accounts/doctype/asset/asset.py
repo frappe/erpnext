@@ -39,7 +39,7 @@ class Asset(Document):
 		if not flt(self.gross_purchase_amount):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 			
-		if not self.current_value:
+		if not self.current_value and self.next_depreciation_date:
 			self.current_value = flt(self.gross_purchase_amount)
 		else:
 			if flt(self.current_value) > flt(self.gross_purchase_amount):
@@ -55,7 +55,7 @@ class Asset(Document):
 				
 	def make_depreciation_schedule(self):
 		self.schedules = []
-		if not self.get("schedules"):
+		if not self.get("schedules") and self.next_depreciation_date:
 			accumulated_depreciation = 0
 			value_after_depreciation = flt(self.current_value)
 			for n in xrange(self.number_of_depreciations):
@@ -126,4 +126,4 @@ class Asset(Document):
 			elif self.docstatus == 2:
 				status = "Cancelled"
 
-		frappe.db.set_value(self.doctype, self.name, "status", status)
+		self.db_set("status", status)
