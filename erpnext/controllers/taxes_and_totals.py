@@ -59,6 +59,11 @@ class calculate_taxes_and_totals(object):
 					item.rate = flt(item.price_list_rate *
 						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 
+				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']:
+					item.total_margin = self.calculate_margin(item)
+					item.rate = flt(item.total_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))\
+						if item.total_margin > 0 else item.rate
+
 				item.net_rate = item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.net_amount = item.amount
@@ -435,3 +440,17 @@ class calculate_taxes_and_totals(object):
 				self.doc.precision("outstanding_amount"))
 		elif self.doc.doctype == "Purchase Invoice":
 			self.doc.outstanding_amount = flt(total_amount_to_pay, self.doc.precision("outstanding_amount"))
+
+	def calculate_margin(self, item):
+		total_margin = 0.0
+		if item.price_list_rate:
+			if item.pricing_rule and not self.doc.ignore_pricing_rule: 
+				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
+				item.margin_type = pricing_rule.margin_type
+				item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
+
+			if item.margin_type and item.margin_rate_or_amount:
+				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
+				total_margin = flt(item.price_list_rate) + flt(margin_value)
+
+		return total_margin 

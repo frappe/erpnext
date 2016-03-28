@@ -415,6 +415,21 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertEquals(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_reserved_qty)
 
+	def test_create_so_with_margin(self):
+		so = make_sales_order(item_code="_Test Item", qty=1, do_not_submit=True)
+		so.items[0].price_list_rate = price_list_rate = 100
+		so.items[0].margin_type = 'Percentage'
+		so.items[0].margin_rate_or_amount = 25
+		so.insert()
+		
+		new_so = frappe.copy_doc(so)
+		new_so.save(ignore_permissions=True)
+		
+		self.assertEquals(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
+		new_so.items[0].margin_rate_or_amount = 25
+		new_so.submit()
+
+		self.assertEquals(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")

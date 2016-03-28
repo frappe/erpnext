@@ -101,9 +101,8 @@ def process_args(args):
 		args.item_code = get_item_code(barcode=args.barcode)
 	elif not args.item_code and args.serial_no:
 		args.item_code = get_item_code(serial_no=args.serial_no)
-
+	
 	set_transaction_type(args)
-
 	return args
 
 @frappe.whitelist()
@@ -433,7 +432,6 @@ def apply_price_list(args, as_doc=False):
 					# update the value
 					if fieldname in item and fieldname not in ("name", "doctype"):
 						item[fieldname] = children[i][fieldname]
-
 		return args
 	else:
 		return {
@@ -511,4 +509,4 @@ def get_gross_profit(out):
 		})
 	
 	return out
-	
+

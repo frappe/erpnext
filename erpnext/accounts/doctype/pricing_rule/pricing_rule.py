@@ -124,7 +124,7 @@ def get_pricing_rule_for_item(args):
 		"name": args.name,
 		"pricing_rule": None
 	})
-
+	
 	if args.ignore_pricing_rule or not args.item_code:
 		return item_details
 
@@ -155,6 +155,8 @@ def get_pricing_rule_for_item(args):
 	if pricing_rule:
 		item_details.pricing_rule = pricing_rule.name
 		item_details.pricing_rule_for = pricing_rule.price_or_discount
+		item_details.margin_type = pricing_rule.margin_type
+		item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 		if pricing_rule.price_or_discount == "Price":
 			item_details.update({
 				"price_list_rate": pricing_rule.price/flt(args.conversion_rate) \
@@ -163,7 +165,6 @@ def get_pricing_rule_for_item(args):
 			})
 		else:
 			item_details.discount_percentage = pricing_rule.discount_percentage
-
 	return item_details
 
 def get_pricing_rules(args):
