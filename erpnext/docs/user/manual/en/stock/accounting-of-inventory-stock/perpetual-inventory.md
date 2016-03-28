@@ -143,11 +143,11 @@ details of Purchase Receipt:
 <p><strong>Stock Ledger</strong>
 </p>
 
-![pr<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-2.png)
+<img alt="Stock" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-2.png">
 
 **General Ledger**
 
-![pr<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-3.png)
+<img alt="Leger" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-3.png">
 
 As stock balance increases through Purchase Receipt, "Store" and "Fixed Asset
 Warehouse" accounts are debited and a temporary account "Stock Receipt But Not
@@ -162,7 +162,7 @@ Purchase Invoice for the same. The general ledger entries are as follows:
 
 **General Ledger**
 
-![pi<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-4.png)
+<img alt="General" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-4.png">
 
 Here "Stock Received But Not Billed" account is debited and nullified the
 effect of Purchase Receipt.
@@ -220,11 +220,11 @@ at $300. Following are the details of Delivery Note:
 
 **Stock Ledger**
 
-![dn<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-5.png)
+<img alt="Stock" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-5.png">
 
 **General Ledger**
 
-![dn<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-6.png)
+<img alt="General" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-6.png">
 
 As item is delivered from "Stores" warehouse, "Stores" account is credited and
 equal amount is debited to the expense account "Cost of Goods Sold". The
@@ -254,11 +254,11 @@ of the Sales Invoice are same as the above Delivery Note.
 
 **Stock Ledger**
 
-![si<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-7.png)
+<img alt="Stock" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-7.png">
 
 **General Ledger**
 
-![si<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-8.png)
+<img alt="General" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-8.png">
 
 Here, apart from normal account entries for invoice, "Stores" and "Cost of
 Goods Sold" accounts are also affected based on the valuation amount.
@@ -292,11 +292,11 @@ Goods Sold" accounts are also affected based on the valuation amount.
 
 **Stock Ledger**
 
-![mr<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-9.png)
+<img alt="Stock" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-9.png">
 
 **General Ledger**
 
-![mr<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-10.png)
+<img alt="General" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-10.png">
 
 * * *
 
@@ -327,11 +327,11 @@ Goods Sold" accounts are also affected based on the valuation amount.
 
 **Stock Ledger**
 
-![mi<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-11.png)
+<img alt="Stock" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-11.png">
 
 **General Ledger**
 
-![mi<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-12.png)
+<img alt="Stock" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-12.png">
 
 * * *
 
@@ -364,8 +364,10 @@ Goods Sold" accounts are also affected based on the valuation amount.
 
 **Stock Ledger**
 
-![mtn<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-13.png)
+<img alt="Stock" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-13.png">
 
 **General Ledger**
 
-![mtn<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-14.png)
+<img alt="Stock" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-14.png">
+
+{ next }

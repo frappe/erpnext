@@ -29,7 +29,7 @@ HTML, CSS, Python to learn this. For help, please post on our forum.
 
 Print Formats are rendered on the server side using the [Jinja Templating Language](http://jinja.pocoo.org/docs/templates/). All forms have access to the doc object which contains information about the document that is being formatted. You can also access common utilities via the frappe module.
 
-For styling, the [Boostrap CSS Framework](http://getbootstrap.com/) is provided and you can enjoy the full range of classes.
+For styling, the [Bootstrap CSS Framework](http://getbootstrap.com/) is provided and you can enjoy the full range of classes.
 
 > Note: Pre-printed stationary is usually not a good idea because your Prints
 will look incomplete (inconsistent) when you send them by mail.

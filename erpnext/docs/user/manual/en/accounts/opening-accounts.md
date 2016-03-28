@@ -1,4 +1,4 @@
-Now that you have completed most of the setup, its time to start moving in!
+	Now that you have completed most of the setup, its time to start moving in!
 
 There are two important sets of data you need to enter before you start your
 operations.
