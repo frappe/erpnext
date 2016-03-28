@@ -48,9 +48,12 @@ class AccountsController(TransactionBase):
 		self.validate_party()
 		self.validate_currency()
 		
-		if self.meta.get_field("is_recurring") and not self.get("__islocal"):
-			validate_recurring_document(self)
-			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
+		if self.meta.get_field("is_recurring"):
+			if self.amended_from and self.recurring_id:
+				self.recurring_id = None
+			if not self.get("__islocal"):
+				validate_recurring_document(self)
+				convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
 
 	def on_update_after_submit(self):
 		if self.meta.get_field("is_recurring"):
