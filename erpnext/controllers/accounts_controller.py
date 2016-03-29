@@ -279,7 +279,7 @@ class AccountsController(TransactionBase):
 		res = frappe.db.sql("""
 			select
 				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no,
-				reference_name as against_order
+				t2.reference_name as against_order
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
