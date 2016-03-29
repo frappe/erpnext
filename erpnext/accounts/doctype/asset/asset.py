@@ -101,7 +101,7 @@ class Asset(Document):
 			
 				d.db_set("journal_entry", None)
 				total_depreciation_amount += flt(d.depreciation_amount)
-		self.db_set("current_value", (self.current_value - total_depreciation_amount))
+		self.db_set("current_value", (self.current_value + total_depreciation_amount))
 		
 	def validate_depreciation_settings_in_company(self):
 		company = frappe.get_doc("Company", self.company)

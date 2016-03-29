@@ -266,15 +266,18 @@ class PurchaseInvoice(BuyingController):
 						frappe.throw(_("Purchase Date of asset {0} does not match with Purchase Invoice date")
 							.format(d.asset))
 					
-					if asset.supplier != self.supplier:
+					if asset.supplier and asset.supplier != self.supplier:
 						frappe.throw(_("Supplier of asset {0} does not match with the supplier in the Purchase Invoice").format(d.asset))
 				
-					if asset.status != "Available":
+					if asset.status != "Submitted":
 						frappe.throw(_("Row #{0}: Asset {1} is already {2}")
 							.format(d.idx, d.asset, asset.status))
 					
 					frappe.db.set_value("Asset", asset.name, "purchase_invoice", 
 						(self.name if self.docstatus==1 else None))
+						
+					if self.docstatus==1 and not asset.supplier:
+						frappe.db.set_value("Asset", asset.name, "supplier", self.supplier)
 					
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \

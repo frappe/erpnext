@@ -28,7 +28,7 @@ Explanation of the fields:
 	- Double Declining Method: An accelerated method of depreciation, it results in higher depreciation expense in the earlier years of ownership.
 8. Number of Depreciations: The number of depreciations during the useful life. In case of existing assets which are partially depreciated, mention the number of pending depreciations.
 9. Number of Months in a Period: The number of months between two depreciations.
-10. Next Depreciation Date: Mention the next depreciation date, even if it is the first one.
+10. Next Depreciation Date: Mention the next depreciation date, even if it is the first one. If depreciation already completed, leave it blank.
 
 ### Depreciations
 
