@@ -37,7 +37,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "project", 
    "fieldtype": "Link", 
@@ -770,7 +770,7 @@
  "istable": 0, 
  "max_attachments": 5, 
  "menu_index": 0, 
- "modified": "2016-03-25 05:27:03.346334", 
+ "modified": "2016-03-29 01:01:50.074252", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Task", 

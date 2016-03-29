@@ -180,7 +180,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				var excise = frappe.model.make_new_doc_and_get_name('Journal Entry');
 				excise = locals['Journal Entry'][excise];
 				excise.voucher_type = 'Excise Entry';
-				loaddoc('Journal Entry', excise.name);
+				frappe.set_route('Form', 'Journal Entry', excise.name);
 			}, __("Make"));
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 	},

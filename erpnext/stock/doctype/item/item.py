@@ -52,11 +52,14 @@ class Item(WebsiteGenerator):
 		if self.is_sales_item=="Yes":
 			self.publish_in_hub = 1
 
+		if not self.description:
+			self.description = self.item_name
+
 	def validate(self):
 		super(Item, self).validate()
 
-		if not self.stock_uom:
-			msgprint(_("Please enter default Unit of Measure"), raise_exception=1)
+		if not self.description:
+			self.description = self.item_name
 
 		self.validate_uom()
 		self.add_default_uom_in_conversion_factor_table()

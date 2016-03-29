@@ -216,7 +216,7 @@ cur_frm.cscript.new_contact = function(){
 	tn = frappe.model.make_new_doc_and_get_name('Contact');
 	locals['Contact'][tn].is_customer = 1;
 	if(doc.customer) locals['Contact'][tn].customer = doc.customer;
-	loaddoc('Contact', tn);
+	frappe.set_route('Form', 'Contact', tn);
 }
 
 cur_frm.fields_dict['project'].get_query = function(doc, cdt, cdn) {

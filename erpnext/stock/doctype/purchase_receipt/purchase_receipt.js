@@ -181,7 +181,7 @@ cur_frm.cscript.new_contact = function() {
 	locals['Contact'][tn].is_supplier = 1;
 	if(doc.supplier)
 		locals['Contact'][tn].supplier = doc.supplier;
-	loaddoc('Contact', tn);
+	frappe.set_route('Form', 'Contact', tn);
 }
 
 cur_frm.fields_dict['items'].grid.get_field('project').get_query = function(doc, cdt, cdn) {

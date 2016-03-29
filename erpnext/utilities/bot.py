@@ -11,6 +11,9 @@ from frappe import _
 class FindItemBot(BotParser):
 	def get_reply(self):
 		if self.startswith('where is', 'find item', 'locate'):
+			if not frappe.has_permission('Warehouse'):
+				raise frappe.PermissionError
+
 			item = '%{0}%'.format(self.strip_words(self.query, 'where is', 'find item', 'locate'))
 			items = frappe.db.sql('''select name from `tabItem` where item_code like %(txt)s
 				or item_name like %(txt)s or description like %(txt)s''', dict(txt=item))
