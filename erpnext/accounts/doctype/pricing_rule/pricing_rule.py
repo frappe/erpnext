@@ -242,6 +242,8 @@ def filter_pricing_rules(args, pricing_rules):
 		for p in pricing_rules:
 			if p.item_code and args.variant_of:
 				p.variant_of = args.variant_of
+			else:
+				p.variant_of = None
 
 	# find pricing rule with highest priority
 	if pricing_rules:
@@ -251,7 +253,7 @@ def filter_pricing_rules(args, pricing_rules):
 
 	# apply internal priority
 	all_fields = ["item_code", "item_group", "brand", "customer", "customer_group", "territory",
-		"supplier", "supplier_type", "campaign", "sales_partner"]
+		"supplier", "supplier_type", "campaign", "sales_partner", "variant_of"]
 
 	if len(pricing_rules) > 1:
 		for field_set in [["item_code", "variant_of", "item_group", "brand"],
