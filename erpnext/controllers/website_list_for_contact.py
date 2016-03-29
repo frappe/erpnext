@@ -28,15 +28,14 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 	filters.append((doctype, "docstatus", "=", 1))
 
 	if user != "Guest" and is_website_user():
+		parties_doctype = 'RFQ Supplier' if doctype == 'Request for Quotation' else doctype
 		# find party for this contact
-		customers, suppliers = get_customers_suppliers(doctype, user)
+		customers, suppliers = get_customers_suppliers(parties_doctype, user)
+		key, parties = get_party_details(customers, suppliers)
 
-		if customers:
-			key, parties = "customer", customers
-		elif suppliers:
-			key, parties = "supplier", suppliers
-		else:
-			key, parties = "customer", []
+		if doctype == 'Request for Quotation':
+			if key == 'customer': frappe.throw(_("Not Permitted"), frappe.PermissionError)
+			return rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length)
 
 		filters.append((doctype, key, "in", parties))
 
@@ -51,6 +50,23 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 
 	return post_process(doctype, get_list(doctype, txt, filters, limit_start, limit_page_length,
 		fields="name", order_by = "modified desc"))
+
+def get_party_details(customers, suppliers):
+	if customers:
+		key, parties = "customer", customers
+	elif suppliers:
+		key, parties = "supplier", suppliers
+	else:
+		key, parties = "customer", []
+
+	return key, parties
+
+def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length):
+	data = frappe.db.sql("""select distinct parent as name, supplier from `tab{doctype}`
+			where supplier = '{supplier}' and docstatus=1  order by modified desc limit {start}, {len}""".
+			format(doctype=parties_doctype, supplier=parties[0], start=limit_start, len = limit_page_length), as_dict=1)
+
+	return post_process(doctype, data)
 
 def post_process(doctype, data):
 	result = []

@@ -12,8 +12,10 @@
 
 <div>{{ description }}</div>
 
-<a class='btn btn-primary'
-	href='/job_application?job_title={{ doc.job_title }}'>
+<p>
+	<a class='btn btn-primary'
+	href='/job_application?job_title={{ doc.name }}'>
 	{{ _("Apply Now") }}</a>
+</p>
 
 {% endblock %}

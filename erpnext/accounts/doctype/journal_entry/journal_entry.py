@@ -501,7 +501,7 @@ class JournalEntry(AccountsController):
 
 	def validate_empty_accounts_table(self):
 		if not self.get('accounts'):
-			frappe.throw("Accounts table cannot be blank.")
+			frappe.throw(_("Accounts table cannot be blank."))
 
 	def set_account_and_party_balance(self):
 		account_balance = {}

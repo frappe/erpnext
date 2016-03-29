@@ -50,6 +50,10 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						this.make_purchase_order, __("Make"));
 
 				if(doc.material_request_type === "Purchase")
+					cur_frm.add_custom_button(__("Request for Quotation"),
+						this.make_request_for_quotation, __("Make"));
+
+				if(doc.material_request_type === "Purchase")
 					cur_frm.add_custom_button(__("Supplier Quotation"),
 					this.make_supplier_quotation, __("Make"));
 				
@@ -154,6 +158,14 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	make_purchase_order: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
+			frm: cur_frm,
+			run_link_triggers: true
+		});
+	},
+	
+	make_request_for_quotation: function(){
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.material_request.material_request.make_request_for_quotation",
 			frm: cur_frm,
 			run_link_triggers: true
 		});

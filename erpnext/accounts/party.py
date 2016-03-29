@@ -16,7 +16,7 @@ class DuplicatePartyAccountError(frappe.ValidationError): pass
 
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None,
-	posting_date=None, price_list=None, currency=None, doctype=None):
+	posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
 
 	if not party:
 		return {}
@@ -25,7 +25,7 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 
 	return _get_party_details(party, account, party_type,
-		company, posting_date, price_list, currency, doctype)
+		company, posting_date, price_list, currency, doctype, ignore_permissions)
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None,
 	posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
@@ -313,8 +313,8 @@ def validate_party_frozen_disabled(party_type, party_name):
 	if party_type and party_name:
 		party = frappe.db.get_value(party_type, party_name, ["is_frozen", "disabled"], as_dict=True)
 		if party.disabled:
-			frappe.throw("{0} {1} is disabled".format(party_type, party_name), PartyDisabled)
+			frappe.throw(_("{0} {1} is disabled".format(party_type, party_name), PartyDisabled))
 		elif party.is_frozen:
 			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
 			if not frozen_accounts_modifier in frappe.get_roles():
-				frappe.throw("{0} {1} is frozen".format(party_type, party_name), PartyFrozen)
+				frappe.throw(_("{0} {1} is frozen".format(party_type, party_name), PartyFrozen))

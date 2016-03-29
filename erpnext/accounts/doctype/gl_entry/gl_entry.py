@@ -41,7 +41,7 @@ class GLEntry(Document):
 		mandatory = ['account','remarks','voucher_type','voucher_no','company']
 		for k in mandatory:
 			if not self.get(k):
-				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
+				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
 
 		account_type = frappe.db.get_value("Account", self.account, "account_type")
 		if account_type in ["Receivable", "Payable"] and not (self.party_type and self.party):

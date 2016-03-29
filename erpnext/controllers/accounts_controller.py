@@ -48,9 +48,12 @@ class AccountsController(TransactionBase):
 		self.validate_party()
 		self.validate_currency()
 		
-		if self.meta.get_field("is_recurring") and not self.get("__islocal"):
-			validate_recurring_document(self)
-			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
+		if self.meta.get_field("is_recurring"):
+			if self.amended_from and self.recurring_id:
+				self.recurring_id = None
+			if not self.get("__islocal"):
+				validate_recurring_document(self)
+				convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
 
 	def on_update_after_submit(self):
 		if self.meta.get_field("is_recurring"):
@@ -138,6 +141,10 @@ class AccountsController(TransactionBase):
 			for fieldname in self.meta.get_valid_columns():
 				parent_dict[fieldname] = self.get(fieldname)
 
+			if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+				document_type = "{} Item".format(self.doctype)
+				parent_dict.update({"document_type": document_type})
+
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -166,6 +173,7 @@ class AccountsController(TransactionBase):
 								item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
+						# if user changed the discount percentage then set user's discount percentage ?
 						item.set("discount_percentage", ret.get("discount_percentage"))
 						if ret.get("pricing_rule_for") == "Price":
 							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
