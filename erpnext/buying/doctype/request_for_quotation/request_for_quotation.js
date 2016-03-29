@@ -8,7 +8,7 @@ frappe.require("assets/erpnext/js/utils.js");
 
 frappe.ui.form.on("Request for Quotation",{
 	setup: function(frm){
-		frm.fields_dict["suppliers"].grid.get_field("contact_person").get_query = function(doc, cdt, cdn){
+		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function(doc, cdt, cdn){
 			var d =locals[cdt][cdn];
 			return {
 				filters: {'supplier': d.supplier}
@@ -18,11 +18,25 @@ frappe.ui.form.on("Request for Quotation",{
 
 	onload: function(frm){
 		frm.add_fetch('standard_reply', 'response', 'response');
+
+		if(!frm.doc.message_for_supplier) {
+			frm.set_value("message_for_supplier", __("Please supply the specified items at the best possible rates"))
+		}
 	},
-	
+
 	refresh: function(frm, cdt, cdn){
 		if (frm.doc.docstatus === 1) {
-			frm.add_custom_button(__("Make Supplier Quotation"), function(){ frm.trigger("make_suppplier_quotation") });
+			frm.add_custom_button(__("Make Supplier Quotation"),
+				function(){ frm.trigger("make_suppplier_quotation") });
+
+			frm.add_custom_button(__("Send Supplier Emails"), function() {
+				frappe.call({
+					method: 'erpnext.buying.doctype.request_for_quotation.request_for_quotation.send_supplier_emails',
+					args: {
+						rfq_name: frm.doc.name
+					}
+				});
+			});
 		}
 	},
 
@@ -31,13 +45,16 @@ frappe.ui.form.on("Request for Quotation",{
 		var dialog = new frappe.ui.Dialog({
 			title: __("For Supplier"),
 			fields: [
-				{"fieldtype": "Select", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier",
-					"options": $.map(doc.suppliers, function(d){ return d.supplier }), "reqd": 1 },
-				{"fieldtype": "Button", "label": __("Make Supplier Quotation"), "fieldname": "make_supplier_quotation", "cssClass": "btn-primary"},
+				{"fieldtype": "Select", "label": __("Supplier"),
+					"fieldname": "supplier", "options":"Supplier",
+					"options": $.map(doc.suppliers,
+						function(d) { return d.supplier }), "reqd": 1 },
+				{"fieldtype": "Button", "label": __("Make Supplier Quotation"),
+					"fieldname": "make_supplier_quotation", "cssClass": "btn-primary"},
 			]
 		});
 
-		dialog.fields_dict.make_supplier_quotation.$input.click(function(){
+		dialog.fields_dict.make_supplier_quotation.$input.click(function() {
 			args = dialog.get_values();
 			if(!args) return;
 			dialog.hide();

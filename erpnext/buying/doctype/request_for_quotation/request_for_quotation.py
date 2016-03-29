@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
-from frappe.utils import get_url, cint
+from frappe.utils import get_url, random_string
 from frappe.utils.user import get_user_fullname
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.doctype.material_request.material_request import set_missing_values
@@ -29,44 +29,55 @@ class RequestforQuotation(BuyingController):
 
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
-		self.send_to_supplier()
 
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
 
 	def send_to_supplier(self):
 		link = get_url("/rfq/" + self.name)
-		for supplier_data in self.suppliers:
-			if supplier_data.email_id and cint(supplier_data.sent_email_to_supplier)==1:
-				update_password_link = self.create_supplier_user(supplier_data, link)
-				self.supplier_rfq_mail(supplier_data, update_password_link, link)
+		for rfq_supplier in self.suppliers:
+			if rfq_supplier.email_id and rfq_supplier.send_email_to_supplier:
 
-	def create_supplier_user(self, supplier_data, link):
-		from frappe.utils import random_string, get_url
+				# make new user if required
+				update_password_link = self.create_supplier_user(rfq_supplier, link)
 
+				self.supplier_rfq_mail(rfq_supplier, update_password_link, link)
+
+	def create_supplier_user(self, rfq_supplier, link):
+		'''Create a new user for the supplier if not set in contact'''
 		update_password_link = ''
-		if not supplier_data.user_id:
-			user = self.create_user(supplier_data)
-			key = random_string(32)
-			user.reset_password_key = key
-			user.redirect_url = link
-			user.save(ignore_permissions=True)
 
-			update_password_link = get_url("/update-password?key=" + key)
-			frappe.get_doc('Contact', supplier_data.contact_person).save()
+		contact = frappe.get_doc("Contact", rfq_supplier.contact)
+		if not contact.user:
+			if frappe.db.exists("User", rfq_supplier.email_id):
+				user = frappe.get_doc("User", rfq_supplier.email_id)
+			else:
+				user, update_password_link = self.create_user(rfq_supplier, link)
+
+			# set user_id in contact
+			contact = frappe.get_doc('Contact', rfq_supplier.contact)
+			contact.user = user.name
+			contact.save()
 
 		return update_password_link
 
-	def create_user(self, supplier_data):
+	def create_user(self, rfq_supplier, link):
 		user = frappe.get_doc({
 			'doctype': 'User',
 			'send_welcome_email': 0,
-			'email': supplier_data.email_id,
-			'first_name': supplier_data.supplier_name,
+			'email': rfq_supplier.email_id,
+			'first_name': rfq_supplier.supplier_name,
 			'user_type': 'Website User'
 		})
 
-		return user
+		# reset password
+		key = random_string(32)
+		update_password_link = get_url("/update-password?key=" + key)
+		user.reset_password_key = key
+		user.redirect_url = link
+		user.save(ignore_permissions=True)
+
+		return user, update_password_link
 
 	def supplier_rfq_mail(self, data, update_password_link, rfq_link):
 		full_name = get_user_fullname(frappe.session['user'])
@@ -75,7 +86,7 @@ class RequestforQuotation(BuyingController):
 
 		args = {
 			'update_password_link': update_password_link,
-			'message': frappe.render_template(self.response, data.as_dict()),
+			'message': frappe.render_template(self.message_for_supplier, data.as_dict()),
 			'rfq_link': rfq_link,
 			'user_fullname': full_name
 		}
@@ -90,18 +101,18 @@ class RequestforQuotation(BuyingController):
 
 		frappe.msgprint(_("Email sent to supplier {0}").format(data.supplier))
 
+@frappe.whitelist()
+def send_supplier_emails(rfq_name):
+	rfq = frappe.get_doc("Request for Quotation", rfq_name)
+	if rfq.docstatus==1:
+		rfq.send_to_supplier()
+
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
 	return list_context
 
-@frappe.whitelist()
-def get_supplier(doctype, txt, searchfield, start, page_len, filters):
-	query = """Select supplier from `tabRFQ Supplier` where parent = %(parent)s and supplier like %(txt)s
-				limit %(start)s, %(page_len)s """
-				
-	return frappe.db.sql(query, {'parent': filters.get('parent'),
-		'start': start, 'page_len': page_len, 'txt': "%%%s%%" % frappe.db.escape(txt)})
 
 # This method is used to make supplier quotation from material request form.
 @frappe.whitelist()
@@ -160,7 +171,7 @@ def add_items(sq_doc, supplier, items):
 		if data.get("qty") > 0:
 			if isinstance(data, dict):
 				data = frappe._dict(data)
-				
+
 			create_rfq_items(sq_doc, supplier, data)
 
 def create_rfq_items(sq_doc, supplier, data):

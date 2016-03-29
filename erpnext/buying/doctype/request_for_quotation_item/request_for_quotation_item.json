@@ -299,6 +299,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+   "default": "Today", 
    "fieldname": "schedule_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -598,7 +599,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-03-25 01:14:38.490488", 
+ "modified": "2016-03-29 05:28:39.203232", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Request for Quotation Item", 
@@ -608,5 +609,6 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "track_seen": 0
 }

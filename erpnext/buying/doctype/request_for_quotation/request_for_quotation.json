@@ -159,7 +159,7 @@
    "label": "Supplier Detail", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "RFQ Supplier", 
+   "options": "Request for Quotation Supplier", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -281,7 +281,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
-   "fieldname": "response", 
+   "fieldname": "message_for_supplier", 
    "fieldtype": "Text Editor", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -609,7 +609,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-25 01:14:01.194848", 
+ "modified": "2016-03-29 06:18:26.398938", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Request for Quotation", 
@@ -763,5 +763,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "timeline_field": "", 
- "title_field": ""
+ "title_field": "", 
+ "track_seen": 0
 }
