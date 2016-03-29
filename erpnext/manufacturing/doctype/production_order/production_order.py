@@ -267,7 +267,7 @@ class ProductionOrder(Document):
 
 				# if time log needs to be moved, make sure that the from time is not the same
 				if _from_time == time_log.from_time:
-					frappe.throw("Capacity Planning Error")
+					frappe.throw(_("Capacity Planning Error"))
 
 			d.planned_start_time = time_log.from_time
 			d.planned_end_time = time_log.to_time

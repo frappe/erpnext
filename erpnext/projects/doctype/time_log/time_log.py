@@ -193,7 +193,7 @@ class TimeLog(Document):
 			or self.get_overlap_for("user")
 
 		if not overlapping:
-			frappe.throw("Logical error: Must find overlapping")
+			frappe.throw(_("Logical error: Must find overlapping"))
 
 		self.from_time = get_datetime(overlapping.to_time) + get_mins_between_operations()
 
