@@ -60,6 +60,9 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 				chart_area.get(0), wrapper.page);
 		})
 
+	if(frappe.defaults.get_default('company')) {
+		wrapper.$company_select.val(frappe.defaults.get_default('company'));
+	}
 	wrapper.$company_select.change();
 }
 
