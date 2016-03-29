@@ -94,7 +94,11 @@ class MaintenanceSchedule(TransactionBase):
 		validated = False
 
 		employee = frappe.db.get_value("Sales Person", sales_person, "employee")
-		holiday_list = get_holiday_list_for_employee(employee)
+		if employee:
+			holiday_list = get_holiday_list_for_employee(employee)
+		else:
+			holiday_list = frappe.db.get_value("Company", self.company, "default_holiday_list")
+
 		holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday` where parent=%s''', holiday_list)
 
 		if not validated and holidays:
