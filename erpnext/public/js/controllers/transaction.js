@@ -441,10 +441,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.toggle_reqd("plc_conversion_rate",
 			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
 
-		var company_currency = this.get_company_currency();
-		this.change_form_labels(company_currency);
-		this.change_grid_labels(company_currency);
-		this.frm.refresh_fields();
+		if(this.frm.doc_currency!==this.frm.doc.currency) {
+			// reset names only when the currency is different
+
+			var company_currency = this.get_company_currency();
+			this.change_form_labels(company_currency);
+			this.change_grid_labels(company_currency);
+			this.frm.refresh_fields();
+			this.frm.doc_currency = this.frm.doc.currency;
+		}
 	},
 
 	change_form_labels: function(company_currency) {
@@ -648,7 +653,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				if (in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]), d.doctype){
 					item_list[0]["margin_type"] = d.margin_type
 					item_list[0]["margin_rate_or_amount"] = d.margin_rate_or_amount
-				}	
+				}
 			}
 		};
 
@@ -851,7 +856,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(!this.frm.doc.recurring_id) {
 				this.frm.set_value('recurring_id', this.frm.doc.name);
 			}
-			
+
 			var owner_email = this.frm.doc.owner=="Administrator"
 				? frappe.user_info("Administrator").email
 				: this.frm.doc.owner;
@@ -879,7 +884,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 		}
 	},
-	
+
 	set_gross_profit: function(item) {
 		if (this.frm.doc.doctype == "Sales Order" && item.valuation_rate) {
 			rate = flt(item.rate) * flt(this.frm.doc.conversion_rate || 1);
@@ -897,7 +902,7 @@ frappe.ui.form.on(cur_frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 	} else {
 		item.discount_percentage = 0.0;
 	}
-	
+
 	cur_frm.cscript.set_gross_profit(item);
 	cur_frm.cscript.calculate_taxes_and_totals();
 })
