@@ -7,19 +7,17 @@ __For Example:__ Consider a customer- Jane D'souza placing an order for a double
 bed costing $10000 She is asked to give some advance before the furniture
 house begins work on her order. She gives them $5000 in cash.
 
-  
-Go to Accounts and open a new Journal Entry to make the advance entry.
+Once Sales Order or Purchase Order is submitted, you will find option to create Advance Payment entry against it.
+
+To directly create Advance Payment Entry, Go to:
 
 > Accounts > Documents > Journal Entry > New Journal Entry  
 
-Mention the voucher type as cash voucher. This differs for different
-customers. If somebody pays by cheque the voucher type will be Bank Voucher.
-Then select the customer account and make the respective debit and credit
-entries.  
+Select a Voucher Type based on a mode in which advance payment is made.
 
 Since the customer has given $5000 as cash advance,it will be recorded as a
-credit entry against the customer. To balance it with the debit entry [Double
-accounting Entry] enter $5000 as debit against the company's cash account. In
+credit entry against the customer. To balance it with the debit entry [as per the Double
+accounting system] enter $5000 as debit against the company's cash account. In
 the row "Is Advance" click 'Yes'.
 
 #### Figure 1 : Journal Entry -Advance Entry  
@@ -43,7 +41,7 @@ will be credited because it has given value.
 
 <img class="screenshot" alt="Advace Payment" src="{{docs_base_url}}/assets/img/accounts/advance-payment-2.png">
 
-Save and submit the JV. If this document is not saved it will not be pulled in
+Save and submit the Journal Entry. If this document is not saved it will not be pulled in
 other accounting documents.
 
 When you make a new Sales Invoice for the same customer, mention the advance
