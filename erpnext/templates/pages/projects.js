@@ -66,6 +66,7 @@ frappe.ready(function() {
 			},
 			dataType: "json",
 			success: function(data) {
+				console.log(data.message);
 				if(typeof data.message == 'undefined') {
 					$('.project-'+ item).html("No "+ item_status +" "+ item);
 					$(".more-"+ item).toggle(false);
