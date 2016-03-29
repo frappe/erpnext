@@ -17,9 +17,11 @@ status_map = {
 		["Opportunity", "has_opportunity"],
 	],
 	"Opportunity": [
-		["Lost", "eval:self.status=='Lost'"],
 		["Quotation", "has_quotation"],
-		["Converted", "has_ordered_quotation"]
+		["Converted", "has_ordered_quotation"],
+		["Lost", "eval:self.status=='Lost'"],
+		["Closed", "eval:self.status=='Closed'"]
+
 	],
 	"Quotation": [
 		["Draft", None],
