@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import today, flt, cint, fmt_money
+from frappe.utils import today, flt, cint, fmt_money, formatdate
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
-from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year, get_account_currency
+from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return
@@ -64,8 +64,6 @@ class AccountsController(TransactionBase):
 		for fieldname in ["posting_date", "transaction_date"]:
 			if not self.get(fieldname) and self.meta.get_field(fieldname):
 				self.set(fieldname, today())
-				if self.meta.get_field("fiscal_year") and not self.fiscal_year:
-					self.fiscal_year = get_fiscal_year(self.get(fieldname))[0]
 				break
 
 	def calculate_taxes_and_totals(self):
@@ -222,10 +220,17 @@ class AccountsController(TransactionBase):
 
 	def get_gl_dict(self, args, account_currency=None):
 		"""this method populates the common properties of a gl entry record"""
+		
+		fiscal_years = get_fiscal_years(self.posting_date, company=self.company)
+		if len(fiscal_years) > 1:
+			frappe.throw(_("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(formatdate(self.posting_date)))
+		else:
+			fiscal_year = fiscal_years[0][0]
+						
 		gl_dict = frappe._dict({
 			'company': self.company,
 			'posting_date': self.posting_date,
-			'fiscal_year': get_fiscal_year(self.posting_date, company=self.company)[0],
+			'fiscal_year': fiscal_year,
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,
 			'remarks': self.get("remarks"),
