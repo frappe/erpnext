@@ -88,8 +88,8 @@ class GLEntry(Document):
 					"Cost Center", self.cost_center, "company")
 
 			return self.cost_center_company[self.cost_center]
-
-		if self.cost_center and _get_cost_center_company() != self.company:
+		
+		if self.cost_center and _get_cost_center_company() != self.company:	
 			frappe.throw(_("Cost Center {0} does not belong to Company {1}").format(self.cost_center, self.company))
 
 	def validate_party(self):

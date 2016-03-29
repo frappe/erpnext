@@ -56,7 +56,7 @@ class BOM(Document):
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = frappe.db.sql("""select name, item_name, is_asset_item, is_purchase_item,
+		item = frappe.db.sql("""select name, item_name, is_fixed_asset, is_purchase_item,
 			docstatus, description, image, is_sub_contracted_item, stock_uom, default_bom,
 			last_purchase_rate
 			from `tabItem` where name=%s""", item_code, as_dict = 1)

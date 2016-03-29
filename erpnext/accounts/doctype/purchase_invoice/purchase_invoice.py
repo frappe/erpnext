@@ -55,14 +55,15 @@ class PurchaseInvoice(BuyingController):
 		self.set_against_expense_account()
 		self.validate_write_off_account()
 		self.update_valuation_rate("items")
-		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount",
-			"items")
+		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
+		self.validate_fixed_asset_account()
 		self.create_remarks()
 
 	def create_remarks(self):
 		if not self.remarks:
 			if self.bill_no and self.bill_date:
-				self.remarks = _("Against Supplier Invoice {0} dated {1}").format(self.bill_no, formatdate(self.bill_date))
+				self.remarks = _("Against Supplier Invoice {0} dated {1}").format(self.bill_no, 
+					formatdate(self.bill_date))
 			else:
 				self.remarks = _("No Remarks")
 
@@ -152,12 +153,13 @@ class PurchaseInvoice(BuyingController):
 		stock_items = self.get_stock_items()
 		for item in self.get("items"):
 			# in case of auto inventory accounting,
-			# against expense account is always "Stock Received But Not Billed"
-			# for a stock item and if not epening entry and not drop-ship entry
+			# expense account is always "Stock Received But Not Billed" for a stock item 
+			# except epening entry, drop-ship entry and fixed asset items
 
-			if auto_accounting_for_stock and item.item_code in stock_items \
-				and self.is_opening == 'No' and (not item.po_detail or
-					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
+			if auto_accounting_for_stock and item.item_code in stock_items and self.is_opening == 'No' \
+				and (not item.po_detail 
+					or not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")
+					or not frappe.db.get_value("Item", item.item_code, "is_fixed_asset")):
 
 				item.expense_account = stock_not_billed_account
 				item.cost_center = None
@@ -235,6 +237,7 @@ class PurchaseInvoice(BuyingController):
 
 	def on_submit(self):
 		self.check_prev_docstatus()
+		self.validate_asset()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
@@ -248,7 +251,34 @@ class PurchaseInvoice(BuyingController):
 			self.update_billing_status_in_pr()
 
 		self.update_project()
-
+		
+	def validate_asset(self):
+		for d in self.get("items"):
+			if frappe.db.get_value("Item", d.item_code, "is_fixed_asset"):
+				if not d.asset:
+					frappe.throw(_("Row #{0}: Asset is mandatory against a Fixed Asset Item").format(d.idx))
+				else:
+					asset = frappe.get_doc("Asset", d.asset)
+					
+					super(PurchaseInvoice, self).validate_asset(asset, d)
+		
+					if getdate(asset.purchase_date) != getdate(self.posting_date):
+						frappe.throw(_("Purchase Date of asset {0} does not match with Purchase Invoice date")
+							.format(d.asset))
+					
+					if asset.supplier and asset.supplier != self.supplier:
+						frappe.throw(_("Supplier of asset {0} does not match with the supplier in the Purchase Invoice").format(d.asset))
+				
+					if asset.status != "Submitted":
+						frappe.throw(_("Row #{0}: Asset {1} is already {2}")
+							.format(d.idx, d.asset, asset.status))
+					
+					frappe.db.set_value("Asset", asset.name, "purchase_invoice", 
+						(self.name if self.docstatus==1 else None))
+						
+					if self.docstatus==1 and not asset.supplier:
+						frappe.db.set_value("Asset", asset.name, "supplier", self.supplier)
+					
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
@@ -415,6 +445,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_gl_entries_on_cancel()
 		self.update_project()
+		self.validate_asset()
 
 	def update_project(self):
 		project_list = []
@@ -465,26 +496,16 @@ class PurchaseInvoice(BuyingController):
 
 		for pr in set(updated_pr):
 			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)
+			
+	def validate_fixed_asset_account(self):
+		for d in self.get('items'):
+			if frappe.db.get_value("Item", d.item_code, "is_fixed_asset"):
+				account_type = frappe.db.get_value("Account", d.expense_account, "account_type")
+				if account_type != 'Fixed Asset':
+					frappe.throw(_("Row {0}# Account must be of type 'Fixed Asset'").format(d.idx))
 
 	def on_recurring(self, reference_doc):
 		self.due_date = None
-
-@frappe.whitelist()
-def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
-	from erpnext.controllers.queries import get_match_cond
-
-	# expense account can be any Debit account,
-	# but can also be a Liability account with account_type='Expense Account' in special circumstances.
-	# Hence the first condition is an "OR"
-	return frappe.db.sql("""select tabAccount.name from `tabAccount`
-			where (tabAccount.report_type = "Profit and Loss"
-					or tabAccount.account_type in ("Expense Account", "Fixed Asset", "Temporary"))
-				and tabAccount.is_group=0
-				and tabAccount.docstatus!=2
-				and tabAccount.company = %(company)s
-				and tabAccount.{key} LIKE %(txt)s
-				{mcond}""".format( key=frappe.db.escape(searchfield), mcond=get_match_cond(doctype) ),
-				{ 'company': filters['company'], 'txt': "%%%s%%" % frappe.db.escape(txt) })
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):

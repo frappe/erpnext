@@ -111,40 +111,27 @@ frappe.ui.form.on("Item", {
 
 $.extend(erpnext.item, {
 	setup_queries: function(frm) {
-		// Expense Account
-		// ---------------------------------
 		frm.fields_dict['expense_account'].get_query = function(doc) {
 			return {
-				filters: {
-					"report_type": "Profit and Loss",
-					"is_group": 0
-				}
+				query: "erpnext.controllers.queries.get_expense_account",
 			}
 		}
 
-		// Income Account
-		// --------------------------------
 		frm.fields_dict['income_account'].get_query = function(doc) {
 			return {
 				query: "erpnext.controllers.queries.get_income_account"
 			}
 		}
 
-
-		// Purchase Cost Center
-		// -----------------------------
 		frm.fields_dict['buying_cost_center'].get_query = function(doc) {
 			return {
-				filters:{ "is_group": 0 }
+				filters: { "is_group": 0 }
 			}
 		}
 
-
-		// Sales Cost Center
-		// -----------------------------
 		frm.fields_dict['selling_cost_center'].get_query = function(doc) {
 			return {
-				filters:{ "is_group": 0 }
+				filters: { "is_group": 0 }
 			}
 		}
 
@@ -159,7 +146,7 @@ $.extend(erpnext.item, {
 			}
 		}
 
-		frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
+		frm.fields_dict['item_group'].get_query = function(doc, cdt, cdn) {
 			return {
 				filters: [
 					['Item Group', 'docstatus', '!=', 2]

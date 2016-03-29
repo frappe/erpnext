@@ -52,7 +52,8 @@ def get():
 	            },
 	            _("Plant and Machinery"): {
 	                "account_type": "Fixed Asset"
-	            }
+	            },
+	            _("Accumulated Depreciations"): {}
 	        },
 	        _("Investments"): {
 	        	"is_group": 1

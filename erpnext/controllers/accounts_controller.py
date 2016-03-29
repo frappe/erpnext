@@ -458,7 +458,20 @@ class AccountsController(TransactionBase):
 				# Note: not validating with gle account because we don't have the account
 				# at quotation / sales order level and we shouldn't stop someone
 				# from creating a sales invoice if sales order is already created
-
+				
+	def validate_asset(self, asset, item_row):
+		if asset.company != self.company:
+			frappe.throw(_("Row #{0}: Asset {1} does not belong to company {2}")
+				.format(item_row.idx, item_row.asset, self.company))
+				
+		elif asset.item_code != item_row.item_code:
+			frappe.throw(_("Row #{0}: Asset {1} does not linked to Item {2}")
+				.format(item_row.idx, item_row.asset, item_row.item_code))
+		elif asset.docstatus != 1:
+			frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(item_row.idx, item_row.asset))
+		elif item_row.qty > 1:
+			frappe.throw(_("Row #{0}: Qty must be 1, as item is linked to an asset").format(item_row.idx))
+						
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, "tax_rate")

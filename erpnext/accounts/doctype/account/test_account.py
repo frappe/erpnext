@@ -35,7 +35,12 @@ def _make_test_records(verbose):
 
 		# related to Account Inventory Integration
 		["_Test Account Stock In Hand", "Current Assets", 0, None, None],
-		["_Test Account Fixed Assets", "Current Assets", 0, None, None],
+		
+		# fixed asset depreciation
+		["_Test Fixed Asset", "Current Assets", 0, "Fixed Asset", None],
+		["_Test Accumulated Depreciations", "Current Assets", 0, None, None],
+		["_Test Depreciations", "Expenses", 0, None, None],
+		["_Test Gain/Loss on Asset Disposal", "Expenses", 0, None, None],
 
 		# Receivable / Payable Account
 		["_Test Receivable", "Current Assets", 0, "Receivable", None],
