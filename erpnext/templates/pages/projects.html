@@ -4,6 +4,10 @@
 
 {%- from "templates/includes/projects/macros.html" import back_link -%}
 
+{% block header_actions %}
+{% include 'templates/includes/projects/project_search_box.html' %}
+{% endblock %}
+
 {% block breadcrumbs %}
    <div class="page-breadcrumbs" data-html-block="breadcrumbs">
    	<ul class="breadcrumb">
@@ -15,11 +19,6 @@
    </div>
 {% endblock %}
 
-{% block header %}
-<h1 class= "title">
-{{ doc.project_name }}
-</h1>
-{% endblock %}
 
 {% block style %}
 	<style>
@@ -30,28 +29,31 @@
 
 {% block page_content %}
 
-{% include 'templates/includes/projects/project_search_box.html' %}
-
-<!-- {% if frappe.form_dict.q %}
-	<p class="text-muted"> <a href="/projects?project={{doc.name}}" class="text-muted">
-	Filtered by "{{ frappe.form_dict.q }}" Clear</a></p>
-{% else %}
-	<h3>{{ _("Activity Feed") }}</h3>
-	<div class='project-timelines timeline-centered'>
-	{% include "erpnext/templates/includes/projects/timeline.html" %}
-	</div>
-		{% if doc.timelines|length > 9 %}
-		<p><a class='more-timelines small underline'>{{ _("More") }}</a><p>
-		{% endif %}
-
-{% endif %} -->
-
-<div class='padding'></div>
-
-<h3>{{ _("Tasks") }}</h3>
+<div class="row">
+<div class="col-xs-6">
+<h2 class= "title">
+	{{ doc.project_name }}
+</h2>
+</div>
+<div class="col-xs-6">
+	{% if doc.percent_complete %}
+		<div class="progress progress-hg">
+		  <div class="progress-bar progress-bar-warning active" role="progressbar" 
+		  	aria-valuenow="{{ doc.percent_complete|round|int }}"
+		  	aria-valuemin="0" aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">		    
+		  </div>
+		</div>
+	{% endif %}
+</div>
+</div>
+<hr class="small">
+	
+<div class="clearfix">
+  <h4 style="float: left;">{{ _("Tasks") }}</h4>
+  <a class="btn btn-secondary btn-default" style="float: right; position: relative; top: 20px;" href='/tasks?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New task</a>
+</div>
 
 <p>
-<a class='small underline' href='/tasks?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New task</a>
 <a class='small underline task-status-switch' data-status='Open'>{{ _("Show closed") }}</a>
 </p>
 
@@ -67,28 +69,9 @@
 {% endif %}
 
 
-<!-- <div class='padding'></div>
-<h3>{{ _("Issues") }}</h3>
-
-<p>
-	<a class='small underline' href='/issues?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New issue</a>
-	<a class='small underline issue-status-switch' data-status='Open'>{{ _("Show closed") }}</a>
-</p>
-
-{% if doc.issues %}
-	<div class='project-issue-section'>
-		<div class='project-issue'>
-			{% include "erpnext/templates/includes/projects/project_issues.html" %}
-		</div>
-		<p><a id='more-issue' style='display: none;' class='more-issues small underline'>{{ _("More") }}</a><p>
-	</div>
-{% else %}
-	<p class="text-muted">No Issues</p>
-{% endif %} -->
-
 <div class='padding'></div>
 
-<h3>{{ _("Time Logs") }}</h3>
+<h4>{{ _("Time Logs") }}</h4>
 
 {% if doc.timelogs %}
 	<div class='project-timelogs'>
