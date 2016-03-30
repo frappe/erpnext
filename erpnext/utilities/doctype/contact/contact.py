@@ -92,3 +92,13 @@ def get_contact_details(contact):
 		"contact_department": contact.get("department")
 	}
 	return out
+
+def update_contact(doc, method):
+	'''Update contact when user is updated, if contact is found. Called via hooks'''
+	contact_name = frappe.db.get_value("Contact", {"email_id": doc.name})
+	if contact_name:
+		contact = frappe.get_doc("Contact", contact_name)
+		contact.first_name = doc.first_name
+		contact.last_name = doc.last_name
+		contact.phone = doc.phone
+		contact.save(ignore_permissions=True)
