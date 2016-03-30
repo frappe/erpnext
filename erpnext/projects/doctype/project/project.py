@@ -124,9 +124,9 @@ class Project(Document):
 			from `tabPurchase Invoice Item` where project = %s and docstatus=1""", self.name)
 
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
-				
+			
 	def send_welcome_email(self):
-		url = get_url("/project?{0}".format(self.name))
+		url = get_url("/project/?name={0}".format(self.name))
 		messages = (
 		_("You have been invited to collaborate on the project: {0}".format(self.name)),
 		url,
