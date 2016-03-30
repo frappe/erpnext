@@ -34,7 +34,6 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 		key, parties = get_party_details(customers, suppliers)
 
 		if doctype == 'Request for Quotation':
-			if key == 'customer': frappe.throw(_("Not Permitted"), frappe.PermissionError)
 			return rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length)
 
 		filters.append((doctype, key, "in", parties))
