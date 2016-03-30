@@ -106,35 +106,47 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(asset.status, "Partially Depreciated")
 		
 	def test_asset_sale(self):
-		frappe.get_doc("Asset", "Macbook Pro 1").submit()
+		print "started test_asset_sale"
+		asset = frappe.get_doc("Asset", "Macbook Pro 1")
+		asset.submit()
+		print "asset submitted"
+		for d in asset.get("schedules"):
+			print d.schedule_date, d.depreciation_amount
 		post_depreciation_entries(date="2016-01-01")
+		print "posted depreciation entry"
+		asset.load_from_db()
+		for d in asset.get("schedules"):
+			print d.schedule_date, d.depreciation_amount
 		
 		si = create_sales_invoice(item_code="Macbook Pro", rate=25000, do_not_save=True)
 		si.get("items")[0].asset = "Macbook Pro 1"
+		print "si saved"
 		si.submit()
+		print "si submitted"
 		
 		self.assertEqual(frappe.db.get_value("Asset", "Macbook Pro 1", "status"), "Sold")
-		
+		print "status", frappe.db.get_value("Asset", "Macbook Pro 1", "status")
 		expected_gle = (
 			("_Test Accumulated Depreciations - _TC", 30000.0, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
 			("_Test Gain/Loss on Asset Disposal - _TC", 45000.0, 0.0),
 			("Debtors - _TC", 25000.0, 0.0)
 		)
-		
+		print "expected gle", expected_gle
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry` 
 			where voucher_type='Sales Invoice' and voucher_no = %s
 			order by account""", si.name)
-		
+		print "gle", gle
 		self.assertEqual(gle, expected_gle)
-		
+		print "Cancelling..."
 		si.cancel()
-		
+		print "Cancelled"
 		self.assertEqual(frappe.db.get_value("Asset", "Macbook Pro 1", "status"), "Partially Depreciated")
+		print "end of test"
 		
 	def tearDown(self):
 		asset = frappe.get_doc("Asset", "Macbook Pro 1")
-		
+		print "docstatus and status", asset.docstatus, asset.status
 		if asset.docstatus == 1 and asset.status not in ("Scrapped", "Sold", "Draft", "Cancelled"):
 			asset.cancel()
 			
