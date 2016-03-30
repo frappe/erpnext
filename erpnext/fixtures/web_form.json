@@ -11,13 +11,13 @@
   "introduction_text": null, 
   "is_standard": 1, 
   "login_required": 1, 
-  "modified": "2016-03-06 02:09:28.583572", 
+  "modified": "2016-03-30 01:27:27.469840", 
   "name": "tasks", 
   "page_name": "tasks", 
   "published": 1, 
   "success_message": null, 
   "success_url": "/projects?project=Collaborative Project Management", 
-  "title": "Tasks", 
+  "title": "Task", 
   "web_form_fields": [
    {
     "default": null, 
@@ -40,6 +40,17 @@
     "options": null, 
     "read_only": 0, 
     "reqd": 1
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": "status", 
+    "fieldtype": "Select", 
+    "hidden": 0, 
+    "label": "Status", 
+    "options": "Open\nClosed\nCancelled", 
+    "read_only": 0, 
+    "reqd": 0
    }, 
    {
     "default": null, 
@@ -84,17 +95,6 @@
     "options": null, 
     "read_only": 0, 
     "reqd": 0
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "status", 
-    "fieldtype": "Select", 
-    "hidden": 0, 
-    "label": "Status", 
-    "options": "Open\nWorking\nPending Review\nOverdue\nClosed\nCancelled", 
-    "read_only": 0, 
-    "reqd": 0
    }
   ], 
   "web_page_link_text": null
@@ -111,7 +111,7 @@
   "introduction_text": null, 
   "is_standard": 0, 
   "login_required": 1, 
-  "modified": "2016-03-11 12:26:41.147028", 
+  "modified": "2016-03-30 01:28:00.061700", 
   "name": "time-log", 
   "page_name": "time-log", 
   "published": 1, 
@@ -140,6 +140,17 @@
     "options": null, 
     "read_only": 1, 
     "reqd": 0
+   }, 
+   {
+    "default": "Open", 
+    "description": null, 
+    "fieldname": "status", 
+    "fieldtype": "Select", 
+    "hidden": 0, 
+    "label": "Status", 
+    "options": "Open\nWorking\nPending Review\nClosed\nCancelled", 
+    "read_only": 1, 
+    "reqd": 1
    }, 
    {
     "default": null, 
@@ -197,17 +208,6 @@
     "reqd": 0
    }, 
    {
-    "default": "Open", 
-    "description": null, 
-    "fieldname": "status", 
-    "fieldtype": "Select", 
-    "hidden": 0, 
-    "label": "Status", 
-    "options": "Open\nWorking\nPending Review\nClosed\nCancelled", 
-    "read_only": 1, 
-    "reqd": 1
-   }, 
-   {
     "default": null, 
     "description": null, 
     "fieldname": "note", 
@@ -226,217 +226,6 @@
   "allow_delete": 1, 
   "allow_edit": 1, 
   "allow_multiple": 1, 
-  "breadcrumbs": "[{\"title\":\"Collaborative Project Management\", \"name\":\"projects?project=Collaborative Project Management\"}]", 
-  "doc_type": "Issue", 
-  "docstatus": 0, 
-  "doctype": "Web Form", 
-  "introduction_text": null, 
-  "is_standard": 1, 
-  "login_required": 1, 
-  "modified": "2016-03-11 13:10:53.133110", 
-  "name": "issues-view", 
-  "page_name": "issues-view", 
-  "published": 1, 
-  "success_message": null, 
-  "success_url": "/projects?project=Collaborative Project Management", 
-  "title": "Issues-view", 
-  "web_form_fields": [
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "project", 
-    "fieldtype": "Link", 
-    "hidden": 0, 
-    "label": "Project", 
-    "options": "Project", 
-    "read_only": 1, 
-    "reqd": 1
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "subject", 
-    "fieldtype": "Data", 
-    "hidden": 0, 
-    "label": "Subject", 
-    "options": null, 
-    "read_only": 1, 
-    "reqd": 1
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "description", 
-    "fieldtype": "Text", 
-    "hidden": 0, 
-    "label": "Description", 
-    "options": null, 
-    "read_only": 1, 
-    "reqd": 0
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "raised_by", 
-    "fieldtype": "Data", 
-    "hidden": 0, 
-    "label": "Raised By (Email)", 
-    "options": "Email", 
-    "read_only": 1, 
-    "reqd": 0
-   }, 
-   {
-    "default": "Today", 
-    "description": null, 
-    "fieldname": "opening_date", 
-    "fieldtype": "Date", 
-    "hidden": 0, 
-    "label": "Opening Date", 
-    "options": null, 
-    "read_only": 1, 
-    "reqd": 0
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "resolution_date", 
-    "fieldtype": "Datetime", 
-    "hidden": 0, 
-    "label": "Resolution Date", 
-    "options": null, 
-    "read_only": 0, 
-    "reqd": 0
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "resolution_details", 
-    "fieldtype": "Data", 
-    "hidden": 0, 
-    "label": "Resolution Details", 
-    "options": null, 
-    "read_only": 0, 
-    "reqd": 0
-   }, 
-   {
-    "default": "Open", 
-    "description": null, 
-    "fieldname": "status", 
-    "fieldtype": "Select", 
-    "hidden": 0, 
-    "label": "Status", 
-    "options": "Open\nReplied\nHold\nClosed", 
-    "read_only": 0, 
-    "reqd": 0
-   }
-  ], 
-  "web_page_link_text": null
- }, 
- {
-  "allow_comments": 1, 
-  "allow_delete": 1, 
-  "allow_edit": 1, 
-  "allow_multiple": 1, 
-  "breadcrumbs": "[{\"title\":\"Collaborative Project Management\", \"name\":\"projects?project=Collaborative Project Management\"}]", 
-  "doc_type": "Task", 
-  "docstatus": 0, 
-  "doctype": "Web Form", 
-  "introduction_text": null, 
-  "is_standard": 1, 
-  "login_required": 1, 
-  "modified": "2016-03-15 00:00:39.230196", 
-  "name": "tasks-view", 
-  "page_name": "tasks-view", 
-  "published": 1, 
-  "success_message": null, 
-  "success_url": "/projects?project=Collaborative Project Management", 
-  "title": "Tasks-view", 
-  "web_form_fields": [
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "project", 
-    "fieldtype": "Link", 
-    "hidden": 0, 
-    "label": "Project", 
-    "options": "Project", 
-    "read_only": 1, 
-    "reqd": 1
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "subject", 
-    "fieldtype": "Data", 
-    "hidden": 0, 
-    "label": "Subject", 
-    "options": null, 
-    "read_only": 1, 
-    "reqd": 1
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "description", 
-    "fieldtype": "Data", 
-    "hidden": 0, 
-    "label": "Details", 
-    "options": null, 
-    "read_only": 1, 
-    "reqd": 0
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "exp_start_date", 
-    "fieldtype": "Date", 
-    "hidden": 0, 
-    "label": "Expected Start Date", 
-    "options": null, 
-    "read_only": 1, 
-    "reqd": 0
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "exp_end_date", 
-    "fieldtype": "Date", 
-    "hidden": 0, 
-    "label": "Expected End Date", 
-    "options": null, 
-    "read_only": 1, 
-    "reqd": 0
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "priority", 
-    "fieldtype": "Select", 
-    "hidden": 0, 
-    "label": "Priority", 
-    "options": "Low\nMedium\nHigh\nUrgent", 
-    "read_only": 1, 
-    "reqd": 0
-   }, 
-   {
-    "default": null, 
-    "description": null, 
-    "fieldname": "status", 
-    "fieldtype": "Select", 
-    "hidden": 0, 
-    "label": "Status", 
-    "options": "Open\nWorking\nPending Review\nOverdue\nClosed\nCancelled", 
-    "read_only": 0, 
-    "reqd": 0
-   }
-  ], 
-  "web_page_link_text": null
- }, 
- {
-  "allow_comments": 1, 
-  "allow_delete": 1, 
-  "allow_edit": 1, 
-  "allow_multiple": 1, 
   "breadcrumbs": "[{\"title\":\"Issues\", \"name\":\"issues\"}]", 
   "doc_type": "Issue", 
   "docstatus": 0, 
@@ -444,13 +233,13 @@
   "introduction_text": null, 
   "is_standard": 1, 
   "login_required": 1, 
-  "modified": "2015-06-01 08:14:26.350792", 
+  "modified": "2016-03-30 01:22:09.921515", 
   "name": "issues", 
   "page_name": "issues", 
   "published": 1, 
   "success_message": "", 
   "success_url": "/issues", 
-  "title": "Issues", 
+  "title": "Issue", 
   "web_form_fields": [
    {
     "default": null, 
@@ -511,13 +300,13 @@
   "introduction_text": null, 
   "is_standard": 1, 
   "login_required": 1, 
-  "modified": "2015-11-23 08:21:53.924318", 
+  "modified": "2016-03-30 01:22:04.728685", 
   "name": "addresses", 
   "page_name": "addresses", 
   "published": 1, 
   "success_message": null, 
   "success_url": "/addresses", 
-  "title": "Addresses", 
+  "title": "Address", 
   "web_form_fields": [
    {
     "default": null, 
@@ -677,13 +466,13 @@
   "introduction_text": null, 
   "is_standard": 0, 
   "login_required": 0, 
-  "modified": "2016-02-19 16:46:57.448416", 
+  "modified": "2016-03-30 01:21:57.425828", 
   "name": "job_application", 
   "page_name": "job_application", 
   "published": 1, 
   "success_message": "Thank you for applying.", 
   "success_url": "/jobs", 
-  "title": "Job Application", 
+  "title": "Job Applicant", 
   "web_form_fields": [
    {
     "default": null, 

@@ -38,19 +38,19 @@
 <div class="col-xs-6">
 	{% if doc.percent_complete %}
 		<div class="progress progress-hg">
-		  <div class="progress-bar progress-bar-warning active" role="progressbar" 
+		  <div class="progress-bar progress-bar-warning active" role="progressbar"
 		  	aria-valuenow="{{ doc.percent_complete|round|int }}"
-		  	aria-valuemin="0" aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">		    
+		  	aria-valuemin="0" aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">
 		  </div>
 		</div>
 	{% endif %}
 </div>
 </div>
 <hr class="small">
-	
+
 <div class="clearfix">
   <h4 style="float: left;">{{ _("Tasks") }}</h4>
-  <a class="btn btn-secondary btn-default" style="float: right; position: relative; top: 20px;" href='/tasks?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New task</a>
+  <a class="btn btn-secondary btn-default btn-sm" style="float: right; position: relative; top: 10px;" href='/tasks?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New task</a>
 </div>
 
 <p>
