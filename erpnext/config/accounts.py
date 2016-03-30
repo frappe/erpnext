@@ -83,6 +83,14 @@ def get_data():
 					"type": "doctype",
 					"name": "Item",
 				},
+				{
+					"type": "doctype",
+					"name": "Asset",
+				},
+				{
+					"type": "doctype",
+					"name": "Asset Category",
+				}
 			]
 		},
 		{
