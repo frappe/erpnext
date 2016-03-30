@@ -4,24 +4,24 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from erpnext.controllers.website_list_for_contact import get_customers_suppliers, \
+					get_party_details
 
 def get_context(context):
 	context.no_cache = 1
 	context.doc = frappe.get_doc(frappe.form_dict.doctype, frappe.form_dict.name)
 	context.parents = frappe.form_dict.parents
 	context.doc.supplier = get_supplier()
-	unauthrized_user(context.doc.supplier)
+	update_supplier_details(context)
+	unauthorized_user(context.doc.supplier)
 	context["title"] = frappe.form_dict.name
 
-def unauthrized_user(supplier):
-	status = check_supplier_has_docname_access(supplier)
-	if status == False:
-		frappe.throw(_("Not Permitted"), frappe.PermissionError)
-
 def get_supplier():
-	from erpnext.shopping_cart.utils import check_customer_or_supplier
-	key, parties = check_customer_or_supplier()
-	return parties[0] if key == 'Supplier' else ''
+	doctype = frappe.form_dict.doctype
+	parties_doctype = 'Request for Quotation Supplier' if doctype == 'Request for Quotation' else doctype
+	customers, suppliers = get_customers_suppliers(parties_doctype, frappe.session.user)
+	key, parties = get_party_details(customers, suppliers)
+	return parties[0] if key == 'supplier' else ''
 
 def check_supplier_has_docname_access(supplier):
 	status = True
@@ -29,3 +29,15 @@ def check_supplier_has_docname_access(supplier):
 		where supplier = '{supplier}'""".format(supplier=supplier)):
 		status = False
 	return status
+
+def unauthorized_user(supplier):
+	status = check_supplier_has_docname_access(supplier)
+	if status == False:
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
+def update_supplier_details(context):
+	supplier_doc = frappe.get_doc("Supplier", context.doc.supplier)
+	context.doc.currency = supplier_doc.default_currency
+	context.doc.currency_symbol = frappe.db.get_value("Currency", context.doc.currency, "symbol")
+	context.doc.number_format = frappe.db.get_value("Currency", context.doc.currency, "number_format")
+	context.doc.buying_price_list = supplier_doc.default_price_list

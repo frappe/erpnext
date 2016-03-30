@@ -6,6 +6,9 @@ window.doc={{ doc.as_json() }};
 $(document).ready(function() {
 	new rfq();
 	doc.supplier = "{{ doc.supplier }}"
+	doc.currency = "{{ doc.currency }}"
+	doc.number_format = "{{ doc.number_format }}"
+	doc.buying_price_list = "{{ doc.buying_price_list }}"
 });
 
 rfq = Class.extend({
@@ -57,11 +60,11 @@ rfq = Class.extend({
 				data.qty = me.qty;
 				data.rate = me.rate;
 				data.amount = (me.rate * me.qty) || 0.0;
-				$(repl('.rfq-amount[data-idx=%(idx)s]',{'idx': me.idx})).text(data.amount.toFixed(2));
+				$(repl('.rfq-amount[data-idx=%(idx)s]',{'idx': me.idx})).text(format_number(data.amount, doc.number_format, 2));
 			}
 
 			doc.grand_total += flt(data.amount);
-			$('.tax-grand-total').text(doc.grand_total.toFixed(2));
+			$('.tax-grand-total').text(format_number(doc.grand_total, doc.number_format, 2));
 		})
 	},
 
