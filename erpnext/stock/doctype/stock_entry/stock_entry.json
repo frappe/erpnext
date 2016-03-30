@@ -659,7 +659,7 @@
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -1431,7 +1431,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-18 08:37:08.747493", 
+ "modified": "2016-03-30 03:49:43.167729", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 
@@ -1523,5 +1523,6 @@
  "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
- "title_field": "title"
+ "title_field": "title", 
+ "track_seen": 0
 }

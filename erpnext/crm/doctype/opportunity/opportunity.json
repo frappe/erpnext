@@ -974,7 +974,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-03 06:13:49.728079", 
+ "modified": "2016-03-30 05:47:46.617670", 
  "modified_by": "Administrator", 
  "module": "CRM", 
  "name": "Opportunity", 
@@ -1027,5 +1027,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "timeline_field": "customer", 
- "title_field": "title"
+ "title_field": "title", 
+ "track_seen": 1
 }

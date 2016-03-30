@@ -315,7 +315,7 @@
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -807,7 +807,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-18 05:09:50.749754", 
+ "modified": "2016-03-30 03:50:02.164476", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 
@@ -858,5 +858,6 @@
  "read_only_onload": 0, 
  "search_fields": "item", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "track_seen": 0
 }

@@ -7,6 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -702,7 +703,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-25 07:31:44.715945", 
+ "modified": "2016-03-30 05:47:37.280932", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Issue", 
@@ -735,5 +736,5 @@
  "sort_order": "ASC", 
  "timeline_field": "customer", 
  "title_field": "subject", 
- "track_seen": 0
+ "track_seen": 1
 }
