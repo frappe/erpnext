@@ -64,7 +64,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "description": "", 
    "fieldname": "item_code", 
@@ -2323,7 +2323,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 1, 
- "modified": "2016-03-29 08:29:07.922559", 
+ "modified": "2016-03-30 03:25:38.966362", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
