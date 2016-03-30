@@ -134,7 +134,7 @@ class TestAsset(unittest.TestCase):
 		
 	def tearDown(self):
 		asset = frappe.get_doc("Asset", "Macbook Pro 1")
-		
+		print asset.docstatus, asset.status
 		if asset.docstatus == 1 and asset.status not in ("Scrapped", "Sold", "Draft", "Cancelled"):
 			asset.cancel()
 			
