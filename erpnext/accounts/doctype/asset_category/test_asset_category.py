@@ -13,8 +13,8 @@ class TestAssetCategory(unittest.TestCase):
 		
 		self.assertRaises(frappe.MandatoryError, asset_category.insert)
 		
-		asset_category.number_of_depreciations = 5
-		asset_category.number_of_months_in_a_period = 12
+		asset_category.number_of_depreciations = 3
+		asset_category.number_of_months_in_a_period = 3
 		asset_category.append("accounts", {
 			"company": "_Test Company",
 			"fixed_asset_account": "_Test Fixed Asset - _TC",
