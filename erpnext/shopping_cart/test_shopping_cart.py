@@ -197,8 +197,7 @@ class TestShoppingCart(unittest.TestCase):
 
 	def remove_all_items_from_cart(self):
 		quotation = _get_cart_quotation()
-		quotation.set("items", [])
-		quotation.save(ignore_permissions=True)
+		quotation.delete()
 
 	def create_user_if_not_exists(self, email, first_name = None):
 		if frappe.db.exists("User", email):

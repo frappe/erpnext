@@ -98,7 +98,7 @@ def update_contact(doc, method):
 	contact_name = frappe.db.get_value("Contact", {"email_id": doc.name})
 	if contact_name:
 		contact = frappe.get_doc("Contact", contact_name)
-		contact.first_name = doc.first_name
-		contact.last_name = doc.last_name
-		contact.phone = doc.phone
+		for key in ("first_name", "last_name", "phone"):
+			if doc.get(key):
+				contact.set(key, doc.get(key))
 		contact.save(ignore_permissions=True)
