@@ -191,7 +191,8 @@ class TestShoppingCart(unittest.TestCase):
 		frappe.set_user("test_cart_user@example.com")
 
 	def login_as_customer(self):
-		self.create_user_if_not_exists("test_contact_customer@example.com")
+		self.create_user_if_not_exists("test_contact_customer@example.com",
+			"_Test Contact For _Test Customer")
 		frappe.set_user("test_contact_customer@example.com")
 
 	def remove_all_items_from_cart(self):
@@ -199,7 +200,7 @@ class TestShoppingCart(unittest.TestCase):
 		quotation.set("items", [])
 		quotation.save(ignore_permissions=True)
 
-	def create_user_if_not_exists(self, email):
+	def create_user_if_not_exists(self, email, first_name = None):
 		if frappe.db.exists("User", email):
 			return
 
@@ -208,7 +209,7 @@ class TestShoppingCart(unittest.TestCase):
 			"user_type": "Website User",
 			"email": email,
 			"send_welcome_email": 0,
-			"first_name": email.split("@")[0]
+			"first_name": first_name or email.split("@")[0]
 		}).insert(ignore_permissions=True)
 
 test_dependencies = ["Sales Taxes and Charges Template", "Price List", "Item Price", "Shipping Rule", "Currency Exchange",
