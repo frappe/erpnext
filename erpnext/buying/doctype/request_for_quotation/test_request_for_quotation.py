@@ -51,6 +51,7 @@ def make_request_for_quotation():
 	rfq.status = 'Draft'
 	rfq.company = '_Test Company'
 	rfq.response = 'Test Data'
+	rfq.message_for_supplier = "Please supply the specified items at the best possible rates"
 	
 	for data in supplier_data:
 		rfq.append('suppliers', data)
