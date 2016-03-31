@@ -3,13 +3,13 @@
 	<a class="no-decoration" href="/projects?project={{ doc.name }}">
 		<div class="row">
 			<div class="col-xs-4">
-           
+
 				{{ doc.name }}
 			</div>
 			<div class="col-xs-4">
 				{% if doc.percent_complete %}
 					<div class="progress" style="margin-bottom: 0!important; margin-top: 10px!important; height:5px;">
-					  <div class="progress-bar progress-bar-warning" role="progressbar" 
+					  <div class="progress-bar progress-bar-{{ "warning" if doc.percent_complete|round < 100 else "success"}}" role="progressbar"
 					  	aria-valuenow="{{ doc.percent_complete|round|int }}"
 					  	aria-valuemin="0" aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">
 					  </div>

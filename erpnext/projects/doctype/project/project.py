@@ -37,7 +37,7 @@ class Project(Document):
 		self.sync_tasks()
 		self.tasks = []
 		self.send_welcome_email()
-		
+
 	def validate_dates(self):
 		if self.expected_start_date and self.expected_end_date:
 			if getdate(self.expected_end_date) < getdate(self.expected_start_date):
@@ -124,7 +124,7 @@ class Project(Document):
 			from `tabPurchase Invoice Item` where project = %s and docstatus=1""", self.name)
 
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
-				
+
 	def send_welcome_email(self):
 		url = get_url("/project/{0}".format(self.name))
 		messages = (
@@ -143,7 +143,7 @@ class Project(Document):
 				print user.welcome_email_sent
 				frappe.sendmail(user.user, subject=_("Project Collaboration Invitation"), content=content.format(*messages), bulk=True)
 				user.welcome_email_sent=1
-			
+
 
 def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20):
 	return frappe.db.sql('''select distinct project.*
@@ -163,7 +163,7 @@ def get_list_context(context=None):
 	return {
 		"title": _("My Projects"),
 		"get_list": get_project_list,
-		"row_template": "templates/includes/project_row.html"
+		"row_template": "templates/includes/projects/project_row.html"
 	}
 
 @frappe.whitelist()
