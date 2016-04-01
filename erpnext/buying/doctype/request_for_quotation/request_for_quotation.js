@@ -32,6 +32,7 @@ frappe.ui.form.on("Request for Quotation",{
 			frm.add_custom_button(__("Send Supplier Emails"), function() {
 				frappe.call({
 					method: 'erpnext.buying.doctype.request_for_quotation.request_for_quotation.send_supplier_emails',
+					freeze: true,
 					args: {
 						rfq_name: frm.doc.name
 					}
@@ -75,6 +76,14 @@ frappe.ui.form.on("Request for Quotation",{
 			});
 		});
 		dialog.show()
+	}
+})
+
+frappe.ui.form.on("Request for Quotation Supplier",{
+	supplier: function(frm, cdt, cdn){
+		var d = locals[cdt][cdn]
+		frappe.model.set_value(cdt, cdn, 'contact', '')
+		frappe.model.set_value(cdt, cdn, 'email_id', '')
 	}
 })
 

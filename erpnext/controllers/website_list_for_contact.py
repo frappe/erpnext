@@ -93,12 +93,16 @@ def post_process(doctype, data):
 	return result
 
 def get_customers_suppliers(doctype, user):
+	from erpnext.shopping_cart.cart import get_customer
 	meta = frappe.get_meta(doctype)
 	contacts = frappe.get_all("Contact", fields=["customer", "supplier", "email_id"],
 		filters={"email_id": user})
 
 	customers = [c.customer for c in contacts if c.customer] if meta.get_field("customer") else None
 	suppliers = [c.supplier for c in contacts if c.supplier] if meta.get_field("supplier") else None
+
+	if not customers and not suppliers:
+		return [get_customer().name], None
 
 	return customers, suppliers
 

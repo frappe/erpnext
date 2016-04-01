@@ -351,7 +351,7 @@ def get_debtors_account(cart_settings):
 
 def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None):
 	if not party:
-		party = get_customer()
+		return
 
 	address_docs = frappe.db.sql("""select * from `tabAddress`
 		where `{0}`=%s order by name limit {1}, {2}""".format(party.doctype.lower(),

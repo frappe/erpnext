@@ -227,9 +227,15 @@ def validate_party_accounts(doc):
 
 		party_account_currency = frappe.db.get_value("Account", account.account, "account_currency")
 		existing_gle_currency = get_party_gle_currency(doc.doctype, doc.name, account.company)
+		company_default_currency = frappe.db.get_value("Company",
+			frappe.db.get_default("Company"), "default_currency", cache=True)
 
 		if existing_gle_currency and party_account_currency != existing_gle_currency:
 			frappe.throw(_("Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.").format(existing_gle_currency, account.company))
+
+		if doc.default_currency and party_account_currency and company_default_currency:
+			if doc.default_currency != party_account_currency and doc.default_currency != company_default_currency:
+				frappe.throw(_("Billing currency must be equal to either default comapany's currency or party's payble account currency"))
 
 @frappe.whitelist()
 def get_due_date(posting_date, party_type, party, company):

@@ -5,9 +5,10 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import get_url, random_string
 from frappe.utils.user import get_user_fullname
-from frappe.model.mapper import get_mapped_doc
+from erpnext.accounts.party import get_party_account_currency, get_party_details
 from erpnext.stock.doctype.material_request.material_request import set_missing_values
 from erpnext.controllers.buying_controller import BuyingController
 
@@ -98,7 +99,6 @@ class RequestforQuotation(BuyingController):
 		frappe.sendmail(recipients=data.email_id, sender=sender, subject=subject,
 			message=frappe.get_template(template).render(args),
 			attachments = [frappe.attach_print('Request for Quotation', self.name)],as_bulk=True)
-
 		frappe.msgprint(_("Email sent to supplier {0}").format(data.supplier))
 
 @frappe.whitelist()
@@ -119,6 +119,9 @@ def get_list_context(context=None):
 def make_supplier_quotation(source_name, for_supplier, target_doc=None):
 	def postprocess(source, target_doc):
 		target_doc.supplier = for_supplier
+		args = get_party_details(for_supplier, party_type="Supplier", ignore_permissions=True)
+		target_doc.currency = args.currency
+		target_doc.buying_price_list = args.buying_price_list or frappe.db.get_value('Buying Settings', None, 'buying_price_list')
 		set_missing_values(source, target_doc)
 
 	doclist = get_mapped_doc("Request for Quotation", source_name, {
@@ -146,18 +149,16 @@ def create_supplier_quotation(doc):
 	if isinstance(doc, basestring):
 		doc = json.loads(doc)
 
-	supplier = frappe.get_doc('Supplier', doc.get('supplier'))
-
 	try:
 		sq_doc = frappe.get_doc({
 			"doctype": "Supplier Quotation",
-			"supplier": supplier.name,
+			"supplier": doc.get('supplier'),
 			"terms": doc.get("terms"),
 			"company": doc.get("company"),
-			"currency": supplier.default_currency,
-			"buying_price_list": supplier.default_price_list or frappe.db.get_value('Buying Settings', None, 'buying_price_list')
+			"currency": doc.get('currency') or get_party_account_currency('Supplier', doc.get('supplier'), doc.get('company')),
+			"buying_price_list": doc.get('buying_price_list') or frappe.db.get_value('Buying Settings', None, 'buying_price_list')
 		})
-		add_items(sq_doc, supplier, doc.get('items'))
+		add_items(sq_doc, doc.get('supplier'), doc.get('items'))
 		sq_doc.flags.ignore_permissions = True
 		sq_doc.run_method("set_missing_values")
 		sq_doc.save()
