@@ -21,7 +21,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		this.frm.dashboard.reset();
 		var allow_purchase = false;
 		var allow_delivery = false;
-
+		
+		cur_frm.page.add_document_flow(cur_frm)
 		if(doc.docstatus==1) {
 			if(doc.status != 'Closed') {
 
