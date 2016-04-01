@@ -41,7 +41,7 @@ frappe.ui.form.on("Purchase Receipt", {
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
-		cur_frm.page.add_document_flow(cur_frm)
+		this.frm.page.add_document_flow(this.frm)
 		if(this.frm.doc.docstatus===1) {
 			this.show_stock_ledger();
 			if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
