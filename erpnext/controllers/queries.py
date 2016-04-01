@@ -362,6 +362,6 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 			{condition} {match_condition}"""
 		.format(condition=condition, key=frappe.db.escape(searchfield), 
 			match_condition=get_match_cond(doctype)), {
-			'company': filters['company'], 
+			'company': filters.get("company", ""),
 			'txt': "%%%s%%" % frappe.db.escape(txt)
 		})
