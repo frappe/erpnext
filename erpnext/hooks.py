@@ -82,13 +82,13 @@ website_route_rules = [
 ]
 
 portal_menu_items = [
-	{"title": _("Projects"), "route": "project", "reference_doctype": "Project"},
-	{"title": _("Request for Quotations"), "route": "rfq", "reference_doctype": "Request for Quotation"},
-	{"title": _("Orders"), "route": "orders", "reference_doctype": "Sales Order"},
-	{"title": _("Invoices"), "route": "invoices", "reference_doctype": "Sales Invoice"},
-	{"title": _("Shipments"), "route": "shipments", "reference_doctype": "Delivery Note"},
-	{"title": _("Issues"), "route": "issues", "reference_doctype": "Issue"},
-	{"title": _("Addresses"), "route": "addresses", "reference_doctype": "Address"}
+	{"title": _("Projects"), "route": "/project", "reference_doctype": "Project"},
+	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation"},
+	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order"},
+	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice"},
+	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note"},
+	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue"},
+	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"}
 ]
 
 has_website_permission = {
