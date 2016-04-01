@@ -18,6 +18,6 @@ If your asset item is serialized, click [here]({{docs_base_url}}/user/videos/lea
 
 Separate Warehouse should be created for the fixed asset items. All the sales, purchase and stock transactions for asset items should be done for fixed asset warehouse only.
 
-As per the perpetual inventory valuation system, accounting ledger is auto-created for a warehouse. You can move the accounting ledger of fixed asset asset from Stock Asset (default group) to Fixed Asset's group account.
+As per the perpetual inventory valuation system, accounting ledger is auto-created for a warehouse. You can move the accounting ledger of fixed asset from Stock Asset (default group) to Fixed Asset's group account.
 
 <!-- markdown -->
