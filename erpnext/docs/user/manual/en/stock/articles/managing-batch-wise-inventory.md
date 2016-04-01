@@ -1,6 +1,6 @@
 #Managing Batch wise Inventory
 
-Set of items which has same properties and attributes can be group in a single Batch. For example, pharceuticals items are batch, so that it's manufacturing and expiry date can be tracked together. 
+Set of items which has same properties and attributes can be group in a single Batch. For example, pharmaceuticals  items are batch, so that it's manufacturing and expiry date can be tracked together. 
 
 To maintain batches against an Item you need to mention 'Has Batch No' as yes in the Item Master. 
 
