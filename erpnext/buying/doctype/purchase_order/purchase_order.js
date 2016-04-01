@@ -20,7 +20,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		// this.frm.dashboard.reset();
 		var allow_receipt = false;
 		var is_drop_ship = false;
-		cur_frm.page.add_document_flow(cur_frm)
+		this.frm.page.add_document_flow(this.frm)
 		for (var i in cur_frm.doc.items) {
 			var item = cur_frm.doc.items[i];
 			if(item.delivered_by_supplier !== 1) {
