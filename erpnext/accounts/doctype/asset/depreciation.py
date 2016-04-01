@@ -64,22 +64,22 @@ def make_depreciation_entry(asset_name, date=None):
 		asset.set_status()
 
 def get_depreciation_accounts(asset):
-	accounts = frappe.get_all("Asset Category Account",
-		fields = ['fixed_asset_account', 'accumulated_depreciation_account',
-			'depreciation_expense_account'],
-		filters={'parent': asset.asset_category, 'company_name': asset.company})
+	fixed_asset_account = accumulated_depreciation_account = depreciation_expense_account = None
+	
+	accounts = frappe.db.get_value("Asset Category Account",
+		filters={'parent': asset.asset_category, 'company_name': asset.company},
+		fieldname = ['fixed_asset_account', 'accumulated_depreciation_account',
+			'depreciation_expense_account'], as_dict=1)
 
-	if accounts:
-		accounts = accounts[0]
-
-	fixed_asset_account = accounts.fixed_asset_account
-	accumulated_depreciation_account = accounts.accumulated_depreciation_account
-	depreciation_expense_account = accounts.depreciation_expense_account
-
+	if accounts:	
+		fixed_asset_account = accounts.fixed_asset_account
+		accumulated_depreciation_account = accounts.accumulated_depreciation_account
+		depreciation_expense_account = accounts.depreciation_expense_account
+		
 	if not accumulated_depreciation_account or not depreciation_expense_account:
 		accounts = frappe.db.get_value("Company", asset.company,
 			["accumulated_depreciation_account", "depreciation_expense_account"])
-
+		
 		if not accumulated_depreciation_account:
 			accumulated_depreciation_account = accounts[0]
 		if not depreciation_expense_account:
