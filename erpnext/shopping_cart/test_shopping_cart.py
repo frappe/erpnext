@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from erpnext.shopping_cart.cart import _get_cart_quotation, update_cart, get_customer
+from erpnext.shopping_cart.cart import _get_cart_quotation, update_cart, get_party
 
 class TestShoppingCart(unittest.TestCase):
 	"""
@@ -118,7 +118,7 @@ class TestShoppingCart(unittest.TestCase):
 			"doctype": "Quotation",
 			"quotation_to": "Customer",
 			"order_type": "Shopping Cart",
-			"customer": get_customer(frappe.session.user).name,
+			"customer": get_party(frappe.session.user).name,
 			"docstatus": 0,
 			"contact_email": frappe.session.user,
 			"selling_price_list": "_Test Price List Rest of the World",
