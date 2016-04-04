@@ -85,13 +85,18 @@ cur_frm.add_fetch('item_code', 'description', 'description');
 cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 	if(doc.serial_no) {
 		return{
-			filters:{ 'serial_no': doc.serial_no}
+			doctype: "Serial No",
+			fields: "item_code",
+			filters:{
+				name: doc.serial_no
+			}
 		}
 	}
 	else{
 		return{
 			filters:[
-				['Item', 'docstatus', '!=', 2]
+				['Item', 'docstatus', '!=', 2],
+				['Item', 'disabled', '=', 0]
 			]
 		}
 	}

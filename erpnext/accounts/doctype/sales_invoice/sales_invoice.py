@@ -375,7 +375,7 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
 
 		if flt(self.paid_amount) + flt(self.write_off_amount) \
-				- flt(self.base_grand_total) > 1/(10**(self.precision("base_grand_total") + 1)):
+				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
 
@@ -471,7 +471,7 @@ class SalesInvoice(SellingController):
 			frappe.db.set(self,'paid_amount',0)
 
 		frappe.db.set(self, 'base_paid_amount',
-			flt(self.paid_amount*self.conversion_rate, self.precision("base_paid_amount")))		
+			flt(self.paid_amount*self.conversion_rate, self.precision("base_paid_amount")))
 
 	def check_prev_docstatus(self):
 		for d in self.get('items'):
