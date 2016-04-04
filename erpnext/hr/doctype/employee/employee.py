@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_add, today
+from frappe.utils import getdate, validate_email_add, today, get_gravatar
 from frappe.model.naming import make_autoname
 from frappe import throw, _
 import frappe.permissions
