@@ -96,13 +96,6 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEquals(quotation.net_total, 20)
 		self.assertEquals(len(quotation.get("items")), 1)
 
-		# remove second item
-		update_cart("_Test Item 2", 0)
-		quotation = self.test_get_cart_customer()
-
-		self.assertEquals(len(quotation.get("items")), 0)
-		self.assertEquals(quotation.net_total, 0)
-
 	def test_tax_rule(self):
 		self.login_as_customer()
 		quotation = self.create_quotation()
@@ -197,6 +190,7 @@ class TestShoppingCart(unittest.TestCase):
 
 	def remove_all_items_from_cart(self):
 		quotation = _get_cart_quotation()
+		quotation.flags.ignore_permissions=True
 		quotation.delete()
 
 	def create_user_if_not_exists(self, email, first_name = None):
