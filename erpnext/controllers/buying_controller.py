@@ -262,6 +262,36 @@ class BuyingController(StockController):
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
 	
+	def validate_purchase_return(self):
+		for d in self.get("items"):
+			if self.is_return and flt(d.rejected_qty) != 0:
+				frappe.throw(_("Row #{0}: Rejected Qty can not be entered in Purchase Return").format(d.idx))
+
+			# validate rate with ref PR
+
+	def validate_rejected_warehouse(self):
+		for d in self.get("items"):
+			if flt(d.rejected_qty) and not d.rejected_warehouse:
+				d.rejected_warehouse = self.rejected_warehouse
+				if not d.rejected_warehouse:
+					frappe.throw(_("Row #{0}: Rejected Warehouse is mandatory against rejected Item {1}").format(d.idx, d.item_code))
+
+	# validate accepted and rejected qty
+	def validate_accepted_rejected_qty(self):
+		for d in self.get("items"):
+			if not flt(d.received_qty) and flt(d.qty):
+				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
+
+			elif not flt(d.qty) and flt(d.rejected_qty):
+				d.qty = flt(d.received_qty) - flt(d.rejected_qty)
+
+			elif not flt(d.rejected_qty):
+				d.rejected_qty = flt(d.received_qty) -  flt(d.qty)
+
+			# Check Received Qty = Accepted Qty + Rejected Qty
+			if ((flt(d.qty) + flt(d.rejected_qty)) != flt(d.received_qty)):
+				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
+	
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		sl_entries = []
 		stock_items = self.get_stock_items()
