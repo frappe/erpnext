@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, cint, formatdate, flt, getdate
+from frappe.utils import cint, formatdate, flt, getdate
 from frappe import msgprint, _, throw
 from erpnext.setup.utils import get_company_currency
 import frappe.defaults
@@ -53,6 +53,9 @@ class PurchaseInvoice(BuyingController):
 
 		# validate stock items
 		if (self.update_stock == 1):
+			pc_obj = frappe.get_doc('Purchase Common')
+			pc_obj.validate_for_items(self)
+			
 			self.validate_purchase_return()
 			self.validate_rejected_warehouse()
 			self.validate_accepted_rejected_qty()
@@ -318,43 +321,6 @@ class PurchaseInvoice(BuyingController):
 			}
 		])
 
-	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
-		sl_entries = []
-		stock_items = self.get_stock_items()
-
-		for d in self.get('items'):
-			if d.item_code in stock_items and d.warehouse:
-				pr_qty = flt(d.qty) * flt(d.conversion_factor)
-
-				if pr_qty:
-					val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
-					rate = flt(d.valuation_rate, val_rate_db_precision)
-					sle = self.get_sl_entries(d, {
-						"actual_qty": flt(pr_qty),
-						"serial_no": cstr(d.serial_no).strip()
-					})
-					if self.is_return:
-						sle.update({
-							"outgoing_rate": rate
-						})
-					else:
-						sle.update({
-							"incoming_rate": rate
-						})
-					sl_entries.append(sle)
-
-				if flt(d.rejected_qty) > 0:
-					sl_entries.append(self.get_sl_entries(d, {
-						"warehouse": d.rejected_warehouse,
-						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
-						"serial_no": cstr(d.rejected_serial_no).strip(),
-						"incoming_rate": 0.0
-					}))
-
-		# self.bk_flush_supp_wh(sl_entries)
-		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock,
-			via_landed_cost_voucher=via_landed_cost_voucher)
-		
 	def on_submit(self):
 		self.check_prev_docstatus()
 		self.validate_asset()

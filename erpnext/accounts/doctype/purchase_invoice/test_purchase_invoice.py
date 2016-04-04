@@ -11,6 +11,7 @@ import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
 	test_records as pr_test_records
 from erpnext.exceptions import InvalidCurrency
+from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 
 test_dependencies = ["Item", "Cost Center"]
 test_ignore = ["Serial No"]
@@ -317,6 +318,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	
 	def test_purchase_invoice_update_stock_gl_entry_with_perpetual_inventory(self):
 		set_perpetual_inventory()
+		
 		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(), 
 			posting_time=frappe.utils.nowtime())
 		
@@ -359,6 +361,22 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[gle.account][0], gle.account)
 			self.assertEquals(expected_gl_entries[gle.account][1], gle.debit)
 			self.assertEquals(expected_gl_entries[gle.account][2], gle.credit)
+	
+	def test_update_stock_and_purchase_return(self):
+		actual_qty_0 = get_qty_after_transaction()
+		
+		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(), 
+			posting_time=frappe.utils.nowtime())
+		
+		actual_qty_1 = get_qty_after_transaction()
+		self.assertEquals(actual_qty_0 + 5, actual_qty_1)
+
+		# return entry
+		pi1 = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2, rate=50, update_stock=1)
+
+		actual_qty_2 = get_qty_after_transaction()
+
+		self.assertEquals(actual_qty_1 - 2, actual_qty_2)
 
 def make_purchase_invoice(**args):
 	pi = frappe.new_doc("Purchase Invoice")

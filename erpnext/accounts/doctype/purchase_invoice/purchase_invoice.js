@@ -16,7 +16,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			}
 		}
 		
-		cur_frm.cscript.hide_fields(this.frm.doc);
+		hide_fields(this.frm.doc);
 	},
 
 	refresh: function(doc) {
@@ -108,7 +108,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	is_paid: function() {
-		cur_frm.cscript.hide_fields(this.frm.doc);
+		hide_fields(this.frm.doc);
 		if(cint(this.frm.doc.is_paid)) {
 			if(!this.frm.doc.company) {
 				cur_frm.set_value("is_paid", 0)
@@ -164,7 +164,7 @@ cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 
 // Hide Fields
 // ------------
-cur_frm.cscript.hide_fields = function(doc) {
+function hide_fields(doc) {
 	parent_fields = ['due_date', 'is_opening', 'advances_section', 'from_date', 'to_date'];
 
 	if(cint(doc.is_paid) == 1) {
@@ -186,7 +186,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 }
 
 cur_frm.cscript.update_stock = function(doc, dt, dn) {
-	cur_frm.cscript.hide_fields(doc, dt, dn);
+	hide_fields(doc, dt, dn);
 }
 
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
