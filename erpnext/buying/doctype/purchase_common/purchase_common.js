@@ -117,7 +117,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		if ((doc.doctype == "Purchase Receipt") || (doc.doctype == "Purchase Invoice" && doc.update_stock)) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
-
 			if(!(item.received_qty || item.rejected_qty) && item.qty) {
 				item.received_qty = item.qty;
 			}
@@ -153,6 +152,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]));
 			item.qty = item.rejected_qty = 0.0;
 		} else {
+			
 			item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
 		}
 
@@ -235,6 +235,10 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 		erpnext.utils.get_address_display(this.frm, "shipping_address",
 			"shipping_address_display", is_your_company_address=true)
+	},
+	
+	tc_name: function() {
+		this.get_terms();
 	}
 });
 

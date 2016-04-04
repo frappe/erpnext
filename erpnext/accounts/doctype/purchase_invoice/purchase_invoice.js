@@ -136,10 +136,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		this.frm.refresh_fields();
 	},
 
-	tc_name: function() {
-		this.get_terms();
-	},
-
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row,

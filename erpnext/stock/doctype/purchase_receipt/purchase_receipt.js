@@ -24,7 +24,6 @@ frappe.ui.form.on("Purchase Receipt", {
 	}
 });
 
-
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
@@ -88,10 +87,6 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_return",
 			frm: cur_frm
 		})
-	},
-
-	tc_name: function() {
-		this.get_terms();
 	},
 
 	close_purchase_receipt: function() {
@@ -199,8 +194,6 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(frappe.boot.notification_settings.purchase_receipt))
 		cur_frm.email_doc(frappe.boot.notification_settings.purchase_receipt_message);
 }
-
-
 
 frappe.provide("erpnext.buying");
 
