@@ -23,9 +23,6 @@ script:
   - cd ~/frappe-bench
   - bench get-app erpnext $TRAVIS_BUILD_DIR
   - bench use test_site
-  - bench setup redis-cache
-  - bench setup redis-async-broker
-  - bench setup procfile --with-celery-broker
   - bench reinstall
   - bench build
   - bench build-website
