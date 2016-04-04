@@ -130,43 +130,6 @@ class PurchaseReceipt(BuyingController):
 				 if not d.prevdoc_docname:
 					 frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
-	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
-		sl_entries = []
-		stock_items = self.get_stock_items()
-
-		for d in self.get('items'):
-			if d.item_code in stock_items and d.warehouse:
-				pr_qty = flt(d.qty) * flt(d.conversion_factor)
-
-				if pr_qty:
-					val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
-					rate = flt(d.valuation_rate, val_rate_db_precision)
-					sle = self.get_sl_entries(d, {
-						"actual_qty": flt(pr_qty),
-						"serial_no": cstr(d.serial_no).strip()
-					})
-					if self.is_return:
-						sle.update({
-							"outgoing_rate": rate
-						})
-					else:
-						sle.update({
-							"incoming_rate": rate
-						})
-					sl_entries.append(sle)
-
-				if flt(d.rejected_qty) > 0:
-					sl_entries.append(self.get_sl_entries(d, {
-						"warehouse": d.rejected_warehouse,
-						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
-						"serial_no": cstr(d.rejected_serial_no).strip(),
-						"incoming_rate": 0.0
-					}))
-
-		self.bk_flush_supp_wh(sl_entries)
-		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock,
-			via_landed_cost_voucher=via_landed_cost_voucher)
-
 	def update_ordered_qty(self):
 		po_map = {}
 		for d in self.get("items"):
@@ -194,16 +157,6 @@ class PurchaseReceipt(BuyingController):
 		po_qty, po_warehouse = frappe.db.get_value("Purchase Order Item", po_detail,
 			["qty", "warehouse"])
 		return po_qty, po_warehouse
-
-	def bk_flush_supp_wh(self, sl_entries):
-		for d in self.get('supplied_items'):
-			# negative quantity is passed as raw material qty has to be decreased
-			# when PR is submitted and it has to be increased when PR is cancelled
-			sl_entries.append(self.get_sl_entries(d, {
-				"item_code": d.rm_item_code,
-				"warehouse": self.supplier_warehouse,
-				"actual_qty": -1*flt(d.consumed_qty),
-			}))
 
 	def validate_inspection(self):
 		for d in self.get('items'):		 #Enter inspection date for all items that require inspection
