@@ -31,7 +31,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 
 			if(this.frm.doc.company && !this.frm.doc.amended_from) {
-				cur_frm.script_manager.trigger("company");
+				this.frm.script_manager.trigger("company");
 			}
 		}
 

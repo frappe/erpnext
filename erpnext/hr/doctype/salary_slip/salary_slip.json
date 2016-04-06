@@ -820,7 +820,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "rounded_total", 
    "fieldtype": "Currency", 
@@ -874,14 +874,14 @@
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "icon": "icon-file-text", 
- "idx": 1, 
+ "idx": 9, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-18 16:02:55.254165", 
+ "modified": "2016-04-06 03:10:12.181480", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 
@@ -954,5 +954,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "timeline_field": "employee", 
- "title_field": "employee_name"
+ "title_field": "employee_name", 
+ "track_seen": 0
 }

@@ -65,7 +65,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "supplier_name", 
    "fieldtype": "Data", 
@@ -658,7 +658,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-04-04 06:44:41.680149", 
+ "modified": "2016-04-06 05:39:47.329568", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier", 

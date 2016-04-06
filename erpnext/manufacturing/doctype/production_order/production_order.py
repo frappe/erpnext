@@ -42,7 +42,6 @@ class ProductionOrder(Document):
 		self.validate_sales_order()
 		self.validate_warehouse()
 		self.calculate_operating_cost()
-		self.validate_delivery_date()
 		self.validate_qty()
 		self.validate_operation_time()
 
@@ -57,7 +56,7 @@ class ProductionOrder(Document):
 			if len(so):
 				if not self.expected_delivery_date:
 					self.expected_delivery_date = so[0].delivery_date
-				
+
 				self.project = so[0].project
 
 				self.validate_production_order_against_so()
@@ -154,7 +153,7 @@ class ProductionOrder(Document):
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
-			
+
 		frappe.db.set(self,'status', 'Submitted')
 		self.make_time_logs()
 		self.update_completed_qty_in_material_request()
@@ -182,11 +181,11 @@ class ProductionOrder(Document):
 		update_bin_qty(self.production_item, self.fg_warehouse, {
 			"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)
 		})
-		
+
 		if self.material_request:
 			mr_obj = frappe.get_doc("Material Request", self.material_request)
 			mr_obj.update_requested_qty([self.material_request_item])
-			
+
 	def update_completed_qty_in_material_request(self):
 		if self.material_request:
 			frappe.get_doc("Material Request", self.material_request).update_completed_qty([self.material_request_item])
@@ -324,11 +323,6 @@ class ProductionOrder(Document):
 		else:
 			self.actual_start_date = None
 			self.actual_end_date = None
-
-	def validate_delivery_date(self):
-		if self.planned_start_date and self.expected_delivery_date \
-			and getdate(self.expected_delivery_date) < getdate(self.planned_start_date):
-				frappe.msgprint(_("Expected Delivery Date is lesser than Planned Start Date."))
 
 	def delete_time_logs(self):
 		for time_log in frappe.get_all("Time Log", ["name"], {"production_order": self.name}):

@@ -297,7 +297,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "depends_on": "customer", 
    "fieldname": "customer_name", 
@@ -614,7 +614,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-31 06:02:28.862296", 
+ "modified": "2016-04-06 03:15:16.876595", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Schedule", 

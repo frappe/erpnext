@@ -293,7 +293,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "depends_on": "", 
    "fieldname": "customer_name", 
@@ -369,7 +369,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "depends_on": "", 
    "fieldname": "supplier_name", 
@@ -583,7 +583,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-04-04 07:19:01.513526", 
+ "modified": "2016-04-06 05:39:47.125816", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Contact", 

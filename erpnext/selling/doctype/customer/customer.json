@@ -63,7 +63,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "customer_name", 
    "fieldtype": "Data", 
@@ -927,7 +927,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-04-04 06:44:50.251933", 
+ "modified": "2016-04-06 03:15:14.488537", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Customer", 
