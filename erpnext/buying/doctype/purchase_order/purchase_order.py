@@ -103,7 +103,7 @@ class PurchaseOrder(BuyingController):
 					d.price_list_rate = d.base_price_list_rate / conversion_rate
 					d.rate = d.base_rate / conversion_rate
 				else:
-					msgprint("Last purchase rate not found")
+					msgprint(_("Last purchase rate not found"))
 
 					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
 					if item_last_purchase_rate:
