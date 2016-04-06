@@ -19,22 +19,6 @@ frappe.ready(function() {
 		}
 	})
 
-	//
-	// $('.btn-closed-tasks').click(function() {
-	// 	reload_items('closed','tasks');
-	// });
-	//
-	// $('.btn-open-tasks').click(function() {
-	// 	reload_items('open','tasks');
-	// });
-	//
-	// $('.btn-closed-issues').click(function() {
-	// 	reload_items('closed','issues');
-	// });
-	//
-	// $('.btn-open-issues').click(function() {
-	// 	reload_items('open','issues');
-	// });
 
 	var start = 10;
 	$(".more-tasks").click(function() {
@@ -66,7 +50,6 @@ frappe.ready(function() {
 			},
 			dataType: "json",
 			success: function(data) {
-				console.log(data.message);
 				if(typeof data.message == 'undefined') {
 					$('.project-'+ item).html("No "+ item_status +" "+ item);
 					$(".more-"+ item).toggle(false);
