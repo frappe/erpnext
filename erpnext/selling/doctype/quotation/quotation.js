@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-
+{% include 'item_info/item_info/custom_quotation.js' %};
 {% include 'selling/sales_common.js' %}
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
