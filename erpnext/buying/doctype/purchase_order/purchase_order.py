@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 from frappe.utils import cstr, flt
-from frappe import msgprint, _, throw
+from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.item.item import get_last_purchase_details
@@ -188,17 +188,6 @@ class PurchaseOrder(BuyingController):
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_closed_status(pc_obj)
-
-		# Check if Purchase Receipt has been submitted against current Purchase Order
-		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.name, detail_doctype = 'Purchase Receipt Item')
-
-		# Check if Purchase Invoice has been submitted against current Purchase Order
-		submitted = frappe.db.sql_list("""select t1.name
-			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
-			where t1.name = t2.parent and t2.purchase_order = %s and t1.docstatus = 1""",
-			self.name)
-		if submitted:
-			throw(_("Purchase Invoice {0} is already submitted").format(", ".join(submitted)))
 
 		frappe.db.set(self,'status','Cancelled')
 

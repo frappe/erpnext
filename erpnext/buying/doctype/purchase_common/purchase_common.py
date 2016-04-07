@@ -80,17 +80,3 @@ class PurchaseCommon(BuyingController):
 
 		if status == "Closed":
 			frappe.throw(_("{0} {1} status is {2}").format(doctype, docname, status), frappe.InvalidStatusError)
-
-	def check_docstatus(self, check, doctype, docname, detail_doctype = ''):
-		if check == 'Next':
-			submitted = frappe.db.sql("""select t1.name from `tab%s` t1,`tab%s` t2
-				where t1.name = t2.parent and t2.prevdoc_docname = %s and t1.docstatus = 1"""
-				% (doctype, detail_doctype, '%s'), docname)
-			if submitted:
-				frappe.throw(_("{0} {1} has already been submitted").format(doctype, submitted[0][0]))
-
-		if check == 'Previous':
-			submitted = frappe.db.sql("""select name from `tab%s`
-				where docstatus = 1 and name = %s""" % (doctype, '%s'), docname)
-			if not submitted:
-				frappe.throw(_("{0} {1} is not submitted").format(doctype, submitted[0][0]))

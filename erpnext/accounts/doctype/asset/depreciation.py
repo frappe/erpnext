@@ -160,12 +160,13 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
 
 	return gl_entries
 
+@frappe.whitelist()
 def get_disposal_account_and_cost_center(company):
 	disposal_account, depreciation_cost_center = frappe.db.get_value("Company", company,
 		["disposal_account", "depreciation_cost_center"])
 
 	if not disposal_account:
-		frappe.throw(_("Please set 'Asset Disposal Account' in Company {0}").format(company))
+		frappe.throw(_("Please set 'Gain/Loss Account on Asset Disposal' in Company {0}").format(company))
 	if not depreciation_cost_center:
 		frappe.throw(_("Please set 'Asset Depreciation Cost Center' in Company {0}").format(company))
 

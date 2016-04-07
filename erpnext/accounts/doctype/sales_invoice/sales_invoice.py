@@ -13,7 +13,8 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
-from erpnext.accounts.doctype.asset.depreciation import get_gl_entries_on_asset_disposal
+from erpnext.accounts.doctype.asset.depreciation \
+	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -60,8 +61,9 @@ class SalesInvoice(SellingController):
 		self.validate_advance_jv("Sales Order")
 		self.add_remarks()
 		self.validate_write_off_account()
+		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
-
+		
 		if cint(self.is_pos):
 			self.validate_pos()
 
@@ -454,16 +456,15 @@ class SalesInvoice(SellingController):
 		return warehouse
 		
 	def set_income_account_for_fixed_assets(self):
-		disposal_account = None
+		disposal_account = depreciation_cost_center = None
 		for d in self.get("items"):
-			if frappe.db.get_value("Item", d.item_code, "is_fixed_asset"):
+			if d.is_fixed_asset:
 				if not disposal_account:
-					disposal_account = frappe.db.get_value("Company", self.company, "disposal_account")
-					if not disposal_account:
-						frappe.throw(_("Please mention 'Gain/Loss Account on Asset Disposal' in Company"))
-				
+					disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(self.company)
+					
 				d.income_account = disposal_account
-
+				if not d.cost_center:
+					d.cost_center = depreciation_cost_center
 
 	def check_prev_docstatus(self):
 		for d in self.get('items'):
@@ -472,13 +473,6 @@ class SalesInvoice(SellingController):
 
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
-				
-	def validate_asset(self, asset, item_row):
-		super(SalesInvoice, self).validate_asset(asset, item_row)
-		
-		if self.docstatus == 1 and asset.status in ("Scrapped", "Cancelled", "Sold"):
-			frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
-				.format(item_row.idx, asset.name, asset.status))
 
 	def make_gl_entries(self, repost_future_gle=True):
 		gl_entries = self.get_gl_entries()
@@ -565,19 +559,15 @@ class SalesInvoice(SellingController):
 		# income account gl entries
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
-				if frappe.db.get_value("Item", item.item_code, "is_fixed_asset"):
-					if not item.asset:
-						frappe.throw(_("Row #{0}: Asset is mandatory against a Fixed Asset Item")
-							.format(item.idx))
-					else:
-						asset = frappe.get_doc("Asset", item.asset)
-						self.validate_asset(asset, item)
+				if item.is_fixed_asset:
+					asset = frappe.get_doc("Asset", item.asset)
+				
+					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, item.base_net_amount)
+					for gle in fixed_asset_gl_entries:
+						gle["against"] = self.customer
+						gl_entries.append(self.get_gl_dict(gle))
 					
-						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, item.base_net_amount)
-						for gle in fixed_asset_gl_entries:
-							gl_entries.append(self.get_gl_dict(gle))
-						
-						asset.set_status("Sold" if self.docstatus==1 else None)
+					asset.set_status("Sold" if self.docstatus==1 else None)
 				else:
 					account_currency = get_account_currency(item.income_account)
 					gl_entries.append(

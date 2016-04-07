@@ -269,6 +269,22 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",
 			frm: cur_frm
 		})
+	},
+	
+	asset: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if(row.asset) {
+			frappe.call({
+				method: erpnext.accounts.doctype.asset.depreciation.get_disposal_account_and_cost_center,
+				args: {
+					"company": frm.doc.company
+				},
+				callback: function(r, rt) {
+					frappe.model.set_value(cdt, cdn, "income_account", r.message[0]);
+					frappe.model.set_value(cdt, cdn, "cost_center", r.message[1]);
+				}
+			})
+		}
 	}
 });
 

@@ -3,7 +3,6 @@ auto-creation-of-material-request
 depreciation-entry
 maintain-stock-field-frozen-in-item-master
 manage-rejected-finished-goods-items
-managing-assets
 managing-batch-wise-inventory
 managing-fractions-in-uom
 opening-stock-balance-entry-for-the-serialized-and-batch-item

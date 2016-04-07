@@ -5,19 +5,50 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import cstr
+from frappe.utils import cstr, nowdate, getdate
 from erpnext.accounts.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.doctype.asset.asset import make_sales_invoice, make_purchase_invoice
 
 class TestAsset(unittest.TestCase):
 	def setUp(self):
 		set_depreciation_settings_in_company()
 		create_asset()
+		
+	def test_purchase_asset(self):
+		asset = frappe.get_doc("Asset", "Macbook Pro 1")
+		asset.submit()
+		
+		pi = make_purchase_invoice(asset.name, asset.item_code, asset.gross_purchase_amount, asset.company)
+		pi.supplier = "_Test Supplier"
+		pi.insert()
+		pi.submit()
+		
+		asset.load_from_db()
+		self.assertEqual(asset.supplier, "_Test Supplier")
+		self.assertEqual(getdate(asset.purchase_date), getdate(nowdate()))
+		self.assertEqual(asset.purchase_invoice, pi.name)
+		
+		expected_gle = (
+			("_Test Fixed Asset - _TC", 100000.0, 0.0),
+			("Creditors - _TC", 0.0, 100000.0)
+		)
 
-	def test_fixed_asset_must_be_non_stock_item(self):
-		item = frappe.get_doc("Item", "Macbook Pro")
-		item.is_stock_item = 1
-		self.assertRaises(frappe.ValidationError, item.save)
+		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Purchase Invoice' and voucher_no = %s
+			order by account""", pi.name)
+
+		self.assertEqual(gle, expected_gle)
+
+		pi.cancel()
+
+		asset.load_from_db()
+		self.assertEqual(asset.supplier, None)
+		self.assertEqual(asset.purchase_date, None)
+		self.assertEqual(asset.purchase_invoice, None)
+		
+		self.assertFalse(frappe.db.get_value("GL Entry", 
+			{"voucher_type": "Purchase Invoice", "voucher_no": pi.name}))
+		
 
 	def test_schedule_for_straight_line_method(self):
 		asset = frappe.get_doc("Asset", "Macbook Pro 1")
@@ -25,9 +56,9 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(asset.status, "Draft")
 
 		expected_schedules = [
-			["2015-12-31", 30000, 30000],
-			["2016-03-31", 30000, 60000],
-			["2016-06-30", 30000, 90000]
+			["2020-12-31", 30000, 30000],
+			["2021-03-31", 30000, 60000],
+			["2021-06-30", 30000, 90000]
 		]
 
 		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
@@ -42,9 +73,9 @@ class TestAsset(unittest.TestCase):
 		asset.save()
 
 		expected_schedules = [
-			["2015-12-31", 66667, 66667],
-			["2016-03-31", 22222, 88889],
-			["2016-06-30", 1111, 90000]
+			["2020-12-31", 66667, 66667],
+			["2021-03-31", 22222, 88889],
+			["2021-06-30", 1111, 90000]
 		]
 
 		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
@@ -58,7 +89,7 @@ class TestAsset(unittest.TestCase):
 		asset.load_from_db()
 		self.assertEqual(asset.status, "Submitted")
 
-		post_depreciation_entries(date="2016-01-01")
+		post_depreciation_entries(date="2021-01-01")
 		asset.load_from_db()
 
 		self.assertEqual(asset.status, "Partially Depreciated")
@@ -75,11 +106,10 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(gle, expected_gle)
 		self.assertEqual(asset.get("current_value"), 70000)
 
-
 	def test_scrap_asset(self):
 		asset = frappe.get_doc("Asset", "Macbook Pro 1")
 		asset.submit()
-		post_depreciation_entries(date="2016-01-01")
+		post_depreciation_entries(date="2021-01-01")
 
 		scrap_asset("Macbook Pro 1")
 
@@ -107,10 +137,13 @@ class TestAsset(unittest.TestCase):
 
 	def test_asset_sale(self):
 		frappe.get_doc("Asset", "Macbook Pro 1").submit()
-		post_depreciation_entries(date="2016-01-01")
+		post_depreciation_entries(date="2021-01-01")
 
-		si = create_sales_invoice(item_code="Macbook Pro", rate=25000, do_not_save=True)
-		si.get("items")[0].asset = "Macbook Pro 1"
+		si = make_sales_invoice(asset="Macbook Pro 1", item_code="Macbook Pro", company="_Test Company")
+		si.customer = "_Test Customer"
+		si.due_date = nowdate()
+		si.get("items")[0].rate = 25000
+		si.insert()
 		si.submit()
 
 		self.assertEqual(frappe.db.get_value("Asset", "Macbook Pro 1", "status"), "Sold")
@@ -156,9 +189,10 @@ def create_asset():
 		"item_code": "Macbook Pro",
 		"company": "_Test Company",
 		"purchase_date": "2015-01-01",
-		"next_depreciation_date": "2015-12-31",
+		"next_depreciation_date": "2020-12-31",
 		"gross_purchase_amount": 100000,
-		"expected_value_after_useful_life": 10000
+		"expected_value_after_useful_life": 10000,
+		"warehouse": "_Test Warehouse - _TC"
 	})
 	try:
 		asset.save()
@@ -171,7 +205,7 @@ def create_asset_category():
 	asset_category = frappe.new_doc("Asset Category")
 	asset_category.asset_category_name = "Computers"
 	asset_category.number_of_depreciations = 3
-	asset_category.number_of_months_in_a_period = 3
+	asset_category.frequency_of_depreciation = 3
 	asset_category.append("accounts", {
 		"company_name": "_Test Company",
 		"fixed_asset_account": "_Test Fixed Asset - _TC",
@@ -189,8 +223,7 @@ def create_fixed_asset_item():
 			"description": "Macbook Pro Retina Display",
 			"item_group": "All Item Groups",
 			"stock_uom": "Nos",
-			"is_stock_item": 0,
-			"is_fixed_asset": 1
+			"is_stock_item": 0
 		}).insert()		
 	except frappe.DuplicateEntryError:
 		pass

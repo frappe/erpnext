@@ -88,7 +88,6 @@ class Item(WebsiteGenerator):
 		self.validate_variant_attributes()
 		self.validate_website_image()
 		self.make_thumbnail()
-		self.validate_fixed_asset_item()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -607,11 +606,6 @@ class Item(WebsiteGenerator):
 			if variant:
 				frappe.throw(_("Item variant {0} exists with same attributes")
 					.format(variant), ItemVariantExistsError)
-
-	def validate_fixed_asset_item(self):
-		if self.is_fixed_asset and self.is_stock_item:
-			frappe.throw(_("Fixed Asset Item must be a non-stock item"))
-
 
 @frappe.whitelist()
 def get_dashboard_data(name):

@@ -5,13 +5,15 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, add_months, cint
+from frappe.utils import flt, add_months, cint, nowdate, getdate
 from frappe.model.document import Document
+from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_fixed_asset_account
+from erpnext.accounts.doctype.asset.depreciation import get_disposal_account_and_cost_center
 
 class Asset(Document):
 	def validate(self):
 		self.status = self.get_status()
-		self.validate_fixed_asset_item()
+		self.validate_item()
 		self.validate_asset_values()
 		self.set_depreciation_settings()
 		self.make_depreciation_schedule()
@@ -25,12 +27,10 @@ class Asset(Document):
 		self.delete_depreciation_entries()
 		self.set_status()
 
-	def validate_fixed_asset_item(self):
+	def validate_item(self):
 		item = frappe.get_doc("Item", self.item_code)
 		if item.disabled:
 			frappe.throw(_("Item {0} has been disabled").format(self.item_code))
-		if item.is_stock_item:
-			frappe.throw(_("Item {0} must be a non-stock item").format(self.item_code))
 
 	def validate_asset_values(self):
 		if flt(self.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
@@ -38,6 +38,12 @@ class Asset(Document):
 
 		if not flt(self.gross_purchase_amount):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
+			
+		if not self.is_existing_asset and not self.next_depreciation_date:
+			frappe.throw(_("Next Depreciation Date is mandatory for new asset"))
+			
+		if self.next_depreciation_date and getdate(self.next_depreciation_date) < getdate(nowdate()):
+			frappe.throw(_("Next Depreciation Date must be on or after today"))
 
 		if not self.current_value and self.next_depreciation_date:
 			self.current_value = flt(self.gross_purchase_amount)
@@ -49,7 +55,7 @@ class Asset(Document):
 	def set_depreciation_settings(self):
 		asset_category = frappe.get_doc("Asset Category", self.asset_category)
 
-		for field in ("depreciation_method", "number_of_depreciations", "number_of_months_in_a_period"):
+		for field in ("depreciation_method", "number_of_depreciations", "frequency_of_depreciation"):
 			if not self.get(field):
 				self.set(field, asset_category.get(field))
 
@@ -60,7 +66,7 @@ class Asset(Document):
 			value_after_depreciation = flt(self.current_value)
 			for n in xrange(self.number_of_depreciations):
 				schedule_date = add_months(self.next_depreciation_date,
-					n * cint(self.number_of_months_in_a_period))
+					n * cint(self.frequency_of_depreciation))
 
 				depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
 
@@ -112,7 +118,7 @@ class Asset(Document):
 						.format(company.meta.get_label(field), self.company))
 
 	def set_status(self, status=None):
-		'''Set asset and update status'''
+		'''Get and update status'''
 		if not status:
 			status = self.get_status()
 		self.db_set("status", status)
@@ -133,3 +139,37 @@ class Asset(Document):
 			status = "Cancelled"
 
 		return status
+
+@frappe.whitelist()
+def make_purchase_invoice(asset, item_code, gross_purchase_amount, company):
+	pi = frappe.new_doc("Purchase Invoice")
+	pi.company = company
+	pi.currency = frappe.db.get_value("Company", company, "default_currency")
+	pi.append("items", {
+		"item_code": item_code,
+		"is_fixed_asset": 1,
+		"asset": asset,
+		"expense_account": get_fixed_asset_account(asset),
+		"qty": 1,
+		"price_list_rate": gross_purchase_amount,
+		"rate": gross_purchase_amount
+	})
+	pi.set_missing_values()
+	return pi
+	
+@frappe.whitelist()
+def make_sales_invoice(asset, item_code, company):
+	si = frappe.new_doc("Sales Invoice")
+	si.company = company
+	si.currency = frappe.db.get_value("Company", company, "default_currency")
+	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(company)
+	si.append("items", {
+		"item_code": item_code,
+		"is_fixed_asset": 1,
+		"asset": asset,
+		"income_account": disposal_account,
+		"cost_center": depreciation_cost_center,
+		"qty": 1
+	})
+	si.set_missing_values()
+	return si
