@@ -52,30 +52,12 @@ class PurchaseReceipt(BuyingController):
 		self.set_status()
 		self.po_required()
 		self.validate_with_previous_doc()
-		self.validate_purchase_return()
-		self.validate_rejected_warehouse()
-		self.validate_accepted_rejected_qty()
 		self.validate_inspection()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
 		pc_obj = frappe.get_doc('Purchase Common')
-		pc_obj.validate_for_items(self)
 		self.check_for_closed_status(pc_obj)
-
-		# sub-contracting
-		self.validate_for_subcontracting()
-		self.create_raw_materials_supplied("supplied_items")
-		self.set_landed_cost_voucher_amount()
-		self.update_valuation_rate("items")
-
-
-	def set_landed_cost_voucher_amount(self):
-		for d in self.get("items"):
-			lc_voucher_amount = frappe.db.sql("""select sum(applicable_charges)
-				from `tabLanded Cost Item`
-				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
-			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({

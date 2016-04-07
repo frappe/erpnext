@@ -14,9 +14,9 @@ class LandedCostVoucher(Document):
 		for pr in self.get("purchase_receipts"):
 			pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.description,
 				pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name
-				from `tabPurchase Receipt Item` pr_item where parent = %s
-				and exists(select name from tabItem where name = pr_item.item_code and is_stock_item = 1)""",
-				pr.purchase_receipt, as_dict=True)
+				from `tab{doctype} Item` pr_item where parent = %s
+				and exists(select name from tabItem where name = pr_item.item_code and is_stock_item = 1)
+				""".format(doctype=pr.receipt_document_type), pr.receipt_document, as_dict=True)
 
 			for d in pr_items:
 				item = self.append("items")
@@ -25,12 +25,12 @@ class LandedCostVoucher(Document):
 				item.qty = d.qty
 				item.rate = d.base_rate
 				item.amount = d.base_amount
-				item.purchase_receipt = pr.purchase_receipt
+				item.receipt_document_type = pr.receipt_document_type
+				item.receipt_document = pr.receipt_document
 				item.purchase_receipt_item = d.name
 
 		if self.get("taxes"):
 			self.set_applicable_charges_for_item()
-
 
 	def validate(self):
 		self.check_mandatory()
@@ -43,25 +43,26 @@ class LandedCostVoucher(Document):
 
 	def check_mandatory(self):
 		if not self.get("purchase_receipts"):
-			frappe.throw(_("Please enter Purchase Receipts"))
+			frappe.throw(_("Please enter Receipt Document"))
 
 		if not self.get("taxes"):
 			frappe.throw(_("Please enter Taxes and Charges"))
 
 	def validate_purchase_receipts(self):
-		purchase_receipts = []
+		receipt_documents = []
+		
 		for d in self.get("purchase_receipts"):
-			if frappe.db.get_value("Purchase Receipt", d.purchase_receipt, "docstatus") != 1:
-				frappe.throw(_("Purchase Receipt must be submitted"))
+			if frappe.db.get_value(d.receipt_document_type, d.receipt_document, "docstatus") != 1:
+				frappe.throw(_("Receipt document must be submitted"))
 			else:
-				purchase_receipts.append(d.purchase_receipt)
+				receipt_documents.append(d.receipt_document)
 
 		for item in self.get("items"):
-			if not item.purchase_receipt:
+			if not item.receipt_document:
 				frappe.throw(_("Item must be added using 'Get Items from Purchase Receipts' button"))
-			elif item.purchase_receipt not in purchase_receipts:
-				frappe.throw(_("Item Row {0}: Purchase Receipt {1} does not exist in above 'Purchase Receipts' table")
-					.format(item.idx, item.purchase_receipt))
+			elif item.receipt_document not in receipt_documents:
+				frappe.throw(_("Item Row {idx}: {doctype} {docname} does not exist in above '{doctype}' table")
+					.format(idx=item.idx, doctype=item.receipt_document_type, docname=item.receipt_document))
 
 	def set_total_taxes_and_charges(self):
 		self.total_taxes_and_charges = sum([flt(d.amount) for d in self.get("taxes")])
@@ -83,36 +84,35 @@ class LandedCostVoucher(Document):
 		self.update_landed_cost()
 
 	def update_landed_cost(self):
-		purchase_receipts = list(set([d.purchase_receipt for d in self.get("items")]))
-		for purchase_receipt in purchase_receipts:
-			pr = frappe.get_doc("Purchase Receipt", purchase_receipt)
+		for d in self.get("items"):
+			doc = frappe.get_doc(d.receipt_document_type, d.receipt_document)
 
 			# set landed cost voucher amount in pr item
-			pr.set_landed_cost_voucher_amount()
+			doc.set_landed_cost_voucher_amount()
 
 			# set valuation amount in pr item
-			pr.update_valuation_rate("items")
+			doc.update_valuation_rate("items")
 
 			# save will update landed_cost_voucher_amount and voucher_amount in PR,
 			# as those fields are allowed to edit after submit
-			pr.save()
+			doc.save()
 
 			# update latest valuation rate in serial no
-			self.update_rate_in_serial_no(pr)
+			self.update_rate_in_serial_no(doc)
 
 			# update stock & gl entries for cancelled state of PR
-			pr.docstatus = 2
-			pr.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-			pr.make_gl_entries_on_cancel()
+			doc.docstatus = 2
+			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
+			doc.make_gl_entries_on_cancel()
 
 
 			# update stock & gl entries for submit state of PR
-			pr.docstatus = 1
-			pr.update_stock_ledger(via_landed_cost_voucher=True)
-			pr.make_gl_entries()
+			doc.docstatus = 1
+			doc.update_stock_ledger(via_landed_cost_voucher=True)
+			doc.make_gl_entries()
 
-	def update_rate_in_serial_no(self, purchase_receipt):
-		for item in purchase_receipt.get("items"):
+	def update_rate_in_serial_no(self, receipt_document):
+		for item in receipt_document.get("items"):
 			if item.serial_no:
 				serial_nos = get_serial_nos(item.serial_no)
 				if serial_nos:
