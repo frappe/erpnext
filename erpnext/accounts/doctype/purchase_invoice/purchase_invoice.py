@@ -51,14 +51,6 @@ class PurchaseInvoice(BuyingController):
 		if (self.is_paid == 1):
 			self.validate_cash()
 
-		# validate stock items
-		if (self.update_stock == 1):
-			self.validate_purchase_return()
-			self.validate_rejected_warehouse()
-			self.validate_accepted_rejected_qty()
-			pc_obj = frappe.get_doc('Purchase Common')
-			pc_obj.validate_for_items(self)
-
 		self.check_active_purchase_items()
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
@@ -279,9 +271,15 @@ class PurchaseInvoice(BuyingController):
 				'source_field': '-1 * qty',
 				# 'percent_join_field': 'prevdoc_docname',
 				# 'overflow_type': 'receipt',
-				'extra_cond': """ and exists (select name from `tabPurchase Invoice` where name=`tabPurchase Invoice Item`.parent and is_return=1)"""
+				'extra_cond': """ and exists (select name from `tabPurchase Invoice`
+					where name=`tabPurchase Invoice Item`.parent and update_stock=1 and is_return=1)"""
 			}
 		])
+	
+	def validate_purchase_receipt(self):
+		for item in self.get("items"):
+			if item.purchase_receipt:
+				frappe.throw(_("Stock cannot be updated against Purchase Receipt {0}").format(item.purchase_receipt))
 
 	def on_submit(self):
 		self.check_prev_docstatus()
@@ -290,7 +288,6 @@ class PurchaseInvoice(BuyingController):
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 
-                # make purchase receipt
 		if (self.update_stock == 1):
 			# from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_stock_ledger
 			self.update_stock_ledger()
@@ -427,9 +424,15 @@ class PurchaseInvoice(BuyingController):
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
+				
+				if auto_accounting_for_stock and self.update_stock:
+					expense_account = warehouse_account[item.warehouse]["name"]
+				else:
+					expense_account = item.expense_account
+				
 				gl_entries.append(
 					self.get_gl_dict({
-						"account": item.expense_account if not self.update_stock else warehouse_account[item.warehouse]["name"],
+						"account": expense_account,
 						"against": self.supplier,
 						"debit": item.base_net_amount,
 						"debit_in_account_currency": item.base_net_amount \
