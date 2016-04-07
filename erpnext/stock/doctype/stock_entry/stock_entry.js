@@ -72,6 +72,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
 			this.show_general_ledger();
 		}
+		erpnext.hide_company();
 	},
 
 	on_submit: function() {
