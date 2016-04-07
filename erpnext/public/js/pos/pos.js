@@ -131,7 +131,9 @@ erpnext.pos.PointOfSale = Class.extend({
 							item_code: obj.name,
 							item_price: format_currency(obj.price_list_rate, obj.currency),
 							item_name: obj.name===obj.item_name ? "" : obj.item_name,
-							item_image: obj.image ? "url('" + obj.image + "')" : null
+							item_image: obj.image ? "url('" + obj.image + "')" : null,
+							color: frappe.get_palette(obj.item_name),
+							abbr: frappe.get_abbr(obj.item_name)
 						})).tooltip().appendTo($wrap);
 					});
 				}

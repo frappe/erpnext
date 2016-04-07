@@ -8,6 +8,7 @@ frappe.require("assets/erpnext/js/utils.js");
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	onload: function() {
 		var me = this;
+		this.frm.show_print_first = true;
 		if(this.frm.doc.__islocal) {
 			var today = get_today(),
 				currency = frappe.defaults.get_user_default("currency");
@@ -81,7 +82,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				me.calculate_taxes_and_totals();
 		}
 		if(frappe.meta.get_docfield(this.frm.doc.doctype + " Item", "item_code")) {
-			cur_frm.get_field("items").grid.set_multiple_add("item_code", "qty");
+			this.setup_item_selector();
 		}
 	},
 
@@ -890,7 +891,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			rate = flt(item.rate) * flt(this.frm.doc.conversion_rate || 1);
 			item.gross_profit = flt(((rate - item.valuation_rate) * item.qty), precision("amount", item));
 		}
+	},
+
+	setup_item_selector: function() {
+		if(!this.item_selector) {
+			this.item_selector = new erpnext.ItemSelector({frm: this.frm});
+		}
 	}
+
+
+
 });
 
 frappe.ui.form.on(cur_frm.doctype + " Item", "rate", function(frm, cdt, cdn) {

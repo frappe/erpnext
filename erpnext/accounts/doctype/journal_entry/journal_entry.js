@@ -50,6 +50,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 	},
 
 	load_defaults: function() {
+		this.frm.show_print_first = true;
 		if(this.frm.doc.__islocal && this.frm.doc.company) {
 			frappe.model.set_default_values(this.frm.doc);
 			$.each(this.frm.doc.accounts || [], function(i, jvd) {
@@ -360,7 +361,7 @@ frappe.ui.form.on("Journal Entry Account", {
 	credit: function(frm, dt, dn) {
 		cur_frm.cscript.update_totals(frm.doc);
 	},
-	
+
 	exchange_rate: function(frm, cdt, cdn) {
 		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 		var row = locals[cdt][cdn];
@@ -368,7 +369,7 @@ frappe.ui.form.on("Journal Entry Account", {
 		if(row.account_currency == company_currency || !frm.doc.multi_currency) {
 			frappe.model.set_value(cdt, cdn, "exchange_rate", 1);
 		}
-		
+
 		erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
 	}
 })
@@ -404,7 +405,7 @@ $.extend(erpnext.journal_entry, {
 
 		frappe.model.set_value(cdt, cdn, "credit",
 			flt(flt(row.credit_in_account_currency)*row.exchange_rate), precision("credit", row));
-			
+
 		cur_frm.cscript.update_totals(frm.doc);
 	},
 

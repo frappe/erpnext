@@ -160,10 +160,10 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 
 	return tax_accounts
 
-def item_query(doctype, txt, searchfield, start, page_len, filters):
+def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
-	return frappe.db.sql("""select tabItem.name,tabItem.item_group,
+	return frappe.db.sql("""select tabItem.name, tabItem.item_group, tabItem.image,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
 		if(length(tabItem.description) > 40, \
@@ -192,7 +192,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 				"_txt": txt.replace("%", ""),
 				"start": start,
 				"page_len": page_len
-			})
+			}, as_dict=as_dict)
 
 def bom(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
@@ -209,11 +209,11 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		limit %(start)s, %(page_len)s """.format(
 			fcond=get_filters_cond(doctype, filters, conditions),
 			mcond=get_match_cond(doctype),
-			key=frappe.db.escape(searchfield)), 
+			key=frappe.db.escape(searchfield)),
 		{
 			'txt': "%%%s%%" % frappe.db.escape(txt),
 			'_txt': txt.replace("%", ""),
-			'start': start, 
+			'start': start,
 			'page_len': page_len
 		})
 
@@ -346,13 +346,13 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
-	
+
 	if not filters: filters = {}
 
 	condition = ""
 	if filters.get("company"):
 		condition += "and tabAccount.company = %(company)s"
-		
+
 	return frappe.db.sql("""select tabAccount.name from `tabAccount`
 		where (tabAccount.report_type = "Profit and Loss"
 				or tabAccount.account_type in ("Expense Account", "Fixed Asset", "Temporary"))
@@ -360,7 +360,7 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 			and tabAccount.docstatus!=2
 			and tabAccount.{key} LIKE %(txt)s
 			{condition} {match_condition}"""
-		.format(condition=condition, key=frappe.db.escape(searchfield), 
+		.format(condition=condition, key=frappe.db.escape(searchfield),
 			match_condition=get_match_cond(doctype)), {
 			'company': filters.get("company", ""),
 			'txt': "%%%s%%" % frappe.db.escape(txt)
