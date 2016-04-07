@@ -108,51 +108,45 @@
 <div class="webpage-content">
 	
 	<article class="web-page-content" id="supplier-2" style="text-align: Left">
-	<p>Suppliers are companies or individuals who provide you with products or
-services. They are treated in exactly the same manner as Customers in ERPNext.</p>
+	<p>Suppliers are companies or individuals who provide you with products or services.</p>
 
-<p>You can create a new Supplier via:</p>
+<p>You can create a new Supplier from:</p>
 
-<blockquote>
-  <p>Buying &gt; Documents &gt; Supplier &gt; New Supplier</p>
-</blockquote>
+<p><code>Buying &gt; Documents &gt; Supplier &gt; New Supplier</code></p>
 
 <p><img class="screenshot" alt="Supplier Master" src="https://frappe.github.io/erpnext/assets/img/buying/supplier-master.png"></p>
 
 <h3>Contacts and Addresses</h3>
 
-<p>Contacts and Addresses in ERPNext are stored separately so that you can attach
-multiple Contacts or Addresses to Customers and Suppliers. To add a Contact or
-Address go to Buying and click on “New Contact” or “New Address”.</p>
+<p>Contacts and Addresses in ERPNext are stored separately so that you can create multiple Contacts and Addresses for a Suppliers. Once Supplier is saved, you will find option to create Contact and Address for that Supplier.</p>
+
+<p><img class="screenshot" alt="Supplier Master" src="https://frappe.github.io/erpnext/assets/img/buying/supplier-new-address-contact.png"></p>
 
 <blockquote>
-  <p>Tip: When you select a Supplier in any transaction, one Contact and Address
-  gets pre-selected. This is the “Default Contact or Address”. So make sure you
-  set your defaults correctly!</p>
+  <p>Tip: When you select a Supplier in any transaction, Contact for which "Is Primary" field id checked, it will auto-fetch with the Supplier details.</p>
 </blockquote>
 
 <h3>Integration with Accounts</h3>
 
-<p>In ERPNext, there is a separate Account record for each Supplier, of Each
-company.</p>
+<p>For all the Supplier, "Creditor" account is set as default payable Account. When Purchase Invoice is created, payable towards the supplier is booked against "Creditors" account.</p>
 
-<p>When you create a new Supplier, ERPNext will automatically create an Account
-Ledger for the Supplier under “Accounts Payable” in the Company set in the
-Supplier record.</p>
+<p>If you want to customize payable account for the Supplier, you should first add a payable Account in the Chart of Account, and then select that Payable Account in the Supplier master.</p>
 
-<blockquote>
-  <p>Advanced Tip: If you want to change the Account Group under which the
-  Supplier Account is created, you can set it in the Company master.</p>
-</blockquote>
+<p><img class="screenshot" alt="Supplier Master" src="https://frappe.github.io/erpnext/assets/img/buying/supplier-payable-account.png"></p>
 
-<p>If you want to create an Account in another Company, just change the Company
-value and “Save” the Supplier again.</p>
+<p>If you don't want to customize payable account, and proceed with default payable account "Creditor", then do not update any value in the Default Supplier Account's table.</p>
 
 <blockquote>
-  <p>Tip: You can also import from the Data Import Tool</p>
+  <p>Advanced Tip: Default Payable Account is set in the Company master. If you want to set another account as Account as default for payable instead of Creditors Account, go to Company master, and set that account as "Default Payable Account".</p>
 </blockquote>
 
-<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="supplier-quotation.html">Supplier Quotation</a></p></p>
+<p>You can add multiple companies in your ERPNext instance, and one Supplier can be used across multiple companies. In this case, you should define Companywise Payable Account for the Supplier in the "Default Payable Accounts" table.</p>
+
+<iframe width="660" height="371" src="https://www.youtube.com/embed/anoGi_RpQ20" frameborder="0" allowfullscreen></iframe>
+
+<p>(Check from 2:20)</p>
+
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="request-for-quotation.html">Request For Quotation</a></p></p>
 
 	</article>
 	

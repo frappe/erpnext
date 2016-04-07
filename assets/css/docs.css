@@ -236,6 +236,10 @@ body {
 .toggle-sidebar {
   margin-right: 15px;
 }
+.navbar-default .navbar-nav > li > a,
+.navbar-default .navbar-brand {
+  color: #8D99A6;
+}
 body {
   font-size: 16px;
   line-height: 1.65em;
