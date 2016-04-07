@@ -4,10 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, nowdate, rounded, date_diff
+from frappe.utils import add_days, cint, cstr, flt, getdate, nowdate, rounded, date_diff, money_in_words
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.setup.utils import get_company_currency
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
@@ -17,6 +18,22 @@ from erpnext.utilities.transaction_base import TransactionBase
 class SalarySlip(TransactionBase):
 	def autoname(self):
 		self.name = make_autoname('Sal Slip/' +self.employee + '/.#####')
+
+	def validate(self):
+		self.check_existing()
+
+		if not (len(self.get("earnings")) or len(self.get("deductions"))):
+			self.get_emp_and_leave_details()
+		else:
+			self.get_leave_details(lwp = self.leave_without_pay)
+
+		if not self.net_pay:
+			self.calculate_net_pay()
+
+		company_currency = get_company_currency(self.company)
+		self.total_in_words = money_in_words(self.rounded_total, company_currency)
+
+		set_employee_name(self)
 
 	def get_emp_and_leave_details(self):
 		if self.employee:
@@ -59,7 +76,9 @@ class SalarySlip(TransactionBase):
 
 	def get_leave_details(self, joining_date=None, relieving_date=None, lwp=None):
 		if not self.fiscal_year:
-			self.fiscal_year = frappe.db.get_default("fiscal_year")
+			# if default fiscal year is not set, get from nowdate
+			self.fiscal_year = get_fiscal_year(nowdate())[0]
+
 		if not self.month:
 			self.month = "%02d" % getdate(nowdate()).month
 
@@ -149,23 +168,6 @@ class SalarySlip(TransactionBase):
 		if ret_exist:
 			self.employee = ''
 			frappe.throw(_("Salary Slip of employee {0} already created for this month").format(self.employee))
-
-	def validate(self):
-		from frappe.utils import money_in_words
-		self.check_existing()
-
-		if not (len(self.get("earnings")) or len(self.get("deductions"))):
-			self.get_emp_and_leave_details()
-		else:
-			self.get_leave_details(lwp = self.leave_without_pay)
-
-		if not self.net_pay:
-			self.calculate_net_pay()
-
-		company_currency = get_company_currency(self.company)
-		self.total_in_words = money_in_words(self.rounded_total, company_currency)
-
-		set_employee_name(self)
 
 	def calculate_earning_total(self):
 		self.gross_pay = flt(self.arrear_amount) + flt(self.leave_encashment_amount)
