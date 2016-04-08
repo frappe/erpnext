@@ -41,7 +41,7 @@ class FiscalYear(Document):
 
 	def on_update(self):
 		check_duplicate_fiscal_year(self)
-		
+
 	def validate_overlap(self):
 		existing_fiscal_years = frappe.db.sql("""select name from `tabFiscal Year`
 			where (
@@ -60,18 +60,18 @@ class FiscalYear(Document):
 			for existing in existing_fiscal_years:
 				company_for_existing = frappe.db.sql_list("""select company from `tabFiscal Year Company`
 					where parent=%s""", existing.name)
-				
+
 				overlap = False
 				if not self.get("companies") or not company_for_existing:
 					overlap = True
-			
+
 				for d in self.get("companies"):
 					if d.company in company_for_existing:
 						overlap = True
-					
+
 				if overlap:
 					frappe.throw(_("Year start date or end date is overlapping with {0}. To avoid please set company")
-						.format(existing.name))
+						.format(existing.name), frappe.NameError)
 
 @frappe.whitelist()
 def check_duplicate_fiscal_year(doc):

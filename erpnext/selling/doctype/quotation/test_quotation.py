@@ -69,3 +69,21 @@ class TestQuotation(unittest.TestCase):
 		si.save()
 
 test_records = frappe.get_test_records('Quotation')
+
+def get_quotation_dict(customer=None, item_code=None):
+	if not customer:
+		customer = '_Test Customer'
+	if not item_code:
+		item_code = '_Test Item'
+
+	return {
+		'doctype': 'Quotation',
+		'customer': customer,
+		'items': [
+			{
+				'item_code': item_code,
+				'qty': 1,
+				'rate': 100
+			}
+		]
+	}
