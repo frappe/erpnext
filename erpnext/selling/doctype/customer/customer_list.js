@@ -4,7 +4,7 @@ frappe.listview_settings['Customer'] = {
 		color = {
 			'Open': 'red',
 			'Active': 'green',
-			'Dormant', 'dardgrey'
+			'Dormant': 'darkgrey'
 		}
 		return [__(doc.status), color[doc.status], "status,=," + doc.status];
 	}
