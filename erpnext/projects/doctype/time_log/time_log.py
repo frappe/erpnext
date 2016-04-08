@@ -247,6 +247,11 @@ class TimeLog(Document):
 
 		elif self.project:
 			frappe.get_doc("Project", self.project).update_project()
+			
+	def has_webform_permission(doc):
+		project_user = frappe.db.get_value("Project User", {"parent": doc.project, "user":frappe.session.user} , "user")
+		if project_user:
+			return True		
 
 
 @frappe.whitelist()

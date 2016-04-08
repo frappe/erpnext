@@ -18,6 +18,7 @@ def execute(filters=None):
 		_("Task Subject") + "::180", _("Project") + ":Link/Project:120", _("Status") + "::70"]
 
 	user_map = get_user_map()
+	employee_map = get_employee_map()
 	task_map = get_task_map()
 
 	conditions = build_conditions(filters)
@@ -30,12 +31,16 @@ def execute(filters=None):
 	data = []
 	total_hours = total_employee_hours = count = 0
 	for tl in time_logs:
+		if tl.employee:
+			employee=employee_map[tl.employee]
+		else:
+			employee=user_map[tl.owner]	
 		if tl.owner not in users:
 			users.append(tl.owner)
 			data.append(["", "", "", "Total", total_employee_hours, "", "", "", "", ""])
 			total_employee_hours = 0
 
-		data.append([tl.name, user_map[tl.owner], tl.from_time, tl.to_time, tl.hours,
+		data.append([tl.name, employee, tl.from_time, tl.to_time, tl.hours,
 				tl.activity_type, tl.task, task_map.get(tl.task), tl.project, tl.status])
 
 		count += 1
@@ -59,6 +64,16 @@ def get_user_map():
 		user_map.setdefault(p.name, []).append(p.fullname)
 
 	return user_map
+	
+def get_employee_map():
+	employees = frappe.db.sql("""select name,
+		employee_name as fullname
+		from tabEmployee""", as_dict=1)
+	employee_map = {}
+	for p in employees:
+		employee_map.setdefault(p.name, []).append(p.fullname)
+
+	return employee_map	
 
 def get_task_map():
 	tasks = frappe.db.sql("""select name, subject from tabTask""", as_dict=1)

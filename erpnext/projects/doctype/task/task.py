@@ -101,6 +101,11 @@ class Task(Document):
 					task.exp_end_date = add_days(task.exp_start_date, task_duration)
 					task.flags.ignore_recursion_check = True
 					task.save()
+					
+	def has_webform_permission(doc):
+		project_user = frappe.db.get_value("Project User", {"parent": doc.project, "user":frappe.session.user} , "user")
+		if project_user:
+			return True				
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
@@ -134,7 +139,7 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 			order by name
 			limit %(start)s, %(page_len)s """ % {'key': searchfield,
 			'txt': "%%%s%%" % frappe.db.escape(txt), 'mcond':get_match_cond(doctype),
-			'start': start, 'page_len': page_len})
+			'start': start, 'page_len': page_len})			
 
 
 @frappe.whitelist()
@@ -150,3 +155,6 @@ def set_tasks_as_overdue():
 		where exp_end_date is not null
 		and exp_end_date < CURDATE()
 		and `status` not in ('Closed', 'Cancelled')""")
+		
+
+		
