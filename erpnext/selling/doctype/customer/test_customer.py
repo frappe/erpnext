@@ -11,8 +11,6 @@ from erpnext.exceptions import PartyFrozen, PartyDisabled
 
 test_ignore = ["Price List"]
 
-test_dependencies = ['Quotation']
-
 test_records = frappe.get_test_records('Customer')
 
 class TestCustomer(unittest.TestCase):
@@ -112,47 +110,6 @@ class TestCustomer(unittest.TestCase):
 		self.assertEquals("_Test Customer 1", test_customer_1.name)
 		self.assertEquals("_Test Customer 1 - 1", duplicate_customer.name)
 		self.assertEquals(test_customer_1.customer_name, duplicate_customer.customer_name)
-
-	def test_party_status_open(self):
-		from erpnext.selling.doctype.quotation.test_quotation import get_quotation_dict
-
-		customer = frappe.get_doc(get_customer_dict('Party Status Test')).insert()
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
-
-		quotation = frappe.get_doc(get_quotation_dict(customer=customer.name)).insert()
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Open')
-
-		quotation.submit()
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
-
-		quotation.cancel()
-		quotation.delete()
-		customer.delete()
-
-	def test_party_status_close(self):
-		from erpnext.selling.doctype.quotation.test_quotation import get_quotation_dict
-
-		customer = frappe.get_doc(get_customer_dict('Party Status Test')).insert()
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
-
-		# open quotation
-		quotation = frappe.get_doc(get_quotation_dict(customer=customer.name)).insert()
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Open')
-
-		# close quotation (submit)
-		quotation.submit()
-
-		quotation1 = frappe.get_doc(get_quotation_dict(customer=customer.name)).insert()
-
-		# still open
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Open')
-
-		quotation.cancel()
-		quotation.delete()
-
-		quotation1.delete()
-
-		customer.delete()
 
 def get_customer_dict(customer_name):
 	return {
