@@ -10,6 +10,8 @@ def get_notification_config():
 			"Warranty Claim": {"status": "Open"},
 			"Task": {"status": "Overdue"},
 			"Project": {"status": "Open"},
+			"Customer": {"status": "Open"},
+			"Supplier": {"status": "Open"},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
 			"Opportunity": {"status": "Open"},
