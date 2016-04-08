@@ -69,37 +69,59 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field, 
 				if(r.message) {
 					frm.set_value(display_field, r.message)
 				}
-				
-				if(frappe.meta.get_docfield(frm.doc.doctype, "taxes") && !is_your_company_address) {
-					if(!erpnext.utils.validate_mandatory(frm, "Customer/Supplier",
-						frm.doc.customer || frm.doc.supplier, address_field)) return;
 
-					if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date",
-						frm.doc.posting_date || frm.doc.transaction_date, address_field)) return;
-				} else return;
-
-				frappe.call({
-					method: "erpnext.accounts.party.set_taxes",
-					args: {
-						"party": frm.doc.customer || frm.doc.supplier,
-						"party_type": (frm.doc.customer ? "Customer" : "Supplier"),
-						"posting_date": frm.doc.posting_date || frm.doc.transaction_date,
-						"company": frm.doc.company,
-						"billing_address": ((frm.doc.customer) ? (frm.doc.customer_address) : (frm.doc.supplier_address)),
-						"shipping_address": frm.doc.shipping_address_name
-					},
-					callback: function(r) {
-						if(r.message){
-							frm.set_value("taxes_and_charges", r.message)
-						}
-					}
-				});
+				erpnext.utils.set_taxes(frm, address_field, display_field, is_your_company_address);
 			}
 		})
 	} else {
 		frm.set_value(display_field, null);
 	}
-	
+
+};
+
+erpnext.utils.set_taxes = function(frm, address_field, display_field, is_your_company_address) {
+	if(frappe.meta.get_docfield(frm.doc.doctype, "taxes") && !is_your_company_address) {
+		if(!erpnext.utils.validate_mandatory(frm, "Lead/Customer/Supplier",
+			frm.doc.customer || frm.doc.supplier || frm.doc.lead, address_field)) {
+				return;
+			}
+
+		if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date",
+			frm.doc.posting_date || frm.doc.transaction_date, address_field)) {
+			return;
+		}
+	} else {
+		return;
+	}
+
+	var party_type, party;
+	if (frm.doc.lead) {
+		party_type = 'Lead';
+		party = frm.doc.lead;
+	} else if (frm.doc.customer) {
+		party_type = 'Customer';
+		party = frm.doc.customer;
+	} else if (frm.doc.supplier) {
+		party_type = 'Supplier';
+		party = frm.doc.supplier;
+	}
+
+	frappe.call({
+		method: "erpnext.accounts.party.set_taxes",
+		args: {
+			"party": party,
+			"party_type": party_type,
+			"posting_date": frm.doc.posting_date || frm.doc.transaction_date,
+			"company": frm.doc.company,
+			"billing_address": ((frm.doc.customer || frm.doc.lead) ? (frm.doc.customer_address) : (frm.doc.supplier_address)),
+			"shipping_address": frm.doc.shipping_address_name
+		},
+		callback: function(r) {
+			if(r.message){
+				frm.set_value("taxes_and_charges", r.message)
+			}
+		}
+	});
 }
 
 erpnext.utils.get_contact_details = function(frm) {
