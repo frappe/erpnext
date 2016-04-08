@@ -30,7 +30,11 @@ def notify_status(doc, method):
 	if not party_type:
 		return
 
-	party = frappe.get_doc(party_type, doc.get(party_type.lower()))
+	name = doc.get(party_type.lower())
+	if not name:
+		return
+
+	party = frappe.get_doc(party_type, name)
 	config = get_notification_config().get('for_doctype').get(doc.doctype)
 
 	status = None
