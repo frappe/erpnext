@@ -1,10 +1,12 @@
 {% if not hide_footer_signup %}
-
-				<input class="form-control" type="text" id="footer-subscribe-email"
-                    style="display: inline-block; max-width: 50%;margin-right:15px;"
-					placeholder="{{ _('Your email address') }}...">
-				<button class="btn btn-default btn-sm btn-subscribe" type="button"
-					id="footer-subscribe-button" style="float:right; border-radius:8px; border:1px solid #7575ff; 					color:#7575ff; background-color:white;">{{ _("Get Updates") }}</button>
+<div class='input-group input-group-sm pull-right footer-subscribe'>
+	<input class="form-control" type="text" id="footer-subscribe-email"
+		placeholder="{{ _('Your email address') }}...">
+	<span class='input-group-btn'>
+		<button class="btn btn-default" type="button"
+			id="footer-subscribe-button">{{ _("Get Updates") }}</button>
+	</span>
+</div>
 
 <script>
 frappe.ready(function() {
@@ -33,4 +35,5 @@ frappe.ready(function() {
 	});
 });
 </script>
+
 {% endif %}

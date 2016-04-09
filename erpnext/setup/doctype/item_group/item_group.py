@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import urllib
-from frappe.utils import nowdate
+from frappe.utils import nowdate, cint, cstr
 from frappe.utils.nestedset import NestedSet
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
@@ -60,7 +60,8 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		context.update({
 			"items": get_product_list_for_group(product_group = self.name, start=start, limit=24, search=frappe.form_dict.get("q")),
 			"parent_groups": get_parent_item_groups(self.name),
-			"title": self.name
+			"title": self.name,
+			"products_as_list": cint(frappe.db.get_single_value('Website Settings', 'products_as_list'))
 		})
 
 		if self.slideshow:
@@ -73,8 +74,8 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(product_group)])
 
 	# base query
-	query = """select name, item_name, page_name, website_image, thumbnail, item_group,
-			web_long_description as website_description,
+	query = """select name, item_name, item_code, page_name, website_image, thumbnail, item_group,
+			description, web_long_description as website_description,
 			concat(parent_website_route, "/", page_name) as route
 		from `tabItem`
 		where show_in_website = 1
@@ -89,7 +90,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 		query += """ and (web_long_description like %(search)s
 				or item_name like %(search)s
 				or name like %(search)s)"""
-		search = "%" + cstr(search) + "%"		
+		search = "%" + cstr(search) + "%"
 
 	query += """order by weightage desc, modified desc limit %s, %s""" % (start, limit)
 
@@ -108,7 +109,12 @@ def get_item_for_list_in_html(context):
 	# user may forget it during upload
 	if (context.get("website_image") or "").startswith("files/"):
 		context["website_image"] = "/" + urllib.quote(context["website_image"])
-	return frappe.get_template("templates/includes/product_in_grid.html").render(context)
+
+	products_template = 'templates/includes/products_as_grid.html'
+	if cint(frappe.db.get_single_value('Products Settings', 'products_as_list')):
+		products_template = 'templates/includes/products_as_list.html'
+
+	return frappe.get_template(products_template).render(context)
 
 def get_group_item_count(item_group):
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(item_group)])
