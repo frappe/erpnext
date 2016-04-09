@@ -33,6 +33,7 @@ class AccountsController(TransactionBase):
 
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
+
 			if not self.meta.get_field("is_return") or not self.is_return:
 				self.validate_value("base_grand_total", ">=", 0)
 
@@ -54,26 +55,25 @@ class AccountsController(TransactionBase):
 			if not self.get("__islocal"):
 				validate_recurring_document(self)
 				convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
-		
-		self.validate_paid_amount()
-	
+
+		if self.doctype == 'Purchase Invoice':
+			self.validate_paid_amount()
+
 	def validate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
 			is_paid = self.get("is_pos") or self.get("is_paid")
 			if cint(is_paid) == 1:
-				if flt(self.paid_amount) == 0:
+				if flt(self.paid_amount) == 0 and flt(self.outstanding_amount) > 0:
 					if self.cash_bank_account:
 						self.paid_amount = flt(flt(self.grand_total) - flt(self.write_off_amount), 
 							self.precision("paid_amount"))
+						self.base_paid_amount = flt(self.paid_amount * self.conversion_rate, self.precision("base_paid_amount"))
 					else:
 						# show message that the amount is not paid
 						self.paid_amount = 0
 						frappe.throw(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
 			else:
 				frappe.db.set(self,'paid_amount',0)
-
-			frappe.db.set(self, 'base_paid_amount',
-				flt(self.paid_amount*self.conversion_rate, self.precision("base_paid_amount")))
 
 	def on_update_after_submit(self):
 		if self.meta.get_field("is_recurring"):
@@ -510,7 +510,7 @@ class AccountsController(TransactionBase):
 							elif asset.status in ("Scrapped", "Cancelled", "Sold"):
 								frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
 									.format(d.idx, d.asset, asset.status))
-						
+
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, "tax_rate")

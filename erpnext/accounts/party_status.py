@@ -37,6 +37,7 @@ def notify_status(doc, method):
 
 	party = frappe.get_doc(party_type, name)
 	filters = get_filters_for(doc.doctype)
+	party.flags.ignore_mandatory = True
 
 	status = None
 	if filters:
