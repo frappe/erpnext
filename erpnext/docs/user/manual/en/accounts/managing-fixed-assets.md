@@ -18,7 +18,7 @@ Next step will be creating the fixed asset records. Asset record is the heart of
 Explanation of the fields:
 
 1. Asset Category: The category of assets it belongs to.
-2. Is Existing Asset: Check if adding an existing asset. The existing assets which are partially / fully depreciated can also be created/maintained for the future reference.
+2. Is Existing Asset: Check if the asset is being carried forward from the previous Fiscal Year. The existing assets which are partially / fully depreciated can also be created/maintained for the future reference.
 3. Status: The options are - Draft, Submitted, Partially Depreciated, Fully Depreciated, Sold and Scrapped.
 4. Warehouse: Set the location of the asset.
 5. Gross Purchase Amount: The purchase cost of the asset

@@ -33,24 +33,27 @@ class Asset(Document):
 			frappe.throw(_("Item {0} has been disabled").format(self.item_code))
 
 	def validate_asset_values(self):
+		self.value_after_depreciation = flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)
+		
 		if flt(self.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
 			frappe.throw(_("Expected Value After Useful Life must be less than Gross Purchase Amount"))
 
 		if not flt(self.gross_purchase_amount):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
-			
-		if not self.is_existing_asset and not self.next_depreciation_date:
-			frappe.throw(_("Next Depreciation Date is mandatory for new asset"))
-			
+		
+		if not self.is_existing_asset:
+			self.opening_accumulated_depreciation = 0
+			if not self.next_depreciation_date:
+				frappe.throw(_("Next Depreciation Date is mandatory for new asset"))
+		else:
+			depreciable_amount = flt(self.gross_purchase_amount) - flt(self.expected_value_after_useful_life)
+			if flt(self.opening_accumulated_depreciation) > depreciable_amount:
+					frappe.throw(_("Opening Accumulated Depreciation must be less than equal to {0}")
+						.format(depreciable_amount))
+						
 		if self.next_depreciation_date and getdate(self.next_depreciation_date) < getdate(nowdate()):
 			frappe.throw(_("Next Depreciation Date must be on or after today"))
-
-		if not self.current_value and self.next_depreciation_date:
-			self.current_value = flt(self.gross_purchase_amount)
-		else:
-			if flt(self.current_value) > flt(self.gross_purchase_amount):
-				frappe.throw(_("Current Value After Depreciation must be less than equal to {0}")
-					.format(flt(self.gross_purchase_amount)))
+		
 
 	def set_depreciation_settings(self):
 		asset_category = frappe.get_doc("Asset Category", self.asset_category)
@@ -62,25 +65,26 @@ class Asset(Document):
 	def make_depreciation_schedule(self):
 		self.schedules = []
 		if not self.get("schedules") and self.next_depreciation_date:
-			accumulated_depreciation = 0
-			value_after_depreciation = flt(self.current_value)
+			accumulated_depreciation = flt(self.opening_accumulated_depreciation)
+			value_after_depreciation = flt(self.value_after_depreciation)
 			for n in xrange(self.number_of_depreciations):
 				schedule_date = add_months(self.next_depreciation_date,
 					n * cint(self.frequency_of_depreciation))
 
 				depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
+				
+				accumulated_depreciation += flt(depreciation_amount)
+				value_after_depreciation -= flt(depreciation_amount)
 
 				self.append("schedules", {
 					"schedule_date": schedule_date,
 					"depreciation_amount": depreciation_amount,
-					"accumulated_depreciation_amount": accumulated_depreciation + depreciation_amount
+					"accumulated_depreciation_amount": accumulated_depreciation
 				})
-				accumulated_depreciation += flt(depreciation_amount)
-				value_after_depreciation -= flt(depreciation_amount)
 
 	def get_depreciation_amount(self, depreciable_value):
 		if self.depreciation_method == "Straight Line":
-			depreciation_amount = (flt(self.current_value) -
+			depreciation_amount = (flt(self.value_after_depreciation) -
 				flt(self.expected_value_after_useful_life)) / cint(self.number_of_depreciations)
 		else:
 			factor = 200.0 /  cint(self.number_of_depreciations)
@@ -100,14 +104,13 @@ class Asset(Document):
 			frappe.throw(_("Please cancel Purchase Invoice {0} first").format(self.purchase_invoice))
 
 	def delete_depreciation_entries(self):
-		total_depreciation_amount = 0
 		for d in self.get("schedules"):
 			if d.journal_entry:
 				frappe.get_doc("Journal Entry", d.journal_entry).cancel()
-
-				d.db_set("journal_entry", None)
-				total_depreciation_amount += flt(d.depreciation_amount)
-		self.db_set("current_value", (self.current_value + total_depreciation_amount))
+				d.db_set("journal_entry", None)				
+		
+		self.db_set("value_after_depreciation", 
+			(flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)))
 
 	def validate_depreciation_settings_in_company(self):
 		company = frappe.get_doc("Company", self.company)
@@ -131,9 +134,9 @@ class Asset(Document):
 			status = "Submitted"
 			if self.journal_entry_for_scrap:
 				status = "Scrapped"
-			elif flt(self.current_value) <= flt(self.expected_value_after_useful_life):
+			elif flt(self.value_after_depreciation) <= flt(self.expected_value_after_useful_life):
 				status = "Fully Depreciated"
-			elif flt(self.current_value) < flt(self.gross_purchase_amount):
+			elif flt(self.value_after_depreciation) < flt(self.gross_purchase_amount):
 				status = 'Partially Depreciated'
 		elif self.docstatus == 2:
 			status = "Cancelled"

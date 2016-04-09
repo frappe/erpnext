@@ -104,7 +104,7 @@ class TestAsset(unittest.TestCase):
 			order by account""", asset.name)
 
 		self.assertEqual(gle, expected_gle)
-		self.assertEqual(asset.get("current_value"), 70000)
+		self.assertEqual(asset.get("value_after_depreciation"), 70000)
 
 	def test_scrap_asset(self):
 		asset = frappe.get_doc("Asset", "Macbook Pro 1")

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import today, flt, cint, fmt_money, formatdate
+from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -498,6 +498,8 @@ class AccountsController(TransactionBase):
 							if asset.status != "Submitted":
 								frappe.throw(_("Row #{0}: Asset {1} is already {2}")
 									.format(d.idx, d.asset, asset.status))
+							elif getdate(asset.purchase_date) != getdate(self.posting_date):
+								frappe.throw(_("Row #{0}: Posting Date must be same as purchase date {1} of asset {2}").format(d.idx, asset.purchase_date, d.asset))
 							elif asset.is_existing_asset:
 								frappe.throw(_("Row #{0}: Purchase Invoice cannot be made against an existing asset {1}").format(d.idx, d.asset))
 								

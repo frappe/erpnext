@@ -49,7 +49,7 @@ frappe.ui.form.on('Asset', {
 	},
 	
 	is_existing_asset: function(frm) {
-		frm.toggle_enable(["purchase_date", "supplier"], frm.doc.is_existing_asset);
+		frm.toggle_enable("supplier", frm.doc.is_existing_asset);
 		frm.toggle_reqd("next_depreciation_date", !frm.doc.is_existing_asset);
 	}
 });
