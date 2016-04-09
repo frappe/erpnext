@@ -1,5 +1,6 @@
 @border-color: #d1d8dd;
 @light-border-color:  #EBEFF2;
+@light-bg:            #fafbfc;
 
 .web-long-description {
 	font-size: 18px;
@@ -54,9 +55,35 @@
 	padding: 15px 0px;
 }
 
+.product-search {
+	margin-bottom: 15px;
+}
+
 @media (max-width: 767px) {
 	.product-search {
 		width: 100%;
-		margin-bottom: 13px;
 	}
+}
+
+.product-list-link {
+	.row {
+		border-bottom: 1px solid @light-border-color;
+	}
+
+	.row:hover {
+		background-color: @light-bg;
+	}
+
+	.row > div {
+		padding-top: 15px;
+		padding-bottom: 15px;
+	}
+}
+
+.product-list-link:first-child .row {
+	border-top: 1px solid @light-border-color;
+}
+
+.item-group-nav-buttons {
+	margin-top: 15px;
 }

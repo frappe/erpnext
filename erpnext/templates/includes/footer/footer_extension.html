@@ -2,11 +2,14 @@
 <div class="container">
 	<div class="row">
 		<div class="col-sm-6 col-sm-offset-3 text-center" style="margin-top: 15px;">
+			<div class='input-group input-group-sm'>
 				<input class="form-control" type="text" id="footer-subscribe-email"
-                    style="display: inline-block; max-width: 50%; margin-right: 10px;"
 					placeholder="{{ _('Your email address') }}...">
-				<button class="btn btn-default btn-sm" type="button"
-					id="footer-subscribe-button">{{ _("Get Updates") }}</button>
+				<span class='input-group-btn'>
+					<button class="btn btn-default" type="button"
+						id="footer-subscribe-button">{{ _("Get Updates") }}</button>
+				</span>
+			</div>
 		</div>
 	</div>
     <div class="text-center text-muted small" style="padding: 30px;">
