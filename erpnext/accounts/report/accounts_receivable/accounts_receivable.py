@@ -58,21 +58,19 @@ class ReceivablePayableReport(object):
 					"width": 120
 				})
 
+		columns.append({
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Data",
+			"width": 100
+		})
 		if args.get("party_type") == "Customer":
 			columns += [_("Territory") + ":Link/Territory:80"]
 		if args.get("party_type") == "Supplier":
 			columns += [_("Supplier Type") + ":Link/Supplier Type:80"]
-		columns += [
-			{
-				"fieldname": "currency",
-				"label": _("Currency"),
-				"fieldtype": "Data",
-				"width": 100,
-				"hidden": 1
-			},
-			_("Remarks") + "::200"
-		]
-
+			
+		columns.append(_("Remarks") + "::200")
+		
 		return columns
 
 	def get_data(self, party_naming_by, args):
@@ -120,16 +118,16 @@ class ReceivablePayableReport(object):
 					row += get_ageing_data(cint(self.filters.range1), cint(self.filters.range2),
 						cint(self.filters.range3), self.age_as_on, entry_date, outstanding_amount)
 
+					if self.filters.get(scrub(args.get("party_type"))):
+						row.append(gle.account_currency)
+					else:
+						row.append(company_currency)
+
 					# customer territory / supplier type
 					if args.get("party_type") == "Customer":
 						row += [self.get_territory(gle.party)]
 					if args.get("party_type") == "Supplier":
 						row += [self.get_supplier_type(gle.party)]
-
-					if self.filters.get(scrub(args.get("party_type"))):
-						row.append(gle.account_currency)
-					else:
-						row.append(company_currency)
 
 					row.append(gle.remarks)
 					data.append(row)

@@ -16,6 +16,14 @@ def execute(filters=None):
 	if item_list:
 		item_tax, tax_accounts = get_tax_accounts(item_list, columns)
 
+	columns.append({
+		"fieldname": "currency",
+		"label": _("Currency"),
+		"fieldtype": "Data",
+		"width": 80
+	})
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	print company_currency
 	data = []
 	for d in item_list:
 		purchase_receipt = None
@@ -34,7 +42,7 @@ def execute(filters=None):
 			row.append(item_tax.get(d.parent, {}).get(d.item_code, {}).get(tax, 0))
 
 		total_tax = sum(row[last_col:])
-		row += [total_tax, d.base_net_amount + total_tax]
+		row += [total_tax, d.base_net_amount + total_tax, company_currency]
 
 		data.append(row)
 
@@ -48,7 +56,8 @@ def get_columns():
 		"Supplier Name::120", "Payable Account:Link/Account:120", _("Project") + ":Link/Project:80",
 		_("Company") + ":Link/Company:100", _("Purchase Order") + ":Link/Purchase Order:100",
 		_("Purchase Receipt") + ":Link/Purchase Receipt:100", _("Expense Account") + ":Link/Account:140",
-		_("Qty") + ":Float:120", _("Rate") + ":Currency:120", _("Amount") + ":Currency:120"]
+		_("Qty") + ":Float:120", _("Rate") + ":Currency/currency:120", _("Amount") + ":Currency/currency:120"
+	]
 
 def get_conditions(filters):
 	conditions = ""
@@ -110,7 +119,7 @@ def get_tax_accounts(item_list, columns):
 					(tax_amount * d.base_net_amount) / d.base_net_total
 
 	tax_accounts.sort()
-	columns += [account_head + ":Currency:80" for account_head in tax_accounts]
-	columns += ["Total Tax:Currency:80", "Total:Currency:80"]
+	columns += [account_head + ":Currency/currency:80" for account_head in tax_accounts]
+	columns += ["Total Tax:Currency/currency:80", "Total:Currency/currency:80"]
 
 	return item_tax, tax_accounts
