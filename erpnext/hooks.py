@@ -137,7 +137,7 @@ doc_events = {
 	# bubble transaction notification on master
 	('Opportunity', 'Quotation', 'Sales Order', 'Sales Invoice', 'Supplier Quotation',
 		'Purchase Order', 'Purchase Invoice', 'Project', 'Issue'): {
-			'on_update': 'erpnext.accounts.party_status.notify_status'
+			'on_change': 'erpnext.accounts.party_status.notify_status'
 		}
 }
 
