@@ -69,7 +69,7 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field, 
 				if(r.message) {
 					frm.set_value(display_field, r.message)
 				}
-				
+
 				if(frappe.meta.get_docfield(frm.doc.doctype, "taxes") && !is_your_company_address) {
 					if(!erpnext.utils.validate_mandatory(frm, "Customer/Supplier",
 						frm.doc.customer || frm.doc.supplier, address_field)) return;
@@ -99,7 +99,7 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field, 
 	} else {
 		frm.set_value(display_field, null);
 	}
-	
+
 }
 
 erpnext.utils.get_contact_details = function(frm) {
@@ -127,7 +127,7 @@ erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
 	return true;
 }
 
-erpnext.utils.get_shipping_address = function(frm){
+erpnext.utils.get_shipping_address = function(frm, callback){
 	frappe.call({
 		method: "erpnext.utilities.doctype.address.address.get_shipping_address",
 		args: {company: frm.doc.company},
@@ -135,6 +135,10 @@ erpnext.utils.get_shipping_address = function(frm){
 			if(r.message){
 				frm.set_value("shipping_address", r.message[0]) //Address title or name
 				frm.set_value("shipping_address_display", r.message[1]) //Address to be displayed on the page
+			}
+
+			if(callback){
+				return callback();
 			}
 		}
 	});

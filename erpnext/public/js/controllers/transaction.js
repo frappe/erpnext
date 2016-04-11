@@ -308,7 +308,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
 		else var date = this.frm.doc.transaction_date;
-		set_party_account(set_pricing);
+		
+		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") && 
+			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)){
+				erpnext.utils.get_shipping_address(this.frm, function(){
+					set_party_account(set_pricing);
+				})
+		}else{
+			set_party_account(set_pricing);
+		}
 
 		if(this.frm.doc.company) {
 			erpnext.last_selected_company = this.frm.doc.company;
