@@ -25,7 +25,7 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, upd
 def process_gl_map(gl_map, merge_entries=True):
 	if merge_entries:
 		gl_map = merge_similar_entries(gl_map)
-
+	print gl_map
 	for entry in gl_map:
 		# toggle debit, credit if negative entry
 		if flt(entry.debit) < 0:
