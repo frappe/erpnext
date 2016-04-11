@@ -5,12 +5,14 @@ from __future__ import unicode_literals
 
 import frappe
 
+from frappe import _
 from frappe.utils import evaluate_filters
-from erpnext.startup.notifications import get_notification_config
+from frappe.desk.notifications import get_filters_for
 
+# NOTE: if you change this also update triggers in erpnext/hooks.py
 status_depends_on = {
-	'Customer': ('Opportunity', 'Quotation', 'Sales Order', 'Sales Invoice', 'Project', 'Issue'),
-	'Supplier': ('Supplier Quotation', 'Purchase Order', 'Purchase Invoice')
+	'Customer': ('Opportunity', 'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project', 'Issue'),
+	'Supplier': ('Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice')
 }
 
 default_status = {
@@ -35,11 +37,11 @@ def notify_status(doc, method):
 		return
 
 	party = frappe.get_doc(party_type, name)
-	config = get_notification_config().get('for_doctype').get(doc.doctype)
+	filters = get_filters_for(doc.doctype)
 
 	status = None
-	if config:
-		if evaluate_filters(doc, config):
+	if filters:
+		if evaluate_filters(doc, filters):
 			# filters match, passed document is open
 			status = 'Open'
 
@@ -56,21 +58,45 @@ def notify_status(doc, method):
 			party.status = status
 			update_status(party, )
 
-def update_status(doc):
-	'''Set status as open if there is any open notification'''
-	config = get_notification_config()
-
-	original_status = doc.status
-
-	doc.status = default_status[doc.doctype]
+def get_party_status(doc):
+	'''return party status based on open documents'''
+	status = default_status[doc.doctype]
 	for doctype in status_depends_on[doc.doctype]:
-		filters = config.get('for_doctype', {}).get(doctype) or {}
+		filters = get_filters_for(doctype)
 		filters[doc.doctype.lower()] = doc.name
 		if filters:
-			open_count = frappe.get_all(doctype, fields='count(*) as count', filters=filters)
-			if open_count[0].count > 0:
-				doc.status = 'Open'
+			open_count = frappe.get_all(doctype, fields='name', filters=filters, limit_page_length=1)
+			if len(open_count) > 0:
+				status = 'Open'
 				break
 
-	if doc.status != original_status:
-		doc.db_set('status', doc.status)
+	return status
+
+def update_status(doc):
+	'''Set status as open if there is any open notification'''
+	status = get_party_status(doc)
+	if doc.status != status:
+		doc.db_set('status', status)
+
+def get_transaction_count(doc):
+	'''Return list of open documents given party doc'''
+	out = []
+	for doctype in status_depends_on[doc.doctype]:
+		filters = get_filters_for(doctype)
+		filters[doc.doctype.lower()] = doc.name
+		if filters:
+			open_count = frappe.get_all(doctype, fields='count(*) as count', filters=filters)[0].count
+			out.append({'name': doctype, 'count': open_count})
+
+	return out
+
+@frappe.whitelist()
+def get_transaction_info(party_type, party_name):
+	doc = frappe.get_doc(party_type, party_name)
+	if not doc.has_permission('read'):
+		frappe.msgprint(_("Not permitted"), raise_exception=True)
+
+	out = {}
+	out['transaction_count'] = get_transaction_count(doc)
+
+	return out

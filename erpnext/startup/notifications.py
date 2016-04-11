@@ -26,7 +26,6 @@ def get_notification_config():
 			"Leave Application": {"status": "Open"},
 			"Expense Claim": {"approval_status": "Draft"},
 			"Job Applicant": {"status": "Open"},
-			"Purchase Receipt": {"docstatus": 0},
 			"Delivery Note": {"docstatus": 0},
 			"Stock Entry": {"docstatus": 0},
 			"Material Request": {
@@ -34,13 +33,13 @@ def get_notification_config():
 				"status": ("not in", ("Stopped",)),
 				"per_ordered": ("<", 100)
 			},
-			"Request for Quotation": {
-				"docstatus": 0
-			},
+			"Request for Quotation": { "docstatus": 0 },
+			"Supplier Quotation": {"docstatus": 0},
 			"Purchase Order": {
 				"status": ("not in", ("Completed", "Closed")),
 				"docstatus": ("<", 2)
 			},
+			"Purchase Receipt": {"docstatus": 0},
 			"Production Order": { "status": "In Process" },
 			"BOM": {"docstatus": 0},
 			"Timesheet": {"docstatus": 0},
