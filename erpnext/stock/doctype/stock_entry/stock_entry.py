@@ -27,9 +27,8 @@ class StockEntry(StockController):
 		return _("From {0} to {1}").format(self.from_warehouse, self.to_warehouse)
 
 	def onload(self):
-		if self.docstatus==1:
-			for item in self.get("items"):
-				item.update(get_bin_details(item.item_code, item.s_warehouse))
+		for item in self.get("items"):
+			item.update(get_bin_details(item.item_code, item.s_warehouse))
 
 	def validate(self):
 		self.pro_doc = None
