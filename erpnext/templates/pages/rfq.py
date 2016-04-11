@@ -4,16 +4,16 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from erpnext.controllers.website_list_for_contact import get_customers_suppliers, \
-					get_party_details
+from erpnext.controllers.website_list_for_contact import (get_customers_suppliers,
+					get_party_details)
 
 def get_context(context):
 	context.no_cache = 1
 	context.doc = frappe.get_doc(frappe.form_dict.doctype, frappe.form_dict.name)
 	context.parents = frappe.form_dict.parents
 	context.doc.supplier = get_supplier()
-	update_supplier_details(context)
 	unauthorized_user(context.doc.supplier)
+	update_supplier_details(context)
 	context["title"] = frappe.form_dict.name
 
 def get_supplier():
@@ -31,13 +31,13 @@ def check_supplier_has_docname_access(supplier):
 	return status
 
 def unauthorized_user(supplier):
-	status = check_supplier_has_docname_access(supplier)
+	status = check_supplier_has_docname_access(supplier) or False
 	if status == False:
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
 def update_supplier_details(context):
 	supplier_doc = frappe.get_doc("Supplier", context.doc.supplier)
-	context.doc.currency = supplier_doc.default_currency
+	context.doc.currency = supplier_doc.default_currency or frappe.db.get_value("Company", context.doc.company, "default_currency")
 	context.doc.currency_symbol = frappe.db.get_value("Currency", context.doc.currency, "symbol")
 	context.doc.number_format = frappe.db.get_value("Currency", context.doc.currency, "number_format")
-	context.doc.buying_price_list = supplier_doc.default_price_list
+	context.doc.buying_price_list = supplier_doc.default_price_list or ''
