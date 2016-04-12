@@ -260,7 +260,7 @@ frappe.ui.form.on("Quotation Item", {
     },
 });
 
-filter = function(arr1, arr2) {      //filter related item template
+filter = function(arr1, arr2) {   
     return arr1.filter(function(obj) {
     return !inList(arr2,obj.item_code)
     });
