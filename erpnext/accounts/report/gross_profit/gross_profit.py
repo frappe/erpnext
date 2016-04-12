@@ -145,11 +145,11 @@ class GrossProfitGenerator(object):
 			self.data.append(row)
 
 		if self.grouped:
-			self.collapse_group()
+			self.get_average_rate_based_on_group_by()
 		else:
 			self.grouped_data = []
 
-	def collapse_group(self):
+	def get_average_rate_based_on_group_by(self):
 		# sum buying / selling totals for group
 		self.grouped_data = []
 		for key in self.grouped.keys():
@@ -165,6 +165,8 @@ class GrossProfitGenerator(object):
 			new_row.gross_profit_percent = ((new_row.gross_profit / new_row.base_amount) * 100.0) \
 				if new_row.base_amount else 0
 			new_row.buying_rate = (new_row.buying_amount / new_row.qty) \
+				if new_row.qty else 0
+			new_row.base_rate = (new_row.base_amount / new_row.qty) \
 				if new_row.qty else 0
 
 			self.grouped_data.append(new_row)
