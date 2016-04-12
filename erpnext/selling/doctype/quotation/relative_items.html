@@ -1,0 +1,63 @@
+<style type="text/css">
+    .add-items {
+        overflow-y: scroll;
+        max-height: 300px;
+    },
+    .hide {
+        display: none;
+        }
+</style>
+
+<div class="add-items">
+    <table class="table table-bordered table-condensed">
+        <thead>
+          <tr>
+            <td align="center"><b>Suggested Items</b></td>  
+            <td align="center"><b>Alternate Items</b></td>
+            <td align="center"><b>Accessory Items</b></td>
+          </tr>
+        </thead>
+            {% for(var s=0, ls=max; s < ls; s++) { %}
+             <tr>
+                <td align="center" id="check_id">
+                    {% if(items["Suggested Items"][s]){ %}  
+                    <div class="row member">
+                        <div class="col-xs-6">
+                            {{ items["Suggested Items"][s].item_code }}
+                        </div>    
+                        <div class="col-xs-6">  
+                            <input type="checkbox" class="select" value="{%= items["Suggested Items"][s].item_code %}">
+                        </div>
+                    </div>      
+                    {% } %}
+                </td>
+
+                <td align="center" id="check_id">
+                    {% if(items["Alternate Items"][s]){ %}  
+                    <div class="row member">
+                        <div class="col-xs-6">
+                            {{ items["Alternate Items"][s].item_code }}
+                        </div>    
+                        <div class="col-xs-6">  
+                            <input type="checkbox" class="select member" value="{%= items["Alternate Items"][s].item_code %}">
+                        </div>
+                    </div>      
+                    {% } %}
+                </td>
+
+                <td align="center" id="check_id">
+                    {% if(items["Accessory Items"][s]){ %}  
+                    <div class="row member">
+                        <div class="col-xs-6">
+                            {{ items["Accessory Items"][s].item_code }}
+                        </div>    
+                        <div class="col-xs-6">  
+                            <input type="checkbox" class="select" value="{%= items["Accessory Items"][s].item_code %}">
+                        </div>
+                    </div>      
+                    {% } %}
+                </td>
+            </tr>
+            {% } %}
+    </table>
+</div>
