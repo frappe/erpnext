@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import frappe
 
-from frappe import _
 from frappe.utils import evaluate_filters
 from frappe.desk.notifications import get_filters_for
 
@@ -77,26 +76,3 @@ def update_status(doc):
 	status = get_party_status(doc)
 	if doc.status != status:
 		doc.db_set('status', status)
-
-def get_transaction_count(doc):
-	'''Return list of open documents given party doc'''
-	out = []
-	for doctype in status_depends_on[doc.doctype]:
-		filters = get_filters_for(doctype)
-		filters[doc.doctype.lower()] = doc.name
-		if filters:
-			open_count = frappe.get_all(doctype, fields='count(*) as count', filters=filters)[0].count
-			out.append({'name': doctype, 'count': open_count})
-
-	return out
-
-@frappe.whitelist()
-def get_transaction_info(party_type, party_name):
-	doc = frappe.get_doc(party_type, party_name)
-	if not doc.has_permission('read'):
-		frappe.msgprint(_("Not permitted"), raise_exception=True)
-
-	out = {}
-	out['transaction_count'] = get_transaction_count(doc)
-
-	return out

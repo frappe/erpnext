@@ -2298,7 +2298,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 1, 
- "modified": "2016-04-04 06:45:30.554933", 
+ "modified": "2016-04-11 09:15:30.911215", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
@@ -2468,6 +2468,7 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "item_name,description,item_group,customer_code", 
+ "sort_field": "idx desc, modified desc", 
  "sort_order": "DESC", 
  "title_field": "item_name", 
  "track_seen": 0

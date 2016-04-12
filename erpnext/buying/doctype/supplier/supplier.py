@@ -9,7 +9,7 @@ from frappe.model.naming import make_autoname
 from erpnext.utilities.address_and_contact import load_address_and_contact
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts
-from erpnext.accounts.party_status import get_transaction_count, get_party_status, status_depends_on
+from erpnext.accounts.party_status import get_party_status
 
 class Supplier(TransactionBase):
 	def get_feed(self):
@@ -18,7 +18,7 @@ class Supplier(TransactionBase):
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self, "supplier")
-		self.set_onload('transactions', status_depends_on[self.doctype])
+		self.set_onload('links', self.meta.get_links_setup())
 
 	def autoname(self):
 		supp_master_name = frappe.defaults.get_global_default('supp_master_name')
@@ -84,30 +84,3 @@ class Supplier(TransactionBase):
 		frappe.db.sql("""update `tabAddress` set address_title=%(newdn)s
 			{set_field} where supplier=%(newdn)s"""\
 			.format(set_field=set_field), ({"newdn": newdn}))
-
-# @frappe.whitelist()
-# def get_dashboard_info(supplier):
-# 	doc = frappe.get_doc('Supplier', supplier)
-# 	if not doc.has_permission('read'):
-# 		frappe.msgprint(_("Not permitted"), raise_exception=True)
-#
-# 	out = {}
-# 	out['transaction_count'] = get_transaction_count(doc)
-#
-# 	billing_this_year = frappe.db.sql("""
-# 		select sum(credit_in_account_currency) - sum(debit_in_account_currency)
-# 		from `tabGL Entry`
-# 		where voucher_type='Purchase Invoice' and party_type = 'Supplier'
-# 			and party=%s and fiscal_year = %s""",
-# 		(supplier, frappe.db.get_default("fiscal_year")))
-#
-# 	total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
-# 		from `tabPurchase Invoice`
-# 		where supplier=%s and docstatus = 1""", supplier)
-#
-#
-# 	out["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
-# 	out["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
-# 	out["company_currency"] = frappe.db.sql_list("select distinct default_currency from tabCompany")
-#
-# 	return out

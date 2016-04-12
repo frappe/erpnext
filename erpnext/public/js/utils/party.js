@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.utils");
-frappe.provide('erpnext.party');
+
 erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	if(!method) {
 		method = "erpnext.accounts.party.get_party_details";
@@ -139,31 +139,4 @@ erpnext.utils.get_shipping_address = function(frm){
 			}
 		}
 	});
-}
-
-erpnext.party.setup_dashboard = function(frm) {
-	frm.dashboard.reset(frm.doc);
-	if(frm.doc.__islocal)
-		return;
-
-	$.each(frm.doc.__onload.transactions, function(i, doctype) {
-		frm.dashboard.add_doctype_badge(doctype, frm.doc.doctype.toLowerCase());
-	})
-
-	return frappe.call({
-		type: "GET",
-		method: "erpnext.accounts.party_status.get_transaction_info",
-		args: {
-			party_type: frm.doc.doctype,
-			party_name: frm.doc.name
-		},
-		callback: function(r) {
-			$.each(r.message.transaction_count, function(i, d) {
-				if(d.count) {
-					frm.dashboard.set_badge_count(d.name, d.count)
-				}
-			})
-		}
-	});
-
 }

@@ -27,7 +27,8 @@ class Item(WebsiteGenerator):
 
 	def onload(self):
 		super(Item, self).onload()
-		self.get("__onload").sle_exists = self.check_if_sle_exists()
+		self.set_onload('sle_exists', self.check_if_sle_exists())
+		self.set_onload('links', self.meta.get_links_setup())
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
@@ -84,7 +85,7 @@ class Item(WebsiteGenerator):
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
-			self.old_website_item_groups = frappe.db.sql_list("""select item_group 
+			self.old_website_item_groups = frappe.db.sql_list("""select item_group
 				from `tabWebsite Item Group`
 				where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
 
@@ -568,7 +569,7 @@ class Item(WebsiteGenerator):
 			if variant:
 				frappe.throw(_("Item variant {0} exists with same attributes")
 					.format(variant), ItemVariantExistsError)
-					
+
 	def validate_fixed_asset_item(self):
 		if self.is_fixed_asset and self.is_stock_item:
 			frappe.throw(_("Fixed Asset Item must be a non-stock item"))

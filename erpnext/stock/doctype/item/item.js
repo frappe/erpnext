@@ -16,6 +16,7 @@ frappe.ui.form.on("Item", {
 	},
 
 	refresh: function(frm) {
+
 		if(frm.doc.is_stock_item) {
 			frm.add_custom_button(__("Balance"), function() {
 				frappe.route_options = {
@@ -73,6 +74,8 @@ frappe.ui.form.on("Item", {
 		}
 
 		erpnext.item.toggle_attributes(frm);
+
+		frm.dashboard.show_documents();
 	},
 
 	validate: function(frm){
