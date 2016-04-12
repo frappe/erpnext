@@ -82,13 +82,13 @@ website_route_rules = [
 ]
 
 portal_menu_items = [
-	{"title": _("Projects"), "route": "project", "reference_doctype": "Project"},
-	{"title": _("Request for Quotations"), "route": "rfq", "reference_doctype": "Request for Quotation"},
-	{"title": _("Orders"), "route": "orders", "reference_doctype": "Sales Order"},
-	{"title": _("Invoices"), "route": "invoices", "reference_doctype": "Sales Invoice"},
-	{"title": _("Shipments"), "route": "shipments", "reference_doctype": "Delivery Note"},
-	{"title": _("Issues"), "route": "issues", "reference_doctype": "Issue"},
-	{"title": _("Addresses"), "route": "addresses", "reference_doctype": "Address"}
+	{"title": _("Projects"), "route": "/project", "reference_doctype": "Project"},
+	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation"},
+	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order"},
+	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice"},
+	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note"},
+	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue"},
+	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"}
 ]
 
 has_website_permission = {
@@ -127,15 +127,19 @@ doc_events = {
 		"on_update": "erpnext.hr.doctype.employee.employee.update_user_permissions",
 		"on_update": "erpnext.utilities.doctype.contact.contact.update_contact"
 	},
-	"Sales Taxes and Charges Template": {
-		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
-	},
-	"Price List": {
+	("Sales Taxes and Charges Template", 'Price List'): {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
 	"Address": {
 		"validate": "erpnext.shopping_cart.cart.set_customer_in_address"
-	}
+	},
+
+	# bubble transaction notification on master
+	('Opportunity', 'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
+		'Supplier Quotation', 'Purchase Order', 'Purchase Receipt',
+		'Purchase Invoice', 'Project', 'Issue'): {
+			'on_change': 'erpnext.accounts.party_status.notify_status'
+		}
 }
 
 scheduler_events = {

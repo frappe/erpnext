@@ -113,7 +113,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "supplier_name", 
    "fieldtype": "Read Only", 
@@ -173,7 +173,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-03-29 06:03:50.811469", 
+ "modified": "2016-04-06 05:39:47.516470", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Request for Quotation Supplier", 

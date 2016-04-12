@@ -31,6 +31,9 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 		parties_doctype = 'Request for Quotation Supplier' if doctype == 'Request for Quotation' else doctype
 		# find party for this contact
 		customers, suppliers = get_customers_suppliers(parties_doctype, user)
+
+		if not customers and not suppliers: return []
+
 		key, parties = get_party_details(customers, suppliers)
 
 		if doctype == 'Request for Quotation':

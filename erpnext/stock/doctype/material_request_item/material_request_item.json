@@ -7,6 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -327,6 +328,7 @@
    "allow_on_submit": 0, 
    "bold": 1, 
    "collapsible": 0, 
+   "default": "Today", 
    "fieldname": "schedule_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -650,7 +652,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-03-17 07:20:38.969978", 
+ "modified": "2016-04-06 05:48:04.866802", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request Item", 
@@ -658,5 +660,6 @@
  "permissions": [], 
  "read_only": 0, 
  "read_only_onload": 0, 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "track_seen": 0
 }

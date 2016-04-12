@@ -38,7 +38,7 @@
 <div class="col-xs-6">
 	{% if doc.percent_complete %}
 		<div class="progress progress-hg">
-		  <div class="progress-bar progress-bar-warning active" role="progressbar"
+		  <div class="progress-bar progress-bar-{{ "warning" if doc.percent_complete|round < 100 else "success" }} active" role="progressbar"
 		  	aria-valuenow="{{ doc.percent_complete|round|int }}"
 		  	aria-valuemin="0" aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">
 		  </div>

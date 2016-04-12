@@ -30,16 +30,16 @@ class Company(Document):
 		self.validate_abbr()
 		self.validate_default_accounts()
 		self.validate_currency()
-		
+
 	def validate_abbr(self):
 		self.abbr = self.abbr.strip()
-		
+
 		if self.get('__islocal') and len(self.abbr) > 5:
 			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
 
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
-			
+
 		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
 			frappe.throw(_("Abbreviation already used for another company"))
 
@@ -111,6 +111,8 @@ class Company(Document):
 		self._set_default_account("default_cash_account", "Cash")
 		self._set_default_account("default_bank_account", "Bank")
 		self._set_default_account("round_off_account", "Round Off")
+		self._set_default_account("accumulated_depreciation_account", "Accumulated Depreciation")
+		self._set_default_account("depreciation_expense_account", "Depreciation")
 
 		if cint(frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock")):
 			self._set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
@@ -159,6 +161,7 @@ class Company(Document):
 
 		frappe.db.set(self, "cost_center", _("Main") + " - " + self.abbr)
 		frappe.db.set(self, "round_off_cost_center", _("Main") + " - " + self.abbr)
+		frappe.db.set(self, "depreciation_cost_center", _("Main") + " - " + self.abbr)
 
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:

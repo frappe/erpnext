@@ -16,7 +16,7 @@ class TestAssetCategory(unittest.TestCase):
 		asset_category.number_of_depreciations = 3
 		asset_category.number_of_months_in_a_period = 3
 		asset_category.append("accounts", {
-			"company": "_Test Company",
+			"company_name": "_Test Company",
 			"fixed_asset_account": "_Test Fixed Asset - _TC",
 			"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
 			"depreciation_expense_account": "_Test Depreciations - _TC"

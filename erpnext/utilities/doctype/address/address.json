@@ -482,7 +482,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "depends_on": "eval:!doc.is_your_company_address", 
    "fieldname": "customer_name", 
@@ -533,7 +533,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "depends_on": "eval:!doc.is_your_company_address", 
    "fieldname": "supplier_name", 
@@ -637,14 +637,14 @@
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "icon": "icon-map-marker", 
- "idx": 1, 
+ "idx": 5, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-16 16:10:26.435426", 
+ "modified": "2016-04-06 05:39:46.951866", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Address", 
@@ -735,5 +735,6 @@
  "read_only_onload": 0, 
  "search_fields": "customer, supplier, sales_partner, country, state", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "track_seen": 0
 }

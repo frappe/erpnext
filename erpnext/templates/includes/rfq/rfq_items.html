@@ -18,12 +18,12 @@
 				</p>
 		</div>
 		<div class="col-sm-2 col-xs-2 text-right">
-				<input type="number" class="form-control text-right rfq-rate"
+			{{doc.currency_symbol}}	<input type="number" class="form-control text-right rfq-rate"
 				style="margin-top: 5px; max-width: 70px;display: inline-block" value="0.00"
 				data-idx="{{ d.idx }}">
 		</div>
         <div class="col-sm-2 col-xs-2 text-right" style="padding-top: 9px;">
-            <span class="rfq-amount" data-idx="{{ d.idx }}">0.00</span>
+           {{doc.currency_symbol}} <span class="rfq-amount" data-idx="{{ d.idx }}">0.00</span>
         </div>
 		</div>
 	</div>

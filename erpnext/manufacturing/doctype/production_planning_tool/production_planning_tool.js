@@ -18,6 +18,10 @@ cur_frm.add_fetch("sales_order", "customer", "customer");
 cur_frm.add_fetch("sales_order", "base_grand_total", "grand_total");
 
 frappe.ui.form.on("Production Planning Tool", {
+	onload_post_render: function(frm) {
+	 		frm.get_field("items").grid.set_multiple_add("item_code", "planned_qty");
+	 },	
+	 
 	get_sales_orders: function(frm) {
 		frappe.call({
 			doc: frm.doc,

@@ -99,24 +99,24 @@ class TestCustomer(unittest.TestCase):
 		frappe.db.sql("delete from `tabCustomer` where customer_name='_Test Customer 1'")
 
 		if not frappe.db.get_value("Customer", "_Test Customer 1"):
-			test_customer_1 = frappe.get_doc({
-				 "customer_group": "_Test Customer Group",
-				 "customer_name": "_Test Customer 1",
-				 "customer_type": "Individual",
-				 "doctype": "Customer",
-				 "territory": "_Test Territory"
-			}).insert(ignore_permissions=True)
+			test_customer_1 = frappe.get_doc(
+				get_customer_dict('_Test Customer 1')).insert(ignore_permissions=True)
 		else:
 			test_customer_1 = frappe.get_doc("Customer", "_Test Customer 1")
 
-		duplicate_customer = frappe.get_doc({
-			 "customer_group": "_Test Customer Group",
-			 "customer_name": "_Test Customer 1",
-			 "customer_type": "Individual",
-			 "doctype": "Customer",
-			 "territory": "_Test Territory"
-		}).insert(ignore_permissions=True)
+		duplicate_customer = frappe.get_doc(
+			get_customer_dict('_Test Customer 1')).insert(ignore_permissions=True)
 
 		self.assertEquals("_Test Customer 1", test_customer_1.name)
 		self.assertEquals("_Test Customer 1 - 1", duplicate_customer.name)
 		self.assertEquals(test_customer_1.customer_name, duplicate_customer.customer_name)
+
+def get_customer_dict(customer_name):
+	return {
+		 "customer_group": "_Test Customer Group",
+		 "customer_name": customer_name,
+		 "customer_type": "Individual",
+		 "doctype": "Customer",
+		 "territory": "_Test Territory"
+	}
+
