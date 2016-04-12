@@ -1,19 +1,11 @@
 {% if not hide_footer_signup %}
-<div class="container">
-	<div class="row">
-		<div class="col-sm-6 col-sm-offset-3 text-center" style="margin-top: 15px;">
+
 				<input class="form-control" type="text" id="footer-subscribe-email"
-                    style="display: inline-block; max-width: 50%; margin-right: 10px;"
+                    style="display: inline-block; max-width: 50%;margin-right:15px;"
 					placeholder="{{ _('Your email address') }}...">
-				<button class="btn btn-default btn-sm" type="button"
-					id="footer-subscribe-button">{{ _("Get Updates") }}</button>
-		</div>
-	</div>
-    <div class="text-center text-muted small" style="padding: 30px;">
-        <a href="https://erpnext.com?source=website_footer" target="_blank" class="text-extra-muted">
-            Powered by ERPNext</a>
-    </div>
-</div>
+				<button class="btn btn-default btn-sm btn-subscribe" type="button"
+					id="footer-subscribe-button" style="float:right; border-radius:8px; border:1px solid #78D6FF; 					color:#78D6FF; background-color:white;">{{ _("Get Updates") }}</button>
+
 <script>
 frappe.ready(function() {
 	$("#footer-subscribe-button").click(function() {

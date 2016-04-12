@@ -44,12 +44,11 @@ $.extend(shopping_cart, {
 		var cart_count = getCookie("cart_count");
 		
 		if($(".cart-icon").length == 0) {
-			$('<div class="cart-icon" style="float:right;padding-top:10px;">\
-				<a href="/cart" class="text-muted small">\
-					<div class="btn btn-primary cart"> Cart\
-						<span id="cart-count" class="label" style="padding-left:5px;margin-left:5px;\
-								margin-right:-5px;background-color: #2905E2;">\
-						</span>\
+			$('<div class="cart-icon" style="float:right;padding-top:5px;padding-right:10px;padding-left:10px;border-radius:10px;\
+    			border: 2px solid #2fa5d6;color:#2fa5d6;">\
+				<a href="/cart" style="color:#2fa5d6;">\
+					<i class="icon-shopping-cart"></i> <span style="\
+					position: relative; bottom: 2ex; font-size: 75%; margin-left:-12px;" id="cart-count"></span> Cart\
 					</div>\
 				</a></div>').appendTo($('.hidden-xs'))
 		}
