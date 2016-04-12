@@ -7,13 +7,16 @@ import unittest
 import frappe
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 	import set_perpetual_inventory, get_gl_entries, test_records as pr_test_records
-
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 
 class TestLandedCostVoucher(unittest.TestCase):
 	def test_landed_cost_voucher(self):
 		set_perpetual_inventory(1)
 		pr = frappe.copy_doc(pr_test_records[0])
 		pr.submit()
+		
+		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
+			posting_time=frappe.utils.nowtime(), cash_bank_account="Cash - _TC", is_paid=1)
 
 		last_sle = frappe.db.get_value("Stock Ledger Entry", {
 				"voucher_type": pr.doctype,
@@ -24,10 +27,13 @@ class TestLandedCostVoucher(unittest.TestCase):
 			fieldname=["qty_after_transaction", "stock_value"],
 			as_dict=1)
 
-		self.submit_landed_cost_voucher(pr)
+		self.submit_landed_cost_voucher(pr, pi)
 
 		pr_lc_value = frappe.db.get_value("Purchase Receipt Item", {"parent": pr.name}, "landed_cost_voucher_amount")
 		self.assertEquals(pr_lc_value, 25.0)
+		
+		pi_lc_value = frappe.db.get_value("Purchase Invoice Item", {"parent": pi.name}, "landed_cost_voucher_amount")
+		self.assertEquals(pi_lc_value, 25.0)
 
 		last_sle_after_landed_cost = frappe.db.get_value("Stock Ledger Entry", {
 				"voucher_type": pr.doctype,
@@ -79,12 +85,12 @@ class TestLandedCostVoucher(unittest.TestCase):
 		serial_no = frappe.db.get_value("Serial No", "SN001",
 			["warehouse", "purchase_rate"], as_dict=1)
 
-		self.assertEquals(serial_no.purchase_rate - serial_no_rate, 5.0)
+		self.assertEquals(serial_no.purchase_rate - serial_no_rate, 7.5)
 		self.assertEquals(serial_no.warehouse, "_Test Warehouse - _TC")
 
 		set_perpetual_inventory(0)
 
-	def submit_landed_cost_voucher(self, pr):
+	def submit_landed_cost_voucher(self, pr, pi=None):
 		lcv = frappe.new_doc("Landed Cost Voucher")
 		lcv.company = "_Test Company"
 		lcv.set("purchase_receipts", [{
@@ -94,10 +100,20 @@ class TestLandedCostVoucher(unittest.TestCase):
 			"posting_date": pr.posting_date,
 			"grand_total": pr.base_grand_total
 		}])
+		
+		if pi:
+			lcv.append("purchase_receipts", {
+				"receipt_document_type": "Purchase Invoice",
+				"receipt_document": pi.name,
+				"supplier": pi.supplier,
+				"posting_date": pi.posting_date,
+				"grand_total": pi.base_grand_total
+			})
+		
 		lcv.set("taxes", [{
 			"description": "Insurance Charges",
 			"account": "_Test Account Insurance Charges - _TC",
-			"amount": 50.0
+			"amount": 75.0
 		}])
 
 		lcv.insert()

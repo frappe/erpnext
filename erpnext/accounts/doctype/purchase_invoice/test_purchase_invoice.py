@@ -344,19 +344,19 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(), 
 			posting_time=frappe.utils.nowtime(), cash_bank_account="Cash - _TC", is_paid=1)
 
-		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
-			order by account asc""", pi.name, as_dict=1)
+		gl_entries = frappe.db.sql("""select account, account_currency, sum(debit) as debit, 
+				sum(credit) as credit, debit_in_account_currency, credit_in_account_currency 
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s 
+			group by account, voucher_no order by account asc;""", pi.name, as_dict=1)
 
 		self.assertTrue(gl_entries)
 		
 		expected_gl_entries = dict((d[0], d) for d in [
-			[pi.credit_to, 250, 250.0],
+			[pi.credit_to, 250.0, 250.0],
 			[pi.items[0].warehouse, 250.0, 0.0],
 			["Cash - _TC", 0.0, 250.0]
 		])
-		
+				
 		for i, gle in enumerate(gl_entries):
 			self.assertEquals(expected_gl_entries[gle.account][0], gle.account)
 			self.assertEquals(expected_gl_entries[gle.account][1], gle.debit)
@@ -365,7 +365,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_update_stock_and_purchase_return(self):
 		actual_qty_0 = get_qty_after_transaction()
 		
-		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(), 
+		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
 			posting_time=frappe.utils.nowtime())
 		
 		actual_qty_1 = get_qty_after_transaction()
