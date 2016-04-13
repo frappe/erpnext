@@ -51,7 +51,10 @@ class SellingController(StockController):
 
 		elif getattr(self, "lead", None):
 			from erpnext.crm.doctype.lead.lead import get_lead_details
-			self.update_if_missing(get_lead_details(self.lead))
+			self.update_if_missing(get_lead_details(
+				self.lead,
+				posting_date=self.get('transaction_date') or self.get('posting_date'),
+				company=self.company))
 
 	def set_price_list_and_item_details(self):
 		self.set_price_list_currency("Selling")
