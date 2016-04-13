@@ -426,7 +426,7 @@ def create_users(args):
 	# create employee for self
 	emp = frappe.get_doc({
 		"doctype": "Employee",
-		"full_name": " ".join(filter(None, [args.get("first_name"), args.get("last_name")])),
+		"employee_name": " ".join(filter(None, [args.get("first_name"), args.get("last_name")])),
 		"user_id": frappe.session.user,
 		"status": "Active",
 		"company": args.get("company_name")
@@ -470,7 +470,7 @@ def create_users(args):
 				# create employee
 				emp = frappe.get_doc({
 					"doctype": "Employee",
-					"full_name": fullname,
+					"employee_name": fullname,
 					"user_id": email,
 					"status": "Active",
 					"company": args.get("company_name")

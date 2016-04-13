@@ -16,7 +16,7 @@ install:
   - sudo bash setup_frappe.sh --skip-setup-bench --mysql-root-password travis
   - sudo pip install --upgrade pip
   - rm $TRAVIS_BUILD_DIR/.git/shallow
-  - cd ~/ && bench init frappe-bench --frappe-path https://github.com/frappe/frappe.git --frappe-branch develop
+  - bash $TRAVIS_BUILD_DIR/travis/bench_init.sh
   - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
 
 script:

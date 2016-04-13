@@ -171,18 +171,10 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			erpnext.buying.get_items_from_product_bundle(me.frm);
 		}, __("Get items from"));
 	},
-	
-	company: function() {
-		var me = this;
-		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") 
-			&& !this.frm.doc.shipping_address) {
-				erpnext.utils.get_shipping_address(this.frm)
-		}
-	},
-	
+
 	shipping_address: function(){
 		var me = this;
-		
+
 		this.frm.set_query("shipping_address", function(){
 			if(me.frm.doc.customer){
 				return{
@@ -200,8 +192,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				}
 			}
 		});
-		
-		erpnext.utils.get_address_display(this.frm, "shipping_address", 
+
+		erpnext.utils.get_address_display(this.frm, "shipping_address",
 			"shipping_address_display", is_your_company_address=true)
 	}
 });
