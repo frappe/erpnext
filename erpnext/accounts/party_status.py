@@ -55,7 +55,9 @@ def notify_status(doc, method):
 			# may be open elsewhere, check
 			# default status
 			party.status = status
-			update_status(party, )
+			update_status(party)
+
+	party.update_modified()
 
 def get_party_status(doc):
 	'''return party status based on open documents'''
