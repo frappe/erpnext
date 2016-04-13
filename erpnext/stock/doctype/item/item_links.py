@@ -8,8 +8,8 @@ links = {
 	},
 	'transactions': [
 		{
-			'label': _('Related'),
-			'items': ['BOM', 'Product Bundle', 'Serial No', 'Batch']
+			'label': _('Groups'),
+			'items': ['BOM', 'Product Bundle']
 		},
 		{
 			'label': _('Pricing'),
@@ -23,6 +23,10 @@ links = {
 			'label': _('Buy'),
 			'items': ['Material Request', 'Supplier Quotation', 'Request for Quotation',
 				'Purchase Order', 'Purchase Invoice']
+		},
+		{
+			'label': _('Traceability'),
+			'items': ['Serial No', 'Batch']
 		},
 		{
 			'label': _('Move'),

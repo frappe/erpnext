@@ -18,15 +18,13 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this._super(doc, dt, dn);
 
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
-			cur_frm.add_custom_button(__('Sales Order'),
-				cur_frm.cscript['Make Sales Order'], __("Make"));
+			cur_frm.add_custom_button(__('Make Sales Order'),
+				cur_frm.cscript['Make Sales Order']);
 
 			if(doc.status!=="Ordered") {
-				cur_frm.add_custom_button(__('Lost'),
-					cur_frm.cscript['Declare Order Lost'], __("Status"));
+				cur_frm.add_custom_button(__('Set as Lost'),
+					cur_frm.cscript['Declare Order Lost']);
 			}
-			
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 
 		if (this.frm.doc.docstatus===0) {
@@ -47,7 +45,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		}
 
 		this.toggle_reqd_lead_customer();
-		
+
 	},
 
 	quotation_to: function() {
@@ -166,6 +164,6 @@ frappe.ui.form.on("Quotation Item", "items_on_form_rendered", function(frm, cdt,
 
 frappe.ui.form.on("Quotation Item", "stock_balance", function(frm, cdt, cdn) {
 	var d = frappe.model.get_doc(cdt, cdn);
-	frappe.route_options = {"item_code": d.item_code}; 
+	frappe.route_options = {"item_code": d.item_code};
 	frappe.set_route("query-report", "Stock Balance");
 })

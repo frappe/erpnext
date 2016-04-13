@@ -5,7 +5,7 @@ links = {
 	'transactions': [
 		{
 			'label': _('Procurement'),
-			'items': ['Material Request', 'Request for Quotation', 'Supplier Quotation']
+			'items': ['Request for Quotation', 'Supplier Quotation']
 		},
 		{
 			'label': _('Orders'),

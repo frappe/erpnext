@@ -13,7 +13,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 1, 
+   "collapsible": 0, 
    "fieldname": "basic_info", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -421,7 +421,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 1, 
+   "collapsible": 0, 
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "address_contacts", 
    "fieldtype": "Section Break", 
@@ -685,7 +685,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-04-11 08:01:21.188319", 
+ "modified": "2016-04-13 05:47:43.797061", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier", 

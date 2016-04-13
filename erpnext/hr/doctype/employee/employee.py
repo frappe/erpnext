@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_add, today, get_gravatar
+from frappe.utils import getdate, validate_email_add, today
 from frappe.model.naming import make_autoname
 from frappe import throw, _
 import frappe.permissions
@@ -19,8 +19,7 @@ class EmployeeUserDisabledError(frappe.ValidationError):
 
 class Employee(Document):
 	def onload(self):
-		self.get("__onload").salary_structure_exists = frappe.db.get_value("Salary Structure",
-				{"employee": self.name, "is_active": "Yes", "docstatus": ["!=", 2]})
+		self.set_onload('links', self.meta.get_links_setup())
 
 	def autoname(self):
 		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
