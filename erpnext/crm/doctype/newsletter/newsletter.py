@@ -9,7 +9,8 @@ from frappe import throw, _
 from frappe.model.document import Document
 from frappe.email.bulk import check_bulk_limit
 from frappe.utils.verified_command import get_signed_params, verify_request
-import erpnext.tasks
+from frappe.utils.background_jobs import enqueue
+from frappe.utils.scheduler import log
 from erpnext.crm.doctype.newsletter_list.newsletter_list import add_subscribers
 
 class Newsletter(Document):
@@ -32,11 +33,8 @@ class Newsletter(Document):
 		self.recipients = self.get_recipients()
 
 		if getattr(frappe.local, "is_ajax", False):
-			# to avoid request timed out!
 			self.validate_send()
-
-			# hack! event="bulk_long" to queue in longjob queue
-			erpnext.tasks.send_newsletter.delay(frappe.local.site, self.name, event="bulk_long")
+			enqueue(send_newsletter, queue="short", timeout=300,  newsletter=self.name)
 		else:
 			self.send_bulk()
 
@@ -164,6 +162,26 @@ def confirm_subscription(email):
 	frappe.db.commit()
 
 	frappe.respond_as_web_page(_("Confirmed"), _("{0} has been successfully added to our Newsletter list.").format(email))
+
+
+def send_newsletter(newsletter):
+	try:
+		doc = frappe.get_doc("Newsletter", newsletter)
+		doc.send_bulk()
+
+	except:
+		frappe.db.rollback()
+
+		# wasn't able to send emails :(
+		doc.db_set("email_sent", 0)
+		frappe.db.commit()
+
+		log("send_newsletter")
+
+		raise
+
+	else:
+		frappe.db.commit()
 
 
 
