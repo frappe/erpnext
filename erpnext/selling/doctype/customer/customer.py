@@ -199,7 +199,7 @@ def get_customer_outstanding(customer, company):
 		select sum(base_grand_total*(100 - per_billed)/100)
 		from `tabSales Order`
 		where customer=%s and docstatus = 1 and company=%s
-		and per_billed < 100 and status != 'Stopped'""", (customer, company))
+		and per_billed < 100 and status != 'Closed'""", (customer, company))
 
 	outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
 
@@ -210,7 +210,7 @@ def get_customer_outstanding(customer, company):
 		where
 			dn.name = dn_item.parent
 			and dn.customer=%s and dn.company=%s
-			and dn.docstatus = 1 and dn.status != 'Stopped'
+			and dn.docstatus = 1 and dn.status not in ('Closed', 'Stopped')
 			and ifnull(dn_item.against_sales_order, '') = ''
 			and ifnull(dn_item.against_sales_invoice, '') = ''""", (customer, company), as_dict=True)
 
