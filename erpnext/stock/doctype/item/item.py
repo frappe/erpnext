@@ -400,13 +400,22 @@ class Item(WebsiteGenerator):
 			vals = frappe.db.get_value("Item", self.name,
 				["has_serial_no", "is_stock_item", "valuation_method", "has_batch_no"], as_dict=True)
 
-			if vals and ((self.is_stock_item == 0 and vals.is_stock_item == 1) or
+			if vals and ((self.is_stock_item != vals.is_stock_item) or
 				vals.has_serial_no != self.has_serial_no or
 				vals.has_batch_no != self.has_batch_no or
 				cstr(vals.valuation_method) != cstr(self.valuation_method)):
-					if self.check_if_sle_exists() == "exists":
-						frappe.throw(_("As there are existing stock transactions for this item, \
+					if self.check_if_linked_document_exists():
+						frappe.throw(_("As there are existing transactions for this item, \
 							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'"))
+							
+	def check_if_linked_document_exists(self):
+		for doctype in ("Sales Order Item", "Delivery Note Item", "Sales Invoice Item", 
+			"Material Request Item", "Purchase Order Item", "Purchase Receipt Item", 
+			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"):
+			if frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
+				frappe.db.get_value("Production Order", 
+					filters={"production_item": self.name, "docstatus": 1}):
+				return True
 
 	def validate_reorder_level(self):
 		if len(self.get("reorder_levels", {"material_request_type": "Purchase"})):
