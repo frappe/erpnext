@@ -80,7 +80,7 @@ class Project(Document):
 		self.update_percent_complete()
 		self.update_costing()
 		self.flags.dont_sync_tasks = True
-		self.save()
+		self.save(ignore_permissions = True)
 
 	def update_percent_complete(self):
 		total = frappe.db.sql("""select count(*) from tabTask where project=%s""", self.name)[0][0]
