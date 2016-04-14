@@ -94,7 +94,11 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		var me = this;
 		frappe.call({
 			method: "erpnext.crm.doctype.lead.lead.get_lead_details",
-			args: { "lead": this.frm.doc.lead },
+			args: {
+				'lead': this.frm.doc.lead,
+				'posting_date': this.frm.doc.transaction_date,
+				'company': this.frm.doc.company,
+			},
 			callback: function(r) {
 				if(r.message) {
 					me.frm.updating_party_details = true;

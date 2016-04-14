@@ -353,25 +353,31 @@ class JournalEntry(AccountsController):
 			self.remark = ("\n").join(r) #User Remarks is not mandatory
 
 	def set_print_format_fields(self):
-		total_amount = 0.0
-		bank_account_currency = None
-		pay_to_recd_from = None
+		bank_amount = party_amount = total_amount = 0.0
+		currency = bank_account_currency = party_account_currency = pay_to_recd_from= None
 		for d in self.get('accounts'):
 			if d.party_type and d.party:
 				if not pay_to_recd_from:
 					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
 
+				party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
+				party_account_currency = d.account_currency
+
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
-				total_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
+				bank_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				bank_account_currency = d.account_currency
 
 		if pay_to_recd_from:
 			self.pay_to_recd_from = pay_to_recd_from
-		else:
-			total_amount = 0
+			if bank_amount:
+				total_amount = bank_amount
+				currency = bank_account_currency
+			else:
+				total_amount = party_amount
+				currency = party_account_currency
 
-		self.set_total_amount(total_amount, bank_account_currency)
+		self.set_total_amount(total_amount, currency)
 
 	def set_total_amount(self, amt, currency):
 		self.total_amount = amt
@@ -664,7 +670,7 @@ def get_payment_entry(ref_doc, args):
 	bank_row.cost_center = cost_center
 
 	amount = args.get("debit_in_account_currency") or args.get("amount")
-	
+
 	if bank_row.account_currency == args.get("party_account_currency"):
 		bank_row.set(args.get("amount_field_bank"), amount)
 	else:

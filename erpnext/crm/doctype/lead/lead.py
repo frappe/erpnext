@@ -10,6 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.utilities.address_and_contact import load_address_and_contact
+from erpnext.accounts.party import set_taxes
 
 sender_field = "email_id"
 
@@ -140,7 +141,7 @@ def make_quotation(source_name, target_doc=None):
 	return target_doc
 
 @frappe.whitelist()
-def get_lead_details(lead):
+def get_lead_details(lead, posting_date=None, company=None):
 	if not lead: return {}
 
 	from erpnext.accounts.party import set_address_details
@@ -159,5 +160,10 @@ def get_lead_details(lead):
 	})
 
 	set_address_details(out, lead, "Lead")
+
+	taxes_and_charges = set_taxes(None, 'Lead', posting_date, company,
+		billing_address=out.get('customer_address'), shipping_address=out.get('shipping_address_name'))
+	if taxes_and_charges:
+		out['taxes_and_charges'] = taxes_and_charges
 
 	return out

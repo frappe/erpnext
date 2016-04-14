@@ -262,3 +262,4 @@ erpnext.patches.v6_20x.remove_customer_supplier_roles
 erpnext.patches.v6_24.rename_item_field
 erpnext.patches.v7_0.update_party_status
 erpnext.patches.v7_0.update_item_projected
+erpnext.patches.v6_20x.update_product_bundle_description

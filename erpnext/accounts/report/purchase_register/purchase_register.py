@@ -21,6 +21,8 @@ def execute(filters=None):
 		invoice_expense_map, expense_accounts)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
 	supplier_details = get_supplier_deatils(invoice_list)
+	
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 
 	data = []
 	for inv in invoice_list:
@@ -32,7 +34,7 @@ def execute(filters=None):
 		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name,
 			supplier_details.get(inv.supplier),
 			inv.credit_to, ", ".join(project), inv.bill_no, inv.bill_date, inv.remarks,
-			", ".join(purchase_order), ", ".join(purchase_receipt)]
+			", ".join(purchase_order), ", ".join(purchase_receipt), company_currency]
 
 		# map expense values
 		base_net_total = 0
@@ -62,10 +64,19 @@ def execute(filters=None):
 def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
-		_("Invoice") + ":Link/Purchase Invoice:120", _("Posting Date") + ":Date:80", _("Supplier Id") + "::120",
-		_("Supplier Name") + "::120", _("Supplier Type") + ":Link/Supplier Type:120", _("Payable Account") + ":Link/Account:120",
-		_("Project") + ":Link/Project:80", _("Bill No") + "::120", _("Bill Date") + ":Date:80", _("Remarks") + "::150",
-		_("Purchase Order") + ":Link/Purchase Order:100", _("Purchase Receipt") + ":Link/Purchase Receipt:100"
+		_("Invoice") + ":Link/Purchase Invoice:120", 
+		_("Posting Date") + ":Date:80", _("Supplier Id") + "::120",
+		_("Supplier Name") + "::120", _("Supplier Type") + ":Link/Supplier Type:120", 
+		_("Payable Account") + ":Link/Account:120", _("Project") + ":Link/Project:80", 
+		_("Bill No") + "::120", _("Bill Date") + ":Date:80", _("Remarks") + "::150",
+		_("Purchase Order") + ":Link/Purchase Order:100", 
+		_("Purchase Receipt") + ":Link/Purchase Receipt:100",
+		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Data",
+			"width": 80
+		}
 	]
 	expense_accounts = tax_accounts = expense_columns = tax_columns = []
 
@@ -84,14 +95,14 @@ def get_columns(invoice_list):
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
 
-	expense_columns = [(account + ":Currency:120") for account in expense_accounts]
+	expense_columns = [(account + ":Currency/currency:120") for account in expense_accounts]
 	for account in tax_accounts:
 		if account not in expense_accounts:
-			tax_columns.append(account + ":Currency:120")
+			tax_columns.append(account + ":Currency/currency:120")
 
-	columns = columns + expense_columns + [_("Net Total") + ":Currency:120"] + tax_columns + \
-		[_("Total Tax") + ":Currency:120", _("Grand Total") + ":Currency:120",
-			_("Rounded Total") + ":Currency:120", _("Outstanding Amount") + ":Currency:120"]
+	columns = columns + expense_columns + [_("Net Total") + ":Currency/currency:120"] + tax_columns + \
+		[_("Total Tax") + ":Currency/currency:120", _("Grand Total") + ":Currency/currency:120",
+			_("Rounded Total") + ":Currency/currency:120", _("Outstanding Amount") + ":Currency/currency:120"]
 
 	return columns, expense_accounts, tax_accounts
 

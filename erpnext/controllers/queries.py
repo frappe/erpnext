@@ -184,8 +184,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			idx desc,
 			name, item_name
 		limit %(start)s, %(page_len)s """.format(key=searchfield,
-			fcond=get_filters_cond(doctype, filters, conditions),
-			mcond=get_match_cond(doctype)),
+			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+			mcond=get_match_cond(doctype).replace('%', '%%')),
 			{
 				"today": nowdate(),
 				"txt": "%%%s%%" % txt,

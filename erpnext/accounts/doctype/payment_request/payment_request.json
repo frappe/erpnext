@@ -598,13 +598,13 @@
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "idx": 0, 
- "in_create": 0, 
+ "in_create": 1, 
  "in_dialog": 0, 
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-02-24 16:49:46.832403", 
+ "modified": "2016-04-12 15:26:22.756129", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Request", 
@@ -675,5 +675,6 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "track_seen": 0
 }

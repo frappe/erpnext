@@ -22,6 +22,7 @@ def execute(filters=None):
 
 	invoice_so_dn_map = get_invoice_so_dn_map(invoice_list)
 	customer_map = get_customer_deatils(invoice_list)
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 
 	data = []
 	for inv in invoice_list:
@@ -32,7 +33,8 @@ def execute(filters=None):
 		row = [inv.name, inv.posting_date, inv.customer, inv.customer_name,
 		customer_map.get(inv.customer, {}).get("customer_group"), 
 		customer_map.get(inv.customer, {}).get("territory"),
-		inv.debit_to, inv.project, inv.remarks, ", ".join(sales_order), ", ".join(delivery_note)]
+		inv.debit_to, inv.project, inv.remarks, 
+		", ".join(sales_order), ", ".join(delivery_note), company_currency]
 
 		# map income values
 		base_net_total = 0
@@ -66,7 +68,13 @@ def get_columns(invoice_list):
 		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80", _("Customer Id") + "::120",
 		_("Customer Name") + "::120", _("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80",
 		_("Receivable Account") + ":Link/Account:120", _("Project") +":Link/Project:80", _("Remarks") + "::150",
-		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100"
+		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
+		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Data",
+			"width": 80
+		}
 	]
 
 	income_accounts = tax_accounts = income_columns = tax_columns = []
@@ -83,14 +91,14 @@ def get_columns(invoice_list):
 			and parent in (%s) order by account_head""" %
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
-	income_columns = [(account + ":Currency:120") for account in income_accounts]
+	income_columns = [(account + ":Currency/currency:120") for account in income_accounts]
 	for account in tax_accounts:
 		if account not in income_accounts:
-			tax_columns.append(account + ":Currency:120")
+			tax_columns.append(account + ":Currency/currency:120")
 
-	columns = columns + income_columns + [_("Net Total") + ":Currency:120"] + tax_columns + \
-		[_("Total Tax") + ":Currency:120", _("Grand Total") + ":Currency:120",
-		_("Rounded Total") + ":Currency:120", _("Outstanding Amount") + ":Currency:120"]
+	columns = columns + income_columns + [_("Net Total") + ":Currency/currency:120"] + tax_columns + \
+		[_("Total Tax") + ":Currency/currency:120", _("Grand Total") + ":Currency/currency:120",
+		_("Rounded Total") + ":Currency/currency:120", _("Outstanding Amount") + ":Currency/currency:120"]
 
 	return columns, income_accounts, tax_accounts
 
