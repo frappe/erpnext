@@ -4,7 +4,8 @@ links = {
 	'fieldname': 'item_code',
 	'non_standard_fieldnames': {
 		'Production Order': 'production_item',
-		'Product Bundle': 'new_item_code'
+		'Product Bundle': 'new_item_code',
+		'Batch': 'item'
 	},
 	'transactions': [
 		{

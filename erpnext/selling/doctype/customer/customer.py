@@ -10,7 +10,7 @@ from frappe.utils import flt, cint, cstr
 from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.utilities.address_and_contact import load_address_and_contact
-from erpnext.accounts.party import validate_party_accounts
+from erpnext.accounts.party import validate_party_accounts, get_timeline_data
 from erpnext.accounts.party_status import get_party_status
 
 class Customer(TransactionBase):
@@ -127,6 +127,18 @@ class Customer(TransactionBase):
 		frappe.db.sql("""update `tabAddress` set address_title=%(newdn)s
 			{set_field} where customer=%(newdn)s"""\
 			.format(set_field=set_field), ({"newdn": newdn}))
+
+
+@frappe.whitelist()
+def get_dashboard_data(name):
+	'''load dashboard related data'''
+	frappe.has_permission(doc=frappe.get_doc('Customer', name), throw=True)
+
+	from frappe.desk.notifications import get_open_count
+	return {
+		'count': get_open_count('Customer', name),
+		'timeline_data': get_timeline_data('Customer', name),
+	}
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
 	if frappe.db.get_default("cust_master_name") == "Customer Name":

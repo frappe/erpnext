@@ -324,3 +324,10 @@ def validate_party_frozen_disabled(party_type, party_name):
 			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
 			if not frozen_accounts_modifier in frappe.get_roles():
 				frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
+
+def get_timeline_data(doctype, name):
+	'''returns timeline data for the past one year'''
+	from frappe.desk.form.load import get_communication_data
+	data = get_communication_data(doctype, name, fields = 'unix_timestamp(date(creation)), count(name)',
+		group_by='group by date(creation)', as_dict=False)
+	return dict(data)

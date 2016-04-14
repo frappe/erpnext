@@ -16,6 +16,12 @@ frappe.ui.form.on("Item", {
 
 	},
 
+	dashboard_update: function(frm) {
+		if(frm.dashboard_data.stock_data && frm.dashboard_data.stock_data.length) {
+			frm.dashboard.add_stats(frappe.render_template('item_dashboard', {data: frm.dashboard_data.stock_data}))
+		}
+	},
+
 	refresh: function(frm) {
 
 		if(frm.doc.is_stock_item) {

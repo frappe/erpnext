@@ -8,7 +8,7 @@ from frappe import msgprint, _
 from frappe.model.naming import make_autoname
 from erpnext.utilities.address_and_contact import load_address_and_contact
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import validate_party_accounts
+from erpnext.accounts.party import validate_party_accounts, get_timeline_data
 from erpnext.accounts.party_status import get_party_status
 
 class Supplier(TransactionBase):
@@ -84,3 +84,14 @@ class Supplier(TransactionBase):
 		frappe.db.sql("""update `tabAddress` set address_title=%(newdn)s
 			{set_field} where supplier=%(newdn)s"""\
 			.format(set_field=set_field), ({"newdn": newdn}))
+
+@frappe.whitelist()
+def get_dashboard_data(name):
+	'''load dashboard related data'''
+	frappe.has_permission(doc=frappe.get_doc('Supplier', name), throw=True)
+
+	from frappe.desk.notifications import get_open_count
+	return {
+		'count': get_open_count('Supplier', name),
+		'timeline_data': get_timeline_data('Supplier', name),
+	}

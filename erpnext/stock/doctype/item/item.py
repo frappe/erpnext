@@ -407,13 +407,13 @@ class Item(WebsiteGenerator):
 					if self.check_if_linked_document_exists():
 						frappe.throw(_("As there are existing transactions for this item, \
 							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'"))
-							
+
 	def check_if_linked_document_exists(self):
-		for doctype in ("Sales Order Item", "Delivery Note Item", "Sales Invoice Item", 
-			"Material Request Item", "Purchase Order Item", "Purchase Receipt Item", 
+		for doctype in ("Sales Order Item", "Delivery Note Item", "Sales Invoice Item",
+			"Material Request Item", "Purchase Order Item", "Purchase Receipt Item",
 			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"):
 			if frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
-				frappe.db.get_value("Production Order", 
+				frappe.db.get_value("Production Order",
 					filters={"production_item": self.name, "docstatus": 1}):
 				return True
 
@@ -582,6 +582,30 @@ class Item(WebsiteGenerator):
 	def validate_fixed_asset_item(self):
 		if self.is_fixed_asset and self.is_stock_item:
 			frappe.throw(_("Fixed Asset Item must be a non-stock item"))
+
+
+@frappe.whitelist()
+def get_dashboard_data(name):
+	'''load dashboard related data'''
+	frappe.has_permission(doc=frappe.get_doc('Item', name), throw=True)
+
+	from frappe.desk.notifications import get_open_count
+	return {
+		'count': get_open_count('Item', name),
+		'timeline_data': get_timeline_data(name),
+		'stock_data': get_stock_data(name)
+	}
+
+def get_timeline_data(name):
+	'''returns timeline data based on stock ledger entry'''
+	return dict(frappe.db.sql('''select unix_timestamp(posting_date), count(*)
+		from `tabStock Ledger Entry` where item_code=%s
+			and posting_date > date_sub(curdate(), interval 1 year)
+			group by posting_date''', name))
+
+def get_stock_data(name):
+	return frappe.get_all('Bin', fields=['warehouse', 'actual_qty', 'projected_qty'],
+		filters={'item_code': name})
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
 	if (not end_of_life) or (disabled is None):

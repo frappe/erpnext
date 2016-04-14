@@ -69,6 +69,7 @@ class Bin(Document):
 		 	flt(self.indented_qty) + flt(self.planned_qty) - flt(self.reserved_qty)
 
 		self.save()
+		update_item_projected_qty(self.item_code)
 
 	def get_first_sle(self):
 		sle = frappe.db.sql("""
@@ -79,3 +80,9 @@ class Bin(Document):
 			limit 1
 		""", (self.item_code, self.warehouse), as_dict=1)
 		return sle and sle[0] or None
+
+def update_item_projected_qty(item_code):
+	'''Set Item project qty'''
+	frappe.db.sql('''update tabItem set
+		total_projected_qty = (select sum(projected_qty) from tabBin where item_code=%s)
+		where name=%s''', (item_code, item_code))

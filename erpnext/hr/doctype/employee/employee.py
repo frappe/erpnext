@@ -157,6 +157,28 @@ class Employee(Document):
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
 
+	def get_timeline_data(self):
+		'''returns timeline data based on attendance'''
+		return
+
+@frappe.whitelist()
+def get_dashboard_data(name):
+	'''load dashboard related data'''
+	frappe.has_permission(doc=frappe.get_doc('Employee', name), throw=True)
+
+	from frappe.desk.notifications import get_open_count
+	return {
+		'count': get_open_count('Employee', name),
+		'timeline_data': get_timeline_data(name),
+	}
+
+def get_timeline_data(name):
+	'''Return timeline for attendance'''
+	return dict(frappe.db.sql('''select unix_timestamp(att_date), count(*)
+		from `tabAttendance` where employee=%s
+			and att_date > date_sub(curdate(), interval 1 year)
+			and status in ('Present', 'Half Day')
+			group by att_date''', name))
 
 @frappe.whitelist()
 def get_retirement_date(date_of_birth=None):
