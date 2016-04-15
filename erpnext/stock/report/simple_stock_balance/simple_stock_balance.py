@@ -38,15 +38,22 @@ def get_columns():
 	columns = [
 		_("Item")+":Link/Item:100",
 		_("Item Name")+"::150",
-		_("Item Group")+"::100",
-		_("Brand")+"::90",
-		_("Description")+"::140",
+		_("Item Group")+":50",
+		_("Brand")+":50",
+		_("Description")+":0",
 		_("Warehouse")+":Link/Warehouse:100",
-		_("Stock UOM")+":Link/UOM:90",
-		_("Balance Qty")+":Float:100",
-		_("Company")+":Link/Company:100"
+		_("Stock UOM")+":Link/UOM:50",
+		_("Opening Qty")+":Float:0",
+		_("Opening Value")+":Float:0",
+		_("In Qty")+":Float:0",
+		_("In Value")+":Float:0",
+		_("Out Qty")+":Float:0",
+		_("Out Value")+":Float:0",
+		_("Balance Qty")+":Float:75",
+		_("Balance Value")+":Float:0",
+		_("Valuation Rate")+":Float:0",
+		_("Company")+":Link/Company:0"
 	]
-
 	return columns
 
 def get_conditions(filters):
