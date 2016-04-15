@@ -15,8 +15,7 @@ form_grid_templates = {
 
 class BOM(Document):
 	def autoname(self):
-		names = frappe.db.sql("""select name from `tabBOM`
-			where item=%s""", self.item)
+		names = frappe.db.sql("""select name from `tabBOM` where item=%s""", self.item)
 
 		if names:
 			# name can be BOM/ITEM/001, BOM/ITEM/001-1, BOM-ITEM-001, BOM-ITEM-001-1
@@ -65,7 +64,7 @@ class BOM(Document):
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = frappe.db.sql("""select name, item_name, is_fixed_asset, is_purchase_item,
+		item = frappe.db.sql("""select name, item_name, is_fixed_asset,
 			docstatus, description, image, is_sub_contracted_item, stock_uom, default_bom,
 			last_purchase_rate
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
@@ -119,7 +118,7 @@ class BOM(Document):
 		rate = 0
 		if arg['bom_no']:
 			rate = self.get_bom_unitcost(arg['bom_no'])
-		elif arg and (arg['is_purchase_item'] == 1 or arg['is_sub_contracted_item'] == 1):
+		elif arg:
 			if self.rm_cost_as_per == 'Valuation Rate':
 				rate = self.get_valuation_rate(arg)
 			elif self.rm_cost_as_per == 'Last Purchase Rate':

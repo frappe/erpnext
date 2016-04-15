@@ -45,7 +45,6 @@ class PurchaseInvoice(BuyingController):
 			self.validate_supplier_invoice()
 			self.validate_advance_jv("Purchase Order")
 
-		self.check_active_purchase_items()
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
@@ -79,12 +78,6 @@ class PurchaseInvoice(BuyingController):
 		if not self.is_return:
 			super(PurchaseInvoice, self).get_advances(self.credit_to, "Supplier", self.supplier,
 				"Purchase Invoice Advance", "advances", "debit_in_account_currency", "purchase_order")
-
-	def check_active_purchase_items(self):
-		for d in self.get('items'):
-			if d.item_code:		# extra condn coz item_code is not mandatory in PV
-				if frappe.db.get_value("Item", d.item_code, "is_purchase_item") != 1:
-					msgprint(_("Item {0} is not Purchase Item").format(d.item_code), raise_exception=True)
 
 	def check_conversion_rate(self):
 		default_currency = get_company_currency(self.company)

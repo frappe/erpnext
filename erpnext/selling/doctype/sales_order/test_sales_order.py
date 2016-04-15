@@ -238,9 +238,9 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 
-		make_item("_Test Service Product Bundle", {"is_stock_item": 0, "is_pro_applicable": 0, "is_sales_item": 1})
-		make_item("_Test Service Product Bundle Item 1", {"is_stock_item": 0, "is_pro_applicable": 0, "is_sales_item": 1})
-		make_item("_Test Service Product Bundle Item 2", {"is_stock_item": 0, "is_pro_applicable": 0, "is_sales_item": 1})
+		make_item("_Test Service Product Bundle", {"is_stock_item": 0, "is_pro_applicable": 0})
+		make_item("_Test Service Product Bundle Item 1", {"is_stock_item": 0, "is_pro_applicable": 0})
+		make_item("_Test Service Product Bundle Item 2", {"is_stock_item": 0, "is_pro_applicable": 0})
 
 		make_product_bundle("_Test Service Product Bundle",
 			["_Test Service Product Bundle Item 1", "_Test Service Product Bundle Item 2"])
@@ -254,9 +254,9 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 
-		make_item("_Test Mix Product Bundle", {"is_stock_item": 0, "is_pro_applicable": 0, "is_sales_item": 1})
-		make_item("_Test Mix Product Bundle Item 1", {"is_stock_item": 1, "is_sales_item": 1})
-		make_item("_Test Mix Product Bundle Item 2", {"is_stock_item": 0, "is_pro_applicable": 0, "is_sales_item": 1})
+		make_item("_Test Mix Product Bundle", {"is_stock_item": 0, "is_pro_applicable": 0})
+		make_item("_Test Mix Product Bundle Item 1", {"is_stock_item": 1})
+		make_item("_Test Mix Product Bundle Item 2", {"is_stock_item": 0, "is_pro_applicable": 0})
 
 		make_product_bundle("_Test Mix Product Bundle",
 			["_Test Mix Product Bundle Item 1", "_Test Mix Product Bundle Item 2"])
@@ -265,7 +265,7 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_auto_insert_price(self):
 		from erpnext.stock.doctype.item.test_item import make_item
-		make_item("_Test Item for Auto Price List", {"is_stock_item": 0, "is_pro_applicable": 0, "is_sales_item": 1})
+		make_item("_Test Item for Auto Price List", {"is_stock_item": 0, "is_pro_applicable": 0})
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
 
 		item_price = frappe.db.get_value("Item Price", {"price_list": "_Test Price List",
@@ -299,14 +299,13 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
-		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "is_sales_item": 1,
-			"is_purchase_item": 1, "delivered_by_supplier": 1, 'default_supplier': '_Test Supplier',
+		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "delivered_by_supplier": 1, 
+        'default_supplier': '_Test Supplier',
 		    "expense_account": "_Test Account Cost for Goods Sold - _TC",
 		    "cost_center": "_Test Cost Center - _TC"
 			})
 
-		dn_item = make_item("_Test Regular Item", {"is_stock_item": 1, "is_sales_item": 1,
-			"is_purchase_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TC",
+		dn_item = make_item("_Test Regular Item", {"is_stock_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TC",
   		  	"cost_center": "_Test Cost Center - _TC"})
 
 		so_items = [

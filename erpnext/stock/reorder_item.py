@@ -23,7 +23,6 @@ def _reorder_item():
 
 	items_to_consider = frappe.db.sql_list("""select name from `tabItem` item
 		where is_stock_item=1 and has_variants=0
-			and (is_purchase_item=1 or is_sub_contracted_item=1)
 			and disabled=0
 			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)
 			and (exists (select name from `tabItem Reorder` ir where ir.parent=item.name)

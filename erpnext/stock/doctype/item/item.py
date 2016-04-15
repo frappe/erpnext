@@ -50,12 +50,11 @@ class Item(WebsiteGenerator):
 		self.name = self.item_code
 
 	def before_insert(self):
-		if self.is_sales_item=="Yes":
-			self.publish_in_hub = 1
-
 		if not self.description:
 			self.description = self.item_name
 
+		self.publish_in_hub = 1
+        
 	def validate(self):
 		super(Item, self).validate()
 
@@ -71,7 +70,6 @@ class Item(WebsiteGenerator):
 		self.check_item_tax()
 		self.validate_barcode()
 		self.cant_change()
-		self.validate_reorder_level()
 		self.validate_warehouse_for_reorder()
 		self.update_item_desc()
 		self.synced_with_hub = 0
@@ -416,11 +414,6 @@ class Item(WebsiteGenerator):
 				frappe.db.get_value("Production Order",
 					filters={"production_item": self.name, "docstatus": 1}):
 				return True
-
-	def validate_reorder_level(self):
-		if len(self.get("reorder_levels", {"material_request_type": "Purchase"})):
-			if not (self.is_purchase_item or self.is_pro_applicable):
-				frappe.throw(_("""To set reorder level, item must be a Purchase Item or Manufacturing Item"""))
 
 		for d in self.get("reorder_levels"):
 			if d.warehouse_reorder_level and not d.warehouse_reorder_qty:

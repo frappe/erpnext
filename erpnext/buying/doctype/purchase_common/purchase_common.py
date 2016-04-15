@@ -57,7 +57,7 @@ class PurchaseCommon(BuyingController):
 				if d.meta.get_field(x):
 					d.set(x, f_lst[x])
 
-			item = frappe.db.sql("""select is_stock_item, is_purchase_item,
+			item = frappe.db.sql("""select is_stock_item,
 				is_sub_contracted_item, end_of_life, disabled from `tabItem` where name=%s""",
 				d.item_code, as_dict=1)[0]
 
@@ -67,11 +67,6 @@ class PurchaseCommon(BuyingController):
 			# validate stock item
 			if item.is_stock_item==1 and d.qty and not d.warehouse:
 				frappe.throw(_("Warehouse is mandatory for stock Item {0} in row {1}").format(d.item_code, d.idx))
-
-			# validate purchase item
-			if obj.doctype=="Material Request" and getattr(obj, "material_request_type", None)=="Purchase":
-				if item.is_purchase_item != 1 and item.is_sub_contracted_item != 1:
-					frappe.throw(_("{0} must be a Purchased or Sub-Contracted Item in row {1}").format(d.item_code, d.idx))
 
 			items.append(cstr(d.item_code))
 

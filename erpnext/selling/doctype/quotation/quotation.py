@@ -28,10 +28,6 @@ class Quotation(SellingController):
 	def validate_order_type(self):
 		super(Quotation, self).validate_order_type()
 
-		for d in self.get('items'):
-			if not frappe.db.get_value("Item", d.item_code, "is_sales_item"):
-				frappe.throw(_("Item {0} must be Sales Item").format(d.item_code))
-
 	def validate_quotation_to(self):
 		if self.customer:
 			self.quotation_to = "Customer"

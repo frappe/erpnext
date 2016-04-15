@@ -251,19 +251,6 @@ class BuyingController(StockController):
 
 		return self._sub_contracted_items
 
-	@property
-	def purchase_items(self):
-		if not hasattr(self, "_purchase_items"):
-			self._purchase_items = []
-			item_codes = list(set(item.item_code for item in
-				self.get("items")))
-			if item_codes:
-				self._purchase_items = [r[0] for r in frappe.db.sql("""select name
-					from `tabItem` where name in (%s) and is_purchase_item='Yes'""" % \
-					(", ".join((["%s"]*len(item_codes))),), item_codes)]
-
-		return self._purchase_items
-
 	def is_item_table_empty(self):
 		if not len(self.get("items")):
 			frappe.throw(_("Item table can not be blank"))

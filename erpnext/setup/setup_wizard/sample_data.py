@@ -11,26 +11,25 @@ import random
 def make_sample_data():
 	"""Create a few opportunities, quotes, material requests, issues, todos, projects
 	to help the user get started"""
+	items = frappe.get_all("Item")
 
-	selling_items = frappe.get_all("Item", filters = {"is_sales_item": 1})
-	buying_items = frappe.get_all("Item", filters = {"is_purchase_item": 1})
 	customers = frappe.get_all("Customer")
 	warehouses = frappe.get_all("Warehouse")
 
-	if selling_items and customers:
+	if items and customers:
 		for i in range(3):
 			customer = random.choice(customers).name
-			make_opportunity(selling_items, customer)
-			make_quote(selling_items, customer)
+			make_opportunity(items, customer)
+			make_quote(items, customer)
 
 	make_projects()
 
-	if buying_items and warehouses:
-		make_material_request(buying_items)
+	if items and warehouses:
+		make_material_request(items)
 
 	frappe.db.commit()
 
-def make_opportunity(selling_items, customer):
+def make_opportunity(items, customer):
 	b = frappe.get_doc({
 		"doctype": "Opportunity",
 		"enquiry_from": "Customer",
@@ -39,16 +38,16 @@ def make_opportunity(selling_items, customer):
 		"with_items": 1
 	})
 
-	add_random_children(b, "items", rows=len(selling_items), randomize = {
+	add_random_children(b, "items", rows=len(items), randomize = {
 		"qty": (1, 5),
-		"item_code": ("Item", {"is_sales_item": 1})
+		"item_code": ["Item"]
 	}, unique="item_code")
 
 	b.insert(ignore_permissions=True)
 
 	b.add_comment('Comment', text="This is a dummy record")
 
-def make_quote(selling_items, customer):
+def make_quote(items, customer):
 	qtn = frappe.get_doc({
 		"doctype": "Quotation",
 		"quotation_to": "Customer",
@@ -56,17 +55,17 @@ def make_quote(selling_items, customer):
 		"order_type": "Sales"
 	})
 
-	add_random_children(qtn, "items", rows=len(selling_items), randomize = {
+	add_random_children(qtn, "items", rows=len(items), randomize = {
 		"qty": (1, 5),
-		"item_code": ("Item", {"is_sales_item": 1})
+		"item_code": ["Item"]
 	}, unique="item_code")
 
 	qtn.insert(ignore_permissions=True)
 
 	qtn.add_comment('Comment', text="This is a dummy record")
 
-def make_material_request(buying_items):
-	for i in buying_items:
+def make_material_request(items):
+	for i in items:
 		mr = frappe.get_doc({
 			"doctype": "Material Request",
 			"material_request_type": "Purchase",
