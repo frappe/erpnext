@@ -63,11 +63,11 @@ class AccountsController(TransactionBase):
 			if cint(is_paid) == 1:
 				if flt(self.paid_amount) == 0:
 					if self.cash_bank_account:
-						frappe.db.set(self, 'paid_amount',
-							flt(flt(self.grand_total) - flt(self.write_off_amount), self.precision("paid_amount")))
+						self.paid_amount = flt(flt(self.grand_total) - flt(self.write_off_amount), 
+							self.precision("paid_amount"))
 					else:
 						# show message that the amount is not paid
-						frappe.db.set(self,'paid_amount',0)
+						self.paid_amount = 0
 						frappe.throw(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
 			else:
 				frappe.db.set(self,'paid_amount',0)
