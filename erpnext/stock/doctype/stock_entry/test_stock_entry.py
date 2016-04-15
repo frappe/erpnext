@@ -12,7 +12,7 @@ from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFre
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from frappe.tests.test_permissions import set_user_permission_doctypes
-from eprnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 def get_sle(**args):
 	condition, values = "", []
