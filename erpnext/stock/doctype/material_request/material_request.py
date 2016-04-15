@@ -75,9 +75,23 @@ class MaterialRequest(BuyingController):
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 
+		self.set_title()
+
+
 		# self.validate_qty_against_so()
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
+
+	def set_title(self):
+		'''Set title as comma separated list of items'''
+		items = []
+		for d in self.items:
+			if d.item_code not in items:
+				items.append(d.item_code)
+			if(len(items)==4):
+				break
+
+		self.title = ', '.join(items)
 
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
