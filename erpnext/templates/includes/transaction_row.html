@@ -1,23 +1,16 @@
 <div class="web-list-item">
 <a href="/{{ pathname }}/{{ doc.name }}">
 <div class="row">
-	<div class="col-sm-8 col-xs-7">
-		<div class="row">
-			<div class="col-sm-9">
-                <div>{{ doc.name }}</div>
+	<div class="col-sm-6">
+
+                <span class="indicator {{ doc.indicator_color or "darkgrey" }}">{{ doc.name }}</span>
                 <div class="small text-muted">{{ doc.items_preview }}</div>
-            </div>
-			<div class="col-sm-3">
-                <span class="indicator {{ doc.indicator_color or "darkgrey" }}">
-                    {{ doc.indicator_title or doc.status or "Submitted" }}
-                </span>
-			</div>
-		</div>
+
 	</div>
-	<div class="col-sm-2 col-xs-5 text-right">
+	<div class="col-sm-3 col-xs-5">
 		{{ doc.get_formatted("grand_total") }}
 	</div>
-	<div class="col-sm-2 small text-muted text-right" title="{{ frappe.utils.format_datetime(doc.creation, "medium") }}">
+	<div class="col-sm-3 small text-muted text-right" title="{{ frappe.utils.format_datetime(doc.creation, "medium") }}">
 		{{ frappe.utils.pretty_date(doc.creation) }}</div>
 </div>
 </a>

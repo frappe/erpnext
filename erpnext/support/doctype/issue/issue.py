@@ -57,7 +57,8 @@ def get_list_context(context=None):
 	return {
 		"title": _("My Issues"),
 		"get_list": get_issue_list,
-		"row_template": "templates/includes/issue_row.html"
+		"row_template": "templates/includes/issue_row.html",
+		"show_sidebar": True
 	}
 
 def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20):

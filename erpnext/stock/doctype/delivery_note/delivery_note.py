@@ -330,6 +330,7 @@ def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
 	list_context["title"] = _("My Shipments")
+	list_context["show_sidebar"] = True
 	return list_context
 
 def get_invoiced_qty_map(delivery_note):
