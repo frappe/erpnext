@@ -15,13 +15,13 @@ form_grid_templates = {
 
 class BOM(Document):
 	def autoname(self):
-		names = frappe.db.sql("""select name from `tabBOM` where item=%s""", self.item)
+		names = frappe.db.sql_list("""select name from `tabBOM` where item=%s""", self.item)
 
 		if names:
 			# name can be BOM/ITEM/001, BOM/ITEM/001-1, BOM-ITEM-001, BOM-ITEM-001-1
 
 			# split by item
-			names = [name[0].split(self.item)[-1][1:] for name in names]
+			names = [name.split(self.item)[-1][1:] for name in names]
 
 			# split by (-) if cancelled
 			names = [cint(name.split('-')[-1]) for name in names]

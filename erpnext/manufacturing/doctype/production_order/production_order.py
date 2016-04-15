@@ -19,7 +19,6 @@ from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
 class OperationTooLongError(frappe.ValidationError): pass
-class ProductionNotApplicableError(frappe.ValidationError): pass
 class ItemHasVariantError(frappe.ValidationError): pass
 
 form_grid_templates = {

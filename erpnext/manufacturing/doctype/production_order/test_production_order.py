@@ -8,7 +8,7 @@ import frappe
 from frappe.utils import flt, time_diff_in_hours, now, add_days
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.manufacturing.doctype.production_order.production_order \
-	import make_stock_entry, ProductionNotApplicableError,ItemHasVariantError
+	import make_stock_entry, ItemHasVariantError
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.projects.doctype.time_log.time_log import OverProductionLoggedError
 
@@ -125,6 +125,7 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertEqual(prod_order.planned_operating_cost, cost*2)
 
 	def test_production_item(self):
+		prod_order = make_prod_order_test_record(item="_Test FG Item", qty=1, do_not_save=True)
 		frappe.db.set_value("Item", "_Test FG Item", "end_of_life", "2000-1-1")
 
 		self.assertRaises(frappe.ValidationError, prod_order.save)
