@@ -84,5 +84,5 @@ class Bin(Document):
 def update_item_projected_qty(item_code):
 	'''Set Item project qty'''
 	frappe.db.sql('''update tabItem set
-		total_projected_qty = (select sum(projected_qty) from tabBin where item_code=%s)
+		total_projected_qty = ifnull((select sum(projected_qty) from tabBin where item_code=%s), 0)
 		where name=%s''', (item_code, item_code))
