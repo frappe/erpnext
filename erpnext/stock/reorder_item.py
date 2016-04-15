@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+import erpnext
 from frappe.utils import flt, nowdate, add_days, cint
 from frappe import _
 
@@ -18,7 +19,7 @@ def _reorder_item():
 	material_requests = {"Purchase": {}, "Transfer": {}}
 	warehouse_company = frappe._dict(frappe.db.sql("""select name, company from `tabWarehouse`
 		where disabled=0"""))
-	default_company = (frappe.defaults.get_defaults().get("company") or
+	default_company = (erpnext.get_default_company() or
 		frappe.db.sql("""select name from tabCompany limit 1""")[0][0])
 
 	items_to_consider = frappe.db.sql_list("""select name from `tabItem` item

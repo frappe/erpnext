@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import erpnext
 import json
 import urllib
 import itertools
@@ -55,6 +56,14 @@ class Item(WebsiteGenerator):
 
 		self.publish_in_hub = 1
 
+	def after_insert(self):
+		'''set opening stock and item price'''
+		if self.standard_rate:
+			self.add_price()
+
+		if self.opening_stock:
+			self.set_opening_stock()
+
 	def validate(self):
 		super(Item, self).validate()
 
@@ -94,6 +103,36 @@ class Item(WebsiteGenerator):
 		self.update_item_price()
 		self.update_variants()
 		self.update_template_item()
+
+	def add_price(self, price_list=None):
+		'''Add a new price'''
+		if not price_list:
+			price_list = (frappe.db.get_single_value('Selling Settings', 'selling_price_list')
+				or frappe.db.get_value('Price List', _('Standard Selling')))
+		if price_list:
+			item_price = frappe.get_doc({
+				"doctype": "Item Price",
+				"price_list": price_list,
+				"item_code": self.name,
+				"currency": erpnext.get_default_currency(),
+				"price_list_rate": self.standard_rate
+			})
+			item_price.insert()
+
+	def set_opening_stock(self):
+		'''set opening stock'''
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		# default warehouse, or Stores
+		default_warehouse = (frappe.db.get_single_value('Stock Settings', 'default_warehouse')
+			or frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')}))
+
+		if default_warehouse:
+			stock_entry = make_stock_entry(item_code=self.name,
+				target=default_warehouse,
+				qty=self.opening_stock)
+
+			stock_entry.add_comment("Comment", _("Opening Stock"))
 
 	def validate_website_image(self):
 		"""Validate if the website image is a public file"""
