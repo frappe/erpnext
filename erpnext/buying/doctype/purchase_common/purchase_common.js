@@ -48,8 +48,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				}
 			} else {
 				return{
-					query: "erpnext.controllers.queries.item_query",
-					filters: { 'is_purchase_item': 1 }
+					query: "erpnext.controllers.queries.item_query"
 				}
 			}
 		});

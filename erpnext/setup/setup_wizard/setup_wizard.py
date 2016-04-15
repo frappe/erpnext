@@ -46,7 +46,7 @@ def setup_complete(args=None):
 		try:
 			make_sample_data()
 			frappe.clear_cache()
-		except FiscalYearError:
+		except:
 			# clear message
 			if frappe.message_log:
 				frappe.message_log.pop()
@@ -291,8 +291,6 @@ def create_items(args):
 					"item_code": item,
 					"item_name": item,
 					"description": item,
-					"is_sales_item": 1 if is_sales_item else 0,
-					"is_purchase_item": 1 if is_purchase_item else 0,
 					"show_in_website": 1,
 					"is_stock_item": is_stock_item and 1 or 0,
 					"is_pro_applicable": is_pro_applicable and 1 or 0,
