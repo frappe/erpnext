@@ -125,12 +125,6 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertEqual(prod_order.planned_operating_cost, cost*2)
 
 	def test_production_item(self):
-		frappe.db.set_value("Item", "_Test FG Item", "is_pro_applicable", 0)
-
-		prod_order = make_prod_order_test_record(item="_Test FG Item", qty=1, do_not_save=True)
-		self.assertRaises(ProductionNotApplicableError, prod_order.save)
-
-		frappe.db.set_value("Item", "_Test FG Item", "is_pro_applicable", 1)
 		frappe.db.set_value("Item", "_Test FG Item", "end_of_life", "2000-1-1")
 
 		self.assertRaises(frappe.ValidationError, prod_order.save)

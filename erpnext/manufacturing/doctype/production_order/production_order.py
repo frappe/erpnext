@@ -329,9 +329,6 @@ class ProductionOrder(Document):
 			frappe.delete_doc("Time Log", time_log.name)
 
 	def validate_production_item(self):
-		if not frappe.db.get_value("Item", self.production_item, "is_pro_applicable"):
-			frappe.throw(_("Item is not allowed to have Production Order."), ProductionNotApplicableError)
-
 		if frappe.db.get_value("Item", self.production_item, "has_variants"):
 			frappe.throw(_("Production Order cannot be raised against a Item Template"), ItemHasVariantError)
 

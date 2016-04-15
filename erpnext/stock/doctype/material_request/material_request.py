@@ -212,7 +212,7 @@ def make_purchase_order(source_name, target_doc=None):
 	}, target_doc, postprocess)
 
 	return doclist
-    
+
 @frappe.whitelist()
 def make_request_for_quotation(source_name, target_doc=None):
 	doclist = get_mapped_doc("Material Request", source_name, 	{
@@ -363,8 +363,8 @@ def raise_production_orders(material_request):
 	errors =[]
 	production_orders = []
 	for d in mr.items:
-		if (d.qty - d.ordered_qty) >0 :
-			if frappe.db.get_value("Item", d.item_code, "is_pro_applicable"):
+		if (d.qty - d.ordered_qty) >0:
+			if frappe.db.get_value("BOM", {"item": d.item_code, "is_default": 1}):
 				prod_order = frappe.new_doc("Production Order")
 				prod_order.production_item = d.item_code
 				prod_order.qty = d.qty - d.ordered_qty

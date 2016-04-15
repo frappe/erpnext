@@ -15,6 +15,7 @@ erpnext.ItemSelector = Class.extend({
 				}
 				me.dialog.show();
 				me.render_items();
+				setTimeout(function() { me.dialog.input.focus(); }, 1000);
 			});
 		}
 	},

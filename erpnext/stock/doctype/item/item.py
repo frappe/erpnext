@@ -54,7 +54,7 @@ class Item(WebsiteGenerator):
 			self.description = self.item_name
 
 		self.publish_in_hub = 1
-        
+
 	def validate(self):
 		super(Item, self).validate()
 
@@ -348,9 +348,6 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx))
 
 	def validate_item_type(self):
-		if self.is_pro_applicable == 1 and self.is_stock_item==0:
-			self.is_pro_applicable = 0
-
 		if self.has_serial_no == 1 and self.is_stock_item == 0:
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
 

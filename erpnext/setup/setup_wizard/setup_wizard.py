@@ -277,7 +277,6 @@ def create_items(args):
 			is_sales_item = args.get("is_sales_item_" + str(i))
 			is_purchase_item = args.get("is_purchase_item_" + str(i))
 			is_stock_item = item_group!=_("Services")
-			is_pro_applicable = item_group!=_("Services")
 			default_warehouse = ""
 			if is_stock_item:
 				default_warehouse = frappe.db.get_value("Warehouse", filters={
@@ -293,7 +292,6 @@ def create_items(args):
 					"description": item,
 					"show_in_website": 1,
 					"is_stock_item": is_stock_item and 1 or 0,
-					"is_pro_applicable": is_pro_applicable and 1 or 0,
 					"item_group": item_group,
 					"stock_uom": args.get("item_uom_" + str(i)),
 					"default_warehouse": default_warehouse

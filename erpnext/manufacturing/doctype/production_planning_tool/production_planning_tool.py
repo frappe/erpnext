@@ -36,7 +36,7 @@ class ProductionPlanningTool(Document):
 			so_filter += " and so.project = %(project)s"
 
 		if self.fg_item:
-			item_filter += " and item.name = %(item)s"
+			item_filter += " and so_item.item_code = %(item)s"
 
 		open_so = frappe.db.sql("""
 			select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
@@ -44,14 +44,14 @@ class ProductionPlanningTool(Document):
 			where so_item.parent = so.name
 				and so.docstatus = 1 and so.status != "Stopped"
 				and so.company = %(company)s
-				and so_item.qty > so_item.delivered_qty {0}
-				and (exists (select name from `tabItem` item where item.name=so_item.item_code
-					and ((item.is_pro_applicable = 1 or item.is_sub_contracted_item = 1) {1}))
+				and so_item.qty > so_item.delivered_qty {0} {1}
+				and (exists (select name from `tabBOM` bom where bom.item=so_item.item_code
+						and bom.is_active = 1)
 					or exists (select name from `tabPacked Item` pi
 						where pi.parent = so.name and pi.parent_item = so_item.item_code
-							and exists (select name from `tabItem` item where item.name=pi.item_code
-								and (item.is_pro_applicable = 1 or item.is_sub_contracted_item = 1) {2})))
-			""".format(so_filter, item_filter, item_filter), {
+							and exists (select name from `tabBOM` bom where bom.item=pi.item_code
+								and bom.is_active = 1)))
+			""".format(so_filter, item_filter), {
 				"from_date": self.from_date,
 				"to_date": self.to_date,
 				"customer": self.customer,
@@ -86,7 +86,7 @@ class ProductionPlanningTool(Document):
 			mr_filter += " and mr_item.warehouse = %(warehouse)s"
 
 		if self.fg_item:
-			item_filter += " and item.name = %(item)s"
+			item_filter += " and mr_item.item_code = %(item)s"
 
 		pending_mr = frappe.db.sql("""
 			select distinct mr.name, mr.transaction_date
@@ -94,9 +94,9 @@ class ProductionPlanningTool(Document):
 			where mr_item.parent = mr.name
 				and mr.material_request_type = "Manufacture"
 				and mr.docstatus = 1
-				and mr_item.qty > mr_item.ordered_qty {0}
-				and (exists (select name from `tabItem` item where item.name=mr_item.item_code
-					and (item.is_pro_applicable = 1 or item.is_sub_contracted_item = 1 {1})))
+				and mr_item.qty > ifnull(mr_item.ordered_qty,0) {0} {1}
+				and (exists (select name from `tabBOM` bom where bom.item=mr_item.item_code
+					and bom.is_active = 1))
 			""".format(mr_filter, item_filter), {
 				"from_date": self.from_date,
 				"to_date": self.to_date,
@@ -137,8 +137,8 @@ class ProductionPlanningTool(Document):
 			(qty - delivered_qty) as pending_qty
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and qty > delivered_qty
-			and exists (select * from `tabItem` item where item.name=so_item.item_code
-				and item.is_pro_applicable = 1) %s""" % \
+			and exists (select name from `tabBOM` bom where bom.item=so_item.item_code
+					and bom.is_active = 1) %s""" % \
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		if self.fg_item:
@@ -151,8 +151,8 @@ class ProductionPlanningTool(Document):
 			where so_item.parent = pi.parent and so_item.docstatus = 1
 			and pi.parent_item = so_item.item_code
 			and so_item.parent in (%s) and so_item.qty > so_item.delivered_qty
-			and exists (select * from `tabItem` item where item.name=pi.item_code
-				and item.is_pro_applicable = 1) %s""" % \
+			and exists (select name from `tabBOM` bom where bom.item=pi.item_code
+					and bom.is_active = 1) %s""" % \
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		self.add_items(items + packed_items)
@@ -171,8 +171,8 @@ class ProductionPlanningTool(Document):
 			(qty - ordered_qty) as pending_qty
 			from `tabMaterial Request Item` mr_item
 			where parent in (%s) and docstatus = 1 and qty > ordered_qty
-			and exists (select * from `tabItem` item where item.name=mr_item.item_code
-				and item.is_pro_applicable = 1) %s""" % \
+			and exists (select name from `tabBOM` bom where bom.item=mr_item.item_code
+				and bom.is_active = 1) %s""" % \
 			(", ".join(["%s"] * len(mr_list)), item_condition), tuple(mr_list), as_dict=1)
 
 		self.add_items(items)
@@ -324,7 +324,6 @@ class ProductionPlanningTool(Document):
 					fb.description, fb.stock_uom, it.min_order_qty
 					from `tabBOM Explosion Item` fb, `tabBOM` bom, `tabItem` it
 					where bom.name = fb.parent and it.name = fb.item_code
-					and (is_pro_applicable = 0 or ifnull(default_bom, "")="")
 					and (is_sub_contracted_item = 0 or ifnull(default_bom, "")="")
 					and is_stock_item = 1
 					and fb.docstatus<2 and bom.name=%s
