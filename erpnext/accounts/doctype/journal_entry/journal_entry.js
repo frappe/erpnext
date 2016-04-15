@@ -400,11 +400,11 @@ $.extend(erpnext.journal_entry, {
 		var row = locals[cdt][cdn];
 
 		frappe.model.set_value(cdt, cdn, "debit",
-			flt(flt(row.debit_in_account_currency)*row.exchange_rate), precision("debit", row));
+			flt(flt(row.debit_in_account_currency)*row.exchange_rate, precision("debit", row)));
 
 		frappe.model.set_value(cdt, cdn, "credit",
-			flt(flt(row.credit_in_account_currency)*row.exchange_rate), precision("credit", row));
-			
+			flt(flt(row.credit_in_account_currency)*row.exchange_rate, precision("credit", row)));
+
 		cur_frm.cscript.update_totals(frm.doc);
 	},
 
