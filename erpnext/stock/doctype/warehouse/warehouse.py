@@ -14,6 +14,14 @@ class Warehouse(Document):
 		if not self.warehouse_name.endswith(suffix):
 			self.name = self.warehouse_name + suffix
 
+	def onload(self):
+		'''load account name for General Ledger Report'''
+		account = frappe.db.get_value("Account", {
+			"account_type": "Warehouse", "company": self.company, "warehouse": self.name})
+
+		if account:
+			self.set_onload('account', account)
+
 	def validate(self):
 		if self.email_id:
 			validate_email_add(self.email_id, True)

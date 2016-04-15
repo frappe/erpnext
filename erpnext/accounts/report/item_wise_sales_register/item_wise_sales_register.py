@@ -14,7 +14,14 @@ def execute(filters=None):
 	item_list = get_items(filters)
 	if item_list:
 		item_tax, tax_accounts = get_tax_accounts(item_list, columns)
-
+	columns.append({
+		"fieldname": "currency",
+		"label": _("Currency"),
+		"fieldtype": "Data",
+		"width": 80
+	})
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	
 	data = []
 	for d in item_list:
 		delivery_note = None
@@ -25,14 +32,14 @@ def execute(filters=None):
 			from `tabDelivery Note Item` where docstatus=1 and so_detail=%s""", d.so_detail))
 
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.customer, d.customer_name,
-			d.customer_group, d.debit_to, d.territory, d.project_name, d.company, d.sales_order,
+			d.customer_group, d.debit_to, d.territory, d.project, d.company, d.sales_order,
 			delivery_note, d.income_account, d.qty, d.base_net_rate, d.base_net_amount]
 
 		for tax in tax_accounts:
 			row.append(item_tax.get(d.parent, {}).get(d.item_code, {}).get(tax, 0))
 
 		total_tax = sum(row[last_col:])
-		row += [total_tax, d.base_net_amount + total_tax]
+		row += [total_tax, d.base_net_amount + total_tax, company_currency]
 
 		data.append(row)
 
@@ -48,7 +55,7 @@ def get_columns():
 		_("Project") + ":Link/Project:80", _("Company") + ":Link/Company:100",
 		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
 		_("Income Account") + ":Link/Account:140", _("Qty") + ":Float:120",
-		_("Rate") + ":Currency:120", _("Amount") + ":Currency:120"
+		_("Rate") + ":Currency/currency:120", _("Amount") + ":Currency/currency:120"
 	]
 
 def get_conditions(filters):
@@ -66,7 +73,7 @@ def get_conditions(filters):
 
 def get_items(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project_name,
+	return frappe.db.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project,
 		si.customer, si.remarks, si.territory, si.company, si.base_net_total, si_item.item_code, si_item.item_name,
 		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account,
 		si_item.qty, si_item.base_net_rate, si_item.base_net_amount, si.customer_name,
@@ -86,7 +93,7 @@ def get_tax_accounts(item_list, columns):
 	tax_details = frappe.db.sql("""select parent, account_head, item_wise_tax_detail,
 		charge_type, base_tax_amount_after_discount_amount
 		from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice'
-		and docstatus = 1 and ifnull(account_head, '') != ''
+		and docstatus = 1 and (account_head is not null and account_head != '')
 		and parent in (%s)""" % ', '.join(['%s']*len(invoice_wise_items)),
 		tuple(invoice_wise_items.keys()))
 
@@ -108,7 +115,7 @@ def get_tax_accounts(item_list, columns):
 					flt((tax_amount * d.base_net_amount) / d.base_net_total)
 
 	tax_accounts.sort()
-	columns += [account_head + ":Currency:80" for account_head in tax_accounts]
-	columns += ["Total Tax:Currency:80", "Total:Currency:80"]
+	columns += [account_head + ":Currency/currency:80" for account_head in tax_accounts]
+	columns += ["Total Tax:Currency/currency:80", "Total:Currency/currency:80"]
 
 	return item_tax, tax_accounts

@@ -8,6 +8,8 @@ from frappe import msgprint, _
 from frappe.model.naming import make_autoname
 from erpnext.utilities.address_and_contact import load_address_and_contact
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.accounts.party import validate_party_accounts, get_timeline_data
+from erpnext.accounts.party_status import get_party_status
 
 class Supplier(TransactionBase):
 	def get_feed(self):
@@ -16,6 +18,7 @@ class Supplier(TransactionBase):
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self, "supplier")
+		self.set_onload('links', self.meta.get_links_setup())
 
 	def autoname(self):
 		supp_master_name = frappe.defaults.get_global_default('supp_master_name')
@@ -44,6 +47,9 @@ class Supplier(TransactionBase):
 		if frappe.defaults.get_global_default('supp_master_name') == 'Naming Series':
 			if not self.naming_series:
 				msgprint(_("Series is mandatory"), raise_exception=1)
+
+		validate_party_accounts(self)
+		self.status = get_party_status(self)
 
 	def get_contacts(self,nm):
 		if nm:
@@ -80,27 +86,12 @@ class Supplier(TransactionBase):
 			.format(set_field=set_field), ({"newdn": newdn}))
 
 @frappe.whitelist()
-def get_dashboard_info(supplier):
-	if not frappe.has_permission("Supplier", "read", supplier):
-		frappe.throw(_("No permission"))
+def get_dashboard_data(name):
+	'''load dashboard related data'''
+	frappe.has_permission(doc=frappe.get_doc('Supplier', name), throw=True)
 
-	out = {}
-	for doctype in ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
-		out[doctype] = frappe.db.get_value(doctype,
-			{"supplier": supplier, "docstatus": ["!=", 2] }, "count(*)")
-
-	billing_this_year = frappe.db.sql("""select sum(base_grand_total)
-		from `tabPurchase Invoice`
-		where supplier=%s and docstatus = 1 and fiscal_year = %s""", 
-		(supplier, frappe.db.get_default("fiscal_year")))
-			
-	total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
-		from `tabPurchase Invoice`
-		where supplier=%s and docstatus = 1""", supplier)
-	
-
-	out["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
-	out["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
-	out["company_currency"] = frappe.db.sql_list("select distinct default_currency from tabCompany")
-
-	return out
+	from frappe.desk.notifications import get_open_count
+	return {
+		'count': get_open_count('Supplier', name),
+		'timeline_data': get_timeline_data('Supplier', name),
+	}

@@ -5,21 +5,44 @@ frappe.provide("erpnext.item");
 
 frappe.ui.form.on("Item", {
 	onload: function(frm) {
+		frm.hide_first = true;
 		erpnext.item.setup_queries(frm);
 		if (frm.doc.variant_of){
 			frm.fields_dict["attributes"].grid.set_column_disp("attribute_value", true);
 		}
 
+		// should never check Private
+		frm.fields_dict["website_image"].df.is_private = 0;
+
+	},
+
+	dashboard_update: function(frm) {
+		if(frm.dashboard_data.stock_data && frm.dashboard_data.stock_data.length) {
+			frm.dashboard.add_stats(frappe.render_template('item_dashboard', {data: frm.dashboard_data.stock_data}))
+		}
 	},
 
 	refresh: function(frm) {
+
 		if(frm.doc.is_stock_item) {
-			frm.add_custom_button(__("Show Balance"), function() {
+			frm.add_custom_button(__("Balance"), function() {
 				frappe.route_options = {
 					"item_code": frm.doc.name
 				}
 				frappe.set_route("query-report", "Stock Balance");
-			});
+			}, __("View"));
+			frm.add_custom_button(__("Ledger"), function() {
+				frappe.route_options = {
+					"item_code": frm.doc.name
+				}
+				frappe.set_route("query-report", "Stock Ledger");
+			}, __("View"));
+			frm.add_custom_button(__("Projected"), function() {
+				frappe.route_options = {
+					"item_code": frm.doc.name
+				}
+				frappe.set_route("query-report", "Stock Projected Qty");
+			}, __("View"));
 		}
 
 		// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
@@ -33,11 +56,12 @@ frappe.ui.form.on("Item", {
 			frm.set_intro(__("This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set"), true);
 			frm.add_custom_button(__("Show Variants"), function() {
 				frappe.set_route("List", "Item", {"variant_of": frm.doc.name});
-			}, "icon-list", "btn-default");
+			}, __("View"));
 
-			frm.add_custom_button(__("Make Variant"), function() {
+			frm.add_custom_button(__("Variant"), function() {
 				erpnext.item.make_variant()
-			}, "icon-list", "btn-default");
+			}, __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(__("This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set", [frm.doc.variant_of]), true);
@@ -56,13 +80,9 @@ frappe.ui.form.on("Item", {
 				(frm.doc.__onload && frm.doc.__onload.sle_exists=="exists") ? false : true);
 		}
 
-		erpnext.item.toggle_reqd(frm);
-
 		erpnext.item.toggle_attributes(frm);
 
-		if (frm.is_new() && frm.doc.is_stock_item) {
-			frm.fields_dict.inventory.collapse(false);
-		}
+		frm.dashboard.show_links();
 	},
 
 	validate: function(frm){
@@ -82,11 +102,6 @@ frappe.ui.form.on("Item", {
 			frm.set_value("description", frm.doc.item_code);
 	},
 
-	tax_type: function(frm, cdt, cdn){
-		var d = locals[cdt][cdn];
-		return get_server_fields('get_tax_rate', d.tax_type, 'taxes', doc, cdt, cdn, 1);
-	},
-
 	copy_from_item_group: function(frm) {
 		return frm.call({
 			doc: frm.doc,
@@ -95,8 +110,8 @@ frappe.ui.form.on("Item", {
 	},
 
 	is_stock_item: function(frm) {
-		frm.is_new() && frm.fields_dict.inventory.collapse(!frm.doc.is_stock_item);
-		erpnext.item.toggle_reqd(frm);
+		if(frm.doc.is_pro_applicable && !frm.doc.is_stock_item)
+			frm.set_value("is_pro_applicable", 0);
 	},
 
 	has_variants: function(frm) {
@@ -106,44 +121,27 @@ frappe.ui.form.on("Item", {
 
 $.extend(erpnext.item, {
 	setup_queries: function(frm) {
-		// Expense Account
-		// ---------------------------------
 		frm.fields_dict['expense_account'].get_query = function(doc) {
 			return {
-				filters: {
-					"report_type": "Profit and Loss",
-					"is_group": 0
-				}
+				query: "erpnext.controllers.queries.get_expense_account",
 			}
 		}
 
-		// Income Account
-		// --------------------------------
 		frm.fields_dict['income_account'].get_query = function(doc) {
 			return {
-				filters: {
-					"report_type": "Profit and Loss",
-					"is_group": 0,
-					'account_type': "Income Account"
-				}
+				query: "erpnext.controllers.queries.get_income_account"
 			}
 		}
 
-
-		// Purchase Cost Center
-		// -----------------------------
 		frm.fields_dict['buying_cost_center'].get_query = function(doc) {
 			return {
-				filters:{ "is_group": 0 }
+				filters: { "is_group": 0 }
 			}
 		}
 
-
-		// Sales Cost Center
-		// -----------------------------
 		frm.fields_dict['selling_cost_center'].get_query = function(doc) {
 			return {
-				filters:{ "is_group": 0 }
+				filters: { "is_group": 0 }
 			}
 		}
 
@@ -158,7 +156,7 @@ $.extend(erpnext.item, {
 			}
 		}
 
-		frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
+		frm.fields_dict['item_group'].get_query = function(doc, cdt, cdn) {
 			return {
 				filters: [
 					['Item Group', 'docstatus', '!=', 2]
@@ -176,10 +174,6 @@ $.extend(erpnext.item, {
 
 	},
 
-	toggle_reqd: function(frm) {
-		frm.toggle_reqd("default_warehouse", frm.doc.is_stock_item);
-	},
-
 	make_dashboard: function(frm) {
 		frm.dashboard.reset();
 		if(frm.doc.__islocal)
@@ -188,8 +182,8 @@ $.extend(erpnext.item, {
 
 	edit_prices_button: function(frm) {
 		frm.add_custom_button(__("Add / Edit Prices"), function() {
-			frappe.set_route("Report", "Item Price", {"item_code": frm.doc.name});
-		}, "icon-money", "btn-default");
+			frappe.set_route("List", "Item Price", {"item_code": frm.doc.name});
+		}, __("View"));
 	},
 
 	weight_to_validate: function(frm){
@@ -233,7 +227,7 @@ $.extend(erpnext.item, {
 			frappe.call({
 				method:"erpnext.controllers.item_variant.get_variant",
 				args: {
-					"item": cur_frm.doc.name,
+					"template": cur_frm.doc.name,
 					"args": d.get_values()
 				},
 				callback: function(r) {
@@ -317,6 +311,10 @@ $.extend(erpnext.item, {
 		frm.toggle_display("attributes", frm.doc.has_variants || frm.doc.variant_of);
 		frm.fields_dict.attributes.grid.toggle_reqd("attribute_value", frm.doc.variant_of ? 1 : 0);
 		frm.fields_dict.attributes.grid.set_column_disp("attribute_value", frm.doc.variant_of ? 1 : 0);
+
+		frm.toggle_enable("attributes", !frm.doc.variant_of);
+		frm.fields_dict.attributes.grid.toggle_enable("attribute", !frm.doc.variant_of);
+		frm.fields_dict.attributes.grid.toggle_enable("attribute_value", !frm.doc.variant_of);
 	}
 });
 
@@ -324,3 +322,4 @@ cur_frm.add_fetch('attribute', 'numeric_values', 'numeric_values');
 cur_frm.add_fetch('attribute', 'from_range', 'from_range');
 cur_frm.add_fetch('attribute', 'to_range', 'to_range');
 cur_frm.add_fetch('attribute', 'increment', 'increment');
+cur_frm.add_fetch('tax_type', 'tax_rate', 'tax_rate');

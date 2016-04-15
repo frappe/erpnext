@@ -1,0 +1,12 @@
+<div style="padding-left: 15px;">
+	<h5>Stock Levels</h5>
+	<div class="row">
+		<div class="col-md-6 col-xs-12">
+			<ul class="list-unstyled">
+			{% data.every(function(d) { %}
+				<li class="small">{{ d.warehouse }}: {{ d.actual_qty }} ({{ d.projected_qty }})</li>
+			{% }) %}
+			</ul>
+		</div>
+	</div>
+</div>

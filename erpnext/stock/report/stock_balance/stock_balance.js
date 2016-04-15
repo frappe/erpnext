@@ -23,6 +23,13 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldtype": "Link",
 			"width": "80",
 			"options": "Item"
-		}
+		},
+		{
+			"fieldname": "warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Warehouse"
+		},
 	]
 }

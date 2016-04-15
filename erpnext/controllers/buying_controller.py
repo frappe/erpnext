@@ -20,8 +20,9 @@ class BuyingController(StockController):
 			}
 
 	def get_feed(self):
-		return _("From {0} | {1} {2}").format(self.supplier_name, self.currency,
-			self.grand_total)
+		if self.get("supplier_name"):
+			return _("From {0} | {1} {2}").format(self.supplier_name, self.currency,
+				self.grand_total)
 
 	def validate(self):
 		super(BuyingController, self).validate()
@@ -40,7 +41,7 @@ class BuyingController(StockController):
 
 		# set contact and address details for supplier, if they are not mentioned
 		if getattr(self, "supplier", None):
-			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier"))
+			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions))
 
 		self.set_missing_item_details()
 
@@ -51,15 +52,6 @@ class BuyingController(StockController):
 				if supplier:
 					self.supplier = supplier
 					break
-
-	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company
-
-		warehouses = list(set([d.warehouse for d in
-			self.get("items") if getattr(d, "warehouse", None)]))
-
-		for w in warehouses:
-			validate_warehouse_company(w, self.company)
 
 	def validate_stock_or_nonstock_items(self):
 		if self.meta.get_field("taxes") and not self.get_stock_items():
@@ -234,7 +226,7 @@ class BuyingController(StockController):
 
 	def get_items_from_bom(self, item_code, bom):
 		bom_items = frappe.db.sql("""select t2.item_code,
-			ifnull(t2.qty, 0) / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
+			t2.qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
 			t2.rate, t2.stock_uom, t2.name, t2.description
 			from `tabBOM` t1, `tabBOM Item` t2, tabItem t3
 			where t2.parent = t1.name and t1.item = %s
@@ -258,19 +250,6 @@ class BuyingController(StockController):
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._sub_contracted_items
-
-	@property
-	def purchase_items(self):
-		if not hasattr(self, "_purchase_items"):
-			self._purchase_items = []
-			item_codes = list(set(item.item_code for item in
-				self.get("items")))
-			if item_codes:
-				self._purchase_items = [r[0] for r in frappe.db.sql("""select name
-					from `tabItem` where name in (%s) and is_purchase_item='Yes'""" % \
-					(", ".join((["%s"]*len(item_codes))),), item_codes)]
-
-		return self._purchase_items
 
 	def is_item_table_empty(self):
 		if not len(self.get("items")):

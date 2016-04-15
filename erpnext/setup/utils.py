@@ -32,9 +32,9 @@ def get_ancestors_of(doctype, name):
 def before_tests():
 	frappe.clear_cache()
 	# complete setup if missing
-	from erpnext.setup.page.setup_wizard.setup_wizard import setup_account
+	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 	if not frappe.get_list("Company"):
-		setup_account({
+		setup_complete({
 			"currency"			:"USD",
 			"first_name"		:"Test",
 			"last_name"			:"User",
@@ -43,13 +43,15 @@ def before_tests():
 			"company_abbr"		:"WP",
 			"industry"			:"Manufacturing",
 			"country"			:"United States",
-			"fy_start_date"		:"2014-01-01",
-			"fy_end_date"		:"2014-12-31",
+			"fy_start_date"		:"2011-01-01",
+			"fy_end_date"		:"2011-12-31",
 			"language"			:"english",
 			"company_tagline"	:"Testing",
 			"email"				:"test@erpnext.com",
 			"password"			:"test",
-			"chart_of_accounts" : "Standard"
+			"chart_of_accounts" : "Standard",
+			"domain"			: "Manufacturing",
+			
 		})
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
@@ -63,21 +65,32 @@ def before_tests():
 
 @frappe.whitelist()
 def get_exchange_rate(from_currency, to_currency):
-	try:
-		cache = frappe.cache()
-		key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
-		value = cache.get(key)
-		if not value:
-			import requests
-			response = requests.get("http://api.fixer.io/latest", params={
-				"base": from_currency,
-				"symbols": to_currency
-			})
-			# expire in 24 hours
-			response.raise_for_status()
-			value = response.json()["rates"][to_currency]
-			cache.setex(key, value, 24 * 60 * 60)
-		return flt(value)
-	except:
-		exchange = "%s-%s" % (from_currency, to_currency)
-		return flt(frappe.db.get_value("Currency Exchange", exchange, "exchange_rate"))
+	if from_currency == to_currency:
+		return 1
+	
+	exchange = "%s-%s" % (from_currency, to_currency)
+	value = flt(frappe.db.get_value("Currency Exchange", exchange, "exchange_rate"))
+
+	if not value:
+		try:
+			cache = frappe.cache()
+			key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
+			value = cache.get(key)
+
+			if not value:
+				import requests
+				response = requests.get("http://api.fixer.io/latest", params={
+					"base": from_currency,
+					"symbols": to_currency
+				})
+				# expire in 6 hours
+				response.raise_for_status()
+				value = response.json()["rates"][to_currency]
+				cache.setex(key, value, 6 * 60 * 60)
+
+			return flt(value)
+		except:
+			frappe.msgprint(_("Unable to find exchange rate for {0} to {1}").format(from_currency, to_currency))
+			return 0.0
+	else:
+		return value

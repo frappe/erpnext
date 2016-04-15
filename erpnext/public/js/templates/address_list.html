@@ -1,4 +1,4 @@
-<p><button class="btn btn-xs btn-default btn-address">New Address</button></p>
+<p><button class="btn btn-xs btn-default btn-address">{{ __("New Address") }}</button></p>
 <div class="clearfix"></div>
 {% for(var i=0, l=addr_list.length; i<l; i++) { %}
     <p class="h6">
@@ -8,7 +8,7 @@
         {% if(addr_list[i].is_shipping_address) { %}
             <span class="text-muted">({%= __("Shipping") %})</span>{% } %}
 
-        <a href="#Form/Address/{%= addr_list[i].name %}"
+        <a href="#Form/Address/{%= encodeURIComponent(addr_list[i].name) %}"
             class="btn btn-default btn-xs pull-right">
             {%= __("Edit") %}</a>
         </p>

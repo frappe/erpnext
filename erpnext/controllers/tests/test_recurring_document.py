@@ -5,22 +5,20 @@ from __future__ import unicode_literals
 import frappe
 import frappe.permissions
 from erpnext.controllers.recurring_document import date_field_map
-from frappe.utils import getdate
+from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate, add_days
 
 def test_recurring_document(obj, test_records):
-	from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate, add_days
-	from erpnext.accounts.utils import get_fiscal_year
 	frappe.db.set_value("Print Settings", "Print Settings", "send_print_as_pdf", 1)
 	today = nowdate()
 	base_doc = frappe.copy_doc(test_records[0])
 
 	base_doc.update({
 		"is_recurring": 1,
+		"submit_on_create": 1,
 		"recurring_type": "Monthly",
 		"notification_email_address": "test@example.com, test1@example.com, test2@example.com",
 		"repeat_on_day_of_month": getdate(today).day,
 		"due_date": None,
-		"fiscal_year": get_fiscal_year(today)[0],
 		"from_date": get_first_day(today),
 		"to_date": get_last_day(today)
 	})
@@ -38,14 +36,15 @@ def test_recurring_document(obj, test_records):
 	_test_recurring_document(obj, doc1, date_field, True)
 
 	# monthly without a first and last day period
-	doc2 = frappe.copy_doc(base_doc)
-	doc2.update({
-		"from_date": today,
-		"to_date": add_to_date(today, days=30)
-	})
-	doc2.insert()
-	doc2.submit()
-	_test_recurring_document(obj, doc2, date_field, False)
+	if getdate(today).day != 1:
+		doc2 = frappe.copy_doc(base_doc)
+		doc2.update({
+			"from_date": today,
+			"to_date": add_to_date(today, days=30)
+		})
+		doc2.insert()
+		doc2.submit()
+		_test_recurring_document(obj, doc2, date_field, False)
 
 	# quarterly
 	doc3 = frappe.copy_doc(base_doc)
@@ -112,7 +111,7 @@ def _test_recurring_document(obj, base_doc, date_field, first_and_last_day):
 
 	def _test(i):
 		obj.assertEquals(i+1, frappe.db.sql("""select count(*) from `tab%s`
-			where recurring_id=%s and docstatus=1""" % (base_doc.doctype, '%s'),
+			where recurring_id=%s and (docstatus=1 or docstatus=0)""" % (base_doc.doctype, '%s'),
 			(base_doc.recurring_id))[0][0])
 
 		next_date = get_next_date(base_doc.get(date_field), no_of_months,
@@ -121,7 +120,7 @@ def _test_recurring_document(obj, base_doc, date_field, first_and_last_day):
 		manage_recurring_documents(base_doc.doctype, next_date=next_date, commit=False)
 
 		recurred_documents = frappe.db.sql("""select name from `tab%s`
-			where recurring_id=%s and docstatus=1 order by name desc"""
+			where recurring_id=%s and (docstatus=1 or docstatus=0) order by name desc"""
 			% (base_doc.doctype, '%s'), (base_doc.recurring_id))
 
 		obj.assertEquals(i+2, len(recurred_documents))

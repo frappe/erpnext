@@ -67,6 +67,9 @@ def validate_returned_items(doc):
 
 	already_returned_items = get_already_returned_items(doc)
 
+	# ( not mandatory when it is Purchase Invoice or a Sales Invoice without Update Stock )
+	warehouse_mandatory = not (doc.doctype=="Purchase Invoice" or (doc.doctype=="Sales Invoice" and not doc.update_stock))
+
 	items_returned = False
 	for d in doc.get("items"):
 		if flt(d.qty) < 0:
@@ -97,6 +100,9 @@ def validate_returned_items(doc):
 								frappe.throw(_("Row # {0}: Serial No {1} does not match with {2} {3}")
 									.format(d.idx, s, doc.doctype, doc.return_against))
 
+				if warehouse_mandatory and not d.get("warehouse"):
+					frappe.throw(_("Warehouse is mandatory"))
+
 			items_returned = True
 
 	if not items_returned:
@@ -110,7 +116,7 @@ def get_already_returned_items(doc):
 			`tab{0} Item` child, `tab{1}` par
 		where
 			child.parent = par.name and par.docstatus = 1
-			and ifnull(par.is_return, 0) = 1 and par.return_against = %s and child.qty < 0
+			and par.is_return = 1 and par.return_against = %s and child.qty < 0
 		group by item_code
 	""".format(doc.doctype, doc.doctype), doc.return_against))
 

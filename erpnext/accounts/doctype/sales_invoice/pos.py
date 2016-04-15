@@ -10,11 +10,6 @@ def get_items(price_list, sales_or_purchase, item=None):
 	order_by = ""
 	args = {"price_list": price_list}
 
-	if sales_or_purchase == "Sales":
-		condition = "i.is_sales_item=1"
-	else:
-		condition = "i.is_purchase_item=1"
-
 	if item:
 		# search serial no
 		item_code = frappe.db.sql("""select name as serial_no, item_code
@@ -48,8 +43,9 @@ def get_items(price_list, sales_or_purchase, item=None):
 		ON
 			(item_det.item_code=i.name or item_det.item_code=i.variant_of)
 		where
-			ifnull(i.has_variants, 0) = 0 and
+			i.has_variants = 0 and
 			{condition}
 		order by
 			{order_by}
-			i.name""".format(condition=condition, order_by=order_by), args, as_dict=1)
+			i.name
+		limit 24""".format(condition=condition, order_by=order_by), args, as_dict=1)

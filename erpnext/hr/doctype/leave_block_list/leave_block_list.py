@@ -5,7 +5,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from erpnext.accounts.utils import validate_fiscal_year
 from frappe import _
 from frappe.model.document import Document
 
@@ -14,8 +13,6 @@ class LeaveBlockList(Document):
 	def validate(self):
 		dates = []
 		for d in self.get("leave_block_list_dates"):
-			# validate fiscal year
-			validate_fiscal_year(d.block_date, self.year, _("Block Date"))
 
 			# date is not repeated
 			if d.block_date in dates:
@@ -58,7 +55,7 @@ def get_applicable_block_lists(employee=None, company=None, all_lists=False):
 
 	# global
 	for block_list in frappe.db.sql_list("""select name from `tabLeave Block List`
-		where ifnull(applies_to_all_departments,0)=1 and company=%s""", company):
+		where applies_to_all_departments=1 and company=%s""", company):
 		add_block_list(block_list)
 
 	return list(set(block_lists))

@@ -1,7 +1,6 @@
 {
     "country_code": "in",
     "name": "Chart of Accounts - India",
-	"is_active": "Yes",
     "tree": {
 	    "Application of Funds (Assets)": {
 	        "Current Assets": {
@@ -49,7 +48,8 @@
 	            },
 	            "Plant and Machinery": {
 	                "account_type": "Fixed Asset"
-	            }
+	            },
+				"Accumulated Depreciations": {}
 	        },
 	        "Investments": {
 	        	"is_group": 1

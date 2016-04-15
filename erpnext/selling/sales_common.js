@@ -55,10 +55,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if(this.frm.fields_dict["items"].grid.get_field('item_code')) {
 			this.frm.set_query("item_code", "items", function() {
 				return {
-					query: "erpnext.controllers.queries.item_query",
-					filters: (me.frm.doc.order_type === "Maintenance" ?
-						{'is_service_item': 1}:
-						{'is_sales_item': 1	})
+					query: "erpnext.controllers.queries.item_query"
 				}
 			});
 		}
@@ -81,10 +78,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					}
 				}
 			});
-		}
-
-		if(this.frm.fields_dict.sales_team && this.frm.fields_dict.sales_team.grid.get_field("sales_person")) {
-			this.frm.set_query("sales_person", "sales_team", erpnext.queries.not_a_group_filter);
 		}
 	},
 
@@ -128,8 +121,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
-		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-			precision("rate", item));
+		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate
+		if(in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]), cdt)
+			this.calculate_revised_margin_and_rate(item, doc,cdt, cdn);
+		else
+			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
+				precision("rate", item));
 
 		this.calculate_taxes_and_totals();
 	},
@@ -141,6 +138,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		} else {
 			this.price_list_rate(doc, cdt, cdn);
 		}
+		this.set_gross_profit(item);
 	},
 
 	commission_rate: function() {
@@ -183,16 +181,21 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	warehouse: function(doc, cdt, cdn) {
 		var me = this;
-		this.batch_no(doc, cdt, cdn);
 		var item = frappe.get_doc(cdt, cdn);
+		
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_available_qty",
+				method: "erpnext.stock.get_item_details.get_bin_details",
 				child: item,
 				args: {
 					item_code: item.item_code,
 					warehouse: item.warehouse,
 				},
+				callback:function(r){
+					if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+						me.batch_no(doc, cdt, cdn);
+					}
+				}
 			});
 		}
 	},
@@ -203,30 +206,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		if(df && editable_price_list_rate) {
 			df.read_only = 0;
-		}
-	},
-
-	calculate_outstanding_amount: function(update_paid_amount) {
-		// NOTE:
-		// paid_amount and write_off_amount is only for POS Invoice
-		// total_advance is only for non POS Invoice
-		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.docstatus==0 && !this.frm.doc.is_return) {
-			frappe.model.round_floats_in(this.frm.doc, ["base_grand_total", "total_advance", "write_off_amount",
-				"paid_amount"]);
-			var total_amount_to_pay = this.frm.doc.base_grand_total - this.frm.doc.write_off_amount
-				- this.frm.doc.total_advance;
-			if(this.frm.doc.is_pos) {
-				if(!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount) {
-					this.frm.doc.paid_amount = flt(total_amount_to_pay);
-					this.frm.refresh_field("paid_amount");
-				}
-			} else {
-				this.frm.doc.paid_amount = 0
-				this.frm.refresh_field("paid_amount");
-			}
-
-			this.frm.set_value("outstanding_amount", flt(total_amount_to_pay
-				- this.frm.doc.paid_amount, precision("outstanding_amount")));
 		}
 	},
 
@@ -312,14 +291,72 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 		}
 		refresh_field('product_bundle_help');
+	},
+
+	make_payment_request: function() {
+		frappe.call({
+			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
+			args: {
+				"dt": cur_frm.doc.doctype,
+				"dn": cur_frm.doc.name,
+				"recipient_id": cur_frm.doc.contact_email
+			},
+			callback: function(r) {
+				if(!r.exc){
+					var doc = frappe.model.sync(r.message);
+					frappe.set_route("Form", r.message.doctype, r.message.name);
+				}
+			}
+		})
+	},
+
+	rate: function(doc, cdt, cdn){
+		// if user changes the rate then set margin Rate or amount to 0
+		item = locals[cdt][cdn];
+		item.margin_type = "";
+		item.margin_rate_or_amount = 0.0;
+		cur_frm.refresh_fields();
+	},
+
+	margin_rate_or_amount: function(doc, cdt, cdn) {
+		// calculated the revised total margin and rate on margin rate changes
+		item = locals[cdt][cdn];
+		this.calculate_revised_margin_and_rate(item)
+		this.calculate_taxes_and_totals();
+		cur_frm.refresh_fields();
+	},
+
+	margin_type: function(doc, cdt, cdn){
+		// calculate the revised total margin and rate on margin type changes
+		item = locals[cdt][cdn];
+		this.calculate_revised_margin_and_rate(item, doc,cdt, cdn)
+		this.calculate_taxes_and_totals();
+		cur_frm.refresh_fields();
+	},
+
+	calculate_revised_margin_and_rate: function(item){
+		if(in_list(["Percentage", "Amount"], item.margin_type)){
+			if(item.margin_type == "Percentage")
+				item.total_margin = item.price_list_rate + item.price_list_rate * ( item.margin_rate_or_amount / 100);
+			else
+				item.total_margin = item.price_list_rate + item.margin_rate_or_amount;
+			item.rate = flt(item.total_margin * (1 - item.discount_percentage / 100.0),
+				precision("rate", item));
+		}
+		else{
+			item.rate_or_amount = 0.0;
+			item.total_margin = 0.0;
+			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
+				precision("rate", item));
+		}
 	}
 });
 
-frappe.ui.form.on(cur_frm.doctype,"project_name", function(frm) {
+frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
 	if(in_list(["Delivery Note", "Sales Invoice"], frm.doc.doctype)) {
 		frappe.call({
 			method:'erpnext.projects.doctype.project.project.get_cost_center_name' ,
-			args: {	project_name: frm.doc.project_name	},
+			args: {	project: frm.doc.project	},
 			callback: function(r, rt) {
 				if(!r.exc) {
 					$.each(frm.doc["items"] || [], function(i, row) {

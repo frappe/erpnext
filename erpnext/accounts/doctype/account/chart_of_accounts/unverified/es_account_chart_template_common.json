@@ -1,6 +1,7 @@
 {
     "country_code": "es", 
     "name": "PGCE com\u00fan", 
+	"disabled": "Yes",
     "tree": {
         "Acreedores y deudores por operaciones comerciales": {
             "Acreedores varios": {

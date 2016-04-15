@@ -9,18 +9,9 @@ from frappe.utils import add_days, getdate, cint, cstr
 from frappe import throw, _
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
 from erpnext.stock.utils import get_valid_serial_nos
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class MaintenanceSchedule(TransactionBase):
-
-	def get_item_details(self, item_code):
-		item = frappe.db.sql("""select item_name, description from `tabItem`
-			where name=%s""", (item_code), as_dict=1)
-		ret = {
-			'item_name': item and item[0]['item_name'] or '',
-			'description' : item and item[0]['description'] or ''
-		}
-		return ret
-
 	def generate_schedule(self):
 		self.set('schedules', [])
 		frappe.db.sql("""delete from `tabMaintenance Schedule Detail`
@@ -100,35 +91,25 @@ class MaintenanceSchedule(TransactionBase):
 		return schedule_list
 
 	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person):
-		from erpnext.accounts.utils import get_fiscal_year
 		validated = False
-		fy_details = ""
 
-		try:
-			fy_details = get_fiscal_year(date=schedule_date, verbose=0)
-		except Exception:
-			pass
+		employee = frappe.db.get_value("Sales Person", sales_person, "employee")
+		if employee:
+			holiday_list = get_holiday_list_for_employee(employee)
+		else:
+			holiday_list = frappe.db.get_value("Company", self.company, "default_holiday_list")
 
-		if fy_details and fy_details[0]:
-			# check holiday list in employee master
-			holiday_list = frappe.db.sql_list("""select h.holiday_date from `tabEmployee` emp,
-				`tabSales Person` sp, `tabHoliday` h, `tabHoliday List` hl
-				where sp.name=%s and emp.name=sp.employee
-				and hl.name=emp.holiday_list and
-				h.parent=hl.name and
-				hl.fiscal_year=%s""", (sales_person, fy_details[0]))
-			if not holiday_list:
-				# check global holiday list
-				holiday_list = frappe.db.sql("""select h.holiday_date from
-					`tabHoliday` h, `tabHoliday List` hl
-					where h.parent=hl.name and ifnull(hl.is_default, 0) = 1
-					and hl.fiscal_year=%s""", fy_details[0])
+		holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday` where parent=%s''', holiday_list)
 
-			if not validated and holiday_list:
-				if schedule_date in holiday_list:
+		if not validated and holidays:
+
+			# max iterations = len(holidays)
+			for i in xrange(len(holidays)):
+				if schedule_date in holidays:
 					schedule_date = add_days(schedule_date, -1)
 				else:
 					validated = True
+					break
 
 		return schedule_date
 
@@ -168,12 +149,12 @@ class MaintenanceSchedule(TransactionBase):
 
 	def validate_sales_order(self):
 		for d in self.get('items'):
-			if d.prevdoc_docname:
+			if d.sales_order:
 				chk = frappe.db.sql("""select ms.name from `tabMaintenance Schedule` ms,
 					`tabMaintenance Schedule Item` msi where msi.parent=ms.name and
-					msi.prevdoc_docname=%s and ms.docstatus=1""", d.prevdoc_docname)
+					msi.sales_order=%s and ms.docstatus=1""", d.sales_order)
 				if chk:
-					throw(_("Maintenance Schedule {0} exists against {0}").format(chk[0][0], d.prevdoc_docname))
+					throw(_("Maintenance Schedule {0} exists against {0}").format(chk[0][0], d.sales_order))
 
 	def validate(self):
 		self.validate_maintenance_detail()
@@ -192,7 +173,7 @@ class MaintenanceSchedule(TransactionBase):
 	def validate_serial_no(self, serial_nos, amc_start_date):
 		for serial_no in serial_nos:
 			sr_details = frappe.db.get_value("Serial No", serial_no,
-				["warranty_expiry_date", "amc_expiry_date", "status", "delivery_date"], as_dict=1)
+				["warranty_expiry_date", "amc_expiry_date", "warehouse", "delivery_date"], as_dict=1)
 
 			if not sr_details:
 				frappe.throw(_("Serial No {0} not found").format(serial_no))
@@ -203,9 +184,10 @@ class MaintenanceSchedule(TransactionBase):
 			if sr_details.amc_expiry_date and sr_details.amc_expiry_date >= amc_start_date:
 				throw(_("Serial No {0} is under maintenance contract upto {1}").format(serial_no, sr_details.amc_start_date))
 
-			if sr_details.status=="Delivered" and sr_details.delivery_date and \
+			if not sr_details.warehouse and sr_details.delivery_date and \
 				sr_details.delivery_date >= amc_start_date:
-					throw(_("Maintenance start date can not be before delivery date for Serial No {0}").format(serial_no))
+					throw(_("Maintenance start date can not be before delivery date for Serial No {0}")
+						.format(serial_no))
 
 	def validate_schedule(self):
 		item_lst1 =[]

@@ -16,7 +16,7 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		if (this.frm.doc.docstatus === 0) {
-			this.frm.add_custom_button(__('From Sales Order'),
+			this.frm.add_custom_button(__('Sales Order'),
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
@@ -28,7 +28,7 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 							company: me.frm.doc.company
 						}
 					});
-				}, "icon-download", "btn-default");
+				}, __("Get items from"));
 		} else if (this.frm.doc.docstatus === 1) {
 			this.frm.add_custom_button(__("Make Maintenance Visit"), function() {
 				frappe.model.open_mapped_doc({
@@ -36,7 +36,7 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 					source_name: me.frm.doc.name,
 					frm: me.frm
 				})
-			}, frappe.boot.doctype_icons["Maintenance Visit"]);
+			}, __("Make"));
 		}
 	},
 
@@ -80,11 +80,16 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 $.extend(cur_frm.cscript, new erpnext.support.MaintenanceSchedule({frm: cur_frm}));
 
 cur_frm.cscript.onload = function(doc, dt, dn) {
-  if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
+	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
 
-  if(doc.__islocal){
-    set_multiple(dt,dn,{transaction_date:get_today()});
-  }
+	if(doc.__islocal){
+		set_multiple(dt,dn,{transaction_date:get_today()});
+	}
+
+	// set add fetch for item_code's item_name and description
+	cur_frm.add_fetch('item_code', 'item_name', 'item_name');
+	cur_frm.add_fetch('item_code', 'description', 'description');
+
 }
 
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
@@ -96,21 +101,6 @@ cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	return {
 		filters:{ 'customer': doc.customer }
-	}
-}
-
-
-cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
-	return {
-		filters:{ 'is_service_item': 1 }
-	}
-}
-
-cur_frm.cscript.item_code = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.item_code) {
-		return get_server_fields('get_item_details', d.item_code, 'items',
-			doc, cdt, cdn, 1);
 	}
 }
 

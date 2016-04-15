@@ -7,9 +7,11 @@ from __future__ import unicode_literals
 from frappe.model.document import Document
 import frappe
 from frappe import _
-from frappe.utils import comma_and
+from frappe.utils import comma_and, validate_email_add
 
 sender_field = "email_id"
+
+class DuplicationError(frappe.ValidationError): pass
 
 class JobApplicant(Document):
 	def onload(self):
@@ -25,6 +27,7 @@ class JobApplicant(Document):
 
 	def validate(self):
 		self.check_email_id_is_unique()
+		validate_email_add(self.email_id, True)
 
 	def check_email_id_is_unique(self):
 		if self.email_id:
@@ -33,3 +36,4 @@ class JobApplicant(Document):
 
 			if names:
 				frappe.throw(_("Email id must be unique, already exists for {0}").format(comma_and(names)), frappe.DuplicateEntryError)
+

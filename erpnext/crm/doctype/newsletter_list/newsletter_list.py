@@ -13,12 +13,14 @@ class NewsletterList(Document):
 	def onload(self):
 		singles = [d.name for d in frappe.db.get_all("DocType", "name", {"issingle": 1})]
 		self.get("__onload").import_types = [{"value": d.parent, "label": "{0} ({1})".format(d.parent, d.label)} \
-			for d in frappe.db.get_all("DocField", ("parent", "label"), {"options": "Email"}) if d.parent not in singles]
+			for d in frappe.db.get_all("DocField", ("parent", "label"), {"options": "Email"}) 
+			if d.parent not in singles]
 
 	def import_from(self, doctype):
 		"""Extract email ids from given doctype and add them to the current list"""
 		meta = frappe.get_meta(doctype)
-		email_field = [d.fieldname for d in meta.fields if d.fieldtype in ("Data", "Small Text") and d.options=="Email"][0]
+		email_field = [d.fieldname for d in meta.fields 
+			if d.fieldtype in ("Data", "Small Text", "Text", "Code") and d.options=="Email"][0]
 		unsubscribed_field = "unsubscribed" if meta.get_field("unsubscribed") else None
 		added = 0
 
@@ -67,9 +69,9 @@ def add_subscribers(name, email_list):
 	count = 0
 	for email in email_list:
 		email = email.strip()
-		validate_email_add(email, True)
+		valid = validate_email_add(email, False)
 
-		if email:
+		if valid:
 			if not frappe.db.get_value("Newsletter List Subscriber",
 				{"newsletter_list": name, "email": email}):
 				frappe.get_doc({
@@ -81,6 +83,8 @@ def add_subscribers(name, email_list):
 				count += 1
 			else:
 				pass
+		else:
+			frappe.msgprint(_("{0} is not a valid email id").format(email))
 
 	frappe.msgprint(_("{0} subscribers added").format(count))
 

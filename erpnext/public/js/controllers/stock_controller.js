@@ -29,7 +29,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 					company: me.frm.doc.company
 				};
 				frappe.set_route("query-report", "Stock Ledger");
-			}, "icon-bar-chart");
+			}, __("View"));
 		}
 
 	},
@@ -46,7 +46,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 					group_by_voucher: false
 				};
 				frappe.set_route("query-report", "General Ledger");
-			}, "icon-table");
+			}, __("View"));
 		}
 	}
 });

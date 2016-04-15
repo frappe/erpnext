@@ -19,16 +19,16 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
 			cur_frm.add_custom_button(__('Make Sales Order'),
-				cur_frm.cscript['Make Sales Order'], frappe.boot.doctype_icons["Sales Order"]);
+				cur_frm.cscript['Make Sales Order']);
+
 			if(doc.status!=="Ordered") {
 				cur_frm.add_custom_button(__('Set as Lost'),
-					cur_frm.cscript['Declare Order Lost'], "icon-exclamation", "btn-default");
+					cur_frm.cscript['Declare Order Lost']);
 			}
-
 		}
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('From Opportunity'),
+			cur_frm.add_custom_button(__('Opportunity'),
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
@@ -41,10 +41,11 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				}, "icon-download", "btn-default");
+				}, __("Get items from"), "btn-default");
 		}
 
 		this.toggle_reqd_lead_customer();
+
 	},
 
 	quotation_to: function() {
@@ -93,7 +94,11 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		var me = this;
 		frappe.call({
 			method: "erpnext.crm.doctype.lead.lead.get_lead_details",
-			args: { "lead": this.frm.doc.lead },
+			args: {
+				'lead': this.frm.doc.lead,
+				'posting_date': this.frm.doc.transaction_date,
+				'company': this.frm.doc.company,
+			},
 			callback: function(r) {
 				if(r.message) {
 					me.frm.updating_party_details = true;
@@ -159,4 +164,10 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 
 frappe.ui.form.on("Quotation Item", "items_on_form_rendered", function(frm, cdt, cdn) {
 	// enable tax_amount field if Actual
+})
+
+frappe.ui.form.on("Quotation Item", "stock_balance", function(frm, cdt, cdn) {
+	var d = frappe.model.get_doc(cdt, cdn);
+	frappe.route_options = {"item_code": d.item_code};
+	frappe.set_route("query-report", "Stock Balance");
 })

@@ -46,17 +46,22 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 
 // Serial No based on item_code
 cur_frm.fields_dict['item_serial_no'].get_query = function(doc, cdt, cdn) {
-	var filter = {};
+	var filters = {};
 	if (doc.item_code) {
-		filter = {
-			'item_code': doc.item_code,
-			'status': "Available"
+		filters = {
+			'item_code': doc.item_code
 		}
-	} else
-		filter = { 'status': "Available" }
-
-	return { filters: filter }
+	}
+	return { filters: filters }
 }
+
+cur_frm.set_query("batch_no", function(doc) {
+	return {
+		filters: {
+			"item": doc.item_code
+		}
+	}
+})
 
 cur_frm.add_fetch('item_code', 'item_name', 'item_name');
 cur_frm.add_fetch('item_code', 'description', 'description');

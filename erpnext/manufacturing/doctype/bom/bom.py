@@ -4,22 +4,33 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr, flt
-
 from frappe import _
 from frappe.model.document import Document
 
 from operator import itemgetter
 
-class BOM(Document):
+form_grid_templates = {
+	"items": "templates/form_grid/item_grid.html"
+}
 
+class BOM(Document):
 	def autoname(self):
-		last_name = frappe.db.sql("""select max(name) from `tabBOM`
-			where name like "BOM/%s/%%" """ % frappe.db.escape(self.item))
-		if last_name:
-			idx = cint(cstr(last_name[0][0]).split('/')[-1].split('-')[0]) + 1
+		names = frappe.db.sql_list("""select name from `tabBOM` where item=%s""", self.item)
+
+		if names:
+			# name can be BOM/ITEM/001, BOM/ITEM/001-1, BOM-ITEM-001, BOM-ITEM-001-1
+
+			# split by item
+			names = [name.split(self.item)[-1][1:] for name in names]
+
+			# split by (-) if cancelled
+			names = [cint(name.split('-')[-1]) for name in names]
+
+			idx = max(names) + 1
 		else:
 			idx = 1
-		self.name = 'BOM/' + self.item + ('/%.3i' % idx)
+
+		self.name = 'BOM-' + self.item + ('-%.3i' % idx)
 
 	def validate(self):
 		self.clear_operations()
@@ -53,7 +64,7 @@ class BOM(Document):
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = frappe.db.sql("""select name, item_name, is_asset_item, is_purchase_item,
+		item = frappe.db.sql("""select name, item_name, is_fixed_asset,
 			docstatus, description, image, is_sub_contracted_item, stock_uom, default_bom,
 			last_purchase_rate
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
@@ -107,7 +118,7 @@ class BOM(Document):
 		rate = 0
 		if arg['bom_no']:
 			rate = self.get_bom_unitcost(arg['bom_no'])
-		elif arg and (arg['is_purchase_item'] == 1 or arg['is_sub_contracted_item'] == 1):
+		elif arg:
 			if self.rm_cost_as_per == 'Valuation Rate':
 				rate = self.get_valuation_rate(arg)
 			elif self.rm_cost_as_per == 'Last Purchase Rate':
@@ -124,22 +135,17 @@ class BOM(Document):
 		if self.docstatus == 2:
 			return
 
-		items_rate = frappe._dict()
 		for d in self.get("items"):
 			rate = self.get_bom_material_detail({'item_code': d.item_code, 'bom_no': d.bom_no,
 				'qty': d.qty})["rate"]
 			if rate:
 				d.rate = rate
-				items_rate.setdefault(d.item_code, d.rate)
-
-		for e in self.get("exploded_items"):
-			if items_rate.get(e.item_code):
-				e.rate = items_rate.get(e.item_code)
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
 			self.calculate_cost()
 		self.save()
+		self.update_exploded_items()
 
 		frappe.msgprint(_("Cost Updated"))
 
@@ -163,7 +169,7 @@ class BOM(Document):
 		if valuation_rate <= 0:
 			last_valuation_rate = frappe.db.sql("""select valuation_rate
 				from `tabStock Ledger Entry`
-				where item_code = %s and ifnull(valuation_rate, 0) > 0
+				where item_code = %s and valuation_rate > 0
 				order by posting_date desc, posting_time desc, name desc limit 1""", args['item_code'])
 
 			valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
@@ -202,6 +208,9 @@ class BOM(Document):
 			self.description = ret[0]
 			self.uom = ret[1]
 			self.item_name= ret[2]
+
+		if not self.quantity:
+			frappe.throw(_("Quantity should be greater than 0"))
 
 	def validate_materials(self):
 		""" Validate raw material entries """
@@ -323,7 +332,7 @@ class BOM(Document):
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name, bom_item.description,
 			bom_item.stock_uom, bom_item.qty, bom_item.rate,
-			ifnull(bom_item.qty, 0 ) / ifnull(bom.quantity, 1) as qty_consumed_per_unit
+			bom_item.qty / ifnull(bom.quantity, 1) as qty_consumed_per_unit
 			from `tabBOM Explosion Item` bom_item, tabBOM bom
 			where bom_item.parent = bom.name and bom.name = %s and bom.docstatus = 1""", bom_no, as_dict = 1)
 
@@ -371,7 +380,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
 	query = """select
 				bom_item.item_code,
 				item.item_name,
-				sum(ifnull(bom_item.qty, 0)/ifnull(bom.quantity, 1)) * %(qty)s as qty,
+				sum(bom_item.qty/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.description,
 				item.image,
 				item.stock_uom,
@@ -391,8 +400,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
 
 	if fetch_exploded:
 		query = query.format(table="BOM Explosion Item",
-			conditions="""and item.is_pro_applicable = 0
-				and item.is_sub_contracted_item = 0 """)
+			conditions="""and item.is_sub_contracted_item = 0""")
 		items = frappe.db.sql(query, { "qty": qty,	"bom": bom }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", conditions="")

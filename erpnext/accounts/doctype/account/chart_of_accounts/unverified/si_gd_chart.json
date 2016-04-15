@@ -1,6 +1,7 @@
 {
     "country_code": "si", 
     "name": "Kontni na\u010drt za gospodarske dru\u017ebe", 
+	"disabled": "Yes",
     "tree": {
         "DOLGORO\u010cNA SREDSTVA": {
             "DANA DOLGORO\u010cNA POSOJILA IN TERJATVE ZA NEVPLA\u010cANI VPOKLICANI KAPITAL": {

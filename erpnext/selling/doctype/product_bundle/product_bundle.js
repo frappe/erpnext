@@ -12,9 +12,8 @@ cur_frm.fields_dict.new_item_code.get_query = function() {
 }
 cur_frm.fields_dict.new_item_code.query_description = __('Please select Item where "Is Stock Item" is "No" and "Is Sales Item" is "Yes" and there is no other Product Bundle');
 
-cur_frm.cscript.item_code = function(doc, dt, dn) {
-	var d = locals[dt][dn];
-	if (d.item_code){
-		return get_server_fields('get_item_details', d.item_code, 'items', doc ,dt, dn, 1);
-	}
+cur_frm.cscript.onload = function() {
+	// set add fetch for item_code's item_name and description
+	cur_frm.add_fetch('item_code', 'stock_uom', 'uom');
+	cur_frm.add_fetch('item_code', 'description', 'description');
 }

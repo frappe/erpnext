@@ -180,6 +180,6 @@ erpnext.SalesFunnel = Class.extend({
 		context.fillStyle = "black";
 		context.textBaseline = "middle";
 		context.font = "1.1em sans-serif";
-		context.fillText(title, width + 20, y_mid);
+		context.fillText(__(title), width + 20, y_mid);
 	}
 });

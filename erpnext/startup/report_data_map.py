@@ -46,8 +46,7 @@ data_map = {
 	# Stock
 	"Item": {
 		"columns": ["name", "if(item_name=name, '', item_name) as item_name", "description",
-			"item_group as parent_item_group", "stock_uom", "brand", "valuation_method",
-			"re_order_level", "re_order_qty"],
+			"item_group as parent_item_group", "stock_uom", "brand", "valuation_method"],
 		# "conditions": ["docstatus < 2"],
 		"order_by": "name",
 		"links": {
@@ -78,7 +77,7 @@ data_map = {
 	"Stock Ledger Entry": {
 		"columns": ["name", "posting_date", "posting_time", "item_code", "warehouse",
 			"actual_qty as qty", "voucher_type", "voucher_no", "project",
-			"ifnull(incoming_rate,0) as incoming_rate", "stock_uom", "serial_no",
+			"incoming_rate as incoming_rate", "stock_uom", "serial_no",
 			"qty_after_transaction", "valuation_rate"],
 		"order_by": "posting_date, posting_time, name",
 		"links": {
@@ -100,10 +99,10 @@ data_map = {
 	},
 	"Production Order": {
 		"columns": ["name", "production_item as item_code",
-			"(ifnull(qty, 0) - ifnull(produced_qty, 0)) as qty",
+			"(qty - produced_qty) as qty",
 			"fg_warehouse as warehouse"],
 		"conditions": ["docstatus=1", "status != 'Stopped'", "ifnull(fg_warehouse, '')!=''",
-			"ifnull(qty, 0) > ifnull(produced_qty, 0)"],
+			"qty > produced_qty"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]
@@ -111,10 +110,10 @@ data_map = {
 	},
 	"Material Request Item": {
 		"columns": ["item.name as name", "item_code", "warehouse",
-			"(ifnull(qty, 0) - ifnull(ordered_qty, 0)) as qty"],
+			"(qty - ordered_qty) as qty"],
 		"from": "`tabMaterial Request Item` item, `tabMaterial Request` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
-			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(ordered_qty, 0)"],
+			"ifnull(warehouse, '')!=''", "qty > ordered_qty"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]
@@ -122,10 +121,10 @@ data_map = {
 	},
 	"Purchase Order Item": {
 		"columns": ["item.name as name", "item_code", "warehouse",
-			"(ifnull(qty, 0) - ifnull(received_qty, 0)) as qty"],
+			"(qty - received_qty) as qty"],
 		"from": "`tabPurchase Order Item` item, `tabPurchase Order` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
-			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(received_qty, 0)"],
+			"ifnull(warehouse, '')!=''", "qty > received_qty"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]
@@ -133,10 +132,10 @@ data_map = {
 	},
 
 	"Sales Order Item": {
-		"columns": ["item.name as name", "item_code", "(ifnull(qty, 0) - ifnull(delivered_qty, 0)) as qty", "warehouse"],
+		"columns": ["item.name as name", "item_code", "(qty - delivered_qty) as qty", "warehouse"],
 		"from": "`tabSales Order Item` item, `tabSales Order` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
-			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(delivered_qty, 0)"],
+			"ifnull(warehouse, '')!=''", "qty > delivered_qty"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]

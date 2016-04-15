@@ -21,18 +21,20 @@ def execute(filters=None):
 		invoice_expense_map, expense_accounts)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
 	supplier_details = get_supplier_deatils(invoice_list)
+	
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 
 	data = []
 	for inv in invoice_list:
 		# invoice details
 		purchase_order = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_order", [])))
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
-		project_name = list(set(invoice_po_pr_map.get(inv.name, {}).get("project_name", [])))
+		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
 
-		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name, 
+		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name,
 			supplier_details.get(inv.supplier),
-			inv.credit_to, ", ".join(project_name), inv.bill_no, inv.bill_date, inv.remarks,
-			", ".join(purchase_order), ", ".join(purchase_receipt)]
+			inv.credit_to, ", ".join(project), inv.bill_no, inv.bill_date, inv.remarks,
+			", ".join(purchase_order), ", ".join(purchase_receipt), company_currency]
 
 		# map expense values
 		base_net_total = 0
@@ -54,7 +56,7 @@ def execute(filters=None):
 
 		# total tax, grand total, outstanding amount & rounded total
 		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 2), inv.outstanding_amount]
-		data.append(row)		
+		data.append(row)
 
 	return columns, data
 
@@ -62,34 +64,45 @@ def execute(filters=None):
 def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
-		_("Invoice") + ":Link/Purchase Invoice:120", _("Posting Date") + ":Date:80", _("Supplier Id") + "::120",
-		_("Supplier Name") + "::120", _("Supplier Type") + ":Link/Supplier Type:120", _("Payable Account") + ":Link/Account:120",
-		_("Project") + ":Link/Project:80", _("Bill No") + "::120", _("Bill Date") + ":Date:80", _("Remarks") + "::150",
-		_("Purchase Order") + ":Link/Purchase Order:100", _("Purchase Receipt") + ":Link/Purchase Receipt:100"
+		_("Invoice") + ":Link/Purchase Invoice:120", 
+		_("Posting Date") + ":Date:80", _("Supplier Id") + "::120",
+		_("Supplier Name") + "::120", _("Supplier Type") + ":Link/Supplier Type:120", 
+		_("Payable Account") + ":Link/Account:120", _("Project") + ":Link/Project:80", 
+		_("Bill No") + "::120", _("Bill Date") + ":Date:80", _("Remarks") + "::150",
+		_("Purchase Order") + ":Link/Purchase Order:100", 
+		_("Purchase Receipt") + ":Link/Purchase Receipt:100",
+		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Data",
+			"width": 80
+		}
 	]
 	expense_accounts = tax_accounts = expense_columns = tax_columns = []
 
 	if invoice_list:
 		expense_accounts = frappe.db.sql_list("""select distinct expense_account
-			from `tabPurchase Invoice Item` where docstatus = 1 and ifnull(expense_account, '') != ''
+			from `tabPurchase Invoice Item` where docstatus = 1
+			and (expense_account is not null and expense_account != '')
 			and parent in (%s) order by expense_account""" %
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
 		tax_accounts = 	frappe.db.sql_list("""select distinct account_head
 			from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice'
-			and docstatus = 1 and ifnull(account_head, '') != '' and category in ('Total', 'Valuation and Total')
+			and docstatus = 1 and (account_head is not null and account_head != '')
+			and category in ('Total', 'Valuation and Total')
 			and parent in (%s) order by account_head""" %
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
 
-	expense_columns = [(account + ":Currency:120") for account in expense_accounts]
+	expense_columns = [(account + ":Currency/currency:120") for account in expense_accounts]
 	for account in tax_accounts:
 		if account not in expense_accounts:
-			tax_columns.append(account + ":Currency:120")
+			tax_columns.append(account + ":Currency/currency:120")
 
-	columns = columns + expense_columns + [_("Net Total") + ":Currency:120"] + tax_columns + \
-		[_("Total Tax") + ":Currency:120", _("Grand Total") + ":Currency:120",
-			_("Rounded Total") + ":Currency:120", _("Outstanding Amount") + ":Currency:120"]
+	columns = columns + expense_columns + [_("Net Total") + ":Currency/currency:120"] + tax_columns + \
+		[_("Total Tax") + ":Currency/currency:120", _("Grand Total") + ":Currency/currency:120",
+			_("Rounded Total") + ":Currency/currency:120", _("Outstanding Amount") + ":Currency/currency:120"]
 
 	return columns, expense_accounts, tax_accounts
 
@@ -143,8 +156,8 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 	return invoice_expense_map, invoice_tax_map
 
 def get_invoice_po_pr_map(invoice_list):
-	pi_items = frappe.db.sql("""select parent, purchase_order, purchase_receipt, po_detail, 
-		project_name from `tabPurchase Invoice Item` where parent in (%s)
+	pi_items = frappe.db.sql("""select parent, purchase_order, purchase_receipt, po_detail,
+		project from `tabPurchase Invoice Item` where parent in (%s)
 		and (ifnull(purchase_order, '') != '' or ifnull(purchase_receipt, '') != '')""" %
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
@@ -164,9 +177,9 @@ def get_invoice_po_pr_map(invoice_list):
 		if pr_list:
 			invoice_po_pr_map.setdefault(d.parent, frappe._dict()).setdefault("purchase_receipt", pr_list)
 
-		if d.project_name:
+		if d.project:
 			invoice_po_pr_map.setdefault(d.parent, frappe._dict()).setdefault(
-				"project_name", []).append(d.project_name)
+				"project", []).append(d.project)
 
 	return invoice_po_pr_map
 

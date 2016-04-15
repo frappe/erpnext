@@ -8,16 +8,16 @@ import frappe
 @frappe.whitelist()
 def get_children():
 	ctype = frappe.local.form_dict.get('ctype')
-	frappe.local.form_dict['parent_field'] = 'parent_' + ctype.lower().replace(' ', '_')
-	if not frappe.form_dict.get('parent'):
-		frappe.local.form_dict['parent'] = ''
+	parent_field = 'parent_' + ctype.lower().replace(' ', '_')
+	parent = frappe.form_dict.get("parent") or ""
 
 	return frappe.db.sql("""select name as value,
 		if(is_group='Yes', 1, 0) as expandable
-		from `tab%(ctype)s`
+		from `tab{ctype}`
 		where docstatus < 2
-		and ifnull(%(parent_field)s,'') = "%(parent)s"
-		order by name""" % frappe.local.form_dict, as_dict=1)
+		and ifnull(`{parent_field}`,'') = %s
+		order by name""".format(ctype=frappe.db.escape(ctype), parent_field=frappe.db.escape(parent_field)),
+		parent, as_dict=1)
 
 @frappe.whitelist()
 def add_node():

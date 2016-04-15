@@ -9,7 +9,9 @@ from frappe import throw, _
 from frappe.model.document import Document
 from frappe.email.bulk import check_bulk_limit
 from frappe.utils.verified_command import get_signed_params, verify_request
-import erpnext.tasks
+from frappe.utils.background_jobs import enqueue
+from frappe.utils.scheduler import log
+from frappe.email.bulk import send
 from erpnext.crm.doctype.newsletter_list.newsletter_list import add_subscribers
 
 class Newsletter(Document):
@@ -20,7 +22,7 @@ class Newsletter(Document):
 				group by status""", (self.doctype, self.name))) or None
 
 	def test_send(self, doctype="Lead"):
-		self.recipients = self.test_email_id.split(",")
+		self.recipients = frappe.utils.split_emails(self.test_email_id)
 		self.send_bulk()
 		frappe.msgprint(_("Scheduled to send to {0}").format(self.test_email_id))
 
@@ -32,11 +34,11 @@ class Newsletter(Document):
 		self.recipients = self.get_recipients()
 
 		if getattr(frappe.local, "is_ajax", False):
-			# to avoid request timed out!
 			self.validate_send()
 
-			# hack! event="bulk_long" to queue in longjob queue
-			erpnext.tasks.send_newsletter.delay(frappe.local.site, self.name, event="bulk_long")
+			# using default queue with a longer timeout as this isn't a scheduled task
+			enqueue(send_newsletter, queue='default', timeout=1500, event='send_newsletter', newsletter=self.name)
+
 		else:
 			self.send_bulk()
 
@@ -53,8 +55,6 @@ class Newsletter(Document):
 
 		sender = self.send_from or frappe.utils.get_formatted_email(self.owner)
 
-		from frappe.email.bulk import send
-
 		if not frappe.flags.in_test:
 			frappe.db.auto_commit_on_many_writes = True
 
@@ -62,7 +62,8 @@ class Newsletter(Document):
 			subject = self.subject, message = self.message,
 			reference_doctype = self.doctype, reference_name = self.name,
 			unsubscribe_method = "/api/method/erpnext.crm.doctype.newsletter.newsletter.unsubscribe",
-			unsubscribe_params = {"name": self.newsletter_list})
+			unsubscribe_params = {"name": self.newsletter_list},
+			bulk_priority = 0)
 
 		if not frappe.flags.in_test:
 			frappe.db.auto_commit_on_many_writes = False
@@ -120,7 +121,7 @@ def create_lead(email_id):
 		"lead_name": real_name or email_id,
 		"status": "Lead",
 		"naming_series": get_default_naming_series("Lead"),
-		"company": frappe.db.get_default("company"),
+		"company": frappe.db.get_default("Company"),
 		"source": "Email"
 	})
 	lead.insert()
@@ -163,6 +164,26 @@ def confirm_subscription(email):
 	frappe.db.commit()
 
 	frappe.respond_as_web_page(_("Confirmed"), _("{0} has been successfully added to our Newsletter list.").format(email))
+
+
+def send_newsletter(newsletter):
+	try:
+		doc = frappe.get_doc("Newsletter", newsletter)
+		doc.send_bulk()
+
+	except:
+		frappe.db.rollback()
+
+		# wasn't able to send emails :(
+		doc.db_set("email_sent", 0)
+		frappe.db.commit()
+
+		log("send_newsletter")
+
+		raise
+
+	else:
+		frappe.db.commit()
 
 
 

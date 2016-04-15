@@ -11,6 +11,8 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
+from frappe.tests.test_permissions import set_user_permission_doctypes
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 def get_sle(**args):
 	condition, values = "", []
@@ -27,6 +29,10 @@ class TestStockEntry(unittest.TestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		set_perpetual_inventory(0)
+
+		for role in ("Stock User", "Sales User"):
+			set_user_permission_doctypes(doctype="Stock Entry", role=role,
+				apply_user_permissions=0, user_permission_doctypes=None)
 
 	def test_fifo(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
@@ -64,38 +70,40 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual([[1, 20],[1, 30]], eval(sle.stock_queue))
 
 		frappe.db.set_default("allow_negative_stock", 0)
-	
+
 	def test_auto_material_request(self):
 		from erpnext.stock.doctype.item.test_item import make_item_variant
 		make_item_variant()
 		self._test_auto_material_request("_Test Item")
-		
+		self._test_auto_material_request("_Test Item", material_request_type="Transfer")
+
 	def test_auto_material_request_for_variant(self):
 		self._test_auto_material_request("_Test Variant Item-S")
 
-	def _test_auto_material_request(self, item_code):
+	def _test_auto_material_request(self, item_code, material_request_type="Purchase"):
 		item = frappe.get_doc("Item", item_code)
 
 		if item.variant_of:
 			template = frappe.get_doc("Item", item.variant_of)
 		else:
 			template = item
-			
+
 		projected_qty, actual_qty = frappe.db.get_value("Bin", {"item_code": item_code,
 			"warehouse": "_Test Warehouse - _TC"}, ["projected_qty", "actual_qty"]) or [0, 0]
 
 		# stock entry reqd for auto-reorder
 		create_stock_reconciliation(item_code=item_code, warehouse="_Test Warehouse - _TC",
 			qty = actual_qty + abs(projected_qty) + 10, rate=100)
-			
+
 		projected_qty = frappe.db.get_value("Bin", {"item_code": item_code,
 			"warehouse": "_Test Warehouse - _TC"}, "projected_qty") or 0
-		
+
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
-		
+
 		# update re-level qty so that it is more than projected_qty
 		if projected_qty >= template.reorder_levels[0].warehouse_reorder_level:
 			template.reorder_levels[0].warehouse_reorder_level += projected_qty
+			template.reorder_levels[0].material_request_type = material_request_type
 			template.save()
 
 		from erpnext.stock.reorder_item import reorder_item
@@ -234,7 +242,7 @@ class TestStockEntry(unittest.TestCase):
 		repack = frappe.copy_doc(test_records[3])
 		repack.posting_date = nowdate()
 		repack.posting_time = nowtime()
-		
+
 		repack.set("additional_costs", [
 			{
 				"description": "Actual Oerating Cost",
@@ -258,7 +266,7 @@ class TestStockEntry(unittest.TestCase):
 			"voucher_no": repack.name, "item_code": "_Test Item Home Desktop 100"}, "stock_value_difference"))
 
 		stock_value_diff = flt(fg_stock_value_diff - rm_stock_value_diff, 2)
-		
+
 		self.assertEqual(stock_value_diff, 1200)
 
 		self.check_gl_entries("Stock Entry", repack.name,
@@ -291,7 +299,7 @@ class TestStockEntry(unittest.TestCase):
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 			order by account asc, debit asc""", (voucher_type, voucher_no), as_list=1)
-		
+
 		self.assertTrue(gl_entries)
 		gl_entries.sort(key=lambda x: x[0])
 		for i, gle in enumerate(gl_entries):
@@ -456,6 +464,10 @@ class TestStockEntry(unittest.TestCase):
 	def test_warehouse_user(self):
 		set_perpetual_inventory(0)
 
+		for role in ("Stock User", "Sales User"):
+			set_user_permission_doctypes(doctype="Stock Entry", role=role,
+				apply_user_permissions=1, user_permission_doctypes=["Warehouse"])
+
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "User Permission")
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "User Permission")
 		test_user = frappe.get_doc("User", "test@example.com")
@@ -531,7 +543,7 @@ class TestStockEntry(unittest.TestCase):
 				rm_cost += flt(d.amount)
 
 		fg_cost = filter(lambda x: x.item_code=="_Test FG Item 2", stock_entry.get("items"))[0].amount
-		self.assertEqual(fg_cost, 
+		self.assertEqual(fg_cost,
 			flt(rm_cost + bom_operation_cost + production_order.additional_operating_cost, 2))
 
 
@@ -558,6 +570,27 @@ class TestStockEntry(unittest.TestCase):
 		stock_entry.insert()
 		self.assertTrue("_Test Variant Item-S" in [d.item_code for d in stock_entry.items])
 
+	def test_same_serial_nos_in_repack_or_manufacture_entries(self):
+		s1 = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+		serial_nos = s1.get("items")[0].serial_no
+
+		s2 = make_stock_entry(item_code="_Test Serialized Item With Series", source="_Test Warehouse - _TC",
+			qty=2, basic_rate=100, purpose="Repack", serial_no=serial_nos, do_not_save=True)
+
+		s2.append("items", {
+			"item_code": "_Test Serialized Item",
+			"t_warehouse": "_Test Warehouse - _TC",
+			"qty": 2,
+			"basic_rate": 120,
+			"expense_account": "Stock Adjustment - _TC",
+			"conversion_factor": 1.0,
+			"cost_center": "_Test Cost Center - _TC",
+			"serial_no": serial_nos
+		})
+
+		s2.submit()
+		s2.cancel()
+
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
 	se.get("items")[0].item_code = item_code or "_Test Serialized Item With Series"
@@ -571,50 +604,6 @@ def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se.insert()
 	se.submit()
 	return se
-
-def make_stock_entry(**args):
-	from erpnext.accounts.utils import get_fiscal_year
-
-	s = frappe.new_doc("Stock Entry")
-	args = frappe._dict(args)
-	if args.posting_date:
-		s.posting_date = args.posting_date
-	if args.posting_time:
-		s.posting_time = args.posting_time
-
-	if not args.purpose:
-		if args.source and args.target:
-			s.purpose = "Material Transfer"
-		elif args.source:
-			s.purpose = "Material Issue"
-		else:
-			s.purpose = "Material Receipt"
-	else:
-		s.purpose = args.purpose
-
-	s.company = args.company or "_Test Company"
-	s.fiscal_year = get_fiscal_year(s.posting_date)[0]
-	s.purchase_receipt_no = args.purchase_receipt_no
-	s.delivery_note_no = args.delivery_note_no
-	s.sales_invoice_no = args.sales_invoice_no
-	s.difference_account = args.difference_account or "Stock Adjustment - _TC"
-
-	s.append("items", {
-		"item_code": args.item or args.item_code or "_Test Item",
-		"s_warehouse": args.from_warehouse or args.source,
-		"t_warehouse": args.to_warehouse or args.target,
-		"qty": args.qty,
-		"basic_rate": args.basic_rate,
-		"expense_account": args.expense_account or "Stock Adjustment - _TC",
-		"conversion_factor": 1.0,
-		"cost_center": "_Test Cost Center - _TC"
-	})
-
-	if not args.do_not_save:
-		s.insert()
-		if not args.do_not_submit:
-			s.submit()
-	return s
 
 def get_qty_after_transaction(**args):
 	args = frappe._dict(args)

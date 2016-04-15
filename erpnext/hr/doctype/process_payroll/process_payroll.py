@@ -41,7 +41,7 @@ class ProcessPayroll(Document):
 
 
 	def get_joining_releiving_condition(self):
-		m = self.get_month_details(self.fiscal_year, self.month)
+		m = get_month_details(self.fiscal_year, self.month)
 		cond = """
 			and ifnull(t1.date_of_joining, '0000-00-00') <= '%(month_end_date)s'
 			and ifnull(t1.relieving_date, '2199-12-31') >= '%(month_start_date)s'
@@ -53,24 +53,6 @@ class ProcessPayroll(Document):
 		for f in ['company', 'month', 'fiscal_year']:
 			if not self.get(f):
 				frappe.throw(_("Please set {0}").format(f))
-
-	def get_month_details(self, year, month):
-		ysd = frappe.db.get_value("Fiscal Year", year, "year_start_date")
-		if ysd:
-			from dateutil.relativedelta import relativedelta
-			import calendar, datetime
-			diff_mnt = cint(month)-cint(ysd.month)
-			if diff_mnt<0:
-				diff_mnt = 12-int(ysd.month)+cint(month)
-			msd = ysd + relativedelta(months=diff_mnt) # month start date
-			month_days = cint(calendar.monthrange(cint(msd.year) ,cint(month))[1]) # days in month
-			med = datetime.date(msd.year, cint(month), month_days) # month end date
-			return {
-				'year': msd.year,
-				'month_start_date': msd,
-				'month_end_date': med,
-				'month_days': month_days
-			}
 
 	def create_sal_slip(self):
 		"""
@@ -98,9 +80,9 @@ class ProcessPayroll(Document):
 
 
 	def create_log(self, ss_list):
-		log = "<p>No employee for the above selected criteria OR salary slip already created</p>"
+		log = "<p>" + _("No employee for the above selected criteria OR salary slip already created") + "</p>"
 		if ss_list:
-			log = "<b>Salary Slip Created For</b>\
+			log = "<b>" + _("Salary Slip Created") + "</b>\
 			<br><br>%s" % '<br>'.join(self.format_as_links(ss_list))
 		return log
 
@@ -196,12 +178,31 @@ class ProcessPayroll(Document):
 		journal_entry.set("accounts", [
 			{
 				"account": salary_account,
-				"debit": amount
+				"debit_in_account_currency": amount
 			},
 			{
 				"account": default_bank_account,
-				"credit": amount
+				"credit_in_account_currency": amount
 			},
 		])
 
 		return journal_entry.as_dict()
+
+@frappe.whitelist()
+def get_month_details(year, month):
+	ysd = frappe.db.get_value("Fiscal Year", year, "year_start_date")
+	if ysd:
+		from dateutil.relativedelta import relativedelta
+		import calendar, datetime
+		diff_mnt = cint(month)-cint(ysd.month)
+		if diff_mnt<0:
+			diff_mnt = 12-int(ysd.month)+cint(month)
+		msd = ysd + relativedelta(months=diff_mnt) # month start date
+		month_days = cint(calendar.monthrange(cint(msd.year) ,cint(month))[1]) # days in month
+		med = datetime.date(msd.year, cint(month), month_days) # month end date
+		return frappe._dict({
+			'year': msd.year,
+			'month_start_date': msd,
+			'month_end_date': med,
+			'month_days': month_days
+		})

@@ -24,7 +24,7 @@ class HubSettings(Document):
 	def publish_selling_items(self):
 		"""Set `publish_in_hub`=1 for all Sales Items"""
 		for item in frappe.get_all("Item", fields=["name"],
-			filters={"is_sales_item": 1, "publish_in_hub": "0"}):
+			filters={ "publish_in_hub": "0"}):
 			frappe.db.set_value("Item", item.name, "publish_in_hub", 1)
 
 	def register(self):
@@ -78,7 +78,7 @@ class HubSettings(Document):
 			if item.image:
 				item.image = expand_relative_urls(item.image)
 
-		item_list = frappe.db.sql_list("select name from tabItem where ifnull(publish_in_hub,0)=1")
+		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
 
 		if items:
 			response = requests.post(self.hub_url + "/api/method/hub.hub.api.sync", data={

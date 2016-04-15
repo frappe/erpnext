@@ -16,14 +16,13 @@
     "description": "138-CMS Shoe",
     "doctype": "Sales Invoice Item",
     "income_account": "Sales - _TC",
-	"expense_account": "_Test Account Cost for Goods Sold - _TC",
+  	"expense_account": "_Test Account Cost for Goods Sold - _TC",
     "item_name": "138-CMS Shoe",
     "parentfield": "items",
     "qty": 1.0,
     "rate": 500.0
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "base_grand_total": 561.8,
   "grand_total": 561.8,
   "is_pos": 0,
@@ -158,7 +157,6 @@
     "stock_uom": "_Test UOM"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "grand_total": 0,
   "is_pos": 0,
   "naming_series": "_T-Sales Invoice-",
@@ -280,7 +278,6 @@
     "stock_uom": "_Test UOM"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "grand_total": 0,
   "is_pos": 0,
   "naming_series": "_T-Sales Invoice-",

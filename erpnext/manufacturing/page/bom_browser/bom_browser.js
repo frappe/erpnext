@@ -60,7 +60,6 @@ erpnext.BOMTree = Class.extend({
 					frappe.boot.user.in_create.indexOf("BOM") !== -1;
 		me.can_write = frappe.model.can_write("BOM");
 		me.can_delete = frappe.model.can_delete("BOM");
-
 		this.tree = new frappe.ui.Tree({
 			parent: $(parent),
 			label: me.bom,
@@ -74,15 +73,15 @@ erpnext.BOMTree = Class.extend({
 						return node.expandable;
 					},
 					click: function(node) {
-						frappe.set_route("Form", "BOM", node.data.parent);
+						frappe.set_route("Form", "BOM", node.data.value);
 					}
 				}
 			],
 			get_label: function(node) {
 				if(node.data.qty) {
-					return node.data.qty + " x " + node.data.value;
+					return node.data.qty + " x " + node.data.item_code;
 				} else {
-					return node.data.value;
+					return node.data.item_code || node.data.value;
 				}
 			}
 		});

@@ -7,7 +7,7 @@ erpnext.pos.PointOfSale = Class.extend({
 	init: function(wrapper, frm) {
 		this.wrapper = wrapper;
 		this.frm = frm;
-		this.wrapper.html(frappe.render_template("pos", {}));
+		this.wrapper.html(frappe.render_template("pos", {currency: this.frm.currency}));
 
 		this.check_transaction_type();
 		this.make();
@@ -15,6 +15,11 @@ erpnext.pos.PointOfSale = Class.extend({
 		var me = this;
 		$(this.frm.wrapper).on("refresh-fields", function() {
 			me.refresh();
+		});
+
+		this.wrapper.find('input.discount-percentage').on("change", function() {
+			frappe.model.set_value(me.frm.doctype, me.frm.docname,
+				"additional_discount_percentage", flt(this.value));
 		});
 
 		this.wrapper.find('input.discount-amount').on("change", function() {
@@ -52,10 +57,13 @@ erpnext.pos.PointOfSale = Class.extend({
 				"fieldtype": "Link",
 				"options": this.party,
 				"label": this.party,
-				"fieldname": "pos_party",
+				"fieldname": this.party.toLowerCase(),
 				"placeholder": this.party
 			},
 			parent: this.wrapper.find(".party-area"),
+			frm: this.frm,
+			doctype: this.frm.doctype,
+			docname: this.frm.docname,
 			only_input: true,
 		});
 		this.party_field.make_input();
@@ -78,7 +86,7 @@ erpnext.pos.PointOfSale = Class.extend({
 			only_input: true,
 		});
 		this.search.make_input();
-		this.search.$input.on("keypress", function() {
+		this.search.$input.on("keyup", function() {
 			if(!me.search.autocomplete_open)
 				if(me.item_timeout)
 					clearTimeout(me.item_timeout);
@@ -123,7 +131,9 @@ erpnext.pos.PointOfSale = Class.extend({
 							item_code: obj.name,
 							item_price: format_currency(obj.price_list_rate, obj.currency),
 							item_name: obj.name===obj.item_name ? "" : obj.item_name,
-							item_image: obj.image ? "url('" + obj.image + "')" : null
+							item_image: obj.image ? "url('" + obj.image + "')" : null,
+							color: frappe.get_palette(obj.item_name),
+							abbr: frappe.get_abbr(obj.item_name)
 						})).tooltip().appendTo($wrap);
 					});
 				}
@@ -230,6 +240,11 @@ erpnext.pos.PointOfSale = Class.extend({
 	},
 	refresh_fields: function() {
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
+		this.party_field.frm = this.frm;
+		this.party_field.doctype = this.frm.doctype;
+		this.party_field.docname = this.frm.docname;
+
+		this.wrapper.find('input.discount-percentage').val(this.frm.doc.additional_discount_percentage);
 		this.wrapper.find('input.discount-amount').val(this.frm.doc.discount_amount);
 
 		this.show_items_in_item_cart();
@@ -413,16 +428,29 @@ erpnext.pos.PointOfSale = Class.extend({
 					title: 'Payment',
 					fields: [
 						{fieldtype:'Currency',
-							fieldname:'total_amount', label: __('Total Amount'), read_only:1,
-							"default": me.frm.doc.grand_total, read_only: 1},
+							fieldname:'total_amount', label: __('Total Amount'),
+							"default": me.frm.doc.grand_total},
 						{fieldtype:'Select', fieldname:'mode_of_payment',
 							label: __('Mode of Payment'),
 							options: me.modes_of_payment.join('\n'), reqd: 1,
 							"default": default_mode},
 						{fieldtype:'Currency', fieldname:'paid_amount', label:__('Amount Paid'),
-							reqd:1, "default": me.frm.doc.grand_total, hidden: 1, change: function() {
+							reqd:1, "default": me.frm.doc.grand_total,
+							change: function() {
 								var values = dialog.get_values();
-								dialog.set_value("change", Math.round(values.paid_amount - values.total_amount));
+
+								var actual_change = flt(values.paid_amount - values.total_amount,
+									precision("paid_amount"));
+
+								if (actual_change > 0) {
+									var rounded_change =
+										round_based_on_smallest_currency_fraction(actual_change,
+											me.frm.doc.currency, precision("paid_amount"));
+								} else {
+									var rounded_change = 0;
+								}
+
+								dialog.set_value("change", rounded_change);
 								dialog.get_input("change").trigger("change");
 
 							}},
@@ -455,6 +483,9 @@ erpnext.pos.PointOfSale = Class.extend({
 						// set to nearest 5
 						dialog.set_value("paid_amount", dialog.get_value("total_amount"));
 						dialog.get_input("paid_amount").trigger("change");
+					} else if (!is_cash) {
+						dialog.set_value("paid_amount", dialog.get_value("total_amount"));
+						dialog.set_value("change", 0);
 					}
 				}).trigger("change");
 
@@ -473,13 +504,11 @@ erpnext.pos.PointOfSale = Class.extend({
 			}
 			me.frm.set_value("mode_of_payment", values.mode_of_payment);
 
-			//me.frm.cscript.calculate_taxes_and_totals();
-
-			var paid_amount = flt((flt(values.paid_amount) - flt(values.change)) / me.frm.doc.conversion_rate, precision("paid_amount"));
+			var paid_amount = flt((flt(values.paid_amount) - flt(values.change)), precision("paid_amount"));
 			me.frm.set_value("paid_amount", paid_amount);
 
 			// specifying writeoff amount here itself, so as to avoid recursion issue
-			me.frm.set_value("write_off_amount", me.frm.doc.base_grand_total - paid_amount);
+			me.frm.set_value("write_off_amount", me.frm.doc.grand_total - paid_amount);
 			me.frm.set_value("outstanding_amount", 0);
 
 			me.frm.savesubmit(this);

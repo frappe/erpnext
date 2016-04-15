@@ -52,6 +52,9 @@ def get():
 	            },
 	            _("Plant and Machinery"): {
 	                "account_type": "Fixed Asset"
+	            },
+	            _("Accumulated Depreciation"): {
+	            	"account_type": "Accumulated Depreciation"
 	            }
 	        },
 	        _("Investments"): {
@@ -88,7 +91,7 @@ def get():
 	                "account_type": "Expense Account"
 	            },
 	            _("Depreciation"): {
-	                "account_type": "Expense Account"
+	                "account_type": "Depreciation"
 	            },
 	            _("Entertainment Expenses"): {
 	                "account_type": "Expense Account"
