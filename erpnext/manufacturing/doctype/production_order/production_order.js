@@ -1,61 +1,96 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.ui.form.on("Production Order", "onload", function(frm) {
-	if (!frm.doc.status)
-		frm.doc.status = 'Draft';
+frappe.ui.form.on("Production Order", {
+	onload: function(frm) {
+		if (!frm.doc.status)
+			frm.doc.status = 'Draft';
 
-	frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
-	frm.add_fetch("sales_order", "project", "project");
+		frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
+		frm.add_fetch("sales_order", "project", "project");
 
-	if(frm.doc.__islocal) {
-		frm.set_value({
-			"actual_start_date": "",
-			"actual_end_date": ""
+		if(frm.doc.__islocal) {
+			frm.set_value({
+				"actual_start_date": "",
+				"actual_end_date": ""
+			});
+			erpnext.production_order.set_default_warehouse(frm);
+		}
+
+		erpnext.production_order.set_custom_buttons(frm);
+		erpnext.production_order.setup_company_filter(frm);
+		erpnext.production_order.setup_bom_filter(frm);
+	},
+	refresh: function(frm) {
+		erpnext.toggle_naming_series();
+		frm.set_intro("");
+		erpnext.production_order.set_custom_buttons(frm);
+
+		if (frm.doc.docstatus === 0 && !frm.doc.__islocal) {
+			frm.set_intro(__("Submit this Production Order for further processing."));
+		}
+
+		if (frm.doc.docstatus===1) {
+			frm.trigger('show_progress');
+		}
+	},
+	show_progress: function(frm) {
+		var bars = [];
+		var message = '';
+		var added_min = false;
+
+		// produced qty
+		var title = __('{0} items produced', [frm.doc.produced_qty]);
+		bars.push({
+			'title': title,
+			'width': (frm.doc.produced_qty / frm.doc.qty * 100) + '%',
+			'progress_class': 'progress-bar-success'
 		});
-		erpnext.production_order.set_default_warehouse(frm);
-	}
+		if(bars[0].width=='0%') {
+			 bars[0].width = '0.5%';
+			 added_min = 0.5;
+		 }
+		message = title;
 
-	erpnext.production_order.set_custom_buttons(frm);
-	erpnext.production_order.setup_company_filter(frm);
-	erpnext.production_order.setup_bom_filter(frm);
-});
-
-frappe.ui.form.on("Production Order", "refresh", function(frm) {
-	erpnext.toggle_naming_series();
-	frm.set_intro("");
-	erpnext.production_order.set_custom_buttons(frm);
-
-	if (frm.doc.docstatus === 0 && !frm.doc.__islocal) {
-		frm.set_intro(__("Submit this Production Order for further processing."));
-	}
-});
-
-frappe.ui.form.on("Production Order", "additional_operating_cost", function(frm) {
-	erpnext.production_order.calculate_total_cost(frm);
-});
-
-frappe.ui.form.on("Production Order Operation", "workstation", function(frm, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.workstation) {
-		frappe.call({
-			"method": "frappe.client.get",
-			args: {
-				doctype: "Workstation",
-				name: d.workstation
-			},
-			callback: function (data) {
-				frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
-				erpnext.production_order.calculate_cost(frm.doc);
-				erpnext.production_order.calculate_total_cost(frm);
-			}
-		})
+		// pending qty
+		var pending_complete = frm.doc.material_transferred_for_manufacturing - frm.doc.produced_qty;
+		if(pending_complete) {
+			var title = __('{0} items in progress', [pending_complete]);
+			bars.push({
+				'title': title,
+				'width': ((pending_complete / frm.doc.qty * 100) - added_min)  + '%',
+				'progress_class': 'progress-bar-warning'
+			})
+			message = message + '. ' + title;
+		}
+		frm.dashboard.add_progress(__('Status'), bars, message);
 	}
 });
 
-frappe.ui.form.on("Production Order Operation", "time_in_mins", function(frm, cdt, cdn) {
-	erpnext.production_order.calculate_cost(frm.doc);
-	erpnext.production_order.calculate_total_cost(frm)
+
+
+frappe.ui.form.on("Production Order Operation", {
+	workstation: function(frm, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if (d.workstation) {
+			frappe.call({
+				"method": "frappe.client.get",
+				args: {
+					doctype: "Workstation",
+					name: d.workstation
+				},
+				callback: function (data) {
+					frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
+					erpnext.production_order.calculate_cost(frm.doc);
+					erpnext.production_order.calculate_total_cost(frm);
+				}
+			})
+		}
+	},
+	time_in_mins: function(frm, cdt, cdn) {
+		erpnext.production_order.calculate_cost(frm.doc);
+		erpnext.production_order.calculate_total_cost(frm);
+	}
 });
 
 erpnext.production_order = {
@@ -84,13 +119,20 @@ erpnext.production_order = {
 			}
 
 			if (flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) {
-				frm.add_custom_button(__('Transfer Materials for Manufacture'),
-					cur_frm.cscript['Transfer Raw Materials'], __("Stock Entry"));
+				var btn = frm.add_custom_button(__('Start'),
+					cur_frm.cscript['Transfer Raw Materials']);
+				btn.addClass('btn-primary');
 			}
 
 			if (flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) {
-				frm.add_custom_button(__('Update Finished Goods'),
-					cur_frm.cscript['Update Finished Goods'], __("Stock Entry"));
+				var btn = frm.add_custom_button(__('Finish'),
+					cur_frm.cscript['Update Finished Goods']);
+
+				if(doc.material_transferred_for_manufacturing==doc.qty) {
+					// all materials transferred for manufacturing,
+					// make this primary
+					btn.addClass('btn-primary');
+				}
 			}
 		}
 
@@ -179,7 +221,7 @@ $.extend(cur_frm.cscript, {
 			flt(this.frm.doc.qty) - flt(this.frm.doc.material_transferred_for_manufacturing);
 
 		frappe.prompt({fieldtype:"Int", label: __("Qty for {0}", [purpose]), fieldname:"qty",
-			description: __("Max: {0}", [max]) },
+			description: __("Max: {0}", [max]), 'default': max },
 			function(data) {
 				if(data.qty > max) {
 					frappe.msgprint(__("Quantity must not be more than {0}", [max]));
