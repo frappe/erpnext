@@ -644,7 +644,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-04-06 05:39:46.951866", 
+ "modified": "2016-04-15 03:09:31.497272", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Address", 
@@ -731,6 +731,7 @@
    "write": 1
   }
  ], 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "customer, supplier, sales_partner, country, state", 
