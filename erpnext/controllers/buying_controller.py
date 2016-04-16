@@ -229,7 +229,7 @@ class BuyingController(StockController):
 			rm.amount = required_qty * flt(rm.rate)
 			raw_materials_cost += flt(rm.amount)
 
-		if self.doctype == "Purchase Receipt":
+		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 			item.rm_supp_cost = raw_materials_cost
 
 	def cleanup_raw_materials_supplied(self, parent_items, raw_material_table):
@@ -307,7 +307,7 @@ class BuyingController(StockController):
 		for d in self.get("items"):
 			if not flt(d.received_qty) and flt(d.qty):
 				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
-
+			
 			elif not flt(d.qty) and flt(d.rejected_qty):
 				d.qty = flt(d.received_qty) - flt(d.rejected_qty)
 

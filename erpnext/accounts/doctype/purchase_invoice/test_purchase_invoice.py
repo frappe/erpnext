@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.model
-from frappe.utils import cint
+from frappe.utils import cint, flt
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
 	test_records as pr_test_records
@@ -377,6 +377,31 @@ class TestPurchaseInvoice(unittest.TestCase):
 		actual_qty_2 = get_qty_after_transaction()
 
 		self.assertEquals(actual_qty_1 - 2, actual_qty_2)
+	
+	def test_subcontracting(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100)
+		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TC",
+			qty=100, basic_rate=100)
+		
+		pi = make_purchase_invoice(item_code="_Test FG Item", qty=10, rate=500, is_subcontracted="Yes",
+			update_stock=1)
+		self.assertEquals(len(pi.get("supplied_items")), 2)
+		
+		rm_supp_cost = sum([d.amount for d in pi.get("supplied_items")])
+		self.assertEquals(pi.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
+	
+	def test_rejected_serial_no(self):
+		pi = make_purchase_invoice(item_code="_Test Serialized Item With Series", received_qty=2, qty=1,
+			rejected_qty=1, rate=500, update_stock=1,
+			rejected_warehouse = "_Test Rejected Warehouse - _TC")
+		
+		self.assertEquals(frappe.db.get_value("Serial No", pi.get("items")[0].serial_no, "warehouse"),
+			pi.get("items")[0].warehouse)
+			
+		self.assertEquals(frappe.db.get_value("Serial No", pi.get("items")[0].rejected_serial_no, "warehouse"),
+			pi.get("items")[0].rejected_warehouse)
 
 def make_purchase_invoice(**args):
 	pi = frappe.new_doc("Purchase Invoice")
@@ -398,17 +423,23 @@ def make_purchase_invoice(**args):
 	pi.conversion_rate = args.conversion_rate or 1
 	pi.is_return = args.is_return
 	pi.return_against = args.return_against
+	pi.is_subcontracted = args.is_subcontracted or "No"
+	pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 5,
+		"received_qty": args.received_qty or 0,
+		"rejected_qty": args.rejected_qty or 0,
 		"rate": args.rate or 50,
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": "_Test UOM",
 		"cost_center": "_Test Cost Center - _TC",
-		"project": args.project
+		"project": args.project,
+		"rejected_warehouse": args.rejected_warehouse or "",
+		"rejected_serial_no": args.rejected_serial_no or ""
 	})
 	if not args.do_not_save:
 		pi.insert()
