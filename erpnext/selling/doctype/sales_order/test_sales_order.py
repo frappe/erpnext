@@ -126,6 +126,34 @@ class TestSalesOrder(unittest.TestCase):
 
 		dn.cancel()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
+		
+	def test_reserved_qty_for_over_delivery_via_sales_invoice(self):
+		# set over-delivery tolerance
+		frappe.db.set_value('Item', "_Test Item", 'tolerance', 50)
+
+		existing_reserved_qty = get_reserved_qty()
+
+		so = make_sales_order()
+		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
+
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.get("items")[0].qty = 12
+		si.insert()
+		si.submit()
+		
+		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
+		
+		so.load_from_db()
+		self.assertEqual(so.get("items")[0].delivered_qty, 12)
+		self.assertEqual(so.per_delivered, 100)
+
+		si.cancel()
+		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
+		
+		so.load_from_db()
+		self.assertEqual(so.get("items")[0].delivered_qty, 0)
+		self.assertEqual(so.per_delivered, 0)
 
 	def test_reserved_qty_for_partial_delivery_with_packing_list(self):
 		existing_reserved_qty_item1 = get_reserved_qty("_Test Item")

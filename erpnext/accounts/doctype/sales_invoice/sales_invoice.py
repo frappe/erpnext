@@ -81,14 +81,10 @@ class SalesInvoice(SellingController):
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		self.update_packing_list()
 
-	def on_submit(self):
-		if cint(self.update_stock) == 1:
-			self.update_stock_ledger()
-		else:
-			# Check for Approving Authority
-			if not self.recurring_id:
-				frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
-				 	self.company, self.base_grand_total, self)
+	def on_submit(self):			
+		if not self.recurring_id:
+			frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
+			 	self.company, self.base_grand_total, self)
 
 		self.check_prev_docstatus()
 
@@ -99,7 +95,12 @@ class SalesInvoice(SellingController):
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.update_billing_status_in_dn()
-
+		
+		# Updating stock ledger should always be called after updating prevdoc status, 
+		# because updating reserved qty in bin depends upon updated delivered qty in SO
+		if self.update_stock == 1:
+			self.update_stock_ledger()
+		
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
 
@@ -117,9 +118,6 @@ class SalesInvoice(SellingController):
 		self.update_time_log_batch(None)
 
 	def on_cancel(self):
-		if cint(self.update_stock) == 1:
-			self.update_stock_ledger()
-
 		self.check_close_sales_order("sales_order")
 
 		from erpnext.accounts.utils import remove_against_link_from_jv
@@ -137,6 +135,11 @@ class SalesInvoice(SellingController):
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 
 		self.validate_c_form_on_cancel()
+		
+		# Updating stock ledger should always be called after updating prevdoc status, 
+		# because updating reserved qty in bin depends upon updated delivered qty in SO
+		if self.update_stock == 1:
+			self.update_stock_ledger()
 
 		self.make_gl_entries_on_cancel()
 
@@ -461,21 +464,6 @@ class SalesInvoice(SellingController):
 				
 				d.income_account = disposal_account
 
-	def on_update(self):
-		if cint(self.is_pos) == 1:
-			if flt(self.paid_amount) == 0:
-				if self.cash_bank_account:
-					frappe.db.set(self, 'paid_amount',
-						flt(flt(self.grand_total) - flt(self.write_off_amount), self.precision("paid_amount")))
-				else:
-					# show message that the amount is not paid
-					frappe.db.set(self,'paid_amount',0)
-					frappe.msgprint(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
-		else:
-			frappe.db.set(self,'paid_amount',0)
-
-		frappe.db.set(self, 'base_paid_amount',
-			flt(self.paid_amount*self.conversion_rate, self.precision("base_paid_amount")))
 
 	def check_prev_docstatus(self):
 		for d in self.get('items'):

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
-from frappe.utils import flt
+from frappe.utils import flt,cint, cstr
 
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
@@ -32,10 +32,29 @@ class BuyingController(StockController):
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
+		
+		if self.doctype=="Purchase Invoice":
+			self.validate_purchase_receipt_if_update_stock()
+		
+		if self.doctype=="Purchase Receipt" or (self.doctype=="Purchase Invoice" and self.update_stock):
+			self.validate_purchase_return()
+			self.validate_rejected_warehouse()
+			self.validate_accepted_rejected_qty()
+			
+			pc_obj = frappe.get_doc('Purchase Common')
+			pc_obj.validate_for_items(self)
+			
+			#sub-contracting
+			self.validate_for_subcontracting()
+			self.create_raw_materials_supplied("supplied_items")
+			self.set_landed_cost_voucher_amount()
+		
+		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
+			self.update_valuation_rate("items")
 
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)
-
+		
 		self.set_supplier_from_item_default()
 		self.set_price_list_currency("Buying")
 
@@ -60,6 +79,13 @@ class BuyingController(StockController):
 			if tax_for_valuation:
 				frappe.throw(_("Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items"))
 
+	def set_landed_cost_voucher_amount(self):
+		for d in self.get("items"):
+			lc_voucher_amount = frappe.db.sql("""select sum(applicable_charges)
+				from `tabLanded Cost Item`
+				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
+			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
+			
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
 		company_currency = get_company_currency(self.company)
@@ -94,7 +120,6 @@ class BuyingController(StockController):
 			if item.item_code and item.qty and item.item_code in stock_items:
 				item_proportion = flt(item.base_net_amount) / stock_items_amount if stock_items_amount \
 					else flt(item.qty) / stock_items_qty
-
 				if i == (last_stock_item_idx - 1):
 					item.item_tax_amount = flt(valuation_amount_adjustment,
 						self.precision("item_tax_amount", item))
@@ -108,10 +133,10 @@ class BuyingController(StockController):
 					item.conversion_factor = get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
 
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
-				rm_supp_cost = flt(item.rm_supp_cost) if self.doctype=="Purchase Receipt" else 0.0
+				rm_supp_cost = flt(item.rm_supp_cost) if self.doctype in ["Purchase Receipt", "Purchase Invoice"] else 0.0
 
 				landed_cost_voucher_amount = flt(item.landed_cost_voucher_amount) \
-					if self.doctype == "Purchase Receipt" else 0.0
+					if self.doctype in ["Purchase Receipt", "Purchase Invoice"] else 0.0
 
 				item.valuation_rate = ((item.base_net_amount + item.item_tax_amount + rm_supp_cost
 					 + landed_cost_voucher_amount) / qty_in_stock_uom)
@@ -123,7 +148,7 @@ class BuyingController(StockController):
 			frappe.throw(_("Please enter 'Is Subcontracted' as Yes or No"))
 
 		if self.is_subcontracted == "Yes":
-			if self.doctype == "Purchase Receipt" and not self.supplier_warehouse:
+			if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and not self.supplier_warehouse:
 				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted Purchase Receipt"))
 
 			for item in self.get("items"):
@@ -139,7 +164,7 @@ class BuyingController(StockController):
 		if self.is_subcontracted=="Yes":
 			parent_items = []
 			for item in self.get("items"):
-				if self.doctype == "Purchase Receipt":
+				if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 					item.rm_supp_cost = 0.0
 				if item.item_code in self.sub_contracted_items:
 					self.update_raw_materials_supplied(item, raw_material_table)
@@ -149,7 +174,7 @@ class BuyingController(StockController):
 
 			self.cleanup_raw_materials_supplied(parent_items, raw_material_table)
 
-		elif self.doctype == "Purchase Receipt":
+		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 			for item in self.get("items"):
 				item.rm_supp_cost = 0.0
 
@@ -179,7 +204,7 @@ class BuyingController(StockController):
 
 			rm.conversion_factor = item.conversion_factor
 
-			if self.doctype == "Purchase Receipt":
+			if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 				rm.consumed_qty = required_qty
 				rm.description = bom_item.description
 				if item.batch_no and not rm.batch_no:
@@ -205,7 +230,7 @@ class BuyingController(StockController):
 			rm.amount = required_qty * flt(rm.rate)
 			raw_materials_cost += flt(rm.amount)
 
-		if self.doctype == "Purchase Receipt":
+		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
 			item.rm_supp_cost = raw_materials_cost
 
 	def cleanup_raw_materials_supplied(self, parent_items, raw_material_table):
@@ -261,3 +286,106 @@ class BuyingController(StockController):
 				if not d.conversion_factor:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
+	
+	def validate_purchase_return(self):
+		for d in self.get("items"):
+			if self.is_return and flt(d.rejected_qty) != 0:
+				frappe.throw(_("Row #{0}: Rejected Qty can not be entered in Purchase Return").format(d.idx))
+
+			# validate rate with ref PR
+
+	def validate_rejected_warehouse(self):
+		for d in self.get("items"):
+			if flt(d.rejected_qty) and not d.rejected_warehouse:
+				if self.rejected_warehouse:
+					d.rejected_warehouse = self.rejected_warehouse
+				
+				if not d.rejected_warehouse:
+					frappe.throw(_("Row #{0}: Rejected Warehouse is mandatory against rejected Item {1}").format(d.idx, d.item_code))
+
+	# validate accepted and rejected qty
+	def validate_accepted_rejected_qty(self):
+		for d in self.get("items"):
+			if not flt(d.received_qty) and flt(d.qty):
+				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
+
+			elif not flt(d.qty) and flt(d.rejected_qty):
+				d.qty = flt(d.received_qty) - flt(d.rejected_qty)
+
+			elif not flt(d.rejected_qty):
+				d.rejected_qty = flt(d.received_qty) -  flt(d.qty)
+
+			# Check Received Qty = Accepted Qty + Rejected Qty
+			if ((flt(d.qty) + flt(d.rejected_qty)) != flt(d.received_qty)):
+				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
+	
+	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
+		self.update_ordered_qty()
+		
+		sl_entries = []
+		stock_items = self.get_stock_items()
+
+		for d in self.get('items'):
+			if d.item_code in stock_items and d.warehouse:
+				pr_qty = flt(d.qty) * flt(d.conversion_factor)
+
+				if pr_qty:
+					val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
+					rate = flt(d.valuation_rate, val_rate_db_precision)
+					sle = self.get_sl_entries(d, {
+						"actual_qty": flt(pr_qty),
+						"serial_no": cstr(d.serial_no).strip()
+					})
+					if self.is_return:
+						sle.update({
+							"outgoing_rate": rate
+						})
+					else:
+						sle.update({
+							"incoming_rate": rate
+						})
+					sl_entries.append(sle)
+
+				if flt(d.rejected_qty) > 0:
+					sl_entries.append(self.get_sl_entries(d, {
+						"warehouse": d.rejected_warehouse,
+						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
+						"serial_no": cstr(d.rejected_serial_no).strip(),
+						"incoming_rate": 0.0
+					}))
+
+		self.make_sl_entries_for_supplier_warehouse(sl_entries)
+		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock,
+			via_landed_cost_voucher=via_landed_cost_voucher)
+			
+	def update_ordered_qty(self):
+		po_map = {}
+		for d in self.get("items"):
+			if self.doctype=="Purchase Receipt" \
+				and d.prevdoc_doctype=="Purchase Order" and d.prevdoc_detail_docname:
+					po_map.setdefault(d.prevdoc_docname, []).append(d.prevdoc_detail_docname)
+			
+			elif self.doctype=="Purchase Invoice" and d.purchase_order and d.po_detail:
+				po_map.setdefault(d.purchase_order, []).append(d.po_detail)
+
+		for po, po_item_rows in po_map.items():
+			if po and po_item_rows:
+				po_obj = frappe.get_doc("Purchase Order", po)
+
+				if po_obj.status in ["Closed", "Cancelled"]:
+					frappe.throw(_("{0} {1} is cancelled or closed").format(_("Purchase Order"), po),
+						frappe.InvalidStatusError)
+
+				po_obj.update_ordered_qty(po_item_rows)
+	
+	def make_sl_entries_for_supplier_warehouse(self, sl_entries):
+		if hasattr(self, 'supplied_items'):
+			for d in self.get('supplied_items'):
+				# negative quantity is passed, as raw material qty has to be decreased
+				# when PR is submitted and it has to be increased when PR is cancelled
+				sl_entries.append(self.get_sl_entries(d, {
+					"item_code": d.rm_item_code,
+					"warehouse": self.supplier_warehouse,
+					"actual_qty": -1*flt(d.consumed_qty),
+				}))
+	

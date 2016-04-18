@@ -54,6 +54,26 @@ class AccountsController(TransactionBase):
 			if not self.get("__islocal"):
 				validate_recurring_document(self)
 				convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
+		
+		self.validate_paid_amount()
+	
+	def validate_paid_amount(self):
+		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
+			is_paid = self.get("is_pos") or self.get("is_paid")
+			if cint(is_paid) == 1:
+				if flt(self.paid_amount) == 0:
+					if self.cash_bank_account:
+						self.paid_amount = flt(flt(self.grand_total) - flt(self.write_off_amount), 
+							self.precision("paid_amount"))
+					else:
+						# show message that the amount is not paid
+						self.paid_amount = 0
+						frappe.throw(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
+			else:
+				frappe.db.set(self,'paid_amount',0)
+
+			frappe.db.set(self, 'base_paid_amount',
+				flt(self.paid_amount*self.conversion_rate, self.precision("base_paid_amount")))
 
 	def on_update_after_submit(self):
 		if self.meta.get_field("is_recurring"):
@@ -126,14 +146,6 @@ class AccountsController(TransactionBase):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
 
-		if self.doctype == "Purchase Invoice":
-			auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
-
-			if auto_accounting_for_stock:
-				stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
-
-			stock_items = self.get_stock_items()
-
 		if hasattr(self, "items"):
 			parent_dict = {}
 			for fieldname in self.meta.get_valid_columns():
@@ -180,14 +192,8 @@ class AccountsController(TransactionBase):
 							item.rate = flt(item.price_list_rate *
 								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
 
-					if self.doctype == "Purchase Invoice":
-						if auto_accounting_for_stock and item.item_code in stock_items \
-							and self.is_opening == 'No' \
-							and (not item.po_detail or not frappe.db.get_value("Purchase Order Item",
-								item.po_detail, "delivered_by_supplier")):
-
-								item.expense_account = stock_not_billed_account
-								item.cost_center = None
+			if self.doctype == "Purchase Invoice":
+				self.set_expense_account()
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):

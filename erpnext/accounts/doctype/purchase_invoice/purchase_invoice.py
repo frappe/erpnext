@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, formatdate, flt, getdate
-from frappe import msgprint, _, throw
+from frappe import _, throw
 from erpnext.setup.utils import get_company_currency
 import frappe.defaults
 
@@ -12,6 +12,9 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
+from erpnext.controllers.stock_controller import get_warehouse_account
+from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
+from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -45,18 +48,30 @@ class PurchaseInvoice(BuyingController):
 			self.validate_supplier_invoice()
 			self.validate_advance_jv("Purchase Order")
 
+		# validate cash purchase
+		if (self.is_paid == 1):
+			self.validate_cash()
+
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
 		self.check_for_closed_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
+		self.set_expense_account()
 		self.set_against_expense_account()
 		self.validate_write_off_account()
-		self.update_valuation_rate("items")
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
 		self.validate_fixed_asset_account()
 		self.create_remarks()
+
+	def validate_cash(self):
+		if not self.cash_bank_account and flt(self.paid_amount):
+			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
+
+		if flt(self.paid_amount) + flt(self.write_off_amount) \
+				- flt(self.base_grand_total) > 1/(10**(self.precision("base_grand_total") + 1)):
+			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
 	def create_remarks(self):
 		if not self.remarks:
@@ -135,52 +150,55 @@ class PurchaseInvoice(BuyingController):
 				["Purchase Order", "purchase_order", "po_detail"],
 				["Purchase Receipt", "purchase_receipt", "pr_detail"]
 			])
-
-	def set_against_expense_account(self):
+			
+	def set_expense_account(self):
 		auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
 		if auto_accounting_for_stock:
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
-
-		against_accounts = []
-		stock_items = self.get_stock_items()
+			stock_items = self.get_stock_items()
+			
+		if self.update_stock:
+			warehouse_account = get_warehouse_account()
+		
 		for item in self.get("items"):
 			# in case of auto inventory accounting,
 			# expense account is always "Stock Received But Not Billed" for a stock item 
 			# except epening entry, drop-ship entry and fixed asset items
 
-			if auto_accounting_for_stock and item.item_code in stock_items and self.is_opening == 'No' \
-				and (not item.po_detail 
-					or not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")
-					or not frappe.db.get_value("Item", item.item_code, "is_fixed_asset")):
+			if auto_accounting_for_stock and self.is_opening == 'No' \
+				and item.item_code in stock_items and ((not item.po_detail 
+				or not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier"))
+				or not frappe.db.get_value("Item", item.item_code, "is_fixed_asset")):
 
-				item.expense_account = stock_not_billed_account
-				item.cost_center = None
-
-				if stock_not_billed_account not in against_accounts:
-					against_accounts.append(stock_not_billed_account)
-
+				if self.update_stock:
+					item.expense_account = warehouse_account[item.warehouse]["name"]
+				else:
+					item.expense_account = stock_not_billed_account
+					
 			elif not item.expense_account:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
 
-			elif item.expense_account not in against_accounts:
-				# if no auto_accounting_for_stock or not a stock item
+	def set_against_expense_account(self):
+		against_accounts = []
+		for item in self.get("items"):
+			if item.expense_account not in against_accounts:
 				against_accounts.append(item.expense_account)
 
 		self.against_expense_account = ",".join(against_accounts)
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
-			 for d in self.get('items'):
-				 if not d.purchase_order:
-					 throw(_("Purchse Order number required for Item {0}").format(d.item_code))
+			for d in self.get('items'):
+				if not d.purchase_order:
+					throw(_("Purchse Order number required for Item {0}").format(d.item_code))
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
-			 for d in self.get('items'):
-				 if not d.purchase_receipt and d.item_code in stock_items:
-					 throw(_("Purchase Receipt number required for Item {0}").format(d.item_code))
+			for d in self.get('items'):
+				if not d.purchase_receipt and d.item_code in stock_items:
+					throw(_("Purchase Receipt number required for Item {0}").format(d.item_code))
 
 	def validate_write_off_account(self):
 		if self.write_off_amount and not self.write_off_account:
@@ -228,20 +246,70 @@ class PurchaseInvoice(BuyingController):
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
 
+	def update_status_updater_args(self):
+		if cint(self.update_stock):
+			self.status_updater.extend([{
+				'source_dt': 'Purchase Invoice Item',
+				'target_dt': 'Purchase Order Item',
+				'join_field': 'po_detail',
+				'target_field': 'received_qty',
+				'target_parent_dt': 'Purchase Order',
+				'target_parent_field': 'per_received',
+				'target_ref_field': 'qty',
+				'source_field': 'qty',
+				'percent_join_field':'purchase_order',
+				# 'percent_join_field': 'prevdoc_docname',
+				'overflow_type': 'receipt',
+				'extra_cond': """ and exists(select name from `tabPurchase Invoice`
+					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)"""
+			},
+			{
+				'source_dt': 'Purchase Invoice Item',
+				'target_dt': 'Purchase Order Item',
+				'join_field': 'po_detail',
+				'target_field': 'returned_qty',
+				'target_parent_dt': 'Purchase Order',
+				# 'target_parent_field': 'per_received',
+				# 'target_ref_field': 'qty',
+				'source_field': '-1 * qty',
+				# 'percent_join_field': 'prevdoc_docname',
+				# 'overflow_type': 'receipt',
+				'extra_cond': """ and exists (select name from `tabPurchase Invoice`
+					where name=`tabPurchase Invoice Item`.parent and update_stock=1 and is_return=1)"""
+			}
+		])
+	
+	def validate_purchase_receipt_if_update_stock(self):
+		if self.update_stock:
+			for item in self.get("items"):
+				if item.purchase_receipt:
+					frappe.throw(_("Stock cannot be updated against Purchase Receipt {0}")
+						.format(item.purchase_receipt))
+
 	def on_submit(self):
 		self.check_prev_docstatus()
+		self.update_status_updater_args()
+		
 		self.validate_asset()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
-
-		# this sequence because outstanding may get -negative
-		self.make_gl_entries()
+			
 		if not self.is_return:
 			self.update_against_document_in_jv()
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 			self.update_billing_status_in_pr()
+
+		# Updating stock ledger should always be called after updating prevdoc status, 
+		# because updating ordered qty in bin depends upon updated ordered qty in PO
+		if self.update_stock == 1:
+			self.update_stock_ledger()
+			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
+			update_serial_nos_after_submit(self, "items")
+			
+		# this sequence because outstanding may get -negative
+		self.make_gl_entries()
 
 		self.update_project()
 		
@@ -271,22 +339,51 @@ class PurchaseInvoice(BuyingController):
 						
 					if self.docstatus==1 and not asset.supplier:
 						frappe.db.set_value("Asset", asset.name, "supplier", self.supplier)
-					
-	def make_gl_entries(self):
-		auto_accounting_for_stock = \
+
+	def make_gl_entries(self, repost_future_gle=False):
+		self.auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
-		stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
-		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-
+		self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
+		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		self.negative_expense_to_be_booked = 0.0
 		gl_entries = []
+		
+		
+		self.make_supplier_gl_entry(gl_entries)
+		self.make_item_gl_entries(gl_entries)
+		self.make_tax_gl_entries(gl_entries)
+		
+		gl_entries = merge_similar_entries(gl_entries)
+		
+		self.make_payment_gl_entries(gl_entries)
 
-		# parent's gl entry
+		self.make_write_off_gl_entry(gl_entries)
+		
+		if gl_entries:
+			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
+			
+			make_gl_entries(gl_entries,  cancel=(self.docstatus == 2),
+				update_outstanding=update_outstanding, merge_entries=False)
+			
+			if update_outstanding == "No":
+				update_outstanding_amt(self.credit_to, "Supplier", self.supplier,
+					self.doctype, self.return_against if cint(self.is_return) else self.name)
+
+			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
+				from erpnext.controllers.stock_controller import update_gl_entries_after
+				items, warehouses = self.get_items_and_warehouses()
+				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
+					
+		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
+			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+		
+
+	def make_supplier_gl_entry(self, gl_entries):
 		if self.grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
 				self.precision("grand_total"))
-
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_to,
@@ -301,6 +398,88 @@ class PurchaseInvoice(BuyingController):
 				}, self.party_account_currency)
 			)
 
+	def make_item_gl_entries(self, gl_entries):
+		# item gl entries
+		stock_items = self.get_stock_items()
+		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		warehouse_account = get_warehouse_account()
+		
+		for item in self.get("items"):
+			if flt(item.base_net_amount):
+				account_currency = get_account_currency(item.expense_account)
+				
+				if self.update_stock and self.auto_accounting_for_stock:
+					val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
+
+					# warehouse account
+					warehouse_debit_amount = flt(flt(item.valuation_rate, val_rate_db_precision) 
+						* flt(item.qty)	* flt(item.conversion_factor), item.precision("base_net_amount"))
+						
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": item.expense_account,
+							"against": self.supplier,
+							"debit": warehouse_debit_amount,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"cost_center": item.cost_center
+						}, account_currency)
+					)
+					
+					# Amount added through landed-cost-voucher
+					if flt(item.landed_cost_voucher_amount):
+						gl_entries.append(self.get_gl_dict({
+							"account": expenses_included_in_valuation,
+							"against": item.expense_account,
+							"cost_center": item.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"credit": flt(item.landed_cost_voucher_amount)
+						}))
+
+					# sub-contracting warehouse
+					if flt(item.rm_supp_cost):
+						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["name"]
+						gl_entries.append(self.get_gl_dict({
+							"account": supplier_warehouse_account,
+							"against": item.expense_account,
+							"cost_center": item.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"credit": flt(item.rm_supp_cost)
+						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
+				else:
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": item.expense_account,
+							"against": self.supplier,
+							"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
+							"debit_in_account_currency": (flt(item.base_net_amount, 
+								item.precision("base_net_amount")) if account_currency==self.company_currency 
+								else flt(item.net_amount, item.precision("net_amount"))),
+							"cost_center": item.cost_center
+						}, account_currency)
+					)
+				
+			if self.auto_accounting_for_stock and self.is_opening == "No" and \
+				item.item_code in stock_items and item.item_tax_amount:
+					# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
+					if item.purchase_receipt:
+						negative_expense_booked_in_pr = frappe.db.sql("""select name from `tabGL Entry`
+							where voucher_type='Purchase Receipt' and voucher_no=%s and account=%s""",
+							(item.purchase_receipt, self.expenses_included_in_valuation))
+
+						if not negative_expense_booked_in_pr:
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": self.stock_received_but_not_billed,
+									"against": self.supplier,
+									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
+									"remarks": self.remarks or "Accounting Entry for Stock"
+								})
+							)
+
+							self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
+								item.precision("item_tax_amount"))
+
+	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -320,69 +499,31 @@ class PurchaseInvoice(BuyingController):
 						"cost_center": tax.cost_center
 					}, account_currency)
 				)
-
 			# accumulate valuation tax
 			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
-				if auto_accounting_for_stock and not tax.cost_center:
+				if self.auto_accounting_for_stock and not tax.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
 				valuation_tax.setdefault(tax.cost_center, 0)
 				valuation_tax[tax.cost_center] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
-
-		# item gl entries
-		negative_expense_to_be_booked = 0.0
-		stock_items = self.get_stock_items()
-		for item in self.get("items"):
-			if flt(item.base_net_amount):
-				account_currency = get_account_currency(item.expense_account)
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": item.expense_account,
-						"against": self.supplier,
-						"debit": item.base_net_amount,
-						"debit_in_account_currency": item.base_net_amount \
-							if account_currency==self.company_currency else item.net_amount,
-						"cost_center": item.cost_center
-					}, account_currency)
-				)
-
-			if auto_accounting_for_stock and self.is_opening == "No" and \
-				item.item_code in stock_items and item.item_tax_amount:
-					# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
-					if item.purchase_receipt:
-						negative_expense_booked_in_pr = frappe.db.sql("""select name from `tabGL Entry`
-							where voucher_type='Purchase Receipt' and voucher_no=%s and account=%s""",
-							(item.purchase_receipt, expenses_included_in_valuation))
-
-						if not negative_expense_booked_in_pr:
-							gl_entries.append(
-								self.get_gl_dict({
-									"account": stock_received_but_not_billed,
-									"against": self.supplier,
-									"debit": flt(item.item_tax_amount, self.precision("item_tax_amount", item)),
-									"remarks": self.remarks or "Accounting Entry for Stock"
-								})
-							)
-
-							negative_expense_to_be_booked += flt(item.item_tax_amount, self.precision("item_tax_amount", item))
-
-		if self.is_opening == "No" and negative_expense_to_be_booked and valuation_tax:
+		
+		if self.is_opening == "No" and self.negative_expense_to_be_booked and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"
 			# this will balance out valuation amount included in cost of goods sold
 
 			total_valuation_amount = sum(valuation_tax.values())
-			amount_including_divisional_loss = negative_expense_to_be_booked
+			amount_including_divisional_loss = self.negative_expense_to_be_booked
 			i = 1
 			for cost_center, amount in valuation_tax.items():
 				if i == len(valuation_tax):
 					applicable_amount = amount_including_divisional_loss
 				else:
-					applicable_amount = negative_expense_to_be_booked * (amount / total_valuation_amount)
+					applicable_amount = self.negative_expense_to_be_booked * (amount / total_valuation_amount)
 					amount_including_divisional_loss -= applicable_amount
 
 				gl_entries.append(
 					self.get_gl_dict({
-						"account": expenses_included_in_valuation,
+						"account": self.expenses_included_in_valuation,
 						"cost_center": cost_center,
 						"against": self.supplier,
 						"credit": applicable_amount,
@@ -392,6 +533,36 @@ class PurchaseInvoice(BuyingController):
 
 				i += 1
 
+	def make_payment_gl_entries(self, gl_entries):
+		# Make Cash GL Entries
+		if cint(self.is_paid) and self.cash_bank_account and self.paid_amount:
+			bank_account_currency = get_account_currency(self.cash_bank_account)
+			# CASH, make payment entries
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.credit_to,
+					"party_type": "Supplier",
+					"party": self.supplier,
+					"against": self.cash_bank_account,
+					"debit": self.base_paid_amount,
+					"debit_in_account_currency": self.base_paid_amount \
+						if self.party_account_currency==self.company_currency else self.paid_amount,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher_type": self.doctype,
+				}, self.party_account_currency)
+			)
+						
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.cash_bank_account,
+					"against": self.supplier,
+					"credit": self.base_paid_amount,
+					"credit_in_account_currency": self.base_paid_amount \
+						if bank_account_currency==self.company_currency else self.paid_amount
+				}, bank_account_currency)
+			)
+
+	def make_write_off_gl_entry(self, gl_entries):
 		# writeoff account includes petty difference in the invoice amount
 		# and the amount that is paid
 		if self.write_off_account and flt(self.write_off_amount):
@@ -421,13 +592,11 @@ class PurchaseInvoice(BuyingController):
 				})
 			)
 
-		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=(self.docstatus == 2))
-
 	def on_cancel(self):
 		self.check_for_closed_status()
-
+		
+		self.update_status_updater_args()
+		
 		if not self.is_return:
 			from erpnext.accounts.utils import remove_against_link_from_jv
 			remove_against_link_from_jv(self.doctype, self.name)
@@ -436,6 +605,11 @@ class PurchaseInvoice(BuyingController):
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 			self.update_billing_status_in_pr()
 
+		# Updating stock ledger should always be called after updating prevdoc status, 
+		# because updating ordered qty in bin depends upon updated ordered qty in PO
+		if self.update_stock == 1:
+			self.update_stock_ledger()
+			
 		self.make_gl_entries_on_cancel()
 		self.update_project()
 		self.validate_asset()

@@ -45,6 +45,32 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po.load_from_db()
 		self.assertEquals(po.get("items")[0].received_qty, 4)
+		
+	def test_ordered_qty_against_pi_with_update_stock(self):
+		existing_ordered_qty = get_ordered_qty()
+
+		po = create_purchase_order()
+		
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
+
+		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
+
+		pi = make_purchase_invoice(po.name)
+		pi.update_stock = 1
+		pi.items[0].qty = 12
+		pi.insert()
+		pi.submit()
+		
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
+
+		po.load_from_db()
+		self.assertEquals(po.get("items")[0].received_qty, 12)
+
+		pi.cancel()
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
+
+		po.load_from_db()
+		self.assertEquals(po.get("items")[0].received_qty, 0)
 
 	def test_make_purchase_invoice(self):
 		po = create_purchase_order(do_not_submit=True)

@@ -21,9 +21,22 @@ frappe.ui.form.on("Purchase Receipt", {
 				"batch_no": doc.batch_no
 			}
 		}
+
+		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
+			frm.set_query(field, "items", function() {
+				return {
+					filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]]
+				}
+			})
+		})
+		
+		frm.set_query("supplier_warehouse", function() {
+			return {
+				filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]]
+			}
+		})
 	}
 });
-
 
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
@@ -76,48 +89,6 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 	},
 
-	received_qty: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		frappe.model.round_floats_in(item, ["qty", "received_qty"]);
-
-		item.qty = (item.qty < item.received_qty) ? item.qty : item.received_qty;
-		this.qty(doc, cdt, cdn);
-	},
-
-	qty: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		frappe.model.round_floats_in(item, ["qty", "received_qty"]);
-
-		if(!(item.received_qty || item.rejected_qty) && item.qty) {
-			item.received_qty = item.qty;
-		}
-
-		if(item.qty > item.received_qty) {
-			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "qty", item.name)),
-						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]))
-			item.qty = item.rejected_qty = 0.0;
-		} else {
-			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
-		}
-
-		this._super(doc, cdt, cdn);
-	},
-
-	rejected_qty: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
-
-		if(item.rejected_qty > item.received_qty) {
-			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "rejected_qty", item.name)),
-						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]));
-			item.qty = item.rejected_qty = 0.0;
-		} else {
-			item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
-		}
-
-		this.qty(doc, cdt, cdn);
-	},
-
 	make_purchase_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
@@ -130,10 +101,6 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_return",
 			frm: cur_frm
 		})
-	},
-
-	tc_name: function() {
-		this.get_terms();
 	},
 
 	close_purchase_receipt: function() {
@@ -241,8 +208,6 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(frappe.boot.notification_settings.purchase_receipt))
 		cur_frm.email_doc(frappe.boot.notification_settings.purchase_receipt_message);
 }
-
-
 
 frappe.provide("erpnext.buying");
 
