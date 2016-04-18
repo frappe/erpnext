@@ -15,29 +15,29 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				this.frm.set_df_property("credit_to", "print_hide", 0);
 			}
 		}
-		
-		hide_fields(this.frm.doc);
 	},
 
 	refresh: function(doc) {
 		this._super();
+		
+		hide_fields(this.frm.doc);
 
 		// Show / Hide button
 		this.show_general_ledger();
+		
+		if(doc.update_stock==1 && doc.docstatus==1) {
+			this.show_stock_ledger();
+		}
 
 		if(!doc.is_return && doc.docstatus==1) {
 			if(doc.outstanding_amount > 0) {
 				this.frm.add_custom_button(__('Payment'), this.make_bank_entry, __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
-				
+			
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				cur_frm.add_custom_button(doc.update_stock ? __('Purchase Return') : __('Debit Note'), 
 					this.make_debit_note, __("Make"));
-			}
-			
-			if(doc.update_stock==1) {
-				this.show_stock_ledger();
 			}
 		}
 		
@@ -69,6 +69,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				})
 			}, __("Get items from"));
 		}
+		
+		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 	},
 
 	supplier: function() {
@@ -326,3 +328,29 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 	else
 		cur_frm.pformat.print_heading = __("Purchase Invoice");
 }
+
+frappe.ui.form.on("Purchase Invoice", {
+	onload: function(frm) {
+		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
+			frm.set_query(field, "items", function() {
+				return {
+					filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]]
+				}
+			})
+		})
+
+		frm.set_query("supplier_warehouse", function() {
+			return {
+				filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]]
+			}
+		})
+	},
+	
+	is_subcontracted: function(frm) {
+		if (frm.doc.is_subcontracted === "Yes") {
+			erpnext.buying.get_default_bom(frm);
+		}
+		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
+	}
+})
+	

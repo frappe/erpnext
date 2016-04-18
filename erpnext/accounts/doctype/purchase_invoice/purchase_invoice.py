@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, formatdate, flt, getdate
-from frappe import msgprint, _, throw
+from frappe import _, throw
 from erpnext.setup.utils import get_company_currency
 import frappe.defaults
 
@@ -13,7 +13,8 @@ from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
 from erpnext.controllers.stock_controller import get_warehouse_account
-
+from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
+from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -51,7 +52,6 @@ class PurchaseInvoice(BuyingController):
 		if (self.is_paid == 1):
 			self.validate_cash()
 
-		self.check_active_purchase_items()
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
@@ -61,7 +61,6 @@ class PurchaseInvoice(BuyingController):
 		self.set_expense_account()
 		self.set_against_expense_account()
 		self.validate_write_off_account()
-		self.update_valuation_rate("items")
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
 		self.validate_fixed_asset_account()
 		self.create_remarks()
@@ -177,7 +176,6 @@ class PurchaseInvoice(BuyingController):
 				else:
 					item.expense_account = stock_not_billed_account
 					
-				item.cost_center = None
 			elif not item.expense_account:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
 
@@ -281,34 +279,37 @@ class PurchaseInvoice(BuyingController):
 			}
 		])
 	
-	def validate_purchase_receipt(self):
-		for item in self.get("items"):
-			if item.purchase_receipt:
-				frappe.throw(_("Stock cannot be updated against Purchase Receipt {0}").format(item.purchase_receipt))
+	def validate_purchase_receipt_if_update_stock(self):
+		if self.update_stock:
+			for item in self.get("items"):
+				if item.purchase_receipt:
+					frappe.throw(_("Stock cannot be updated against Purchase Receipt {0}")
+						.format(item.purchase_receipt))
 
 	def on_submit(self):
 		self.check_prev_docstatus()
+		self.update_status_updater_args()
+		
 		self.validate_asset()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
-
-		if (self.update_stock == 1):
-			# from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_stock_ledger
-			self.update_stock_ledger()
-			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-			update_serial_nos_after_submit(self, "items")
-			self.update_status_updater_args()
-			self.update_prevdoc_status()
-
-		# this sequence because outstanding may get -negative
-		self.make_gl_entries()
-		
+			
 		if not self.is_return:
 			self.update_against_document_in_jv()
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 			self.update_billing_status_in_pr()
+
+		# Updating stock ledger should always be called after updating prevdoc status, 
+		# because updating ordered qty in bin depends upon updated ordered qty in PO
+		if self.update_stock == 1:
+			self.update_stock_ledger()
+			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
+			update_serial_nos_after_submit(self, "items")
+			
+		# this sequence because outstanding may get -negative
+		self.make_gl_entries()
 
 		self.update_project()
 		
@@ -353,38 +354,32 @@ class PurchaseInvoice(BuyingController):
 		self.make_item_gl_entries(gl_entries)
 		self.make_tax_gl_entries(gl_entries)
 		
-		from erpnext.accounts.general_ledger import merge_similar_entries
 		gl_entries = merge_similar_entries(gl_entries)
 		
 		self.make_payment_gl_entries(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
+		
 		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
 			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 			
 			make_gl_entries(gl_entries,  cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False)
 			
 			if update_outstanding == "No":
-				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 				update_outstanding_amt(self.credit_to, "Supplier", self.supplier,
 					self.doctype, self.return_against if cint(self.is_return) else self.name)
 
-			if repost_future_gle and cint(self.update_stock) \
-				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-					from erpnext.controllers.stock_controller import update_gl_entries_after
-					items, warehouses = self.get_items_and_warehouses()
-					update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
+			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
+				from erpnext.controllers.stock_controller import update_gl_entries_after
+				items, warehouses = self.get_items_and_warehouses()
+				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
 					
-		elif self.docstatus == 2 and cint(self.update_stock) \
-			and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-				from erpnext.accounts.general_ledger import delete_gl_entries
-				delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
+			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 		
 
 	def make_supplier_gl_entry(self, gl_entries):
-		# parent's gl entry
 		if self.grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
@@ -406,21 +401,62 @@ class PurchaseInvoice(BuyingController):
 	def make_item_gl_entries(self, gl_entries):
 		# item gl entries
 		stock_items = self.get_stock_items()
+		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		warehouse_account = get_warehouse_account()
 		
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
 				
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": item.expense_account,
-						"against": self.supplier,
-						"debit": item.base_net_amount,
-						"debit_in_account_currency": item.base_net_amount \
-							if account_currency==self.company_currency else item.net_amount,
-						"cost_center": item.cost_center
-					}, account_currency)
-				)
+				if self.update_stock and self.auto_accounting_for_stock:
+					val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
+
+					# warehouse account
+					warehouse_debit_amount = flt(flt(item.valuation_rate, val_rate_db_precision) 
+						* flt(item.qty)	* flt(item.conversion_factor), item.precision("base_net_amount"))
+						
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": item.expense_account,
+							"against": self.supplier,
+							"debit": warehouse_debit_amount,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"cost_center": item.cost_center
+						}, account_currency)
+					)
+					
+					# Amount added through landed-cost-voucher
+					if flt(item.landed_cost_voucher_amount):
+						gl_entries.append(self.get_gl_dict({
+							"account": expenses_included_in_valuation,
+							"against": item.expense_account,
+							"cost_center": item.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"credit": flt(item.landed_cost_voucher_amount)
+						}))
+
+					# sub-contracting warehouse
+					if flt(item.rm_supp_cost):
+						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["name"]
+						gl_entries.append(self.get_gl_dict({
+							"account": supplier_warehouse_account,
+							"against": item.expense_account,
+							"cost_center": item.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"credit": flt(item.rm_supp_cost)
+						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
+				else:
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": item.expense_account,
+							"against": self.supplier,
+							"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
+							"debit_in_account_currency": (flt(item.base_net_amount, 
+								item.precision("base_net_amount")) if account_currency==self.company_currency 
+								else flt(item.net_amount, item.precision("net_amount"))),
+							"cost_center": item.cost_center
+						}, account_currency)
+					)
 				
 			if self.auto_accounting_for_stock and self.is_opening == "No" and \
 				item.item_code in stock_items and item.item_tax_amount:
@@ -435,13 +471,13 @@ class PurchaseInvoice(BuyingController):
 								self.get_gl_dict({
 									"account": self.stock_received_but_not_billed,
 									"against": self.supplier,
-									"debit": flt(item.item_tax_amount, self.precision("item_tax_amount", item)),
+									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
 									"remarks": self.remarks or "Accounting Entry for Stock"
 								})
 							)
 
 							self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
-								self.precision("item_tax_amount", item))
+								item.precision("item_tax_amount"))
 
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
@@ -558,7 +594,9 @@ class PurchaseInvoice(BuyingController):
 
 	def on_cancel(self):
 		self.check_for_closed_status()
-
+		
+		self.update_status_updater_args()
+		
 		if not self.is_return:
 			from erpnext.accounts.utils import remove_against_link_from_jv
 			remove_against_link_from_jv(self.doctype, self.name)
@@ -567,6 +605,11 @@ class PurchaseInvoice(BuyingController):
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 			self.update_billing_status_in_pr()
 
+		# Updating stock ledger should always be called after updating prevdoc status, 
+		# because updating ordered qty in bin depends upon updated ordered qty in PO
+		if self.update_stock == 1:
+			self.update_stock_ledger()
+			
 		self.make_gl_entries_on_cancel()
 		self.update_project()
 		self.validate_asset()

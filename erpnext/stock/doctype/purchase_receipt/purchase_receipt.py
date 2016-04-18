@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt, cint
+from frappe.utils import flt, cint
 
 from frappe import _
 import frappe.defaults
@@ -81,22 +81,6 @@ class PurchaseReceipt(BuyingController):
 				 if not d.prevdoc_docname:
 					 frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
-	def update_ordered_qty(self):
-		po_map = {}
-		for d in self.get("items"):
-			if d.prevdoc_doctype and d.prevdoc_doctype == "Purchase Order" and d.prevdoc_detail_docname:
-				po_map.setdefault(d.prevdoc_docname, []).append(d.prevdoc_detail_docname)
-
-		for po, po_item_rows in po_map.items():
-			if po and po_item_rows:
-				po_obj = frappe.get_doc("Purchase Order", po)
-
-				if po_obj.status in ["Closed", "Cancelled"]:
-					frappe.throw(_("{0} {1} is cancelled or closed").format(_("Purchase Order"), po),
-						frappe.InvalidStatusError)
-
-				po_obj.update_ordered_qty(po_item_rows)
-
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.db.sql("""select sum(qty) from `tabPurchase Receipt Item`
 			where prevdoc_detail_docname = %s and docstatus = 1
@@ -129,19 +113,20 @@ class PurchaseReceipt(BuyingController):
 		purchase_controller = frappe.get_doc("Purchase Common")
 
 		# Check for Approving Authority
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, 
+			self.company, self.base_grand_total)
 
 		# Set status as Submitted
 		frappe.db.set(self, 'status', 'Submitted')
 
 		self.update_prevdoc_status()
-		self.update_ordered_qty()
-
 		self.update_billing_status()
 
 		if not self.is_return:
 			purchase_controller.update_last_purchase_rate(self, 1)
 
+		# Updating stock ledger should always be called after updating prevdoc status, 
+		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		self.update_stock_ledger()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
@@ -171,17 +156,15 @@ class PurchaseReceipt(BuyingController):
 
 		frappe.db.set(self,'status','Cancelled')
 
-		self.update_stock_ledger()
-
-		self.update_prevdoc_status()
-		# Must be called after updating received qty in PO
-		self.update_ordered_qty()
-
+		self.update_prevdoc_status()		
 		self.update_billing_status()
 
 		if not self.is_return:
 			pc_obj.update_last_purchase_rate(self, 0)
-
+		
+		# Updating stock ledger should always be called after updating prevdoc status, 
+		# because updating ordered qty in bin depends upon updated ordered qty in PO
+		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 
 	def get_current_stock(self):
@@ -256,13 +239,11 @@ class PurchaseReceipt(BuyingController):
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
 
 					# divisional loss adjustment
-					sle_valuation_amount = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
-							self.precision("base_net_amount", d))
-
-					distributed_amount = flt(flt(d.base_net_amount, self.precision("base_net_amount", d))) + \
+					distributed_amount = flt(flt(d.base_net_amount, d.precision("base_net_amount"))) + \
 						flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost) + flt(d.item_tax_amount)
 
-					divisional_loss = flt(distributed_amount - sle_valuation_amount, self.precision("base_net_amount", d))
+					divisional_loss = flt(distributed_amount - stock_value_diff, 
+						d.precision("base_net_amount"))
 					if divisional_loss:
 						gl_entries.append(self.get_gl_dict({
 							"account": stock_rbnb,

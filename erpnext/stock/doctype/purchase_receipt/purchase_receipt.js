@@ -21,6 +21,20 @@ frappe.ui.form.on("Purchase Receipt", {
 				"batch_no": doc.batch_no
 			}
 		}
+
+		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
+			frm.set_query(field, "items", function() {
+				return {
+					filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]]
+				}
+			})
+		})
+		
+		frm.set_query("supplier_warehouse", function() {
+			return {
+				filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]]
+			}
+		})
 	}
 });
 

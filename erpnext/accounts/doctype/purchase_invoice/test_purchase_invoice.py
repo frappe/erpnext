@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.model
-from frappe.utils import cint
+from frappe.utils import cint, flt
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
 	test_records as pr_test_records
@@ -120,20 +120,20 @@ class TestPurchaseInvoice(unittest.TestCase):
 		set_perpetual_inventory(0)
 
 	def test_purchase_invoice_calculation(self):
-		wrapper = frappe.copy_doc(test_records[0])
-		wrapper.insert()
-		wrapper.load_from_db()
+		pi = frappe.copy_doc(test_records[0])
+		pi.insert()
+		pi.load_from_db()
 
 		expected_values = [
 			["_Test Item Home Desktop 100", 90, 59],
 			["_Test Item Home Desktop 200", 135, 177]
 		]
-		for i, item in enumerate(wrapper.get("items")):
+		for i, item in enumerate(pi.get("items")):
 			self.assertEqual(item.item_code, expected_values[i][0])
 			self.assertEqual(item.item_tax_amount, expected_values[i][1])
 			self.assertEqual(item.valuation_rate, expected_values[i][2])
 
-		self.assertEqual(wrapper.base_net_total, 1250)
+		self.assertEqual(pi.base_net_total, 1250)
 
 		# tax amounts
 		expected_values = [
@@ -147,7 +147,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			["_Test Account Discount - _TC", 168.03, 1512.30],
 		]
 
-		for i, tax in enumerate(wrapper.get("taxes")):
+		for i, tax in enumerate(pi.get("taxes")):
 			self.assertEqual(tax.account_head, expected_values[i][0])
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
@@ -375,8 +375,28 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi1 = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2, rate=50, update_stock=1)
 
 		actual_qty_2 = get_qty_after_transaction()
-
 		self.assertEquals(actual_qty_1 - 2, actual_qty_2)
+		
+		pi1.cancel()
+		self.assertEquals(actual_qty_1, get_qty_after_transaction())
+		
+		pi.cancel()
+		self.assertEquals(actual_qty_0, get_qty_after_transaction())
+		
+	def test_subcontracting_via_purchase_invoice(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100)
+		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TC", 
+			qty=100, basic_rate=100)
+		
+		pi = make_purchase_invoice(item_code="_Test FG Item", qty=10, rate=500, 
+			update_stock=1, is_subcontracted="Yes")
+		
+		self.assertEquals(len(pi.get("supplied_items")), 2)
+		
+		rm_supp_cost = sum([d.amount for d in pi.get("supplied_items")])
+		self.assertEquals(pi.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
 
 def make_purchase_invoice(**args):
 	pi = frappe.new_doc("Purchase Invoice")
@@ -389,6 +409,7 @@ def make_purchase_invoice(**args):
 		pi.update_stock = 1
 	if args.is_paid:
 		pi.is_paid = 1
+		
 	if args.cash_bank_account:
 		pi.cash_bank_account=args.cash_bank_account
 		
@@ -398,6 +419,8 @@ def make_purchase_invoice(**args):
 	pi.conversion_rate = args.conversion_rate or 1
 	pi.is_return = args.is_return
 	pi.return_against = args.return_against
+	pi.is_subcontracted = args.is_subcontracted
+	pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",

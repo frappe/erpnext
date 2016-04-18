@@ -191,6 +191,8 @@ class DeliveryNote(SellingController):
 		if not self.is_return:
 			self.check_credit_limit()
 
+		# Updating stock ledger should always be called after updating prevdoc status, 
+		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
 		self.make_gl_entries()
 
@@ -201,6 +203,8 @@ class DeliveryNote(SellingController):
 		self.update_prevdoc_status()
 		self.update_billing_status()
 
+		# Updating stock ledger should always be called after updating prevdoc status, 
+		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
 
 		self.cancel_packing_slips()
