@@ -51,7 +51,7 @@ class PurchaseCommon(BuyingController):
 				item_code = %s and warehouse = %s""", (d.item_code, d.warehouse), as_dict=1)
 
 			f_lst ={'projected_qty': bin and flt(bin[0]['projected_qty']) or 0, 'ordered_qty': 0, 'received_qty' : 0}
-			if d.doctype == 'Purchase Receipt Item':
+			if d.doctype in ('Purchase Receipt Item', 'Purchase Invoice Item'):
 				f_lst.pop('received_qty')
 			for x in f_lst :
 				if d.meta.get_field(x):

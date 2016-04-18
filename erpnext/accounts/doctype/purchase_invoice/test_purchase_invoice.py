@@ -397,6 +397,17 @@ class TestPurchaseInvoice(unittest.TestCase):
 		
 		rm_supp_cost = sum([d.amount for d in pi.get("supplied_items")])
 		self.assertEquals(pi.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
+		
+	def test_rejected_serial_no(self):
+		pi = make_purchase_invoice(item_code="_Test Serialized Item With Series", received_qty=2, qty=1,
+			rejected_qty=1, rate=500, update_stock=1,
+			rejected_warehouse = "_Test Rejected Warehouse - _TC")
+		
+		self.assertEquals(frappe.db.get_value("Serial No", pi.get("items")[0].serial_no, "warehouse"),
+			pi.get("items")[0].warehouse)
+			
+		self.assertEquals(frappe.db.get_value("Serial No", pi.get("items")[0].rejected_serial_no, 
+			"warehouse"), pi.get("items")[0].rejected_warehouse)
 
 def make_purchase_invoice(**args):
 	pi = frappe.new_doc("Purchase Invoice")
@@ -419,19 +430,23 @@ def make_purchase_invoice(**args):
 	pi.conversion_rate = args.conversion_rate or 1
 	pi.is_return = args.is_return
 	pi.return_against = args.return_against
-	pi.is_subcontracted = args.is_subcontracted
+	pi.is_subcontracted = args.is_subcontracted or "No"
 	pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 5,
+		"received_qty": args.received_qty or 0,
+		"rejected_qty": args.rejected_qty or 0,
 		"rate": args.rate or 50,
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": "_Test UOM",
 		"cost_center": "_Test Cost Center - _TC",
-		"project": args.project
+		"project": args.project,
+		"rejected_warehouse": args.rejected_warehouse or "",
+		"rejected_serial_no": args.rejected_serial_no or ""
 	})
 	if not args.do_not_save:
 		pi.insert()
