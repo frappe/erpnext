@@ -72,15 +72,15 @@ class PurchaseCommon(BuyingController):
 
 		if items and len(items) != len(set(items)) and \
 			not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items") or 0):
-			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
+			frappe.msgprint(_("Warning: Same item has been entered multiple times."), small=True)
 
 
 	def check_for_closed_status(self, doctype, docname):
 		status = frappe.db.get_value(doctype, docname, "status")
-		
+
 		if status == "Closed":
 			frappe.throw(_("{0} {1} status is {2}").format(doctype, docname, status), frappe.InvalidStatusError)
-		
+
 	def check_docstatus(self, check, doctype, docname, detail_doctype = ''):
 		if check == 'Next':
 			submitted = frappe.db.sql("""select t1.name from `tab%s` t1,`tab%s` t2

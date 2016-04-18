@@ -65,11 +65,14 @@ class Bin(Document):
 		self.indented_qty = flt(self.indented_qty) + flt(args.get("indented_qty"))
 		self.planned_qty = flt(self.planned_qty) + flt(args.get("planned_qty"))
 
-		self.projected_qty = flt(self.actual_qty) + flt(self.ordered_qty) + \
-		 	flt(self.indented_qty) + flt(self.planned_qty) - flt(self.reserved_qty)
-
+		self.set_projected_qty()
 		self.save()
 		update_item_projected_qty(self.item_code)
+
+	def set_projected_qty(self):
+		self.projected_qty = (flt(self.actual_qty) + flt(self.ordered_qty)
+			+ flt(self.indented_qty) + flt(self.planned_qty) - flt(self.reserved_qty)
+			- flt(self.reserved_qty_for_production))
 
 	def get_first_sle(self):
 		sle = frappe.db.sql("""
@@ -81,8 +84,25 @@ class Bin(Document):
 		""", (self.item_code, self.warehouse), as_dict=1)
 		return sle and sle[0] or None
 
+	def update_reserved_qty_for_production(self):
+		'''Update qty reserved for production from Production Item tables
+			in open production orders'''
+		self.reserved_qty_for_production = frappe.db.sql('''select sum(required_qty - transferred_qty)
+			from `tabProduction Order` pro, `tabProduction Order Item` item
+			where
+				item.item_code = %s
+				and item.parent = pro.name
+				and pro.docstatus = 1
+				and pro.source_warehouse = %s''', (self.item_code, self.warehouse))[0][0]
+
+		self.set_projected_qty()
+
+		self.db_set('reserved_qty_for_production', self.reserved_qty_for_production)
+		self.db_set('projected_qty', self.projected_qty)
+
+
 def update_item_projected_qty(item_code):
-	'''Set Item project qty'''
+	'''Set total_projected_qty in Item as sum of projected qty in all warehouses'''
 	frappe.db.sql('''update tabItem set
 		total_projected_qty = ifnull((select sum(projected_qty) from tabBin where item_code=%s), 0)
 		where name=%s''', (item_code, item_code))

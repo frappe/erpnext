@@ -1,12 +1,39 @@
-<div style="padding-left: 15px;">
+<div style="padding-left: 15px; padding-right: 15px;">
 	<h5>Stock Levels</h5>
-	<div class="row">
-		<div class="col-md-6 col-xs-12">
-			<ul class="list-unstyled">
-			{% data.every(function(d) { %}
-				<li class="small">{{ d.warehouse }}: {{ d.actual_qty }} ({{ d.projected_qty }})</li>
-			{% }) %}
-			</ul>
-		</div>
-	</div>
+	<ul class="list-group">
+	{% for(var i=0; i < data.length; i++) { var d = data[i]; %}
+		<li class="list-group-item" style="background-color: inherit;">
+			<div class="row">
+				<div class="col-sm-8 small" style="margin-top: 8px;">{{ d.warehouse }}</div>
+				<div class="col-sm-4 small">
+					<span class="inline-graph">
+						<span class="inline-graph-half" title="{{ __("Reserved Qty") }}">
+							<span class="inline-graph-count">{{ d.reserved_qty }}</span>
+							<span class="inline-graph-bar">
+								<span class="inline-graph-bar-inner"
+									style="width: {{ cint(Math.abs(d.reserved_qty)/max_count * 100) || 5 }}%">
+								</span>
+							</span>
+						</span>
+						<span class="inline-graph-half" title="{{ __("Acutal Qty {0} / Waiting Qty {1}", [d.actual_qty, d.pending_qty]) }}">
+							<span class="inline-graph-count">
+								{{ d.actual_qty }} {{ (d.pending_qty > 0) ? ("(" + d.pending_qty+ ")") : "" }}
+							</span>
+							<span class="inline-graph-bar">
+								<span class="inline-graph-bar-inner dark"
+									style="width: {{ cint(d.actual_qty/max_count * 100) }}%">
+								</span>
+								{% if(d.pending_qty > 0) { %}
+								<span class="inline-graph-bar-inner" title="{{ __("Projected Qty") }}"
+									style="width: {{ cint(d.pending_qty/max_count * 100) }}%">
+								</span>
+								{% } %}
+							</span>
+						</span>
+					</span>
+				</div>
+			</div>
+		</li>
+	{% } %}
+	</ul>
 </div>

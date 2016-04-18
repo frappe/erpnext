@@ -7,7 +7,7 @@ frappe.ui.form.on("Supplier", {
 		frappe.setup_language_field(frm);
 	},
 	refresh: function(frm) {
-		frm.dashboard.show_links();
+		frm.dashboard.show_dashboard();
 
 		if(frappe.defaults.get_default("supp_master_name")!="Naming Series") {
 			frm.toggle_display("naming_series", false);

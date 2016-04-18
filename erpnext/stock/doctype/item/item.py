@@ -633,8 +633,8 @@ def get_timeline_data(name):
 			group by posting_date''', name))
 
 def get_stock_data(name):
-	return frappe.get_all('Bin', fields=['warehouse', 'actual_qty', 'projected_qty'],
-		filters={'item_code': name})
+	return frappe.get_all('Bin', fields=['warehouse', 'actual_qty', 'projected_qty', 'reserved_qty'],
+		filters={'item_code': name}, order_by = 'warehouse asc')
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
 	if (not end_of_life) or (disabled is None):

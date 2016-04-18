@@ -1,9 +1,21 @@
 import frappe
-from erpnext.accounts.party_status import update_status
+from erpnext.accounts.party_status import status_depends_on, default_status
+from frappe.desk.notifications import get_filters_for
 
 def execute():
-	for doctype in ('Customer', 'Supplier'):
-		frappe.reload_doctype(doctype)
-		for doc in frappe.get_all(doctype):
-			doc = frappe.get_doc(doctype, doc.name)
-			update_status(doc)
+	for party_type in ('Customer', 'Supplier'):
+		frappe.reload_doctype(party_type)
+
+		# set all as default status
+		frappe.db.sql('update `tab{0}` set status=%s'.format(party_type), default_status[party_type])
+
+		for doctype in status_depends_on[party_type]:
+			filters = get_filters_for(doctype)
+			parties = frappe.get_all(doctype, fields="{0} as party".format(party_type.lower()),
+				filters=filters, limit_page_length=1)
+
+			parties = filter(None, [p.party for p in parties])
+
+			if parties:
+				frappe.db.sql('update `tab{0}` set status="Open" where name in ({1})'.format(party_type,
+					', '.join(len(parties) * ['%s'])), parties)

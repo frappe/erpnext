@@ -25,7 +25,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		var me = this;
 		erpnext.toggle_naming_series();
-		this.frm.dashboard.show_links();
+		this.frm.dashboard.show_dashboard();
 	},
 
 	date_of_birth: function() {
