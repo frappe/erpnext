@@ -1,3 +1,6 @@
+
+##### If you are having technical problems, or have a query regarding ERPNext, make a post on our [Discussion Forum](https://discuss.erpnext.com) instead
+
 ## Reporting issues
 
 We only accept issues that are bug reports or feature requests. Bugs must be isolated and reproducible problems. Please read the following guidelines before opening any issue.
