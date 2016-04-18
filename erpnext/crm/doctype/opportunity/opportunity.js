@@ -8,7 +8,9 @@ frappe.ui.form.on("Opportunity", {
 	customer: function(frm) {
 		erpnext.utils.get_party_details(frm);
 	},
-	customer_address: erpnext.utils.get_address_display,
+	customer_address: function(frm, cdt, cdn){
+		erpnext.utils.get_address_display(frm, 'customer_address', 'address_display', false);
+	},
 	contact_person: erpnext.utils.get_contact_details,
 	enquiry_from: function(frm) {
 		frm.toggle_reqd("lead", frm.doc.enquiry_from==="Lead");
