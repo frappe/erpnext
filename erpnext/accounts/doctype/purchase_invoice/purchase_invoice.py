@@ -47,14 +47,10 @@ class PurchaseInvoice(BuyingController):
 			self.validate_supplier_invoice()
 			self.validate_advance_jv("Purchase Order")
 
-<<<<<<< 6b319e8b1441d724ba66e491a52c3307776b817a
-=======
 		# validate cash purchase
 		if (self.is_paid == 1):
 			self.validate_cash()
 
-		self.check_active_purchase_items()
->>>>>>> [enhancement] update landed cost on PI via landed cost voucher when update stock is set on PI
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
@@ -368,7 +364,7 @@ class PurchaseInvoice(BuyingController):
 			
 			make_gl_entries(gl_entries,  cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False)
-			
+
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 				update_outstanding_amt(self.credit_to, "Supplier", self.supplier,
@@ -409,11 +405,12 @@ class PurchaseInvoice(BuyingController):
 	def make_item_gl_entries(self, gl_entries):
 		# item gl entries
 		stock_items = self.get_stock_items()
-		
+
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
 				
+
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.expense_account,
@@ -454,7 +451,7 @@ class PurchaseInvoice(BuyingController):
 				account_currency = get_account_currency(tax.account_head)
 
 				dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
-
+				
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,

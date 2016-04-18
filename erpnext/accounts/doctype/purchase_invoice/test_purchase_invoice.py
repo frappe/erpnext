@@ -399,7 +399,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		
 		self.assertEquals(frappe.db.get_value("Serial No", pi.get("items")[0].serial_no, "warehouse"),
 			pi.get("items")[0].warehouse)
-			
+				
 		self.assertEquals(frappe.db.get_value("Serial No", pi.get("items")[0].rejected_serial_no, "warehouse"),
 			pi.get("items")[0].rejected_warehouse)
 
