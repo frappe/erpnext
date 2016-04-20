@@ -18,14 +18,15 @@ class TestAsset(unittest.TestCase):
 		asset = frappe.get_doc("Asset", "Macbook Pro 1")
 		asset.submit()
 		
-		pi = make_purchase_invoice(asset.name, asset.item_code, asset.gross_purchase_amount, asset.company)
+		pi = make_purchase_invoice(asset.name, asset.item_code, asset.gross_purchase_amount, 
+			asset.company, asset.purchase_date)
 		pi.supplier = "_Test Supplier"
 		pi.insert()
 		pi.submit()
 		
 		asset.load_from_db()
 		self.assertEqual(asset.supplier, "_Test Supplier")
-		self.assertEqual(getdate(asset.purchase_date), getdate(nowdate()))
+		self.assertEqual(asset.purchase_date, getdate("2015-01-01"))
 		self.assertEqual(asset.purchase_invoice, pi.name)
 		
 		expected_gle = (
@@ -43,7 +44,6 @@ class TestAsset(unittest.TestCase):
 
 		asset.load_from_db()
 		self.assertEqual(asset.supplier, None)
-		self.assertEqual(asset.purchase_date, None)
 		self.assertEqual(asset.purchase_invoice, None)
 		
 		self.assertFalse(frappe.db.get_value("GL Entry", 
@@ -65,6 +65,25 @@ class TestAsset(unittest.TestCase):
 			for d in asset.get("schedules")]
 
 		self.assertEqual(schedules, expected_schedules)
+		
+	def test_schedule_for_straight_line_method_for_existing_asset(self):
+		asset = frappe.get_doc("Asset", "Macbook Pro 1")
+		asset.is_existing_asset = 1
+		asset.number_of_depreciations_booked = 1
+		asset.opening_accumulated_depreciation = 40000
+		asset.save()
+		
+		self.assertEqual(asset.status, "Draft")
+
+		expected_schedules = [
+			["2020-12-31", 25000, 65000],
+			["2021-03-31", 25000, 90000]
+		]
+
+		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
 
 
 	def test_schedule_for_double_declining_method(self):
@@ -76,6 +95,24 @@ class TestAsset(unittest.TestCase):
 			["2020-12-31", 66667, 66667],
 			["2021-03-31", 22222, 88889],
 			["2021-06-30", 1111, 90000]
+		]
+
+		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
+		
+	def test_schedule_for_double_declining_method_for_existing_asset(self):
+		asset = frappe.get_doc("Asset", "Macbook Pro 1")
+		asset.depreciation_method = "Double Declining Balance"
+		asset.is_existing_asset = 1
+		asset.number_of_depreciations_booked = 1
+		asset.opening_accumulated_depreciation = 50000
+		asset.save()
+
+		expected_schedules = [
+			["2020-12-31", 33333, 83333],
+			["2021-03-31", 6667, 90000]
 		]
 
 		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
@@ -204,7 +241,7 @@ def create_asset():
 def create_asset_category():
 	asset_category = frappe.new_doc("Asset Category")
 	asset_category.asset_category_name = "Computers"
-	asset_category.number_of_depreciations = 3
+	asset_category.total_number_of_depreciations = 3
 	asset_category.frequency_of_depreciation = 3
 	asset_category.append("accounts", {
 		"company_name": "_Test Company",

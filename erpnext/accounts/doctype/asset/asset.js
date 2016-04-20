@@ -60,7 +60,8 @@ erpnext.asset.make_purchase_invoice = function(frm) {
 			"asset": frm.doc.name,
 			"item_code": frm.doc.item_code,
 			"gross_purchase_amount": frm.doc.gross_purchase_amount,
-			"company": frm.doc.company
+			"company": frm.doc.company,
+			"posting_date": frm.doc.purchase_date
 		},
 		method: "erpnext.accounts.doctype.asset.asset.make_purchase_invoice",
 		callback: function(r) {

@@ -146,15 +146,17 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-03-09 12:21:27.938215", 
+ "modified": "2016-04-20 16:43:21.407123", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Depreciation Schedule", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [], 
+ "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "track_seen": 0
 }

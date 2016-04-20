@@ -29,13 +29,13 @@ def get_data(filters):
 			
 		row.update(asset_depreciations.get(asset_category))
 		row.accumulated_depreciation_as_on_to_date = (flt(row.accumulated_depreciation_as_on_from_date) + 
-			flt(row.depreciation_amount_during_the_period))
-			
+			flt(row.depreciation_amount_during_the_period) - flt(row.depreciation_eliminated))
+		
 		row.net_asset_value_as_on_from_date = (flt(row.cost_as_on_from_date) - 
 			flt(row.accumulated_depreciation_as_on_from_date))
-			
+		
 		row.net_asset_value_as_on_to_date = (flt(row.cost_as_on_to_date) - 
-			flt(row.accumulated_depreciation_as_on_to_date) - flt(row.depreciation_eliminated))
+			flt(row.accumulated_depreciation_as_on_to_date))
 	
 		data.append(row)
 		
@@ -89,19 +89,20 @@ def get_accumulated_depreciations(assets, filters):
 		asset_depreciations.setdefault(d.asset_category, frappe._dict({
 			"accumulated_depreciation_as_on_from_date": asset.opening_accumulated_depreciation,
 			"depreciation_amount_during_the_period": 0,
-			"depreciation_eliminated": 0
+			"depreciation_eliminated_during_the_period": 0
 		}))
 		
 		depr = asset_depreciations[d.asset_category]
 		
 		for schedule in asset.get("schedules"):
 			if getdate(schedule.schedule_date) < getdate(filters.from_date):
-				depr.accumulated_depreciation_as_on_from_date += flt(schedule.depreciation_amount)
+				if not asset.disposal_date and getdate(asset.disposal_date) >= getdate(filters.from_date):
+					depr.accumulated_depreciation_as_on_from_date += flt(schedule.depreciation_amount)
 			elif getdate(schedule.schedule_date) <= getdate(filters.to_date):
 				depr.depreciation_amount_during_the_period += flt(schedule.depreciation_amount)
 				
 				if asset.disposal_date and getdate(schedule.schedule_date) > getdate(asset.disposal_date):
-					depr.depreciation_eliminated += flt(schedule.depreciation_amount)
+					depr.depreciation_eliminated_during_the_period += flt(schedule.depreciation_amount)
 		
 	return asset_depreciations
 	
@@ -158,7 +159,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Depreciation Eliminated due to disposal of assets"),
-			"fieldname": "depreciation_eliminated",
+			"fieldname": "depreciation_eliminated_during_the_period",
 			"fieldtype": "Currency",
 			"width": 300
 		},

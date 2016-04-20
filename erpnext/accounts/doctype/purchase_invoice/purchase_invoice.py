@@ -322,7 +322,6 @@ class PurchaseInvoice(BuyingController):
 					asset.supplier = self.supplier
 				else:
 					asset.purchase_invoice = None
-					asset.purchase_date = None
 					asset.supplier = None
 					
 				asset.flags.ignore_validate_update_after_submit = True
