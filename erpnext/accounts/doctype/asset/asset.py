@@ -129,7 +129,7 @@ class Asset(Document):
 		for d in self.get("schedules"):
 			if d.journal_entry:
 				frappe.get_doc("Journal Entry", d.journal_entry).cancel()
-				d.db_set("journal_entry", None)				
+				d.db_set("journal_entry", None)
 		
 		self.db_set("value_after_depreciation", 
 			(flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)))

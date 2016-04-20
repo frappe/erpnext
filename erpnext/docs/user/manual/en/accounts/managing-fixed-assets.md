@@ -23,13 +23,15 @@ Explanation of the fields:
 4. Warehouse: Set the location of the asset.
 5. Gross Purchase Amount: The purchase cost of the asset
 6. Expected Value After Useful Life: Useful Life is the time period over in which the company expects that the asset will be productive. After that period, either the asset is scrapped or sold. In case it is sold, mention the estimated value here. This value is also known as Salvage Value, Scrap Value or Residual Value.
-7. Current Value (After Depreciation): In case you are creating record of an existing asset which has already been partially/fully depreciated, mention the currect value of the asset. In case of new asset, mention the purchase amount or leave it blank.
-8. Depreciation Method: There are two options: Straight Line and Double Declining Balance.
+7. Opening Accumulated Depreciation: The accumulated depreciation amount which has already been booked for an existing asset.
+8. Current Value (After Depreciation): In case you are creating record of an existing asset which has already been partially/fully depreciated, mention the currect value of the asset. In case of new asset, mention the purchase amount or leave it blank.
+9. Depreciation Method: There are two options: Straight Line and Double Declining Balance.
 	- Straight Line: This method spreads the cost of the fixed asset evenly over its useful life.
 	- Double Declining Method: An accelerated method of depreciation, it results in higher depreciation expense in the earlier years of ownership.
-9. Number of Depreciations: The number of depreciations during the useful life. In case of existing assets which are partially depreciated, mention the number of pending depreciations.
-10. Frequency of Depreciation (Months): The number of months between two depreciations.
-11. Next Depreciation Date: Mention the next depreciation date, even if it is the first one. If the asset is an existing one and depreciation has already been completed, leave it blank.
+10. Total Number of Depreciations: The total number of depreciations during the useful life. In case of existing assets which are partially depreciated, mention the number of pending depreciations.
+11. Number of Depreciations Booked: Enter the number of already booked depreciations for an existing asset.
+12. Frequency of Depreciation (Months): The number of months between two depreciations.
+13. Next Depreciation Date: Mention the next depreciation date, even if it is the first one. If the asset is an existing one and depreciation has already been completed, leave it blank.
 
 ### Depreciations
 
