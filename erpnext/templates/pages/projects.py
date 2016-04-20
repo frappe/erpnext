@@ -7,7 +7,8 @@ import json
 
 def get_context(context):
 	context.no_cache = 1
-
+	context.show_search = True
+	context.show_sidebar = True
 	project = frappe.get_doc('Project', frappe.form_dict.project)
 
 	project.has_permission('read')

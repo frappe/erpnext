@@ -4,12 +4,6 @@
 	text-decoration: underline;
 }
 
-.page-container {
-	font-weight: normal;
-    margin: 50px auto;
-    max-width: 700px;
-}
-
 .project-item:hover {
   background-color: #f7f7f7;
 }

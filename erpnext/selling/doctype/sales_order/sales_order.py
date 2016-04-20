@@ -311,6 +311,7 @@ def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
 	list_context["show_sidebar"] = True
+	list_context["show_search"] = True
 	list_context["title"] = _("My Orders")
 	list_context["parents"] = [{"title": _("My Account"), "name": "me"}]
 	return list_context

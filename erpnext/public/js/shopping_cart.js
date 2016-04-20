@@ -45,10 +45,10 @@ $.extend(shopping_cart, {
 		
 		if($(".cart-icon").length == 0) {
 			$('<div class="cart-icon small" style="float:right;padding:3px;border-radius:10px;\
-    			border: 1px solid #78D6FF;">\
-				<a href="/cart" style="color:#78D6FF; text-decoration: none">\
+    			border: 1px solid #7575ff;">\
+				<a href="/cart" style="color:#7575ff; text-decoration: none">\
 					Cart\
-					<span style="color:#78D6FF;" class="badge" id="cart-count">5</span>\
+					<span style="color:#7575ff;" class="badge" id="cart-count">5</span>\
 				</a></div>').appendTo($('.shopping-cart'))
 		}
 		

@@ -214,6 +214,7 @@ class Item(WebsiteGenerator):
 				self.thumbnail = file_doc.thumbnail_url
 
 	def get_context(self, context):
+		context.show_search=True
 		if self.variant_of:
 			# redirect to template page!
 			template_item = frappe.get_doc("Item", self.variant_of)

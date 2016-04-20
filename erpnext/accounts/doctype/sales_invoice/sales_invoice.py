@@ -678,6 +678,7 @@ def get_list_context(context=None):
 	list_context = get_list_context(context)
 	list_context["title"] = _("My Invoices")
 	list_context["show_sidebar"] = True
+	list_context["show_search"] = True
 	return list_context
 
 @frappe.whitelist()
