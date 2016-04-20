@@ -76,6 +76,9 @@ frappe.ui.form.on("Item", {
 
 		erpnext.item.toggle_attributes(frm);
 
+		frm.dashboard.show_heatmap = frm.doc.is_stock_item;
+		frm.dashboard.heatmap_message = __('This is based on stock movement. See {0} for details',
+			['<a href="#query-report/Stock Ledger">' + __('Stock Ledger') + '</a>']);
 		frm.dashboard.show_dashboard();
 	},
 

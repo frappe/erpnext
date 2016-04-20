@@ -7,6 +7,8 @@ frappe.ui.form.on("Customer", {
 		frappe.setup_language_field(frm);
 	},
 	refresh: function(frm) {
+		frm.dashboard.show_heatmap = true;
+		frm.dashboard.heatmap_message = __('This is based on transactions against this Customer. See timeline below for details');
 		frm.dashboard.show_dashboard();
 
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {

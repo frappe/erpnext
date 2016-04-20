@@ -26,6 +26,8 @@ class Project(Document):
 					"task_id": task.name
 				})
 
+		self.set_onload('links', self.meta.get_links_setup())
+
 	def __setup__(self):
 		self.onload()
 
@@ -143,6 +145,16 @@ class Project(Document):
 				frappe.sendmail(user.user, subject=_("Project Collaboration Invitation"), content=content.format(*messages), bulk=True)
 				user.welcome_email_sent=1
 
+
+@frappe.whitelist()
+def get_dashboard_data(name):
+	'''load dashboard related data'''
+	frappe.has_permission(doc=frappe.get_doc('Project', name), throw=True)
+
+	from frappe.desk.notifications import get_open_count
+	return {
+		'count': get_open_count('Project', name),
+	}
 
 def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20):
 	return frappe.db.sql('''select distinct project.*

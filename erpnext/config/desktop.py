@@ -28,14 +28,6 @@ def get_data():
 			"link": "List/Supplier"
 		},
 		{
-			"module_name": "Income Statement",
-			"_doctype": "Account",
-			"color": "#3498db",
-			"icon": "octicon octicon-repo",
-			"type": "link",
-			"link": "query-report/Profit and Loss Statement"
-		},
-		{
 			"_doctype": "Employee",
 			"module_name": "Employee",
 			"color": "#2ecc71",
@@ -66,6 +58,14 @@ def get_data():
 			"_doctype": "Lead",
 			"type": "link",
 			"link": "List/Lead"
+		},
+		{
+			"module_name": "Profit and Loss Statment",
+			"_doctype": "Account",
+			"color": "#3498db",
+			"icon": "octicon octicon-repo",
+			"type": "link",
+			"link": "query-report/Profit and Loss Statement"
 		},
 
 		# old

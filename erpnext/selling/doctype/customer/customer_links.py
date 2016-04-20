@@ -12,6 +12,10 @@ links = {
 			'items': ['Sales Order', 'Delivery Note', 'Sales Invoice']
 		},
 		{
+			'label': _('Support'),
+			'items': ['Issue']
+		},
+		{
 			'label': _('Projects'),
 			'items': ['Project']
 		}

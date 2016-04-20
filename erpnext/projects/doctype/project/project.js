@@ -3,6 +3,8 @@
 
 frappe.ui.form.on("Project", {
 	onload: function(frm) {
+		frm.hide_first = true;
+
 		var so = frappe.meta.get_docfield("Project", "sales_order");
 		so.get_route_options_for_new_doc = function(field) {
 			if(frm.is_new()) return;
@@ -40,26 +42,23 @@ frappe.ui.form.on("Project", {
 					frappe.route_options = {"project": frm.doc.name,
 						"start": frm.doc.expected_start_date, "end": frm.doc.expected_end_date};
 					frappe.set_route("Gantt", "Task");
-				}, __("View"), true);
-				frm.add_custom_button(__("Tasks"), function() {
-					frappe.route_options = {"project": frm.doc.name}
-					frappe.set_route("List", "Task");
-				}, __("View"), true);
+				});
 			}
 
-			if(frappe.model.can_read("Time Log")) {
-				frm.add_custom_button(__("Time Logs"), function() {
-					frappe.route_options = {"project": frm.doc.name}
-					frappe.set_route("List", "Time Log");
-				}, __("View"), true);
-			}
+			frm.dashboard.show_dashboard();
+			frm.dashboard.add_section(frappe.render_template('project_dashboard', {project: frm.doc}));
 
-			if(frappe.model.can_read("Expense Claim")) {
-				frm.add_custom_button(__("Expense Claims"), function() {
-					frappe.route_options = {"project": frm.doc.name}
-					frappe.set_route("List", "Expense Claim");
-				}, __("View"), true);
-			}
+			// var bars = [];
+			// bars.push({
+			// 	'title': __('Percent Complete'),
+			// 	'width': (frm.doc.percent_complete || 1)  + '%',
+			// 	'progress_class': 'progress-bar-success'
+			// })
+			//
+			// var message = __("{0}% complete", [frm.doc.percent_complete]);
+			//
+			// frm.dashboard.add_progress(__('Status'), bars, message);
+
 		}
 
 	}
