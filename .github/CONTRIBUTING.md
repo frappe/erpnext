@@ -47,7 +47,7 @@ If you rebased your commits, you will have to [force push](http://vignette2.wiki
 ###Good practices: 
 
 * You should rebase your branch with the branch you plan to make a Pull Request to as often as you can. 
-* Your commit messages should be Pull Requestecise and explain exactly what the commit does. Same goes for the Pull Request title.
+* Your commit messages should be precise and explain exactly what the commit does. Same goes for the Pull Request title.
 * When making a PR make sure that all your code is committed properly by checking the diffs.
 * If you're working on different things at the same time, make sure you make separate branches for each.
 * Don't create new DocTypes unless absolutely necessary. If you find that there is a another DocType with a similar functionality, then please try and extend that functionality.
