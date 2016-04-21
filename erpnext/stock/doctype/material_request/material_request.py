@@ -115,7 +115,6 @@ class MaterialRequest(BuyingController):
 		pc_obj = frappe.get_doc('Purchase Common')
 
 		pc_obj.check_for_closed_status(self.doctype, self.name)
-		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Order', docname = self.name, detail_doctype = 'Purchase Order Item')
 
 		self.update_requested_qty()
 

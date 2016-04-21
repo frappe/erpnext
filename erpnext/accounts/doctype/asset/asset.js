@@ -8,28 +8,83 @@ frappe.ui.form.on('Asset', {
 		frm.set_query("item_code", function() {
 			return {
 				"filters": {
-					"is_stock_item": 0,
-					"is_fixed_asset": 1,
 					"disabled": 0
+				}
+			};
+		});
+		
+		frm.set_query("warehouse", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company
 				}
 			};
 		});
 	},
 	
 	refresh: function(frm) {
+		frappe.ui.form.trigger("Asset", "is_existing_asset");
+		
 		if (frm.doc.docstatus==1) {
-			if (in_list(["Submittted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
-				cur_frm.add_custom_button("Scrap Asset", function() {
+			if (frm.doc.status=='Submitted' && !frm.doc.is_existing_asset && !frm.doc.purchase_invoice) {
+				frm.add_custom_button("Make Purchase Invoice", function() {
+					erpnext.asset.make_purchase_invoice(frm);
+				});
+			}
+			if (in_list(["Submitted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
+				frm.add_custom_button("Scrap Asset", function() {
 					erpnext.asset.scrap_asset(frm);
 				});
+				
+				frm.add_custom_button("Sale Asset", function() {
+					erpnext.asset.make_sales_invoice(frm);
+				});
+				
 			} else if (frm.doc.status=='Scrapped') {
-				cur_frm.add_custom_button("Restore Asset", function() {
+				frm.add_custom_button("Restore Asset", function() {
 					erpnext.asset.restore_asset(frm);
 				});
 			}
 		}
+	},
+	
+	is_existing_asset: function(frm) {
+		frm.toggle_enable("supplier", frm.doc.is_existing_asset);
+		frm.toggle_reqd("next_depreciation_date", !frm.doc.is_existing_asset);
 	}
 });
+
+erpnext.asset.make_purchase_invoice = function(frm) {
+	frappe.call({
+		args: {
+			"asset": frm.doc.name,
+			"item_code": frm.doc.item_code,
+			"gross_purchase_amount": frm.doc.gross_purchase_amount,
+			"company": frm.doc.company,
+			"posting_date": frm.doc.purchase_date
+		},
+		method: "erpnext.accounts.doctype.asset.asset.make_purchase_invoice",
+		callback: function(r) {
+			var doclist = frappe.model.sync(r.message);
+			frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+		}
+	})
+}
+
+erpnext.asset.make_sales_invoice = function(frm) {
+	frappe.call({
+		args: {
+			"asset": frm.doc.name,
+			"item_code": frm.doc.item_code,
+			"company": frm.doc.company
+		},
+		method: "erpnext.accounts.doctype.asset.asset.make_sales_invoice",
+		callback: function(r) {
+			var doclist = frappe.model.sync(r.message);
+			frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+		}
+	})
+}
 
 erpnext.asset.scrap_asset = function(frm) {
 	frappe.confirm(__("Do you really want to scrap this asset?"), function () {

@@ -62,6 +62,7 @@ class PurchaseInvoice(BuyingController):
 		self.set_against_expense_account()
 		self.validate_write_off_account()
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
+		self.validate_fixed_asset()
 		self.validate_fixed_asset_account()
 		self.create_remarks()
 
@@ -165,11 +166,10 @@ class PurchaseInvoice(BuyingController):
 			# in case of auto inventory accounting,
 			# expense account is always "Stock Received But Not Billed" for a stock item 
 			# except epening entry, drop-ship entry and fixed asset items
-
-			if auto_accounting_for_stock and self.is_opening == 'No' \
-				and item.item_code in stock_items and ((not item.po_detail 
-				or not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier"))
-				or not frappe.db.get_value("Item", item.item_code, "is_fixed_asset")):
+			
+			if auto_accounting_for_stock and item.item_code in stock_items and self.is_opening == 'No' \
+				and (not item.po_detail or not item.is_fixed_asset
+				or not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
 
 				if self.update_stock:
 					item.expense_account = warehouse_account[item.warehouse]["name"]
@@ -290,8 +290,6 @@ class PurchaseInvoice(BuyingController):
 		self.check_prev_docstatus()
 		self.update_status_updater_args()
 		
-		self.validate_asset()
-
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 			
@@ -312,34 +310,23 @@ class PurchaseInvoice(BuyingController):
 		self.make_gl_entries()
 
 		self.update_project()
+		self.update_fixed_asset()
 		
-	def validate_asset(self):
+	def update_fixed_asset(self):		
 		for d in self.get("items"):
-			if frappe.db.get_value("Item", d.item_code, "is_fixed_asset"):
-				if not d.asset:
-					frappe.throw(_("Row #{0}: Asset is mandatory against a Fixed Asset Item").format(d.idx))
+			if d.is_fixed_asset:
+				asset = frappe.get_doc("Asset", d.asset)
+				if self.docstatus==1:
+					asset.purchase_invoice = self.name
+					asset.purchase_date = self.posting_date
+					asset.supplier = self.supplier
 				else:
-					asset = frappe.get_doc("Asset", d.asset)
+					asset.purchase_invoice = None
+					asset.supplier = None
 					
-					super(PurchaseInvoice, self).validate_asset(asset, d)
-		
-					if getdate(asset.purchase_date) != getdate(self.posting_date):
-						frappe.throw(_("Purchase Date of asset {0} does not match with Purchase Invoice date")
-							.format(d.asset))
+				asset.flags.ignore_validate_update_after_submit = True
+				asset.save()
 					
-					if asset.supplier and asset.supplier != self.supplier:
-						frappe.throw(_("Supplier of asset {0} does not match with the supplier in the Purchase Invoice").format(d.asset))
-				
-					if asset.status != "Submitted":
-						frappe.throw(_("Row #{0}: Asset {1} is already {2}")
-							.format(d.idx, d.asset, asset.status))
-					
-					frappe.db.set_value("Asset", asset.name, "purchase_invoice", 
-						(self.name if self.docstatus==1 else None))
-						
-					if self.docstatus==1 and not asset.supplier:
-						frappe.db.set_value("Asset", asset.name, "supplier", self.supplier)
-
 	def make_gl_entries(self, repost_future_gle=False):
 		self.auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
@@ -612,7 +599,7 @@ class PurchaseInvoice(BuyingController):
 			
 		self.make_gl_entries_on_cancel()
 		self.update_project()
-		self.validate_asset()
+		self.update_fixed_asset()
 
 	def update_project(self):
 		project_list = []
@@ -666,7 +653,7 @@ class PurchaseInvoice(BuyingController):
 			
 	def validate_fixed_asset_account(self):
 		for d in self.get('items'):
-			if frappe.db.get_value("Item", d.item_code, "is_fixed_asset"):
+			if d.is_fixed_asset:
 				account_type = frappe.db.get_value("Account", d.expense_account, "account_type")
 				if account_type != 'Fixed Asset':
 					frappe.throw(_("Row {0}# Account must be of type 'Fixed Asset'").format(d.idx))
@@ -678,3 +665,18 @@ class PurchaseInvoice(BuyingController):
 def make_debit_note(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Purchase Invoice", source_name, target_doc)
+
+@frappe.whitelist()
+def get_fixed_asset_account(asset, account=None):
+	if account:
+		if frappe.db.get_value("Account", account, "account_type") != "Fixed Asset":
+			account=None
+			
+	if not account:
+		asset_category, company = frappe.db.get_value("Asset", asset, ["asset_category", "company"])
+		
+		account = frappe.db.get_value("Asset Category Account",
+			filters={"parent": asset_category, "company_name": company}, fieldname="fixed_asset_account")
+			
+	return account
+			

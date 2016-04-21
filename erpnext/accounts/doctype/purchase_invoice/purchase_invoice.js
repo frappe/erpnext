@@ -156,6 +156,22 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			frm: cur_frm
 		})
 	},
+	
+	asset: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if(row.asset) {
+			frappe.call({
+				method: erpnext.accounts.doctype.purchase_invoice.purchase_invoice.get_fixed_asset_account,
+				args: {
+					"asset": row.asset,
+					"account": row.expense_account
+				},
+				callback: function(r, rt) {
+					frappe.model.set_value(cdt, cdn, "expense_account", r.message);
+				}
+			})
+		}
+	}
 });
 
 cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
