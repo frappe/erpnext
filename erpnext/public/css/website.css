@@ -50,9 +50,27 @@
 .product-text {
   padding: 15px 0px;
 }
+.product-search {
+  margin-bottom: 15px;
+}
 @media (max-width: 767px) {
   .product-search {
     width: 100%;
-    margin-bottom: 13px;
   }
+}
+.product-list-link .row {
+  border-bottom: 1px solid #EBEFF2;
+}
+.product-list-link .row:hover {
+  background-color: #fafbfc;
+}
+.product-list-link .row > div {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+.product-list-link:first-child .row {
+  border-top: 1px solid #EBEFF2;
+}
+.item-group-nav-buttons {
+  margin-top: 15px;
 }
