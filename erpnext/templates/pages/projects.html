@@ -3,11 +3,15 @@
 {% block title %}{{ doc.project_name }}{% endblock %}
 
 {%- from "templates/includes/projects/macros.html" import back_link -%}
-
-{% block header_actions %}
-{% include 'templates/includes/projects/project_search_box.html' %}
-{% endblock %}
-
+{% block header %}<h1>{{ doc.project_name }}</h1>{% endblock %}
+{% block header_actions %}{% if doc.percent_complete %}
+		<div class="progress progress-hg">
+		  <div class="progress-bar progress-bar-{{ "warning" if doc.percent_complete|round < 100 else "success" }} active" role="progressbar"
+		  	aria-valuenow="{{ doc.percent_complete|round|int }}"
+		  	aria-valuemin="0" aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">
+		  </div>
+		</div>
+	{% endif %}{% endblock %}
 {% block breadcrumbs %}
    <div class="page-breadcrumbs" data-html-block="breadcrumbs">
    	<ul class="breadcrumb">
@@ -29,24 +33,6 @@
 
 {% block page_content %}
 
-<div class="row">
-<div class="col-xs-6">
-<h2 class= "title">
-	{{ doc.project_name }}
-</h2>
-</div>
-<div class="col-xs-6">
-	{% if doc.percent_complete %}
-		<div class="progress progress-hg">
-		  <div class="progress-bar progress-bar-{{ "warning" if doc.percent_complete|round < 100 else "success" }} active" role="progressbar"
-		  	aria-valuenow="{{ doc.percent_complete|round|int }}"
-		  	aria-valuemin="0" aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">
-		  </div>
-		</div>
-	{% endif %}
-</div>
-</div>
-<hr class="small">
 
 <div class="clearfix">
   <h4 style="float: left;">{{ _("Tasks") }}</h4>

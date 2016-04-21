@@ -1,11 +1,18 @@
 {% extends "templates/web.html" %}
 
-{% block header_actions %}
+{#{% block header_actions %}
 {% include 'templates/includes/product_search_box.html' %}
-{% endblock %}
-
+{% endblock %}#}
+{% block header %}<h1>{{ _("Products") }}</h1>{% endblock %}
 {% block breadcrumbs %}
-    {% include "templates/includes/breadcrumbs.html" %}
+ <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+ 	<ul class="breadcrumb">
+ 		<li>
+ 			<span class="icon icon-angle-left"></span>
+ 			<a href="/me">My Account</a>
+ 		</li>
+ 	</ul>
+ </div>
 {% endblock %}
 
 {% block page_content %}
@@ -38,16 +45,4 @@
 		{% endif %}
 	</div>
 </div>
-{% endblock %}
-
-{% block style %}
-<style>
-	.product-image.missing-image {
-		border: 1px dashed {{ theme.border_color or "#d1d8dd" }};
-	}
-
-	.product-image.missing-image .octicon {
-		color: {{ theme.border_color or "#d1d8dd" }};
-	}
-</style>
 {% endblock %}

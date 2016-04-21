@@ -53,11 +53,12 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			frappe.throw(frappe._("An item exists with same name ({0}), please change the item group name or rename the item").format(self.name))
 
 	def get_context(self, context):
+		context.show_search=True
 		start = int(frappe.form_dict.start or 0)
 		if start < 0:
 			start = 0
 		context.update({
-			"items": get_product_list_for_group(product_group = self.name, start=start, limit=24),
+			"items": get_product_list_for_group(product_group = self.name, start=start, limit=24, search=frappe.form_dict.get("q")),
 			"parent_groups": get_parent_item_groups(self.name),
 			"title": self.name
 		})
@@ -68,7 +69,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		return context
 
 @frappe.whitelist(allow_guest=True)
-def get_product_list_for_group(product_group=None, start=0, limit=10):
+def get_product_list_for_group(product_group=None, start=0, limit=10, search=None):
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(product_group)])
 
 	# base query
@@ -83,10 +84,16 @@ def get_product_list_for_group(product_group=None, start=0, limit=10):
 			and (item_group in ({child_groups})
 			or name in (select parent from `tabWebsite Item Group` where item_group in ({child_groups})))
 			""".format(child_groups=child_groups)
+	# search term condition
+	if search:
+		query += """ and (web_long_description like %(search)s
+				or item_name like %(search)s
+				or name like %(search)s)"""
+		search = "%" + cstr(search) + "%"		
 
 	query += """order by weightage desc, modified desc limit %s, %s""" % (start, limit)
 
-	data = frappe.db.sql(query, {"product_group": product_group, "today": nowdate()}, as_dict=1)
+	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
 
 	return [get_item_for_list_in_html(r) for r in data]
 

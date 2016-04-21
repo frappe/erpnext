@@ -172,10 +172,13 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20):
 
 def get_list_context(context=None):
 	return {
+		"show_sidebar": True,
+		"show_search": True,
 		"title": _("My Projects"),
 		"get_list": get_project_list,
 		"row_template": "templates/includes/projects/project_row.html"
 	}
+
 
 @frappe.whitelist()
 def get_cost_center_name(project):

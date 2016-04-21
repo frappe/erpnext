@@ -10,8 +10,9 @@
 
 {% block page_content %}
 
+{%- if description -%}
 <div>{{ description }}</div>
-
+{% endif %}
 <p>
 	<a class='btn btn-primary'
 	href='/job_application?job_title={{ doc.name }}'>
