@@ -6,6 +6,10 @@ import frappe
 import json
 
 def get_context(context):
+	project_user = frappe.db.get_value("Project User", {"parent": frappe.form_dict.project, "user": frappe.session.user} , "user")
+	if not project_user or frappe.session.user == 'Guest': 
+		raise frappe.PermissionError
+		
 	context.no_cache = 1
 
 	project = frappe.get_doc('Project', frappe.form_dict.project)
