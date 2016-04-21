@@ -4,7 +4,7 @@
 // print heading
 cur_frm.pformat.print_heading = 'Invoice';
 
-{% include 'selling/sales_common.js' %};
+{% include 'erpnext/selling/sales_common.js' %};
 
 frappe.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({

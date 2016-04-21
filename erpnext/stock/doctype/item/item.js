@@ -84,19 +84,10 @@ frappe.ui.form.on("Item", {
 
 	dashboard_update: function(frm) {
 		if(frm.dashboard_data.stock_data && frm.dashboard_data.stock_data.length) {
-			var max_count = 0;
-			frm.dashboard_data.stock_data.forEach(function(d) {
-				d.actual_or_pending = d.projected_qty - d.reserved_qty;
-				d.pending_qty = 0;
-				if(d.actual_or_pending > d.actual_qty) {
-					d.pending_qty = d.actual_or_pending - d.actual_qty;
-				}
-
-				max_count = Math.max(d.actual_or_pending, d.actual_qty,
-					d.reserved_qty, max_count);
-			})
-			frm.dashboard.add_stats(frappe.render_template('item_dashboard',
-				{data: frm.dashboard_data.stock_data, max_count: max_count}));
+			var context = erpnext.get_item_dashboard_data(frm.dashboard_data.stock_data, 0);
+			frm.dashboard.add_section('<h5 style="margin-top: 0px;">Stock Levels</h5>\
+				<ul class="list-group">' + frappe.render_template('item_dashboard', context), true)
+				+ '</ul>';
 		}
 	},
 

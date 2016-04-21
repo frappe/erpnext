@@ -1,39 +1,42 @@
-<div>
-	<h5 style="margin-top: 0px;">Stock Levels</h5>
-	<ul class="list-group" style="margin: 0px;">
-	{% for(var i=0; i < data.length; i++) { var d = data[i]; %}
-		<li class="list-group-item" style="background-color: inherit;">
-			<div class="row">
-				<div class="col-sm-8 small" style="margin-top: 8px;">{{ d.warehouse }}</div>
-				<div class="col-sm-4 small">
-					<span class="inline-graph">
-						<span class="inline-graph-half" title="{{ __("Reserved Qty") }}">
-							<span class="inline-graph-count">{{ d.reserved_qty }}</span>
-							<span class="inline-graph-bar">
-								<span class="inline-graph-bar-inner"
-									style="width: {{ cint(Math.abs(d.reserved_qty)/max_count * 100) || 5 }}%">
-								</span>
-							</span>
-						</span>
-						<span class="inline-graph-half" title="{{ __("Acutal Qty {0} / Waiting Qty {1}", [d.actual_qty, d.pending_qty]) }}">
-							<span class="inline-graph-count">
-								{{ d.actual_qty }} {{ (d.pending_qty > 0) ? ("(" + d.pending_qty+ ")") : "" }}
-							</span>
-							<span class="inline-graph-bar">
-								<span class="inline-graph-bar-inner dark"
-									style="width: {{ cint(d.actual_qty/max_count * 100) }}%">
-								</span>
-								{% if(d.pending_qty > 0) { %}
-								<span class="inline-graph-bar-inner" title="{{ __("Projected Qty") }}"
-									style="width: {{ cint(d.pending_qty/max_count * 100) }}%">
-								</span>
-								{% } %}
+{% for d in data %}
+	<li class="list-group-item" style="background-color: inherit;">
+		<div class="row">
+			<div class="col-sm-4 small" style="margin-top: 8px;">
+				<a data-type="warehouse" data-name="{{ d.warehouse }}">{{ d.warehouse }}</a>
+			</div>
+			<div class="col-sm-4 small" style="margin-top: 8px;">
+				{% if d.item_code %}
+					<a data-type="item"
+						data-name="{{ d.item_code }}">{{ d.item_code }}</a>
+				{% endif %}
+			</div>
+			<div class="col-sm-4 small">
+				<span class="inline-graph">
+					<span class="inline-graph-half" title="{{ __("Reserved Qty") }}">
+						<span class="inline-graph-count">{{ d.total_reserved }}</span>
+						<span class="inline-graph-bar">
+							<span class="inline-graph-bar-inner"
+								style="width: {{ cint(Math.abs(d.total_reserved)/max_count * 100) || 5 }}%">
 							</span>
 						</span>
 					</span>
-				</div>
+					<span class="inline-graph-half" title="{{ __("Acutal Qty {0} / Waiting Qty {1}", [d.actual_qty, d.pending_qty]) }}">
+						<span class="inline-graph-count">
+							{{ d.actual_qty }} {{ (d.pending_qty > 0) ? ("(" + d.pending_qty+ ")") : "" }}
+						</span>
+						<span class="inline-graph-bar">
+							<span class="inline-graph-bar-inner dark"
+								style="width: {{ cint(d.actual_qty/max_count * 100) }}%">
+							</span>
+							{% if d.pending_qty > 0 %}
+							<span class="inline-graph-bar-inner" title="{{ __("Projected Qty") }}"
+								style="width: {{ cint(d.pending_qty/max_count * 100) }}%">
+							</span>
+							{% endif %}
+						</span>
+					</span>
+				</span>
 			</div>
-		</li>
-	{% } %}
-	</ul>
-</div>
+		</div>
+	</li>
+{% endfor %}

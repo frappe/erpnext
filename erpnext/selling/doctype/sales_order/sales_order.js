@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'selling/sales_common.js' %}
+{% include 'erpnext/selling/sales_common.js' %}
 
 frappe.ui.form.on("Sales Order", {
 	onload: function(frm) {

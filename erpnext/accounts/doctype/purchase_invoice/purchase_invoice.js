@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.accounts");
-{% include 'buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
 
 
 erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({

@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 
-{% include 'selling/sales_common.js' %}
+{% include 'erpnext/selling/sales_common.js' %}
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {

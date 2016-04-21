@@ -1,0 +1,32 @@
+<div class="padding">
+	<div class="row" style="margin-bottom: 15px;">
+		<div class="col-sm-8"></div>
+		<div class="col-sm-4">
+			<button class="btn btn-default btn-xs pull-right btn-order"
+				data-value="desc" style="margin-left: 10px;">
+					<span class="octicon octicon-triangle-down"></span></button>
+			<div class="dropdown pull-right" data-value="actual_qty">
+			  <a class="text-muted dropdown-toggle small"
+			  	data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+			    {{ __("Actual quantity") }}
+			  </a>
+			  <ul class="dropdown-menu">
+			    <li><a class="option" data-value="actual_qty">
+					{{ __("Actual quantity") }}</a></li>
+			    <li><a class="option" data-value="reserved_qty">
+					{{ __("Reserved for sale") }}</a></li>
+			    <li><a class="option" data-value="reserved_qty_for_production">
+					{{ __("Reserved for manufacturing") }}</a></li>
+			    <li><a class="option" data-value="projected_qty">
+					{{ __("Projected quantity") }}</a></li>
+			  </ul>
+			</div>
+		</div>
+	</div>
+	<div class="result list-group">
+
+	</div>
+	<div class="more hidden" style="padding-top: 15px;">
+		<a class="btn btn-default btn-xs btn-more">More</a>
+	</div>
+</div>
