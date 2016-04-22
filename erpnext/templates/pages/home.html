@@ -1,31 +1,48 @@
 {% extends "templates/web.html" %}
+{% from "erpnext/templates/includes/macros.html" import product_image_square %}
 
-{% block title %}{{brand_html}}{% endblock %}
+{% block title %}{{ brand_html }}{% endblock %}
 
 {% block page_content %}
-<script>{% include "templates/includes/product_list.js" %}</script>
-
-<script>
-frappe.ready(function() {
-	window.start = 0;
-	window.get_product_list();
-});
-</script>
 
 <div class="row">
 	<div class="col-sm-12">
-		<h2 class="text-center">{{ tag_line }}</h2>
-		<p class="lead text-center">{{ description }}</p>
-		<p class="text-center"><a href="/login" class="btn btn-primary text-center">Login</a></p>
-		<div style="margin-top:75px;">
-		<h5>{{_("FEATURED PRODUCTS")}}</h5>	
-		<div class="featured-products">	
-		<div id="search-list" class="row" style="margin-top:40px;">
+		<h2 class="text-center">{{ homepage.tag_line or '' }}</h2>
+		<p class="lead text-center">{{ homepage.description or '' }}</p>
+		<p class="text-center">
+			<a href="/login" class="btn btn-primary text-center">Login</a>
+		</p>
 
+		{% if homepage.products %}
+		<!-- TODO: styling of this section -->
+		<div class='featured-products-section'>
+			<h5 class='text-uppercase'>{{ _("Featured Products") }}</h5>
+			<div class="featured-products">
+				<div id="search-list" class="row" style="margin-top:40px;">
+					{% for item in homepage.products %}
+						<a class="product-link" href="{{ item.route | abs_url }}">
+							<div class="col-sm-4 product-image-wrapper">
+								{{ product_image_square(item.thumbnail or item.image) }}
+								<div class="text-ellipsis inline-block small product-text">
+									{{ item.item_name }}
+								</div>
+							</div>
+						</a>
+					{% endfor %}
+				</div>
+			</div>
+			<!-- TODO: remove hardcoding of /products -->
+			<p class="text-center"><a href="/products" class="btn btn-primary">More Products</a></p>
 		</div>
-		</div>
-		<p class="text-center"><a href="/products" class="btn btn-primary">More Products</a></p>
-	</div>
+		{% endif %}
 	</div>
 </div>
+{% endblock %}
+
+{% block style %}
+<style>
+	.featured-products-section {
+		margin-top: 75px;
+	}
+</style>
 {% endblock %}

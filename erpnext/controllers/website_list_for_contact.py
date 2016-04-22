@@ -49,7 +49,7 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 				order_by = "modified desc"))
 		else:
 			return []
-			
+
 	return post_process(doctype, get_list(doctype, txt, filters, limit_start, limit_page_length,
 		fields="name", order_by = "modified desc"))
 

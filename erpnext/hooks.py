@@ -139,7 +139,11 @@ doc_events = {
 		'Supplier Quotation', 'Purchase Order', 'Purchase Receipt',
 		'Purchase Invoice', 'Project', 'Issue'): {
 			'on_change': 'erpnext.accounts.party_status.notify_status'
-		}
+		},
+
+	"Website Settings": {
+		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
+	}
 }
 
 scheduler_events = {

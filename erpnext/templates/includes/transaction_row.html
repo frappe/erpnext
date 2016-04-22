@@ -1,17 +1,27 @@
-<div class="web-list-item">
-<a href="/{{ pathname }}/{{ doc.name }}">
-<div class="row">
-	<div class="col-sm-6">
+<div class="web-list-item transaction-list-item">
+	<a href="/{{ pathname }}/{{ doc.name }}">
+		<div class="row">
+			<div class="col-sm-6">
+				<span>{{ doc.name }}</span>
+				<div class="small text-muted items-preview text-ellipsis">
+					{{ doc.items_preview }}
+				</div>
+			</div>
+			<div class="col-sm-4">
+				<span class="indicator {{ doc.indicator_color or "darkgrey" }}">
+					{{ doc.indicator_title or doc.status }}
+				</span>
+				<div class="small text-muted transaction-time"
+					title="{{ frappe.utils.format_datetime(doc.modified, "medium") }}">
+					{{ frappe.utils.pretty_date(doc.modified) }}
+				</div>
+			</div>
+			<div class="col-sm-2 text-right">
+				{{ doc.get_formatted("grand_total") }}
+			</div>
+			<!-- <div class="col-sm-3 text-right">
 
-                <span class="indicator {{ doc.indicator_color or "darkgrey" }}">{{ doc.name }}</span>
-                <div class="small text-muted">{{ doc.items_preview }}</div>
-
-	</div>
-	<div class="col-sm-3 col-xs-5">
-		{{ doc.get_formatted("grand_total") }}
-	</div>
-	<div class="col-sm-3 small text-muted text-right" title="{{ frappe.utils.format_datetime(doc.creation, "medium") }}">
-		{{ frappe.utils.pretty_date(doc.creation) }}</div>
-</div>
-</a>
+			</div> -->
+		</div>
+	</a>
 </div>

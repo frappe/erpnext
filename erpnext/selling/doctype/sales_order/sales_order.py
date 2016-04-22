@@ -310,10 +310,13 @@ class SalesOrder(SellingController):
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
-	list_context["show_sidebar"] = True
-	list_context["show_search"] = True
-	list_context["title"] = _("My Orders")
-	list_context["parents"] = [{"title": _("My Account"), "name": "me"}]
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Orders'),
+	})
+
 	return list_context
 
 @frappe.whitelist()
@@ -338,10 +341,10 @@ def close_or_unclose_sales_orders(names, status):
 def make_material_request(source_name, target_doc=None):
 	def postprocess(source, doc):
 		doc.material_request_type = "Purchase"
-		
+
 	def update_item(source, target, source_parent):
 		target.project = source_parent.project
-		
+
 
 	so = frappe.get_doc("Sales Order", source_name)
 
