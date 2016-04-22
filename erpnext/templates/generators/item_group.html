@@ -27,19 +27,19 @@
 	</div>
 	<div>
 		{% if items %}
-		<div id="search-list" class="row">
+		<div id="search-list" {% if not products_as_list -%} class="row" {%- endif %}>
 			{% for item in items %}
 				{{ item }}
 			{% endfor %}
 		</div>
-			<div class="text-center">
-				{% if frappe.form_dict.start|int > 0 %}
-				<a class="btn btn-default" href="{{ pathname }}?start={{ frappe.form_dict.start|int - 24 }}">Prev</a>
-				{% endif %}
-				{% if items|length == 24 %}
-				<a class="btn btn-default" href="{{ pathname }}?start={{ frappe.form_dict.start|int + 24 }}">Next</a>
-				{% endif %}
-			</div>
+		<div class="text-center item-group-nav-buttons">
+			{% if frappe.form_dict.start|int > 0 %}
+			<a class="btn btn-default" href="{{ pathname }}?start={{ frappe.form_dict.start|int - 24 }}">Prev</a>
+			{% endif %}
+			{% if items|length == 24 %}
+			<a class="btn btn-default" href="{{ pathname }}?start={{ frappe.form_dict.start|int + 24 }}">Next</a>
+			{% endif %}
+		</div>
 		{% else %}
 			<div class="text-muted">No items listed.</div>
 		{% endif %}

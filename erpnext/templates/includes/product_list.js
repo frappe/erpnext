@@ -22,14 +22,14 @@ window.get_product_list = function() {
 		},
 		dataType: "json",
 		success: function(data) {
-			window.render_product_list(data.message);
+			window.render_product_list(data.message || []);
 		}
 	})
 }
 
 window.render_product_list = function(data) {
+	var table = $("#search-list .table");
 	if(data.length) {
-		var table = $("#search-list .table");
 		if(!table.length)
 			var table = $("<table class='table'>").appendTo("#search-list");
 
