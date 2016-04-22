@@ -321,13 +321,13 @@ class ProductionPlanningTool(Document):
 				# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 				for d in frappe.db.sql("""select fb.item_code,
 					ifnull(sum(fb.qty/ifnull(bom.quantity, 1)), 0) as qty,
-					fb.description, fb.stock_uom, it.min_order_qty
-					from `tabBOM Explosion Item` fb, `tabBOM` bom, `tabItem` it
+					fb.description, fb.stock_uom, item.min_order_qty
+					from `tabBOM Explosion Item` fb, `tabBOM` bom, `tabItem` item
 					where bom.name = fb.parent and it.name = fb.item_code
-					and (is_sub_contracted_item = 0 or ifnull(default_bom, "")="")
-					and is_stock_item = 1
+					and (item.is_sub_contracted_item = 0 or ifnull(item.default_bom, "")="")
+					and item.is_stock_item = 1
 					and fb.docstatus<2 and bom.name=%s
-					group by item_code, stock_uom""", bom, as_dict=1):
+					group by fb.item_code, fb.stock_uom""", bom, as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
 			else:
 				# Get all raw materials considering SA items as raw materials,
@@ -339,7 +339,7 @@ class ProductionPlanningTool(Document):
 					where bom.name = bom_item.parent and bom.name = %s and bom_item.docstatus < 2
 					and bom_item.item_code = item.name
 					and item.is_stock_item = 1
-					group by item_code""", bom, as_dict=1):
+					group by bom_item.item_code""", bom, as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
 			for item, item_details in bom_wise_item_details.items():
 				for so_qty in so_wise_qty:
