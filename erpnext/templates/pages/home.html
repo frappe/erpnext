@@ -1,0 +1,31 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{brand_html}}{% endblock %}
+
+{% block page_content %}
+<script>{% include "templates/includes/product_list.js" %}</script>
+
+<script>
+frappe.ready(function() {
+	window.start = 0;
+	window.get_product_list();
+});
+</script>
+
+<div class="row">
+	<div class="col-sm-12">
+		<h2 class="text-center">{{ tag_line }}</h2>
+		<p class="lead text-center">{{ description }}</p>
+		<p class="text-center"><a href="/login" class="btn btn-primary text-center">Login</a></p>
+		<div style="margin-top:75px;">
+		<h5>{{_("FEATURED PRODUCTS")}}</h5>	
+		<div class="featured-products">	
+		<div id="search-list" class="row" style="margin-top:40px;">
+
+		</div>
+		</div>
+		<p class="text-center"><a href="/products" class="btn btn-primary">More Products</a></p>
+	</div>
+	</div>
+</div>
+{% endblock %}
