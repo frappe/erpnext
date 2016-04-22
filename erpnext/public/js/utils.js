@@ -132,22 +132,3 @@ $(document).on('app_ready', function() {
 		});
 	}
 });
-
-erpnext.get_item_dashboard_data = function(data, max_count) {
-	if(!max_count) max_count = 0;
-	data.forEach(function(d) {
-		d.actual_or_pending = d.projected_qty + d.reserved_qty + d.reserved_qty_for_production;
-		d.pending_qty = 0;
-		d.total_reserved = d.reserved_qty + d.reserved_qty_for_production;
-		if(d.actual_or_pending > d.actual_qty) {
-			d.pending_qty = d.actual_or_pending - d.actual_qty;
-		}
-
-		max_count = Math.max(d.actual_or_pending, d.actual_qty,
-			d.total_reserved, max_count);
-	});
-	return {
-		data: data,
-		max_count: max_count
-	}
-}
