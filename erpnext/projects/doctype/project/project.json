@@ -196,7 +196,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "expected_end_date", 
    "fieldtype": "Date", 
@@ -429,7 +429,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "percent_complete", 
    "fieldtype": "Percent", 
@@ -966,14 +966,14 @@
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "icon": "icon-puzzle-piece", 
- "idx": 24, 
+ "idx": 29, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 4, 
- "modified": "2016-03-31 01:34:05.703925", 
+ "modified": "2016-04-22 03:15:39.635420", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
@@ -1020,6 +1020,7 @@
    "write": 0
   }
  ], 
+ "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "customer, status, priority, is_active", 

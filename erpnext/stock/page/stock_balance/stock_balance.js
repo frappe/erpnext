@@ -42,26 +42,25 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 			refresh();
 		});
 
-	// order
-	page.content.find('.btn-order').on('click', function() {
-		var btn = $(this);
-		var order = $(this).attr('data-value')==='desc' ? 'asc' : 'desc';
-
-		btn.attr('data-value', order);
-		page.sort_order = order;
-		btn.find('.octicon')
-			.removeClass('octicon-triangle-' + (order==='asc' ? 'down' : 'up'))
-			.addClass('octicon-triangle-' + (order==='desc' ? 'down' : 'up'));
-		page.start = 0;
-		refresh();
-	});
-
-	// select field
-	page.content.find('.dropdown a.option').on('click', function() {
-		page.sort_by = $(this).attr('data-value');
-		page.content.find('.dropdown .dropdown-toggle').html($(this).html());
-		refresh();
-	});
+	page.sort_selector = new frappe.ui.SortSelector({
+		parent: page.content.find('.sort-selector-area'),
+		args: {
+			sort_by: 'projected_qty',
+			sort_order: 'asc',
+			options: [
+				{fieldname: 'projected_qty', label: __('Projected qty')},
+				{fieldname: 'reserved_qty', label: __('Reserved for sale')},
+				{fieldname: 'reserved_qty_for_production', label: __('Reserved for manufacturing')},
+				{fieldname: 'actual_qty', label: __('Acutal qty in stock')},
+			]
+		},
+		change: function(sort_by, sort_order) {
+			page.sort_by = sort_by;
+			page.sort_order = sort_order;
+			page.start = 0;
+			refresh();
+		}
+	})
 
 	var refresh = function() {
 		var item_code = item_field.get_value();
