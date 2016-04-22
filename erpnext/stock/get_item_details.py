@@ -48,7 +48,7 @@ def get_item_details(args):
 	if frappe.db.exists("Product Bundle", args.item_code):
 		valuation_rate = 0.0
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
-		
+
 		for bundle_item in bundled_items.items:
 			valuation_rate += \
 				flt(get_valuation_rate(bundle_item.item_code, out.get("warehouse")).get("valuation_rate") \
@@ -83,7 +83,7 @@ def get_item_details(args):
 
 	if args.get("is_subcontracted") == "Yes":
 		out.bom = get_default_bom(args.item_code)
-		
+
 	get_gross_profit(out)
 
 	return out
@@ -101,7 +101,7 @@ def process_args(args):
 		args.item_code = get_item_code(barcode=args.barcode)
 	elif not args.item_code and args.serial_no:
 		args.item_code = get_item_code(serial_no=args.serial_no)
-	
+
 	set_transaction_type(args)
 	return args
 
@@ -127,7 +127,7 @@ def validate_item_details(args, item):
 
 	if args.transaction_type=="selling" and cint(item.has_variants):
 		throw(_("Item {0} is a template, please select one of its variants").format(item.name))
-		
+
 	elif args.transaction_type=="buying" and args.doctype != "Material Request":
 		if args.get("is_subcontracted") == "Yes" and item.is_sub_contracted_item != 1:
 			throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
@@ -143,7 +143,7 @@ def get_basic_details(args, item):
 	user_default_warehouse_list = get_user_default_as_list('Warehouse')
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list)==1 else ""
-	
+
 	warehouse = user_default_warehouse or args.warehouse or item.default_warehouse
 
 	out = frappe._dict({
@@ -177,8 +177,8 @@ def get_basic_details(args, item):
 	})
 
 	# if default specified in item is for another company, fetch from company
-	for d in [["Account", "income_account", "default_income_account"], 
-		["Account", "expense_account", "default_expense_account"], 
+	for d in [["Account", "income_account", "default_income_account"],
+		["Account", "expense_account", "default_expense_account"],
 		["Cost Center", "cost_center", "cost_center"], ["Warehouse", "warehouse", ""]]:
 			company = frappe.db.get_value(d[0], out.get(d[1]), "company")
 			if not out[d[1]] or (company and args.company != company):
@@ -365,7 +365,7 @@ def get_projected_qty(item_code, warehouse):
 def get_bin_details(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		["projected_qty", "actual_qty"], as_dict=True) \
-		or {"projected_qty": 0, "actual_qty": 0, "valuation_rate": 0}
+		or {"projected_qty": 0, "actual_qty": 0}
 
 @frappe.whitelist()
 def get_batch_qty(batch_no,warehouse,item_code):
@@ -473,31 +473,31 @@ def get_default_bom(item_code=None):
 			return bom
 		else:
 			frappe.throw(_("No default BOM exists for Item {0}").format(item_code))
-			
+
 def get_valuation_rate(item_code, warehouse=None):
 	item = frappe.get_doc("Item", item_code)
 	if item.is_stock_item:
 		if not warehouse:
 			warehouse = item.default_warehouse
-			
-		return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, 
+
+		return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 			["valuation_rate"], as_dict=True) or {"valuation_rate": 0}
-			
+
 	elif not item.is_stock_item:
-		valuation_rate =frappe.db.sql("""select sum(base_net_amount) / sum(qty) 
-			from `tabPurchase Invoice Item` 
+		valuation_rate =frappe.db.sql("""select sum(base_net_amount) / sum(qty)
+			from `tabPurchase Invoice Item`
 			where item_code = %s and docstatus=1""", item_code)
-		
+
 		if valuation_rate:
 			return {"valuation_rate": valuation_rate[0][0] or 0.0}
 	else:
 		return {"valuation_rate": 0.0}
-		
+
 def get_gross_profit(out):
 	if out.valuation_rate:
 		out.update({
 			"gross_profit": ((out.base_rate - out.valuation_rate) * out.qty)
 		})
-	
+
 	return out
 

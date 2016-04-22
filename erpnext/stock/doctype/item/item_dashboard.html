@@ -1,11 +1,11 @@
 {% for d in data %}
 	<li class="list-group-item" style="background-color: inherit;">
 		<div class="row">
-			<div class="col-sm-4 small" style="margin-top: 8px;">
+			<div class="col-sm-3 small" style="margin-top: 8px;">
 				<a data-type="warehouse" data-name="{{ d.warehouse }}">{{ d.warehouse }}</a>
 			</div>
-			<div class="col-sm-4 small" style="margin-top: 8px;">
-				{% if d.item_code %}
+			<div class="col-sm-3 small" style="margin-top: 8px;">
+				{% if show_item %}
 					<a data-type="item"
 						data-name="{{ d.item_code }}">{{ d.item_code }}</a>
 				{% endif %}
@@ -36,6 +36,18 @@
 						</span>
 					</span>
 				</span>
+			</div>
+			<div class="col-sm-2 text-right" style="margin-top: 8px;">
+				{% if d.actual_qty %}
+				<button class="btn btn-default btn-xs btn-move"
+					data-warehouse="{{ d.warehouse }}"
+					data-actual_qty="{{ d.actual_qty }}"
+					data-item="{{ d.item_code }}">{{ __("Move") }}</a>
+				{% endif %}
+				<button style="margin-left: 7px;" class="btn btn-default btn-xs btn-add"
+					data-warehouse="{{ d.warehouse }}"
+					data-actual_qty="{{ d.actual_qty }}"
+					data-item="{{ d.item_code }}">{{ __("Add") }}</a>
 			</div>
 		</div>
 	</li>

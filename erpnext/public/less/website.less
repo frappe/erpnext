@@ -1,10 +1,13 @@
 @border-color: #d1d8dd;
-@light-border-color:  #EBEFF2;
+@light-border-color: #EBEFF2;
+@text-muted: #8D99A6;
+@light-bg: #fafbfc;
 
 .web-long-description {
 	font-size: 18px;
 	line-height: 200%;
 }
+
 .item-stock {
 	margin-bottom: 10px !important;
 }
@@ -12,10 +15,6 @@
 .product-link {
 	display: block;
 	text-align: center;
-}
-
-.product-image-wrapper {
-
 }
 
 @media (max-width: 767px) {
@@ -33,13 +32,13 @@
 	background-size: cover;
 	background-repeat: no-repeat;
 	background-position: center top;
-	border-bottom: 1px dashed @light-border-color;
+	border-radius: 4px;
 }
 
 .product-image.missing-image {
 	.product-image-square;
 	position: relative;
-	border-bottom: 1px dashed @light-border-color;
+	background-color: @light-border-color;
 }
 
 .product-image.missing-image .octicon {
@@ -74,3 +73,87 @@
 	 border-top: 2px solid @light-border-color;
 	 padding-top:10px;
 }
+
+.featured-products {
+	border-top: 1px solid @light-border-color;
+}
+
+.transaction-list-item {
+	border-bottom: none;
+	padding: 30px;
+	margin: 0px -30px;
+
+	&:hover,
+	&:active,
+	&:focus {
+		background-color: @light-bg;
+	}
+
+	.indicator {
+		font-size: inherit;
+		font-weight: inherit;
+		color: @text-muted;
+		margin-left: -15px;
+	}
+
+	.transaction-time {
+		// margin-left: 15px;
+	}
+
+	.items-preview,
+	.transaction-time {
+		margin-top: 5px;
+	}
+}
+
+// order.html
+.transaction-subheading {
+	.indicator {
+		font-weight: inherit;
+		color: @text-muted;
+	}
+}
+
+.order-container {
+	margin: 50px 0px;
+
+	.order-item-header .h6 {
+		padding: 7px 15px;
+	}
+
+	.order-items {
+		margin: 30px 0px 0px;
+	}
+
+	.order-item-table {
+		margin: 0px -15px;
+	}
+
+	.order-item-header {
+		border-bottom: 1px solid #d1d8dd;
+	}
+
+	.order-image-col {
+		padding-right: 0px;
+	}
+
+	.order-image {
+		max-width: 55px;
+		max-height: 55px;
+		margin-top: -5px;
+	}
+
+	.order-taxes {
+		margin-top: 30px;
+
+		.row {
+			margin-top: 15px;
+		}
+	}
+
+	.tax-grand-total-row {
+		border-top: 1px solid @border-color;
+		padding-top: 15px;
+	}
+}
+

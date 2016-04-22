@@ -23,7 +23,7 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center top;
-  border-bottom: 1px dashed #EBEFF2;
+  border-radius: 4px;
 }
 .product-image.missing-image {
   width: 100%;
@@ -32,8 +32,9 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center top;
+  border-radius: 4px;
   position: relative;
-  border-bottom: 1px dashed #EBEFF2;
+  background-color: #EBEFF2;
 }
 .product-image.missing-image .octicon {
   font-size: 32px;
@@ -62,4 +63,64 @@
 .item-desc {
   border-top: 2px solid #EBEFF2;
   padding-top: 10px;
+}
+.featured-products {
+  border-top: 1px solid #EBEFF2;
+}
+.transaction-list-item {
+  border-bottom: none;
+  padding: 30px;
+  margin: 0px -30px;
+}
+.transaction-list-item:hover,
+.transaction-list-item:active,
+.transaction-list-item:focus {
+  background-color: #fafbfc;
+}
+.transaction-list-item .indicator {
+  font-size: inherit;
+  font-weight: inherit;
+  color: #8D99A6;
+  margin-left: -15px;
+}
+.transaction-list-item .items-preview,
+.transaction-list-item .transaction-time {
+  margin-top: 5px;
+}
+.transaction-subheading .indicator {
+  font-weight: inherit;
+  color: #8D99A6;
+}
+.order-container {
+  margin: 50px 0px;
+}
+.order-container .order-item-header .h6 {
+  padding: 7px 15px;
+}
+.order-container .order-items {
+  margin: 30px 0px 0px;
+}
+.order-container .order-item-table {
+  margin: 0px -15px;
+}
+.order-container .order-item-header {
+  border-bottom: 1px solid #d1d8dd;
+}
+.order-container .order-image-col {
+  padding-right: 0px;
+}
+.order-container .order-image {
+  max-width: 55px;
+  max-height: 55px;
+  margin-top: -5px;
+}
+.order-container .order-taxes {
+  margin-top: 30px;
+}
+.order-container .order-taxes .row {
+  margin-top: 15px;
+}
+.order-container .tax-grand-total-row {
+  border-top: 1px solid #d1d8dd;
+  padding-top: 15px;
 }

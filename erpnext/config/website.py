@@ -7,6 +7,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Homepage",
+					"description": _("Settings for website homepage"),
+				},
+				{
+					"type": "doctype",
 					"name": "Shopping Cart Settings",
 					"label": _("Shopping Cart Settings"),
 					"description": _("Settings for online shopping cart such as shipping rules, price list etc."),
