@@ -59,6 +59,8 @@ def make_stock_entry(**args):
 	s.sales_invoice_no = args.sales_invoice_no
 	if args.difference_account:
 		s.difference_account = args.difference_account
+	if not args.cost_center:
+		args.cost_center = frappe.get_value('Company', s.company, 'cost_center')
 
 	s.append("items", {
 		"item_code": args.item,
@@ -67,7 +69,8 @@ def make_stock_entry(**args):
 		"qty": args.qty,
 		"basic_rate": args.basic_rate,
 		"conversion_factor": 1.0,
-		"serial_no": args.serial_no
+		"serial_no": args.serial_no,
+		'cost_center': args.cost_center
 	})
 
 	if not args.do_not_save:
