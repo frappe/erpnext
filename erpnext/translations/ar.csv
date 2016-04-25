@@ -503,7 +503,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +139,Proposal Writin
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +35,Another Sales Person {0} exists with the same Employee id,شخص آخر مبيعات {0} موجود مع نفس الرقم الوظيفي
 apps/erpnext/erpnext/config/accounts.py +70,Masters,الماجستير
 apps/erpnext/erpnext/config/accounts.py +127,Update Bank Transaction Dates,تواريخ عملية البنك التحديث
-apps/erpnext/erpnext/stock/stock_ledger.py +337,Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},خطأ الأسهم السلبية ( { } 6 ) القطعة ل {0} في {1} في معرض النماذج ثلاثية على {2} {3} {4} في {5}
+apps/erpnext/erpnext/stock/stock_ledger.py +337,Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},خطأ الأسهم السلبية ( {6} ) القطعة ل {0} في {1} في معرض النماذج ثلاثية على {2} {3} {4} في {5}
 apps/erpnext/erpnext/config/projects.py +30,Time Tracking,تتبع الوقت
 DocType: Fiscal Year Company,Fiscal Year Company,الشركة السنة المالية
 DocType: Packing Slip Item,DN Detail,DN التفاصيل
