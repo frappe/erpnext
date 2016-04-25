@@ -161,6 +161,8 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 
 def prepare_data(accounts, filters, total_row, parent_children_map):
 	data = []
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	
 	for d in accounts:
 		has_value = False
 		row = {
@@ -169,7 +171,8 @@ def prepare_data(accounts, filters, total_row, parent_children_map):
 			"parent_account": d.parent_account,
 			"indent": d.indent,
 			"from_date": filters.from_date,
-			"to_date": filters.to_date
+			"to_date": filters.to_date,
+			"currency": company_currency
 		}
 
 		prepare_opening_and_closing(d)
@@ -201,37 +204,50 @@ def get_columns():
 			"fieldname": "opening_debit",
 			"label": _("Opening (Dr)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"fieldname": "opening_credit",
 			"label": _("Opening (Cr)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"fieldname": "debit",
 			"label": _("Debit"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"fieldname": "credit",
 			"label": _("Credit"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"fieldname": "closing_debit",
 			"label": _("Closing (Dr)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"fieldname": "closing_credit",
 			"label": _("Closing (Cr)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
+		},
+		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1
 		}
 	]
 
