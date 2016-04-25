@@ -24,6 +24,7 @@ frappe.ui.form.on('Asset', {
 	
 	refresh: function(frm) {
 		frappe.ui.form.trigger("Asset", "is_existing_asset");
+		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
 		
 		if (frm.doc.docstatus==1) {
 			if (frm.doc.status=='Submitted' && !frm.doc.is_existing_asset && !frm.doc.purchase_invoice) {
@@ -32,6 +33,10 @@ frappe.ui.form.on('Asset', {
 				});
 			}
 			if (in_list(["Submitted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
+				frm.add_custom_button("Transfer Asset", function() {
+					erpnext.asset.transfer_asset(frm);
+				});
+				
 				frm.add_custom_button("Scrap Asset", function() {
 					erpnext.asset.scrap_asset(frm);
 				});
@@ -45,7 +50,42 @@ frappe.ui.form.on('Asset', {
 					erpnext.asset.restore_asset(frm);
 				});
 			}
+			
+			frm.trigger("show_graph");
 		}
+	},
+	
+	show_graph: function(frm) {
+		if(flt(frm.doc.value_after_depreciation) == flt(frm.doc.gross_purchase_amount))
+			return
+		
+		var x_intervals = ["x", frm.doc.purchase_date];
+		var asset_values = ["Asset Value", frm.doc.gross_purchase_amount];
+		
+		if(frm.doc.opening_accumulated_depreciation) {
+			x_intervals.push(dateutil.str_to_obj(frm.doc.creation));
+			asset_values.push(flt(frm.doc.gross_purchase_amount) - 
+				flt(frm.doc.opening_accumulated_depreciation))
+		}
+		
+		$.each(frm.doc.schedules || [], function(i, v) {
+			x_intervals.push(v.schedule_date);
+			if(v.journal_entry) {				
+				asset_values.push(flt(frm.doc.gross_purchase_amount) - flt(v.accumulated_depreciation_amount))
+			} else {
+				asset_values.push(null);
+			}
+		})
+		
+		if(in_list(["Scrapped", "Sold"], frm.doc.status)) {
+			x_intervals.push(frm.doc.disposal_date);
+			asset_values.push(0)
+		}
+
+		frm.dashboard.reset();
+		frm.dashboard.add_graph([x_intervals, asset_values]);
+		
+		
 	},
 	
 	is_existing_asset: function(frm) {
@@ -112,4 +152,55 @@ erpnext.asset.restore_asset = function(frm) {
 			}
 		})
 	})
+}
+
+erpnext.asset.transfer_asset = function(frm) {
+	var dialog = new frappe.ui.Dialog({
+		title: __("Transfer Asset"),
+		fields: [
+			{
+				"label": __("Target Warehouse"), 
+				"fieldname": "target_warehouse",
+				"fieldtype": "Link", 
+				"options": "Warehouse",
+				"get_query": function () {
+					return {
+						filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]]
+					}
+				}, 
+				"reqd": 1 
+			},
+			{
+				"label": __("Date"), 
+				"fieldname": "transfer_date",
+				"fieldtype": "Datetime", 
+				"reqd": 1,
+				"default": frappe.datetime.now_datetime()
+			}
+		]
+	});
+
+	dialog.set_primary_action(__("Transfer"), function() {
+		args = dialog.get_values();
+		if(!args) return;
+		dialog.hide();
+		return frappe.call({
+			type: "GET",
+			method: "erpnext.accounts.doctype.asset.asset.transfer_asset",
+			args: {
+				args: {
+					"asset": frm.doc.name,
+					"transfer_date": args.transfer_date,
+					"source_warehouse": frm.doc.warehouse,
+					"target_warehouse": args.target_warehouse,
+					"company": frm.doc.company
+				}
+			},
+			freeze: true,
+			callback: function(r) {
+				cur_frm.reload_doc();
+			}
+		})
+	});
+	dialog.show();
 }
