@@ -107,7 +107,7 @@
 }
 .erpnext-icon {
   width: 24px;
-  margin-right: 0px;
+  ackmargin-right: 0px;
   margin-top: -3px;
 }
 .pos .discount-amount-area .discount-field-col {
@@ -115,4 +115,12 @@
 }
 .pos .discount-amount-area .input-group {
   margin-top: 2px;
+}
+.dashboard-list-item {
+  background-color: inherit;
+  padding: 7px 15px;
+  border-bottom: 1px solid #d1d8dd;
+}
+.dashboard-list-item:last-child {
+  border-bottom: none;
 }

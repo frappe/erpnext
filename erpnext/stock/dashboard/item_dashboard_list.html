@@ -1,5 +1,5 @@
 {% for d in data %}
-	<li class="list-group-item" style="background-color: inherit;">
+	<div class="dashboard-list-item">
 		<div class="row">
 			<div class="col-sm-3 small" style="margin-top: 8px;">
 				<a data-type="warehouse" data-name="{{ d.warehouse }}">{{ d.warehouse }}</a>
@@ -47,8 +47,9 @@
 				<button style="margin-left: 7px;" class="btn btn-default btn-xs btn-add"
 					data-warehouse="{{ d.warehouse }}"
 					data-actual_qty="{{ d.actual_qty }}"
-					data-item="{{ d.item_code }}">{{ __("Add") }}</a>
+					data-item="{{ d.item_code }}"
+					data-rate="{{ d.valuation_rate }}">{{ __("Add") }}</a>
 			</div>
 		</div>
-	</li>
+	</div>
 {% endfor %}

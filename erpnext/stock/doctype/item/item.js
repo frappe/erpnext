@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.item");
+frappe.require('assets/js/item-dashboard.min.js');
 
 frappe.ui.form.on("Item", {
 	onload: function(frm) {
@@ -41,6 +42,7 @@ frappe.ui.form.on("Item", {
 
 		// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
 		// read only if any stock ledger entry exists
+
 		erpnext.item.make_dashboard(frm);
 
 		// clear intro
@@ -80,15 +82,14 @@ frappe.ui.form.on("Item", {
 		frm.dashboard.heatmap_message = __('This is based on stock movement. See {0} for details',
 			['<a href="#query-report/Stock Ledger">' + __('Stock Ledger') + '</a>']);
 		frm.dashboard.show_dashboard();
-	},
 
-	dashboard_update: function(frm) {
-		if(frm.dashboard_data.stock_data && frm.dashboard_data.stock_data.length) {
-			var context = erpnext.get_item_dashboard_data(frm.dashboard_data.stock_data, 0);
-			frm.dashboard.add_section('<h5 style="margin-top: 0px;">Stock Levels</h5>\
-				<ul class="list-group">' + frappe.render_template('item_dashboard', context), true)
-				+ '</ul>';
-		}
+		var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;">Stock Levels</h5>');
+		erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
+			parent: section,
+			item_code: frm.doc.name
+		});
+		erpnext.item.item_dashboard.refresh();
+
 	},
 
 	validate: function(frm){

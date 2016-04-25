@@ -617,7 +617,6 @@ def get_dashboard_data(name):
 	return {
 		'count': get_open_count('Item', name),
 		'timeline_data': get_timeline_data(name),
-		'stock_data': get_stock_data(name)
 	}
 
 def get_timeline_data(name):
@@ -626,11 +625,6 @@ def get_timeline_data(name):
 		from `tabStock Ledger Entry` where item_code=%s
 			and posting_date > date_sub(curdate(), interval 1 year)
 			group by posting_date''', name))
-
-def get_stock_data(name):
-	return frappe.get_all('Bin', fields=['warehouse', 'actual_qty', 'projected_qty',
-		'reserved_qty', 'reserved_qty_for_production'],
-		filters={'item_code': name}, order_by = 'warehouse asc')
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
 	if (not end_of_life) or (disabled is None):

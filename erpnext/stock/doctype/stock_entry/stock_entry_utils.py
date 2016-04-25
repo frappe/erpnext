@@ -67,7 +67,7 @@ def make_stock_entry(**args):
 		"s_warehouse": args.source,
 		"t_warehouse": args.target,
 		"qty": args.qty,
-		"basic_rate": args.basic_rate,
+		"basic_rate": args.rate or args.basic_rate,
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
 		'cost_center': args.cost_center
