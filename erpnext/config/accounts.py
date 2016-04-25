@@ -221,6 +221,11 @@ def get_data():
 					"name": "Period Closing Voucher",
 					"description": _("Close Balance Sheet and book Profit or Loss.")
 				},
+				{
+					"type": "doctype",
+					"name": "Asset Movement",
+					"description": _("Transfer an asset from one warehouse to another")
+				},
 			]
 		},
 		{

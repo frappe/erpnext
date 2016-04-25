@@ -63,7 +63,7 @@ frappe.ui.form.on('Asset', {
 		var asset_values = ["Asset Value", frm.doc.gross_purchase_amount];
 		
 		if(frm.doc.opening_accumulated_depreciation) {
-			x_intervals.push(dateutil.str_to_obj(frm.doc.creation));
+			x_intervals.push(moment(frm.doc.creation).format('YYYY-MM-DD'));
 			asset_values.push(flt(frm.doc.gross_purchase_amount) - 
 				flt(frm.doc.opening_accumulated_depreciation))
 		}
@@ -81,7 +81,6 @@ frappe.ui.form.on('Asset', {
 			x_intervals.push(frm.doc.disposal_date);
 			asset_values.push(0)
 		}
-
 		frm.dashboard.reset();
 		frm.dashboard.add_graph([x_intervals, asset_values]);
 		
@@ -190,7 +189,7 @@ erpnext.asset.transfer_asset = function(frm) {
 			args: {
 				args: {
 					"asset": frm.doc.name,
-					"transfer_date": args.transfer_date,
+					"transaction_date": args.transfer_date,
 					"source_warehouse": frm.doc.warehouse,
 					"target_warehouse": args.target_warehouse,
 					"company": frm.doc.company
