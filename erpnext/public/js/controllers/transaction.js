@@ -2,8 +2,10 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext");
-frappe.require("assets/erpnext/js/controllers/taxes_and_totals.js");
-frappe.require("assets/erpnext/js/utils.js");
+frappe.require([
+	"assets/erpnext/js/controllers/taxes_and_totals.js",
+	"assets/erpnext/js/utils.js",
+	"assets/erpnext/js/utils/item_selector.js"]);
 
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	onload: function() {
@@ -309,8 +311,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
 		else var date = this.frm.doc.transaction_date;
-		
-		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") && 
+
+		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
 			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)){
 				erpnext.utils.get_shipping_address(this.frm, function(){
 					set_party_account(set_pricing);
