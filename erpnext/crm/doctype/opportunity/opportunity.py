@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe.utils import cstr, cint
+from frappe.utils import cstr, cint, get_fullname
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
@@ -46,10 +46,20 @@ class Opportunity(TransactionBase):
 		if not (self.lead or self.customer):
 			lead_name = frappe.db.get_value("Lead", {"email_id": self.contact_email})
 			if not lead_name:
+				sender_name = get_fullname(self.contact_email)
+				if sender_name == self.contact_email:
+					sender_name = None 
+				
+				account = ''
+				email_name = self.contact_email[0:self.contact_email.index('@')]
+				email_split = email_name.split('.')
+				for s in email_split:
+					account = account + s.capitalize() + ' '
+
 				lead = frappe.get_doc({
 					"doctype": "Lead",
 					"email_id": self.contact_email,
-					"lead_name": self.contact_email
+					"lead_name": sender_name or account
 				})
 				lead.insert(ignore_permissions=True)
 				lead_name = lead.name
