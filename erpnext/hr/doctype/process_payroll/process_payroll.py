@@ -70,7 +70,6 @@ class ProcessPayroll(Document):
 					"fiscal_year": self.fiscal_year,
 					"employee": emp[0],
 					"month": self.month,
-					"email_check": self.send_email,
 					"company": self.company,
 				})
 				ss.insert()
@@ -109,7 +108,6 @@ class ProcessPayroll(Document):
 		for ss in ss_list:
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
 			try:
-				ss_obj.email_check = self.send_email
 				ss_obj.submit()
 			except Exception,e:
 				not_submitted_ss.append(ss[0])
@@ -128,11 +126,9 @@ class ProcessPayroll(Document):
 
 		submitted_ss = self.format_as_links(list(set(all_ss) - set(not_submitted_ss)))
 		if submitted_ss:
-			mail_sent_msg = self.send_email and " (Mail has been sent to the employee)" or ""
 			log = """
-			<b>Salary Slips Submitted %s:</b>\
-			<br><br> %s <br><br>
-			""" % (mail_sent_msg, '<br>'.join(submitted_ss))
+				<b>Salary Slips Submitted %s:</b>
+				""" % ('<br>'.join(submitted_ss))
 
 		if not_submitted_ss:
 			log += """
