@@ -204,15 +204,17 @@ class SalarySlip(TransactionBase):
 			self.precision("net_pay") if disable_rounded_total else 0)
 
 	def on_submit(self):
-		if(self.email_check == 1):
-			self.send_mail_funct()
+		if(frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")):
+			self.email_salary_slip()
 
 
-	def send_mail_funct(self):
-		receiver = frappe.db.get_value("Employee", self.employee, "company_email")
+	def email_salary_slip(self):
+		receiver = frappe.db.get_value("Employee", self.employee, "company_email") or \
+			frappe.db.get_value("Employee", self.employee, "personal_email")
+		
 		if receiver:
 			subj = 'Salary Slip - ' + cstr(self.month) +'/'+cstr(self.fiscal_year)
 			frappe.sendmail([receiver], subject=subj, message = _("Please see attachment"),
 				attachments=[frappe.attach_print(self.doctype, self.name, file_name=self.name)])
 		else:
-			msgprint(_("Company Email ID not found, hence mail not sent"))
+			msgprint(_("{0}: Employee email not found, hence email not sent").format(self.employee_name))
