@@ -39,22 +39,29 @@ class PaymentRequest(Document):
 					frappe.throw(_("PayPal Settings missing"))
 			
 	def on_submit(self):
-		if not self.mute_email:
+		send_mail = True
+		self.make_communication_entry()
+		
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		
+		if hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart":
+			send_mail = False
+			
+		if send_mail:
 			self.send_payment_request()
 			self.send_email()
-
-		self.make_communication_entry()
 	
 	def on_cancel(self):
 		self.set_as_cancelled()
 	
 	def get_payment_url(self):
 		""" This is blanck method to trigger hooks call from individual payment gateway app
-		  which will return respective payment gateway"""
+		which will return respective payment gateway"""
 		pass
 	
 	def make_invoice(self):
-		if self.make_sales_invoice:
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		if hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart":
 			from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 			si = make_sales_invoice(self.reference_name, ignore_permissions=True)
 			si = si.insert(ignore_permissions=True)
@@ -99,13 +106,13 @@ class PaymentRequest(Document):
 				
 		if self.reference_doctype == "Sales Order":
 			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name,
-			 amount=amount, debit_in_account_currency=debit_in_account_currency , journal_entry=True, 
-			 bank_account=self.payment_account)
+			amount=amount, debit_in_account_currency=debit_in_account_currency , journal_entry=True,
+			bank_account=self.payment_account)
 			
-		if self.reference_doctype == "Sales Invoice":			
+		if self.reference_doctype == "Sales Invoice":
 			jv = get_payment_entry_against_invoice(self.reference_doctype, self.reference_name,
-			 amount=amount, debit_in_account_currency=debit_in_account_currency, journal_entry=True,
-			 bank_account=self.payment_account)
+			amount=amount, debit_in_account_currency=debit_in_account_currency, journal_entry=True,
+			bank_account=self.payment_account)
 			
 		jv.update({
 			"voucher_type": "Journal Entry",
@@ -128,8 +135,13 @@ class PaymentRequest(Document):
 						
 	def get_message(self):
 		"""return message with payment gateway link"""
-		return  cstr(self.message) + " <a href='{0}'>{1}</a>".format(self.payment_url, \
-			self.payment_url_message or _(" Click here to pay"))
+		
+		context = {
+			"doc": frappe.get_doc(self.reference_doctype, self.reference_name),
+			"payment_url": self.payment_url
+		}
+		
+		return frappe.render_template(self.message, context)
 		
 	def set_failed(self):
 		pass
@@ -157,6 +169,7 @@ def make_payment_request(**args):
 	"""Make payment request"""
 	
 	args = frappe._dict(args)
+	
 	ref_doc = frappe.get_doc(args.dt, args.dn)
 	
 	gateway_account = get_gateway_details(args)
@@ -169,21 +182,17 @@ def make_payment_request(**args):
 	if existing_payment_request:
 		pr = frappe.get_doc("Payment Request", existing_payment_request)
 		
-	else:	
+	else:
 		pr = frappe.new_doc("Payment Request")
 		pr.update({
 			"payment_gateway_account": gateway_account.name,
 			"payment_gateway": gateway_account.payment_gateway,
 			"payment_account": gateway_account.payment_account,
 			"currency": ref_doc.currency,
-			"make_sales_invoice": args.cart or 0,
 			"grand_total": grand_total,
-			"mute_email": args.mute_email or 0,
 			"email_to": args.recipient_id or "",
 			"subject": "Payment Request for %s"%args.dn,
 			"message": gateway_account.message,
-			"payment_url_message": gateway_account.payment_url_message,
-			"payment_success_url": gateway_account.payment_success_url,
 			"reference_doctype": args.dt,
 			"reference_name": args.dn
 		})
@@ -194,13 +203,12 @@ def make_payment_request(**args):
 		if args.submit_doc:
 			pr.insert(ignore_permissions=True)
 			pr.submit()
-
-		
-	if args.cart:
+			
+	if hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart":
 		generate_payment_request(pr.name)
 		frappe.db.commit()
 		
-	if not args.cart:	
+	if not args.cart:
 		return pr
 			
 	return pr.as_dict()
@@ -240,7 +248,7 @@ def get_gateway_details(args):
 	
 def get_payment_gateway_account(args):
 	return frappe.db.get_value("Payment Gateway Account", args, 
-		["name", "payment_gateway", "payment_account", "message", "payment_url_message"], 
+		["name", "payment_gateway", "payment_account", "message"], 
 			as_dict=1)
 
 @frappe.whitelist()
