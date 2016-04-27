@@ -512,8 +512,8 @@ apps/erpnext/erpnext/projects/doctype/time_log/time_log.py +211,Production Order
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +139,Proposal Writing,الكتابة الاقتراح
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +35,Another Sales Person {0} exists with the same Employee id,شخص آخر مبيعات {0} موجود مع نفس الرقم الوظيفي
 apps/erpnext/erpnext/config/accounts.py +70,Masters,الماجستير
-apps/erpnext/erpnext/config/accounts.py +135,Update Bank Transaction Dates,تواريخ عملية البنك التحديث
-apps/erpnext/erpnext/stock/stock_ledger.py +337,Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},خطأ الأسهم السلبية ( { } 6 ) القطعة ل {0} في {1} في معرض النماذج ثلاثية على {2} {3} {4} في {5}
+apps/erpnext/erpnext/config/accounts.py +127,Update Bank Transaction Dates,تواريخ عملية البنك التحديث
+apps/erpnext/erpnext/stock/stock_ledger.py +337,Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},خطأ الأسهم السلبية ( {6} ) القطعة ل {0} في {1} في معرض النماذج ثلاثية على {2} {3} {4} في {5}
 apps/erpnext/erpnext/config/projects.py +30,Time Tracking,تتبع الوقت
 DocType: Fiscal Year Company,Fiscal Year Company,الشركة السنة المالية
 DocType: Packing Slip Item,DN Detail,DN التفاصيل
@@ -643,7 +643,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -654,19 +654,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","قالب الضرائب القياسية التي يمكن تطبيقها على جميع عمليات البيع. يمكن أن يحتوي هذا القالب قائمة رؤساء الضريبية، وكذلك غيرهم من رؤساء حساب / الدخل مثل ""شحن""، ""التأمين""، ""معالجة""، وغيرها 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","قالب الضرائب القياسية التي يمكن تطبيقها على جميع عمليات البيع. يمكن أن يحتوي هذا القالب قائمة رؤساء الضريبية، وكذلك غيرهم من رؤساء حساب / الدخل مثل ""شحن""، ""التأمين""، ""معالجة""، وغيرها
 
- #### ملاحظة 
+ #### ملاحظة
 
  معدل الضريبة لك تعريف هنا سوف يكون معدل الضريبة موحد لجميع الأصناف ** **. إذا كانت هناك بنود ** ** التي لها أسعار مختلفة، وأنها يجب أن يضاف في * الضرائب البند ** الجدول في البند ** ** الرئيسي.
 
- #### وصف الأعمدة 
+ #### وصف الأعمدة
 
- 1. نوع الحساب: 
+ 1. نوع الحساب:
  - وهذا يمكن أن يكون على ** صافي إجمالي ** (وهذا هو مجموع المبلغ الأساسي).
  - ** في الصف السابق الكل / المكونات ** (للضرائب أو رسوم التراكمية). إذا قمت بتحديد هذا الخيار، سيتم تطبيق الضريبة كنسبة مئوية من الصف السابق (في الجدول الضرائب) كمية أو المجموع.
  - ** ** الفعلية (كما ذكر).
- 2. رئيس الحساب: حساب دفتر الأستاذ والتي بموجبها سيتم حجز هذه الضريبة 
+ 2. رئيس الحساب: حساب دفتر الأستاذ والتي بموجبها سيتم حجز هذه الضريبة
  3. مركز التكلفة: إذا الضرائب / الرسوم هو الدخل (مثل الشحن) أو حساب فإنه يحتاج إلى أن يتم الحجز مقابل مركز التكلفة.
  4. الوصف: وصف الضريبية (التي ستتم طباعتها في الفواتير / الاقتباس).
  5. معدل: معدل الضريبة.
@@ -1973,7 +1973,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1985,19 +1985,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","قالب الضرائب القياسية التي يمكن تطبيقها على جميع المعاملات شراء. يمكن أن يحتوي هذا القالب قائمة رؤساء الضريبية، وكذلك غيرهم من رؤساء حساب مثل ""شحن""، ""التأمين""، ""معالجة""، وغيرها 
+10. Add or Deduct: Whether you want to add or deduct the tax.","قالب الضرائب القياسية التي يمكن تطبيقها على جميع المعاملات شراء. يمكن أن يحتوي هذا القالب قائمة رؤساء الضريبية، وكذلك غيرهم من رؤساء حساب مثل ""شحن""، ""التأمين""، ""معالجة""، وغيرها
 
- #### ملاحظة 
+ #### ملاحظة
 
  معدل الضريبة التي تحدد هنا سوف يكون معدل الضريبة موحد لجميع الأصناف ** **. إذا كانت هناك بنود ** ** التي لها أسعار مختلفة، وأنها يجب أن يضاف في * الضرائب البند ** الجدول في البند ** ** الرئيسي.
 
- #### وصف الأعمدة 
+ #### وصف الأعمدة
 
- 1. نوع الحساب: 
+ 1. نوع الحساب:
  - وهذا يمكن أن يكون على ** صافي إجمالي ** (وهذا هو مجموع المبلغ الأساسي).
  - ** في الصف السابق الكل / المكونات ** (للضرائب أو رسوم التراكمية). إذا قمت بتحديد هذا الخيار، سيتم تطبيق الضريبة كنسبة مئوية من الصف السابق (في الجدول الضرائب) كمية أو المجموع.
  - ** ** الفعلية (كما ذكر).
- 2. رئيس الحساب: حساب دفتر الأستاذ والتي بموجبها سيتم حجز هذه الضريبة 
+ 2. رئيس الحساب: حساب دفتر الأستاذ والتي بموجبها سيتم حجز هذه الضريبة
  3. مركز التكلفة: إذا الضرائب / الرسوم هو الدخل (مثل الشحن) أو حساب فإنه يحتاج إلى أن يتم الحجز مقابل مركز التكلفة.
  4. الوصف: وصف الضريبية (التي ستتم طباعتها في الفواتير / الاقتباس).
  5. معدل: معدل الضريبة.
@@ -2168,7 +2168,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","الشروط والأحكام التي يمكن أن تضاف إلى المبيعات والمشتريات القياسية.
 
- أمثلة: 
+ أمثلة:
 
  1. صلاحية العرض.
  1. شروط الدفع (مقدما، وعلى الائتمان، وجزء مسبقا الخ).
@@ -2177,7 +2177,7 @@ Examples:
  1. الضمان إن وجدت.
  1. عودة السياسة.
  1. شروط الشحن، إذا كان ذلك ممكنا.
- 1. سبل معالجة النزاعات، التعويض، والمسؤولية، الخ 
+ 1. سبل معالجة النزاعات، التعويض، والمسؤولية، الخ
  1. معالجة والاتصال من الشركة الخاصة بك."
 DocType: Attendance,Leave Type,ترك نوع
 apps/erpnext/erpnext/controllers/stock_controller.py +173,Expense / Difference account ({0}) must be a 'Profit or Loss' account,"حساب / حساب الفرق ({0}) يجب أن يكون الربح أو الخسارة ""حساب"
@@ -2460,7 +2460,7 @@ DocType: Appraisal,Appraisal,تقييم
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +102,Email sent to supplier {0},البريد الإلكتروني المرسلة إلى المورد {0}
 apps/erpnext/erpnext/hr/doctype/leave_block_list/leave_block_list.py +19,Date is repeated,ويتكرر التاريخ
 apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html +27,Authorized Signatory,المفوض بالتوقيع
-apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +187,Leave approver must be one of {0},"الموافق عل الاجازة يجب ان يكون واحد من 
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +187,Leave approver must be one of {0},"الموافق عل الاجازة يجب ان يكون واحد من
 {0}"
 DocType: Hub Settings,Seller Email,البائع البريد الإلكتروني
 DocType: Project,Total Purchase Cost (via Purchase Invoice),مجموع تكلفة الشراء (عن طريق شراء الفاتورة)
@@ -3069,7 +3069,7 @@ DocType: Accounts Settings,"If enabled, the system will post accounting entries 
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +15,Brokerage,سمسرة
 DocType: Address,Postal Code,الرمز البريدي
 DocType: Production Order Operation,"in Minutes
-Updated via 'Time Log'","في دقائق 
+Updated via 'Time Log'","في دقائق
  تحديث عبر 'وقت دخول """
 DocType: Customer,From Lead,من العميل المحتمل
 apps/erpnext/erpnext/config/manufacturing.py +13,Orders released for production.,أوامر الإفراج عن الإنتاج.
@@ -3237,7 +3237,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +133,Please find attached
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +42,Bank Statement balance as per General Ledger,بنك ميزان بيان وفقا لدفتر الأستاذ العام
 DocType: Job Applicant,Applicant Name,اسم مقدم الطلب
 DocType: Authorization Rule,Customer / Item Name,العميل / أسم البند
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -3370,17 +3370,17 @@ DocType: Address Template,"<h4>Default Template</h4>
 {% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
 {% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
 {% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<H4> افتراضي قالب </ H4> 
- <p> ويستخدم <a href=""http://jinja.pocoo.org/docs/templates/""> جينجا قالبي templating </A> وجميع مجالات عنوان ( بما في ذلك الحقول المخصصة إن وجدت) سوف تكون متاحة </ P> 
- <قبل> <كود> {{address_line1}} العلامة & lt؛ BR & GT؛ 
- {٪ إذا address_line2٪} {{address_line2}} العلامة & lt؛ BR & GT؛ { ENDIF٪ -٪} 
- {{مدينة}} العلامة & lt؛ BR & GT؛ 
- {٪ إذا الدولة٪} {{دولة}} العلامة & lt؛ BR & GT؛ {٪ ENDIF -٪} 
- {٪ إذا كان الرقم السري٪} PIN: {{الرقم السري}} العلامة & lt؛ BR & GT؛ {٪ ENDIF -٪} 
- {{البلاد}} العلامة & lt؛ BR & GT؛ 
- {٪ إذا كان الهاتف٪} الهاتف: {{هاتف}} العلامة & lt؛ BR & GT؛ { ٪ ENDIF -٪} 
- {٪ إذا الفاكس٪} فاكس: {{الفاكس}} العلامة & lt؛ BR & GT؛ {٪ ENDIF -٪} 
- {٪ إذا٪ email_id} البريد الإلكتروني: {{email_id}} العلامة & lt؛ BR & GT ؛ {٪ ENDIF -٪} 
+</code></pre>","<H4> افتراضي قالب </ H4>
+ <p> ويستخدم <a href=""http://jinja.pocoo.org/docs/templates/""> جينجا قالبي templating </A> وجميع مجالات عنوان ( بما في ذلك الحقول المخصصة إن وجدت) سوف تكون متاحة </ P>
+ <قبل> <كود> {{address_line1}} العلامة & lt؛ BR & GT؛
+ {٪ إذا address_line2٪} {{address_line2}} العلامة & lt؛ BR & GT؛ { ENDIF٪ -٪}
+ {{مدينة}} العلامة & lt؛ BR & GT؛
+ {٪ إذا الدولة٪} {{دولة}} العلامة & lt؛ BR & GT؛ {٪ ENDIF -٪}
+ {٪ إذا كان الرقم السري٪} PIN: {{الرقم السري}} العلامة & lt؛ BR & GT؛ {٪ ENDIF -٪}
+ {{البلاد}} العلامة & lt؛ BR & GT؛
+ {٪ إذا كان الهاتف٪} الهاتف: {{هاتف}} العلامة & lt؛ BR & GT؛ { ٪ ENDIF -٪}
+ {٪ إذا الفاكس٪} فاكس: {{الفاكس}} العلامة & lt؛ BR & GT؛ {٪ ENDIF -٪}
+ {٪ إذا٪ email_id} البريد الإلكتروني: {{email_id}} العلامة & lt؛ BR & GT ؛ {٪ ENDIF -٪}
  </ الرمز> </ PRE>"
 DocType: Salary Slip Deduction,Default Amount,المبلغ الافتراضي
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +96,Warehouse not found in the system,لم يتم العثور على المستودع في النظام
@@ -3561,7 +3561,7 @@ apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +73,Year start 
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.js +40,New Newsletter,النشرة الإخبارية جديدة
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +148,Start date should be less than end date for Item {0},يجب أن يكون تاريخ البدء أقل من تاريخ انتهاء القطعة ل {0}
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","مثال: ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","مثال: ABCD #####
  إذا تم تعيين سلسلة وليس المذكورة لا المسلسل في المعاملات، سيتم إنشاء الرقم التسلسلي ثم التلقائي على أساس هذه السلسلة. إذا كنت تريد دائما أن يذكر صراحة المسلسل رقم لهذا البند. ترك هذا فارغا."
 DocType: Upload Attendance,Upload Attendance,تحميل الحضور
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +119,BOM and Manufacturing Quantity are required,ويلزم BOM والتصنيع الكمية
