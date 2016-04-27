@@ -40,6 +40,11 @@ class FiscalYear(Document):
 
 	def on_update(self):
 		check_duplicate_fiscal_year(self)
+	
+	def on_trash(self):
+		global_defaults = frappe.get_doc("Global Defaults")
+		if global_defaults.current_fiscal_year == self.name:
+			frappe.throw(_("You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings").format(self.name))
 
 @frappe.whitelist()
 def check_duplicate_fiscal_year(doc):
