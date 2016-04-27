@@ -21,7 +21,7 @@ def execute(filters=None):
 def get_data(filters, show_party_name):
 	party_name_field = "customer_name" if filters.get("party_type")=="Customer" else "supplier_name"
 	parties = frappe.get_all(filters.get("party_type"), fields = ["name", party_name_field], order_by="name")
-	
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 	opening_balances = get_opening_balances(filters)
 	balances_within_period = get_balances_within_period(filters)
 	
@@ -57,6 +57,10 @@ def get_data(filters, show_party_name):
 			"closing_credit": closing_credit
 		})
 		
+		row.update({
+			"currency": company_currency
+		})
+		
 		has_value = False
 		if (opening_debit or opening_credit or debit or credit or closing_debit or closing_credit):
 			has_value  =True
@@ -69,7 +73,8 @@ def get_data(filters, show_party_name):
 		data.append({
 			"party": "'" + _("Totals") + "'",
 			"debit": total_debit,
-			"credit": total_credit
+			"credit": total_credit,
+			"currency": company_currency
 		})
 	
 	return data
@@ -138,37 +143,50 @@ def get_columns(filters, show_party_name):
 			"fieldname": "opening_debit",
 			"label": _("Opening (Dr)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"fieldname": "opening_credit",
 			"label": _("Opening (Cr)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"fieldname": "debit",
 			"label": _("Debit"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"fieldname": "credit",
 			"label": _("Credit"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"fieldname": "closing_debit",
 			"label": _("Closing (Dr)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"fieldname": "closing_credit",
 			"label": _("Closing (Cr)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
+		},
+		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1
 		}
 	]
 	

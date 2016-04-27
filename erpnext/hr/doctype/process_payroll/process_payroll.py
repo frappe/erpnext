@@ -206,3 +206,5 @@ def get_month_details(year, month):
 			'month_end_date': med,
 			'month_days': month_days
 		})
+	else:
+		frappe.throw(_("Fiscal Year {0} not found").format(year))
