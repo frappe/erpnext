@@ -1,6 +1,12 @@
 [
  {
   "doctype": "Supplier",
+  "supplier_name": "_Test Supplier with Country",
+  "supplier_type": "_Test Supplier Type",
+  "country": "Greece"
+ },
+ {
+  "doctype": "Supplier",
   "supplier_name": "_Test Supplier",
   "supplier_type": "_Test Supplier Type"
  },
