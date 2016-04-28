@@ -14,7 +14,7 @@ def execute(filters=None):
 	item_list = get_items(filters)
 	aii_account_map = get_aii_accounts()
 	if item_list:
-		item_tax, tax_accounts = get_tax_accounts(item_list, columns)
+		item_row_tax, tax_accounts = get_tax_accounts(item_list, columns)
 
 	columns.append({
 		"fieldname": "currency",
@@ -23,7 +23,7 @@ def execute(filters=None):
 		"width": 80
 	})
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
-	print company_currency
+	
 	data = []
 	for d in item_list:
 		purchase_receipt = None
@@ -39,7 +39,7 @@ def execute(filters=None):
 			purchase_receipt, expense_account, d.qty, d.base_net_rate, d.base_net_amount]
 
 		for tax in tax_accounts:
-			row.append(item_tax.get(d.parent, {}).get(d.item_code, {}).get(tax, 0))
+			row.append(item_row_tax.get(d.name, {}).get(tax, 0))
 
 		total_tax = sum(row[last_col:])
 		row += [total_tax, d.base_net_amount + total_tax, company_currency]
@@ -76,29 +76,40 @@ def get_items(filters):
 	conditions = get_conditions(filters)
 	match_conditions = frappe.build_match_conditions("Purchase Invoice")
 
-	return frappe.db.sql("""select pi_item.parent, pi.posting_date, pi.credit_to, pi.company,
-		pi.supplier, pi.remarks, pi.base_net_total, pi_item.item_code, pi_item.item_name, pi_item.item_group,
-		pi_item.project, pi_item.purchase_order, pi_item.purchase_receipt, pi_item.po_detail,
-		pi_item.expense_account, pi_item.qty, pi_item.base_net_rate, pi_item.base_net_amount, pi.supplier_name
+	return frappe.db.sql("""
+		select 
+			pi_item.name, pi_item.parent, pi.posting_date, pi.credit_to, pi.company,
+			pi.supplier, pi.remarks, pi.base_net_total, pi_item.item_code, pi_item.item_name, 
+			pi_item.item_group, pi_item.project, pi_item.purchase_order, pi_item.purchase_receipt, 
+			pi_item.po_detail, pi_item.expense_account, pi_item.qty, pi_item.base_net_rate, 
+			pi_item.base_net_amount, pi.supplier_name
 		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item
 		where pi.name = pi_item.parent and pi.docstatus = 1 %s %s
-		order by pi.posting_date desc, pi_item.item_code desc""" % (conditions, match_conditions), filters, as_dict=1)
+		order by pi.posting_date desc, pi_item.item_code desc
+	""" % (conditions, match_conditions), filters, as_dict=1)
 
 def get_aii_accounts():
 	return dict(frappe.db.sql("select name, stock_received_but_not_billed from tabCompany"))
 
 def get_tax_accounts(item_list, columns):
 	import json
-	item_tax = {}
+	item_row_tax = {}
 	tax_accounts = []
-	invoice_wise_items = {}
+	invoice_item_row = {}
+	item_row_map = {}
 	for d in item_list:
-		invoice_wise_items.setdefault(d.parent, []).append(d)
+		invoice_item_row.setdefault(d.parent, []).append(d)
+		item_row_map.setdefault(d.parent, {}).setdefault(d.item_code, []).append(d)
 
-	tax_details = frappe.db.sql("""select parent, account_head, item_wise_tax_detail, charge_type, base_tax_amount_after_discount_amount
-		from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice'
-		and docstatus = 1 and (account_head is not null and account_head != '') and category in ('Total', 'Valuation and Total')
-		and parent in (%s)""" % ', '.join(['%s']*len(invoice_wise_items)), tuple(invoice_wise_items.keys()))
+	tax_details = frappe.db.sql("""
+		select 
+			parent, account_head, item_wise_tax_detail, charge_type, base_tax_amount_after_discount_amount
+		from `tabPurchase Taxes and Charges` 
+		where parenttype = 'Purchase Invoice' and docstatus = 1 
+			and (account_head is not null and account_head != '') 
+			and category in ('Total', 'Valuation and Total')
+			and parent in (%s)
+		""" % ', '.join(['%s']*len(invoice_item_row)), tuple(invoice_item_row.keys()))
 
 	for parent, account_head, item_wise_tax_detail, charge_type, tax_amount in tax_details:
 		if account_head not in tax_accounts:
@@ -107,19 +118,26 @@ def get_tax_accounts(item_list, columns):
 		if item_wise_tax_detail:
 			try:
 				item_wise_tax_detail = json.loads(item_wise_tax_detail)
-				for item, tax_amount in item_wise_tax_detail.items():
-					item_tax.setdefault(parent, {}).setdefault(item, {})[account_head] = \
-						flt(tax_amount[1]) if isinstance(tax_amount, list) else flt(tax_amount)
+				
+				for item_code, tax_amount in item_wise_tax_detail.items():
+					tax_amount = flt(tax_amount[1]) if isinstance(tax_amount, list) else flt(tax_amount)
+					
+					item_net_amount = sum([flt(d.base_net_amount) 
+						for d in item_row_map.get(parent, {}).get(item_code, [])])
+					
+					for d in item_row_map.get(parent, {}).get(item_code, []):
+						item_row_tax.setdefault(d.name, {})[account_head] = \
+							flt((tax_amount * d.base_net_amount) / item_net_amount)
 
 			except ValueError:
 				continue
 		elif charge_type == "Actual" and tax_amount:
-			for d in invoice_wise_items.get(parent, []):
-				item_tax.setdefault(parent, {}).setdefault(d.item_code, {})[account_head] = \
-					(tax_amount * d.base_net_amount) / d.base_net_total
+			for d in invoice_item_row.get(parent, []):
+				item_row_tax.setdefault(d.name, {})[account_head] = \
+					flt((tax_amount * d.base_net_amount) / d.base_net_total)
 
 	tax_accounts.sort()
 	columns += [account_head + ":Currency/currency:80" for account_head in tax_accounts]
 	columns += ["Total Tax:Currency/currency:80", "Total:Currency/currency:80"]
 
-	return item_tax, tax_accounts
+	return item_row_tax, tax_accounts
