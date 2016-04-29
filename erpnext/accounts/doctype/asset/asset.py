@@ -191,3 +191,16 @@ def make_sales_invoice(asset, item_code, company):
 	})
 	si.set_missing_values()
 	return si
+	
+@frappe.whitelist()
+def transfer_asset(args):
+	import json
+	args = json.loads(args)
+	movement_entry = frappe.new_doc("Asset Movement")
+	movement_entry.update(args)
+	movement_entry.insert()
+	movement_entry.submit()
+	
+	frappe.db.commit()
+	
+	frappe.msgprint(_("Asset Movement record {0} created").format("<a href='#Form/Asset Movement/{0}'>{0}</a>".format(movement_entry.name)))

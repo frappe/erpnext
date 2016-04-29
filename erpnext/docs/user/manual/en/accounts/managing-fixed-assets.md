@@ -45,6 +45,10 @@ On the scheduled date, system creates depreciation entry by creating a Journal E
 
 In the depreciation entry, the "Accumulated Depreciation Account" is credited and "Depreciation Expense Account" is debited. The related accounts can be set in the Asset Category or Company.
 
+For better visibility, net value of the asset on different depreciation dates are shown in a line graph.
+
+<img class="screenshot" alt="Asset" src="{{docs_base_url}}/assets/img/accounts/asset-graph.png">
+
 
 ## Purchase an asset
 
@@ -72,3 +76,13 @@ To sale an asset, open the asset record and create a Sales Invoice using "Sale A
 You can scrap an asset anytime using the "Scrap Asset" button in the Asset record. The "Gain/Loss Account on Asset Disposal" mentioned in the Company is debited by the Current Value (After Depreciation) of the asset. After scrapping, you can also restore the asset using "Restore Asset" button.
 
 <img class="screenshot" alt="Asset" src="{{docs_base_url}}/assets/img/accounts/scrap-journal-entry.png">
+
+## Asset Movement
+
+The movement of the assets (from one warehouse to another) is also tracked via Asset Movement form.
+
+<img class="screenshot" alt="Asset" src="{{docs_base_url}}/assets/img/accounts/asset-movement.png">
+
+There is also a dedicated button "Transfer Asset" inside the Asset form to track the Asset Movement.
+
+<img class="screenshot" alt="Asset" src="{{docs_base_url}}/assets/img/accounts/asset-movement-using-button.png">
