@@ -119,16 +119,22 @@ def get_conditions(filters):
 
 def get_invoices(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, posting_date, credit_to, supplier, supplier_name,
-		bill_no, bill_date, remarks, base_net_total, base_grand_total, outstanding_amount
-		from `tabPurchase Invoice` where docstatus = 1 %s
+	return frappe.db.sql("""
+		select 
+			name, posting_date, credit_to, supplier, supplier_name,
+			bill_no, bill_date, remarks, base_net_total, base_grand_total, outstanding_amount
+		from `tabPurchase Invoice` 
+		where docstatus = 1 %s
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
 
 
 def get_invoice_expense_map(invoice_list):
-	expense_details = frappe.db.sql("""select parent, expense_account, sum(base_net_amount) as amount
-		from `tabPurchase Invoice Item` where parent in (%s) group by parent, expense_account""" %
-		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+	expense_details = frappe.db.sql("""
+		select parent, expense_account, sum(base_net_amount) as amount
+		from `tabPurchase Invoice Item` 
+		where parent in (%s) 
+		group by parent, expense_account
+	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
 	invoice_expense_map = {}
 	for d in expense_details:
@@ -138,9 +144,12 @@ def get_invoice_expense_map(invoice_list):
 	return invoice_expense_map
 
 def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
-	tax_details = frappe.db.sql("""select parent, account_head, sum(base_tax_amount_after_discount_amount) as tax_amount
-		from `tabPurchase Taxes and Charges` where parent in (%s) group by parent, account_head""" %
-		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+	tax_details = frappe.db.sql("""
+		select parent, account_head, sum(base_tax_amount_after_discount_amount) as tax_amount
+		from `tabPurchase Taxes and Charges` 
+		where parent in (%s) and category in ('Total', 'Valuation and Total')
+		group by parent, account_head
+	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
 	invoice_tax_map = {}
 	for d in tax_details:
@@ -156,10 +165,11 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 	return invoice_expense_map, invoice_tax_map
 
 def get_invoice_po_pr_map(invoice_list):
-	pi_items = frappe.db.sql("""select parent, purchase_order, purchase_receipt, po_detail,
-		project from `tabPurchase Invoice Item` where parent in (%s)
-		and (ifnull(purchase_order, '') != '' or ifnull(purchase_receipt, '') != '')""" %
-		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+	pi_items = frappe.db.sql("""
+		select parent, purchase_order, purchase_receipt, po_detail, project 
+		from `tabPurchase Invoice Item` 
+		where parent in (%s) and (ifnull(purchase_order, '') != '' or ifnull(purchase_receipt, '') != '')
+	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
 	invoice_po_pr_map = {}
 	for d in pi_items:

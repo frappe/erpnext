@@ -13,7 +13,7 @@ def execute(filters=None):
 
 	item_list = get_items(filters)
 	if item_list:
-		item_tax, tax_accounts = get_tax_accounts(item_list, columns)
+		item_row_tax, tax_accounts = get_tax_accounts(item_list, columns)
 	columns.append({
 		"fieldname": "currency",
 		"label": _("Currency"),
@@ -36,7 +36,7 @@ def execute(filters=None):
 			delivery_note, d.income_account, d.qty, d.base_net_rate, d.base_net_amount]
 
 		for tax in tax_accounts:
-			row.append(item_tax.get(d.parent, {}).get(d.item_code, {}).get(tax, 0))
+			row.append(item_row_tax.get(d.name, {}).get(tax, 0))
 
 		total_tax = sum(row[last_col:])
 		row += [total_tax, d.base_net_amount + total_tax, company_currency]
@@ -73,49 +73,66 @@ def get_conditions(filters):
 
 def get_items(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project,
-		si.customer, si.remarks, si.territory, si.company, si.base_net_total, si_item.item_code, si_item.item_name,
-		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account,
-		si_item.qty, si_item.base_net_rate, si_item.base_net_amount, si.customer_name,
-		si.customer_group, si_item.so_detail
+	return frappe.db.sql("""
+		select
+			si_item.name, si_item.parent, si.posting_date, si.debit_to, si.project,
+			si.customer, si.remarks, si.territory, si.company, si.base_net_total, 
+			si_item.item_code, si_item.item_name, si_item.item_group, si_item.sales_order, 
+			si_item.delivery_note, si_item.income_account, si_item.qty, 
+			si_item.base_net_rate, si_item.base_net_amount, si.customer_name,
+			si.customer_group, si_item.so_detail
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 %s
 		order by si.posting_date desc, si_item.item_code desc""" % conditions, filters, as_dict=1)
 
 def get_tax_accounts(item_list, columns):
 	import json
-	item_tax = {}
+	item_row_tax = {}
 	tax_accounts = []
-	invoice_wise_items = {}
+	invoice_item_row = {}
+	item_row_map = {}
 	for d in item_list:
-		invoice_wise_items.setdefault(d.parent, []).append(d)
+		invoice_item_row.setdefault(d.parent, []).append(d)
+		item_row_map.setdefault(d.parent, {}).setdefault(d.item_code, []).append(d)
 
-	tax_details = frappe.db.sql("""select parent, account_head, item_wise_tax_detail,
-		charge_type, base_tax_amount_after_discount_amount
-		from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice'
-		and docstatus = 1 and (account_head is not null and account_head != '')
-		and parent in (%s)""" % ', '.join(['%s']*len(invoice_wise_items)),
-		tuple(invoice_wise_items.keys()))
+	tax_details = frappe.db.sql("""
+		select 
+			parent, account_head, item_wise_tax_detail,
+			charge_type, base_tax_amount_after_discount_amount
+		from `tabSales Taxes and Charges` 
+		where 
+			parenttype = 'Sales Invoice' and docstatus = 1 
+			and (account_head is not null and account_head != '')
+			and parent in (%s)
+	""" % ', '.join(['%s']*len(invoice_item_row)), tuple(invoice_item_row.keys()))
 
 	for parent, account_head, item_wise_tax_detail, charge_type, tax_amount in tax_details:
 		if account_head not in tax_accounts:
 			tax_accounts.append(account_head)
-
+			
 		if item_wise_tax_detail:
 			try:
 				item_wise_tax_detail = json.loads(item_wise_tax_detail)
-				for item, tax_amount in item_wise_tax_detail.items():
-					item_tax.setdefault(parent, {}).setdefault(item, {})[account_head] = \
-						 flt(tax_amount[1]) if isinstance(tax_amount, list) else flt(tax_amount)
+
+				for item_code, tax_amount in item_wise_tax_detail.items():
+					tax_amount = flt(tax_amount[1]) if isinstance(tax_amount, list) else flt(tax_amount)
+						
+					item_net_amount = sum([flt(d.base_net_amount) 
+						for d in item_row_map.get(parent, {}).get(item_code, [])])
+						
+					for d in item_row_map.get(parent, {}).get(item_code, []):
+						item_row_tax.setdefault(d.name, {})[account_head] = \
+							flt((tax_amount * d.base_net_amount) / item_net_amount)
+
 			except ValueError:
 				continue
 		elif charge_type == "Actual" and tax_amount:
-			for d in invoice_wise_items.get(parent, []):
-				item_tax.setdefault(parent, {}).setdefault(d.item_code, {})[account_head] = \
+			for d in invoice_item_row.get(parent, []):
+				item_row_tax.setdefault(d.name, {})[account_head] = \
 					flt((tax_amount * d.base_net_amount) / d.base_net_total)
 
 	tax_accounts.sort()
 	columns += [account_head + ":Currency/currency:80" for account_head in tax_accounts]
 	columns += ["Total Tax:Currency/currency:80", "Total:Currency/currency:80"]
 
-	return item_tax, tax_accounts
+	return item_row_tax, tax_accounts
