@@ -116,14 +116,14 @@ def get_tax_accounts(item_list, columns):
 
 				for item_code, tax_amount in item_wise_tax_detail.items():
 					tax_amount = flt(tax_amount[1]) if isinstance(tax_amount, list) else flt(tax_amount)
-						
+					
 					item_net_amount = sum([flt(d.base_net_amount) 
 						for d in item_row_map.get(parent, {}).get(item_code, [])])
 						
 					for d in item_row_map.get(parent, {}).get(item_code, []):
-						item_row_tax.setdefault(d.name, {})[account_head] = \
-							flt((tax_amount * d.base_net_amount) / item_net_amount)
-
+						item_tax_amount = flt((tax_amount * d.base_net_amount) / item_net_amount) if item_net_amount else 0
+						item_row_tax.setdefault(d.name, {})[account_head] = item_tax_amount
+			
 			except ValueError:
 				continue
 		elif charge_type == "Actual" and tax_amount:
