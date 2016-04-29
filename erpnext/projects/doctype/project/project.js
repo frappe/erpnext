@@ -3,8 +3,6 @@
 
 frappe.ui.form.on("Project", {
 	onload: function(frm) {
-		frm.hide_first = true;
-
 		var so = frappe.meta.get_docfield("Project", "sales_order");
 		so.get_route_options_for_new_doc = function(field) {
 			if(frm.is_new()) return;
@@ -46,7 +44,7 @@ frappe.ui.form.on("Project", {
 			}
 
 			frm.dashboard.show_dashboard();
-			frm.dashboard.add_section(frappe.render_template('project_dashboard', {project: frm.doc}));
+			// frm.dashboard.add_section(frappe.render_template('project_dashboard', {project: frm.doc}));
 
 			// var bars = [];
 			// bars.push({

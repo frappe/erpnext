@@ -3,7 +3,6 @@
 
 frappe.ui.form.on("Customer", {
 	before_load: function(frm) {
-		frm.hide_first = true;
 		frappe.setup_language_field(frm);
 	},
 	refresh: function(frm) {

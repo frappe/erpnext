@@ -6,7 +6,6 @@ frappe.require('assets/js/item-dashboard.min.js');
 
 frappe.ui.form.on("Item", {
 	onload: function(frm) {
-		frm.hide_first = true;
 		erpnext.item.setup_queries(frm);
 		if (frm.doc.variant_of){
 			frm.fields_dict["attributes"].grid.set_column_disp("attribute_value", true);
