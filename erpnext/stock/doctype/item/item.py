@@ -507,9 +507,22 @@ class Item(WebsiteGenerator):
 			clear_cache(self.page_name)
 
 		frappe.db.set_value("Item", newdn, "item_code", newdn)
+		
 		if merge:
 			self.set_last_purchase_rate(newdn)
 			self.recalculate_bin_qty(newdn)
+			
+		for dt in ("Sales Taxes and Charges", "Purchase Taxes and Charges"):
+			for d in frappe.db.sql("""select name, item_wise_tax_detail from `tab{0}` 
+					where ifnull(item_wise_tax_detail, '') != ''""".format(dt), as_dict=1):
+				
+				item_wise_tax_detail = json.loads(d.item_wise_tax_detail)
+				if olddn in item_wise_tax_detail:
+					item_wise_tax_detail[newdn] = item_wise_tax_detail[olddn]
+					item_wise_tax_detail.pop(olddn)
+					
+					frappe.db.set_value(dt, d.name, "item_wise_tax_detail", 
+						json.dumps(item_wise_tax_detail), update_modified=False)
 
 	def set_last_purchase_rate(self, newdn):
 		last_purchase_rate = get_last_purchase_details(newdn).get("base_rate", 0)
@@ -606,7 +619,8 @@ class Item(WebsiteGenerator):
 			variant = get_variant(self.variant_of, args, self.name)
 			if variant:
 				frappe.throw(_("Item variant {0} exists with same attributes")
-					.format(variant), ItemVariantExistsError)
+					.format(variant), ItemVariantExistsError)			
+			
 
 @frappe.whitelist()
 def get_dashboard_data(name):
