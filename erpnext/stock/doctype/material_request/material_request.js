@@ -3,7 +3,7 @@
 
 {% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
 
-frappe.require("assets/erpnext/js/utils.js");
+
 
 frappe.ui.form.on("Material Request Item", {
 	"qty": function(frm, doctype, name) {

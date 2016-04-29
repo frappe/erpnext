@@ -3,12 +3,12 @@
 
 //c-form js file
 // -----------------------------
-frappe.require("assets/erpnext/js/utils.js");
+
 
 cur_frm.fields_dict.invoices.grid.get_field("invoice_no").get_query = function(doc) {
 	return {
 		filters: {
-			"docstatus": 1, 
+			"docstatus": 1,
 			"customer": doc.customer,
 			"company": doc.company,
 			"c_form_applicable": 'Yes',

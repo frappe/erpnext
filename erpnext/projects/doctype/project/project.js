@@ -43,20 +43,9 @@ frappe.ui.form.on("Project", {
 				});
 			}
 
+			frm.dashboard.show_heatmap = true;
+			frm.dashboard.heatmap_message = __('This is based on the Time Logs created against this project');
 			frm.dashboard.show_dashboard();
-			// frm.dashboard.add_section(frappe.render_template('project_dashboard', {project: frm.doc}));
-
-			// var bars = [];
-			// bars.push({
-			// 	'title': __('Percent Complete'),
-			// 	'width': (frm.doc.percent_complete || 1)  + '%',
-			// 	'progress_class': 'progress-bar-success'
-			// })
-			//
-			// var message = __("{0}% complete", [frm.doc.percent_complete]);
-			//
-			// frm.dashboard.add_progress(__('Status'), bars, message);
-
 		}
 
 	}

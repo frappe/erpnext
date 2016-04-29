@@ -3,7 +3,6 @@
 
 
 frappe.provide("erpnext.stock");
-frappe.require("assets/erpnext/js/controllers/stock_controller.js");
 
 erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	setup: function() {
@@ -11,16 +10,16 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.frm.fields_dict.purchase_receipts.grid.get_field('receipt_document').get_query =
 			function(doc, cdt ,cdn) {
 				var d = locals[cdt][cdn]
-				
+
 				var filters = [
 					[d.receipt_document_type, 'docstatus', '=', '1'],
 					[d.receipt_document_type, 'company', '=', me.frm.doc.company],
 				]
-				
+
 				if(d.receipt_document_type == "Purchase Invoice") {
 					filters.push(["Purchase Invoice", "update_stock", "=", "1"])
 				}
-								
+
 				if(!me.frm.doc.company) msgprint(__("Please enter company first"));
 				return {
 					filters:filters

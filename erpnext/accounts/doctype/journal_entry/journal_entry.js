@@ -3,7 +3,7 @@
 
 frappe.provide("erpnext.accounts");
 frappe.provide("erpnext.journal_entry");
-frappe.require("assets/erpnext/js/utils.js");
+
 
 frappe.ui.form.on("Journal Entry", {
 	refresh: function(frm) {

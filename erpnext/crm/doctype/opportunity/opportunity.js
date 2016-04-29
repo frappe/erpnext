@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.crm");
-frappe.require("assets/erpnext/js/utils.js");
+
 cur_frm.email_field = "contact_email";
 frappe.ui.form.on("Opportunity", {
 	customer: function(frm) {

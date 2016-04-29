@@ -4,9 +4,8 @@
 frappe.provide("erpnext.buying");
 
 cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
-{% include 'erpnext/accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.js' %}
 
-frappe.require("assets/erpnext/js/controllers/transaction.js");
+{% include 'erpnext/accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.js' %}
 
 cur_frm.email_field = "contact_email";
 
@@ -129,12 +128,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
 			}
 		}
-		
+
 		this._super(doc, cdt, cdn);
 		this.conversion_factor(doc, cdt, cdn);
-		
+
 	},
-	
+
 	received_qty: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["qty", "received_qty"]);
@@ -142,7 +141,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		item.qty = (item.qty < item.received_qty) ? item.qty : item.received_qty;
 		this.qty(doc, cdt, cdn);
 	},
-	
+
 	rejected_qty: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
@@ -152,7 +151,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]));
 			item.qty = item.rejected_qty = 0.0;
 		} else {
-			
+
 			item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
 		}
 
@@ -236,7 +235,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		erpnext.utils.get_address_display(this.frm, "shipping_address",
 			"shipping_address_display", is_your_company_address=true)
 	},
-	
+
 	tc_name: function() {
 		this.get_terms();
 	}

@@ -154,7 +154,16 @@ def get_dashboard_data(name):
 	from frappe.desk.notifications import get_open_count
 	return {
 		'count': get_open_count('Project', name),
+		'timeline_data': get_timeline_data(name)
 	}
+
+def get_timeline_data(name):
+	'''Return timeline for attendance'''
+	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
+		from `tabTime Log` where project=%s
+			and from_time > date_sub(curdate(), interval 1 year)
+			and docstatus < 2
+			group by date(from_time)''', name))
 
 def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20):
 	return frappe.db.sql('''select distinct project.*

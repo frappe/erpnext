@@ -1,5 +1,3 @@
-frappe.require('assets/js/item-dashboard.min.js');
-
 frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
@@ -52,32 +50,35 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 
 	page.sort_selector.wrapper.css({'margin-right': '15px', 'margin-top': '4px'});
 
-	page.item_dashboard = new erpnext.stock.ItemDashboard({
-		parent: page.main,
-	})
+	frappe.require('assets/js/item-dashboard.min.js', function() {
+		page.item_dashboard = new erpnext.stock.ItemDashboard({
+			parent: page.main,
+		})
 
-	page.item_dashboard.before_refresh = function() {
-		this.item_code = page.item_field.get_value();
-		this.warehouse = page.warehouse_field.get_value();
-	}
+		page.item_dashboard.before_refresh = function() {
+			this.item_code = page.item_field.get_value();
+			this.warehouse = page.warehouse_field.get_value();
+		}
 
-	page.item_dashboard.refresh();
+		page.item_dashboard.refresh();
 
-	// item click
-	var setup_click = function(doctype) {
-		page.main.on('click', 'a[data-type="'+ doctype.toLowerCase() +'"]', function() {
-			var name = $(this).attr('data-name');
-			var field = page[doctype.toLowerCase() + '_field'];
-			if(field.get_value()===name) {
-				frappe.set_route('Form', doctype, name)
-			} else {
-				field.set_input(name);
-				page.item_dashboard.refresh();
-			}
-		});
-	}
+		// item click
+		var setup_click = function(doctype) {
+			page.main.on('click', 'a[data-type="'+ doctype.toLowerCase() +'"]', function() {
+				var name = $(this).attr('data-name');
+				var field = page[doctype.toLowerCase() + '_field'];
+				if(field.get_value()===name) {
+					frappe.set_route('Form', doctype, name)
+				} else {
+					field.set_input(name);
+					page.item_dashboard.refresh();
+				}
+			});
+		}
 
-	setup_click('Item');
-	setup_click('Warehouse');
+		setup_click('Item');
+		setup_click('Warehouse');
+	});
+
 
 }

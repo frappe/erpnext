@@ -2,7 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.item");
-frappe.require('assets/js/item-dashboard.min.js');
 
 frappe.ui.form.on("Item", {
 	onload: function(frm) {
@@ -77,17 +76,6 @@ frappe.ui.form.on("Item", {
 
 		erpnext.item.toggle_attributes(frm);
 
-		frm.dashboard.show_heatmap = frm.doc.is_stock_item;
-		frm.dashboard.heatmap_message = __('This is based on stock movement. See {0} for details',
-			['<a href="#query-report/Stock Ledger">' + __('Stock Ledger') + '</a>']);
-		frm.dashboard.show_dashboard();
-
-		var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;">Stock Levels</h5>');
-		erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
-			parent: section,
-			item_code: frm.doc.name
-		});
-		erpnext.item.item_dashboard.refresh();
 
 	},
 
@@ -184,6 +172,20 @@ $.extend(erpnext.item, {
 		frm.dashboard.reset();
 		if(frm.doc.__islocal)
 			return;
+
+		frm.dashboard.show_heatmap = frm.doc.is_stock_item;
+		frm.dashboard.heatmap_message = __('This is based on stock movement. See {0} for details',
+			['<a href="#query-report/Stock Ledger">' + __('Stock Ledger') + '</a>']);
+		frm.dashboard.show_dashboard();
+
+		frappe.require('assets/js/item-dashboard.min.js', function() {
+			var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;">Stock Levels</h5>');
+			erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
+				parent: section,
+				item_code: frm.doc.name
+			});
+			erpnext.item.item_dashboard.refresh();
+		});
 	},
 
 	edit_prices_button: function(frm) {

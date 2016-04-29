@@ -5,11 +5,10 @@
 cur_frm.cscript.tax_table = "Sales Taxes and Charges";
 {% include 'erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.js' %}
 
-frappe.provide("erpnext.selling");
-frappe.require("assets/erpnext/js/controllers/transaction.js");
 
 cur_frm.email_field = "contact_email";
 
+frappe.provide("erpnext.selling");
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	onload: function() {
 		this._super();
@@ -182,7 +181,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	warehouse: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
-		
+
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
 				method: "erpnext.stock.get_item_details.get_bin_details",

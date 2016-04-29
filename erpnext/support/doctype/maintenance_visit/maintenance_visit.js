@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.support");
-frappe.require("assets/erpnext/js/utils.js");
+
 
 frappe.ui.form.on_change("Maintenance Visit", "customer", function(frm) {
 	erpnext.utils.get_party_details(frm) });

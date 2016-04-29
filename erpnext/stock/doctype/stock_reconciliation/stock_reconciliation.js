@@ -1,8 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.require("assets/erpnext/js/controllers/stock_controller.js");
-frappe.require("assets/erpnext/js/utils.js");
 frappe.provide("erpnext.stock");
 
 frappe.ui.form.on("Stock Reconciliation", {

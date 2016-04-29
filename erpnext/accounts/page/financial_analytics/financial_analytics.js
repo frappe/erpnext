@@ -12,7 +12,7 @@ frappe.pages['financial-analytics'].on_page_load = function(wrapper) {
 
 };
 
-frappe.require("assets/erpnext/js/account_tree_grid.js");
+{% include "erpnext/public/js/account_tree_grid.js" %}
 
 erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	filters: [
