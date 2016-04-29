@@ -45,16 +45,19 @@ class TimeLog(Document):
 
 	def set_status(self):
 		self.status = {
-			0: "Draft",
+			0: "To Submit",
 			1: "Submitted",
 			2: "Cancelled"
 		}[self.docstatus or 0]
 
+		if not self.to_time:
+			self.status = 'In Progress'
+
 		if self.time_log_batch:
-			self.status="Batched for Billing"
+			self.status= "Batched for Billing"
 
 		if self.sales_invoice:
-			self.status="Billed"
+			self.status= "Billed"
 
 	def set_title(self):
 		"""Set default title for the Time Log"""
@@ -88,8 +91,8 @@ class TimeLog(Document):
 		existing = frappe.db.sql("""select name, from_time, to_time from `tabTime Log`
 			where `{0}`=%(val)s and
 			(
-				(%(from_time)s > from_time and %(from_time)s < to_time) or 
-				(%(to_time)s > from_time and %(to_time)s < to_time) or 
+				(%(from_time)s > from_time and %(from_time)s < to_time) or
+				(%(to_time)s > from_time and %(to_time)s < to_time) or
 				(%(from_time)s <= from_time and %(to_time)s >= to_time))
 			and name!=%(name)s
 			and docstatus < 2""".format(fieldname),
@@ -233,7 +236,7 @@ class TimeLog(Document):
 				self.billing_amount = self.billing_rate * self.hours
 			else:
 				self.billing_amount = 0
-		
+
 		if self.additional_cost and self.billable:
 			self.billing_amount += self.additional_cost
 
@@ -247,11 +250,11 @@ class TimeLog(Document):
 
 		elif self.project:
 			frappe.get_doc("Project", self.project).update_project()
-			
+
 	def has_webform_permission(doc):
 		project_user = frappe.db.get_value("Project User", {"parent": doc.project, "user":frappe.session.user} , "user")
 		if project_user:
-			return True		
+			return True
 
 
 @frappe.whitelist()
