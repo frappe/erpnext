@@ -19,20 +19,20 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {
 			cur_frm.cscript.calculate_taxes_and_totals();
-		})
+		});
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "tax_amount", function(frm, cdt, cdn) {
 			cur_frm.cscript.calculate_taxes_and_totals();
-		})
+		});
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "row_id", function(frm, cdt, cdn) {
 			cur_frm.cscript.calculate_taxes_and_totals();
-		})
+		});
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "included_in_print_rate", function(frm, cdt, cdn) {
 			cur_frm.cscript.set_dynamic_labels();
 			cur_frm.cscript.calculate_taxes_and_totals();
-		})
+		});
 
 		frappe.ui.form.on(this.frm.doctype, "apply_discount_on", function(frm) {
 			if(frm.doc.additional_discount_percentage) {
@@ -40,7 +40,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			} else {
 				cur_frm.cscript.calculate_taxes_and_totals();
 			}
-		})
+		});
 
 		frappe.ui.form.on(this.frm.doctype, "additional_discount_percentage", function(frm) {
 			if (frm.via_discount_amount) {
