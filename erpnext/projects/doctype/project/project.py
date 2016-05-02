@@ -27,6 +27,8 @@ class Project(Document):
 				})
 
 		self.set_onload('links', self.meta.get_links_setup())
+		self.set_onload('activity_summary', frappe.db.sql('''select activity_type, sum(hours) as total_hours
+			from `tabTime Log` where project=%s group by activity_type order by total_hours desc''', self.name, as_dict=True))
 
 	def __setup__(self):
 		self.onload()

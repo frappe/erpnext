@@ -43,11 +43,32 @@ frappe.ui.form.on("Project", {
 				});
 			}
 
-			frm.dashboard.show_heatmap = true;
-			frm.dashboard.heatmap_message = __('This is based on the Time Logs created against this project');
-			frm.dashboard.show_dashboard();
+			frm.trigger('show_dashboard');
 		}
+	},
+	show_dashboard: function(frm) {
+		frm.dashboard.show_heatmap = true;
+		frm.dashboard.heatmap_message = __('This is based on the Time Logs created against this project');
+		frm.dashboard.show_dashboard();
 
+		if(frm.doc.__onload.activity_summary.length) {
+			var hours = $.map(frm.doc.__onload.activity_summary, function(d) { return d.total_hours });
+			var max_count = Math.max.apply(null, hours);
+			var sum = hours.reduce(function(a, b) { return a + b; }, 0);
+			var section = frm.dashboard.add_section(
+				frappe.render_template('project_dashboard',
+					{
+						data: frm.doc.__onload.activity_summary,
+						max_count: max_count,
+						sum: sum
+					}));
+
+			section.on('click', '.time-log-link', function() {
+				var activity_type = $(this).attr('data-activity_type');
+				frappe.set_route('List', 'Time Log',
+					{'activity_type': activity_type, 'project': frm.doc.name});
+			});
+		}
 	}
 });
 
