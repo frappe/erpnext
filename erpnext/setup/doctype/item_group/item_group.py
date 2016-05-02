@@ -58,7 +58,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		if start < 0:
 			start = 0
 		context.update({
-			"items": get_product_list_for_group(product_group = self.name, start=start, limit=24, search=frappe.form_dict.get("q")),
+			"items": get_product_list_for_group(product_group = self.name, start=start, limit=24, search=frappe.form_dict.get("search")),
 			"parent_groups": get_parent_item_groups(self.name),
 			"title": self.name,
 			"products_as_list": cint(frappe.db.get_single_value('Website Settings', 'products_as_list'))

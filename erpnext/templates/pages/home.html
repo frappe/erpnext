@@ -7,32 +7,27 @@
 
 <div class="row">
 	<div class="col-sm-12">
-		<h2 class="text-center">{{ homepage.tag_line or '' }}</h2>
-		<p class="lead text-center">{{ homepage.description or '' }}</p>
-		<p class="text-center">
-			<a href="/login" class="btn btn-primary text-center">Login</a>
-		</p>
-
+		<div class="homepage-tagline h1 text-center">{{ homepage.tag_line or '' }}</div>
+		<p class="text-center">{{ homepage.description or '' }}</p>
 		{% if homepage.products %}
-		<!-- TODO: styling of this section -->
-		<div class='featured-products-section'>
-			<h5 class='text-uppercase'>{{ _("Featured Products") }}</h5>
+		<div class='featured-products-section' itemscope itemtype="http://schema.org/Product">
+			<h5 class='featured-product-heading'>{{ _("Featured Products") }}</h5>
 			<div class="featured-products">
 				<div id="search-list" class="row" style="margin-top:40px;">
 					{% for item in homepage.products %}
-						<a class="product-link" href="{{ item.route | abs_url }}">
-							<div class="col-sm-4 product-image-wrapper">
-								{{ product_image_square(item.thumbnail or item.image) }}
-								<div class="text-ellipsis inline-block small product-text">
-									{{ item.item_name }}
-								</div>
+					<a class="product-link" href="{{ item.route|abs_url }}">
+						<div class="col-sm-4 col-xs-4 product-image-wrapper">
+							<div class="product-image-img">
+							{{ product_image_square(item.thumbnail or item.image) }}
+							<div class="product-text" itemprop="name">{{ item.item_name }}</div>
 							</div>
-						</a>
+						</div>
+					</a>
 					{% endfor %}
 				</div>
 			</div>
 			<!-- TODO: remove hardcoding of /products -->
-			<p class="text-center"><a href="/products" class="btn btn-primary">More Products</a></p>
+			<div class=" text-center text-uppercase"><a href="/products" class="btn btn-primary all-products">  {{ _("View All Products") }}</a></div>
 		</div>
 		{% endif %}
 	</div>
@@ -42,7 +37,16 @@
 {% block style %}
 <style>
 	.featured-products-section {
-		margin-top: 75px;
+		margin-top: 95px;
 	}
+
+	.home-login {
+		margin-top: 30px;
+	}
+	.btn-login {
+		width: 80px;
+	}
+	
+	
 </style>
 {% endblock %}

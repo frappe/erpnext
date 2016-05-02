@@ -12,6 +12,19 @@ frappe.ready(function() {
 	}
 	// update login
 	shopping_cart.set_cart_count();
+	
+	$(".shopping-cart").on('shown.bs.dropdown', function() {
+		if (!$('.shopping-cart-menu .cart-container').length) {
+			return frappe.call({
+				method: 'erpnext.shopping_cart.cart.get_shopping_cart_menu',
+				callback: function(r) {
+					if (r.message) {
+						$('.shopping-cart-menu').html(r.message);
+					}
+				}
+			});
+		}
+	});
 });
 
 $.extend(shopping_cart, {
@@ -32,7 +45,11 @@ $.extend(shopping_cart, {
 				},
 				btn: opts.btn,
 				callback: function(r) {
-					shopping_cart.set_cart_count();
+					shopping_cart.set_cart_count();	
+					if (r.message.shopping_cart_menu) {
+						$('.shopping-cart-menu').html(r.message.shopping_cart_menu);
+					}
+					
 					if(opts.callback)
 						opts.callback(r);
 				}
@@ -43,14 +60,9 @@ $.extend(shopping_cart, {
 	set_cart_count: function() {
 		var cart_count = getCookie("cart_count");
 		
-		if($(".cart-icon").length == 0) {
-			$('<div class="cart-icon small" style="float:right;padding:3px;border-radius:10px;\
-    			border: 1px solid #7575ff;">\
-				<a href="/cart" style="color:#7575ff; text-decoration: none">\
-					Cart\
-					<span style="color:#7575ff;" class="badge" id="cart-count">5</span>\
-				</a></div>').appendTo($('.shopping-cart'))
-		}
+		if(cart_count) {
+			$(".shopping-cart").toggle(true);	
+		}		
 		
 		var $cart = $('.cart-icon');
 		var $badge = $cart.find("#cart-count");

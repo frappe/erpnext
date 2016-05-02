@@ -52,8 +52,10 @@
 				</div>
 				<br>
 				<div style="min-height: 100px; margin: 10px 0;">
-					<h4 class="item-price" itemprop="price"></h4>
-					<div class="item-stock" itemprop="availablity"></div>
+					<div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+						<h4 class="item-price" itemprop="price"></h4>
+						<div class="item-stock" itemprop="availability"></div>
+					</div>	
                     <div class="item-cart hide">
     					<div id="item-add-to-cart">
     						<button class="btn btn-primary btn-sm">
@@ -71,7 +73,7 @@
 		</div>
 		<div class="row item-website-description" style="margin-top:30px; margin-bottom:20px">
 			<div class="col-md-12">
-		<h4>{{ _("DESCRIPTION") }}</h4>
+		<div class="h6 text-uppercase">{{ _("Description") }}</div>
 		<div itemprop="description" class="item-desc">
 		{{ web_long_description or description or _("No description given") }}
 		</div>
@@ -81,7 +83,7 @@
 		{% if website_specifications -%}
 		<div class="row item-website-specification" style="margin-top: 40px">
 			<div class="col-md-12">
-				<h4>{{ _("SPECIFICATIONS") }}</h4>
+				<div class="h6 text-uppercase">{{ _("Specifications") }}</div>
 
 				<table class="table borderless" style="width: 100%">
 				{% for d in website_specifications -%}

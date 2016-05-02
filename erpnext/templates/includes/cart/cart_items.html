@@ -1,23 +1,34 @@
 {% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description %}
 
 {% for d in doc.items %}
-<div class="cart-item">
-    <div class="row">
-        <div class="col-sm-8 col-xs-6" style="margin-bottom: 10px;">
-            {{ item_name_and_description(d) }}
-        </div>
-        <div class="col-sm-2 col-xs-3 text-right">
-            <span style="max-width: 50px; display: inline-block">
-                <input class="form-control text-right cart-qty"
-                value = "{{ d.get_formatted('qty') }}"
-                data-item-code="{{ d.item_code }}"></span>
-    		<p class="text-muted small" style="margin-top: 10px;">
-                {{ _("Rate") + ': ' + d.get_formatted("rate") }}
-            </p>
-    	</div>
-        <div class="col-sm-2 col-xs-3 text-right">
-            {{ d.get_formatted("amount") }}
-        </div>
+<div class="row cart-items checkout">
+    <div class="col-sm-8 col-xs-6 col-name-description">
+        {{ item_name_and_description(d) }}
+    </div>
+    <div class="col-sm-2 col-xs-3 text-right col-qty">
+        <span style="max-width: 50px; display: inline-block">
+            <input class="form-control text-right cart-qty"
+            value = "{{ d.get_formatted('qty') }}"
+            data-item-code="{{ d.item_code }}"></span>    	
+			<span class="text-muted small remove-item" data-item-code="{{ d.item_code }}">{{_("Remove")}}</span>	
+	</div>
+    <div class="col-sm-2 col-xs-3 text-right col-amount">
+        {{ d.get_formatted("amount") }}
+        <p class="text-muted small item-rate">{{
+            _("Rate: {0}").format(d.get_formatted("rate")) }}</p>
+    </div>
+</div>
+
+<div class="row cart-items cart-dropdown">
+    <div class="col-sm-7 col-xs-6 col-name-description">
+        {{ item_name_and_description(d) }}
+    </div>
+    <div class="col-sm-2 col-xs-2 text-right col-qty">
+		{{ d.get_formatted('qty') }}
+	</div>
+    <div class="col-sm-3 col-xs-2 text-right col-amount">
+        {{ d.get_formatted("amount") }}
+
     </div>
 </div>
 {% endfor %}

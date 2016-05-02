@@ -147,7 +147,8 @@ class Item(WebsiteGenerator):
 		file = frappe.get_all("File", filters={
 			"file_url": self.website_image
 		}, fields=["name", "is_private"], order_by="is_private asc", limit_page_length=1)
-
+		
+		
 		if file:
 			file = file[0]
 
