@@ -87,7 +87,7 @@ class Account(Document):
 			return
 		
 		existing_is_group = frappe.db.get_value("Account", self.name, "is_group")
-		if self.is_group != existing_is_group:
+		if cint(self.is_group) != cint(existing_is_group):
 			if self.check_gle_exists():
 				throw(_("Account with existing transaction cannot be converted to ledger"))
 			elif self.is_group:
