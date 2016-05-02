@@ -3,26 +3,9 @@
 {% block title %}{{ doc.project_name }}{% endblock %}
 
 {%- from "templates/includes/projects/macros.html" import back_link -%}
-{% block header %}<h1>{{ doc.project_name }}</h1>{% endblock %}
-{% block header_actions %}{% if doc.percent_complete %}
-		<div class="progress progress-hg">
-		  <div class="progress-bar progress-bar-{{ "warning" if doc.percent_complete|round < 100 else "success" }} active" role="progressbar"
-		  	aria-valuenow="{{ doc.percent_complete|round|int }}"
-		  	aria-valuemin="0" aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">
-		  </div>
-		</div>
-	{% endif %}{% endblock %}
-{% block breadcrumbs %}
-   <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-   	<ul class="breadcrumb">
-   		<li>
-   			<span class="icon icon-angle-left"></span>
-   			<a href="/project">Projects</a>
-   		</li>
-   	</ul>
-   </div>
+{% block header %}
+	<h1>{{ doc.project_name }}</h1>
 {% endblock %}
-
 
 {% block style %}
 	<style>
@@ -32,7 +15,13 @@
 
 
 {% block page_content %}
-
+{% if doc.percent_complete %}
+<div class="progress progress-hg">
+	<div class="progress-bar progress-bar-{{ "warning" if doc.percent_complete|round < 100 else "success" }} active" 				role="progressbar" aria-valuenow="{{ doc.percent_complete|round|int }}"
+	aria-valuemin="0" aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">
+	</div>
+</div>
+{% endif %}		
 
 <div class="clearfix">
   <h4 style="float: left;">{{ _("Tasks") }}</h4>

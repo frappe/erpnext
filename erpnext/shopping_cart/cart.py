@@ -92,8 +92,9 @@ def update_cart(item_code, qty, with_items=False):
 
 	set_cart_count(quotation)
 
-	if with_items:
-		context = get_cart_quotation(quotation)
+	context = get_cart_quotation(quotation)
+	
+	if cint(with_items):
 		return {
 			"items": frappe.render_template("templates/includes/cart/cart_items.html",
 				context),
@@ -101,7 +102,17 @@ def update_cart(item_code, qty, with_items=False):
 				context),
 		}
 	else:
-		return quotation.name
+		return {
+			'name': quotation.name,
+			'shopping_cart_menu': get_shopping_cart_menu(context)
+		}
+		
+@frappe.whitelist()
+def get_shopping_cart_menu(context=None):
+	if not context:
+		context = get_cart_quotation()
+		
+	return frappe.render_template('templates/includes/cart/cart_dropdown.html', context)
 
 @frappe.whitelist()
 def update_cart_address(address_fieldname, address_name):

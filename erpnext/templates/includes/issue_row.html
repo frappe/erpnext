@@ -1,11 +1,11 @@
-<div class="web-list-item">
-    <a class="no-decoration" href="/issues?name={{ doc.name }}">
+<div class="web-list-item transaction-list-item">
+    <a href="/issues?name={{ doc.name }}">
     <div class="row">
         <div class="col-xs-8">
             <span class="indicator {{ "red" if doc.status=="Open" else "darkgrey"   }}">
                 {{ doc.name }}</span>
-                <span style="margin-left: 15px;">
-                    {{ doc.subject }}</span>
+                <div class="items-preview text-ellipsis">
+                    {{ doc.subject }}</div>
         </div>
         <div class="col-xs-4 text-right small text-muted">
             {{ frappe.format_date(doc.modified) }}

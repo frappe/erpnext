@@ -1,8 +1,5 @@
 {% extends "templates/web.html" %}
 
-{#{% block header_actions %}
-{% include 'templates/includes/product_search_box.html' %}
-{% endblock %}#}
 {% block header %}<h1>{{ _("Products") }}</h1>{% endblock %}
 {% block breadcrumbs %}
  <div class="page-breadcrumbs" data-html-block="breadcrumbs">
@@ -16,7 +13,7 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="item-group-content">
+<div class="item-group-content" itemscope itemtype="http://schema.org/Product">
 	<div>
 		{% if slideshow %}<!-- slideshow -->
 		{% include "templates/includes/slideshow.html" %}

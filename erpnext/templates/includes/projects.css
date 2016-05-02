@@ -83,7 +83,6 @@
 }
 
 .progress-hg{
-	margin-bottom: 0!important;
-	margin-top: 30px!important;
-	height:5px;
+	margin-bottom: 30!important;
+	height:2px;
 }

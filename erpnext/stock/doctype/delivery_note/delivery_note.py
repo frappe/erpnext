@@ -329,9 +329,12 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
-	list_context["title"] = _("My Shipments")
-	list_context["show_sidebar"] = True
-	list_context["show_search"] = True
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Shipments'),
+	})
 	return list_context
 
 def get_invoiced_qty_map(delivery_note):

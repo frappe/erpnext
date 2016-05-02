@@ -185,7 +185,8 @@ def get_list_context(context=None):
 	return {
 		"show_sidebar": True,
 		"show_search": True,
-		"title": _("My Projects"),
+		'no_breadcrumbs': True,
+		"title": _("Projects"),
 		"get_list": get_project_list,
 		"row_template": "templates/includes/projects/project_row.html"
 	}

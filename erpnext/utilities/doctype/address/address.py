@@ -122,9 +122,10 @@ def get_territory_from_address(address):
 def get_list_context(context=None):
 	from erpnext.shopping_cart.cart import get_address_docs
 	return {
-		"title": _("My Addresses"),
+		"title": _("Addresses"),
 		"get_list": get_address_docs,
 		"row_template": "templates/includes/address_row.html",
+		'no_breadcrumbs': True,
 	}
 
 def has_website_permission(doc, ptype, user, verbose=False):
