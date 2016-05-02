@@ -169,7 +169,7 @@ erpnext.patches.v5_0.update_item_and_description_again
 erpnext.patches.v6_0.multi_currency
 erpnext.patches.v5_0.repost_gle_for_jv_with_multiple_party
 erpnext.patches.v5_0.portal_fixes
-erpnext.patches.v5_0.reset_values_in_tools
+erpnext.patches.v5_0.reset_values_in_tools # 02-05-2016
 execute:frappe.delete_doc("Page", "users")
 erpnext.patches.v5_0.update_material_transferred_for_manufacturing_again
 erpnext.patches.v5_0.index_on_account_and_gl_entry
