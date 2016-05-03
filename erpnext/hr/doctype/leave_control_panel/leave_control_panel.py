@@ -21,8 +21,17 @@ class LeaveControlPanel(Document):
 					condition += " and " + l[1]+ "= '" +l[0] +"'"
 				flag = 1
 		emp_query = "select name from `tabEmployee` "
+
 		if flag == 1:
 			emp_query += condition
+
+		# Get only those employees which are active. If you have 'where' clause in the query append
+		# employee status, else append condition in 'where' clause
+		if 'where' in condition:
+			emp_query += " and status = 'Active' "
+		else:
+			emp_query += "where status = 'Active' "
+
 		e = frappe.db.sql(emp_query)
 		return e
 
@@ -30,7 +39,7 @@ class LeaveControlPanel(Document):
 		for f in ["from_date", "to_date", "leave_type", "no_of_days"]:
 			if not self.get(f):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(f)))
-	
+
 	def to_date_validation(self):
 		if date_diff(self.to_date, self.from_date) <= 0:
 			return "Invalid period"
