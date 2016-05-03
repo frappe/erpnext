@@ -394,7 +394,12 @@ class ProductionPlanningTool(Document):
 			total_qty = sum([flt(d[0]) for d in so_item_qty])
 			if total_qty > item_projected_qty.get(item, 0):
 				# shortage
-				requested_qty = total_qty - flt(item_projected_qty.get(item))
+				if self.ignore_projected_qty:
+					# ignore projected qty
+					requested_qty = total_qty
+				else:
+					# consider projected qty
+					requested_qty = total_qty - flt(item_projected_qty.get(item))
 				# consider minimum order qty
 
 				if requested_qty < flt(so_item_qty[0][3]):
