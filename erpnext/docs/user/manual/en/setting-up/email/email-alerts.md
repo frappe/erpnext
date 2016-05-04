@@ -28,6 +28,41 @@ To setup an Email Alert:
 1. Set the recipients of this alert. The recipient could either be a field of the document or a list of fixed email ids.
 1. Compose the message
 
+
+### Setting a Subject
+You can retrieve the data for a particular field by using `doc.[field_name]`. To use it in your subject / message, you have to surround it with `{{ }}`. These are called [Jinja](http://jinja.pocoo.org/) tags. So, for example to get the name of a document, you use `{{ doc.name }}`. The below example sends an email on saving a Task with the Subject, "TASK##### has been created"
+
+<img class="screenshot" alt="Setting Subject" src="{{docs_base_url}}/assets/img/setup/email/email-alert-subject.png">
+
+### Setting Conditions
+
+Email alerts allow you to set conditions according to the field data in your documents. For example, if you want to recieve an Email if a Lead has been saved as "Interested" as it's status, you put `doc.status == "Interested"` in the conditions textbox. You can also set more complex conditions by combining them.
+
+<img class="screenshot" alt="Setting Condition" src="{{docs_base_url}}/assets/img/setup/email/email-alert-condition.png">
+
+The above example will send an Email Alert when a Task is saved with the status "Open" and the Expected End Date for the Task is the date on or before the date on which it was saved on. 
+
+### Setting a Message
+
+You can use both Jinja Tags (`{{ doc.[field_name] }}`) and HTML tags in the message textbox. 
+
+	<h3>Order Overdue</h3>
+
+	<p>Transaction {{ doc.name }} has exceeded Due Date. Please take necessary action.</p>
+
+	<!-- show last comment -->
+	{% if comments %}
+	Last comment: {{ comments[-1].comment }} by {{ comments[-1].by }}
+	{% endif %}
+
+	<h4>Details</h4>
+
+	<ul>
+	<li>Customer: {{ doc.customer }}
+	<li>Amount: {{ doc.total_amount }}
+	</ul>
+
+
 ---
 
 ### Example
