@@ -10,29 +10,17 @@ from frappe.model.document import Document
 
 class LeaveControlPanel(Document):
 	def get_employees(self):
-		lst1 = [[self.employee_type,"employment_type"],[self.branch,"branch"],[self.designation,"designation"],[self.department, "department"]]
-		condition = "where "
-		flag = 0
-		for l in lst1:
-			if(l[0]):
-				if flag == 0:
-					condition += l[1] + "= '" + l[0] +"'"
-				else:
-					condition += " and " + l[1]+ "= '" +l[0] +"'"
-				flag = 1
-		emp_query = "select name from `tabEmployee` "
+		conditions, values = [], []
+		for field in ["employment_type", "branch", "designation", "department"]:
+			if self.get(field):
+				conditions.append("{0}=%s".format(field))
+				values.append(self.get(field))
 
-		if flag == 1:
-			emp_query += condition
+		condition_str = " and " + " and ".join(conditions) if len(conditions) else ""
 
-		# Get only those employees which are active. If you have 'where' clause in the query append
-		# employee status, else append condition in 'where' clause
-		if 'where' in condition:
-			emp_query += " and status = 'Active' "
-		else:
-			emp_query += "where status = 'Active' "
+		e = frappe.db.sql("select name from tabEmployee where status='Active' {condition}"
+			.format(condition=condition_str), tuple(values))
 
-		e = frappe.db.sql(emp_query)
 		return e
 
 	def validate_values(self):
