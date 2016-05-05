@@ -21,4 +21,4 @@ def get_approver_list(name):
 		user_role.role = "Leave Approver"
 		and user_role.parent = user.name and
 		user.name != %s 
-		""", name)
+		""", name or "")
