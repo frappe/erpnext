@@ -202,7 +202,7 @@ frappe.ui.form.on("Payment Tool Detail", "against_voucher_no", function(frm, cdt
 	}
 
 	frappe.call({
-		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_against_voucher_amount',
+		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_against_voucher_details',
 		args: {
 			"against_voucher_type": row.against_voucher_type,
 			"against_voucher_no": row.against_voucher_no,
