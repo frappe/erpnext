@@ -10,27 +10,24 @@ from frappe.model.document import Document
 
 class LeaveControlPanel(Document):
 	def get_employees(self):
-		lst1 = [[self.employee_type,"employment_type"],[self.branch,"branch"],[self.designation,"designation"],[self.department, "department"]]
-		condition = "where "
-		flag = 0
-		for l in lst1:
-			if(l[0]):
-				if flag == 0:
-					condition += l[1] + "= '" + l[0] +"'"
-				else:
-					condition += " and " + l[1]+ "= '" +l[0] +"'"
-				flag = 1
-		emp_query = "select name from `tabEmployee` "
-		if flag == 1:
-			emp_query += condition
-		e = frappe.db.sql(emp_query)
+		conditions, values = [], []
+		for field in ["employment_type", "branch", "designation", "department"]:
+			if self.get(field):
+				conditions.append("{0}=%s".format(field))
+				values.append(self.get(field))
+
+		condition_str = " and " + " and ".join(conditions) if len(conditions) else ""
+
+		e = frappe.db.sql("select name from tabEmployee where status='Active' {condition}"
+			.format(condition=condition_str), tuple(values))
+
 		return e
 
 	def validate_values(self):
 		for f in ["from_date", "to_date", "leave_type", "no_of_days"]:
 			if not self.get(f):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(f)))
-	
+
 	def to_date_validation(self):
 		if date_diff(self.to_date, self.from_date) <= 0:
 			return "Invalid period"

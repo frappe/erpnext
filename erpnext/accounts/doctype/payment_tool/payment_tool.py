@@ -20,15 +20,15 @@ class PaymentTool(Document):
 		jv.company = self.company
 		jv.cheque_no = self.reference_no
 		jv.cheque_date = self.reference_date
-		
-		party_account_currency, party_account_type = frappe.db.get_value("Account", self.party_account, 
+
+		party_account_currency, party_account_type = frappe.db.get_value("Account", self.party_account,
 			["account_currency", "account_type"])
-		
+
 		bank_account_currency, bank_account_type = None, None
 		if self.payment_account:
-			bank_account_currency, bank_account_type = frappe.db.get_value("Account", self.payment_account, 
+			bank_account_currency, bank_account_type = frappe.db.get_value("Account", self.payment_account,
 				["account_currency", "account_type"])
-		
+
 		if not self.total_payment_amount:
 			frappe.throw(_("Please enter Payment Amount in atleast one row"))
 
@@ -36,11 +36,11 @@ class PaymentTool(Document):
 			if not frappe.db.get_value(v.against_voucher_type, {"name": v.against_voucher_no}):
 				frappe.throw(_("Row {0}: {1} is not a valid {2}").format(v.idx, v.against_voucher_no,
 					v.against_voucher_type))
-			
+
 			if v.payment_amount:
 				exchange_rate = get_exchange_rate(self.party_account, party_account_currency,
 					self.company, v.against_voucher_type, v.against_voucher_no)
-				
+
 				d1 = jv.append("accounts")
 				d1.account = self.party_account
 				d1.party_type = self.party_type
@@ -56,7 +56,7 @@ class PaymentTool(Document):
 				d1.reference_name = v.against_voucher_no
 				d1.is_advance = 'Yes' \
 					if v.against_voucher_type in ['Sales Order', 'Purchase Order'] else 'No'
-					
+
 				amount = flt(d1.debit_in_account_currency) - flt(d1.credit_in_account_currency)
 				if bank_account_currency == party_account_currency:
 					total_payment_amount += amount
@@ -65,27 +65,27 @@ class PaymentTool(Document):
 
 		d2 = jv.append("accounts")
 		if self.payment_account:
-			bank_account_currency, bank_account_type = frappe.db.get_value("Account", self.payment_account, 
+			bank_account_currency, bank_account_type = frappe.db.get_value("Account", self.payment_account,
 				["account_currency", "account_type"])
-				
+
 			d2.account = self.payment_account
 			d2.account_currency = bank_account_currency
 			d2.account_type = bank_account_type
-			d2.exchange_rate = get_exchange_rate(self.payment_account, bank_account_currency, self.company, 
-				debit=(abs(total_payment_amount) if total_payment_amount < 0 else 0), 
+			d2.exchange_rate = get_exchange_rate(self.payment_account, bank_account_currency, self.company,
+				debit=(abs(total_payment_amount) if total_payment_amount < 0 else 0),
 				credit=(total_payment_amount if total_payment_amount > 0 else 0))
 			d2.account_balance = get_balance_on(self.payment_account)
-		
+
 		amount_field_bank = 'debit_in_account_currency' if total_payment_amount < 0 \
 			else 'credit_in_account_currency'
-		
+
 		d2.set(amount_field_bank, abs(total_payment_amount))
-		
+
 		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
 		if party_account_currency != company_currency or \
 			(bank_account_currency and bank_account_currency != company_currency):
 				jv.multi_currency = 1
-			
+
 		jv.set_amounts_in_company_currency()
 		jv.set_total_debit_credit()
 
@@ -150,7 +150,7 @@ def get_orders_to_be_billed(party_type, party, party_account_currency, company_c
 	return order_list
 
 @frappe.whitelist()
-def get_against_voucher_amount(against_voucher_type, against_voucher_no, party_account, company):
+def get_against_voucher_details(against_voucher_type, against_voucher_no, party_account, company):
 	party_account_currency = get_account_currency(party_account)
 	company_currency = frappe.db.get_value("Company", company, "default_currency")
 	ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
