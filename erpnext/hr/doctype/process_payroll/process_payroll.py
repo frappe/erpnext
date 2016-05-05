@@ -127,7 +127,7 @@ class ProcessPayroll(Document):
 		submitted_ss = self.format_as_links(list(set(all_ss) - set(not_submitted_ss)))
 		if submitted_ss:
 			log = """
-				<b>Salary Slips Submitted %s:</b>
+				<b>Salary Slips Submitted:</b> <br><br>%s
 				""" % ('<br>'.join(submitted_ss))
 
 		if not_submitted_ss:
