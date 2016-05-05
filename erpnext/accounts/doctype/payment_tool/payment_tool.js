@@ -146,6 +146,10 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 					c.total_amount = d.invoice_amount;
 					c.outstanding_amount = d.outstanding_amount;
 
+					if (in_list(['Sales Invoice', 'Purchase Invoice'], d.voucher_type)){
+						c.due_date = d.due_date
+					}
+
 					if (frm.doc.set_payment_amount) {
 						c.payment_amount = d.outstanding_amount;
 					}
