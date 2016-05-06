@@ -53,17 +53,18 @@ def validate_returned_items(doc):
 
 	valid_items = frappe._dict()
 
-	select_fields = "item_code, sum(qty) as qty, rate" if doc.doctype=="Purchase Invoice" \
-		else "item_code, sum(qty) as qty, rate, serial_no, batch_no"
+	select_fields = "item_code, qty" if doc.doctype=="Purchase Invoice" \
+		else "item_code, qty, serial_no, batch_no"
 
-	for d in frappe.db.sql("""select {0} from `tab{1} Item` where parent = %s
-		group by item_code""".format(select_fields, doc.doctype), doc.return_against, as_dict=1):
-			valid_items.setdefault(d.item_code, d)
+	for d in frappe.db.sql("""select {0} from `tab{1} Item` where parent = %s"""
+		.format(select_fields, doc.doctype), doc.return_against, as_dict=1):
+			valid_items = get_ref_item_dict(valid_items, d)
+			
 
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
 		for d in frappe.db.sql("""select item_code, sum(qty) as qty, serial_no, batch_no from `tabPacked Item`
 			where parent = %s group by item_code""".format(doc.doctype), doc.return_against, as_dict=1):
-				valid_items.setdefault(d.item_code, d)
+				valid_items = get_ref_item_dict(valid_items, d)
 
 	already_returned_items = get_already_returned_items(doc)
 
@@ -86,7 +87,7 @@ def validate_returned_items(doc):
 				elif abs(d.qty) > max_return_qty:
 					frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
 						.format(d.idx, ref.qty, d.item_code), StockOverReturnError)
-				elif ref.batch_no and d.batch_no != ref.batch_no:
+				elif ref.batch_no and d.batch_no not in ref.batch_no:
 					frappe.throw(_("Row # {0}: Batch No must be same as {1} {2}")
 						.format(d.idx, doc.doctype, doc.return_against))
 				elif ref.serial_no:
@@ -94,9 +95,8 @@ def validate_returned_items(doc):
 						frappe.throw(_("Row # {0}: Serial No is mandatory").format(d.idx))
 					else:
 						serial_nos = get_serial_nos(d.serial_no)
-						ref_serial_nos = get_serial_nos(ref.serial_no)
 						for s in serial_nos:
-							if s not in ref_serial_nos:
+							if s not in ref.serial_no:
 								frappe.throw(_("Row # {0}: Serial No {1} does not match with {2} {3}")
 									.format(d.idx, s, doc.doctype, doc.return_against))
 
@@ -107,6 +107,25 @@ def validate_returned_items(doc):
 
 	if not items_returned:
 		frappe.throw(_("Atleast one item should be entered with negative quantity in return document"))
+		
+def get_ref_item_dict(valid_items, ref_item_row):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+	
+	valid_items.setdefault(ref_item_row.item_code, frappe._dict({
+		"qty": 0,
+		"serial_no": [],
+		"batch_no": []
+	}))
+	item_dict = valid_items[ref_item_row.item_code]
+	item_dict["qty"] += ref_item_row.qty
+	
+	if ref_item_row.get("serial_no"):
+		item_dict["serial_no"] += get_serial_nos(ref_item_row.serial_no)
+		
+	if ref_item_row.get("batch_no"):
+		item_dict["batch_no"].append(ref_item_row.batch_no)
+		
+	return valid_items
 
 def get_already_returned_items(doc):
 	return frappe._dict(frappe.db.sql("""

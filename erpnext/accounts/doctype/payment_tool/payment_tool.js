@@ -146,6 +146,10 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 					c.total_amount = d.invoice_amount;
 					c.outstanding_amount = d.outstanding_amount;
 
+					if (in_list(['Sales Invoice', 'Purchase Invoice'], d.voucher_type)){
+						c.due_date = d.due_date
+					}
+
 					if (frm.doc.set_payment_amount) {
 						c.payment_amount = d.outstanding_amount;
 					}
@@ -202,7 +206,7 @@ frappe.ui.form.on("Payment Tool Detail", "against_voucher_no", function(frm, cdt
 	}
 
 	frappe.call({
-		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_against_voucher_amount',
+		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_against_voucher_details',
 		args: {
 			"against_voucher_type": row.against_voucher_type,
 			"against_voucher_no": row.against_voucher_no,
