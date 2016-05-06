@@ -12,12 +12,6 @@
 	{% include "templates/includes/breadcrumbs.html" %}
 {% endblock %}
 
-{% block style %}
-<style>
-    {% include "templates/includes/order/order.css" %}
-</style>
-{% endblock %}
-
 {% block header_actions %}
 {% if doc.items %}
 <button class="btn btn-primary btn-sm"
@@ -35,8 +29,7 @@
         {{ doc.get_formatted("transaction_date") }}
     </div>
 </div>
-
-<div class="rfq-content">
+<div class="rfq-content" style="margin-top:15px">
 	<div id="order-container">
 			<div id="rfq-items">
 				<div class="row cart-item-header">

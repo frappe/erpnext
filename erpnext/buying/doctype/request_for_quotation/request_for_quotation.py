@@ -18,6 +18,7 @@ class RequestforQuotation(BuyingController):
 	def validate(self):
 		self.validate_duplicate_supplier()
 		self.validate_common()
+		self.update_email_id()
 
 	def validate_duplicate_supplier(self):
 		supplier_list = [d.supplier for d in self.suppliers]
@@ -28,6 +29,11 @@ class RequestforQuotation(BuyingController):
 		pc = frappe.get_doc('Purchase Common')
 		pc.validate_for_items(self)
 
+	def update_email_id(self):
+		for rfq_supplier in self.suppliers:
+			if not rfq_supplier.email_id:
+				rfq_supplier.email_id = frappe.db.get_value("Contact", rfq_supplier.contact, "email_id")
+
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
 
@@ -37,12 +43,14 @@ class RequestforQuotation(BuyingController):
 	def send_to_supplier(self):
 		link = get_url("/rfq/" + self.name)
 		for rfq_supplier in self.suppliers:
-			if rfq_supplier.email_id and rfq_supplier.send_email_to_supplier:
+			if rfq_supplier.email_id:
 
 				# make new user if required
 				update_password_link = self.create_supplier_user(rfq_supplier, link)
 
 				self.supplier_rfq_mail(rfq_supplier, update_password_link, link)
+			else:
+				frappe.throw(_("For supplier {0} email id is required to send email").format(rfq_supplier.supplier))
 
 	def create_supplier_user(self, rfq_supplier, link):
 		'''Create a new user for the supplier if not set in contact'''
