@@ -15,6 +15,7 @@ $(document).bind('toolbar_setup', function() {
 			frappe.urllib.get_base_url()+'/assets/erpnext/images/erp-icon.svg" />');
 
 	$('[data-link="docs"]').attr("href", "https://manual.erpnext.com")
+	$('[data-link="issues"]').attr("href", "https://github.com/frappe/erpnext/issues")
 });
 
 // doctypes created via tree
