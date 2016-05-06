@@ -394,7 +394,7 @@ class ProductionPlanningTool(Document):
 			total_qty = sum([flt(d[0]) for d in so_item_qty])
 			if total_qty > item_projected_qty.get(item, 0):
 				# shortage
-				if self.ignore_projected_qty:
+				if self.create_material_requests_for_all_required_qty:
 					# ignore projected qty
 					requested_qty = total_qty
 				else:
