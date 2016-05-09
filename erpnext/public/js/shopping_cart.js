@@ -48,8 +48,7 @@ $.extend(shopping_cart, {
 					shopping_cart.set_cart_count();	
 					if (r.message.shopping_cart_menu) {
 						$('.shopping-cart-menu').html(r.message.shopping_cart_menu);
-					}
-					
+					}					
 					if(opts.callback)
 						opts.callback(r);
 				}

@@ -70,7 +70,6 @@
   border-top: 1px solid #EBEFF2;
 }
 .transaction-list-item {
-  border-bottom: none;
   padding: 30px;
   margin: 0px -30px;
 }
@@ -166,7 +165,7 @@
   display: none;
 }
 .cart-dropdown-container {
-  width: 350px;
+  width: 320px;
   padding: 15px;
 }
 .cart-dropdown-container .item-price {
@@ -189,7 +188,7 @@
   display: none;
 }
 .cart-dropdown-container .checkout-btn {
-  margin: 15px;
+  padding-top: 25px;
 }
 .cart-dropdown-container .col-name-description {
   margin-bottom: 8px;

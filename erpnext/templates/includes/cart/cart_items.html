@@ -10,7 +10,6 @@
             <input class="form-control text-right cart-qty"
             value = "{{ d.get_formatted('qty') }}"
             data-item-code="{{ d.item_code }}"></span>    	
-			<span class="text-muted small remove-item" data-item-code="{{ d.item_code }}">{{_("Remove")}}</span>	
 	</div>
     <div class="col-sm-2 col-xs-3 text-right col-amount">
         {{ d.get_formatted("amount") }}
@@ -20,13 +19,10 @@
 </div>
 
 <div class="row cart-items cart-dropdown">
-    <div class="col-sm-7 col-xs-6 col-name-description">
+    <div class="col-sm-8 col-xs-8 col-name-description">
         {{ item_name_and_description(d) }}
     </div>
-    <div class="col-sm-2 col-xs-2 text-right col-qty">
-		{{ d.get_formatted('qty') }}
-	</div>
-    <div class="col-sm-3 col-xs-2 text-right col-amount">
+    <div class="col-sm-4 col-xs-4 text-right col-amount">
         {{ d.get_formatted("amount") }}
 
     </div>

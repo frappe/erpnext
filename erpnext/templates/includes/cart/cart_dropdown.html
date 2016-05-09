@@ -2,13 +2,10 @@
 	<div id="cart-error" class="alert alert-danger"
 	style="display: none;"></div>
 	<div class="row cart-items-dropdown cart-item-header text-muted">
-		<div class="col-sm-7 col-xs-6 h6 text-uppercase">
+		<div class="col-sm-6 col-xs-6 h6 text-uppercase">
 		{{ _("Item") }}
 		</div>
-		<div class="col-sm-2 col-xs-2 text-right h6 text-uppercase">
-		{{ _("Qty") }}
-		</div>
-		<div class="col-sm-3 col-xs-2 text-right h6 text-uppercase">
+		<div class="col-sm-6 col-xs-6 text-right h6 text-uppercase">
 		{{ _("Price") }}
 		</div>
 	</div>
@@ -17,8 +14,8 @@
 	<div class="cart-items">
 		{% include "templates/includes/cart/cart_items.html" %}
 	</div>
-	<div class="text-center checkout-btn">
-	<p class="text-center"><a href="/cart" class="btn btn-primary">{{ _("Checkout") }}</a></p>
+	<div class="checkout-btn">
+	<a href="/cart" class="btn btn-block btn-primary">{{ _("Checkout") }}</a>
 	</div>
 	{% else %}
 	<p>{{ _("Cart is Empty") }}</p>
