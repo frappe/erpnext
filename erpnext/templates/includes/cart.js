@@ -63,23 +63,6 @@ $.extend(shopping_cart, {
 				btn: this,
 				callback: function(r) {
 					frappe.unfreeze();
-					if(!r.exc) {
-						$(".cart-items").html(r.message.items);
-						$(".cart-tax-items").html(r.message.taxes);
-						$(".cart-icon").hide();
-					}
-				},
-			});
-		});
-	},
-	
-	bind_remove_item: function() {
-		$(".cart-items").on("click", ".remove-item", function() {
-			var item_code = $(this).attr("data-item-code");
-			shopping_cart.update_cart({
-				item_code: item_code,
-				qty: "0",
-				callback: function(r) {
 					location.reload();
 					if(!r.exc) {
 						$(".cart-items").html(r.message.items);
@@ -90,7 +73,7 @@ $.extend(shopping_cart, {
 			});
 		});
 	},
-
+	
 	render_tax_row: function($cart_taxes, doc, shipping_rules) {
 		var shipping_selector;
 		if(shipping_rules) {
