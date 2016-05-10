@@ -68,6 +68,10 @@ $.extend(shopping_cart, {
 
 		if(parseInt(cart_count) === 0 || cart_count === undefined) {
 			$cart.css("display", "none");
+			$(".cart-items").html('Cart is Empty');
+			$(".cart-tax-items").hide();
+			$(".btn-place-order").hide();
+			$(".cart-addresses").hide();
 		}
 		else {
 			$cart.css("display", "inline");

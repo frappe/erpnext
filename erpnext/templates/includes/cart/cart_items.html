@@ -1,7 +1,7 @@
 {% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description %}
 
 {% for d in doc.items %}
-<div class="row cart-items checkout">
+<div class="row checkout">
     <div class="col-sm-8 col-xs-6 col-name-description">
         {{ item_name_and_description(d) }}
     </div>
@@ -18,7 +18,7 @@
     </div>
 </div>
 
-<div class="row cart-items cart-dropdown">
+<div class="row cart-dropdown">
     <div class="col-sm-8 col-xs-8 col-name-description">
         {{ item_name_and_description(d) }}
     </div>
