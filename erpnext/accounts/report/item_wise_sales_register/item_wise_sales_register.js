@@ -28,6 +28,12 @@ frappe.query_reports["Item-wise Sales Register"] = frappe.query_reports["Sales R
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company")
+		},
+		{
+			"fieldname":"mode_of_payment",
+			"label": __("Mode of Payment"),
+			"fieldtype": "Link",
+			"options": "Mode of Payment"
 		}
 	]
 }

@@ -32,7 +32,7 @@ def execute(filters=None):
 			from `tabDelivery Note Item` where docstatus=1 and so_detail=%s""", d.so_detail))
 
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.customer, d.customer_name,
-			d.customer_group, d.debit_to, d.territory, d.project, d.company, d.sales_order,
+			d.customer_group, d.debit_to, d.mode_of_payment, d.territory, d.project, d.company, d.sales_order,
 			delivery_note, d.income_account, d.qty, d.base_net_rate, d.base_net_amount]
 
 		for tax in tax_accounts:
@@ -51,7 +51,8 @@ def get_columns():
 		_("Item Group") + ":Link/Item Group:100", _("Invoice") + ":Link/Sales Invoice:120",
 		_("Posting Date") + ":Date:80", _("Customer") + ":Link/Customer:120",
 		_("Customer Name") + "::120", _("Customer Group") + ":Link/Customer Group:120",
-		_("Receivable Account") + ":Link/Account:120", _("Territory") + ":Link/Territory:80",
+		_("Receivable Account") + ":Link/Account:120", 
+		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Territory") + ":Link/Territory:80", 
 		_("Project") + ":Link/Project:80", _("Company") + ":Link/Company:100",
 		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
 		_("Income Account") + ":Link/Account:140", _("Qty") + ":Float:120",
@@ -65,7 +66,8 @@ def get_conditions(filters):
 		("customer", " and si.customer = %(customer)s"),
 		("item_code", " and si_item.item_code = %(item_code)s"),
 		("from_date", " and si.posting_date>=%(from_date)s"),
-		("to_date", " and si.posting_date<=%(to_date)s")):
+		("to_date", " and si.posting_date<=%(to_date)s"),
+		("mode_of_payment", " and ifnull(mode_of_payment, '') = %(mode_of_payment)s")):
 			if filters.get(opts[0]):
 				conditions += opts[1]
 
@@ -80,7 +82,7 @@ def get_items(filters):
 			si_item.item_code, si_item.item_name, si_item.item_group, si_item.sales_order, 
 			si_item.delivery_note, si_item.income_account, si_item.qty, 
 			si_item.base_net_rate, si_item.base_net_amount, si.customer_name,
-			si.customer_group, si_item.so_detail
+			si.customer_group, si_item.so_detail, si.mode_of_payment
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 %s
 		order by si.posting_date desc, si_item.item_code desc""" % conditions, filters, as_dict=1)
