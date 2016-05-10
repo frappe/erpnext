@@ -17,17 +17,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			this.frm.set_df_property("debit_to", "print_hide", 0);
 		}
 
-		// toggle to pos view if is_pos is 1 in user_defaults
-		if ((is_null(this.frm.doc.is_pos) && cint(frappe.defaults.get_user_default("is_pos"))===1) || this.frm.doc.is_pos) {
-			if(this.frm.doc.__islocal && !this.frm.doc.amended_from && !this.frm.doc.customer) {
-				this.frm.set_value("is_pos", 1);
-				this.is_pos(function() {
-					if (cint(frappe.defaults.get_user_defaults("fs_pos_view"))===1)
-						erpnext.pos.toggle(me.frm, true);
-				});
-			}
-		}
-
 		erpnext.queries.setup_queries(this.frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(me.frm.doc);
 		});
@@ -149,39 +138,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.get_terms();
 	},
 
-	is_pos: function(doc, dt, dn, callback_fn) {
-		cur_frm.cscript.hide_fields(this.frm.doc);
-		if(cur_frm.doc.__missing_values_set) return;
-		if(cint(this.frm.doc.is_pos)) {
-			if(!this.frm.doc.company) {
-				this.frm.set_value("is_pos", 0);
-				msgprint(__("Please specify Company to proceed"));
-			} else {
-				var me = this;
-				return this.frm.call({
-					doc: me.frm.doc,
-					method: "set_missing_values",
-					callback: function(r) {
-						if(!r.exc) {
-							if(r.message && r.message.print_format) {
-								cur_frm.pos_print_format = r.message.print_format;
-							}
-							cur_frm.doc.__missing_values_set = true;
-							me.frm.script_manager.trigger("update_stock");
-							frappe.model.set_default_values(me.frm.doc);
-							me.set_dynamic_labels();
-							me.calculate_taxes_and_totals();
-							if(callback_fn) callback_fn();
-							frappe.after_ajax(function() {
-								cur_frm.doc.__missing_values_set = false;
-							})
-						}
-					}
-				});
-			}
-		}
-	},
-
 	customer: function() {
 		var me = this;
 		if(this.frm.updating_party_details) return;
@@ -242,11 +198,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	write_off_amount: function() {
 		this.set_in_company_currency(this.frm.doc, ["write_off_amount"]);
-		this.write_off_outstanding_amount_automatically();
-	},
-
-	paid_amount: function() {
-		this.set_in_company_currency(this.frm.doc, ["paid_amount"]);
 		this.write_off_outstanding_amount_automatically();
 	},
 

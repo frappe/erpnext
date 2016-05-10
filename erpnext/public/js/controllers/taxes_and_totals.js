@@ -1,13 +1,30 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
+erpnext.taxes_and_totals = erpnext.payments.extend({
+	apply_pricing_rule_on_item: function(item){
+		if(!item.margin_type){
+			item.margin_rate_or_amount = 0.0;
+		}
+
+		if(item.margin_type == "Percentage"){
+			item.total_margin = item.price_list_rate + item.price_list_rate * ( item.margin_rate_or_amount / 100);
+		}else{
+			item.total_margin = item.price_list_rate + item.margin_rate_or_amount;
+		}
+
+		item.rate = flt(item.total_margin , 2);
+
+		if(item.discount_percentage){
+			discount_value = flt(item.total_margin) * flt(item.discount_percentage) / 100;
+			item.rate = flt((item.total_margin) - (discount_value), precision('rate'));
+		}
+	},
+
 	calculate_taxes_and_totals: function(update_paid_amount) {
 		this.discount_amount_applied = false;
 		this._calculate_taxes_and_totals();
-
-		if (frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount"))
-			this.apply_discount_amount();
+		this.calculate_discount_amount();
 
 		// Advance calculation applicable to Sales /Purchase Invoice
 		if(in_list(["Sales Invoice", "Purchase Invoice"], this.frm.doc.doctype)
@@ -22,6 +39,11 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		}
 
 		this.frm.refresh_fields();
+	},
+
+	calculate_discount_amount: function(){
+		if (frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount"))
+			this.apply_discount_amount();
 	},
 
 	_calculate_taxes_and_totals: function() {
@@ -98,7 +120,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 
 			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0 });
 
-			if (!this.discount_amount_applied) {
+			if (!this.discount_amount_applied && cur_frm) {
 				cur_frm.cscript.validate_taxes_and_charges(tax.doctype, tax.name);
 				me.validate_inclusive_tax(tax);
 			}
@@ -433,13 +455,14 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 	apply_discount_amount: function() {
 		var me = this;
 		var distributed_amount = 0.0;
+		this.frm.doc.base_discount_amount = 0.0;
 
 		if (this.frm.doc.discount_amount) {
 			if(!this.frm.doc.apply_discount_on)
 				frappe.throw(__("Please select Apply Discount On"));
-
-			this.frm.set_value("base_discount_amount",
-				flt(this.frm.doc.discount_amount * this.frm.doc.conversion_rate, precision("base_discount_amount")))
+			
+			this.frm.doc.base_discount_amount = flt(this.frm.doc.discount_amount * this.frm.doc.conversion_rate, 
+				precision("base_discount_amount"));
 
 			var total_for_discount_amount = this.get_total_for_discount_amount();
 			// calculate item amount after Discount Amount
@@ -455,8 +478,6 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				this.discount_amount_applied = true;
 				this._calculate_taxes_and_totals();
 			}
-		} else {
-			this.frm.set_value("base_discount_amount", 0);
 		}
 	},
 
@@ -524,18 +545,59 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				this.frm.doc.paid_amount = 0
 			}
 			this.set_in_company_currency(this.frm.doc, ["paid_amount"]);
-			this.frm.refresh_field("paid_amount");
-			this.frm.refresh_field("base_paid_amount");
+
+			if(this.frm.refresh_field){
+				this.frm.refresh_field("paid_amount");
+				this.frm.refresh_field("base_paid_amount");
+			}
+			
+			if(this.frm.doc.doctype == "Sales Invoice"){
+				this.calculate_paid_amount()
+			}
+			
+			var outstanding_amount = 0.0
 
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
 
-			var outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount),
-				precision("outstanding_amount"));
+			if (total_amount_to_pay > paid_amount){
+				outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount),
+					precision("outstanding_amount"));
+			}
 
 		} else if(this.frm.doc.doctype == "Purchase Invoice") {
 			var outstanding_amount = flt(total_amount_to_pay, precision("outstanding_amount"));
 		}
-		this.frm.set_value("outstanding_amount", outstanding_amount);
-	}
+
+		this.frm.doc.outstanding_amount = outstanding_amount;
+		this.calculate_change_amount()
+	},
+	
+	calculate_paid_amount: function(){
+		var me = this;
+		var paid_amount = base_paid_amount = 0.0;
+		$.each(this.frm.doc['payments'] || [], function(index, data){
+			if(data.amount > 0){
+				data.base_amount = flt(data.amount * me.frm.doc.conversion_rate);
+				paid_amount += data.amount;
+				base_paid_amount += data.base_amount;	
+			}
+		})
+		
+		this.frm.doc.paid_amount = flt(paid_amount, precision("paid_amount"));
+		this.frm.doc.base_paid_amount = flt(base_paid_amount, precision("base_paid_amount"));
+	},
+	
+	calculate_change_amount: function(){
+		var change_amount = 0.0;
+		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
+			change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total, 
+				precision("change_amount"))
+		}
+		
+		this.frm.doc.change_amount = flt(change_amount, 
+			precision("change_amount"))
+		this.frm.doc.base_change_amount = flt(change_amount * this.frm.doc.conversion_rate, 
+			precision("base_change_amount"))
+	},
 })

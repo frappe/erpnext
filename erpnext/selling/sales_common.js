@@ -122,7 +122,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate
 		if(in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]), cdt)
-			this.calculate_revised_margin_and_rate(item, doc,cdt, cdn);
+			this.apply_pricing_rule_on_item(item);
 		else
 			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
 				precision("rate", item));
@@ -320,7 +320,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	margin_rate_or_amount: function(doc, cdt, cdn) {
 		// calculated the revised total margin and rate on margin rate changes
 		item = locals[cdt][cdn];
-		this.calculate_revised_margin_and_rate(item)
+		this.apply_pricing_rule_on_item(item)
 		this.calculate_taxes_and_totals();
 		cur_frm.refresh_fields();
 	},
@@ -328,26 +328,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	margin_type: function(doc, cdt, cdn){
 		// calculate the revised total margin and rate on margin type changes
 		item = locals[cdt][cdn];
-		this.calculate_revised_margin_and_rate(item, doc,cdt, cdn)
+		this.apply_pricing_rule_on_item(item, doc,cdt, cdn)
 		this.calculate_taxes_and_totals();
 		cur_frm.refresh_fields();
-	},
-
-	calculate_revised_margin_and_rate: function(item){
-		if(in_list(["Percentage", "Amount"], item.margin_type)){
-			if(item.margin_type == "Percentage")
-				item.total_margin = item.price_list_rate + item.price_list_rate * ( item.margin_rate_or_amount / 100);
-			else
-				item.total_margin = item.price_list_rate + item.margin_rate_or_amount;
-			item.rate = flt(item.total_margin * (1 - item.discount_percentage / 100.0),
-				precision("rate", item));
-		}
-		else{
-			item.rate_or_amount = 0.0;
-			item.total_margin = 0.0;
-			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-				precision("rate", item));
-		}
 	}
 });
 

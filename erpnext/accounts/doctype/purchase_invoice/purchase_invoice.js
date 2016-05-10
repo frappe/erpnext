@@ -129,7 +129,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 	paid_amount: function() {
 		this.set_in_company_currency(this.frm.doc, ["paid_amount"]);
-		this.write_off_outstanding_amount();
+		this.write_off_amount();
 		this.frm.refresh_fields();
 	},
 

@@ -124,3 +124,49 @@
 .dashboard-list-item:last-child {
   border-bottom: none;
 }
+
+.payment-toolbar {
+	margin-left: 35px;
+}
+
+.payment-mode {
+	cursor: pointer;
+	font-family: sans-serif;
+	font-size: 15px;
+}
+
+.pos-payment-row .col-xs-6 {
+	padding :10px;
+}
+
+.pos-payment-row {
+	border-bottom:1px solid #d1d8dd;
+    margin: 2px 0px 5px 0px;
+}
+
+.pos-payment-row:hover {
+	background-color: #FCFFDD;
+	cursor: pointer;
+}
+
+.pos-keyboard-key, .delete-btn {
+	border: 1px solid #d1d8dd;
+	height:85px;
+	width:85px;
+	margin:10px 10px;
+	font-size:24px;
+	font-weight:200;
+}
+
+.amount-label {
+	font-size: 16px;
+}
+
+.selected-payment-mode {
+	background-color: #FCFFDD;
+	cursor: pointer;
+}
+
+.pos-invoice-list {
+	padding: 15px 10px;
+}

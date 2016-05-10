@@ -64,8 +64,8 @@ class SalesInvoice(SellingController):
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
 		
-		if cint(self.is_pos):
-			self.validate_pos()
+		# if cint(self.is_pos):
+			# self.validate_pos()
 
 		if cint(self.update_stock):
 			self.validate_dropship_item()
@@ -82,6 +82,18 @@ class SalesInvoice(SellingController):
 		self.validate_time_logs_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		self.update_packing_list()
+
+	def before_save(self):
+		set_account_for_mode_of_payment(self)
+		
+	def update_change_amount(self):
+		self.base_paid_amount = 0.0
+		if self.paid_amount:
+			self.base_paid_amount = flt(self.paid_amount * self.conversion_rate, self.precision("base_paid_amount"))
+			self.change_amount = self.base_change_amount = 0.0
+			if self.paid_amount > self.grand_total:
+				self.change_amount = flt(self.paid_amount - self.grand_total, self.precision("change_amount"))
+				self.base_change_amount = flt(self.change_amount * self.conversion_rate, self.precision("base_change_amount"))
 
 	def on_submit(self):			
 		if not self.recurring_id:
@@ -588,8 +600,7 @@ class SalesInvoice(SellingController):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def make_pos_gl_entries(self, gl_entries):
-		if cint(self.is_pos) and self.cash_bank_account and self.paid_amount:
-			bank_account_currency = get_account_currency(self.cash_bank_account)
+		if cint(self.is_pos) and self.paid_amount:
 			# POS, make payment entries
 			gl_entries.append(
 				self.get_gl_dict({
@@ -597,22 +608,43 @@ class SalesInvoice(SellingController):
 					"party_type": "Customer",
 					"party": self.customer,
 					"against": self.cash_bank_account,
-					"credit": self.base_paid_amount,
-					"credit_in_account_currency": self.base_paid_amount \
-						if self.party_account_currency==self.company_currency else self.paid_amount,
+					"credit": flt(self.base_paid_amount - self.base_change_amount),
+					"credit_in_account_currency": flt(self.base_paid_amount - self.base_change_amount) \
+						if self.party_account_currency==self.company_currency else flt(self.paid_amount - self.change_amount),
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": self.cash_bank_account,
-					"against": self.customer,
-					"debit": self.base_paid_amount,
-					"debit_in_account_currency": self.base_paid_amount \
-						if bank_account_currency==self.company_currency else self.paid_amount
-				}, bank_account_currency)
-			)
+
+			cash_account = ''
+			for payment_mode in self.payments:
+				if payment_mode.type == 'Cash':
+					cash_account = payment_mode.account
+
+				if payment_mode.base_amount > 0:
+					payment_mode_account_currency = get_account_currency(payment_mode.account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": payment_mode.account,
+							"against": self.customer,
+							"debit": payment_mode.base_amount,
+							"debit_in_account_currency": payment_mode.base_amount \
+								if payment_mode_account_currency==self.company_currency else payment_mode.amount
+						}, payment_mode_account_currency)
+					)
+
+			if self.change_amount:
+				cash_account = cash_account or self.payments[0].account
+				cash_account_currency = get_account_currency(cash_account)
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": cash_account,
+						"against": self.customer,
+						"credit": self.base_change_amount,
+						"credit_in_account_currency": self.base_change_amount \
+							if payment_mode_account_currency==self.company_currency else self.change_amount
+					}, payment_mode_account_currency)
+				)
 
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
@@ -680,7 +712,7 @@ def get_bank_cash_account(mode_of_payment, company):
 	account = frappe.db.get_value("Mode of Payment Account",
 		{"parent": mode_of_payment, "company": company}, "default_account")
 	if not account:
-		frappe.msgprint(_("Please set default Cash or Bank account in Mode of Payment {0}").format(mode_of_payment))
+		frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}").format(mode_of_payment))
 	return {
 		"account": account
 	}
@@ -738,3 +770,8 @@ def make_delivery_note(source_name, target_doc=None):
 def make_sales_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Sales Invoice", source_name, target_doc)
+
+def set_account_for_mode_of_payment(self):
+	for data in self.payments:
+		if not data.account:
+			data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")

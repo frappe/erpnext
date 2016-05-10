@@ -165,7 +165,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		erpnext.hide_company();
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
-		erpnext.pos.make_pos_btn(this.frm);
+		// erpnext.pos.make_pos_btn(this.frm);
 		this.setup_sms();
 		this.make_show_payments_btn();
 	},
@@ -550,7 +550,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		setup_field_label_map(["base_total", "base_net_total", "base_total_taxes_and_charges",
 			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "total_amount_to_pay",
-			"base_paid_amount", "base_write_off_amount"
+			"base_paid_amount", "base_write_off_amount", "base_change_amount"
 		], company_currency);
 
 		setup_field_label_map(["total", "net_total", "total_taxes_and_charges", "discount_amount",
