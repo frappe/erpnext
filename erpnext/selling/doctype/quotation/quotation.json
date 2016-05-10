@@ -3,6 +3,7 @@
  "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "naming_series:", 
+ "beta": 0, 
  "creation": "2013-05-24 19:29:08", 
  "custom": 0, 
  "docstatus": 0, 
@@ -922,7 +923,7 @@
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "report_hide": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0, 
@@ -2131,7 +2132,7 @@
  "istable": 0, 
  "max_attachments": 1, 
  "menu_index": 0, 
- "modified": "2016-04-14 12:28:39.092593", 
+ "modified": "2016-05-10 12:16:13.978635", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 
@@ -2302,6 +2303,7 @@
    "write": 0
   }
  ], 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 1, 
  "search_fields": "status,transaction_date,customer,lead,order_type", 

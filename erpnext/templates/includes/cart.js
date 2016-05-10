@@ -16,7 +16,6 @@ $.extend(shopping_cart, {
 		shopping_cart.bind_address_select();
 		shopping_cart.bind_place_order();
 		shopping_cart.bind_change_qty();
-		shopping_cart.bind_remove_item();
 
 	},
 
@@ -63,7 +62,6 @@ $.extend(shopping_cart, {
 				btn: this,
 				callback: function(r) {
 					frappe.unfreeze();
-					location.reload();
 					if(!r.exc) {
 						$(".cart-items").html(r.message.items);
 						$(".cart-tax-items").html(r.message.taxes);
