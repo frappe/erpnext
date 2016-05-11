@@ -361,8 +361,13 @@ class PurchaseReceipt(BuyingController):
 						d.precision("base_net_amount"))
 						
 					if divisional_loss:
+						if self.is_return or flt(d.item_tax_amount):
+							loss_account = expenses_included_in_valuation
+						else:
+							loss_account = stock_rbnb
+							
 						gl_entries.append(self.get_gl_dict({
-							"account": expenses_included_in_valuation,
+							"account": loss_account,
 							"against": warehouse_account[d.warehouse]["name"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
