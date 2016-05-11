@@ -131,8 +131,7 @@ def get_data():
 			"icon": "octicon octicon-credit-card",
 			"type": "page",
 			"link": "pos",
-			"label": _("POS"),
-			"hidden": 1
+			"label": _("POS")
 		},
 		{
 			"module_name": "Projects",

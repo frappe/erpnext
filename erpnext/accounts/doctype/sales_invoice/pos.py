@@ -14,14 +14,16 @@ def get_pos_data():
 	doc = frappe.new_doc('Sales Invoice')
 	doc.update_stock = 1;
 	doc.is_pos = 1;
-	pos_profile = get_pos_profile(doc.company)
+	pos_profile = get_pos_profile(doc.company) or {}
 
-	if not pos_profile:
-		frappe.throw(_("Create pos profile first"))
+	if pos_profile.get('name'):
+		pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
+	else:
+		frappe.msgprint(_("Warning Message: Create pos profile"))
 
-	pos_profile = frappe.get_doc('POS Profile', pos_profile.name)	
 	update_pos_profile_data(doc, pos_profile)
 	update_multi_mode_option(doc, pos_profile)
+	print_template = frappe.db.get_value('Print Format', pos_profile.get('print_format'), 'html') or ''
 
 	return {
 		'doc': doc,
@@ -29,7 +31,7 @@ def get_pos_data():
 		'customers': get_customers(pos_profile),
 		'pricing_rules': get_pricing_rules(doc),
 		'mode_of_payment': get_mode_of_payment(doc),
-		'print_template': frappe.db.get_value('Print Format', pos_profile.print_format, 'html') or '',
+		'print_template': print_template,
 		'meta': {
 			'invoice': frappe.get_meta('Sales Invoice'),
 			'items': frappe.get_meta('Sales Invoice Item'),
@@ -40,21 +42,21 @@ def get_pos_data():
 def update_pos_profile_data(doc, pos_profile):
 	company_data = frappe.db.get_value('Company', doc.company, '*', as_dict=1)
 
-	doc.taxes_and_charges = pos_profile.taxes_and_charges
+	doc.taxes_and_charges = pos_profile.get('taxes_and_charges')
 	if doc.taxes_and_charges:
 		update_tax_table(doc)
 
-	doc.currency = pos_profile.currency or company_data.default_currency
+	doc.currency = pos_profile.get('currency') or company_data.default_currency
 	doc.conversion_rate = 1.0 
 	if doc.currency != company_data.default_currency:
 		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency)
-	doc.selling_price_list = pos_profile.selling_price_list or frappe.db.get_value('Selling Settings', None, 'selling_price_list')
-	doc.naming_series = pos_profile.naming_series or 'SINV-'
-	doc.letter_head = pos_profile.letter_head or company_data.default_letter_head
-	doc.ignore_pricing_rule = pos_profile.ignore_pricing_rule
-	doc.apply_discount_on = pos_profile.apply_discount_on
-	doc.customer_group = pos_profile.customer_group or get_root('Customer Group')
-	doc.territory = pos_profile.territory or get_root('Territory')
+	doc.selling_price_list = pos_profile.get('selling_price_list') or frappe.db.get_value('Selling Settings', None, 'selling_price_list')
+	doc.naming_series = pos_profile.get('naming_series') or 'SINV-'
+	doc.letter_head = pos_profile.get('letter_head') or company_data.default_letter_head
+	doc.ignore_pricing_rule = pos_profile.get('ignore_pricing_rule') or 0
+	doc.apply_discount_on = pos_profile.get('apply_discount_on') or ''
+	doc.customer_group = pos_profile.get('customer_group') or get_root('Customer Group')
+	doc.territory = pos_profile.get('territory') or get_root('Territory')
 	
 def get_root(table):
 	root = frappe.db.sql(""" select name from `tab%(table)s` having 
@@ -64,6 +66,9 @@ def get_root(table):
 
 def update_multi_mode_option(doc, pos_profile):
 	from frappe.model import default_fields
+	
+	if not pos_profile:
+		return
 
 	for payment_mode in pos_profile.payments:
 		payment_mode = payment_mode.as_dict()
@@ -89,10 +94,10 @@ def get_items(doc, pos_profile):
 
 		item.price_list_rate = frappe.db.get_value('Item Price', {'item_code': item.name,
 									'price_list': doc.selling_price_list}, 'price_list_rate') or 0
-		item.default_warehouse = pos_profile.warehouse or item.default_warehouse or None
-		item.expense_account = pos_profile.expense_account or item.expense_account
-		item.income_account = pos_profile.income_account or item_doc.income_account
-		item.cost_center = pos_profile.cost_center or item_doc.selling_cost_center
+		item.default_warehouse = pos_profile.get('warehouse') or item.default_warehouse or None
+		item.expense_account = pos_profile.get('expense_account') or item.expense_account
+		item.income_account = pos_profile.get('income_account') or item_doc.income_account
+		item.cost_center = pos_profile.get('cost_center') or item_doc.selling_cost_center
 		item.actual_qty = frappe.db.get_value('Bin', {'item_code': item.name,
 								'warehouse': item.default_warehouse}, 'actual_qty') or 0
 		item.serial_nos = frappe.db.sql_list("""select name from `tabSerial No` where warehouse= %(warehouse)s 
@@ -103,7 +108,7 @@ def get_items(doc, pos_profile):
 
 def get_customers(pos_profile):
 	filters = {'disabled': 0}
-	if pos_profile.customer:
+	if pos_profile.get('customer'):
 		filters.update({'name': pos_profile.customer})
 
 	return frappe.get_all("Customer", fields=["*"], filters = filters)
@@ -133,13 +138,13 @@ def make_invoice(doc_list):
 			si_doc = frappe.new_doc('Sales Invoice')
 			si_doc.offline_pos_name = name
 			si_doc.update(doc)
-			submit_invoice(si_doc)
+			submit_invoice(si_doc, name)
 			name_list.append(name)
 
 	return name_list
 
 def validate_customer(doc):
-	if not frappe.db.get_value('Customer', doc.get('customer')):
+	if not frappe.db.exists('Customer', doc.get('customer')):
 		customer_doc = frappe.new_doc('Customer')
 		customer_doc.customer_name = doc.get('customer')
 		customer_doc.customer_type = 'Company'
@@ -165,20 +170,21 @@ def validate_item(doc):
 			item_doc.save(ignore_permissions=True)
 			frappe.db.commit()
 
-def submit_invoice(si_doc):
+def submit_invoice(si_doc, name):
 	try:
 		si_doc.insert()
 		si_doc.submit()
 	except Exception, e:
 		if frappe.message_log: frappe.message_log.pop()
 		frappe.db.rollback()
-		save_invoice(e, si_doc)
+		save_invoice(e, si_doc, name)
 
-def save_invoice(e, si_doc):
-	si_doc.docstatus = 0
-	si_doc.name = ''
-	si_doc.save(ignore_permissions=True)
-	make_scheduler_log(e, si_doc.name)
+def save_invoice(e, si_doc, name):
+	if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name, 'docstatus': 1}):
+		si_doc.docstatus = 0
+		si_doc.name = ''
+		si_doc.save(ignore_permissions=True)
+		make_scheduler_log(e, si_doc.name)
 
 def make_scheduler_log(e, sales_invoice):
 	scheduler_log = frappe.new_doc('Scheduler Log')

@@ -3,11 +3,11 @@
 
 frappe.ui.form.on("POS Profile", "onload", function(frm) {
 	frm.set_query("selling_price_list", function() {
-		return { filter: { selling: 1 } };
+		return { filters: { selling: 1 } };
 	});
 
 	frm.set_query("print_format", function() {
-		return { filter: { doc_type: "Sales Invoice" } };
+		return { filters: { doc_type: "Sales Invoice", print_format_type: "Js"} };
 	});
 
 	erpnext.queries.setup_queries(frm, "Warehouse", function() {
