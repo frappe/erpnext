@@ -330,19 +330,23 @@ class BuyingController(StockController):
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
 				if pr_qty:
-					val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
-					rate = flt(d.valuation_rate, val_rate_db_precision)
 					sle = self.get_sl_entries(d, {
 						"actual_qty": flt(pr_qty),
 						"serial_no": cstr(d.serial_no).strip()
 					})
 					if self.is_return:
+						original_incoming_rate = frappe.db.get_value("Stock Ledger Entry", 
+							{"voucher_type": "Purchase Receipt", "voucher_no": self.return_against, 
+							"item_code": d.item_code}, "incoming_rate")
+							
 						sle.update({
-							"outgoing_rate": rate
+							"outgoing_rate": original_incoming_rate
 						})
 					else:
+						val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
+						incoming_rate = flt(d.valuation_rate, val_rate_db_precision)
 						sle.update({
-							"incoming_rate": rate
+							"incoming_rate": incoming_rate
 						})
 					sl_entries.append(sle)
 

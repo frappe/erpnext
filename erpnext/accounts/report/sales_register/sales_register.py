@@ -33,7 +33,7 @@ def execute(filters=None):
 		row = [inv.name, inv.posting_date, inv.customer, inv.customer_name,
 		customer_map.get(inv.customer, {}).get("customer_group"), 
 		customer_map.get(inv.customer, {}).get("territory"),
-		inv.debit_to, inv.project, inv.remarks, 
+		inv.debit_to, inv.mode_of_payment, inv.project, inv.remarks, 
 		", ".join(sales_order), ", ".join(delivery_note), company_currency]
 
 		# map income values
@@ -65,9 +65,11 @@ def execute(filters=None):
 def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
-		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80", _("Customer Id") + "::120",
-		_("Customer Name") + "::120", _("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80",
-		_("Receivable Account") + ":Link/Account:120", _("Project") +":Link/Project:80", _("Remarks") + "::150",
+		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80", 
+		_("Customer Id") + "::120", _("Customer Name") + "::120", 
+		_("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80", 
+		_("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + ":Link/Mode of Payment:80", 
+		_("Project") +":Link/Project:80", _("Remarks") + "::150", 
 		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
 		{
 			"fieldname": "currency",
@@ -110,13 +112,15 @@ def get_conditions(filters):
 
 	if filters.get("from_date"): conditions += " and posting_date >= %(from_date)s"
 	if filters.get("to_date"): conditions += " and posting_date <= %(to_date)s"
+	
+	if filters.get("mode_of_payment"): conditions += " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"
 
 	return conditions
 
 def get_invoices(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, posting_date, debit_to, project, customer,
-		customer_name, remarks, base_net_total, base_grand_total, base_rounded_total, outstanding_amount
+	return frappe.db.sql("""select name, posting_date, debit_to, project, customer, customer_name, remarks, 
+		base_net_total, base_grand_total, base_rounded_total, outstanding_amount, mode_of_payment
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date desc, name desc""" %
 		conditions, filters, as_dict=1)

@@ -189,12 +189,9 @@ class PurchaseReceipt(BuyingController):
 		for d in self.get("items"):
 			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
 				if warehouse_account.get(d.warehouse):
-
-					val_rate_db_precision = 6 if cint(d.precision("valuation_rate")) <= 6 else 9
-
-					# warehouse account
-					stock_value_diff = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty)
-						* flt(d.conversion_factor),	d.precision("base_net_amount"))
+					stock_value_diff = frappe.db.get_value("Stock Ledger Entry", 
+						{"voucher_type": "Purchase Receipt", "voucher_no": self.name, 
+						"voucher_detail_no": d.name}, "stock_value_difference")
 
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse]["name"],
@@ -239,14 +236,20 @@ class PurchaseReceipt(BuyingController):
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
 
 					# divisional loss adjustment
-					distributed_amount = flt(flt(d.base_net_amount, d.precision("base_net_amount"))) + \
+					valuation_amount_as_per_doc = flt(d.base_net_amount, d.precision("base_net_amount")) + \
 						flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost) + flt(d.item_tax_amount)
 
-					divisional_loss = flt(distributed_amount - stock_value_diff, 
+					divisional_loss = flt(valuation_amount_as_per_doc - stock_value_diff, 
 						d.precision("base_net_amount"))
+						
 					if divisional_loss:
+						if self.is_return or flt(d.item_tax_amount):
+							loss_account = expenses_included_in_valuation
+						else:
+							loss_account = stock_rbnb
+							
 						gl_entries.append(self.get_gl_dict({
-							"account": stock_rbnb,
+							"account": loss_account,
 							"against": warehouse_account[d.warehouse]["name"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
