@@ -21,7 +21,8 @@ domains = {
 			'Expense Claim', 'Employee'],
 		'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Maintenance User'],
 		'properties': [
-			{'doctype': 'Item', 'fieldname': 'is_stock_item', 'property': 'default', 'value': 0}
+			{'doctype': 'Item', 'fieldname': 'is_stock_item', 'property': 'default', 'value': 0},
+			{'fieldname': 'barcode', 'property': 'hidden', 'value': 1}
 		]
 	}
 }
