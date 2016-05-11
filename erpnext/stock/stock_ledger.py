@@ -215,8 +215,6 @@ class update_entries_after(object):
 		stock_value_change = 0
 		if incoming_rate:
 			stock_value_change = actual_qty * incoming_rate
-		elif flt(sle.outgoing_rate):
-			stock_value_change = actual_qty * flt(sle.outgoing_rate)
 		elif actual_qty < 0:
 			# In case of delivery/stock issue, get average purchase rate
 			# of serial nos of current entry

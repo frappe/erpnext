@@ -35,7 +35,7 @@ def execute(filters=None):
 
 		expense_account = d.expense_account or aii_account_map.get(d.company)
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.supplier,
-			d.supplier_name, d.credit_to, d.project, d.company, d.purchase_order,
+			d.supplier_name, d.credit_to, d.mode_of_payment, d.project, d.company, d.purchase_order,
 			purchase_receipt, expense_account, d.qty, d.base_net_rate, d.base_net_amount]
 
 		for tax in tax_accounts:
@@ -53,7 +53,8 @@ def get_columns():
 	return [_("Item Code") + ":Link/Item:120", _("Item Name") + "::120",
 		_("Item Group") + ":Link/Item Group:100", _("Invoice") + ":Link/Purchase Invoice:120",
 		_("Posting Date") + ":Date:80", _("Supplier") + ":Link/Supplier:120",
-		"Supplier Name::120", "Payable Account:Link/Account:120", _("Project") + ":Link/Project:80",
+		"Supplier Name::120", "Payable Account:Link/Account:120", 
+		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Project") + ":Link/Project:80",
 		_("Company") + ":Link/Company:100", _("Purchase Order") + ":Link/Purchase Order:100",
 		_("Purchase Receipt") + ":Link/Purchase Receipt:100", _("Expense Account") + ":Link/Account:140",
 		_("Qty") + ":Float:120", _("Rate") + ":Currency/currency:120", _("Amount") + ":Currency/currency:120"
@@ -66,7 +67,8 @@ def get_conditions(filters):
 		("supplier", " and pi.supplier = %(supplier)s"),
 		("item_code", " and pi_item.item_code = %(item_code)s"),
 		("from_date", " and pi.posting_date>=%(from_date)s"),
-		("to_date", " and pi.posting_date<=%(to_date)s")):
+		("to_date", " and pi.posting_date<=%(to_date)s"),
+		("mode_of_payment", " and ifnull(mode_of_payment, '') = %(mode_of_payment)s")):
 			if filters.get(opts[0]):
 				conditions += opts[1]
 
@@ -82,7 +84,7 @@ def get_items(filters):
 			pi.supplier, pi.remarks, pi.base_net_total, pi_item.item_code, pi_item.item_name, 
 			pi_item.item_group, pi_item.project, pi_item.purchase_order, pi_item.purchase_receipt, 
 			pi_item.po_detail, pi_item.expense_account, pi_item.qty, pi_item.base_net_rate, 
-			pi_item.base_net_amount, pi.supplier_name
+			pi_item.base_net_amount, pi.supplier_name, pi.mode_of_payment
 		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item
 		where pi.name = pi_item.parent and pi.docstatus = 1 %s %s
 		order by pi.posting_date desc, pi_item.item_code desc

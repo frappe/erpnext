@@ -33,7 +33,7 @@ def execute(filters=None):
 
 		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name,
 			supplier_details.get(inv.supplier),
-			inv.credit_to, ", ".join(project), inv.bill_no, inv.bill_date, inv.remarks,
+			inv.credit_to, inv.mode_of_payment, ", ".join(project), inv.bill_no, inv.bill_date, inv.remarks,
 			", ".join(purchase_order), ", ".join(purchase_receipt), company_currency]
 
 		# map expense values
@@ -64,10 +64,10 @@ def execute(filters=None):
 def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
-		_("Invoice") + ":Link/Purchase Invoice:120", 
-		_("Posting Date") + ":Date:80", _("Supplier Id") + "::120",
-		_("Supplier Name") + "::120", _("Supplier Type") + ":Link/Supplier Type:120", 
-		_("Payable Account") + ":Link/Account:120", _("Project") + ":Link/Project:80", 
+		_("Invoice") + ":Link/Purchase Invoice:120", _("Posting Date") + ":Date:80", 
+		_("Supplier Id") + "::120", _("Supplier Name") + "::120", 
+		_("Supplier Type") + ":Link/Supplier Type:120", _("Payable Account") + ":Link/Account:120", 
+		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Project") + ":Link/Project:80", 
 		_("Bill No") + "::120", _("Bill Date") + ":Date:80", _("Remarks") + "::150",
 		_("Purchase Order") + ":Link/Purchase Order:100", 
 		_("Purchase Receipt") + ":Link/Purchase Receipt:100",
@@ -114,6 +114,8 @@ def get_conditions(filters):
 
 	if filters.get("from_date"): conditions += " and posting_date>=%(from_date)s"
 	if filters.get("to_date"): conditions += " and posting_date<=%(to_date)s"
+	
+	if filters.get("mode_of_payment"): conditions += " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"
 
 	return conditions
 
@@ -121,8 +123,8 @@ def get_invoices(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select 
-			name, posting_date, credit_to, supplier, supplier_name,
-			bill_no, bill_date, remarks, base_net_total, base_grand_total, outstanding_amount
+			name, posting_date, credit_to, supplier, supplier_name, bill_no, bill_date, remarks, 
+			base_net_total, base_grand_total, outstanding_amount, mode_of_payment
 		from `tabPurchase Invoice` 
 		where docstatus = 1 %s
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)

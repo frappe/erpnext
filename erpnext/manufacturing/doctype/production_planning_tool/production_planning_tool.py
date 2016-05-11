@@ -384,19 +384,24 @@ class ProductionPlanningTool(Document):
 			self.create_material_request()
 
 	def get_requested_items(self):
-		item_projected_qty = self.get_projected_qty()
 		items_to_be_requested = frappe._dict()
 
+		if not self.create_material_requests_for_all_required_qty:
+			item_projected_qty = self.get_projected_qty()			
+
 		for item, so_item_qty in self.item_dict.items():
-			requested_qty = 0
 			total_qty = sum([flt(d[0]) for d in so_item_qty])
-			if total_qty > item_projected_qty.get(item, 0):
+			requested_qty = 0
+			
+			if self.create_material_requests_for_all_required_qty:
+				requested_qty = total_qty
+			elif total_qty > item_projected_qty.get(item, 0):
 				# shortage
 				requested_qty = total_qty - flt(item_projected_qty.get(item))
 				# consider minimum order qty
 
-				if requested_qty < flt(so_item_qty[0][3]):
-					requested_qty = flt(so_item_qty[0][3])
+			if requested_qty and requested_qty < flt(so_item_qty[0][3]):
+				requested_qty = flt(so_item_qty[0][3])
 
 			# distribute requested qty SO wise
 			for item_details in so_item_qty:
