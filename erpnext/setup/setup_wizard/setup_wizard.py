@@ -12,6 +12,7 @@ import install_fixtures
 from .sample_data import make_sample_data
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from frappe.core.doctype.communication.comment import add_info_comment
+from erpnext.setup.setup_wizard.domainify import setup_domain
 
 def setup_complete(args=None):
 	if frappe.db.sql("select name from tabCompany"):
@@ -32,6 +33,7 @@ def setup_complete(args=None):
 	create_customers(args)
 	create_suppliers(args)
 	frappe.local.message_log = []
+	setup_domain(args.get('domain'))
 
 	website_maker(args.company_name.strip(), args.company_tagline, args.name)
 	create_logo(args)
