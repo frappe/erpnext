@@ -81,10 +81,11 @@ class AccountsController(TransactionBase):
 			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
 
 	def set_missing_values(self, for_validate=False):
-		for fieldname in ["posting_date", "transaction_date"]:
-			if not self.get(fieldname) and self.meta.get_field(fieldname):
-				self.set(fieldname, today())
-				break
+		if frappe.flags.in_test:
+			for fieldname in ["posting_date","transaction_date"]:
+				if self.meta.get_field(fieldname) and not self.get(fieldname):
+					self.set(fieldname, today())
+					break
 
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.defaults
-from frappe.utils import cint, flt, cstr
+from frappe.utils import cint, flt, cstr, today
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
 class TestPurchaseReceipt(unittest.TestCase):
@@ -193,6 +193,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		po = create_purchase_order()
 		
 		pr1 = make_purchase_receipt(po.name)
+		pr1.posting_date = today()
 		pr1.posting_time = "10:00"
 		pr1.get("items")[0].received_qty = 2
 		pr1.get("items")[0].qty = 2
@@ -209,6 +210,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pi2.submit()
 		
 		pr2 = make_purchase_receipt(po.name)
+		pr2.posting_date = today()
 		pr2.posting_time = "08:00"
 		pr2.get("items")[0].received_qty = 5
 		pr2.get("items")[0].qty = 5
@@ -236,8 +238,7 @@ def set_perpetual_inventory(enable=1):
 def make_purchase_receipt(**args):
 	pr = frappe.new_doc("Purchase Receipt")
 	args = frappe._dict(args)
-	if args.posting_date:
-		pr.posting_date = args.posting_date
+	pr.posting_date = args.posting_date or today()
 	if args.posting_time:
 		pr.posting_time = args.posting_time
 	pr.company = args.company or "_Test Company"
