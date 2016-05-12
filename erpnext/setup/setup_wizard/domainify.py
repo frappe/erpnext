@@ -24,7 +24,7 @@ domains = {
 			{'doctype': 'Item', 'fieldname': 'is_stock_item', 'property': 'default', 'value': 0},
 		],
 		'set_value': [
-			['Stock Settings', 'show_barcode', 0]
+			['Stock Settings', None, 'show_barcode', 0]
 		]
 	}
 }
@@ -46,6 +46,12 @@ def setup_domain(domain):
 	if data.properties:
 		for args in data.properties:
 			frappe.make_property_setter(args)
+
+	if data.set_value:
+		for args in data.set_value:
+			doc = frappe.get_doc(args[0], args[1] or args[0])
+			doc.set(args[2], args[3])
+			doc.save()
 
 	frappe.clear_cache()
 
