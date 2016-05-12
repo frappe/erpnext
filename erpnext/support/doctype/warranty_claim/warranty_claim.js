@@ -3,8 +3,6 @@
 
 frappe.provide("erpnext.support");
 
-{% include "erpnext/public/js/utils.js" %}
-
 frappe.ui.form.on("Warranty Claim", {
 	customer: function(frm) {
 		erpnext.utils.get_party_details(frm);
