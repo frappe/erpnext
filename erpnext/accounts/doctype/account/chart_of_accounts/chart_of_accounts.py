@@ -37,7 +37,8 @@ def create_charts(chart_name, company):
 						"root_type": root_type,
 						"report_type": report_type,
 						"account_type": child.get("account_type"),
-						"account_currency": frappe.db.get_value("Company", company, "default_currency")
+						"account_currency": frappe.db.get_value("Company", company, "default_currency"),
+						"tax_rate": child.get("tax_rate")
 					})
 
 					if root_account or frappe.local.flags.allow_unverified_charts:
