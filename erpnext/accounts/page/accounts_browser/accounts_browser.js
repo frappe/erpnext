@@ -232,7 +232,7 @@ erpnext.AccountsChart = Class.extend({
 				$(fd.tax_rate.wrapper).toggle(false);
 				$(fd.warehouse.wrapper).toggle(false);
 			} else {
-				$(fd.account_type.wrapper).toggle(true);
+				$(fd.account_type.wrapper).toggle(node.root ? false : true);
 				fd.account_type.$input.trigger("change");
 			}
 		});
@@ -242,9 +242,6 @@ erpnext.AccountsChart = Class.extend({
 			$(fd.tax_rate.wrapper).toggle(fd.account_type.get_value()==='Tax');
 			$(fd.warehouse.wrapper).toggle(fd.account_type.get_value()==='Warehouse');
 		})
-
-		// root type if root
-		$(fd.root_type.wrapper).toggle(node.root);
 
 		// create
 		d.set_primary_action(__("Create New"), function() {
@@ -262,10 +259,10 @@ erpnext.AccountsChart = Class.extend({
 			v.company = me.company;
 
 			if(node.root) {
-				v.is_root = true;
+				v.is_root = 1;
 				v.parent_account = null;
 			} else {
-				v.is_root = false;
+				v.is_root = 0;
 				v.root_type = null;
 			}
 
@@ -289,6 +286,11 @@ erpnext.AccountsChart = Class.extend({
 		}
 
 		$(fd.is_group.input).prop("checked", false).change();
+		
+		// In case of root, show root type and hide account_type, is_group
+		$(fd.root_type.wrapper).toggle(node.root);
+		$(fd.is_group.wrapper).toggle(!node.root);
+		
 		d.show();
 	},
 

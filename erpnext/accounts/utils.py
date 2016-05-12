@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
+from frappe.utils import nowdate, cstr, flt, cint, now, getdate, add_months
 from frappe import throw, _
 from frappe.utils import formatdate
 import frappe.desk.reportview
@@ -129,12 +129,13 @@ def add_ac(args=None):
 	if not args:
 		args = frappe.local.form_dict
 		args.pop("cmd")
-
+	
 	ac = frappe.new_doc("Account")
 	ac.update(args)
 	ac.old_parent = ""
 	ac.freeze_account = "No"
-	if ac.get("is_root"):
+	if cint(ac.get("is_root")):
+		ac.parent_account = None
 		ac.flags.ignore_mandatory = True
 	ac.insert()
 
