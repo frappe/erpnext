@@ -300,7 +300,7 @@ cur_frm.fields_dict['production_item'].get_query = function(doc) {
 	return {
 		query: "erpnext.controllers.queries.item_query",
 		filters:{
-			'is_pro_applicable': 1,
+			'is_stock_item': 1,
 		}
 	}
 }
