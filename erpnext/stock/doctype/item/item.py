@@ -144,22 +144,22 @@ class Item(WebsiteGenerator):
 			return
 
 		# find if website image url exists as public
-		file = frappe.get_all("File", filters={
+		file_doc = frappe.get_all("File", filters={
 			"file_url": self.website_image
 		}, fields=["name", "is_private"], order_by="is_private asc", limit_page_length=1)
-		
-		
-		if file:
-			file = file[0]
 
-		if not file:
+
+		if file_doc:
+			file_doc = file_doc[0]
+
+		if not file_doc:
 			if not auto_set_website_image:
 				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found")
 					.format(self.website_image, self.name))
 
 			self.website_image = None
 
-		elif file.is_private:
+		elif file_doc.is_private:
 			if not auto_set_website_image:
 				frappe.msgprint(_("Website Image should be a public file or website URL"))
 
@@ -508,21 +508,21 @@ class Item(WebsiteGenerator):
 			clear_cache(self.page_name)
 
 		frappe.db.set_value("Item", newdn, "item_code", newdn)
-		
+
 		if merge:
 			self.set_last_purchase_rate(newdn)
 			self.recalculate_bin_qty(newdn)
-			
+
 		for dt in ("Sales Taxes and Charges", "Purchase Taxes and Charges"):
-			for d in frappe.db.sql("""select name, item_wise_tax_detail from `tab{0}` 
+			for d in frappe.db.sql("""select name, item_wise_tax_detail from `tab{0}`
 					where ifnull(item_wise_tax_detail, '') != ''""".format(dt), as_dict=1):
-				
+
 				item_wise_tax_detail = json.loads(d.item_wise_tax_detail)
 				if olddn in item_wise_tax_detail:
 					item_wise_tax_detail[newdn] = item_wise_tax_detail[olddn]
 					item_wise_tax_detail.pop(olddn)
-					
-					frappe.db.set_value(dt, d.name, "item_wise_tax_detail", 
+
+					frappe.db.set_value(dt, d.name, "item_wise_tax_detail",
 						json.dumps(item_wise_tax_detail), update_modified=False)
 
 	def set_last_purchase_rate(self, newdn):
@@ -620,8 +620,8 @@ class Item(WebsiteGenerator):
 			variant = get_variant(self.variant_of, args, self.name)
 			if variant:
 				frappe.throw(_("Item variant {0} exists with same attributes")
-					.format(variant), ItemVariantExistsError)			
-			
+					.format(variant), ItemVariantExistsError)
+
 
 @frappe.whitelist()
 def get_dashboard_data(name):

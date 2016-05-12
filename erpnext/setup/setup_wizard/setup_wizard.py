@@ -35,7 +35,7 @@ def setup_complete(args=None):
 	frappe.local.message_log = []
 	setup_domain(args.get('domain'))
 
-	website_maker(args.company_name.strip(), args.company_tagline, args.name)
+	website_maker(args)
 	create_logo(args)
 
 	frappe.db.commit()

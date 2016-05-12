@@ -1,11 +1,13 @@
 import frappe
 
 from erpnext.setup.install import create_compact_item_print_custom_field
+from frappe.utils import cint
 
 def execute():
-	if not frappe.db.get_value("Features Setup", None, "fs_item_barcode"):
-		# hide barcode fields
-		frappe.make_property_setter(dict(fieldname='barcode', property='hidden', value=1))
+	frappe.reload_doctype('Stock Settings')
+	stock_settings = frappe.get_doc('Stock Settings', 'Stock Settings')
+	stock_settings.show_barcode_field = cint(frappe.db.get_value("Features Setup", None, "fs_item_barcode"))
+	stock_settings.save()
 
 	create_compact_item_print_custom_field()
 

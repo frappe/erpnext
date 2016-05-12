@@ -264,3 +264,4 @@ erpnext.patches.v7_0.update_party_status
 erpnext.patches.v7_0.update_item_projected
 erpnext.patches.v7_0.fix_duplicate_icons
 erpnext.patches.v7_0.remove_features_setup
+erpnext.patches.v7_0.update_home_page

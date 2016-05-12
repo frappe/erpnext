@@ -20,7 +20,7 @@
 			</div>
 			<div class="col-sm-6" style="padding-left:20px;">
 				 <h2 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h2>
-				
+
 				<p class="text-muted">
 					{{ _("Item Code") }}: <span itemprop="productID">{{ variant and variant.name or name }}</span></p>
 				<br>
@@ -55,7 +55,7 @@
 					<div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
 						<h4 class="item-price" itemprop="price"></h4>
 						<div class="item-stock" itemprop="availability"></div>
-					</div>	
+					</div>
                     <div class="item-cart hide">
     					<div id="item-add-to-cart">
     						<button class="btn btn-primary btn-sm">
@@ -79,7 +79,7 @@
 		</div>
 		</div>
 		</div>
-		
+
 		{% if website_specifications -%}
 		<div class="row item-website-specification" style="margin-top: 40px">
 			<div class="col-md-12">

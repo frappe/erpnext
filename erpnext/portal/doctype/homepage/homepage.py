@@ -7,4 +7,19 @@ import frappe
 from frappe.model.document import Document
 
 class Homepage(Document):
-	pass
+	def validate(self):
+		if not self.products:
+			self.setup_items()
+		if not self.description:
+			self.description = frappe._("This is an example website auto-generated from ERPNext")
+
+	def setup_items(self):
+		for d in frappe.get_all('Item', fields=['name', 'item_name', 'description', 'image'],
+			filters={'show_in_website': 1}, limit=3):
+
+			# set missing routes (?)
+			doc = frappe.get_doc('Item', d.name)
+			doc.save()
+			self.append('products', dict(item_code=d.name,
+				item_name=d.item_name, description=d.description, image=d.image))
+

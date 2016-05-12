@@ -3,19 +3,27 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, nowdate
-from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_html
 
 no_cache = 1
 no_sitemap = 1
 
 def get_context(context):
 	homepage = frappe.get_doc('Homepage')
-	
+
 	for item in homepage.products:
-		item.route = '/' + '/'.join(frappe.db.get_value('Item', item.item_code, ['parent_website_route', 'page_name']))
-		
-	
+		parent_website_route, page_name = frappe.db.get_value('Item', item.item_code,
+			['parent_website_route', 'page_name'])
+		item.route = '/' + '/'.join(filter(None, [parent_website_route, page_name]))
+
+	# show atleast 3 products
+	if len(homepage.products) < 3:
+		for i in xrange(3 - len(homepage.products)):
+			homepage.append('products', {
+				'item_code': 'product-{0}'.format(i),
+				'item_name': frappe._('Product {0}').format(i),
+				'route': '#'
+			})
+
 	return {
 		'homepage': homepage
 	}

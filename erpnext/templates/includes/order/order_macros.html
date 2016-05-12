@@ -9,15 +9,15 @@
         </div>
         <div class="col-xs-8 col-sm-10">
             {{ d.item_code }}
-            <p class="text-muted small item-description">{{ d.description }}</p>
+            <div class="text-muted small item-description">{{ d.description }}</div>
         </div>
     </div>
-	
+
     <div class="row item_name_dropdown">
         <div class="col-xs-4 col-sm-4 order-image-col">
             <div class="order-image">
               <span class="cart-count-badge pull-right small"> {{ d.get_formatted('qty') }} </span>{{ product_image_square(d.image) }}
-            </div>		
+            </div>
         </div>
         <div class="col-xs-8 col-sm-8">
             {{ d.item_code }}
