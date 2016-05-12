@@ -7,15 +7,25 @@ import frappe
 domains = {
 	'Manufacturing': {
 		'desktop_icons': ['Item', 'BOM', 'Customer', 'Supplier', 'Sales Order',
-			'Production Order', 'Stock Entry', 'Buying', 'Selling', 'Accounts']
+			'Production Order',  'Stock Entry', 'Purchase Order', 'Buying', 'Selling', 'Accounts'],
+		'remove_roles': ['Maintenance Manager', 'Maintenance User', 'Support Manager', 'Support Team'],
 	},
+	
 	'Retail': {
+		'desktop_icons': ['POS', 'Item', 'Customer', 'Sales Invoice',  'Purchase Order', 'Accounts',
+		 'Buying'],
 		'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Maintenance User'],
-		'desktop_icons': ['POS', 'Item', 'Customer', 'Sales Invoice', 'Accounts']
 	},
+	
 	'Distribution': {
+		'desktop_icons': ['Item', 'Customer', 'Supplier', 'Lead', 'Sales Order',
+			 'Sales Invoice', 'CRM', 'Selling', 'Buying', 'Stock', 'Accounts'],
 		'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Maintenance User'],
+		'properties': [
+			{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
+		]
 	},
+	
 	'Services': {
 		'desktop_icons': ['Project', 'Time Log', 'Customer', 'Sales Invoice', 'Lead', 'Opportunity',
 			'Expense Claim', 'Employee'],
