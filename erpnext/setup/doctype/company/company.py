@@ -63,14 +63,17 @@ class Company(Document):
 	def on_update(self):
 		if not frappe.db.sql("""select name from tabAccount
 				where company=%s and docstatus<2 limit 1""", self.name):
-			self.create_default_accounts()
-			self.create_default_warehouses()
+			if not frappe.local.flags.ignore_chart_of_accounts:
+				self.create_default_accounts()
+				self.create_default_warehouses()
+			
 			self.install_country_fixtures()
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
 
-		self.set_default_accounts()
+		if not frappe.local.flags.ignore_chart_of_accounts:
+			self.set_default_accounts()
 
 		if self.default_currency:
 			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
@@ -80,7 +83,8 @@ class Company(Document):
 	def install_country_fixtures(self):
 		path = os.path.join(os.path.dirname(__file__), "fixtures", self.country.lower())
 		if os.path.exists(path.encode("utf-8")):
-			frappe.get_attr("erpnext.setup.doctype.company.fixtures.{0}.install".format(self.country.lower()))(self)
+			frappe.get_attr("erpnext.setup.doctype.company.fixtures.{0}.install"
+				.format(self.country.lower()))(self)
 
 	def create_default_warehouses(self):
 		for whname in (_("Stores"), _("Work In Progress"), _("Finished Goods")):
