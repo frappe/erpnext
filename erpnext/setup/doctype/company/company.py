@@ -67,7 +67,7 @@ class Company(Document):
 				self.create_default_accounts()
 				self.create_default_warehouses()
 			
-			self.install_country_fixtures()
+				self.install_country_fixtures()
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
@@ -92,19 +92,21 @@ class Company(Document):
 				stock_group = frappe.db.get_value("Account", {"account_type": "Stock",
 					"is_group": 1, "company": self.name})
 				if stock_group:
-					frappe.get_doc({
+					warehouse = frappe.get_doc({
 						"doctype":"Warehouse",
 						"warehouse_name": whname,
 						"company": self.name,
 						"create_account_under": stock_group
-					}).insert()
+					})
+					warehouse.flags.ignore_permissions = self.flags.ignore_permissions
+					warehouse.insert()
 
 	def create_default_accounts(self):
 		if not self.chart_of_accounts:
 			self.chart_of_accounts = "Standard"
 
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
-		create_charts(self.chart_of_accounts, self.name)
+		create_charts(self.chart_of_accounts, self.name, self.flags.ignore_permissions)
 
 		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
 			{"company": self.name, "account_type": "Receivable"}))
