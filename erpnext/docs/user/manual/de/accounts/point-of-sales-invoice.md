@@ -12,7 +12,7 @@ Sie können eine Ausgangsrechnung des Typs POS erstellen, indem Sie "Ist POS" an
 In ERPNext können über den POS alle Verkaufs- und Einkaufstransaktionen, wie Ausgangsrechnung, Angebot, Kundenauftrag, Lieferantenauftrag, usw. bearbeitet werden. Über folgende zwei Schritte richten Sie den POS ein:
 
 1. Aktivieren Sie die POS-Ansicht über Einstellungen > Anpassen > Funktionseinstellungen
-2. Erstellen Sie einen Datensatz für die [POS-Einstellungen]({{docs_base_url}}/user/manual/en/setting-up/pos-setting.html)
+2. Erstellen Sie einen Datensatz für die [POS-Einstellungen]({{docs_base_url}}/user/manual/de/setting-up/pos-setting.html)
 
 #### Auf die POS-Ansicht umschalten
 

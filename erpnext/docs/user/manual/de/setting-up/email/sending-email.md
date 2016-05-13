@@ -5,6 +5,6 @@ In ERPNext können sie jedes beliebige Dokument per E-Mail versenden (als PDF-An
 
 <img class="screenshot" alt="Emails versenden" src="{{docs_base_url}}/assets/img/setup/email/send-email.gif">
 
-**Anmerkung:** Es müssen Konten zum [E-Mail-Versand]({{docs_base_url}}/user/manual/en/setting-up/email/email-account.html) eingerichtet sein.
+**Anmerkung:** Es müssen Konten zum [E-Mail-Versand]({{docs_base_url}}/user/manual/de/setting-up/email/email-account.html) eingerichtet sein.
 
 {next}

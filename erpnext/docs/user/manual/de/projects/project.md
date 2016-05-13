@@ -8,7 +8,7 @@ Das Projektmanagement in ERPNext ist aufgabengesteuert. Sie können ein Projekt 
 ### Aufgaben verwalten
 
 Ein Projekt kann in mehrere verschiedene Aufgaben aufgeteilt werden. 
-Eine Aufgabe kann über das Projektdokument selbst erstellt werden oder über die Schaltfläche [Aufgabe]({{docs_base_url}}/user/manual/en/projects/tasks.html).
+Eine Aufgabe kann über das Projektdokument selbst erstellt werden oder über die Schaltfläche [Aufgabe]({{docs_base_url}}/user/manual/de/projects/tasks.html).
 
 <img class="screenshot" alt="Projekt" src="{{docs_base_url}}/assets/img/project/project_task.png">
 
@@ -24,7 +24,7 @@ Eine Aufgabe kann über das Projektdokument selbst erstellt werden oder über di
 
 ### Zeitmanagement
 
-ERPNext verwendet [Zeitprotokolle]({{docs_base_url}}/user/manual/en/projects/time-log.html) um den Fortschritt eines Projektes nachzuverfolgen. Sie können Zeitprotokolle zu jeder Aufgabe erstellen. Das aktuelle Start- und Enddatum wird dann zusammen mit der Kostenberechnung  basierend auf dem Zeitprotokoll aktualisiert.
+ERPNext verwendet [Zeitprotokolle]({{docs_base_url}}/user/manual/de/projects/time-log.html) um den Fortschritt eines Projektes nachzuverfolgen. Sie können Zeitprotokolle zu jeder Aufgabe erstellen. Das aktuelle Start- und Enddatum wird dann zusammen mit der Kostenberechnung  basierend auf dem Zeitprotokoll aktualisiert.
 
 * Um ein Zeitprotokoll zu einem Projekt anzusehen, klicken Sie auf "Zeitprotokolle"
 
@@ -38,7 +38,7 @@ ERPNext verwendet [Zeitprotokolle]({{docs_base_url}}/user/manual/en/projects/tim
 
 ### Aufwände verwalten
 
-Sie können [Aufwandsabrechnungen]({{docs_base_url}}/user/manual/en/human-resources/expense-claim.html) mit Projektaufgaben verbuchen. Das System aktualisiert die Gesamtsumme der Aufwände im Abschnitt Kostenabrechnung.
+Sie können [Aufwandsabrechnungen]({{docs_base_url}}/user/manual/de/human-resources/expense-claim.html) mit Projektaufgaben verbuchen. Das System aktualisiert die Gesamtsumme der Aufwände im Abschnitt Kostenabrechnung.
 
 * Um die Aufwandsabrechnungen zu einem Projekt anzusehen, klicken Sie auf "Aufwandsabrechnung".
 
@@ -54,7 +54,7 @@ Sie können [Aufwandsabrechnungen]({{docs_base_url}}/user/manual/en/human-resour
 
 ### Kostenstelle
 
-Sie können zu einem Projekt eine [Kostenstelle]({{docs_base_url}}/user/manual/en/accounts/setup/cost-center.html) erstellen oder Sie können eine existierende Kostenstelle verwenden um alle Aufwände die zu einem Projekt entstehen mitzuverfolgen.
+Sie können zu einem Projekt eine [Kostenstelle]({{docs_base_url}}/user/manual/de/accounts/setup/cost-center.html) erstellen oder Sie können eine existierende Kostenstelle verwenden um alle Aufwände die zu einem Projekt entstehen mitzuverfolgen.
 
 <img class="screenshot" alt="Projekt - Kostenstelle" src="{{docs_base_url}}/assets/img/project/project_cost_center.png">
 
@@ -69,7 +69,7 @@ Der Abschnitt Projektkostenabrechnung hilft Ihnen dabei, die Zeit und die AUfwä
 
 ### Abrechnung
 
-Sie können einen [Kundenauftrag]({{docs_base_url}}/user/manual/en/selling/sales-order.html) zu einem Projekt erstellen bzw. ihn mit dem Projekt verknüpfen. Wenn er einmal verlinkt ist, können Sie das Vertriebsmodul dazu nutzen, dass Projekt mit Ihrem Kunden abzurechnen.
+Sie können einen [Kundenauftrag]({{docs_base_url}}/user/manual/de/selling/sales-order.html) zu einem Projekt erstellen bzw. ihn mit dem Projekt verknüpfen. Wenn er einmal verlinkt ist, können Sie das Vertriebsmodul dazu nutzen, dass Projekt mit Ihrem Kunden abzurechnen.
 
 <img class="screenshot" alt="Projekt - Kundenauftrag" src="{{docs_base_url}}/assets/img/project/project_sales_order.png">
 
