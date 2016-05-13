@@ -5,6 +5,8 @@ Wenn Sie Formate von ERPNext-Formularen ändern wollen, können Sie das über be
 
 > Einstellungen > Anpassen > Benutzerdefiniertes Skript
 
+![Custom Script]({{docs_base_url}}/assets/img/customize/custom-script-1.png)
+
 ### Themen
 
 {index}

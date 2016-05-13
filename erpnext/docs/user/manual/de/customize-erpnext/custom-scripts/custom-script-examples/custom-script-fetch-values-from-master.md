@@ -5,7 +5,7 @@ Um einen Wert oder eine Verknüpfung auf eine Auswahl zu holen, verwenden Sie di
 
 > add_fetch(link_fieldname, source_fieldname, target_fieldname)
 
-### Beispiel:
+### Beispiel
 
 Sie erstellen ein benutzerdefiniertes Feld **VAT ID** (vat_id) unter **Kunde** und **Ausgangsrechnung** und Sie möchten sicher stellen, dass dieser Wert immer aktualisiert wird, wenn Sie einen Kunden oder eine Ausgangsrechnung aufrufen.
 

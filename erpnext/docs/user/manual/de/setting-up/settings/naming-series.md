@@ -23,11 +23,9 @@ Um einen Nummernkreis einzustellen, gehen Sie zu:
 
 In diesem Formular,
 
-1\. Wählen Sie die Transaktion aus, für die Sie den Nummernkreis einstellen wollen. Das System wird den aktuellen Nummernkreis in der Textbox aktualisieren.
-
-2\. Passen Sie den Nummernkreis nach Ihren Wünschen mit eindeutigen Präfixen an. Jedes Präfix muss in einer neuen Zeile stehen.
-
-3\. Das erste Präfix wird zum Standard-Präfix. Wenn Sie möchten, dass ein Benutzer explizit einen Nummernkreis statt der Standardeinstellung auswählt, markieren Sie die Option "Benutzer muss immer auswählen".
+1. Wählen Sie die Transaktion aus, für die Sie den Nummernkreis einstellen wollen. Das System wird den aktuellen Nummernkreis in der Textbox aktualisieren.
+2. Passen Sie den Nummernkreis nach Ihren Wünschen mit eindeutigen Präfixen an. Jedes Präfix muss in einer neuen Zeile stehen.
+3. Das erste Präfix wird zum Standard-Präfix. Wenn Sie möchten, dass ein Benutzer explizit einen Nummernkreis statt der Standardeinstellung auswählt, markieren Sie die Option "Benutzer muss immer auswählen".
 
 Sie können auch den Startpunkt eines Nummernkreises auswählen, indem Sie den Namen und den Startpunkt des Nummernkreises im Abschnitt "Seriennummer aktualisieren" angeben.
 

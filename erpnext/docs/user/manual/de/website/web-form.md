@@ -13,13 +13,10 @@ Um ein neues **Webformular** zu erstellen, gehen Sie zu:
 
 > Webseite > Web-Formular > Neu
 
-1\. Geben Sie die Bezeichnung und die URL des Web-Formulars an.
-
-2\. Wählen Sie den DocType aus, in dem der Benutzer Datensätze speichern soll.
-
-3\. Geben Sie an, ob sich der Benutzer einloggen muss, Daten ändern muss, mehrere verschiedene Datensätze verwalten soll, etc.
-
-4\. Fügen Sie die Felder, die Sie in den Datensätzen haben wollen, hinzu.
+1. Geben Sie die Bezeichnung und die URL des Web-Formulars an.
+2. Wählen Sie den DocType aus, in dem der Benutzer Datensätze speichern soll.
+3. Geben Sie an, ob sich der Benutzer einloggen muss, Daten ändern muss, mehrere verschiedene Datensätze verwalten soll, etc.
+4. Fügen Sie die Felder, die Sie in den Datensätzen haben wollen, hinzu.
 
 <img class="screenshot" alt="Webformular" src="{{docs_base_url}}/assets/img/website/web-form.png">
 
