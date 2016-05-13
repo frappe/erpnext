@@ -17,7 +17,7 @@ Der **Fertigungsauftrag** wird aus dem **Werkzeug zur Fertigungsplanung** generi
 * Geben Sie das geplante Startdatum an (ein geschätztes Datum zu dem die Produktion beginnen soll).
 * Wählen Sie das Lager aus. Das Fertigungslager ist der Ort zu dem die Artikel gelangen, wenn Sie mit der Herstellung beginnen, und das Eingangslager ist der Ort, wo fertige Erzeugnisse lagern, bevor sie versandt werden.
 
-> Anmerkung: Sie können einen Fertigungsauftrag abspeichern ohne ein Lager auszuwählen. Läger sind jedoch zwingend erforderlich um einen Fertigungsauftrag zu übertragen.
+> Anmerkung: Sie können einen Fertigungsauftrag abspeichern ohne ein Lager auszuwählen. Lager sind jedoch zwingend erforderlich um einen Fertigungsauftrag zu übertragen.
 
 ### Arbeitsplätze neu zuordnen/Dauer von Arbeitsgängen
 

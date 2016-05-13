@@ -18,7 +18,7 @@ Um für Ihr Icon ein Bild hochzuladen, das in allen Transaktionen erscheint, spe
 
 ### Lagerbestand: Lager- und Bestandseinstellungen
 
-In ERPNext können Sie verschiedene Typen von Lägern einstellen um Ihre unterschiedlichen Artikel zu lagern. Die Auswahl kann aufgrund der Artikeltypen getroffen werden. Das kann ein Artikel des Anlagevermögens sein, ein Lagerartikel oder auch ein Fertigungsartikel.
+In ERPNext können Sie verschiedene Typen von Lagern einstellen um Ihre unterschiedlichen Artikel zu lagern. Die Auswahl kann aufgrund der Artikeltypen getroffen werden. Das kann ein Artikel des Anlagevermögens sein, ein Lagerartikel oder auch ein Fertigungsartikel.
 
 * **Lagerartikel:** Wenn Sie Lagerartikel dieses Typs in Ihrem Lagerbestand verwalten, erzeugt ERPNext für jede Transaktion dieses Artikels eine Buchung im Lagerhauptbuch.
 * **Standardlager:** Das ist das Lager, welches automatisch bei Ihren Transaktionen ausgewählt wird.

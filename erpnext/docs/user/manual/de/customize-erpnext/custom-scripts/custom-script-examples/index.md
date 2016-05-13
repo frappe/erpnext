@@ -19,6 +19,6 @@ Sie erstellen ein benutzerdefiniertes Skript wie folgt (Sie müssen dafür Syste
 
 3\. Zum Testen gehen Sie auf Werkzeuge > Cache leeren und laden Sie die Seite neu, wenn Sie ein benutzerdefiniertes Skript aktualisieren.
 
-### Themen:
+### Themen
 
 {index}
