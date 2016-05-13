@@ -37,12 +37,12 @@ Um Zeitprotokolle über den Kalender zu erstellen, gehen Sie zu "Zeitprotokoll" 
 ### Abrechnung über Zeitprotokolle
 
 * Wenn Sie ein Zeitprotokoll abrechnen wollen, müssem Sie die Option "Abrechenbar" anklicken.
-* Im Abschnitt Kostenberechnung erstellt das System den Rechungsbetrag über die [Aktivitätskosten]({{docs_base_url}}/user/manual/en/projects/activity-cost.html)  basierend auf dem angegebenen Mitarbeiter und der angegebenen Aktivitätsart.
+* Im Abschnitt Kostenberechnung erstellt das System den Rechungsbetrag über die [Aktivitätskosten]({{docs_base_url}}/user/manual/de/projects/activity-cost.html)  basierend auf dem angegebenen Mitarbeiter und der angegebenen Aktivitätsart.
 * Das System kalkuliert dann den Rechnungsbetrag basierend auf den im Zeitprotokoll angegebenen Stunden.
 * Wenn "Abrechenbar" nicht markiert wurde, zeigt das System beim "Rechnungsbetrag" 0 an.
 
 <img class="screenshot" alt="Zeitprotokoll - Abrechnung" src="{{docs_base_url}}/assets/img/project/time_log_costing.png">
 
-* Nach dem Übertragen des Zeitprotokolls müssen Sie einen [Zeitprotokollstapel]({{docs_base_url}}/user/manual/en/projects/time-log-batch.html) erstellen um mit der Abrechnung fortfahren zu können.
+* Nach dem Übertragen des Zeitprotokolls müssen Sie einen [Zeitprotokollstapel]({{docs_base_url}}/user/manual/de/projects/time-log-batch.html) erstellen um mit der Abrechnung fortfahren zu können.
 
 {next}

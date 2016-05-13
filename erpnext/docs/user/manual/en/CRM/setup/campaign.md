@@ -4,7 +4,7 @@ geographical area, to achieve specified objectives.
 
 <img class="screenshot" alt="Campaign" src="{{docs_base_url}}/assets/img/crm/campaign.png">
 
-You can track [Lead]({{docs_base_url}}/user/manual/en/crm/lead.html), [Opportunity]({{docs_base_url}}/user/manual/en/crm/opportunity.html), [Quotation]({{docs_base_url}}/user/manual/en/selling/quotation.html) against a campaign.
+You can track [Lead]({{docs_base_url}}/user/manual/en/CRM/lead.html), [Opportunity]({{docs_base_url}}/user/manual/en/CRM/opportunity.html), [Quotation]({{docs_base_url}}/user/manual/en/selling/quotation.html) against a campaign.
 
 ###Track Leads against Campaign
 

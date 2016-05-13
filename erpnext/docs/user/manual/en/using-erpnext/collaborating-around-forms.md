@@ -14,6 +14,6 @@ be added in the right sidebar.
 
 ### Tags
 
-[Read more about Tags]({{docs_base_url}}/user/manual/en/collaboration-tools/tags.html)  
+[Read more about Tags]({{docs_base_url}}/user/manual/en/using-erpnext/tags.html)  
 
 {next}

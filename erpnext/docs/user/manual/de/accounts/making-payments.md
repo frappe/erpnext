@@ -3,13 +3,10 @@
 
 Zahlungen zu Ausgangs- oder Eingangsrechnungen können über die Schaltfläche "Zahlungsbuchung erstellen" zu übertragenen Rechnungen erfasst werden.
 
-1\. Aktualisieren Sie das Bankkonto (Sie können hier auch ein Standardkonto in den Unternehmensstammdaten einstellen).
-
-2\. Aktualiseren Sie das Veröffentlichungsdatum.
-
-3\. Geben Sie Schecknummer und Scheckdatum ein.
-
-4\. Speichern und Übertragen Sie.
+  1. Aktualisieren Sie das Bankkonto (Sie können hier auch ein Standardkonto in den Unternehmensstammdaten einstellen).
+  1. Aktualiseren Sie das Veröffentlichungsdatum.
+  1. Geben Sie Schecknummer und Scheckdatum ein.
+  1. Speichern und Übertragen Sie.
 
 <img class="screenshot" alt="Zahlungen durchführen" src="{{docs_base_url}}/assets/img/accounts/make-payment.png">
 

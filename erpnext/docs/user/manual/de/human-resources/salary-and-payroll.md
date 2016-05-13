@@ -7,11 +7,9 @@ Die Gehaltsabrechnung ist der zugrundeliegende Datensatz zum Verwaltungsakt von 
 
 Um in ERPNext eine Gehaltsabrechnung durchzuführen
 
-1\. Erstellen Sie Gehaltsstrukturen für alle Arbeitnehmer.
-
-2\. Erstellen Sie über den Prozess Gehaltsabrechnung Gehaltsabrechnungen.
-
-3\. Buchen Sie das Gehalt in Ihren Konten.
+1. Erstellen Sie Gehaltsstrukturen für alle Arbeitnehmer.
+2. Erstellen Sie über den Prozess Gehaltsabrechnung Gehaltsabrechnungen.
+3. Buchen Sie das Gehalt in Ihren Konten.
 
 ### Gehaltsstruktur
 
@@ -19,11 +17,9 @@ Die Gehaltsstruktur gibt an, wie Gehälter auf Basis von Einkommen und Abzügen 
 
 Gehaltsstrukturen werden verwendet um Organisationen zu helfen
 
-1\. Gehaltslevel zu erhalten, die am Markt wettbewerbsfähig sind.
-
-2\. Ein ausgeglichenes Verhältnis zwischen den Entlohnungen intern anfallender Jobs zu erreichen.
-
-3\. Unterschiede in den Ebenen von Verwantwortung, Begabungen und Leistungen zu erkennen und entsprechend zu vergüten und Gehaltserhöhungen zu verwalten.
+1. Gehaltslevel zu erhalten, die am Markt wettbewerbsfähig sind.
+2. Ein ausgeglichenes Verhältnis zwischen den Entlohnungen intern anfallender Jobs zu erreichen.
+3. Unterschiede in den Ebenen von Verwantwortung, Begabungen und Leistungen zu erkennen und entsprechend zu vergüten und Gehaltserhöhungen zu verwalten.
 
 Eine Gehaltsstruktur kann folgende Komponenten enthalten:
 
@@ -83,15 +79,11 @@ Sie können auch Gehaltsabrechnungen für mehrere verschiedene Mitarbeiter über
 
 Beim Bearbeiten einer Gehaltsabrechnung
 
-1\. Wählen Sie die Firma, für die Sie Gehaltsabrechnungen erstellen wollen.
-
-2\. Wählen Sie den ensprechenden Monat und das Jahr.
-
-3\. Klicken Sie auf "Gehaltsabrechnung erstellen". Hierdurch werden für jeden aktiven Mitarbeiter für den gewählten Monat Datensätze für die Gehaltsabrechnung angelegt. Wenn die Gehaltsabrechnungen einmal angelegt sind, erstellt das System keine weiteren Gehaltsabrechnungen. Alle Aktualisierungen werden im Bereich "Aktivitätsprotokoll" angezeigt.
-
-4\. Wenn alle Gehaltsabrechnungen erstellt wurden, können Sie prüfen, ob Sie richtig sind, und sie bearbeiten, wenn Sie unbezahlten Urlaub abziehen wollen.
-
-5\. Wenn Sie das geprüft haben, können Sie sie alle gemeinsam "übertragen" indem Sie auf die Schaltfläche "Gehaltsabrechnung übertragen" klicken. Wenn Sie möchten, dass Sie automatisch per E-Mail an einen Mitarbeiter verschickt werden, stellen Sie sicher, dass Sie die Option "E-Mail absenden" angeklickt haben.
+1. Wählen Sie die Firma, für die Sie Gehaltsabrechnungen erstellen wollen.
+2. Wählen Sie den ensprechenden Monat und das Jahr.
+3. Klicken Sie auf "Gehaltsabrechnung erstellen". Hierdurch werden für jeden aktiven Mitarbeiter für den gewählten Monat Datensätze für die Gehaltsabrechnung angelegt. Wenn die Gehaltsabrechnungen einmal angelegt sind, erstellt das System keine weiteren Gehaltsabrechnungen. Alle Aktualisierungen werden im Bereich "Aktivitätsprotokoll" angezeigt.
+4. Wenn alle Gehaltsabrechnungen erstellt wurden, können Sie prüfen, ob Sie richtig sind, und sie bearbeiten, wenn Sie unbezahlten Urlaub abziehen wollen.
+5. Wenn Sie das geprüft haben, können Sie sie alle gemeinsam "übertragen" indem Sie auf die Schaltfläche "Gehaltsabrechnung übertragen" klicken. Wenn Sie möchten, dass Sie automatisch per E-Mail an einen Mitarbeiter verschickt werden, stellen Sie sicher, dass Sie die Option "E-Mail absenden" angeklickt haben.
 
 ### Gehälter in Konten buchen
 

@@ -31,7 +31,7 @@ Wenn dieser Punkt aktiviert ist, kann ein Benutzer mit dieser Rolle nur auf best
 
 Um Benutzerberechtigungen zu setzen, gehen Sie zu:
 
-> Einstellungen > Berechtigungen > [Benutzerrechte-Manager]({{docs_base_url}}/user/manual/en/setting-up/users-and-permissions/user-permissions.html)
+> Einstellungen > Berechtigungen > [Benutzerrechte-Manager]({{docs_base_url}}/user/manual/de/setting-up/users-and-permissions/user-permissions.html)
 
 
 

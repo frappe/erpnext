@@ -14,7 +14,7 @@ Um Ihre eigenen Versionen zu erstellen, öffnen Sie eine bereits vorhandene Vorl
 
 > Einstellungen > Druck > Druckformate
 
-![Druckformat]({{docs_base_url}}/assets/old_images/erpnext/customize/print-format.png)
+![Druckformat]({{docs_base_url}}/assets/img/customize/print-settings.png)
 
 Wählen Sie den Typ des Druckformats, welches Sie bearbeiten wollen, und klicken Sie auf die Schaltfläche "Kopieren" in der rechten Spalte. Es öffnet sich ein neues Druckformat mit der Einstellung NEIN für "für "Ist Standard" und Sie kännen das Druckformat bearbeiten.
 
@@ -26,11 +26,10 @@ Zum Bearbeiten des Erscheinungsbildes bietet sich das [Bootstrap CSS Framework](
 
 > Anmerkung: Vorgedrucktes Briefpapier zu verwenden ist normalerweise keine gute Idee, weil Ihre Ausdrucke unfertig (inkonsistent) aussehen, wenn Sie per E-mail verschickt werden.
 
-### Referenzen:
+### Referenzen
 
-1\. [Programmiersprache Jinja Templating: Referenz](http://jinja.pocoo.org/docs/templates/)
-
-2\. [Bootstrap CSS Framework](http://getbootstrap.com/)
+1. [Programmiersprache Jinja Templating: Referenz](http://jinja.pocoo.org/docs/templates/)
+1. [Bootstrap CSS Framework](http://getbootstrap.com/)
 
 ### Druckeinstellungen
 
@@ -38,9 +37,9 @@ Um Ihre Druck- und PDF-Einstellungen zu bearbeiten/zu aktualisieren, gehen Sie z
 
 > Einstellungen > Druck und Branding > Druckeinstellungen
 
-![Druckformat]({{docs_base_url}}/assets/old_images/erpnext/customize/print-settings.png)
+![Druckformat]({{docs_base_url}}/assets/img/customize/print-settings.png)
 
-### Beispiel:
+### Beispiel
 
 <h3>{{ doc.select<em>print</em>heading or "Invoice" }}</h3>
     <div class="row">
@@ -84,9 +83,8 @@ Um Ihre Druck- und PDF-Einstellungen zu bearbeiten/zu aktualisieren, gehen Sie z
 
 ### Anmerkungen
 
-1\. Um nach Datum und Währung formatiert Werte zu erhalten, verwenden Sie: `doc.get_formatted("fieldname")`
-
-2\. Für übersetzbare Zeichenfolgen verwenden Sie: `{{ _("This string is translated") }}`
+1. Um nach Datum und Währung formatiert Werte zu erhalten, verwenden Sie: `doc.get_formatted("fieldname")`
+1. Für übersetzbare Zeichenfolgen verwenden Sie: `{{ _("This string is translated") }}`
 
 ### Fußzeilen
 

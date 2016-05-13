@@ -5,7 +5,7 @@ Eine Kampagne ist eine groß angelegte Umsetzung einer Vertriebsstrategie um ein
 
 <img class="screenshot" alt="Kampagne" src="{{docs_base_url}}/assets/img/crm/campaign.png">
 
-Sie können in einer Kampagne [Leads]({{docs_base_url}}/user/manual/en/crm/lead.html), [Opportunities]({{docs_base_url}}/user/manual/en/crm/opportunity.html) und [Angebote]({{docs_base_url}}/user/manual/en/selling/quotation.html) nachverfolgen.
+Sie können in einer Kampagne [Leads]({{docs_base_url}}/user/manual/de/CRM/lead.html), [Opportunities]({{docs_base_url}}/user/manual/de/CRM/opportunity.html) und [Angebote]({{docs_base_url}}/user/manual/de/selling/quotation.html) nachverfolgen.
 
 ### Leads zu einer Kampagne nachverfolgen
 

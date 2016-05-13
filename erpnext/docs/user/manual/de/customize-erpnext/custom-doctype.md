@@ -11,15 +11,11 @@ Um einen neuen DocType zu erstellen, gehen Sie zu:
 
 ### Einzelheiten zum DocType
 
-1\. Modul: Wählen Sie das Modul aus, in dem dieser DocType verwendet wird.
-
-2\. Dokumententyp: Geben Sie an, ob dieser DocType Hauptdaten befördern oder Transaktionen nachverfolgen soll. Der DocType für das Buch wird als Vorlage hinzugefügt.
-
-3\. Ist Untertabelle: Wenn dieser DocType als Tabelle in einen anderen DocType eingefügt wird, wie die Artikeltabelle in den DocType Kundenauftrag, dann sollten Sie auch "Ist Untertabelle" ankreuzen. Ansonsten nicht.
-
-4\. Ist einzeln: Wenn diese Option aktiviert ist, wird dieser DocType zu einem einzeln verwendeten Formular, wie die Vertriebseinstellungen, die nicht von Benutzern reproduziert werden können.
-
-5\. Benutzerdefiniert?: Dieses Feld ist standardmäßig aktiviert, wenn ein benutzerdefinierter DocType hinzugefügt wird.
+1. Modul: Wählen Sie das Modul aus, in dem dieser DocType verwendet wird.
+2. Dokumententyp: Geben Sie an, ob dieser DocType Hauptdaten befördern oder Transaktionen nachverfolgen soll. Der DocType für das Buch wird als Vorlage hinzugefügt.
+3. Ist Untertabelle: Wenn dieser DocType als Tabelle in einen anderen DocType eingefügt wird, wie die Artikeltabelle in den DocType Kundenauftrag, dann sollten Sie auch "Ist Untertabelle" ankreuzen. Ansonsten nicht.
+4. Ist einzeln: Wenn diese Option aktiviert ist, wird dieser DocType zu einem einzeln verwendeten Formular, wie die Vertriebseinstellungen, die nicht von Benutzern reproduziert werden können.
+5. Benutzerdefiniert?: Dieses Feld ist standardmäßig aktiviert, wenn ein benutzerdefinierter DocType hinzugefügt wird.
 
 ![Grundlagen zum Doctype]({{docs_base_url}}/assets/img/setup/customize/doctype-basics.png)
 
@@ -29,17 +25,12 @@ In der Tabelle Felder können Sie die Felder (Eigenschaften) des DocTypes (Artik
 
 Felder sind viel mehr als Datenbankspalten; sie können sein:
 
-1\. Spalten in der Datenbank
-
-2\. Wichtig für das Layout (Bereiche, Spaltentrennung)
-
-3\. Untertabellen (Feld vom Typ Tabelle)
-
-4\. HTML
-
-5\. Aktionen (Schaltflächen)
-
-6\. Anhänge oder Bilder
+1. Spalten in der Datenbank
+2. Wichtig für das Layout (Bereiche, Spaltentrennung)
+3. Untertabellen (Feld vom Typ Tabelle)
+4. HTML
+5. Aktionen (Schaltflächen)
+6. Anhänge oder Bilder
 
 ![Felder im DocType]({{docs_base_url}}/assets/img/setup/customize/Doctype-all-fields.png)
 

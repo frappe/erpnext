@@ -5,4 +5,4 @@ customize-form
 document-title
 hiding-modules-and-features
 print-format
-articles
+custom-scripts

@@ -12,7 +12,7 @@ Beginnen Sie wie folgt:
 
 Abbildung: Übersicht aus dem Benutzerberechtigungs-Manager die aufzeigt, wie Benutzer nur auf bestimmte Firmen zugreifen können
 
-#### Beispiel:
+#### Beispiel
 
 Der Benutzer "aromn@example.com" hat die Rolle "Nutzer Vertrieb" und wir möchten die Zugriffsrechte des Benutzers so einschränken, dass er nur auf Datensätze einer bestimmten Firma, nämlich der Wind Power LLC, zugreifen kann.
 

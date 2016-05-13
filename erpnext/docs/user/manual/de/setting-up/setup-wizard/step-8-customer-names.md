@@ -18,6 +18,6 @@ Kundenname: American Power Mills
 
 Kontaktname: Shiv Agarwal
 
-Um mehr über Kunden zu erfahren, lesen Sie im Abschnitt [Details zu Kunden]({{docs_base_url}}/user/manual/en/CRM/customer.html) nach.
+Um mehr über Kunden zu erfahren, lesen Sie im Abschnitt [Details zu Kunden]({{docs_base_url}}/user/manual/de/CRM/customer.html) nach.
 
 {next}

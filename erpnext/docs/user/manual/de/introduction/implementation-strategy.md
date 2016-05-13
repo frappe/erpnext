@@ -11,7 +11,7 @@ Bevor Sie damit beginnen, Ihre Arbeiten über ERPNext abzuwickeln, müssen Sie s
 * Lesen Sie das Handbuch.
 * Legen Sie ein kostenloses Konto auf [https://erpnext.com](https://erpnext.com) an. (Das ist der einfachste Weg um zu experimentieren.)
 * Legen Sie Ihre ersten Kunden, Lieferanten und Artikel an. Erstellen Sie weitere, um sich mit diesen Verfahren vertraut zu machen.
-* Legen Sie Kundengruppen, Artikelgruppen, Läger und Lieferantengruppen an, damit Sie Ihre Artikel klassifizieren können.
+* Legen Sie Kundengruppen, Artikelgruppen, Lager und Lieferantengruppen an, damit Sie Ihre Artikel klassifizieren können.
 * Durchlaufen Sie einen Standard-Vertriebszyklus: Lead -> Opportunity -> Angebot -> Kundenauftrag -> Lieferschein -> Ausgangsrechnung -> Zahlung (Journalbuchung/Buchungssatz)
 * Durchlaufen Sie einen Standard-Einkaufszyklus: Materialanfrage -> Lieferantenauftrag -> Eingangsrechnung -> Zahlung (Journalbuchung/Buchungssatz)
 * Durchlaufen Sie einen Fertigungszyklus (wenn anwendbar): Stückliste -> Planungswerkzeug zur Fertigung -> Fertigungsauftrag -> Materialausgabe
