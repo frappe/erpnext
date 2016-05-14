@@ -19,8 +19,12 @@ class Account(Document):
 			self.get("__onload").can_freeze_account = True
 
 	def autoname(self):
-		self.name = self.account_name.strip() + ' - ' + \
-			frappe.db.get_value("Company", self.company, "abbr")
+		# first validate if company exists
+		company = frappe.db.get_value("Company", self.company, ["abbr", "name"], as_dict=True)
+		if not company:
+			frappe.throw(_('Company {0} does not exist').format(self.company))
+
+		self.name = self.account_name.strip() + ' - ' + company.abbr
 
 	def validate(self):
 		if frappe.local.flags.allow_unverified_charts:
@@ -68,7 +72,7 @@ class Account(Document):
 				if self.root_type != db_value.root_type:
 					frappe.db.sql("update `tabAccount` set root_type=%s where lft > %s and rgt < %s",
 						(self.root_type, self.lft, self.rgt))
-						
+
 		if self.root_type and not self.report_type:
 			self.report_type = "Balance Sheet" \
 				if self.root_type in ("Asset", "Liability", "Equity") else "Profit and Loss"
@@ -78,14 +82,14 @@ class Account(Document):
 		if frappe.db.exists("Account", self.name):
 			if not frappe.db.get_value("Account", self.name, "parent_account"):
 				throw(_("Root cannot be edited."), RootNotEditable)
-				
+
 		if not self.parent_account and not self.is_group:
 			frappe.throw(_("Root Account must be a group"))
-			
+
 	def validate_group_or_ledger(self):
 		if self.get("__islocal"):
 			return
-		
+
 		existing_is_group = frappe.db.get_value("Account", self.name, "is_group")
 		if self.is_group != existing_is_group:
 			if self.check_gle_exists():
@@ -153,7 +157,7 @@ class Account(Document):
 	def validate_mandatory(self):
 		if not self.root_type:
 			throw(_("Root Type is mandatory"))
-			
+
 		if not self.report_type:
 			throw(_("Report Type is mandatory"))
 
@@ -216,9 +220,9 @@ class Account(Document):
 
 			if val != [self.is_group, self.root_type, self.company]:
 				throw(_("""Merging is only possible if following properties are same in both records. Is Group, Root Type, Company"""))
-				
+
 			if self.is_group and frappe.db.get_value("Account", new, "parent_account") == old:
-				frappe.db.set_value("Account", new, "parent_account", 
+				frappe.db.set_value("Account", new, "parent_account",
 					frappe.db.get_value("Account", old, "parent_account"))
 
 		return new_account
