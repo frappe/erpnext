@@ -58,7 +58,7 @@ Exchange Rate in the payment entry should always be same as invoice (60), even i
 
 #### Example 2: Inter-bank Transfer (USD -> INR)
 
-Suppose, default currency of the company is INR. You have an Paypal account for which Currency is USD. You receive payments in the paypal account and lets say, paypal transfers amount once in a week to your other bank account which is managed in INR. 
+Suppose the default currency of the company is INR. You have a Paypal account for which Currency is USD. You receive payments in the paypal account and lets say, paypal transfers amount once in a week to your other bank account which is managed in INR. 
 
 Paypal account gets debited on different date with different exchange rate, but on transfer date the exchange rate can be different. Hence, there is generally Exchange Loss / Gain on the transfer entry.
 In the bank transfer entry, system sets exchange rate of the credit account (Paypal) based on the average incoming exchange rate. This is to maintain Paypal balance properly in company currency. In case you modify the average exchange rate, you need to adjust the exchange rate manually in the future entries, so that balance in account currency and company currency are in sync.
