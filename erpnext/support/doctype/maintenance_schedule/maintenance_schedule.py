@@ -47,28 +47,37 @@ class MaintenanceSchedule(TransactionBase):
 				self.validate_serial_no(serial_nos, d.start_date)
 				self.update_amc_date(serial_nos, d.end_date)
 
+			no_email_sp = []
 			if d.sales_person not in email_map:
 				sp = frappe.get_doc("Sales Person", d.sales_person)
-				email_map[d.sales_person] = sp.get_email_id()
+				try:
+					email_map[d.sales_person] = sp.get_email_id()
+				except frappe.ValidationError:
+					no_email_sp.append(d.sales_person)
+					
+			if no_email_sp:
+				frappe.msgprint(
+					frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
+						doc.owner, "<br>"+no_email_sp.join("<br>")
+				))
 
 			scheduled_date = frappe.db.sql("""select scheduled_date from
 				`tabMaintenance Schedule Detail` where sales_person=%s and item_code=%s and
 				parent=%s""", (d.sales_person, d.item_code, self.name), as_dict=1)
 
 			for key in scheduled_date:
-				if email_map[d.sales_person]:
-					description = "Reference: %s, Item Code: %s and Customer: %s" % \
-						(self.name, d.item_code, self.customer)
-					frappe.get_doc({
-						"doctype": "Event",
-						"owner": email_map[d.sales_person] or self.owner,
-						"subject": description,
-						"description": description,
-						"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
-						"event_type": "Private",
-						"ref_type": self.doctype,
-						"ref_name": self.name
-					}).insert(ignore_permissions=1)
+				description = frappe._("Reference: %s, Item Code: %s and Customer: %s") % \
+					(self.name, d.item_code, self.customer)
+				frappe.get_doc({
+					"doctype": "Event",
+					"owner": email_map.get(d.sales_person, self.owner),
+					"subject": description,
+					"description": description,
+					"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
+					"event_type": "Private",
+					"ref_type": self.doctype,
+					"ref_name": self.name
+				}).insert(ignore_permissions=1)
 
 		frappe.db.set(self, 'status', 'Submitted')
 
@@ -144,7 +153,7 @@ class MaintenanceSchedule(TransactionBase):
 			elif not d.sales_person:
 				throw(_("Please select Incharge Person's name"))
 
-			if getdate(d.start_date) >= getdate(d.end_date):
+			if getdate(d.start_date) > getdate(d.end_date):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
 
 	def validate_sales_order(self):
