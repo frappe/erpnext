@@ -1,7 +1,6 @@
 {
     "country_code": "cl",
-    "name": "Plan de Cuentas",
-	"disabled": "Yes",
+    "name": "Chile - Plan de Cuentas",
     "tree": {
         "Cuentas de Movimiento": {
             "Compras": {

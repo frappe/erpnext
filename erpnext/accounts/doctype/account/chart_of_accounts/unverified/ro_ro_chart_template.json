@@ -1,7 +1,6 @@
 {
     "country_code": "ro",
     "name": "Romania - Chart of Accounts",
-	"disabled": "Yes",
     "tree": {
         "CONTURI FINANCIARE": {
             "CONTURI DE BILANT": {
@@ -91,7 +90,6 @@
                         "Rezultatul reportat": {
                             "Rezultatul reportat provenit din adoptarea pentru prima data a IAS, mai pu\u00fein IAS 29": {},
                             "Rezultatul reportat provenit din corectarea erorilor contabile": {},
-                            "Rezultatul reportat provenit din trecerea la aplicarea Reglementarilor contabile conforme cu Directiva a patra a Comunitatilor Economice Europene": {},
                             "Rezultatul reportat reprezentand profitul nerepartizat sau pierderea neacoperita": {}
                         }
                     }
@@ -154,8 +152,7 @@
                         }
                     },
                     "IMOBILIZARI CORPORALE IN CURS DE APROVIZIONARE": {
-                        "Instalatii tehnice, mijloace de transport, animale si plantatii in curs de aprovizionare": {},
-                        "Mobilier, aparatura birotica, echipamente de protectie a valorilor umane si materiale si alte active corporale in curs de aprovizionare": {}
+                        "Instalatii tehnice, mijloace de transport, animale si plantatii in curs de aprovizionare": {}
                     },
                     "IMOBILIZARI FINANCIARE": {
                         "Actiuni detinute la entitatile afiliate": {},

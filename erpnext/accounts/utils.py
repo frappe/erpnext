@@ -131,12 +131,18 @@ def add_ac(args=None):
 		args.pop("cmd")
 	
 	ac = frappe.new_doc("Account")
+	
+	if args.get("ignore_permissions"):
+		ac.flags.ignore_permissions = True
+		args.pop("ignore_permissions")
+	
 	ac.update(args)
 	ac.old_parent = ""
 	ac.freeze_account = "No"
 	if cint(ac.get("is_root")):
 		ac.parent_account = None
-		ac.flags.ignore_mandatory = True
+		ac.flags.ignore_mandatory = True		
+		
 	ac.insert()
 
 	return ac.name

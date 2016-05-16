@@ -14,6 +14,8 @@ def install(company):
 
 	for d in docs:
 		try:
-			frappe.get_doc(d).insert()
+			doc = frappe.get_doc(d)
+			doc.flags.ignore_permissions = True
+			doc.insert()
 		except frappe.NameError:
 			pass
