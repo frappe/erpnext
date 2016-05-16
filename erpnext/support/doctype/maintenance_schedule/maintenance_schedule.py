@@ -153,7 +153,7 @@ class MaintenanceSchedule(TransactionBase):
 			elif not d.sales_person:
 				throw(_("Please select Incharge Person's name"))
 
-			if getdate(d.start_date) >= getdate(d.end_date):
+			if getdate(d.start_date) > getdate(d.end_date):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
 
 	def validate_sales_order(self):
