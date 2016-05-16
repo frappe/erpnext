@@ -93,7 +93,7 @@ def update_cart(item_code, qty, with_items=False):
 	set_cart_count(quotation)
 
 	context = get_cart_quotation(quotation)
-	
+
 	if cint(with_items):
 		return {
 			"items": frappe.render_template("templates/includes/cart/cart_items.html",
@@ -106,12 +106,12 @@ def update_cart(item_code, qty, with_items=False):
 			'name': quotation.name,
 			'shopping_cart_menu': get_shopping_cart_menu(context)
 		}
-		
+
 @frappe.whitelist()
 def get_shopping_cart_menu(context=None):
 	if not context:
 		context = get_cart_quotation()
-		
+
 	return frappe.render_template('templates/includes/cart/cart_dropdown.html', context)
 
 @frappe.whitelist()
@@ -307,6 +307,8 @@ def get_party(user=None):
 		return frappe.get_doc(party_doctype, party)
 
 	else:
+		if not cart_settings.enabled:
+			return None
 		customer = frappe.new_doc("Customer")
 		fullname = get_fullname(user)
 		customer.update({
@@ -367,6 +369,9 @@ def get_debtors_account(cart_settings):
 def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None):
 	if not party:
 		party = get_party()
+
+	if not party:
+		return []
 
 	address_docs = frappe.db.sql("""select * from `tabAddress`
 		where `{0}`=%s order by name limit {1}, {2}""".format(party.doctype.lower(),
