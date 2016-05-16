@@ -28,7 +28,7 @@ Holiday of a company can be recorded in the [Holiday List]({{docs_base_url}}/use
 
 ####Over Production Allowance Percentage
 
-In Production Order, `Qty to Manufacture` is set. When creating Manufacture entry against Production Order, it validates `Qty to Manufature` entered in production order, and doesn't allow creating Manufacture Entry for more qty and Production Order qty. If you want to create Manufacture Qty than Production Order qty, mention Over Production Allowance Qty in the Manufacturing Settings. Based on Allowance Percentage mentioned, you will be able to create Manufacture Entry for more Qty than in Production Order.
+While making Production Orders against a Sales Order, the system will only allow production item quantity to be lesser than or equal to the quantity in the Sales Order. In case you wish to allow Production Orders to be raised with greater quantity, you can mention the Over Production Allowance Percentage here.
 
 ####Back-flush Raw Materials Based On
 
