@@ -12,37 +12,40 @@ frappe.ui.form.on('Cheque Print Template', {
 				}).addClass("btn-primary");
 				
 			$(frm.fields_dict.cheque_print_preview.wrapper).empty()
-			
-			$("<div style='position: relative; overflow-x: scroll;'>\
-				<div id='cheque_preview' style='width:"+ frm.doc.cheque_width + "cm; \
-					height: "+ frm.doc.cheque_height +"cm;\
-					background-image: url("+frm.doc.scanned_cheque+");\
+				
+				
+			var template = '<div style="position: relative; overflow-x: scroll;">\
+				<div id="cheque_preview" style="width: {{ cheque_width }}cm; \
+					height: {{ cheque_height }}cm;\
+					background-image: url({{ scanned_cheque }});\
 					background-repeat: no-repeat;\
-					background-size: cover;'>\
-					<span style='top: "+frm.doc.date_dist_from_top_edge+"cm;\
-						left: "+ flt(frm.doc.date_dist_from_left_edge) +"cm;\
-						position: absolute;'> "+ frappe.datetime.obj_to_user() +" </span>\
-					<span style='top: "+frm.doc.acc_no_dist_from_top_edge+"cm;\
-						left: "+ frm.doc.acc_no_dist_from_left_edge +"cm;\
-						position: absolute;'> Acc. No. </span>\
-					<span style='top:"+ frm.doc.payer_name_from_top_edge +"cm;\
-						left: "+ flt(frm.doc.payer_name_from_left_edge) +"cm;\
-						position: absolute;'> Payer Name </span>\
-					<span style='top:"+ frm.doc.amt_in_words_from_top_edge +"cm;\
-						left: "+ flt(frm.doc.amt_in_words_from_left_edge) +"cm;\
+					background-size: cover;">\
+					<span style="top: {{ date_dist_from_top_edge }}cm;\
+						left: {{ date_dist_from_left_edge }}cm;\
+						position: absolute;"> {{ frappe.datetime.obj_to_user() }} </span>\
+					<span style="top: {{ acc_no_dist_from_top_edge }}cm;\
+						left: {{ acc_no_dist_from_left_edge }}cm;\
+						position: absolute;"> Acc. No. </span>\
+					<span style="top: {{ payer_name_from_top_edge }}cm;\
+						left: {{ payer_name_from_left_edge }}cm;\
+						position: absolute;"> Payer Name </span>\
+					<span style="top:{{ amt_in_words_from_top_edge }}cm;\
+						left: {{ amt_in_words_from_left_edge }}cm;\
 						position: absolute;\
 						display: block;\
-						width: "+frm.doc.amt_in_word_width+"cm;\
-						line-height: "+frm.doc.amt_in_words_line_spacing+"cm;\
-						word-wrap: break-word;'> Amount in Words </span>\
-					<span style='top:"+ frm.doc.amt_in_figures_from_top_edge +"cm;\
-						left: "+ flt(frm.doc.amt_in_figures_from_left_edge) +"cm;\
-						position: absolute;'> 1000 </span>\
-					<span style='top:"+ frm.doc.signatory_from_top_edge +"cm;\
-						left: "+ flt(frm.doc.signatory_from_left_edge) +"cm;\
-						position: absolute;'> Signatory Name </span>\
+						width: {{ amt_in_word_width }}cm;\
+						line-height: {{ amt_in_words_line_spacing }}cm;\
+						word-wrap: break-word;"> Amount in Words </span>\
+					<span style="top: {{ amt_in_figures_from_top_edge }}cm;\
+						left: {{ amt_in_figures_from_left_edge }}cm;\
+						position: absolute;"> 1000 </span>\
+					<span style="top: {{ signatory_from_top_edge }}cm;\
+						left: {{ signatory_from_left_edge }}cm;\
+						position: absolute;"> Signatory Name </span>\
 				</div>\
-			</div>").appendTo(frm.fields_dict.cheque_print_preview.wrapper)
+			</div>';
+			
+			$(frappe.render(template, frm.doc)).appendTo(frm.fields_dict.cheque_print_preview.wrapper)
 		}
 	}
 });
