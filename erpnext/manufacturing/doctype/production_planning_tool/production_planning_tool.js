@@ -101,7 +101,7 @@ cur_frm.fields_dict['sales_orders'].grid.get_field('sales_order').get_query = fu
 
 cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc) {
  	return erpnext.queries.item({
-		'is_pro_applicable': 1
+		'is_stock_item': 1
 	});
 }
 
