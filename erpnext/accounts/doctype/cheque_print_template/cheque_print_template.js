@@ -6,14 +6,15 @@ frappe.provide("erpnext.cheque_print");
 frappe.ui.form.on('Cheque Print Template', {
 	refresh: function(frm) {
 		if(!frm.doc.__islocal) {
-			frm.add_custom_button(__("Cheque Print Preview"), function() {
+			frm.add_custom_button(frm.doc.has_print_format?__("Update Print Format"):__("Create Print Format"),
+				function() {
 					erpnext.cheque_print.view_cheque_print(frm);
-				});
+				}).addClass("btn-primary");
 				
 			$(frm.fields_dict.cheque_print_preview.wrapper).empty()
 			
 			$("<div style='position: relative; overflow-x: scroll;'>\
-				<div style='width:"+ frm.doc.cheque_width + "cm; \
+				<div id='cheque_preview' style='width:"+ frm.doc.cheque_width + "cm; \
 					height: "+ frm.doc.cheque_height +"cm;\
 					background-image: url("+frm.doc.scanned_cheque+");\
 					background-repeat: no-repeat;\
@@ -48,43 +49,19 @@ frappe.ui.form.on('Cheque Print Template', {
 
 
 erpnext.cheque_print.view_cheque_print = function(frm) {
-		var dialog = new frappe.ui.Dialog({
-			title: 'Cheque Print Preview'
-		});
-
-		dialog.show();
-		var body = dialog.body;
-		console.log(frm.doc.cheque_width)
-		dialog.$wrapper.find('.modal-dialog').css("width", "790px");
-
-		$(body).html("<div style='width:"+ frm.doc.cheque_width + "cm; \
-						height: "+ frm.doc.cheque_height +"cm;\
-						background-image: url("+frm.doc.cheque_scan+");\
-						background-repeat: no-repeat;\
-						background-size: cover;\
-						border: 1px solid black;'>\
-							<span style='top: "+frm.doc.data_7+"cm;\
-								left: "+ flt(frm.doc.data_8) +"cm;\
-								position: absolute;'> "+ frappe.datetime.obj_to_user() +" </span>\
-							<span style='top: "+frm.doc.acc_no_ps+"cm;\
-								left: "+ frm.doc.str_loc_acc_no +"cm;\
-								position: absolute;'> 1234567890 </span>\
-							<span style='top:"+ frm.doc.data_9 +"cm;\
-								left: "+ flt(frm.doc.data_10) +"cm;\
-								position: absolute;'> Saurabh Palande </span>\
-							<span style='top:"+ frm.doc.data_11 +"cm;\
-								left: "+ flt(frm.doc.data_13) +"cm;\
-								position: absolute;\
-								display: block;\
-								width: "+frm.doc.ln_width+"cm;\
-								line-height: "+frm.doc.ln_spacing+"cm;\
-								word-wrap: break-word;'>One Crore One Lakh Forty One Thousand Six hundred And Sixty Six Only </span>\
-							<span style='top:"+ frm.doc.data_15 +"cm;\
-								left: "+ flt(frm.doc.data_16) +"cm;\
-								position: absolute;'> 1,01,41666.00 </span>\
-							<span style='top:"+ frm.doc.data_17 +"cm;\
-								left: "+ flt(frm.doc.data_18) +"cm;\
-								position: absolute;'> Frappe Technologies Pvt Ltd </span>\
-					</div>")
-		
-	}
+	frappe.call({
+		method: "erpnext.accounts.doctype.cheque_print_template.cheque_print_template.create_or_update_cheque_print_format",
+		args:{
+			"template_name": frm.doc.name
+		},
+		callback: function(r) {
+			if (!r.exe && !frm.doc.has_print_format) {
+				var doc = frappe.model.sync(r.message);
+				frappe.set_route("Form", r.message.doctype, r.message.name);
+			}
+			else {
+				frappe.msgprint(__("Print settings updated in respective print format"))
+			}
+		}
+	})
+}
