@@ -57,8 +57,8 @@ class MaintenanceSchedule(TransactionBase):
 					
 			if no_email_sp:
 				frappe.msgprint(
-					frappe._("Setting Events to <b>{0}</b>, since the Employee attached to the below Sales Persons does not have a User ID<br>{1}").format(
-						doc.owner, no_email_sp.join("<br>")
+					frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
+						doc.owner, "<br>"+no_email_sp.join("<br>")
 				))
 
 			scheduled_date = frappe.db.sql("""select scheduled_date from
