@@ -57,7 +57,7 @@ class MaintenanceSchedule(TransactionBase):
 					
 			if no_email_sp:
 				frappe.msgprint(
-					"Setting Events to <b>{0}</b>, since the Employee attached to the below Sales Persons does not have a User ID<br>{1}".format(
+					frappe._("Setting Events to <b>{0}</b>, since the Employee attached to the below Sales Persons does not have a User ID<br>{1}").format(
 						doc.owner, no_email_sp.join("<br>")
 				))
 
@@ -66,7 +66,7 @@ class MaintenanceSchedule(TransactionBase):
 				parent=%s""", (d.sales_person, d.item_code, self.name), as_dict=1)
 
 			for key in scheduled_date:
-				description = "Reference: %s, Item Code: %s and Customer: %s" % \
+				description = frappe._("Reference: %s, Item Code: %s and Customer: %s") % \
 					(self.name, d.item_code, self.customer)
 				frappe.get_doc({
 					"doctype": "Event",
