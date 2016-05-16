@@ -201,6 +201,11 @@ def get_data():
 					"doctype": "Cost Center",
 				},
 				{
+					"type": "doctype",
+					"name": "Budget",
+					"description": _("Define budget for a financial year.")
+				},
+				{
 					"type": "report",
 					"name": "Budget Variance Report",
 					"is_query_report": True,

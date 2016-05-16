@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import unittest, frappe
 from frappe.utils import flt
-from erpnext.accounts.utils import get_actual_expense, BudgetError, get_fiscal_year
+from erpnext.accounts.doctype.budget.budget import get_actual_expense, BudgetError, get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
 
 
