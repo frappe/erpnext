@@ -7,20 +7,34 @@ frappe.pages['pos'].on_page_load = function(wrapper) {
 		title: 'Point of Sale',
 		single_column: true
 	});
-	
-	wrapper = $(wrapper).find('.page-content')
-	new erpnext.pos.PointOfSale(page, wrapper)
+
+	wrapper.pos = new erpnext.pos.PointOfSale(wrapper)
 }
 
+frappe.pages['pos'].refresh = function(wrapper) {
+	wrapper.pos.on_refresh_page()
+}
+
+
 erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
-	init: function(page, wrapper){
-		this.page = page;
-		this.wrapper = wrapper;
+	init: function(wrapper){
+		this.load = true;
+		this.page = wrapper.page;
+		this.wrapper = $(wrapper).find('.page-content');
 		this.set_indicator();
 		this.onload();
 		this.make_menu_list();
 		this.set_interval_for_si_sync();
 		this.si_docs = this.get_doc_from_localstorage();
+	},
+	
+	on_refresh_page: function() {
+		var me = this;
+		if(this.load){
+			this.load = false;
+		}else{
+			this.create_new();
+		}
 	},
 
 	check_internet_connection: function(){
@@ -48,7 +62,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	onload: function(){
 		var me = this;
-
 		this.get_data_from_server(function(){
 			me.create_new(); 
 		});
@@ -64,7 +77,11 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		});
 	
 		this.page.add_menu_item(__("Sync Master Data"), function(){
-			me.get_data_from_server()
+			me.get_data_from_server(function(){
+				me.load_data()
+				me.make_customer()
+				me.make_item_list()
+			})
 		});
 	
 		this.page.add_menu_item(__("New Sales Invoice"), function() {
@@ -83,7 +100,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.list_dialog.show();
 		this.list_body = this.list_dialog.body;
 		$(this.list_body).append('<div class="row list-row list-row-head pos-invoice-list">\
-				<div class="col-xs-6">Customer</div>\
+				<div class="col-xs-3">Sr</div>\
+				<div class="col-xs-3">Customer</div>\
 				<div class="col-xs-3 text-right">Grand Total</div>\
 				<div class="col-xs-3 text-right">Status</div>\
 		</div>')
@@ -91,9 +109,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$.each(this.si_docs, function(index, data){
 			for(key in data) {
 				$(frappe.render_template("pos_invoice_list", {
+					sr: index + 1,
 					name: key,
 					customer: data[key].customer,
-					grand_total: data[key].grand_total,
+					grand_total: format_currency(data[key].grand_total, me.frm.doc.currency),
 					status: (data[key].docstatus == 1) ? 'Submitted' : 'Draft'
 				})).appendTo($(me.list_body));
 			}
@@ -104,11 +123,20 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			doc_data = me.get_invoice_doc(me.si_docs)
 			if(doc_data){
 				me.frm.doc = doc_data[0][me.name];
+				me.set_missing_values();
 				me.refresh();
 				me.disable_input_field();
 				me.list_dialog.hide();
 			}
 		})
+	},
+	
+	set_missing_values: function(){
+		var me = this;
+		doc = JSON.parse(localStorage.getItem('doc'))
+		if(this.frm.doc.payments.length == 0){
+			this.frm.doc.payments = doc.payments;
+		}
 	},
 
 	get_invoice_doc: function(si_docs){
@@ -127,6 +155,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		frappe.call({
 			method: "erpnext.accounts.doctype.sales_invoice.pos.get_pos_data",
 			freeze: true,
+			freeze_message: __("Master data syncing, it might take some time"),
 			callback: function(r){
 				window.items = r.message.items;
 				window.customers = r.message.customers;
@@ -142,8 +171,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	},
 	
 	create_new: function(){
-		this.frm = {}
 		var me = this;
+		this.frm = {}
 		this.name = '';
 		this.frm.doc =  JSON.parse(localStorage.getItem('doc'))
 		this.load_data();
@@ -555,11 +584,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.create_invoice();
 				me.make_payment();
 			});
-		}else if(this.frm.doc.docstatus == 0){
+		}else if(this.frm.doc.docstatus == 0 && this.name){
 			this.page.set_primary_action(__("Submit"), function() {
-				frappe.confirm(__("Do you really want to submit the invoice?"), function () {
-					me.write_off_amount()
-				})
+				me.write_off_amount()
 			})
 		}else if(this.frm.doc.docstatus == 1){
 			this.page.set_primary_action(__("Print"), function() {
@@ -571,6 +598,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					}, 1000)
 				});
 			})
+		}else {
+			this.page.clear_primary_action()
 		}
 	},
 	
@@ -582,27 +611,36 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			dialog = new frappe.ui.Dialog({
 				title: 'Write Off Amount',
 				fields: [
-					{fieldtype: "Currency", fieldname: "write_off_amount", label: __("Amount"), reqd: 1},
+					{fieldtype: "Check", fieldname: "write_off_amount", label: __("Write of Outstanding Amount")},
 				]
-			  });
+			});
   
-			  dialog.show();
+			dialog.show();
 			  
-			  dialog.fields_dict.write_off_amount.$input.change(function(){
-				  value = dialog.get_values()
-			  })
-			  
-			  dialog.set_primary_action(__("Submit"), function(){
-				  me.frm.doc.write_off_amount = value.write_off_amount;
-				  me.calculate_outstanding_amount();
-				  dialog.hide();
-				  me.change_status();
-			  })
+			dialog.fields_dict.write_off_amount.$input.change(function(){
+				write_off_amount = dialog.get_values().write_off_amount
+				me.frm.doc.write_off_outstanding_amount_automatically = write_off_amount;
+				me.frm.doc.base_write_off_amount = (write_off_amount==1) ? flt(me.frm.doc.grand_total - me.frm.doc.paid_amount, precision("outstanding_amount")) : 0;
+				me.frm.doc.write_off_amount = flt(me.frm.doc.base_write_off_amount * me.frm.doc.conversion_rate, precision("write_off_amount"))
+				me.calculate_outstanding_amount();
+			})
+			
+			dialog.set_primary_action(__("Submit"), function(){
+				dialog.hide()
+				me.submit_invoice()
+			})
 		}else{
-			me.change_status();
+			this.submit_invoice()
 		}
 	},
 	
+	submit_invoice: function(){
+		var me = this;
+		frappe.confirm(__("Do you really want to submit the invoice?"), function () {
+			me.change_status();
+		})
+	},
+
 	change_status: function(){
 		if(this.frm.doc.docstatus == 0){
 			this.frm.doc.docstatus = 1;
@@ -662,14 +700,18 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	},
 
 	get_doc_from_localstorage: function(){
-		return JSON.parse(localStorage.getItem('sales_invoice_doc')) || [];
+		try{
+			return JSON.parse(localStorage.getItem('sales_invoice_doc')) || [];
+		}catch(e){
+			return []
+		}
 	},
 
 	set_interval_for_si_sync: function(){
 		var me = this;
 		setInterval(function(){
 			me.sync_sales_invoice()
-		}, 6000)
+		}, 60000)
 	},
 
 	sync_sales_invoice: function(){
@@ -711,14 +753,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	remove_doc_from_localstorage: function(){
 		var me = this;
 		this.si_docs = this.get_doc_from_localstorage();
+		this.new_si_docs = []
 		if(this.removed_items){
 			$.each(this.si_docs, function(index, data){
 				for(key in data){
-					if(in_list(me.removed_items, key)){			
-						me.si_docs.splice(index)
+					if(!in_list(me.removed_items, key)){
+						me.new_si_docs.push(data)
 					}
 				}
 			})
+			this.si_docs = this.new_si_docs;
 			this.update_localstorage();
 		}
 	},

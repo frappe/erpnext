@@ -20,10 +20,8 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		var me = this;
 	
 		this.dialog.set_primary_action(__("Submit"), function() {
-			frappe.confirm(__("Do you really want to submit the invoice?"), function () {
-				me.write_off_amount();
-				me.dialog.hide();
-			})
+			me.dialog.hide()
+			me.write_off_amount()
 		})
 	},
 
@@ -33,13 +31,6 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		$(this.$body).html(frappe.render_template('pos_payment', this.frm.doc))
 		this.show_payment_details();
 		this.bind_keyboard_event()
-	},
-
-	pay_amount: function(){
-		var me = this;
-		this.make_multimode_payment();
-		this.calculate_outstanding_amount()
-		this.show_payment_details();
 	},
 
 	make_multimode_payment: function(){
@@ -91,12 +82,12 @@ erpnext.payments = erpnext.stock.StockController.extend({
 				me.payment_val = flt(me.frm.doc.outstanding_amount)
 				me.selected_mode.val(format_number(me.payment_val, 2));
 				me.update_paid_amount()
-				me.bind_amount_change_event();
 			}else if(flt(me.selected_mode.val()) > 0){
 				//If user click on existing row which has value
 				me.payment_val = flt(me.selected_mode.val());
 			}
 			me.selected_mode.select()
+			me.bind_amount_change_event();
 		})
 	},
 	

@@ -165,7 +165,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		erpnext.hide_company();
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
-		// erpnext.pos.make_pos_btn(this.frm);
 		this.setup_sms();
 		this.make_show_payments_btn();
 	},
