@@ -47,12 +47,19 @@ class MaintenanceSchedule(TransactionBase):
 				self.validate_serial_no(serial_nos, d.start_date)
 				self.update_amc_date(serial_nos, d.end_date)
 
+			no_email_sp = []
 			if d.sales_person not in email_map:
 				sp = frappe.get_doc("Sales Person", d.sales_person)
 				try:
 					email_map[d.sales_person] = sp.get_email_id()
 				except frappe.ValidationError:
-					pass
+					no_email_sp.append(d.sales_person)
+					
+			if no_email_sp:
+				frappe.msgprint(
+					"Setting Events to <b>{0}</b>, since the Employee attached to the below Sales Persons does not have a User ID<br>{1}".format(
+						doc.owner, no_email_sp.join("<br>")
+				))
 
 			scheduled_date = frappe.db.sql("""select scheduled_date from
 				`tabMaintenance Schedule Detail` where sales_person=%s and item_code=%s and
