@@ -20,6 +20,7 @@ def setup_complete(args=None):
 
 	install_fixtures.install(args.get("country"))
 
+	update_setup_wizard_access()
 	create_fiscal_year_and_company(args)
 	create_users(args)
 	set_defaults(args)
@@ -52,6 +53,14 @@ def setup_complete(args=None):
 				frappe.message_log.pop()
 
 			pass
+
+def update_setup_wizard_access():
+	setup_wizard = frappe.get_doc('Page', 'setup-wizard')
+	for roles in setup_wizard.roles:
+		if roles.role == 'System Manager':
+			roles.role = 'Administrator'
+	setup_wizard.flags.ignore_permissions = 1
+	setup_wizard.save()
 
 def create_fiscal_year_and_company(args):
 	if (args.get('fy_start_date')):
