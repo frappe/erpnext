@@ -1,6 +1,9 @@
 import frappe
 
 def execute():
+	frappe.reload_doc("accounts", "doctype", "budget")
+	frappe.reload_doc("accounts", "doctype", "budget_account")
+	
 	existing_budgets = frappe.db.sql("""
 		select 
 			cc.name, cc.company, cc.distribution_id, 
