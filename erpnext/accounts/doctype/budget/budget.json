@@ -112,7 +112,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "default": "Stop", 
@@ -139,7 +139,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "default": "Warn", 
@@ -277,7 +277,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-05-16 13:12:10.439375", 
+ "modified": "2016-05-16 15:00:40.233685", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Budget", 

@@ -69,11 +69,11 @@ Since Project's Cost Center is updated in both sales and purchase entries, you c
 
 #### 3.2 Projectwise Budgeting
 
-If you have also define budgets in the Cost Center of a Project, you will get Budget Variance Report for a Cost Center of a Project.
+You can define budgets against the Cost Center associated with a Project. At any point of time, you can refer Budget Variance Report to analysis the expense vs budget against a cost center.
 
 To check Budget Variance report, go to:
 
-`Accounts > Standard Reports > Budget Variance Report`
+`Accounts > Budget and Cost Center > Budget Variance Report`
 
 [Click here to learn how to do budgeting from Cost Center]({{docs_base_url}}/user/manual/en/accounts/budgeting.html).
 

@@ -14,7 +14,8 @@ def delete_company_transactions(company_name):
 	doc = frappe.get_doc("Company", company_name)
 
 	if frappe.session.user != doc.owner:
-		frappe.throw(_("Transactions can only be deleted by the creator of the Company"), frappe.PermissionError)
+		frappe.throw(_("Transactions can only be deleted by the creator of the Company"), 
+			frappe.PermissionError)
 
 	delete_bins(company_name)
 	delete_time_logs(company_name)
@@ -22,7 +23,7 @@ def delete_company_transactions(company_name):
 
 	for doctype in frappe.db.sql_list("""select parent from
 		tabDocField where fieldtype='Link' and options='Company'"""):
-		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget Detail",
+		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget",
 			"Party Account", "Employee", "Sales Taxes and Charges Template",
 			"Purchase Taxes and Charges Template", "POS Profile", 'BOM'):
 				delete_for_doctype(doctype, company_name)
