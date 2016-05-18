@@ -2066,7 +2066,7 @@ DocType: Delivery Note,Required only for sample item.,ಕೇವಲ ಮಾದ�
 DocType: Stock Ledger Entry,Actual Qty After Transaction,ವ್ಯವಹಾರದ ನಂತರ ನಿಜವಾದ ಪ್ರಮಾಣ
 ,Pending SO Items For Purchase Request,ಖರೀದಿ ವಿನಂತಿ ಆದ್ದರಿಂದ ಐಟಂಗಳು ಬಾಕಿ
 DocType: Supplier,Billing Currency,ಬಿಲ್ಲಿಂಗ್ ಕರೆನ್ಸಿ
-apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +148,Extra Large,ದೊಡ್ಡದು
+apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +148,Extra Large,ಎಕ್ಸ್ಟ್ರಾ ದೊಡ್ಡದು
 ,Profit and Loss Statement,ಲಾಭ ಮತ್ತು ನಷ್ಟ ಹೇಳಿಕೆ
 DocType: Bank Reconciliation Detail,Cheque Number,ಚೆಕ್ ಸಂಖ್ಯೆ
 DocType: Payment Tool Detail,Payment Tool Detail,ಪಾವತಿ ಉಪಕರಣ ವಿವರ
@@ -2076,7 +2076,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +500,Warnin
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +362,Local,ಸ್ಥಳೀಯ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +26,Loans and Advances (Assets),ಸಾಲ ಮತ್ತು ಅಡ್ವಾನ್ಸಸ್ ( ಆಸ್ತಿಗಳು )
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +12,Debtors,ಸಾಲಗಾರರು
-apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +147,Large,ದೊಡ್ಡದು
+apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +147,Large,ದೊಡ್ಡ
 DocType: C-Form Invoice Detail,Territory,ಕ್ಷೇತ್ರ
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +139,Please mention no of visits required,ನಮೂದಿಸಿ ಅಗತ್ಯವಿದೆ ಭೇಟಿ ಯಾವುದೇ
 DocType: Stock Settings,Default Valuation Method,ಡೀಫಾಲ್ಟ್ ಮೌಲ್ಯಮಾಪನ ವಿಧಾನ
