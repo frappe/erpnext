@@ -27,5 +27,3 @@ class JobOpening(WebsiteGenerator):
 def get_list_context(context):
 	context.title = _("Jobs")
 	context.introduction = _('Current Job Openings')
-	context.show_sidebar=True
-	context.show_search=True
