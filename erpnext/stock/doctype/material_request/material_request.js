@@ -7,20 +7,15 @@ frappe.ui.form.on('Material Request', {
 	setup: function(frm) {
 		frm.get_field('items').grid.editable_fields = [
 			{fieldname: 'item_code', columns: 4},
-			{fieldname: 'qty', columns: 3},
-			{fieldname: 'uom', columns: 2},
+			{fieldname: 'qty', columns: 2},
+			{fieldname: 'warehouse', columns: 3},
 			{fieldname: 'schedule_date', columns: 2},
 		];
-
+	},
+	onload: function(frm) {
 		// formatter for material request item
-		frappe.meta.set_formatter('Material Request Item', 'item_code', frm.doc.name,
-			function(value, df, options, doc) {
-				return repl('<span class="indicator %(color)s">%(name)s</span>', {
-					color: (doc.qty<=doc.ordered_qty) ? "green" : "orange",
-					name: doc.item_code
-				});
-			}
-		);
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange" })
 	}
 });
 

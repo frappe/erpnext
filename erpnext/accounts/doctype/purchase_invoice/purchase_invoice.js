@@ -15,16 +15,21 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				this.frm.set_df_property("credit_to", "print_hide", 0);
 			}
 		}
+
+		// formatter for material request item
+		this.frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
+
 	},
 
 	refresh: function(doc) {
 		this._super();
-		
+
 		hide_fields(this.frm.doc);
 
 		// Show / Hide button
 		this.show_general_ledger();
-		
+
 		if(doc.update_stock==1 && doc.docstatus==1) {
 			this.show_stock_ledger();
 		}
@@ -34,13 +39,13 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				this.frm.add_custom_button(__('Payment'), this.make_bank_entry, __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
-			
+
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
-				cur_frm.add_custom_button(doc.update_stock ? __('Purchase Return') : __('Debit Note'), 
+				cur_frm.add_custom_button(doc.update_stock ? __('Purchase Return') : __('Debit Note'),
 					this.make_debit_note, __("Make"));
 			}
 		}
-		
+
 		if(doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Purchase Order'), function() {
 				frappe.model.map_current_doc({
@@ -69,7 +74,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				})
 			}, __("Get items from"));
 		}
-		
+
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 	},
 
@@ -156,7 +161,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			frm: cur_frm
 		})
 	},
-	
+
 	asset: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if(row.asset) {
@@ -188,13 +193,13 @@ function hide_fields(doc) {
 			var docfield = frappe.meta.docfield_map[doc.doctype][parent_fields[i]];
 			if(!docfield.hidden) unhide_field(parent_fields[i]);
 		}
-	
+
 	}
 
 	item_fields_stock = ['warehouse_section', 'received_qty', 'rejected_qty'];
 
 	cur_frm.fields_dict['items'].grid.set_column_disp(item_fields_stock,
-		(cint(doc.update_stock)==1 ? true : false));	
+		(cint(doc.update_stock)==1 ? true : false));
 
 	cur_frm.refresh_fields();
 }
@@ -361,7 +366,7 @@ frappe.ui.form.on("Purchase Invoice", {
 			}
 		})
 	},
-	
+
 	is_subcontracted: function(frm) {
 		if (frm.doc.is_subcontracted === "Yes") {
 			erpnext.buying.get_default_bom(frm);
@@ -369,4 +374,3 @@ frappe.ui.form.on("Purchase Invoice", {
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
 	}
 })
-	

@@ -8,6 +8,10 @@ frappe.ui.form.on("Sales Order", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+
+		// formatter for material request item
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.delivered_qty) ? "green" : "orange" })
 	}
 });
 
@@ -117,7 +121,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	tc_name: function() {
 		this.get_terms();
 	},
-	
+
 	make_material_request: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",

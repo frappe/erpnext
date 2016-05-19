@@ -63,7 +63,7 @@ class SalesInvoice(SellingController):
 		self.validate_write_off_account()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
-		
+
 		# if cint(self.is_pos):
 			# self.validate_pos()
 
@@ -85,7 +85,7 @@ class SalesInvoice(SellingController):
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
-		
+
 	def update_change_amount(self):
 		self.base_paid_amount = 0.0
 		if self.paid_amount:
@@ -95,7 +95,7 @@ class SalesInvoice(SellingController):
 				self.change_amount = flt(self.paid_amount - self.grand_total, self.precision("change_amount"))
 				self.base_change_amount = flt(self.change_amount * self.conversion_rate, self.precision("base_change_amount"))
 
-	def on_submit(self):			
+	def on_submit(self):
 		if not self.recurring_id:
 			frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			 	self.company, self.base_grand_total, self)
@@ -109,12 +109,12 @@ class SalesInvoice(SellingController):
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.update_billing_status_in_dn()
-		
-		# Updating stock ledger should always be called after updating prevdoc status, 
+
+		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
-		
+
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
 
@@ -149,8 +149,8 @@ class SalesInvoice(SellingController):
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 
 		self.validate_c_form_on_cancel()
-		
-		# Updating stock ledger should always be called after updating prevdoc status, 
+
+		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
@@ -466,14 +466,14 @@ class SalesInvoice(SellingController):
 				msgprint(_("POS Profile required to make POS Entry"), raise_exception=True)
 
 		return warehouse
-		
+
 	def set_income_account_for_fixed_assets(self):
 		disposal_account = depreciation_cost_center = None
 		for d in self.get("items"):
 			if d.is_fixed_asset:
 				if not disposal_account:
 					disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(self.company)
-					
+
 				d.income_account = disposal_account
 				if not d.cost_center:
 					d.cost_center = depreciation_cost_center
@@ -573,12 +573,12 @@ class SalesInvoice(SellingController):
 			if flt(item.base_net_amount):
 				if item.is_fixed_asset:
 					asset = frappe.get_doc("Asset", item.asset)
-				
+
 					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, item.base_net_amount)
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle))
-					
+
 					asset.db_set("disposal_date", self.posting_date)
 					asset.set_status("Sold" if self.docstatus==1 else None)
 				else:

@@ -10,12 +10,24 @@ cur_frm.email_field = "contact_email";
 
 frappe.provide("erpnext.selling");
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
+	setup: function() {
+		this._super();
+		this.frm.get_field('items').grid.editable_fields = [
+			{fieldname: 'item_code', columns: 4},
+			{fieldname: 'qty', columns: 2},
+			{fieldname: 'rate', columns: 3},
+			{fieldname: 'amount', columns: 2}
+		];
+	},
+
 	onload: function() {
 		this._super();
 		this.setup_queries();
 	},
 
 	setup_queries: function() {
+
+
 		var me = this;
 
 		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
@@ -336,17 +348,21 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
 	if(in_list(["Delivery Note", "Sales Invoice"], frm.doc.doctype)) {
-		frappe.call({
-			method:'erpnext.projects.doctype.project.project.get_cost_center_name' ,
-			args: {	project: frm.doc.project	},
-			callback: function(r, rt) {
-				if(!r.exc) {
-					$.each(frm.doc["items"] || [], function(i, row) {
-						frappe.model.set_value(row.doctype, row.name, "cost_center", r.message);
-						msgprint(__("Cost Center For Item with Item Code '"+row.item_name+"' has been Changed to "+ r.message));
-					})
+		if(frm.doc.project) {
+			frappe.call({
+				method:'erpnext.projects.doctype.project.project.get_cost_center_name' ,
+				args: {	project: frm.doc.project	},
+				callback: function(r, rt) {
+					if(!r.exc) {
+						$.each(frm.doc["items"] || [], function(i, row) {
+							if(r.message) {
+								frappe.model.set_value(row.doctype, row.name, "cost_center", r.message);
+								msgprint(__("Cost Center For Item with Item Code '"+row.item_name+"' has been Changed to "+ r.message));
+							}
+						})
+					}
 				}
-			}
-		})
+			})
+		}
 	}
 })
