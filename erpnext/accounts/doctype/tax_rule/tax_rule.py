@@ -140,4 +140,11 @@ def get_tax_template(posting_date, args):
 			if rule.get(key): rule.no_of_keys_matched += 1
 
 	rule = sorted(tax_rule, lambda b, a: cmp(a.no_of_keys_matched, b.no_of_keys_matched) or cmp(a.priority, b.priority))[0]
-	return rule.sales_tax_template or rule.purchase_tax_template
+
+	tax_template = rule.sales_tax_template or rule.purchase_tax_template
+	doctype = "{0} Taxes and Charges Template".format(rule.tax_type)
+
+	if frappe.db.get_value(doctype, tax_template, 'disabled')==1:
+		return None
+
+	return tax_template

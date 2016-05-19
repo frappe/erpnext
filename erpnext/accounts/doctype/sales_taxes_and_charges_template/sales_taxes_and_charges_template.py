@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from erpnext.controllers.accounts_controller import validate_taxes_and_charges, validate_inclusive_tax
 
@@ -19,6 +20,12 @@ def valdiate_taxes_and_charges_template(doc):
 			where is_default = 1 and name != %s and company = %s""".format(doc.doctype),
 			(doc.name, doc.company))
 
+	validate_disabled(doc)
+
 	for tax in doc.get("taxes"):
 		validate_taxes_and_charges(tax)
 		validate_inclusive_tax(tax, doc)
+
+def validate_disabled(doc):
+	if doc.is_default and doc.disabled:
+		frappe.throw(_("Disabled template must not be default template"))
