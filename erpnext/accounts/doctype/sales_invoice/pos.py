@@ -19,7 +19,7 @@ def get_pos_data():
 	if pos_profile.get('name'):
 		pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
 	else:
-		frappe.msgprint(_("Warning Message: Create pos profile"))
+		frappe.msgprint(_("Warning Message: Create POS Profile"))
 
 	update_pos_profile_data(doc, pos_profile)
 	update_multi_mode_option(doc, pos_profile)
@@ -47,7 +47,7 @@ def update_pos_profile_data(doc, pos_profile):
 		update_tax_table(doc)
 
 	doc.currency = pos_profile.get('currency') or company_data.default_currency
-	doc.conversion_rate = 1.0 
+	doc.conversion_rate = 1.0
 	if doc.currency != company_data.default_currency:
 		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency)
 	doc.selling_price_list = pos_profile.get('selling_price_list') or frappe.db.get_value('Selling Settings', None, 'selling_price_list')
@@ -57,16 +57,16 @@ def update_pos_profile_data(doc, pos_profile):
 	doc.apply_discount_on = pos_profile.get('apply_discount_on') or ''
 	doc.customer_group = pos_profile.get('customer_group') or get_root('Customer Group')
 	doc.territory = pos_profile.get('territory') or get_root('Territory')
-	
+
 def get_root(table):
-	root = frappe.db.sql(""" select name from `tab%(table)s` having 
+	root = frappe.db.sql(""" select name from `tab%(table)s` having
 		min(lft)"""%{'table': table}, as_dict=1)
-	
-	return root[0].name 
+
+	return root[0].name
 
 def update_multi_mode_option(doc, pos_profile):
 	from frappe.model import default_fields
-	
+
 	if not pos_profile:
 		return
 
@@ -100,7 +100,7 @@ def get_items(doc, pos_profile):
 		item.cost_center = pos_profile.get('cost_center') or item_doc.selling_cost_center
 		item.actual_qty = frappe.db.get_value('Bin', {'item_code': item.name,
 								'warehouse': item.default_warehouse}, 'actual_qty') or 0
-		item.serial_nos = frappe.db.sql_list("""select name from `tabSerial No` where warehouse= %(warehouse)s 
+		item.serial_nos = frappe.db.sql_list("""select name from `tabSerial No` where warehouse= %(warehouse)s
 			and item_code = %(item_code)s""", {'warehouse': item.default_warehouse, 'item_code': item.item_code})
 		item_list.append(item)
 
@@ -118,7 +118,7 @@ def get_pricing_rules(doc):
 		return frappe.db.sql(""" Select * from `tabPricing Rule` where docstatus < 2 and disable = 0
 					and selling = 1 and ifnull(company, '') in (%(company)s, '') and
 					ifnull(for_price_list, '') in (%(price_list)s, '')  and %(date)s between
-					ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31') order by priority desc, name desc""", 
+					ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31') order by priority desc, name desc""",
 				{'company': doc.company, 'price_list': doc.selling_price_list, 'date': nowdate()}, as_dict=1)
 
 def get_mode_of_payment(doc):

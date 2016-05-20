@@ -16,9 +16,9 @@ domains = {
 			['Stock Settings', None, 'show_barcode_field', 1]
 		]
 	},
-	
-	'Retail': { 
-		'desktop_icons': ['POS', 'Item', 'Customer', 'Sales Invoice',  'Purchase Order', 'Warranty Claim', 
+
+	'Retail': {
+		'desktop_icons': ['POS', 'Item', 'Customer', 'Sales Invoice',  'Purchase Order', 'Warranty Claim',
 		'Accounts', 'Buying'],
 		'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
 		'properties': [
@@ -29,7 +29,7 @@ domains = {
 			['Stock Settings', None, 'show_barcode_field', 1]
 		]
 	},
-	
+
 	'Distribution': {
 		'desktop_icons': ['Item', 'Customer', 'Supplier', 'Lead', 'Sales Order',
 			 'Sales Invoice', 'CRM', 'Selling', 'Buying', 'Stock', 'Accounts', 'HR'],
@@ -41,9 +41,9 @@ domains = {
 			['Stock Settings', None, 'show_barcode_field', 1]
 		]
 	},
-	
+
 	'Services': {
-		'desktop_icons': ['Project', 'Time Log', 'Customer', 'Sales Invoice', 'Lead', 'Opportunity',
+		'desktop_icons': ['Project', 'Time Log', 'Customer', 'Sales Order', 'Sales Invoice', 'Lead', 'Opportunity',
 			'Expense Claim', 'Employee', 'HR'],
 		'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
 		'properties': [
