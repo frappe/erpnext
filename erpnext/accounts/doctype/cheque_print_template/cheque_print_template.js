@@ -20,6 +20,10 @@ frappe.ui.form.on('Cheque Print Template', {
 					background-image: url({{ scanned_cheque }});\
 					background-repeat: no-repeat;\
 					background-size: cover;">\
+					<span style="top: {{ acc_pay_dist_from_top_edge }}cm;\
+						left: {{ acc_pay_dist_from_left_edge }}cm;\
+						border-bottom: solid 1px;border-top:solid 1px;\
+						position: absolute;"> {{ message_to_show || __("Account Pay Only") }} </span>\
 					<span style="top: {{ date_dist_from_top_edge }}cm;\
 						left: {{ date_dist_from_left_edge }}cm;\
 						position: absolute;"> {{ frappe.datetime.obj_to_user() }} </span>\

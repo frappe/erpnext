@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe import _
 
 class ChequePrintTemplate(Document):
 	pass
@@ -28,13 +29,17 @@ def create_or_update_cheque_print_format(template_name):
 	cheque_print.html = """
 <div style="position: relative; top:%(starting_position_from_top_edge)scm">
 	<div style="width:%(cheque_width)scm;height:%(cheque_height)scm;">
+		<span style="top: {{ %(acc_pay_dist_from_top_edge)s }}cm; left: {{ %(acc_pay_dist_from_left_edge)s }}cm;
+			border-bottom: solid 1px;border-top:solid 1px; position: absolute;">
+				%(message_to_show)s
+		</span>
 		<span style="top:%(date_dist_from_top_edge)s cm; left:%(date_dist_from_left_edge)scm;
 			position: absolute;">
 			{{doc.cheque_date or '' }}
 		</span>
 		<span style="top:%(acc_no_dist_from_top_edge)scm;left:%(acc_no_dist_from_left_edge)scm;
 			position: absolute;">
-			{{ doc.account_no or "Account No" }}
+			{{ doc.account_no }}
 		</span>
 		<span style="top:%(payer_name_from_top_edge)scm;left: %(payer_name_from_left_edge)scm;
 			position: absolute;">
@@ -58,6 +63,9 @@ def create_or_update_cheque_print_format(template_name):
 		"starting_position_from_top_edge": doc.starting_position_from_top_edge \
 			if doc.cheque_size == "A4" else 0.0,
 		"cheque_width": doc.cheque_width, "cheque_height": doc.cheque_height,
+		"acc_pay_dist_from_top_edge": doc.acc_pay_dist_from_top_edge,
+		"acc_pay_dist_from_left_edge": doc.acc_pay_dist_from_left_edge,
+		"message_to_show": doc.message_to_show if doc.message_to_show else _("Account Pay Only"),
 		"date_dist_from_top_edge": doc.date_dist_from_top_edge,
 		"date_dist_from_left_edge": doc.date_dist_from_left_edge,
 		"acc_no_dist_from_top_edge": doc.acc_no_dist_from_top_edge,
