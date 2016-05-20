@@ -87,15 +87,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			var today = get_today(),
 				currency = frappe.defaults.get_user_default("currency");
 
-			$.each(["posting_date", "transaction_date"], function(i, fieldname) {
-				if (me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname] && me.frm[fieldname]) {
-					me.frm.set_value(fieldname, me.frm[fieldname]);
-				}
-			});
-
 			$.each({
-				posting_date: today,
-				transaction_date: today,
 				currency: currency,
 				price_list_currency: currency,
 				status: "Draft",
