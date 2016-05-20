@@ -28,7 +28,7 @@ erpnext.financial_statements = {
 				{ "value": "Half-Yearly", "label": __("Half-Yearly") },
 				{ "value": "Yearly", "label": __("Yearly") }
 			],
-			"default": "Yearly",
+			"default": "Monthly",
 			"reqd": 1
 		}
 	],
@@ -83,5 +83,5 @@ erpnext.financial_statements = {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Cash Flow', {company: filters.company});
 		}, 'Financial Statements');
-	},
+	}
 };
