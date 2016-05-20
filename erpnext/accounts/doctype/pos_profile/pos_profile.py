@@ -27,7 +27,7 @@ class POSProfile(Document):
 					self.company), raise_exception=1)
 
 	def validate_all_link_fields(self):
-		accounts = {"Account": [self.cash_bank_account, self.income_account,
+		accounts = {"Account": [self.income_account,
 			self.expense_account], "Cost Center": [self.cost_center],
 			"Warehouse": [self.warehouse]}
 
