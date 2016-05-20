@@ -2,7 +2,9 @@ import frappe
 import erpnext
 
 def execute():
+	frappe.reload_doc('portal', 'doctype', 'homepage_featured_product')
 	frappe.reload_doc('portal', 'doctype', 'homepage')
+	frappe.reload_doc('portal', 'doctype', 'products_settings')
 
 	website_settings = frappe.get_doc('Website Settings', 'Website Settings')
 	if frappe.db.exists('Web Page', website_settings.home_page):
