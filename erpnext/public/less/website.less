@@ -84,9 +84,6 @@
 }
 
 .transaction-list-item {
-	padding: 30px;
-	margin: 0px -30px;
-
 	&:hover,
 	&:active,
 	&:focus {
@@ -96,7 +93,6 @@
 	.indicator {
 		font-weight: inherit;
 		color: @text-muted;
-		margin-left: -15px;
 	}
 
 	.transaction-time {
@@ -155,8 +151,8 @@
 	}
 
 	.tax-grand-total-row {
-		border-top: 1px solid @border-color;
 		padding-top: 15px;
+		padding-bottom: 30px;
 	}
 
 	.tax-grand-total {
@@ -279,6 +275,13 @@
 	margin-top: 15px;
 }
 
+.footer-subscribe {
+	.btn-default {
+		background-color: transparent;
+		border: 1px solid @border-color;
+	}
+}
+
 @media (min-width: 992px) {
 	.footer-subscribe {
 		max-width: 350px;
@@ -303,25 +306,5 @@
 
 .product-image-wrapper {
 	padding-bottom: 40px;
-}
-
-
-.featured-product-heading, .all-products {
- text-transform: uppercase;
- letter-spacing: 0.5px;
- font-size: 12px;
- font-weight: 500;
-}
-
-.all-products {
- font-weight: 300;
- padding-left: 25px;
- padding-right: 25px;
- padding-top: 10px;
- padding-bottom: 10px;
-}
-
-.homepage-tagline {
-	font-size:40px !important;
 }
 

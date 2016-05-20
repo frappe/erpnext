@@ -7,8 +7,10 @@
 
 <div class="row">
 	<div class="col-sm-12">
-		<div class="homepage-tagline h1 text-center">{{ homepage.tag_line or '' }}</div>
-		<p class="text-center">{{ homepage.description or '' }}</p>
+		<div class="hero">
+			<h1 class="text-center">{{ homepage.tag_line or '' }}</h1>
+			<p class="text-center">{{ homepage.description or '' }}</p>
+		</div>
 		{% if homepage.products %}
 		<div class='featured-products-section' itemscope itemtype="http://schema.org/Product">
 			<h5 class='featured-product-heading'>{{ _("Featured Products") }}</h5>
@@ -27,7 +29,9 @@
 				</div>
 			</div>
 			<!-- TODO: remove hardcoding of /products -->
-			<div class="text-center"><a href="/products" class="btn btn-primary all-products">  {{ _("View All Products") }}</a></div>
+			<div class="text-center padding">
+				<a href="/products" class="btn btn-primary all-products">
+					{{ _("View All Products") }}</a></div>
 		</div>
 		{% endif %}
 	</div>
@@ -36,8 +40,14 @@
 
 {% block style %}
 <style>
-	.featured-products-section {
-		margin-top: 95px;
+	.hero {
+		padding-top: 50px;
+		padding-bottom: 100px;
+	}
+
+	.hero h1 {
+		font-size: 40px;
+		font-weight: 200;
 	}
 
 	.home-login {
@@ -45,6 +55,21 @@
 	}
 	.btn-login {
 		width: 80px;
+	}
+
+	.featured-product-heading, .all-products {
+		 text-transform: uppercase;
+		 letter-spacing: 0.5px;
+		 font-size: 12px;
+		 font-weight: 500;
+	}
+
+	.all-products {
+		 font-weight: 300;
+		 padding-left: 25px;
+		 padding-right: 25px;
+		 padding-top: 10px;
+		 padding-bottom: 10px;
 	}
 
 

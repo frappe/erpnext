@@ -71,10 +71,6 @@
 .featured-products {
   border-top: 1px solid #EBEFF2;
 }
-.transaction-list-item {
-  padding: 30px;
-  margin: 0px -30px;
-}
 .transaction-list-item:hover,
 .transaction-list-item:active,
 .transaction-list-item:focus {
@@ -83,7 +79,6 @@
 .transaction-list-item .indicator {
   font-weight: inherit;
   color: #8D99A6;
-  margin-left: -15px;
 }
 .transaction-list-item .items-preview,
 .transaction-list-item .transaction-time {
@@ -123,8 +118,8 @@
   margin-top: 15px;
 }
 .order-container .tax-grand-total-row {
-  border-top: 1px solid #d1d8dd;
   padding-top: 15px;
+  padding-bottom: 30px;
 }
 .order-container .tax-grand-total {
   display: inline-block;
@@ -217,6 +212,10 @@
 .item-group-nav-buttons {
   margin-top: 15px;
 }
+.footer-subscribe .btn-default {
+  background-color: transparent;
+  border: 1px solid #d1d8dd;
+}
 @media (min-width: 992px) {
   .footer-subscribe {
     max-width: 350px;
@@ -237,21 +236,4 @@
 }
 .product-image-wrapper {
   padding-bottom: 40px;
-}
-.featured-product-heading,
-.all-products {
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 12px;
-  font-weight: 500;
-}
-.all-products {
-  font-weight: 300;
-  padding-left: 25px;
-  padding-right: 25px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-.homepage-tagline {
-  font-size: 40px !important;
 }
