@@ -399,7 +399,12 @@ class ProductionPlanningTool(Document):
 				requested_qty = total_qty
 			elif total_qty > item_projected_qty.get(item, 0):
 				# shortage
-				requested_qty = total_qty - flt(item_projected_qty.get(item))
+				if self.create_material_requests_for_all_required_qty:
+					# ignore projected qty
+					requested_qty = total_qty
+				else:
+					# consider projected qty
+					requested_qty = total_qty - flt(item_projected_qty.get(item))
 				# consider minimum order qty
 
 			if requested_qty and requested_qty < flt(so_item_qty[0][3]):
