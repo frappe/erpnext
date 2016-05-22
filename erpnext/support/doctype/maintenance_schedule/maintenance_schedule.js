@@ -5,8 +5,9 @@ frappe.provide("erpnext.support");
 
 frappe.ui.form.on_change("Maintenance Schedule", "customer", function(frm) {
 	erpnext.utils.get_party_details(frm) });
-frappe.ui.form.on_change("Maintenance Schedule", "customer_address",
-	erpnext.utils.get_address_display);
+frappe.ui.form.on_change("Maintenance Schedule", "customer_address", function(){
+	erpnext.utils.get_address_display(cur_frm, 'customer_address', 'address_display');
+});
 frappe.ui.form.on_change("Maintenance Schedule", "contact_person",
 	erpnext.utils.get_contact_details);
 
