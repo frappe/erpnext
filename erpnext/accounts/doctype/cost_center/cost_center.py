@@ -16,36 +16,12 @@ class CostCenter(NestedSet):
 
 	def validate(self):
 		self.validate_mandatory()
-		self.validate_accounts()
 
 	def validate_mandatory(self):
 		if self.cost_center_name != self.company and not self.parent_cost_center:
 			frappe.throw(_("Please enter parent cost center"))
 		elif self.cost_center_name == self.company and self.parent_cost_center:
 			frappe.throw(_("Root cannot have a parent cost center"))
-			
-	def validate_accounts(self):
-		if self.is_group==1 and self.get("budgets"):
-			frappe.throw(_("Budget cannot be set for Group Cost Center"))
-			
-		check_acc_list = []
-		for d in self.get('budgets'):
-			if d.account:
-				account_details = frappe.db.get_value("Account", d.account, 
-					["is_group", "company", "report_type"], as_dict=1)
-				if account_details.is_group:
-					frappe.throw(_("Budget cannot be assigned against Group Account {0}").format(d.account))
-				elif account_details.company != self.company:
-					frappe.throw(_("Account {0} does not belongs to company {1}").format(d.account, self.company))
-				elif account_details.report_type != "Profit and Loss":
-					frappe.throw(_("Budget cannot be assigned against {0}, as it's not an Income or Expense account")
-						.format(d.account))
-
-				if [d.account, d.fiscal_year] in check_acc_list:
-					frappe.throw(_("Account {0} has been entered more than once for fiscal year {1}")
-						.format(d.account, d.fiscal_year))
-				else:
-					check_acc_list.append([d.account, d.fiscal_year])
 
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():

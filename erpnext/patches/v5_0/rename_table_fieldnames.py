@@ -86,9 +86,6 @@ rename_map = {
 	"Bank Reconciliation": [
 		["entries", "journal_entries"]
 	],
-	"Cost Center": [
-		["budget_details", "budgets"]
-	],
 	"C-Form": [
 		["invoice_details", "invoices"]
 	],

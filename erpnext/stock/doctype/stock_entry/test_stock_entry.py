@@ -122,8 +122,8 @@ class TestStockEntry(unittest.TestCase):
 		set_perpetual_inventory()
 
 		mr = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, basic_rate=100)
-
+			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC")
+					
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
 			"warehouse": mr.get("items")[0].t_warehouse})
 
@@ -149,9 +149,10 @@ class TestStockEntry(unittest.TestCase):
 		set_perpetual_inventory()
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, basic_rate=100)
+			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC")
 
-		mi = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC", qty=40)
+		mi = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC", 
+			qty=40, expense_account="Stock Adjustment - _TC")
 
 		self.check_stock_ledger_entries("Stock Entry", mi.name,
 			[["_Test Item", "_Test Warehouse - _TC", -40.0]])

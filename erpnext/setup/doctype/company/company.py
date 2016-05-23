@@ -194,17 +194,11 @@ class Company(Document):
 
 		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
 		if not rec:
-			# delete Account
-			frappe.db.sql("delete from `tabAccount` where company = %s", self.name)
-
-			# delete cost center child table - budget detail
-			frappe.db.sql("""delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc
-				where bd.parent = cc.name and cc.company = %s""", self.name)
-			#delete cost center
-			frappe.db.sql("delete from `tabCost Center` WHERE company = %s", self.name)
-
-			# delete account from customer and supplier
-			frappe.db.sql("delete from `tabParty Account` where company=%s", self.name)
+			frappe.db.sql("""delete from `tabBudget Account` b
+				where exists(select name from tabBudget where name=b.parent and company = %s)""", self.name)
+			
+			for doctype in ["Account", "Cost Center", "Budget", "Party Account"]:
+				frappe.db.sql("delete from `tab{0}` where company = %s".format(doctype), self.name)
 
 		if not frappe.db.get_value("Stock Ledger Entry", {"company": self.name}):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)

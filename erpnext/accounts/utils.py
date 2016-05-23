@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import nowdate, cstr, flt, cint, now, getdate, add_months
+from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
 from frappe.utils import formatdate
 import frappe.desk.reportview
@@ -13,7 +13,6 @@ import frappe.desk.reportview
 from erpnext.accounts.doctype.account.account import get_account_currency
 
 class FiscalYearError(frappe.ValidationError): pass
-class BudgetError(frappe.ValidationError): pass
 
 @frappe.whitelist()
 def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False):
@@ -320,72 +319,6 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 			difference.setdefault(account, flt(stock_value) - flt(account_balance))
 
 	return difference
-
-def validate_expense_against_budget(args):
-	args = frappe._dict(args)
-	if frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
-			budget = frappe.db.sql("""
-				select bd.budget_allocated, cc.distribution_id
-				from `tabCost Center` cc, `tabBudget Detail` bd
-				where cc.name=bd.parent and cc.name=%s and account=%s and bd.fiscal_year=%s
-			""", (args.cost_center, args.account, args.fiscal_year), as_dict=True)
-
-			if budget and budget[0].budget_allocated:
-				yearly_action, monthly_action = frappe.db.get_value("Company", args.company,
-					["yearly_bgt_flag", "monthly_bgt_flag"])
-				action_for = action = ""
-
-				if monthly_action in ["Stop", "Warn"]:
-					budget_amount = get_allocated_budget(budget[0].distribution_id,
-						args.posting_date, args.fiscal_year, budget[0].budget_allocated)
-
-					args["month_end_date"] = frappe.db.sql("select LAST_DAY(%s)",
-						args.posting_date)[0][0]
-					action_for, action = _("Monthly"), monthly_action
-
-				elif yearly_action in ["Stop", "Warn"]:
-					budget_amount = budget[0].budget_allocated
-					action_for, action = _("Annual"), yearly_action
-
-				if action_for:
-					actual_expense = get_actual_expense(args)
-					if actual_expense > budget_amount:
-						frappe.msgprint(_("{0} budget for Account {1} against Cost Center {2} will exceed by {3}").format(
-							_(action_for), args.account, args.cost_center, cstr(actual_expense - budget_amount)))
-						if action=="Stop":
-							raise BudgetError
-
-def get_allocated_budget(distribution_id, posting_date, fiscal_year, yearly_budget):
-	if distribution_id:
-		distribution = {}
-		for d in frappe.db.sql("""select mdp.month, mdp.percentage_allocation
-			from `tabMonthly Distribution Percentage` mdp, `tabMonthly Distribution` md
-			where mdp.parent=md.name and md.fiscal_year=%s""", fiscal_year, as_dict=1):
-				distribution.setdefault(d.month, d.percentage_allocation)
-
-	dt = frappe.db.get_value("Fiscal Year", fiscal_year, "year_start_date")
-	budget_percentage = 0.0
-
-	while(dt <= getdate(posting_date)):
-		if distribution_id:
-			budget_percentage += distribution.get(getdate(dt).strftime("%B"), 0)
-		else:
-			budget_percentage += 100.0/12
-
-		dt = add_months(dt, 1)
-
-	return yearly_budget * budget_percentage / 100
-
-def get_actual_expense(args):
-	args["condition"] = " and posting_date<='%s'" % args.month_end_date \
-		if args.get("month_end_date") else ""
-
-	return flt(frappe.db.sql("""
-		select sum(debit) - sum(credit)
-		from `tabGL Entry`
-		where account='%(account)s' and cost_center='%(cost_center)s'
-		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
-	""" % (args))[0][0])
 
 def get_currency_precision(currency=None):
 	if not currency:
