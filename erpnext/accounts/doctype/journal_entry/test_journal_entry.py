@@ -172,9 +172,9 @@ class TestJournalEntry(unittest.TestCase):
 
 		jv.submit()
 
-def make_journal_entry(account1, account2, amount, cost_center=None, exchange_rate=1, save=True, submit=False):
+def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False):
 	jv = frappe.new_doc("Journal Entry")
-	jv.posting_date = "2013-02-14"
+	jv.posting_date = posting_date or "2013-02-14"
 	jv.company = "_Test Company"
 	jv.user_remark = "test"
 	jv.multi_currency = 1
