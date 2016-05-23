@@ -58,15 +58,15 @@ def validate_expense_against_budget(args):
 				b.action_if_annual_budget_exceeded, b.action_if_accumulated_monthly_budget_exceeded
 			from `tabBudget` b, `tabBudget Account` ba
 			where 
-				b.name=ba.parent and b.fiscal_year=%s and ba.account=%s
+				b.name=ba.parent and b.fiscal_year=%s and ba.account=%s and b.docstatus=1
 				and exists(select name from `tabCost Center` where lft<=%s and rgt>=%s and name=b.cost_center)
 		""", (args.fiscal_year, args.account, cc_lft, cc_rgt), as_dict=True)
-		
+
 		for budget in budget_records:
 			if budget.budget_amount:
 				yearly_action = budget.action_if_annual_budget_exceeded
 				monthly_action = budget.action_if_accumulated_monthly_budget_exceeded
-			
+
 				if monthly_action in ["Stop", "Warn"]:
 					budget_amount = get_accumulated_monthly_budget(budget.monthly_distribution,
 						args.posting_date, args.fiscal_year, budget.budget_amount)

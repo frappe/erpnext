@@ -70,7 +70,8 @@ def make_stock_entry(**args):
 		"basic_rate": args.rate or args.basic_rate,
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
-		'cost_center': args.cost_center
+		'cost_center': args.cost_center,
+		'expense_account': args.expense_account
 	})
 
 	if not args.do_not_save:
