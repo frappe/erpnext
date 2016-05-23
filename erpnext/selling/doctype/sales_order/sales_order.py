@@ -339,8 +339,6 @@ def make_material_request(source_name, target_doc=None):
 
 	so = frappe.get_doc("Sales Order", source_name)
 
-	item_table = "Packed Item" if so.packed_items else "Sales Order Item"
-
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Material Request",
@@ -348,12 +346,20 @@ def make_material_request(source_name, target_doc=None):
 				"docstatus": ["=", 1]
 			}
 		},
-		item_table: {
+		"Packed Item": {
 			"doctype": "Material Request Item",
 			"field_map": {
 				"parent": "sales_order",
 				"stock_uom": "uom"
 			}
+		}.
+		"Sales Order Item": {
+			"doctype": "Material Request Item",
+			"field_map": {
+				"parent": "sales_order",
+				"stock_uom": "uom"
+			},
+			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code)
 		}
 	}, target_doc, postprocess)
 
