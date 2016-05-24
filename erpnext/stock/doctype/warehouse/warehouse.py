@@ -5,10 +5,11 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, validate_email_add
 from frappe import throw, msgprint, _
+from frappe.utils.nestedset import NestedSet
 
-from frappe.model.document import Document
-
-class Warehouse(Document):
+class Warehouse(NestedSet):
+	nsm_parent_field = 'parent_warehouse'
+	
 	def autoname(self):
 		suffix = " - " + frappe.db.get_value("Company", self.company, "abbr")
 		if not self.warehouse_name.endswith(suffix):
@@ -45,6 +46,7 @@ class Warehouse(Document):
 
 	def on_update(self):
 		self.create_account_head()
+		self.update_nsm_model()
 
 	def create_account_head(self):
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
@@ -81,7 +83,9 @@ class Warehouse(Document):
 		elif frappe.db.get_value("Account", self.create_account_under, "company") != self.company:
 			frappe.throw(_("Warehouse {0}: Parent account {1} does not bolong to the company {2}")
 				.format(self.name, self.create_account_under, self.company))
-
+	
+	def update_nsm_model(self):
+		frappe.utils.nestedset.update_nsm(self)
 
 	def on_trash(self):
 		# delete bin
