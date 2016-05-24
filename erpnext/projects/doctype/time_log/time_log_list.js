@@ -34,10 +34,6 @@ frappe.listview_settings['Time Log'] = {
 			// select only billable time logs
 			for(var i in selected) {
 				var d = selected[i];
-				if(!d.billable) {
-					msgprint(__("Time Log is not billable") + ": " + d.name + " - " + d.title);
-					return;
-				}
 				if(d.status=="Batched for Billing") {
 					msgprint(__("Time Log has been Batched for Billing") + ": " + d.name + " - " + d.title);
 					return;
