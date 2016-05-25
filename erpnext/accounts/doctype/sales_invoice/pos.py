@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import nowdate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.get_item_details import get_pos_profile
+from erpnext.accounts.party import get_party_account_currency
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 @frappe.whitelist()
@@ -28,7 +29,7 @@ def get_pos_data():
 	return {
 		'doc': doc,
 		'items': get_items(doc, pos_profile),
-		'customers': get_customers(pos_profile),
+		'customers': get_customers(pos_profile, doc),
 		'pricing_rules': get_pricing_rules(doc),
 		'mode_of_payment': get_mode_of_payment(doc),
 		'print_template': print_template,
@@ -68,6 +69,12 @@ def update_multi_mode_option(doc, pos_profile):
 	from frappe.model import default_fields
 
 	if not pos_profile:
+		for payment in frappe.get_all('Mode of Payment Account', fields=["default_account", "parent"], 
+							filters = {'company': doc.company}):
+			payments = doc.append('payments', {})
+			payments.mode_of_payment = payment.parent
+			payments.account = payment.default_account
+
 		return
 
 	for payment_mode in pos_profile.payments:
@@ -106,12 +113,19 @@ def get_items(doc, pos_profile):
 
 	return item_list
 
-def get_customers(pos_profile):
+def get_customers(pos_profile, doc):
 	filters = {'disabled': 0}
+	customer_list = []
 	if pos_profile.get('customer'):
 		filters.update({'name': pos_profile.customer})
 
-	return frappe.get_all("Customer", fields=["*"], filters = filters)
+	customers = frappe.get_all("Customer", fields=["*"], filters = filters)
+
+	for customer in customers:
+		customer_currency = get_party_account_currency('Customer', customer.name, doc.company) or doc.currency
+		if customer_currency == doc.currency:
+			customer_list.append(customer)
+	return customer_list
 
 def get_pricing_rules(doc):
 	if doc.ignore_pricing_rule == 0:

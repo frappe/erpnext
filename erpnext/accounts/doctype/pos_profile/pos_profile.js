@@ -24,18 +24,6 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 	});
 });
 
-//cash bank account
-//------------------------------------
-cur_frm.fields_dict['cash_bank_account'].get_query = function(doc,cdt,cdn) {
-	return{
-		filters:{
-			'report_type': "Balance Sheet",
-			'is_group': 0,
-			'company': doc.company
-		}
-	}
-}
-
 // Income Account
 // --------------------------------
 cur_frm.fields_dict['income_account'].get_query = function(doc,cdt,cdn) {

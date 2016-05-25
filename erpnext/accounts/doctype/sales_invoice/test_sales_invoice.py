@@ -525,7 +525,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def make_pos_profile(self):
 		pos_profile = frappe.get_doc({
-			"cash_bank_account": "_Test Bank - _TC",
 			"company": "_Test Company",
 			"cost_center": "_Test Cost Center - _TC",
 			"currency": "INR",
