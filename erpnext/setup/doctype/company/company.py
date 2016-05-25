@@ -87,7 +87,7 @@ class Company(Document):
 				.format(self.country.lower()))(self)
 
 	def create_default_warehouses(self):
-		for wh_detail in [{"warehouse_name": _("All Warehouses"), "is_group": "Yes"},
+		for wh_detail in [{"warehouse_name": _("Warehouses"), "is_group": "Yes"},
 			{"warehouse_name": _("Stores"), "is_group": "No"},
 			{"warehouse_name": _("Work In Progress"), "is_group": "No"},
 			{"warehouse_name": _("Finished Goods"), "is_group": "No"}]:
@@ -102,7 +102,7 @@ class Company(Document):
 						"is_group": wh_detail["is_group"],
 						"company": self.name,
 						"parent_warehouse": "" if wh_detail["is_group"] == "Yes" \
-							else "{0} - {1}".format(_("All Warehouses"), self.abbr),
+							else "{0} - {1}".format(_("Warehouses"), self.abbr),
 						"create_account_under": stock_group
 					})
 					warehouse.flags.ignore_permissions = True

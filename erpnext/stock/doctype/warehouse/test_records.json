@@ -3,7 +3,16 @@
   "company": "_Test Company",
   "create_account_under": "Stock Assets - _TC",
   "doctype": "Warehouse",
-  "warehouse_name": "_Test Warehouse"
+  "warehouse_name": "_Test Warehouse",
+  
+  
+ }
+ {
+  "company": "_Test Company",
+  "create_account_under": "Stock Assets - _TC",
+  "doctype": "Warehouse",
+  "warehouse_name": "_Test Warehouse",
+  ""
  },
  {
   "company": "_Test Company",
