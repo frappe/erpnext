@@ -194,8 +194,9 @@ class Company(Document):
 
 		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
 		if not rec:
-			frappe.db.sql("""delete from `tabBudget Account` b
-				where exists(select name from tabBudget where name=b.parent and company = %s)""", self.name)
+			frappe.db.sql("""delete from `tabBudget Account`
+				where exists(select name from tabBudget 
+					where name=`tabBudget Account`.parent and company = %s)""", self.name)
 			
 			for doctype in ["Account", "Cost Center", "Budget", "Party Account"]:
 				frappe.db.sql("delete from `tab{0}` where company = %s".format(doctype), self.name)
