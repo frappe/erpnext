@@ -20,7 +20,7 @@ def setup_complete(args=None):
 
 	install_fixtures.install(args.get("country"))
 
-	# update_setup_wizard_access()
+	update_setup_wizard_access()
 	create_fiscal_year_and_company(args)
 	create_users(args)
 	set_defaults(args)
