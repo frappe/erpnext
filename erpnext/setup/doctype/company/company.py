@@ -103,9 +103,9 @@ class Company(Document):
 		create_charts(self.chart_of_accounts, self.name)
 
 		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
-			{"company": self.name, "account_type": "Receivable"}))
+			{"company": self.name, "account_type": "Receivable", "is_group": 0}))
 		frappe.db.set(self, "default_payable_account", frappe.db.get_value("Account",
-			{"company": self.name, "account_type": "Payable"}))
+			{"company": self.name, "account_type": "Payable", "is_group": 0}))
 
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
