@@ -408,7 +408,8 @@ class PurchaseInvoice(BuyingController):
 							"against": self.supplier,
 							"debit": warehouse_debit_amount,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"cost_center": item.cost_center
+							"cost_center": item.cost_center,
+							"project": item.project
 						}, account_currency)
 					)
 					
@@ -419,7 +420,8 @@ class PurchaseInvoice(BuyingController):
 							"against": item.expense_account,
 							"cost_center": item.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"credit": flt(item.landed_cost_voucher_amount)
+							"credit": flt(item.landed_cost_voucher_amount),
+							"project": item.project
 						}))
 
 					# sub-contracting warehouse
@@ -441,7 +443,8 @@ class PurchaseInvoice(BuyingController):
 							"debit_in_account_currency": (flt(item.base_net_amount, 
 								item.precision("base_net_amount")) if account_currency==self.company_currency 
 								else flt(item.net_amount, item.precision("net_amount"))),
-							"cost_center": item.cost_center
+							"cost_center": item.cost_center,
+							"project": item.project
 						}, account_currency)
 					)
 				

@@ -62,6 +62,7 @@ class StockController(AccountsController):
 							"cost_center": detail.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
+							"project": detail.get("project") or self.get("project")
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)

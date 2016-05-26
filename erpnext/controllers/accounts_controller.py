@@ -247,7 +247,8 @@ class AccountsController(TransactionBase):
 			'credit_in_account_currency': 0,
 			'is_opening': self.get("is_opening") or "No",
 			'party_type': None,
-			'party': None
+			'party': None,
+			'project': self.get("project")
 		})
 		gl_dict.update(args)
 

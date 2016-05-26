@@ -222,7 +222,8 @@ class PurchaseReceipt(BuyingController):
 							"against": warehouse_account[d.warehouse]["name"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"credit": flt(d.landed_cost_voucher_amount)
+							"credit": flt(d.landed_cost_voucher_amount),
+							"project": d.project
 						}))
 
 					# sub-contracting warehouse
@@ -253,7 +254,8 @@ class PurchaseReceipt(BuyingController):
 							"against": warehouse_account[d.warehouse]["name"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"debit": divisional_loss
+							"debit": divisional_loss,
+							"project": d.project
 						}, stock_rbnb_currency))
 
 				elif d.warehouse not in warehouse_with_no_account or \
