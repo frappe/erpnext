@@ -78,7 +78,7 @@ frappe.require("assets/erpnext/js/stock_grid_report.js", function() {
 			this.trigger_refresh_on_change(["value_or_qty", "brand", "warehouse", "range"]);
 
 			this.show_zero_check();
-			this.setup_plot_check();
+			this.setup_chart_check();
 		},
 		init_filter_values: function() {
 			this._super();
@@ -197,9 +197,6 @@ frappe.require("assets/erpnext/js/stock_grid_report.js", function() {
 					}
 				}
 			});
-		},
-		get_plot_points: function(item, col, idx) {
-			return [[dateutil.user_to_obj(col.name).getTime(), item[col.field]]]
 		},
 		show_stock_ledger: function(item_code) {
 			frappe.route_options = {

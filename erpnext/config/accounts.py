@@ -321,12 +321,6 @@ def get_data():
 			"label": _("Analytics"),
 			"items": [
 				{
-					"type": "page",
-					"name": "financial-analytics",
-					"label": _("Financial Analytics"),
-					"icon": "icon-bar-chart",
-				},
-				{
 					"type": "report",
 					"name": "Gross Profit",
 					"doctype": "Sales Invoice",

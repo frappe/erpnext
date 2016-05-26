@@ -266,3 +266,4 @@ erpnext.patches.v7_0.fix_duplicate_icons
 erpnext.patches.v7_0.remove_features_setup
 erpnext.patches.v7_0.update_home_page
 erpnext.patches.v7_0.create_budget_record
+execute:frappe.delete_doc_if_exists("Page", "financial-analytics")

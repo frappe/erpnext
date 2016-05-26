@@ -27,8 +27,10 @@ def execute(filters=None):
 		data.append(provisional_profit_loss)
 
 	columns = get_columns(filters.periodicity, period_list, company=filters.company)
+	
+	chart = get_chart_data(columns, asset, liability, equity)
 
-	return columns, data, message
+	return columns, data, message, chart
 
 def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 	if asset and (liability or equity):
@@ -70,3 +72,20 @@ def check_opening_balance(asset, liability, equity):
 
 	if opening_balance:
 		return _("Previous Financial Year is not closed")
+		
+def get_chart_data(columns, asset, liability, equity):
+	x_intervals = ['x'] + [d.get("label") for d in columns[2:]]
+	
+	asset_data, liability_data, equity_data = ["Assets"], ["Liabilities"], ["Equity"]
+	
+	for p in columns[2:]:
+		asset_data.append(asset[-2].get(p.get("fieldname")))
+		liability_data.append(liability[-2].get(p.get("fieldname")))
+		equity_data.append(equity[-2].get(p.get("fieldname")))
+
+	return {
+		"data": {
+			'x': 'x',
+			'columns': [x_intervals, asset_data, liability_data, equity_data]
+		}
+	}
