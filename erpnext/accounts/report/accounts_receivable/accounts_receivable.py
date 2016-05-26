@@ -18,8 +18,8 @@ class ReceivablePayableReport(object):
 		party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
 		columns = self.get_columns(party_naming_by, args)
 		data = self.get_data(party_naming_by, args)
-		graph_data = self.get_graph_data(columns, data)
-		return columns, data, None, graph_data
+		chart = self.get_chart_data(columns, data)
+		return columns, data, None, chart
 
 	def get_columns(self, party_naming_by, args):
 		columns = [_("Posting Date") + ":Date:80", _(args.get("party_type")) + ":Link/" + args.get("party_type") + ":200"]
@@ -256,7 +256,7 @@ class ReceivablePayableReport(object):
 			.get(against_voucher_type, {})\
 			.get(against_voucher, [])
 			
-	def get_graph_data(self, columns, data):
+	def get_chart_data(self, columns, data):
 		ageing_columns = columns[self.ageing_col_idx_start : self.ageing_col_idx_start+4]
 		
 		range_totals = [[d.get("label")] for d in ageing_columns]
@@ -267,9 +267,9 @@ class ReceivablePayableReport(object):
 			
 		return {
 			"data": {
-				'columns': range_totals,
-				'type': 'pie'
-			}
+				'columns': range_totals
+			},
+			"chart_type": 'pie'
 		}
 		
 

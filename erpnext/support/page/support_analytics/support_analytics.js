@@ -32,8 +32,13 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 		{fieldtype:"Date", label: __("From Date")},
 		{fieldtype:"Date", label: __("To Date")},
 		{fieldtype:"Select", label: __("Range"),
-			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]}
+			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"], default_value: "Monthly"}
 	],
+	
+	init_filter_values: function() {
+		this._super();
+		this.filter_inputs.range.val('Monthly');
+	},
 
 	setup_columns: function() {
 		var std_columns = [
@@ -100,11 +105,5 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 		})
 
 		this.data = [total_tickets, days_to_close, hours_to_close, hours_to_respond];
-	},
-
-	get_plot_points: function(item, col, idx) {
-		return [[dateutil.str_to_obj(col.id).getTime(), item[col.field]],
-			[dateutil.user_to_obj(col.name).getTime(), item[col.field]]];
 	}
-
 });

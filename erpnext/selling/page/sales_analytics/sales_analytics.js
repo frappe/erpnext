@@ -97,11 +97,11 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 			"Sales Order", "Delivery Note"]},
 		{fieldtype:"Select", fieldname: "value_or_qty", label:  __("Value or Qty"),
 			options:[{label: __("Value"), value: "Value"}, {label: __("Quantity"), value: "Quantity"}]},
-		{fieldtype:"Select", fieldname: "company", label: __("Company"), link:"Company",
-			default_value: __("Select Company...")},
 		{fieldtype:"Date", fieldname: "from_date", label: __("From Date")},
 		{fieldtype:"Label", fieldname: "to", label: __("To")},
 		{fieldtype:"Date", fieldname: "to_date", label: __("To Date")},
+		{fieldtype:"Select", fieldname: "company", label: __("Company"), link:"Company",
+			default_value: __("Select Company...")},
 		{fieldtype:"Select", label: __("Range"), fieldname: "range",
 			options:[{label: __("Daily"), value: "Daily"}, {label: __("Weekly"), value: "Weekly"},
 				{label: __("Monthly"), value: "Monthly"}, {label: __("Quarterly"), value: "Quarterly"},
@@ -114,7 +114,7 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 		this.trigger_refresh_on_change(["value_or_qty", "tree_type", "based_on", "company"]);
 
 		this.show_zero_check()
-		this.setup_plot_check();
+		this.setup_chart_check();
 	},
 	init_filter_values: function() {
 		this._super();
@@ -243,9 +243,5 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 		if(!this.checked) {
 			this.data[0].checked = true;
 		}
-	},
-	get_plot_points: function(item, col, idx) {
-		return [[dateutil.str_to_obj(col.id).getTime(), item[col.field]],
-			[dateutil.user_to_obj(col.name).getTime(), item[col.field]]];
 	}
 });

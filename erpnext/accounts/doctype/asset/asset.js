@@ -90,12 +90,25 @@ frappe.ui.form.on('Asset', {
 			last_depreciation_date = frm.doc.disposal_date;
 		}
 		
-		frm.dashboard.reset();
-		frm.dashboard.add_graph({
-			x: 'x',
-			columns: [x_intervals, asset_values],
-			regions: {
-				'Asset Value': [{'start': last_depreciation_date, 'style':'dashed'}]
+		frm.dashboard.setup_chart({
+			data: {
+				x: 'x',
+				columns: [x_intervals, asset_values],
+				regions: {
+					'Asset Value': [{'start': last_depreciation_date, 'style':'dashed'}]
+				}
+			},
+			legend: {
+				show: false
+			},
+			axis: {
+				x: {
+					type: 'category'
+				},
+				y: {
+					min: 0,
+					padding: {bottom: 10}
+				}
 			}
 		});		
 	},
