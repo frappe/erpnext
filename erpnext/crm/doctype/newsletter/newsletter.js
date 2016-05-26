@@ -38,7 +38,7 @@ cur_frm.cscript.setup_dashboard = function() {
 		var total = frappe.utils.sum($.map(stat, function(v) { return v; }));
 		if(total) {
 			$.each(stat, function(k, v) {
-				stat[k] = flt(v * 100 / total, 2);
+				stat[k] = flt(v * 100 / total, 2) + '%';
 			});
 
 			cur_frm.dashboard.add_progress("Status", [
