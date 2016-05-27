@@ -74,7 +74,8 @@ def check_if_in_list(gle, gl_map):
 			and cstr(e.get('party'))==cstr(gle.get('party')) \
 			and cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
 			and cstr(e.get('against_voucher_type')) == cstr(gle.get('against_voucher_type')) \
-			and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')):
+			and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')) \
+			and cstr(e.get('project')) == cstr(gle.get('project')):
 				return e
 
 def save_entries(gl_map, adv_adj, update_outstanding):
