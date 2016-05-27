@@ -76,16 +76,27 @@ def check_opening_balance(asset, liability, equity):
 def get_chart_data(columns, asset, liability, equity):
 	x_intervals = ['x'] + [d.get("label") for d in columns[2:]]
 	
-	asset_data, liability_data, equity_data = ["Assets"], ["Liabilities"], ["Equity"]
+	asset_data, liability_data, equity_data = [], [], []
 	
 	for p in columns[2:]:
-		asset_data.append(asset[-2].get(p.get("fieldname")))
-		liability_data.append(liability[-2].get(p.get("fieldname")))
-		equity_data.append(equity[-2].get(p.get("fieldname")))
+		if asset:
+			asset_data.append(asset[-2].get(p.get("fieldname")))
+		if liability:
+			liability_data.append(liability[-2].get(p.get("fieldname")))
+		if equity:
+			equity_data.append(equity[-2].get(p.get("fieldname")))
+		
+	columns = [x_intervals]
+	if asset_data:
+		columns.append(["Assets"] + asset_data)
+	if liability_data:
+		columns.append(["Liabilities"] + liability_data)
+	if equity_data:
+		columns.append(["Equity"] + equity_data)
 
 	return {
 		"data": {
 			'x': 'x',
-			'columns': [x_intervals, asset_data, liability_data, equity_data]
+			'columns': columns
 		}
 	}
