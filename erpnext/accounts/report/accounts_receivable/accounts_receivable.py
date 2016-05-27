@@ -259,19 +259,19 @@ class ReceivablePayableReport(object):
 	def get_chart_data(self, columns, data):
 		ageing_columns = columns[self.ageing_col_idx_start : self.ageing_col_idx_start+4]
 		
-		range_totals = [[d.get("label")] for d in ageing_columns]
-		
+		rows = []
 		for d in data:
-			for i in xrange(4):
-				range_totals[i].append(d[self.ageing_col_idx_start + i])
-			
+			rows.append(d[self.ageing_col_idx_start : self.ageing_col_idx_start+4])
+
+		if rows:
+			rows.insert(0, [[d.get("label")] for d in ageing_columns])
+		
 		return {
 			"data": {
-				'columns': range_totals
+				'rows': rows
 			},
 			"chart_type": 'pie'
 		}
-		
 
 def execute(filters=None):
 	args = {
