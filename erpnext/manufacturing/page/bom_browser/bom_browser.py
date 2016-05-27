@@ -5,7 +5,8 @@ from __future__ import unicode_literals
 import frappe
 
 @frappe.whitelist()
-def get_children(parent):
+def get_children():
+	parent = frappe.local.form_dict.get('bom')
 	return frappe.db.sql("""select item_code,
 		bom_no as value, qty,
 		if(ifnull(bom_no, "")!="", 1, 0) as expandable
