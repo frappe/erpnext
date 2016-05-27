@@ -1,6 +1,8 @@
 import frappe
 
 def execute():
+	frappe.reload_doctype("GL Entry")
+	
 	for doctype in ("Delivery Note", "Sales Invoice", "Stock Entry"):
 		frappe.db.sql("""
 			update `tabGL Entry` gle, `tab{0}` dt
