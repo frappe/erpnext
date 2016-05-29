@@ -966,6 +966,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	setup_item_selector: function() {
+		// TODO: remove item selector
+
+		return;
 		if(!this.item_selector) {
 			this.item_selector = new erpnext.ItemSelector({frm: this.frm});
 		}

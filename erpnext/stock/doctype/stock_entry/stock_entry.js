@@ -67,7 +67,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			}
 		});
 
-		if(!this.item_selector) {
+		if(!this.item_selector && false) {
 			this.item_selector = new erpnext.ItemSelector({frm: this.frm});
 		}
 	},

@@ -487,56 +487,59 @@ class Item(WebsiteGenerator):
 		for variant_of in frappe.get_all("Item", filters={"variant_of": self.name}):
 			frappe.delete_doc("Item", variant_of.name)
 
-	def before_rename(self, olddn, newdn, merge=False):
+	def before_rename(self, old_name, new_name, merge=False):
+		if self.item_name==old_name:
+			self.item_name=new_name
+
 		if merge:
 			# Validate properties before merging
-			if not frappe.db.exists("Item", newdn):
-				frappe.throw(_("Item {0} does not exist").format(newdn))
+			if not frappe.db.exists("Item", new_name):
+				frappe.throw(_("Item {0} does not exist").format(new_name))
 
 			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
-			new_properties = [cstr(d) for d in frappe.db.get_value("Item", newdn, field_list)]
+			new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, field_list)]
 			if new_properties != [cstr(self.get(fld)) for fld in field_list]:
 				frappe.throw(_("To merge, following properties must be same for both items")
 					+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
 
-			frappe.db.sql("delete from `tabBin` where item_code=%s", olddn)
+			frappe.db.sql("delete from `tabBin` where item_code=%s", old_name)
 
-	def after_rename(self, olddn, newdn, merge):
-		super(Item, self).after_rename(olddn, newdn, merge)
+	def after_rename(self, old_name, new_name, merge):
+		super(Item, self).after_rename(old_name, new_name, merge)
 		if self.page_name:
 			invalidate_cache_for_item(self)
 			clear_cache(self.page_name)
 
-		frappe.db.set_value("Item", newdn, "item_code", newdn)
+		frappe.db.set_value("Item", new_name, "item_code", new_name)
 
 		if merge:
-			self.set_last_purchase_rate(newdn)
-			self.recalculate_bin_qty(newdn)
+			self.set_last_purchase_rate(new_name)
+			self.recalculate_bin_qty(new_name)
 
 		for dt in ("Sales Taxes and Charges", "Purchase Taxes and Charges"):
 			for d in frappe.db.sql("""select name, item_wise_tax_detail from `tab{0}`
 					where ifnull(item_wise_tax_detail, '') != ''""".format(dt), as_dict=1):
 
 				item_wise_tax_detail = json.loads(d.item_wise_tax_detail)
-				if olddn in item_wise_tax_detail:
-					item_wise_tax_detail[newdn] = item_wise_tax_detail[olddn]
-					item_wise_tax_detail.pop(olddn)
+				if old_name in item_wise_tax_detail:
+					item_wise_tax_detail[new_name] = item_wise_tax_detail[old_name]
+					item_wise_tax_detail.pop(old_name)
 
 					frappe.db.set_value(dt, d.name, "item_wise_tax_detail",
 						json.dumps(item_wise_tax_detail), update_modified=False)
 
-	def set_last_purchase_rate(self, newdn):
-		last_purchase_rate = get_last_purchase_details(newdn).get("base_rate", 0)
-		frappe.db.set_value("Item", newdn, "last_purchase_rate", last_purchase_rate)
+	def set_last_purchase_rate(self, new_name):
+		last_purchase_rate = get_last_purchase_details(new_name).get("base_rate", 0)
+		frappe.db.set_value("Item", new_name, "last_purchase_rate", last_purchase_rate)
 
-	def recalculate_bin_qty(self, newdn):
+	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
 		frappe.db.auto_commit_on_many_writes = 1
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		for warehouse in frappe.db.sql("select name from `tabWarehouse`"):
-			repost_stock(newdn, warehouse[0])
+			repost_stock(new_name, warehouse[0])
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
