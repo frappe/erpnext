@@ -49,9 +49,11 @@ class TaxRule(Document):
 			"supplier":			self.supplier,
 			"supplier_type":	self.supplier_type,
 			"billing_city":		self.billing_city,
+			"billing_county":	self.billing_county,
 			"billing_state": 	self.billing_state,
 			"billing_country":	self.billing_country,
 			"shipping_city":	self.shipping_city,
+			"shipping_county":	self.shipping_county,
 			"shipping_state":	self.shipping_state,
 			"shipping_country":	self.shipping_country,
 			"company":			self.company
@@ -101,16 +103,18 @@ def get_party_details(party, party_type, args=None):
 		billing_filters=	{party_type: party, "is_primary_address": 1}
 		shipping_filters=	{party_type:party, "is_shipping_address": 1}
 
-	billing_address=	frappe.get_all("Address", fields=["city", "state", "country"], filters= billing_filters)
-	shipping_address=	frappe.get_all("Address", fields=["city", "state", "country"], filters= shipping_filters)
+	billing_address=	frappe.get_all("Address", fields=["city", "county", "state", "country"], filters= billing_filters)
+	shipping_address=	frappe.get_all("Address", fields=["city", "county", "state", "country"], filters= shipping_filters)
 
 	if billing_address:
 		out["billing_city"]= billing_address[0].city
+		out["billing_county"]= billing_address[0].county
 		out["billing_state"]= billing_address[0].state
 		out["billing_country"]= billing_address[0].country
 
 	if shipping_address:
 		out["shipping_city"]= shipping_address[0].city
+		out["shipping_county"]= shipping_address[0].county
 		out["shipping_state"]= shipping_address[0].state
 		out["shipping_country"]= shipping_address[0].country
 
