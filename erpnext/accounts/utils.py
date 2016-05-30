@@ -135,6 +135,10 @@ def add_ac(args=None):
 		args.pop("ignore_permissions")
 
 	ac.update(args)
+
+	if not ac.parent_account:
+		ac.parent_account = args.get("parent")
+
 	ac.old_parent = ""
 	ac.freeze_account = "No"
 	if cint(ac.get("is_root")):
@@ -153,6 +157,10 @@ def add_cc(args=None):
 
 	cc = frappe.new_doc("Cost Center")
 	cc.update(args)
+
+	if not cc.parent_cost_center:
+		cc.parent_cost_center = args.get("parent")
+
 	cc.old_parent = ""
 	cc.insert()
 	return cc.name
