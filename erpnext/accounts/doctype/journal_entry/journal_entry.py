@@ -728,8 +728,9 @@ def get_outstanding(args):
 			amount_field: abs(against_jv_amount)
 		}
 	elif args.get("doctype") in ("Sales Invoice", "Purchase Invoice"):
+		party_type = "Customer" if args.get("doctype") == "Sales Invoice" else "Supplier"
 		invoice = frappe.db.get_value(args["doctype"], args["docname"],
-			["outstanding_amount", "conversion_rate"], as_dict=1)
+			["outstanding_amount", "conversion_rate", scrub(party_type)], as_dict=1)
 
 		exchange_rate = invoice.conversion_rate if (args.get("account_currency") != company_currency) else 1
 
@@ -742,7 +743,9 @@ def get_outstanding(args):
 
 		return {
 			amount_field: abs(flt(invoice.outstanding_amount)),
-			"exchange_rate": exchange_rate
+			"exchange_rate": exchange_rate,
+			"party_type": party_type,
+			"party": invoice.get(scrub(party_type))
 		}
 
 @frappe.whitelist()
