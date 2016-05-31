@@ -79,6 +79,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 	},
 	get_item_dashboard_data: function(data, max_count, show_item) {
 		if(!max_count) max_count = 0;
+		if(!data) data = [];
 		data.forEach(function(d) {
 			d.actual_or_pending = d.projected_qty + d.reserved_qty + d.reserved_qty_for_production;
 			d.pending_qty = 0;

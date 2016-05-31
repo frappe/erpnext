@@ -7,7 +7,6 @@ import frappe
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
 from frappe.utils import formatdate
-import frappe.desk.reportview
 
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
@@ -128,20 +127,20 @@ def add_ac(args=None):
 	if not args:
 		args = frappe.local.form_dict
 		args.pop("cmd")
-	
+
 	ac = frappe.new_doc("Account")
-	
+
 	if args.get("ignore_permissions"):
 		ac.flags.ignore_permissions = True
 		args.pop("ignore_permissions")
-	
+
 	ac.update(args)
 	ac.old_parent = ""
 	ac.freeze_account = "No"
 	if cint(ac.get("is_root")):
 		ac.parent_account = None
-		ac.flags.ignore_mandatory = True		
-		
+		ac.flags.ignore_mandatory = True
+
 	ac.insert()
 
 	return ac.name
