@@ -193,9 +193,6 @@ class Account(Document):
 
 	def validate_trash(self):
 		"""checks gl entries and if child exists"""
-		if not self.parent_account:
-			throw(_("Root account can not be deleted"))
-
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be deleted"))
 		if self.check_if_child_exists():
