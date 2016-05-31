@@ -64,7 +64,9 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 
 def check_opening_balance(asset, liability, equity):
 	# Check if previous year balance sheet closed
-	opening_balance = flt(asset[0].get("opening_balance", 0))
+	opening_balance = 0
+	if asset:
+		opening_balance = flt(asset[0].get("opening_balance", 0))
 	if liability:
 		opening_balance -= flt(liability[0].get("opening_balance", 0))
 	if equity:

@@ -101,7 +101,7 @@ class TestShoppingCart(unittest.TestCase):
 		quotation = self.create_quotation()
 
 		from erpnext.accounts.party import set_taxes
-
+		
 		tax_rule_master = set_taxes(quotation.customer, "Customer", \
 			quotation.transaction_date, quotation.company, None, None, \
 			quotation.customer_address, quotation.shipping_address_name, 1)
@@ -131,6 +131,9 @@ class TestShoppingCart(unittest.TestCase):
 			"taxes": frappe.get_doc("Sales Taxes and Charges Template", "_Test Tax 1").taxes,
 			"company": "_Test Company"
 		}
+		
+		for d in values["taxes"]:
+			d.name = None
 
 		quotation.update(values)
 
