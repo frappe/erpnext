@@ -98,7 +98,7 @@ class Company(Document):
 						"company": self.name,
 						"create_account_under": stock_group
 					})
-					warehouse.flags.ignore_permissions = self.flags.ignore_permissions
+					warehouse.flags.ignore_permissions = True
 					warehouse.insert()
 
 	def create_default_accounts(self):
@@ -106,7 +106,7 @@ class Company(Document):
 			self.chart_of_accounts = "Standard"
 
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
-		create_charts(self.chart_of_accounts, self.name, self.flags.ignore_permissions)
+		create_charts(self.chart_of_accounts, self.name)
 
 		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
 			{"company": self.name, "account_type": "Receivable", "is_group": 0}))

@@ -6,7 +6,7 @@ import frappe, os, json
 from frappe.utils import cstr
 from unidecode import unidecode
 
-def create_charts(chart_name, company, ignore_permissions=False):
+def create_charts(chart_name, company):
 	chart = get_chart(chart_name)
 	
 	if chart:
@@ -44,7 +44,7 @@ def create_charts(chart_name, company, ignore_permissions=False):
 					if root_account or frappe.local.flags.allow_unverified_charts:
 						account.flags.ignore_mandatory = True
 						
-					account.flags.ignore_permissions = ignore_permissions
+					account.flags.ignore_permissions = True
 					
 					account.insert()
 
