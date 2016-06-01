@@ -24,8 +24,6 @@ frappe.ui.form.on("Supplier", {
 		  	unhide_field(['address_html','contact_html']);
 			erpnext.utils.render_address_and_contact(frm);
 		}
-
-		frm.events.add_custom_buttons(frm);
 	},
 });
 
