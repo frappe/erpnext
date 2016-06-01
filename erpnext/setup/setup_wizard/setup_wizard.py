@@ -56,6 +56,8 @@ def setup_complete(args=None):
 			pass
 
 def update_setup_wizard_access():
+	if frappe.flags.in_test:
+		return
 	setup_wizard = frappe.get_doc('Page', 'setup-wizard')
 	for roles in setup_wizard.roles:
 		if roles.role == 'System Manager':

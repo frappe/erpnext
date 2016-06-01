@@ -131,9 +131,6 @@ class TestShoppingCart(unittest.TestCase):
 			"taxes": frappe.get_doc("Sales Taxes and Charges Template", "_Test Tax 1").taxes,
 			"company": "_Test Company"
 		}
-		
-		for d in values["taxes"]:
-			d.name = None
 
 		quotation.update(values)
 
