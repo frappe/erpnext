@@ -39,7 +39,7 @@ frappe.ui.form.on("Newsletter List", "refresh", function(frm) {
 
 		frm.add_custom_button(__("New Newsletter"), function() {
 			frappe.route_options = {"newsletter_list": frm.doc.name};
-			new_doc("Newsletter");
+			frappe.new_doc("Newsletter");
 		}, __("Action"));
 
 	}

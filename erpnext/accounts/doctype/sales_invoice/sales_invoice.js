@@ -51,7 +51,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					this.make_sales_return, __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
-			
+
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
 				var from_delivery_note = false;
@@ -61,7 +61,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 
 				if(!from_delivery_note && !is_delivered_by_supplier) {
-					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Make Delivery Note'], 
+					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Make Delivery Note'],
 						__("Make"));
 				}
 			}
@@ -221,7 +221,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			frm: cur_frm
 		})
 	},
-	
+
 	asset: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if(row.asset) {
@@ -390,7 +390,7 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cur_frm.doc.is_pos) {
 		cur_frm.msgbox = frappe.msgprint(format('<a class="btn btn-primary" \
 			onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">{0}</a>\
-			<a class="btn btn-default" href="javascript:new_doc(cur_frm.doctype);">{1}</a>', [
+			<a class="btn btn-default" href="javascript:frappe.new_doc(cur_frm.doctype);">{1}</a>', [
 			__('Print'), __('New')
 		]));
 

@@ -30,22 +30,6 @@ frappe.ui.form.on("Customer", {
 
 		frm.events.add_custom_buttons(frm);
 	},
-	add_custom_buttons: function(frm) {
-		// ["Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"].forEach(function(doctype, i) {
-		// 	if(frappe.model.can_read(doctype)) {
-		// 		frm.add_custom_button(__(doctype), function() {
-		// 			frappe.route_options = {"customer": frm.doc.name};
-		// 			frappe.set_route("List", doctype);
-		// 		}, __("View"));
-		// 	}
-		// 	if(frappe.model.can_create(doctype)) {
-		// 		frm.add_custom_button(__(doctype), function() {
-		// 			frappe.route_options = {"customer": frm.doc.name};
-		// 			new_doc(doctype);
-		// 		}, __("Make"));
-		// 	}
-		// });
-	},
 	validate: function(frm) {
 		if(frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
 	}

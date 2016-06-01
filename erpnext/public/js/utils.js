@@ -93,7 +93,7 @@ $.extend(erpnext.utils, {
 			.html(frappe.render_template("address_list",
 				cur_frm.doc.__onload))
 			.find(".btn-address").on("click", function() {
-				new_doc("Address");
+				frappe.new_doc("Address");
 			});
 
 		// render contact
@@ -102,7 +102,7 @@ $.extend(erpnext.utils, {
 				.html(frappe.render_template("contact_list",
 					cur_frm.doc.__onload))
 				.find(".btn-contact").on("click", function() {
-					new_doc("Contact");
+					frappe.new_doc("Contact");
 				}
 			);
 		}

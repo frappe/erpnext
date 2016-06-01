@@ -27,22 +27,6 @@ frappe.ui.form.on("Supplier", {
 
 		frm.events.add_custom_buttons(frm);
 	},
-	add_custom_buttons: function(frm) {
-		// ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"].forEach(function(doctype, i) {
-		// 	if(frappe.model.can_read(doctype)) {
-		// 		frm.add_custom_button(__(doctype), function() {
-		// 			frappe.route_options = {"supplier": frm.doc.name};
-		// 			frappe.set_route("List", doctype);
-		// 		}, __("View"));
-		// 	}
-		// 	if(frappe.model.can_create(doctype)) {
-		// 		frm.add_custom_button(__(doctype), function() {
-		// 			frappe.route_options = {"supplier": frm.doc.name};
-		// 			new_doc(doctype);
-		// 		}, __("Make"));
-		// 	}
-		// });
-	},
 });
 
 cur_frm.fields_dict['default_price_list'].get_query = function(doc, cdt, cdn) {
