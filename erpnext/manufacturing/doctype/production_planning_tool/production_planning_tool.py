@@ -323,7 +323,7 @@ class ProductionPlanningTool(Document):
 					ifnull(sum(fb.qty/ifnull(bom.quantity, 1)), 0) as qty,
 					fb.description, fb.stock_uom, item.min_order_qty
 					from `tabBOM Explosion Item` fb, `tabBOM` bom, `tabItem` item
-					where bom.name = fb.parent and it.name = fb.item_code
+					where bom.name = fb.parent and item.name = fb.item_code
 					and (item.is_sub_contracted_item = 0 or ifnull(item.default_bom, "")="")
 					and item.is_stock_item = 1
 					and fb.docstatus<2 and bom.name=%s
