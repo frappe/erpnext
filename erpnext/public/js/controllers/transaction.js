@@ -216,12 +216,17 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			// barcode cleared, remove item
 			d.item_code = "";
 		}
-		this.item_code(doc, cdt, cdn);
+		this.item_code(doc, cdt, cdn, true);
 	},
 
-	item_code: function(doc, cdt, cdn) {
+	item_code: function(doc, cdt, cdn, from_barcode) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
+
+		// clear barcode if setting item (else barcode will take priority)
+		if(!from_barcode) {
+			item.barcode = null;
+		}
 		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party()) {
 				cur_frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
