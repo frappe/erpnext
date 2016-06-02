@@ -4,6 +4,14 @@
 frappe.provide("erpnext.bom");
 
 frappe.ui.form.on("BOM", {
+	setup: function(frm) {
+		frm.get_field('items').grid.editable_fields = [
+			{fieldname: 'item_code', columns: 4},
+			{fieldname: 'item_name', columns: 3},
+			{fieldname: 'qty', columns: 2},
+			{fieldname: 'rate', columns: 2}
+		];
+	},
 	onload_post_render: function(frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
