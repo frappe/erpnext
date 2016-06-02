@@ -65,7 +65,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 		this.max_count = this.max_count;
 
 		// show more button
-		if(data.length===21) {
+		if(data && data.length===21) {
 			this.content.find('.more').removeClass('hidden');
 
 			// remove the last element

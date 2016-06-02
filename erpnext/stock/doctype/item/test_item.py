@@ -6,7 +6,8 @@ import unittest
 import frappe
 
 from frappe.test_runner import make_test_records
-from erpnext.controllers.item_variant import create_variant, ItemVariantExistsError, InvalidItemAttributeValueError
+from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
+	InvalidItemAttributeValueError)
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
@@ -85,6 +86,18 @@ class TestItem(unittest.TestCase):
 
 		for key, value in to_check.iteritems():
 			self.assertEquals(value, details.get(key))
+
+	def test_item_attribute_change_after_variant(self):
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
+
+		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		variant.save()
+
+		attribute = frappe.get_doc('Item Attribute', 'Test Size')
+		attribute.item_attribute_values = []
+
+		self.assertRaises(InvalidItemAttributeValueError, attribute.save)
+		frappe.db.rollback()
 
 	def test_make_item_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)

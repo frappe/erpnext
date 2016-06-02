@@ -32,13 +32,13 @@ def validate_item_variant_attributes(item, args):
 	attribute_values = {}
 	for t in frappe.get_all("Item Attribute Value", fields=["parent", "attribute_value"],
 		filters={"parent": ["in", args.keys()]}):
-		
+
 		(attribute_values.setdefault(t.parent.lower(), [])).append(t.attribute_value)
 
 	numeric_attributes = frappe._dict((t.attribute.lower(), t) for t in \
 		frappe.db.sql("""select attribute, from_range, to_range, increment from `tabItem Variant Attribute`
 		where parent = %s and numeric_values=1""", (item), as_dict=1))
-		
+
 	for attribute, value in args.items():
 		if attribute.lower() in numeric_attributes:
 			numeric_attribute = numeric_attributes[attribute.lower()]
@@ -61,10 +61,10 @@ def validate_item_variant_attributes(item, args):
 			if not (is_in_range and is_incremental):
 				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3}")\
 					.format(attribute, from_range, to_range, increment), InvalidItemAttributeValueError)
-		
+
 		elif value not in attribute_values.get(attribute.lower(), []):
 			frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values").format(
-				value, attribute))
+				value, attribute), InvalidItemAttributeValueError)
 
 def find_variant(template, args, variant_item_code=None):
 	conditions = ["""(iv_attribute.attribute="{0}" and iv_attribute.attribute_value="{1}")"""\
