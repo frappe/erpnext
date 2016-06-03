@@ -67,7 +67,7 @@ frappe.ui.form.on("Project", {
 	},
 	show_dashboard: function(frm) {
 		frm.dashboard.show_heatmap = true;
-		frm.dashboard.heatmap_message = __('This is based on the Time Logs created against this project');
+		frm.dashboard.heatmap_message = __('This is based on the Time Sheet created against this project');
 		frm.dashboard.show_dashboard();
 
 		if(frm.doc.__onload.activity_summary.length) {
@@ -82,9 +82,9 @@ frappe.ui.form.on("Project", {
 						sum: sum
 					}));
 
-			section.on('click', '.time-log-link', function() {
+			section.on('click', '.time-sheet-link', function() {
 				var activity_type = $(this).attr('data-activity_type');
-				frappe.set_route('List', 'Time Log',
+				frappe.set_route('List', 'Time Sheet',
 					{'activity_type': activity_type, 'project': frm.doc.name});
 			});
 		}

@@ -28,7 +28,7 @@ class Project(Document):
 
 		self.set_onload('links', self.meta.get_links_setup())
 		self.set_onload('activity_summary', frappe.db.sql('''select activity_type, sum(hours) as total_hours
-			from `tabTime Log` where project=%s group by activity_type order by total_hours desc''', self.name, as_dict=True))
+			from `tabTime Sheet Detail` where project=%s group by activity_type order by total_hours desc''', self.name, as_dict=True))
 
 	def __setup__(self):
 		self.onload()
@@ -95,13 +95,13 @@ class Project(Document):
 			self.percent_complete = flt(flt(completed) / total * 100, 2)
 
 	def update_costing(self):
-		from_time_log = frappe.db.sql("""select
+		from_time_sheet = frappe.db.sql("""select
 			sum(costing_amount) as costing_amount,
 			sum(billing_amount) as billing_amount,
 			min(from_time) as start_date,
 			max(to_time) as end_date,
 			sum(hours) as time
-			from `tabTime Log` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
+			from `tabTime Sheet Detail` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
 
 		from_expense_claim = frappe.db.sql("""select
 			sum(total_sanctioned_amount) as total_sanctioned_amount
@@ -109,12 +109,12 @@ class Project(Document):
 			and docstatus = 1""",
 			self.name, as_dict=1)[0]
 
-		self.actual_start_date = from_time_log.start_date
-		self.actual_end_date = from_time_log.end_date
+		self.actual_start_date = from_time_sheet.start_date
+		self.actual_end_date = from_time_sheet.end_date
 
-		self.total_costing_amount = from_time_log.costing_amount
-		self.total_billing_amount = from_time_log.billing_amount
-		self.actual_time = from_time_log.time
+		self.total_costing_amount = from_time_sheet.costing_amount
+		self.total_billing_amount = from_time_sheet.billing_amount
+		self.actual_time = from_time_sheet.time
 
 		self.total_expense_claim = from_expense_claim.total_sanctioned_amount
 
@@ -162,7 +162,7 @@ def get_dashboard_data(name):
 def get_timeline_data(name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
-		from `tabTime Log` where project=%s
+		from `tabTime Sheet Detail` where project=%s
 			and from_time > date_sub(curdate(), interval 1 year)
 			and docstatus < 2
 			group by date(from_time)''', name))

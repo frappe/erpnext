@@ -10,7 +10,6 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.manufacturing.doctype.production_order.production_order \
 	import make_stock_entry, ItemHasVariantError
 from erpnext.stock.doctype.stock_entry import test_stock_entry
-from erpnext.projects.doctype.time_log.time_log import OverProductionLoggedError
 from erpnext.stock.utils import get_bin
 
 class TestProductionOrder(unittest.TestCase):
@@ -72,25 +71,25 @@ class TestProductionOrder(unittest.TestCase):
 
 		self.assertRaises(StockOverProductionError, s.submit)
 
-	def test_make_time_log(self):
-		from erpnext.projects.doctype.time_log.test_time_log import make_time_log_test_record
+	def test_make_time_sheet(self):
+		from erpnext.manufacturing.doctype.production_order.production_order import make_timesheet
 		prod_order = make_prod_order_test_record(item="_Test FG Item 2",
 			planned_start_date=now(), qty=1, do_not_save=True)
 
 		prod_order.set_production_order_operations()
 		prod_order.insert()
 		prod_order.submit()
-
+		
 		d = prod_order.operations[0]
-
 		d.completed_qty = flt(d.completed_qty)
 
-		time_log = make_time_log_test_record(hours=1, production_order= prod_order.name, operation= d.operation,
-			completed_qty= prod_order.qty - d.completed_qty, operation_id=d.name, for_manufacturing=1, simulate=True)
+		name = frappe.db.get_value('Time Sheet', {'production_order': prod_order.name}, 'name')
+		time_sheet_doc = frappe.get_doc('Time Sheet', name)
+		time_sheet_doc.submit()
+		
 
-		self.assertEqual(prod_order.name, time_log.production_order)
-		self.assertEqual((prod_order.qty - d.completed_qty), time_log.completed_qty)
-		self.assertEqual(time_diff_in_hours(d.planned_end_time, d.planned_start_time),time_log.hours)
+		self.assertEqual(prod_order.name, time_sheet_doc.production_order)
+		self.assertEqual((prod_order.qty - d.completed_qty), sum([d.completed_qty for d in time_sheet_doc.timesheets]))
 
 		manufacturing_settings = frappe.get_doc({
 			"doctype": "Manufacturing Settings",
@@ -105,8 +104,11 @@ class TestProductionOrder(unittest.TestCase):
 
 		self.assertEqual(prod_order.operations[0].actual_operation_time, 60)
 		self.assertEqual(prod_order.operations[0].actual_operating_cost, 100)
+		
+		time_sheet_doc1 = make_timesheet(prod_order.name)
+		self.assertEqual(len(time_sheet_doc1.get('timesheets')), 0)
 
-		time_log.cancel()
+		time_sheet_doc.cancel()
 
 		prod_order.load_from_db()
 		self.assertEqual(prod_order.operations[0].status, "Pending")
@@ -114,11 +116,6 @@ class TestProductionOrder(unittest.TestCase):
 
 		self.assertEqual(flt(prod_order.operations[0].actual_operation_time), 0)
 		self.assertEqual(flt(prod_order.operations[0].actual_operating_cost), 0)
-
-		time_log2 = make_time_log_test_record(from_time= add_days(time_log.to_time, 1) ,production_order= prod_order.name, operation= d.operation,
-			completed_qty= 5, operation_id=d.name, for_manufacturing=1, do_not_save=True)
-
-		self.assertRaises(OverProductionLoggedError, time_log2.save)
 
 	def test_planned_operating_cost(self):
 		prod_order = make_prod_order_test_record(item="_Test FG Item 2",

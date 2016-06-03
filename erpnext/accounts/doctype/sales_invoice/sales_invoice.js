@@ -430,3 +430,29 @@ cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
 		]
 	}
 });
+
+frappe.ui.form.on('Sales Invoice', {
+	setup: function(frm){
+		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(doc, cdt, cdn){
+			return {
+				filters: [
+					["Time Sheet", "status", "in", ["Submitted", "Payslip"]]
+				]
+			}
+		}
+	}
+})
+
+frappe.ui.form.on('Sales Invoice Timesheet', {
+	time_sheet: function(frm){
+		frm.call({
+			method: "calculate_billing_amount_from_timesheet",
+			doc: frm.doc,
+			callback: function(r, rt) {
+				refresh_field('total_billing_amount')
+			}
+		})
+	}
+})
+
+cur_frm.add_fetch("time_sheet", "total_billing_amount", "billing_amount");

@@ -124,29 +124,6 @@ class TestTask(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_start_date"), getdate('2015-1-26'))
 		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_end_date"), getdate('2015-1-28'))
 
-		time_log = frappe.new_doc('Time Log')
-		time_log.update({
-			"from_time": "2015-1-1",
-			"to_time": "2015-1-20",
-			"task": task1.name
-		})
-		time_log.submit()
-
-		self.assertEqual(frappe.db.get_value("Task", task2.name, "exp_start_date"), getdate('2015-1-21'))
-		self.assertEqual(frappe.db.get_value("Task", task2.name, "exp_end_date"), getdate('2015-1-25'))
-
-		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_start_date"), getdate('2015-1-26'))
-		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_end_date"), getdate('2015-1-28'))
-
-		time_log.cancel()
-
-		self.assertEqual(frappe.db.get_value("Task", task2.name, "exp_start_date"), getdate('2015-1-21'))
-		self.assertEqual(frappe.db.get_value("Task", task2.name, "exp_end_date"), getdate('2015-1-25'))
-
-		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_start_date"), getdate('2015-1-26'))
-		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_end_date"), getdate('2015-1-28'))
-
-
 	def test_close_assignment(self):
 		task = frappe.new_doc("Task")
 		task.subject = "Test Close Assignment"

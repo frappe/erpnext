@@ -31,13 +31,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Time Log",
-					"description": _("Time Log for tasks."),
-				},
-				{
-					"type": "doctype",
-					"name": "Time Log Batch",
-					"description": _("Batch Time Logs for billing."),
+					"name": "Time Sheet",
+					"description": _("Time Sheet for tasks."),
 				},
 				{
 					"type": "doctype",
@@ -58,8 +53,8 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Daily Time Log Summary",
-					"doctype": "Time Log"
+					"name": "Daily Time Sheet Summary",
+					"doctype": "Time Sheet"
 				},
 				{
 					"type": "report",

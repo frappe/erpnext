@@ -20,8 +20,9 @@ def get_context(context):
 	project.tasks = get_tasks(project.name, start=0, item_status='open',
 		search=frappe.form_dict.get("search"))
 
-	project.timelogs = get_timelogs(project.name, start=0,
-		search=frappe.form_dict.get("search"))
+	project.timelogs = []
+	# project.timelogs = get_timelogs(project.name, start=0,
+		# search=frappe.form_dict.get("search"))
 
 
 	context.doc = project

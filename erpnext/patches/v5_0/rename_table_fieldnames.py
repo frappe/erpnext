@@ -182,8 +182,8 @@ rename_map = {
 	"Territory": [
 		["target_details", "targets"]
 	],
-	"Time Log Batch": [
-		["time_log_batch_details", "time_logs"]
+	"Time Sheet": [
+		["time_sheet_details", "time_logs"]
 	],
 	"Workstation": [
 		["workstation_operation_hours", "working_hours"]
