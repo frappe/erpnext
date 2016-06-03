@@ -173,7 +173,7 @@ DocType: Upload Attendance,"Download the Template, fill appropriate data and att
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Unduh Template, isi data yang sesuai dan melampirkan gambar yang sudah dimodifikasi.
  Semua tanggal dan karyawan kombinasi dalam jangka waktu yang dipilih akan datang dalam template, dengan catatan kehadiran yang ada"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,Item {0} tidak aktif atau akhir hidup telah tercapai
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Akan diperbarui setelah Faktur Penjualan yang Dikirim.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Akan diperbarui setelah Faktur Penjualan yang Dikirim.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Untuk mencakup pajak berturut-turut {0} di tingkat Stok Barang, pajak dalam baris {1} juga harus disertakan"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,Pengaturan untuk modul HR
 DocType: SMS Center,SMS Center,SMS Center
@@ -930,7 +930,7 @@ DocType: Sales Person,Select company name first.,Pilih nama perusahaan terlebih 
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,Dr
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Penawaran Diterima dari Supplier
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},Untuk {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,Diperbaharui melalui log waktu
+DocType: Time Sheet,updated via Time Logs,Diperbaharui melalui log waktu
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Rata-rata Usia
 DocType: Opportunity,Your sales person who will contact the customer in future,Sales Anda yang akan menghubungi Konsumen di masa depan
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,Daftar beberapa Supplier Anda. Mereka bisa menjadi organisasi atau individu.
@@ -957,11 +957,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',Silahkan mengatur &#39;Terapkan Diskon tambahan On&#39;
 ,Ordered Items To Be Billed,Item Pesanan Tertagih
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,Dari Rentang harus kurang dari Untuk Rentang
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Pilih Waktu Log dan Kirim untuk membuat Faktur Penjualan baru.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Pilih Waktu Log dan Kirim untuk membuat Faktur Penjualan baru.
 DocType: Global Defaults,Global Defaults,Standar Global
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,Proyek Kolaborasi Undangan
 DocType: Salary Slip,Deductions,Pengurangan
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,Batch Waktu Log ini telah ditagih.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,Batch Waktu Log ini telah ditagih.
 DocType: Salary Slip,Leave Without Pay,Cuti Tanpa Bayar
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,Kesalahan Perencanaan Kapasitas
 ,Trial Balance for Party,Trial Balance untuk Partai
@@ -1271,7 +1271,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Jumlah D
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,Silahkan buat akun baru dari Bagan Akun.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Kunjungan Pemeliharaan
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Tersedia Batch Qty di Gudang
-DocType: Time Log Batch Detail,Time Log Batch Detail,Waktu Log Batch Detil
+DocType: Time Sheet Detail,Time Sheet Detail,Waktu Log Batch Detil
 DocType: Landed Cost Voucher,Landed Cost Help,Bantuan Biaya Landed
 DocType: Purchase Invoice,Select Shipping Address,Pilih Alamat Pengiriman
 DocType: Leave Block List,Block Holidays on important days.,Blok Hari Libur pada hari-hari penting.
@@ -1406,7 +1406,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Berat disebutkan, \n Sebutkan ""Berat UOM"" terlalu"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Permintaan bahan yang digunakan untuk membuat Entri Bursa ini
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,Unit tunggal Item.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',Waktu Log Batch {0} harus 'Dikirim'
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',Waktu Log Batch {0} harus 'Dikirim'
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Membuat Entri Akuntansi Untuk Setiap Gerakan Stock
 DocType: Leave Allocation,Total Leaves Allocated,Jumlah cuti Dialokasikan
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Gudang diperlukan pada Row ada {0}
@@ -1526,7 +1526,7 @@ DocType: Production Plan Material Request,Material Request Date,Bahan Permintaan
 DocType: Purchase Order Item,Supplier Quotation Item,Quotation Stok Barang Supplier
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Menonaktifkan penciptaan log waktu terhadap Order Produksi. Operasi tidak akan dilacak terhadap Orde Produksi
 DocType: Item,Has Variants,Memiliki Varian
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Klik 'Buat Sales Invoice' tombol untuk membuat Faktur Penjualan baru.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Klik 'Buat Sales Invoice' tombol untuk membuat Faktur Penjualan baru.
 DocType: Monthly Distribution,Name of the Monthly Distribution,Nama Distribusi Bulanan
 DocType: Sales Person,Parent Sales Person,Induk Sales Person
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,Silakan tentukan Mata uang Default di Dalam Perusahaan dan Global
@@ -1739,7 +1739,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,Asset Tetap
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Persediaan memiliki serial
 DocType: Activity Type,Default Billing Rate,Standar Tingkat Penagihan
-DocType: Time Log Batch,Total Billing Amount,Jumlah Total Tagihan
+DocType: Time Sheet,Total Billing Amount,Jumlah Total Tagihan
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,Akun Piutang
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},Row # {0}: Aset {1} sudah {2}
 DocType: Quotation Item,Stock Balance,Balance Nilai Stok
@@ -2219,7 +2219,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),Tingkat Net (Perusaha
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,Kelola Wilayah Tree.
 DocType: Journal Entry Account,Sales Invoice,Faktur Penjualan
 DocType: Journal Entry Account,Party Balance,Saldo Partai
-DocType: Sales Invoice Item,Time Log Batch,Waktu Log Batch
+DocType: Sales Invoice Item,Time Sheet,Waktu Log Batch
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,Silakan pilih Terapkan Diskon Pada
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Slip Gaji Dibuat
 DocType: Company,Default Receivable Account,Standar Piutang Rekening
@@ -2402,7 +2402,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Write Off Jumlah Outstanding
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Periksa apakah Anda memerlukan faktur berulang otomatis. Setelah mengirimkan setiap faktur penjualan, bagian Berulang akan terlihat."
 DocType: Account,Accounts Manager,Manager Akunting
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',Waktu Log {0} harus 'Dikirim'
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',Waktu Log {0} harus 'Dikirim'
 DocType: Stock Settings,Default Stock UOM,Standar Stock UOM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Biaya Tingkat berdasarkan Jenis Kegiatan (per jam)
 DocType: Production Planning Tool,Create Material Requests,Buat Order Permintaan Material
@@ -2704,7 +2704,7 @@ DocType: Sales Order,Partly Billed,Sebagian Ditagih
 DocType: Item,Default BOM,Standar BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,Mohon tipe nama perusahaan untuk mengkonfirmasi
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,Jumlah Posisi Amt
-DocType: Time Log Batch,Total Hours,Jumlah Jam
+DocType: Time Sheet,Total Hours,Jumlah Jam
 DocType: Journal Entry,Printing Settings,Pengaturan pencetakan
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},Jumlah Debit harus sama dengan total kredit. Perbedaannya adalah {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Otomotif
@@ -2995,7 +2995,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,Ditransfer Qty
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Menjelajahi
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Perencanaan
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Membuat Waktu Log Batch
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Membuat Waktu Log Batch
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Diterbitkan
 DocType: Project,Total Billing Amount (via Time Logs),Jumlah Total Tagihan (via Waktu Log)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,Kami menjual item ini
@@ -3045,7 +3045,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,Unit berbeda Item
 DocType: Pricing Rule,Buying,Pembelian
 DocType: HR Settings,Employee Records to be created by,Rekaman Karyawan yang akan dibuat oleh
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,Batch Waktu Log ini telah dibatalkan.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,Batch Waktu Log ini telah dibatalkan.
 ,Reqd By Date,Reqd By Date
 DocType: Salary Slip Earning,Salary Slip Earning,Slip Gaji Produktif
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,Kreditor
@@ -3462,7 +3462,7 @@ DocType: Budget Detail,Budget Detail,Rincian Anggaran
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Entrikan pesan sebelum mengirimnya
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Profil Point of Sale
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,Silahkan Perbarui Pengaturan SMS
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Waktu Log {0} sudah ditagih
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Waktu Log {0} sudah ditagih
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Pinjaman tanpa Jaminan
 DocType: Cost Center,Cost Center Name,Nama Pusat Biaya
 DocType: Maintenance Schedule Detail,Scheduled Date,Dijadwalkan Tanggal

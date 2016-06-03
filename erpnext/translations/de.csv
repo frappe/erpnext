@@ -172,7 +172,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Vorlage herunterladen, passende Daten eintragen und geänderte Datei anfügen. Alle Termine und Mitarbeiter-Kombinationen im gewählten Zeitraum werden in die Vorlage übernommen, inklusive der bestehenden Anwesenheitslisten"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,Artikel {0} ist nicht aktiv oder hat das Ende der Lebensdauer erreicht
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,"Wird aktualisiert, wenn die Ausgangsrechnung übertragen wurde."
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,"Wird aktualisiert, wenn die Ausgangsrechnung übertragen wurde."
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Um Steuern im Artikelpreis in Zeile {0} einzubeziehen, müssen Steuern in den Zeilen {1} ebenfalls einbezogen sein"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,Einstellungen für das Personal-Modul
 DocType: SMS Center,SMS Center,SMS-Center
@@ -927,7 +927,7 @@ DocType: Sales Person,Select company name first.,Zuerst den Firmennamen auswähl
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,Soll
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Angebote von Lieferanten
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},An {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,Aktualisiert über Zeitprotokolle
+DocType: Time Sheet,updated via Time Logs,Aktualisiert über Zeitprotokolle
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Durchschnittsalter
 DocType: Opportunity,Your sales person who will contact the customer in future,"Ihr Vertriebsmitarbeiter, der den Kunden in Zukunft kontaktiert"
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,Bitte ein paar Lieferanten angeben. Diese können Firmen oder Einzelpersonen sein.
@@ -954,11 +954,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',"Bitte ""Zusätzlichen Rabatt anwenden auf"" aktivieren"
 ,Ordered Items To Be Billed,"Bestellte Artikel, die abgerechnet werden müssen"
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,Von-Bereich muss kleiner sein als Bis-Bereich
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,"Bitte Zeitprotokolle auswählen und übertragen, um eine neue Ausgangsrechnung zu erstellen."
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,"Bitte Zeitprotokolle auswählen und übertragen, um eine neue Ausgangsrechnung zu erstellen."
 DocType: Global Defaults,Global Defaults,Allgemeine Voreinstellungen
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,Projekt-Zusammenarbeit Einladung
 DocType: Salary Slip,Deductions,Abzüge
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,Dieser Zeitprotokollstapel wurde abgerechnet.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,Dieser Zeitprotokollstapel wurde abgerechnet.
 DocType: Salary Slip,Leave Without Pay,Unbezahlter Urlaub
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,Fehler in der Kapazitätsplanung
 ,Trial Balance for Party,Summen- und Saldenliste für Gruppe
@@ -1267,7 +1267,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Zusätzl
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,Bitte neues Konto aus dem Kontenplan erstellen.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Wartungsbesuch
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Verfügbare Losgröße im Lager
-DocType: Time Log Batch Detail,Time Log Batch Detail,Zeitprotokollstapel-Detail
+DocType: Time Sheet Detail,Time Sheet Detail,Zeitprotokollstapel-Detail
 DocType: Landed Cost Voucher,Landed Cost Help,Hilfe zum Einstandpreis
 DocType: Purchase Invoice,Select Shipping Address,Wählen Sie Lieferadresse
 DocType: Leave Block List,Block Holidays on important days.,Urlaub an wichtigen Tagen sperren.
@@ -1402,7 +1402,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Gewicht ist angegeben, bitte auch ""Gewichts-Maßeinheit"" angeben"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Materialanfrage wurde für die Erstellung dieser Lagerbuchung verwendet
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,Einzelnes Element eines Artikels
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',"Zeitprotokollstapel {0} muss ""übertragen"" sein"
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',"Zeitprotokollstapel {0} muss ""übertragen"" sein"
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Eine Buchung für jede Lagerbewegung erstellen
 DocType: Leave Allocation,Total Leaves Allocated,Insgesamt zugewiesene Urlaubstage
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Angabe des Lagers ist in Zeile {0} erforderlich
@@ -1522,7 +1522,7 @@ DocType: Production Plan Material Request,Material Request Date,Material Auftrag
 DocType: Purchase Order Item,Supplier Quotation Item,Lieferantenangebotsposition
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Deaktiviert die Erstellung von Zeitprotokollen zu Fertigungsaufträgen. Arbeitsgänge werden nicht zu Fertigungsaufträgen nachverfolgt
 DocType: Item,Has Variants,Hat Varianten
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Auf ""Ausgangsrechnung erstellen"" klicken, um eine neue Ausgangsrechnung zu erstellen."
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Auf ""Ausgangsrechnung erstellen"" klicken, um eine neue Ausgangsrechnung zu erstellen."
 DocType: Monthly Distribution,Name of the Monthly Distribution,Bezeichnung der monatsweisen Verteilung
 DocType: Sales Person,Parent Sales Person,Übergeordneter Vertriebsmitarbeiter
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,Bitte Standardwährung in den Unternehmensstammdaten und den allgemeinen Voreinstellungen angeben
@@ -1734,7 +1734,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,Anlagevermögen
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Serialisierter Lagerbestand
 DocType: Activity Type,Default Billing Rate,Standard-Rechnungspreis
-DocType: Time Log Batch,Total Billing Amount,Gesamtrechnungsbetrag
+DocType: Time Sheet,Total Billing Amount,Gesamtrechnungsbetrag
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,Forderungskonto
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},Row # {0}: Vermögens {1} ist bereits {2}
 DocType: Quotation Item,Stock Balance,Lagerbestand
@@ -2214,7 +2214,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),Nettopreis (Firmenwä
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,Baumstruktur der Regionen verwalten
 DocType: Journal Entry Account,Sales Invoice,Ausgangsrechnung
 DocType: Journal Entry Account,Party Balance,Gruppen-Saldo
-DocType: Sales Invoice Item,Time Log Batch,Zeitprotokollstapel
+DocType: Sales Invoice Item,Time Sheet,Zeitprotokollstapel
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,"Bitte ""Rabatt anwenden auf"" auswählen"
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Gehaltsabrechnung Erstellt
 DocType: Company,Default Receivable Account,Standard-Forderungskonto
@@ -2397,7 +2397,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Offenen Betrag ausbuchen
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Aktivieren, wenn Sie automatisch wiederkehrende Ausgangsrechnungen benötigen. Nach dem Übertragen einer Ausgangsrechnung wird der Bereich für wiederkehrende Ausgangsrechnungen angezeigt."
 DocType: Account,Accounts Manager,Kontenmanager
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',"Zeitprotokoll {0} muss ""übertragen"" sein"
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',"Zeitprotokoll {0} muss ""übertragen"" sein"
 DocType: Stock Settings,Default Stock UOM,Standardlagermaßeinheit
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Kalkulationsbetrag basierend auf Aktivitätsart (pro Stunde)
 DocType: Production Planning Tool,Create Material Requests,Materialanfragen erstellen
@@ -2698,7 +2698,7 @@ DocType: Sales Order,Partly Billed,Teilweise abgerechnet
 DocType: Item,Default BOM,Standardstückliste
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,Bitte zum Bestätigen Firmenname erneut eingeben
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,Offener Gesamtbetrag
-DocType: Time Log Batch,Total Hours,Summe der Stunden
+DocType: Time Sheet,Total Hours,Summe der Stunden
 DocType: Journal Entry,Printing Settings,Druckeinstellungen
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},Gesamt-Soll muss gleich Gesamt-Haben sein. Die Differenz ist {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Fahrzeugbau
@@ -2988,7 +2988,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,Übergebene Menge
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigieren
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Planung
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Zeitprotokollstapel erstellen
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Zeitprotokollstapel erstellen
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Ausgestellt
 DocType: Project,Total Billing Amount (via Time Logs),Gesamtumsatz (über Zeitprotokolle)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,Wir verkaufen diesen Artikel
@@ -3038,7 +3038,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,Eindeutige Einheit eines Artikels
 DocType: Pricing Rule,Buying,Einkauf
 DocType: HR Settings,Employee Records to be created by,Mitarbeiter-Datensätze werden erstellt nach
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,Dieser Zeitprotokollstapel wurde storniert.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,Dieser Zeitprotokollstapel wurde storniert.
 ,Reqd By Date,Benötigt nach Datum
 DocType: Salary Slip Earning,Salary Slip Earning,Verdienst laut Gehaltsabrechnung
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,Gläubiger
@@ -3454,7 +3454,7 @@ DocType: Budget Detail,Budget Detail,Budget-Detail
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Bitte eine Nachricht vor dem Versenden eingeben
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Verkaufsstellen-Profil
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,Bitte SMS-Einstellungen aktualisieren
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Zeitprotokoll {0} bereits abgerechnet
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Zeitprotokoll {0} bereits abgerechnet
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Ungesicherte Kredite
 DocType: Cost Center,Cost Center Name,Kostenstellenbezeichnung
 DocType: Maintenance Schedule Detail,Scheduled Date,Geplantes Datum

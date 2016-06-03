@@ -172,7 +172,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Template ကို Download, သင့်လျော်သောအချက်အလက်ဖြည့်စွက်ခြင်းနှင့်ပြုပြင်ထားသောဖိုင်ပူးတွဲ။ ရွေးချယ်ထားတဲ့ကာလအတွက်အားလုံးသည်ရက်စွဲများနှင့်ဝန်ထမ်းပေါင်းစပ်လက်ရှိတက်ရောက်သူမှတ်တမ်းများနှင့်တကွ, template မှာရောက်လိမ့်မည်"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,item {0} တက်ကြွသို့မဟုတ်အသက်၏အဆုံးသည်မဖြစ်သေးရောက်ရှိခဲ့သည်
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,အရောင်းပြေစာ Submitted ပြီးနောက် updated လိမ့်မည်။
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,အရောင်းပြေစာ Submitted ပြီးနောက် updated လိမ့်မည်။
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","အခွန်ကိုထည့်သွင်းရန်အတန်းအတွက် {0} Item မှုနှုန်း, အတန်း {1} အတွက်အခွန်ကိုလည်းထည့်သွင်းရပါမည်"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,HR Module သည် Settings ကို
 DocType: SMS Center,SMS Center,SMS ကို Center က
@@ -907,7 +907,7 @@ DocType: Sales Person,Select company name first.,ပထမဦးဆုံး�
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,ဒေါက်တာ
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,ကိုးကားချက်များပေးသွင်းထံမှလက်ခံရရှိခဲ့သည်။
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},{1} {2} | {0} မှ
-DocType: Time Log Batch,updated via Time Logs,အချိန် Logs ကနေတဆင့် updated
+DocType: Time Sheet,updated via Time Logs,အချိန် Logs ကနေတဆင့် updated
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,ပျမ်းမျှအားဖြင့်ခေတ်
 DocType: Opportunity,Your sales person who will contact the customer in future,အနာဂတ်အတွက်ဖောက်သည်ဆက်သွယ်ပါလိမ့်မည်တော်မူသောသင်တို့ရောင်းအားလူတစ်ဦး
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,သင့်ရဲ့ပေးသွင်းသူများ၏အနည်းငယ်စာရင်း။ သူတို့ဟာအဖွဲ့အစည်းများသို့မဟုတ်လူပုဂ္ဂိုလ်တစ်ဦးချင်းဖြစ်နိုင်ပါတယ်။
@@ -934,11 +934,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',&#39;&#39; Apply ဖြည့်စွက်လျှော့တွင် &#39;&#39; set ကျေးဇူးပြု.
 ,Ordered Items To Be Billed,ကြေညာတဲ့ခံရဖို့အမိန့်ထုတ်ပစ္စည်းများ
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,Range ထဲထဲကနေ A မျိုးမျိုးရန်ထက်လျော့နည်းဖြစ်ဖို့ရှိပါတယ်
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,အချိန် Logs ကိုရွေးပြီးအသစ်တစ်ခုကိုအရောင်းပြေစာကိုဖန်တီးရန် Submit ။
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,အချိန် Logs ကိုရွေးပြီးအသစ်တစ်ခုကိုအရောင်းပြေစာကိုဖန်တီးရန် Submit ။
 DocType: Global Defaults,Global Defaults,ဂလိုဘယ် Defaults ကို
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,စီမံကိန်းပူးပေါင်းဆောင်ရွက်ဖိတ်ကြားလွှာ
 DocType: Salary Slip,Deductions,ဖြတ်ငွေများ
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,ဒါဟာအချိန်အထဲ Batch ကြေညာခဲ့တာဖြစ်ပါတယ်။
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,ဒါဟာအချိန်အထဲ Batch ကြေညာခဲ့တာဖြစ်ပါတယ်။
 DocType: Salary Slip,Leave Without Pay,Pay ကိုမရှိရင် Leave
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,စွမ်းဆောင်ရည်မြှင့်စီမံကိန်းအမှား
 ,Trial Balance for Party,ပါတီများအတွက် trial Balance ကို
@@ -1247,7 +1247,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),အပ�
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,ငွေစာရင်း၏ Chart ဟာကနေအကောင့်သစ်ဖန်တီးပေးပါ။
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,ပြုပြင်ထိန်းသိမ်းမှုခရီးစဉ်
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,ဂိုဒေါင်ကနေရယူနိုင်ပါတယ် Batch Qty
-DocType: Time Log Batch Detail,Time Log Batch Detail,အချိန်အထဲ Batch Detail
+DocType: Time Sheet Detail,Time Sheet Detail,အချိန်အထဲ Batch Detail
 DocType: Landed Cost Voucher,Landed Cost Help,ကုန်ကျစရိတ်အကူအညီဆင်းသက်
 DocType: Purchase Invoice,Select Shipping Address,သဘောင်္တင်လိပ်စာကို Select လုပ်ပါ
 DocType: Leave Block List,Block Holidays on important days.,အရေးကြီးသောရက်အားလပ်ရက်ပိတ်ဆို့။
@@ -1382,7 +1382,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","အလေးချိန်ဖော်ပြခဲ့သောဖြစ်ပါတယ်, \ nPlease လွန်း &quot;အလေးချိန် UOM&quot; ဖော်ပြထားခြင်း"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,ဒီစတော့အိတ် Entry &#39;ပါစေရန်အသုံးပြုပစ္စည်းတောင်းဆိုခြင်း
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,တစ်ဦး Item ၏လူပျိုယူနစ်။
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',အချိန်အထဲ Batch {0} &#39;&#39; Submitted &#39;&#39; ရမည်
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',အချိန်အထဲ Batch {0} &#39;&#39; Submitted &#39;&#39; ရမည်
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,ကျွန်တော်စတော့အိတ်လပ်ြရြားမြသည်စာရင်းကိုင် Entry &#39;ပါစေ
 DocType: Leave Allocation,Total Leaves Allocated,ခွဲဝေစုစုပေါင်းရွက်
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Row မရှိပါ {0} မှာလိုအပ်သည့်ဂိုဒေါင်
@@ -1502,7 +1502,7 @@ DocType: Production Plan Material Request,Material Request Date,ပစ္စည�
 DocType: Purchase Order Item,Supplier Quotation Item,ပေးသွင်းစျေးနှုန်း Item
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,ထုတ်လုပ်မှုအမိန့်ဆန့်ကျင်အချိန်သစ်လုံး၏ဖန်ဆင်းခြင်းလုပ်မလုပ်။ စစ်ဆင်ရေးထုတ်လုပ်မှုကိုအမိန့်ဆန့်ကျင်ခြေရာခံလိမ့်မည်မဟုတ်
 DocType: Item,Has Variants,မူကွဲရှိပါတယ်
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,အသစ်တစ်ခုကိုအရောင်းပြေစာကိုဖန်တီးရန်ခလုတ်ကို &#39;&#39; အရောင်းပြေစာလုပ်ပါ &#39;&#39; ပေါ်တွင်ကလစ်နှိပ်ပါ။
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,အသစ်တစ်ခုကိုအရောင်းပြေစာကိုဖန်တီးရန်ခလုတ်ကို &#39;&#39; အရောင်းပြေစာလုပ်ပါ &#39;&#39; ပေါ်တွင်ကလစ်နှိပ်ပါ။
 DocType: Monthly Distribution,Name of the Monthly Distribution,အဆိုပါလစဉ်ဖြန့်ဖြူးအမည်
 DocType: Sales Person,Parent Sales Person,မိဘအရောင်းပုဂ္ဂိုလ်
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,ကုမ္ပဏီနှင့် Master နှင့် Global Defaults ကိုအတွက်ပုံမှန်ငွေကြေးစနစ်ကိုသတ်မှတ်ပေးပါ
@@ -1714,7 +1714,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,ပုံသေ Asset
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Serial Inventory
 DocType: Activity Type,Default Billing Rate,Default အနေနဲ့ငွေတောင်းခံလွှာနှုန်း
-DocType: Time Log Batch,Total Billing Amount,စုစုပေါင်း Billing ငွေပမာဏ
+DocType: Time Sheet,Total Billing Amount,စုစုပေါင်း Billing ငွေပမာဏ
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,receiver အကောင့်
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},အတန်း # {0}: ပိုင်ဆိုင်မှု {1} {2} ပြီးသားဖြစ်ပါတယ်
 DocType: Quotation Item,Stock Balance,စတော့အိတ် Balance
@@ -2162,7 +2162,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),Net က Rate (ကု�
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,နယ်မြေတွေကို Tree Manage ။
 DocType: Journal Entry Account,Sales Invoice,အရောင်းပြေစာ
 DocType: Journal Entry Account,Party Balance,ပါတီ Balance
-DocType: Sales Invoice Item,Time Log Batch,အချိန်အထဲ Batch
+DocType: Sales Invoice Item,Time Sheet,အချိန်အထဲ Batch
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,လျှော့တွင် Apply ကို select ကျေးဇူးပြု.
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,လစာစလစ်ဖြတ်ပိုင်းပုံစံ Created
 DocType: Company,Default Receivable Account,default receiver အကောင့်
@@ -2345,7 +2345,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,ထူးချွန်ငွေပမာဏပိတ်ရေးထား
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","သင်အလိုအလျှောက်ထပ်တလဲလဲကုန်ပို့လွှာလိုအပ်ပါကစစ်ဆေးပါ။ မည်သည့်အရောင်းကုန်ပို့လွှာတင်သွင်းခြင်း, ပြီးနောက်, ထပ်တလဲလဲအပိုင်းမြင်နိုင်ပါလိမ့်မည်။"
 DocType: Account,Accounts Manager,အကောင့်အသစ်များ၏ Manager က
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',အချိန်အထဲ {0} &#39;&#39; Submitted &#39;&#39; ရမည်
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',အချိန်အထဲ {0} &#39;&#39; Submitted &#39;&#39; ရမည်
 DocType: Stock Settings,Default Stock UOM,default စတော့အိတ် UOM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),(တစ်နာရီလျှင်) လုပ်ဆောင်ချက်ကအမျိုးအစားပေါ်အခြေခံပြီးကုန်ကျနှုန်း
 DocType: Production Planning Tool,Create Material Requests,ပစ္စည်းတောင်းဆို Create
@@ -2646,7 +2646,7 @@ DocType: Sales Order,Partly Billed,တစ်စိတ်တစ်ပိုင်
 DocType: Item,Default BOM,default BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,အတည်ပြုရန်ကုမ္ပဏီ၏နာမ-type ကိုပြန်လည် ကျေးဇူးပြု.
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,စုစုပေါင်းထူးချွန် Amt
-DocType: Time Log Batch,Total Hours,စုစုပေါင်းနာရီ
+DocType: Time Sheet,Total Hours,စုစုပေါင်းနာရီ
 DocType: Journal Entry,Printing Settings,ပုံနှိပ်ခြင်းက Settings
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},စုစုပေါင်း Debit စုစုပေါင်းချေးငွေတန်းတူဖြစ်ရမည်။ အဆိုပါခြားနားချက် {0} သည်
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,မော်တော်ယာဉ်
@@ -2936,7 +2936,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,လွှဲပြောင်း Qty
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigator
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,စီမံကိန်း
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,အချိန်အထဲ Batch လုပ်ပါ
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,အချိန်အထဲ Batch လုပ်ပါ
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,ထုတ်ပြန်သည်
 DocType: Project,Total Billing Amount (via Time Logs),(အချိန် Logs ကနေတဆင့်) စုစုပေါင်း Billing ငွေပမာဏ
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,ကျွန်ုပ်တို့သည်ဤ Item ရောင်းချ
@@ -2986,7 +2986,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,တစ်ဦး Item ၏ထူးခြားသောယူနစ်
 DocType: Pricing Rule,Buying,ဝယ်
 DocType: HR Settings,Employee Records to be created by,အသုံးပြုနေသူများကဖန်တီးခံရဖို့ဝန်ထမ်းမှတ်တမ်း
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,ဒါဟာအချိန်အထဲ Batch ဖျက်သိမ်းခဲ့ကြောင်းသိရသည်။
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,ဒါဟာအချိန်အထဲ Batch ဖျက်သိမ်းခဲ့ကြောင်းသိရသည်။
 ,Reqd By Date,နေ့စွဲအားဖြင့် Reqd
 DocType: Salary Slip Earning,Salary Slip Earning,လစာစလစ်ဖြတ်ပိုင်းပုံစံင်ငွေ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,အကြွေးရှင်
@@ -3391,7 +3391,7 @@ DocType: Budget Detail,Budget Detail,ဘဏ္ဍာငွေအရအသုံ�
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,ပေးပို့ခြင်းမပြုမီသတင်းစကားကိုရိုက်ထည့်ပေးပါ
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,point-of-Sale ကိုယ်ရေးအချက်အလက်များ profile
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,SMS ကို Settings ကို Update ကျေးဇူးပြု.
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,အချိန်အထဲ {0} ပြီးသားကြေညာ
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,အချိန်အထဲ {0} ပြီးသားကြေညာ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,မလုံခြုံချေးငွေ
 DocType: Cost Center,Cost Center Name,ကုန်ကျ Center ကအမည်
 DocType: Maintenance Schedule Detail,Scheduled Date,Scheduled နေ့စွဲ

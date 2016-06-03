@@ -172,7 +172,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records",ទាញយកទំព័រគំរូបំពេញទិន្នន័យត្រឹមត្រូវហើយភ្ជាប់ឯកសារដែលបានកែប្រែ។ កាលបរិច្ឆេទនិងបុគ្គលិកទាំងអស់រួមបញ្ចូលគ្នានៅក្នុងរយៈពេលដែលបានជ្រើសនឹងមកនៅក្នុងពុម្ពដែលមានស្រាប់ជាមួយនឹងកំណត់ត្រាវត្តមាន
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,ធាតុ {0} គឺមិនសកម្មឬទីបញ្ចប់នៃជីវិតត្រូវបានឈានដល់
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,នឹងត្រូវបានបន្ថែមបន្ទាប់ពីមានវិក័យប័ត្រលក់ត្រូវបានដាក់ស្នើ។
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,នឹងត្រូវបានបន្ថែមបន្ទាប់ពីមានវិក័យប័ត្រលក់ត្រូវបានដាក់ស្នើ។
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included",ដើម្បីរួមបញ្ចូលពន្ធក្នុងជួរ {0} នៅក្នុងអត្រាធាតុពន្ធក្នុងជួរដេក {1} ត្រូវតែត្រូវបានរួមបញ្ចូល
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,ការកំណត់សម្រាប់ម៉ូឌុលធនធានមនុស្ស
 DocType: SMS Center,SMS Center,ផ្ញើសារជាអក្សរមជ្ឈមណ្ឌល
@@ -906,7 +906,7 @@ DocType: Sales Person,Select company name first.,ជ្រើសឈ្មោះ�
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,លោកបណ្ឌិត
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,សម្រង់ពាក្យដែលទទួលបានពីការផ្គត់ផ្គង់។
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},ដើម្បី {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,ធ្វើឱ្យទាន់សម័យតាមរយៈពេលកំណត់ហេតុ
+DocType: Time Sheet,updated via Time Logs,ធ្វើឱ្យទាន់សម័យតាមរយៈពេលកំណត់ហេតុ
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,អាយុជាមធ្យម
 DocType: Opportunity,Your sales person who will contact the customer in future,ការលក់ផ្ទាល់ខ្លួនរបស់អ្នកដែលនឹងទាក់ទងអតិថិជននៅថ្ងៃអនាគត
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,រាយមួយចំនួននៃការផ្គត់ផ្គង់របស់អ្នក។ ពួកគេអាចត្រូវបានអង្គការឬបុគ្គល។
@@ -933,11 +933,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',សូមកំណត់ &#39;អនុវត្តការបញ្ចុះតម្លៃបន្ថែមទៀតនៅលើ &quot;
 ,Ordered Items To Be Billed,ធាតុបញ្ជាឱ្យនឹងត្រូវបានផ្សព្វផ្សាយ
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,ពីជួរមានដើម្បីឱ្យមានតិចជាងដើម្បីជួរ
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,ជ្រើសកំណត់ហេតុនិងការដាក់ស្នើវេលាម៉ោងដើម្បីបង្កើតវិក័យប័ត្រលក់ថ្មី។
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,ជ្រើសកំណត់ហេតុនិងការដាក់ស្នើវេលាម៉ោងដើម្បីបង្កើតវិក័យប័ត្រលក់ថ្មី។
 DocType: Global Defaults,Global Defaults,លំនាំដើមជាសកល
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,ការអញ្ជើញសហការគម្រោង
 DocType: Salary Slip,Deductions,ការកាត់
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,នេះបាច់កំណត់ហេតុម៉ោងត្រូវបានផ្សព្វផ្សាយ។
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,នេះបាច់កំណត់ហេតុម៉ោងត្រូវបានផ្សព្វផ្សាយ។
 DocType: Salary Slip,Leave Without Pay,ទុកឱ្យដោយគ្មានការបង់
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,កំហុសក្នុងការធ្វើផែនការការកសាងសមត្ថភាព
 ,Trial Balance for Party,អង្គជំនុំតុល្យភាពសម្រាប់ការគណបក្ស
@@ -1246,7 +1246,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),ចំ�
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,សូមបង្កើតគណនីថ្មីមួយពីតារាងនៃគណនី។
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,ថែទាំទស្សនកិច្ច
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,បាច់អាចរកបាន Qty នៅឃ្លាំង
-DocType: Time Log Batch Detail,Time Log Batch Detail,ពត៌មានលំអិតបាច់កំណត់ហេតុម៉ោង
+DocType: Time Sheet Detail,Time Sheet Detail,ពត៌មានលំអិតបាច់កំណត់ហេតុម៉ោង
 DocType: Landed Cost Voucher,Landed Cost Help,ជំនួយការចំណាយបានចុះចត
 DocType: Purchase Invoice,Select Shipping Address,ជ្រើសអាសយដ្ឋានដឹកជញ្ជូន
 DocType: Leave Block List,Block Holidays on important days.,ប្រតិទិនឈប់សម្រាកនៅថ្ងៃដ៏សំខាន់ប្លុក។
@@ -1381,7 +1381,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too",ទំងន់ត្រូវបានបង្ហាញ \ n សូមនិយាយអំពី &quot;ទម្ងន់ UOM&quot; ពេក
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,សម្ភារៈស្នើសុំប្រើដើម្បីធ្វើឱ្យផ្សារហ៊ុននេះបានចូល
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,អង្គភាពតែមួយនៃធាតុមួយ។
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',កំណត់ហេតុពេលវេលាបាច់ {0} ត្រូវតែត្រូវបាន &quot;ផ្តល់ជូន&quot;
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',កំណត់ហេតុពេលវេលាបាច់ {0} ត្រូវតែត្រូវបាន &quot;ផ្តល់ជូន&quot;
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,ធ្វើឱ្យធាតុគណនេយ្យសម្រាប់គ្រប់ចលនាហ៊ុន
 DocType: Leave Allocation,Total Leaves Allocated,ចំនួនសរុបដែលបានបម្រុងទុកស្លឹក
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},ឃ្លាំងបានទាមទារនៅក្នុងជួរដេកគ្មាន {0}
@@ -1501,7 +1501,7 @@ DocType: Production Plan Material Request,Material Request Date,សម្ភា�
 DocType: Purchase Order Item,Supplier Quotation Item,ធាតុសម្រង់ក្រុមហ៊ុនផ្គត់ផ្គង់
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,មិនអនុញ្ញាតការបង្កើតនៃការពេលវេលាដែលនឹងដីកាកំណត់ហេតុផលិតកម្ម។ ប្រតិបត្ដិការនឹងមិនត្រូវបានតាមដានប្រឆាំងនឹងដីកាសម្រេចរបស់ផលិតកម្ម
 DocType: Item,Has Variants,មានវ៉ារ្យ៉ង់
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,ចុចលើប៊ូតុង &quot;ធ្វើឱ្យការលក់វិក័យប័ត្រក្នុងការបង្កើតវិក័យប័ត្រលក់ថ្មី។
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,ចុចលើប៊ូតុង &quot;ធ្វើឱ្យការលក់វិក័យប័ត្រក្នុងការបង្កើតវិក័យប័ត្រលក់ថ្មី។
 DocType: Monthly Distribution,Name of the Monthly Distribution,ឈ្មោះរបស់ចែកចាយប្រចាំខែ
 DocType: Sales Person,Parent Sales Person,ឪពុកម្តាយរបស់បុគ្គលលក់
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,សូមបញ្ជាក់រូបិយប័ណ្ណលំនាំដើមក្នុងក្រុមហ៊ុន Master និងលំនាំដើមជាសកល
@@ -1712,7 +1712,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,ទ្រព្យសកម្មថេរ
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,សារពើភ័ណ្ឌស៊េរី
 DocType: Activity Type,Default Billing Rate,អត្រាការប្រាក់វិក័យប័ត្រលំនាំដើម
-DocType: Time Log Batch,Total Billing Amount,ចំនួនទឹកប្រាក់សរុបវិក័យប័ត្រ
+DocType: Time Sheet,Total Billing Amount,ចំនួនទឹកប្រាក់សរុបវិក័យប័ត្រ
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,គណនីត្រូវទទួល
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},ជួរដេក # {0}: ទ្រព្យសកម្ម {1} មានរួចហើយ {2}
 DocType: Quotation Item,Stock Balance,តុល្យភាពភាគហ៊ុន
@@ -2160,7 +2160,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),អត្រាកា
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,គ្រប់គ្រងដើមឈើមួយដើមដែនដី។
 DocType: Journal Entry Account,Sales Invoice,វិក័យប័ត្រការលក់
 DocType: Journal Entry Account,Party Balance,តុល្យភាពគណបក្ស
-DocType: Sales Invoice Item,Time Log Batch,កំណត់ហេតុម៉ោងបាច់
+DocType: Sales Invoice Item,Time Sheet,កំណត់ហេតុម៉ោងបាច់
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,សូមជ្រើសរើសអនុវត្តបញ្ចុះតម្លៃនៅលើ
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,គ្រូពេទ្យប្រហែលជាត្រូវបានបង្កើតឡើងប្រាក់បៀវត្សរ៍
 DocType: Company,Default Receivable Account,គណនីអ្នកទទួលលំនាំដើម
@@ -2343,7 +2343,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,បិទការសរសេរចំនួនទឹកប្រាក់ដ៏ឆ្នើម
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.",សូមពិនិត្យមើលប្រសិនបើអ្នកត្រូវការវិក័យប័ត្រកើតឡើងដោយស្វ័យប្រវត្តិ។ បន្ទាប់ពីការដាក់ស្នើវិក័យប័ត្រណាមួយការលក់ព្យាបាលផ្នែកនឹងត្រូវបានមើលឃើញ។
 DocType: Account,Accounts Manager,ការគ្រប់គ្រងគណនី
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',ពេលវេលាកំណត់ហេតុ {0} ត្រូវតែបាន &quot;ផ្តល់ជូន&quot;
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',ពេលវេលាកំណត់ហេតុ {0} ត្រូវតែបាន &quot;ផ្តល់ជូន&quot;
 DocType: Stock Settings,Default Stock UOM,លំនាំដើមហ៊ុន UOM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),អត្រាការប្រាក់ដែលមានមូលដ្ឋានលើមានតម្លៃប្រភេទសកម្មភាព (ក្នុងមួយម៉ោង)
 DocType: Production Planning Tool,Create Material Requests,បង្កើតសម្ភារៈសំណើ
@@ -2644,7 +2644,7 @@ DocType: Sales Order,Partly Billed,ផ្សព្វផ្សាយមួយផ
 DocType: Item,Default BOM,Bom លំនាំដើម
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,សូមប្រភេទឈ្មោះរបស់ក្រុមហ៊ុនដើម្បីបញ្ជាក់
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,សរុបឆ្នើម AMT
-DocType: Time Log Batch,Total Hours,ម៉ោងសរុប
+DocType: Time Sheet,Total Hours,ម៉ោងសរុប
 DocType: Journal Entry,Printing Settings,ការកំណត់បោះពុម្ព
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},ឥណពន្ធសរុបត្រូវតែស្មើនឹងឥណទានសរុប។ ភាពខុសគ្នានេះគឺ {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,រថយន្ដ
@@ -2934,7 +2934,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,ផ្ទេរ Qty
 apps/erpnext/erpnext/config/learn.py +11,Navigating,ការរុករក
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,ការធ្វើផែនការ
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,ធ្វើឱ្យបាច់កំណត់ហេតុម៉ោង
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,ធ្វើឱ្យបាច់កំណត់ហេតុម៉ោង
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,ចេញផ្សាយ
 DocType: Project,Total Billing Amount (via Time Logs),ចំនួនវិក័យប័ត្រសរុប (តាមរយៈការពេលវេលាកំណត់ហេតុ)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,យើងលក់ធាតុនេះ
@@ -2984,7 +2984,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,អង្គភាពផ្សេងគ្នានៃធាតុ
 DocType: Pricing Rule,Buying,ការទិញ
 DocType: HR Settings,Employee Records to be created by,កំណត់ត្រាបុគ្គលិកដែលនឹងត្រូវបានបង្កើតឡើងដោយ
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,នេះបាច់កំណត់ហេតុម៉ោងត្រូវបានលុបចោល។
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,នេះបាច់កំណត់ហេតុម៉ោងត្រូវបានលុបចោល។
 ,Reqd By Date,Reqd តាមកាលបរិច្ឆេទ
 DocType: Salary Slip Earning,Salary Slip Earning,ទទួលបានប្រាក់ខែគ្រូពេទ្យប្រហែលជា
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,ម្ចាស់បំណុល
@@ -3389,7 +3389,7 @@ DocType: Budget Detail,Budget Detail,ពត៌មានថវិការ
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,សូមបញ្ចូលសារមុនពេលផ្ញើ
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,ចំណុចនៃការលក់ពត៌មានផ្ទាល់ខ្លួន
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,សូមធ្វើឱ្យទាន់សម័យការកំណត់ការផ្ញើសារជាអក្សរ
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,កំណត់ហេតុពេលវេលា {0} ផ្សព្វផ្សាយរួចហើយ
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,កំណត់ហេតុពេលវេលា {0} ផ្សព្វផ្សាយរួចហើយ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,ការផ្តល់កម្ចីដោយគ្មានសុវត្ថិភាព
 DocType: Cost Center,Cost Center Name,ឈ្មោះមជ្ឈមណ្ឌលចំណាយអស់
 DocType: Maintenance Schedule Detail,Scheduled Date,កាលបរិច្ឆេទដែលបានកំណត់ពេល

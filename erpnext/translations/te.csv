@@ -167,7 +167,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records",", మూస తగిన డేటా నింపి ఆ మారిన ఫైలులో అటాచ్. ఎంపిక కాలంలో అన్ని తేదీలు మరియు ఉద్యోగి కలయిక ఉన్న హాజరు రికార్డుల తో, టెంప్లేట్ వస్తాయి"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,{0} ఐటెమ్ చురుకుగా కాదు లేదా జీవితాంతం చేరుకుంది చెయ్యబడింది
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,సేల్స్ వాయిస్ సమర్పించిన తర్వాత అప్డేట్ అవుతుంది.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,సేల్స్ వాయిస్ సమర్పించిన తర్వాత అప్డేట్ అవుతుంది.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","అంశం రేటు వరుసగా {0} లో పన్ను చేర్చడానికి, వరుసలలో పన్నులు {1} కూడా చేర్చారు తప్పక"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,ఆర్ మాడ్యూల్ కోసం సెట్టింగులు
 DocType: SMS Center,SMS Center,SMS సెంటర్
@@ -883,7 +883,7 @@ DocType: Sales Person,Select company name first.,మొదటిది ఎంచ
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,డాక్టర్
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,కొటేషన్స్ పంపిణీదారుల నుండి పొందింది.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},కు {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,సమయం దినచర్య ద్వారా నవీకరించబడింది
+DocType: Time Sheet,updated via Time Logs,సమయం దినచర్య ద్వారా నవీకరించబడింది
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,సగటు వయసు
 DocType: Opportunity,Your sales person who will contact the customer in future,భవిష్యత్తులో కస్టమర్ కలుసుకుని మీ అమ్మకాలు వ్యక్తి
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,మీ సరఫరాదారులు కొన్ని జాబితా. వారు సంస్థలు లేదా వ్యక్తులతో కావచ్చు.
@@ -910,10 +910,10 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',సెట్ &#39;న అదనపు డిస్కౌంట్ వర్తించు&#39; దయచేసి
 ,Ordered Items To Be Billed,క్రమ అంశాలు బిల్ టు
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,రేంజ్ తక్కువ ఉండాలి కంటే పరిధి
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,సమయం దినచర్య ఎంచుకోండి మరియు ఒక కొత్త సేల్స్ వాయిస్ సృష్టించడానికి సమర్పించండి.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,సమయం దినచర్య ఎంచుకోండి మరియు ఒక కొత్త సేల్స్ వాయిస్ సృష్టించడానికి సమర్పించండి.
 DocType: Global Defaults,Global Defaults,గ్లోబల్ డిఫాల్ట్
 DocType: Salary Slip,Deductions,తగ్గింపులకు
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,ఈ సమయం లాగిన్ బ్యాచ్ బిల్ చెయ్యబడింది.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,ఈ సమయం లాగిన్ బ్యాచ్ బిల్ చెయ్యబడింది.
 DocType: Salary Slip,Leave Without Pay,పే లేకుండా వదిలి
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,పరిమాణ ప్రణాళికా లోపం
 ,Trial Balance for Party,పార్టీ కోసం ట్రయల్ బ్యాలెన్స్
@@ -1212,7 +1212,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),అద�
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,ఖాతాల చార్ట్ నుండి కొత్త ఖాతాను సృష్టించండి.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,నిర్వహణ సందర్శించండి
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Warehouse వద్ద అందుబాటులో బ్యాచ్ ప్యాక్ చేసిన అంశాల
-DocType: Time Log Batch Detail,Time Log Batch Detail,సమయం లాగిన్ బ్యాచ్ వివరాలు
+DocType: Time Sheet Detail,Time Sheet Detail,సమయం లాగిన్ బ్యాచ్ వివరాలు
 DocType: Landed Cost Voucher,Landed Cost Help,అడుగుపెట్టాయి ఖర్చు సహాయము
 DocType: Purchase Invoice,Select Shipping Address,షిప్పింగ్ చిరునామా ఎంచుకోండి
 DocType: Leave Block List,Block Holidays on important days.,ముఖ్యమైన రోజులు బ్లాక్ సెలవులు.
@@ -1345,7 +1345,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","బరువు \ n దయచేసి చాలా &quot;బరువు UoM&quot; చెప్పలేదు, ప్రస్తావించబడింది"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,మెటీరియల్ అభ్యర్థన ఈ స్టాక్ ఎంట్రీ చేయడానికి ఉపయోగిస్తారు
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,ఒక అంశం యొక్క సింగిల్ యూనిట్.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',సమయం లాగిన్ బ్యాచ్ {0} &#39;Submitted&#39; తప్పక
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',సమయం లాగిన్ బ్యాచ్ {0} &#39;Submitted&#39; తప్పక
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,ప్రతి స్టాక్ ఉద్యమం కోసం అకౌంటింగ్ ఎంట్రీ చేయండి
 DocType: Leave Allocation,Total Leaves Allocated,మొత్తం ఆకులు కేటాయించిన
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},రో లేవు అవసరం వేర్హౌస్ {0}
@@ -1461,7 +1461,7 @@ DocType: Production Plan Material Request,Material Request Date,మెటీర�
 DocType: Purchase Order Item,Supplier Quotation Item,సరఫరాదారు కొటేషన్ అంశం
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,ఉత్పత్తి ఆర్డర్స్ వ్యతిరేకంగా సమయం చిట్టాల యొక్క సృష్టి ఆపివేస్తుంది. ఆపరేషన్స్ ఉత్పత్తి ఉత్తర్వు మీద ట్రాక్ ఉండదు
 DocType: Item,Has Variants,రకాల్లో
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,ఒక కొత్త సేల్స్ వాయిస్ రూపొందించడానికి &#39;సేల్స్ వాయిస్ చేయండి&#39; బటన్ పై క్లిక్.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,ఒక కొత్త సేల్స్ వాయిస్ రూపొందించడానికి &#39;సేల్స్ వాయిస్ చేయండి&#39; బటన్ పై క్లిక్.
 DocType: Monthly Distribution,Name of the Monthly Distribution,మంత్లీ పంపిణీ పేరు
 DocType: Sales Person,Parent Sales Person,మాతృ సేల్స్ పర్సన్
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,కంపెనీ మాస్టర్ మరియు గ్లోబల్ డిఫాల్ట్ లో డిఫాల్ట్ కరెన్సీ రాయండి
@@ -1663,7 +1663,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,స్థిర ఆస్తి
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,సీరియల్ ఇన్వెంటరీ
 DocType: Activity Type,Default Billing Rate,డిఫాల్ట్ బిల్లింగ్ రేటు
-DocType: Time Log Batch,Total Billing Amount,మొత్తం బిల్లింగ్ మొత్తం
+DocType: Time Sheet,Total Billing Amount,మొత్తం బిల్లింగ్ మొత్తం
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,స్వీకరించదగిన ఖాతా
 DocType: Quotation Item,Stock Balance,స్టాక్ సంతులనం
 apps/erpnext/erpnext/config/selling.py +306,Sales Order to Payment,చెల్లింపు కు అమ్మకాల ఆర్డర్
@@ -2101,7 +2101,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),నికర రే�
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,భూభాగం ట్రీ నిర్వహించండి.
 DocType: Journal Entry Account,Sales Invoice,సేల్స్ వాయిస్
 DocType: Journal Entry Account,Party Balance,పార్టీ సంతులనం
-DocType: Sales Invoice Item,Time Log Batch,సమయం లాగిన్ బ్యాచ్
+DocType: Sales Invoice Item,Time Sheet,సమయం లాగిన్ బ్యాచ్
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,డిస్కౌంట్ న వర్తించు దయచేసి ఎంచుకోండి
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,వేతనం స్లిప్ రూపొందించబడింది
 DocType: Company,Default Receivable Account,డిఫాల్ట్ స్వీకరించదగిన ఖాతా
@@ -2278,7 +2278,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,అత్యుత్తమ మొత్తం ఆఫ్ వ్రాయండి
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","మీరు స్వయంచాలక పునరావృత ఇన్వాయిస్లు అవసరం ఉంటే తనిఖీ. ఏ అమ్మకాలు ఇన్వాయిస్ సమర్పించిన తర్వాత, సెక్షన్ పునరావృతమయ్యే కనిపిస్తుంది."
 DocType: Account,Accounts Manager,అకౌంట్స్ మేనేజర్
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',సమయం లాగిన్ {0} &#39;Submitted&#39; తప్పక
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',సమయం లాగిన్ {0} &#39;Submitted&#39; తప్పక
 DocType: Stock Settings,Default Stock UOM,డిఫాల్ట్ స్టాక్ UoM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),కార్యాచరణ రకం ఆధారంగా రేటు ఖరీదు (గంటకు)
 DocType: Production Planning Tool,Create Material Requests,మెటీరియల్ అభ్యర్థనలు సృష్టించు
@@ -2564,7 +2564,7 @@ DocType: Sales Order,Partly Billed,పాక్షికంగా గుర్�
 DocType: Item,Default BOM,డిఫాల్ట్ BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,తిరిగి రకం కంపెనీ పేరు నిర్ధారించడానికి దయచేసి
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,మొత్తం అద్భుతమైన ఆంట్
-DocType: Time Log Batch,Total Hours,మొత్తం గంటలు
+DocType: Time Sheet,Total Hours,మొత్తం గంటలు
 DocType: Journal Entry,Printing Settings,ప్రింటింగ్ సెట్టింగ్స్
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},మొత్తం డెబిట్ మొత్తం క్రెడిట్ సమానంగా ఉండాలి. తేడా {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,ఆటోమోటివ్
@@ -2841,7 +2841,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,బదిలీ ప్యాక్ చేసిన అంశాల
 apps/erpnext/erpnext/config/learn.py +11,Navigating,నావిగేట్
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,ప్లానింగ్
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,సమయం లాగిన్ బ్యాచ్ చేయండి
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,సమయం లాగిన్ బ్యాచ్ చేయండి
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,జారి చేయబడిన
 DocType: Project,Total Billing Amount (via Time Logs),మొత్తం బిల్లింగ్ మొత్తం (టైమ్ దినచర్య ద్వారా)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,మేము ఈ అంశం అమ్మే
@@ -2889,7 +2889,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,ఒక అంశం యొక్క విలక్షణ యూనిట్
 DocType: Pricing Rule,Buying,కొనుగోలు
 DocType: HR Settings,Employee Records to be created by,Employee రికార్డ్స్ ద్వారా సృష్టించబడుతుంది
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,ఈ సమయం లాగిన్ బ్యాచ్ రద్దు చేయబడింది.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,ఈ సమయం లాగిన్ బ్యాచ్ రద్దు చేయబడింది.
 ,Reqd By Date,Reqd తేదీ ద్వారా
 DocType: Salary Slip Earning,Salary Slip Earning,వేతనం స్లిప్ ఎర్నింగ్
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,రుణదాతల
@@ -3286,7 +3286,7 @@ DocType: Budget Detail,Budget Detail,బడ్జెట్ వివరాలు
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,పంపే ముందు సందేశాన్ని నమోదు చేయండి
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,పాయింట్ ఆఫ్ అమ్మకానికి ప్రొఫైల్
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,SMS సెట్టింగ్లు అప్డేట్ దయచేసి
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,ఇప్పటికే బిల్ లోనికి ప్రవేశించండి {0}
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,ఇప్పటికే బిల్ లోనికి ప్రవేశించండి {0}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,హామీలేని రుణాలు
 DocType: Cost Center,Cost Center Name,ఖర్చు సెంటర్ పేరు
 DocType: Maintenance Schedule Detail,Scheduled Date,షెడ్యూల్డ్ తేదీ

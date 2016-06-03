@@ -172,7 +172,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Изтеглете шаблони, попълнете необходимите данни и се прикрепва на текущото изображение. Всички дати и служител комбинация в избрания период ще дойде в шаблона, със съществуващите записи посещаемост"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,Точка {0} не е активен или е било постигнато в края на жизнения
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Ще бъде актуализиран след фактурата за продажба е подадено.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Ще бъде актуализиран след фактурата за продажба е подадено.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","За да включват курортна такса в ред {0} в скоростта на т, данъци в редове {1} трябва да се включат и"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,Настройки за Module HR
 DocType: SMS Center,SMS Center,SMS Center
@@ -907,7 +907,7 @@ DocType: Sales Person,Select company name first.,Изберете име на к
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,Dr
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,"Цитатите, получени от доставчици."
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},За да {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,актуализиран чрез Час Logs
+DocType: Time Sheet,updated via Time Logs,актуализиран чрез Час Logs
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Средна възраст
 DocType: Opportunity,Your sales person who will contact the customer in future,"Продажбите си човек, който ще се свърже с клиента в бъдеще"
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,Списък някои от вашите доставчици. Те могат да бъдат организации или лица.
@@ -934,11 +934,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',"Моля, задайте &quot;Прилагане Допълнителна отстъпка от &#39;"
 ,Ordered Items To Be Billed,"Поръчаните артикули, които се таксуват"
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,От Range трябва да бъде по-малко от гамата
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Изберете Час Logs и подадем да създадете нов фактурата за продажба.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Изберете Час Logs и подадем да създадете нов фактурата за продажба.
 DocType: Global Defaults,Global Defaults,Глобални Defaults
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,Проект Collaboration Покана
 DocType: Salary Slip,Deductions,Удръжки
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,This Time Log партида се таксува.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,This Time Log партида се таксува.
 DocType: Salary Slip,Leave Without Pay,Оставете без заплащане
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,Капацитет Error планиране
 ,Trial Balance for Party,Trial Везни за парти
@@ -1247,7 +1247,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Допъ
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,Моля да създадете нов акаунт от сметкоплан.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Поддръжка посещение
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Свободно Batch Количество в склада
-DocType: Time Log Batch Detail,Time Log Batch Detail,Време Log Batch Подробности
+DocType: Time Sheet Detail,Time Sheet Detail,Време Log Batch Подробности
 DocType: Landed Cost Voucher,Landed Cost Help,Поземлен Cost Помощ
 DocType: Purchase Invoice,Select Shipping Address,Изберете Адрес за доставка
 DocType: Leave Block List,Block Holidays on important days.,Блок Holidays по важни дни.
@@ -1382,7 +1382,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Тегло се споменава, \ nМоля спомена &quot;Тегло мерна единица&quot; твърде"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Материал Заявка използва за направата на този запас Влизане
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,Единична единица на дадена позиция.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',Време Log Партида {0} трябва да бъде &quot;Изпратен&quot;
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',Време Log Партида {0} трябва да бъде &quot;Изпратен&quot;
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Направи счетоводен запис за всеки склад Movement
 DocType: Leave Allocation,Total Leaves Allocated,Общо Leaves Отпуснати
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Warehouse изисква най Row Не {0}
@@ -1502,7 +1502,7 @@ DocType: Production Plan Material Request,Material Request Date,Материал
 DocType: Purchase Order Item,Supplier Quotation Item,Доставчик оферта Точка
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Забранява създаването на времеви трупи срещу производствени поръчки. Операциите не се проследяват срещу Производство Поръчка
 DocType: Item,Has Variants,Има варианти
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Щракнете върху бутона &quot;Направи фактурата за продажба&quot;, за да създадете нов фактурата за продажба."
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Щракнете върху бутона &quot;Направи фактурата за продажба&quot;, за да създадете нов фактурата за продажба."
 DocType: Monthly Distribution,Name of the Monthly Distribution,Име на месец Дистрибуцията
 DocType: Sales Person,Parent Sales Person,Родител Продажби Person
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,"Моля, посочете Default валути в Company магистър и глобални Defaults"
@@ -1714,7 +1714,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,Дълготраен актив
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Сериализирани Инвентаризация
 DocType: Activity Type,Default Billing Rate,Default Billing Курсове
-DocType: Time Log Batch,Total Billing Amount,Общо Billing Сума
+DocType: Time Sheet,Total Billing Amount,Общо Billing Сума
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,Вземания Акаунт
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},Row {0}: Asset {1} е вече {2}
 DocType: Quotation Item,Stock Balance,Фондова Balance
@@ -2162,7 +2162,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),Net Rate (Company в�
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,Управление Territory Tree.
 DocType: Journal Entry Account,Sales Invoice,Фактурата за продажба
 DocType: Journal Entry Account,Party Balance,Party Balance
-DocType: Sales Invoice Item,Time Log Batch,Време Log Batch
+DocType: Sales Invoice Item,Time Sheet,Време Log Batch
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,Моля изберете Apply отстъпка от
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Заплата Slip Създаден
 DocType: Company,Default Receivable Account,Default вземания Акаунт
@@ -2345,7 +2345,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Отпишат дължимата сума
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Проверете дали имате нужда от автоматични периодични фактури. След представянето на каквото и фактура продажби, повтарящо раздел ще се вижда."
 DocType: Account,Accounts Manager,Мениджър Сметки
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',Време Log {0} трябва да бъде &quot;Изпратен&quot;
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',Време Log {0} трябва да бъде &quot;Изпратен&quot;
 DocType: Stock Settings,Default Stock UOM,Default фондова мерна единица
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Остойностяване процент въз основа на Type активност (на час)
 DocType: Production Planning Tool,Create Material Requests,Създаване на материали Исканията
@@ -2646,7 +2646,7 @@ DocType: Sales Order,Partly Billed,Частично Обявен
 DocType: Item,Default BOM,Default BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,"Моля име повторно вид фирма, за да потвърдите"
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,Общият размер на неизплатените Amt
-DocType: Time Log Batch,Total Hours,Общо Часа
+DocType: Time Sheet,Total Hours,Общо Часа
 DocType: Journal Entry,Printing Settings,Настройки за печат
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},Общ дебит трябва да бъде равна на Общ кредит. Разликата е {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Автомобилен
@@ -2936,7 +2936,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,Прехвърлени Количество
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Навигация
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Планиране
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Направи Time Log Batch
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Направи Time Sheet
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Издаден
 DocType: Project,Total Billing Amount (via Time Logs),Общо Billing сума (чрез Time Logs)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,Ние продаваме този артикул
@@ -2986,7 +2986,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,Обособена единица на артикул
 DocType: Pricing Rule,Buying,Купуване
 DocType: HR Settings,Employee Records to be created by,Архивите на служителите да бъдат създадени от
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,This Time Log Batch е бил отменен.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,This Time Sheet е бил отменен.
 ,Reqd By Date,Reqd по дата
 DocType: Salary Slip Earning,Salary Slip Earning,Заплата Slip Приходи
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,Кредиторите
@@ -3391,7 +3391,7 @@ DocType: Budget Detail,Budget Detail,Бюджет Подробности
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,"Моля, въведете съобщение, преди да изпратите"
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Точка на продажба на профил
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,"Моля, актуализирайте SMS Settings"
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Време Log {0} вече таксува
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Време Log {0} вече таксува
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Необезпечени кредити
 DocType: Cost Center,Cost Center Name,Стойност Име Center
 DocType: Maintenance Schedule Detail,Scheduled Date,Предвидена дата

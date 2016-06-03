@@ -2,13 +2,51 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee', 'company', 'company');
+cur_frm.add_fetch('time_sheet', 'total_hours', 'working_hours');
 
 frappe.ui.form.on("Salary Slip", {
+	setup: function(frm) {
+		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(){
+			return {
+				filters: {
+					employee: frm.doc.employee,
+					make_for: 'Salary Slip'
+				}
+			}
+		}
+	},
+
 	company: function(frm) {
 		var company = locals[':Company'][frm.doc.company];
 		if(!frm.doc.letter_head && company.default_letter_head) {
 			frm.set_value('letter_head', company.default_letter_head);
 		}
+	},
+
+	refresh: function(frm) {
+		frm.trigger("toggle_fields")
+	},
+
+	salary_slip_based_on_timesheet: function(frm) {
+		frm.trigger("toggle_fields")
+	},
+
+	toggle_fields: function(frm) {
+		if(frm.doc.salary_slip_based_on_timesheet) {
+			hide_field(['fiscal_year', 'month', 'total_days_in_month', 'leave_without_pay', 'payment_days'])
+			unhide_field(['start_date', 'end_date', 'hourly_wages', 'timesheets'])
+		}else {
+			unhide_field(['fiscal_year', 'month', 'total_days_in_month', 'leave_without_pay', 'payment_days'])
+			hide_field(['start_date', 'end_date', 'hourly_wages', 'timesheets'])
+		}
+	}
+})
+
+
+frappe.ui.form.on("Salary Slip Timesheet", {
+	time_sheet: function(frm, cdt, cdn) {
+		doc = frm.doc;
+		cur_frm.cscript.fiscal_year(doc, cdt, cdn)
 	}
 })
 
@@ -38,7 +76,13 @@ cur_frm.cscript.fiscal_year = function(doc,dt,dn){
 		});
 }
 
-cur_frm.cscript.month = cur_frm.cscript.employee = cur_frm.cscript.fiscal_year;
+cur_frm.cscript.month = cur_frm.cscript.salary_slip_based_on_timesheet = cur_frm.cscript.fiscal_year;
+cur_frm.cscript.start_date = cur_frm.cscript.end_date = cur_frm.cscript.fiscal_year;
+
+cur_frm.cscript.employee = function(doc,dt,dn){
+	doc.salary_structure = ''
+	cur_frm.cscript.fiscal_year(doc, dt, dn)
+}
 
 cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 	if (doc.employee && doc.fiscal_year && doc.month) {

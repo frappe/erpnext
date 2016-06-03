@@ -173,7 +173,7 @@ DocType: Upload Attendance,"Download the Template, fill appropriate data and att
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Stáhněte si šablony, vyplňte potřebné údaje a přiložte upravený soubor.
  Všechny termíny a zaměstnanec kombinaci ve zvoleném období přijde v šabloně, se stávajícími evidence docházky"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,"Bod {0} není aktivní, nebo byl dosažen konec života"
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Bude aktualizováno po odeslání faktury.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Bude aktualizováno po odeslání faktury.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Chcete-li zahrnout daně na řádku v poměru Položka {0}, daně v řádcích {1} musí být zahrnuty"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,Nastavenie modulu HR
 DocType: SMS Center,SMS Center,SMS centrum
@@ -928,7 +928,7 @@ DocType: Sales Person,Select company name first.,"Prosím, vyberte najprv názov
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,Dr
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Ponuky od Dodávateľov.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},Chcete-li {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,aktualizovať cez čas Záznamy
+DocType: Time Sheet,updated via Time Logs,aktualizovať cez čas Záznamy
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Průměrný věk
 DocType: Opportunity,Your sales person who will contact the customer in future,"Váš obchodní zástupce, který bude kontaktovat zákazníka v budoucnu"
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,"Napíšte niekoľkých svojich dodávateľov. Môžu to byť organizácie, ale aj jednotlivci."
@@ -955,11 +955,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',Prosím nastavte na &quot;Použiť dodatočnú zľavu On&quot;
 ,Ordered Items To Be Billed,Objednané zboží fakturovaných
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,"Z rozsahu, musí byť nižšia ako na Range"
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Vyberte Time protokolů a předložit k vytvoření nové prodejní faktury.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Vyberte Time protokolů a předložit k vytvoření nové prodejní faktury.
 DocType: Global Defaults,Global Defaults,Globální Výchozí
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,Projekt spolupráce Pozvánka
 DocType: Salary Slip,Deductions,Odpočty
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,To Batch Time Log bylo účtováno.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,To Batch Time Log bylo účtováno.
 DocType: Salary Slip,Leave Without Pay,Nechat bez nároku na mzdu
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,Plánovanie kapacít Chyba
 ,Trial Balance for Party,Trial váhy pre stranu
@@ -1269,7 +1269,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Dodatoč
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,"Prosím, vytvořte nový účet z grafu účtů."
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Maintenance Visit
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,K dispozícii dávky Množstvo v sklade
-DocType: Time Log Batch Detail,Time Log Batch Detail,Time Log Batch Detail
+DocType: Time Sheet Detail,Time Sheet Detail,Time Sheet Detail
 DocType: Landed Cost Voucher,Landed Cost Help,Přistálo Náklady Help
 DocType: Purchase Invoice,Select Shipping Address,Zvoliť adresu pre dodanie
 DocType: Leave Block List,Block Holidays on important days.,Blokové Dovolená na významných dnů.
@@ -1404,7 +1404,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Hmotnost je uvedeno, \n uveďte prosím ""váha UOM"" příliš"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Materiál Žádost používá k výrobě této populace Entry
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,Single jednotka položky.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',"Time Log Batch {0} musí být ""Odesláno"""
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',"Time Sheet {0} musí být ""Odesláno"""
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Ujistěte se účetní položka pro každý pohyb zásob
 DocType: Leave Allocation,Total Leaves Allocated,Celkem Leaves Přidělené
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Warehouse vyžadované pri Row No {0}
@@ -1524,7 +1524,7 @@ DocType: Production Plan Material Request,Material Request Date,Materiál Reques
 DocType: Purchase Order Item,Supplier Quotation Item,Položka dodávateľskej ponuky
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Zakáže vytváranie časových protokolov proti výrobnej zákazky. Transakcie nesmú byť sledované proti výrobnej zákazky
 DocType: Item,Has Variants,Má varianty
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Klikněte na tlačítko "", aby se prodej na faktuře"" vytvořit nový prodejní faktury."
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Klikněte na tlačítko "", aby se prodej na faktuře"" vytvořit nový prodejní faktury."
 DocType: Monthly Distribution,Name of the Monthly Distribution,Název měsíční výplatou
 DocType: Sales Person,Parent Sales Person,Parent obchodník
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,"Uveďte prosím výchozí měnu, ve společnosti Master and Global výchozí"
@@ -1737,7 +1737,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,Základní Jmění
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Serialized Zásoby
 DocType: Activity Type,Default Billing Rate,Predvolené fakturácia Rate
-DocType: Time Log Batch,Total Billing Amount,Celková suma fakturácie
+DocType: Time Sheet,Total Billing Amount,Celková suma fakturácie
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,Pohledávky účtu
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},Riadok # {0}: Asset {1} je už {2}
 DocType: Quotation Item,Stock Balance,Reklamní Balance
@@ -2217,7 +2217,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),Čistý Rate (Company
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,Správa Territory strom.
 DocType: Journal Entry Account,Sales Invoice,Prodejní faktury
 DocType: Journal Entry Account,Party Balance,Balance Party
-DocType: Sales Invoice Item,Time Log Batch,Time Log Batch
+DocType: Sales Invoice Item,Time Sheet,Time Sheet
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,"Prosím, vyberte Použiť Zľava na"
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Plat Slip Vytvorené
 DocType: Company,Default Receivable Account,Výchozí pohledávek účtu
@@ -2400,7 +2400,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Odepsat dlužné částky
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Zkontrolujte, zda potřebujete automatické opakující faktury. Po odeslání jakékoliv prodejní fakturu, opakující se část bude viditelný."
 DocType: Account,Accounts Manager,Accounts Manager
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',"Time Log {0} musí být ""Odesláno"""
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',"Time Log {0} musí být ""Odesláno"""
 DocType: Stock Settings,Default Stock UOM,Východzia skladová MJ
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Kalkulácia Hodnotiť založené na typ aktivity (za hodinu)
 DocType: Production Planning Tool,Create Material Requests,Vytvořit Žádosti materiálu
@@ -2702,7 +2702,7 @@ DocType: Sales Order,Partly Billed,Částečně Účtovaný
 DocType: Item,Default BOM,Výchozí BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,Prosím re-typ názov spoločnosti na potvrdenie
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,Celkem Vynikající Amt
-DocType: Time Log Batch,Total Hours,Celkem hodin
+DocType: Time Sheet,Total Hours,Celkem hodin
 DocType: Journal Entry,Printing Settings,Nastavenie tlače
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},Celkové inkaso musí rovnat do celkového kreditu. Rozdíl je {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Automobilový
@@ -2993,7 +2993,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,Přenesená Množství
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigácia
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Plánování
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Udělejte si čas Log Batch
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Udělejte si čas Log Batch
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Vydané
 DocType: Project,Total Billing Amount (via Time Logs),Celkom Billing Suma (cez Time Záznamy)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,Táto položka je na predaj
@@ -3043,7 +3043,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,Samostatnou jednotku z položky
 DocType: Pricing Rule,Buying,Nákupy
 DocType: HR Settings,Employee Records to be created by,"Zaměstnanec Záznamy, které vytvořil"
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,To Batch Time Log byla zrušena.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,To Batch Time Log byla zrušena.
 ,Reqd By Date,Pr p Podľa dátumu
 DocType: Salary Slip Earning,Salary Slip Earning,Plat Slip Zisk
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,Věřitelé
@@ -3460,7 +3460,7 @@ DocType: Budget Detail,Budget Detail,Detail Rozpočtu
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,"Prosím, zadejte zprávu před odesláním"
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Point-of-Sale Profil
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,Aktualizujte prosím nastavení SMS
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Time Log {0} už účtoval
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Time Log {0} už účtoval
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Nezajištěných úvěrů
 DocType: Cost Center,Cost Center Name,Meno nákladového strediska
 DocType: Maintenance Schedule Detail,Scheduled Date,Plánované datum

@@ -173,7 +173,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records","टेम्पलेट डाउनलोड करा , योग्य डेटा भरा आणि संचिकेशी संलग्न करा . निवडलेल्या कालावधीत मध्ये सर्व तारखा आणि कर्मचारी संयोजन , विद्यमान उपस्थिती रेकॉर्ड सह टेम्पलेट मधे येइल"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,आयटम {0} सक्रिय नाही किंवा आयुष्याच्या शेवट  गाठला  आहे
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,विक्री चलन सबमिट केल्यानंतर अद्यतनित केले जाईल.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,विक्री चलन सबमिट केल्यानंतर अद्यतनित केले जाईल.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","आयटम दर सलग {0} मधे कर समाविष्ट करण्यासाठी, पंक्ती मध्ये कर {1} समाविष्ट करणे आवश्यक आहे"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,एचआर विभाग सेटिंग्ज
 DocType: SMS Center,SMS Center,एसएमएस केंद्र
@@ -908,7 +908,7 @@ DocType: Sales Person,Select company name first.,प्रथम  कंपन�
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,डॉ
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,अवतरणे पुरवठादारांकडून   प्राप्त झाली.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},करण्यासाठी {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,वेळ नोंदी द्वारे अद्ययावत
+DocType: Time Sheet,updated via Time Logs,वेळ नोंदी द्वारे अद्ययावत
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,सरासरी वय
 DocType: Opportunity,Your sales person who will contact the customer in future,भविष्यात ग्राहक संपर्क साधू शकणारे  आपले विक्री व्यक्ती
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,आपल्या पुरवठादारांची यादी करा.  ते संघटना किंवा व्यक्ती असू शकते.
@@ -935,11 +935,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',कृपया 'वर अतिरिक्त सवलत लागू करा'  सेट  करा
 ,Ordered Items To Be Billed,आदेश दिलेले  आयटम बिल करायचे
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,श्रेणी पासून श्रेणी पर्यंत कमी असली पाहिजे
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,वेळ नोंदी निवडा आणि एक नवीन विक्री चलन तयार करण्यासाठी सबमिट करा.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,वेळ नोंदी निवडा आणि एक नवीन विक्री चलन तयार करण्यासाठी सबमिट करा.
 DocType: Global Defaults,Global Defaults,ग्लोबल डीफॉल्ट
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,प्रकल्प सहयोग आमंत्रण
 DocType: Salary Slip,Deductions,वजावट
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,या वेळ लॉग बॅच बिल आले आहे.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,या वेळ लॉग बॅच बिल आले आहे.
 DocType: Salary Slip,Leave Without Pay,पे न करता रजा
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,क्षमता नियोजन त्रुटी
 ,Trial Balance for Party,पार्टी चाचणी शिल्लक
@@ -1248,7 +1248,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),अत�
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,लेखा चार्टपासून  नवीन खाते तयार करा.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,देखभाल भेट द्या
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,वखार मधे उपलब्ध बॅच प्रमाण
-DocType: Time Log Batch Detail,Time Log Batch Detail,वेळ लॉग बॅच तपशील
+DocType: Time Sheet Detail,Time Sheet Detail,वेळ लॉग बॅच तपशील
 DocType: Landed Cost Voucher,Landed Cost Help,स्थावर खर्च मदत
 DocType: Purchase Invoice,Select Shipping Address,पाठविण्याचा पत्ता निवडा
 DocType: Leave Block List,Block Holidays on important days.,महत्वाचे दिवस अवरोधित करा सुट्ट्या.
@@ -1383,7 +1383,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","वजनाचा उल्लेख आहे \ n कृपया खूप ""वजन UOM"" उल्लेख करा"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,साहित्य विनंती या शेअर नोंद करण्यासाठी   वापरले
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,एका  आयटम एकच एकक.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',वेळ लॉग बॅच {0} &#39;सादर&#39; करणे आवश्यक आहे
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',वेळ लॉग बॅच {0} &#39;सादर&#39; करणे आवश्यक आहे
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,प्रत्येक स्टॉक चळवळीसाठी  Accounting प्रवेश करा
 DocType: Leave Allocation,Total Leaves Allocated,एकूण रजा  वाटप
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},रो क्रमांक  {0} साठी  आवश्यक कोठार
@@ -1503,7 +1503,7 @@ DocType: Production Plan Material Request,Material Request Date,साहित�
 DocType: Purchase Order Item,Supplier Quotation Item,पुरवठादार कोटेशन आयटम
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,उत्पादन आदेश विरुद्ध वेळ नोंदी तयार करणे अक्षम करते .ऑपरेशन उत्पादन ऑर्डर विरुद्ध मागे काढला जाऊ नये
 DocType: Item,Has Variants,रूपे आहेत
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,नवीन विक्री चलन तयार करण्यासाठी &#39;विक्री चलन करा&#39; बटणावर क्लिक करा.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,नवीन विक्री चलन तयार करण्यासाठी &#39;विक्री चलन करा&#39; बटणावर क्लिक करा.
 DocType: Monthly Distribution,Name of the Monthly Distribution,मासिक वितरण नाव
 DocType: Sales Person,Parent Sales Person,पालक विक्री व्यक्ती
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,कृपया कंपनी मास्टर आणि जागतिक मुलभूत मधे पूर्वनिर्धारीत चलन निर्दिष्ट करा
@@ -1715,7 +1715,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,निश्चित मालमत्ता
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,सिरीयलाइज यादी
 DocType: Activity Type,Default Billing Rate,डीफॉल्ट बिलिंग दर
-DocType: Time Log Batch,Total Billing Amount,एकूण बिलिंग रक्कम
+DocType: Time Sheet,Total Billing Amount,एकूण बिलिंग रक्कम
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,प्राप्त खाते
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},सलग # {0}: मालमत्ता {1} आधीच आहे {2}
 DocType: Quotation Item,Stock Balance,शेअर शिल्लक
@@ -2163,7 +2163,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),निव्वळ �
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,प्रदेश वृक्ष व्यवस्थापित करा.
 DocType: Journal Entry Account,Sales Invoice,विक्री चलन
 DocType: Journal Entry Account,Party Balance,पार्टी शिल्लक
-DocType: Sales Invoice Item,Time Log Batch,वेळ लॉग बॅच
+DocType: Sales Invoice Item,Time Sheet,वेळ लॉग बॅच
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,कृपया सवलत लागू निवडा
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,पगाराच्या स्लिप्स तयार
 DocType: Company,Default Receivable Account,मुलभूत प्राप्तीयोग्य खाते
@@ -2346,7 +2346,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Write Off बाकी रक्कम
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","आपण स्वयंचलित आवर्ती पावत्या आवश्यकता असल्यास तपासा. कोणतेही विक्री चलन सबमिट केल्यानंतर, विभाग आवर्ती दृश्यमान होईल."
 DocType: Account,Accounts Manager,खाते व्यवस्थापक
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',वेळ लॉग {0} &#39;सादर&#39; करणे आवश्यक आहे
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',वेळ लॉग {0} &#39;सादर&#39; करणे आवश्यक आहे
 DocType: Stock Settings,Default Stock UOM,डिफॉल्ट स्टॉक UOM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),क्रियाकलाप प्रकार आधारित दर कोटीच्या (प्रती तास)
 DocType: Production Planning Tool,Create Material Requests,साहित्य विनंत्या तयार करा
@@ -2647,7 +2647,7 @@ DocType: Sales Order,Partly Billed,अंशतः बिल आकारले
 DocType: Item,Default BOM,मुलभूत BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,कंपनीचे नाव  पुष्टी करण्यासाठी पुन्हा-टाइप करा
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,एकूण थकबाकी रक्कम
-DocType: Time Log Batch,Total Hours,एकूण तास
+DocType: Time Sheet,Total Hours,एकूण तास
 DocType: Journal Entry,Printing Settings,मुद्रण सेटिंग्ज
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},एकूण डेबिट एकूण क्रेडिट समान असणे आवश्यक आहे. फरक  {0}आहे
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,ऑटोमोटिव्ह
@@ -2937,7 +2937,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,हस्तांतरित Qty
 apps/erpnext/erpnext/config/learn.py +11,Navigating,नॅव्हिगेट
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,नियोजन
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,वेळ लॉग बॅच करा
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,वेळ लॉग बॅच करा
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,जारी
 DocType: Project,Total Billing Amount (via Time Logs),एकूण बिलिंग रक्कम (वेळ नोंदी द्वारे)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,आम्ही ही  आयटम विक्री
@@ -2987,7 +2987,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,एक आयटम वेगळा एकक
 DocType: Pricing Rule,Buying,खरेदी
 DocType: HR Settings,Employee Records to be created by,कर्मचारी रेकॉर्ड करून तयार करणे
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,हि वेळ लॉग बॅच रद्द करण्यात आली आहे.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,हि वेळ लॉग बॅच रद्द करण्यात आली आहे.
 ,Reqd By Date,Reqd तारीख करून
 DocType: Salary Slip Earning,Salary Slip Earning,पगाराच्या स्लिप्स कमाई
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,कर्ज
@@ -3392,7 +3392,7 @@ DocType: Budget Detail,Budget Detail,अर्थसंकल्प तपशी
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,पाठविण्यापूर्वी कृपया संदेश प्रविष्ट करा
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,पॉइंट-ऑफ-सेल  प्रोफाइल
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,SMS सेटिंग्ज अद्यतनित करा
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,आधीच बिल वेळ लॉग {0}
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,आधीच बिल वेळ लॉग {0}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,बिनव्याजी कर्ज
 DocType: Cost Center,Cost Center Name,खर्च केंद्र नाव
 DocType: Maintenance Schedule Detail,Scheduled Date,अनुसूचित तारीख

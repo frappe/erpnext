@@ -172,7 +172,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records","ഫലകം ഡൗൺലോഡ്, ഉചിതമായ ഡാറ്റ പൂരിപ്പിക്കുക പ്രമാണത്തെ കൂട്ടിച്ചേർക്കുക. തിരഞ്ഞെടുത്ത കാലയളവിൽ എല്ലാ തീയതി ജീവനക്കാരൻ കോമ്പിനേഷൻ നിലവിലുള്ള ഹാജർ രേഖകളുമായി, ടെംപ്ലേറ്റ് വരും"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,ഇനം {0} സജീവ അല്ലെങ്കിൽ ജീവിതാവസാനം അല്ല എത്തികഴിഞ്ഞു
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,സെയിൽസ് ഇൻവോയിസ് സമർപ്പിച്ചു കഴിഞ്ഞാൽ അപ്ഡേറ്റ് ചെയ്യും.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,സെയിൽസ് ഇൻവോയിസ് സമർപ്പിച്ചു കഴിഞ്ഞാൽ അപ്ഡേറ്റ് ചെയ്യും.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","നികുതി ഉൾപ്പെടുത്തുന്നതിനായി നിരയിൽ {0} ഇനം നിരക്ക്, വരികൾ {1} ലെ നികുതികൾ കൂടി ഉൾപ്പെടുത്തും വേണം"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,എച്ച് മൊഡ്യൂൾ വേണ്ടി ക്രമീകരണങ്ങൾ
 DocType: SMS Center,SMS Center,എസ്എംഎസ് കേന്ദ്രം
@@ -907,7 +907,7 @@ DocType: Sales Person,Select company name first.,ആദ്യം കമ്പന
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,ഡോ
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,ഉദ്ധരണികളും വിതരണക്കാരിൽനിന്നുമാണ് ലഭിച്ചു.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},{0} ചെയ്യുക | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,സമയം ലോഗുകൾ വഴി നവീകരിച്ചത്
+DocType: Time Sheet,updated via Time Logs,സമയം ലോഗുകൾ വഴി നവീകരിച്ചത്
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,ശരാശരി പ്രായം
 DocType: Opportunity,Your sales person who will contact the customer in future,ഭാവിയിൽ ഉപഭോക്തൃ ബന്ധപ്പെടുന്നതാണ് നിങ്ങളുടെ വിൽപ്പന വ്യക്തി
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,"നിങ്ങളുടെ വിതരണക്കാരും ഏതാനും കാണിയ്ക്കുക. അവർ സംഘടനകൾ, വ്യക്തികളുടെ ആകാം."
@@ -934,11 +934,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',&#39;പ്രയോഗിക്കുക അഡീഷണൽ ഡിസ്കൌണ്ട്&#39; സജ്ജീകരിക്കുക
 ,Ordered Items To Be Billed,ബില്ല് ഉത്തരവിട്ടു ഇനങ്ങൾ
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,റേഞ്ച് നിന്നും പരിധി വരെ കുറവ് ഉണ്ട്
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,സമയം ലോഗുകൾ തിരഞ്ഞെടുത്ത് ഒരു പുതിയ സെയിൽസ് ഇൻവോയിസ് സൃഷ്ടിക്കാൻ സമർപ്പിക്കുക.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,സമയം ലോഗുകൾ തിരഞ്ഞെടുത്ത് ഒരു പുതിയ സെയിൽസ് ഇൻവോയിസ് സൃഷ്ടിക്കാൻ സമർപ്പിക്കുക.
 DocType: Global Defaults,Global Defaults,ആഗോള സ്ഥിരസ്ഥിതികൾ
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,പ്രോജക്റ്റ് സഹകരണത്തിന് ക്ഷണം
 DocType: Salary Slip,Deductions,പൂർണമായും
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,ഈ സമയം ലോഗ് ബാച്ച് ഈടാക്കൂ ചെയ്തു.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,ഈ സമയം ലോഗ് ബാച്ച് ഈടാക്കൂ ചെയ്തു.
 DocType: Salary Slip,Leave Without Pay,ശമ്പള ഇല്ലാതെ വിടുക
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,ശേഷി ആസൂത്രണ പിശക്
 ,Trial Balance for Party,പാർട്ടി ട്രയൽ ബാലൻസ്
@@ -1247,7 +1247,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),അഡ�
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,അക്കൗണ്ട്സ് ചാർട്ട് നിന്ന് പുതിയ അക്കൗണ്ട് സൃഷ്ടിക്കുക.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,മെയിൻറനൻസ് സന്ദർശനം
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,വെയർഹൗസ് ലഭ്യമായ ബാച്ച് Qty
-DocType: Time Log Batch Detail,Time Log Batch Detail,സമയം ലോഗ് ബാച്ച് വിശദാംശം
+DocType: Time Sheet Detail,Time Sheet Detail,സമയം ലോഗ് ബാച്ച് വിശദാംശം
 DocType: Landed Cost Voucher,Landed Cost Help,ചെലവ് സഹായം റജിസ്റ്റർ
 DocType: Purchase Invoice,Select Shipping Address,ഷിപ്പിംഗ് വിലാസം തിരഞ്ഞെടുക്കുക
 DocType: Leave Block List,Block Holidays on important days.,പ്രധാനപ്പെട്ട ദിവസങ്ങളിൽ അവധി തടയുക.
@@ -1382,7 +1382,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","ഭാരോദ്വഹനം പരാമർശിച്ചിരിക്കുന്നത്, \ n ദയവായി വളരെ &quot;ഭാരോദ്വഹനം UOM&quot; മറന്ന"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,ഈ ഓഹരി എൻട്രി ചെയ്യുന്നതിനുപയോഗിക്കുന്ന മെറ്റീരിയൽ അഭ്യർത്ഥന
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,ഒരു ഇനത്തിന്റെ സിംഗിൾ യൂണിറ്റ്.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',സമയം ലോഗ് ബാച്ച് {0} &#39;സമർപ്പിച്ചു&#39; വേണം
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',സമയം ലോഗ് ബാച്ച് {0} &#39;സമർപ്പിച്ചു&#39; വേണം
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,ഓരോ ഓഹരി പ്രസ്ഥാനത്തിന് വേണ്ടി അക്കൗണ്ടിംഗ് എൻട്രി വരുത്തുക
 DocType: Leave Allocation,Total Leaves Allocated,അനുവദിച്ച മൊത്തം ഇലകൾ
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},വരി ഇല്ല {0} ആവശ്യമാണ് വെയർഹൗസ്
@@ -1502,7 +1502,7 @@ DocType: Production Plan Material Request,Material Request Date,മെറ്റ�
 DocType: Purchase Order Item,Supplier Quotation Item,വിതരണക്കാരൻ ക്വട്ടേഷൻ ഇനം
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,പ്രൊഡക്ഷൻ ഉത്തരവുകൾ നേരെ സമയം രേഖകൾ സൃഷ്ടി പ്രവർത്തനരഹിതമാക്കുന്നു. ഓപറേഷൻസ് പ്രൊഡക്ഷൻ ഓർഡർ നേരെ ട്രാക്ക് ചെയ്യപ്പെടാൻ വരികയുമില്ല
 DocType: Item,Has Variants,രൂപഭേദങ്ങൾ ഉണ്ട്
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,ഒരു പുതിയ സെയിൽസ് ഇൻവോയിസ് സൃഷ്ടിക്കാൻ ബട്ടൺ &#39;സെയിൽസ് ഇൻവോയിസ് Make&#39; ക്ലിക്ക് ചെയ്യുക.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,ഒരു പുതിയ സെയിൽസ് ഇൻവോയിസ് സൃഷ്ടിക്കാൻ ബട്ടൺ &#39;സെയിൽസ് ഇൻവോയിസ് Make&#39; ക്ലിക്ക് ചെയ്യുക.
 DocType: Monthly Distribution,Name of the Monthly Distribution,പ്രതിമാസ വിതരണം പേര്
 DocType: Sales Person,Parent Sales Person,പേരന്റ്ഫോള്ഡര് സെയിൽസ് വ്യാക്തി
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,കമ്പനി മാസ്റ്റർ ആഗോള സ്ഥിരസ്ഥിതികളിലേക്ക് ലെ സ്വതേ കറൻസി വ്യക്തമാക്കുക
@@ -1714,7 +1714,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,സ്ഥിര അസറ്റ്
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,സീരിയൽ ഇൻവെന്ററി
 DocType: Activity Type,Default Billing Rate,സ്ഥിരസ്ഥിതി ബില്ലിംഗ് റേറ്റ്
-DocType: Time Log Batch,Total Billing Amount,ആകെ ബില്ലിംഗ് തുക
+DocType: Time Sheet,Total Billing Amount,ആകെ ബില്ലിംഗ് തുക
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,സ്വീകാ അക്കൗണ്ട്
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},വരി # {0}: അസറ്റ് {1} {2} ഇതിനകം
 DocType: Quotation Item,Stock Balance,ഓഹരി ബാലൻസ്
@@ -2162,7 +2162,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),അറ്റ നി�
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,ടെറിട്ടറി ട്രീ നിയന്ത്രിക്കുക.
 DocType: Journal Entry Account,Sales Invoice,സെയിൽസ് ഇൻവോയിസ്
 DocType: Journal Entry Account,Party Balance,പാർട്ടി ബാലൻസ്
-DocType: Sales Invoice Item,Time Log Batch,സമയം ലോഗ് ബാച്ച്
+DocType: Sales Invoice Item,Time Sheet,സമയം ലോഗ് ബാച്ച്
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,ഡിസ്കൌണ്ട് പ്രയോഗിക്കുക തിരഞ്ഞെടുക്കുക
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,ശമ്പളം ജി സൃഷ്ടിച്ചത്
 DocType: Company,Default Receivable Account,സ്ഥിരസ്ഥിതി സ്വീകാ അക്കൗണ്ട്
@@ -2345,7 +2345,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,നിലവിലുള്ള തുക എഴുതുക
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","ഓട്ടോമാറ്റിക്ക് ആവർത്തന ഇൻവോയ്സുകൾ വേണമെങ്കിൽ പരിശോധിക്കുക. ഏതെങ്കിലും വിൽപ്പന ഇൻവോയ്സ് സമർപ്പിച്ച ശേഷം, ആവർത്തക വിഭാഗം ദൃശ്യമാകും."
 DocType: Account,Accounts Manager,അക്കൗണ്ടുകൾ മാനേജർ
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',സമയം ലോഗ് {0} &#39;സമർപ്പിച്ചു&#39; വേണം
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',സമയം ലോഗ് {0} &#39;സമർപ്പിച്ചു&#39; വേണം
 DocType: Stock Settings,Default Stock UOM,സ്വതേ സ്റ്റോക്ക് UOM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),(മണിക്കൂറിൽ) പ്രവർത്തന രീതി അനുസരിച്ചുളള ആറെണ്ണവും റേറ്റ്
 DocType: Production Planning Tool,Create Material Requests,മെറ്റീരിയൽ അഭ്യർത്ഥനകൾ സൃഷ്ടിക്കുക
@@ -2646,7 +2646,7 @@ DocType: Sales Order,Partly Billed,ഭാഗികമായി ഈടാക്�
 DocType: Item,Default BOM,സ്വതേ BOM ലേക്ക്
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,സ്ഥിരീകരിക്കാൻ കമ്പനിയുടെ പേര്-തരം റീ ദയവായി
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,മൊത്തം ശാരീരിക
-DocType: Time Log Batch,Total Hours,ആകെ മണിക്കൂർ
+DocType: Time Sheet,Total Hours,ആകെ മണിക്കൂർ
 DocType: Journal Entry,Printing Settings,അച്ചടി ക്രമീകരണങ്ങൾ
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},ആകെ ഡെബിറ്റ് ആകെ ക്രെഡിറ്റ് സമാനമോ ആയിരിക്കണം. വ്യത്യാസം {0} ആണ്
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,ഓട്ടോമോട്ടീവ്
@@ -2936,7 +2936,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,മാറ്റിയത് Qty
 apps/erpnext/erpnext/config/learn.py +11,Navigating,നീങ്ങുന്നത്
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,ആസൂത്രണ
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,സമയം ലോഗ് ബാച്ച് നിർമ്മിക്കുക
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,സമയം ലോഗ് ബാച്ച് നിർമ്മിക്കുക
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,ഇഷ്യൂചെയ്തു
 DocType: Project,Total Billing Amount (via Time Logs),(ടൈം ലോഗുകൾ വഴി) ആകെ ബില്ലിംഗ് തുക
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,ഞങ്ങൾ ഈ ഇനം വിൽക്കാൻ
@@ -2986,7 +2986,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,ഒരു ഇനം വ്യക്തമായ യൂണിറ്റ്
 DocType: Pricing Rule,Buying,വാങ്ങൽ
 DocType: HR Settings,Employee Records to be created by,സൃഷ്ടിച്ച ചെയ്യേണ്ട ജീവനക്കാരൻ റെക്കോർഡ്സ്
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,ഈ സമയം ലോഗ് ബാച്ച് റദ്ദാക്കി.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,ഈ സമയം ലോഗ് ബാച്ച് റദ്ദാക്കി.
 ,Reqd By Date,തീയതിയനുസരിച്ചു് Reqd
 DocType: Salary Slip Earning,Salary Slip Earning,ശമ്പളം ജി സമ്പാദിക്കുന്നത്
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,കടക്കാരിൽ
@@ -3391,7 +3391,7 @@ DocType: Budget Detail,Budget Detail,ബജറ്റ് വിശദാംശം
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,അയക്കുന്നതിന് മുമ്പ് സന്ദേശം നൽകുക
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,പോയിന്റ്-ഓഫ്-വില്പനയ്ക്ക് പ്രൊഫൈൽ
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,എസ്എംഎസ് ക്രമീകരണങ്ങൾ അപ്ഡേറ്റ് ദയവായി
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,സമയം ലോഗ് {0} ഇതിനകം ഈടാക്കൂ
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,സമയം ലോഗ് {0} ഇതിനകം ഈടാക്കൂ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,മുൻവാതിൽ വായ്പകൾ
 DocType: Cost Center,Cost Center Name,കോസ്റ്റ് സെന്റർ പേര്
 DocType: Maintenance Schedule Detail,Scheduled Date,ഷെഡ്യൂൾഡ് തീയതി

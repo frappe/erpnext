@@ -95,7 +95,7 @@ apps/erpnext/erpnext/controllers/trends.py +36,Fiscal Year: {0} does not exists,
 ,Supplier-Wise Sales Analytics,Forhandler-Wise Sales Analytics
 ,Customers Not Buying Since Long Time,Kunder Ikke købe siden lang tid
 DocType: Purchase Receipt Item,Recd Quantity,RECD Mængde
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',Time Log {0} skal være »Tilmeldt &#39;
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',Time Log {0} skal være »Tilmeldt &#39;
 DocType: Opportunity,Potential Sales Deal,Potentielle Sales Deal
 DocType: Production Planning Tool,"Items to be requested which are ""Out of Stock"" considering all warehouses based on projected qty and minimum order qty",Varer der skal ansøges som er &quot;på lager&quot; i betragtning af alle lagre baseret på forventede qty og mindste bestilling qty
 DocType: Hub Settings,Hub Node,Hub Node
@@ -157,7 +157,7 @@ DocType: Delivery Note Item,Against Sales Order Item,Mod Sales Order Item
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +353,All these items have already been invoiced,Alle disse punkter er allerede blevet faktureret
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +95,'Opening','Åbning'
 apps/erpnext/erpnext/stock/doctype/item/item.py +601,Item {0} is cancelled,Vare {0} er aflyst
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Make Time Log Batch
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Make Time Sheet
 DocType: Serial No,Out of Warranty,Ud af garanti
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +74,Row # {0}:,Row # {0}:
 apps/erpnext/erpnext/config/setup.py +93,Email Notifications,E-mail-meddelelser
@@ -408,7 +408,7 @@ DocType: Purchase Receipt Item,Landed Cost Voucher Amount,Landed Cost Voucher Be
 apps/erpnext/erpnext/public/js/setup_wizard.js +149,Attach Logo,Vedhæft Logo
 DocType: Production Order,Additional Operating Cost,Yderligere driftsomkostninger
 DocType: Company,Retail,Retail
-DocType: Sales Invoice Item,Time Log Batch,Time Log Batch
+DocType: Sales Invoice Item,Time Sheet,Time Sheet
 DocType: Shipping Rule Condition,From Value,Fra Value
 DocType: Quality Inspection,Purchase Receipt No,Kvittering Nej
 apps/erpnext/erpnext/controllers/website_list_for_contact.py +80,{0}% Billed,{0}% Billed
@@ -488,7 +488,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +272,
 DocType: Process Payroll,Create Bank Entry for the total salary paid for the above selected criteria,Opret Bank Punktet om den samlede løn for de ovenfor valgte kriterier
 DocType: Pricing Rule,Brand,Brand
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +138,Research,Forskning
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,This Time Log Batch er blevet faktureret.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,This Time Sheet er blevet faktureret.
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js +28,Message Sent,Besked sendt
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +41,Minimum Inventory Level,Minimum Inventory Level
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +295,Serial No {0} created,Løbenummer {0} oprettet
@@ -1329,7 +1329,7 @@ DocType: Stock Reconciliation Item,Current Qty,Aktuel Antal
 DocType: Packing Slip Item,Packing Slip Item,Packing Slip Vare
 DocType: Shopping Cart Shipping Rule,Shopping Cart Shipping Rule,Indkøbskurv Shipping Rule
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +46,Please enter Purchase Receipts,Indtast venligst Køb Kvitteringer
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,This Time Log Batch er blevet annulleret.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,This Time Sheet er blevet annulleret.
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +15,Update Cost,Opdatering Omkostninger
 DocType: Address,Shop,Butik
 DocType: SMS Center,Send To,Send til
@@ -1381,7 +1381,7 @@ apps/erpnext/erpnext/accounts/utils.py +195,Allocated amount can not be negative
 DocType: Account,Stock Received But Not Billed,Stock Modtaget men ikke faktureret
 DocType: Item Group,Parent Item Group,Moderselskab Item Group
 DocType: Quality Inspection,In Process,I Process
-DocType: Time Log Batch,updated via Time Logs,opdateret via Time Logs
+DocType: Time Sheet,updated via Time Logs,opdateret via Time Logs
 DocType: Naming Series,Current Value,Aktuel værdi
 DocType: Process Payroll,Creates salary slip for above mentioned criteria.,Opretter lønseddel for ovennævnte kriterier.
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +26,Item 4,Punkt 4
@@ -1462,7 +1462,7 @@ DocType: Purchase Order,Supplied Items,Medfølgende varer
 DocType: Email Digest,Send regular summary reports via Email.,Send regelmæssige sammenfattende rapporter via e-mail.
 DocType: Pricing Rule,Sales Manager,Salgschef
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +249,Please select Employee Record first.,Vælg Medarbejder Record først.
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Time Log {0} allerede faktureret
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Time Log {0} allerede faktureret
 DocType: Purchase Order,In Words will be visible once you save the Purchase Order.,"I Ord vil være synlig, når du gemmer indkøbsordre."
 DocType: Item Reorder,Re-Order Level,Re-Order Level
 apps/erpnext/erpnext/public/js/setup_wizard.js +201,Rate (%),Sats (%)
@@ -1510,7 +1510,7 @@ DocType: Leave Block List,Block Holidays on important days.,Bloker Ferie på vig
 DocType: Stock Ledger Entry,Stock Ledger Entry,Stock Ledger indtastning
 apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +25,Name or Email is mandatory,Navn eller E-mail er obligatorisk
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +111,Electrical,Elektrisk
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',Time Log Batch {0} skal være »Tilmeldt &#39;
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',Time Sheet {0} skal være »Tilmeldt &#39;
 apps/erpnext/erpnext/public/js/setup_wizard.js +272,Pair,Par
 DocType: Purchase Order,Raw Materials Supplied,Raw Materials Leveres
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +114,Batch {0} of Item {1} has expired.,Batch {0} af Item {1} er udløbet.
@@ -1728,7 +1728,7 @@ apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +68,Receiver List 
 apps/erpnext/erpnext/public/js/setup_wizard.js +266,A Product or Service,En vare eller tjenesteydelse
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +283,Time Logs created:,Time Logs oprettet:
 apps/erpnext/erpnext/projects/doctype/project/project.js +58,Expense Claims,Expense Krav
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Vælg Time Logs og Send for at oprette en ny Sales Invoice.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Vælg Time Logs og Send for at oprette en ny Sales Invoice.
 DocType: Supplier,Credit Limit,Kreditgrænse
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +91,A Customer Group exists with same name please change the Customer name or rename the Customer Group,En kundegruppe med samme navn findes. Ret Kundens navn eller omdøb kundegruppen
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +21,"To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.","Hvis du ikke vil anvende Prisfastsættelse Regel i en bestemt transaktion, bør alle gældende Priser Regler deaktiveres."
@@ -2034,7 +2034,7 @@ DocType: Purchase Invoice,Shipping Address,Forsendelse Adresse
 DocType: Quotation Item,Quotation Item,Citat Vare
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +175,For Quantity (Manufactured Qty) is mandatory,For Mængde (Fremstillet Antal) er obligatorisk
 DocType: Item,Serial Number Series,Serial Number Series
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Vil blive opdateret efter Sales Invoice er indgivet.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Vil blive opdateret efter Sales Invoice er indgivet.
 DocType: Authorization Rule,Authorization Rule,Autorisation Rule
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +189,Sales Invoice {0} must be cancelled before cancelling this Sales Order,"Salg Faktura {0} skal annulleres, før den annullerer denne Sales Order"
 DocType: Serial No,Warranty Expiry Date,Garanti Udløbsdato
@@ -2354,7 +2354,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +196,Maintenance
 DocType: Purchase Order,% Received,% Modtaget
 DocType: Workstation Working Hour,Workstation Working Hour,Workstation Working Hour
 DocType: Features Setup,To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,At spore elementer ved hjælp af stregkode. Du vil være i stand til at indtaste poster i følgeseddel og salgsfaktura ved at scanne stregkoden på varen.
-DocType: Time Log Batch Detail,Time Log Batch Detail,Time Log Batch Detail
+DocType: Time Sheet Detail,Time Sheet Detail,Time Sheet Detail
 DocType: SMS Center,Send SMS,Send SMS
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +313,My Orders,Mine ordrer
 DocType: Item,Default BOM,Standard BOM
@@ -2395,7 +2395,7 @@ DocType: Sales Person,Name and Employee ID,Navn og Medarbejder ID
 ,Requested Items To Be Ordered,Anmodet Varer skal bestilles
 DocType: Supplier,Supplier of Goods or Services.,Leverandør af varer eller tjenesteydelser.
 apps/erpnext/erpnext/controllers/stock_controller.py +72,No accounting entries for the following warehouses,Ingen bogføring for følgende lagre
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Klik på &#39;Make Salg Faktura&#39; knappen for at oprette en ny Sales Invoice.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Klik på &#39;Make Salg Faktura&#39; knappen for at oprette en ny Sales Invoice.
 DocType: Payment Tool Detail,Against Voucher No,Mod blad nr
 DocType: Maintenance Visit,Completion Status,Afslutning status
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +7,Your email address,Din e-mail-adresse
@@ -2584,7 +2584,7 @@ DocType: Sales Partner,Select Monthly Distribution to unevenly distribute target
 apps/erpnext/erpnext/accounts/doctype/account/account.py +44,Account {0}: Parent account {1} does not exist,Konto {0}: Forældre-konto {1} findes ikke
 DocType: Workstation,Wages per hour,Lønningerne i timen
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +62,Total Variance,Samlet Varians
-DocType: Time Log Batch,Total Hours,Total Hours
+DocType: Time Sheet,Total Hours,Total Hours
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py +43,No employee found,Ingen medarbejder fundet
 DocType: Account,Balance must be,Balance skal være
 DocType: Issue,Raised By (Email),Rejst af (E-mail)
@@ -2691,7 +2691,7 @@ DocType: Newsletter,A Lead with this email id should exist,Et emne med dette e-m
 DocType: Notification Control,Expense Claim Rejected Message,Expense krav Afvist Message
 DocType: Time Log,Will be updated when billed.,"Vil blive opdateret, når faktureret."
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +182,Serial No {0} is under warranty upto {1},Løbenummer {0} er under garanti op {1}
-DocType: Time Log Batch,Total Billing Amount,Samlet Billing Beløb
+DocType: Time Sheet,Total Billing Amount,Samlet Billing Beløb
 DocType: POS Profile,Update Stock,Opdatering Stock
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production Order {0} must be cancelled before cancelling this Sales Order,"Produktionsordre {0} skal annulleres, før den annullerer denne Sales Order"
 DocType: Serial No,Delivery Details,Levering Detaljer

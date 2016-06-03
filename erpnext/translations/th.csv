@@ -168,7 +168,7 @@ DocType: Upload Attendance,"Download the Template, fill appropriate data and att
 All dates and employee combination in the selected period will come in the template, with existing attendance records","ดาวน์โหลดแม่แบบกรอกข้อมูลที่เหมาะสมและแนบไฟล์ที่ถูกแก้ไข
  ทุกวันและการรวมกันของพนักงานในระยะเวลาที่เลือกจะมาในแม่แบบที่มีการบันทึกการเข้าร่วมที่มีอยู่"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,รายการที่ {0} ไม่ได้ใช้งาน หรือจุดสิ้นสุดของ ชีวิต ได้ถึง
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,จะมีการปรับปรุงหลังจากที่ใบแจ้งหนี้การขายมีการส่ง
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,จะมีการปรับปรุงหลังจากที่ใบแจ้งหนี้การขายมีการส่ง
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included",จะรวมถึง ภาษี ในแถว {0} ใน อัตรา รายการ ภาษี ใน แถว {1} จะต้องรวม
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,การตั้งค่าสำหรับ โมดูล ทรัพยากรบุคคล
 DocType: SMS Center,SMS Center,ศูนย์ SMS
@@ -906,7 +906,7 @@ DocType: Sales Person,Select company name first.,เลือกชื่อ บ
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,ดร
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,ใบเสนอราคาที่ได้รับจากผู้จัดจำหน่าย
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},เพื่อ {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,อัปเดตผ่านทางบันทึกเวลา
+DocType: Time Sheet,updated via Time Logs,อัปเดตผ่านทางบันทึกเวลา
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,อายุเฉลี่ย
 DocType: Opportunity,Your sales person who will contact the customer in future,คนขายของคุณที่จะติดต่อกับลูกค้าในอนาคต
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,รายการ บางส่วนของ ซัพพลายเออร์ ของคุณ พวกเขาจะเป็น องค์กร หรือบุคคล
@@ -933,10 +933,10 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',โปรดตั้ง &#39;ใช้ส่วนลดเพิ่มเติมใน&#39;
 ,Ordered Items To Be Billed,รายการที่สั่งซื้อจะเรียกเก็บเงิน
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,จากช่วงจะต้องมีน้อยกว่าในช่วง
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,เลือกบันทึกเวลา และส่งมาเพื่อสร้างเป็นใบแจ้งหนี้การขายใหม่
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,เลือกบันทึกเวลา และส่งมาเพื่อสร้างเป็นใบแจ้งหนี้การขายใหม่
 DocType: Global Defaults,Global Defaults,เริ่มต้นทั่วโลก
 DocType: Salary Slip,Deductions,การหักเงิน
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,บันทึกเวลาชุดนี้ ถูกเรียกเก็บเงินแล้ว
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,บันทึกเวลาชุดนี้ ถูกเรียกเก็บเงินแล้ว
 DocType: Salary Slip,Leave Without Pay,ฝากโดยไม่ต้องจ่าย
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,ข้อผิดพลาดการวางแผนกำลังการผลิต
 ,Trial Balance for Party,งบทดลองสำหรับพรรค
@@ -1236,7 +1236,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),จำ�
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,กรุณาสร้างบัญชีใหม่ จากผังบัญชี
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,การเข้ามาบำรุงรักษา
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,จำนวนชุดที่โกดัง
-DocType: Time Log Batch Detail,Time Log Batch Detail,รายละเอียดชุดบันทึกเวลา
+DocType: Time Sheet Detail,Time Sheet Detail,รายละเอียดชุดบันทึกเวลา
 DocType: Landed Cost Voucher,Landed Cost Help,Landed ช่วยเหลือค่าใช้จ่าย
 DocType: Purchase Invoice,Select Shipping Address,เลือกที่อยู่ในการจัดส่ง
 DocType: Leave Block List,Block Holidays on important days.,วันหยุดที่ถูกบล็อกในวันสำคัญ
@@ -1369,7 +1369,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","น้ำหนักที่ถูกกล่าวถึง, \n กรุณาระบุ ""น้ำหนัก UOM"" เกินไป"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,ขอวัสดุที่ใช้เพื่อให้รายการสินค้านี้
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,หน่วยเดียวของรายการ
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',ต้อง 'ส่ง' ชุดบันทึกเวลา {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',ต้อง 'ส่ง' ชุดบันทึกเวลา {0}
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,ทำให้ รายการ บัญชี สำหรับ ทุก การเคลื่อนไหวของ หุ้น
 DocType: Leave Allocation,Total Leaves Allocated,ใบรวมจัดสรร
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},โกดังสินค้าจำเป็นที่แถวไม่มี {0}
@@ -1485,7 +1485,7 @@ DocType: Production Plan Material Request,Material Request Date,ขอวัส�
 DocType: Purchase Order Item,Supplier Quotation Item,รายการใบเสนอราคาของผู้ผลิต
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,ปิดการใช้งานการสร้างบันทึกเวลากับการสั่งซื้อการผลิต การดำเนินงานจะไม่ได้รับการติดตามกับใบสั่งผลิต
 DocType: Item,Has Variants,มีหลากหลายรูปแบบ
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,คลิกที่ &#39;ให้ขายใบแจ้งหนี้&#39; เพื่อสร้างใบแจ้งหนี้การขายใหม่
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,คลิกที่ &#39;ให้ขายใบแจ้งหนี้&#39; เพื่อสร้างใบแจ้งหนี้การขายใหม่
 DocType: Monthly Distribution,Name of the Monthly Distribution,ชื่อของการกระจายรายเดือน
 DocType: Sales Person,Parent Sales Person,ผู้ปกครองคนขาย
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,โปรดระบุ สกุลเงิน เริ่มต้นใน บริษัท โท และ เริ่มต้น ทั่วโลก
@@ -1688,7 +1688,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,สินทรัพย์ คงที่
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,เนื่องสินค้าคงคลัง
 DocType: Activity Type,Default Billing Rate,เริ่มต้นอัตราการเรียกเก็บเงิน
-DocType: Time Log Batch,Total Billing Amount,การเรียกเก็บเงินจำนวนเงินรวม
+DocType: Time Sheet,Total Billing Amount,การเรียกเก็บเงินจำนวนเงินรวม
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,ลูกหนี้การค้า
 DocType: Quotation Item,Stock Balance,ยอดคงเหลือสต็อก
 apps/erpnext/erpnext/config/selling.py +306,Sales Order to Payment,ใบสั่งขายถึงการชำระเงิน
@@ -2158,7 +2158,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),อัตรากา
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,จัดการ ต้นไม้ มณฑล
 DocType: Journal Entry Account,Sales Invoice,ขายใบแจ้งหนี้
 DocType: Journal Entry Account,Party Balance,ยอดคงเหลือพรรค
-DocType: Sales Invoice Item,Time Log Batch,ชุดบันทึกเวลา
+DocType: Sales Invoice Item,Time Sheet,ชุดบันทึกเวลา
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,กรุณาเลือกใช้ส่วนลด
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,สลิปเงินเดือนที่ต้องการสร้าง
 DocType: Company,Default Receivable Account,บัญชีเริ่มต้นลูกหนี้
@@ -2335,7 +2335,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,เขียนปิดยอดคงค้าง
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.",ตรวจสอบว่าใบแจ้งหนี้ที่คุณต้องเกิดขึ้นโดยอัตโนมัติ หลังจากส่งใบแจ้งหนี้ใด ๆ ขายส่วนกิจวัตรจะสามารถมองเห็น
 DocType: Account,Accounts Manager,ผู้จัดการบัญชี
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',บันทึกเวลา {0} ต้องถูก 'ส่ง'
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',บันทึกเวลา {0} ต้องถูก 'ส่ง'
 DocType: Stock Settings,Default Stock UOM,เริ่มต้น UOM สต็อก
 DocType: Time Log,Costing Rate based on Activity Type (per hour),อัตราค่าใช้จ่ายขึ้นอยู่กับประเภทกิจกรรม (ต่อชั่วโมง)
 DocType: Production Planning Tool,Create Material Requests,ขอสร้างวัสดุ
@@ -2622,7 +2622,7 @@ DocType: Sales Order,Partly Billed,จำนวนมากที่สุดเ
 DocType: Item,Default BOM,BOM เริ่มต้น
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,กรุณาชื่อ บริษัท อีกครั้งเพื่อยืนยันชนิด
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,รวมที่โดดเด่น Amt
-DocType: Time Log Batch,Total Hours,รวมชั่วโมง
+DocType: Time Sheet,Total Hours,รวมชั่วโมง
 DocType: Journal Entry,Printing Settings,การตั้งค่าการพิมพ์
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},เดบิต รวม ต้องเท่ากับ เครดิต รวม
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,ยานยนต์
@@ -2900,7 +2900,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,โอน จำนวน
 apps/erpnext/erpnext/config/learn.py +11,Navigating,การนำ
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,การวางแผน
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,ทำให้เวลาที่เข้าสู่ระบบชุด
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,ทำให้เวลาที่เข้าสู่ระบบชุด
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,ออก
 DocType: Project,Total Billing Amount (via Time Logs),จำนวนเงินที่เรียกเก็บเงินรวม (ผ่านบันทึกเวลา)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,เราขาย สินค้า นี้
@@ -2948,7 +2948,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,หน่วยที่แตกต่างของสินค้า
 DocType: Pricing Rule,Buying,การซื้อ
 DocType: HR Settings,Employee Records to be created by,ระเบียนพนักงานที่จะถูกสร้างขึ้นโดย
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,บันทึกเวลาชุดนี้ถูกยกเลิกแล้ว
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,บันทึกเวลาชุดนี้ถูกยกเลิกแล้ว
 ,Reqd By Date,reqd โดยวันที่
 DocType: Salary Slip Earning,Salary Slip Earning,รายได้สลิปเงินเดือน
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,เจ้าหนี้
@@ -3356,7 +3356,7 @@ DocType: Budget Detail,Budget Detail,รายละเอียดงบปร�
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,กรุณาใส่ข้อความ ก่อนที่จะส่ง
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,จุดขายข้อมูลส่วนตัว
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,กรุณาอัปเดตการตั้งค่า SMS
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,เวลาเข้าสู่ระบบ {0} เรียกเก็บเงินแล้ว
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,เวลาเข้าสู่ระบบ {0} เรียกเก็บเงินแล้ว
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,เงินให้กู้ยืม ที่ไม่มีหลักประกัน
 DocType: Cost Center,Cost Center Name,ค่าใช้จ่ายชื่อศูนย์
 DocType: Maintenance Schedule Detail,Scheduled Date,วันที่กำหนด

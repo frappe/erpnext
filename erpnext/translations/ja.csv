@@ -173,7 +173,7 @@ DocType: Upload Attendance,"Download the Template, fill appropriate data and att
 All dates and employee combination in the selected period will come in the template, with existing attendance records","テンプレートをダウンロードし、適切なデータを記入した後、変更したファイルを添付してください。
 選択した期間内のすべての日付と従業員の組み合わせは、既存の出勤記録と一緒に、テンプレートに入ります"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,アイテム{0}は、アクティブでないか、販売終了となっています
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,請求書を提出すると更新されます。
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,請求書を提出すると更新されます。
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included",アイテム料金の行{0}に税を含めるには、行{1}の税も含まれていなければなりません
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,人事モジュール設定
 DocType: SMS Center,SMS Center,SMSセンター
@@ -939,7 +939,7 @@ DocType: Sales Person,Select company name first.,はじめに会社名を選択�
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,借方
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,サプライヤーから受け取った見積。
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},{0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,時間ログ経由で更新
+DocType: Time Sheet,updated via Time Logs,時間ログ経由で更新
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,平均年齢
 DocType: Opportunity,Your sales person who will contact the customer in future,顧客を訪問する営業担当者
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,サプライヤーの一部を一覧表示します。彼らは、組織や個人である可能性があります。
@@ -966,11 +966,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',設定」で追加の割引を適用」してください
 ,Ordered Items To Be Billed,支払予定注文済アイテム
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,範囲開始は範囲終了よりも小さくなければなりません
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,タイムログを選択し、新しい請求書を作成し提出してください。
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,タイムログを選択し、新しい請求書を作成し提出してください。
 DocType: Global Defaults,Global Defaults,共通デフォルト設定
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,プロジェクトコラボレーション招待
 DocType: Salary Slip,Deductions,控除
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,この時間ログバッチは請求済みです
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,この時間ログバッチは請求済みです
 DocType: Salary Slip,Leave Without Pay,無給休暇
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,キャパシティプランニングのエラー
 ,Trial Balance for Party,当事者用の試算表
@@ -1281,7 +1281,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),追加�
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,勘定科目表から新しいアカウントを作成してください
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,メンテナンスのための訪問
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,倉庫での利用可能なバッチ数量
-DocType: Time Log Batch Detail,Time Log Batch Detail,時間ログバッチの詳細
+DocType: Time Sheet Detail,Time Sheet Detail,時間ログバッチの詳細
 DocType: Landed Cost Voucher,Landed Cost Help,陸揚費用ヘルプ
 DocType: Purchase Invoice,Select Shipping Address,配送先住所を選択します
 DocType: Leave Block List,Block Holidays on important days.,年次休暇（記念日休暇）
@@ -1418,7 +1418,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too",重量が記載されていますので、あわせて「重量単位」を記載してください
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,この在庫エントリを作成するために使用される資材要求
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,アイテムの１単位
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',時間ログバッチ{0}は「提出済」でなければなりません
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',時間ログバッチ{0}は「提出済」でなければなりません
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,各在庫の動きを会計処理のエントリとして作成
 DocType: Leave Allocation,Total Leaves Allocated,休暇割当合計
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},行番号{0}には倉庫が必要です
@@ -1539,7 +1539,7 @@ DocType: Production Plan Material Request,Material Request Date,材料依頼日
 DocType: Purchase Order Item,Supplier Quotation Item,サプライヤー見積アイテム
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,製造指図に対する時間ログの作成を無効にします。操作は、製造指図に対して追跡してはなりません
 DocType: Item,Has Variants,バリエーションあり
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,新しい売上請求書を作成するために「請求書を作成」ボタンをクリックしてください。
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,新しい売上請求書を作成するために「請求書を作成」ボタンをクリックしてください。
 DocType: Monthly Distribution,Name of the Monthly Distribution,月次配分の名前
 DocType: Sales Person,Parent Sales Person,親販売担当者
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,会社マスタ・共通デフォルト設定で「デフォルト通貨」を指定してください
@@ -1752,7 +1752,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,固定資産
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,シリアル番号を付与した目録
 DocType: Activity Type,Default Billing Rate,デフォルト請求単価
-DocType: Time Log Batch,Total Billing Amount,総請求額
+DocType: Time Sheet,Total Billing Amount,総請求額
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,売掛金勘定
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},行＃{0}：アセット{1} {2}既にあります
 DocType: Quotation Item,Stock Balance,在庫残高
@@ -2239,7 +2239,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),正味単価（会社
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,地域ツリーを管理
 DocType: Journal Entry Account,Sales Invoice,請求書
 DocType: Journal Entry Account,Party Balance,当事者残高
-DocType: Sales Invoice Item,Time Log Batch,時間ログバッチ
+DocType: Sales Invoice Item,Time Sheet,時間ログバッチ
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,「割引を適用」を選択してください
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,給与スリップを作成します
 DocType: Company,Default Receivable Account,デフォルト売掛金勘定
@@ -2422,7 +2422,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,未償却残額
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.",自動で繰り返し請求にする場合チェックをオンにします。請求書の提出後、「繰り返し」セクションが表示されます。
 DocType: Account,Accounts Manager,会計管理者
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',時間ログ{0}は「提出済」でなければなりません
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',時間ログ{0}は「提出済」でなければなりません
 DocType: Stock Settings,Default Stock UOM,デフォルト在庫数量単位
 DocType: Time Log,Costing Rate based on Activity Type (per hour),行動タイプ（毎時）に基づく原価
 DocType: Production Planning Tool,Create Material Requests,資材要求を作成
@@ -2723,7 +2723,7 @@ DocType: Sales Order,Partly Billed,一部支払済
 DocType: Item,Default BOM,デフォルト部品表
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,確認のため会社名を再入力してください
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,残高合計
-DocType: Time Log Batch,Total Hours,時間合計
+DocType: Time Sheet,Total Hours,時間合計
 DocType: Journal Entry,Printing Settings,印刷設定
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},借方合計は貸方合計に等しくなければなりません。{0}の差があります。
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,自動車
@@ -3013,7 +3013,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,移転数量
 apps/erpnext/erpnext/config/learn.py +11,Navigating,ナビゲート
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,計画
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,時間ログバッチを作成
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,時間ログバッチを作成
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,課題
 DocType: Project,Total Billing Amount (via Time Logs),総請求金額（時間ログ経由）
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,このアイテムを売る
@@ -3063,7 +3063,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,アイテムの明確な単位
 DocType: Pricing Rule,Buying,購入
 DocType: HR Settings,Employee Records to be created by,従業員レコード作成元
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,この時間ログバッチはキャンセルされました
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,この時間ログバッチはキャンセルされました
 ,Reqd By Date,要求済日付
 DocType: Salary Slip Earning,Salary Slip Earning,給与支給明細
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,債権者
@@ -3480,7 +3480,7 @@ DocType: Budget Detail,Budget Detail,予算の詳細
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,メッセージを入力してください
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,POSプロフィール
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,SMSの設定を更新してください
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,時間ログ{0}は請求済です
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,時間ログ{0}は請求済です
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,無担保ローン
 DocType: Cost Center,Cost Center Name,コストセンター名
 DocType: Maintenance Schedule Detail,Scheduled Date,スケジュール日付

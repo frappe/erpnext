@@ -172,7 +172,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Κατεβάστε το πρότυπο, συμπληρώστε τα κατάλληλα δεδομένα και επισυνάψτε το τροποποιημένο αρχείο. Όλες οι ημερομηνίες και ο συνδυασμός των υπαλλήλων στην επιλεγμένη περίοδο θα εμφανιστεί στο πρότυπο, με τους υπάρχοντες καταλόγους παρουσίας"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,Το είδος {0} δεν είναι ενεργό ή το τέλος της ζωής έχει περάσει
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Θα ενημερωθεί μετά τήν έκδοση του τιμολογίου πωλήσεων.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Θα ενημερωθεί μετά τήν έκδοση του τιμολογίου πωλήσεων.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Για να περιληφθούν οι φόροι στη γραμμή {0} της τιμής είδους, οι φόροι στις γραμμές {1} πρέπει επίσης να συμπεριληφθούν"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,Ρυθμίσεις για τη λειτουργική μονάδα HR
 DocType: SMS Center,SMS Center,Κέντρο SMS
@@ -928,7 +928,7 @@ DocType: Sales Person,Select company name first.,Επιλέξτε το όνομ�
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,Dr
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Προσφορές που λήφθηκαν από προμηθευτές.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},Έως {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,ενημερώνεται μέσω χρόνος Καταγράφει
+DocType: Time Sheet,updated via Time Logs,ενημερώνεται μέσω χρόνος Καταγράφει
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Μέσος όρος ηλικίας
 DocType: Opportunity,Your sales person who will contact the customer in future,Ο πωλητής σας που θα επικοινωνήσει με τον πελάτη στο μέλλον
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,Απαριθμήστε μερικούς από τους προμηθευτές σας. Θα μπορούσαν να είναι φορείς ή ιδιώτες.
@@ -955,11 +955,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',Παρακαλούμε να ορίσετε «Εφαρμόστε επιπλέον έκπτωση On»
 ,Ordered Items To Be Billed,Παραγγελθέντα είδη για τιμολόγηση
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,"Από το φάσμα πρέπει να είναι μικρότερη από ό, τι στην γκάμα"
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Επιλέξτε αρχεία καταγραφής χρονολογίου και πατήστε υποβολή για να δημιουργηθεί ένα νέο τιμολόγιο πώλησης
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Επιλέξτε αρχεία καταγραφής χρονολογίου και πατήστε υποβολή για να δημιουργηθεί ένα νέο τιμολόγιο πώλησης
 DocType: Global Defaults,Global Defaults,Καθολικές προεπιλογές
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,Συνεργασία Πρόσκληση έργου
 DocType: Salary Slip,Deductions,Κρατήσεις
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,Αυτή η παρτίδα αρχείων καταγραφής χρονολογίου έχει χρεωθεί.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,Αυτή η παρτίδα αρχείων καταγραφής χρονολογίου έχει χρεωθεί.
 DocType: Salary Slip,Leave Without Pay,Άδεια άνευ αποδοχών
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,Χωρητικότητα Σφάλμα Προγραμματισμού
 ,Trial Balance for Party,Ισοζύγιο για το Κόμμα
@@ -1268,7 +1268,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Πρόσ
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,Παρακαλώ να δημιουργήσετε νέο λογαριασμό από το λογιστικό σχέδιο.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Επίσκεψη συντήρησης
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Διαθέσιμο παρτίδας Ποσότητα σε αποθήκη
-DocType: Time Log Batch Detail,Time Log Batch Detail,Λεπτομέρεια παρτίδας αρχείων καταγραφής χρονολογίου
+DocType: Time Sheet Detail,Time Sheet Detail,Λεπτομέρεια παρτίδας αρχείων καταγραφής χρονολογίου
 DocType: Landed Cost Voucher,Landed Cost Help,Βοήθεια κόστους αποστολής εμπορευμάτων
 DocType: Purchase Invoice,Select Shipping Address,Επιλέξτε Διεύθυνση αποστολής
 DocType: Leave Block List,Block Holidays on important days.,Αποκλεισμός αδειών στις σημαντικές ημέρες.
@@ -1403,7 +1403,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Το βάρος αναφέρεται, \nπαρακαλώ, αναφέρετε επίσης και τη μονάδα μέτρησης βάρους'"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Αίτηση υλικού που χρησιμοποιείται για να γίνει αυτήν η καταχώρnση αποθέματος
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,Μία μονάδα ενός είδους
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',Η παρτίδα αρχείων καταγραφής χρονολογίου {0} πρέπει να 'υποβληθεί'
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',Η παρτίδα αρχείων καταγραφής χρονολογίου {0} πρέπει να 'υποβληθεί'
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Δημιούργησε λογιστική καταχώρηση για κάθε κίνηση αποθέματος
 DocType: Leave Allocation,Total Leaves Allocated,Σύνολο αδειών που διατέθηκε
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Αποθήκη απαιτείται κατά Row Όχι {0}
@@ -1523,7 +1523,7 @@ DocType: Production Plan Material Request,Material Request Date,Υλικό Ημ�
 DocType: Purchase Order Item,Supplier Quotation Item,Είδος της προσφοράς του προμηθευτή
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Απενεργοποιεί τη δημιουργία του χρόνου κορμών κατά Εντολές Παραγωγής. Οι πράξεις δεν θα πρέπει να παρακολουθούνται κατά την παραγωγή διαταγής
 DocType: Item,Has Variants,Έχει παραλλαγές
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Κάντε κλικ στο δημιούργησε τιμολόγιο πώλησης για να δημιουργηθεί ένα νέο τιμολόγιο πώλησης.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Κάντε κλικ στο δημιούργησε τιμολόγιο πώλησης για να δημιουργηθεί ένα νέο τιμολόγιο πώλησης.
 DocType: Monthly Distribution,Name of the Monthly Distribution,Όνομα της μηνιαίας διανομής
 DocType: Sales Person,Parent Sales Person,Γονικός πωλητής
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,Παρακαλώ ορίστε προεπιλεγμένο νόμισμα στην κύρια εγγραφή εταιρείας και τις γενικές προεπιλογές
@@ -1735,7 +1735,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,Πάγιο
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Απογραφή συνέχειες
 DocType: Activity Type,Default Billing Rate,Επιτόκιο Υπερημερίας Τιμολόγησης
-DocType: Time Log Batch,Total Billing Amount,Συνολικό Ποσό Χρέωσης
+DocType: Time Sheet,Total Billing Amount,Συνολικό Ποσό Χρέωσης
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,Εισπρακτέα λογαριασμού
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},Σειρά # {0}: Asset {1} είναι ήδη {2}
 DocType: Quotation Item,Stock Balance,Ισοζύγιο αποθέματος
@@ -2215,7 +2215,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),Καθαρό ποσο
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,Διαχειριστείτε το δέντρο περιοχών.
 DocType: Journal Entry Account,Sales Invoice,Τιμολόγιο πώλησης
 DocType: Journal Entry Account,Party Balance,Υπόλοιπο συμβαλλόμενου
-DocType: Sales Invoice Item,Time Log Batch,Παρτίδα αρχείων καταγραφής χρονολογίου
+DocType: Sales Invoice Item,Time Sheet,Παρτίδα αρχείων καταγραφής χρονολογίου
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,Παρακαλώ επιλέξτε Εφαρμογή έκπτωση σε
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Εκκαθαριστικό μισθοδοσίας Δημιουργήθηκε
 DocType: Company,Default Receivable Account,Προεπιλεγμένος λογαριασμός εισπρακτέων
@@ -2398,7 +2398,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Διαγραφή οφειλόμενου ποσού
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Επιλέξτε εάν χρειάζεστε αυτόματα επαναλαμβανόμενα τιμολόγια. Μετά την υποβολή κάθε τιμολογίου πώλησης, το επαναλαμβανόμενο τμήμαθα είναι ορατό."
 DocType: Account,Accounts Manager,Διαχειριστής λογαριασμών
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',Το αρχείο καταγραφής χρονολογίου {0} πρέπει να 'υποβλήθεί'
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',Το αρχείο καταγραφής χρονολογίου {0} πρέπει να 'υποβλήθεί'
 DocType: Stock Settings,Default Stock UOM,Προεπιλεγμένη Μ.Μ. Αποθέματος
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Κοστολόγηση Βαθμολογήστε με βάση τον τύπο δραστηριότητας (ανά ώρα)
 DocType: Production Planning Tool,Create Material Requests,Δημιουργία αιτήσεων υλικού
@@ -2699,7 +2699,7 @@ DocType: Sales Order,Partly Billed,Μερικώς τιμολογημένος
 DocType: Item,Default BOM,Προεπιλεγμένη Λ.Υ.
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,Παρακαλώ πληκτρολογήστε ξανά το όνομα της εταιρείας για να επιβεβαιώσετε
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,Συνολικού ανεξόφλητου υπολοίπου
-DocType: Time Log Batch,Total Hours,Σύνολο ωρών
+DocType: Time Sheet,Total Hours,Σύνολο ωρών
 DocType: Journal Entry,Printing Settings,Ρυθμίσεις εκτύπωσης
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},Η συνολική χρέωση πρέπει να είναι ίση με τη συνολική πίστωση. Η διαφορά είναι {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Αυτοκίνητο
@@ -2989,7 +2989,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,Μεταφερόμενη ποσότητα
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Πλοήγηση
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Προγραμματισμός
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Δημιούργησε χρονολόγιο παρτίδας
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Δημιούργησε χρονολόγιο παρτίδας
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Εκδόθηκε
 DocType: Project,Total Billing Amount (via Time Logs),Συνολικό Ποσό Χρέωσης (μέσω χρόνος Καταγράφει)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,Πουλάμε αυτό το είδος
@@ -3039,7 +3039,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,Διακριτή μονάδα ενός είδους
 DocType: Pricing Rule,Buying,Αγορά
 DocType: HR Settings,Employee Records to be created by,Εγγραφές των υπαλλήλων που πρόκειται να δημιουργηθούν από
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,Αυτή η παρτίδα αρχείων καταγραφής χρονολογίου έχει ακυρωθεί.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,Αυτή η παρτίδα αρχείων καταγραφής χρονολογίου έχει ακυρωθεί.
 ,Reqd By Date,Reqd Με ημερομηνία
 DocType: Salary Slip Earning,Salary Slip Earning,Αποδοχές στη βεβαίωση αποδοχών
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,Πιστωτές
@@ -3456,7 +3456,7 @@ DocType: Budget Detail,Budget Detail,Λεπτομέρειες προϋπολογ
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Παρακαλώ εισάγετε το μήνυμα πριν από την αποστολή
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Point-of-Sale Προφίλ
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,Παρακαλώ ενημερώστε τις ρυθμίσεις SMS
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Χρόνος καταγραφής {0} έχει ήδη χρεωθεί
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Χρόνος καταγραφής {0} έχει ήδη χρεωθεί
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Ακάλυπτά δάνεια
 DocType: Cost Center,Cost Center Name,Όνομα κέντρου κόστους
 DocType: Maintenance Schedule Detail,Scheduled Date,Προγραμματισμένη ημερομηνία

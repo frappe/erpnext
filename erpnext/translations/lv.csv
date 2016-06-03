@@ -172,7 +172,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Lejupielādēt veidni, aizpildīt atbilstošus datus un pievienot modificētu failu. Visi datumi un darbinieku saspēles izvēlēto periodu nāks veidnē, ar esošajiem apmeklējuma reģistru"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,Postenis {0} nav aktīvs vai ir sasniegts nolietoto
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Atjauninās pēc pārdošanas rēķinu iesniegšanas.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Atjauninās pēc pārdošanas rēķinu iesniegšanas.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Lai iekļautu nodokli rindā {0} vienības likmes, nodokļi rindās {1} ir jāiekļauj arī"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,Iestatījumi HR moduļa
 DocType: SMS Center,SMS Center,SMS Center
@@ -907,7 +907,7 @@ DocType: Sales Person,Select company name first.,Izvēlieties uzņēmuma nosauku
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,Dr
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,"Citāti, kas saņemti no piegādātājiem."
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},Uz {0} | {1}{2}
-DocType: Time Log Batch,updated via Time Logs,"atjaunināt, izmantojot Time Baļķi"
+DocType: Time Sheet,updated via Time Logs,"atjaunināt, izmantojot Time Baļķi"
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Vidējais vecums
 DocType: Opportunity,Your sales person who will contact the customer in future,"Jūsu pārdošanas persona, kas sazinās ar klientu nākotnē"
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,Uzskaitīt daži no jūsu piegādātājiem. Tie varētu būt organizācijas vai privātpersonas.
@@ -934,11 +934,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',Lūdzu noteikt &quot;piemērot papildu Atlaide On&quot;
 ,Ordered Items To Be Billed,Pasūtītās posteņi ir Jāmaksā
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,No Range ir jābūt mazāk nekā svārstās
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,"Izvēlieties Time Baļķi un iesniegt, lai izveidotu jaunu pārdošanas rēķinu."
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,"Izvēlieties Time Baļķi un iesniegt, lai izveidotu jaunu pārdošanas rēķinu."
 DocType: Global Defaults,Global Defaults,Globālie Noklusējumi
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,Projektu Sadarbība Ielūgums
 DocType: Salary Slip,Deductions,Atskaitījumi
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,Šoreiz Log Partijas ir jāmaksā.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,Šoreiz Log Partijas ir jāmaksā.
 DocType: Salary Slip,Leave Without Pay,Bezalgas atvaļinājums
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,Capacity Planning kļūda
 ,Trial Balance for Party,Trial Balance uz pusi
@@ -1247,7 +1247,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Papildu 
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,"Lūdzu, izveidojiet jaunu kontu no kontu plāna."
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Uzturēšana Apmeklēt
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Pieejams Partijas Daudz at Noliktava
-DocType: Time Log Batch Detail,Time Log Batch Detail,Time Log Partijas Detail
+DocType: Time Sheet Detail,Time Sheet Detail,Time Log Partijas Detail
 DocType: Landed Cost Voucher,Landed Cost Help,Izkrauti izmaksas Palīdzība
 DocType: Purchase Invoice,Select Shipping Address,Izvēlieties Piegādes adrese
 DocType: Leave Block List,Block Holidays on important days.,Bloķēt Holidays par svarīgākajiem dienas.
@@ -1382,7 +1382,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Svars ir minēts, \ nLūdzu nerunājot ""Svara UOM"" too"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,"Materiāls Pieprasījums izmantoti, lai šā krājuma Entry"
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,Viena vienība posteņa.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',"Time Log Partijas {0} ir ""Iesniegtie"""
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',"Time Log Partijas {0} ir ""Iesniegtie"""
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Padarīt grāmatvedības ieraksts Katrs krājumu aprites
 DocType: Leave Allocation,Total Leaves Allocated,Kopā Leaves Piešķirtie
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Noliktava vajadzīgi Row Nr {0}
@@ -1502,7 +1502,7 @@ DocType: Production Plan Material Request,Material Request Date,Materiāls piepr
 DocType: Purchase Order Item,Supplier Quotation Item,Piegādātājs Citāts postenis
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Izslēdz izveidi laika apaļkoku pret pasūtījumu. Darbības nedrīkst izsekot pret Ražošanas uzdevums
 DocType: Item,Has Variants,Ir Varianti
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Noklikšķiniet uz ""Make pārdošanas rēķinu"" pogu, lai izveidotu jaunu pārdošanas rēķinu."
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Noklikšķiniet uz ""Make pārdošanas rēķinu"" pogu, lai izveidotu jaunu pārdošanas rēķinu."
 DocType: Monthly Distribution,Name of the Monthly Distribution,Nosaukums Mēneša Distribution
 DocType: Sales Person,Parent Sales Person,Parent Sales Person
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,"Lūdzu, norādiet noklusējuma valūtu kompānijā Master un Global noklusējumu"
@@ -1714,7 +1714,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,Pamatlīdzeklis
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Serializēja inventarizācija
 DocType: Activity Type,Default Billing Rate,Default Norēķinu Rate
-DocType: Time Log Batch,Total Billing Amount,Kopā Norēķinu summa
+DocType: Time Sheet,Total Billing Amount,Kopā Norēķinu summa
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,Debitoru konts
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},Row # {0}: Asset {1} jau {2}
 DocType: Quotation Item,Stock Balance,Stock Balance
@@ -2162,7 +2162,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),Net Rate (Uzņēmējd
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,Pārvaldīt Territory Tree.
 DocType: Journal Entry Account,Sales Invoice,Pārdošanas rēķins
 DocType: Journal Entry Account,Party Balance,Party Balance
-DocType: Sales Invoice Item,Time Log Batch,Laiks Log Partijas
+DocType: Sales Invoice Item,Time Sheet,Laiks Log Partijas
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,"Lūdzu, izvēlieties Piesakies atlaide"
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Alga Slip Izveidots
 DocType: Company,Default Receivable Account,Default pasūtītāju konta
@@ -2345,7 +2345,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Uzrakstiet Off Izcila summa
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Pārbaudiet, vai jums ir nepieciešams automātiskā regulāru rēķinu. Pēc iesniegšanas jebkuru pārdošanas rēķinu, Atkārtotas sadaļu būs redzama."
 DocType: Account,Accounts Manager,Accounts Manager
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',"Time Log {0} ir ""Iesniegtie"""
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',"Time Log {0} ir ""Iesniegtie"""
 DocType: Stock Settings,Default Stock UOM,Default Stock UOM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),"Izmaksu likmi, pamatojoties uz darbības veida (stundā)"
 DocType: Production Planning Tool,Create Material Requests,Izveidot Materiāls Pieprasījumi
@@ -2646,7 +2646,7 @@ DocType: Sales Order,Partly Billed,Daļēji Jāmaksā
 DocType: Item,Default BOM,Default BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,"Lūdzu, atkārtoti tipa uzņēmuma nosaukums, lai apstiprinātu"
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,Kopā Izcila Amt
-DocType: Time Log Batch,Total Hours,Kopējais stundu skaits
+DocType: Time Sheet,Total Hours,Kopējais stundu skaits
 DocType: Journal Entry,Printing Settings,Drukāšanas iestatījumi
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},Kopējais debets jābūt vienādam ar kopējās kredīta. Atšķirība ir {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Automobiļu
@@ -2936,7 +2936,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,Nodota Daudz
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigācija
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Plānošana
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Padarīt Time Ieiet Sērija
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Padarīt Time Ieiet Sērija
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Izdots
 DocType: Project,Total Billing Amount (via Time Logs),Kopā Norēķinu Summa (via Time Baļķi)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,Mēs pārdot šo Prece
@@ -2986,7 +2986,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,Atsevišķu vienību posteņa
 DocType: Pricing Rule,Buying,Pirkšana
 DocType: HR Settings,Employee Records to be created by,"Darbinieku Records, kas rada"
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,Šoreiz Log Partijas ir atcelts.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,Šoreiz Log Partijas ir atcelts.
 ,Reqd By Date,Reqd pēc datuma
 DocType: Salary Slip Earning,Salary Slip Earning,Alga Slip krāšana
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,Kreditori
@@ -3391,7 +3391,7 @@ DocType: Budget Detail,Budget Detail,Budžets Detail
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Ievadiet ziņu pirms nosūtīšanas
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Point-of-Sale Profils
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,"Lūdzu, atjauniniet SMS Settings"
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Time Log {0} jau rēķins
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Time Log {0} jau rēķins
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Nenodrošināti aizdevumi
 DocType: Cost Center,Cost Center Name,Cost Center Name
 DocType: Maintenance Schedule Detail,Scheduled Date,Plānotais datums

@@ -172,7 +172,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Töltse le a sablont, töltse megfelelő adatokat és csatolja a módosított fájlt. Minden időpontot és a munkavállalói kombináció a kiválasztott időszakban jön a sablon, a meglévő jelenléti ívek"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,"Elem {0} nem aktív, vagy az elhasználódott elérte"
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Után felülvizsgálják Sales számla benyújtásának.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Után felülvizsgálják Sales számla benyújtásának.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Hogy tartalmazzák az adót a sorban {0} tétel mértéke, az adók sorokban {1} is fel kell venni"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,Beállításait HR modul
 DocType: SMS Center,SMS Center,SMS Központ
@@ -907,7 +907,7 @@ DocType: Sales Person,Select company name first.,Válassza ki a cég nevét elő
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,Dr
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Idézetek a szállítóktól kapott.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},{0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,keresztül frissíthető Time Naplók
+DocType: Time Sheet,updated via Time Logs,keresztül frissíthető Time Naplók
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Átlagéletkor
 DocType: Opportunity,Your sales person who will contact the customer in future,"Az értékesítési személy, aki felveszi a kapcsolatot Önnel a jövőben"
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,Felsorolok néhány a szállítók. Ők lehetnek szervezetek vagy magánszemélyek.
@@ -934,11 +934,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',"Kérjük, állítsa be az &quot;Apply További kedvezmény&quot;"
 ,Ordered Items To Be Billed,Rendelt mennyiség számlázásra
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,Range kell lennie kisebb hatótávolsággal
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Válassza ki a Time Naplók és elküldése hogy hozzon létre egy új Értékesítési számlák.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Válassza ki a Time Naplók és elküldése hogy hozzon létre egy új Értékesítési számlák.
 DocType: Global Defaults,Global Defaults,Általános beállítások
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,Project Együttműködés Meghívó
 DocType: Salary Slip,Deductions,Levonások
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,Ez az Időnapló gyűjtő ki lett számlázva.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,Ez az Időnapló gyűjtő ki lett számlázva.
 DocType: Salary Slip,Leave Without Pay,Fizetés nélküli szabadságon
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,Kapacitás tervezés Error
 ,Trial Balance for Party,Trial Balance Party
@@ -1247,7 +1247,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),További
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,"Kérjük, hozzon létre új fiókot a számlatükör."
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Karbantartási látogatás
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Elérhető Batch Mennyiség a Warehouse
-DocType: Time Log Batch Detail,Time Log Batch Detail,Időnapló gyűjtő adatai
+DocType: Time Sheet Detail,Time Sheet Detail,Időnapló gyűjtő adatai
 DocType: Landed Cost Voucher,Landed Cost Help,Beszerzési költség Súgó
 DocType: Purchase Invoice,Select Shipping Address,Select Szállítási cím
 DocType: Leave Block List,Block Holidays on important days.,Blokk Holidays fontos napokon.
@@ -1382,7 +1382,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Súly említik, \ nKérlek beszélve ""Súly UOM"" túl"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Anyaga Request használják e Stock Entry
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,Egy darab anyag.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',"A(z) {0} időnapló gyűjtőt be kell ""Küldeni"""
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',"A(z) {0} időnapló gyűjtőt be kell ""Küldeni"""
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Tedd számviteli könyvelése minden Készletmozgás
 DocType: Leave Allocation,Total Leaves Allocated,Összes lekötött szabadság
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Warehouse szükség Row {0}
@@ -1502,7 +1502,7 @@ DocType: Production Plan Material Request,Material Request Date,Anyaga igénylé
 DocType: Purchase Order Item,Supplier Quotation Item,Beszállítói ajánlat tétel
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Kikapcsolja létrehozása időt naplóid gyártási megrendeléseket. Műveletek nem lehet nyomon követni ellenében rendelés
 DocType: Item,Has Variants,Van-e változatok
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Kattints a ""Tedd Értékesítési számlák"" gombra, hogy egy új Értékesítési számlák."
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Kattints a ""Tedd Értékesítési számlák"" gombra, hogy egy új Értékesítési számlák."
 DocType: Monthly Distribution,Name of the Monthly Distribution,Nevét az havi megoszlása
 DocType: Sales Person,Parent Sales Person,Szülő Értékesítői
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,"Kérjük, adja meg alapértelmezett pénzneme a Társaság Mester és globális alapértékeit"
@@ -1714,7 +1714,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,Az állóeszköz-
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Serialized Inventory
 DocType: Activity Type,Default Billing Rate,Alapértelmezett díjszabás
-DocType: Time Log Batch,Total Billing Amount,Összesen Számlázási összeg
+DocType: Time Sheet,Total Billing Amount,Összesen Számlázási összeg
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,Követelések Account
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},Sor # {0}: Asset {1} {2} már
 DocType: Quotation Item,Stock Balance,Készlet egyenleg
@@ -2162,7 +2162,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),Nettó ár (Társasá
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,Kezelése Terület fa.
 DocType: Journal Entry Account,Sales Invoice,Eladási számla
 DocType: Journal Entry Account,Party Balance,Párt Balance
-DocType: Sales Invoice Item,Time Log Batch,Időnapló gyűjtő
+DocType: Sales Invoice Item,Time Sheet,Időnapló gyűjtő
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,"Kérjük, válassza az Apply kedvezmény"
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Fizetés Slip Létrehozta
 DocType: Company,Default Receivable Account,Alapértelmezett Receivable Account
@@ -2345,7 +2345,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Írja Off fennálló összeg
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Ellenőrizze, hogy szükség van az automatikus visszatérő számlákat. Benyújtása után minden értékesítési számlát, ismétlődő szakasz lesz látható."
 DocType: Account,Accounts Manager,Fiókkezelõ
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',"A(z) {0} időnaplót be kell ""Küldeni"""
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',"A(z) {0} időnaplót be kell ""Küldeni"""
 DocType: Stock Settings,Default Stock UOM,Alapértelmezett mértékegység
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Költségszámítás feltüntetett ár tevékenység típusa (óránként)
 DocType: Production Planning Tool,Create Material Requests,Anyagigénylés létrehozása
@@ -2646,7 +2646,7 @@ DocType: Sales Order,Partly Billed,Részben számlázott
 DocType: Item,Default BOM,Alapértelmezett BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,"Kérjük ismíteld cég nevét, hogy erősítse"
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,Teljes fennálló Amt
-DocType: Time Log Batch,Total Hours,Össz óraszám
+DocType: Time Sheet,Total Hours,Össz óraszám
 DocType: Journal Entry,Printing Settings,Nyomtatási beállítások
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},"Összesen Betéti kell egyeznie az összes Credit. A különbség az, {0}"
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Automotive
@@ -2936,7 +2936,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,Át Mennyiség
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigálás
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Tervezés
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Legyen ideje Bejelentkezés Batch
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Legyen ideje Bejelentkezés Batch
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Kiadott
 DocType: Project,Total Billing Amount (via Time Logs),Összesen Számlázási összeg (via Idő Napló)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,Az általunk forgalmazott ezt a tárgyat
@@ -2986,7 +2986,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,Különálló egység Egy tétel
 DocType: Pricing Rule,Buying,Beszerzés
 DocType: HR Settings,Employee Records to be created by,Munkavállalói Records által létrehozandó
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,Ez az Időnapló gyűjtő törölve lett.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,Ez az Időnapló gyűjtő törölve lett.
 ,Reqd By Date,Reqd Dátum szerint
 DocType: Salary Slip Earning,Salary Slip Earning,Fizetés Slip Earning
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,A hitelezők
@@ -3391,7 +3391,7 @@ DocType: Budget Detail,Budget Detail,Költségkeret részlete
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,"Kérjük, adja üzenet elküldése előtt"
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Point-of-Sale Profile
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,"Kérjük, frissítsd SMS beállítások"
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,A(z) {0} időnapló már számlázva van
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,A(z) {0} időnapló már számlázva van
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Fedezetlen hitelek
 DocType: Cost Center,Cost Center Name,Költségközpont neve
 DocType: Maintenance Schedule Detail,Scheduled Date,Ütemezett dátum

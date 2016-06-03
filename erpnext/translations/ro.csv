@@ -173,7 +173,7 @@ DocType: Upload Attendance,"Download the Template, fill appropriate data and att
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Descărcați șablonul, umple de date corespunzătoare și atașați fișierul modificat.
  Toate datele și angajat combinație în perioada selectata va veni în șablon, cu înregistrări nervi existente"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,Articolul {0} nu este activ sau sfarsitul ciclului sau de viata a fost atins
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Vor fi actualizate după Factura Vanzare este prezentat.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Vor fi actualizate după Factura Vanzare este prezentat.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Pentru a include taxa în rândul {0} în rata articol, impozitele în rânduri {1} trebuie de asemenea să fie incluse"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,Setările pentru modul HR
 DocType: SMS Center,SMS Center,SMS Center
@@ -928,7 +928,7 @@ DocType: Sales Person,Select company name first.,Selectați numele companiei în
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,Dr
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Cotatiilor primite de la furnizori.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},Pentru a {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,actualizat prin timp Busteni
+DocType: Time Sheet,updated via Time Logs,actualizat prin timp Busteni
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Vârstă medie
 DocType: Opportunity,Your sales person who will contact the customer in future,Persoana de vânzări care va contacta clientul în viitor
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,Listeaza cativa din furnizorii dvs. Ei ar putea fi organizații sau persoane fizice.
@@ -955,11 +955,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',Vă rugăm să setați &quot;Aplicați discount suplimentar pe&quot;
 ,Ordered Items To Be Billed,Comandat de Articole Pentru a fi facturat
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,Din Gama trebuie să fie mai mică de la gama
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Selectați Timp Busteni Trimite pentru a crea o nouă factură de vânzare.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Selectați Timp Busteni Trimite pentru a crea o nouă factură de vânzare.
 DocType: Global Defaults,Global Defaults,Valori Implicite Globale
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,Colaborare proiect Invitație
 DocType: Salary Slip,Deductions,Deduceri
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,Acest lot Timpul Log a fost facturat.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,Acest lot Timpul Log a fost facturat.
 DocType: Salary Slip,Leave Without Pay,Concediu Fără Plată
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,Capacitate de eroare de planificare
 ,Trial Balance for Party,Trial Balance pentru Party
@@ -1267,7 +1267,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Discount
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,Vă rugăm să creați un cont nou de Planul de conturi.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Vizita Mentenanta
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Cantitate lot disponibilă în depozit
-DocType: Time Log Batch Detail,Time Log Batch Detail,Ora Log lot Detaliu
+DocType: Time Sheet Detail,Time Sheet Detail,Ora Log lot Detaliu
 DocType: Landed Cost Voucher,Landed Cost Help,Costul Ajutor Landed
 DocType: Purchase Invoice,Select Shipping Address,Selectați adresa de expediere
 DocType: Leave Block List,Block Holidays on important days.,Blocaţi zile de sărbătoare în zilele importante.
@@ -1401,7 +1401,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too",
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Cerere de material utilizat pentru a face acest stoc de intrare
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,Unitate unică a unui articol.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',"Ora Log Lot {0} trebuie să fie ""Înscris"""
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',"Ora Log Lot {0} trebuie să fie ""Înscris"""
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Realizeaza Intrare de Contabilitate Pentru Fiecare Modificare a Stocului
 DocType: Leave Allocation,Total Leaves Allocated,Totalul Frunze alocate
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Depozit necesar la Row Nu {0}
@@ -1521,7 +1521,7 @@ DocType: Production Plan Material Request,Material Request Date,Cerere de materi
 DocType: Purchase Order Item,Supplier Quotation Item,Furnizor ofertă Articol
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Dezactivează crearea de busteni de timp împotriva comenzi de producție. Operațiunile nu trebuie să fie urmărite împotriva producției Ordine
 DocType: Item,Has Variants,Are variante
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Clic pe butonul 'Intocmeste Factura Vanzare' pentru a crea o nouă Factură de Vânzare.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Clic pe butonul 'Intocmeste Factura Vanzare' pentru a crea o nouă Factură de Vânzare.
 DocType: Monthly Distribution,Name of the Monthly Distribution,Numele de Distributie lunar
 DocType: Sales Person,Parent Sales Person,Mamă Sales Person
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,Vă rugăm să precizați implicit de valuta în Compania de Master și setări implicite globale
@@ -1733,7 +1733,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,Activ Fix
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Inventarul serializat
 DocType: Activity Type,Default Billing Rate,Rata de facturare implicit
-DocType: Time Log Batch,Total Billing Amount,Suma totală de facturare
+DocType: Time Sheet,Total Billing Amount,Suma totală de facturare
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,Contul de încasat
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},Rând # {0}: {1} activ este deja {2}
 DocType: Quotation Item,Stock Balance,Stoc Sold
@@ -2213,7 +2213,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),Rata netă (companie 
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,Gestioneaza Ramificatiile Teritoriule.
 DocType: Journal Entry Account,Sales Invoice,Factură de vânzări
 DocType: Journal Entry Account,Party Balance,Balanța Party
-DocType: Sales Invoice Item,Time Log Batch,Timp Log lot
+DocType: Sales Invoice Item,Time Sheet,Timp Log lot
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,Vă rugăm să selectați Aplicați Discount On
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Salariu Slip Creat
 DocType: Company,Default Receivable Account,Implicit cont de încasat
@@ -2396,7 +2396,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Scrie Off remarcabile Suma
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Verificați dacă aveți nevoie de facturi recurente automate. După introducerea oricarei factură de vânzare, sectiunea Recurente va fi vizibila."
 DocType: Account,Accounts Manager,Manager de Conturi
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',"Ora Log {0} trebuie să fie ""Înscris"""
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',"Ora Log {0} trebuie să fie ""Înscris"""
 DocType: Stock Settings,Default Stock UOM,Stoc UOM Implicit
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Rata costa în funcție de activitatea de tip (pe oră)
 DocType: Production Planning Tool,Create Material Requests,Creare Necesar de Materiale
@@ -2810,7 +2810,7 @@ DocType: Sales Order,Partly Billed,Parțial Taxat
 DocType: Item,Default BOM,FDM Implicit
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,Vă rugăm să re-tip numele companiei pentru a confirma
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,Totală restantă Amt
-DocType: Time Log Batch,Total Hours,Total ore
+DocType: Time Sheet,Total Hours,Total ore
 DocType: Journal Entry,Printing Settings,Setări de imprimare
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},Totală de debit trebuie să fie egal cu total Credit. Diferența este {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Autopropulsat
@@ -3100,7 +3100,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,Transferat Cantitate
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigarea
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Planificare
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Ora face Log lot
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Ora face Log lot
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Emis
 DocType: Project,Total Billing Amount (via Time Logs),Suma totală de facturare (prin timp Busteni)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,Vindem acest articol
@@ -3150,7 +3150,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,Unitate distinctă de Postul
 DocType: Pricing Rule,Buying,Cumpărare
 DocType: HR Settings,Employee Records to be created by,Inregistrari Angajaților pentru a fi create prin
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,Acest lot Timpul Log a fost anulat.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,Acest lot Timpul Log a fost anulat.
 ,Reqd By Date,Reqd de Date
 DocType: Salary Slip Earning,Salary Slip Earning,Salariul Slip Câștigul salarial
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,Creditorii
@@ -3566,7 +3566,7 @@ DocType: Budget Detail,Budget Detail,Detaliu buget
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Vă rugăm să introduceți mesajul înainte de trimitere
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Punctul de vânzare profil
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,Vă rugăm să actualizați Setări SMS
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Timp Log {0} deja facturat
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Timp Log {0} deja facturat
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Creditele negarantate
 DocType: Cost Center,Cost Center Name,Nume Centrul de Cost
 DocType: Maintenance Schedule Detail,Scheduled Date,Data programată

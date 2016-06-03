@@ -168,7 +168,7 @@ DocType: Upload Attendance,"Download the Template, fill appropriate data and att
 All dates and employee combination in the selected period will come in the template, with existing attendance records","下載模板，填寫相應的數據，並附加了修改過的文件。
 在選定時間段內所有時間和員工的組合會在模板中，與現有的考勤記錄"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,項目{0}不活躍或生命的盡頭已經達到
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,之後銷售發票已提交將被更新。
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,之後銷售發票已提交將被更新。
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included",要包括稅款，行{0}項率，稅收行{1}也必須包括在內
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,設定人力資源模塊
 DocType: SMS Center,SMS Center,短信中心
@@ -906,7 +906,7 @@ DocType: Sales Person,Select company name first.,先選擇公司名稱。
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,博士
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,從供應商收到的報價。
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},{0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,通過時間更新日誌
+DocType: Time Sheet,updated via Time Logs,通過時間更新日誌
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,平均年齡
 DocType: Opportunity,Your sales person who will contact the customer in future,你的銷售人員會在未來聯繫客戶
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,列出一些你的供應商。他們可以是組織或個人。
@@ -933,10 +933,10 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',請設置“收取額外折扣”
 ,Ordered Items To Be Billed,預付款的訂購物品
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,從範圍必須小於要範圍
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,選擇時間日誌並提交以建立一個新的銷售發票。
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,選擇時間日誌並提交以建立一個新的銷售發票。
 DocType: Global Defaults,Global Defaults,全域預設值
 DocType: Salary Slip,Deductions,扣除
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,此時日誌批量一直標榜。
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,此時日誌批量一直標榜。
 DocType: Salary Slip,Leave Without Pay,無薪假
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,產能規劃錯誤
 ,Trial Balance for Party,試算表的派對
@@ -1235,7 +1235,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),額外�
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,請從科目表建立新帳戶。
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,維護訪問
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,可用的批次數量在倉庫
-DocType: Time Log Batch Detail,Time Log Batch Detail,時間日誌批次詳情
+DocType: Time Sheet Detail,Time Sheet Detail,時間日誌批次詳情
 DocType: Landed Cost Voucher,Landed Cost Help,到岸成本幫助
 DocType: Purchase Invoice,Select Shipping Address,選擇送貨地址
 DocType: Leave Block List,Block Holidays on important days.,重要的日子中封鎖假期。
@@ -1368,7 +1368,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too",重量被提及，請同時註明“重量計量單位”
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,做此存貨分錄所需之物料需求
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,該產品的一個單元。
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',時間日誌批次{0}必須是'提交'狀態
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',時間日誌批次{0}必須是'提交'狀態
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,為每股份轉移做會計分錄
 DocType: Leave Allocation,Total Leaves Allocated,已安排的休假總計
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},在第{0}行需要倉庫
@@ -1484,7 +1484,7 @@ DocType: Production Plan Material Request,Material Request Date,材料申請日�
 DocType: Purchase Order Item,Supplier Quotation Item,供應商報價項目
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,禁止建立生產訂單的時間日誌。不得對生產訂單追踪作業
 DocType: Item,Has Variants,有變種
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,單擊“製作銷售發票”按鈕來創建一個新的銷售發票。
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,單擊“製作銷售發票”按鈕來創建一個新的銷售發票。
 DocType: Monthly Distribution,Name of the Monthly Distribution,每月分配的名稱
 DocType: Sales Person,Parent Sales Person,母公司銷售人員
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,請在公司主檔及全域性預設值指定預設貨幣
@@ -1687,7 +1687,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,固定資產
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,序列化庫存
 DocType: Activity Type,Default Billing Rate,默認計費率
-DocType: Time Log Batch,Total Billing Amount,總結算金額
+DocType: Time Sheet,Total Billing Amount,總結算金額
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,應收賬款
 DocType: Quotation Item,Stock Balance,庫存餘額
 apps/erpnext/erpnext/config/selling.py +306,Sales Order to Payment,銷售訂單到付款
@@ -2158,7 +2158,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),淨利率（公司貨
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,管理領地樹。
 DocType: Journal Entry Account,Sales Invoice,銷售發票
 DocType: Journal Entry Account,Party Balance,黨平衡
-DocType: Sales Invoice Item,Time Log Batch,時間日誌批次
+DocType: Sales Invoice Item,Time Sheet,時間日誌批次
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,請選擇適用的折扣
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,工資單創建
 DocType: Company,Default Receivable Account,預設應收帳款
@@ -2335,7 +2335,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,核銷額（億元）
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.",是否需要自動週期性發票。提交任何銷售發票後，經常性部分就會顯示出來。
 DocType: Account,Accounts Manager,會計經理
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',時間日誌{0}必須是'提交'
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',時間日誌{0}必須是'提交'
 DocType: Stock Settings,Default Stock UOM,預設庫存計量單位
 DocType: Time Log,Costing Rate based on Activity Type (per hour),成本核算房價為活動類型（每小時）
 DocType: Production Planning Tool,Create Material Requests,建立物料需求
@@ -2622,7 +2622,7 @@ DocType: Sales Order,Partly Billed,天色帳單
 DocType: Item,Default BOM,預設的BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,請確認重新輸入公司名稱
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,總街貨量金額
-DocType: Time Log Batch,Total Hours,總時數
+DocType: Time Sheet,Total Hours,總時數
 DocType: Journal Entry,Printing Settings,列印設定
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},借方總額必須等於貸方總額。差額為{0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,汽車
@@ -2900,7 +2900,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,轉讓數量
 apps/erpnext/erpnext/config/learn.py +11,Navigating,導航
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,規劃
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,做時間記錄批
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,做時間記錄批
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,發行
 DocType: Project,Total Billing Amount (via Time Logs),總結算金額（經由時間日誌）
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,我們賣這種產品
@@ -2948,7 +2948,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,一個項目的不同的單元
 DocType: Pricing Rule,Buying,採購
 DocType: HR Settings,Employee Records to be created by,員工紀錄的創造者
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,此時日誌批次已被取消。
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,此時日誌批次已被取消。
 ,Reqd By Date,REQD按日期
 DocType: Salary Slip Earning,Salary Slip Earning,工資單盈利
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,債權人
@@ -3357,7 +3357,7 @@ DocType: Budget Detail,Budget Detail,預算案詳情
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,在發送前，請填寫留言
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,簡介銷售點的
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,請更新短信設置
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,時間日誌{0}已結算
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,時間日誌{0}已結算
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,無抵押貸款
 DocType: Cost Center,Cost Center Name,成本中心名稱
 DocType: Maintenance Schedule Detail,Scheduled Date,預定日期
