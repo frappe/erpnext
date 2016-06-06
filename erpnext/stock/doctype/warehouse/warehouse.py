@@ -165,3 +165,43 @@ class Warehouse(NestedSet):
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
+
+@frappe.whitelist()
+def get_children():
+	from erpnext.stock.utils import get_stock_value_on
+	ctype = frappe.local.form_dict.get('ctype')
+	company = frappe.local.form_dict.get('comp')
+	
+	parent_field = 'parent_' + ctype.lower().replace(' ', '_')
+	parent = frappe.form_dict.get("parent") or ""
+	
+	if parent == "Warehouses":
+		parent = ""
+
+	warehouses = frappe.db.sql("""select name as value,
+		if(is_group='Yes', 1, 0) as expandable
+		from `tab{ctype}`
+		where docstatus < 2
+		and ifnull(`{parent_field}`,'') = %s and `company` = %s
+		order by name""".format(ctype=frappe.db.escape(ctype), parent_field=frappe.db.escape(parent_field)),
+		(parent, company), as_dict=1)
+	
+	# return warehouses
+	for wh in warehouses:
+		wh["balance"] = get_stock_value_on(warehouse=wh.value)
+	return warehouses
+		
+@frappe.whitelist()
+def add_node():
+	ctype = frappe.form_dict.get('ctype')
+	parent_field = 'parent_' + ctype.lower().replace(' ', '_')
+	name_field = ctype.lower().replace(' ', '_') + '_name'
+
+	doc = frappe.new_doc(ctype)
+	doc.update({
+		name_field: frappe.form_dict['name_field'],
+		parent_field: frappe.form_dict['parent'],
+		"is_group": frappe.form_dict['is_group']
+	})
+
+	doc.save()

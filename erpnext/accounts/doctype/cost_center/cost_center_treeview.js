@@ -6,6 +6,7 @@ frappe.treeview_settings["Cost Center"] = {
 		fieldtype:"Select",
 		options: $.map(locals[':Company'], function(c) { return c.name; }).sort(),
 		label: __("Company"),
+		default: frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
 	}],
 	root_label: "Cost Centers",
 	get_tree_nodes: 'erpnext.accounts.page.accounts_browser.accounts_browser.get_children',
