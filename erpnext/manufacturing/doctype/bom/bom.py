@@ -185,13 +185,13 @@ class BOM(Document):
 			item = frappe.get_doc("Item", self.item)
 			if item.default_bom != self.name:
 				item.default_bom = self.name
-				item.save()
+				item.save(ignore_permissions = True)
 		else:
 			frappe.db.set(self, "is_default", 0)
 			item = frappe.get_doc("Item", self.item)
 			if item.default_bom == self.name:
 				item.default_bom = None
-				item.save()
+				item.save(ignore_permissions = True)
 
 	def clear_operations(self):
 		if not self.with_operations:
