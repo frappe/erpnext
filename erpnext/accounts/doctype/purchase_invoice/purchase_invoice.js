@@ -26,10 +26,9 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		this._super();
 
 		hide_fields(this.frm.doc);
-		this.frm.page.add_document_flow(cur_frm)
 		// Show / Hide button
 		this.show_general_ledger();
-		
+
 		if(doc.update_stock==1 && doc.docstatus==1) {
 			this.show_stock_ledger();
 		}

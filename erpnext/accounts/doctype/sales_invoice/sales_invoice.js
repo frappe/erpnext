@@ -24,7 +24,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	refresh: function(doc, dt, dn) {
 		this._super();
-		this.frm.page.add_document_flow(this.frm)
 		if(cur_frm.msgbox && cur_frm.msgbox.$wrapper.is(":visible")) {
 			// hide new msgbox
 			cur_frm.msgbox.hide();
