@@ -80,7 +80,7 @@ def get_permitted_and_not_permitted_links(doctype):
 	meta = frappe.get_meta(doctype)
 
 	for df in meta.get_link_fields():
-		if df.options not in ("Customer", "Supplier", "Sales Partner"):
+		if df.options not in ("Customer", "Supplier", "Company", "Sales Partner"):
 			continue
 
 		if frappe.has_permission(df.options):
