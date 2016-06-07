@@ -26,7 +26,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		this._super();
 
 		hide_fields(this.frm.doc);
-
 		// Show / Hide button
 		this.show_general_ledger();
 

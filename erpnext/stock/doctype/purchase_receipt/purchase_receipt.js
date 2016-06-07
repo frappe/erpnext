@@ -29,7 +29,7 @@ frappe.ui.form.on("Purchase Receipt", {
 				}
 			})
 		})
-		
+
 		frm.set_query("supplier_warehouse", function() {
 			return {
 				filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]]
@@ -41,7 +41,6 @@ frappe.ui.form.on("Purchase Receipt", {
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
-
 		if(this.frm.doc.docstatus===1) {
 			this.show_stock_ledger();
 			if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
@@ -71,9 +70,9 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				if (this.frm.has_perm("submit")) {
 					cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt, __("Status"))
 				}
-				
+
 				cur_frm.add_custom_button(__('Return'), this.make_purchase_return, __("Make"));
-				
+
 				if(flt(this.frm.doc.per_billed) < 100) {
 					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice, __("Make"));
 				}
