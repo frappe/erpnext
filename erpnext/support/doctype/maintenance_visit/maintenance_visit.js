@@ -6,10 +6,12 @@ frappe.provide("erpnext.support");
 
 frappe.ui.form.on_change("Maintenance Visit", "customer", function(frm) {
 	erpnext.utils.get_party_details(frm) });
-frappe.ui.form.on_change("Maintenance Visit", "customer_address",
-	erpnext.utils.get_address_display);
-frappe.ui.form.on_change("Maintenance Visit", "contact_person",
-	erpnext.utils.get_contact_details);
+frappe.ui.form.on_change("Maintenance Visit", "customer_address", function(frm){
+	erpnext.utils.get_address_display(frm, 'customer_address', 'address_display')
+});
+frappe.ui.form.on_change("Maintenance Visit", "contact_person", function(frm){
+	erpnext.utils.get_contact_details(frm)
+});
 
 // TODO commonify this code
 erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
