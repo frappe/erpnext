@@ -3,7 +3,6 @@
 
 // for module flow
 
-frappe.provide('frappe.document_flow');
 $.extend(frappe.document_flow, {
 	"Selling": {
 		"Sales Order": ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "Journal Entry"],

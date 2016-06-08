@@ -89,7 +89,7 @@ portal_menu_items = [
 	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order"},
 	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice"},
 	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note"},
-	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue"},
+	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "show_always": True},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"}
 ]
 
