@@ -63,7 +63,7 @@ class Quotation(SellingController):
 
 	def on_cancel(self):
 		#update enquiry status
-		self.set_status()
+		self.set_status(update=True)
 		self.update_opportunity()
 
 	def print_other_charges(self,docname):

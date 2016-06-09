@@ -268,3 +268,4 @@ erpnext.patches.v7_0.update_home_page
 erpnext.patches.v7_0.create_budget_record
 execute:frappe.delete_doc_if_exists("Page", "financial-analytics")
 erpnext.patches.v7_0.update_project_in_gl_entry
+execute:frappe.db.sql('update tabQuotation set status="Cancelled" where docstatus=2')
