@@ -13,9 +13,14 @@ form_grid_templates = {
 }
 
 class Quotation(SellingController):
+	def after_insert(self):
+		self.update_lead()
+
 	def validate(self):
 		super(Quotation, self).validate()
 		self.set_status()
+		self.update_opportunity()
+		self.update_lead()
 		self.validate_order_type()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_quotation_to()
@@ -35,6 +40,10 @@ class Quotation(SellingController):
 		elif self.lead:
 			self.quotation_to = "Lead"
 
+	def update_lead(self):
+		if self.lead:
+			frappe.get_doc("Lead", self.lead).set_status(update=True)
+
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
 			if opportunity:
@@ -45,6 +54,8 @@ class Quotation(SellingController):
 			frappe.db.set(self, 'status', 'Lost')
 			frappe.db.set(self, 'order_lost_reason', arg)
 			self.update_opportunity()
+			self.update_lead()
+
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
 
