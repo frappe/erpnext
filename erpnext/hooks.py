@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from frappe import _
+from . import __version__ as app_version
 
 app_name = "erpnext"
 app_title = "ERPNext"
@@ -7,7 +8,6 @@ app_publisher = "Frappe Technologies Pvt. Ltd."
 app_description = """ERP made simple"""
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "6.27.22"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
