@@ -82,23 +82,23 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			frm.add_custom_button(__("Close"), function() {
 				frm.set_value("status", "Closed");
 				frm.save();
-			}, __("Status"));
+			});
 		} else {
 			frm.add_custom_button(__("Reopen"), function() {
 				frm.set_value("status", "Open");
 				frm.save();
-			}, __("Status"));
+			});
 		}
 	}
 
 	if(doc.status!=="Lost") {
 		if(doc.status!=="Quotation") {
 			cur_frm.add_custom_button(__('Lost'),
-				cur_frm.cscript['Declare Opportunity Lost'], __("Status"));
+				cur_frm.cscript['Declare Opportunity Lost']);
 		}
 
-		cur_frm.add_custom_button(__('Quotation'),cur_frm.cscript.create_quotation, __("Make"));
-		cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+		cur_frm.add_custom_button(__('Quotation'),
+			cur_frm.cscript.create_quotation);
 	}
 
 }

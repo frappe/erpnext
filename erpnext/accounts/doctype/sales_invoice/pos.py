@@ -20,7 +20,8 @@ def get_pos_data():
 	if pos_profile.get('name'):
 		pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
 	else:
-		frappe.msgprint(_("Warning Message: Create POS Profile"))
+		frappe.msgprint('<a href="#Form/POS Profile/New POS Profile">'
+			+ _("Welcome to POS: Create your POS Profile") + '</a>');
 
 	update_pos_profile_data(doc, pos_profile)
 	update_multi_mode_option(doc, pos_profile)
@@ -69,7 +70,7 @@ def update_multi_mode_option(doc, pos_profile):
 	from frappe.model import default_fields
 
 	if not pos_profile:
-		for payment in frappe.get_all('Mode of Payment Account', fields=["default_account", "parent"], 
+		for payment in frappe.get_all('Mode of Payment Account', fields=["default_account", "parent"],
 							filters = {'company': doc.company}):
 			payments = doc.append('payments', {})
 			payments.mode_of_payment = payment.parent

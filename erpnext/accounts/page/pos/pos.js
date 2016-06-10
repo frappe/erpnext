@@ -266,7 +266,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				"options": this.party,
 				"label": this.party,
 				"fieldname": this.party.toLowerCase(),
-				"placeholder": this.party
+				"placeholder": __("Select or add new customer")
 			},
 			parent: this.wrapper.find(".party-area"),
 			only_input: true,

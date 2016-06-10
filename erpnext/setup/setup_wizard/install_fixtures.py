@@ -120,6 +120,9 @@ def install(country=None):
 		{'uom_name': _('Unit'), 'doctype': 'UOM', 'name': _('Unit'), "must_be_whole_number": 1},
 		{'uom_name': _('Box'), 'doctype': 'UOM', 'name': _('Box'), "must_be_whole_number": 1},
 		{'uom_name': _('Kg'), 'doctype': 'UOM', 'name': _('Kg')},
+		{'uom_name': _('Meter'), 'doctype': 'UOM', 'name': _('Meter')},
+		{'uom_name': _('Litre'), 'doctype': 'UOM', 'name': _('Litre')},
+		{'uom_name': _('Gram'), 'doctype': 'UOM', 'name': _('Gram')},
 		{'uom_name': _('Nos'), 'doctype': 'UOM', 'name': _('Nos'), "must_be_whole_number": 1},
 		{'uom_name': _('Pair'), 'doctype': 'UOM', 'name': _('Pair'), "must_be_whole_number": 1},
 		{'uom_name': _('Set'), 'doctype': 'UOM', 'name': _('Set'), "must_be_whole_number": 1},
@@ -127,11 +130,17 @@ def install(country=None):
 		{'uom_name': _('Minute'), 'doctype': 'UOM', 'name': _('Minute')},
 
 		# Mode of Payment
-		{'doctype': 'Mode of Payment', 'mode_of_payment': 'Check' if country=="United States" else _('Cheque')},
-		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Cash')},
-		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Credit Card')},
-		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Wire Transfer')},
-		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Bank Draft')},
+		{'doctype': 'Mode of Payment',
+			'mode_of_payment': 'Check' if country=="United States" else _('Cheque'),
+			'type': 'Bank'},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Cash'),
+			'type': 'Cash'},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Credit Card'),
+			'type': 'Bank'},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Wire Transfer'),
+			'type': 'Bank'},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Bank Draft'),
+			'type': 'Bank'},
 
 		# Activity Type
 		{'doctype': 'Activity Type', 'activity_type': _('Planning')},

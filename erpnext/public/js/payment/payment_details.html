@@ -1,4 +1,9 @@
 <div class="row pos-payment-row" type="{{type}}" idx={{idx}}>
     <div class="col-xs-6"><h5 class="payment-mode text-ellipsis" idx="{{idx}}"> {{mode_of_payment}} </h5></div>
-	<div class="col-xs-6 text-right"><input disabled data-fieldtype="Currency" class="input-with-feedback form-control text-right amount" idx="{{idx}}" type="text" value="{{format_number(amount, 2)}}"></div>
+	<div class="col-xs-6 text-right">
+		<input disabled data-fieldtype="Currency"
+			style="cursor: pointer;"
+			class="input-with-feedback form-control text-right amount"
+			idx="{{idx}}" type="text" value="{{format_number(amount, 2)}}">
+		</div>
 </div>

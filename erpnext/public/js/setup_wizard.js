@@ -269,7 +269,7 @@ function load_erpnext_slides() {
 							"default": __("Products")},
 						{fieldtype:"Select", fieldname:"item_uom_" + i, label:__("UOM"),
 							options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"),
-								__("Hour"), __("Minute")],
+								__("Hour"), __("Minute"), __("Litre"), __("Meter"), __("Gram")],
 							"default": __("Unit")},
 						{fieldtype: "Check", fieldname: "is_sales_item_" + i, label:__("We sell this Item"), default: 1},
 						{fieldtype: "Check", fieldname: "is_purchase_item_" + i, label:__("We buy this Item")},
