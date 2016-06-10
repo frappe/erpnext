@@ -356,7 +356,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			});
 		}
 
-		if(this.items.length == 1){
+		if(this.items.length == 1
+			&& this.search.$input.val()) {
 			this.search.$input.val("");
 			this.add_to_cart();
 		}
