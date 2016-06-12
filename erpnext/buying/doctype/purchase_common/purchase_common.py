@@ -72,7 +72,7 @@ class PurchaseCommon(BuyingController):
 
 		if items and len(items) != len(set(items)) and \
 			not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items") or 0):
-			frappe.msgprint(_("Warning: Same item has been entered multiple times."), small=True)
+			frappe.msgprint(_("Warning: Same item has been entered multiple times."), alert=True)
 
 
 	def check_for_closed_status(self, doctype, docname):
