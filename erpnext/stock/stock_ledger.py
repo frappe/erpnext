@@ -141,7 +141,7 @@ class update_entries_after(object):
 			"stock_value": self.stock_value
 		})
 		bin_doc.flags.via_stock_ledger_entry = True
-		
+
 		bin_doc.save(ignore_permissions=True)
 
 	def process_sle(self, sle):
@@ -211,7 +211,7 @@ class update_entries_after(object):
 		if incoming_rate < 0:
 			# wrong incoming rate
 			incoming_rate = self.valuation_rate
-			
+
 		stock_value_change = 0
 		if incoming_rate:
 			stock_value_change = actual_qty * incoming_rate
@@ -334,11 +334,23 @@ class update_entries_after(object):
 
 	def raise_exceptions(self):
 		deficiency = min(e["diff"] for e in self.exceptions)
-		msg = _("Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5}").format(self.item_code,
-			self.warehouse, self.exceptions[0]["posting_date"], self.exceptions[0]["posting_time"],
-			_(self.exceptions[0]["voucher_type"]), self.exceptions[0]["voucher_no"], deficiency)
+
+
+
+		if frappe.local.flags.currently_saving.doctype==self.exceptions[0]["voucher_type"] \
+			and frappe.local.flags.currently_saving.name==self.exceptions[0]["voucher_no"]:
+			msg = _("{0} units of {1} needed in {2} to complete this transaction.").format(
+				abs(deficiency), frappe.get_desk_link('Item', self.item_code),
+				frappe.get_desk_link('Warehouse', self.warehouse))
+		else:
+			msg = _("{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction.").format(
+				abs(deficiency), frappe.get_desk_link('Item', self.item_code),
+				frappe.get_desk_link('Warehouse', self.warehouse),
+				self.exceptions[0]["posting_date"], self.exceptions[0]["posting_time"],
+				frappe.get_desk_link(self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]))
+
 		if self.verbose:
-			frappe.throw(msg, NegativeStockError)
+			frappe.throw(msg, NegativeStockError, title='Insufficent Stock')
 		else:
 			raise NegativeStockError, msg
 

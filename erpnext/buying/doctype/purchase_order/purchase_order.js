@@ -3,7 +3,7 @@
 
 frappe.provide("erpnext.buying");
 
-{% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'buying/doctype/purchase_common/purchase_common.js' %};
 
 frappe.ui.form.on("Purchase Order", {
 	onload: function(frm) {
@@ -20,6 +20,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		// this.frm.dashboard.reset();
 		var allow_receipt = false;
 		var is_drop_ship = false;
+
 		for (var i in cur_frm.doc.items) {
 			var item = cur_frm.doc.items[i];
 			if(item.delivered_by_supplier !== 1) {
@@ -46,7 +47,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 			if(is_drop_ship && doc.status!="Delivered"){
 				cur_frm.add_custom_button(__('Delivered'),
-					this.delivered_by_supplier, __("Status"));
+					 this.delivered_by_supplier, __("Status"));
 
 				cur_frm.page.set_inner_btn_group_as_primary(__("Status"));
 			}
@@ -60,7 +61,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 		}
 
-		if(doc.docstatus == 1 && !in_list(["Closed", "Completed"], doc.status)) {
+		if(doc.docstatus == 1 && doc.status != "Closed") {
 			if(flt(doc.per_received, 2) < 100 && allow_receipt) {
 				cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt, __("Make"));
 
@@ -90,6 +91,15 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				docstatus: ["!=", 2],
 			}
 		});
+	},
+
+	validate: function() {
+		// set default schedule date as today if missing.
+		(this.frm.doc.items || []).forEach(function(d) {
+			if(!d.schedule_date) {
+				d.schedule_date = frappe.datetime.nowdate();
+			}
+		})
 	},
 
 	make_stock_entry: function() {
