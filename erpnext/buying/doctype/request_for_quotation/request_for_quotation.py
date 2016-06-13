@@ -78,13 +78,8 @@ class RequestforQuotation(BuyingController):
 			'first_name': rfq_supplier.supplier_name,
 			'user_type': 'Website User'
 		})
-
-		# reset password
-		key = random_string(32)
-		update_password_link = get_url("/update-password?key=" + key)
-		user.reset_password_key = key
-		user.redirect_url = link
 		user.save(ignore_permissions=True)
+		update_password_link = user.reset_password()
 
 		return user, update_password_link
 
