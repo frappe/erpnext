@@ -12,6 +12,9 @@ frappe.pages['pos'].on_page_load = function(wrapper) {
 }
 
 frappe.pages['pos'].refresh = function(wrapper) {
+	window.onbeforeunload = function (e) {
+		return wrapper.pos.beforeunload()
+	}
 	wrapper.pos.on_refresh_page()
 }
 
@@ -36,6 +39,20 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.onload();
 		}else{
 			this.create_new();
+		}
+	},
+
+	beforeunload: function(e){
+		if(this.connection_status == false && frappe.get_route()[0] == "pos"){
+			e = e || window.event;
+
+			// For IE and Firefox prior to version 4
+			if (e) {
+			    e.returnValue = 'You are in offline mode,';
+			}
+
+			// For Safari
+			return 'You are in offline mode,';
 		}
 	},
 
@@ -108,10 +125,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.list_dialog.show();
 		this.list_body = this.list_dialog.body;
 		$(this.list_body).append('<div class="row list-row list-row-head pos-invoice-list">\
-				<div class="col-xs-3">Sr</div>\
-				<div class="col-xs-3">Customer</div>\
-				<div class="col-xs-4 text-center">Grand Total</div>\
+				<div class="col-xs-2">Sr</div>\
+				<div class="col-xs-4">Customer</div>\
 				<div class="col-xs-2 text-left">Status</div>\
+				<div class="col-xs-4 text-right">Grand Total</div>\
 		</div>')
 
 		$.each(this.si_docs, function(index, data){
