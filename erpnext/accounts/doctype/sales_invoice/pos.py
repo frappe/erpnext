@@ -25,15 +25,16 @@ def get_pos_data():
 
 	update_pos_profile_data(doc, pos_profile)
 	update_multi_mode_option(doc, pos_profile)
-	print_template = frappe.db.get_value('Print Format', pos_profile.get('print_format'), 'html') or ''
+	default_print_format = pos_profile.get('print_format') or "Point of Sale"
+	print_template = frappe.db.get_value('Print Format', default_print_format, 'html')
 
 	return {
 		'doc': doc,
 		'items': get_items(doc, pos_profile),
 		'customers': get_customers(pos_profile, doc),
 		'pricing_rules': get_pricing_rules(doc),
-		'mode_of_payment': get_mode_of_payment(doc),
 		'print_template': print_template,
+		'write_off_account': pos_profile.get('write_off_account'),
 		'meta': {
 			'invoice': frappe.get_meta('Sales Invoice'),
 			'items': frappe.get_meta('Sales Invoice Item'),
@@ -70,11 +71,11 @@ def update_multi_mode_option(doc, pos_profile):
 	from frappe.model import default_fields
 
 	if not pos_profile:
-		for payment in frappe.get_all('Mode of Payment Account', fields=["default_account", "parent"],
-							filters = {'company': doc.company}):
+		for payment in get_mode_of_payment(doc):
 			payments = doc.append('payments', {})
 			payments.mode_of_payment = payment.parent
 			payments.account = payment.default_account
+			payments.type = payment.type
 
 		return
 
@@ -86,6 +87,10 @@ def update_multi_mode_option(doc, pos_profile):
 				del payment_mode[fieldname]
 
 		doc.append('payments', payment_mode)
+
+def get_mode_of_payment(doc):
+	return frappe.db.sql(""" select mpa.default_account, mpa.parent, mp.type as type from `tabMode of Payment Account` mpa,
+		 `tabMode of Payment` mp where mpa.parent = mp.name and company = %(company)s""", {'company': doc.company}, as_dict=1)
 
 def update_tax_table(doc):
 	taxes = get_taxes_and_charges('Sales Taxes and Charges Template', doc.taxes_and_charges)
@@ -135,9 +140,6 @@ def get_pricing_rules(doc):
 					ifnull(for_price_list, '') in (%(price_list)s, '')  and %(date)s between
 					ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31') order by priority desc, name desc""",
 				{'company': doc.company, 'price_list': doc.selling_price_list, 'date': nowdate()}, as_dict=1)
-
-def get_mode_of_payment(doc):
-	return frappe.get_all('Mode of Payment Account', fields = ['distinct parent'], filters={'company': doc.company})
 
 @frappe.whitelist()
 def make_invoice(doc_list):

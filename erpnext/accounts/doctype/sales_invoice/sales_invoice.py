@@ -650,6 +650,7 @@ class SalesInvoice(SellingController):
 		# write off entries, applicable if only pos
 		if self.write_off_account and self.write_off_amount:
 			write_off_account_currency = get_account_currency(self.write_off_account)
+			default_cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -671,7 +672,7 @@ class SalesInvoice(SellingController):
 					"debit": self.base_write_off_amount,
 					"debit_in_account_currency": self.base_write_off_amount \
 						if write_off_account_currency==self.company_currency else self.write_off_amount,
-					"cost_center": self.write_off_cost_center
+					"cost_center": self.write_off_cost_center or default_cost_center
 				}, write_off_account_currency)
 			)
 

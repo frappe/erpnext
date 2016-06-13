@@ -31,6 +31,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		$(this.$body).html(frappe.render_template('pos_payment', this.frm.doc))
 		this.show_payment_details();
 		this.bind_keyboard_event()
+		this.clear_amount()
 	},
 
 	make_multimode_payment: function(){
@@ -57,10 +58,32 @@ erpnext.payments = erpnext.stock.StockController.extend({
 					currency: me.frm.doc.currency,
 					type: data.type
 				})).appendTo(multimode_payments)
+
+				if (data.type == 'Cash' && me.frm.doc.outstanding_amount > 0) {
+					me.idx = data.idx;
+					me.set_outstanding_amount();
+				}
 			})
 		}else{
 			$("<p>No payment mode selected in pos profile</p>").appendTo(multimode_payments)
 		}
+	},
+
+	set_outstanding_amount: function(){
+		this.selected_mode = $(this.$body).find(repl("input[idx='%(idx)s']",{'idx': this.idx}));
+		this.highlight_selected_row()
+		this.payment_val = 0.0
+		if(this.frm.doc.outstanding_amount > 0 && flt(this.selected_mode.val()) == 0.0){
+			//When user first tithis click on row
+			this.payment_val = flt(this.frm.doc.outstanding_amount)
+			this.selected_mode.val(format_number(this.payment_val, 2));
+			this.update_paid_amount()
+		}else if(flt(this.selected_mode.val()) > 0){
+			//If user click on existing row which has value
+			this.payment_val = flt(this.selected_mode.val());
+		}
+		this.selected_mode.select()
+		this.bind_amount_change_event();
 	},
 	
 	bind_keyboard_event: function(){
@@ -69,28 +92,15 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		this.bind_payment_mode_keys_event();
 		this.bind_keyboard_keys_event();
 	},
-	
+
 	bind_payment_mode_keys_event: function(){
 		var me = this;
 		$(this.$body).find('.pos-payment-row').click(function(){
 			me.idx = $(this).attr("idx");
-			me.selected_mode = $(me.$body).find(repl("input[idx='%(idx)s']",{'idx': me.idx}));
-			me.highlight_selected_row()
-			me.payment_val = 0.0
-			if(me.frm.doc.outstanding_amount > 0 && flt(me.selected_mode.val()) == 0.0){
-				//When user first time click on row
-				me.payment_val = flt(me.frm.doc.outstanding_amount)
-				me.selected_mode.val(format_number(me.payment_val, 2));
-				me.update_paid_amount()
-			}else if(flt(me.selected_mode.val()) > 0){
-				//If user click on existing row which has value
-				me.payment_val = flt(me.selected_mode.val());
-			}
-			me.selected_mode.select()
-			me.bind_amount_change_event();
+			me.set_outstanding_amount()
 		})
 	},
-	
+
 	highlight_selected_row: function(){
 		var me = this;
 		selected_row = $(this.$body).find(repl(".pos-payment-row[idx='%(idx)s']",{'idx': this.idx}));
@@ -127,7 +137,19 @@ erpnext.payments = erpnext.stock.StockController.extend({
 			me.update_paid_amount()
 		})
 	},
-	
+
+	clear_amount: function(){
+		var me = this;
+		$(this.$body).find('.clr').click(function(e){
+			e.stopPropagation();
+			me.idx = $(this).attr("idx");
+			me.selected_mode = $(me.$body).find(repl("input[idx='%(idx)s']",{'idx': me.idx}));
+			me.payment_val = 0.0;
+			me.selected_mode.val(0.0);
+			me.update_paid_amount();
+		})
+	},
+
 	update_paid_amount: function(){
 		var me = this;
 		$.each(this.frm.doc.payments, function(index, data){
