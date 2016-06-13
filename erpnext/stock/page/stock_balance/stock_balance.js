@@ -7,7 +7,7 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 	page.start = 0;
 
 	page.warehouse_field = page.add_field({
-		fieldname: 'wareshouse',
+		fieldname: 'warehouse',
 		label: __('Warehouse'),
 		fieldtype:'Link',
 		options:'Warehouse',

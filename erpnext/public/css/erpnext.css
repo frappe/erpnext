@@ -118,8 +118,11 @@
 }
 .dashboard-list-item {
   background-color: inherit;
-  padding: 7px 15px;
+  padding: 5px 0px;
   border-bottom: 1px solid #d1d8dd;
+}
+#page-stock-balance .dashboard-list-item {
+  padding: 5px 15px;
 }
 .dashboard-list-item:last-child {
   border-bottom: none;

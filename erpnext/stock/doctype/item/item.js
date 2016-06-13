@@ -174,7 +174,7 @@ $.extend(erpnext.item, {
 		frm.dashboard.show_dashboard();
 
 		frappe.require('assets/js/item-dashboard.min.js', function() {
-			var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;">Stock Levels</h5>');
+			var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;"><a href="#stock-balance">Stock Levels</a></h5>');
 			erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
 				parent: section,
 				item_code: frm.doc.name

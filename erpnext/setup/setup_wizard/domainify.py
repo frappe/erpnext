@@ -8,7 +8,7 @@ domains = {
 	'Manufacturing': {
 		'desktop_icons': ['Item', 'BOM', 'Customer', 'Supplier', 'Sales Order',
 			'Production Order',  'Stock Entry', 'Purchase Order', 'Task', 'Buying', 'Selling',
-			 'Accounts', 'HR'],
+			 'Accounts', 'HR', 'ToDo'],
 		'properties': [
 			{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'collapsible_depends_on', 'value': 'is_stock_item'},
 		],
@@ -19,7 +19,7 @@ domains = {
 
 	'Retail': {
 		'desktop_icons': ['POS', 'Item', 'Customer', 'Sales Invoice',  'Purchase Order', 'Warranty Claim',
-		'Accounts', 'Buying'],
+		'Accounts', 'Buying', 'ToDo'],
 		'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
 		'properties': [
 			{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
@@ -32,7 +32,7 @@ domains = {
 
 	'Distribution': {
 		'desktop_icons': ['Item', 'Customer', 'Supplier', 'Lead', 'Sales Order',
-			 'Sales Invoice', 'CRM', 'Selling', 'Buying', 'Stock', 'Accounts', 'HR'],
+			 'Sales Invoice', 'CRM', 'Selling', 'Buying', 'Stock', 'Accounts', 'HR', 'ToDo'],
 		'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
 		'properties': [
 			{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
@@ -44,7 +44,7 @@ domains = {
 
 	'Services': {
 		'desktop_icons': ['Project', 'Time Log', 'Customer', 'Sales Order', 'Sales Invoice', 'Lead', 'Opportunity',
-			'Expense Claim', 'Employee', 'HR'],
+			'Expense Claim', 'Employee', 'HR', 'ToDo'],
 		'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
 		'properties': [
 			{'doctype': 'Item', 'fieldname': 'is_stock_item', 'property': 'default', 'value': 0},
