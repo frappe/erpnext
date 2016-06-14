@@ -16,16 +16,25 @@ frappe.query_reports["Minutes to First Response for Issues"] = {
         },
     ],
 	get_chart_data: function(columns, result) {
-		console.log(result);
 		return {
 			data: {
 				x: 'Date',
 				columns: [
 					['Date'].concat($.map(result, function(d) { return d[0]; })),
-					['Mins to first reponse'].concat($.map(result, function(d) { return d[1]; }))
+					['Mins to first response'].concat($.map(result, function(d) { return d[1]; }))
 				]
+				// rows: [['Date', 'Mins to first response']].concat(result)
 			},
-			chart_type: 'line'
+		    axis: {
+		        x: {
+		            type: 'timeseries',
+		            tick: {
+		                format: '%Y-%m-%d'
+		            }
+		        }
+		    },
+			chart_type: 'line',
+
 		}
 	}
 }
