@@ -12,6 +12,9 @@ frappe.pages['pos'].on_page_load = function(wrapper) {
 }
 
 frappe.pages['pos'].refresh = function(wrapper) {
+	window.onbeforeunload = function () {
+		return wrapper.pos.beforeunload()
+	}
 	wrapper.pos.on_refresh_page()
 }
 
@@ -36,6 +39,21 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.onload();
 		}else{
 			this.create_new();
+		}
+	},
+
+	beforeunload: function(e){
+		if(this.connection_status == false && frappe.get_route()[0] == "pos"){
+			e = e || window.event;
+
+			// For IE and Firefox prior to version 4
+			if (e) {
+			    e.returnValue = __("You are in offline mode. You will not be able to reload until you have network.");
+				return
+			}
+
+			// For Safari
+			return __("You are in offline mode. You will not be able to reload until you have network.");
 		}
 	},
 
@@ -76,19 +94,19 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 
 		this.page.add_menu_item(__("New Sales Invoice"), function() {
-			me.save_previous_entry()
-			me.create_new()
+			me.save_previous_entry();
+			me.create_new();
 		})
 
 		this.page.add_menu_item(__("View Offline Records"), function(){
-			me.show_unsync_invoice_list()
+			me.show_unsync_invoice_list();
 		});
 
 		this.page.add_menu_item(__("Sync Master Data"), function(){
 			me.get_data_from_server(function(){
-				me.load_data()
-				me.make_customer()
-				me.make_item_list()
+				me.load_data();
+				me.make_customer();
+				me.make_item_list();
 			})
 		});
 
@@ -107,36 +125,40 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.list_dialog.show();
 		this.list_body = this.list_dialog.body;
-		$(this.list_body).append('<div class="row list-row list-row-head pos-invoice-list">\
-				<div class="col-xs-3">Sr</div>\
-				<div class="col-xs-3">Customer</div>\
-				<div class="col-xs-4 text-center">Grand Total</div>\
-				<div class="col-xs-2 text-left">Status</div>\
-		</div>')
+		if(this.si_docs.length > 0){
+			$(this.list_body).append('<div class="row list-row list-row-head pos-invoice-list">\
+					<div class="col-xs-2">Sr</div>\
+					<div class="col-xs-4">Customer</div>\
+					<div class="col-xs-2 text-left">Status</div>\
+					<div class="col-xs-4 text-right">Grand Total</div>\
+			</div>')
 
-		$.each(this.si_docs, function(index, data){
-			for(key in data) {
-				$(frappe.render_template("pos_invoice_list", {
-					sr: index + 1,
-					name: key,
-					customer: data[key].customer,
-					grand_total: format_currency(data[key].grand_total, me.frm.doc.currency),
-					data: me.get_doctype_status(data[key])
-				})).appendTo($(me.list_body));
-			}
-		})
+			$.each(this.si_docs, function(index, data){
+				for(key in data) {
+					$(frappe.render_template("pos_invoice_list", {
+						sr: index + 1,
+						name: key,
+						customer: data[key].customer,
+						grand_total: format_currency(data[key].grand_total, me.frm.doc.currency),
+						data: me.get_doctype_status(data[key])
+					})).appendTo($(me.list_body));
+				}
+			})
 
-		$(this.list_body).find('.list-row').click(function() {
-			me.name = $(this).attr('invoice-name')
-			doc_data = me.get_invoice_doc(me.si_docs)
-			if(doc_data){
-				me.frm.doc = doc_data[0][me.name];
-				me.set_missing_values();
-				me.refresh();
-				me.disable_input_field();
-				me.list_dialog.hide();
-			}
-		})
+			$(this.list_body).find('.list-row').click(function() {
+				me.name = $(this).attr('invoice-name')
+				doc_data = me.get_invoice_doc(me.si_docs)
+				if(doc_data){
+					me.frm.doc = doc_data[0][me.name];
+					me.set_missing_values();
+					me.refresh();
+					me.disable_input_field();
+					me.list_dialog.hide();
+				}
+			})
+		}else{
+			$(this.list_body).append(repl('<div class="media-heading">%(message)s</div>', {'message': __("All records are synced.")}))
+		}
 	},
 
 	get_doctype_status: function(doc){
@@ -180,6 +202,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				window.pricing_rules = r.message.pricing_rules;
 				window.meta = r.message.meta;
 				window.print_template = r.message.print_template;
+				me.write_off_account = r.message.write_off_account;
 				localStorage.setItem('doc', JSON.stringify(r.message.doc));
 				if(callback){
 					callback();
@@ -640,8 +663,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.create_invoice();
 				me.make_payment();
 			});
-		}else if(this.frm.doc.docstatus == 0 && this.name){
+		}else if(this.frm.doc.docstatus == 0 && this.frm.doc.items.length){
 			this.page.set_primary_action(__("Submit"), function() {
+				me.validate()
+				me.create_invoice();
 				me.write_off_amount()
 			})
 		}else if(this.frm.doc.docstatus == 1){
@@ -652,6 +677,11 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}else {
 			this.page.clear_primary_action()
 		}
+
+		this.page.set_secondary_action(__("New"), function() {
+			me.save_previous_entry();
+			me.create_new();
+		});
 	},
 
 	print_document: function(html){
@@ -672,18 +702,30 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			dialog = new frappe.ui.Dialog({
 				title: 'Write Off Amount',
 				fields: [
-					{fieldtype: "Check", fieldname: "write_off_amount", label: __("Write of Outstanding Amount")},
+					{fieldtype: "Check", fieldname: "write_off_amount", label: __("Write off Outstanding Amount")},
+					{fieldtype: "Link", options:"Account", default:this.write_off_account, fieldname: "write_off_account", 
+					label: __("Write off Account"), get_query: function() {
+						return {
+							filters: {'is_group': 0, 'report_type': 'Profit and Loss'}
+						}
+					}}
 				]
 			});
 
 			dialog.show();
 
 			dialog.fields_dict.write_off_amount.$input.change(function(){
-				write_off_amount = dialog.get_values().write_off_amount
+				write_off_amount = dialog.get_values().write_off_amount;
 				me.frm.doc.write_off_outstanding_amount_automatically = write_off_amount;
 				me.frm.doc.base_write_off_amount = (write_off_amount==1) ? flt(me.frm.doc.grand_total - me.frm.doc.paid_amount, precision("outstanding_amount")) : 0;
+				me.frm.doc.write_off_account = (write_off_amount==1) ? dialog.get_values().write_off_account : '';
 				me.frm.doc.write_off_amount = flt(me.frm.doc.base_write_off_amount * me.frm.doc.conversion_rate, precision("write_off_amount"))
 				me.calculate_outstanding_amount();
+				me.set_primary_action();
+			})
+
+			dialog.fields_dict.write_off_account.$input.change(function(){
+				me.frm.doc.write_off_account = dialog.get_values().write_off_account;
 			})
 
 			dialog.set_primary_action(__("Submit"), function(){

@@ -577,7 +577,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var me = this;
 		var paid_amount = base_paid_amount = 0.0;
 		$.each(this.frm.doc['payments'] || [], function(index, data){
-			if(data.amount > 0){
+			if(data.amount > -1){
 				data.base_amount = flt(data.amount * me.frm.doc.conversion_rate);
 				paid_amount += data.amount;
 				base_paid_amount += data.base_amount;	
