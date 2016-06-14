@@ -20,7 +20,7 @@ function load_erpnext_slides() {
 					description: __('Max 5 characters'), placeholder: __('e.g. "MC"'), reqd:1},
 				{fieldname:'company_tagline', label: __('What does it do?'), fieldtype:'Data',
 					placeholder:__('e.g. "Build tools for builders"'), reqd:1},
-				{fieldname:'bank_account', label: __('Bank Account'), fieldtype:'Data',
+				{fieldname:'bank_account', label: __('Bank Name'), fieldtype:'Data',
 					placeholder: __('e.g. "XYZ National Bank"'), reqd:1 },
 				{fieldname:'domain', label: __('Domain'), fieldtype:'Select',
 					options: [
