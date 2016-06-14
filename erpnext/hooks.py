@@ -136,6 +136,10 @@ doc_events = {
 		"validate": "erpnext.shopping_cart.cart.set_customer_in_address"
 	},
 
+	"Newsletter List Subscriber": {
+		"validate": "erpnext.crm.doctype.newsletter_list.newsletter_list.restrict_newsletter_list"
+	},
+
 	# bubble transaction notification on master
 	('Opportunity', 'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
 		'Supplier Quotation', 'Purchase Order', 'Purchase Receipt',
