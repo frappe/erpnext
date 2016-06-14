@@ -64,6 +64,12 @@ def get_data():
 					"label": _("Support Analytics"),
 					"icon": "icon-bar-chart"
 				},
+				{
+					"type": "report",
+					"name": "Minutes to First Response for Issues",
+					"doctype": "Issue",
+					"is_query_report": True
+				},
 			]
 		},
 	]
