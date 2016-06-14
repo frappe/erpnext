@@ -7,12 +7,14 @@ def execute():
 	frappe.reload_doctype('Opportunity')
 
 	for doctype in ('Issue', 'Opportunity'):
-		for parent in frappe.get_all(doctype, order_by='creation desc', limit=1000):
+		frappe.db.sql('update tab{0} set mins_to_first_response=0'.format(doctype))
+		for parent in frappe.get_all(doctype, order_by='creation desc', limit=500):
+			parent_doc = frappe.get_doc(doctype, parent.name)
 			for communication in frappe.get_all('Communication',
-				filters={'reference_doctype': doctype, 'reference_name': parent.name},
-				order_by = 'creation desc', limit=2):
+				filters={'reference_doctype': doctype, 'reference_name': parent.name,
+				'communication_medium': 'Email'},
+				order_by = 'creation asc', limit=2):
 
-				parent_doc = frappe.get_doc(doctype, parent.name)
 				communication_doc = frappe.get_doc('Communication', communication.name)
 
 				update_mins_to_first_communication(parent_doc, communication_doc)
