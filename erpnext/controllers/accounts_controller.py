@@ -48,7 +48,7 @@ class AccountsController(TransactionBase):
 
 		self.validate_party()
 		self.validate_currency()
-		
+
 		if self.meta.get_field("is_recurring"):
 			if self.amended_from and self.recurring_id:
 				self.recurring_id = None
@@ -65,7 +65,7 @@ class AccountsController(TransactionBase):
 			if cint(is_paid) == 1:
 				if flt(self.paid_amount) == 0 and flt(self.outstanding_amount) > 0:
 					if self.cash_bank_account:
-						self.paid_amount = flt(flt(self.grand_total) - flt(self.write_off_amount), 
+						self.paid_amount = flt(flt(self.grand_total) - flt(self.write_off_amount),
 							self.precision("paid_amount"))
 						self.base_paid_amount = flt(self.paid_amount * self.conversion_rate, self.precision("base_paid_amount"))
 					else:
@@ -227,13 +227,13 @@ class AccountsController(TransactionBase):
 
 	def get_gl_dict(self, args, account_currency=None):
 		"""this method populates the common properties of a gl entry record"""
-		
+
 		fiscal_years = get_fiscal_years(self.posting_date, company=self.company)
 		if len(fiscal_years) > 1:
 			frappe.throw(_("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(formatdate(self.posting_date)))
 		else:
 			fiscal_year = fiscal_years[0][0]
-						
+
 		gl_dict = frappe._dict({
 			'company': self.company,
 			'posting_date': self.posting_date,
@@ -471,31 +471,31 @@ class AccountsController(TransactionBase):
 				# Note: not validating with gle account because we don't have the account
 				# at quotation / sales order level and we shouldn't stop someone
 				# from creating a sales invoice if sales order is already created
-				
+
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
 			if d.is_fixed_asset:
 				if d.qty > 1:
 					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
-				
+
 				if d.meta.get_field("asset"):
 					if not d.asset:
 						frappe.throw(_("Row #{0}: Asset is mandatory for fixed asset purchase/sale")
 							.format(d.idx))
 					else:
 						asset = frappe.get_doc("Asset", d.asset)
-		
+
 						if asset.company != self.company:
 							frappe.throw(_("Row #{0}: Asset {1} does not belong to company {2}")
 								.format(d.idx, d.asset, self.company))
-				
+
 						elif asset.item_code != d.item_code:
 							frappe.throw(_("Row #{0}: Asset {1} does not linked to Item {2}")
 								.format(d.idx, d.asset, d.item_code))
-								
+
 						elif asset.docstatus != 1:
 							frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
-					
+
 						elif self.doctype == "Purchase Invoice":
 							if asset.status != "Submitted":
 								frappe.throw(_("Row #{0}: Asset {1} is already {2}")
@@ -504,18 +504,18 @@ class AccountsController(TransactionBase):
 								frappe.throw(_("Row #{0}: Posting Date must be same as purchase date {1} of asset {2}").format(d.idx, asset.purchase_date, d.asset))
 							elif asset.is_existing_asset:
 								frappe.throw(_("Row #{0}: Purchase Invoice cannot be made against an existing asset {1}").format(d.idx, d.asset))
-								
+
 						elif self.docstatus=="Sales Invoice" and self.docstatus == 1:
 							if self.update_stock:
 								frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
-								
+
 							elif asset.status in ("Scrapped", "Cancelled", "Sold"):
 								frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
 									.format(d.idx, d.asset, asset.status))
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
-	return frappe.db.get_value("Account", account_head, "tax_rate")
+	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 @frappe.whitelist()
 def get_default_taxes_and_charges(master_doctype):

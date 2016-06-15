@@ -2,6 +2,18 @@
 // License: GNU General Public License v3. See license.txt
 
 erpnext.taxes_and_totals = erpnext.payments.extend({
+	setup: function() {
+		if(this.frm.get_field('taxes')) {
+			this.frm.get_field('taxes').grid.editable_fields = [
+				{fieldname: 'charge_type', columns: 2},
+				{fieldname: 'account_head', columns: 3},
+				{fieldname: 'rate', columns: 2},
+				{fieldname: 'tax_amount', columns: 2},
+				{fieldname: 'total', columns: 2}
+			];
+		}
+
+	},
 	apply_pricing_rule_on_item: function(item){
 		if(!item.margin_type){
 			item.margin_rate_or_amount = 0.0;
@@ -460,8 +472,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		if (this.frm.doc.discount_amount) {
 			if(!this.frm.doc.apply_discount_on)
 				frappe.throw(__("Please select Apply Discount On"));
-			
-			this.frm.doc.base_discount_amount = flt(this.frm.doc.discount_amount * this.frm.doc.conversion_rate, 
+
+			this.frm.doc.base_discount_amount = flt(this.frm.doc.discount_amount * this.frm.doc.conversion_rate,
 				precision("base_discount_amount"));
 
 			var total_for_discount_amount = this.get_total_for_discount_amount();
@@ -550,11 +562,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				this.frm.refresh_field("paid_amount");
 				this.frm.refresh_field("base_paid_amount");
 			}
-			
+
 			if(this.frm.doc.doctype == "Sales Invoice"){
 				this.calculate_paid_amount()
 			}
-			
+
 			var outstanding_amount = 0.0
 
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
@@ -572,7 +584,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.doc.outstanding_amount = outstanding_amount;
 		this.calculate_change_amount()
 	},
-	
+
 	calculate_paid_amount: function(){
 		var me = this;
 		var paid_amount = base_paid_amount = 0.0;
@@ -580,24 +592,24 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			if(data.amount > -1){
 				data.base_amount = flt(data.amount * me.frm.doc.conversion_rate);
 				paid_amount += data.amount;
-				base_paid_amount += data.base_amount;	
+				base_paid_amount += data.base_amount;
 			}
 		})
-		
+
 		this.frm.doc.paid_amount = flt(paid_amount, precision("paid_amount"));
 		this.frm.doc.base_paid_amount = flt(base_paid_amount, precision("base_paid_amount"));
 	},
-	
+
 	calculate_change_amount: function(){
 		var change_amount = 0.0;
 		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
-			change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total, 
+			change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total,
 				precision("change_amount"))
 		}
-		
-		this.frm.doc.change_amount = flt(change_amount, 
+
+		this.frm.doc.change_amount = flt(change_amount,
 			precision("change_amount"))
-		this.frm.doc.base_change_amount = flt(change_amount * this.frm.doc.conversion_rate, 
+		this.frm.doc.base_change_amount = flt(change_amount * this.frm.doc.conversion_rate,
 			precision("base_change_amount"))
 	},
 })

@@ -3,6 +3,7 @@
 
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
+		this._super();
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
@@ -978,7 +979,4 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.item_selector = new erpnext.ItemSelector({frm: this.frm});
 		}
 	}
-
-
-
 });
