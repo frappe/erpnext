@@ -15,7 +15,28 @@ frappe.listview_settings['Item'] = {
 		} else if (doc.variant_of) {
 			return [__("Variant"), "green", "variant_of,=," + doc.variant_of];
 		}
-	}
+	},
+
+	reports: [
+		{
+			name: 'Stock Summary',
+			report_type: 'Page',
+			route: 'stock-balance'
+		},
+		{
+			name: 'Stock Ledger',
+			report_type: 'Script Report'
+		},
+		{
+			name: 'Stock Balance',
+			report_type: 'Script Report'
+		},
+		{
+			name: 'Stock Projected Qty',
+			report_type: 'Script Report'
+		}
+
+	]
 };
 
 frappe.help.youtube_id["Item"] = "qXaEwld4_Ps";

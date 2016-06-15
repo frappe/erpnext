@@ -13,8 +13,8 @@ def execute(filters=None):
 		},
 		{
 			'fieldname': 'mins',
-			'label': 'Float',
-			'fieldtype': 'Mins to First Response'
+			'fieldtype': 'Float',
+			'label': 'Mins to First Response'
 		},
 	]
 
