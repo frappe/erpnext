@@ -449,9 +449,12 @@ class ProductionPlanningTool(Document):
 					"transaction_date": nowdate(),
 					"status": "Draft",
 					"company": self.company,
-					"requested_by": frappe.session.user,
-					"material_request_type": "Purchase"
+					"requested_by": frappe.session.user
 				})
+				if item_wrapper.default_bom:
+					material_request.update({"material_request_type": "Manufacture"}) 
+				else:
+					material_request.update({"material_request_type": "Purchase"})
 				for sales_order, requested_qty in items_to_be_requested[item].items():
 					material_request.append("items", {
 						"doctype": "Material Request Item",
