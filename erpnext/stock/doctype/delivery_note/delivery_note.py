@@ -282,6 +282,15 @@ class DeliveryNote(SellingController):
 			dn_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
+	
+	def get_link_filters(self, for_doctype):
+		self.prev_link_mapper = {
+			"Sales Order": {
+				"fieldname": "against_sales_order"
+			}
+		}
+		
+		return super(DeliveryNote, self).get_link_filters(for_doctype)
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly

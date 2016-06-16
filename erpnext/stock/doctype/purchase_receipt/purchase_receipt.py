@@ -333,6 +333,15 @@ class PurchaseReceipt(BuyingController):
 
 		self.load_from_db()
 
+	def get_link_filters(self, for_doctype):
+		self.prev_link_mapper = {
+			"Purchase Order": {
+				"fieldname": "prevdoc_docname"
+			}
+		}
+		
+		return super(PurchaseReceipt, self).get_link_filters(for_doctype)
+
 def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Billed against Sales Order directly
 	billed_against_po = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`

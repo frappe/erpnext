@@ -235,6 +235,15 @@ class PurchaseOrder(BuyingController):
 			if item.delivered_by_supplier == 1:
 				item.received_qty = item.qty
 
+	def get_link_filters(self, for_doctype):
+		self.prev_link_mapper = {
+			"Supplier Quotation": {
+				"fieldname": "supplier_quotation"
+			}
+		}
+		
+		return super(PurchaseOrder, self).get_link_filters(for_doctype)
+
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):
 	if not frappe.has_permission("Purchase Order", "write"):

@@ -696,6 +696,18 @@ class SalesInvoice(SellingController):
 			self.set(fieldname, reference_doc.get(fieldname))
 
 		self.due_date = None
+	
+	def get_link_filters(self, for_doctype):
+		self.prev_link_mapper = {
+			"Sales Order": {
+				"fieldname": "sales_order"
+			},
+			"Delivery Note": {
+				"fieldname": "delivery_note"
+			}
+		}
+		
+		return super(SalesInvoice, self).get_link_filters(for_doctype)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

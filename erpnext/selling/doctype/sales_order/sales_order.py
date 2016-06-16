@@ -307,6 +307,15 @@ class SalesOrder(SellingController):
 		self.set("delivery_date", get_next_date(reference_doc.delivery_date, mcount,
 						cint(reference_doc.repeat_on_day_of_month)))
 
+	def get_link_filters(self, for_doctype):
+		self.prev_link_mapper = {
+			"Quotation": {
+				"fieldname": "prevdoc_docname"
+			}
+		}
+		
+		return super(SalesOrder, self).get_link_filters(for_doctype)
+		
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
