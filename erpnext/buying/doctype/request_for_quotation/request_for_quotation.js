@@ -103,6 +103,22 @@ frappe.ui.form.on("Request for Quotation Supplier",{
 erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
+		if (this.frm.doc.docstatus===0) {
+			cur_frm.add_custom_button(__('Material Request'),
+				function() {
+					frappe.model.map_current_doc({
+						method: "erpnext.stock.doctype.material_request.material_request.make_request_for_quotation",
+						source_doctype: "Material Request",
+						get_query_filters: {
+							material_request_type: "Purchase",
+							docstatus: 1,
+							status: ["!=", "Stopped"],
+							per_ordered: ["<", 99.99],
+							company: cur_frm.doc.company
+						}
+					})
+				}, __("Get items from"));
+		}
 	},
 
 	calculate_taxes_and_totals: function() {
