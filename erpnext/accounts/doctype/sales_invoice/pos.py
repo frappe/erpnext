@@ -134,12 +134,14 @@ def get_customers(pos_profile, doc):
 	return customer_list
 
 def get_pricing_rules(doc):
+	pricing_rules = ""
 	if doc.ignore_pricing_rule == 0:
-		return frappe.db.sql(""" Select * from `tabPricing Rule` where docstatus < 2 and disable = 0
-					and selling = 1 and ifnull(company, '') in (%(company)s, '') and
-					ifnull(for_price_list, '') in (%(price_list)s, '')  and %(date)s between
-					ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31') order by priority desc, name desc""",
-				{'company': doc.company, 'price_list': doc.selling_price_list, 'date': nowdate()}, as_dict=1)
+		pricing_rules = frappe.db.sql(""" Select * from `tabPricing Rule` where docstatus < 2 and disable = 0
+						and selling = 1 and ifnull(company, '') in (%(company)s, '') and
+						ifnull(for_price_list, '') in (%(price_list)s, '')  and %(date)s between
+						ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31') order by priority desc, name desc""",
+						{'company': doc.company, 'price_list': doc.selling_price_list, 'date': nowdate()}, as_dict=1)
+	return pricing_rules
 
 @frappe.whitelist()
 def make_invoice(doc_list):

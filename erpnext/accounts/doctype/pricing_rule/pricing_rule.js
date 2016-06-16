@@ -94,3 +94,9 @@ cur_frm.cscript.buying = function() {
 cur_frm.cscript.type = function(doc){
 	cur_frm.set_df_property('rate', 'description', doc.type=='Percentage'?'In Percentage %':'In Amount')
 }
+
+frappe.ui.form.on('Pricing Rule', 'price_or_discount', function(frm){
+	if(frm.doc.price_or_discount == 'Price') {
+		frm.set_value('for_price_list', "")
+	}
+})
