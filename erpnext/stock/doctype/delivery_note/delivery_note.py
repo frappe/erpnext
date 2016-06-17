@@ -60,7 +60,14 @@ class DeliveryNote(SellingController):
 			'source_field': '-1 * qty',
 			'extra_cond': """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)"""
 		}]
+		
+		self.prev_link_mapper = {
+			"Sales Order": {
+				"fieldname": "against_sales_order"
+			}
+		}
 
+		
 	def before_print(self):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)
@@ -284,12 +291,6 @@ class DeliveryNote(SellingController):
 		self.load_from_db()
 	
 	def get_link_filters(self, for_doctype):
-		self.prev_link_mapper = {
-			"Sales Order": {
-				"fieldname": "against_sales_order"
-			}
-		}
-		
 		return super(DeliveryNote, self).get_link_filters(for_doctype)
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):

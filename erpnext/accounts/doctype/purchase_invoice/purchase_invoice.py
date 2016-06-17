@@ -35,6 +35,15 @@ class PurchaseInvoice(BuyingController):
 			'percent_join_field': 'purchase_order',
 			'overflow_type': 'billing'
 		}]
+		
+		self.prev_link_mapper = {
+			"Purchase Order": {
+				"fieldname": "purchase_order"
+			},
+			"Purchase Receipt": {
+				"fieldname": "purchase_receipt"
+			}
+		}
 
 	def validate(self):
 		if not self.is_opening:
@@ -665,15 +674,6 @@ class PurchaseInvoice(BuyingController):
 		self.due_date = None
 	
 	def get_link_filters(self, for_doctype):
-		self.prev_link_mapper = {
-			"Purchase Order": {
-				"fieldname": "purchase_order"
-			},
-			"Purchase Receipt": {
-				"fieldname": "purchase_receipt"
-			}
-		}
-		
 		return super(PurchaseInvoice, self).get_link_filters(for_doctype)
 
 @frappe.whitelist()

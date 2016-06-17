@@ -38,6 +38,15 @@ class SalesInvoice(SellingController):
 			'keyword': 'Billed',
 			'overflow_type': 'billing'
 		}]
+		
+		self.prev_link_mapper = {
+			"Sales Order": {
+				"fieldname": "sales_order"
+			},
+			"Delivery Note": {
+				"fieldname": "delivery_note"
+			}
+		}
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
@@ -698,15 +707,6 @@ class SalesInvoice(SellingController):
 		self.due_date = None
 	
 	def get_link_filters(self, for_doctype):
-		self.prev_link_mapper = {
-			"Sales Order": {
-				"fieldname": "sales_order"
-			},
-			"Delivery Note": {
-				"fieldname": "delivery_note"
-			}
-		}
-		
 		return super(SalesInvoice, self).get_link_filters(for_doctype)
 
 def get_list_context(context=None):

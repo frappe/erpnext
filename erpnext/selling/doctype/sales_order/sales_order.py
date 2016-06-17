@@ -21,6 +21,15 @@ form_grid_templates = {
 class WarehouseRequired(frappe.ValidationError): pass
 
 class SalesOrder(SellingController):
+	def __init__(self, arg1, arg2=None):
+		super(SalesOrder, self).__init__(arg1, arg2)
+		
+		self.prev_link_mapper = {
+			"Quotation": {
+				"fieldname": "prevdoc_docname"
+			}
+		}
+		
 	def validate(self):
 		super(SalesOrder, self).validate()
 
@@ -308,12 +317,6 @@ class SalesOrder(SellingController):
 						cint(reference_doc.repeat_on_day_of_month)))
 
 	def get_link_filters(self, for_doctype):
-		self.prev_link_mapper = {
-			"Quotation": {
-				"fieldname": "prevdoc_docname"
-			}
-		}
-		
 		return super(SalesOrder, self).get_link_filters(for_doctype)
 		
 def get_list_context(context=None):

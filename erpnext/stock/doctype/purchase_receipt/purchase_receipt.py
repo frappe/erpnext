@@ -45,6 +45,12 @@ class PurchaseReceipt(BuyingController):
 			# 'overflow_type': 'receipt',
 			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
+		
+		self.prev_link_mapper = {
+			"Purchase Order": {
+				"fieldname": "prevdoc_docname"
+			}
+		}
 
 	def validate(self):
 		super(PurchaseReceipt, self).validate()
@@ -334,12 +340,6 @@ class PurchaseReceipt(BuyingController):
 		self.load_from_db()
 
 	def get_link_filters(self, for_doctype):
-		self.prev_link_mapper = {
-			"Purchase Order": {
-				"fieldname": "prevdoc_docname"
-			}
-		}
-		
 		return super(PurchaseReceipt, self).get_link_filters(for_doctype)
 
 def update_billed_amount_based_on_po(po_detail, update_modified=True):

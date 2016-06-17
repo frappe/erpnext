@@ -32,6 +32,12 @@ class PurchaseOrder(BuyingController):
 			'percent_join_field': 'prevdoc_docname',
 			'overflow_type': 'order'
 		}]
+		
+		self.prev_link_mapper = {
+			"Supplier Quotation": {
+				"fieldname": "supplier_quotation"
+			}
+		}
 
 	def validate(self):
 		super(PurchaseOrder, self).validate()
@@ -236,12 +242,6 @@ class PurchaseOrder(BuyingController):
 				item.received_qty = item.qty
 
 	def get_link_filters(self, for_doctype):
-		self.prev_link_mapper = {
-			"Supplier Quotation": {
-				"fieldname": "supplier_quotation"
-			}
-		}
-		
 		return super(PurchaseOrder, self).get_link_filters(for_doctype)
 
 @frappe.whitelist()
