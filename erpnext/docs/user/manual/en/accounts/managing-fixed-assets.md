@@ -50,7 +50,7 @@ For better visibility, net value of the asset on different depreciation dates ar
 <img class="screenshot" alt="Asset" src="{{docs_base_url}}/assets/img/accounts/asset-graph.png">
 
 
-## Purchase an asset
+## Purchase an Asset
 
 For purchasing a new asset, create and submit the asset record with all the depreciation settings. Then create a Purchase Invoice via "Make Purchase Invoice" button. On clicking the button, system will load a new Purchase Invoice form with pre-loaded items table. It will also set proper fixed asset account (defined in teh Asset Category) in the Expense Account field. You need to select Supplier and other necessary details and submit the Purchase Invoice. 
 
@@ -59,7 +59,7 @@ For purchasing a new asset, create and submit the asset record with all the depr
 On submission of the invoice, the "Fixed Asset Account" will be debited and payable account will be credited. It also updates purchase date, supplier and Purchase Invoice no in the Asset record.
 
 
-## Sale an ssset
+## Sale an Asset
 
 To sale an asset, open the asset record and create a Sales Invoice using "Sale Asset" button. On submission of the Sales Invoice, following entries will take place:
 
