@@ -196,12 +196,18 @@ def add_node():
 	ctype = frappe.form_dict.get('ctype')
 	parent_field = 'parent_' + ctype.lower().replace(' ', '_')
 	name_field = ctype.lower().replace(' ', '_') + '_name'
-
+	
 	doc = frappe.new_doc(ctype)
+	
+	parent = frappe.form_dict['parent']
+	
+	if cint(frappe.form_dict['is_root']):
+		parent = None
+
 	doc.update({
 		name_field: frappe.form_dict['name_field'],
-		parent_field: frappe.form_dict['parent'],
+		parent_field: parent,
 		"is_group": frappe.form_dict['is_group']
 	})
-
+	
 	doc.save()

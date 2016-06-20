@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import flt, nowdate
 import frappe.defaults
 from frappe.model.document import Document
@@ -15,13 +16,21 @@ class Bin(Document):
 		self.validate_mandatory()
 
 		self.projected_qty = flt(self.actual_qty) + flt(self.ordered_qty) + \
-		 	flt(self.indented_qty) + flt(self.planned_qty) - flt(self.reserved_qty)
+			flt(self.indented_qty) + flt(self.planned_qty) - flt(self.reserved_qty)
+		
+		self.validate_leaf_warehouse()
 
 	def validate_mandatory(self):
 		qf = ['actual_qty', 'reserved_qty', 'ordered_qty', 'indented_qty']
 		for f in qf:
 			if (not getattr(self, f, None)) or (not self.get(f)):
 				self.set(f, 0.0)
+	
+	def validate_leaf_warehouse(self):
+		from erpnext.stock.utils import is_leaf_warehouse
+		
+		if not is_leaf_warehouse(self.warehouse):
+			frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
 
 	def update_stock(self, args, allow_negative_stock=False, via_landed_cost_voucher=False):
 		self.update_qty(args)

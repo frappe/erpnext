@@ -160,6 +160,28 @@ $.extend(erpnext.item, {
 		frm.fields_dict.supplier_items.grid.get_field("supplier").get_query = function(doc, cdt, cdn) {
 			return { query: "erpnext.controllers.queries.supplier_query" }
 		}
+		
+		frm.fields_dict['default_warehouse'].get_query = function(doc) {
+			return {
+				filters: { "is_group": "No" }
+			}
+		}
+		
+		frm.fields_dict.reorder_levels.grid.get_field("warehouse_group").get_query = function(doc, cdt, cdn) {
+			return {
+				filters: { "is_group": "Yes" }
+			}
+		}
+		
+		frm.fields_dict.reorder_levels.grid.get_field("warehouse").get_query = function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: {
+					"is_group": "No",
+					"parent_warehouse": d.warehouse_group
+				}
+			}
+		}
 
 	},
 

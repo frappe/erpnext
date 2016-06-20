@@ -187,3 +187,9 @@ def validate_warehouse_company(warehouse, company):
 	if warehouse_company and warehouse_company != company:
 		frappe.throw(_("Warehouse {0} does not belong to company {1}").format(warehouse, company),
 			InvalidWarehouseCompany)
+
+def is_leaf_warehouse(warehouse):
+	if frappe.db.get_value("Warehouse", warehouse, "is_group") == "No":
+		return True
+	return False
+	
