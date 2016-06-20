@@ -5,23 +5,23 @@ In ERPNext, you can also create a Task independently.
 
 ### Status of the Task
 
-A Task can have one of the following status' - Open, Working, Pending Review, Closed, or Cancelled.
+A Task can have one of the following statuses - Open, Working, Pending Review, Closed, or Cancelled.
 
 <img class="screenshot" alt="Task - Status" src="{{docs_base_url}}/assets/img/project/task_status.png">
 
-* By default each new Task created shall have the status set to 'Open'.
+* By default each new Task created has the status set to 'Open'.
 
-* If a Time Log is made against a task, its status shall be set to 'Working'.
+* If a Time Log is made against a task, its status will be set to 'Working'.
 
 ### Dependent Task
 
-You can specify a list of dependent task under the 'Depends On' section.
+You can specify a list of dependent tasks under the 'Depends On' section.
 
 <img class="screenshot" alt="Depends On" src="{{docs_base_url}}/assets/img/project/task_depends_on.png">
 
-* You cannot close the parent Task until all 'Dependant Task' are closed.
+* You cannot close the parent task until all dependent tasks are closed.
 
-* If the Dependent Task are delayed and overlap with the expected Start Date of the Parent task, the system will reschedule the parent task.
+* If the dependent tasks are delayed and overlap with the expected Start Date of the Parent task, the system will reschedule the parent task.
 
 ### Managing Time
 
