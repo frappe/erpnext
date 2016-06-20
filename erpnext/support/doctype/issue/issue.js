@@ -4,9 +4,9 @@ frappe.ui.form.on("Issue", {
 	},
 
 	"refresh": function(frm) {
-        last_status = frm.doc.status;
+		last_status = frm.doc.status;
 	},
-    "status": function(frm) {dialog(frm)}
+	"status": function(frm) {dialog(frm)}
 });
 function dialog(frm){
     var d = new frappe.ui.Dialog({
@@ -16,16 +16,13 @@ function dialog(frm){
                             "fieldtype": "Text",
                             "label": __("Resolution Details"),
                             "reqd": 1,
-							"name":"resolution_details"
-                        },
-                        {
-                            "fieldtype": "Button",
-                            "label": __("Submit")
+			    "name":"resolution_details"
                         }
                     ]
                 });
+                
                 d.set_value("resolution_details",cur_frm.doc.resolution_details)
-                d.get_input("submit").on("click", function () {
+                d.set_primary_action(__("Update"), function() {
                     if (d.get_value("resolution_details")===""){
                         show_alert("Resolution Details are Required",5)
                         return
