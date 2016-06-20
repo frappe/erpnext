@@ -4,17 +4,12 @@
 organization, you can skip this page.)
 
 If you are running a small business that has a few employees, you understand
-that it's hard to manage the dynamic nature of doing businesses. You are
-already using a software like Accounting, and may be some more to manage your
-inventory and sales (or CRM).
-
-An ERP brings all of this together in one place.
-
-Small businesses are not so different from large ones. They contain most of
-the complexities of a large business along with many other constraints. Small
-businesses have to communicate with customers, do accounts, pay taxes, do
-payroll, manage timelines, deliver quality, answer questions, and keep
-everyone happy just like in large businesses.
+that it's hard to manage the dynamic nature of doing businesses. Small businesses
+are not so different from large ones. They contain most of the complexities of
+a large business along with many other constraints. Small businesses have to
+communicate with customers, do accounts, pay taxes, do payroll, manage timelines,
+deliver quality goods and services, answer questions, and keep everyone happy, 
+just like in large businesses.
 
 Large businesses have the advantage of using advanced data systems to manage
 their process efficiently. Small businesses, on the other hand, typically
