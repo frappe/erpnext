@@ -438,3 +438,14 @@ def validate_bom_no(item, bom_no):
 	if item and not (bom.item.lower() == item.lower() or \
 		bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()):
 		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
+@frappe.whitelist()
+def get_children(parent=None):
+	if parent:
+		return frappe.db.sql("""select item_code,
+			bom_no as value, qty,
+			if(ifnull(bom_no, "")!="", 1, 0) as expandable
+			from `tabBOM Item`
+			where parent=%s
+			order by idx
+			""", parent, as_dict=True)

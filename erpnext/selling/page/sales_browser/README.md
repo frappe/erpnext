@@ -1,1 +1,0 @@
-Tree editor for Territory, Customer Group, Item Group, Sales Partner

@@ -10,7 +10,7 @@ frappe.treeview_settings["Account"] = {
 		default: frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
 	}],
 	root_label: "Accounts",
-	get_tree_nodes: 'erpnext.accounts.page.accounts_browser.accounts_browser.get_children',
+	get_tree_nodes: 'erpnext.accounts.utils.get_children',
 	add_tree_node: 'erpnext.accounts.utils.add_ac',
 	menu_items:[
 		{
