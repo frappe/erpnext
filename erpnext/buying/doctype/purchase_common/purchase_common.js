@@ -25,6 +25,26 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	onload: function() {
 		this.setup_queries();
 		this._super();
+
+		if(this.frm.get_field('shipping_address')) {
+			this.frm.set_query("shipping_address", function(){
+				if(me.frm.doc.customer){
+					return{
+						filters:{
+							"customer": me.frm.doc.customer
+						}
+					}
+				}
+				else{
+					return{
+						filters:{
+							"is_your_company_address": 1,
+							"company": me.frm.doc.company
+						}
+					}
+				}
+			});
+		}
 	},
 
 	setup_queries: function() {
@@ -225,25 +245,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	shipping_address: function(){
 		var me = this;
-
-		this.frm.set_query("shipping_address", function(){
-			if(me.frm.doc.customer){
-				return{
-					filters:{
-						"customer": me.frm.doc.customer
-					}
-				}
-			}
-			else{
-				return{
-					filters:{
-						"is_your_company_address": 1,
-						"company": me.frm.doc.company
-					}
-				}
-			}
-		});
-
 		erpnext.utils.get_address_display(this.frm, "shipping_address",
 			"shipping_address_display", is_your_company_address=true)
 	},
