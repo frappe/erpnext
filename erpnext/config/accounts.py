@@ -193,10 +193,10 @@ def get_data():
 			"items": [
 				{
 					"type": "page",
-					"name": "Accounts Browser",
+					"name": "Tree",
 					"icon": "icon-sitemap",
 					"label": _("Chart of Cost Centers"),
-					"route": "Accounts Browser/Cost Center",
+					"route": "Tree/Cost Center",
 					"description": _("Tree of financial Cost Centers."),
 					"doctype": "Cost Center",
 				},

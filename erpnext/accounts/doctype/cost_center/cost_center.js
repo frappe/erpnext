@@ -3,7 +3,7 @@
 
 frappe.provide("erpnext.accounts");
 
-cur_frm.list_route = "Accounts Browser/Cost Center";
+cur_frm.list_route = "Tree/Cost Center";
 
 
 frappe.ui.form.on('Cost Center', {
