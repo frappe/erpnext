@@ -147,10 +147,11 @@ def get_invoice_expense_map(invoice_list):
 
 def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 	tax_details = frappe.db.sql("""
-		select parent, account_head, sum(base_tax_amount_after_discount_amount) as tax_amount
+		select parent, account_head, case add_deduct_tax when "Add" then sum(base_tax_amount_after_discount_amount)
+		else sum(base_tax_amount_after_discount_amount) * -1 end as tax_amount
 		from `tabPurchase Taxes and Charges` 
 		where parent in (%s) and category in ('Total', 'Valuation and Total')
-		group by parent, account_head
+		group by parent, account_head, add_deduct_tax
 	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
 	invoice_tax_map = {}
