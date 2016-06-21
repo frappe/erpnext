@@ -18,11 +18,11 @@ frappe.ui.form.on("Company", {
 				!frm.doc.__onload.transactions_exist));
 
 			frm.add_custom_button(__('Cost Centers'), function() {
-				frappe.set_route('Accounts Browser', 'Cost Center', {'company': frm.doc.name})
+				frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name})
 			})
 
 			frm.add_custom_button(__('Chart of Accounts'), function() {
-				frappe.set_route('Accounts Browser', 'Account', {'company': frm.doc.name})
+				frappe.set_route('Tree', 'Account', {'company': frm.doc.name})
 			})
 		}
 

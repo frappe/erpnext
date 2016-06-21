@@ -34,7 +34,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.set_intro(intro_txt);
 
 	cur_frm.add_custom_button(__('Chart of Cost Centers'),
-		function() { frappe.set_route("Accounts Browser", "Cost Center"); }, __("View"))
+		function() { frappe.set_route("Tree", "Cost Center"); }, __("View"))
 }
 
 cur_frm.cscript.parent_cost_center = function(doc, cdt, cdn) {

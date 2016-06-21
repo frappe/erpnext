@@ -48,7 +48,7 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 
 cur_frm.cscript.add_toolbar_buttons = function(doc) {
 	cur_frm.add_custom_button(__('Chart of Accounts'),
-		function() { frappe.set_route("Accounts Browser", "Account"); }, __("View"))
+		function() { frappe.set_route("Tree", "Account"); }, __("View"))
 
 	if (doc.is_group == 1) {
 		cur_frm.add_custom_button(__('Group to Non-Group'),

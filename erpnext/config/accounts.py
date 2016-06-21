@@ -51,10 +51,10 @@ def get_data():
 				},
 				{
 					"type": "page",
-					"name": "Accounts Browser",
+					"name": "Tree",
 					"icon": "icon-sitemap",
 					"label": _("Chart of Accounts"),
-					"route": "Accounts Browser/Account",
+					"route": "Tree/Account",
 					"description": _("Tree of financial accounts."),
 					"doctype": "Account",
 				},
