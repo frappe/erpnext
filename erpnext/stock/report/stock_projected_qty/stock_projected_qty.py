@@ -57,16 +57,19 @@ def get_data(filters):
 	return data
 
 def get_bin_list(filters):
-	bin_filters = frappe._dict()
+	conditions = []
+	
 	if filters.item_code:
-		bin_filters.item_code = filters.item_code
+		conditions.append("item_code = '%s' "%filters.item_code)
+		
 	if filters.warehouse:
-		bin_filters.warehouse = filters.warehouse
+		wh = frappe.get_doc("Warehouse", filters.warehouse)
+		conditions.append(" warehouse in (select name from `tabWarehouse` wh\
+			where wh.lft >= %s and wh.rgt <= %s)"%(wh.lft, wh.rgt))
 
-	bin_list = frappe.get_all("Bin", fields=["item_code", "warehouse",
-		"actual_qty", "planned_qty", "indented_qty", "ordered_qty", "reserved_qty",
-		"reserved_qty_for_production", "projected_qty"],
-		filters=bin_filters, order_by="item_code, warehouse")
+	bin_list = frappe.db.sql("""select item_code, warehouse, actual_qty, planned_qty, indented_qty,
+		ordered_qty, reserved_qty, reserved_qty_for_production, projected_qty
+		from tabBin where %s order by item_code, warehouse """% " and ".join(conditions), as_dict=1,debug=1)
 
 	return bin_list
 
@@ -101,4 +104,6 @@ def get_item_map(item_code):
 		item["reorder_levels"] = reorder_levels.get(item.name) or []
 		item_map[item.name] = item
 
+		
+	frappe.errprint(item_map)
 	return item_map

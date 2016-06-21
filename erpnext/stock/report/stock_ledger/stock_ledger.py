@@ -73,7 +73,7 @@ def get_sle_conditions(filters):
 		conditions.append("""item_code in (select name from tabItem
 			{item_conditions})""".format(item_conditions=item_conditions))
 	if filters.get("warehouse"):
-		conditions.append("warehouse=%(warehouse)s")
+		conditions.append(get_warehouse_condition(filters.get("warehouse")))
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 
@@ -86,7 +86,7 @@ def get_opening_balance(filters, columns):
 	from erpnext.stock.stock_ledger import get_previous_sle
 	last_entry = get_previous_sle({
 		"item_code": filters.item_code,
-		"warehouse": filters.warehouse,
+		"warehouse": get_warehouse_condition(filters.warehouse),
 		"posting_date": filters.from_date,
 		"posting_time": "00:00:00"
 	})
@@ -97,3 +97,8 @@ def get_opening_balance(filters, columns):
 			row[i] = last_entry.get(v, 0)
 		
 	return row
+	
+def get_warehouse_condition(warehouse):
+	wh = frappe.get_doc("Warehouse", warehouse)
+	return " warehouse in (select name from `tabWarehouse` wh\
+		where wh.lft >= %s and wh.rgt <= %s)"%(wh.lft, wh.rgt)

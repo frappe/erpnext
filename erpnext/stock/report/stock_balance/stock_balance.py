@@ -71,7 +71,9 @@ def get_conditions(filters):
 		conditions += " and item_code = '%s'" % frappe.db.escape(filters.get("item_code"), percent=False)
 
 	if filters.get("warehouse"):
-		conditions += " and warehouse = '%s'" % frappe.db.escape(filters.get("warehouse"), percent=False)
+		wh = frappe.get_doc("Warehouse", filters.get("warehouse"))
+		conditions += "and warehouse in (\
+			select name from `tabWarehouse` wh where wh.lft >= %s and wh.rgt <= %s)"%(wh.lft, wh.rgt)
 
 	return conditions
 

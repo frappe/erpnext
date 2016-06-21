@@ -17,8 +17,18 @@ frappe.ui.form.on("Warehouse", {
 				frappe.set_route("query-report", "General Ledger");
 			});
  		}
+		
+		frm.fields_dict['parent_warehouse'].get_query = function(doc) {
+			return {
+				filters: {
+					"is_group": "Yes",
+				}
+			}
+		}
 	}
 });
+
+
 
 
 cur_frm.set_query("create_account_under", function() {
