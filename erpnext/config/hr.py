@@ -15,7 +15,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Employee Attendance Tool",
 					"label": _("Employee Attendance Tool"),
-					"description":_("Mark Employee Attendance in Bulk"),
+					"description":_("Mark Attendance for multiple employees"),
 					"hide_count": True
 				},
 				{

@@ -7,23 +7,23 @@ import frappe
 import frappe.utils
 from frappe import throw, _
 from frappe.model.document import Document
-from frappe.email.bulk import check_bulk_limit
+from frappe.email.queue import check_email_limit
 from frappe.utils.verified_command import get_signed_params, verify_request
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.scheduler import log
-from frappe.email.bulk import send
+from frappe.email.queue import send
 from erpnext.crm.doctype.newsletter_list.newsletter_list import add_subscribers
 
 class Newsletter(Document):
 	def onload(self):
 		if self.email_sent:
 			self.get("__onload").status_count = dict(frappe.db.sql("""select status, count(name)
-				from `tabBulk Email` where reference_doctype=%s and reference_name=%s
+				from `tabEmail Queue` where reference_doctype=%s and reference_name=%s
 				group by status""", (self.doctype, self.name))) or None
 
 	def test_send(self, doctype="Lead"):
 		self.recipients = frappe.utils.split_emails(self.test_email_id)
-		self.send_bulk()
+		self.queue_all()
 		frappe.msgprint(_("Scheduled to send to {0}").format(self.test_email_id))
 
 	def send_emails(self):
@@ -40,13 +40,13 @@ class Newsletter(Document):
 			enqueue(send_newsletter, queue='default', timeout=1500, event='send_newsletter', newsletter=self.name)
 
 		else:
-			self.send_bulk()
+			self.queue_all()
 
 		frappe.msgprint(_("Scheduled to send to {0} recipients").format(len(self.recipients)))
 
 		frappe.db.set(self, "email_sent", 1)
 
-	def send_bulk(self):
+	def queue_all(self):
 		if not self.get("recipients"):
 			# in case it is called via worker
 			self.recipients = self.get_recipients()
@@ -63,7 +63,7 @@ class Newsletter(Document):
 			reference_doctype = self.doctype, reference_name = self.name,
 			unsubscribe_method = "/api/method/erpnext.crm.doctype.newsletter.newsletter.unsubscribe",
 			unsubscribe_params = {"name": self.newsletter_list},
-			bulk_priority = 0)
+			send_priority = 0)
 
 		if not frappe.flags.in_test:
 			frappe.db.auto_commit_on_many_writes = False
@@ -76,7 +76,7 @@ class Newsletter(Document):
 	def validate_send(self):
 		if self.get("__islocal"):
 			throw(_("Please save the Newsletter before sending"))
-		check_bulk_limit(self.recipients)
+		check_email_limit(self.recipients)
 
 @frappe.whitelist()
 def get_lead_options():
@@ -144,7 +144,7 @@ def subscribe(email):
 	<p><a href="{2}">{3}</a></p>
 	"""
 
-	frappe.sendmail(email, subject=_("Confirm Your Email"), content=content.format(*messages), bulk=True)
+	frappe.sendmail(email, subject=_("Confirm Your Email"), content=content.format(*messages))
 
 @frappe.whitelist(allow_guest=True)
 def confirm_subscription(email):
@@ -169,7 +169,7 @@ def confirm_subscription(email):
 def send_newsletter(newsletter):
 	try:
 		doc = frappe.get_doc("Newsletter", newsletter)
-		doc.send_bulk()
+		doc.queue_all()
 
 	except:
 		frappe.db.rollback()

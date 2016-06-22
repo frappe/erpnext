@@ -22,7 +22,7 @@ class TestNewsletter(unittest.TestCase):
 
 	def test_send(self):
 		self.send_newsletter()
-		self.assertEquals(len(frappe.get_all("Bulk Email")), 3)
+		self.assertEquals(len(frappe.get_all("Email Queue")), 3)
 
 	def test_unsubscribe(self):
 		# test unsubscribe
@@ -33,10 +33,10 @@ class TestNewsletter(unittest.TestCase):
 		unsubscribe(email, "_Test Newsletter List")
 
 		self.send_newsletter()
-		self.assertEquals(len(frappe.get_all("Bulk Email")), 2)
+		self.assertEquals(len(frappe.get_all("Email Queue")), 2)
 
 	def send_newsletter(self):
-		frappe.db.sql("delete from `tabBulk Email`")
+		frappe.db.sql("delete from `tabEmail Queue`")
 		frappe.delete_doc("Newsletter", "_Test Newsletting")
 		newsletter = frappe.get_doc({
 			"doctype": "Newsletter",

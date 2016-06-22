@@ -239,8 +239,7 @@ def send_birthday_reminders():
 			frappe.sendmail(recipients=filter(lambda u: u not in (e.company_email, e.personal_email, e.user_id), users),
 				subject=_("Birthday Reminder for {0}").format(e.employee_name),
 				message=_("""Today is {0}'s birthday!""").format(e.employee_name),
-				reply_to=e.company_email or e.personal_email or e.user_id,
-				bulk=True)
+				reply_to=e.company_email or e.personal_email or e.user_id)
 
 def get_employees_who_are_born_today():
 	"""Get Employee properties whose birthday is today."""
