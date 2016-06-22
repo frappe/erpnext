@@ -40,6 +40,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Minutes to First Response for Opportunity",
+					"doctype": "Opportunity",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"is_query_report": True,
 					"name": "Lead Details",
 					"doctype": "Lead"
