@@ -70,6 +70,38 @@ $.extend(shopping_cart, {
 				},
 			});
 		});
+		
+		$(".cart-items").on('click', '.number-spinner button', function () {  
+			var btn = $(this),
+				oldValue = btn.closest('.number-spinner').find('input').val().trim(),
+				newVal = 0;
+	
+			if (btn.attr('data-dir') == 'up') {
+				console.log(oldValue);
+				newVal = parseInt(oldValue) + 1;
+			} else {
+				if (oldValue > 1) {
+					newVal = parseInt(oldValue) - 1;
+				}
+			}
+			btn.closest('.number-spinner').find('input').val(newVal);
+			var item_code = btn.closest('.number-spinner').find('input').attr("data-item-code"); 
+			frappe.freeze();
+			shopping_cart.update_cart({
+				item_code: item_code,
+				qty: newVal,
+				with_items: 1,
+				btn: this,
+				callback: function(r) {
+					frappe.unfreeze();
+					if(!r.exc) {
+						$(".cart-items").html(r.message.items);
+						$(".cart-tax-items").html(r.message.taxes);
+						$(".cart-icon").hide();
+					}
+				},
+			});
+		});
 	},
 	
 	render_tax_row: function($cart_taxes, doc, shipping_rules) {

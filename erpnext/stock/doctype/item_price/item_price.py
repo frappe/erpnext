@@ -13,7 +13,7 @@ class ItemPrice(Document):
 	def validate(self):
 		self.validate_item()
 		self.validate_price_list()
-		self.check_duplicate_item()
+		# self.check_duplicate_item()
 		self.update_price_list_details()
 		self.update_item_details()
 
@@ -25,13 +25,13 @@ class ItemPrice(Document):
 		enabled = frappe.db.get_value("Price List", self.price_list, "enabled")
 		if not enabled:
 			throw(_("Price List {0} is disabled").format(self.price_list))
-
-	def check_duplicate_item(self):
-		if frappe.db.sql("""select name from `tabItem Price`
-			where item_code=%s and price_list=%s and name!=%s""", (self.item_code, self.price_list, self.name)):
-
-			frappe.throw(_("Item {0} appears multiple times in Price List {1}").format(self.item_code, self.price_list),
-				ItemPriceDuplicateItem)
+	#
+	# def check_duplicate_item(self):
+	# 	if frappe.db.sql("""select name from `tabItem Price`
+	# 		where item_code=%s and price_list=%s and name!=%s""", (self.item_code, self.price_list, self.name)):
+	#
+	# 		frappe.throw(_("Item {0} appears multiple times in Price List {1}").format(self.item_code, self.price_list),
+	# 			ItemPriceDuplicateItem)
 
 	def update_price_list_details(self):
 		self.buying, self.selling, self.currency = \

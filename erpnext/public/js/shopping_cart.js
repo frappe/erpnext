@@ -20,6 +20,7 @@ frappe.ready(function() {
 				callback: function(r) {
 					if (r.message) {
 						$('.shopping-cart-menu').html(r.message);
+						$('#cart-overlay').addClass('show');
 					}
 				}
 			});
