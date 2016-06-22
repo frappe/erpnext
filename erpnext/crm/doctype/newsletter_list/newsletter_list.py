@@ -89,3 +89,14 @@ def add_subscribers(name, email_list):
 	frappe.msgprint(_("{0} subscribers added").format(count))
 
 	return frappe.get_doc("Newsletter List", name).update_total_subscribers()
+
+def restrict_newsletter_list(doc, method):
+	from frappe.limits import get_limits
+
+	newsletter_list_limit = get_limits().get('newsletter_recipients')
+	if not newsletter_list_limit:
+		return
+
+	nl = frappe.get_doc("Newsletter List", doc.newsletter_list)
+	if nl.get_total_subscribers() >= newsletter_list_limit:
+		frappe.throw(_("Please Upgrade to add more than {0} subscribers").format(newsletter_list_limit))
