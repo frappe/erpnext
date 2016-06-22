@@ -101,7 +101,7 @@ class RequestforQuotation(BuyingController):
 
 		frappe.sendmail(recipients=data.email_id, sender=sender, subject=subject,
 			message=frappe.get_template(template).render(args),
-			attachments = [frappe.attach_print('Request for Quotation', self.name)],as_bulk=True)
+			attachments = [frappe.attach_print('Request for Quotation', self.name)])
 		frappe.msgprint(_("Email sent to supplier {0}").format(data.supplier))
 
 @frappe.whitelist()
