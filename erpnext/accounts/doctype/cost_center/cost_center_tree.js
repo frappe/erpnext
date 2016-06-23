@@ -2,7 +2,7 @@ frappe.treeview_settings["Cost Center"] = {
 	breadcrumbs: "Accounts",
 	get_tree_root: false,
 	filters: [{
-		fieldname: "comp",
+		fieldname: "company",
 		fieldtype:"Select",
 		options: $.map(locals[':Company'], function(c) { return c.name; }).sort(),
 		label: __("Company"),

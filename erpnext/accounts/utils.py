@@ -9,6 +9,7 @@ from frappe import throw, _
 from frappe.utils import formatdate
 
 # imported to enable erpnext.accounts.utils.get_account_currency
+from erpnext.accounts.doctype.account.account import get_account_currency
 import frappe.defaults
 from erpnext.accounts.report.financial_statements import sort_root_accounts
 
@@ -128,7 +129,7 @@ def add_ac(args=None):
 	if not args:
 		args = frappe.local.form_dict
 		args.pop("cmd")
-
+	
 	ac = frappe.new_doc("Account")
 
 	if args.get("ignore_permissions"):
@@ -139,7 +140,7 @@ def add_ac(args=None):
 
 	if not ac.parent_account:
 		ac.parent_account = args.get("parent")
-
+	
 	ac.old_parent = ""
 	ac.freeze_account = "No"
 	if cint(ac.get("is_root")):
@@ -447,7 +448,7 @@ def get_companies():
 @frappe.whitelist()
 def get_children():
 	args = frappe.local.form_dict
-	ctype, company = args['ctype'], args['comp']
+	ctype, company = args['ctype'], args['company']
 	fieldname = frappe.db.escape(ctype.lower().replace(' ','_'))
 	doctype = frappe.db.escape(ctype)
 

@@ -6,8 +6,7 @@ import frappe
 from frappe import _, throw
 from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
-from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year
-from erpnext.accounts.doctype.account.account import get_account_currency
+from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return

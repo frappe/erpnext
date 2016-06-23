@@ -41,7 +41,7 @@ def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
 			stock_value, voucher_type, voucher_no, batch_no, serial_no, company
-		from `tabStock Ledger Entry`
+		from `tabStock Ledger Entry` sle
 		where company = %(company)s and
 			posting_date between %(from_date)s and %(to_date)s
 			{sle_conditions}
@@ -99,6 +99,8 @@ def get_opening_balance(filters, columns):
 	return row
 	
 def get_warehouse_condition(warehouse):
-	wh = frappe.get_doc("Warehouse", warehouse)
-	return " warehouse in (select name from `tabWarehouse` wh\
-		where wh.lft >= %s and wh.rgt <= %s)"%(wh.lft, wh.rgt)
+	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+	
+	return " exists (select name from `tabWarehouse` wh \
+		where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"%(lft, rgt)
+	

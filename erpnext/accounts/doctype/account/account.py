@@ -179,9 +179,12 @@ class Account(Document):
 			self.warehouse = None
 
 	def validate_warehouse(self, warehouse):
-		if frappe.db.get_value("Stock Ledger Entry", {"warehouse": warehouse}):
+		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+		
+		if frappe.db.sql_list("""select sle.name from `tabStock Ledger Entry` sle where exists (select wh.name from
+			tabWarehouse wh where lft >= %s and rgt <= %s and sle.warehouse = wh.warehouse)""", (lft, rgt)):
 			throw(_("Stock entries exist against warehouse {0}, hence you cannot re-assign or modify Warehouse").format(warehouse))
-
+		
 	def update_nsm_model(self):
 		"""update lft, rgt indices for nested set model"""
 		import frappe

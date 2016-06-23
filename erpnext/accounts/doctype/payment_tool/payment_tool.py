@@ -7,7 +7,7 @@ from frappe import _, scrub
 from frappe.utils import flt
 from frappe.model.document import Document
 import json
-from erpnext.accounts.doctype.account.account import get_account_currency
+from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
 
 class PaymentTool(Document):

@@ -4,7 +4,7 @@ frappe.treeview_settings['Warehouse'] = {
 	get_tree_root: false,
 	root_label: "Warehouses",
 	filters: [{
-		fieldname: "comp",
+		fieldname: "company",
 		fieldtype:"Select",
 		options: $.map(locals[':Company'], function(c) { return c.name; }).sort(),
 		label: __("Company"),
