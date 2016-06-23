@@ -4,13 +4,10 @@
 {% block breadcrumbs %}
 	{% include "templates/includes/breadcrumbs.html" %}
 {% endblock %}
-{% block title %}
-{{ doc.name }}
-{% endblock %}
 
-{% block header %}
-<h1>{{ doc.name }}</h1>
-{% endblock %}
+{% block title %}{{ doc.name }}{% endblock %}
+
+{% block header %}<h1>{{ doc.name }}</h1>{% endblock %}
 
 {% block page_content %}
 

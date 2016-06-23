@@ -272,3 +272,4 @@ execute:frappe.db.sql('update tabQuotation set status="Cancelled" where docstatu
 execute:frappe.rename_doc("DocType", "Payments", "Sales Invoice Payment", force=True)
 erpnext.patches.v7_0.update_mins_to_first_response
 erpnext.patches.v6_20x.repost_valuation_rate_for_negative_inventory
+erpnext.patches.v7_0.re_route

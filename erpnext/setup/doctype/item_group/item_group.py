@@ -16,12 +16,15 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	website = frappe._dict(
 		condition_field = "show_in_website",
 		template = "templates/generators/item_group.html",
-		parent_website_route_field = "parent_item_group",
 		no_cache = 1
 	)
 
 	def autoname(self):
 		self.name = self.item_group_name
+
+	def validate(self):
+		super(ItemGroup, self).validate()
+		self.make_route()
 
 	def on_update(self):
 		NestedSet.on_update(self)
@@ -30,6 +33,15 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		self.validate_name_with_item()
 		self.validate_one_root()
 
+	def make_route(self):
+		'''Make website route'''
+		if not self.route:
+			self.route = ''
+			if self.parent_item_group:
+				self.route = frappe.get_doc('Item Group', self.parent_item_group).route + '/'
+
+			self.route += self.scrub(self.item_group_name)
+
 	def after_rename(self, olddn, newdn, merge=False):
 		NestedSet.after_rename(self, olddn, newdn, merge)
 		WebsiteGenerator.after_rename(self, olddn, newdn, merge)
@@ -37,16 +49,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	def on_trash(self):
 		NestedSet.on_trash(self)
 		WebsiteGenerator.on_trash(self)
-
-	def set_parent_website_route(self):
-		"""Overwrite `parent_website_route` from `WebsiteGenerator`.
-			Only set `parent_website_route` if parent is visble.
-
-			e.g. If `show_in_website` is set for Products then url should be `/products`"""
-		if self.parent_item_group and frappe.db.get_value("Item Group", self.parent_item_group, "show_in_website"):
-			WebsiteGenerator.set_parent_website_route(self)
-		else:
-			self.parent_website_route = ""
 
 	def validate_name_with_item(self):
 		if frappe.db.exists("Item", self.name):
@@ -74,9 +76,8 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(product_group)])
 
 	# base query
-	query = """select name, item_name, item_code, page_name, image, website_image, thumbnail, item_group,
-			description, web_long_description as website_description,
-			concat(parent_website_route, "/", page_name) as route
+	query = """select name, item_name, item_code, route, image, website_image, thumbnail, item_group,
+			description, web_long_description as website_description
 		from `tabItem`
 		where show_in_website = 1
 			and disabled=0
@@ -127,7 +128,7 @@ def get_group_item_count(item_group):
 
 def get_parent_item_groups(item_group_name):
 	item_group = frappe.get_doc("Item Group", item_group_name)
-	return frappe.db.sql("""select name, page_name from `tabItem Group`
+	return frappe.db.sql("""select name, route from `tabItem Group`
 		where lft <= %s and rgt >= %s
 		and show_in_website=1
 		order by lft asc""", (item_group.lft, item_group.rgt), as_dict=True)
@@ -138,6 +139,5 @@ def invalidate_cache_for(doc, item_group=None):
 
 	for d in get_parent_item_groups(item_group):
 		d = frappe.get_doc("Item Group", d.name)
-		route = d.get_route()
-		if route:
-			clear_cache(route)
+		if d.route:
+			clear_cache(d.route)

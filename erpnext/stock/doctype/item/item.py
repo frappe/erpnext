@@ -22,7 +22,6 @@ class Item(WebsiteGenerator):
 		page_title_field = "item_name",
 		condition_field = "show_in_website",
 		template = "templates/generators/item.html",
-		parent_website_route_field = "item_group",
 		no_cache = 1
 	)
 
@@ -133,6 +132,14 @@ class Item(WebsiteGenerator):
 
 			stock_entry.add_comment("Comment", _("Opening Stock"))
 
+	def make_route(self):
+		if not self.route:
+			self.route = frappe.db.get_value('Item Group', self.item_group, 'route') + '/' + self.scrub(self.item_name)
+
+	def get_parents(self, context):
+		item_group, route = frappe.db.get_value('Item Group', self.item_group, ['name', 'route'])
+		context.parents = [{'name': route, 'label': item_group}]
+
 	def validate_website_image(self):
 		"""Validate if the website image is a public file"""
 		auto_set_website_image = False
@@ -218,7 +225,7 @@ class Item(WebsiteGenerator):
 		if self.variant_of:
 			# redirect to template page!
 			template_item = frappe.get_doc("Item", self.variant_of)
-			frappe.flags.redirect_location = template_item.get_route() + "?variant=" + urllib.quote(self.name)
+			frappe.flags.redirect_location = template_item.route + "?variant=" + urllib.quote(self.name)
 			raise frappe.Redirect
 
 		context.parent_groups = get_parent_item_groups(self.item_group) + \
@@ -506,9 +513,9 @@ class Item(WebsiteGenerator):
 
 	def after_rename(self, old_name, new_name, merge):
 		super(Item, self).after_rename(old_name, new_name, merge)
-		if self.page_name:
+		if self.route:
 			invalidate_cache_for_item(self)
-			clear_cache(self.page_name)
+			clear_cache(self.route)
 
 		frappe.db.set_value("Item", new_name, "item_code", new_name)
 
