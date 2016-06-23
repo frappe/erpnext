@@ -2,9 +2,52 @@ import frappe
 from frappe import _
 
 def execute():
-	for warehouse in frappe.db.sql_list("""select name from tabWarehouse
-		order by company asc, name asc"""):
-		warehouse = frappe.get_doc("Warehouse", warehouse)
-		warehouse.is_group = "No"
-		warehouse.parent_warehouse = ""
-		warehouse.save(ignore_permissions=True)
+	frappe.reload_doc("stock", "doctype", "warehouse")
+	
+	for company in frappe.get_all("Company", fields=["name", "abbr"]):
+		if not frappe.db.get_value("Warehouse", "{0} - {1}".format(_("All Warehouses"), company.abbr)):
+			create_default_warehouse_group(company)
+		
+		for warehouse in frappe.get_all("Warehouse", filters={"company": company.name}, fields=["name", "create_account_under",
+			"parent_warehouse", "is_group"]):
+			set_parent_to_warehouses(warehouse, company)
+			set_parent_to_warehouse_acounts(warehouse, company)
+			frappe.db.commit()
+
+def set_parent_to_warehouses(warehouse, company):
+	warehouse = frappe.get_doc("Warehouse", warehouse.name)
+	warehouse.is_group = "Yes" if warehouse.is_group == "Yes" else "No"
+	
+	if not warehouse.parent_warehouse and warehouse.name != "{0} - {1}".format(_("All Warehouses"), company.abbr):
+		warehouse.parent_warehouse = "{0} - {1}".format(_("All Warehouses"), company.abbr)
+	
+	warehouse.save(ignore_permissions=True)
+
+def set_parent_to_warehouse_acounts(warehouse, company):
+	account = frappe.db.get_value("Account", {"warehouse": warehouse.name})
+	stock_group = frappe.db.get_value("Account", {"account_type": "Stock",
+		"is_group": 1, "company": company.name})
+
+	if account and account != "{0} - {1}".format(_("All Warehouses"), company.abbr):
+		account = frappe.get_doc("Account", account)
+		
+		if warehouse.is_group == "Yes":
+			account.is_group = 1
+			account.account_type = ""
+		
+		if warehouse.create_account_under == stock_group or not warehouse.create_account_under:
+			if not warehouse.parent_warehouse:
+				account.parent_account = "{0} - {1}".format(_("All Warehouses"), company.abbr)
+			else:
+				account.parent_account = frappe.db.get_value("Account", warehouse.parent_warehouse)
+
+		account.save(ignore_permissions=True)
+
+def create_default_warehouse_group(company):
+	frappe.get_doc({
+		"doctype": "Warehouse",
+		"warehouse_name": _("All Warehouses"),
+		"is_group": "Yes",
+		"company": company.name,
+		"parent_warehouse": ""
+	}).insert(ignore_permissions=True)

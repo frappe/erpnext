@@ -182,7 +182,7 @@ class Account(Document):
 		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
 		
 		if frappe.db.sql_list("""select sle.name from `tabStock Ledger Entry` sle where exists (select wh.name from
-			tabWarehouse wh where lft >= %s and rgt <= %s and sle.warehouse = wh.warehouse)""", (lft, rgt)):
+			tabWarehouse wh where lft >= %s and rgt <= %s and sle.warehouse = wh.name)""", (lft, rgt)):
 			throw(_("Stock entries exist against warehouse {0}, hence you cannot re-assign or modify Warehouse").format(warehouse))
 		
 	def update_nsm_model(self):
