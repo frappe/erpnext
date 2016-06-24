@@ -164,20 +164,21 @@ class Account(Document):
 	def validate_warehouse_account(self):
 		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 			return
-
-		if self.account_type == "Warehouse":
+			
+		if self.account_type == "Stock" and not self.is_group:
 			if not self.warehouse:
-				throw(_("Warehouse is mandatory if account type is Warehouse"))
-
-			old_warehouse = frappe.db.get_value("Account", self.name, "warehouse")
-			if old_warehouse != self.warehouse:
+				throw(_("Warehouse is mandatory"))
+				
+			old_warehouse = cstr(frappe.db.get_value("Account", self.name, "warehouse"))
+			if old_warehouse != cstr(self.warehouse):
 				if old_warehouse:
 					self.validate_warehouse(old_warehouse)
 				if self.warehouse:
 					self.validate_warehouse(self.warehouse)
+					
 		elif self.warehouse:
 			self.warehouse = None
-
+	
 	def validate_warehouse(self, warehouse):
 		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
 

@@ -18,7 +18,7 @@ class Warehouse(NestedSet):
 	def onload(self):
 		'''load account name for General Ledger Report'''
 		account = frappe.db.get_value("Account", {
-			"account_type": "Warehouse", "company": self.company, "warehouse": self.name})
+			"account_type": "Stock", "company": self.company, "warehouse": self.name, "is_group": 0})
 
 		if account:
 			self.set_onload('account', account)
@@ -36,7 +36,7 @@ class Warehouse(NestedSet):
 				self.validate_parent_account()
 
 				warehouse_account = frappe.db.get_value("Account",
-					{"account_type": "Warehouse", "company": self.company, "warehouse": self.name},
+					{"account_type": "Stock", "company": self.company, "warehouse": self.name, "is_group": 0},
 					["name", "parent_account"])
 
 				if warehouse_account and warehouse_account[1] != self.create_account_under:
@@ -61,7 +61,7 @@ class Warehouse(NestedSet):
 							else self.create_account_under,
 						'is_group': 1 if self.is_group=="Yes" else 0 ,
 						'company':self.company,
-						"account_type": "Warehouse",
+						"account_type": "Stock",
 						"warehouse": self.name,
 						"freeze_account": "No"
 					})
@@ -152,8 +152,8 @@ class Warehouse(NestedSet):
 		return get_name_with_abbr(dn, self.company)
 
 	def get_account(self, warehouse):
-		return frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"warehouse": warehouse, "company": self.company})
+		return frappe.db.get_value("Account", {"account_type": "Stock",
+			"warehouse": warehouse, "company": self.company, "is_group": 0})
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if merge:

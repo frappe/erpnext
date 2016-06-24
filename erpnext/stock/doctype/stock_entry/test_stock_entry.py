@@ -127,7 +127,7 @@ class TestStockEntry(unittest.TestCase):
 		mr = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
 			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC")
 					
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
 			"warehouse": mr.get("items")[0].t_warehouse})
 
 		self.check_stock_ledger_entries("Stock Entry", mr.name,
@@ -160,7 +160,7 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mi.name,
 			[["_Test Item", "_Test Warehouse - _TC", -40.0]])
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
 			"warehouse": "_Test Warehouse - _TC"})
 
 		stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
@@ -192,10 +192,10 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mtn.name,
 			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
 			"warehouse": mtn.get("items")[0].s_warehouse})
 
-		fixed_asset_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
+		fixed_asset_account = frappe.db.get_value("Account", {"account_type": "Stock",
 			"warehouse": mtn.get("items")[0].t_warehouse})
 
 		stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
@@ -260,7 +260,7 @@ class TestStockEntry(unittest.TestCase):
 		repack.insert()
 		repack.submit()
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
 			"warehouse": repack.get("items")[1].t_warehouse})
 
 		rm_stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
