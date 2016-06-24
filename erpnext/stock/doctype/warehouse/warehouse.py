@@ -176,10 +176,10 @@ class Warehouse(NestedSet):
 @frappe.whitelist()
 def get_children():
 	from erpnext.stock.utils import get_stock_value_on
-	ctype = frappe.local.form_dict.get('ctype')
+	doctype = frappe.local.form_dict.get('doctype')
 	company = frappe.local.form_dict.get('company')
 	
-	parent_field = 'parent_' + ctype.lower().replace(' ', '_')
+	parent_field = 'parent_' + doctype.lower().replace(' ', '_')
 	parent = frappe.form_dict.get("parent") or ""
 	
 	if parent == "Warehouses":
@@ -187,10 +187,10 @@ def get_children():
 
 	warehouses = frappe.db.sql("""select name as value,
 		if(is_group='Yes', 1, 0) as expandable
-		from `tab{ctype}`
+		from `tab{doctype}`
 		where docstatus < 2
 		and ifnull(`{parent_field}`,'') = %s and `company` = %s
-		order by name""".format(ctype=frappe.db.escape(ctype), parent_field=frappe.db.escape(parent_field)),
+		order by name""".format(doctype=frappe.db.escape(doctype), parent_field=frappe.db.escape(parent_field)),
 		(parent, company), as_dict=1)
 	
 	# return warehouses
@@ -200,12 +200,12 @@ def get_children():
 		
 @frappe.whitelist()
 def add_node():
-	ctype = frappe.form_dict.get('ctype')
+	doctype = frappe.form_dict.get('doctype')
 	company = frappe.form_dict.get('company')
-	parent_field = 'parent_' + ctype.lower().replace(' ', '_')
-	name_field = ctype.lower().replace(' ', '_') + '_name'
+	parent_field = 'parent_' + doctype.lower().replace(' ', '_')
+	name_field = doctype.lower().replace(' ', '_') + '_name'
 	
-	doc = frappe.new_doc(ctype)
+	doc = frappe.new_doc(doctype)
 	
 	parent = frappe.form_dict['parent']
 	

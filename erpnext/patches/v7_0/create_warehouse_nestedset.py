@@ -12,7 +12,6 @@ def execute():
 			"parent_warehouse", "is_group"]):
 			set_parent_to_warehouses(warehouse, company)
 			set_parent_to_warehouse_acounts(warehouse, company)
-			frappe.db.commit()
 
 def set_parent_to_warehouses(warehouse, company):
 	warehouse = frappe.get_doc("Warehouse", warehouse.name)
@@ -30,10 +29,6 @@ def set_parent_to_warehouse_acounts(warehouse, company):
 
 	if account and account != "{0} - {1}".format(_("All Warehouses"), company.abbr):
 		account = frappe.get_doc("Account", account)
-		
-		if warehouse.is_group == "Yes":
-			account.is_group = 1
-			account.account_type = ""
 		
 		if warehouse.create_account_under == stock_group or not warehouse.create_account_under:
 			if not warehouse.parent_warehouse:

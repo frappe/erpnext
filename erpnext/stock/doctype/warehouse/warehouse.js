@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+cur_frm.list_route = "Tree/Warehouse";
+
 frappe.ui.form.on("Warehouse", {
 	refresh: function(frm) {
 		frm.toggle_display('warehouse_name', frm.doc.__islocal);

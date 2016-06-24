@@ -448,13 +448,13 @@ def get_companies():
 @frappe.whitelist()
 def get_children():
 	args = frappe.local.form_dict
-	ctype, company = args['ctype'], args['company']
-	fieldname = frappe.db.escape(ctype.lower().replace(' ','_'))
-	doctype = frappe.db.escape(ctype)
+	doctype, company = args['doctype'], args['company']
+	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
+	doctype = frappe.db.escape(doctype)
 
 	# root
 	if args['parent'] in ("Accounts", "Cost Centers"):
-		fields = ", root_type, report_type, account_currency" if ctype=="Account" else ""
+		fields = ", root_type, report_type, account_currency" if doctype=="Account" else ""
 		acc = frappe.db.sql(""" select
 			name as value, is_group as expandable {fields}
 			from `tab{doctype}`
@@ -467,7 +467,7 @@ def get_children():
 			sort_root_accounts(acc)
 	else:
 		# other
-		fields = ", account_currency" if ctype=="Account" else ""
+		fields = ", account_currency" if doctype=="Account" else ""
 		acc = frappe.db.sql("""select
 			name as value, is_group as expandable, parent_{fieldname} as parent {fields}
 			from `tab{doctype}`
@@ -476,7 +476,7 @@ def get_children():
 			order by name""".format(fields=fields, fieldname=fieldname, doctype=doctype),
 				args['parent'], as_dict=1)
 
-	if ctype == 'Account':
+	if doctype == 'Account':
 		company_currency = frappe.db.get_value("Company", company, "default_currency")
 		for each in acc:
 			each["company_currency"] = company_currency
