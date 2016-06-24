@@ -14,8 +14,8 @@ def get_product_list(search=None, start=0, limit=12):
 	# limit = 12 because we show 12 items in the grid view
 
 	# base query
-	query = """select name, item_name, item_code, page_name, website_image, thumbnail, item_group,
-			description, web_long_description as website_description, parent_website_route
+	query = """select name, item_name, item_code, route, website_image, thumbnail, item_group,
+			description, web_long_description as website_description
 		from `tabItem`
 		where show_in_website = 1
 			and disabled=0
@@ -37,10 +37,6 @@ def get_product_list(search=None, start=0, limit=12):
 		"search": search,
 		"today": nowdate()
 	}, as_dict=1)
-
-	for d in data:
-		d.route = ((d.parent_website_route + "/") if d.parent_website_route else "") \
-			+ (d.page_name or "")
 
 	return [get_item_for_list_in_html(r) for r in data]
 

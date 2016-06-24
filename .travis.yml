@@ -25,7 +25,6 @@ script:
   - bench use test_site
   - bench reinstall
   - bench build
-  - bench build-website
   - bench start &
   - sleep 10
   - bench --verbose run-tests --driver Firefox

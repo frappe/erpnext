@@ -19,7 +19,7 @@ def get_list_context(context=None):
 	}
 
 def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20):
-	from frappe.templates.pages.list import get_list
+	from frappe.www.list import get_list
 	user = frappe.session.user
 	key = None
 

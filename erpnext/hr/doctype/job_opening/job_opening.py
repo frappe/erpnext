@@ -17,9 +17,9 @@ class JobOpening(WebsiteGenerator):
 		condition_field = "publish",
 		page_title_field = "job_title",
 	)
-	
-	def get_route(self):
-		return 'jobs/' + quoted(self.page_name)
+
+	def make_route(self):
+		return 'jobs/' + self.scrub(self.job_title)
 
 	def get_context(self, context):
 		context.parents = [{'name': 'jobs', 'title': _('All Jobs') }]
