@@ -259,3 +259,4 @@ erpnext.patches.v6_20x.remove_fiscal_year_from_holiday_list
 erpnext.patches.v6_24.map_customer_address_to_shipping_address_on_po
 erpnext.patches.v6_27.fix_recurring_order_status
 erpnext.patches.v6_20x.update_product_bundle_description
+erpnext.patches.v6_20x.repost_valuation_rate_for_negative_inventory
