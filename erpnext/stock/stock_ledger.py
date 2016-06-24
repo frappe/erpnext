@@ -229,27 +229,35 @@ class update_entries_after(object):
 				# calculate new valuation rate only if stock value is positive
 				# else it remains the same as that of previous entry
 				self.valuation_rate = new_stock_value / new_stock_qty
-
+		
 	def get_moving_average_values(self, sle):
 		actual_qty = flt(sle.actual_qty)
+		new_stock_qty = flt(self.qty_after_transaction) + actual_qty
+		if new_stock_qty >= 0:
+			if actual_qty > 0:
+				if flt(self.qty_after_transaction) <= 0:
+					self.valuation_rate = sle.incoming_rate
+				else:
+					new_stock_value = (self.qty_after_transaction * self.valuation_rate) + \
+						(actual_qty * sle.incoming_rate)
 
-		if actual_qty > 0 or flt(sle.outgoing_rate) > 0:
-			rate = flt(sle.incoming_rate) if actual_qty > 0 else flt(sle.outgoing_rate)
+					self.valuation_rate = new_stock_value / new_stock_qty
 
-			if self.qty_after_transaction < 0 and not self.valuation_rate:
-				# if negative stock, take current valuation rate as incoming rate
-				self.valuation_rate = rate
+			elif sle.outgoing_rate:
+				if new_stock_qty:
+					new_stock_value = (self.qty_after_transaction * self.valuation_rate) + \
+						(actual_qty * sle.outgoing_rate)
 
-			new_stock_qty = abs(self.qty_after_transaction) + actual_qty
-			new_stock_value = (abs(self.qty_after_transaction) * self.valuation_rate) + (actual_qty * rate)
+					self.valuation_rate = new_stock_value / new_stock_qty
+				else:
+					self.valuation_rate = self.outgoing_rate
 
-			if new_stock_qty:
-				self.valuation_rate = new_stock_value / flt(new_stock_qty)
+		else:
+			if flt(self.qty_after_transaction) >= 0 and sle.outgoing_rate:
+				self.valuation_rate = sle.outgoing_rate
 
-		elif not self.valuation_rate and self.qty_after_transaction <= 0:
-			self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, self.allow_zero_rate)
-
-		self.valuation_rate = abs(flt(self.valuation_rate))
+			if not self.valuation_rate and actual_qty > 0:
+				self.valuation_rate = sle.incoming_rate
 
 	def get_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
@@ -268,10 +276,7 @@ class update_entries_after(object):
 					self.stock_queue.append([actual_qty, incoming_rate])
 				else:
 					qty = self.stock_queue[-1][0] + actual_qty
-					if qty == 0:
-						self.stock_queue.pop(-1)
-					else:
-						self.stock_queue[-1] = [qty, incoming_rate]
+					self.stock_queue[-1] = [qty, incoming_rate]
 		else:
 			qty_to_pop = abs(actual_qty)
 			while qty_to_pop:
@@ -298,7 +303,7 @@ class update_entries_after(object):
 						break
 				else:
 					index = 0
-
+					
 				# select first batch or the batch with same rate
 				batch = self.stock_queue[index]
 				if qty_to_pop >= batch[0]:
@@ -320,7 +325,11 @@ class update_entries_after(object):
 		stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
 		stock_qty = sum((flt(batch[0]) for batch in self.stock_queue))
 
-		self.valuation_rate = (stock_value / flt(stock_qty)) if stock_qty else 0
+		if stock_qty:
+			self.valuation_rate = stock_value / flt(stock_qty)
+		
+		if not self.stock_queue:
+			self.stock_queue.append([0, sle.incoming_rate or sle.outgoing_rate or self.valuation_rate])
 
 	def get_sle_before_datetime(self):
 		"""get previous stock ledger entry before current time-bucket"""
