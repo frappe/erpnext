@@ -181,3 +181,5 @@ get_translated_dict = {
 bot_parsers = [
 	'erpnext.utilities.bot.FindItemBot',
 ]
+
+get_site_info = 'erpnext.utilities.get_site_info'
