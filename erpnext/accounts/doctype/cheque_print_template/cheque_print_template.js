@@ -17,7 +17,6 @@ frappe.ui.form.on('Cheque Print Template', {
 			var template = '<div style="position: relative; overflow-x: scroll;">\
 				<div id="cheque_preview" style="width: {{ cheque_width }}cm; \
 					height: {{ cheque_height }}cm;\
-					background-image: url({{ scanned_cheque }});\
 					background-repeat: no-repeat;\
 					background-size: cover;">\
 					<span style="top: {{ acc_pay_dist_from_top_edge }}cm;\
@@ -50,6 +49,10 @@ frappe.ui.form.on('Cheque Print Template', {
 			</div>';
 			
 			$(frappe.render(template, frm.doc)).appendTo(frm.fields_dict.cheque_print_preview.wrapper)
+			
+			if (frm.doc.scanned_cheque) {
+				$(frm.fields_dict.cheque_print_preview.wrapper).find("#cheque_preview").css('background-image', 'url(' + frm.doc.scanned_cheque + ')');
+			}
 		}
 	}
 });
