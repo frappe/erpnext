@@ -378,7 +378,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		payment_dr_or_cr = "payment_gl_entry.debit_in_account_currency - payment_gl_entry.credit_in_account_currency"
 
 	invoice_list = frappe.db.sql("""select
-			voucher_no,	voucher_type, posting_date,
+			voucher_no,	voucher_type, posting_date, 
 			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
 			(
 				select
@@ -405,7 +405,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 						or against_voucher is null))
 				or (voucher_type != 'Journal Entry'))
 		group by voucher_type, voucher_no
-		having (invoice_amount - payment_amount) > 0.005""".format(
+		having (invoice_amount - payment_amount) > 0.005
+		order by posting_date, name""".format(
 			dr_or_cr = dr_or_cr,
 			payment_dr_or_cr = payment_dr_or_cr,
 			condition = condition or ""
@@ -423,7 +424,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			'invoice_amount': flt(d.invoice_amount),
 			'payment_amount': flt(d.payment_amount),
 			'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision),
-			'due_date': frappe.db.get_value(d.voucher_type, d.voucher_no, "due_date")
+			'due_date': frappe.db.get_value(d.voucher_type, d.voucher_no, "due_date"),
+			'exchange_rate': frappe.db.get_value(d.voucher_type, d.voucher_no, "conversion_rate")
 		})
 
 	return outstanding_invoices

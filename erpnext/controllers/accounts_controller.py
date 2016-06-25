@@ -396,10 +396,10 @@ class AccountsController(TransactionBase):
 			select
 				account_currency, sum({dr_or_cr}) as amount
 			from
-				`tabJournal Entry Account`
+				`tabGL Entry`
 			where
-				reference_type = %s and reference_name = %s and party=%s
-				and docstatus = 1 and is_advance = "Yes"
+				against_voucher_type = %s and against_voucher = %s and party=%s
+				and docstatus = 1
 		""".format(dr_or_cr=dr_or_cr), (self.doctype, self.name, party), as_dict=1)
 
 		if advance:
