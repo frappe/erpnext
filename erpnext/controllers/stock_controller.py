@@ -322,6 +322,6 @@ def get_warehouse_account():
 
 	for d in frappe.db.sql("""select warehouse, name, account_currency from tabAccount
 		where account_type = 'Stock' and (warehouse is not null and warehouse != ''
-		and is_group != 1)""", as_dict=1):
+		and is_group != 1) and is_group=0 """, as_dict=1):
 			warehouse_account.setdefault(d.warehouse, d)
 	return warehouse_account
