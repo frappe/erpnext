@@ -79,8 +79,11 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_auto_material_request_for_variant(self):
 		self._test_auto_material_request("_Test Variant Item-S")
-
-	def _test_auto_material_request(self, item_code, material_request_type="Purchase"):
+	
+	def test_auto_material_request_for_warehouse_group(self):
+		self._test_auto_material_request("_Test Item Warehouse Group Wise Reorder", warehouse="_Test Warehouse Group-C1 - _TC")
+		
+	def _test_auto_material_request(self, item_code, material_request_type="Purchase", warehouse="_Test Warehouse - _TC"):
 		item = frappe.get_doc("Item", item_code)
 
 		if item.variant_of:
@@ -89,14 +92,14 @@ class TestStockEntry(unittest.TestCase):
 			template = item
 
 		projected_qty, actual_qty = frappe.db.get_value("Bin", {"item_code": item_code,
-			"warehouse": "_Test Warehouse - _TC"}, ["projected_qty", "actual_qty"]) or [0, 0]
+			"warehouse": warehouse}, ["projected_qty", "actual_qty"]) or [0, 0]
 
 		# stock entry reqd for auto-reorder
-		create_stock_reconciliation(item_code=item_code, warehouse="_Test Warehouse - _TC",
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse,
 			qty = actual_qty + abs(projected_qty) + 10, rate=100)
 
 		projected_qty = frappe.db.get_value("Bin", {"item_code": item_code,
-			"warehouse": "_Test Warehouse - _TC"}, "projected_qty") or 0
+			"warehouse": warehouse}, "projected_qty") or 0
 
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
 

@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.list_route = "Accounts Browser/Account";
+cur_frm.list_route = "Tree/Account";
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.__islocal) {
@@ -48,7 +48,7 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 
 cur_frm.cscript.add_toolbar_buttons = function(doc) {
 	cur_frm.add_custom_button(__('Chart of Accounts'),
-		function() { frappe.set_route("Accounts Browser", "Account"); }, __("View"))
+		function() { frappe.set_route("Tree", "Account"); }, __("View"))
 
 	if (doc.is_group == 1) {
 		cur_frm.add_custom_button(__('Group to Non-Group'),

@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.list_route = "Sales Browser/Territory";
+cur_frm.list_route = "Tree/Territory";
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.cscript.set_root_readonly(doc);

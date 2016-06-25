@@ -71,7 +71,9 @@ def get_conditions(filters):
 		conditions += " and item_code = '%s'" % frappe.db.escape(filters.get("item_code"), percent=False)
 
 	if filters.get("warehouse"):
-		conditions += " and warehouse = '%s'" % frappe.db.escape(filters.get("warehouse"), percent=False)
+		lft, rgt = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"])
+		conditions += " and exists (select name from `tabWarehouse` wh \
+			where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"%(lft, rgt)
 
 	return conditions
 
@@ -79,9 +81,9 @@ def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select item_code, warehouse, posting_date, actual_qty, valuation_rate,
 			company, voucher_type, qty_after_transaction, stock_value_difference
-		from `tabStock Ledger Entry` force index (posting_sort_index)
+		from `tabStock Ledger Entry` sle force index (posting_sort_index)
 		where docstatus < 2 %s order by posting_date, posting_time, name""" %
-		conditions, as_dict=1)
+		conditions, as_dict=1, debug=1)
 
 def get_item_warehouse_map(filters):
 	iwb_map = {}

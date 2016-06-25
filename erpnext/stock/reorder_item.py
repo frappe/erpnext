@@ -37,7 +37,7 @@ def _reorder_item():
 
 	item_warehouse_projected_qty = get_item_warehouse_projected_qty(items_to_consider)
 
-	def add_to_material_request(item_code, warehouse, reorder_level, reorder_qty, material_request_type):
+	def add_to_material_request(item_code, warehouse, reorder_level, reorder_qty, material_request_type, warehouse_group=None):
 		if warehouse not in warehouse_company:
 			# a disabled warehouse
 			return
@@ -46,7 +46,10 @@ def _reorder_item():
 		reorder_qty = flt(reorder_qty)
 
 		# projected_qty will be 0 if Bin does not exist
-		projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse))
+		if warehouse_group:
+			projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse_group))
+		else:
+			projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse))
 
 		if (reorder_level or reorder_qty) and projected_qty < reorder_level:
 			deficiency = reorder_level - projected_qty
@@ -70,7 +73,7 @@ def _reorder_item():
 		if item.get("reorder_levels"):
 			for d in item.get("reorder_levels"):
 				add_to_material_request(item_code, d.warehouse, d.warehouse_reorder_level,
-					d.warehouse_reorder_qty, d.material_request_type)
+					d.warehouse_reorder_qty, d.material_request_type, warehouse_group=d.warehouse_group)
 
 	if material_requests:
 		return create_material_request(material_requests)
@@ -82,9 +85,17 @@ def get_item_warehouse_projected_qty(items_to_consider):
 		from tabBin where item_code in ({0})
 			and (warehouse != "" and warehouse is not null)"""\
 		.format(", ".join(["%s"] * len(items_to_consider))), items_to_consider):
-
+		
 		item_warehouse_projected_qty.setdefault(item_code, {})[warehouse] = flt(projected_qty)
-
+		
+		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
+		
+		if warehouse_doc.parent_warehouse:
+			if not item_warehouse_projected_qty.get(item_code, {}).get(warehouse_doc.parent_warehouse):
+				item_warehouse_projected_qty.setdefault(item_code, {})[warehouse_doc.parent_warehouse] = flt(projected_qty)
+			else:
+				item_warehouse_projected_qty[item_code][warehouse_doc.parent_warehouse] += flt(projected_qty)
+				
 	return item_warehouse_projected_qty
 
 def create_material_request(material_requests):

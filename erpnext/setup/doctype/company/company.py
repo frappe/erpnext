@@ -87,15 +87,23 @@ class Company(Document):
 				.format(self.country.lower()))(self)
 
 	def create_default_warehouses(self):
-		for whname in (_("Stores"), _("Work In Progress"), _("Finished Goods")):
-			if not frappe.db.exists("Warehouse", whname + " - " + self.abbr):
+		for wh_detail in [
+			{"warehouse_name": _("All Warehouses"), "is_group": "Yes"},
+			{"warehouse_name": _("Stores"), "is_group": "No"},
+			{"warehouse_name": _("Work In Progress"), "is_group": "No"},
+			{"warehouse_name": _("Finished Goods"), "is_group": "No"}]:
+			
+			if not frappe.db.exists("Warehouse", "{0} - {1}".format(wh_detail["warehouse_name"], self.abbr)):
 				stock_group = frappe.db.get_value("Account", {"account_type": "Stock",
 					"is_group": 1, "company": self.name})
 				if stock_group:
 					warehouse = frappe.get_doc({
 						"doctype":"Warehouse",
-						"warehouse_name": whname,
+						"warehouse_name": wh_detail["warehouse_name"],
+						"is_group": wh_detail["is_group"],
 						"company": self.name,
+						"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr) \
+							if wh_detail["is_group"] == "No" else "",
 						"create_account_under": stock_group
 					})
 					warehouse.flags.ignore_permissions = True

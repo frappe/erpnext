@@ -52,26 +52,26 @@ def update_page_info(bootinfo):
 	bootinfo.page_info.update({
 		"Chart of Accounts": {
 			"title": "Chart of Accounts",
-			"route": "Accounts Browser/Account"
+			"route": "Tree/Account"
 		},
 		"Chart of Cost Centers": {
 			"title": "Chart of Cost Centers",
-			"route": "Accounts Browser/Cost Center"
+			"route": "Tree/Cost Center"
 		},
 		"Item Group Tree": {
 			"title": "Item Group Tree",
-			"route": "Sales Browser/Item Group"
+			"route": "Tree/Item Group"
 		},
 		"Customer Group Tree": {
 			"title": "Customer Group Tree",
-			"route": "Sales Browser/Customer Group"
+			"route": "Tree/Customer Group"
 		},
 		"Territory Tree": {
 			"title": "Territory Tree",
-			"route": "Sales Browser/Territory"
+			"route": "Tree/Territory"
 		},
 		"Sales Person Tree": {
 			"title": "Sales Person Tree",
-			"route": "Sales Browser/Sales Person"
+			"route": "Tree/Sales Person"
 		}
 	})

@@ -78,10 +78,10 @@ def get_data():
 				},
 				{
 					"type": "page",
-					"name": "Sales Browser",
+					"name": "Tree",
 					"icon": "icon-sitemap",
 					"label": _("Item Group"),
-					"link": "Sales Browser/Item Group",
+					"link": "Tree/Item Group",
 					"description": _("Tree of Item Groups."),
 					"doctype": "Item Group",
 				},

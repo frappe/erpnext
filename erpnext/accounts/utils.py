@@ -10,6 +10,8 @@ from frappe.utils import formatdate
 
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
+import frappe.defaults
+from erpnext.accounts.report.financial_statements import sort_root_accounts
 
 class FiscalYearError(frappe.ValidationError): pass
 
@@ -127,7 +129,7 @@ def add_ac(args=None):
 	if not args:
 		args = frappe.local.form_dict
 		args.pop("cmd")
-
+	
 	ac = frappe.new_doc("Account")
 
 	if args.get("ignore_permissions"):
@@ -135,6 +137,10 @@ def add_ac(args=None):
 		args.pop("ignore_permissions")
 
 	ac.update(args)
+
+	if not ac.parent_account:
+		ac.parent_account = args.get("parent")
+	
 	ac.old_parent = ""
 	ac.freeze_account = "No"
 	if cint(ac.get("is_root")):
@@ -153,6 +159,10 @@ def add_cc(args=None):
 
 	cc = frappe.new_doc("Cost Center")
 	cc.update(args)
+
+	if not cc.parent_cost_center:
+		cc.parent_cost_center = args.get("parent")
+
 	cc.old_parent = ""
 	cc.insert()
 	return cc.name
@@ -428,3 +438,51 @@ def get_account_name(account_type=None, root_type=None, is_group=None, account_c
 		"account_currency": account_currency or frappe.defaults.get_defaults().currency,
 		"company": company or frappe.defaults.get_defaults().company
 	}, "name")
+
+@frappe.whitelist()
+def get_companies():
+	"""get a list of companies based on permission"""
+	return [d.name for d in frappe.get_list("Company", fields=["name"],
+		order_by="name")]
+
+@frappe.whitelist()
+def get_children():
+	args = frappe.local.form_dict
+	doctype, company = args['doctype'], args['company']
+	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
+	doctype = frappe.db.escape(doctype)
+
+	# root
+	if args['parent'] in ("Accounts", "Cost Centers"):
+		fields = ", root_type, report_type, account_currency" if doctype=="Account" else ""
+		acc = frappe.db.sql(""" select
+			name as value, is_group as expandable {fields}
+			from `tab{doctype}`
+			where ifnull(`parent_{fieldname}`,'') = ''
+			and `company` = %s	and docstatus<2
+			order by name""".format(fields=fields, fieldname = fieldname, doctype=doctype),
+				company, as_dict=1)
+
+		if args["parent"]=="Accounts":
+			sort_root_accounts(acc)
+	else:
+		# other
+		fields = ", account_currency" if doctype=="Account" else ""
+		acc = frappe.db.sql("""select
+			name as value, is_group as expandable, parent_{fieldname} as parent {fields}
+			from `tab{doctype}`
+			where ifnull(`parent_{fieldname}`,'') = %s
+			and docstatus<2
+			order by name""".format(fields=fields, fieldname=fieldname, doctype=doctype),
+				args['parent'], as_dict=1)
+
+	if doctype == 'Account':
+		company_currency = frappe.db.get_value("Company", company, "default_currency")
+		for each in acc:
+			each["company_currency"] = company_currency
+			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False))
+
+			if each.account_currency != company_currency:
+				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value")))
+
+	return acc
