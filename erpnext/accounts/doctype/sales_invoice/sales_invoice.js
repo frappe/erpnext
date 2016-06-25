@@ -75,6 +75,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		// Show buttons only when pos view is active
 		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !doc.is_return) {
 			cur_frm.cscript.sales_order_btn();
+			cur_frm.cscript.time_sheet_btn();
 			cur_frm.cscript.delivery_note_btn();
 		}
 
@@ -108,6 +109,19 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						per_billed: ["<", 99.99],
 						customer: cur_frm.doc.customer || undefined,
 						company: cur_frm.doc.company
+					}
+				})
+			}, __("Get items from"));
+	},
+	
+	time_sheet_btn: function() {
+		this.$sales_order_btn = cur_frm.add_custom_button(__('Time Sheet'),
+			function() {
+				frappe.model.map_current_doc({
+					method: "erpnext.projects.doctype.time_sheet.time_sheet.make_sales_invoice",
+					source_doctype: "Time Sheet",
+					get_query_filters: {
+						status: "Submitted"
 					}
 				})
 			}, __("Get items from"));
@@ -430,3 +444,29 @@ cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
 		]
 	}
 });
+
+frappe.ui.form.on('Sales Invoice', {
+	setup: function(frm){
+		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(doc, cdt, cdn){
+			return {
+				filters: [
+					["Time Sheet", "status", "in", ["Submitted", "Payslip"]]
+				]
+			}
+		}
+	}
+})
+
+frappe.ui.form.on('Sales Invoice Timesheet', {
+	time_sheet: function(frm){
+		frm.call({
+			method: "calculate_billing_amount_from_timesheet",
+			doc: frm.doc,
+			callback: function(r, rt) {
+				refresh_field('total_billing_amount')
+			}
+		})
+	}
+})
+
+cur_frm.add_fetch("time_sheet", "total_billing_amount", "billing_amount");

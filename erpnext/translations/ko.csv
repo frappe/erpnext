@@ -173,7 +173,7 @@ DocType: Upload Attendance,"Download the Template, fill appropriate data and att
 All dates and employee combination in the selected period will come in the template, with existing attendance records",", 템플릿을 다운로드 적절한 데이터를 입력하고 수정 된 파일을 첨부합니다.
  선택한 기간의 모든 날짜와 직원 조합은 기존의 출석 기록과 함께, 템플릿에 올 것이다"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,{0} 항목을 활성화하지 않거나 수명이 도달했습니다
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,견적서를 제출 한 후 업데이트됩니다.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,견적서를 제출 한 후 업데이트됩니다.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","행에있는 세금을 포함하려면 {0} 항목의 요금에, 행의 세금은 {1}도 포함되어야한다"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,HR 모듈에 대한 설정
 DocType: SMS Center,SMS Center,SMS 센터
@@ -930,7 +930,7 @@ DocType: Sales Person,Select company name first.,첫 번째 회사 이름을 선
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,박사
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,인용문은 공급 업체에서 받았다.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},에 {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,시간 로그를 통해 업데이트
+DocType: Time Sheet,updated via Time Logs,시간 로그를 통해 업데이트
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,평균 연령
 DocType: Opportunity,Your sales person who will contact the customer in future,미래의 고객에게 연락 할 것이다 판매 사람
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,공급 업체의 몇 가지를 나열합니다.그들은 조직 또는 개인이 될 수 있습니다.
@@ -957,11 +957,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',설정 &#39;에 추가 할인을 적용&#39;하세요
 ,Ordered Items To Be Billed,청구 항목을 주문한
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,범위이어야한다보다는에게 범위
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,시간 로그를 선택하고 새로운 판매 송장을 만들 제출.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,시간 로그를 선택하고 새로운 판매 송장을 만들 제출.
 DocType: Global Defaults,Global Defaults,글로벌 기본값
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,프로젝트 협력 초대
 DocType: Salary Slip,Deductions,공제
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,이 시간 로그 일괄 청구하고있다.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,이 시간 로그 일괄 청구하고있다.
 DocType: Salary Slip,Leave Without Pay,지불하지 않고 종료
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,용량 계획 오류
 ,Trial Balance for Party,파티를위한 시산표
@@ -1271,7 +1271,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),추가 �
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,계정 차트에서 새로운 계정을 생성 해주세요.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,유지 보수 방문
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,창고에서 사용 가능한 배치 수량
-DocType: Time Log Batch Detail,Time Log Batch Detail,시간 로그 일괄 처리 정보
+DocType: Time Sheet Detail,Time Sheet Detail,시간 로그 일괄 처리 정보
 DocType: Landed Cost Voucher,Landed Cost Help,착륙 비용 도움말
 DocType: Purchase Invoice,Select Shipping Address,선택 배송 주소
 DocType: Leave Block List,Block Holidays on important days.,중요한 일에 블록 휴일.
@@ -1406,7 +1406,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","무게도 ""무게 UOM""를 언급 해주십시오 \n, 언급"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,자료 요청이 재고 항목을 확인하는 데 사용
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,항목의 하나의 단위.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',시간 로그 일괄 {0} '제출'해야
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',시간 로그 일괄 {0} '제출'해야
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,모든 재고 이동을위한 회계 항목을 만듭니다
 DocType: Leave Allocation,Total Leaves Allocated,할당 된 전체 잎
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},행 없음에 필요한 창고 {0}
@@ -1526,7 +1526,7 @@ DocType: Production Plan Material Request,Material Request Date,자료 요청 �
 DocType: Purchase Order Item,Supplier Quotation Item,공급 업체의 견적 상품
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,생산 오더에 대한 시간 로그의 생성을 사용하지 않습니다. 작업은 생산 오더에 대해 추적 할 수 없다
 DocType: Item,Has Variants,변형을 가지고
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,새로운 판매 송장을 작성하는 '판매 송장 확인'버튼을 클릭합니다.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,새로운 판매 송장을 작성하는 '판매 송장 확인'버튼을 클릭합니다.
 DocType: Monthly Distribution,Name of the Monthly Distribution,월별 분포의 이름
 DocType: Sales Person,Parent Sales Person,부모 판매 사람
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,회사 마스터 및 글로벌 기본값에 기본 통화를 지정하십시오
@@ -1739,7 +1739,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,고정 자산
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,직렬화 된 재고
 DocType: Activity Type,Default Billing Rate,기본 결제 요금
-DocType: Time Log Batch,Total Billing Amount,총 결제 금액
+DocType: Time Sheet,Total Billing Amount,총 결제 금액
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,채권 계정
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},행 번호 {0} 자산이 {1} 이미 {2}
 DocType: Quotation Item,Stock Balance,재고 대차
@@ -2219,7 +2219,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),인터넷 속도 (회
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,지역의 나무를 관리합니다.
 DocType: Journal Entry Account,Sales Invoice,판매 송장
 DocType: Journal Entry Account,Party Balance,파티 밸런스
-DocType: Sales Invoice Item,Time Log Batch,시간 로그 배치
+DocType: Sales Invoice Item,Time Sheet,시간 로그 배치
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,할인에 적용을 선택하세요
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,급여 슬립이 만든
 DocType: Company,Default Receivable Account,기본 채권 계정
@@ -2402,7 +2402,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,잔액을 떨어져 쓰기
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","당신이 자동 반복 송장을 필요로하는 경우에 선택합니다.모든 판매 청구서를 제출 한 후, 반복되는 부분은 볼 수 있습니다."
 DocType: Account,Accounts Manager,계정 관리자
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',시간 로그는 {0} '제출'해야
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',시간 로그는 {0} '제출'해야
 DocType: Stock Settings,Default Stock UOM,기본 재고 UOM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),활동 유형에 따라 요금 원가 계산 (시간당)
 DocType: Production Planning Tool,Create Material Requests,자료 요청을 만듭니다
@@ -2704,7 +2704,7 @@ DocType: Sales Order,Partly Billed,일부 청구
 DocType: Item,Default BOM,기본 BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,다시 입력 회사 이름은 확인하시기 바랍니다
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,총 발행 AMT 사의
-DocType: Time Log Batch,Total Hours,총 시간
+DocType: Time Sheet,Total Hours,총 시간
 DocType: Journal Entry,Printing Settings,인쇄 설정
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},총 직불 카드는 전체 신용 동일해야합니다.차이는 {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,자동차
@@ -2995,7 +2995,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,수량에게 전송
 apps/erpnext/erpnext/config/learn.py +11,Navigating,탐색
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,계획
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,시간 로그 일괄 확인
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,시간 로그 일괄 확인
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,발행 된
 DocType: Project,Total Billing Amount (via Time Logs),총 결제 금액 (시간 로그를 통해)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,우리는이 품목을
@@ -3045,7 +3045,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,항목의 고유 단위
 DocType: Pricing Rule,Buying,구매
 DocType: HR Settings,Employee Records to be created by,직원 기록에 의해 생성되는
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,이 시간 로그 일괄 취소되었습니다.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,이 시간 로그 일괄 취소되었습니다.
 ,Reqd By Date,Reqd 날짜
 DocType: Salary Slip Earning,Salary Slip Earning,급여 적립 전표
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,채권자
@@ -3461,7 +3461,7 @@ DocType: Budget Detail,Budget Detail,예산 세부 정보
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,전송하기 전에 메시지를 입력 해주세요
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,판매 시점 프로필
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,SMS 설정을 업데이트하십시오
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,이미 청구 시간 로그 {0}
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,이미 청구 시간 로그 {0}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,무담보 대출
 DocType: Cost Center,Cost Center Name,코스트 센터의 이름
 DocType: Maintenance Schedule Detail,Scheduled Date,예약 된 날짜

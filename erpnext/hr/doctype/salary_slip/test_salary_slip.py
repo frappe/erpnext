@@ -4,10 +4,13 @@ from __future__ import unicode_literals
 
 import unittest
 import frappe
-from frappe.utils import today
+from frappe.utils import today, now_datetime, getdate, cstr
 from erpnext.hr.doctype.employee.employee import make_salary_structure
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.leave_application.test_leave_application import make_allocation_record
+from erpnext.projects.doctype.time_sheet.time_sheet import make_salary_slip as make_salary_slip_from_time_sheet
+from erpnext.projects.doctype.time_log.test_time_log import make_time_log_test_record
+from erpnext.projects.doctype.time_sheet.test_time_sheet import add_time_log
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
@@ -152,6 +155,33 @@ class TestSalarySlip(unittest.TestCase):
 			salary_slip = salary_slip.name
 
 		return salary_slip
+
+	def make_activity_for_employee(self):
+		activity_type = frappe.get_doc("Activity Type", "_Test Activity Type")
+		activity_type.billing_rate = 50
+		activity_type.costing_rate = 20
+		activity_type.wage_rate = 25
+		activity_type.save()
+
+	def make_time_sheet_for_employee(self):
+		time_sheet = frappe.get_doc({
+			"doctype": "Time Sheet",
+			"make_for": "Salary Slip",
+			"employee": "_T-Employee-0002"
+		})
+
+		start_date = end_date = now_datetime()
+		for r in range(0, 4):
+			tl1 = make_time_log_test_record(user= "test@example.com", employee= "_T-Employee-0002", simulate= True)
+			add_time_log(time_sheet, tl1.name)
+			start_date = tl1.from_time if tl1.from_time < start_date else start_date
+			end_date = tl1.to_time if tl1.to_time > end_date else end_date
+
+		time_sheet.start_date = cstr(getdate(start_date))
+		time_sheet.end_date = cstr(getdate(end_date))
+		time_sheet.insert()
+		time_sheet.submit()
+		return time_sheet
 
 test_dependencies = ["Leave Application", "Holiday List"]
 

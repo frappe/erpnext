@@ -104,7 +104,7 @@ DocType: Purchase Order Item,Qty as per Stock UOM,Cantidad de acuerdo a la Unida
 DocType: Production Order,Production Order,Orden de Producción
 DocType: Landed Cost Voucher,Landed Cost Voucher,Comprobante de costos de destino estimados
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +37,Ageing Range 1,Rango de antigüedad 1
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,Este Grupo de Horas Registradas se ha facturado.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,Este Grupo de Horas Registradas se ha facturado.
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +10,Apparel & Accessories,Ropa y Accesorios
 DocType: Quality Inspection,Get Specification Details,Obtenga Especificación Detalles
 apps/erpnext/erpnext/config/stock.py +191,"Attributes for Item Variants. e.g Size, Color etc.","Atributos para  Elementos variables. por ejemplo, tamaño, color, etc."
@@ -125,7 +125,7 @@ apps/erpnext/erpnext/config/setup.py +83,"Show / Hide features like Serial Nos, 
 DocType: HR Settings,HR Settings,Configuración de Recursos Humanos
 DocType: Workstation Working Hour,Workstation Working Hour,Horario de la Estación de Trabajo
 DocType: Sales Invoice,Exhibition,Exposición
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',El Registro de Horas {0} tiene que ser ' Enviado '
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',El Registro de Horas {0} tiene que ser ' Enviado '
 apps/erpnext/erpnext/public/js/setup_wizard.js +287,Add a few sample records,Agregar algunos registros de muestra
 apps/erpnext/erpnext/setup/doctype/company/company.js +66,Delete all the Transactions for this Company,Eliminar todas las transacciones para esta empresa
 apps/erpnext/erpnext/controllers/recurring_document.py +132,New {0}: #{1},Nuevo {0}: # {1}
@@ -161,7 +161,7 @@ DocType: Maintenance Schedule,Generate Schedule,Generar Horario
 DocType: Employee External Work History,Employee External Work History,Historial de Trabajo Externo del Empleado
 DocType: Delivery Note,Vehicle Dispatch Date,Fecha de despacho de vehículo
 DocType: Employee,"Here you can maintain family details like name and occupation of parent, spouse and children","Aquí usted puede mantener los detalles de la familia como el nombre y ocupación de los padres, cónyuge e hijos"
-DocType: Time Log Batch Detail,Time Log Batch Detail,Detalle de Grupo de Horas Registradas
+DocType: Time Sheet Detail,Time Sheet Detail,Detalle de Grupo de Horas Registradas
 DocType: Task,depends_on,depende de
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +178,Secured Loans,Préstamos Garantizados
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +196,Only the selected Leave Approver can submit this Leave Application,Sólo el Supervisor de Vacaciones seleccionado puede presentar esta solicitud de permiso
@@ -384,7 +384,7 @@ apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +68,Receiver List 
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +17,Reserved Qty,Cant. Reservada
 DocType: Project Task,Pending Review,Pendiente de revisar
 DocType: Target Detail,Target Detail,Objetivo Detalle
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Hora de registro {0} ya facturado
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Hora de registro {0} ya facturado
 DocType: Production Order Operation,Make Time Log,Hacer Registro de Tiempo
 DocType: Purchase Taxes and Charges Template,Purchase Taxes and Charges Template,Plantillas de Cargos e Impuestos
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +162,Current Liabilities,Pasivo Corriente
@@ -596,7 +596,7 @@ DocType: SMS Settings,"Enter static url parameters here (Eg. sender=ERPNext, use
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +50,Expected Delivery Date cannot be before Sales Order Date,La fecha prevista de entrega no puede ser anterior a la fecha de la órden de venta
 DocType: Payment Tool,Payment Mode,Método de pago
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +142,Quotation {0} is cancelled,Cotización {0} se cancela
-DocType: Sales Invoice Item,Time Log Batch,Grupo de Horas Registradas
+DocType: Sales Invoice Item,Time Sheet,Grupo de Horas Registradas
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +211,Quality Inspection required for Item {0},Inspección de la calidad requerida para el articulo {0}
 DocType: Address,Preferred Shipping Address,Dirección de envío preferida
 DocType: Time Log,"Log of Activities performed by users against Tasks that can be used for tracking time, billing.",Bitácora de actividades realizadas por los usuarios en las tareas que se utilizan para el seguimiento del tiempo y la facturación.
@@ -944,7 +944,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 DocType: Production Planning Tool,Select Items,Seleccione Artículos
 DocType: Bank Reconciliation Detail,Cheque Date,Fecha del Cheque
 DocType: HR Settings,Employee record is created using selected field. ,El registro del empleado se crea utilizando el campo seleccionado.
-DocType: Time Log Batch,Total Hours,Total de Horas
+DocType: Time Sheet,Total Hours,Total de Horas
 apps/erpnext/erpnext/setup/doctype/company/company.py +53,Account {0} does not belong to company: {1},Cuenta {0} no pertenece a la compañía: {1}
 DocType: Contact,Enter department to which this Contact belongs,Introduzca departamento al que pertenece este Contacto
 DocType: Item Group,Website Specifications,Especificaciones del Sitio Web
@@ -1156,7 +1156,7 @@ apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +93,{0} 
 DocType: Item,Item Tax,Impuesto del artículo
 ,Item Prices,Precios de los Artículos
 DocType: Account,Balance must be,Balance debe ser
-DocType: Time Log Batch,updated via Time Logs,actualizada a través de los registros de tiempo
+DocType: Time Sheet,updated via Time Logs,actualizada a través de los registros de tiempo
 DocType: Sales Invoice Advance,Advance Amount,Importe Anticipado
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +25,Please enter valid mobile nos,"Por favor, ingrese un numero de móvil válido"
 DocType: Sales Partner,A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,Terceros / proveedor / comisionista / afiliado / distribuidor que vende productos de empresas a cambio de una comisión.
@@ -1797,7 +1797,7 @@ DocType: Stock Reconciliation Item,Current Qty,Cant. Actual
 DocType: POS Profile,[Select],[Seleccionar]
 DocType: Item,Has Serial No,Tiene No de Serie
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +94,Sales Order required for Item {0},Orden de Venta requerida para el punto {0}
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',Registro de Tiempo {0} debe ser ' Enviado '
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',Registro de Tiempo {0} debe ser ' Enviado '
 DocType: Operation,Default Workstation,Estación de Trabajo por Defecto
 DocType: Production Plan Item,Production Plan Item,Plan de producción de producto
 DocType: Purchase Taxes and Charges,Valuation and Total,Valuación y Total
@@ -2463,7 +2463,7 @@ DocType: Installation Note Item,Against Document Detail No,Contra documento No.
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.js +24,Add Subscribers,Añadir Suscriptores
 DocType: Purchase Invoice,Grand Total (Company Currency),Suma total (Moneda Local)
 DocType: Employee,Ms,Sra.
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Se actualizará después de la factura de venta se considera enviada .
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Se actualizará después de la factura de venta se considera enviada .
 DocType: Purchase Invoice Item,Quantity and Rate,Cantidad y Cambio
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py +36,Balance Qty,Can. en balance
 DocType: BOM,Materials Required (Exploded),Materiales necesarios ( despiece )
@@ -2700,7 +2700,7 @@ DocType: Employee,Employment Details,Detalles de Empleo
 DocType: Stock Entry,Total Incoming Value,Valor total de entradas
 DocType: Stock Reconciliation Item,Stock Reconciliation Item,Articulo de Reconciliación de Inventario
 DocType: Buying Settings,Buying Settings,Configuración de Compras
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,Este Grupo de Horas Registradas se ha facturado.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,Este Grupo de Horas Registradas se ha facturado.
 DocType: Item Customer Detail,Item Customer Detail,Detalle del producto para el cliente
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +30,Newsletter has already been sent,El boletín de noticias ya ha sido enviado
 DocType: Process Payroll,Process Payroll,Nómina de Procesos
@@ -2788,9 +2788,9 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +12,"Pricing 
 apps/erpnext/erpnext/controllers/buying_controller.py +131,Please select BOM in BOM field for Item {0},"Por favor, seleccione la Solicitud de Materiales en el campo de Solicitud de Materiales para el punto {0}"
 DocType: Salary Slip Earning,Salary Slip Earning,Ingreso en Planilla
 DocType: Purchase Receipt,Rate at which supplier's currency is converted to company's base currency,Grado a la que la moneda de proveedor se convierte en la moneda base de la compañía
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Haga Registro de Tiempo de Lotes
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Haga Registro de Tiempo de Lotes
 ,Stock Ageing,Antigüedad de existencias
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Seleccionar registros de tiempo e Presentar después de crear una nueva factura de venta .
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Seleccionar registros de tiempo e Presentar después de crear una nueva factura de venta .
 DocType: Hub Settings,Hub Settings,Ajustes del Centro de actividades
 DocType: Shipping Rule Condition,A condition for a Shipping Rule,Una condición para una regla de envío
 DocType: Lead,Person Name,Nombre de la persona
@@ -2940,7 +2940,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +172,Leaves per Year
 DocType: Leave Block List,Leave Block List Name,Nombre de la Lista de Bloqueo de Vacaciones
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +27,User ID not set for Employee {0},ID de usuario no establecido para el empleado {0}
 apps/erpnext/erpnext/accounts/doctype/account/account.py +46,Account {0}: You can not assign itself as parent account,Cuenta {0}: no puede asignar la misma cuenta como su cuenta Padre.
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Clic en el botón ""Crear factura de venta"" para crearla."
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Clic en el botón ""Crear factura de venta"" para crearla."
 DocType: Item Price,Item Price,Precios de Productos
 DocType: Leave Control Panel,Leave blank if considered for all branches,Dejar en blanco si se considera para todas las ramas
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +323,Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1},El elemento {0} no se encuentra en 'Materias Primas Suministradas' en la tabla de la órden de compra {1}
@@ -2980,7 +2980,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +269,Consumable,Consumible
 DocType: Employee,Relation,Relación
 DocType: Project,Expected Start Date,Fecha prevista de inicio
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +76,Row {0}: Party Type and Party is required for Receivable / Payable account {1},Fila {0}: el tipo de entidad se requiere para las cuentas por cobrar/pagar {1}
-DocType: Time Log Batch,Total Billing Amount,Monto total de facturación
+DocType: Time Sheet,Total Billing Amount,Monto total de facturación
 DocType: Expense Claim,Total Claimed Amount,Total reembolso
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,"Por favor, actualizar la configuración SMS"
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +18,Consulting,Consuloría

@@ -209,7 +209,7 @@ DocType: Upload Attendance,"Download the Template, fill appropriate data and att
 All dates and employee combination in the selected period will come in the template, with existing attendance records",", Şablon İndir uygun verileri doldurmak ve değiştirilmiş dosya ekleyin.
  Seçilen dönemde tüm tarihler ve çalışan kombinasyonu mevcut katılım kayıtları ile, şablonda gelecek"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,Ürün {0} aktif değil veya kullanım ömrünün sonuna gelindi
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Satış Faturası verildikten sonra güncellenecektir.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Satış Faturası verildikten sonra güncellenecektir.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included",Satır {0} a vergi eklemek için  {1} satırlarındaki vergiler de dahil edilmelidir
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,İK Modülü Ayarları
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,İK Modülü Ayarları
@@ -1101,7 +1101,7 @@ DocType: Sales Person,Select company name first.,Önce şirket adı seçiniz
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,Dr
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Tedarikçilerden alınan teklifler.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},Şu kişi(lere) {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,Zaman Kayıtlar üzerinden güncellenir
+DocType: Time Sheet,updated via Time Logs,Zaman Kayıtlar üzerinden güncellenir
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Ortalama Yaş
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Ortalama Yaş
 DocType: Opportunity,Your sales person who will contact the customer in future,Müşteriyle ileride irtibat kuracak satış kişiniz
@@ -1131,11 +1131,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',Set &#39;On İlave İndirim Uygula&#39; Lütfen
 ,Ordered Items To Be Billed,Faturalanacak Sipariş Edilen Ürünler
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,Menzil az olmak zorundadır Kimden daha Range için
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Günlükleri seçin ve yeni Satış Faturası oluşturmak için teslim edin.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Günlükleri seçin ve yeni Satış Faturası oluşturmak için teslim edin.
 DocType: Global Defaults,Global Defaults,Küresel Varsayılanlar
 DocType: Salary Slip,Deductions,Kesintiler
 DocType: Salary Slip,Deductions,Kesintiler
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,Bu Günlük Partisi faturalandı.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,Bu Günlük Partisi faturalandı.
 DocType: Salary Slip,Leave Without Pay,Ücretsiz İzin
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,Kapasite Planlama Hatası
 ,Trial Balance for Party,Parti için Deneme Dengesi
@@ -1505,7 +1505,7 @@ apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new ac
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Bakım Ziyareti
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Bakım Ziyareti
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Depo Available at Toplu Adet
-DocType: Time Log Batch Detail,Time Log Batch Detail,Günlük Seri Detayı
+DocType: Time Sheet Detail,Time Sheet Detail,Günlük Seri Detayı
 DocType: Landed Cost Voucher,Landed Cost Help,Indi Maliyet Yardım
 DocType: Purchase Invoice,Select Shipping Address,Seç Teslimat Adresi
 DocType: Leave Block List,Block Holidays on important days.,Önemli günlerde Blok Tatil.
@@ -1662,7 +1662,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Ağırlık çok ""Ağırlık Ölçü Birimi"" belirtiniz \n, söz edilmektedir"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Bu stok girdisini yapmak için kullanılan Malzeme Talebi
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,Bir Ürünün tek birimi
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',Günlük Seri {0} 'Teslim edilmelidir'
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',Günlük Seri {0} 'Teslim edilmelidir'
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Her Stok Hareketi için Muhasebe kaydı oluştur
 DocType: Leave Allocation,Total Leaves Allocated,Ayrılan toplam izinler
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Satır No gerekli Depo {0}
@@ -1797,7 +1797,7 @@ DocType: Production Plan Material Request,Material Request Date,Malzeme Talep Ta
 DocType: Purchase Order Item,Supplier Quotation Item,Tedarikçi Teklif ürünü
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Üretim Siparişleri karşı gerçek zamanlı günlükleri oluşturulmasını devre dışı bırakır. Operasyonlar Üretim Emri karşı izlenen edilmeyecektir
 DocType: Item,Has Variants,Varyasyoları var
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Yeni Satış Faturası oluşturmak için 'Satış Fatura Yap' butonuna tıklayın.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Yeni Satış Faturası oluşturmak için 'Satış Fatura Yap' butonuna tıklayın.
 DocType: Monthly Distribution,Name of the Monthly Distribution,Aylık Dağıtım Adı
 DocType: Sales Person,Parent Sales Person,Ana Satış Elemanı
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,Şirket Alanı ve Küresel Standartlardaki Para Birimini belirtiniz
@@ -2044,7 +2044,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,Sabit Varlık
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Serileştirilmiş Envanteri
 DocType: Activity Type,Default Billing Rate,Varsayılan Fatura Oranı
-DocType: Time Log Batch,Total Billing Amount,Toplam Fatura Tutarı
+DocType: Time Sheet,Total Billing Amount,Toplam Fatura Tutarı
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,Alacak Hesabı
 DocType: Quotation Item,Stock Balance,Stok Bakiye
 DocType: Quotation Item,Stock Balance,Stok Bakiye
@@ -2593,7 +2593,7 @@ apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,Bölge Ağacını
 DocType: Journal Entry Account,Sales Invoice,Satış Faturası
 DocType: Journal Entry Account,Sales Invoice,Satış Faturası
 DocType: Journal Entry Account,Party Balance,Parti Dengesi
-DocType: Sales Invoice Item,Time Log Batch,Günlük Seri
+DocType: Sales Invoice Item,Time Sheet,Günlük Seri
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,İndirim Açık Uygula seçiniz
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Maaş Kayma düzenlendi
 DocType: Company,Default Receivable Account,Standart Alacak Hesabı
@@ -2813,7 +2813,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Bekleyen Miktarı Sil
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Otomatik mükerrer faturaya ihtiyacınız olup olmadığını kontrol edin, herhangi bir satış faturası ibraz edildikten sonra tekrar bölümü görünür olacaktır."
 DocType: Account,Accounts Manager,Hesap Yöneticisi
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',Günlük {0} 'Teslim edilmelidir'
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',Günlük {0} 'Teslim edilmelidir'
 DocType: Stock Settings,Default Stock UOM,Varsayılan Stok Ölçü Birimi
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Etkinlik Türü dayalı Oranı Maliyetlendirme (saatte)
 DocType: Production Planning Tool,Create Material Requests,Malzeme İstekleri Oluştur
@@ -3140,8 +3140,8 @@ DocType: Sales Order,Partly Billed,Kısmen Faturalandı
 DocType: Item,Default BOM,Standart BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,Re-tipi şirket ismi onaylamak için lütfen
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,Toplam Alacakların Tutarı
-DocType: Time Log Batch,Total Hours,Toplam Saat
-DocType: Time Log Batch,Total Hours,Toplam Saat
+DocType: Time Sheet,Total Hours,Toplam Saat
+DocType: Time Sheet,Total Hours,Toplam Saat
 DocType: Journal Entry,Printing Settings,Baskı Ayarları
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},"Toplam Borç Toplam Krediye eşit olmalıdırr. Aradaki fark, {0}"
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Otomotiv
@@ -3484,7 +3484,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Gezinme
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Planlama
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Planlama
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Günlük Parti oluşturun
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Günlük Parti oluşturun
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Veriliş
 DocType: Project,Total Billing Amount (via Time Logs),Toplam Fatura Tutarı (Zaman Kayıtlar üzerinden)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,Bu ürünü satıyoruz
@@ -3539,7 +3539,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,Bir Öğe Farklı birim
 DocType: Pricing Rule,Buying,Satın alma
 DocType: HR Settings,Employee Records to be created by,Oluşturulacak Çalışan Kayıtları
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,Bu Günlük partisi iptal edildi.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,Bu Günlük partisi iptal edildi.
 ,Reqd By Date,Teslim Tarihi
 DocType: Salary Slip Earning,Salary Slip Earning,Bordro Dahili Kazanç
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,Alacaklılar
@@ -4032,7 +4032,7 @@ DocType: Budget Detail,Budget Detail,Bütçe Detay
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Lütfen Göndermeden önce mesajı giriniz
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Satış Noktası Profili
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,Lütfen SMS ayarlarını güncelleyiniz
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Zaten fatura Zaman Günlüğü {0}
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Zaten fatura Zaman Günlüğü {0}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Teminatsız Krediler
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Teminatsız Krediler
 DocType: Cost Center,Cost Center Name,Maliyet Merkezi Adı

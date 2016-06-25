@@ -168,7 +168,7 @@ DocType: Upload Attendance,"Download the Template, fill appropriate data and att
 All dates and employee combination in the selected period will come in the template, with existing attendance records",", டெம்ப்ளேட் பதிவிறக்கம் பொருத்தமான தரவு நிரப்ப செய்தது கோப்பு இணைக்கவும்.
  தேர்வு காலம் இருக்கும் அனைத்து தேதிகளும் ஊழியர் இணைந்து ஏற்கனவே உள்ள வருகைப் பதிவேடுகள் கொண்டு, டெம்ப்ளேட் வரும்"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,பொருள் {0} செயலில் இல்லை அல்லது வாழ்க்கை முடிவுக்கு வந்து விட்டது
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,விற்பனை விலைப்பட்டியல் சமர்பிக்கப்பட்டதும் புதுப்பிக்கப்படும்.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,விற்பனை விலைப்பட்டியல் சமர்பிக்கப்பட்டதும் புதுப்பிக்கப்படும்.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","வரிசையில் வரி ஆகியவை அடங்கும் {0} பொருள் விகிதம் , வரிசைகளில் வரிகளை {1} சேர்க்கப்பட்டுள்ளது"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,அலுவலக தொகுதி அமைப்புகள்
 DocType: SMS Center,SMS Center,எஸ்எம்எஸ் மையம்
@@ -906,7 +906,7 @@ DocType: Sales Person,Select company name first.,முதல் நிறுவ
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,டாக்டர்
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,மேற்கோள்கள் சப்ளையர்கள் இருந்து பெற்றார்.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},எப்படி {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,நேரத்தில் பதிவுகள் வழியாக புதுப்பிக்கப்பட்டது
+DocType: Time Sheet,updated via Time Logs,நேரத்தில் பதிவுகள் வழியாக புதுப்பிக்கப்பட்டது
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,சராசரி வயது
 DocType: Opportunity,Your sales person who will contact the customer in future,எதிர்காலத்தில் வாடிக்கையாளர் தொடர்பு யார் உங்கள் விற்பனை நபர்
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,உங்கள் சப்ளையர்கள் ஒரு சில பட்டியல் . அவர்கள் நிறுவனங்கள் அல்லது தனிநபர்கள் இருக்க முடியும் .
@@ -933,10 +933,10 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',அமைக்க மேலும் கூடுதல் தள்ளுபடி விண்ணப்பிக்கவும் &#39;தயவு செய்து
 ,Ordered Items To Be Billed,கணக்கில் வேண்டும் உத்தரவிட்டது உருப்படிகள்
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,ரேஞ்ச் குறைவாக இருக்க வேண்டும் இருந்து விட வரையறைக்கு
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,நேரம் பதிவுகள் தேர்ந்தெடுத்து ஒரு புதிய விற்பனை விலைப்பட்டியல் உருவாக்க சமர்ப்பிக்கவும்.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,நேரம் பதிவுகள் தேர்ந்தெடுத்து ஒரு புதிய விற்பனை விலைப்பட்டியல் உருவாக்க சமர்ப்பிக்கவும்.
 DocType: Global Defaults,Global Defaults,உலக இயல்புநிலைகளுக்கு
 DocType: Salary Slip,Deductions,கழிவுகளுக்கு
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,இந்த நேரம் புகுபதிகை தொகுதி படியாக.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,இந்த நேரம் புகுபதிகை தொகுதி படியாக.
 DocType: Salary Slip,Leave Without Pay,சம்பளமில்லா விடுப்பு
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,கொள்ளளவு திட்டமிடுதல் பிழை
 ,Trial Balance for Party,கட்சி சோதனை இருப்பு
@@ -1236,7 +1236,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),கூ�
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,கணக்கு பட்டியலில் இருந்து புதிய கணக்கை உருவாக்கு .
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,பராமரிப்பு வருகை
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,கிடங்கு உள்ள கிடைக்கும் தொகுதி அளவு
-DocType: Time Log Batch Detail,Time Log Batch Detail,நேரம் புகுபதிகை தொகுப்பு விரிவாக
+DocType: Time Sheet Detail,Time Sheet Detail,நேரம் புகுபதிகை தொகுப்பு விரிவாக
 DocType: Landed Cost Voucher,Landed Cost Help,Landed செலவு உதவி
 DocType: Purchase Invoice,Select Shipping Address,ஷிப்பிங் முகவரி தேர்வு
 DocType: Leave Block List,Block Holidays on important days.,முக்கிய நாட்களில் பிளாக் விடுமுறை.
@@ -1369,7 +1369,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","எடை கூட ""எடை UOM"" குறிப்பிட தயவு செய்து \n குறிப்பிடப்பட்டுள்ளது"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,இந்த பங்கு நுழைவு செய்ய பயன்படுத்தப்படும் பொருள் கோரிக்கை
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,ஒரு பொருள் ஒரே யூனிட்.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',நேரம் பதிவு தொகுப்பு {0} ' Submitted'
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',நேரம் பதிவு தொகுப்பு {0} ' Submitted'
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,"ஒவ்வொரு பங்கு இயக்கம் , பைனான்ஸ் உள்ளீடு செய்ய"
 DocType: Leave Allocation,Total Leaves Allocated,மொத்த இலைகள் ஒதுக்கப்பட்ட
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},ரோ இல்லை தேவையான கிடங்கு {0}
@@ -1485,7 +1485,7 @@ DocType: Production Plan Material Request,Material Request Date,பொரு�
 DocType: Purchase Order Item,Supplier Quotation Item,வழங்குபவர் மேற்கோள் பொருள்
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,உற்பத்தி ஆணைகள் எதிராக நேரத்தில் பதிவுகள் உருவாக்கம் முடக்குகிறது. ஆபரேஷன்ஸ் உற்பத்தி ஒழுங்குக்கு எதிரான கண்காணிக்கப்படும்
 DocType: Item,Has Variants,இல்லை வகைகள் உள்ளன
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,ஒரு புதிய விற்பனை விலைப்பட்டியல் உருவாக்க பொத்தானை &#39;விற்பனை விலைப்பட்டியல் கொள்ளுங்கள்&#39; கிளிக்.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,ஒரு புதிய விற்பனை விலைப்பட்டியல் உருவாக்க பொத்தானை &#39;விற்பனை விலைப்பட்டியல் கொள்ளுங்கள்&#39; கிளிக்.
 DocType: Monthly Distribution,Name of the Monthly Distribution,மாதாந்திர விநியோகம் பெயர்
 DocType: Sales Person,Parent Sales Person,பெற்றோர் விற்பனை நபர்
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,நிறுவனத்தின் மாஸ்டர் மற்றும் உலகளாவிய செலுத்தமுடியாத இயல்புநிலை நாணய குறிப்பிடவும்
@@ -1688,7 +1688,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,நிலையான சொத்து
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,தொடர் சரக்கு
 DocType: Activity Type,Default Billing Rate,இயல்புநிலை பில்லிங் மதிப்பீடு
-DocType: Time Log Batch,Total Billing Amount,மொத்த பில்லிங் அளவு
+DocType: Time Sheet,Total Billing Amount,மொத்த பில்லிங் அளவு
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,பெறத்தக்க கணக்கு
 DocType: Quotation Item,Stock Balance,பங்கு இருப்பு
 apps/erpnext/erpnext/config/selling.py +306,Sales Order to Payment,செலுத்துதல் விற்பனை ஆணை
@@ -2158,7 +2158,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),நிகர வி�
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,மண்டலம் மரம் நிர்வகி .
 DocType: Journal Entry Account,Sales Invoice,விற்பனை விலை விவரம்
 DocType: Journal Entry Account,Party Balance,கட்சி இருப்பு
-DocType: Sales Invoice Item,Time Log Batch,நேரம் புகுபதிகை தொகுப்பு
+DocType: Sales Invoice Item,Time Sheet,நேரம் புகுபதிகை தொகுப்பு
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,தள்ளுபடி விண்ணப்பிக்க தேர்ந்தெடுக்கவும்
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,சம்பளம் ஸ்லிப் உருவாக்கப்பட்டது
 DocType: Company,Default Receivable Account,இயல்புநிலை பெறத்தக்க கணக்கு
@@ -2335,7 +2335,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,சிறந்த தொகை இனிய எழுத
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","தானாக வரும் பொருள் தேவை என்பதை அறியவும். எந்த விற்பனை விலைப்பட்டியல் சமர்ப்பித்த பிறகு, தொடர் பகுதியில் காண முடியும்."
 DocType: Account,Accounts Manager,கணக்குகள் மேலாளர்
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',நேரம் பதிவு {0} ' Submitted'
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',நேரம் பதிவு {0} ' Submitted'
 DocType: Stock Settings,Default Stock UOM,முன்னிருப்பு பங்கு மொறட்டுவ பல்கலைகழகம்
 DocType: Time Log,Costing Rate based on Activity Type (per hour),நடவடிக்கை வகை அடிப்படையில் மதிப்பீடு செலவு (ஒரு நாளைக்கு)
 DocType: Production Planning Tool,Create Material Requests,பொருள் கோரிக்கைகள் உருவாக்க
@@ -2622,7 +2622,7 @@ DocType: Sales Order,Partly Billed,இதற்கு கட்டணம்
 DocType: Item,Default BOM,முன்னிருப்பு BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,மீண்டும் தட்டச்சு நிறுவனத்தின் பெயர் உறுதிப்படுத்த தயவு செய்து
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,மொத்த மிகச்சிறந்த விவரங்கள்
-DocType: Time Log Batch,Total Hours,மொத்த நேரம்
+DocType: Time Sheet,Total Hours,மொத்த நேரம்
 DocType: Journal Entry,Printing Settings,அச்சிடுதல் அமைப்புகள்
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},மொத்த பற்று மொத்த கடன் சமமாக இருக்க வேண்டும் .
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,வாகன
@@ -2900,7 +2900,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,அளவு மாற்றம்
 apps/erpnext/erpnext/config/learn.py +11,Navigating,வழிநடத்தல்
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,திட்டமிடல்
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,நேரம் பதிவு தொகுதி செய்ய
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,நேரம் பதிவு தொகுதி செய்ய
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,வெளியிடப்படுகிறது
 DocType: Project,Total Billing Amount (via Time Logs),மொத்த பில்லிங் அளவு (நேரத்தில் பதிவுகள் வழியாக)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,நாம் இந்த பொருளை விற்க
@@ -2948,7 +2948,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,"ஒரு பொருள், மாறுபட்ட அலகு"
 DocType: Pricing Rule,Buying,வாங்குதல்
 DocType: HR Settings,Employee Records to be created by,பணியாளர் ரெக்கார்ட்ஸ் விவரங்களை வேண்டும்
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,இந்த நேரம் புகுபதிகை தொகுப்பு ரத்து செய்யப்பட்டது.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,இந்த நேரம் புகுபதிகை தொகுப்பு ரத்து செய்யப்பட்டது.
 ,Reqd By Date,தேதி வாக்கில் Reqd
 DocType: Salary Slip Earning,Salary Slip Earning,சம்பளம் ஸ்லிப் ஆதாயம்
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,பற்றாளர்களின்
@@ -3357,7 +3357,7 @@ DocType: Budget Detail,Budget Detail,வரவு செலவு திட்�
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,அனுப்புவதற்கு முன் செய்தி உள்ளிடவும்
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,புள்ளி விற்பனை செய்தது
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,SMS அமைப்புகள் மேம்படுத்த
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,ஏற்கனவே படியாக நேரம் பரிசீலனை {0}
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,ஏற்கனவே படியாக நேரம் பரிசீலனை {0}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,பிணையற்ற கடன்கள்
 DocType: Cost Center,Cost Center Name,மையம் பெயர் செலவு
 DocType: Maintenance Schedule Detail,Scheduled Date,திட்டமிடப்பட்ட தேதி

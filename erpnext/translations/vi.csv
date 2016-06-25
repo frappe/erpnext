@@ -168,7 +168,7 @@ DocType: Upload Attendance,"Download the Template, fill appropriate data and att
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Tải Template, điền dữ liệu thích hợp và đính kèm các tập tin sửa đổi.
  Tất cả các ngày và nhân viên kết hợp trong giai đoạn được chọn sẽ đến trong bản mẫu, hồ sơ tham dự với hiện tại"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,Mục {0} không hoạt động hoặc kết thúc của cuộc sống đã đạt tới
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Sẽ được cập nhật sau khi bán hàng hóa đơn được Gửi.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Sẽ được cập nhật sau khi bán hàng hóa đơn được Gửi.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Bao gồm thuế hàng {0} trong tỷ lệ khoản, thuế hàng {1} cũng phải được bao gồm"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,Cài đặt cho nhân sự Mô-đun
 DocType: SMS Center,SMS Center,Trung tâm nhắn tin
@@ -906,7 +906,7 @@ DocType: Sales Person,Select company name first.,Chọn tên công ty đầu ti�
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,Tiến sĩ
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Trích dẫn nhận được từ nhà cung cấp.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},Để {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,cập nhật thông qua Thời gian Logs
+DocType: Time Sheet,updated via Time Logs,cập nhật thông qua Thời gian Logs
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Tuổi trung bình
 DocType: Opportunity,Your sales person who will contact the customer in future,"Người bán hàng của bạn, những người sẽ liên lạc với khách hàng trong tương lai"
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,"Danh sách một số nhà cung cấp của bạn. Họ có thể là các tổ chức, cá nhân."
@@ -933,10 +933,10 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',Xin hãy đặt &#39;Áp dụng giảm giá bổ sung On&#39;
 ,Ordered Items To Be Billed,Ra lệnh tiêu được lập hoá đơn
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,Từ Phạm vi có thể ít hơn Để Phạm vi
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Chọn Thời gian Logs và Submit để tạo ra một hóa đơn bán hàng mới.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Chọn Thời gian Logs và Submit để tạo ra một hóa đơn bán hàng mới.
 DocType: Global Defaults,Global Defaults,Mặc định toàn cầu
 DocType: Salary Slip,Deductions,Các khoản giảm trừ
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,Hàng loạt Giờ này đã được lập hoá đơn.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,Hàng loạt Giờ này đã được lập hoá đơn.
 DocType: Salary Slip,Leave Without Pay,Nếu không phải trả tiền lại
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,Công suất Lỗi Kế hoạch
 ,Trial Balance for Party,Trial Balance cho Đảng
@@ -1236,7 +1236,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Thêm GI
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,Xin vui lòng tạo tài khoản mới từ mục tài khoản.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Bảo trì đăng nhập
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Hàng loạt sẵn Qty tại Kho
-DocType: Time Log Batch Detail,Time Log Batch Detail,Giờ hàng loạt chi tiết
+DocType: Time Sheet Detail,Time Sheet Detail,Giờ hàng loạt chi tiết
 DocType: Landed Cost Voucher,Landed Cost Help,Chi phí hạ cánh giúp
 DocType: Purchase Invoice,Select Shipping Address,Chọn Địa chỉ Vận Chuyển
 DocType: Leave Block List,Block Holidays on important days.,Khối Holidays vào những ngày quan trọng.
@@ -1369,7 +1369,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Trọng lượng được đề cập, \n Xin đề cập đến ""Weight Ươm"" quá"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Yêu cầu vật liệu sử dụng để làm cho nhập chứng khoán này
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,Đơn vị duy nhất của một Item.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',Giờ hàng loạt {0} phải được 'Gửi'
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',Giờ hàng loạt {0} phải được 'Gửi'
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Làm kế toán nhập Đối với tất cả phong trào Cổ
 DocType: Leave Allocation,Total Leaves Allocated,Tổng Lá Phân bổ
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Kho yêu cầu tại Row Không {0}
@@ -1485,7 +1485,7 @@ DocType: Production Plan Material Request,Material Request Date,Chất liệu Y�
 DocType: Purchase Order Item,Supplier Quotation Item,Nhà cung cấp báo giá hàng
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Vô hiệu hóa việc tạo ra các bản ghi thời gian so với đơn đặt hàng sản xuất. Hoạt động sẽ không được theo dõi chống sản xuất hàng
 DocType: Item,Has Variants,Có biến thể
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Bấm vào nút ""Thực hiện kinh doanh Hoá đơn 'để tạo ra một hóa đơn bán hàng mới."
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Bấm vào nút ""Thực hiện kinh doanh Hoá đơn 'để tạo ra một hóa đơn bán hàng mới."
 DocType: Monthly Distribution,Name of the Monthly Distribution,Tên của phân phối hàng tháng
 DocType: Sales Person,Parent Sales Person,Người bán hàng mẹ
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,Vui lòng chỉ định ngoại tệ tại Công ty Thạc sĩ và mặc định toàn cầu
@@ -1688,7 +1688,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,Tài sản cố định
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Hàng tồn kho được tuần tự
 DocType: Activity Type,Default Billing Rate,Mặc định Thanh toán Rate
-DocType: Time Log Batch,Total Billing Amount,Tổng số tiền Thanh toán
+DocType: Time Sheet,Total Billing Amount,Tổng số tiền Thanh toán
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,Tài khoản phải thu
 DocType: Quotation Item,Stock Balance,Số dư chứng khoán
 apps/erpnext/erpnext/config/selling.py +306,Sales Order to Payment,Đặt hàng bán hàng để thanh toán
@@ -2158,7 +2158,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),Tỷ Net (Công ty ti
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,Quản lý Lãnh thổ Tree.
 DocType: Journal Entry Account,Sales Invoice,Hóa đơn bán hàng
 DocType: Journal Entry Account,Party Balance,Balance Đảng
-DocType: Sales Invoice Item,Time Log Batch,Giờ hàng loạt
+DocType: Sales Invoice Item,Time Sheet,Giờ hàng loạt
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,Vui lòng chọn Apply Giảm Ngày
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Mức lương Phiếu tạo
 DocType: Company,Default Receivable Account,Mặc định Tài khoản phải thu
@@ -2335,7 +2335,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Viết Tắt Số tiền nổi bật
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Kiểm tra xem bạn cần hóa đơn định kỳ tự động. Sau khi nộp bất kỳ hóa đơn bán hàng, phần định kỳ sẽ được hiển thị."
 DocType: Account,Accounts Manager,Quản lý tài khoản
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',Giờ {0} phải được 'Gửi'
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',Giờ {0} phải được 'Gửi'
 DocType: Stock Settings,Default Stock UOM,Mặc định Cổ UOM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Chi phí Tỷ giá dựa trên Loại hoạt động (mỗi giờ)
 DocType: Production Planning Tool,Create Material Requests,Các yêu cầu tạo ra vật liệu
@@ -2622,7 +2622,7 @@ DocType: Sales Order,Partly Billed,Được quảng cáo một phần
 DocType: Item,Default BOM,Mặc định HĐQT
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,Hãy gõ lại tên công ty để xác nhận
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,Tổng số nợ Amt
-DocType: Time Log Batch,Total Hours,Tổng số giờ
+DocType: Time Sheet,Total Hours,Tổng số giờ
 DocType: Journal Entry,Printing Settings,In ấn Cài đặt
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},Tổng Nợ phải bằng Tổng số tín dụng. Sự khác biệt là {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Ô tô
@@ -2900,7 +2900,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,Số lượng chuyển giao
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Duyệt
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Hoạch định
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Giờ làm hàng loạt
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Giờ làm hàng loạt
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Ban hành
 DocType: Project,Total Billing Amount (via Time Logs),Tổng số tiền Thanh toán (thông qua Time Logs)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,Chúng tôi bán sản phẩm này
@@ -2948,7 +2948,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,Đơn vị riêng biệt của một khoản
 DocType: Pricing Rule,Buying,Mua
 DocType: HR Settings,Employee Records to be created by,Nhân viên ghi được tạo ra bởi
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,Hàng loạt Giờ này đã bị hủy.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,Hàng loạt Giờ này đã bị hủy.
 ,Reqd By Date,Reqd theo địa điểm
 DocType: Salary Slip Earning,Salary Slip Earning,Lương trượt Earning
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,Nợ
@@ -3357,7 +3357,7 @@ DocType: Budget Detail,Budget Detail,Ngân sách chi tiết
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Vui lòng nhập tin nhắn trước khi gửi
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Point-of-Sale hồ sơ
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,Xin vui lòng cập nhật cài đặt tin nhắn SMS
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Giờ {0} đã lập hóa đơn
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Giờ {0} đã lập hóa đơn
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Các khoản cho vay không có bảo đảm
 DocType: Cost Center,Cost Center Name,Chi phí Tên Trung tâm
 DocType: Maintenance Schedule Detail,Scheduled Date,Dự kiến ngày

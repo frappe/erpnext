@@ -172,7 +172,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records","lataa mallipohja, täytä tarvittavat tiedot ja liitä muokattu tiedosto, kaikki päivämäärä- ja työntekijäyhdistelmät tulee malliin valitun kauden ja olemassaolevien osallistumistietueiden mukaan"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,tuote {0} ei ole aktiivinen tai sen elinkaari loppu
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,päivitetään kun myyntilasku on lähetetty
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,päivitetään kun myyntilasku on lähetetty
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","sisällytä verorivi {0} tuotteen tasoon, verot riveillä {1} tulee myös sisällyttää"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,henkilöstömoduulin asetukset
 DocType: SMS Center,SMS Center,tekstiviesti keskus
@@ -907,7 +907,7 @@ DocType: Sales Person,Select company name first.,valitse yrityksen nimi ensin.
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,€
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,toimittajan tarjous vastaanotettu
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},(lle) {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,päivitetty aikalokin kautta
+DocType: Time Sheet,updated via Time Logs,päivitetty aikalokin kautta
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Keskimääräinen ikä
 DocType: Opportunity,Your sales person who will contact the customer in future,"Myyjä, joka ottaa yhteyttä asiakkaaseen tulevaisuudessa"
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,Luetella muutaman oman toimittajia. Ne voivat olla organisaatioita tai yksilöitä.
@@ -934,11 +934,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',Aseta &#39;Käytä lisäalennusta &quot;
 ,Ordered Items To Be Billed,tilatut laskutettavat tuotteet
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,Vuodesta Range on oltava vähemmän kuin laitumelle
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,valitse aikaloki ja lähetä tehdäksesi uuden myyntilaskun
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,valitse aikaloki ja lähetä tehdäksesi uuden myyntilaskun
 DocType: Global Defaults,Global Defaults,yleiset oletusasetukset
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,Project Collaboration Kutsu
 DocType: Salary Slip,Deductions,vähennykset
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,tämä aikaloki erä on laskutettu
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,tämä aikaloki erä on laskutettu
 DocType: Salary Slip,Leave Without Pay,"poistu, ilman palkkaa"
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,kapasiteetin suunnittelu virhe
 ,Trial Balance for Party,Koetase Party
@@ -1247,7 +1247,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),lisäale
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,"tee uusi tili, tilikartasta"
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,"huolto, käynti"
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,saatava varaston eräyksikkömäärä
-DocType: Time Log Batch Detail,Time Log Batch Detail,aikaloki erä lisätiedot
+DocType: Time Sheet Detail,Time Sheet Detail,aikaloki erä lisätiedot
 DocType: Landed Cost Voucher,Landed Cost Help,"kohdistetut kustannukset, ohje"
 DocType: Purchase Invoice,Select Shipping Address,Valitse toimitusosoite
 DocType: Leave Block List,Block Holidays on important days.,estölomat tärkeinä päivinä
@@ -1382,7 +1382,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","paino on mainittu, \ ssa mainitse  ""paino UOM"" myös"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,varaston kirjaus materiaalipyynnöstä
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,tuotteen yksittäisyksikkö
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',"aikalokin erä {0} pitää ""lähettää"""
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',"aikalokin erä {0} pitää ""lähettää"""
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,tee kirjanpidon kirjaus kaikille varastotapahtumille
 DocType: Leave Allocation,Total Leaves Allocated,"poistumisten yhteismäärä, kohdennettu"
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},varastolta vaaditaan rivi nro {0}
@@ -1502,7 +1502,7 @@ DocType: Production Plan Material Request,Material Request Date,Materiaali Reque
 DocType: Purchase Order Item,Supplier Quotation Item,"toimittajan tarjouskysely, tuote"
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Poistaa luominen Aika Lokit vastaan toimeksiantoja. Toimia ei seurata vastaan Tuotantotilaus
 DocType: Item,Has Variants,on useita malleja
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,valitse 'tee myyntilasku' painike ja tee uusi myyntilasku
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,valitse 'tee myyntilasku' painike ja tee uusi myyntilasku
 DocType: Monthly Distribution,Name of the Monthly Distribution,"toimitus kuukaudessa, nimi"
 DocType: Sales Person,Parent Sales Person,emomyyjä
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,syötä yrityksen oletusvaluutta kohdassa yrityksen valvonta ja yleiset oletusasetukset
@@ -1714,7 +1714,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,pitkaikaiset vastaavat
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Serialized Inventory
 DocType: Activity Type,Default Billing Rate,Oletus laskutustaksa
-DocType: Time Log Batch,Total Billing Amount,laskutuksen kokomaisarvomäärä
+DocType: Time Sheet,Total Billing Amount,laskutuksen kokomaisarvomäärä
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,saatava tili
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},Rivi # {0}: Asset {1} on jo {2}
 DocType: Quotation Item,Stock Balance,varastotase
@@ -2162,7 +2162,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),nettotaso (yrityksen 
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,hallitse aluepuuta
 DocType: Journal Entry Account,Sales Invoice,myyntilasku
 DocType: Journal Entry Account,Party Balance,osatase
-DocType: Sales Invoice Item,Time Log Batch,aikaloki erä
+DocType: Sales Invoice Item,Time Sheet,aikaloki erä
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,valitse käytä alennusta
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Palkka Slip Luotu
 DocType: Company,Default Receivable Account,oletus saatava tili
@@ -2345,7 +2345,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,poiston odottava arvomäärä
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","täppää mikäli haluat automaattisesti toistuvan laskun, laskun lähetyksen jälkeen pääset toistuvan laskun määrityksiin"
 DocType: Account,Accounts Manager,tilien hallinta
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',"aikaloki {0} pitää ""lähettää"""
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',"aikaloki {0} pitää ""lähettää"""
 DocType: Stock Settings,Default Stock UOM,oletus varasto UOM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Maksaa Hinta perustuu Toimintalaji (tunnissa)
 DocType: Production Planning Tool,Create Material Requests,tee materiaalipyyntö
@@ -2646,7 +2646,7 @@ DocType: Sales Order,Partly Billed,Osittain Laskutetaan
 DocType: Item,Default BOM,oletus BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,kirjoita yrityksen nimi uudelleen vahvistukseksi
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,"odottaa, pankkipääte yhteensä"
-DocType: Time Log Batch,Total Hours,tunnit yhteensä
+DocType: Time Sheet,Total Hours,tunnit yhteensä
 DocType: Journal Entry,Printing Settings,Asetusten tulostaminen
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},"debet yhteensä tulee olla sama kuin kredit yhteensä, ero on {0}"
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Automotive
@@ -2936,7 +2936,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,siirretty yksikkömäärä
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Liikkuminen
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Suunnittelu
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Tee Time Log Erä
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Tee Time Log Erä
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,liitetty
 DocType: Project,Total Billing Amount (via Time Logs),laskutuksen kokomaisarvomäärä (aikaloki)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,myymme tätä tuotetta
@@ -2986,7 +2986,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,tuotteen erillisyksikkö
 DocType: Pricing Rule,Buying,ostaminen
 DocType: HR Settings,Employee Records to be created by,työntekijä tietue on tehtävä
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,tämä aikaloki erä on peruutettu
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,tämä aikaloki erä on peruutettu
 ,Reqd By Date,Reqd Päivämäärä
 DocType: Salary Slip Earning,Salary Slip Earning,"palkkalaskelma, ansio"
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,luotonantajat
@@ -3392,7 +3392,7 @@ DocType: Budget Detail,Budget Detail,budjetti yksityiskohdat
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Anna viestin ennen lähettämistä
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Point-of-Sale Profile
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,päivitä teksiviestiasetukset
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,aikaloki {0} on jo laskutettu
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,aikaloki {0} on jo laskutettu
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,vakuudettomat lainat
 DocType: Cost Center,Cost Center Name,kustannuspaikan nimi
 DocType: Maintenance Schedule Detail,Scheduled Date,"aikataulutettu, päivä"

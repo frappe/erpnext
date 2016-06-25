@@ -43,7 +43,7 @@ domains = {
 	},
 
 	'Services': {
-		'desktop_icons': ['Project', 'Time Log', 'Customer', 'Sales Order', 'Sales Invoice', 'Lead', 'Opportunity',
+		'desktop_icons': ['Project', 'Time Sheet', 'Customer', 'Sales Order', 'Sales Invoice', 'Lead', 'Opportunity',
 			'Expense Claim', 'Employee', 'HR', 'ToDo'],
 		'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
 		'properties': [

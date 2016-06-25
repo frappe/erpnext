@@ -6,7 +6,7 @@ import frappe
 
 from frappe.utils import cstr, flt, getdate
 from frappe.model.naming import make_autoname
-from frappe import _
+from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
@@ -16,11 +16,21 @@ class SalaryStructure(Document):
 		self.name = make_autoname(self.employee + '/.SST' + '/.#####')
 		
 	def validate(self):
-		self.check_existing()
+		self.check_overlap()
 		self.validate_amount()
 		self.validate_employee()
 		self.validate_joining_date()
 		set_employee_name(self)
+		
+	def set_as_default(self):
+		frappe.db.set_value('Salary Structure', self.name, 'is_default', 'Yes')
+
+		frappe.db.sql(""" update `tabSalary Structure` set is_default = 'No' where
+			employee = %(employee)s and name != %(name)s""", {'employee': self.employee, 'name': self.name}, auto_commit=1)
+			
+		frappe.clear_cache()
+		
+		msgprint(_("{0} is now the default Salary Structure. Please refresh your browser for the change to take effect.").format(self.name))
 
 	def get_employee_details(self):
 		ret = {}
@@ -58,33 +68,34 @@ class SalaryStructure(Document):
 		self.make_table('Earning Type','earnings','Salary Structure Earning')
 		self.make_table('Deduction Type','deductions', 'Salary Structure Deduction')
 
-	def check_existing(self):
-		ret = self.get_other_active_salary_structure()
-
-		if ret and self.is_active=='Yes':
-			frappe.throw(_("Another Salary Structure {0} is active for employee {1}. Please make its status 'Inactive' to proceed.").format(ret, self.employee))
-
-	def get_other_active_salary_structure(self):
-		ret = frappe.db.sql("""select name from `tabSalary Structure` where is_active = 'Yes'
-			and employee = %s and name!=%s""", (self.employee,self.name))
-
-		return ret[0][0] if ret else None
-
-	def before_test_insert(self):
-		"""Make any existing salary structure for employee inactive."""
-		ret = self.get_other_active_salary_structure()
-		if ret:
-			frappe.db.set_value("Salary Structure", ret, "is_active", "No")
+	def check_overlap(self):
+		existing = frappe.db.sql("""select name from `tabSalary Structure`
+			where employee = %(employee)s and
+			(
+				(%(from_date)s > from_date and %(from_date)s < to_date) or
+				(%(to_date)s > from_date and %(to_date)s < to_date) or
+				(%(from_date)s <= from_date and %(to_date)s >= to_date))
+			and name!=%(name)s
+			and docstatus < 2""",
+			{
+				"employee": self.employee,
+				"from_date": self.from_date,
+				"to_date": self.to_date,
+				"name": self.name or "No Name"
+			}, as_dict=True)
+			
+		if existing:
+			frappe.throw(_("Salary structure {0} already exist, more than one salary structure for same period is not allowed").format(existing[0].name))
 
 	def validate_amount(self):
-		if flt(self.net_pay) < 0:
+		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:
 			frappe.throw(_("Net pay cannot be negative"))
 
 	def validate_employee(self):
 		old_employee = frappe.db.get_value("Salary Structure", self.name, "employee")
 		if old_employee and self.employee != old_employee:
 			frappe.throw(_("Employee can not be changed"))
-			
+
 	def validate_joining_date(self):
 		joining_date = getdate(frappe.db.get_value("Employee", self.employee, "date_of_joining"))
 		if getdate(self.from_date) < joining_date:
@@ -93,6 +104,7 @@ class SalaryStructure(Document):
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc=None):
 	def postprocess(source, target):
+		target.salary_structure = source.name
 		target.run_method("pull_emp_details")
 		target.run_method("get_leave_details")
 		target.run_method("calculate_net_pay")

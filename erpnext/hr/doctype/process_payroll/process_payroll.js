@@ -58,7 +58,23 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 	});
 }
 
+frappe.ui.form.on("Process Payroll", {
+	refresh: function(frm) {
+		// frm.trigger("toggle_fields")
+		frm.disable_save();
+	},
 
-frappe.ui.form.on("Process Payroll", "refresh", function(frm) {
-	frm.disable_save();
-});
+	// salary_slip_based_on_timesheet: function(frm) {
+// 		frm.trigger("toggle_fields")
+// 	},
+//
+// 	toggle_fields: function(frm) {
+// 		if(frm.doc.salary_slip_based_on_timesheet) {
+// 			hide_field(['fiscal_year', 'month'])
+// 			unhide_field(['start_date', 'end_date'])
+// 		}else {
+// 			unhide_field(['fiscal_year', 'month'])
+// 			hide_field(['start_date', 'end_date'])
+// 		}
+//}
+})

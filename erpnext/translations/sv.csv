@@ -169,7 +169,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records","Hämta mallen, fyll lämpliga uppgifter och bifoga den modifierade filen. Alla datum och anställdas kombinationer i den valda perioden kommer i mallen, med befintliga närvaroutdrag"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,Produkt {0} är inte aktiv eller uttjänta har nåtts
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Kommer att uppdateras efter fakturan skickas.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,Kommer att uppdateras efter fakturan skickas.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Om du vill inkludera skatt i rad {0} i punkt hastighet, skatter i rader {1} måste också inkluderas"
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,Inställningar för HR-modul
 DocType: SMS Center,SMS Center,SMS Center
@@ -885,7 +885,7 @@ DocType: Sales Person,Select company name first.,Välj företagsnamn först.
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,Dr
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Offerter mottaget från leverantörer.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},Till {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,uppdateras via Time Loggar
+DocType: Time Sheet,updated via Time Logs,uppdateras via Time Loggar
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Medelålder
 DocType: Opportunity,Your sales person who will contact the customer in future,Din säljare som kommer att kontakta kunden i framtiden
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,Lista några av dina leverantörer. De kunde vara organisationer eller privatpersoner.
@@ -912,10 +912,10 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',Ställ in &quot;tillämpa ytterligare rabatt på&quot;
 ,Ordered Items To Be Billed,Beställda varor att faktureras
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,Från Range måste vara mindre än ligga
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Välj Time Loggar och skicka för att skapa en ny försäljnings faktura.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,Välj Time Loggar och skicka för att skapa en ny försäljnings faktura.
 DocType: Global Defaults,Global Defaults,Globala standardinställningar
 DocType: Salary Slip,Deductions,Avdrag
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,This Time Log Batch har fakturerats.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,This Time Sheet har fakturerats.
 DocType: Salary Slip,Leave Without Pay,Lämna utan lön
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,Kapacitetsplanering Error
 ,Trial Balance for Party,Trial Balance för Party
@@ -1214,7 +1214,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Ytterlig
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,Skapa nytt konto från kontoplan.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,Servicebesök
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Tillgänglig Batch Antal vid Lager
-DocType: Time Log Batch Detail,Time Log Batch Detail,Tid Log Batch Detalj
+DocType: Time Sheet Detail,Time Sheet Detail,Tid Log Batch Detalj
 DocType: Landed Cost Voucher,Landed Cost Help,Landad kostnad Hjälp
 DocType: Purchase Invoice,Select Shipping Address,Välj leveransadress
 DocType: Leave Block List,Block Holidays on important days.,Block Semester på viktiga dagar.
@@ -1347,7 +1347,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Vikt nämns \ Vänligen ange ""Vikt UOM"" också"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Material Begäran används för att göra detta Lagerinlägg
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,Enda enhet av ett objekt.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',Tid Log Batch {0} måste &quot;Avsändare&quot;
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',Tid Log Batch {0} måste &quot;Avsändare&quot;
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Skapa kontering för varje lagerförändring
 DocType: Leave Allocation,Total Leaves Allocated,Totala Löv Avsatt
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},Lager krävs vid Rad nr {0}
@@ -1463,7 +1463,7 @@ DocType: Production Plan Material Request,Material Request Date,Material Request
 DocType: Purchase Order Item,Supplier Quotation Item,Leverantör offert Punkt
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,Inaktiverar skapandet av tids stockar mot produktionsorder. Verksamheten får inte spåras mot produktionsorder
 DocType: Item,Has Variants,Har Varianter
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Klicka på ""Skapa försäljningsfakturan"" knappen för att skapa en ny försäljnings faktura."
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Klicka på ""Skapa försäljningsfakturan"" knappen för att skapa en ny försäljnings faktura."
 DocType: Monthly Distribution,Name of the Monthly Distribution,Namn på månadens distribution
 DocType: Sales Person,Parent Sales Person,Överordnad Försäljningsperson
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,Ange standardvaluta i huvudbolaget och Global inställningar
@@ -1665,7 +1665,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,Fast tillgångar
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,Serial numrerade Inventory
 DocType: Activity Type,Default Billing Rate,Standardfakturerings betyg
-DocType: Time Log Batch,Total Billing Amount,Totalt Fakturerings Mängd
+DocType: Time Sheet,Total Billing Amount,Totalt Fakturerings Mängd
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,Fordran Konto
 DocType: Quotation Item,Stock Balance,Lagersaldo
 apps/erpnext/erpnext/config/selling.py +306,Sales Order to Payment,Kundorder till betalning
@@ -2103,7 +2103,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),Netto kostnad (Föret
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,Hantera Områden.
 DocType: Journal Entry Account,Sales Invoice,Försäljning Faktura
 DocType: Journal Entry Account,Party Balance,Parti Balans
-DocType: Sales Invoice Item,Time Log Batch,Tid Log Batch
+DocType: Sales Invoice Item,Time Sheet,Tid Log Batch
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,Välj Verkställ rabatt på
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,Lön Slip Skapad
 DocType: Company,Default Receivable Account,Standard Mottagarkonto
@@ -2280,7 +2280,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,Avskrivning utestående belopp
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Markera om du behöver automatisk återkommande fakturor. Efter att ha lämnat någon fakturan, kommer återkommande avsnitt vara synlig."
 DocType: Account,Accounts Manager,Account Manager
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',Tid Logga {0} måste &quot;Avsändare&quot;
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',Tid Logga {0} måste &quot;Avsändare&quot;
 DocType: Stock Settings,Default Stock UOM,Standard Stock UOM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),Kostar Pris baseras på Aktivitetstyp (per timme)
 DocType: Production Planning Tool,Create Material Requests,Skapa Materialförfrågan
@@ -2566,7 +2566,7 @@ DocType: Sales Order,Partly Billed,Delvis Faktuerard
 DocType: Item,Default BOM,Standard BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,Vänligen ange företagsnamn igen för att bekräfta
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,Totalt Utestående Amt
-DocType: Time Log Batch,Total Hours,Totalt antal timmar
+DocType: Time Sheet,Total Hours,Totalt antal timmar
 DocType: Journal Entry,Printing Settings,Utskriftsinställningar
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},Totalt Betal måste vara lika med de sammanlagda kredit. Skillnaden är {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,Fordon
@@ -2843,7 +2843,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,Överfört Antal
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigera
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Planering
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,Skapa tidsloggsbatch
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,Skapa tidsloggsbatch
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Utfärdad
 DocType: Project,Total Billing Amount (via Time Logs),Totalt Billing Belopp (via Time Loggar)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,Vi säljer detta objekt
@@ -2891,7 +2891,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,Distinkt enhet för en försändelse
 DocType: Pricing Rule,Buying,Köpa
 DocType: HR Settings,Employee Records to be created by,Personal register som skall skapas av
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,This Time Log Batch har avbrutits.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,This Time Sheet har avbrutits.
 ,Reqd By Date,Reqd Efter datum
 DocType: Salary Slip Earning,Salary Slip Earning,Lön Slip Tjänar
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,Borgenärer
@@ -3288,7 +3288,7 @@ DocType: Budget Detail,Budget Detail,Budgetdetalj
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Ange meddelandet innan du skickar
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,Butikförsäljnings profil
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,Uppdatera SMS Inställningar
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,Tid Logga {0} redan faktureras
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,Tid Logga {0} redan faktureras
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,Lån utan säkerhet
 DocType: Cost Center,Cost Center Name,Kostnadcenter Namn
 DocType: Maintenance Schedule Detail,Scheduled Date,Planerat datum

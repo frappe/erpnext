@@ -172,7 +172,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +139,Item {0} must be a Purchase 
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records",دانلود الگو، داده مناسب پر کنید و ضمیمه فایل تغییر یافتهاست. همه تاریخ و کارمند ترکیبی در دوره زمانی انتخاب شده در قالب آمده، با سوابق حضور و غیاب موجود
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,مورد {0} غیر فعال است و یا پایان زندگی رسیده است
-DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,به روز خواهد شد پس از فاکتور فروش ارائه شده است.
+DocType: Time Sheet,Will be updated after Sales Invoice is Submitted.,به روز خواهد شد پس از فاکتور فروش ارائه شده است.
 apps/erpnext/erpnext/controllers/accounts_controller.py +533,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included",شامل مالیات در ردیف {0} در مورد نرخ، مالیات در ردیف {1} باید گنجانده شود
 apps/erpnext/erpnext/config/hr.py +170,Settings for HR Module,تنظیمات برای ماژول HR
 DocType: SMS Center,SMS Center,مرکز SMS
@@ -907,7 +907,7 @@ DocType: Sales Person,Select company name first.,انتخاب نام شرکت ب
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Dr,دکتر
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,نقل قول از تولید کنندگان دریافت کرد.
 apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},به {0} | {1} {2}
-DocType: Time Log Batch,updated via Time Logs,به روز شده از طریق زمان گزارش ها
+DocType: Time Sheet,updated via Time Logs,به روز شده از طریق زمان گزارش ها
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,میانگین سن
 DocType: Opportunity,Your sales person who will contact the customer in future,فروشنده شما در اینده تماسی با مشتری خواهد داشت
 apps/erpnext/erpnext/public/js/setup_wizard.js +235,List a few of your suppliers. They could be organizations or individuals.,لیست چند از تامین کنندگان خود را. آنها می تواند سازمان ها یا افراد.
@@ -934,11 +934,11 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,Production 
 apps/erpnext/erpnext/public/js/controllers/transaction.js +941,Please set 'Apply Additional Discount On',لطفا &#39;درخواست تخفیف اضافی بر روی&#39;
 ,Ordered Items To Be Billed,آیتم ها دستور داد تا صورتحساب
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +24,From Range has to be less than To Range,از محدوده است که به کمتر از به محدوده
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +21,Select Time Logs and Submit to create a new Sales Invoice.,زمان ثبت را انتخاب کرده و ثبت برای ایجاد یک فاکتور فروش جدید.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +21,Select Time Logs and Submit to create a new Sales Invoice.,زمان ثبت را انتخاب کرده و ثبت برای ایجاد یک فاکتور فروش جدید.
 DocType: Global Defaults,Global Defaults,به طور پیش فرض جهانی
 apps/erpnext/erpnext/projects/doctype/project/project.py +144,Project Collaboration Invitation,پروژه دعوت همکاری
 DocType: Salary Slip,Deductions,کسر
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +23,This Time Log Batch has been billed.,این زمان ورود دسته ای است صورتحساب شده است.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +23,This Time Sheet has been billed.,این زمان ورود دسته ای است صورتحساب شده است.
 DocType: Salary Slip,Leave Without Pay,ترک کنی بدون اینکه پرداخت
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +270,Capacity Planning Error,ظرفیت خطا برنامه ریزی
 ,Trial Balance for Party,تعادل دادگاه برای حزب
@@ -1247,7 +1247,7 @@ DocType: Purchase Invoice,Additional Discount Amount (Company Currency),تخفی
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,لطفا حساب جدید را از نمودار از حساب ایجاد کنید.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +702,Maintenance Visit,نگهداری و تعمیرات مشاهده
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,دسته موجود در انبار تعداد
-DocType: Time Log Batch Detail,Time Log Batch Detail,زمان ورود دسته ای جزئیات
+DocType: Time Sheet Detail,Time Sheet Detail,زمان ورود دسته ای جزئیات
 DocType: Landed Cost Voucher,Landed Cost Help,فرود هزینه راهنما
 DocType: Purchase Invoice,Select Shipping Address,انتخاب آدرس حمل و نقل
 DocType: Leave Block List,Block Holidays on important days.,تعطیلات بلوک در روز مهم است.
@@ -1382,7 +1382,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/item/item.js +181,"Weight is mentioned,\nPlease mention ""Weight UOM"" too",وزن ذکر شده است، \ n لطفا ذکر &quot;وزن UOM&quot; بیش از حد
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,درخواست مواد مورد استفاده در ساخت این سهام ورود
 apps/erpnext/erpnext/config/support.py +53,Single unit of an Item.,تنها واحد آیتم استفاده کنید.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Log Batch {0} must be 'Submitted',زمان ورود دسته ای {0} باید &#39;فرستاده&#39;
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +216,Time Sheet {0} must be 'Submitted',زمان ورود دسته ای {0} باید &#39;فرستاده&#39;
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,را حسابداری برای ورود به جنبش هر سهام
 DocType: Leave Allocation,Total Leaves Allocated,مجموع برگ اختصاص داده شده
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +385,Warehouse required at Row No {0},انبار مورد نیاز در ردیف بدون {0}
@@ -1502,7 +1502,7 @@ DocType: Production Plan Material Request,Material Request Date,مواد تار�
 DocType: Purchase Order Item,Supplier Quotation Item,تامین کننده مورد عبارت
 DocType: Manufacturing Settings,Disables creation of time logs against Production Orders. Operations shall not be tracked against Production Order,غیر فعال ایجاد سیاهههای مربوط به زمان در برابر سفارشات تولید. عملیات باید در برابر سفارش تولید ردیابی نیست
 DocType: Item,Has Variants,دارای انواع
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,در &#39;را فاکتور فروش&#39; را فشار دهید کلیک کنید برای ایجاد یک فاکتور فروش جدید.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,در &#39;را فاکتور فروش&#39; را فشار دهید کلیک کنید برای ایجاد یک فاکتور فروش جدید.
 DocType: Monthly Distribution,Name of the Monthly Distribution,نام توزیع ماهانه
 DocType: Sales Person,Parent Sales Person,شخص پدر و مادر فروش
 apps/erpnext/erpnext/setup/utils.py +14,Please specify Default Currency in Company Master and Global Defaults,لطفا پیش فرض ارز در شرکت استاد و به طور پیش فرض در جهان مشخص
@@ -1714,7 +1714,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} ag
 DocType: Account,Fixed Asset,دارائی های ثابت
 apps/erpnext/erpnext/config/stock.py +305,Serialized Inventory,پرسشنامه سریال
 DocType: Activity Type,Default Billing Rate,به طور پیش فرض نرخ صدور صورت حساب
-DocType: Time Log Batch,Total Billing Amount,کل مقدار حسابداری
+DocType: Time Sheet,Total Billing Amount,کل مقدار حسابداری
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,حساب دریافتنی
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +273,Row #{0}: Asset {1} is already {2},ردیف # {0}: دارایی {1} در حال حاضر {2}
 DocType: Quotation Item,Stock Balance,تعادل سهام
@@ -2162,7 +2162,7 @@ DocType: Purchase Invoice Item,Net Rate (Company Currency),نرخ خالص (شر
 apps/erpnext/erpnext/config/crm.py +101,Manage Territory Tree.,مدیریت درختواره منطقه
 DocType: Journal Entry Account,Sales Invoice,فاکتور فروش
 DocType: Journal Entry Account,Party Balance,تعادل حزب
-DocType: Sales Invoice Item,Time Log Batch,زمان ورود دسته ای
+DocType: Sales Invoice Item,Time Sheet,زمان ورود دسته ای
 apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +442,Please select Apply Discount On,لطفا درخواست تخفیف را انتخاب کنید
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +85,Salary Slip Created,لغزش حقوق و دستمزد ایجاد
 DocType: Company,Default Receivable Account,به طور پیش فرض دریافتنی حساب
@@ -2345,7 +2345,7 @@ apps/erpnext/erpnext/config/selling.py +163,Tax template for selling transaction
 DocType: Sales Invoice,Write Off Outstanding Amount,ارسال فعال برجسته مقدار
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.",اگر شما نیاز به بررسی فاکتورها در محدوده زمانی معین اتوماتیک. پس از ارائه هر فاکتور فروش، دوره بخش قابل مشاهده خواهد بود.
 DocType: Account,Accounts Manager,مدیر حساب
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +39,Time Log {0} must be 'Submitted',زمان ورود {0} باید &#39;فرستاده&#39;
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +39,Time Log {0} must be 'Submitted',زمان ورود {0} باید &#39;فرستاده&#39;
 DocType: Stock Settings,Default Stock UOM,به طور پیش فرض بورس UOM
 DocType: Time Log,Costing Rate based on Activity Type (per hour),هزینه یابی نرخ بر اساس نوع فعالیت (در ساعت)
 DocType: Production Planning Tool,Create Material Requests,ایجاد درخواست مواد
@@ -2646,7 +2646,7 @@ DocType: Sales Order,Partly Billed,تا حدودی صورتحساب
 DocType: Item,Default BOM,به طور پیش فرض BOM
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Please re-type company name to confirm,لطفا دوباره نوع نام شرکت برای تایید
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +64,Total Outstanding Amt,مجموع برجسته AMT
-DocType: Time Log Batch,Total Hours,جمع ساعت
+DocType: Time Sheet,Total Hours,جمع ساعت
 DocType: Journal Entry,Printing Settings,تنظیمات چاپ
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +265,Total Debit must be equal to Total Credit. The difference is {0},دبیت مجموع باید به مجموع اعتبار مساوی باشد. تفاوت در این است {0}
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +11,Automotive,خودرو
@@ -2936,7 +2936,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 ,Transferred Qty,انتقال تعداد
 apps/erpnext/erpnext/config/learn.py +11,Navigating,ناوبری
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,برنامه ریزی
-apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Log Batch,را زمان ورود دسته ای
+apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +20,Make Time Sheet,را زمان ورود دسته ای
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,صادر
 DocType: Project,Total Billing Amount (via Time Logs),کل مقدار حسابداری (از طریق زمان سیاههها)
 apps/erpnext/erpnext/public/js/setup_wizard.js +275,We sell this Item,ما فروش این مورد
@@ -2986,7 +2986,7 @@ DocType: Global Defaults,"If disable, 'In Words' field will not be visible in an
 DocType: Serial No,Distinct unit of an Item,واحد مجزا از یک آیتم
 DocType: Pricing Rule,Buying,خرید
 DocType: HR Settings,Employee Records to be created by,سوابق کارمند به ایجاد شود
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +24,This Time Log Batch has been cancelled.,این زمان ورود دسته لغو شده است.
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.js +24,This Time Sheet has been cancelled.,این زمان ورود دسته لغو شده است.
 ,Reqd By Date,Reqd بر اساس تاریخ
 DocType: Salary Slip Earning,Salary Slip Earning,سود لغزش حقوق و دستمزد
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +164,Creditors,طلبکاران
@@ -3391,7 +3391,7 @@ DocType: Budget Detail,Budget Detail,جزئیات بودجه
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,لطفا قبل از ارسال پیام را وارد کنید
 apps/erpnext/erpnext/config/accounts.py +258,Point-of-Sale Profile,نقطه از فروش مشخصات
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +68,Please Update SMS Settings,لطفا تنظیمات SMS به روز رسانی
-apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.py +37,Time Log {0} already billed,زمان ورود {0} در حال حاضر در صورتحساب یا لیست
+apps/erpnext/erpnext/projects/doctype/time_sheet/time_sheet.py +37,Time Log {0} already billed,زمان ورود {0} در حال حاضر در صورتحساب یا لیست
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +179,Unsecured Loans,نا امن وام
 DocType: Cost Center,Cost Center Name,هزینه نام مرکز
 DocType: Maintenance Schedule Detail,Scheduled Date,تاریخ برنامه ریزی شده

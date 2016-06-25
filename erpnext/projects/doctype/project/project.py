@@ -28,7 +28,7 @@ class Project(Document):
 
 		self.set_onload('links', self.meta.get_links_setup())
 		self.set_onload('activity_summary', frappe.db.sql('''select activity_type, sum(hours) as total_hours
-			from `tabTime Log` where project=%s group by activity_type order by total_hours desc''', self.name, as_dict=True))
+			from `tabTime Sheet Detail` where project=%s group by activity_type order by total_hours desc''', self.name, as_dict=True))
 
 	def __setup__(self):
 		self.onload()
@@ -101,7 +101,7 @@ class Project(Document):
 			min(from_time) as start_date,
 			max(to_time) as end_date,
 			sum(hours) as time
-			from `tabTime Log` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
+			from `tabTime Sheet Detail` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
 
 		from_expense_claim = frappe.db.sql("""select
 			sum(total_sanctioned_amount) as total_sanctioned_amount
@@ -162,7 +162,7 @@ def get_dashboard_data(name):
 def get_timeline_data(name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
-		from `tabTime Log` where project=%s
+		from `tabTime Sheet Detail` where project=%s
 			and from_time > date_sub(curdate(), interval 1 year)
 			and docstatus < 2
 			group by date(from_time)''', name))

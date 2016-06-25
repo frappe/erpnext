@@ -23,8 +23,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Time Log",
-					"description": _("Time Logs for manufacturing."),
+					"name": "Time Sheet",
+					"description": _("Time Sheet for manufacturing."),
 				},
 
 			]
