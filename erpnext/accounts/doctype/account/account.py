@@ -169,8 +169,8 @@ class Account(Document):
 			if not self.warehouse:
 				throw(_("Warehouse is mandatory if account type is Warehouse"))
 
-			old_warehouse = cstr(frappe.db.get_value("Account", self.name, "warehouse"))
-			if old_warehouse != cstr(self.warehouse):
+			old_warehouse = frappe.db.get_value("Account", self.name, "warehouse")
+			if old_warehouse != self.warehouse:
 				if old_warehouse:
 					self.validate_warehouse(old_warehouse)
 				if self.warehouse:
@@ -180,11 +180,12 @@ class Account(Document):
 
 	def validate_warehouse(self, warehouse):
 		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-		
-		if frappe.db.sql_list("""select sle.name from `tabStock Ledger Entry` sle where exists (select wh.name from
-			tabWarehouse wh where lft >= %s and rgt <= %s and sle.warehouse = wh.name)""", (lft, rgt)):
-			throw(_("Stock entries exist against warehouse {0}, hence you cannot re-assign or modify Warehouse").format(warehouse))
-		
+
+		if lft and rgt:
+			if frappe.db.sql_list("""select sle.name from `tabStock Ledger Entry` sle where exists (select wh.name from
+				tabWarehouse wh where lft >= %s and rgt <= %s and sle.warehouse = wh.name)""", (lft, rgt)):
+				throw(_("Stock entries exist against Warehouse {0}, hence you cannot re-assign or modify it").format(warehouse))
+
 	def update_nsm_model(self):
 		"""update lft, rgt indices for nested set model"""
 		import frappe
