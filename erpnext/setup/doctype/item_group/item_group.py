@@ -41,6 +41,8 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 				self.route = frappe.get_doc('Item Group', self.parent_item_group).route + '/'
 
 			self.route += self.scrub(self.item_group_name)
+			
+			return self.route
 
 	def after_rename(self, olddn, newdn, merge=False):
 		NestedSet.after_rename(self, olddn, newdn, merge)

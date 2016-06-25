@@ -134,7 +134,7 @@ class Item(WebsiteGenerator):
 
 	def make_route(self):
 		if not self.route:
-			self.route = frappe.db.get_value('Item Group', self.item_group, 'route') + '/' + self.scrub(self.item_name)
+			return frappe.db.get_value('Item Group', self.item_group, 'route') + '/' + self.scrub(self.item_name)
 
 	def get_parents(self, context):
 		item_group, route = frappe.db.get_value('Item Group', self.item_group, ['name', 'route'])
