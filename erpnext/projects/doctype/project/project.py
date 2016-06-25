@@ -15,7 +15,7 @@ class Project(Document):
 
 	def onload(self):
 		"""Load project tasks for quick view"""
-		if not self.get("tasks"):
+		if not self.get('__unsaved') and not self.get("tasks"):
 			for task in self.get_tasks():
 				self.append("tasks", {
 					"title": task.subject,
