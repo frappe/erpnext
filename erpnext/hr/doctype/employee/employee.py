@@ -186,7 +186,12 @@ def get_retirement_date(date_of_birth=None):
 	ret = {}
 	if date_of_birth:
 		try:
-			dt = getdate(date_of_birth) + datetime.timedelta(21915)
+			retirement_age = frappe.db.get_single_value("HR Settings", "retirement_age")
+			if retirement_age:
+				dt = getdate(date_of_birth) + datetime.timedelta(int(retirement_age)*365.2425)
+			else:
+				dt = getdate(date_of_birth) + datetime.timedelta(21914.55)
+			
 			ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
 		except ValueError:
 			# invalid date
