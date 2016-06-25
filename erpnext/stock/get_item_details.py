@@ -239,7 +239,6 @@ def insert_item_price(args):
 		if frappe.has_permission("Item Price", "write"):
 			price_list_rate = args.rate / args.conversion_factor \
 				if args.get("conversion_factor") else args.rate
-			if not price_list_rate: return
 		
 			item_price = frappe.get_doc({
 				"doctype": "Item Price",
@@ -249,7 +248,7 @@ def insert_item_price(args):
 				"price_list_rate": price_list_rate
 			})
 			
-			name = frappe.db.get_value('Item Price', {'item_code': args.item_code, 'price_list': args.price_list}, 'name')
+			name = frappe.db.get_value('Item Price', {'item_code': args.item_code, 'price_list': args.price_list, 'currency': args.currency}, 'name')
 			
 			if name:
 				item_price = frappe.get_doc('Item Price', name)
