@@ -41,7 +41,7 @@ cur_frm.add_fetch('parent_account', 'root_type', 'root_type');
 cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 	if(doc.is_group==0) {
 		cur_frm.toggle_display(['tax_rate'], doc.account_type == 'Tax');
-		cur_frm.toggle_display('warehouse', doc.account_type=='Warehouse');
+		cur_frm.toggle_display('warehouse', doc.account_type=='Stock');
 	}
 }
 

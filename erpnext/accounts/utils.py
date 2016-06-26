@@ -318,7 +318,7 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 	difference = {}
 
 	account_warehouse = dict(frappe.db.sql("""select name, warehouse from tabAccount
-		where account_type = 'Warehouse' and (warehouse is not null and warehouse != '')
+		where account_type = 'Stock' and (warehouse is not null and warehouse != '') and is_group=0
 		and name in (%s)""" % ', '.join(['%s']*len(account_list)), account_list))
 
 	for account, warehouse in account_warehouse.items():

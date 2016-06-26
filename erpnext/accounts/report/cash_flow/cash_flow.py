@@ -19,7 +19,7 @@ def execute(filters=None):
 			{"account_type": "Depreciation", "label": _("Depreciation")},
 			{"account_type": "Receivable", "label": _("Net Change in Accounts Receivable")},
 			{"account_type": "Payable", "label": _("Net Change in Accounts Payable")},
-			{"account_type": "Warehouse", "label": _("Net Change in Inventory")}
+			{"account_type": "Stock", "label": _("Net Change in Inventory")}
 		]
 	}
 
