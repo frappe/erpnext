@@ -9,7 +9,7 @@ from frappe.utils.nestedset import NestedSet
 
 class Warehouse(NestedSet):
 	nsm_parent_field = 'parent_warehouse'
-	
+
 	def autoname(self):
 		suffix = " - " + frappe.db.get_value("Company", self.company, "abbr")
 		if not self.warehouse_name.endswith(suffix):
@@ -53,6 +53,7 @@ class Warehouse(NestedSet):
 			if not self.get_account(self.name):
 				if self.get("__islocal") or not frappe.db.get_value(
 						"Stock Ledger Entry", {"warehouse": self.name}):
+
 					self.validate_parent_account()
 					ac_doc = frappe.get_doc({
 						"doctype": "Account",
@@ -66,16 +67,23 @@ class Warehouse(NestedSet):
 						"freeze_account": "No"
 					})
 					ac_doc.flags.ignore_permissions = True
-					ac_doc.insert()
-					msgprint(_("Account head {0} created").format(ac_doc.name))
+
+					try:
+						ac_doc.insert()
+						msgprint(_("Account head {0} created").format(ac_doc.name))
+
+					except frappe.DuplicateEntryError, e:
+						if not (e.args and e.args[0]=='Account'):
+							# if this is not due to creation of Account
+							raise
 
 	def validate_parent_account(self):
 		if not self.company:
 			frappe.throw(_("Warehouse {0}: Company is mandatory").format(self.name))
 
 		if not self.create_account_under:
-			parent_account = frappe.db.sql("""select name from tabAccount 
-				where account_type='Stock' and company=%s and is_group=1 
+			parent_account = frappe.db.sql("""select name from tabAccount
+				where account_type='Stock' and company=%s and is_group=1
 				and (warehouse is null or warehouse = '')""", self.company)
 
 			if parent_account:
@@ -86,7 +94,7 @@ class Warehouse(NestedSet):
 		elif frappe.db.get_value("Account", self.create_account_under, "company") != self.company:
 			frappe.throw(_("Warehouse {0}: Parent account {1} does not bolong to the company {2}")
 				.format(self.name, self.create_account_under, self.company))
-	
+
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
 
@@ -108,10 +116,10 @@ class Warehouse(NestedSet):
 		if frappe.db.sql("""select name from `tabStock Ledger Entry`
 				where warehouse = %s""", self.name):
 			throw(_("Warehouse can not be deleted as stock ledger entry exists for this warehouse."))
-		
+
 		if frappe.db.sql("""select name from `tabWarehouse` where parent_warehouse = %s""", self.name):
 			throw(_("Child warehouse exists for this warehouse. You can not delete this warehouse."))
-		
+
 		self.update_nsm_model()
 
 	def before_rename(self, olddn, newdn, merge=False):
@@ -179,10 +187,10 @@ def get_children():
 	from erpnext.stock.utils import get_stock_value_on
 	doctype = frappe.local.form_dict.get('doctype')
 	company = frappe.local.form_dict.get('company')
-	
+
 	parent_field = 'parent_' + doctype.lower().replace(' ', '_')
 	parent = frappe.form_dict.get("parent") or ""
-	
+
 	if parent == "Warehouses":
 		parent = ""
 
@@ -193,23 +201,23 @@ def get_children():
 		and ifnull(`{parent_field}`,'') = %s and `company` = %s
 		order by name""".format(doctype=frappe.db.escape(doctype), parent_field=frappe.db.escape(parent_field)),
 		(parent, company), as_dict=1)
-	
+
 	# return warehouses
 	for wh in warehouses:
 		wh["balance"] = get_stock_value_on(warehouse=wh.value)
 	return warehouses
-		
+
 @frappe.whitelist()
 def add_node():
 	doctype = frappe.form_dict.get('doctype')
 	company = frappe.form_dict.get('company')
 	parent_field = 'parent_' + doctype.lower().replace(' ', '_')
 	name_field = doctype.lower().replace(' ', '_') + '_name'
-	
+
 	doc = frappe.new_doc(doctype)
-	
+
 	parent = frappe.form_dict['parent']
-	
+
 	if cint(frappe.form_dict['is_root']):
 		parent = None
 
@@ -219,5 +227,5 @@ def add_node():
 		"is_group": frappe.form_dict['is_group'],
 		"company": company
 	})
-	
+
 	doc.save()
