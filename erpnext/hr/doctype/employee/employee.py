@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_add, today
+from frappe.utils import getdate, validate_email_add, today, add_years
 from frappe.model.naming import make_autoname
 from frappe import throw, _
 import frappe.permissions
@@ -186,12 +186,8 @@ def get_retirement_date(date_of_birth=None):
 	ret = {}
 	if date_of_birth:
 		try:
-			retirement_age = frappe.db.get_single_value("HR Settings", "retirement_age")
-			if retirement_age:
-				dt = getdate(date_of_birth) + datetime.timedelta(int(retirement_age)*365.2425)
-			else:
-				dt = getdate(date_of_birth) + datetime.timedelta(21914.55)
-			
+			retirement_age = int(frappe.db.get_single_value("HR Settings", "retirement_age") or 60)
+			dt = add_years(getdate(date_of_birth),retirement_age)			
 			ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
 		except ValueError:
 			# invalid date
