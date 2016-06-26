@@ -55,6 +55,16 @@ frappe.ui.form.on("Project", {
 			frm.trigger('show_dashboard');
 		}
 	},
+	tasks_refresh: function(frm) {
+		var grid = frm.get_field('tasks').grid;
+		grid.wrapper.find('select[data-fieldname="status"]').each(function() {
+			if($(this).val()==='Open') {
+				$(this).addClass('input-indicator-open');
+			} else {
+				$(this).removeClass('input-indicator-open');
+			}
+		});
+	},
 	show_dashboard: function(frm) {
 		frm.dashboard.show_heatmap = true;
 		frm.dashboard.heatmap_message = __('This is based on the Time Logs created against this project');
@@ -81,12 +91,17 @@ frappe.ui.form.on("Project", {
 	}
 });
 
-frappe.ui.form.on("Project Task", "edit_task", function(frm, doctype, name) {
-	var doc = frappe.get_doc(doctype, name);
-	if(doc.task_id) {
-		frappe.set_route("Form", "Task", doc.task_id);
-	} else {
-		msgprint(__("Save the document first."));
-	}
-})
+frappe.ui.form.on("Project Task", {
+	edit_task: function(frm, doctype, name) {
+		var doc = frappe.get_doc(doctype, name);
+		if(doc.task_id) {
+			frappe.set_route("Form", "Task", doc.task_id);
+		} else {
+			msgprint(__("Save the document first."));
+		}
+	},
+	status: function(frm, doctype, name) {
+		frm.trigger('tasks_refresh');
+	},
+});
 
