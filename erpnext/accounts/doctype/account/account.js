@@ -63,7 +63,7 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 			frappe.set_route("query-report", "General Ledger");
 		}, __("View"));
 
-		cur_frm.add_custom_button(__('Group to Group'),
+		cur_frm.add_custom_button(__('Non-Group to Group'),
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet', 'btn-default')
 	}
 }
