@@ -290,7 +290,7 @@ def get_company_default(company, fieldname):
 	value = frappe.db.get_value("Company", company, fieldname)
 
 	if not value:
-		throw(_("Please set default value {0} in Company {1}").format(frappe.get_meta("Company").get_label(fieldname), company))
+		throw(_("Please set default {0} in Company {1}").format(frappe.get_meta("Company").get_label(fieldname), company))
 
 	return value
 
@@ -427,7 +427,9 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			'due_date': frappe.db.get_value(d.voucher_type, d.voucher_no, "due_date"),
 			'exchange_rate': frappe.db.get_value(d.voucher_type, d.voucher_no, "conversion_rate")
 		})
-
+		
+	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'])
+	
 	return outstanding_invoices
 
 
