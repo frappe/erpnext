@@ -50,7 +50,7 @@ class Warehouse(NestedSet):
 
 	def create_account_head(self):
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-			if not self.get_account(self.name):
+			if not self.get_account():
 				if self.get("__islocal") or not frappe.db.get_value(
 						"Stock Ledger Entry", {"warehouse": self.name}):
 
@@ -168,7 +168,7 @@ class Warehouse(NestedSet):
 
 	def get_account(self, warehouse=None):
 		filters = {
-			"account_type": "Warehouse",
+			"account_type": "Stock",
 			"company": self.company,
 			"is_group": self.is_group
 		}
@@ -213,7 +213,9 @@ class Warehouse(NestedSet):
 		else:
 			account_name = self.get_account()
 			if account_name:
-				frappe.get_doc("Account", account_name).convert_group_to_ledger()
+				doc = frappe.get_doc("Account", account_name)
+				doc.warehouse = self.name
+				doc.convert_group_to_ledger()
 			
 			self.is_group = 0
 			self.save()
@@ -225,8 +227,10 @@ class Warehouse(NestedSet):
 		else:
 			account_name = self.get_account(self.name)
 			if account_name:
-				frappe.get_doc("Account", account_name).convert_ledger_to_group()
-			
+				doc = frappe.get_doc("Account", account_name)
+				doc.flags.exclude_account_type_check = True
+				doc.convert_ledger_to_group()
+
 			self.is_group = 1
 			self.save()
 			return 1

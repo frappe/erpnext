@@ -163,13 +163,13 @@ $.extend(erpnext.item, {
 		
 		frm.fields_dict['default_warehouse'].get_query = function(doc) {
 			return {
-				filters: { "is_group": "No" }
+				filters: { "is_group": 0 }
 			}
 		}
 		
 		frm.fields_dict.reorder_levels.grid.get_field("warehouse_group").get_query = function(doc, cdt, cdn) {
 			return {
-				filters: { "is_group": "Yes" }
+				filters: { "is_group": 1 }
 			}
 		}
 		
@@ -177,7 +177,7 @@ $.extend(erpnext.item, {
 			var d = locals[cdt][cdn];
 			return {
 				filters: {
-					"is_group": "No",
+					"is_group": 0,
 					"parent_warehouse": d.warehouse_group
 				}
 			}

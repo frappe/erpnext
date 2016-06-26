@@ -27,6 +27,8 @@ frappe.ui.form.on("Warehouse", {
 			frm.add_custom_button(__('Non-Group to Group'),
 				function() { convert_to_group_or_ledger(frm); }, 'icon-retweet', 'btn-default')
 		}
+		
+		cur_frm.toggle_enable(['is_group', 'company'], false);
 
 		frm.fields_dict['parent_warehouse'].get_query = function(doc) {
 			return {

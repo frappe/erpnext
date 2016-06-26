@@ -117,7 +117,7 @@ def set_valuation_method(item_code, valuation_method):
 	frappe.db.set_value("Item", item_code, "valuation_method", valuation_method)
 
 	for warehouse in frappe.get_all("Warehouse", filters={"company": "_Test Company"}, fields=["name", "is_group"]):
-		if warehouse.is_group == "No":
+		if not warehouse.is_group:
 			update_entries_after({
 				"item_code": item_code,
 				"warehouse": warehouse.name

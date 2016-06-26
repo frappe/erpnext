@@ -18,7 +18,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 		
 		lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
 		
-		if is_group == "Yes":
+		if is_group:
 			values.extend([lft, rgt])
 			condition += "and exists (\
 				select name from `tabWarehouse` wh where wh.name = sle.warehouse\
@@ -189,6 +189,6 @@ def validate_warehouse_company(warehouse, company):
 			InvalidWarehouseCompany)
 
 def is_group_warehouse(warehouse):
-	if frappe.db.get_value("Warehouse", warehouse, "is_group") == "Yes":
+	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
 	
