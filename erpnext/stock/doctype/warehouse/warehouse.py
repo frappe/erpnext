@@ -74,12 +74,13 @@ class Warehouse(NestedSet):
 			frappe.throw(_("Warehouse {0}: Company is mandatory").format(self.name))
 
 		if not self.create_account_under:
-			parent_account = frappe.db.get_value("Account",
-				{"account_name": "Stock Assets", "company": self.company})
+			parent_account = frappe.db.sql("""select name from tabAccount 
+				where account_type='Stock' and company=%s and is_group=1 
+				and (warehouse is null or warehouse = '')""", self.company)
 
 			if parent_account:
-				frappe.db.set_value("Warehouse", self.name, "create_account_under", parent_account)
-				self.create_account_under = parent_account
+				frappe.db.set_value("Warehouse", self.name, "create_account_under", parent_account[0][0])
+				self.create_account_under = parent_account[0][0]
 			else:
 				frappe.throw(_("Please enter parent account group for warehouse {0}").format(self.name))
 		elif frappe.db.get_value("Account", self.create_account_under, "company") != self.company:
