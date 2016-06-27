@@ -315,7 +315,32 @@ def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.desk.reportview.execute("Account", filters = filter_list,
 		fields = ["name", "parent_account"],
 		limit_start=start, limit_page_length=page_len, as_list=True)
+		
+def get_worked_on(doctype, txt, searchfield, start, page_len, filters):
 
+	return frappe.db.sql("""select distinct if(if(support_ticket='' or support_ticket is NULL,project,concat(support_ticket, ' ', iss.subject)) is NULL or
+			if(support_ticket='' or support_ticket is NULL,project,concat(support_ticket, ' ', iss.subject))='', 'No Project/Issue Associated',
+			if(support_ticket='' or support_ticket is NULL,project,concat(support_ticket, ' ', iss.subject))) as worked_on
+			from `tabTime Log` ti left join `tabIssue` iss on ti.support_ticket=iss.name
+			where ti.docstatus<2
+			and if(if(support_ticket='' or support_ticket is NULL,project,concat(support_ticket, ' ', iss.subject)) is NULL or
+			if(support_ticket='' or support_ticket is NULL,project,concat(support_ticket, ' ', iss.subject))='', 'No Project/Issue Associated',
+			if(support_ticket='' or support_ticket is NULL,project,concat(support_ticket, ' ', iss.subject))) like %(txt)s
+			order by if(if(support_ticket='' or support_ticket is NULL,project,support_ticket) is NULL or
+			if(support_ticket='' or support_ticket is NULL,project,support_ticket)='', 'No Project/Issue Associated',
+			if(support_ticket='' or support_ticket is NULL,project,support_ticket))
+			limit %(start)s, %(page_len)s""", {"start":start, "page_len":page_len, "txt": "%{0}%".format(txt)})
+
+def get_week_range(doctype, txt, searchfield, start, page_len, filters):
+
+    	return frappe.db.sql("""select name from `tabWeek Range` order by idx""")
+
+def get_activity_type(doctype, txt, searchfield, start, page_len, filters):
+	
+	return frappe.db.sql("""select name,description from `tabActivity Type`
+		where name like %(txt)s or description like %(txt)s
+		order by name asc
+		limit %(start)s, %(page_len)s""", {"start":start, "page_len":page_len, "txt": "%{0}%".format(txt)})
 
 @frappe.whitelist()
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
