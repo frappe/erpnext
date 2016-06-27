@@ -26,7 +26,12 @@ class SalesOrder(SellingController):
 		
 		self.prev_link_mapper = {
 			"Quotation": {
-				"fieldname": "prevdoc_docname"
+				"fieldname": "prevdoc_docname",
+				"doctype": "Sales Order Item",
+				"filters": [
+					["Sales Order Item", "parent", "=", self.name],
+					["Sales Order Item", "prevdoc_docname", "!=", ""]
+				]
 			}
 		}
 		
@@ -315,9 +320,6 @@ class SalesOrder(SellingController):
 		mcount = month_map[reference_doc.recurring_type]
 		self.set("delivery_date", get_next_date(reference_doc.delivery_date, mcount,
 						cint(reference_doc.repeat_on_day_of_month)))
-
-	def get_link_filters(self, for_doctype):
-		return super(SalesOrder, self).get_link_filters(for_doctype)
 		
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

@@ -38,10 +38,20 @@ class PurchaseInvoice(BuyingController):
 		
 		self.prev_link_mapper = {
 			"Purchase Order": {
-				"fieldname": "purchase_order"
+				"fieldname": "purchase_order",
+				"doctype": "Purchase Invoice Item",
+				"filters": [
+					["Purchase Invoice Item", "parent", "=", self.name],
+					["Purchase Invoice Item", "purchase_order", "!=", ""]
+				]
 			},
 			"Purchase Receipt": {
-				"fieldname": "purchase_receipt"
+				"fieldname": "purchase_receipt",
+				"doctype": "Purchase Invoice Item",
+				"filters": [
+					["Purchase Invoice Item", "parent", "=", self.item],
+					["Purchase Invoice Item", "purchase_receipt", "!=", ""]
+				]
 			}
 		}
 
@@ -672,9 +682,6 @@ class PurchaseInvoice(BuyingController):
 
 	def on_recurring(self, reference_doc):
 		self.due_date = None
-	
-	def get_link_filters(self, for_doctype):
-		return super(PurchaseInvoice, self).get_link_filters(for_doctype)
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):

@@ -48,7 +48,12 @@ class PurchaseReceipt(BuyingController):
 		
 		self.prev_link_mapper = {
 			"Purchase Order": {
-				"fieldname": "prevdoc_docname"
+				"fieldname": "prevdoc_docname",
+				"doctype": "Purchase Receipt Item",
+				"filters": [
+					["Purchase Receipt Item", "parent", "=", self.name],
+					["Purchase Receipt Item", "prevdoc_docname", "!=", ""]
+				]
 			}
 		}
 
@@ -338,9 +343,6 @@ class PurchaseReceipt(BuyingController):
 			pr_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
-
-	def get_link_filters(self, for_doctype):
-		return super(PurchaseReceipt, self).get_link_filters(for_doctype)
 
 def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Billed against Sales Order directly

@@ -35,7 +35,12 @@ class PurchaseOrder(BuyingController):
 		
 		self.prev_link_mapper = {
 			"Supplier Quotation": {
-				"fieldname": "supplier_quotation"
+				"fieldname": "supplier_quotation",
+				"doctype": "Purchase Order Item",
+				"filters": [
+					["Purchase Order Item", "parent", "=", self.name],
+					["Purchase Order Item", "supplier_quotation", "!=", ""]
+				]
 			}
 		}
 
@@ -240,9 +245,6 @@ class PurchaseOrder(BuyingController):
 		for item in self.items:
 			if item.delivered_by_supplier == 1:
 				item.received_qty = item.qty
-
-	def get_link_filters(self, for_doctype):
-		return super(PurchaseOrder, self).get_link_filters(for_doctype)
 
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):

@@ -108,7 +108,7 @@ class TransactionBase(StatusUpdater):
 							.format(d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
 
 	def get_link_filters(self, for_doctype):
-		if self.prev_link_mapper.get(for_doctype):
+		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
 			fieldname = self.prev_link_mapper[for_doctype]["fieldname"]
 			
 			values = filter(None, tuple([item.as_dict()[fieldname] for item in self.items]))
