@@ -512,7 +512,6 @@ class Item(WebsiteGenerator):
 			frappe.db.sql("delete from `tabBin` where item_code=%s", old_name)
 
 	def after_rename(self, old_name, new_name, merge):
-		super(Item, self).after_rename(old_name, new_name, merge)
 		if self.route:
 			invalidate_cache_for_item(self)
 			clear_cache(self.route)
