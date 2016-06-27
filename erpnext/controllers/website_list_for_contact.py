@@ -90,7 +90,15 @@ def post_process(doctype, data):
 			doc.set_indicator()
 
 		doc.status_display = ", ".join(doc.status_display)
-		doc.items_preview = ", ".join([d.item_name for d in doc.items])
+		"""
+		tries to join with the item_name of received object 
+		but if any other data type other than int or str is 
+		received, it type casts it to string
+		"""
+		try:
+			doc.items_preview = ", ".join([d.item_name for d in doc.items])
+		except:
+			doc.items_preview = ", ".join([str(d.item_name) for d in doc.items])
 		result.append(doc)
 
 	return result
