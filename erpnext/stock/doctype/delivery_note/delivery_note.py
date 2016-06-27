@@ -60,7 +60,19 @@ class DeliveryNote(SellingController):
 			'source_field': '-1 * qty',
 			'extra_cond': """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)"""
 		}]
+		
+		self.prev_link_mapper = {
+			"Sales Order": {
+				"fieldname": "against_sales_order",
+				"doctype": "Delivery Note Item",
+				"filters": [
+					["Delivery Note Item", "parent", "=", self.name],
+					["Delivery Note Item", "against_sales_order", "!=", ""]
+				]
+			}
+		}
 
+		
 	def before_print(self):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)

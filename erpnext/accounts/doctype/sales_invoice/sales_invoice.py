@@ -38,6 +38,25 @@ class SalesInvoice(SellingController):
 			'keyword': 'Billed',
 			'overflow_type': 'billing'
 		}]
+		
+		self.prev_link_mapper = {
+			"Sales Order": {
+				"fieldname": "sales_order",
+				"doctype": "Sales Invoice Item",
+				"filters": [
+					["Sales Invoice Item", "parent", "=", self.name],
+					["Sales Invoice Item", "sales_order", "!=", ""]
+				]
+			},
+			"Delivery Note": {
+				"fieldname": "delivery_note",
+				"doctype": "Sales Invoice Item",
+				"filters": [
+					["Sales Invoice Item", "parent", "=", self.name],
+					["Sales Invoice Item", "delivery_note", "!=", ""]
+				]
+			}
+		}
 
 	def set_indicator(self):
 		"""Set indicator for portal"""

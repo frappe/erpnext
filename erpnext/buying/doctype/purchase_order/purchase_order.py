@@ -32,6 +32,17 @@ class PurchaseOrder(BuyingController):
 			'percent_join_field': 'prevdoc_docname',
 			'overflow_type': 'order'
 		}]
+		
+		self.prev_link_mapper = {
+			"Supplier Quotation": {
+				"fieldname": "supplier_quotation",
+				"doctype": "Purchase Order Item",
+				"filters": [
+					["Purchase Order Item", "parent", "=", self.name],
+					["Purchase Order Item", "supplier_quotation", "!=", ""]
+				]
+			}
+		}
 
 	def validate(self):
 		super(PurchaseOrder, self).validate()

@@ -35,6 +35,25 @@ class PurchaseInvoice(BuyingController):
 			'percent_join_field': 'purchase_order',
 			'overflow_type': 'billing'
 		}]
+		
+		self.prev_link_mapper = {
+			"Purchase Order": {
+				"fieldname": "purchase_order",
+				"doctype": "Purchase Invoice Item",
+				"filters": [
+					["Purchase Invoice Item", "parent", "=", self.name],
+					["Purchase Invoice Item", "purchase_order", "!=", ""]
+				]
+			},
+			"Purchase Receipt": {
+				"fieldname": "purchase_receipt",
+				"doctype": "Purchase Invoice Item",
+				"filters": [
+					["Purchase Invoice Item", "parent", "=", self.item],
+					["Purchase Invoice Item", "purchase_receipt", "!=", ""]
+				]
+			}
+		}
 
 	def validate(self):
 		if not self.is_opening:

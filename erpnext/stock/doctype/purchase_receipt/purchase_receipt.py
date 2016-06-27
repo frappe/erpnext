@@ -45,6 +45,17 @@ class PurchaseReceipt(BuyingController):
 			# 'overflow_type': 'receipt',
 			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
+		
+		self.prev_link_mapper = {
+			"Purchase Order": {
+				"fieldname": "prevdoc_docname",
+				"doctype": "Purchase Receipt Item",
+				"filters": [
+					["Purchase Receipt Item", "parent", "=", self.name],
+					["Purchase Receipt Item", "prevdoc_docname", "!=", ""]
+				]
+			}
+		}
 
 	def validate(self):
 		super(PurchaseReceipt, self).validate()
