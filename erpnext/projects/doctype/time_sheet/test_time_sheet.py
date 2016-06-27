@@ -72,12 +72,12 @@ def make_salary_structure(employee):
 	salary_structure.set('deductions', [])
 
 	es = salary_structure.append('earnings', {
-		"e_type": "_Test Allowance",
+		"earning_type": "_Test Allowance",
 		"modified_value": 100 
 	})
 
 	ds = salary_structure.append('deductions', {
-		"d_type": "_Test Professional Tax",
+		"deduction_type": "_Test Professional Tax",
 		"d_modified_amt": 50
 	})
 
