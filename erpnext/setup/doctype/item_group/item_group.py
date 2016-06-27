@@ -38,7 +38,10 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		if not self.route:
 			self.route = ''
 			if self.parent_item_group:
-				self.route = frappe.get_doc('Item Group', self.parent_item_group).route + '/'
+				parent_route = frappe.get_doc('Item Group', self.parent_item_group).route
+
+				if parent_route:
+					self.route = parent_route + '/'
 
 			self.route += self.scrub(self.item_group_name)
 
