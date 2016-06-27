@@ -11,7 +11,9 @@ def get_context(context):
 	homepage = frappe.get_doc('Homepage')
 
 	for item in homepage.products:
-		item.route = '/' + frappe.db.get_value('Item', item.item_code, 'route')
+		route = frappe.db.get_value('Item', item.item_code, 'route')
+		if route:
+			item.route = '/' + route
 
 	# show atleast 3 products
 	if len(homepage.products) < 3:
