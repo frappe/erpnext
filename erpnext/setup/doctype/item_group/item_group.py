@@ -41,7 +41,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 				self.route = frappe.get_doc('Item Group', self.parent_item_group).route + '/'
 
 			self.route += self.scrub(self.item_group_name)
-			
+
 			return self.route
 
 	def after_rename(self, olddn, newdn, merge=False):
@@ -57,6 +57,8 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def get_context(self, context):
 		context.show_search=True
+		context.search_link = '/product_search'
+
 		start = int(frappe.form_dict.start or 0)
 		if start < 0:
 			start = 0

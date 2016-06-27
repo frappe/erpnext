@@ -9,6 +9,9 @@ from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_htm
 no_cache = 1
 no_sitemap = 1
 
+def get_context(context):
+	context.show_search = True
+
 @frappe.whitelist(allow_guest=True)
 def get_product_list(search=None, start=0, limit=12):
 	# limit = 12 because we show 12 items in the grid view
