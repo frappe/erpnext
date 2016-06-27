@@ -65,7 +65,7 @@ class PurchaseInvoice(BuyingController):
 			self.po_required()
 			self.pr_required()
 			self.validate_supplier_invoice()
-			self.validate_advance_jv("Purchase Order")
+			
 
 		# validate cash purchase
 		if (self.is_paid == 1):
@@ -108,11 +108,6 @@ class PurchaseInvoice(BuyingController):
 			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.company)
 
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
-
-	def get_advances(self):
-		if not self.is_return:
-			super(PurchaseInvoice, self).get_advances(self.credit_to, "Supplier", self.supplier,
-				"Purchase Invoice Advance", "advances", "debit_in_account_currency", "purchase_order")
 
 	def check_conversion_rate(self):
 		default_currency = get_company_currency(self.company)
@@ -233,37 +228,6 @@ class PurchaseInvoice(BuyingController):
 				submitted = frappe.db.sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = %s", d.purchase_receipt)
 				if not submitted:
 					frappe.throw(_("Purchase Receipt {0} is not submitted").format(d.purchase_receipt))
-
-
-	def update_against_document_in_jv(self):
-		"""
-			Links invoice and advance voucher:
-				1. cancel advance voucher
-				2. split into multiple rows if partially adjusted, assign against voucher
-				3. submit advance voucher
-		"""
-
-		lst = []
-		for d in self.get('advances'):
-			if flt(d.allocated_amount) > 0:
-				args = {
-					'voucher_no' : d.journal_entry,
-					'voucher_detail_no' : d.jv_detail_no,
-					'against_voucher_type' : 'Purchase Invoice',
-					'against_voucher'  : self.name,
-					'account' : self.credit_to,
-					'party_type': 'Supplier',
-					'party': self.supplier,
-					'is_advance' : 'Yes',
-					'dr_or_cr' : 'debit_in_account_currency',
-					'unadjusted_amt' : flt(d.advance_amount),
-					'allocated_amt' : flt(d.allocated_amount)
-				}
-				lst.append(args)
-
-		if lst:
-			from erpnext.accounts.utils import reconcile_against_document
-			reconcile_against_document(lst)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):

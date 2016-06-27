@@ -105,8 +105,8 @@ class PaymentReconciliation(Document):
 					'party': self.party,
 					'is_advance' : e.is_advance,
 					'dr_or_cr' : dr_or_cr,
-					'unadjusted_amt' : flt(e.amount),
-					'allocated_amt' : flt(e.allocated_amount)
+					'unadjusted_amount' : flt(e.amount),
+					'allocated_amount' : flt(e.allocated_amount)
 				})
 
 		if lst:

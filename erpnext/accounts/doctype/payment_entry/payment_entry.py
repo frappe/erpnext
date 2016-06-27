@@ -16,17 +16,26 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 
 class PaymentEntry(AccountsController):
+	def __init__(self, arg1, arg2=None):
+		super(PaymentEntry, self).__init__(arg1, arg2)
+		
+		self.party_account_field = None
+		self.party_account = None
+		
+		if self.payment_type == "Receive":
+			self.party_account_field = "paid_from"
+			self.party_account = self.paid_from
+		elif self.payment_type == "Pay":
+			self.party_account_field = "paid_to"
+			self.party_account = self.paid_to
+				
 	def validate(self):
-		self.define_party_account_field()
 		self.set_missing_values()
 		self.validate_party_details()
 		self.validate_bank_accounts()
 		self.set_exchange_rate()
-		self.set_amounts_in_company_currency()
 		self.validate_reference_documents()
-		self.set_total_allocated_amount()
-		self.set_unallocated_amount()
-		self.set_difference_amount()
+		self.set_amounts()
 		self.clear_unallocated_reference_document_rows()
 		self.set_title()
 		
@@ -35,17 +44,9 @@ class PaymentEntry(AccountsController):
 		self.update_advance_paid()
 		
 	def on_cancel(self):
-		self.make_gl_entries()
+		self.make_gl_entries(cancel=1)
 		self.update_advance_paid()
-		
-	def define_party_account_field(self):
-		self.party_account_field = None
-		
-		if self.payment_type == "Receive":
-			self.party_account_field = "paid_from"
-		elif self.payment_type == "Pay":
-			self.party_account_field = "paid_to"
-					
+							
 	def set_missing_values(self):
 		if self.payment_type == "Internal Transfer":
 			for field in ("party", "party_balance", "total_allocated_amount", 
@@ -114,16 +115,6 @@ class PaymentEntry(AccountsController):
 		if self.paid_to:
 			self.target_exchange_rate = get_exchange_rate(self.paid_to_account_currency, 
 				self.company_currency)
-		
-	def set_amounts_in_company_currency(self):
-		self.base_paid_amount, self.base_received_amount, self.difference_amount = 0, 0, 0
-		if self.paid_amount:
-			self.base_paid_amount = flt(flt(self.paid_amount) * flt(self.source_exchange_rate), 
-				self.precision("base_paid_amount"))
-				
-		if self.received_amount:
-			self.base_received_amount = flt(flt(self.received_amount) * flt(self.target_exchange_rate), 
-				self.precision("base_received_amount"))
 				
 	def validate_reference_documents(self):
 		if self.party_type == "Customer":
@@ -150,6 +141,22 @@ class PaymentEntry(AccountsController):
 					if ref_doc.docstatus != 1:
 						frappe.throw(_("{0} {1} must be submitted")
 							.format(d.reference_doctype, d.reference_name))
+							
+	def set_amounts(self):
+		self.set_amounts_in_company_currency()
+		self.set_total_allocated_amount()
+		self.set_unallocated_amount()
+		self.set_difference_amount()
+		
+	def set_amounts_in_company_currency(self):
+		self.base_paid_amount, self.base_received_amount, self.difference_amount = 0, 0, 0
+		if self.paid_amount:
+			self.base_paid_amount = flt(flt(self.paid_amount) * flt(self.source_exchange_rate), 
+				self.precision("base_paid_amount"))
+				
+		if self.received_amount:
+			self.base_received_amount = flt(flt(self.received_amount) * flt(self.target_exchange_rate), 
+				self.precision("base_received_amount"))
 				
 	def set_total_allocated_amount(self):
 		if self.payment_type == "Internal Transfer":
@@ -203,13 +210,13 @@ class PaymentEntry(AccountsController):
 		else:
 			self.title = self.paid_from + " - " + self.paid_to
 				
-	def make_gl_entries(self):
+	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gl_entries = []
 		self.add_party_gl_entries(gl_entries)
 		self.add_bank_gl_entries(gl_entries)
 		self.add_deductions_gl_entries(gl_entries)
-		
-		make_gl_entries(gl_entries, cancel = (self.docstatus==2))
+
+		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 		
 	def add_party_gl_entries(self, gl_entries):
 		if self.party_account:
@@ -332,6 +339,12 @@ def get_outstanding_reference_documents(args):
 	# Get all outstanding sales /purchase invoices
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"), 
 		args.get("party_account"))
+		
+	for d in outstanding_invoices:
+		d.exchange_rate = 1
+		if party_account_currency != company_currency \
+			and d.voucher_type in ("Sales Invoice", "Purchase Invoice"):
+				d.exchange_rate = frappe.db.get_value(d.voucher_type, d.voucher_no, "conversion_rate")
 	
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed =  get_orders_to_be_billed(args.get("party_type"), args.get("party"), 

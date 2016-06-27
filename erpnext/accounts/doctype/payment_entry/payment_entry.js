@@ -234,11 +234,12 @@ frappe.ui.form.on('Payment Entry', {
 					frm.set_value(field, null);
 			})
 		} else {
+			frm.set_value("party_type", frm.doc.payment_type=="Receive" ? "Customer" : "Supplier");
 			frm.events.party(frm);
 		}
 	},
 		
-	"mode_of_payment": function(frm) {
+	mode_of_payment: function(frm) {
 		return  frappe.call({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 			args: {
@@ -357,7 +358,8 @@ frappe.ui.form.on('Payment Entry', {
 	paid_amount: function(frm) {
 		frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
 		
-		if(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
+		if(!frm.set_paid_amount_based_on_received_amount && 
+				(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency)) {
 			frm.set_value("received_amount", frm.doc.paid_amount);
 			frm.set_value("target_exchange_rate", frm.doc.source_exchange_rate);
 			frm.set_value("base_received_amount", frm.doc.base_paid_amount);
@@ -366,9 +368,19 @@ frappe.ui.form.on('Payment Entry', {
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount);
 		else
 			frm.events.set_difference_amount(frm);
+		
+		frm.set_paid_amount_based_on_received_amount = false;
 	},
 	
 	received_amount: function(frm) {
+		frm.set_paid_amount_based_on_received_amount = true;
+		
+		if(!frm.doc.paid_amount && frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
+			frm.set_value("paid_amount", frm.doc.received_amount);
+			frm.set_value("source_exchange_rate", frm.doc.target_exchange_rate);
+			frm.set_value("base_paid_amount", frm.doc.base_received_amount);
+		}
+		
 		frm.set_value("base_received_amount", 
 			flt(frm.doc.received_amount) * flt(frm.doc.target_exchange_rate));
 			
@@ -397,12 +409,15 @@ frappe.ui.form.on('Payment Entry', {
 			},
 			callback: function(r, rt) {
 				if(r.message) {
+					var total_invoice_outstanding_amount = 0;
 					$.each(r.message, function(i, d) {
 						var c = frm.add_child("references");
 						c.reference_doctype = d.voucher_type;
 						c.reference_name = d.voucher_no;
 						c.total_amount = d.invoice_amount;
 						c.outstanding_amount = d.outstanding_amount;
+						if(!in_list(["Sales Order", "Purchase Order"], d.voucher_type))
+							total_outstanding_amount += flt(d.outstanding_amount);
 						
 						var party_account_currency = frm.doc.payment_type=="Receive" ? 
 							frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency;
@@ -416,6 +431,9 @@ frappe.ui.form.on('Payment Entry', {
 							c.due_date = d.due_date
 						}
 					});
+					
+					var party_amt_field = frm.doc.payment_type=="Receive" ? "paid_amount" : "received_amount";
+					frm.set_value(party_amt_field, total_outstanding_amount);
 				}
 				
 				frm.events.allocate_party_amount_against_ref_docs(frm, 
@@ -426,12 +444,14 @@ frappe.ui.form.on('Payment Entry', {
 	
 	allocate_party_amount_against_ref_docs: function(frm, amount) {
 		$.each(frm.doc.references || [], function(i, row) {
-			if (!amount) return false;
+			row.allocated_amount = 0
 			
-			if(row.outstanding_amount >= amount) row.allocated_amount = amount;
-			else row.allocated_amount = row.outstanding_amount;
+			if(amount) {
+				if(row.outstanding_amount >= amount) row.allocated_amount = amount;
+				else row.allocated_amount = row.outstanding_amount;
 			
-			amount -= flt(row.allocated_amount);
+				amount -= flt(row.allocated_amount);
+			}
 		})
 		frm.refresh_fields()
 		frm.events.set_total_allocated_amount(frm);
