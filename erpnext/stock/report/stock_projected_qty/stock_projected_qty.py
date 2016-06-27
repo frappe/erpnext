@@ -66,11 +66,12 @@ def get_bin_list(filters):
 		lft, rgt = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"])
 	
 		conditions.append(" exists (select name from `tabWarehouse` wh \
-			where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"%(lft, rgt))
+			where wh.lft >= %s and wh.rgt <= %s and bin.warehouse = wh.name)"%(lft, rgt))
 
 	bin_list = frappe.db.sql("""select item_code, warehouse, actual_qty, planned_qty, indented_qty,
 		ordered_qty, reserved_qty, reserved_qty_for_production, projected_qty
-		from tabBin where %s order by item_code, warehouse """% " and ".join(conditions), as_dict=1,debug=1)
+		from tabBin bin {conditions} order by item_code, warehouse
+		""".format(conditions=" where " + " and ".join(conditions) if conditions else ""), as_dict=1)
 
 	return bin_list
 
