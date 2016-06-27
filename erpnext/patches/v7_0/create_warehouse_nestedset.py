@@ -11,7 +11,8 @@ def execute():
 		for warehouse in frappe.get_all("Warehouse", filters={"company": company.name}, fields=["name", "create_account_under",
 			"parent_warehouse", "is_group"]):
 			set_parent_to_warehouses(warehouse, company)
-			set_parent_to_warehouse_acounts(warehouse, company)
+			if frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock"):
+				set_parent_to_warehouse_acounts(warehouse, company)
 
 def set_parent_to_warehouses(warehouse, company):
 	warehouse = frappe.get_doc("Warehouse", warehouse.name)
