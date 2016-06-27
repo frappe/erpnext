@@ -41,7 +41,7 @@ my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 
 email_append_to = ["Job Applicant", "Opportunity", "Issue"]
 
-calendars = ["Task", "Production Order", "Time Log", "Leave Application", "Sales Order", "Holiday List"]
+calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Holiday List"]
 
 fixtures = ["Web Form"]
 

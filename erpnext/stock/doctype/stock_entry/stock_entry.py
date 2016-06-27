@@ -178,7 +178,7 @@ class StockEntry(StockController):
 			self.production_order = None
 
 	def check_if_operations_completed(self):
-		"""Check if Time Logs are completed against before manufacturing to capture operating costs."""
+		"""Check if Time Sheets are completed against before manufacturing to capture operating costs."""
 		prod_order = frappe.get_doc("Production Order", self.production_order)
 
 		for d in prod_order.get("operations"):

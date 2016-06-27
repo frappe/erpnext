@@ -16,6 +16,10 @@ frappe.ui.form.on("Production Order", {
 			});
 			erpnext.production_order.set_default_warehouse(frm);
 		}
+		
+		// formatter for production order operation
+		frm.set_indicator_formatter('operation',
+			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange" })
 
 		erpnext.production_order.set_custom_buttons(frm);
 		erpnext.production_order.setup_company_filter(frm);
@@ -32,6 +36,15 @@ frappe.ui.form.on("Production Order", {
 
 		if (frm.doc.docstatus===1) {
 			frm.trigger('show_progress');
+		}
+		
+		if(frm.doc.docstatus == 1){
+			frm.add_custom_button(__('Make Timesheet'), function(){
+				frappe.model.open_mapped_doc({
+					method: "erpnext.manufacturing.doctype.production_order.production_order.make_timesheet",
+					frm: cur_frm
+				})
+			})
 		}
 	},
 	show_progress: function(frm) {
@@ -90,7 +103,7 @@ frappe.ui.form.on("Production Order Operation", {
 	time_in_mins: function(frm, cdt, cdn) {
 		erpnext.production_order.calculate_cost(frm.doc);
 		erpnext.production_order.calculate_total_cost(frm);
-	}
+	},
 });
 
 erpnext.production_order = {
@@ -112,9 +125,9 @@ erpnext.production_order = {
 
 			// opertions
 			if ((doc.operations || []).length) {
-				frm.add_custom_button(__('Time Logs'), function() {
+				frm.add_custom_button(__('Time Sheet'), function() {
 					frappe.route_options = {"production_order": frm.doc.name};
-					frappe.set_route("List", "Time Log");
+					frappe.set_route("List", "Time Sheet");
 				}, __("View"));
 			}
 
@@ -252,32 +265,6 @@ $.extend(cur_frm.cscript, {
 	qty: function() {
 		frappe.ui.form.trigger("Production Order", 'bom_no')
 	},
-	show_time_logs: function(doc, cdt, cdn) {
-		var child = locals[cdt][cdn]
-		frappe.route_options = {"operation_id": child.name};
-		frappe.set_route("List", "Time Log");
-	},
-
-	make_time_log: function(doc, cdt, cdn){
-		var child = locals[cdt][cdn]
-		frappe.call({
-			method:"erpnext.manufacturing.doctype.production_order.production_order.make_time_log",
-			args: {
-				"name": doc.name,
-				"operation": child.operation,
-				"from_time": child.planned_start_time,
-				"to_time": child.planned_end_time,
-				"project": doc.project,
-				"workstation": child.workstation,
-				"qty": flt(doc.qty) - flt(child.completed_qty),
-				"operation_id": child.name
-			},
-			callback: function(r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			}
-		});
-	}
 });
 
 cur_frm.cscript['Stop Production Order'] = function() {

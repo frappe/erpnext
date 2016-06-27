@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import unittest
 import frappe
-from frappe.utils import today
+from frappe.utils import today, now_datetime, getdate, cstr
 from erpnext.hr.doctype.employee.employee import make_salary_structure
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.leave_application.test_leave_application import make_allocation_record
@@ -35,10 +35,10 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEquals(ss.total_days_in_month, 31)
 		self.assertEquals(ss.payment_days, 30)
-		self.assertEquals(ss.earnings[0].e_modified_amount, 14516.13)
-		self.assertEquals(ss.earnings[1].e_modified_amount, 500)
-		self.assertEquals(ss.deductions[0].d_modified_amount, 100)
-		self.assertEquals(ss.deductions[1].d_modified_amount, 48.39)
+		self.assertEquals(ss.earnings[0].earning_amount, 14516.13)
+		self.assertEquals(ss.earnings[1].earning_amount, 500)
+		self.assertEquals(ss.deductions[0].deduction_amount, 100)
+		self.assertEquals(ss.deductions[1].deduction_amount, 48.39)
 		self.assertEquals(ss.gross_pay, 15016.13)
 		self.assertEquals(ss.net_pay, 14867.74)
 
@@ -49,10 +49,10 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEquals(ss.total_days_in_month, 29)
 		self.assertEquals(ss.payment_days, 28)
-		self.assertEquals(ss.earnings[0].e_modified_amount, 14482.76)
-		self.assertEquals(ss.earnings[1].e_modified_amount, 500)
-		self.assertEquals(ss.deductions[0].d_modified_amount, 100)
-		self.assertEquals(ss.deductions[1].d_modified_amount, 48.28)
+		self.assertEquals(ss.earnings[0].earning_amount, 14482.76)
+		self.assertEquals(ss.earnings[1].earning_amount, 500)
+		self.assertEquals(ss.deductions[0].deduction_amount, 100)
+		self.assertEquals(ss.deductions[1].deduction_amount, 48.28)
 		self.assertEquals(ss.gross_pay, 14982.76)
 		self.assertEquals(ss.net_pay, 14834.48)
 
@@ -152,6 +152,13 @@ class TestSalarySlip(unittest.TestCase):
 			salary_slip = salary_slip.name
 
 		return salary_slip
+
+	def make_activity_for_employee(self):
+		activity_type = frappe.get_doc("Activity Type", "_Test Activity Type")
+		activity_type.billing_rate = 50
+		activity_type.costing_rate = 20
+		activity_type.wage_rate = 25
+		activity_type.save()
 
 test_dependencies = ["Leave Application", "Holiday List"]
 

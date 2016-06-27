@@ -2,13 +2,51 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee', 'company', 'company');
+cur_frm.add_fetch('time_sheet', 'total_hours', 'working_hours');
 
 frappe.ui.form.on("Salary Slip", {
+	setup: function(frm) {
+		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(){
+			return {
+				filters: {
+					employee: frm.doc.employee,
+					make_for: 'Salary Slip'
+				}
+			}
+		}
+	},
+
 	company: function(frm) {
 		var company = locals[':Company'][frm.doc.company];
 		if(!frm.doc.letter_head && company.default_letter_head) {
 			frm.set_value('letter_head', company.default_letter_head);
 		}
+	},
+
+	refresh: function(frm) {
+		frm.trigger("toggle_fields")
+	},
+
+	salary_slip_based_on_timesheet: function(frm) {
+		frm.trigger("toggle_fields")
+	},
+
+	toggle_fields: function(frm) {
+		if(frm.doc.salary_slip_based_on_timesheet) {
+			hide_field(['fiscal_year', 'month', 'total_days_in_month', 'leave_without_pay', 'payment_days'])
+			unhide_field(['start_date', 'end_date', 'hourly_wages', 'timesheets'])
+		}else {
+			unhide_field(['fiscal_year', 'month', 'total_days_in_month', 'leave_without_pay', 'payment_days'])
+			hide_field(['start_date', 'end_date', 'hourly_wages', 'timesheets'])
+		}
+	}
+})
+
+
+frappe.ui.form.on("Salary Slip Timesheet", {
+	time_sheet: function(frm, cdt, cdn) {
+		doc = frm.doc;
+		cur_frm.cscript.fiscal_year(doc, cdt, cdn)
 	}
 })
 
@@ -38,7 +76,13 @@ cur_frm.cscript.fiscal_year = function(doc,dt,dn){
 		});
 }
 
-cur_frm.cscript.month = cur_frm.cscript.employee = cur_frm.cscript.fiscal_year;
+cur_frm.cscript.month = cur_frm.cscript.salary_slip_based_on_timesheet = cur_frm.cscript.fiscal_year;
+cur_frm.cscript.start_date = cur_frm.cscript.end_date = cur_frm.cscript.fiscal_year;
+
+cur_frm.cscript.employee = function(doc,dt,dn){
+	doc.salary_structure = ''
+	cur_frm.cscript.fiscal_year(doc, dt, dn)
+}
 
 cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 	if (doc.employee && doc.fiscal_year && doc.month) {
@@ -56,7 +100,7 @@ var calculate_all = function(doc, dt, dn) {
 	calculate_net_pay(doc, dt, dn);
 }
 
-cur_frm.cscript.e_modified_amount = function(doc,dt,dn){
+cur_frm.cscript.earning_amount = function(doc,dt,dn){
 	calculate_earning_total(doc, dt, dn);
 	calculate_net_pay(doc, dt, dn);
 }
@@ -67,7 +111,7 @@ cur_frm.cscript.e_depends_on_lwp = function(doc,dt,dn){
 }
 // Trigger on earning modified amount and depends on lwp
 // ------------------------------------------------------------------------
-cur_frm.cscript.d_modified_amount = function(doc,dt,dn){
+cur_frm.cscript.deduction_amount = function(doc,dt,dn){
 	calculate_ded_total(doc, dt, dn);
 	calculate_net_pay(doc, dt, dn);
 }
@@ -85,17 +129,17 @@ var calculate_earning_total = function(doc, dt, dn, reset_amount) {
 	var total_earn = 0;
 	for(var i = 0; i < tbl.length; i++){
 		if(cint(tbl[i].e_depends_on_lwp) == 1) {
-			tbl[i].e_modified_amount =  Math.round(tbl[i].e_amount)*(flt(doc.payment_days) /
+			tbl[i].earning_amount =  Math.round(tbl[i].e_amount)*(flt(doc.payment_days) /
 				cint(doc.total_days_in_month)*100)/100;
-			refresh_field('e_modified_amount', tbl[i].name, 'earnings');
+			refresh_field('earning_amount', tbl[i].name, 'earnings');
 		} else if(reset_amount) {
-			tbl[i].e_modified_amount = tbl[i].e_amount;
-			refresh_field('e_modified_amount', tbl[i].name, 'earnings');
+			tbl[i].earning_amount = tbl[i].e_amount;
+			refresh_field('earning_amount', tbl[i].name, 'earnings');
 		}
-		total_earn += flt(tbl[i].e_modified_amount);
+		total_earn += flt(tbl[i].earning_amount);
 	}
 	doc.gross_pay = total_earn + flt(doc.arrear_amount) + flt(doc.leave_encashment_amount);
-	refresh_many(['e_modified_amount', 'gross_pay']);
+	refresh_many(['earning_amount', 'gross_pay']);
 }
 
 // Calculate deduction total
@@ -106,13 +150,13 @@ var calculate_ded_total = function(doc, dt, dn, reset_amount) {
 	var total_ded = 0;
 	for(var i = 0; i < tbl.length; i++){
 		if(cint(tbl[i].d_depends_on_lwp) == 1) {
-			tbl[i].d_modified_amount = Math.round(tbl[i].d_amount)*(flt(doc.payment_days)/cint(doc.total_days_in_month)*100)/100;
-			refresh_field('d_modified_amount', tbl[i].name, 'deductions');
+			tbl[i].deduction_amount = Math.round(tbl[i].d_amount)*(flt(doc.payment_days)/cint(doc.total_days_in_month)*100)/100;
+			refresh_field('deduction_amount', tbl[i].name, 'deductions');
 		} else if(reset_amount) {
-			tbl[i].d_modified_amount = tbl[i].d_amount;
-			refresh_field('d_modified_amount', tbl[i].name, 'earnings');
+			tbl[i].deduction_amount = tbl[i].d_amount;
+			refresh_field('deduction_amount', tbl[i].name, 'earnings');
 		}
-		total_ded += flt(tbl[i].d_modified_amount);
+		total_ded += flt(tbl[i].deduction_amount);
 	}
 	doc.total_deduction = total_ded;
 	refresh_field('total_deduction');

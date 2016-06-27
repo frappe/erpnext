@@ -6,10 +6,10 @@
 		"from_date": "2014-02-01",
 		"earnings": [
 			{
-				"e_type": "_Test Basic Salary"
+				"earning_type": "_Test Basic Salary"
 			},
 			{
-				"e_type": "_Test Allowance"
+				"earning_type": "_Test Allowance"
 			}
 		]
 	}

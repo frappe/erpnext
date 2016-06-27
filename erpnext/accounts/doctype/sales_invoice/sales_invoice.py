@@ -79,9 +79,10 @@ class SalesInvoice(SellingController):
 
 		self.set_against_income_account()
 		self.validate_c_form()
-		self.validate_time_logs_are_submitted()
+		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		self.update_packing_list()
+		self.calculate_billing_amount_from_timesheet()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -125,11 +126,10 @@ class SalesInvoice(SellingController):
 		if not cint(self.is_pos) == 1 and not self.is_return:
 			self.update_against_document_in_jv()
 
-		self.update_time_log_batch(self.name)
-
+		self.update_time_sheet(self.name)
 
 	def before_cancel(self):
-		self.update_time_log_batch(None)
+		self.update_time_sheet(None)
 
 	def on_cancel(self):
 		self.check_close_sales_order("sales_order")
@@ -217,20 +217,21 @@ class SalesInvoice(SellingController):
 		if pos:
 			return {"print_format": pos.get("print_format") }
 
-	def update_time_log_batch(self, sales_invoice):
-		for d in self.get("items"):
-			if d.time_log_batch:
-				tlb = frappe.get_doc("Time Log Batch", d.time_log_batch)
-				tlb.sales_invoice = sales_invoice
-				tlb.flags.ignore_validate_update_after_submit = True
-				tlb.save()
+	def update_time_sheet(self, sales_invoice):
+		for d in self.get("timesheets"):
+			if d.time_sheet:
+				timesheet = frappe.get_doc("Time Sheet", d.time_sheet)
+				timesheet.sales_invoice = sales_invoice
+				timesheet.flags.ignore_validate_update_after_submit = True
+				timesheet.set_status()
+				timesheet.save()
 
-	def validate_time_logs_are_submitted(self):
-		for d in self.get("items"):
-			if d.time_log_batch:
-				docstatus = frappe.db.get_value("Time Log Batch", d.time_log_batch, "docstatus")
-				if docstatus!=1:
-					frappe.throw(_("Time Log Batch {0} must be 'Submitted'").format(d.time_log_batch))
+	def validate_time_sheets_are_submitted(self):
+		for data in self.get("timesheets"):
+			if data.time_sheet:
+				status = frappe.db.get_value("Time Sheet", data.time_sheet, "status")
+				if status not in ['Submitted', 'Payslip']:
+					frappe.throw(_("Time Sheet {0} is already completed or cancelled").format(data.time_sheet))
 
 	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from POS Profiles"""
@@ -450,6 +451,13 @@ class SalesInvoice(SellingController):
 		else:
 			self.set('packed_items', [])
 
+	def calculate_billing_amount_from_timesheet(self):
+		total_billing_amount = 0.0
+		for data in self.timesheets:
+			if data.billing_amount:
+				total_billing_amount += data.billing_amount
+
+		self.total_billing_amount = total_billing_amount
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`

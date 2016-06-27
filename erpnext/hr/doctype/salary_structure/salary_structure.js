@@ -12,7 +12,7 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn){
-	if((!doc.__islocal) && (doc.is_active == 'Yes')){
+	if((!doc.__islocal) && (doc.is_active == 'Yes') && (doc.salary_slip_based_on_timesheet == 0)){
 		cur_frm.add_custom_button(__('Salary Slip'),
 			cur_frm.cscript['Make Salary Slip'], __("Make"));
 		cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
@@ -52,7 +52,11 @@ var calculate_totals = function(doc, cdt, cdn) {
 	}
 	doc.total_earning = total_earn;
 	doc.total_deduction = total_ded;
-	doc.net_pay = flt(total_earn) - flt(total_ded);
+	doc.net_pay = 0.0
+	if(doc.salary_slip_based_on_timesheet == 0){
+		doc.net_pay = flt(total_earn) - flt(total_ded);
+	}
+
 	refresh_many(['total_earning', 'total_deduction', 'net_pay']);
 }
 
