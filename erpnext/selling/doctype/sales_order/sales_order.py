@@ -153,7 +153,7 @@ class SalesOrder(SellingController):
 		self.check_credit_limit()
 		self.update_reserved_qty()
 
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.base_grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
 
 		self.update_prevdoc_status('submit')
 
