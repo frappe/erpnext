@@ -49,7 +49,7 @@ class PurchaseInvoice(BuyingController):
 				"fieldname": "purchase_receipt",
 				"doctype": "Purchase Invoice Item",
 				"filters": [
-					["Purchase Invoice Item", "parent", "=", self.item],
+					["Purchase Invoice Item", "parent", "=", self.name],
 					["Purchase Invoice Item", "purchase_receipt", "!=", ""]
 				]
 			}
