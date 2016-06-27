@@ -63,6 +63,7 @@ def update_setup_wizard_access():
 		if roles.role == 'System Manager':
 			roles.role = 'Administrator'
 	setup_wizard.flags.ignore_permissions = 1
+	setup_wizard.flags.do_not_update_json = 1
 	setup_wizard.save()
 
 def create_fiscal_year_and_company(args):
