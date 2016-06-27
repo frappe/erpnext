@@ -15,7 +15,7 @@ def execute():
 
 def set_parent_to_warehouses(warehouse, company):
 	warehouse = frappe.get_doc("Warehouse", warehouse.name)
-	warehouse.is_group = "Yes" if warehouse.is_group == "Yes" else "No"
+	warehouse.is_group = warehouse.is_group
 	
 	if not warehouse.parent_warehouse and warehouse.name != "{0} - {1}".format(_("All Warehouses"), company.abbr):
 		warehouse.parent_warehouse = "{0} - {1}".format(_("All Warehouses"), company.abbr)
@@ -42,7 +42,7 @@ def create_default_warehouse_group(company):
 	frappe.get_doc({
 		"doctype": "Warehouse",
 		"warehouse_name": _("All Warehouses"),
-		"is_group": "Yes",
+		"is_group": 1,
 		"company": company.name,
 		"parent_warehouse": ""
 	}).insert(ignore_permissions=True)

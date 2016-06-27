@@ -10,7 +10,7 @@ test_records = frappe.get_test_records('Warehouse')
 class TestWarehouse(unittest.TestCase):
 	def test_parent_warehouse(self):
 		parent_warehouse = frappe.get_doc("Warehouse", "_Test Warehouse Group - _TC")
-		self.assertEquals(parent_warehouse.is_group, "Yes")
+		self.assertEquals(parent_warehouse.is_group, 1)
 		
 	def test_warehouse_hierarchy(self):
 		p_warehouse = frappe.get_doc("Warehouse", "_Test Warehouse Group - _TC")
@@ -20,6 +20,6 @@ class TestWarehouse(unittest.TestCase):
 		
 		for child_warehouse in child_warehouses:
 			self.assertEquals(p_warehouse.name, child_warehouse.parent_warehouse)
-			self.assertEquals(child_warehouse.is_group, "No")
+			self.assertEquals(child_warehouse.is_group, 0)
 		
 		

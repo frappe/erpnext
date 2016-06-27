@@ -50,7 +50,7 @@ class Warehouse(NestedSet):
 
 	def create_account_head(self):
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-			if not self.get_account(self.name):
+			if not self.get_account():
 				if self.get("__islocal") or not frappe.db.get_value(
 						"Stock Ledger Entry", {"warehouse": self.name}):
 
@@ -60,7 +60,7 @@ class Warehouse(NestedSet):
 						'account_name': self.warehouse_name,
 						'parent_account': self.parent_warehouse if self.parent_warehouse \
 							else self.create_account_under,
-						'is_group': 1 if self.is_group=="Yes" else 0 ,
+						'is_group': self.is_group,
 						'company':self.company,
 						"account_type": "Stock",
 						"warehouse": self.name,
@@ -113,14 +113,21 @@ class Warehouse(NestedSet):
 		if warehouse_account:
 			frappe.delete_doc("Account", warehouse_account)
 
-		if frappe.db.sql("""select name from `tabStock Ledger Entry`
-				where warehouse = %s""", self.name):
+		if self.check_sle_exists():
 			throw(_("Warehouse can not be deleted as stock ledger entry exists for this warehouse."))
 
-		if frappe.db.sql("""select name from `tabWarehouse` where parent_warehouse = %s""", self.name):
+		if self.check_if_child_exists():
 			throw(_("Child warehouse exists for this warehouse. You can not delete this warehouse."))
 
 		self.update_nsm_model()
+	
+	def check_if_sle_exists(self):
+		return frappe.db.sql("""select name from `tabStock Ledger Entry`
+			where warehouse = %s""", self.name)
+	
+	def check_if_child_exists(self):
+		return frappe.db.sql("""select name from `tabWarehouse`
+			where parent_warehouse = %s""", self.name)
 
 	def before_rename(self, olddn, newdn, merge=False):
 		# Add company abbr if not provided
@@ -159,9 +166,19 @@ class Warehouse(NestedSet):
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
 		return get_name_with_abbr(dn, self.company)
 
-	def get_account(self, warehouse):
-		return frappe.db.get_value("Account", {"account_type": "Stock",
-			"warehouse": warehouse, "company": self.company, "is_group": 0})
+	def get_account(self, warehouse=None):
+		filters = {
+			"account_type": "Stock",
+			"company": self.company,
+			"is_group": self.is_group
+		}
+
+		if warehouse:
+			filters.update({"warehouse": warehouse})
+		else:
+			filters.update({"account_name": self.warehouse_name})
+
+		return frappe.db.get_value("Account", filters)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if merge:
@@ -181,6 +198,42 @@ class Warehouse(NestedSet):
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
+	
+	def convert_to_group_or_ledger(self):
+		if self.is_group:
+			self.convert_to_ledger()
+		else:
+			self.convert_to_group()
+
+	def convert_to_ledger(self):
+		if self.check_if_child_exists():
+			frappe.throw(_("Warehouses with child nodes cannot be converted to ledger"))
+		elif self.check_if_sle_exists():
+			throw(_("Warehouses with existing transaction can not be converted to ledger."))
+		else:
+			account_name = self.get_account()
+			if account_name:
+				doc = frappe.get_doc("Account", account_name)
+				doc.warehouse = self.name
+				doc.convert_group_to_ledger()
+			
+			self.is_group = 0
+			self.save()
+			return 1
+	
+	def convert_to_group(self):
+		if self.check_if_sle_exists():
+			throw(_("Warehouses with existing transaction can not be converted to group."))
+		else:
+			account_name = self.get_account(self.name)
+			if account_name:
+				doc = frappe.get_doc("Account", account_name)
+				doc.flags.exclude_account_type_check = True
+				doc.convert_ledger_to_group()
+
+			self.is_group = 1
+			self.save()
+			return 1
 
 @frappe.whitelist()
 def get_children():
@@ -195,7 +248,7 @@ def get_children():
 		parent = ""
 
 	warehouses = frappe.db.sql("""select name as value,
-		if(is_group='Yes', 1, 0) as expandable
+		is_group as expandable
 		from `tab{doctype}`
 		where docstatus < 2
 		and ifnull(`{parent_field}`,'') = %s and `company` = %s
@@ -229,3 +282,9 @@ def add_node():
 	})
 
 	doc.save()
+
+@frappe.whitelist()
+def convert_to_group_or_ledger():
+	args = frappe.form_dict
+	return frappe.get_doc("Warehouse", args.docname).convert_to_group_or_ledger()
+	

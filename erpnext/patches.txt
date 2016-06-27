@@ -281,3 +281,4 @@ erpnext.patches.v7_0.convert_timelogbatch_to_timesheet
 erpnext.patches.v7_0.convert_timelog_to_timesheet
 erpnext.patches.v7_0.move_timelogbatch_from_salesinvoiceitem_to_salesinvoicetimesheet
 erpnext.patches.v7_0.remove_doctypes_and_reports
+erpnext.patches.v7_0.set_is_group_for_warehouse

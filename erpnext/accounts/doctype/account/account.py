@@ -95,7 +95,7 @@ class Account(Document):
 			if self.check_gle_exists():
 				throw(_("Account with existing transaction cannot be converted to ledger"))
 			elif self.is_group:
-				if self.account_type:
+				if self.account_type and not self.flags.exclude_account_type_check:
 					throw(_("Cannot covert to Group because Account Type is selected."))
 			elif self.check_if_child_exists():
 				throw(_("Account with child nodes cannot be set as ledger"))
@@ -139,7 +139,7 @@ class Account(Document):
 	def convert_ledger_to_group(self):
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be converted to group."))
-		elif self.account_type:
+		elif self.account_type and not self.flags.exclude_account_type_check:
 			throw(_("Cannot covert to Group because Account Type is selected."))
 		else:
 			self.is_group = 1
