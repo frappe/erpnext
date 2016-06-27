@@ -34,7 +34,7 @@ class HolidayList(Document):
 			throw(_("To Date cannot be before From Date"))
 
 		for day in self.get("holidays"):
-			if not (self.from_date <= day.holiday_date <= self.to_date):
+			if not (getdate(self.from_date) <= getdate(day.holiday_date) <= getdate(self.to_date)):
 				frappe.throw(_("The holiday on {0} is not between From Date and To Date").format(formatdate(day.holiday_date)))
 
 	def get_weekly_off_date_list(self, start_date, end_date):
