@@ -7,8 +7,8 @@ import frappe
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 def execute():
-	frappe.reload_doctype('Time Sheet')
-	frappe.reload_doctype('Time Sheet Detail')
+	frappe.reload_doc('projects', 'doctype','time_sheet')
+	frappe.reload_doc('projects', 'doctype', 'time_sheet_detail')
 	
 	make_property_setter('Time Sheet', "naming_series", "options", 'TS-', "Text")
 	make_property_setter('Time Sheet', "naming_series", "default", 'TS-', "Text")
