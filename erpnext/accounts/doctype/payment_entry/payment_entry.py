@@ -21,13 +21,17 @@ class PaymentEntry(AccountsController):
 		
 		self.party_account_field = None
 		self.party_account = None
+		self.party_account_currency = None
 		
 		if self.payment_type == "Receive":
 			self.party_account_field = "paid_from"
 			self.party_account = self.paid_from
+			self.party_account_currency = self.paid_from_account_currency
+			
 		elif self.payment_type == "Pay":
 			self.party_account_field = "paid_to"
 			self.party_account = self.paid_to
+			self.party_account_currency = self.paid_to_account_currency
 				
 	def validate(self):
 		self.set_missing_values()
@@ -80,7 +84,25 @@ class PaymentEntry(AccountsController):
 			acc = get_account_currency_and_balance(self.paid_to, self.posting_date)
 			self.paid_to_account_currency = acc.account_currency
 			self.paid_to_account_balance = acc.account_balance
-							
+			
+		self.party_account_currency = self.paid_from_account_currency \
+			if self.payment_type=="Receive" else self.paid_to_account_currency
+			
+		for d in self.get("references"):
+			if d.allocated_amount and d.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+				ref_doc = frappe.db.get_value(d.reference_doctype, d.reference_name, ["grand_total", 
+					"base_grand_total", "outstanding_amount", "conversion_rate", "due_date"], as_dict=1)
+				
+				d.outstanding_amount = ref_doc.outstanding_amount
+				d.due_date = ref_doc.due_date
+
+				if self.party_account_currency == self.company_currency:
+					d.total_amount = ref_doc.base_grand_total
+					d.exchange_rate = 1
+				else:
+					d.total_amount = ref_doc.grand_total
+					d.exchange_rate = ref_doc.conversion_rate
+	
 	def validate_party_details(self):
 		if self.party:
 			if not frappe.db.exists(self.party_type, self.party):
@@ -165,6 +187,7 @@ class PaymentEntry(AccountsController):
 		self.total_allocated_amount, self.base_total_allocated_amount = 0, 0
 		for d in self.get("references"):
 			if d.allocated_amount:
+				print d.reference_name, d.outstanding_amount, d.allocated_amount
 				if d.allocated_amount > d.outstanding_amount:
 					frappe.throw(_("Row #{0}: Allocated amount cannot be greater than outstanding amount")
 						.format(d.idx))
@@ -221,10 +244,8 @@ class PaymentEntry(AccountsController):
 	def add_party_gl_entries(self, gl_entries):
 		if self.party_account:
 			if self.payment_type=="Receive":
-				party_account_currency = self.paid_from_account_currency
 				against_account = self.paid_to
 			else:
-				 party_account_currency = self.paid_to_account_currency
 				 against_account = self.paid_from
 			
 				
@@ -233,7 +254,7 @@ class PaymentEntry(AccountsController):
 				"party_type": self.party_type,
 				"party": self.party,
 				"against": against_account,
-				"account_currency": party_account_currency
+				"account_currency": self.party_account_currency
 			})
 			
 			for d in self.get("references"):
@@ -276,7 +297,6 @@ class PaymentEntry(AccountsController):
 					})
 				
 				gl_entries.append(gle)
-				
 				
 	def add_bank_gl_entries(self, gl_entries):
 		if self.payment_type in ("Pay", "Internal Transfer"):
@@ -341,10 +361,10 @@ def get_outstanding_reference_documents(args):
 		args.get("party_account"))
 		
 	for d in outstanding_invoices:
-		d.exchange_rate = 1
+		d["exchange_rate"] = 1
 		if party_account_currency != company_currency \
 			and d.voucher_type in ("Sales Invoice", "Purchase Invoice"):
-				d.exchange_rate = frappe.db.get_value(d.voucher_type, d.voucher_no, "conversion_rate")
+				d["exchange_rate"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "conversion_rate")
 	
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed =  get_orders_to_be_billed(args.get("party_type"), args.get("party"), 

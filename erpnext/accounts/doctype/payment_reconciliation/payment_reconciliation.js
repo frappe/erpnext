@@ -4,7 +4,15 @@
 frappe.provide("erpnext.accounts");
 
 erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.extend({
-
+	setup: function() {
+		this.frm.get_field('payments').grid.editable_fields = [
+			{fieldname: 'reference_name', columns: 3},
+			{fieldname: 'amount', columns: 2},
+			{fieldname: 'invoice_number', columns: 3},
+			{fieldname: 'allocated_amount', columns: 3}
+		];
+	}, 
+	
 	onload: function() {
 		var me = this
 		this.frm.set_query('party_type', function() {
@@ -105,14 +113,16 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			if (row.invoice_number && !inList(invoices, row.invoice_number))
 				invoices.push(row.invoice_type + " | " + row.invoice_number);
 		});
+		
+		if (invoices) {
+			frappe.meta.get_docfield("Payment Reconciliation Payment", "invoice_number",
+				me.frm.doc.name).options = "\n" + invoices.join("\n");
 
-		frappe.meta.get_docfield("Payment Reconciliation Payment", "invoice_number",
-			me.frm.doc.name).options = invoices.join("\n");
-
-		$.each(me.frm.doc.payments || [], function(i, p) {
-			if(!inList(invoices, cstr(p.invoice_number))) p.invoice_number = null;
-		});
-
+			$.each(me.frm.doc.payments || [], function(i, p) {
+				if(!inList(invoices, cstr(p.invoice_number))) p.invoice_number = null;
+			});
+		}
+		
 		refresh_field("payments");
 	},
 
