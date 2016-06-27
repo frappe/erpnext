@@ -681,7 +681,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.page.set_secondary_action(__("New"), function() {
 			me.save_previous_entry();
 			me.create_new();
-		});
+		}).addClass("btn-primary");
 	},
 
 	print_document: function(html){
@@ -876,6 +876,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.customer_validate();
 		this.item_validate();
+		this.validate_mode_of_payments()
 	},
 
 	item_validate: function(){
@@ -883,7 +884,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			frappe.throw(__("Select items to save the invoice"))
 		}
 	},
-
+	
+	validate_mode_of_payments: function(){
+		if (this.frm.doc.payments.length === 0){
+			frappe.throw(__("Payment Mode is not configured. Please check, whether account has been set on Mode of Payments or on POS Profile."))
+		}
+	},
+	
 	validate_serial_no: function(){
 		var me = this;
 		var item_code = serial_no = '';
