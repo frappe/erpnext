@@ -113,7 +113,7 @@ class Warehouse(NestedSet):
 		if warehouse_account:
 			frappe.delete_doc("Account", warehouse_account)
 
-		if self.check_sle_exists():
+		if self.check_if_sle_exists():
 			throw(_("Warehouse can not be deleted as stock ledger entry exists for this warehouse."))
 
 		if self.check_if_child_exists():
