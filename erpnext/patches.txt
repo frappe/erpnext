@@ -273,7 +273,7 @@ execute:frappe.rename_doc("DocType", "Payments", "Sales Invoice Payment", force=
 erpnext.patches.v7_0.update_mins_to_first_response
 erpnext.patches.v6_20x.repost_valuation_rate_for_negative_inventory
 erpnext.patches.v7_0.re_route #2016-06-27
-erpnext.patches.v7_0.create_warehouse_nestedset #2016-06-28
+erpnext.patches.v7_0.create_warehouse_nestedset
 erpnext.patches.v7_0.system_settings_setup_complete
 erpnext.patches.v7_0.merge_account_type_stock_and_warehouse_to_stock
 erpnext.patches.v7_0.set_naming_series_for_timesheet
