@@ -80,12 +80,11 @@ class SalarySlip(TransactionBase):
 			self.end_date = m['month_end_date']
 
 	def check_sal_struct(self, joining_date, relieving_date):
-		timesheet = 1 if self.salary_slip_based_on_timesheet else 0
 		struct = frappe.db.sql("""select name from `tabSalary Structure`
 			where employee=%s and is_active = 'Yes'
 			and (from_date <= %s or from_date <= %s)
-			and (to_date is null or to_date >= %s or to_date >= %s) and salary_slip_based_on_timesheet=%s""",
-			(self.employee, self.start_date, joining_date, self.end_date, relieving_date, timesheet))
+			and (to_date is null or to_date >= %s or to_date >= %s)""",
+			(self.employee, self.start_date, joining_date, self.end_date, relieving_date))
 
 		if not struct:
 			self.salary_structure = None
