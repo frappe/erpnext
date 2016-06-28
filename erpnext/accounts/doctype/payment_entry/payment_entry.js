@@ -90,14 +90,16 @@ frappe.ui.form.on('Payment Entry', {
 		frm.toggle_display("source_exchange_rate", 
 			(frm.doc.paid_amount && frm.doc.paid_from_account_currency != company_currency));
 			
-		frm.toggle_display("target_exchange_rate", 
-			(frm.doc.received_amount && frm.doc.paid_to_account_currency != company_currency));
+		frm.toggle_display("target_exchange_rate", (frm.doc.received_amount && 
+			frm.doc.paid_to_account_currency != company_currency &&
+			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency));
 			
 		frm.toggle_display("base_paid_amount", 
 			(!frm.doc.party && frm.doc.paid_from_account_currency != company_currency));
 			
-		frm.toggle_display("base_received_amount", 
-			(!frm.doc.party && frm.doc.paid_to_account_currency != company_currency));
+		frm.toggle_display("base_received_amount", (!frm.doc.party && 
+			frm.doc.paid_to_account_currency != company_currency && 
+			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency));
 				
 		frm.toggle_display("received_amount", 
 			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency)
@@ -116,7 +118,8 @@ frappe.ui.form.on('Payment Entry', {
 		
 		frm.toggle_display("set_exchange_gain_loss", 
 			(frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount && 
-				(frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency)));
+				(frm.doc.paid_from_account_currency != company_currency || 
+					frm.doc.paid_to_account_currency != company_currency)));
 			
 		frm.refresh_fields();
 	},
@@ -193,7 +196,7 @@ frappe.ui.form.on('Payment Entry', {
 		}
 	},
 		
-	"party": function(frm) {
+	party: function(frm) {
 		if(frm.doc.payment_type && frm.doc.party_type && frm.doc.party) {
 			frm.set_party_account_based_on_party = true;
 			
@@ -259,7 +262,7 @@ frappe.ui.form.on('Payment Entry', {
 		if(frm.set_party_account_based_on_party) return;
 		
 		frm.events.set_account_currency_and_balance(frm, frm.doc.paid_from, 
-			"paid_from_account_currency", "paid_from_account_balance", function() {
+			"paid_from_account_currency", "paid_from_account_balance", function(frm) {
 				if(frm.doc.payment_type == "Receive") frm.events.get_outstanding_documents(frm);
 			}
 		);
@@ -269,7 +272,7 @@ frappe.ui.form.on('Payment Entry', {
 		if(frm.set_party_account_based_on_party) return;
 		
 		frm.events.set_account_currency_and_balance(frm, frm.doc.paid_to, 
-			"paid_to_account_currency", "paid_to_account_balance", function() {
+			"paid_to_account_currency", "paid_to_account_balance", function(frm) {
 				if(frm.doc.payment_type == "Pay") frm.events.get_outstanding_documents(frm);
 			}
 		);
@@ -288,7 +291,15 @@ frappe.ui.form.on('Payment Entry', {
 					frm.set_value(currency_field, r.message['account_currency']);
 					frm.set_value(balance_field, r.message['account_balance']);
 					
-					if(callback_function) callback_function()
+					if(frm.doc.payment_type == "Receive" && currency_field=="paid_to_account_currency" 
+						&& !frm.doc.received_amount && frm.doc.paid_amount) {
+							frm.events.paid_amount(frm);
+					} else if(frm.doc.payment_type == "Pay" && currency_field=="paid_from_account_currency" 
+						&& !frm.doc.paid_amount && frm.doc.received_amount) {
+							frm.events.received_amount(frm);
+					}
+					
+					if(callback_function) callback_function(frm);
 						
 					frm.events.hide_unhide_fields(frm);
 					frm.events.set_dynamic_labels(frm);
@@ -391,10 +402,12 @@ frappe.ui.form.on('Payment Entry', {
 	},
 	
 	get_outstanding_documents: function(frm) {
+		frm.clear_table("references");
+		
+		if(!frm.doc.party) return;
+		
 		frm.events.check_mandatory_to_fetch(frm);
 		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
-		
-		frm.clear_table("references");
 
 		return  frappe.call({
 			method: 'erpnext.accounts.doctype.payment_entry.payment_entry.get_outstanding_reference_documents',
@@ -417,7 +430,7 @@ frappe.ui.form.on('Payment Entry', {
 						c.total_amount = d.invoice_amount;
 						c.outstanding_amount = d.outstanding_amount;
 						if(!in_list(["Sales Order", "Purchase Order"], d.voucher_type))
-							total_outstanding_amount += flt(d.outstanding_amount);
+							total_invoice_outstanding_amount += flt(d.outstanding_amount);
 						
 						var party_account_currency = frm.doc.payment_type=="Receive" ? 
 							frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency;
@@ -432,8 +445,12 @@ frappe.ui.form.on('Payment Entry', {
 						}
 					});
 					
-					var party_amt_field = frm.doc.payment_type=="Receive" ? "paid_amount" : "received_amount";
-					frm.set_value(party_amt_field, total_outstanding_amount);
+					if(total_invoice_outstanding_amount > 0) {
+						var party_amt_field = (frm.doc.payment_type=="Receive") ? 
+							"paid_amount" : "received_amount";
+						frm.set_value(party_amt_field, total_invoice_outstanding_amount);
+					}
+					
 				}
 				
 				frm.events.allocate_party_amount_against_ref_docs(frm, 
