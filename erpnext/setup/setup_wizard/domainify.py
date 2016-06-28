@@ -4,58 +4,62 @@
 from __future__ import unicode_literals
 import frappe
 
-domains = {
-	'Manufacturing': {
-		'desktop_icons': ['Item', 'BOM', 'Customer', 'Supplier', 'Sales Order',
-			'Production Order',  'Stock Entry', 'Purchase Order', 'Task', 'Buying', 'Selling',
-			 'Accounts', 'HR', 'ToDo'],
-		'properties': [
-			{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'collapsible_depends_on', 'value': 'is_stock_item'},
-		],
-		'set_value': [
-			['Stock Settings', None, 'show_barcode_field', 1]
-		]
-	},
+def get_domains():
+	'''Written as a function to prevent data mutation effects'''
+	return {
+		'Manufacturing': {
+			'desktop_icons': ['Item', 'BOM', 'Customer', 'Supplier', 'Sales Order',
+				'Production Order',  'Stock Entry', 'Purchase Order', 'Task', 'Buying', 'Selling',
+				 'Accounts', 'HR', 'ToDo'],
+			'properties': [
+				{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'collapsible_depends_on', 'value': 'is_stock_item'},
+			],
+			'set_value': [
+				['Stock Settings', None, 'show_barcode_field', 1]
+			]
+		},
 
-	'Retail': {
-		'desktop_icons': ['POS', 'Item', 'Customer', 'Sales Invoice',  'Purchase Order', 'Warranty Claim',
-		'Accounts', 'Buying', 'ToDo'],
-		'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
-		'properties': [
-			{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
-			{'doctype': 'Customer', 'fieldname': 'credit_limit_section', 'property': 'hidden', 'value': 1},
-		],
-		'set_value': [
-			['Stock Settings', None, 'show_barcode_field', 1]
-		]
-	},
+		'Retail': {
+			'desktop_icons': ['POS', 'Item', 'Customer', 'Sales Invoice',  'Purchase Order', 'Warranty Claim',
+			'Accounts', 'Buying', 'ToDo'],
+			'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
+			'properties': [
+				{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
+				{'doctype': 'Customer', 'fieldname': 'credit_limit_section', 'property': 'hidden', 'value': 1},
+			],
+			'set_value': [
+				['Stock Settings', None, 'show_barcode_field', 1]
+			]
+		},
 
-	'Distribution': {
-		'desktop_icons': ['Item', 'Customer', 'Supplier', 'Lead', 'Sales Order',
-			 'Sales Invoice', 'CRM', 'Selling', 'Buying', 'Stock', 'Accounts', 'HR', 'ToDo'],
-		'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
-		'properties': [
-			{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
-		],
-		'set_value': [
-			['Stock Settings', None, 'show_barcode_field', 1]
-		]
-	},
+		'Distribution': {
+			'desktop_icons': ['Item', 'Customer', 'Supplier', 'Lead', 'Sales Order',
+				 'Sales Invoice', 'CRM', 'Selling', 'Buying', 'Stock', 'Accounts', 'HR', 'ToDo'],
+			'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
+			'properties': [
+				{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
+			],
+			'set_value': [
+				['Stock Settings', None, 'show_barcode_field', 1]
+			]
+		},
 
-	'Services': {
-		'desktop_icons': ['Project', 'Time Sheet', 'Customer', 'Sales Order', 'Sales Invoice', 'Lead', 'Opportunity',
-			'Expense Claim', 'Employee', 'HR', 'ToDo'],
-		'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
-		'properties': [
-			{'doctype': 'Item', 'fieldname': 'is_stock_item', 'property': 'default', 'value': 0},
-		],
-		'set_value': [
-			['Stock Settings', None, 'show_barcode_field', 0]
-		]
+		'Services': {
+			'desktop_icons': ['Project', 'Time Sheet', 'Customer', 'Sales Order', 'Sales Invoice', 'Lead', 'Opportunity',
+				'Expense Claim', 'Employee', 'HR', 'ToDo'],
+			'remove_roles': ['Manufacturing User', 'Manufacturing Manager'],
+			'properties': [
+				{'doctype': 'Item', 'fieldname': 'is_stock_item', 'property': 'default', 'value': 0},
+			],
+			'set_value': [
+				['Stock Settings', None, 'show_barcode_field', 0]
+			]
+		}
 	}
-}
 
 def setup_domain(domain):
+	domains = get_domains()
+
 	if not domain in domains:
 		return
 
