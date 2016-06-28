@@ -9,6 +9,7 @@ from erpnext.controllers.website_list_for_contact import (get_customers_supplier
 
 def get_context(context):
 	context.no_cache = 1
+	context.show_sidebar = True
 	context.doc = frappe.get_doc(frappe.form_dict.doctype, frappe.form_dict.name)
 	context.parents = frappe.form_dict.parents
 	context.doc.supplier = get_supplier()
