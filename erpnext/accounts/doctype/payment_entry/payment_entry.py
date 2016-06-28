@@ -5,10 +5,11 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _, scrub
-from frappe.utils import flt, comma_or
+from frappe.utils import flt, comma_or, nowdate
 from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.doctype.journal_entry.journal_entry import get_average_exchange_rate
+from erpnext.accounts.doctype.journal_entry.journal_entry \
+	import get_average_exchange_rate, get_default_bank_cash_account
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.general_ledger import make_gl_entries
 
@@ -16,9 +17,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 
 class PaymentEntry(AccountsController):
-	def __init__(self, arg1, arg2=None):
-		super(PaymentEntry, self).__init__(arg1, arg2)
-		
+	def setup_party_account_field(self):		
 		self.party_account_field = None
 		self.party_account = None
 		self.party_account_currency = None
@@ -32,8 +31,11 @@ class PaymentEntry(AccountsController):
 			self.party_account_field = "paid_to"
 			self.party_account = self.paid_to
 			self.party_account_currency = self.paid_to_account_currency
+			
+		print self.payment_type, self.party_account_field
 				
 	def validate(self):
+		self.setup_party_account_field()
 		self.set_missing_values()
 		self.validate_party_details()
 		self.validate_bank_accounts()
@@ -69,11 +71,10 @@ class PaymentEntry(AccountsController):
 				self.party_balance = get_balance_on(party_type=self.party_type,
 					party=self.party, date=self.posting_date)
 			
-			if not self.get(self.party_account_field):
+			if not self.party_account:
 				party_account = get_party_account(self.party_type, self.party, self.company)
 				self.set(self.party_account_field, party_account)
-				
-			self.party_account = self.get(self.party_account_field)
+				self.party_account = party_account
 				
 		if self.paid_from and not (self.paid_from_account_currency or self.paid_from_account_balance):
 			acc = get_account_currency_and_balance(self.paid_from, self.posting_date)
@@ -187,7 +188,6 @@ class PaymentEntry(AccountsController):
 		self.total_allocated_amount, self.base_total_allocated_amount = 0, 0
 		for d in self.get("references"):
 			if d.allocated_amount:
-				print d.reference_name, d.outstanding_amount, d.allocated_amount
 				if d.allocated_amount > d.outstanding_amount:
 					frappe.throw(_("Row #{0}: Allocated amount cannot be greater than outstanding amount")
 						.format(d.idx))
@@ -440,3 +440,58 @@ def get_company_defaults(company):
 				.format(frappe.get_meta("Company").get_label(fieldname), company))
 	
 	return ret
+	
+@frappe.whitelist()
+def get_payment_entry_against_invoice(dt, dn):
+	invoice = frappe.get_doc(dt, dn)
+	
+	if dt == "Sales Invoice":
+		party_type = "Customer"
+		party_account = invoice.debit_to
+	else:
+		party_type = "Supplier"
+		party_account = invoice.credit_to
+
+
+	if (dt=="Sales Invoice" and invoice.outstanding_amount > 0) \
+		or (dt=="Purchase Invoice" and invoice.outstanding_amount < 0):
+			payment_type = "Receive"
+	else:
+		payment_type = "Pay"
+	
+	bank = frappe._dict()
+	if invoice.mode_of_payment:
+		bank = get_default_bank_cash_account(invoice.company, mode_of_payment=invoice.mode_of_payment)
+	
+	paid_amount = received_amount = 0
+	if invoice.party_account_currency == bank.account_currency:
+		paid_amount = received_amount = invoice.outstanding_amount
+	elif payment_type == "Receive":
+		paid_amount = invoice.outstanding_amount
+	else:
+		received_amount = invoice.outstanding_amount
+			
+	pe = frappe.new_doc("Payment Entry")
+	pe.payment_type = payment_type
+	pe.company = invoice.company
+	pe.posting_date = nowdate()
+	pe.mode_of_payment = invoice.mode_of_payment
+	pe.party_type = party_type
+	pe.party = invoice.get(scrub(party_type))
+	pe.paid_from = party_account if payment_type=="Receive" else bank.account
+	pe.paid_to = party_account if payment_type=="Pay" else bank.account
+	pe.paid_amount = paid_amount
+	pe.received_amount = received_amount
+	
+	pe.append("references", {
+		"reference_doctype": dt,
+		"reference_name": dn,
+		"allocated_amount": invoice.outstanding_amount
+	})
+	
+	pe.setup_party_account_field()
+	pe.set_missing_values()
+	pe.set_exchange_rate()
+	pe.set_amounts()
+	
+	return pe

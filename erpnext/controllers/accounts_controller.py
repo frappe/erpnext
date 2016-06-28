@@ -312,7 +312,7 @@ class AccountsController(TransactionBase):
 			
 		order_list = list(set([d.get(order_field) 
 			for d in self.get("items") if d.get(order_field)]))
-
+		
 		journal_entries = get_advance_journal_entries(party_type, party, party_account, 
 			amount_field, order_doctype, order_list, include_unallocated)
 			
@@ -324,6 +324,12 @@ class AccountsController(TransactionBase):
 		return res
 
 	def validate_advance_entries(self):
+		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
+		order_list = list(set([d.get(order_field) 
+			for d in self.get("items") if d.get(order_field)]))
+		
+		if not order_list: return
+		
 		advance_entries = self.get_advance_entries(include_unallocated=False)
 		
 		if advance_entries:

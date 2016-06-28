@@ -1000,5 +1000,19 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			})
 		}
+	},
+	
+	make_payment_entry: function() {
+		return frappe.call({
+			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry_against_invoice",
+			args: {
+				"dt": cur_frm.doc.doctype,
+				"dn": cur_frm.doc.name
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
 	}
 });

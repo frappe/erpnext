@@ -316,6 +316,7 @@ def update_reference_in_payment_entry(d, payment_entry):
 		new_row.update(reference_details)
 		
 	payment_entry.flags.ignore_validate_update_after_submit = True
+	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
 	payment_entry.set_amounts()
 	payment_entry.save(ignore_permissions=True)

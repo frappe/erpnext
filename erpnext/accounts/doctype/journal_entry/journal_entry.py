@@ -525,13 +525,10 @@ class JournalEntry(AccountsController):
 			d.party_balance = party_balance[(d.party_type, d.party)]
 
 @frappe.whitelist()
-def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None, account=None):
+def get_default_bank_cash_account(company, voucher_type=None, mode_of_payment=None, account=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 	if mode_of_payment:
-		account = get_bank_cash_account(mode_of_payment, company)
-		if account.get("account"):
-			account.update({"balance": get_balance_on(account.get("account"))})
-			return account
+		account = get_bank_cash_account(mode_of_payment, company).get("account")
 
 	if not account:
 		if voucher_type=="Bank Entry":
@@ -549,12 +546,13 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None, a
 	if account:
 		account_details = frappe.db.get_value("Account", account,
 			["account_currency", "account_type"], as_dict=1)
-		return {
+			
+		return frappe._dict({
 			"account": account,
 			"balance": get_balance_on(account),
 			"account_currency": account_details.account_currency,
 			"account_type": account_details.account_type
-		}
+		})
 
 @frappe.whitelist()
 def get_payment_entry_against_order(dt, dn, amount=None, debit_in_account_currency=None, journal_entry=False, bank_account=None):

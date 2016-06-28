@@ -35,7 +35,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		if(!doc.is_return && doc.docstatus==1) {
 			if(doc.outstanding_amount > 0) {
-				this.frm.add_custom_button(__('Payment'), this.make_bank_entry, __("Make"));
+				this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
 
@@ -217,21 +217,6 @@ cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 		]
 	}
 }
-
-cur_frm.cscript.make_bank_entry = function() {
-	return frappe.call({
-		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice",
-		args: {
-			"dt": "Purchase Invoice",
-			"dn": cur_frm.doc.name
-		},
-		callback: function(r) {
-			var doclist = frappe.model.sync(r.message);
-			frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-		}
-	});
-}
-
 
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
 	return{
