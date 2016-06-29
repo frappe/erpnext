@@ -19,27 +19,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Maintenance"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Maintenance Schedule",
-					"description": _("Plan for maintenance visits."),
-				},
-				{
-					"type": "doctype",
-					"name": "Maintenance Visit",
-					"description": _("Visit report for maintenance call."),
-				},
-				{
-					"type": "report",
-					"name": "Maintenance Schedules",
-					"is_query_report": True,
-					"doctype": "Maintenance Schedule"
-				},
-			]
-		},
-		{
 			"label": _("Warranty"),
 			"items": [
 				{
