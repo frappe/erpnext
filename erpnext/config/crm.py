@@ -70,11 +70,6 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Newsletter",
-					"description": _("Newsletters to contacts, leads."),
-				},
-				{
-					"type": "doctype",
 					"name": "Communication",
 					"description": _("Record of all communications of type email, phone, chat, visit, etc."),
 				},
@@ -115,11 +110,6 @@ def get_data():
 					"link": "Tree/Sales Person",
 					"description": _("Manage Sales Person Tree."),
 					"doctype": "Sales Person",
-				},
-				{
-					"type": "doctype",
-					"name": "Newsletter List",
-					"description": _("Newsletter Mailing List"),
 				},
 			]
 		},
