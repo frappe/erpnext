@@ -4,7 +4,7 @@
 
 {% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
 
-
+cur_frm.add_fetch('contact', 'email_id', 'email_id')
 
 frappe.ui.form.on("Request for Quotation",{
 	setup: function(frm){
@@ -23,7 +23,7 @@ frappe.ui.form.on("Request for Quotation",{
 		];
 		
 		frm.get_field('suppliers').grid.editable_fields = [
-			{fieldname: 'supplier', columns: 5},
+			{fieldname: 'supplier', columns: 4},
 			{fieldname: 'contact', columns: 3},
 			{fieldname: 'email_id', columns: 3}
 		];
