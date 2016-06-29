@@ -4,45 +4,69 @@ from frappe.utils import cint
 from frappe.utils.nestedset import rebuild_tree
 
 def execute():
+	"""
+	Patch Reference:
+		1. check whether warehouse is associated to company or not
+		2. if warehouse is associated with company
+			a. create warehouse group for company
+			b. set warehouse group as parent to other warehouses and set is_group as 0
+		3. if warehouses is not associated with company
+			a. get distinct companies from stock ledger entries
+			b. if sle have only company,
+				i. set default company to all warehouse
+				ii. repeat 2.a and 2.b
+			c. if have multiple companies,
+				i. create group warehouse without company
+				ii. repeat 2.b
+	"""
+	
 	frappe.reload_doc("stock", "doctype", "warehouse")
 
-	for company in frappe.get_all("Company", fields=["name", "abbr"]):
-		validate_parent_account_for_warehouse(company)
-		
-		if not frappe.db.get_value("Warehouse", "{0} - {1}".format(_("All Warehouses"), company.abbr)):
-			create_default_warehouse_group(company)
-		
-		set_parent_to_warehouse(company)
-		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-			set_parent_to_warehouse_acount(company)
+	if check_is_warehouse_associated_with_company():
+		for company in frappe.get_all("Company", fields=["name", "abbr"]):
+			make_warehouse_nestedset(company)
+	else:
+		sle_against_companies = frappe.db.sql_list("""select distinct company from `tabStock Ledger Entry`""")
+		company = frappe.defaults.get_defaults().company
 
-def set_parent_to_warehouse(company):
-	frappe.db.sql(""" update tabWarehouse set parent_warehouse = %s
-		where (is_group = 0 or is_group is null or is_group = '') and ifnull(company, '') = %s
-		""",("{0} - {1}".format(_("All Warehouses"), company.abbr), company.name))
-	
-	rebuild_tree("Warehouse", "parent_warehouse")
+		if len(sle_against_companies) == 1:
+			set_company_to_warehouse(company)
+			make_warehouse_nestedset(company)
 
-def set_parent_to_warehouse_acount(company):
-	frappe.db.sql(""" update tabAccount set parent_account = %s
-		where is_group = 0 and account_type = "Warehouse"
-		and (warehouse is not null or warehouse != '') and company = %s
-		""",("{0} - {1}".format(_("All Warehouses"), company.abbr), company.name))
-	
-	rebuild_tree("Account", "parent_account")
+		elif len(sle_against_companies) > 1:
+			make_warehouse_nestedset()
 
-def create_default_warehouse_group(company):
-	frappe.get_doc({
-		"doctype": "Warehouse",
-		"warehouse_name": _("All Warehouses"),
-		"is_group": 1,
-		"company": company.name,
-		"parent_warehouse": ""
-	}).insert(ignore_permissions=True)
-	
-def validate_parent_account_for_warehouse(company):
+def check_is_warehouse_associated_with_company():
+	warehouse_associcated_with_company = False
+
+	for warehouse in frappe.get_all("Warehouse", fields=["name", "company"]):
+		if warehouse.company:
+			warehouse_associcated_with_company = True
+
+	return warehouse_associcated_with_company
+
+def make_warehouse_nestedset(company=None):
+	validate_parent_account_for_warehouse(company)
+
+	if company:
+		warehouse_group = "{0} - {1}".format(_("All Warehouses"), company.abbr)
+		ignore_mandatory = False
+	else:
+		warehouse_group = _("All Warehouses")
+		ignore_mandatory = True
+
+	if not frappe.db.get_value("Warehouse", warehouse_group):
+		create_default_warehouse_group(company, ignore_mandatory)
+
+	set_parent_to_warehouse(warehouse_group, company)
 	if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+		set_parent_to_warehouse_acount(company)
 
+def validate_parent_account_for_warehouse(company=None):
+	if not company:
+		return
+
+	if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 		parent_account = frappe.db.sql("""select name from tabAccount
 			where account_type='Stock' and company=%s and is_group=1
 			and (warehouse is null or warehouse = '')""", company.name)
@@ -53,3 +77,35 @@ def validate_parent_account_for_warehouse(company):
 
 			if current_parent_accounts_for_warehouse:
 				frappe.db.set_value("Account", current_parent_accounts_for_warehouse[0][0], "account_type", "Stock")
+
+def create_default_warehouse_group(company=None, ignore_mandatory=False):
+	wh = frappe.get_doc({
+		"doctype": "Warehouse",
+		"warehouse_name": _("All Warehouses"),
+		"is_group": 1,
+		"company": company.name if company else "",
+		"parent_warehouse": ""
+	})
+
+	if ignore_mandatory:
+		wh.flags.ignore_mandatory = ignore_mandatory
+
+	wh.insert(ignore_permissions=True)
+
+def set_parent_to_warehouse(warehouse_group, company=None):
+	frappe.db.sql(""" update tabWarehouse set parent_warehouse = %s, is_group = 0
+		where (is_group = 0 or is_group is null or is_group = '') and ifnull(company, '') = %s
+		""",(warehouse_group, company.name if company else ""))
+
+	rebuild_tree("Warehouse", "parent_warehouse")
+
+def set_parent_to_warehouse_acount(company):
+	frappe.db.sql(""" update tabAccount set parent_account = %s
+		where is_group = 0 and account_type = "Warehouse"
+		and (warehouse is not null or warehouse != '') and company = %s
+		""",("{0} - {1}".format(_("All Warehouses"), company.abbr), company.name))
+
+	rebuild_tree("Account", "parent_account")
+
+def set_company_to_warehouse(company):
+	frappe.db.sql("update tabWahouse set company=%s", company)
