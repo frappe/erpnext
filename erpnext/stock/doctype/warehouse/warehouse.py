@@ -11,9 +11,12 @@ class Warehouse(NestedSet):
 	nsm_parent_field = 'parent_warehouse'
 
 	def autoname(self):
-		suffix = " - " + frappe.db.get_value("Company", self.company, "abbr")
-		if not self.warehouse_name.endswith(suffix):
-			self.name = self.warehouse_name + suffix
+		if self.company:
+			suffix = " - " + frappe.db.get_value("Company", self.company, "abbr")
+			if not self.warehouse_name.endswith(suffix):
+				self.name = self.warehouse_name + suffix
+		else:
+			self.name = self.warehouse_name
 
 	def onload(self):
 		'''load account name for General Ledger Report'''
@@ -31,6 +34,7 @@ class Warehouse(NestedSet):
 
 	def update_parent_account(self):
 		if not getattr(self, "__islocal", None) \
+			and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \
 			and (self.create_account_under != frappe.db.get_value("Warehouse", self.name, "create_account_under")):
 
 				self.validate_parent_account()
@@ -251,9 +255,10 @@ def get_children():
 		is_group as expandable
 		from `tab{doctype}`
 		where docstatus < 2
-		and ifnull(`{parent_field}`,'') = %s and `company` = %s
-		order by name""".format(doctype=frappe.db.escape(doctype), parent_field=frappe.db.escape(parent_field)),
-		(parent, company), as_dict=1)
+		and ifnull(`{parent_field}`,'') = %s 
+		and (`company` = %s or company is null or company = '')
+		order by name""".format(doctype=frappe.db.escape(doctype),
+		parent_field=frappe.db.escape(parent_field)), (parent, company), as_dict=1)
 
 	# return warehouses
 	for wh in warehouses:

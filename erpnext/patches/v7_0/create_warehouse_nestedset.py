@@ -18,7 +18,7 @@ def execute():
 
 def set_parent_to_warehouse(company):
 	frappe.db.sql(""" update tabWarehouse set parent_warehouse = %s
-		where (is_group = 0 or is_group is null or is_group = '') and company = %s
+		where (is_group = 0 or is_group is null or is_group = '') and ifnull(company, '') = %s
 		""",("{0} - {1}".format(_("All Warehouses"), company.abbr), company.name))
 	
 	rebuild_tree("Warehouse", "parent_warehouse")
