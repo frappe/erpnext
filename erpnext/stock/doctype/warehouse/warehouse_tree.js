@@ -13,7 +13,7 @@ frappe.treeview_settings['Warehouse'] = {
 	fields:[
 		{fieldtype:'Data', fieldname: 'name_field',
 			label:__('New Warehouse Name'), reqd:true},
-		{fieldtype:'Check', fieldname:'is_group', label:__('Group Node'),
+		{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 			description: __("Further nodes can be only created under 'Group' type nodes")}
 	],
 	onrender: function(node) {
