@@ -160,7 +160,7 @@ class ProductionOrder(Document):
 
 	def before_submit(self):
 		self.set_required_items()
-		self.make_timesheets()
+		self.make_time_logs()
 		
 	def before_cancel(self):
 		for data in self.operations:
@@ -240,7 +240,7 @@ class ProductionOrder(Document):
 
 		return holidays[holiday_list]
 		
-	def make_timesheets(self):
+	def make_time_logs(self):
 		"""Capacity Planning. Plan time logs based on earliest availablity of workstation after
 			Planned Start Date. Time logs will be created and remain in Draft mode and must be submitted
 			before manufacturing entry can be made."""
@@ -267,7 +267,7 @@ class ProductionOrder(Document):
 				# validate operating hours if workstation [not mandatory] is specified
 				self.check_operation_fits_in_working_hours(d)
 				try:
-					time_sheet.validate_timesheets()
+					time_sheet.validate_time_logs()
 				except OverlapError:
 					time_sheet.move_to_next_non_overlapping_slot(d.idx)
 
@@ -319,7 +319,7 @@ class ProductionOrder(Document):
 			frappe.throw(_("Capacity Planning Error"))
 
 	def get_start_end_time(self, time_sheet, operation_id):
-		for data in time_sheet.timesheets:
+		for data in time_sheet.time_logs:
 			if data.operation_id == operation_id:
 				return data.from_time, data.to_time
 
@@ -518,7 +518,7 @@ def add_timesheet_detail(time_sheet, args):
 	if isinstance(args, unicode):
 		args = json.loads(args)
 
-	time_sheet.append('timesheets', args)
+	time_sheet.append('time_logs', args)
 	return time_sheet
 
 @frappe.whitelist()

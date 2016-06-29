@@ -83,7 +83,7 @@ class SalarySlip(TransactionBase):
 		struct = frappe.db.sql("""select name from `tabSalary Structure`
 			where employee=%s and is_active = 'Yes'
 			and (from_date <= %s or from_date <= %s)
-			and (to_date is null or to_date >= %s or to_date >= %s)""",
+			and (to_date is null or to_date >= %s or to_date >= %s) order by from_date desc limit 1""",
 			(self.employee, self.start_date, joining_date, self.end_date, relieving_date))
 
 		if not struct:

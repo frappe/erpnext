@@ -12,12 +12,26 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn){
-	if((!doc.__islocal) && (doc.is_active == 'Yes') && (doc.salary_slip_based_on_timesheet == 0)){
+	if((!doc.__islocal) && (doc.is_active == 'Yes') && cint(doc.salary_slip_based_on_timesheet == 0)){
 		cur_frm.add_custom_button(__('Salary Slip'),
 			cur_frm.cscript['Make Salary Slip'], __("Make"));
 		cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 	}
 }
+
+frappe.ui.form.on('Salary Structure', {
+	refresh: function(frm) {
+		frm.trigger("toggle_fields")
+	},
+
+	salary_slip_based_on_timesheet: function(frm) {
+		frm.trigger("toggle_fields")
+	},
+
+	toggle_fields: function(frm) {
+		frm.toggle_display('time_sheet_earning_detail', cint(frm.doc.salary_slip_based_on_timesheet)==1);
+	}
+})
 
 cur_frm.cscript['Make Salary Slip'] = function() {
 	frappe.model.open_mapped_doc({

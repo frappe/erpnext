@@ -237,7 +237,7 @@ class SalesInvoice(SellingController):
 			return {"print_format": pos.get("print_format") }
 
 	def update_time_sheet(self, sales_invoice):
-		for d in self.get("timesheets"):
+		for d in self.timesheets:
 			if d.time_sheet:
 				timesheet = frappe.get_doc("Time Sheet", d.time_sheet)
 				timesheet.sales_invoice = sales_invoice
@@ -246,7 +246,7 @@ class SalesInvoice(SellingController):
 				timesheet.save()
 
 	def validate_time_sheets_are_submitted(self):
-		for data in self.get("timesheets"):
+		for data in self.timesheets:
 			if data.time_sheet:
 				status = frappe.db.get_value("Time Sheet", data.time_sheet, "status")
 				if status not in ['Submitted', 'Payslip']:
