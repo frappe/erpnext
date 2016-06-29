@@ -525,19 +525,19 @@ class JournalEntry(AccountsController):
 			d.party_balance = party_balance[(d.party_type, d.party)]
 
 @frappe.whitelist()
-def get_default_bank_cash_account(company, voucher_type=None, mode_of_payment=None, account=None):
+def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
 
 	if not account:
-		if voucher_type=="Bank Entry":
+		if account_type=="Bank":
 			account = frappe.db.get_value("Company", company, "default_bank_account")
 			if not account:
 				account = frappe.db.get_value("Account",
 					{"company": company, "account_type": "Bank", "is_group": 0})
 
-		elif voucher_type=="Cash Entry":
+		elif account_type=="Cash":
 			account = frappe.db.get_value("Company", company, "default_cash_account")
 			if not account:
 				account = frappe.db.get_value("Account",
@@ -660,7 +660,7 @@ def get_payment_entry(ref_doc, args):
 	bank_row = je.append("accounts")
 
 	#make it bank_details
-	bank_account = get_default_bank_cash_account(ref_doc.company, "Bank Entry", account=args.get("bank_account"))
+	bank_account = get_default_bank_cash_account(ref_doc.company, "Bank", account=args.get("bank_account"))
 	if bank_account:
 		bank_row.update(bank_account)
 		bank_row.exchange_rate = get_exchange_rate(bank_account["account"],

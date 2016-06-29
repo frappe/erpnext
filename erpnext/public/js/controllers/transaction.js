@@ -169,7 +169,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
 		this.setup_sms();
-		this.make_show_payments_btn();
 	},
 
 	apply_default_taxes: function() {
@@ -203,22 +202,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	send_sms: function() {
 		var sms_man = new SMSManager(this.frm.doc);
-	},
-
-	make_show_payments_btn: function() {
-		var me = this;
-		if (in_list(["Purchase Invoice", "Sales Invoice"], this.frm.doctype)) {
-			if(this.frm.doc.outstanding_amount !== this.frm.doc.base_grand_total) {
-				this.frm.add_custom_button(__("Payments"), function() {
-					frappe.route_options = {
-						"Journal Entry Account.reference_type": me.frm.doc.doctype,
-						"Journal Entry Account.reference_name": me.frm.doc.name
-					};
-
-					frappe.set_route("List", "Journal Entry");
-				}, __("View"));
-			}
-		}
 	},
 
 	barcode: function(doc, cdt, cdn) {
@@ -1004,7 +987,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	
 	make_payment_entry: function() {
 		return frappe.call({
-			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry_against_invoice",
+			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
 			args: {
 				"dt": cur_frm.doc.doctype,
 				"dn": cur_frm.doc.name

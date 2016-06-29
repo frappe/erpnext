@@ -462,11 +462,11 @@ class AccountsController(TransactionBase):
 				formatted_order_total = fmt_money(order_total, precision=self.precision("base_grand_total"),
 					currency=advance.account_currency)
 
-			if order_total >= advance_paid:
-				frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
-			else:
+			if self.currency == self.company_currency:
 				frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2})")
 					.format(formatted_advance_paid, self.name, formatted_order_total))
+					
+			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
 
 	@property
 	def company_abbr(self):

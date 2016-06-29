@@ -94,11 +94,9 @@ frappe.ui.form.on('Payment Entry', {
 			frm.doc.paid_to_account_currency != company_currency &&
 			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency));
 			
-		frm.toggle_display("base_paid_amount", 
-			(!frm.doc.party && frm.doc.paid_from_account_currency != company_currency));
+			frm.toggle_display("base_paid_amount", frm.doc.paid_from_account_currency != company_currency);
 			
-		frm.toggle_display("base_received_amount", (!frm.doc.party && 
-			frm.doc.paid_to_account_currency != company_currency && 
+		frm.toggle_display("base_received_amount", (frm.doc.paid_to_account_currency != company_currency && 
 			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency));
 				
 		frm.toggle_display("received_amount", 
