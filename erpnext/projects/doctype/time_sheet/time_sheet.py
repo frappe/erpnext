@@ -22,9 +22,9 @@ class TimeSheet(Document):
 		self.total_hours = 0.0
 		self.total_billing_amount = 0.0
 		self.validate_dates()
-		self.validate_timesheets()
+		self.validate_time_logs()
 		self.update_cost()
-		for d in self.get("timesheets"):
+		for d in self.get("time_logs"):
 			self.total_hours += flt(d.hours)
 			if d.billable: self.total_billing_amount += flt(d.billing_amount)
 
@@ -46,8 +46,8 @@ class TimeSheet(Document):
 
 	def set_dates(self):
 		if self.docstatus < 2:
-			start_date = min([d.from_time for d in self.timesheets])
-			end_date = max([d.to_time for d in self.timesheets])
+			start_date = min([d.from_time for d in self.time_logs])
+			end_date = max([d.to_time for d in self.time_logs])
 
 			if start_date and end_date:
 				self.start_date = getdate(start_date)
@@ -73,7 +73,7 @@ class TimeSheet(Document):
 			production_order = frappe.get_doc("Production Order", self.production_order)
 			pending_qty = flt(production_order.qty) - flt(production_order.produced_qty)
 
-		for data in self.timesheets:
+		for data in self.time_logs:
 			if not data.from_time and not data.to_time:
 				frappe.throw(_("Row {0}: From Time and To Time is mandatory.").format(data.idx))
 
@@ -94,7 +94,7 @@ class TimeSheet(Document):
 		if self.production_order:
 			pro = frappe.get_doc('Production Order', self.production_order)
 
-			for timesheet in self.timesheets:
+			for timesheet in self.time_logs:
 				for data in pro.operations:
 					if data.name == timesheet.operation_id:
 						summary = self.get_actual_timesheet_summary(timesheet.operation_id)
@@ -119,7 +119,7 @@ class TimeSheet(Document):
 			(self.production_order, operation_id), as_dict=1)[0]
 
 	def update_task_and_project(self):
-		for data in self.timesheets:
+		for data in self.time_logs:
 			if data.task:
 				task = frappe.get_doc("Task", data.task)
 				task.update_time_and_costing()
@@ -129,12 +129,12 @@ class TimeSheet(Document):
 				frappe.get_doc("Project", data.project).update_project()
 
 	def validate_dates(self):
-		for data in self.timesheets:
+		for data in self.time_logs:
 			if time_diff_in_hours(data.to_time, data.from_time) < 0:
 				frappe.throw(_("To date cannot be before from date"))
 
-	def validate_timesheets(self):
-		for data in self.get('timesheets'):
+	def validate_time_logs(self):
+		for data in self.get('time_logs'):
 			self.validate_overlap(data)
 			self.check_workstation_timings(data)
 
@@ -180,8 +180,8 @@ class TimeSheet(Document):
 
 	def move_to_next_non_overlapping_slot(self, index):
 		from datetime import timedelta
-		if self.timesheets:
-			for data in self.timesheets:
+		if self.time_logs:
+			for data in self.time_logs:
 				if data.idx == index:
 					overlapping = self.get_overlap_for("workstation", data)
 					if not overlapping:
@@ -199,7 +199,7 @@ class TimeSheet(Document):
 			{'workstation': workstation}, as_dict=True)[0]
 
 	def update_cost(self):
-		for data in self.timesheets:
+		for data in self.time_logs:
 			if data.activity_type and not data.billing_amount:
 				rate = get_activity_cost(self.employee, data.activity_type)
 				hours =  data.hours or 0
@@ -253,7 +253,7 @@ def set_missing_values(time_sheet, target):
 	target.salary_slip_based_on_timesheet = 1
 	target.start_date = doc.start_date
 	target.end_date = doc.end_date
-	
+
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None):
 	rate = frappe.db.get_values("Activity Cost", {"employee": employee,
@@ -263,7 +263,7 @@ def get_activity_cost(employee=None, activity_type=None):
 			["costing_rate", "billing_rate"], as_dict=True)
 
 	return rate[0] if rate else {}
-	
+
 @frappe.whitelist()
 def get_employee_list(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select distinct(employee) as employee

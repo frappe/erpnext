@@ -31,13 +31,10 @@ frappe.ui.form.on("Salary Slip", {
 	},
 
 	toggle_fields: function(frm) {
-		if(frm.doc.salary_slip_based_on_timesheet) {
-			hide_field(['fiscal_year', 'month', 'total_days_in_month', 'leave_without_pay', 'payment_days'])
-			unhide_field(['start_date', 'end_date', 'hourly_wages', 'timesheets'])
-		}else {
-			unhide_field(['fiscal_year', 'month', 'total_days_in_month', 'leave_without_pay', 'payment_days'])
-			hide_field(['start_date', 'end_date', 'hourly_wages', 'timesheets'])
-		}
+		frm.toggle_display(['start_date', 'end_date', 'hourly_wages', 'timesheets'],
+			cint(frm.doc.salary_slip_based_on_timesheet)==1);
+		frm.toggle_display(['fiscal_year', 'month', 'total_days_in_month', 'leave_without_pay', 'payment_days'],
+			cint(frm.doc.salary_slip_based_on_timesheet)==0);
 	}
 })
 

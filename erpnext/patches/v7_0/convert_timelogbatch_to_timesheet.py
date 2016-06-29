@@ -9,12 +9,13 @@ def execute():
 		time_sheet.employee= ""
 		time_sheet.company = frappe.db.get_single_value('Global Defaults', 'default_company')
 		time_sheet.sales_invoice = tlb.sales_invoice
-		for data in tlb.time_logs:
-			args = get_timesheet_data(data)
-			add_timesheet_detail(time_sheet, args)
+		if tlb.get('time_logs'):
+			for data in tlb.time_logs:
+				args = get_timesheet_data(data)
+				add_timesheet_detail(time_sheet, args)
 
-		time_sheet.docstatus = tlb.docstatus
-		time_sheet.save(ignore_permissions=True)
+			time_sheet.docstatus = tlb.docstatus
+			time_sheet.save(ignore_permissions=True)
 
 def get_timesheet_data(data):
 	time_log = frappe.get_doc('Time Log', data.time_log)

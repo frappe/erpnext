@@ -16,8 +16,8 @@ class TestTimeSheet(unittest.TestCase):
 		time_sheet = make_time_sheet("_T-Employee-0001", True)
 
 		self.assertEquals(time_sheet.total_hours, 2)
-		self.assertEquals(time_sheet.timesheets[0].billing_rate, 50)
-		self.assertEquals(time_sheet.timesheets[0].billing_amount, 100)
+		self.assertEquals(time_sheet.time_logs[0].billing_rate, 50)
+		self.assertEquals(time_sheet.time_logs[0].billing_amount, 100)
 
 	def test_salary_slip_from_timesheet(self):
 		salary_structure = make_salary_structure("_T-Employee-0001")
@@ -58,9 +58,10 @@ class TestTimeSheet(unittest.TestCase):
 def make_salary_structure(employee):
 	name = frappe.db.get_value('Salary Structure', {'employee': employee, 'salary_slip_based_on_timesheet': 1}, 'name')
 	if name:
-		frappe.delete_doc('Salary Structure', name)
+		salary_structure = frappe.get_doc('Salary Structure', name)
+	else:
+		salary_structure = frappe.new_doc("Salary Structure")
 
-	salary_structure = frappe.new_doc("Salary Structure")
 	salary_structure.salary_slip_based_on_timesheet = 1
 	salary_structure.employee = employee
 	salary_structure.from_date = nowdate()
@@ -89,14 +90,14 @@ def make_time_sheet(employee, simulate=False, billable = 0):
 	update_activity_type("_Test Activity Type")
 	time_sheet = frappe.new_doc("Time Sheet")
 	time_sheet.employee = employee
-	time_sheet_detail = time_sheet.append('timesheets', {})
+	time_sheet_detail = time_sheet.append('time_logs', {})
 	time_sheet_detail.billable = billable
 	time_sheet_detail.activity_type = "_Test Activity Type"
 	time_sheet_detail.from_time = now_datetime()
 	time_sheet_detail.hours = 2
 	time_sheet_detail.to_time = time_sheet_detail.from_time + datetime.timedelta(hours= time_sheet_detail.hours)
 
-	for data in time_sheet.get('timesheets'):
+	for data in time_sheet.get('time_logs'):
 		if simulate:
 			while True:
 				try:

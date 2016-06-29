@@ -89,7 +89,7 @@ class TestProductionOrder(unittest.TestCase):
 		
 
 		self.assertEqual(prod_order.name, time_sheet_doc.production_order)
-		self.assertEqual((prod_order.qty - d.completed_qty), sum([d.completed_qty for d in time_sheet_doc.timesheets]))
+		self.assertEqual((prod_order.qty - d.completed_qty), sum([d.completed_qty for d in time_sheet_doc.time_logs]))
 
 		manufacturing_settings = frappe.get_doc({
 			"doctype": "Manufacturing Settings",
@@ -106,7 +106,7 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertEqual(prod_order.operations[0].actual_operating_cost, 100)
 		
 		time_sheet_doc1 = make_timesheet(prod_order.name)
-		self.assertEqual(len(time_sheet_doc1.get('timesheets')), 0)
+		self.assertEqual(len(time_sheet_doc1.get('time_logs')), 0)
 
 		time_sheet_doc.cancel()
 

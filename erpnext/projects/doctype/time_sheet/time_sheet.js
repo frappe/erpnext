@@ -1,11 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.add_fetch("activity_type", "billing_rate", "billing_rate");
-
 frappe.ui.form.on("Time Sheet", {
 	setup: function(frm) {
-		frm.get_field('timesheets').grid.editable_fields = [
+		frm.get_field('time_logs').grid.editable_fields = [
 			{fieldname: 'activity_type', columns: 2},
 			{fieldname: 'from_time', columns: 2},
 			{fieldname: 'hours', columns: 2},
@@ -18,7 +16,7 @@ frappe.ui.form.on("Time Sheet", {
 			}
 		}
 
-		frm.fields_dict['timesheets'].grid.get_field('task').get_query = function(frm, cdt, cdn) {
+		frm.fields_dict['time_logs'].grid.get_field('task').get_query = function(frm, cdt, cdn) {
 			child = locals[cdt][cdn];
 			return{
 				filters: {
@@ -29,7 +27,7 @@ frappe.ui.form.on("Time Sheet", {
 	},
 
 	onload: function(frm){
-		if (frm.doc.__islocal && frm.doc.timesheets) {
+		if (frm.doc.__islocal && frm.doc.time_logs) {
 			frm.set_value("employee", "")
 			calculate_time_and_amount(frm);
 		}
@@ -66,7 +64,7 @@ frappe.ui.form.on("Time Sheet", {
 })
 
 frappe.ui.form.on("Time Sheet Detail", {
-	timesheets_remove: function(frm) {
+	time_logs_remove: function(frm) {
 		calculate_time_and_amount(frm);
 	},
 
@@ -94,30 +92,38 @@ frappe.ui.form.on("Time Sheet Detail", {
 	},
 
 	billing_rate: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn]
-		if(child.hours && child.billing_rate){
-			frappe.mode.set_value(cdt, cdn, 'total_billing_amount', flt(child.billing_rate * child.hours))
-		}
-		calculate_billing_amount(frm, cdt, cdn)
+		calculate_billing_costing_amount(frm, cdt, cdn)
 	},
 
 	costing_rate: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn]
-		frappe.mode.set_value(cdt, cdn, 'total_costing_amount', flt(child.costing_rate * child.hours))
-		calculate_billing_amount(frm, cdt, cdn)
+		calculate_billing_costing_amount(frm, cdt, cdn)
 	},
 
 	billable: function(frm, cdt, cdn) {
-		calculate_billing_amount(frm, cdt, cdn)
+		calculate_billing_costing_amount(frm, cdt, cdn)
+	},
+
+	activity_type: function(frm, cdt, cdn) {
+		child = locals[cdt][cdn];
+		frappe.call({
+			method: "erpnext.projects.doctype.time_sheet.time_sheet.get_activity_cost",
+			args: {
+				employee: frm.doc.employee,
+				activity_type: child.activity_type
+			},
+			callback: function(r){
+				if(r.message){
+					frappe.model.set_value(cdt, cdn, 'billing_rate', r.message['billing_rate']);
+					frappe.model.set_value(cdt, cdn, 'costing_rate', r.message['costing_rate']);
+					calculate_billing_costing_amount(frm, cdt, cdn)
+				}
+			}
+		})
 	}
 });
 
 calculate_end_time = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
-
-	if(!child.from_time) {
-		frappe.model.set_value(cdt, cdn, "from_time", frappe.datetime.now_datetime());
-	}
 
 	var d = moment(child.from_time);
 	d.add(child.hours, "hours");
@@ -125,23 +131,25 @@ calculate_end_time = function(frm, cdt, cdn){
 	frappe.model.set_value(cdt, cdn, "to_time", d.format(moment.defaultDatetimeFormat));
 	frm._setting_hours = false;
 
-	calculate_billing_amount(frm, cdt, cdn)
+	calculate_billing_costing_amount(frm, cdt, cdn)
 }
 
-var calculate_billing_amount = function(frm, cdt, cdn){
+var calculate_billing_costing_amount = function(frm, cdt, cdn){
 	child = locals[cdt][cdn]
-	billing_amount = 0.0
+	billing_amount = costing_amount = 0.0;
 
 	if(child.hours && child.billable){
-		billing_amount = (child.hours * child.billing_rate)	
+		billing_amount = (child.hours * child.billing_rate);
+		costing_amount = flt(child.costing_rate * child.hours);
 	}
 
-	frappe.model.set_value(cdt, cdn, 'billing_amount', billing_amount)
+	frappe.model.set_value(cdt, cdn, 'billing_amount', billing_amount);
+	frappe.model.set_value(cdt, cdn, 'costing_amount', costing_amount);
 	calculate_time_and_amount(frm)
 }
 
 var calculate_time_and_amount = function(frm) {
-	var tl = frm.doc.timesheets || [];
+	var tl = frm.doc.time_logs || [];
 	total_hr = 0;
 	total_billing_amount = 0;
 	for(var i=0; i<tl.length; i++) {
