@@ -5,6 +5,7 @@ links = {
 	'non_standard_fieldnames': {
 		'Production Order': 'production_item',
 		'Product Bundle': 'new_item_code',
+		'BOM': 'item',
 		'Batch': 'item'
 	},
 	'transactions': [

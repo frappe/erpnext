@@ -16,15 +16,7 @@ class Project(Document):
 	def onload(self):
 		"""Load project tasks for quick view"""
 		if not self.get('__unsaved') and not self.get("tasks"):
-			for task in self.get_tasks():
-				self.append("tasks", {
-					"title": task.subject,
-					"status": task.status,
-					"start_date": task.exp_start_date,
-					"end_date": task.exp_end_date,
-					"description": task.description,
-					"task_id": task.name
-				})
+			self.load_tasks()
 
 		self.set_onload('links', self.meta.get_links_setup())
 		self.set_onload('activity_summary', frappe.db.sql('''select activity_type, sum(hours) as total_hours
@@ -32,6 +24,19 @@ class Project(Document):
 
 	def __setup__(self):
 		self.onload()
+
+	def load_tasks(self):
+		"""Load `tasks` from the database"""
+		self.tasks = []
+		for task in self.get_tasks():
+			self.append("tasks", {
+				"title": task.subject,
+				"status": task.status,
+				"start_date": task.exp_start_date,
+				"end_date": task.exp_end_date,
+				"description": task.description,
+				"task_id": task.name
+			})
 
 	def get_tasks(self):
 		return frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc")

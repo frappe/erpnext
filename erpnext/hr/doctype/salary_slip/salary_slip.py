@@ -88,8 +88,8 @@ class SalarySlip(TransactionBase):
 
 		if not struct:
 			self.salary_structure = None
-			msgprint(_("No active or default Salary Structure found for employee {0} and the month")
-				.format(self.employee))
+			frappe.throw(_("No active or default Salary Structure found for employee {0} for the given dates")
+				.format(self.employee), title=_('Salary Structure Missing'))
 
 		return struct and struct[0][0] or ''
 
@@ -261,7 +261,7 @@ class SalarySlip(TransactionBase):
 		self.update_status(self.name)
 		if(frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")):
 			self.email_salary_slip()
-			
+
 	def on_cancel(self):
 		self.update_status()
 
