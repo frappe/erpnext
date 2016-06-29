@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.support");
+frappe.provide("erpnext.maintenance");
 
 frappe.ui.form.on_change("Maintenance Schedule", "customer", function(frm) {
 	erpnext.utils.get_party_details(frm) });
@@ -13,7 +13,7 @@ frappe.ui.form.on_change("Maintenance Schedule", "contact_person", function(){
 });
 
 // TODO commonify this code
-erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
+erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		var me = this;
 
@@ -34,7 +34,7 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 		} else if (this.frm.doc.docstatus === 1) {
 			this.frm.add_custom_button(__("Make Maintenance Visit"), function() {
 				frappe.model.open_mapped_doc({
-					method: "erpnext.support.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
+					method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
 					source_name: me.frm.doc.name,
 					frm: me.frm
 				})
@@ -79,7 +79,7 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 	},
 });
 
-$.extend(cur_frm.cscript, new erpnext.support.MaintenanceSchedule({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.maintenance.MaintenanceSchedule({frm: cur_frm}));
 
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});

@@ -157,5 +157,12 @@ def get_data():
 			"is_help": True,
 			"label": _("Learn"),
 			"hidden": 1
+		},
+		{
+			"module_name": "Maintenance",
+			"color": "#FF888B",
+			"icon": "octicon octicon-tools",
+			"type": "module",
+			"label": _("Maintenance")
 		}
 	]
