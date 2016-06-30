@@ -6,9 +6,10 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import get_url, random_string
+from frappe.utils import get_url, random_string, cint
 from frappe.utils.user import get_user_fullname
 from frappe.desk.form.load import get_attachments
+from frappe.utils.pdf import get_pdf
 from frappe.core.doctype.communication.email import make
 from erpnext.accounts.party import get_party_account_currency, get_party_details
 from erpnext.stock.doctype.material_request.material_request import set_missing_values
@@ -136,7 +137,7 @@ class RequestforQuotation(BuyingController):
 
 	def get_attachments(self):
 		attachments = [d.name for d in get_attachments(self.doctype, self.name)]
-		attachments.append(frappe.attach_print('Request for Quotation', self.name, doc=self))
+		attachments.append(frappe.attach_print(self.doctype, self.name, doc=self))
 		return attachments
 
 @frappe.whitelist()
@@ -226,3 +227,16 @@ def create_rfq_items(sq_doc, supplier, data):
 		"request_for_quotation_item": data.name,
 		"request_for_quotation": data.parent
 	})
+
+@frappe.whitelist()
+def download_pdf(doctype, name, supplier_idx):
+	doc = get_rfq_doc(doctype, name, supplier_idx)
+	if doc:
+		frappe.get_attr("frappe.www.print.download_pdf")(doctype, name, doc=doc)
+
+def get_rfq_doc(doctype, name, supplier_idx):
+	if cint(supplier_idx):
+		doc = frappe.get_doc(doctype, name)
+		args = doc.get('suppliers')[cint(supplier_idx) - 1]
+		doc.update_supplier_part_no(args)
+		return doc
