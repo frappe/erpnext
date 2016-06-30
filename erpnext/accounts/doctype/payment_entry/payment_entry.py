@@ -44,7 +44,7 @@ class PaymentEntry(AccountsController):
 		self.clear_unallocated_reference_document_rows()
 		self.set_title()
 		self.validate_transaction_reference()
-		
+		self.set_remarks()
 		
 	def on_submit(self):
 		self.make_gl_entries()
@@ -137,7 +137,7 @@ class PaymentEntry(AccountsController):
 			frappe.throw(_("Account Type for {0} must be {1}").format(comma_or(account_types)))
 				
 	def set_exchange_rate(self):
-		if self.paid_from:
+		if self.paid_from and not self.source_exchange_rate:
 			if self.paid_from_account_currency == self.company_currency:
 				self.source_exchange_rate = 1
 			elif self.payment_type in ("Pay", "Internal Transfer"):
@@ -146,7 +146,7 @@ class PaymentEntry(AccountsController):
 				self.source_exchange_rate = get_exchange_rate(self.paid_from_account_currency, 
 					self.company_currency)
 		
-		if self.paid_to:
+		if self.paid_to and not self.target_exchange_rate:
 			self.target_exchange_rate = get_exchange_rate(self.paid_to_account_currency, 
 				self.company_currency)
 				
@@ -204,7 +204,6 @@ class PaymentEntry(AccountsController):
 		self.total_allocated_amount, self.base_total_allocated_amount = 0, 0
 		for d in self.get("references"):
 			if d.allocated_amount:
-				print d.allocated_amount, d.outstanding_amount
 				if d.reference_doctype not in ("Sales Order", "Purchase Order") \
 					and d.allocated_amount > d.outstanding_amount:
 						frappe.throw(_("Row #{0}: Allocated amount cannot be greater than outstanding amount")
@@ -226,7 +225,7 @@ class PaymentEntry(AccountsController):
 		base_unallocated_amount = self.unallocated_amount * \
 			(self.source_exchange_rate if self.payment_type=="Receive" else self.target_exchange_rate)
 			
-		base_party_amount = self.base_total_allocated_amount + base_unallocated_amount
+		base_party_amount = flt(self.base_total_allocated_amount) + flt(base_unallocated_amount)
 		
 		if self.payment_type == "Receive":
 			self.difference_amount = base_party_amount - self.base_received_amount
@@ -259,6 +258,37 @@ class PaymentEntry(AccountsController):
 			if not self.reference_no or not self.reference_date:
 				frappe.throw(_("Reference No and Reference Date is mandatory for Bank transaction"))
 				
+	def set_remarks(self):
+		if self.remarks: return
+		
+		if self.payment_type=="Internal Transfer":
+			remarks = [_("Amount {0} {1} transferred from {2} to {3}")
+				.format(self.paid_from_account_currency, self.paid_amount, self.paid_from, self.paid_to)]
+		else:
+			
+			remarks = [_("Amount {0} {1} {2} {3}").format(
+				self.party_account_currency,
+				self.paid_amount if self.payment_type=="Receive" else self.received_amount,
+				_("received from") if self.payment_type=="Receive" else _("to"), self.party
+			)]
+			
+		if self.reference_no:
+			remarks.append(_("Transaction reference no {0} dated {1}")
+				.format(self.reference_no, self.reference_date))
+
+		if self.payment_type in ["Receive", "Pay"]:
+			for d in self.get("references"):
+				if d.allocated_amount:
+					remarks.append(_("Amount {0} {1} against {2} {3}").format(self.party_account_currency, 
+						d.allocated_amount, d.reference_doctype, d.reference_name))
+		
+		for d in self.get("deductions"):
+			if d.amount:
+				remarks.append(_("Amount {0} {1} deducted against {2}")
+					.format(self.company_currency, d.amount, d.account))
+
+		self.set("remarks", "\n".join(remarks))
+			
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gl_entries = []
 		self.add_party_gl_entries(gl_entries)
@@ -520,7 +550,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		received_amount = outstanding_amount
 		if bank_amount:
 			paid_amount = bank_amount
-			
+	
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type
 	pe.company = doc.company
