@@ -21,11 +21,11 @@ def setup_complete(args=None):
 	install_fixtures.install(args.get("country"))
 
 	update_setup_wizard_access()
+	create_price_lists(args)
 	create_fiscal_year_and_company(args)
 	create_users(args)
 	set_defaults(args)
 	create_territories()
-	create_price_lists(args)
 	create_feed_and_todo()
 	create_email_digest()
 	create_letter_head(args)
@@ -88,10 +88,23 @@ def create_fiscal_year_and_company(args):
 			'chart_of_accounts': args.get(('chart_of_accounts')),
 			'domain': args.get('domain')
 		}).insert()
-
+		
+		#Enable shopping cart
+		enable_shopping_cart(args)
+		
 		# Bank Account
 		create_bank_account(args)
-
+		
+def enable_shopping_cart(args):
+	frappe.get_doc({
+		"doctype": "Shopping Cart Settings",
+		"enabled": 1,
+		'company': args.get('company_name').strip(),
+		'price_list': frappe.db.get_value("Price List", {"selling": 1}),
+		'default_customer_group': _("Individual"),
+		'quotation_series': "QTN-",
+	}).insert()	
+	
 def create_bank_account(args):
 	if args.get("bank_account"):
 		company_name = args.get('company_name').strip()
