@@ -21,7 +21,7 @@ frappe.ui.form.on("Request for Quotation",{
 			{fieldname: 'schedule_date', columns: 2},
 			{fieldname: 'warehouse', columns: 3},
 		];
-		
+
 		frm.get_field('suppliers').grid.editable_fields = [
 			{fieldname: 'supplier', columns: 4},
 			{fieldname: 'contact', columns: 3},
@@ -39,8 +39,12 @@ frappe.ui.form.on("Request for Quotation",{
 
 	refresh: function(frm, cdt, cdn) {
 		if (frm.doc.docstatus === 1) {
-			frm.add_custom_button(__("Make Supplier Quotation"),
-				function(){ frm.trigger("make_suppplier_quotation") });
+			frm.add_custom_button(__("Make"),
+				function(){ frm.trigger("make_suppplier_quotation") }, __("Supplier Quotation"));
+
+			frm.add_custom_button(__("View"),
+				function(){ frappe.set_route('List', 'Supplier Quotation',
+					{'request_for_quotation': frm.doc.name}) }, __("Supplier Quotation"));
 
 			frm.add_custom_button(__("Send Supplier Emails"), function() {
 				frappe.call({

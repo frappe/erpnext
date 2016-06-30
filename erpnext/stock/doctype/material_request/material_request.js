@@ -40,6 +40,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	},
 
 	refresh: function(doc) {
+		var me = this;
 		this._super();
 
 		if(doc.docstatus==0) {
@@ -74,6 +75,19 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				if(doc.material_request_type === "Manufacture" && doc.status === "Submitted")
 					cur_frm.add_custom_button(__("Production Order"),
 					this.raise_production_orders, __("Make"));
+
+				// show
+
+				if(doc.material_request_type === "Purchase" && doc.docstatus==1) {
+					me.frm.add_custom_button(__("Request for Quotation"),
+						function() { frappe.set_route('List', 'Request for Quotation',
+						{'material_request': doc.name})}, __("Show"));
+
+					me.frm.add_custom_button(__("Supplier Quotation"),
+						function() { frappe.set_route('List', 'Supplier Quotation',
+						{'material_request': doc.name})}, __("Show"));
+
+				}
 
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 
