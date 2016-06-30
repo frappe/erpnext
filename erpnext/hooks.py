@@ -33,7 +33,7 @@ on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
 on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 
 remember_selected = ['Company', 'Cost Center', 'Project']
-treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory']
+treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', "BOM"]
 
 # website
 update_website_context = "erpnext.shopping_cart.utils.update_website_context"

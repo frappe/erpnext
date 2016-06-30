@@ -15,8 +15,8 @@ frappe.treeview_settings["Account"] = {
 	menu_items:[
 		{
 			label: __('New Company'),
-			action: function() { newdoc('Company'); },
-			condition: 'frappe.boot.user.can_create.indexOf("Company") === -1'
+			action: function() { frappe.new_doc("Company", true) },
+			condition: 'frappe.boot.user.can_create.indexOf("Company") !== -1'
 		}
 	],
 	fields: [

@@ -32,4 +32,13 @@ frappe.treeview_settings["BOM"] = {
 			}
 		}
 	],
+	menu_items: [
+		{
+			label: __("New BOM"),
+			action: function() {
+				frappe.new_doc("BOM", true)
+			},
+			condition: 'frappe.boot.user.can_create.indexOf("BOM") !== -1'
+		}
+	]
 }

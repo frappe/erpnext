@@ -24,6 +24,9 @@ frappe.ui.form.on("BOM", {
 				frm.events.update_cost(frm);
 			});
 			frm.add_custom_button(__("Browse BOM"), function() {
+				frappe.route_options = {
+					"bom": frm.doc.name
+				};
 				frappe.set_route("Tree", "BOM");
 			});
 		}
