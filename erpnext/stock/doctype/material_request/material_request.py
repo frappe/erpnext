@@ -321,9 +321,8 @@ def make_supplier_quotation(source_name, target_doc=None):
 		"Material Request Item": {
 			"doctype": "Supplier Quotation Item",
 			"field_map": {
-				"name": "prevdoc_detail_docname",
-				"parent": "prevdoc_docname",
-				"parenttype": "prevdoc_doctype"
+				"name": "material_request_item",
+				"parent": "material_request"
 			}
 		}
 	}, target_doc, postprocess)
