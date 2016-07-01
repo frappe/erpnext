@@ -49,6 +49,8 @@ class PaymentEntry(AccountsController):
 		self.set_remarks()
 		
 	def on_submit(self):
+		if self.difference_amount:
+			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
 		self.update_advance_paid()
 		
@@ -209,7 +211,7 @@ class PaymentEntry(AccountsController):
 		self.set_total_allocated_amount()
 		self.set_unallocated_amount()
 		self.set_difference_amount()
-		
+
 	def set_amounts_in_company_currency(self):
 		self.base_paid_amount, self.base_received_amount, self.difference_amount = 0, 0, 0
 		if self.paid_amount:
