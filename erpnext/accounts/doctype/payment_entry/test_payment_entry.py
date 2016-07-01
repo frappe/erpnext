@@ -7,7 +7,7 @@ import frappe
 import unittest
 from frappe.utils import flt, nowdate
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, InvalidPaymentEntry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 
@@ -149,6 +149,57 @@ class TestPaymentEntry(unittest.TestCase):
 		
 		self.validate_gl_entries(pe.name, expected_gle)
 		
+	def test_payment_against_negative_sales_invoice(self):
+		pe1 = frappe.new_doc("Payment Entry")
+		pe1.payment_type = "Pay"
+		pe1.company = "_Test Company"
+		pe1.party_type = "Customer"
+		pe1.party = "_Test Customer"
+		pe1.paid_from = "_Test Cash - _TC"
+		pe1.paid_amount = 100
+		pe1.received_amount = 100
+		
+		self.assertRaises(InvalidPaymentEntry, pe1.validate)
+		
+		si1 =  create_sales_invoice()
+		
+		# create full payment entry against si1
+		pe2 = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Cash - _TC")
+		pe2.insert()
+		pe2.submit()
+		
+		# create return entry against si1
+		create_sales_invoice(is_return=1, return_against=si1.name, qty=-1)
+		si1_outstanding = frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount")
+		self.assertEqual(si1_outstanding, -100)
+		
+		# pay more than outstanding against si1
+		pe3 = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Cash - _TC")
+		pe3.paid_amount = pe3.received_amount = 300
+		self.assertRaises(InvalidPaymentEntry, pe3.validate)
+		
+		# pay negative outstanding against si1
+		pe3.paid_to = "Debtors - _TC"
+		pe3.paid_amount = pe3.received_amount = 100
+		
+		pe3.insert()
+		pe3.submit()
+		
+		expected_gle = dict((d[0], d) for d in [
+			["Debtors - _TC", 100, 0, si1.name],
+			["_Test Cash - _TC", 0, 100, None]
+		])
+
+		self.validate_gl_entries(pe3.name, expected_gle)
+
+		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount"))
+		self.assertEqual(outstanding_amount, 0)
+
+		pe3.cancel()
+		self.assertFalse(self.get_gle(pe3.name))
+
+		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount"))
+		self.assertEqual(outstanding_amount, -100)
 		
 	def validate_gl_entries(self, voucher_no, expected_gle):
 		gl_entries = self.get_gle(voucher_no)

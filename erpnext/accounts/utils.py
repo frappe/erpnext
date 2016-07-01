@@ -458,9 +458,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			and {dr_or_cr} > 0
 			{condition}
 			and ((voucher_type = 'Journal Entry'
-					and (against_voucher = ''
-						or against_voucher is null))
-				or (voucher_type != 'Journal Entry'))
+					and (against_voucher = '' or against_voucher is null))
+				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
 		group by voucher_type, voucher_no
 		having (invoice_amount - payment_amount) > 0.005
 		order by posting_date, name""".format(
@@ -471,10 +470,9 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			"party_type": party_type,
 			"party": party,
 			"account": account,
-		}, as_dict=True, debug=1)
+		}, as_dict=True)
 
 	for d in invoice_list:
-		print d.voucher_no, d.invoice_amount, d.payment_amount
 		outstanding_invoices.append(frappe._dict({
 			'voucher_no': d.voucher_no,
 			'voucher_type': d.voucher_type,

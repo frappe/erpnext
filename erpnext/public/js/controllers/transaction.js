@@ -995,6 +995,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				// cur_frm.refresh_fields()
 			}
 		});
 	}
