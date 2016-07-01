@@ -207,5 +207,5 @@ frappe.require("assets/erpnext/js/stock_grid_report.js", function() {
 			frappe.set_route("query-report", "Stock Ledger");
 		}
 	});
-});
+}, false);
 

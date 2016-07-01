@@ -13,4 +13,4 @@ frappe.require("assets/erpnext/js/stock_analytics.js", function() {
 
 		frappe.breadcrumbs.add("Stock")
 	};
-});
+}, false);
