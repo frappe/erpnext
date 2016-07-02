@@ -111,13 +111,9 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Earning Type",
-					"description": _("Salary components.")
-				},
-				{
-					"type": "doctype",
-					"name": "Deduction Type",
-					"description": _("Tax and other salary deductions.")
+					"name": "Salary Component",
+					"label": _("Salary Components"),
+					"description": _("Earnings, Deductions and other Salary components")
 				},
 
 			]

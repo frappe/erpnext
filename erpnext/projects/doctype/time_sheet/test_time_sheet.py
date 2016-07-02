@@ -65,7 +65,7 @@ def make_salary_structure(employee):
 	salary_structure.salary_slip_based_on_timesheet = 1
 	salary_structure.employee = employee
 	salary_structure.from_date = nowdate()
-	salary_structure.earning_type = "Basic"
+	salary_structure.salary_component = "Basic"
 	salary_structure.hour_rate = 50.0
 	salary_structure.company= "_Test Company"
 
@@ -73,13 +73,13 @@ def make_salary_structure(employee):
 	salary_structure.set('deductions', [])
 
 	es = salary_structure.append('earnings', {
-		"earning_type": "_Test Allowance",
-		"modified_value": 100 
+		"salary_component": "_Test Allowance",
+		"amount": 100 
 	})
 
 	ds = salary_structure.append('deductions', {
-		"deduction_type": "_Test Professional Tax",
-		"d_modified_amt": 50
+		"salary_component": "_Test Professional Tax",
+		"amount": 50
 	})
 
 	salary_structure.save(ignore_permissions=True)

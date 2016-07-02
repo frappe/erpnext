@@ -1,0 +1,22 @@
+[
+	{
+			"doctype": "Salary Component",
+			"salary_component": "_Test Basic Salary"
+	},
+	{
+			"doctype": "Salary Component",
+			"salary_component": "_Test Allowance"
+	},
+	{
+			"doctype": "Salary Component",
+			"salary_component": "_Test Professional Tax"
+	},
+	{
+			"doctype": "Salary Component",
+			"salary_component": "_Test TDS"
+	},
+	{
+			"doctype": "Salary Component",
+			"salary_component": "Basic"
+	}
+]
