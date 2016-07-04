@@ -7,7 +7,7 @@
 cur_frm.add_fetch('contact', 'email_id', 'email_id')
 
 frappe.ui.form.on("Request for Quotation",{
-	setup: function(frm){
+	setup: function(frm) {
 		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function(doc, cdt, cdn){
 			var d =locals[cdt][cdn];
 			return {
@@ -29,7 +29,7 @@ frappe.ui.form.on("Request for Quotation",{
 		];
 	},
 
-	onload: function(frm){
+	onload: function(frm) {
 		frm.add_fetch('standard_reply', 'response', 'response');
 
 		if(!frm.doc.message_for_supplier) {
@@ -37,7 +37,7 @@ frappe.ui.form.on("Request for Quotation",{
 		}
 	},
 
-	refresh: function(frm, cdt, cdn){
+	refresh: function(frm, cdt, cdn) {
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(__("Make Supplier Quotation"),
 				function(){ frm.trigger("make_suppplier_quotation") });
@@ -54,7 +54,7 @@ frappe.ui.form.on("Request for Quotation",{
 		}
 	},
 
-	make_suppplier_quotation: function(frm){
+	make_suppplier_quotation: function(frm) {
 		var doc = frm.doc;
 		var dialog = new frappe.ui.Dialog({
 			title: __("For Supplier"),
@@ -93,10 +93,24 @@ frappe.ui.form.on("Request for Quotation",{
 })
 
 frappe.ui.form.on("Request for Quotation Supplier",{
-	supplier: function(frm, cdt, cdn){
+	supplier: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn]
 		frappe.model.set_value(cdt, cdn, 'contact', '')
 		frappe.model.set_value(cdt, cdn, 'email_id', '')
+	},
+
+	download_pdf: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn]
+
+		var w = window.open(
+			frappe.urllib.get_full_url("/api/method/erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_pdf?"
+			+"doctype="+encodeURIComponent(frm.doc.doctype)
+			+"&name="+encodeURIComponent(frm.doc.name)
+			+"&supplier_idx="+encodeURIComponent(child.idx)
+			+"&no_letterhead=0"));
+		if(!w) {
+			msgprint(__("Please enable pop-ups")); return;
+		}
 	}
 })
 

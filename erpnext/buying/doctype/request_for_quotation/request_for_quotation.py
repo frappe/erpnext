@@ -6,8 +6,9 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import get_url, random_string
+from frappe.utils import get_url, random_string, cint
 from frappe.utils.user import get_user_fullname
+from frappe.utils.print_format import download_pdf
 from frappe.desk.form.load import get_attachments
 from frappe.core.doctype.communication.email import make
 from erpnext.accounts.party import get_party_account_currency, get_party_details
@@ -136,22 +137,26 @@ class RequestforQuotation(BuyingController):
 
 	def get_attachments(self):
 		attachments = [d.name for d in get_attachments(self.doctype, self.name)]
-		attachments.append(frappe.attach_print('Request for Quotation', self.name, doc=self))
+		attachments.append(frappe.attach_print(self.doctype, self.name, doc=self))
 		return attachments
 
 @frappe.whitelist()
 def send_supplier_emails(rfq_name):
+	check_portal_enabled('Request for Quotation')
 	rfq = frappe.get_doc("Request for Quotation", rfq_name)
 	if rfq.docstatus==1:
 		rfq.send_to_supplier()
 
+def check_portal_enabled(reference_doctype):
+	if not frappe.db.get_value('Portal Menu Item',
+		{'reference_doctype': reference_doctype}, 'enabled'):
+		frappe.throw(_("Request for Quotation is disabled to access from portal, for more check portal settings."))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
 	list_context["show_sidebar"] = True
 	return list_context
-
 
 # This method is used to make supplier quotation from material request form.
 @frappe.whitelist()
@@ -226,3 +231,16 @@ def create_rfq_items(sq_doc, supplier, data):
 		"request_for_quotation_item": data.name,
 		"request_for_quotation": data.parent
 	})
+
+@frappe.whitelist()
+def get_pdf(doctype, name, supplier_idx):
+	doc = get_rfq_doc(doctype, name, supplier_idx)
+	if doc:
+		download_pdf(doctype, name, doc=doc)
+
+def get_rfq_doc(doctype, name, supplier_idx):
+	if cint(supplier_idx):
+		doc = frappe.get_doc(doctype, name)
+		args = doc.get('suppliers')[cint(supplier_idx) - 1]
+		doc.update_supplier_part_no(args)
+		return doc
