@@ -49,6 +49,7 @@ class PaymentEntry(AccountsController):
 		self.set_remarks()
 		
 	def on_submit(self):
+		self.setup_party_account_field()
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
@@ -127,7 +128,7 @@ class PaymentEntry(AccountsController):
 	def validate_account_type(self, account, account_types):
 		account_type = frappe.db.get_value("Account", account, "account_type")
 		if account_type not in account_types:
-			frappe.throw(_("Account Type for {0} must be {1}").format(comma_or(account_types)))
+			frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
 				
 	def set_exchange_rate(self):
 		if self.paid_from and not self.source_exchange_rate:
@@ -380,7 +381,7 @@ class PaymentEntry(AccountsController):
 				gle = party_gl_dict.copy()
 				
 				gle.update({
-					dr_or_cr + "_in_account_currency": d.unallocated_amount,
+					dr_or_cr + "_in_account_currency": self.unallocated_amount,
 					dr_or_cr: base_unallocated_amount
 				})
 
