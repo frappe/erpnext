@@ -18,9 +18,6 @@ class EmployeeUserDisabledError(frappe.ValidationError):
 
 
 class Employee(Document):
-	def onload(self):
-		self.set_onload('links', self.meta.get_links_setup())
-
 	def autoname(self):
 		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:
@@ -157,22 +154,7 @@ class Employee(Document):
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
 
-	def get_timeline_data(self):
-		'''returns timeline data based on attendance'''
-		return
-
-@frappe.whitelist()
-def get_dashboard_data(name):
-	'''load dashboard related data'''
-	frappe.has_permission(doc=frappe.get_doc('Employee', name), throw=True)
-
-	from frappe.desk.notifications import get_open_count
-	return {
-		'count': get_open_count('Employee', name),
-		'timeline_data': get_timeline_data(name),
-	}
-
-def get_timeline_data(name):
+def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(att_date), count(*)
 		from `tabAttendance` where employee=%s
@@ -187,7 +169,7 @@ def get_retirement_date(date_of_birth=None):
 	if date_of_birth:
 		try:
 			retirement_age = int(frappe.db.get_single_value("HR Settings", "retirement_age") or 60)
-			dt = add_years(getdate(date_of_birth),retirement_age)			
+			dt = add_years(getdate(date_of_birth),retirement_age)
 			ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
 		except ValueError:
 			# invalid date

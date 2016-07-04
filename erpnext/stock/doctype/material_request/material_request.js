@@ -43,12 +43,16 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		var me = this;
 		this._super();
 
+		this.frm.dashboard.reset();
+
 		if(doc.docstatus==0) {
 			cur_frm.add_custom_button(__("Get Items from BOM"),
 				cur_frm.cscript.get_items_from_bom, "icon-sitemap", "btn-default");
 		}
 
 		if(doc.docstatus == 1 && doc.status != 'Stopped') {
+
+			this.frm.dashboard.show_dashboard();
 
 			if(flt(doc.per_ordered, 2) < 100) {
 				// make
@@ -75,19 +79,6 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				if(doc.material_request_type === "Manufacture" && doc.status === "Submitted")
 					cur_frm.add_custom_button(__("Production Order"),
 					this.raise_production_orders, __("Make"));
-
-				// show
-
-				if(doc.material_request_type === "Purchase" && doc.docstatus==1) {
-					me.frm.add_custom_button(__("Request for Quotation"),
-						function() { frappe.set_route('List', 'Request for Quotation',
-						{'material_request': doc.name})}, __("Show"));
-
-					me.frm.add_custom_button(__("Supplier Quotation"),
-						function() { frappe.set_route('List', 'Supplier Quotation',
-						{'material_request': doc.name})}, __("Show"));
-
-				}
 
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 

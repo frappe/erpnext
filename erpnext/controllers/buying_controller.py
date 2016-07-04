@@ -32,29 +32,29 @@ class BuyingController(StockController):
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
-		
+
 		if self.doctype=="Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()
-		
+
 		if self.doctype=="Purchase Receipt" or (self.doctype=="Purchase Invoice" and self.update_stock):
 			self.validate_purchase_return()
 			self.validate_rejected_warehouse()
 			self.validate_accepted_rejected_qty()
-			
+
 			pc_obj = frappe.get_doc('Purchase Common')
 			pc_obj.validate_for_items(self)
-			
+
 			#sub-contracting
 			self.validate_for_subcontracting()
 			self.create_raw_materials_supplied("supplied_items")
 			self.set_landed_cost_voucher_amount()
-		
+
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
 			self.update_valuation_rate("items")
 
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)
-		
+
 		self.set_supplier_from_item_default()
 		self.set_price_list_currency("Buying")
 
@@ -85,7 +85,7 @@ class BuyingController(StockController):
 				from `tabLanded Cost Item`
 				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
 			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
-			
+
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
 		company_currency = get_company_currency(self.company)
@@ -286,7 +286,7 @@ class BuyingController(StockController):
 				if not d.conversion_factor:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
-	
+
 	def validate_purchase_return(self):
 		for d in self.get("items"):
 			if self.is_return and flt(d.rejected_qty) != 0:
@@ -299,7 +299,7 @@ class BuyingController(StockController):
 			if flt(d.rejected_qty) and not d.rejected_warehouse:
 				if self.rejected_warehouse:
 					d.rejected_warehouse = self.rejected_warehouse
-				
+
 				if not d.rejected_warehouse:
 					frappe.throw(_("Row #{0}: Rejected Warehouse is mandatory against rejected Item {1}").format(d.idx, d.item_code))
 
@@ -318,10 +318,10 @@ class BuyingController(StockController):
 			# Check Received Qty = Accepted Qty + Rejected Qty
 			if ((flt(d.qty) + flt(d.rejected_qty)) != flt(d.received_qty)):
 				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
-	
+
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		self.update_ordered_qty()
-		
+
 		sl_entries = []
 		stock_items = self.get_stock_items()
 
@@ -335,10 +335,10 @@ class BuyingController(StockController):
 						"serial_no": cstr(d.serial_no).strip()
 					})
 					if self.is_return:
-						original_incoming_rate = frappe.db.get_value("Stock Ledger Entry", 
-							{"voucher_type": "Purchase Receipt", "voucher_no": self.return_against, 
+						original_incoming_rate = frappe.db.get_value("Stock Ledger Entry",
+							{"voucher_type": "Purchase Receipt", "voucher_no": self.return_against,
 							"item_code": d.item_code}, "incoming_rate")
-							
+
 						sle.update({
 							"outgoing_rate": original_incoming_rate
 						})
@@ -361,14 +361,14 @@ class BuyingController(StockController):
 		self.make_sl_entries_for_supplier_warehouse(sl_entries)
 		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher)
-			
+
 	def update_ordered_qty(self):
 		po_map = {}
 		for d in self.get("items"):
 			if self.doctype=="Purchase Receipt" \
 				and d.prevdoc_doctype=="Purchase Order" and d.prevdoc_detail_docname:
 					po_map.setdefault(d.prevdoc_docname, []).append(d.prevdoc_detail_docname)
-			
+
 			elif self.doctype=="Purchase Invoice" and d.purchase_order and d.po_detail:
 				po_map.setdefault(d.purchase_order, []).append(d.po_detail)
 
@@ -381,7 +381,7 @@ class BuyingController(StockController):
 						frappe.InvalidStatusError)
 
 				po_obj.update_ordered_qty(po_item_rows)
-	
+
 	def make_sl_entries_for_supplier_warehouse(self, sl_entries):
 		if hasattr(self, 'supplied_items'):
 			for d in self.get('supplied_items'):
@@ -392,4 +392,4 @@ class BuyingController(StockController):
 					"warehouse": self.supplier_warehouse,
 					"actual_qty": -1*flt(d.consumed_qty),
 				}))
-	
+

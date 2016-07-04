@@ -18,7 +18,6 @@ class Project(Document):
 		if not self.get('__unsaved') and not self.get("tasks"):
 			self.load_tasks()
 
-		self.set_onload('links', self.meta.get_links_setup())
 		self.set_onload('activity_summary', frappe.db.sql('''select activity_type, sum(hours) as total_hours
 			from `tabTime Sheet Detail` where project=%s group by activity_type order by total_hours desc''', self.name, as_dict=True))
 
@@ -152,19 +151,7 @@ class Project(Document):
 				frappe.sendmail(user.user, subject=_("Project Collaboration Invitation"), content=content.format(*messages))
 				user.welcome_email_sent=1
 
-
-@frappe.whitelist()
-def get_dashboard_data(name):
-	'''load dashboard related data'''
-	frappe.has_permission(doc=frappe.get_doc('Project', name), throw=True)
-
-	from frappe.desk.notifications import get_open_count
-	return {
-		'count': get_open_count('Project', name),
-		'timeline_data': get_timeline_data(name)
-	}
-
-def get_timeline_data(name):
+def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
 		from `tabTime Sheet Detail` where project=%s

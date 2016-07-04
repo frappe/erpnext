@@ -28,7 +28,6 @@ class Item(WebsiteGenerator):
 	def onload(self):
 		super(Item, self).onload()
 		self.set_onload('sle_exists', self.check_if_sle_exists())
-		self.set_onload('links', self.meta.get_links_setup())
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
@@ -632,19 +631,7 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Item variant {0} exists with same attributes")
 					.format(variant), ItemVariantExistsError)
 
-
-@frappe.whitelist()
-def get_dashboard_data(name):
-	'''load dashboard related data'''
-	frappe.has_permission(doc=frappe.get_doc('Item', name), throw=True)
-
-	from frappe.desk.notifications import get_open_count
-	return {
-		'count': get_open_count('Item', name),
-		'timeline_data': get_timeline_data(name),
-	}
-
-def get_timeline_data(name):
+def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
 	return dict(frappe.db.sql('''select unix_timestamp(posting_date), count(*)
 		from `tabStock Ledger Entry` where item_code=%s
