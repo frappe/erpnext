@@ -99,7 +99,6 @@ class Warehouse(NestedSet):
 				self.create_account_under = frappe.db.get_all('Account',
 					filters = {'company': self.company, 'is_group': 1,
 						'parent_account': '', 'root_type': 'Asset'}, limit=1)[0].name
-				frappe.throw(_("Please enter parent account group for warehouse {0}").format(self.name))
 		elif frappe.db.get_value("Account", self.create_account_under, "company") != self.company:
 			frappe.throw(_("Warehouse {0}: Parent account {1} does not bolong to the company {2}")
 				.format(self.name, self.create_account_under, self.company))
