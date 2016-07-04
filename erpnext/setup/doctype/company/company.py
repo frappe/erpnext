@@ -13,7 +13,7 @@ from frappe.model.document import Document
 
 class Company(Document):
 	def onload(self):
-		self.get("__onload").transactions_exist = self.check_if_transactions_exist()
+		self.get("__onload")["transactions_exist"] = self.check_if_transactions_exist()
 
 	def check_if_transactions_exist(self):
 		exists = False
