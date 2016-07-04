@@ -81,6 +81,13 @@ website_route_rules = [
 			"parents": [{"title": _("Request for Quotation"), "name": "rfq"}]
 		}
 	},
+	{"from_route": "/addresses", "to_route": "Address"},
+	{"from_route": "/addresses/<path:name>", "to_route": "addresses",
+		"defaults": {
+			"doctype": "Address",
+			"parents": [{"title": _("Addresses"), "name": "addresses"}]
+		}
+	},
 	{"from_route": "/jobs", "to_route": "Job Opening"},
 ]
 
