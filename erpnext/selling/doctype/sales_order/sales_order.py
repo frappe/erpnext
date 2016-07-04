@@ -286,8 +286,7 @@ class SalesOrder(SellingController):
 			if item.delivered_by_supplier:
 				item_delivered_qty  = frappe.db.sql("""select sum(qty)
 					from `tabPurchase Order Item` poi, `tabPurchase Order` po
-					where poi.prevdoc_detail_docname = %s
-						and poi.prevdoc_doctype = 'Sales Order'
+					where poi.sales_order_item = %s
 						and poi.item_code = %s
 						and poi.parent = po.name
 						and po.docstatus = 1
@@ -611,9 +610,8 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		"Sales Order Item": {
 			"doctype": "Purchase Order Item",
 			"field_map":  [
-				["name", "prevdoc_detail_docname"],
-				["parent", "prevdoc_docname"],
-				["parenttype", "prevdoc_doctype"],
+				["name", "sales_order_item"],
+				["parent", "sales_order"],
 				["uom", "stock_uom"],
 				["delivery_date", "schedule_date"]
 			],

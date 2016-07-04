@@ -366,8 +366,8 @@ class BuyingController(StockController):
 		po_map = {}
 		for d in self.get("items"):
 			if self.doctype=="Purchase Receipt" \
-				and d.prevdoc_doctype=="Purchase Order" and d.prevdoc_detail_docname:
-					po_map.setdefault(d.prevdoc_docname, []).append(d.prevdoc_detail_docname)
+				and d.purchase_order:
+					po_map.setdefault(d.purchase_order, []).append(d.purchase_order_item)
 
 			elif self.doctype=="Purchase Invoice" and d.purchase_order and d.po_detail:
 				po_map.setdefault(d.purchase_order, []).append(d.po_detail)

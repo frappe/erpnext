@@ -213,9 +213,8 @@ def make_purchase_order(source_name, target_doc=None):
 		"Material Request Item": {
 			"doctype": "Purchase Order Item",
 			"field_map": [
-				["name", "prevdoc_detail_docname"],
-				["parent", "prevdoc_docname"],
-				["parenttype", "prevdoc_doctype"],
+				["name", "material_request_item"],
+				["parent", "material_request"],
 				["uom", "stock_uom"],
 				["uom", "uom"]
 			],
@@ -274,9 +273,8 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 			"Material Request Item": {
 				"doctype": "Purchase Order Item",
 				"field_map": [
-					["name", "prevdoc_detail_docname"],
-					["parent", "prevdoc_docname"],
-					["parenttype", "prevdoc_doctype"],
+					["name", "material_request_item"],
+					["parent", "material_request"],
 					["uom", "stock_uom"],
 					["uom", "uom"]
 				],
