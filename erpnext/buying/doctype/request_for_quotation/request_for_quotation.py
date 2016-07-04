@@ -177,11 +177,10 @@ def make_supplier_quotation(source_name, for_supplier, target_doc=None):
 		},
 		"Request for Quotation Item": {
 			"doctype": "Supplier Quotation Item",
-			"field_map": [
-				["name", "request_for_quotation_item"],
-				["parent", "request_for_quotation"],
-				["uom", "uom"]
-			],
+			"field_map": {
+				"name": "request_for_quotation_item",
+				"parent": "request_for_quotation"
+			},
 		}
 	}, target_doc, postprocess)
 
