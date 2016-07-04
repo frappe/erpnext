@@ -70,7 +70,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
-		pe.target_exchange_rate = 50		
+		pe.source_exchange_rate = 50		
 		pe.insert()
 		pe.submit()
 		

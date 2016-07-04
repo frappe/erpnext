@@ -348,10 +348,12 @@ class AccountsController(TransactionBase):
 		"""
 		
 		if self.doctype == "Sales Invoice":
+			party_type = "Customer"
 			party = self.customer
 			party_account = self.debit_to
 			dr_or_cr = "credit_in_account_currency"
 		else:
+			party_type = "Supplier"
 			party = self.supplier
 			party_account = self.credit_to
 			dr_or_cr = "debit_in_account_currency"
@@ -366,7 +368,7 @@ class AccountsController(TransactionBase):
 					'against_voucher_type' : self.doctype,
 					'against_voucher'  : self.name,
 					'account' : party_account,
-					'party_type': 'Customer',
+					'party_type': party_type,
 					'party': party,
 					'is_advance' : 'Yes',
 					'dr_or_cr' : dr_or_cr,
@@ -683,10 +685,10 @@ def get_advance_payment_entries(party_type, party, party_account,
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
 	payment_entries_against_order, unallocated_payment_entries = [], []
-	
+
 	if order_list or against_all_orders:
 		if order_list:
-			reference_condition = " and t2.reference_name in ({1})"\
+			reference_condition = " and t2.reference_name in ({0})"\
 				.format(', '.join(['%s'] * len(order_list)))
 		else:
 			reference_condition = ""
