@@ -94,6 +94,11 @@ class Warehouse(NestedSet):
 				frappe.db.set_value("Warehouse", self.name, "create_account_under", parent_account[0][0])
 				self.create_account_under = parent_account[0][0]
 			else:
+				# did not find parent, add it to root Assets
+				# let the user figure.
+				self.create_account_under = frappe.db.get_all('Account',
+					filters = {'company': self.company, 'is_group': 1,
+						'parent_account': '', 'root_type': 'Asset'}, limit=1)[0].name
 				frappe.throw(_("Please enter parent account group for warehouse {0}").format(self.name))
 		elif frappe.db.get_value("Account", self.create_account_under, "company") != self.company:
 			frappe.throw(_("Warehouse {0}: Parent account {1} does not bolong to the company {2}")
@@ -124,11 +129,11 @@ class Warehouse(NestedSet):
 			throw(_("Child warehouse exists for this warehouse. You can not delete this warehouse."))
 
 		self.update_nsm_model()
-	
+
 	def check_if_sle_exists(self):
 		return frappe.db.sql("""select name from `tabStock Ledger Entry`
 			where warehouse = %s""", self.name)
-	
+
 	def check_if_child_exists(self):
 		return frappe.db.sql("""select name from `tabWarehouse`
 			where parent_warehouse = %s""", self.name)
@@ -202,7 +207,7 @@ class Warehouse(NestedSet):
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
-	
+
 	def convert_to_group_or_ledger(self):
 		if self.is_group:
 			self.convert_to_ledger()
@@ -220,11 +225,11 @@ class Warehouse(NestedSet):
 				doc = frappe.get_doc("Account", account_name)
 				doc.warehouse = self.name
 				doc.convert_group_to_ledger()
-			
+
 			self.is_group = 0
 			self.save()
 			return 1
-	
+
 	def convert_to_group(self):
 		if self.check_if_sle_exists():
 			throw(_("Warehouses with existing transaction can not be converted to group."))
@@ -255,7 +260,7 @@ def get_children():
 		is_group as expandable
 		from `tab{doctype}`
 		where docstatus < 2
-		and ifnull(`{parent_field}`,'') = %s 
+		and ifnull(`{parent_field}`,'') = %s
 		and (`company` = %s or company is null or company = '')
 		order by name""".format(doctype=frappe.db.escape(doctype),
 		parent_field=frappe.db.escape(parent_field)), (parent, company), as_dict=1)
@@ -292,4 +297,3 @@ def add_node():
 def convert_to_group_or_ledger():
 	args = frappe.form_dict
 	return frappe.get_doc("Warehouse", args.docname).convert_to_group_or_ledger()
-	

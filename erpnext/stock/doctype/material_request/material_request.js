@@ -43,8 +43,6 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		var me = this;
 		this._super();
 
-		this.frm.dashboard.reset();
-
 		if(doc.docstatus==0) {
 			cur_frm.add_custom_button(__("Get Items from BOM"),
 				cur_frm.cscript.get_items_from_bom, "icon-sitemap", "btn-default");
