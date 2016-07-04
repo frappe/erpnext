@@ -14,10 +14,12 @@ def execute():
 
 def get_timesheet_data(data):
 	return {
+		'billable': data.billable,
 		'from_time': data.from_time,
 		'hours': data.hours,
 		'to_time': data.to_time,
 		'project': data.project,
+		'task': data.task,
 		'activity_type': data.activity_type,
 		'operation': data.operation,
 		'operation_id': data.operation_id,

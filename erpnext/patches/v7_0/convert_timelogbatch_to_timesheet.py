@@ -21,10 +21,12 @@ def get_timesheet_data(data):
 	time_log = frappe.get_doc('Time Log', data.time_log)
 
 	return {
+		'billable': time_log.billable,
 		'from_time': time_log.from_time,
 		'hours': time_log.hours,
 		'to_time': time_log.to_time,
 		'project': time_log.project,
+		'task': time_log.task,
 		'activity_type': time_log.activity_type,
 		'operation': time_log.operation,
 		'operation_id': time_log.operation_id,
