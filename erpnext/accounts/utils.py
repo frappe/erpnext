@@ -434,15 +434,13 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.debit_in_account_currency - payment_gl_entry.credit_in_account_currency"
 
-	invoice_list = frappe.db.sql("""select
-			voucher_no,	voucher_type, posting_date, 
-			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+	invoice_list = frappe.db.sql("""
+		select
+			voucher_no,	voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
 			(
-				select
-					ifnull(sum({payment_dr_or_cr}), 0)
+				select ifnull(sum({payment_dr_or_cr}), 0)
 				from `tabGL Entry` payment_gl_entry
-				where
-					payment_gl_entry.against_voucher_type = invoice_gl_entry.voucher_type
+				where payment_gl_entry.against_voucher_type = invoice_gl_entry.voucher_type
 					and payment_gl_entry.against_voucher = invoice_gl_entry.voucher_no
 					and payment_gl_entry.party_type = invoice_gl_entry.party_type
 					and payment_gl_entry.party = invoice_gl_entry.party
@@ -452,10 +450,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		from
 			`tabGL Entry` invoice_gl_entry
 		where
-			party_type = %(party_type)s
-			and party = %(party)s
-			and account = %(account)s
-			and {dr_or_cr} > 0
+			party_type = %(party_type)s and party = %(party)s 
+			and account = %(account)s and {dr_or_cr} > 0
 			{condition}
 			and ((voucher_type = 'Journal Entry'
 					and (against_voucher = '' or against_voucher is null))

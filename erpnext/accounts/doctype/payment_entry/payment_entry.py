@@ -194,7 +194,7 @@ class PaymentEntry(AccountsController):
 					""", (self.party_account, self.party, d.reference_name), as_dict=True)
 
 				if not je_accounts:
-					frappe.throw(_("Row #{0}: Journal Entry {0} does not have account {1} or already matched against another voucher")
+					frappe.throw(_("Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher")
 						.format(d.idx, d.reference_name, self.party_account))
 				else:
 					dr_or_cr = "debit" if self.payment_type == "Receive" else "credit"
@@ -270,6 +270,7 @@ class PaymentEntry(AccountsController):
 	def validate_payment_against_negative_invoice(self):
 		if ((self.payment_type=="Pay" and self.party_type=="Customer") 
 				or (self.payment_type=="Receive" and self.party_type=="Supplier")):
+				
 			total_negative_outstanding = sum([abs(flt(d.outstanding_amount)) 
 				for d in self.get("references") if flt(d.outstanding_amount) < 0])
 			
@@ -535,6 +536,7 @@ def get_party_details(company, party_type, party, date):
 
 @frappe.whitelist()	
 def get_account_details(account, date):
+	frappe.has_permission('Payment Entry', throw=True)
 	return frappe._dict({
 		"account_currency": get_account_currency(account),
 		"account_balance": get_balance_on(account, date),
