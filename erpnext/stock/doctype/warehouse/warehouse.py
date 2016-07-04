@@ -93,12 +93,6 @@ class Warehouse(NestedSet):
 			if parent_account:
 				frappe.db.set_value("Warehouse", self.name, "create_account_under", parent_account[0][0])
 				self.create_account_under = parent_account[0][0]
-			else:
-				# did not find parent, add it to root Assets
-				# let the user figure.
-				self.create_account_under = frappe.db.get_all('Account',
-					filters = {'company': self.company, 'is_group': 1,
-						'parent_account': '', 'root_type': 'Asset'}, limit=1)[0].name
 		elif frappe.db.get_value("Account", self.create_account_under, "company") != self.company:
 			frappe.throw(_("Warehouse {0}: Parent account {1} does not bolong to the company {2}")
 				.format(self.name, self.create_account_under, self.company))
