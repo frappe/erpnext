@@ -160,7 +160,6 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 
 	gl_map.append(round_off_gle)
 
-
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		adv_adj=False, update_outstanding="Yes"):
 
@@ -168,8 +167,12 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		check_freezing_date, update_outstanding_amt, validate_frozen_account
 
 	if not gl_entries:
-		gl_entries = frappe.db.sql("""select * from `tabGL Entry`
+		gl_entries = frappe.db.sql("""
+			select account, posting_date, party_type, party, cost_center, fiscal_year,
+			voucher_type, voucher_no, against_voucher_type, against_voucher, cost_center
+			from `tabGL Entry`
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no), as_dict=True)
+
 	if gl_entries:
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 
@@ -180,7 +183,7 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		validate_frozen_account(entry["account"], adv_adj)
 		validate_balance_type(entry["account"], adv_adj)
 		validate_expense_against_budget(entry)
-
+		
 		if entry.get("against_voucher") and update_outstanding == 'Yes':
 			update_outstanding_amt(entry["account"], entry.get("party_type"), entry.get("party"), entry.get("against_voucher_type"),
 				entry.get("against_voucher"), on_cancel=True)

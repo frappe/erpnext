@@ -76,11 +76,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				if(flt(doc.per_billed)==0) {
 					cur_frm.add_custom_button(__('Payment Request'), this.make_payment_request, __("Make"));
-					cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry, __("Make"));
+					cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
 				}
 
 				// maintenance
-				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
+				if(flt(doc.per_delivered, 2) < 100 && 
+						["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
 					cur_frm.add_custom_button(__('Maintenance Visit'), this.make_maintenance_visit, __("Make"));
 					cur_frm.add_custom_button(__('Maintenance Schedule'), this.make_maintenance_schedule, __("Make"));
 				}
@@ -157,19 +158,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		})
 	},
 
-	make_bank_entry: function() {
-		return frappe.call({
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order",
-			args: {
-				"dt": "Sales Order",
-				"dn": cur_frm.doc.name
-			},
-			callback: function(r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			}
-		});
-	},
 	make_purchase_order: function(){
 		var dialog = new frappe.ui.Dialog({
 			title: __("For Supplier"),

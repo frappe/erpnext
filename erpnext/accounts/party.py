@@ -181,8 +181,16 @@ def get_party_account(party_type, party, company):
 				{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
 
 		if not account:
-			default_account_name = "default_receivable_account" if party_type=="Customer" else "default_payable_account"
+			default_account_name = "default_receivable_account" \
+				if party_type=="Customer" else "default_payable_account"
 			account = frappe.db.get_value("Company", company, default_account_name)
+			
+		existing_gle_currency = get_party_gle_currency(party_type, party, company)
+		if existing_gle_currency:
+			if account:
+				account_currency = frappe.db.get_value("Account", account, "account_currency")
+			if (account and account_currency != existing_gle_currency) or not account:
+					account = get_party_gle_account(party_type, party, company)
 
 		return account
 
@@ -202,6 +210,17 @@ def get_party_gle_currency(party_type, party, company):
 		return existing_gle_currency[0][0] if existing_gle_currency else None
 
 	return frappe.local_cache("party_gle_currency", (party_type, party, company), generator,
+		regenerate_if_none=True)
+		
+def get_party_gle_account(party_type, party, company):
+	def generator():
+		existing_gle_account = frappe.db.sql("""select account from `tabGL Entry`
+			where docstatus=1 and company=%(company)s and party_type=%(party_type)s and party=%(party)s
+			limit 1""", { "company": company, "party_type": party_type, "party": party })
+
+		return existing_gle_account[0][0] if existing_gle_account else None
+
+	return frappe.local_cache("party_gle_account", (party_type, party, company), generator,
 		regenerate_if_none=True)
 
 def validate_party_gle_currency(party_type, party, company, party_account_currency=None):
@@ -235,7 +254,7 @@ def validate_party_accounts(doc):
 
 		if doc.default_currency and party_account_currency and company_default_currency:
 			if doc.default_currency != party_account_currency and doc.default_currency != company_default_currency:
-				frappe.throw(_("Billing currency must be equal to either default comapany's currency or party's payble account currency"))
+				frappe.throw(_("Billing currency must be equal to either default comapany's currency or party account currency"))
 
 @frappe.whitelist()
 def get_due_date(posting_date, party_type, party, company):

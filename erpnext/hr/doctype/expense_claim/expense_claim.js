@@ -10,7 +10,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
 			args: {
 				"company": cur_frm.doc.company,
-				"voucher_type": "Bank Entry"
+				"account_type": "Bank"
 			},
 			callback: function(r) {
 				var jv = frappe.model.make_new_doc_and_get_name('Journal Entry');

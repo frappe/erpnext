@@ -46,6 +46,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Payment Entry",
+					"description": _("Payment entries against party or for internal transfer")
+				},
+				{
+					"type": "doctype",
 					"name": "Journal Entry",
 					"description": _("Accounting journal entries.")
 				},

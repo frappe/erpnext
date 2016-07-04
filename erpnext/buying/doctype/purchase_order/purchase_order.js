@@ -76,7 +76,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					this.make_purchase_invoice, __("Make"));
 
 			if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
-				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry, __("Make"));
+				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
 			}
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 
@@ -182,20 +182,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
-	},
-
-	make_bank_entry: function() {
-		return frappe.call({
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order",
-			args: {
-				"dt": "Purchase Order",
-				"dn": cur_frm.doc.name
-			},
-			callback: function(r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			}
-		});
 	},
 
 	unclose_purchase_order: function(){

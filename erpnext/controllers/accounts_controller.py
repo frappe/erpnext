@@ -42,6 +42,7 @@ class AccountsController(TransactionBase):
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
 			self.validate_due_date()
+			self.validate_advance_entries()
 
 		if self.meta.get_field("taxes_and_charges"):
 			self.validate_enabled_taxes_and_charges()
@@ -255,7 +256,7 @@ class AccountsController(TransactionBase):
 		if not account_currency:
 			account_currency = get_account_currency(gl_dict.account)
 
-		if self.doctype not in ["Journal Entry", "Period Closing Voucher"]:
+		if self.doctype not in ["Journal Entry", "Period Closing Voucher", "Payment Entry"]:
 			self.validate_account_currency(gl_dict.account, account_currency)
 			set_balance_in_account_currency(gl_dict, account_currency, self.get("conversion_rate"), self.company_currency)
 
@@ -276,71 +277,114 @@ class AccountsController(TransactionBase):
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s
 			and allocated_amount = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
-	def get_advances(self, account_head, party_type, party, child_doctype, parentfield, dr_or_cr, against_order_field):
+	def set_advances(self):
 		"""Returns list of advances against Account, Party, Reference"""
-		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
+				
+		res = self.get_advance_entries()
 
-		# conver sales_order to "Sales Order"
-		reference_type = against_order_field.replace("_", " ").title()
-
-		condition = ""
-		if order_list:
-			in_placeholder = ', '.join(['%s'] * len(order_list))
-			condition = "or (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))"\
-				.format(reference_type, in_placeholder)
-
-		res = frappe.db.sql("""
-			select
-				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no,
-				t2.reference_name as against_order
-			from
-				`tabJournal Entry` t1, `tabJournal Entry Account` t2
-			where
-				t1.name = t2.parent and t2.account = %s
-				and t2.party_type = %s and t2.party = %s
-				and t2.is_advance = 'Yes' and t1.docstatus = 1
-				and (ifnull(t2.reference_type, '')='' {1})
-			order by t1.posting_date""".format(dr_or_cr, condition),
-			[account_head, party_type, party] + order_list, as_dict=1)
-
-		self.set(parentfield, [])
+		self.set("advances", [])
 		for d in res:
-			self.append(parentfield, {
-				"doctype": child_doctype,
-				"journal_entry": d.jv_no,
-				"jv_detail_no": d.jv_detail_no,
-				"remarks": d.remark,
+			self.append("advances", {
+				"doctype": self.doctype + " Advance",
+				"reference_type": d.reference_type,
+				"reference_name": d.reference_name,
+				"reference_row": d.reference_row,
+				"remarks": d.remarks,
 				"advance_amount": flt(d.amount),
 				"allocated_amount": flt(d.amount) if d.against_order else 0
 			})
+			
+	def get_advance_entries(self, include_unallocated=True):
+		if self.doctype == "Sales Invoice":
+			party_account = self.debit_to
+			party_type = "Customer"
+			party = self.customer
+			amount_field = "credit_in_account_currency"
+			order_field = "sales_order"
+			order_doctype = "Sales Order"
+		else:
+			party_account = self.credit_to
+			party_type = "Supplier"
+			party = self.supplier
+			amount_field = "debit_in_account_currency"
+			order_field = "purchase_order"
+			order_doctype = "Purchase Order"
+			
+		order_list = list(set([d.get(order_field) 
+			for d in self.get("items") if d.get(order_field)]))
+		
+		journal_entries = get_advance_journal_entries(party_type, party, party_account, 
+			amount_field, order_doctype, order_list, include_unallocated)
+			
+		payment_entries = get_advance_payment_entries(party_type, party, party_account, 
+			order_doctype, order_list, include_unallocated)
+		
+		res = journal_entries + payment_entries
+		
+		return res
 
-	def validate_advance_jv(self, reference_type):
-		against_order_field = frappe.scrub(reference_type)
-		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
-		if order_list:
-			account = self.get("debit_to" if self.doctype=="Sales Invoice" else "credit_to")
+	def validate_advance_entries(self):
+		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
+		order_list = list(set([d.get(order_field) 
+			for d in self.get("items") if d.get(order_field)]))
+		
+		if not order_list: return
+		
+		advance_entries = self.get_advance_entries(include_unallocated=False)
+		
+		if advance_entries:
+			advance_entries_against_si = [d.reference_name for d in self.get("advances")]
+			for d in advance_entries:
+				if not advance_entries_against_si or d.reference_name not in advance_entries_against_si:
+					frappe.msgprint(_("Payment Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice.")
+						.format(d.reference_name, d.against_order))
+						
+	def update_against_document_in_jv(self):
+		"""
+			Links invoice and advance voucher:
+				1. cancel advance voucher
+				2. split into multiple rows if partially adjusted, assign against voucher
+				3. submit advance voucher
+		"""
+		
+		if self.doctype == "Sales Invoice":
+			party_type = "Customer"
+			party = self.customer
+			party_account = self.debit_to
+			dr_or_cr = "credit_in_account_currency"
+		else:
+			party_type = "Supplier"
+			party = self.supplier
+			party_account = self.credit_to
+			dr_or_cr = "debit_in_account_currency"
 
-			jv_against_order = frappe.db.sql("""select parent, reference_name as against_order
-				from `tabJournal Entry Account`
-				where docstatus=1 and account=%s and ifnull(is_advance, 'No') = 'Yes'
-				and reference_type=%s
-				and ifnull(reference_name, '') in ({0})
-				group by parent, reference_name""".format(', '.join(['%s']*len(order_list))),
-					tuple([account, reference_type] + order_list), as_dict=1)
-
-			if jv_against_order:
-				order_jv_map = {}
-				for d in jv_against_order:
-					order_jv_map.setdefault(d.against_order, []).append(d.parent)
-
-				advance_jv_against_si = [d.journal_entry for d in self.get("advances")]
-
-				for order, jv_list in order_jv_map.items():
-					for jv in jv_list:
-						if not advance_jv_against_si or jv not in advance_jv_against_si:
-							frappe.msgprint(_("Journal Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice.")
-								.format(jv, order))
-
+		lst = []
+		for d in self.get('advances'):
+			if flt(d.allocated_amount) > 0:
+				args = frappe._dict({
+					'voucher_type': d.reference_type,
+					'voucher_no' : d.reference_name,
+					'voucher_detail_no' : d.reference_row,
+					'against_voucher_type' : self.doctype,
+					'against_voucher'  : self.name,
+					'account' : party_account,
+					'party_type': party_type,
+					'party': party,
+					'is_advance' : 'Yes',
+					'dr_or_cr' : dr_or_cr,
+					'unadjusted_amount' : flt(d.advance_amount),
+					'allocated_amount' : flt(d.allocated_amount),
+					'exchange_rate': (self.conversion_rate 
+						if self.party_account_currency != self.company_currency else 1),
+					'grand_total': (self.base_grand_total 
+						if self.party_account_currency==self.company_currency else self.grand_total),
+					'outstanding_amount': self.outstanding_amount
+				})
+				lst.append(args)
+				
+		if lst:
+			from erpnext.accounts.utils import reconcile_against_document
+			reconcile_against_document(lst)
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_tolerance_for
@@ -396,10 +440,10 @@ class AccountsController(TransactionBase):
 			select
 				account_currency, sum({dr_or_cr}) as amount
 			from
-				`tabJournal Entry Account`
+				`tabGL Entry`
 			where
-				reference_type = %s and reference_name = %s and party=%s
-				and docstatus = 1 and is_advance = "Yes"
+				against_voucher_type = %s and against_voucher = %s and party=%s
+				and docstatus = 1
 		""".format(dr_or_cr=dr_or_cr), (self.doctype, self.name, party), as_dict=1)
 
 		if advance:
@@ -420,11 +464,11 @@ class AccountsController(TransactionBase):
 				formatted_order_total = fmt_money(order_total, precision=self.precision("base_grand_total"),
 					currency=advance.account_currency)
 
-			if order_total >= advance_paid:
-				frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
-			else:
+			if self.currency == self.company_currency and advance_paid > order_total:
 				frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2})")
 					.format(formatted_advance_paid, self.name, formatted_order_total))
+					
+			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
 
 	@property
 	def company_abbr(self):
@@ -600,3 +644,77 @@ def set_balance_in_account_currency(gl_dict, account_currency=None, conversion_r
 	if flt(gl_dict.credit) and not flt(gl_dict.credit_in_account_currency):
 		gl_dict.credit_in_account_currency = gl_dict.credit if account_currency==company_currency \
 			else flt(gl_dict.credit / conversion_rate, 2)
+
+
+def get_advance_journal_entries(party_type, party, party_account, amount_field, 
+		order_doctype, order_list, include_unallocated=True):
+		
+	dr_or_cr = "credit_in_account_currency" if party_type=="Customer" else "debit_in_account_currency"
+	
+	conditions = []
+	if include_unallocated:
+		conditions.append("ifnull(t2.reference_name, '')=''")
+
+	if order_list:
+		order_condition = ', '.join(['%s'] * len(order_list))
+		conditions.append(" (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))"\
+			.format(order_doctype, order_condition))
+		
+	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
+	
+	journal_entries = frappe.db.sql("""
+		select
+			"Journal Entry" as reference_type, t1.name as reference_name, 
+			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
+			t2.reference_name as against_order
+		from
+			`tabJournal Entry` t1, `tabJournal Entry Account` t2
+		where
+			t1.name = t2.parent and t2.account = %s
+			and t2.party_type = %s and t2.party = %s
+			and t2.is_advance = 'Yes' and t1.docstatus = 1
+			and {1} > 0
+			and (ifnull(t2.reference_name, '')='' {2})
+		order by t1.posting_date""".format(amount_field, dr_or_cr, reference_condition),
+		[party_account, party_type, party] + order_list, as_dict=1)
+		
+	return list(journal_entries)
+	
+def get_advance_payment_entries(party_type, party, party_account, 
+		order_doctype, order_list=None, include_unallocated=True, against_all_orders=False):
+	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
+	payment_type = "Receive" if party_type == "Customer" else "Pay"
+	payment_entries_against_order, unallocated_payment_entries = [], []
+
+	if order_list or against_all_orders:
+		if order_list:
+			reference_condition = " and t2.reference_name in ({0})"\
+				.format(', '.join(['%s'] * len(order_list)))
+		else:
+			reference_condition = ""
+			order_list = []
+		
+		payment_entries_against_order = frappe.db.sql("""
+			select
+				"Payment Entry" as reference_type, t1.name as reference_name,
+				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
+				t2.reference_name as against_order, t1.posting_date
+			from `tabPayment Entry` t1, `tabPayment Entry Reference` t2 
+			where
+				t1.name = t2.parent and t1.{0} = %s and t1.payment_type = %s
+				and t1.party_type = %s and t1.party = %s and t1.docstatus = 1
+				and t2.reference_doctype = %s {1}
+		""".format(party_account_field, reference_condition), 
+		[party_account, payment_type, party_type, party, order_doctype] + order_list, as_dict=1)
+		
+	if include_unallocated:
+		unallocated_payment_entries = frappe.db.sql("""
+				select "Payment Entry" as reference_type, name as reference_name, 
+				remarks, unallocated_amount as amount
+				from `tabPayment Entry`
+				where
+					{0} = %s and party_type = %s and party = %s and payment_type = %s
+					and docstatus = 1 and unallocated_amount > 0
+			""".format(party_account_field), (party_account, party_type, party, payment_type), as_dict=1)
+		
+	return list(payment_entries_against_order) + list(unallocated_payment_entries)

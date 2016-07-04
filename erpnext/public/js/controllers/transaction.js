@@ -4,6 +4,16 @@
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
+		
+		if(in_list(["Sales Invoice", "Purchase Invoice"], this.frm.doc.doctype)) {
+			this.frm.get_field('advances').grid.editable_fields = [
+				{fieldname: 'reference_name', columns: 2},
+				{fieldname: 'remarks', columns: 3},
+				{fieldname: 'advance_amount', columns: 3},
+				{fieldname: 'allocated_amount', columns: 3}
+			];
+		}
+		
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
@@ -159,7 +169,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
 		this.setup_sms();
-		this.make_show_payments_btn();
 	},
 
 	apply_default_taxes: function() {
@@ -193,22 +202,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	send_sms: function() {
 		var sms_man = new SMSManager(this.frm.doc);
-	},
-
-	make_show_payments_btn: function() {
-		var me = this;
-		if (in_list(["Purchase Invoice", "Sales Invoice"], this.frm.doctype)) {
-			if(this.frm.doc.outstanding_amount !== this.frm.doc.base_grand_total) {
-				this.frm.add_custom_button(__("Payments"), function() {
-					frappe.route_options = {
-						"Journal Entry Account.reference_type": me.frm.doc.doctype,
-						"Journal Entry Account.reference_name": me.frm.doc.name
-					};
-
-					frappe.set_route("List", "Journal Entry");
-				}, __("View"));
-			}
-		}
 	},
 
 	barcode: function(doc, cdt, cdn) {
@@ -978,5 +971,32 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(!this.item_selector) {
 			this.item_selector = new erpnext.ItemSelector({frm: this.frm});
 		}
+	},
+	
+	get_advances: function() {
+		if(!this.frm.is_return) {
+			return this.frm.call({
+				method: "set_advances",
+				doc: this.frm.doc,
+				callback: function(r, rt) {
+					refresh_field("advances");
+				}
+			})
+		}
+	},
+	
+	make_payment_entry: function() {
+		return frappe.call({
+			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
+			args: {
+				"dt": cur_frm.doc.doctype,
+				"dn": cur_frm.doc.name
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				// cur_frm.refresh_fields()
+			}
+		});
 	}
 });

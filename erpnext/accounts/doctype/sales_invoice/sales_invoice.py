@@ -77,7 +77,6 @@ class SalesInvoice(SellingController):
 		self.check_close_sales_order("sales_order")
 		self.validate_debit_to_acc()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
-		self.validate_advance_jv("Sales Order")
 		self.add_remarks()
 		self.validate_write_off_account()
 		self.validate_fixed_asset()
@@ -294,43 +293,8 @@ class SalesInvoice(SellingController):
 
 		return pos
 
-	def get_advances(self):
-		if not self.is_return:
-			super(SalesInvoice, self).get_advances(self.debit_to, "Customer", self.customer,
-				"Sales Invoice Advance", "advances", "credit_in_account_currency", "sales_order")
-
 	def get_company_abbr(self):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
-
-	def update_against_document_in_jv(self):
-		"""
-			Links invoice and advance voucher:
-				1. cancel advance voucher
-				2. split into multiple rows if partially adjusted, assign against voucher
-				3. submit advance voucher
-		"""
-
-		lst = []
-		for d in self.get('advances'):
-			if flt(d.allocated_amount) > 0:
-				args = {
-					'voucher_no' : d.journal_entry,
-					'voucher_detail_no' : d.jv_detail_no,
-					'against_voucher_type' : 'Sales Invoice',
-					'against_voucher'  : self.name,
-					'account' : self.debit_to,
-					'party_type': 'Customer',
-					'party': self.customer,
-					'is_advance' : 'Yes',
-					'dr_or_cr' : 'credit_in_account_currency',
-					'unadjusted_amt' : flt(d.advance_amount),
-					'allocated_amt' : flt(d.allocated_amount)
-				}
-				lst.append(args)
-
-		if lst:
-			from erpnext.accounts.utils import reconcile_against_document
-			reconcile_against_document(lst)
 
 	def validate_debit_to_acc(self):
 		account = frappe.db.get_value("Account", self.debit_to,
@@ -740,7 +704,8 @@ def get_bank_cash_account(mode_of_payment, company):
 	account = frappe.db.get_value("Mode of Payment Account",
 		{"parent": mode_of_payment, "company": company}, "default_account")
 	if not account:
-		frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}").format(mode_of_payment))
+		frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}")
+			.format(mode_of_payment))
 	return {
 		"account": account
 	}

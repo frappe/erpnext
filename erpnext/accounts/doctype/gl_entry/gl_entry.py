@@ -38,7 +38,7 @@ class GLEntry(Document):
 					self.against_voucher)
 
 	def check_mandatory(self):
-		mandatory = ['account','remarks','voucher_type','voucher_no','company']
+		mandatory = ['account','voucher_type','voucher_no','company']
 		for k in mandatory:
 			if not self.get(k):
 				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))

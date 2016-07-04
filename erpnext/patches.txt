@@ -285,3 +285,4 @@ erpnext.patches.v7_0.remove_doctypes_and_reports
 erpnext.patches.v7_0.set_is_group_for_warehouse
 erpnext.patches.v7_0.update_maintenance_module_in_doctype
 erpnext.patches.v7_0.update_prevdoc_values_for_supplier_quotation_item
+erpnext.patches.v7_0.rename_advance_table_fields

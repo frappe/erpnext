@@ -676,8 +676,9 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.copy_doc(test_records[0])
 		si.append("advances", {
 			"doctype": "Sales Invoice Advance",
-			"journal_entry": jv.name,
-			"jv_detail_no": jv.get("accounts")[0].name,
+			"reference_type": "Journal Entry",
+			"reference_name": jv.name,
+			"reference_row": jv.get("accounts")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark

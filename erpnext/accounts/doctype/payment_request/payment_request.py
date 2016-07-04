@@ -6,11 +6,11 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate, get_url, cstr
+from frappe.utils import flt, get_url, nowdate
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
-from erpnext.accounts.doctype.journal_entry.journal_entry import (get_payment_entry_against_invoice, 
-get_payment_entry_against_order)
+from erpnext.setup.utils import get_exchange_rate
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
 
 class PaymentRequest(Document):		
 	def validate(self):
@@ -41,7 +41,6 @@ class PaymentRequest(Document):
 	def on_submit(self):
 		send_mail = True
 		self.make_communication_entry()
-		
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		
 		if hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart":
@@ -77,55 +76,56 @@ class PaymentRequest(Document):
 		if frappe.session.user == "Guest":
 			frappe.set_user("Administrator")
 			
-		jv = self.create_journal_entry()
+		payment_entry = self.create_payment_entry()
 		self.make_invoice()
 		
-		return jv
+		return payment_entry
 		
-	def create_journal_entry(self):
+	def create_payment_entry(self):
 		"""create entry"""
 		frappe.flags.ignore_account_permission = True
 		
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-		
-		party_account = get_party_account("Customer", ref_doc.get("customer"), ref_doc.company)
-		party_account_currency = get_account_currency(party_account)
-				
-		debit_in_account_currency = 0.0
-				
-		if party_account_currency == ref_doc.company_currency:
-			amount = flt(flt(self.grand_total) * \
-				flt(ref_doc.conversion_rate, ref_doc.precision("conversion_rate")), \
-				ref_doc.precision("base_grand_total"))
-			
-			if self.currency != ref_doc.company_currency:
-				debit_in_account_currency = self.grand_total
-			
-		else:
-			amount = debit_in_account_currency = self.grand_total
-				
-		if self.reference_doctype == "Sales Order":
-			jv = get_payment_entry_against_order(self.reference_doctype, self.reference_name,
-			amount=amount, debit_in_account_currency=debit_in_account_currency , journal_entry=True,
-			bank_account=self.payment_account)
-			
+
 		if self.reference_doctype == "Sales Invoice":
-			jv = get_payment_entry_against_invoice(self.reference_doctype, self.reference_name,
-			amount=amount, debit_in_account_currency=debit_in_account_currency, journal_entry=True,
-			bank_account=self.payment_account)
+			party_account = ref_doc.debit_to
+		elif self.reference_doctype == "Purchase Invoice":
+			party_account = ref_doc.credit_to
+		else:
+			party_account = get_party_account("Customer", ref_doc.get("customer"), ref_doc.company)
 			
-		jv.update({
-			"voucher_type": "Journal Entry",
-			"posting_date": nowdate()
-		})
+		party_account_currency = ref_doc.get("party_account_currency") or get_account_currency(party_account)
 		
-		jv.insert(ignore_permissions=True)
-		jv.submit()
+		bank_amount = self.grand_total
+		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
+			party_amount = self.base_grand_total
+		else:
+			party_amount = self.grand_total
+					
+		payment_entry = get_payment_entry(self.reference_doctype, self.reference_name, 
+			party_amount=party_amount, bank_account=self.payment_account, bank_amount=bank_amount)
+		
+		payment_entry.update({
+			"reference_no": self.name,
+			"reference_date": nowdate(),
+			"remarks": "Payment Entry against {0} {1} via Payment Request {2}".format(self.reference_doctype, 
+				self.reference_name, self.name)
+		})
+
+		company_details = get_company_defaults(ref_doc.company)
+		if payment_entry.difference_amount:
+			payment_entry.append("deductions", {
+				"account": company_details.exchange_gain_loss_account,
+				"cost_center": company_details.cost_center,
+				"amount": payment_entry.difference_amount
+			})
+		payment_entry.insert(ignore_permissions=True)
+		payment_entry.submit()
 
 		#set status as paid for Payment Request
 		frappe.db.set_value(self.doctype, self.name, "status", "Paid")
 		
-		return jv
+		return payment_entry
 		
 	def send_email(self):
 		"""send email with payment link"""
@@ -177,7 +177,7 @@ def make_payment_request(**args):
 	grand_total = get_amount(ref_doc, args.dt)
 	
 	existing_payment_request = frappe.db.get_value("Payment Request", 
-		{"reference_doctype": args.dt, "reference_name": args.dn})
+		{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": ["!=", 2]})
 	
 	if existing_payment_request:
 		pr = frappe.get_doc("Payment Request", existing_payment_request)
@@ -199,7 +199,6 @@ def make_payment_request(**args):
 	
 		if args.return_doc:
 			return pr
-		
 		if args.submit_doc:
 			pr.insert(ignore_permissions=True)
 			pr.submit()

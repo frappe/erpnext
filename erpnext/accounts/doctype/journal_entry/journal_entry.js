@@ -283,7 +283,8 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 				type: "GET",
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
 				args: {
-					"voucher_type": doc.voucher_type,
+					"account_type": (doc.voucher_type=="Bank Entry" ? 
+						"Bank" : (doc.voucher_type=="Cash" ? "Cash" : null)),
 					"company": doc.company
 				},
 				callback: function(r) {
