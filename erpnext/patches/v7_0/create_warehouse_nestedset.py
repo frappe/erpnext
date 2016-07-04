@@ -48,7 +48,7 @@ def check_is_warehouse_associated_with_company():
 def make_warehouse_nestedset(company=None):
 	validate_parent_account_for_warehouse(company)
 	stock_account_group = get_stock_account_group(company.name)
-	if not stock_account_group:
+	if not stock_account_group and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 		return
 
 	if company:
