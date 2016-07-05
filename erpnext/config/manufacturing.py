@@ -39,12 +39,12 @@ def get_data():
 					"label": _("Bill of Materials")
 				},
 				{
-					"type": "page",
-					"name": "bom-browser",
+					"type": "doctype",
+					"name": "BOM",
 					"icon": "icon-sitemap",
 					"label": _("BOM Browser"),
 					"description": _("Tree of Bill of Materials"),
-					"doctype": "BOM"
+					"link": "Tree/BOM",
 				},
 				{
 					"type": "doctype",

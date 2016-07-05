@@ -55,13 +55,12 @@ def get_data():
 					"description": _("Accounting journal entries.")
 				},
 				{
-					"type": "page",
-					"name": "Tree",
+					"type": "doctype",
+					"name": "Account",
 					"icon": "icon-sitemap",
 					"label": _("Chart of Accounts"),
 					"route": "Tree/Account",
 					"description": _("Tree of financial accounts."),
-					"doctype": "Account",
 				},
 				{
 					"type": "report",
@@ -197,13 +196,12 @@ def get_data():
 			"label": _("Budget and Cost Center"),
 			"items": [
 				{
-					"type": "page",
-					"name": "Tree",
+					"type": "doctype",
+					"name": "Cost Center",
 					"icon": "icon-sitemap",
 					"label": _("Chart of Cost Centers"),
 					"route": "Tree/Cost Center",
 					"description": _("Tree of financial Cost Centers."),
-					"doctype": "Cost Center",
 				},
 				{
 					"type": "doctype",
