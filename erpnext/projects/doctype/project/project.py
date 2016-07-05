@@ -15,7 +15,7 @@ class Project(Document):
 
 	def onload(self):
 		"""Load project tasks for quick view"""
-		if not self.get('__unsaved') and not self.get("tasks"):
+		if not self.get("tasks"):
 			self.load_tasks()
 
 		self.set_onload('activity_summary', frappe.db.sql('''select activity_type, sum(hours) as total_hours
