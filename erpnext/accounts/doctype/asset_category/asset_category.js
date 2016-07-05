@@ -2,9 +2,18 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Asset Category', {
+	setup: function(frm) {
+		frm.get_field('accounts').grid.editable_fields = [
+			{fieldname: 'company_name', columns: 2},
+			{fieldname: 'fixed_asset_account', columns: 3},
+			{fieldname: 'accumulated_depreciation_account', columns: 3},
+			{fieldname: 'depreciation_expense_account', columns: 3}
+		];
+	},
+	
 	onload: function(frm) {
 		frm.add_fetch('company_name', 'accumulated_depreciation_account', 'accumulated_depreciation_account');
-		frm.add_fetch('company_name', 'depreciation_expense_account', 'depreciation_expense_account');
+		frm.add_fetch('company_name', 'depreciation_expense_account', 'accumulated_depreciation_account');
 
 		frm.set_query('fixed_asset_account', 'accounts', function(doc, cdt, cdn) {
 			var d  = locals[cdt][cdn];
@@ -13,7 +22,7 @@ frappe.ui.form.on('Asset Category', {
 					"account_type": "Fixed Asset",
 					"root_type": "Asset",
 					"is_group": 0,
-					"company": d.company
+					"company": d.company_name
 				}
 			};
 		});
@@ -24,7 +33,7 @@ frappe.ui.form.on('Asset Category', {
 				"filters": {
 					"root_type": "Asset",
 					"is_group": 0,
-					"company": d.company
+					"company": d.company_name
 				}
 			};
 		});
@@ -35,7 +44,7 @@ frappe.ui.form.on('Asset Category', {
 				"filters": {
 					"root_type": "Expense",
 					"is_group": 0,
-					"company": d.company
+					"company": d.company_name
 				}
 			};
 		});
