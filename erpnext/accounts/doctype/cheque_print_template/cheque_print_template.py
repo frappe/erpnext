@@ -15,7 +15,7 @@ def create_or_update_cheque_print_format(template_name):
 	if not frappe.db.exists("Print Format", template_name):
 		cheque_print = frappe.new_doc("Print Format")
 		cheque_print.update({
-			"doc_type": "Journal Entry",
+			"doc_type": "Payment Entry",
 			"standard": "No",
 			"custom_format": 1,
 			"print_format_type": "Server",
@@ -35,24 +35,24 @@ def create_or_update_cheque_print_format(template_name):
 		</span>
 		<span style="top:%(date_dist_from_top_edge)s cm; left:%(date_dist_from_left_edge)scm;
 			position: absolute;">
-			{{doc.cheque_date or '' }}
+			{{doc.reference_date or '' }}
 		</span>
 		<span style="top:%(acc_no_dist_from_top_edge)scm;left:%(acc_no_dist_from_left_edge)scm;
 			position: absolute;">
-			{{ doc.account_no }}
+			{{ doc.account_no or '' }}
 		</span>
 		<span style="top:%(payer_name_from_top_edge)scm;left: %(payer_name_from_left_edge)scm;
 			position: absolute;">
-			{{doc.pay_to_recd_from}}
+			{{doc.party}}
 		</span>
 		<span style="top:%(amt_in_words_from_top_edge)scm; left:%(amt_in_words_from_left_edge)scm;
 			position: absolute; display: block; width: %(amt_in_word_width)scm;
 			line-height:%(amt_in_words_line_spacing)scm; word-wrap: break-word;">
-				{{doc.total_amount_in_words}}
+				{{frappe.utils.money_in_words(doc.base_paid_amount or doc.base_received_amount)}}
 		</span>
 		<span style="top:%(amt_in_figures_from_top_edge)scm;left: %(amt_in_figures_from_left_edge)scm;
 			position: absolute;">
-			{{doc.get_formatted("total_amount")}}
+			{{doc.get_formatted("base_paid_amount") or doc.get_formatted("base_received_amount")}}
 		</span>
 		<span style="top:%(signatory_from_top_edge)scm;left: %(signatory_from_left_edge)scm;
 			position: absolute;">

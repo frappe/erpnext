@@ -236,6 +236,11 @@ def get_data():
 					"name": "Asset Movement",
 					"description": _("Transfer an asset from one warehouse to another")
 				},
+				{
+					"type": "doctype",
+					"name": "Cheque Print Template",
+					"description": _("Setup cheque dimensions for printing")
+				},
 			]
 		},
 		{
