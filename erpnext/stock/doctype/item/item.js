@@ -40,8 +40,9 @@ frappe.ui.form.on("Item", {
 
 		// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
 		// read only if any stock ledger entry exists
-
-		erpnext.item.make_dashboard(frm);
+		if(!frm.doc.is_fixed_asset) {
+			erpnext.item.make_dashboard(frm);
+		}
 
 		// clear intro
 		frm.set_intro();
@@ -76,7 +77,8 @@ frappe.ui.form.on("Item", {
 
 		erpnext.item.toggle_attributes(frm);
 
-
+		frm.toggle_enable("is_fixed_asset", !frm.doc.is_stock_item &&
+			((frm.doc.__onload && frm.doc.__onload.asset_exists) ? false : true));
 	},
 
 	validate: function(frm){
@@ -85,6 +87,16 @@ frappe.ui.form.on("Item", {
 
 	image: function(frm) {
 		refresh_field("image_view");
+	},
+	
+	is_fixed_asset: function(frm) {
+		if (frm.doc.is_fixed_asset) {
+			frm.set_value("is_stock_item", 0);
+		}
+	},
+	
+	is_stock_item: function(frm) {
+		frm.toggle_enable("is_fixed_asset", !frm.doc.is_stock_item);
 	},
 
 	page_name: frappe.utils.warn_page_name_change,
