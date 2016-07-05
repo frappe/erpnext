@@ -317,7 +317,11 @@ frappe.wiz.on("before_load", function() {
 	load_erpnext_slides();
 	frappe.wiz.add_slide(erpnext.wiz.org);
 	frappe.wiz.add_slide(erpnext.wiz.branding);
-	frappe.wiz.add_slide(erpnext.wiz.users);
+
+	if (!(frappe.boot.limits && frappe.boot.limits.users===1)) {
+		frappe.wiz.add_slide(erpnext.wiz.users);
+	}
+
 	frappe.wiz.add_slide(erpnext.wiz.taxes);
 	frappe.wiz.add_slide(erpnext.wiz.customers);
 	frappe.wiz.add_slide(erpnext.wiz.suppliers);

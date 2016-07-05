@@ -20,7 +20,6 @@ def setup_complete(args=None):
 
 	install_fixtures.install(args.get("country"))
 
-	update_setup_wizard_access()
 	create_price_lists(args)
 	create_fiscal_year_and_company(args)
 	create_users(args)
@@ -41,6 +40,7 @@ def setup_complete(args=None):
 
 	frappe.db.commit()
 	login_as_first_user(args)
+
 	frappe.db.commit()
 	frappe.clear_cache()
 
@@ -54,17 +54,6 @@ def setup_complete(args=None):
 				frappe.message_log.pop()
 
 			pass
-
-def update_setup_wizard_access():
-	if frappe.flags.in_test:
-		return
-	setup_wizard = frappe.get_doc('Page', 'setup-wizard')
-	for roles in setup_wizard.roles:
-		if roles.role == 'System Manager':
-			roles.role = 'Administrator'
-	setup_wizard.flags.ignore_permissions = 1
-	setup_wizard.flags.do_not_update_json = 1
-	setup_wizard.save()
 
 def create_fiscal_year_and_company(args):
 	if (args.get('fy_start_date')):
@@ -88,13 +77,13 @@ def create_fiscal_year_and_company(args):
 			'chart_of_accounts': args.get(('chart_of_accounts')),
 			'domain': args.get('domain')
 		}).insert()
-		
+
 		#Enable shopping cart
 		enable_shopping_cart(args)
-		
+
 		# Bank Account
 		create_bank_account(args)
-		
+
 def enable_shopping_cart(args):
 	frappe.get_doc({
 		"doctype": "Shopping Cart Settings",
@@ -103,8 +92,8 @@ def enable_shopping_cart(args):
 		'price_list': frappe.db.get_value("Price List", {"selling": 1}),
 		'default_customer_group': _("Individual"),
 		'quotation_series': "QTN-",
-	}).insert()	
-	
+	}).insert()
+
 def create_bank_account(args):
 	if args.get("bank_account"):
 		company_name = args.get('company_name').strip()
