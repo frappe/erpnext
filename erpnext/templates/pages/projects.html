@@ -2,7 +2,6 @@
 
 {% block title %}{{ doc.project_name }}{% endblock %}
 
-{%- from "templates/includes/projects/macros.html" import back_link -%}
 {% block header %}
 	<h1>{{ doc.project_name }}</h1>
 {% endblock %}
@@ -25,11 +24,11 @@
 
 <div class="clearfix">
   <h4 style="float: left;">{{ _("Tasks") }}</h4>
-  <a class="btn btn-secondary btn-default btn-sm" style="float: right; position: relative; top: 10px;" href='/tasks?new=1&project={{ doc.project_name }}{{ back_link(doc) }}'>New task</a>
+  <a class="btn btn-secondary btn-default btn-sm" style="float: right; position: relative; top: 10px;" href='/tasks?new=1&project={{ doc.project_name }}'>New task</a>
 </div>
 
 <p>
-<a class='small underline task-status-switch' data-status='Open'>{{ _("Show closed") }}</a>
+<!-- <a class='small underline task-status-switch' data-status='Open'>{{ _("Show closed") }}</a> -->
 </p>
 
 {% if doc.tasks %}
@@ -46,17 +45,17 @@
 
 <div class='padding'></div>
 
-<h4>{{ _("Time Logs") }}</h4>
+<h4>{{ _("Timesheets") }}</h4>
 
-{% if doc.timelogs %}
+{% if doc.timesheets %}
 	<div class='project-timelogs'>
-	{% include "erpnext/templates/includes/projects/project_timelogs.html" %}
+	{% include "erpnext/templates/includes/projects/project_timesheets.html" %}
 	</div>
-	{% if doc.timelogs|length > 9 %}
+	{% if doc.timesheets|length > 9 %}
 		<p><a class='more-timelogs small underline'>{{ _("More") }}</a><p>
 	{% endif %}
 {% else %}
-	<p class="text-muted">No time logs</p>
+	<p class="text-muted">No time sheets</p>
 {% endif %}
 </div>
 

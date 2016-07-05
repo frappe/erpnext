@@ -11,7 +11,6 @@ def get_context(context):
 		raise frappe.PermissionError
 		
 	context.no_cache = 1
-	context.show_search = True
 	context.show_sidebar = True
 	project = frappe.get_doc('Project', frappe.form_dict.project)
 
@@ -20,9 +19,8 @@ def get_context(context):
 	project.tasks = get_tasks(project.name, start=0, item_status='open',
 		search=frappe.form_dict.get("search"))
 
-	project.timelogs = []
-	# project.timelogs = get_timelogs(project.name, start=0,
-		# search=frappe.form_dict.get("search"))
+	project.timesheets = get_timesheets(project.name, start=0,
+		search=frappe.form_dict.get("search"))
 
 
 	context.doc = project
@@ -32,8 +30,8 @@ def get_tasks(project, start=0, search=None, item_status=None):
 	filters = {"project": project}
 	if search:
 		filters["subject"] = ("like", "%{0}%".format(search))
-	if item_status:
-		filters["status"] = item_status
+	# if item_status:
+# 		filters["status"] = item_status
 	tasks = frappe.get_all("Task", filters=filters,
 		fields=["name", "subject", "status", "_seen", "_comments", "modified", "description"],
 		limit_start=start, limit_page_length=10)
@@ -65,27 +63,32 @@ def get_task_html(project, start=0, item_status=None):
 			"tasks": get_tasks(project, start, item_status=item_status)}
 		}, is_path=True)
 
-def get_timelogs(project, start=0, search=None):
+def get_timesheets(project, start=0, search=None):
 	filters = {"project": project}
 	if search:
-		filters["title"] = ("like", "%{0}%".format(search))
+		filters["activity_type"] = ("like", "%{0}%".format(search))
 
-	timelogs = frappe.get_all('Time Log', filters=filters,
-	fields=['name','title','task','activity_type','from_time','to_time','_comments','_seen','status','modified','modified_by'],
+	timesheets = frappe.get_all('Timesheet Detail', filters=filters,
+	fields=['project','activity_type','from_time','to_time','parent'],
 	limit_start=start, limit_page_length=10)
-	for timelog in timelogs:
-		timelog.user_image = frappe.db.get_value('User', timelog.modified_by, 'user_image')
-		
-		timelog.comment_count = len(json.loads(timelog._comments or "[]"))
+	for timesheet in timesheets:
+		timesheet.infos = frappe.get_all('Timesheet', filters={"name": timesheet.parent},
+			fields=['name','_comments','_seen','status','modified','modified_by'],
+			limit_start=start, limit_page_length=10)
 
-		timelog.css_seen = ''
-		if timelog._seen:
-			if frappe.session.user in json.loads(timelog._seen):
-				timelog.css_seen = 'seen'	
-	return timelogs
+		for timesheet.info in timesheet.infos:
+			timesheet.info.user_image = frappe.db.get_value('User', timesheet.info.modified_by, 'user_image')
+
+			timesheet.info.comment_count = len(json.loads(timesheet.info._comments or "[]"))
+
+			timesheet.info.css_seen = ''
+			if timesheet.info._seen:
+				if frappe.session.user in json.loads(timesheet.info._seen):
+					timesheet.info.css_seen = 'seen'		
+	return timesheets
 
 @frappe.whitelist()
-def get_timelog_html(project, start=0):
-	return frappe.render_template("erpnext/templates/includes/projects/project_timelogs.html",
-		{"doc": {"timelogs": get_timelogs(project, start)}}, is_path=True)
+def get_timesheet_html(project, start=0):
+	return frappe.render_template("erpnext/templates/includes/projects/project_timesheets.html",
+		{"doc": {"timesheets": get_timesheets(project, start)}}, is_path=True)
 
