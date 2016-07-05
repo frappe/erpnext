@@ -16,7 +16,7 @@ class Account(Document):
 		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings",
 			"frozen_accounts_modifier")
 		if not frozen_accounts_modifier or frozen_accounts_modifier in frappe.get_roles():
-			self.get("__onload").can_freeze_account = True
+			self.set_onload("can_freeze_account", True)
 
 	def autoname(self):
 		# first validate if company exists
