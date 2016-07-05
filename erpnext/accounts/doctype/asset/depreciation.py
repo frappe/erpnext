@@ -119,6 +119,8 @@ def scrap_asset(asset_name):
 	frappe.db.set_value("Asset", asset_name, "disposal_date", today())
 	frappe.db.set_value("Asset", asset_name, "journal_entry_for_scrap", je.name)
 	asset.set_status("Scrapped")
+	
+	frappe.msgprint(_("Asset scrapped via Journal Entry {0}").format(je.name))
 
 @frappe.whitelist()
 def restore_asset(asset_name):

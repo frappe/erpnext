@@ -173,7 +173,8 @@ def get_basic_details(args, item):
 		"net_amount": 0.0,
 		"discount_percentage": 0.0,
 		"supplier": item.default_supplier,
-		"delivered_by_supplier": item.delivered_by_supplier
+		"delivered_by_supplier": item.delivered_by_supplier,
+		"is_fixed_asset": item.is_fixed_asset
 	})
 
 	# if default specified in item is for another company, fetch from company
