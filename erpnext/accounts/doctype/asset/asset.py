@@ -18,6 +18,7 @@ class Asset(Document):
 		self.validate_asset_values()
 		self.set_depreciation_settings()
 		self.make_depreciation_schedule()
+		self.validate_expected_value_after_useful_life()
 		# Validate depreciation related accounts
 		get_depreciation_accounts(self)
 
@@ -124,6 +125,18 @@ class Asset(Document):
 				depreciation_amount = flt(depreciable_value) - flt(self.expected_value_after_useful_life)
 
 		return depreciation_amount
+		
+	def validate_expected_value_after_useful_life(self):
+		if self.depreciation_method == "Double Declining Balance":
+			accumulated_depreciation_after_full_schedule = \
+				max([d.accumulated_depreciation_amount for d in self.get("schedules")])
+			
+			asset_value_after_full_schedule = (flt(self.gross_purchase_amount) - 
+				flt(accumulated_depreciation_after_full_schedule))
+			
+			if self.expected_value_after_useful_life < asset_value_after_full_schedule:
+				frappe.throw(_("Expected value after useful life must be greater than or equal to {0}")
+					.format(asset_value_after_full_schedule))
 
 	def validate_cancellation(self):
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
