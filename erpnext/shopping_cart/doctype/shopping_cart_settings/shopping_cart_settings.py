@@ -13,7 +13,7 @@ class ShoppingCartSetupError(frappe.ValidationError): pass
 
 class ShoppingCartSettings(Document):
 	def onload(self):
-		self.get("__onload").quotation_series = frappe.get_meta("Quotation").get_options("naming_series")
+		self.get("__onload")["quotation_series"] = frappe.get_meta("Quotation").get_options("naming_series")
 
 	def validate(self):
 		if self.enabled:
