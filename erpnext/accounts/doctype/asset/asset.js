@@ -8,7 +8,9 @@ frappe.ui.form.on('Asset', {
 		frm.set_query("item_code", function() {
 			return {
 				"filters": {
-					"disabled": 0
+					"disabled": 0,
+					"is_fixed_asset": 1,
+					"is_stock_item": 0
 				}
 			};
 		});
@@ -111,6 +113,24 @@ frappe.ui.form.on('Asset', {
 				}
 			}
 		});		
+	},
+	
+	item_code: function(frm) {
+		if(frm.doc.item_code) {
+			frappe.call({
+				method: "erpnext.accounts.doctype.asset.asset.get_item_details",
+				args: {
+					item_code: frm.doc.item_code
+				},
+				callback: function(r, rt) {
+					if(r.message) {
+						$.each(r.message, function(field, value) {
+							frm.set_value(field, value);
+						})
+					}
+				}
+			})
+		}
 	},
 	
 	is_existing_asset: function(frm) {

@@ -30,9 +30,16 @@ class Asset(Document):
 		self.set_status()
 
 	def validate_item(self):
-		item = frappe.get_doc("Item", self.item_code)
-		if item.disabled:
+		item = frappe.db.get_value("Item", self.item_code, 
+			["is_fixed_asset", "is_stock_item", "disabled"], as_dict=1)
+		if not item:
+			frappe.throw(_("Item {0} does not exist").format(self.item_code))
+		elif item.disabled:
 			frappe.throw(_("Item {0} has been disabled").format(self.item_code))
+		elif not item.is_fixed_asset:
+			frappe.throw(_("Item {0} must be a Fixed Asset Item").format(self.item_code))
+		elif item.is_stock_item:
+			frappe.throw(_("Item {0} must be a non-stock item").format(self.item_code))
 
 	def validate_asset_values(self):
 		self.value_after_depreciation = flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)
@@ -204,3 +211,16 @@ def transfer_asset(args):
 	frappe.db.commit()
 	
 	frappe.msgprint(_("Asset Movement record {0} created").format("<a href='#Form/Asset Movement/{0}'>{0}</a>".format(movement_entry.name)))
+	
+@frappe.whitelist()
+def get_item_details(item_code):
+	asset_category = frappe.db.get_value("Item", item_code, "asset_category")
+	
+	ret = frappe.db.get_value("Asset Category", asset_category, 
+		["depreciation_method", "total_number_of_depreciations", "frequency_of_depreciation"], as_dict=1)
+		
+	ret.update({
+		"asset_category": asset_category
+	})
+		
+	return ret
