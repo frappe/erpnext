@@ -22,9 +22,14 @@ def get_data():
 					"description": _("Payment Request")
 				},
 				{
+					"type": "doctype",
+					"name": "Payment Entry",
+					"description": _("Bank/Cash transactions against party or for internal transfer")
+				},
+				{
 					"type": "report",
 					"name": "Accounts Receivable",
-					"doctype": "Sales Invoice",
+					"doctype": "Sales Invoice",	
 					"is_query_report": True
 				},
 				{
@@ -43,11 +48,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Company",
 					"description": _("Company (not Customer or Supplier) master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Payment Entry",
-					"description": _("Payment entries against party or for internal transfer")
 				},
 				{
 					"type": "doctype",

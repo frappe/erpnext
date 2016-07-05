@@ -49,6 +49,7 @@ class PaymentEntry(AccountsController):
 		self.set_remarks()
 		
 	def on_submit(self):
+		self.setup_party_account_field()
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
@@ -127,7 +128,7 @@ class PaymentEntry(AccountsController):
 	def validate_account_type(self, account, account_types):
 		account_type = frappe.db.get_value("Account", account, "account_type")
 		if account_type not in account_types:
-			frappe.throw(_("Account Type for {0} must be {1}").format(comma_or(account_types)))
+			frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
 				
 	def set_exchange_rate(self):
 		if self.paid_from and not self.source_exchange_rate:
@@ -194,7 +195,7 @@ class PaymentEntry(AccountsController):
 					""", (self.party_account, self.party, d.reference_name), as_dict=True)
 
 				if not je_accounts:
-					frappe.throw(_("Row #{0}: Journal Entry {0} does not have account {1} or already matched against another voucher")
+					frappe.throw(_("Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher")
 						.format(d.idx, d.reference_name, self.party_account))
 				else:
 					dr_or_cr = "debit" if self.payment_type == "Receive" else "credit"
@@ -270,6 +271,7 @@ class PaymentEntry(AccountsController):
 	def validate_payment_against_negative_invoice(self):
 		if ((self.payment_type=="Pay" and self.party_type=="Customer") 
 				or (self.payment_type=="Receive" and self.party_type=="Supplier")):
+				
 			total_negative_outstanding = sum([abs(flt(d.outstanding_amount)) 
 				for d in self.get("references") if flt(d.outstanding_amount) < 0])
 			
@@ -379,7 +381,7 @@ class PaymentEntry(AccountsController):
 				gle = party_gl_dict.copy()
 				
 				gle.update({
-					dr_or_cr + "_in_account_currency": d.unallocated_amount,
+					dr_or_cr + "_in_account_currency": self.unallocated_amount,
 					dr_or_cr: base_unallocated_amount
 				})
 
@@ -535,6 +537,7 @@ def get_party_details(company, party_type, party, date):
 
 @frappe.whitelist()	
 def get_account_details(account, date):
+	frappe.has_permission('Payment Entry', throw=True)
 	return frappe._dict({
 		"account_currency": get_account_currency(account),
 		"account_balance": get_balance_on(account, date),
