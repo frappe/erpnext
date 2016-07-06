@@ -240,7 +240,7 @@ class ProductionOrder(Document):
 
 		return holidays[holiday_list]
 		
-	def make_time_logs(self):
+	def make_time_logs(self, open_new=False):
 		"""Capacity Planning. Plan time logs based on earliest availablity of workstation after
 			Planned Start Date. Time logs will be created and remain in Draft mode and must be submitted
 			before manufacturing entry can be made."""
@@ -256,7 +256,7 @@ class ProductionOrder(Document):
 		last_workstation_idx = {}
 
 		for i, d in enumerate(self.operations):
-			if d.workstation:
+			if d.workstation and d.status != 'Completed':
 				last_workstation_idx[d.workstation] = i # set last row index of workstation
 				self.set_start_end_time_for_workstation(d, workstation_list, last_workstation_idx.get(d.workstation))
 				
@@ -269,6 +269,7 @@ class ProductionOrder(Document):
 				try:
 					time_sheet.validate_time_logs()
 				except OverlapError:
+					if frappe.message_log: frappe.message_log.pop()
 					time_sheet.move_to_next_non_overlapping_slot(d.idx)
 
 				from_time, to_time = self.get_start_end_time(time_sheet, d.name)
@@ -280,6 +281,9 @@ class ProductionOrder(Document):
 				d.planned_start_time = from_time
 				d.planned_end_time = to_time
 				d.db_update()
+		
+		if time_sheet and open_new:
+			return time_sheet
 
 		if time_sheet:
 			time_sheet.save()
@@ -531,30 +535,7 @@ def get_default_warehouse():
 
 @frappe.whitelist()
 def make_timesheet(source_name, target_doc=None):
-	def postprocess(source, target):
-		target.production_order = source.name
-		target.naming_series = 'TS-'
-
-	def update_item(source, target, source_parent):
-		target.completed_qty = source_parent.qty - source.completed_qty
-
-	doc = get_mapped_doc("Production Order", source_name, {
-		"Production Order": {
-			"doctype": "Time Sheet",
-			"validation": {
-				"docstatus": ["=", 1]
-			}
-		},
-		"Production Order Operation": {
-			"doctype": "Time Sheet Detail",
-			"field_map": {
-				"name": "operation_id",
-				"operation": "operation",
-				"workstation": "workstation"
-			},
-			"postprocess": update_item,
-			"condition": lambda doc: doc.status != 'Completed'
-		}
-	}, target_doc, postprocess)
-
-	return doc
+	po = frappe.get_doc('Production Order', source_name)
+	ts = po.make_time_logs(open_new=True)
+	
+	return ts

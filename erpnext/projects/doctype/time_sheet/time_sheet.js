@@ -105,20 +105,25 @@ frappe.ui.form.on("Time Sheet Detail", {
 
 	activity_type: function(frm, cdt, cdn) {
 		child = locals[cdt][cdn];
-		frappe.call({
-			method: "erpnext.projects.doctype.time_sheet.time_sheet.get_activity_cost",
-			args: {
-				employee: frm.doc.employee,
-				activity_type: child.activity_type
-			},
-			callback: function(r){
-				if(r.message){
-					frappe.model.set_value(cdt, cdn, 'billing_rate', r.message['billing_rate']);
-					frappe.model.set_value(cdt, cdn, 'costing_rate', r.message['costing_rate']);
-					calculate_billing_costing_amount(frm, cdt, cdn)
+		if(frm.doc.employee || frm.doc.production_order){
+			frappe.call({
+				method: "erpnext.projects.doctype.time_sheet.time_sheet.get_activity_cost",
+				args: {
+					employee: frm.doc.employee,
+					activity_type: child.activity_type
+				},
+				callback: function(r){
+					if(r.message){
+						frappe.model.set_value(cdt, cdn, 'billing_rate', r.message['billing_rate']);
+						frappe.model.set_value(cdt, cdn, 'costing_rate', r.message['costing_rate']);
+						calculate_billing_costing_amount(frm, cdt, cdn)
+					}
 				}
-			}
-		})
+			})
+		}else {
+			frappe.model.set_value(cdt, cdn, 'activity_type', null);
+			frappe.show_alert(__("Select employee"))
+		}
 	}
 });
 
