@@ -15,7 +15,7 @@ class Project(Document):
 
 	def onload(self):
 		"""Load project tasks for quick view"""
-		if not self.get("tasks"):
+		if not self.get('__unsaved') and not self.get("tasks"):
 			self.load_tasks()
 
 		self.set_onload('activity_summary', frappe.db.sql('''select activity_type, sum(hours) as total_hours
@@ -150,6 +150,10 @@ class Project(Document):
 			if user.welcome_email_sent==0:
 				frappe.sendmail(user.user, subject=_("Project Collaboration Invitation"), content=content.format(*messages))
 				user.welcome_email_sent=1
+
+	def on_update(self):
+		self.load_tasks()
+		self.sync_tasks()
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
