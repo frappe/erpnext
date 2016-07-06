@@ -258,9 +258,11 @@ def create_fixed_asset_item():
 			"item_code": "Macbook Pro",
 			"item_name": "Macbook Pro",
 			"description": "Macbook Pro Retina Display",
+			"asset_category": "Computers",
 			"item_group": "All Item Groups",
 			"stock_uom": "Nos",
-			"is_stock_item": 0
+			"is_stock_item": 0,
+			"is_fixed_asset": 1
 		}).insert()		
 	except frappe.DuplicateEntryError:
 		pass
