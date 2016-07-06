@@ -83,8 +83,8 @@ class TestProductionOrder(unittest.TestCase):
 		d = prod_order.operations[0]
 		d.completed_qty = flt(d.completed_qty)
 
-		name = frappe.db.get_value('Time Sheet', {'production_order': prod_order.name}, 'name')
-		time_sheet_doc = frappe.get_doc('Time Sheet', name)
+		name = frappe.db.get_value('Timesheet', {'production_order': prod_order.name}, 'name')
+		time_sheet_doc = frappe.get_doc('Timesheet', name)
 		time_sheet_doc.submit()
 		
 

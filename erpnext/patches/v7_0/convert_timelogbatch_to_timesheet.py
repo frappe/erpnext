@@ -5,7 +5,7 @@ from erpnext.manufacturing.doctype.production_order.production_order import add_
 def execute():	
 	for tlb in frappe.get_all('Time Log Batch', fields=["*"], 
 		filters = [["docstatus", "<", "2"]]):
-		time_sheet = frappe.new_doc('Time Sheet')
+		time_sheet = frappe.new_doc('Timesheet')
 		time_sheet.employee= ""
 		time_sheet.company = frappe.db.get_single_value('Global Defaults', 'default_company')
 		time_sheet.sales_invoice = tlb.sales_invoice

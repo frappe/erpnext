@@ -9,7 +9,7 @@ links = {
 		},
 		{
 			'label': _('Payroll'),
-			'items': ['Salary Structure', 'Salary Slip', 'Time Sheet']
+			'items': ['Salary Structure', 'Salary Slip', 'Timesheet']
 		},
 		{
 			'label': _('Expense'),
