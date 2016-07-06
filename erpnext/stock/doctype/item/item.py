@@ -118,6 +118,9 @@ class Item(WebsiteGenerator):
 
 	def set_opening_stock(self):
 		'''set opening stock'''
+		if not self.valuation_rate:
+			frappe.throw(_("Valuation Rate is mandatory if Opening Stock entered"))		
+		
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		# default warehouse, or Stores
@@ -125,9 +128,8 @@ class Item(WebsiteGenerator):
 			or frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')}))
 
 		if default_warehouse:
-			stock_entry = make_stock_entry(item_code=self.name,
-				target=default_warehouse,
-				qty=self.opening_stock)
+			stock_entry = make_stock_entry(item_code=self.name, target=default_warehouse,
+				qty=self.opening_stock, rate=self.valuation_rate)
 
 			stock_entry.add_comment("Comment", _("Opening Stock"))
 
