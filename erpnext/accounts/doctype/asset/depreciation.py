@@ -21,7 +21,10 @@ def get_depreciable_assets(date):
 			and a.status in ('Submitted', 'Partially Depreciated')
 			and ifnull(ds.journal_entry, '')=''""", date)
 
+@frappe.whitelist()
 def make_depreciation_entry(asset_name, date=None):
+	frappe.has_permission('Journal Entry', throw=True)
+	
 	if not date:
 		date = today()
 
@@ -62,6 +65,8 @@ def make_depreciation_entry(asset_name, date=None):
 
 		asset.db_set("value_after_depreciation", asset.value_after_depreciation)
 		asset.set_status()
+		
+		return asset
 
 def get_depreciation_accounts(asset):
 	fixed_asset_account = accumulated_depreciation_account = depreciation_expense_account = None

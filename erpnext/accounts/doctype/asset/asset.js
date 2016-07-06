@@ -27,7 +27,7 @@ frappe.ui.form.on('Asset', {
 	refresh: function(frm) {
 		frappe.ui.form.trigger("Asset", "is_existing_asset");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
-		
+				
 		if (frm.doc.docstatus==1) {
 			if (frm.doc.status=='Submitted' && !frm.doc.is_existing_asset && !frm.doc.purchase_invoice) {
 				frm.add_custom_button("Make Purchase Invoice", function() {
@@ -105,7 +105,10 @@ frappe.ui.form.on('Asset', {
 			},
 			axis: {
 				x: {
-					type: 'category'
+					type: 'timeseries',
+					tick: {
+						format: "%d-%m-%Y"
+					}
 				},
 				y: {
 					min: 0,
@@ -136,8 +139,27 @@ frappe.ui.form.on('Asset', {
 	is_existing_asset: function(frm) {
 		frm.toggle_enable("supplier", frm.doc.is_existing_asset);
 		frm.toggle_reqd("next_depreciation_date", !frm.doc.is_existing_asset);
-	}
+	},
 });
+
+frappe.ui.form.on('Depreciation Schedule', {
+	make_depreciation_entry: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if (!row.journal_entry) {
+			frappe.call({
+				method: "erpnext.accounts.doctype.asset.depreciation.make_depreciation_entry",
+				args: {
+					"asset_name": frm.doc.name,
+					"date": row.schedule_date
+				},
+				callback: function(r) {
+					frappe.model.sync(r.message);
+					frm.refresh();
+				}
+			})
+		}
+	}
+})
 
 erpnext.asset.make_purchase_invoice = function(frm) {
 	frappe.call({
