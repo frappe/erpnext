@@ -48,15 +48,15 @@ class SalaryStructure(Document):
 		for li in list1:
 			child = self.append(tab_fname, {})
 			if(tab_fname == 'earnings'):
-				child.earning_type = cstr(li[0])
-				child.modified_value = 0
+				child.salary_component = cstr(li[0])
+				child.amount = 0
 			elif(tab_fname == 'deductions'):
-				child.deduction_type = cstr(li[0])
-				child.d_modified_amt = 0
+				child.salary_component = cstr(li[0])
+				child.amount = 0
 
 	def make_earn_ded_table(self):
-		self.make_table('Earning Type','earnings','Salary Structure Earning')
-		self.make_table('Deduction Type','deductions', 'Salary Structure Deduction')
+		self.make_table('Salary Component','earnings','Salary Detail')
+		self.make_table('Salary Component','deductions', 'Salary Detail')
 
 	def check_overlap(self):
 		existing = frappe.db.sql("""select name from `tabSalary Structure`
@@ -94,36 +94,29 @@ class SalaryStructure(Document):
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc=None):
 	def postprocess(source, target):
-		target.salary_structure = source.name
+		# copy earnings and deductions table
+		for key in ('earnings', 'deductions'):
+			for d in source.get(key):
+				target.append(key, {
+					'amount': d.amount,
+					'default_amount': d.default_amount,
+					'depends_on_lwp' : d.depends_on_lwp,
+					'salary_component' : d.salary_component
+				})
+
 		target.run_method("pull_emp_details")
 		target.run_method("get_leave_details")
 		target.run_method("calculate_net_pay")
+			
 
 	doc = get_mapped_doc("Salary Structure", source_name, {
 		"Salary Structure": {
 			"doctype": "Salary Slip",
 			"field_map": {
-				"total_earning": "gross_pay"
+				"total_earning": "gross_pay",
+				"name": "salary_structure"
 			}
-		},
-		"Salary Structure Deduction": {
-			"doctype": "Salary Slip Deduction",
-			"field_map": [
-				["depend_on_lwp", "d_depends_on_lwp"],
-				["d_modified_amt", "d_amount"],
-				["d_modified_amt", "deduction_amount"]
-			],
-			"add_if_empty": True
-		},
-		"Salary Structure Earning": {
-			"doctype": "Salary Slip Earning",
-			"field_map": [
-				["depend_on_lwp", "e_depends_on_lwp"],
-				["modified_value", "e_amount"],
-				["modified_value", "earning_amount"]
-			],
-			"add_if_empty": True
 		}
-	}, target_doc, postprocess)
+	}, target_doc, postprocess, ignore_child_tables=True)
 
 	return doc
