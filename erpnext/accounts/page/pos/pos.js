@@ -741,6 +741,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		frappe.confirm(__("Do you really want to submit the invoice?"), function () {
 			me.change_status();
+			frappe.msgprint(__("Sales invoice submitted sucessfully."))
 		})
 	},
 

@@ -131,7 +131,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 	bind_amount_change_event: function(){
 		var me = this;
 		me.selected_mode.change(function(){
-			me.payment_val =  $(this).val() || 0.0;
+			me.payment_val =  flt($(this).val()) || 0.0;
 			me.selected_mode.val(format_number(me.payment_val, 2))
 			me.idx = me.selected_mode.attr("idx")
 			me.update_paid_amount()
