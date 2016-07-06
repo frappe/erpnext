@@ -29,8 +29,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			cur_frm.msgbox.hide();
 		}
 
-		cur_frm.dashboard.reset();
-
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
 
 		this.show_general_ledger();
@@ -68,11 +66,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
 				cur_frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
 			}
-			
+
 			if(doc.outstanding_amount>0 && !cint(doc.is_return)) {
 				cur_frm.add_custom_button(__('Payment Request'), this.make_payment_request, __("Make"));
 			}
-			
+
 
 		}
 

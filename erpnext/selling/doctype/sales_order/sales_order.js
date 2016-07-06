@@ -18,10 +18,9 @@ frappe.ui.form.on("Sales Order", {
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
 		this._super();
-		this.frm.dashboard.reset();
 		var allow_purchase = false;
 		var allow_delivery = false;
-		
+
 		if(doc.docstatus==1) {
 			if(doc.status != 'Closed') {
 
@@ -80,7 +79,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// maintenance
-				if(flt(doc.per_delivered, 2) < 100 && 
+				if(flt(doc.per_delivered, 2) < 100 &&
 						["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
 					cur_frm.add_custom_button(__('Maintenance Visit'), this.make_maintenance_visit, __("Make"));
 					cur_frm.add_custom_button(__('Maintenance Schedule'), this.make_maintenance_schedule, __("Make"));

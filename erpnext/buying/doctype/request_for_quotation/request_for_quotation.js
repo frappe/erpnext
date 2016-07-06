@@ -39,7 +39,6 @@ frappe.ui.form.on("Request for Quotation",{
 
 	refresh: function(frm, cdt, cdn) {
 		if (frm.doc.docstatus === 1) {
-			frm.dashboard.show_dashboard();
 			frm.add_custom_button(__("Make"),
 				function(){ frm.trigger("make_suppplier_quotation") }, __("Supplier Quotation"));
 

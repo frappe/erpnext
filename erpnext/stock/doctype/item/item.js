@@ -172,19 +172,19 @@ $.extend(erpnext.item, {
 		frm.fields_dict.supplier_items.grid.get_field("supplier").get_query = function(doc, cdt, cdn) {
 			return { query: "erpnext.controllers.queries.supplier_query" }
 		}
-		
+
 		frm.fields_dict['default_warehouse'].get_query = function(doc) {
 			return {
 				filters: { "is_group": 0 }
 			}
 		}
-		
+
 		frm.fields_dict.reorder_levels.grid.get_field("warehouse_group").get_query = function(doc, cdt, cdn) {
 			return {
 				filters: { "is_group": 1 }
 			}
 		}
-		
+
 		frm.fields_dict.reorder_levels.grid.get_field("warehouse").get_query = function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {
@@ -198,14 +198,8 @@ $.extend(erpnext.item, {
 	},
 
 	make_dashboard: function(frm) {
-		frm.dashboard.reset();
 		if(frm.doc.__islocal)
 			return;
-
-		frm.dashboard.show_heatmap = frm.doc.is_stock_item;
-		frm.dashboard.heatmap_message = __('This is based on stock movement. See {0} for details',
-			['<a href="#query-report/Stock Ledger">' + __('Stock Ledger') + '</a>']);
-		frm.dashboard.show_dashboard();
 
 		frappe.require('assets/js/item-dashboard.min.js', function() {
 			var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;"><a href="#stock-balance">Stock Levels</a></h5>');

@@ -17,7 +17,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	refresh: function(doc, cdt, cdn) {
 		var me = this;
 		this._super();
-		// this.frm.dashboard.reset();
 		var allow_receipt = false;
 		var is_drop_ship = false;
 

@@ -1,6 +1,8 @@
 from frappe import _
 
-links = {
+data = {
+	'heatmap': True,
+	'heatmap_message': _('This is based on transactions against this Customer. See timeline below for details'),
 	'fieldname': 'customer',
 	'transactions': [
 		{

@@ -6,10 +6,6 @@ frappe.ui.form.on("Customer", {
 		frappe.setup_language_field(frm);
 	},
 	refresh: function(frm) {
-		frm.dashboard.show_heatmap = true;
-		frm.dashboard.heatmap_message = __('This is based on transactions against this Customer. See timeline below for details');
-		frm.dashboard.show_dashboard();
-
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
 			frm.toggle_display("naming_series", false);
 		} else {
@@ -45,7 +41,7 @@ cur_frm.cscript.load_defaults = function(doc, dt, dn) {
 	if(fields_to_refresh) { refresh_many(fields_to_refresh); }
 }
 
-cur_frm.add_fetch('lead_name', 'company_name', 'customer_name');
+cur_frm.add_fetch('lead_name', ('company_name', 'customer_name');
 cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
 
 cur_frm.fields_dict['customer_group'].get_query = function(doc, dt, dn) {

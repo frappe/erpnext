@@ -66,10 +66,6 @@ frappe.ui.form.on("Project", {
 		});
 	},
 	show_dashboard: function(frm) {
-		frm.dashboard.show_heatmap = true;
-		frm.dashboard.heatmap_message = __('This is based on the Time Sheet created against this project');
-		frm.dashboard.show_dashboard();
-
 		if(frm.doc.__onload.activity_summary.length) {
 			var hours = $.map(frm.doc.__onload.activity_summary, function(d) { return d.total_hours });
 			var max_count = Math.max.apply(null, hours);

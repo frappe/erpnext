@@ -49,9 +49,6 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 
 		if(doc.docstatus == 1 && doc.status != 'Stopped') {
-
-			// this.frm.dashboard.show_dashboard();
-
 			if(flt(doc.per_ordered, 2) < 100) {
 				// make
 				if(doc.material_request_type === "Material Transfer" && doc.status === "Submitted")

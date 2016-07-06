@@ -1,6 +1,7 @@
 from frappe import _
 
-links = {
+data = {
+	'docstatus': 1,
 	'fieldname': 'request_for_quotation',
 	# 'non_standard_fieldnames': {
 	# 	'Purchase Order': 'prevdoc_detail_docname',
