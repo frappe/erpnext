@@ -70,7 +70,7 @@ def execute():
 		"Earning Type": ["earning_name", "description"],
 	}
 	
-	standard_cols_de = standard_cols + ["_user_tags"]
+	standard_cols_de = standard_cols
 	
 
 	target_cols = standard_cols_de + ["salary_component", "description"]
