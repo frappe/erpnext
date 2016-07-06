@@ -100,8 +100,19 @@ frappe.ui.form.on("Request for Quotation",{
 frappe.ui.form.on("Request for Quotation Supplier",{
 	supplier: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn]
-		frappe.model.set_value(cdt, cdn, 'contact', '')
-		frappe.model.set_value(cdt, cdn, 'email_id', '')
+		frappe.call({
+			method:"erpnext.accounts.party.get_party_details",
+			args:{
+				party: d.supplier,
+				party_type: 'Supplier'
+			},
+			callback: function(r){
+				if(r.message){
+					frappe.model.set_value(cdt, cdn, 'contact', r.message.contact_person)
+					frappe.model.set_value(cdt, cdn, 'email_id', r.message.contact_email)
+				}
+			}
+		})
 	},
 
 	download_pdf: function(frm, cdt, cdn) {
