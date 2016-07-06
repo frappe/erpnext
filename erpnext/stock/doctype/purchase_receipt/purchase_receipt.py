@@ -23,36 +23,35 @@ class PurchaseReceipt(BuyingController):
 		self.status_updater = [{
 			'source_dt': 'Purchase Receipt Item',
 			'target_dt': 'Purchase Order Item',
-			'join_field': 'prevdoc_detail_docname',
+			'join_field': 'purchase_order_item',
 			'target_field': 'received_qty',
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_received',
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
-			'percent_join_field': 'prevdoc_docname',
+			'percent_join_field': 'purchase_order',
 			'overflow_type': 'receipt'
 		},
 		{
 			'source_dt': 'Purchase Receipt Item',
 			'target_dt': 'Purchase Order Item',
-			'join_field': 'prevdoc_detail_docname',
+			'join_field': 'purchase_order_item',
 			'target_field': 'returned_qty',
 			'target_parent_dt': 'Purchase Order',
 			# 'target_parent_field': 'per_received',
 			# 'target_ref_field': 'qty',
 			'source_field': '-1 * qty',
-			# 'percent_join_field': 'prevdoc_docname',
 			# 'overflow_type': 'receipt',
 			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
 		
 		self.prev_link_mapper = {
 			"Purchase Order": {
-				"fieldname": "prevdoc_docname",
+				"fieldname": "purchase_order",
 				"doctype": "Purchase Receipt Item",
 				"filters": [
 					["Purchase Receipt Item", "parent", "=", self.name],
-					["Purchase Receipt Item", "prevdoc_docname", "!=", ""]
+					["Purchase Receipt Item", "purchase_order", "!=", ""]
 				]
 			}
 		}
@@ -73,29 +72,29 @@ class PurchaseReceipt(BuyingController):
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
 			"Purchase Order": {
-				"ref_dn_field": "prevdoc_docname",
+				"ref_dn_field": "purchase_order",
 				"compare_fields": [["supplier", "="], ["company", "="],	["currency", "="]],
 			},
 			"Purchase Order Item": {
-				"ref_dn_field": "prevdoc_detail_docname",
+				"ref_dn_field": "purchase_order_item",
 				"compare_fields": [["project", "="], ["uom", "="], ["item_code", "="]],
 				"is_child_table": True
 			}
 		})
 
 		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')) and not self.is_return:
-			self.validate_rate_with_reference_doc([["Purchase Order", "prevdoc_docname", "prevdoc_detail_docname"]])
+			self.validate_rate_with_reference_doc([["Purchase Order", "purchase_order", "purchase_order_item"]])
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in self.get('items'):
-				 if not d.prevdoc_docname:
+				 if not d.purchase_order:
 					 frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.db.sql("""select sum(qty) from `tabPurchase Receipt Item`
-			where prevdoc_detail_docname = %s and docstatus = 1
-			and prevdoc_doctype='Purchase Order' and prevdoc_docname=%s
+			where purchase_order_item = %s and docstatus = 1
+			and purchase_order=%s
 			and parent != %s""", (po_detail, po, self.name))
 		return qty and flt(qty[0][0]) or 0.0
 
@@ -115,9 +114,9 @@ class PurchaseReceipt(BuyingController):
 	def check_for_closed_status(self, pc_obj):
 		check_list =[]
 		for d in self.get('items'):
-			if d.meta.get_field('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
-				check_list.append(d.prevdoc_docname)
-				pc_obj.check_for_closed_status(d.prevdoc_doctype, d.prevdoc_docname)
+			if d.meta.get_field('purchase_order') and d.purchase_order and d.purchase_order not in check_list:
+				check_list.append(d.purchase_order)
+				pc_obj.check_for_closed_status('Purchase Order', d.purchase_order)
 
 	# on submit
 	def on_submit(self):
@@ -335,8 +334,8 @@ class PurchaseReceipt(BuyingController):
 	def update_billing_status(self, update_modified=True):
 		updated_pr = [self.name]
 		for d in self.get("items"):
-			if d.prevdoc_detail_docname:
-				updated_pr += update_billed_amount_based_on_po(d.prevdoc_detail_docname, update_modified)
+			if d.purchase_order_item:
+				updated_pr += update_billed_amount_based_on_po(d.purchase_order_item, update_modified)
 
 		for pr in set(updated_pr):
 			pr_doc = self if (pr == self.name) else frappe.get_doc("Purchase Receipt", pr)
@@ -353,7 +352,7 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Get all Delivery Note Item rows against the Sales Order Item row
 	pr_details = frappe.db.sql("""select pr_item.name, pr_item.amount, pr_item.parent
 		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
-		where pr.name=pr_item.parent and pr_item.prevdoc_detail_docname=%s
+		where pr.name=pr_item.parent and pr_item.purchase_order_item=%s
 			and pr.docstatus=1 and pr.is_return = 0
 		order by pr.posting_date asc, pr.posting_time asc, pr.name asc""", po_detail, as_dict=1)
 
@@ -409,8 +408,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 			"field_map": {
 				"name": "pr_detail",
 				"parent": "purchase_receipt",
-				"prevdoc_detail_docname": "po_detail",
-				"prevdoc_docname": "purchase_order",
+				"purchase_order_item": "po_detail",
+				"purchase_order": "purchase_order",
 			},
 			"postprocess": update_item,
 			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0

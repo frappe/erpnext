@@ -376,8 +376,7 @@ class TestSalesOrder(unittest.TestCase):
 		dn = create_dn_against_so(so.name, delivered_qty=1)
 
 		self.assertEquals(so.customer, po.customer)
-		self.assertEquals(po.items[0].prevdoc_doctype, "Sales Order")
-		self.assertEquals(po.items[0].prevdoc_docname, so.name)
+		self.assertEquals(po.items[0].sales_order, so.name)
 		self.assertEquals(po.items[0].item_code, po_item.item_code)
 		self.assertEquals(dn.items[0].item_code, dn_item.item_code)
 
