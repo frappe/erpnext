@@ -5,6 +5,8 @@ frappe.provide("erpnext.stock");
 
 frappe.ui.form.on("Stock Reconciliation", {
 	onload: function(frm) {
+		frm.add_fetch("item_code", "item_name", "item_name");
+		
 		// end of life
 		frm.set_query("item_code", "items", function(doc, cdt, cdn) {
 			return {
