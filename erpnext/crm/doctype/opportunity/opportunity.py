@@ -50,19 +50,17 @@ class Opportunity(TransactionBase):
 				if sender_name == self.contact_email:
 					sender_name = None
 
-				account = _('Unknown')
-
-				if self.contact_email.index('@'):
+				if not sender_name and self.contact_email.index('@'):
 					email_name = self.contact_email[0:self.contact_email.index('@')]
 
 					email_split = email_name.split('.')
 					for s in email_split:
-						account = account + s.capitalize() + ' '
+						sender_name += s.capitalize() + ' '
 
 				lead = frappe.get_doc({
 					"doctype": "Lead",
 					"email_id": self.contact_email,
-					"lead_name": sender_name or account
+					"lead_name": sender_name
 				})
 				lead.insert(ignore_permissions=True)
 				lead_name = lead.name
