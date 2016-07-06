@@ -107,14 +107,14 @@ def update_customizations():
 			"e_type": "salary_component", 
 			"earning_type": "salary_component", 
 			"e_modified_amount": "amount",
-			"e_amount" : "default_amount"
+			"e_amount" : "default_amount",
 			"e_depends_on_lwp": "depends_on_lwp"
 		},
 		"Salary Slip Deduction": {
 			"d_type": "salary_component", 
 			"deduction_type": "salary_component", 
 			"d_modified_amount": "amount",
-			"d_amount" : "default_amount"
+			"d_amount" : "default_amount",
 			"d_depends_on_lwp": "depends_on_lwp"
 		}
 	}
