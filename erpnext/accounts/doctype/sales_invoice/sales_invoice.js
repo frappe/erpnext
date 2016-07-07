@@ -237,6 +237,32 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			})
 		}
+	},
+
+	is_pos: function(frm){
+		if(this.frm.doc.is_pos) {
+			if(!this.frm.doc.company) {
+				this.frm.set_value("is_pos", 0);
+				msgprint(__("Please specify Company to proceed"));
+			} else {
+				var me = this;
+				return this.frm.call({
+					doc: me.frm.doc,
+					method: "set_missing_values",
+					callback: function(r) {
+						if(!r.exc) {
+							if(r.message && r.message.print_format) {
+								frm.pos_print_format = r.message.print_format;
+							}
+							me.frm.script_manager.trigger("update_stock");
+							frappe.model.set_default_values(me.frm.doc);
+							me.set_dynamic_labels();
+							me.calculate_taxes_and_totals();
+						}
+					}
+				});
+			}
+		}
 	}
 });
 
@@ -428,7 +454,14 @@ frappe.ui.form.on('Sales Invoice', {
 				]
 			}
 		}
-	}
+
+		if(frm.doc.is_pos){
+			frm.get_field('payments').grid.editable_fields = [
+				{fieldname: 'mode_of_payment', columns: 2},
+				{fieldname: 'amount', columns: 2}
+			];
+		}
+	},
 })
 
 frappe.ui.form.on('Sales Invoice Timesheet', {

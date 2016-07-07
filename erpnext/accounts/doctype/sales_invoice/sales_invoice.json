@@ -2071,7 +2071,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 1, 
+   "collapsible": 0, 
    "collapsible_depends_on": "", 
    "depends_on": "eval:doc.is_pos===1||(doc.advances && doc.advances.length>0)", 
    "fieldname": "payments_section", 
@@ -3676,7 +3676,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-07-02 20:10:14.146963", 
+ "modified": "2016-07-07 13:40:27.977803", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
