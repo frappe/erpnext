@@ -100,3 +100,16 @@ frappe.ui.form.on('Pricing Rule', 'price_or_discount', function(frm){
 		frm.set_value('for_price_list', "")
 	}
 })
+
+frappe.ui.form.on('Pricing Rule', {
+	setup: function(frm) {
+		frm.fields_dict["for_price_list"].get_query = function(doc){
+			return {
+				filters: {
+					'selling': doc.selling,
+					'buying': doc.buying
+				}
+			}
+		}
+	}
+})
