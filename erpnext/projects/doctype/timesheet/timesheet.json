@@ -617,5 +617,5 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_order": "ASC", 
- "track_seen": 0
+ "track_seen": 1
 }
