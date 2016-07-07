@@ -151,6 +151,10 @@ class Project(Document):
 				frappe.sendmail(user.user, subject=_("Project Collaboration Invitation"), content=content.format(*messages))
 				user.welcome_email_sent=1
 
+	def on_update(self):
+		self.load_tasks()
+		self.sync_tasks()
+
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
