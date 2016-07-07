@@ -30,6 +30,7 @@ def get_pos_data():
 
 	return {
 		'doc': doc,
+		'default_customer': pos_profile.get('customer'),
 		'items': get_items(doc, pos_profile),
 		'customers': get_customers(pos_profile, doc),
 		'pricing_rules': get_pricing_rules(doc),
@@ -122,9 +123,6 @@ def get_items(doc, pos_profile):
 def get_customers(pos_profile, doc):
 	filters = {'disabled': 0}
 	customer_list = []
-	if pos_profile.get('customer'):
-		filters.update({'name': pos_profile.customer})
-
 	customers = frappe.get_all("Customer", fields=["*"], filters = filters)
 
 	for customer in customers:
