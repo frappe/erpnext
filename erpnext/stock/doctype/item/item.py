@@ -28,6 +28,9 @@ class Item(WebsiteGenerator):
 	def onload(self):
 		super(Item, self).onload()
 		self.set_onload('sle_exists', self.check_if_sle_exists())
+		if self.is_fixed_asset:
+			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
+			self.set_onload("asset_exists", True if asset else False)
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
@@ -86,6 +89,7 @@ class Item(WebsiteGenerator):
 		self.validate_variant_attributes()
 		self.validate_website_image()
 		self.make_thumbnail()
+		self.validate_fixed_asset()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -220,6 +224,14 @@ class Item(WebsiteGenerator):
 					file_doc.make_thumbnail()
 
 				self.thumbnail = file_doc.thumbnail_url
+				
+	def validate_fixed_asset(self):
+		if self.is_fixed_asset:
+			if self.is_stock_item:
+				frappe.throw(_("Fixed Asset Item must be a non-stock item."))
+				
+			if not self.asset_category:
+				frappe.throw(_("Asset Category is mandatory for Fixed Asset item"))
 
 	def get_context(self, context):
 		context.show_search=True
@@ -441,8 +453,8 @@ class Item(WebsiteGenerator):
 
 	def cant_change(self):
 		if not self.get("__islocal"):
-			vals = frappe.db.get_value("Item", self.name,
-				["has_serial_no", "is_stock_item", "valuation_method", "has_batch_no"], as_dict=True)
+			vals = frappe.db.get_value("Item", self.name, ["has_serial_no", "is_stock_item", 
+				"valuation_method", "has_batch_no", "is_fixed_asset"], as_dict=True)
 
 			if vals and ((self.is_stock_item != vals.is_stock_item) or
 				vals.has_serial_no != self.has_serial_no or
@@ -451,6 +463,11 @@ class Item(WebsiteGenerator):
 					if self.check_if_linked_document_exists():
 						frappe.throw(_("As there are existing transactions for this item, \
 							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'"))
+							
+			if vals and not self.is_fixed_asset and self.is_fixed_asset != vals.is_fixed_asset:
+				asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
+				if asset:
+					frappe.throw(_('"Is Fixed Asset" cannot be unchecked, as Asset record exists against the item'))
 
 	def check_if_linked_document_exists(self):
 		for doctype in ("Sales Order Item", "Delivery Note Item", "Sales Invoice Item",

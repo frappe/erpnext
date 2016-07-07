@@ -27,9 +27,9 @@ frappe.treeview_settings["Account"] = {
 		{fieldtype:'Select', fieldname:'root_type', label:__('Root Type'),
 			options: ['Asset', 'Liability', 'Equity', 'Income', 'Expense'].join('\n')},
 		{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
-			options: ['', 'Bank', 'Cash', 'Stock', 'Tax', 'Chargeable'].join('\n'),
-			description: __("Optional. This setting will be used to filter in various transactions."),
-			depends_on: 'eval:doc.is_group==1'},
+			options: ['', 'Bank', 'Cash', 'Stock', 'Tax', 'Chargeable', 'Fixed Asset'].join('\n'),
+			description: __("Optional. This setting will be used to filter in various transactions.")
+		},
 		{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate'),
 			depends_on: 'eval:doc.is_group==1&&doc.account_type=="Tax"'},
 		{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse",

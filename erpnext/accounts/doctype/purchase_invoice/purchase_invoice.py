@@ -181,15 +181,16 @@ class PurchaseInvoice(BuyingController):
 			# expense account is always "Stock Received But Not Billed" for a stock item 
 			# except epening entry, drop-ship entry and fixed asset items
 			
-			if auto_accounting_for_stock and item.item_code in stock_items and self.is_opening == 'No' \
-				and (not item.po_detail or not item.is_fixed_asset
-				or not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
+			if auto_accounting_for_stock and item.item_code in stock_items \
+				and self.is_opening == 'No' and not item.is_fixed_asset \
+				and (not item.po_detail or 
+					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
 
 				if self.update_stock:
 					item.expense_account = warehouse_account[item.warehouse]["name"]
 				else:
 					item.expense_account = stock_not_billed_account
-					
+			
 			elif not item.expense_account:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
 

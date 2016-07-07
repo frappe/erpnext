@@ -18,6 +18,7 @@ class Asset(Document):
 		self.validate_asset_values()
 		self.set_depreciation_settings()
 		self.make_depreciation_schedule()
+		self.validate_expected_value_after_useful_life()
 		# Validate depreciation related accounts
 		get_depreciation_accounts(self)
 
@@ -30,9 +31,16 @@ class Asset(Document):
 		self.set_status()
 
 	def validate_item(self):
-		item = frappe.get_doc("Item", self.item_code)
-		if item.disabled:
+		item = frappe.db.get_value("Item", self.item_code, 
+			["is_fixed_asset", "is_stock_item", "disabled"], as_dict=1)
+		if not item:
+			frappe.throw(_("Item {0} does not exist").format(self.item_code))
+		elif item.disabled:
 			frappe.throw(_("Item {0} has been disabled").format(self.item_code))
+		elif not item.is_fixed_asset:
+			frappe.throw(_("Item {0} must be a Fixed Asset Item").format(self.item_code))
+		elif item.is_stock_item:
+			frappe.throw(_("Item {0} must be a non-stock item").format(self.item_code))
 
 	def validate_asset_values(self):
 		self.value_after_depreciation = flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)
@@ -117,6 +125,18 @@ class Asset(Document):
 				depreciation_amount = flt(depreciable_value) - flt(self.expected_value_after_useful_life)
 
 		return depreciation_amount
+		
+	def validate_expected_value_after_useful_life(self):
+		if self.depreciation_method == "Double Declining Balance":
+			accumulated_depreciation_after_full_schedule = \
+				max([d.accumulated_depreciation_amount for d in self.get("schedules")])
+			
+			asset_value_after_full_schedule = (flt(self.gross_purchase_amount) - 
+				flt(accumulated_depreciation_after_full_schedule))
+			
+			if self.expected_value_after_useful_life < asset_value_after_full_schedule:
+				frappe.throw(_("Expected value after useful life must be greater than or equal to {0}")
+					.format(asset_value_after_full_schedule))
 
 	def validate_cancellation(self):
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
@@ -204,3 +224,16 @@ def transfer_asset(args):
 	frappe.db.commit()
 	
 	frappe.msgprint(_("Asset Movement record {0} created").format("<a href='#Form/Asset Movement/{0}'>{0}</a>".format(movement_entry.name)))
+	
+@frappe.whitelist()
+def get_item_details(item_code):
+	asset_category = frappe.db.get_value("Item", item_code, "asset_category")
+	
+	ret = frappe.db.get_value("Asset Category", asset_category, 
+		["depreciation_method", "total_number_of_depreciations", "frequency_of_depreciation"], as_dict=1)
+		
+	ret.update({
+		"asset_category": asset_category
+	})
+		
+	return ret
