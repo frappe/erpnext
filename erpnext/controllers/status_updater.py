@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt, comma_or
-from frappe import msgprint, _, throw
+from frappe import _
 from frappe.model.document import Document
 
 def validate_status(status, options):
@@ -135,15 +135,12 @@ class StatusUpdater(Document):
 						item['idx'] = d.idx
 						item['target_ref_field'] = args['target_ref_field'].replace('_', ' ')
 
-						if not item[args['target_ref_field']]:
-							msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
-						elif args.get('no_tolerance'):
+						# if not item[args['target_ref_field']]:
+						# 	msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
+						if args.get('no_tolerance'):
 							item['reduce_by'] = item[args['target_field']] - item[args['target_ref_field']]
 							if item['reduce_by'] > .01:
-								msgprint(_("Allowance for over-{0} crossed for Item {1}")
-									.format(args["overflow_type"], item.item_code))
-								throw(_("{0} must be reduced by {1} or you should increase overflow tolerance")
-									.format(_(item.target_ref_field.title()), item["reduce_by"]))
+								self.limits_crossed_error(args, item)
 
 						else:
 							self.check_overflow_with_tolerance(item, args)
@@ -162,10 +159,20 @@ class StatusUpdater(Document):
 			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+tolerance)/100)
 			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
 
-			msgprint(_("Allowance for over-{0} crossed for Item {1}.")
-				.format(args["overflow_type"], item["item_code"]))
-			throw(_("{0} must be reduced by {1} or you should increase overflow tolerance")
-				.format(_(item["target_ref_field"].title()), item["reduce_by"]))
+			self.limits_crossed_error(args, item)
+
+	def limits_crossed_error(self, args, item):
+		'''Raise exception for limits crossed'''
+		frappe.throw(_('This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?')
+			.format(
+				frappe.bold(_(item["target_ref_field"].title())),
+				frappe.bold(item["reduce_by"]),
+				frappe.bold(_(args.get('target_dt'))),
+				frappe.bold(_(self.doctype)),
+				frappe.bold(item.get('item_code'))
+			) + '<br><br>' +
+				_('To allow over-billing or over-ordering, update "Allowance" in Stock Settings or the Item.'),
+			title = _('Limit Crossed'))
 
 	def update_qty(self, update_modified=True):
 		"""Updates qty or amount at row level

@@ -4,7 +4,7 @@ import frappe, sys
 import erpnext
 import frappe.utils
 from erpnext.demo.setup_data import setup_data
-from erpnext.demo.user import hr, sales
+from erpnext.demo.user import hr, sales, purchase
 
 def make(domain='Manufacturing'):
 	frappe.flags.domain = domain
@@ -42,7 +42,7 @@ def simulate():
 
 		hr.work()
 		sales.work()
-		# run_purchase()
+		purchase.work()
 		# run_manufacturing()
 		# run_stock()
 		# run_accounts()

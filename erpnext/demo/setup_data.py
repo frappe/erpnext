@@ -300,3 +300,8 @@ def setup_user_roles():
 		user = frappe.get_doc('User', 'GabrielleLoftus@example.com')
 		user.add_roles('Sales User', 'Sales Manager', 'Accounts User')
 		frappe.db.set_global('demo_sales_user_2', user.name)
+
+	if not frappe.db.get_global('demo_purchase_user'):
+		user = frappe.get_doc('User', 'MichalSobczak@example.com')
+		user.add_roles('Purchase User', 'Purchase Manager', 'Accounts User')
+		frappe.db.set_global('demo_purchase_user', user.name)

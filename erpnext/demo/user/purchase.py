@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe, random
-from frappe.utils.make_random import how_many, can_make, get_random
+from frappe.utils.make_random import how_many, get_random
 from frappe.desk import query_report
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.party import get_party_account_currency
@@ -13,30 +13,40 @@ from erpnext.stock.doctype.material_request.material_request import make_request
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import \
 			 make_supplier_quotation as make_quotation_from_rfq
 
-def run_purchase(current_date):
+def work():
+	frappe.set_user(frappe.db.get_global('demo_purchase_user'))
+
 	if random.random() < 0.3:
 		report = "Items To Be Requested"
-		for row in query_report.run(report)["result"][:how_many("Material Request")]:
+		for row in query_report.run(report)["result"][:random.randint(1, 5)]:
 			item_code, qty = row[0], abs(row[-1])
 
 			mr = make_material_request(item_code, qty)
 
 	if random.random() < 0.3:
-		for mr in frappe.get_all('Material Request', filters={'material_request_type': 'Purchase', 'status': 'Open'}):
-			rfq = make_request_for_quotation(mr.name)
-			rfq.transaction_date = frappe.flags.current_date
-			add_suppliers(rfq)
-			rfq.save()
-			rfq.submit()
+		for mr in frappe.get_all('Material Request',
+			filters={'material_request_type': 'Purchase', 'status': 'Open'},
+			limit=random.randint(1,6)):
+			if not frappe.get_all('Request for Quotation',
+				filters={'material_request': mr.name}, limit=1):
+				rfq = make_request_for_quotation(mr.name)
+				rfq.transaction_date = frappe.flags.current_date
+				add_suppliers(rfq)
+				rfq.save()
+				rfq.submit()
 
-				# Make suppier quotation from RFQ against each supplier.
+	# Make suppier quotation from RFQ against each supplier.
 	if random.random() < 0.3:
-		for supplier_quotation in frappe.get_all('Request for Quotation', {'status': 'Open'}):
-			rfq = frappe.get_doc('Request for Quotation', rfq.name)
-			for supplier in rfq.suppliers:
-				supplier_quotation = make_quotation_from_rfq(rfq.name, supplier.supplier)
-				supplier_quotation.save()
-				supplier_quotation.submit()
+		for rfq in frappe.get_all('Request for Quotation',
+			filters={'status': 'Open'}, limit=random.randint(1, 6)):
+			if not frappe.get_all('Supplier Quotation',
+				filters={'request_for_quotation': rfq.name}, limit=1):
+				rfq = frappe.get_doc('Request for Quotation', rfq.name)
+
+				for supplier in rfq.suppliers:
+					supplier_quotation = make_quotation_from_rfq(rfq.name, supplier.supplier)
+					supplier_quotation.save()
+					supplier_quotation.submit()
 
 	# get supplier details
 	supplier = get_random("Supplier")
@@ -49,14 +59,14 @@ def run_purchase(current_date):
 		exchange_rate = get_exchange_rate(party_account_currency, company_currency)
 
 	# make supplier quotations
-	if can_make("Supplier Quotation"):
+	if random.random() < 0.3:
 		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
 
 		report = "Material Requests for which Supplier Quotations are not created"
 		for row in query_report.run(report)["result"][:how_many("Supplier Quotation")]:
 			if row[0] != "'Total'":
 				sq = frappe.get_doc(make_supplier_quotation(row[0]))
-				sq.transaction_date = current_date
+				sq.transaction_date = frappe.flags.current_date
 				sq.supplier = supplier
 				sq.currency = party_account_currency or company_currency
 				sq.conversion_rate = exchange_rate
@@ -65,7 +75,7 @@ def run_purchase(current_date):
 				frappe.db.commit()
 
 	# make purchase orders
-	if can_make("Purchase Order"):
+	if random.random() < 0.3:
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 		report = "Requested Items To Be Ordered"
 		for row in query_report.run(report)["result"][:how_many("Purchase Order")]:
@@ -74,13 +84,13 @@ def run_purchase(current_date):
 				po.supplier = supplier
 				po.currency = party_account_currency or company_currency
 				po.conversion_rate = exchange_rate
-				po.transaction_date = current_date
+				po.transaction_date = frappe.flags.current_date
 				po.insert()
 				po.submit()
 				frappe.db.commit()
 
-	if can_make("Subcontract"):
-		make_subcontract(current_date)
+	if random.random() < 0.3:
+		make_subcontract()
 
 def make_material_request(item_code, qty):
 	mr = frappe.new_doc("Material Request")

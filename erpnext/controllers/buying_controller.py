@@ -28,7 +28,7 @@ class BuyingController(StockController):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
 			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
-		self.is_item_table_empty()
+
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
@@ -129,7 +129,7 @@ class BuyingController(StockController):
 					valuation_amount_adjustment -= item.item_tax_amount
 
 				self.round_floats_in(item)
-				if flt(item.conversion_factor)==0:
+				if flt(item.conversion_factor)==0.0:
 					item.conversion_factor = get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
 
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
@@ -275,10 +275,6 @@ class BuyingController(StockController):
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._sub_contracted_items
-
-	def is_item_table_empty(self):
-		if not len(self.get("items")):
-			frappe.throw(_("Item table can not be blank"))
 
 	def set_qty_as_per_stock_uom(self):
 		for d in self.get("items"):
