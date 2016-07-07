@@ -288,3 +288,4 @@ erpnext.patches.v7_0.update_prevdoc_values_for_supplier_quotation_item
 erpnext.patches.v7_0.rename_advance_table_fields
 erpnext.patches.v7_0.rename_salary_components
 erpnext.patches.v7_0.rename_prevdoc_fields
+erpnext.patches.v7_0.rename_time_sheet_doctype

@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.ui.form.on("Time Sheet", {
+frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
 		frm.get_field('time_logs').grid.editable_fields = [
 			{fieldname: 'activity_type', columns: 2},
@@ -12,7 +12,7 @@ frappe.ui.form.on("Time Sheet", {
 
 		frm.fields_dict.employee.get_query = function() {
 			return {
-				query:"erpnext.projects.doctype.time_sheet.time_sheet.get_employee_list"
+				query:"erpnext.projects.doctype.timesheet.timesheet.get_employee_list"
 			}
 		}
 
@@ -50,20 +50,20 @@ frappe.ui.form.on("Time Sheet", {
 
 	make_invoice: function(frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.projects.doctype.time_sheet.time_sheet.make_sales_invoice",
+			method: "erpnext.projects.doctype.timesheet.timesheet.make_sales_invoice",
 			frm: frm
 		});
 	},
 
 	make_salary_slip: function(frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.projects.doctype.time_sheet.time_sheet.make_salary_slip",
+			method: "erpnext.projects.doctype.timesheet.timesheet.make_salary_slip",
 			frm: frm
 		});
 	},
 })
 
-frappe.ui.form.on("Time Sheet Detail", {
+frappe.ui.form.on("Timesheet Detail", {
 	time_logs_remove: function(frm) {
 		calculate_time_and_amount(frm);
 	},
@@ -107,7 +107,7 @@ frappe.ui.form.on("Time Sheet Detail", {
 		child = locals[cdt][cdn];
 		if(frm.doc.employee || frm.doc.production_order){
 			frappe.call({
-				method: "erpnext.projects.doctype.time_sheet.time_sheet.get_activity_cost",
+				method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
 				args: {
 					employee: frm.doc.employee,
 					activity_type: child.activity_type

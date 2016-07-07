@@ -73,7 +73,7 @@ def delete_bins(company_name):
 def delete_time_sheets(company_name):
 	# Delete Time Logs as it is linked to Production Order / Project / Task, which are linked to company
 	frappe.db.sql("""
-		delete from `tabTime Sheet`
+		delete from `tabTimesheet`
 		where
 			company=%(company)s
 	""", {"company": company_name})

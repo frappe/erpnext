@@ -41,7 +41,7 @@ frappe.ui.form.on("Production Order", {
 		if(frm.doc.docstatus == 1){
 			frm.add_custom_button(__('Make Timesheet'), function(){
 				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.production_order.production_order.make_timesheet",
+					method: "erpnext.manufacturing.doctype.production_order.production_order.make_new_timesheet",
 					frm: cur_frm
 				})
 			})
@@ -125,9 +125,9 @@ erpnext.production_order = {
 
 			// opertions
 			if ((doc.operations || []).length) {
-				frm.add_custom_button(__('Time Sheet'), function() {
+				frm.add_custom_button(__('Timesheet'), function() {
 					frappe.route_options = {"production_order": frm.doc.name};
-					frappe.set_route("List", "Time Sheet");
+					frappe.set_route("List", "Timesheet");
 				}, __("View"));
 			}
 

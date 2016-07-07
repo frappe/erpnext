@@ -1,6 +1,5 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-# License: GNU General Public License v3. See license.txt
-
+# -*- coding: utf-8 -*-
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -15,8 +14,7 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 class OverlapError(frappe.ValidationError): pass
 class OverProductionLoggedError(frappe.ValidationError): pass
 
-class TimeSheet(Document):
-
+class Timesheet(Document):
 	def validate(self):
 		self.set_status()
 		self.total_hours = 0.0
@@ -117,7 +115,7 @@ class TimeSheet(Document):
 		"""Returns 'Actual Operating Time'. """
 		return frappe.db.sql("""select
 			sum(tsd.hours*60) as mins, sum(tsd.completed_qty) as completed_qty, min(tsd.from_time) as from_time,
-			max(tsd.to_time) as to_time from `tabTime Sheet Detail` as tsd, `tabTime Sheet` as ts where 
+			max(tsd.to_time) as to_time from `tabTimesheet Detail` as tsd, `tabTimesheet` as ts where 
 			ts.production_order = %s and tsd.operation_id = %s and ts.docstatus=1 and ts.name = tsd.parent""",
 			(self.production_order, operation_id), as_dict=1)[0]
 
@@ -159,7 +157,7 @@ class TimeSheet(Document):
 			return
 
 		existing = frappe.db.sql("""select ts.name as name, tsd.from_time as from_time, tsd.to_time as to_time from 
-			`tabTime Sheet Detail` tsd, `tabTime Sheet` ts where tsd.`{0}`=%(val)s and tsd.parent = ts.name and
+			`tabTimesheet Detail` tsd, `tabTimesheet` ts where tsd.`{0}`=%(val)s and tsd.parent = ts.name and
 			(
 				(%(from_time)s > tsd.from_time and %(from_time)s < tsd.to_time) or
 				(%(to_time)s > tsd.from_time and %(to_time)s < tsd.to_time) or
@@ -198,7 +196,7 @@ class TimeSheet(Document):
 
 	def get_last_working_slot(self, time_sheet, workstation):
 		return frappe.db.sql(""" select max(from_time) as from_time, max(to_time) as to_time 
-			from `tabTime Sheet Detail` where workstation = %(workstation)s""",
+			from `tabTimesheet Detail` where workstation = %(workstation)s""",
 			{'workstation': workstation}, as_dict=True)[0]
 
 	def update_cost(self):
@@ -216,8 +214,8 @@ class TimeSheet(Document):
 def make_sales_invoice(source_name, target=None):
 	target = frappe.new_doc("Sales Invoice")
 
-	target.append("timesheets", get_mapped_doc("Time Sheet", source_name, {
-		"Time Sheet": {
+	target.append("timesheets", get_mapped_doc("Timesheet", source_name, {
+		"Timesheet": {
 			"doctype": "Sales Invoice Timesheet",
 			"field_map": {
 				"total_billing_amount": "billing_amount",
@@ -235,8 +233,8 @@ def make_salary_slip(source_name, target_doc=None):
 	target = frappe.new_doc("Salary Slip")
 	set_missing_values(source_name, target)
 	
-	target.append("timesheets", get_mapped_doc("Time Sheet", source_name, {
-		"Time Sheet": {
+	target.append("timesheets", get_mapped_doc("Timesheet", source_name, {
+		"Timesheet": {
 			"doctype": "Salary Slip Timesheet",
 			"field_map": {
 				"total_hours": "working_hours",
@@ -250,7 +248,7 @@ def make_salary_slip(source_name, target_doc=None):
 	return target
 
 def set_missing_values(time_sheet, target):
-	doc = frappe.get_doc('Time Sheet', time_sheet)
+	doc = frappe.get_doc('Timesheet', time_sheet)
 	target.employee = doc.employee
 	target.employee_name = doc.employee_name
 	target.salary_slip_based_on_timesheet = 1

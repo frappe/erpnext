@@ -238,7 +238,7 @@ class SalesInvoice(SellingController):
 	def update_time_sheet(self, sales_invoice):
 		for d in self.timesheets:
 			if d.time_sheet:
-				timesheet = frappe.get_doc("Time Sheet", d.time_sheet)
+				timesheet = frappe.get_doc("Timesheet", d.time_sheet)
 				timesheet.sales_invoice = sales_invoice
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
@@ -247,9 +247,9 @@ class SalesInvoice(SellingController):
 	def validate_time_sheets_are_submitted(self):
 		for data in self.timesheets:
 			if data.time_sheet:
-				status = frappe.db.get_value("Time Sheet", data.time_sheet, "status")
+				status = frappe.db.get_value("Timesheet", data.time_sheet, "status")
 				if status not in ['Submitted', 'Payslip']:
-					frappe.throw(_("Time Sheet {0} is already completed or cancelled").format(data.time_sheet))
+					frappe.throw(_("Timesheet {0} is already completed or cancelled").format(data.time_sheet))
 
 	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from POS Profiles"""

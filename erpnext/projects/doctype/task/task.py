@@ -58,7 +58,7 @@ class Task(Document):
 	def update_time_and_costing(self):
 		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date,
 			sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
-			sum(hours) as time from `tabTime Sheet Detail` where task = %s and docstatus=1"""
+			sum(hours) as time from `tabTimesheet Detail` where task = %s and docstatus=1"""
 			,self.name, as_dict=1)[0]
 		if self.status == "Open":
 			self.status = "Working"

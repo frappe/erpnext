@@ -43,6 +43,6 @@ def get_notification_config():
 			"Purchase Receipt": {"docstatus": 0},
 			"Production Order": { "status": ("in", ("Draft", "Not Started", "In Process")) },
 			"BOM": {"docstatus": 0},
-			"Time Sheet": {"status": "Draft"}
+			"Timesheet": {"status": "Draft"}
 		}
 	}
