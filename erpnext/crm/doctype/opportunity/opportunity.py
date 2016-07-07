@@ -191,17 +191,18 @@ def get_item_details(item_code):
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		quotation = frappe.get_doc(target)
+		
+		if quotation.customer:
+			company_currency = frappe.db.get_value("Company", quotation.company, "default_currency")
+			party_account_currency = get_party_account_currency("Customer", quotation.customer, quotation.company)
 
-		company_currency = frappe.db.get_value("Company", quotation.company, "default_currency")
-		party_account_currency = get_party_account_currency("Customer", quotation.customer, quotation.company)
+			if company_currency == party_account_currency:
+				exchange_rate = 1
+			else:
+				exchange_rate = get_exchange_rate(party_account_currency, company_currency)
 
-		if company_currency == party_account_currency:
-			exchange_rate = 1
-		else:
-			exchange_rate = get_exchange_rate(party_account_currency, company_currency)
-
-		quotation.currency = party_account_currency or company_currency
-		quotation.conversion_rate = exchange_rate
+			quotation.currency = party_account_currency or company_currency
+			quotation.conversion_rate = exchange_rate
 
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
