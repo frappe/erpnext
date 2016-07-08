@@ -183,7 +183,10 @@ def install(country=None):
 		{"doctype": "Offer Term", "offer_term": _("Incentives")},
 
 		{'doctype': "Print Heading", 'print_heading': _("Credit Note")},
-		{'doctype': "Print Heading", 'print_heading': _("Debit Note")}
+		{'doctype': "Print Heading", 'print_heading': _("Debit Note")},
+
+		{"doctype": "Salary Component", "salary_component": _("Basic")},
+		{"doctype": "Salary Component", "salary_component": _("Income Tax")},
 	]
 
 	from erpnext.setup.setup_wizard.industry_type import get_industry_types

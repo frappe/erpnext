@@ -9,6 +9,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Document", 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -1775,6 +1776,7 @@
  "hide_toolbar": 0, 
  "icon": "icon-shopping-cart", 
  "idx": 29, 
+ "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 1, 
@@ -1782,7 +1784,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-05-23 15:20:34.288790", 
+ "modified": "2016-07-08 06:48:04.162164", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 
@@ -1845,7 +1847,7 @@
    "role": "Purchase User", 
    "set_user_permissions": 0, 
    "share": 1, 
-   "submit": 0, 
+   "submit": 1, 
    "write": 1
   }, 
   {

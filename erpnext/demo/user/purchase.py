@@ -27,6 +27,7 @@ def work():
 		for mr in frappe.get_all('Material Request',
 			filters={'material_request_type': 'Purchase', 'status': 'Open'},
 			limit=random.randint(1,6)):
+			print mr.name
 			if not frappe.get_all('Request for Quotation',
 				filters={'material_request': mr.name}, limit=1):
 				rfq = make_request_for_quotation(mr.name)
@@ -59,11 +60,11 @@ def work():
 		exchange_rate = get_exchange_rate(party_account_currency, company_currency)
 
 	# make supplier quotations
-	if random.random() < 0.3:
+	if random.random() < 0.2:
 		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
 
 		report = "Material Requests for which Supplier Quotations are not created"
-		for row in query_report.run(report)["result"][:how_many("Supplier Quotation")]:
+		for row in query_report.run(report)["result"][:random.randint(1, 3)]:
 			if row[0] != "'Total'":
 				sq = frappe.get_doc(make_supplier_quotation(row[0]))
 				sq.transaction_date = frappe.flags.current_date
@@ -89,13 +90,15 @@ def work():
 				po.submit()
 				frappe.db.commit()
 
-	if random.random() < 0.3:
+	if random.random() < 0.2:
 		make_subcontract()
 
 def make_material_request(item_code, qty):
 	mr = frappe.new_doc("Material Request")
 
-	if frappe.db.get_value('BOM', {'item': item_code, 'is_default': 1, 'is_active': 1}):
+	variant_of = frappe.db.get_value('Item', item_code, 'variant_of') or item_code
+
+	if frappe.db.get_value('BOM', {'item': variant_of, 'is_default': 1, 'is_active': 1}):
 		mr.material_request_type = 'Manufacture'
 	else:
 		mr.material_request_type = "Purchase"
@@ -143,6 +146,6 @@ def make_subcontract():
 
 	# transfer material for sub-contract
 	stock_entry = frappe.get_doc(make_stock_entry(po.name, po.items[0].item_code))
-	stock_entry.from_warehouse = "Stores - WP"
-	stock_entry.to_warehouse = "Supplier - WP"
+	stock_entry.from_warehouse = "Stores - WPL"
+	stock_entry.to_warehouse = "Supplier - WPL"
 	stock_entry.insert()

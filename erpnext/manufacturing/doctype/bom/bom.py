@@ -41,8 +41,8 @@ class BOM(Document):
 
 		self.validate_materials()
 		self.set_bom_material_details()
-		self.calculate_cost()
 		self.validate_operations()
+		self.calculate_cost()
 
 	def on_update(self):
 		self.check_recursion()
@@ -64,7 +64,7 @@ class BOM(Document):
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = frappe.db.sql("""select name, item_name, docstatus, description, image, 
+		item = frappe.db.sql("""select name, item_name, docstatus, description, image,
 			is_sub_contracted_item, stock_uom, default_bom, last_purchase_rate
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
@@ -370,7 +370,12 @@ class BOM(Document):
 
 	def validate_operations(self):
 		if self.with_operations and not self.get('operations'):
-			frappe.throw(_("Operations cannot be left blank."))
+			frappe.throw(_("Operations cannot be left blank"))
+
+		if self.with_operations:
+			for d in self.operations:
+				if not d.description:
+					d.description = frappe.db.get_value('Operation', d.operation, 'description')
 
 def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
 	item_dict = {}

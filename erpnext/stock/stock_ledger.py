@@ -229,7 +229,7 @@ class update_entries_after(object):
 				# calculate new valuation rate only if stock value is positive
 				# else it remains the same as that of previous entry
 				self.valuation_rate = new_stock_value / new_stock_qty
-		
+
 	def get_moving_average_values(self, sle):
 		actual_qty = flt(sle.actual_qty)
 		new_stock_qty = flt(self.qty_after_transaction) + actual_qty
@@ -303,7 +303,7 @@ class update_entries_after(object):
 						break
 				else:
 					index = 0
-					
+
 				# select first batch or the batch with same rate
 				batch = self.stock_queue[index]
 				if qty_to_pop >= batch[0]:
@@ -327,7 +327,7 @@ class update_entries_after(object):
 
 		if stock_qty:
 			self.valuation_rate = stock_value / flt(stock_qty)
-		
+
 		if not self.stock_queue:
 			self.stock_queue.append([0, sle.incoming_rate or sle.outgoing_rate or self.valuation_rate])
 
@@ -346,8 +346,9 @@ class update_entries_after(object):
 
 
 
-		if frappe.local.flags.currently_saving.doctype==self.exceptions[0]["voucher_type"] \
-			and frappe.local.flags.currently_saving.name==self.exceptions[0]["voucher_no"]:
+		if (frappe.local.flags.currently_saving
+			and frappe.local.flags.currently_saving.doctype==self.exceptions[0]["voucher_type"]
+			and frappe.local.flags.currently_saving.name==self.exceptions[0]["voucher_no"]):
 			msg = _("{0} units of {1} needed in {2} to complete this transaction.").format(
 				abs(deficiency), frappe.get_desk_link('Item', self.item_code),
 				frappe.get_desk_link('Warehouse', self.warehouse))
