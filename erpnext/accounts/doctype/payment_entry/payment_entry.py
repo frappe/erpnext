@@ -332,6 +332,9 @@ class PaymentEntry(AccountsController):
 		self.set("remarks", "\n".join(remarks))
 			
 	def make_gl_entries(self, cancel=0, adv_adj=0):
+		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
+			self.setup_party_account_field()
+			
 		gl_entries = []
 		self.add_party_gl_entries(gl_entries)
 		self.add_bank_gl_entries(gl_entries)
