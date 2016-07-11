@@ -952,9 +952,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	get_mapper_for_pricing_rule: function(data){
 		return {
-			'Customer': [data.customer, [this.doc.customer]],
-			'Customer Group': [data.customer_group, [this.doc.customer_group, 'All Customer Groups']],
-			'Territory': [data.territory, [this.doc.territory, 'All Territories']],
+			'Customer': [data.customer, [this.frm.doc.customer]],
+			'Customer Group': [data.customer_group, [this.frm.doc.customer_group, 'All Customer Groups']],
+			'Territory': [data.territory, [this.frm.doc.territory, 'All Territories']],
 		}
 	},
 
