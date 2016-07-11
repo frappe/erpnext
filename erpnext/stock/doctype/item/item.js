@@ -187,11 +187,17 @@ $.extend(erpnext.item, {
 
 		frm.fields_dict.reorder_levels.grid.get_field("warehouse").get_query = function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
+			
+			var filters = {
+				"is_group": 0
+			}
+			
+			if (d.parent_warehouse) {
+				filters.extend({"parent_warehouse": d.warehouse_group})
+			}
+			
 			return {
-				filters: {
-					"is_group": 0,
-					"parent_warehouse": d.warehouse_group
-				}
+				filters: filters
 			}
 		}
 
