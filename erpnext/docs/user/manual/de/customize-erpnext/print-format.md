@@ -29,7 +29,7 @@ Zum Bearbeiten des Erscheinungsbildes bietet sich das [Bootstrap CSS Framework](
 ### Referenzen
 
 1. [Programmiersprache Jinja Templating: Referenz](http://jinja.pocoo.org/docs/templates/)
-1. [Bootstrap CSS Framework](http://getbootstrap.com/)
+2. [Bootstrap CSS Framework](http://getbootstrap.com/)
 
 ### Druckeinstellungen
 
@@ -41,45 +41,45 @@ Um Ihre Druck- und PDF-Einstellungen zu bearbeiten/zu aktualisieren, gehen Sie z
 
 ### Beispiel
 
-<h3>{{ doc.select<em>print</em>heading or "Invoice" }}</h3>
-    <div class="row">
-        <div class="col-md-3 text-right">Customer Name</div>
-        <div class="col-md-9">{{ doc.customer<em>name }}</div>
-    </div>
-    <div class="row">
-        <div class="col-md-3 text-right">Date</div>
-        <div class="col-md-9">{{ doc.get</em>formatted("invoice<em>date") }}</div>
-    </div>
-    <table class="table table-bordered">
-        <tbody>
-            <tr>
-                <th>Sr</th>
-                <th>Item Name</th>
-                <th>Description</th>
-                <th class="text-right">Qty</th>
-                <th class="text-right">Rate</th>
-                <th class="text-right">Amount</th>
-            </tr>
-            {%- for row in doc.items -%}
-            <tr>
-                <td style="width: 3%;">{{ row.idx }}</td>
-                <td style="width: 20%;">
-                    {{ row.item</em>name }}
-                    {% if row.item<em>code != row.item</em>name -%}
-                    <br>Item Code: {{ row.item<em>code}}
-                    {%- endif %}
-                </td>
-                <td style="width: 37%;">
-                    <div style="border: 0px;">{{ row.description }}</div></td>
-                <td style="width: 10%; text-align: right;">{{ row.qty }} {{ row.uom or row.stock</em>uom }}</td>
-                <td style="width: 15%; text-align: right;">{{
-                    row.get<em>formatted("rate", doc) }}</td>
-                <td style="width: 15%; text-align: right;">{{
-                    row.get</em>formatted("amount", doc) }}</td>
-            </tr>
-            {%- endfor -%}
-        </tbody>
-    </table>
+ {% raw %}<h3>{{ doc.select_print_heading or "Invoice" }}</h3>
+ <div class="row">
+    <div class="col-md-3 text-right">Customer Name</div>
+    <div class="col-md-9">{{ doc.customer_name }}</div>
+ </div>
+ <div class="row">
+    <div class="col-md-3 text-right">Date</div>
+    <div class="col-md-9">{{ doc.get_formatted("invoice_date") }}</div>
+ </div>
+ <table class="table table-bordered">
+    <tbody>
+        <tr>
+            <th>Sr</th>
+            <th>Item Name</th>
+            <th>Description</th>
+            <th class="text-right">Qty</th>
+            <th class="text-right">Rate</th>
+            <th class="text-right">Amount</th>
+        </tr>
+        {%- for row in doc.items -%}
+        <tr>
+            <td style="width: 3%;">{{ row.idx }}</td>
+            <td style="width: 20%;">
+                {{ row.item_name }}
+                {% if row.item_code != row.item_name -%}
+                <br>Item Code: {{ row.item_code}}
+                {%- endif %}
+            </td>
+            <td style="width: 37%;">
+                <div style="border: 0px;">{{ row.description }}</div></td>
+            <td style="width: 10%; text-align: right;">{{ row.qty }} {{ row.uom or row.stock_uom }}</td>
+            <td style="width: 15%; text-align: right;">{{
+                row.get_formatted("rate", doc) }}</td>
+            <td style="width: 15%; text-align: right;">{{
+                row.get_formatted("amount", doc) }}</td>
+        </tr>
+        {%- endfor -%}
+    </tbody>
+    </table>{% endraw %}
 
 ### Anmerkungen
 
