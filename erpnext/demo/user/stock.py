@@ -29,11 +29,8 @@ def make_purchase_receipt():
 
 			pr.posting_date = frappe.flags.current_date
 			pr.insert()
-			try:
-				pr.submit()
-				frappe.db.commit()
-			except (NegativeStockError):
-				frappe.db.rollback()
+			pr.submit()
+			frappe.db.commit()
 
 def make_delivery_note():
 	# make purchase requests

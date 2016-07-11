@@ -147,6 +147,7 @@ def setup_item():
 	for i in items:
 		item = frappe.new_doc('Item')
 		item.update(i)
+		item.min_order_qty = random.randint(10, 30)
 		item.default_warehouse = frappe.get_all('Warehouse', filters={'warehouse_name': item.default_warehouse}, limit=1)[0].name
 		item.insert()
 

@@ -5,7 +5,7 @@ data = {
 	'fieldname': 'purchase_order',
 	'transactions': [
 		{
-			'label': _('Related Documents'),
+			'label': _('Related'),
 			'items': ['Purchase Receipt', 'Purchase Invoice', 'Stock Entry']
 		},
 	]

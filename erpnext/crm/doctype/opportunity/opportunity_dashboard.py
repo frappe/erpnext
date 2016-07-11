@@ -4,7 +4,7 @@ data = {
 	'fieldname': 'prevdoc_docname',
 	'transactions': [
 		{
-			'label': _('Related Documents'),
+			'label': _('Related'),
 			'items': ['Quotation']
 		},
 	]

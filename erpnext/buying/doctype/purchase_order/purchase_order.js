@@ -10,6 +10,10 @@ frappe.ui.form.on("Purchase Order", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
+
 	}
 });
 

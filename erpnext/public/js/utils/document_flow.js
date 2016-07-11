@@ -14,8 +14,8 @@ $.extend(frappe.document_flow, {
 			"Purchase Invoice", "Payment Entry"]
 	},
 	"Buying": {
-		"Purchase Order": ["Supplier Quotation", "Purchase Order", "Purchase Receipt",
-			"Purchase Invoice", "Payment Entry"],
+		// "Purchase Order": ["Supplier Quotation", "Purchase Order", "Purchase Receipt",
+		// 	"Purchase Invoice", "Payment Entry"],
 		"Supplier Quotation": ["Supplier Quotation", "Purchase Order", "Purchase Receipt",
 			"Purchase Invoice", "Payment Entry"]
 	},
