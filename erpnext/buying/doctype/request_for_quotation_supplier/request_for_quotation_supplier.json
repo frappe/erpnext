@@ -8,6 +8,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 1, 
@@ -199,7 +200,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-06-30 12:47:23.564189", 
+ "modified": "2016-07-11 03:28:06.830030", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Request for Quotation Supplier", 

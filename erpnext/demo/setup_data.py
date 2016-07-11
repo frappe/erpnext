@@ -28,6 +28,8 @@ def setup_data():
 	setup_employee()
 	setup_salary_structure()
 	setup_user_roles()
+	frappe.db.commit()
+	frappe.clear_cache()
 
 def complete_setup(domain='Manufacturing'):
 	print "Complete Setup..."
@@ -198,6 +200,8 @@ def import_json(doctype, submit=False, values=None):
 		doc.insert()
 		if submit:
 			doc.submit()
+
+	frappe.db.commit()
 
 def setup_employee():
 	frappe.db.set_value("HR Settings", None, "emp_created_by", "Naming Series")

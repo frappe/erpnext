@@ -9,6 +9,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Document", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -1410,7 +1411,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-07-04 16:29:19.624908", 
+ "modified": "2016-07-11 03:28:05.251792", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order Item", 

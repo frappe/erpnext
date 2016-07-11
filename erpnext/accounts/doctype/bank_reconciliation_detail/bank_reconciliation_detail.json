@@ -7,6 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -257,7 +258,7 @@
  "istable": 1, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-06-28 13:23:15.412477", 
+ "modified": "2016-07-11 03:27:58.139117", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Bank Reconciliation Detail", 

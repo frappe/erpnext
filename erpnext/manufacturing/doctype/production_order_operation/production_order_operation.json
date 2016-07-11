@@ -8,6 +8,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -538,7 +539,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-06-24 16:12:08.380635", 
+ "modified": "2016-07-11 03:28:04.235889", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order Operation", 

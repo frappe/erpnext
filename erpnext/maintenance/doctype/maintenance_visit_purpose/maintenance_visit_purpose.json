@@ -9,6 +9,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Document", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -291,7 +292,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-06-29 12:56:16.109366", 
+ "modified": "2016-07-11 03:28:02.369271", 
  "modified_by": "Administrator", 
  "module": "Maintenance", 
  "name": "Maintenance Visit Purpose", 

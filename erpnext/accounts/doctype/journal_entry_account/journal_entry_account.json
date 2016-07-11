@@ -8,6 +8,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -659,13 +660,14 @@
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "idx": 1, 
+ "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-05-26 16:23:31.354886", 
+ "modified": "2016-07-11 03:28:01.575159", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry Account", 

@@ -8,6 +8,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -176,7 +177,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-06-10 12:54:18.343417", 
+ "modified": "2016-07-11 03:28:07.779228", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Payment", 

@@ -8,6 +8,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Other", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -274,7 +275,7 @@
  "istable": 1, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-07-06 15:43:52.495428", 
+ "modified": "2016-07-11 03:28:08.918029", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Reconciliation Item", 

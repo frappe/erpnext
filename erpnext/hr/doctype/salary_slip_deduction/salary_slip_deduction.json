@@ -8,6 +8,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -125,7 +126,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-06-27 16:02:25.613138", 
+ "modified": "2016-07-11 03:28:07.000106", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip Deduction", 

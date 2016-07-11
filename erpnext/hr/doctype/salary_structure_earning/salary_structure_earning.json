@@ -7,6 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -101,7 +102,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-06-27 15:28:58.884891", 
+ "modified": "2016-07-11 03:28:07.283082", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Structure Earning", 

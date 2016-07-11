@@ -8,6 +8,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Document", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -213,7 +214,7 @@
  "istable": 1, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-06-27 12:37:42.845967", 
+ "modified": "2016-07-11 03:28:04.828022", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice Advance", 
@@ -222,6 +223,5 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
- "track_seen": 0, 
- "version": 0
+ "track_seen": 0
 }

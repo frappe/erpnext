@@ -435,6 +435,9 @@ def login_as_first_user(args):
 		frappe.local.login_manager.login_as(args.get("email"))
 
 def create_users(args):
+	if frappe.session.user == 'Administrator':
+		return
+
 	# create employee for self
 	emp = frappe.get_doc({
 		"doctype": "Employee",

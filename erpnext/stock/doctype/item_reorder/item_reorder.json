@@ -9,6 +9,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -145,7 +146,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-06-20 15:52:01.978593", 
+ "modified": "2016-07-11 03:19:14.851011", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Reorder", 
@@ -154,5 +155,6 @@
  "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "sort_order": "ASC", 
  "track_seen": 0
 }

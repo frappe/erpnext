@@ -8,7 +8,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
- "editable_grid": 0, 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -204,7 +204,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-07-08 08:42:17.903362", 
+ "modified": "2016-07-11 03:27:58.625909", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Operation", 
