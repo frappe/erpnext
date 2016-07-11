@@ -16,10 +16,10 @@ frappe.ui.form.on("Task", {
 
 
 		if(!doc.__islocal) {
-			if(frappe.model.can_read("Time Sheet")) {
-				frm.add_custom_button(__("Time Sheet"), function() {
+			if(frappe.model.can_read("Timesheet")) {
+				frm.add_custom_button(__("Timesheet"), function() {
 					frappe.route_options = {"project": doc.project, "task": doc.name}
-					frappe.set_route("List", "Time Sheet");
+					frappe.set_route("List", "Timesheet");
 				}, __("View"), true);
 			}
 			if(frappe.model.can_read("Expense Claim")) {

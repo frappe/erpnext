@@ -1,11 +1,11 @@
 import frappe
 
-from erpnext.manufacturing.doctype.production_order.production_order import make_time_sheet, add_timesheet_detail
+from erpnext.manufacturing.doctype.production_order.production_order import make_timesheet, add_timesheet_detail
 
 def execute():
 	for data in frappe.get_all('Time Log', fields=["*"],
 		filters = [["docstatus", "<", "2"]]):
-		time_sheet = make_time_sheet(data.production_order)
+		time_sheet = make_timesheet(data.production_order)
 		args = get_timesheet_data(data)
 		add_timesheet_detail(time_sheet, args)
 		time_sheet.docstatus = data.docstatus

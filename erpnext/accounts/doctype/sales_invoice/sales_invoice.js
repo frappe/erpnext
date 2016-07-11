@@ -450,7 +450,7 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(doc, cdt, cdn){
 			return {
 				filters: [
-					["Time Sheet", "status", "in", ["Submitted", "Payslip"]]
+					["Timesheet", "status", "in", ["Submitted", "Payslip"]]
 				]
 			}
 		}
