@@ -16,6 +16,12 @@ frappe.query_reports["Employee Holiday Attendance"] = {
 			"fieldtype": "Date",
 			"reqd": 1,
 			"default": frappe.datetime.year_end()
+		},
+		{
+			"fieldname":"holiday_list",
+			"label": __("Holiday List"),
+			"fieldtype": "Link",
+			"options": "Holiday List"
 		}
 	]
 }
