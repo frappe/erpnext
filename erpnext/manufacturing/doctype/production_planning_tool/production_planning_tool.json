@@ -9,7 +9,6 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
- "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -706,7 +705,6 @@
  "hide_toolbar": 1, 
  "icon": "icon-calendar", 
  "idx": 1, 
- "image_view": 0, 
  "in_create": 1, 
  "in_dialog": 0, 
  "is_submittable": 0, 
@@ -733,7 +731,6 @@
    "print": 1, 
    "read": 1, 
    "report": 0, 
-   "restrict": 0, 
    "role": "Manufacturing User", 
    "set_user_permissions": 0, 
    "share": 1, 
