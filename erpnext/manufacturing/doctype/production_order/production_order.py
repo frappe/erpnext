@@ -250,6 +250,7 @@ class ProductionOrder(Document):
 		timesheet = make_timesheet(self.name)
 		workstation_list = []
 		last_workstation_idx = {}
+		timesheet.set('time_logs', [])
 
 		for i, d in enumerate(self.operations):
 			if d.workstation and d.status != 'Completed':
