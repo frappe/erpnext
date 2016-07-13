@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 import frappe, random, erpnext
 from frappe.utils.make_random import how_many
 from frappe.desk import query_report
+from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
+from erpnext.manufacturing.doctype.production_order.test_production_order import make_prod_order_test_record
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_manufacturing_user'))
@@ -46,6 +48,13 @@ def work():
 		for pro in query_report.run("Production Orders in Progress")["result"][:how_many("Stock Entry for FG")]:
 			make_stock_entry_from_pro(pro[0], "Manufacture")
 
+	for bom in frappe.get_all('BOM', fields=['item'], filters = {'with_operations': 1}):
+		pro_order = make_prod_order_test_record(item=bom.item, qty=2,
+			source_warehouse="Stores - WPL", wip_warehouse = "Work in Progress - WPL",
+			fg_warehouse = "Stores - WPL", company = erpnext.get_default_company(),
+			stock_uom = frappe.db.get_value('Item', bom.item, 'stock_uom'),
+			planned_start_date = frappe.flags.current_date)
+
 	# submit time logs
 	for timesheet in frappe.get_all("Timesheet", ["name"], {"docstatus": 0,
 		"production_order": ("!=", ""), "to_time": ("<", frappe.flags.current_date)}):
@@ -54,6 +63,8 @@ def work():
 			timesheet.submit()
 			frappe.db.commit()
 		except OverlapError:
+			pass
+		except WorkstationHolidayError:
 			pass
 
 def make_stock_entry_from_pro(pro_id, purpose):
