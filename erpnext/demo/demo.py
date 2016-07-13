@@ -6,6 +6,23 @@ import frappe.utils
 from erpnext.demo.setup_data import setup_data
 from erpnext.demo.user import hr, sales, purchase, manufacturing, stock
 
+"""
+Make a demo
+
+1. Start with a fresh account
+
+bench --site demo.erpnext.dev reinstall
+
+2. Install Demo
+
+bench --site demo.erpnext.dev execute erpnext.demo.demo.make
+
+3. If Demo breaks, to continue
+
+bench --site demo.erpnext.dev execute erpnext.demo.demo.simulate
+
+"""
+
 def make(domain='Manufacturing'):
 	frappe.flags.domain = domain
 	setup_data()
