@@ -26,6 +26,10 @@ bench --site demo.erpnext.dev execute erpnext.demo.demo.simulate
 def make(domain='Manufacturing'):
 	frappe.flags.domain = domain
 	setup_data()
+	site = frappe.local.site
+	frappe.destroy()
+	frappe.init(site)
+	frappe.connect()
 	simulate()
 
 def simulate():

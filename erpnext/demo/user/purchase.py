@@ -104,11 +104,14 @@ def make_material_request(item_code, qty):
 		mr.material_request_type = "Purchase"
 
 	mr.transaction_date = frappe.flags.current_date
+
+	moq = frappe.db.get_value('Item', item_code, 'min_order_qty')
+
 	mr.append("items", {
 		"doctype": "Material Request Item",
 		"schedule_date": frappe.utils.add_days(mr.transaction_date, 7),
 		"item_code": item_code,
-		"qty": qty
+		"qty": qty if qty > moq else moq
 	})
 	mr.insert()
 	mr.submit()
