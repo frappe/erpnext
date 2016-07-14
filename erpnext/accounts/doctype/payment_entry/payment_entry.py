@@ -36,6 +36,7 @@ class PaymentEntry(AccountsController):
 	def validate(self):
 		self.setup_party_account_field()
 		self.set_missing_values()
+		self.validate_payment_type()
 		self.validate_party_details()
 		self.validate_bank_accounts()
 		self.set_exchange_rate()
@@ -108,6 +109,10 @@ class PaymentEntry(AccountsController):
 				for field, value in ref_details.items():
 					if not d.get(field):
 						d.set(field, value)
+						
+	def validate_payment_type(self):
+		if self.payment_type not in ("Receive", "Pay", "Internal Transfer"):
+			frappe.throw(_("Payment Type must be one of Receive, Pay and Internal Transfer"))
 	
 	def validate_party_details(self):
 		if self.party:
