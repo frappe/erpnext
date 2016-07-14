@@ -87,7 +87,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	},
 
 	get_items_from_open_material_requests: function() {
-		frappe.model.map_current_doc({
+		erpnext.utils.map_current_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
 			source_name: this.frm.doc.supplier,
 			get_query_filters: {
@@ -150,7 +150,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	add_from_mappers: function() {
 		cur_frm.add_custom_button(__('Material Request'),
 			function() {
-				frappe.model.map_current_doc({
+				erpnext.utils.map_current_doc({
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					source_doctype: "Material Request",
 					get_query_filters: {
@@ -165,7 +165,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		cur_frm.add_custom_button(__('Supplier Quotation'),
 			function() {
-				frappe.model.map_current_doc({
+				erpnext.utils.map_current_doc({
 					method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
 					source_doctype: "Supplier Quotation",
 					get_query_filters: {

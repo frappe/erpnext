@@ -52,7 +52,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			if(this.frm.doc.docstatus==0) {
 				cur_frm.add_custom_button(__('Purchase Order'),
 					function() {
-						frappe.model.map_current_doc({
+						erpnext.utils.map_current_doc({
 							method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
 							source_doctype: "Purchase Order",
 							get_query_filters: {

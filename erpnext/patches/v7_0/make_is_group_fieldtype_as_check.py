@@ -8,6 +8,6 @@ def execute():
 		#In MySQL, you can't modify the same table which you use in the SELECT part.
 
 		frappe.db.sql(""" update `tab{doctype}` set is_group = 1
-			where name in (select parent_{field} from (select distinct parent_{field} from `tab{doctype}` 
+			where name in (select parent_{field} from (select distinct parent_{field} from `tab{doctype}`
 				where parent_{field} != '') as dummy_table)
-			""".format(doctype=doctype, field=doctype.strip().lower().replace(' ','_')), debug=1)
+			""".format(doctype=doctype, field=doctype.strip().lower().replace(' ','_')))

@@ -87,7 +87,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Sales Order'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
 						source_doctype: "Sales Order",
 						get_query_filters: {

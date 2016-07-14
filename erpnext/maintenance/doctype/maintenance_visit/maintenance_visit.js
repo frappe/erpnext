@@ -19,7 +19,7 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Maintenance Schedule'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
 						source_doctype: "Maintenance Schedule",
 						get_query_filters: {
@@ -31,7 +31,7 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 				}, __("Get items from"));
 			cur_frm.add_custom_button(__('Warranty Claim'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
 						source_doctype: "Warranty Claim",
 						get_query_filters: {
@@ -43,7 +43,7 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 				}, __("Get items from"));
 			cur_frm.add_custom_button(__('Sales Order'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
 						source_doctype: "Sales Order",
 						get_query_filters: {
