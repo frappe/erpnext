@@ -20,7 +20,7 @@ cur_frm.cscript.set_root_readonly = function(doc) {
 cur_frm.fields_dict['parent_customer_group'].get_query = function(doc,cdt,cdn) {
 	return {
 		filters: {
-			'is_group': "Yes"
+			'is_group': 1
 		}
 	}
 }
