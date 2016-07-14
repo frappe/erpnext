@@ -206,7 +206,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Employee Holiday Attendance",
+					"name": "Employees working on a holiday",
 					"doctype": "Employee"
 				},
 				{
