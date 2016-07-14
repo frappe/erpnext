@@ -5,6 +5,15 @@
 
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
+
+frappe.ui.form.on('Delivery Note', 'onload', function(frm) {
+	frm.set_indicator_formatter('item_code',
+		function(doc) {
+			return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
+		})
+
+})
+
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
 		this._super();

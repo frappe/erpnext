@@ -15,8 +15,7 @@ def work():
 	if random.random() < 0.5:
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 		report = "Ordered Items to be Billed"
-		for so in list(set([r[0] for r in
-			query_report.run(report)["result"]
+		for so in list(set([r[0] for r in query_report.run(report)["result"]
 				if r[0]!="Total"]))[:random.randint(1, 5)]:
 			si = frappe.get_doc(make_sales_invoice(so))
 			si.posting_date = frappe.flags.current_date
