@@ -9,7 +9,7 @@ frappe.ui.form.on("Item Group", {
 		frm.fields_dict['parent_item_group'].get_query = function(doc,cdt,cdn) {
 			return{
 				filters:[
-					['Item Group', 'is_group', '=', 'Yes'],
+					['Item Group', 'is_group', '=', 1],
 					['Item Group', 'name', '!=', doc.item_group_name]
 				]
 			}

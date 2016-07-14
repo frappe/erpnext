@@ -20,7 +20,7 @@ cur_frm.cscript.set_root_readonly = function(doc) {
 cur_frm.fields_dict['parent_sales_person'].get_query = function(doc, cdt, cdn) {
 	return{
 		filters: [
-			['Sales Person', 'is_group', '=', 'Yes'],
+			['Sales Person', 'is_group', '=', 1],
 			['Sales Person', 'name', '!=', doc.sales_person_name]
 		]
 	}

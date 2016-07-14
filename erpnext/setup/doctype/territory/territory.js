@@ -20,7 +20,7 @@ cur_frm.cscript.set_root_readonly = function(doc) {
 cur_frm.fields_dict['parent_territory'].get_query = function(doc,cdt,cdn) {
 	return{
 		filters:[
-			['Territory', 'is_group', '=', 'Yes'],
+			['Territory', 'is_group', '=', 1],
 			['Territory', 'name', '!=', doc.territory_name]
 		]
 	}
