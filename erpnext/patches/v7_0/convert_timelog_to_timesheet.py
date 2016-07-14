@@ -3,8 +3,7 @@ import frappe
 from erpnext.manufacturing.doctype.production_order.production_order import make_timesheet, add_timesheet_detail
 
 def execute():
-	if "note" not in frappe.db.get_table_columns("timesheet"):
-		frappe.reload_doc('projects', 'doctype', 'timesheet')
+	frappe.reload_doc('projects', 'doctype', 'timesheet')
 
 	for data in frappe.get_all('Time Log', fields=["*"],
 		filters = [["docstatus", "<", "2"]]):

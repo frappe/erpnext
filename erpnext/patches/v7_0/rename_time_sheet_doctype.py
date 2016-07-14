@@ -1,7 +1,7 @@
 import frappe
 
 def execute():
-	if frappe.db.table_exists("Time Sheet"):
+	if frappe.db.table_exists("Time Sheet") and not frappe.db.table_exists("Timesheet"):
 		frappe.rename_doc("DocType", "Time Sheet", "Timesheet")
 		frappe.rename_doc("DocType", "Time Sheet Detail", "Timesheet Detail")
 		
