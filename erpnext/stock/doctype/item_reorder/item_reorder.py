@@ -9,5 +9,4 @@ import frappe
 from frappe.model.document import Document
 
 class ItemReorder(Document):
-	def onload(self):
-		frappe.msgprint(self.parent)
+	pass

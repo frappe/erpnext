@@ -502,7 +502,7 @@ class Item(WebsiteGenerator):
 			
 		for i in self.get("reorder_levels"):
 			if i.get("material_request_type") != mat_req_type:
-				frappe.throw(_("Row {0}: {1} does not match the default material request type")
+				frappe.throw(_("Row {0}: Material Request Type {1} does not match the default material request type")
 					.format(i.idx, i.material_request_type), InvalidMaterialRequestType)
 
 	def check_if_sle_exists(self):
