@@ -30,11 +30,11 @@ def get_variant(template, args, variant=None):
 
 def validate_item_variant_attributes(item, args=None):
 	if not args:
-		args = {d.attribute:d.attribute_value for d in item.attributes}
+		args = {d.attribute.lower():d.attribute_value for d in item.attributes}
 
 	attribute_values = get_attribute_values()
 
-	numeric_attributes = frappe._dict({d.attribute: d for d
+	numeric_attributes = frappe._dict({d.attribute.lower(): d for d
 		in item.attributes if d.numeric_values==1})
 
 	for attribute, value in args.items():
