@@ -28,16 +28,14 @@ def get_variant(template, args, variant=None):
 
 	return find_variant(template, args, variant)
 
-def validate_item_variant_attributes(item, args):
-	attribute_values = {}
-	for t in frappe.get_all("Item Attribute Value", fields=["parent", "attribute_value"],
-		filters={"parent": ["in", args.keys()]}):
+def validate_item_variant_attributes(item, args=None):
+	if not args:
+		args = {d.attribute:d.attribute_value for d in item.attributes}
 
-		(attribute_values.setdefault(t.parent.lower(), [])).append(t.attribute_value)
+	attribute_values = get_attribute_values()
 
-	numeric_attributes = frappe._dict((t.attribute.lower(), t) for t in \
-		frappe.db.sql("""select attribute, from_range, to_range, increment from `tabItem Variant Attribute`
-		where parent = %s and numeric_values=1""", (item), as_dict=1))
+	numeric_attributes = frappe._dict({d.attribute: d for d
+		in item.attributes if d.numeric_values==1})
 
 	for attribute, value in args.items():
 		if attribute.lower() in numeric_attributes:
@@ -56,7 +54,7 @@ def validate_item_variant_attributes(item, args):
 			#avoid precision error by rounding the remainder
 			remainder = flt((flt(value) - from_range) % increment, precision)
 
-			is_incremental = remainder==0 or remainder==0 or remainder==increment
+			is_incremental = remainder==0 or remainder==increment
 
 			if not (is_in_range and is_incremental):
 				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3}")\
@@ -65,6 +63,16 @@ def validate_item_variant_attributes(item, args):
 		elif value not in attribute_values.get(attribute.lower(), []):
 			frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values").format(
 				value, attribute), InvalidItemAttributeValueError)
+
+def get_attribute_values():
+	if not frappe.flags.attribute_values:
+		attribute_values = {}
+		for t in frappe.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
+			(attribute_values.setdefault(t.parent.lower(), [])).append(t.attribute_value)
+
+		frappe.flags.attribute_values = attribute_values
+
+	return frappe.flags.attribute_values
 
 def find_variant(template, args, variant_item_code=None):
 	conditions = ["""(iv_attribute.attribute="{0}" and iv_attribute.attribute_value="{1}")"""\

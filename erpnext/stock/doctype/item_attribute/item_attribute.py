@@ -6,7 +6,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 
-from erpnext.controllers.item_variant import InvalidItemAttributeValueError
+from erpnext.controllers.item_variant import validate_item_variant_attributes, InvalidItemAttributeValueError
 
 
 class ItemAttributeIncrementError(frappe.ValidationError): pass
@@ -24,9 +24,9 @@ class ItemAttribute(Document):
 
 	def validate_exising_items(self):
 		'''Validate that if there are existing items with attributes, they are valid'''
-		for item in frappe.db.sql('''select i.name from `tabItem Variant Attribute` iva, `tabItem` i
+		for item in frappe.db.sql('''select distinct i.name from `tabItem Variant Attribute` iva, `tabItem` i
 			where iva.attribute = %s and iva.parent = i.name and i.has_variants = 0''', self.name):
-			frappe.get_doc('Item', item[0]).validate_variant_attributes()
+			validate_item_variant_attributes(frappe.get_doc('Item', item[0]))
 
 	def validate_numeric(self):
 		if self.numeric_values:
