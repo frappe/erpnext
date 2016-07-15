@@ -114,6 +114,10 @@ frappe.ui.form.on("Item", {
 			method: "copy_specification_from_item_group"
 		});
 	},
+	
+	reorder_levels_add: function(frm) {
+		console.log("Got Here");
+	},
 
 	has_variants: function(frm) {
 		erpnext.item.toggle_attributes(frm);
@@ -335,7 +339,7 @@ $.extend(erpnext.item, {
 					field.$input.val(ui.item.value);
 					field.$input.trigger("change");
 				},
-			}).on("focus", function(){
+			}).on("focus", function(){ 
 				setTimeout(function() {
 					if(!field.$input.val()) {
 						field.$input.autocomplete("search", "");
@@ -354,6 +358,16 @@ $.extend(erpnext.item, {
 		frm.fields_dict.attributes.grid.toggle_enable("attribute_value", !frm.doc.variant_of);
 	}
 });
+
+cur_frm.cscript.custom_reorder_levels_add = function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	var temp = frm.default_mr_type
+	if (temp == "Material Issue") { temp = "Issue";}
+	else if (temp == "Material Transfer") { temp = "Transfer";}
+	console.log(temp);
+	d.material_request_type = temp;
+
+}
 
 cur_frm.add_fetch('attribute', 'numeric_values', 'numeric_values');
 cur_frm.add_fetch('attribute', 'from_range', 'from_range');
