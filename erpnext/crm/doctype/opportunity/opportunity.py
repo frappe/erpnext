@@ -54,6 +54,7 @@ class Opportunity(TransactionBase):
 					email_name = self.contact_email[0:self.contact_email.index('@')]
 
 					email_split = email_name.split('.')
+					sender_name = ''
 					for s in email_split:
 						sender_name += s.capitalize() + ' '
 
@@ -189,11 +190,11 @@ def get_item_details(item_code):
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		quotation = frappe.get_doc(target)
-		
+
 		company_currency = frappe.db.get_value("Company", quotation.company, "default_currency")
-		party_account_currency = get_party_account_currency("Customer", quotation.customer, 
+		party_account_currency = get_party_account_currency("Customer", quotation.customer,
 			quotation.company) if quotation.customer else company_currency
-		
+
 		quotation.currency = party_account_currency or company_currency
 
 		if company_currency == quotation.currency:
