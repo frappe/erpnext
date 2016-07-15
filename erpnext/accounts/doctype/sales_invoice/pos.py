@@ -114,11 +114,27 @@ def get_items(doc, pos_profile):
 		item.cost_center = pos_profile.get('cost_center') or item_doc.selling_cost_center
 		item.actual_qty = frappe.db.get_value('Bin', {'item_code': item.name,
 								'warehouse': item.default_warehouse}, 'actual_qty') or 0
-		item.serial_nos = frappe.db.sql_list("""select name from `tabSerial No` where warehouse= %(warehouse)s
-			and item_code = %(item_code)s""", {'warehouse': item.default_warehouse, 'item_code': item.item_code})
+		item.serial_nos = get_serial_nos(item, pos_profile)
+		item.batch_nos = frappe.db.sql_list("""select name from `tabBatch` where expiry_date > curdate()
+			and item = %(item_code)s""", {'item_code': item.item_code})
+
 		item_list.append(item)
 
 	return item_list
+
+def get_serial_nos(item, pos_profile):
+	cond = "1=1"
+	if pos_profile.get('update_stock') and pos_profile.get('warehouse'):
+		cond = "warehouse = '{0}'".format(pos_profile.get('warehouse'))
+
+	serial_nos = frappe.db.sql("""select name, warehouse from `tabSerial No` where {0}
+				and item_code = %(item_code)s""".format(cond), {'item_code': item.item_code}, as_dict=1)
+
+	serial_no_list = {}
+	for serial_no in serial_nos:
+		serial_no_list[serial_no.name] = serial_no.warehouse
+
+	return serial_no_list
 
 def get_customers(pos_profile, doc):
 	filters = {'disabled': 0}
