@@ -13,7 +13,8 @@ from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
-from erpnext.controllers.item_variant import get_variant, copy_attributes_to_variant, ItemVariantExistsError
+from erpnext.controllers.item_variant import (get_variant, copy_attributes_to_variant,
+	make_variant_item_code, validate_item_variant_attributes, ItemVariantExistsError)
 
 class DuplicateReorderRows(frappe.ValidationError): pass
 
@@ -36,12 +37,7 @@ class Item(WebsiteGenerator):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
 			if self.variant_of:
 				if not self.item_code:
-					item_code_suffix = ""
-					for attribute in self.attributes:
-						attribute_abbr = frappe.db.get_value("Item Attribute Value",
-							{"parent": attribute.attribute, "attribute_value": attribute.attribute_value}, "abbr")
-						item_code_suffix += "-" + str(attribute_abbr or attribute.attribute_value)
-					self.item_code = str(self.variant_of) + item_code_suffix
+					self.item_code = make_variant_item_code(self.variant_of, self)
 			else:
 				from frappe.model.naming import make_autoname
 				self.item_code = make_autoname(self.naming_series+'.#####')
@@ -123,8 +119,8 @@ class Item(WebsiteGenerator):
 	def set_opening_stock(self):
 		'''set opening stock'''
 		if not self.valuation_rate:
-			frappe.throw(_("Valuation Rate is mandatory if Opening Stock entered"))		
-		
+			frappe.throw(_("Valuation Rate is mandatory if Opening Stock entered"))
+
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		# default warehouse, or Stores
@@ -224,12 +220,12 @@ class Item(WebsiteGenerator):
 					file_doc.make_thumbnail()
 
 				self.thumbnail = file_doc.thumbnail_url
-				
+
 	def validate_fixed_asset(self):
 		if self.is_fixed_asset:
 			if self.is_stock_item:
 				frappe.throw(_("Fixed Asset Item must be a non-stock item."))
-				
+
 			if not self.asset_category:
 				frappe.throw(_("Asset Category is mandatory for Fixed Asset item"))
 
@@ -453,7 +449,7 @@ class Item(WebsiteGenerator):
 
 	def cant_change(self):
 		if not self.get("__islocal"):
-			vals = frappe.db.get_value("Item", self.name, ["has_serial_no", "is_stock_item", 
+			vals = frappe.db.get_value("Item", self.name, ["has_serial_no", "is_stock_item",
 				"valuation_method", "has_batch_no", "is_fixed_asset"], as_dict=True)
 
 			if vals and ((self.is_stock_item != vals.is_stock_item) or
@@ -463,7 +459,7 @@ class Item(WebsiteGenerator):
 					if self.check_if_linked_document_exists():
 						frappe.throw(_("As there are existing transactions for this item, \
 							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'"))
-							
+
 			if vals and not self.is_fixed_asset and self.is_fixed_asset != vals.is_fixed_asset:
 				asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
 				if asset:
@@ -649,6 +645,8 @@ class Item(WebsiteGenerator):
 			if variant:
 				frappe.throw(_("Item variant {0} exists with same attributes")
 					.format(variant), ItemVariantExistsError)
+
+			validate_item_variant_attributes(self, args)
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''

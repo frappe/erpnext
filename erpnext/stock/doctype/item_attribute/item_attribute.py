@@ -16,6 +16,7 @@ class ItemAttribute(Document):
 		self.flags.ignore_these_exceptions_in_test = [InvalidItemAttributeValueError]
 
 	def validate(self):
+		frappe.flags.attribute_values = None
 		self.validate_numeric()
 		self.validate_duplication()
 
@@ -26,7 +27,7 @@ class ItemAttribute(Document):
 		'''Validate that if there are existing items with attributes, they are valid'''
 		for item in frappe.db.sql('''select distinct i.name from `tabItem Variant Attribute` iva, `tabItem` i
 			where iva.attribute = %s and iva.parent = i.name and i.has_variants = 0''', self.name):
-			validate_item_variant_attributes(frappe.get_doc('Item', item[0]))
+			validate_item_variant_attributes(item[0])
 
 	def validate_numeric(self):
 		if self.numeric_values:
