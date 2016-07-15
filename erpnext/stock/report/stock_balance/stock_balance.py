@@ -8,7 +8,7 @@ from frappe.utils import flt, getdate
 
 def execute(filters=None):
 	if not filters: filters = {}
-	
+
 	validate_filters(filters)
 
 	columns = get_columns()
@@ -83,7 +83,7 @@ def get_stock_ledger_entries(filters):
 			company, voucher_type, qty_after_transaction, stock_value_difference
 		from `tabStock Ledger Entry` sle force index (posting_sort_index)
 		where docstatus < 2 %s order by posting_date, posting_time, name""" %
-		conditions, as_dict=1, debug=1)
+		conditions, as_dict=1)
 
 def get_item_warehouse_map(filters):
 	iwb_map = {}
@@ -147,4 +147,3 @@ def validate_filters(filters):
 		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
 		if sle_count > 500000:
 			frappe.throw(_("Please set filter based on Item or Warehouse"))
-	

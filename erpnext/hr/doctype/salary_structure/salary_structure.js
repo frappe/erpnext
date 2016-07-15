@@ -32,8 +32,8 @@ frappe.ui.form.on('Salary Structure', {
 	},
 
 	toggle_fields: function(frm) {
-		frm.toggle_display('time_sheet_earning_detail', frm.doc.salary_slip_based_on_timesheet);
-		frm.toggle_reqd('salary_component', frm.doc.salary_slip_based_on_timesheet);
+		frm.toggle_display(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
+		frm.toggle_reqd(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
 	}
 })
 

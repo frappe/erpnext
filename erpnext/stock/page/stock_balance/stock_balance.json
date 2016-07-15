@@ -4,7 +4,7 @@
  "docstatus": 0, 
  "doctype": "Page", 
  "idx": 0, 
- "modified": "2016-04-21 05:04:30.228526", 
+ "modified": "2016-07-14 06:39:09.096256", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "stock-balance", 
@@ -18,5 +18,5 @@
  "script": null, 
  "standard": "Yes", 
  "style": null, 
- "title": "Stock Balance"
+ "title": "Stock Summary"
 }

@@ -29,7 +29,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Opportunity'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
 						get_query_filters: {

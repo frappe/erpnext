@@ -131,10 +131,13 @@ def make_subcontract():
 	po.is_subcontracted = "Yes"
 	po.supplier = get_random("Supplier")
 
+	item_code = get_random("Item", {"is_sub_contracted_item": 1})
+	moq = frappe.db.get_value('Item', item_code, 'min_order_qty')
+
 	po.append("items", {
-		"item_code": get_random("Item", {"is_sub_contracted_item": 1}),
+		"item_code": item_code,
 		"schedule_date": frappe.utils.add_days(frappe.flags.current_date, 7),
-		"qty": 20
+		"qty": moq
 	})
 	po.set_missing_values()
 	try:

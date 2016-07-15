@@ -97,7 +97,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Quotation'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
 						get_query_filters: {

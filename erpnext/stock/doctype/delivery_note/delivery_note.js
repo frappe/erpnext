@@ -5,6 +5,15 @@
 
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
+
+frappe.ui.form.on('Delivery Note', 'onload', function(frm) {
+	frm.set_indicator_formatter('item_code',
+		function(doc) {
+			return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
+		})
+
+})
+
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
 		this._super();
@@ -28,7 +37,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			if (this.frm.doc.docstatus===0) {
 				cur_frm.add_custom_button(__('Sales Order'),
 					function() {
-						frappe.model.map_current_doc({
+						erpnext.utils.map_current_doc({
 							method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 							source_doctype: "Sales Order",
 							get_query_filters: {

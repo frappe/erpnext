@@ -4,7 +4,7 @@ import frappe, sys
 import erpnext
 import frappe.utils
 from erpnext.demo.setup_data import setup_data
-from erpnext.demo.user import hr, sales, purchase, manufacturing, stock
+from erpnext.demo.user import hr, sales, purchase, manufacturing, stock, accounts
 
 """
 Make a demo
@@ -68,8 +68,7 @@ def simulate():
 		purchase.work()
 		manufacturing.work()
 		stock.work()
-		# run_stock()
-		# run_accounts()
+		accounts.work()
 		# run_projects()
 		# run_messages()
 

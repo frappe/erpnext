@@ -141,31 +141,34 @@ class Timesheet(Document):
 
 	def validate_overlap(self, data):
 		if self.production_order:
-			self.validate_overlap_for("workstation", data)
+			self.validate_overlap_for("workstation", data, data.workstation)
 		else:
-			self.validate_overlap_for("user", data)
-			self.validate_overlap_for("employee", data)
+			self.validate_overlap_for("user", data, self.user)
+			self.validate_overlap_for("employee", data, self.employee)
 
-	def validate_overlap_for(self, fieldname, args):
-		existing = self.get_overlap_for(fieldname, args)
+	def validate_overlap_for(self, fieldname, args, value):
+		if not value: return
+
+		existing = self.get_overlap_for(fieldname, args, value)
 		if existing:
 			frappe.throw(_("Row {0}: From Time and To Time overlap with existing from and to time").format(args.idx),
 				OverlapError)
 
-	def get_overlap_for(self, fieldname, args):
-		if not args.get(fieldname):
-			return
+	def get_overlap_for(self, fieldname, args, value):
+		cond = "ts.`{0}`".format(fieldname)
+		if fieldname == 'workstation':
+			cond = "tsd.`{0}`".format(fieldname)
 
 		existing = frappe.db.sql("""select ts.name as name, tsd.from_time as from_time, tsd.to_time as to_time from 
-			`tabTimesheet Detail` tsd, `tabTimesheet` ts where tsd.`{0}`=%(val)s and tsd.parent = ts.name and
+			`tabTimesheet Detail` tsd, `tabTimesheet` ts where {0}=%(val)s and tsd.parent = ts.name and
 			(
 				(%(from_time)s > tsd.from_time and %(from_time)s < tsd.to_time) or
 				(%(to_time)s > tsd.from_time and %(to_time)s < tsd.to_time) or
 				(%(from_time)s <= tsd.from_time and %(to_time)s >= tsd.to_time))
 			and tsd.name!=%(name)s
-			and ts.docstatus < 2""".format(fieldname),
+			and ts.docstatus < 2""".format(cond),
 			{
-				"val": args.get(fieldname),
+				"val": value,
 				"from_time": args.from_time,
 				"to_time": args.to_time,
 				"name": args.name or "No Name"
@@ -184,7 +187,7 @@ class Timesheet(Document):
 		if self.time_logs:
 			for data in self.time_logs:
 				if data.idx == index:
-					overlapping = self.get_overlap_for("workstation", data)
+					overlapping = self.get_overlap_for("workstation", data, data.workstation)
 					if not overlapping:
 						frappe.throw(_("Logical error: Must find overlapping"))
 					

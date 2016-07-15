@@ -2,7 +2,8 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.require("assets/erpnext/js/financial_statements.js", function() {
-	frappe.query_reports["Profit and Loss Statement"] = $.extend({}, erpnext.financial_statements);
+	frappe.query_reports["Profit and Loss Statement"] = $.extend({},
+		erpnext.financial_statements);
 
 	frappe.query_reports["Profit and Loss Statement"]["filters"].push({
 		"fieldname": "accumulated_values",

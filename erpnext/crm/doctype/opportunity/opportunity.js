@@ -128,7 +128,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
-	frappe.model.map_current_doc({
+	erpnext.utils.map_current_doc({
 		method: "erpnext.crm.doctype.lead.lead.make_opportunity",
 		source_name: cur_frm.doc.lead,
 		frm: cur_frm

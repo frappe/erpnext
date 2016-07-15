@@ -46,7 +46,7 @@ cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_
 
 cur_frm.fields_dict['customer_group'].get_query = function(doc, dt, dn) {
 	return{
-		filters:{'is_group': 'No'}
+		filters:{'is_group': 0}
 	}
 }
 

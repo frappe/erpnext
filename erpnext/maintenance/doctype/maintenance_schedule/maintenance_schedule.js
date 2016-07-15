@@ -20,7 +20,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 		if (this.frm.doc.docstatus === 0) {
 			this.frm.add_custom_button(__('Sales Order'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
 						source_doctype: "Sales Order",
 						get_query_filters: {

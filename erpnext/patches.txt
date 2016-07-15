@@ -294,3 +294,4 @@ execute:frappe.delete_doc_if_exists("Report", "Customers Not Buying Since Long T
 erpnext.patches.v7_0.make_is_group_fieldtype_as_check
 execute:frappe.reload_doc('projects', 'doctype', 'timesheet', force=True)
 execute:frappe.delete_doc_if_exists("Report", "Employee Holiday Attendance")
+
