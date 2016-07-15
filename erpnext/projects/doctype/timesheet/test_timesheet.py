@@ -86,28 +86,30 @@ def make_salary_structure(employee):
 
 	return salary_structure
 
-def make_timesheet(employee, simulate=False, billable = 0):
-	update_activity_type("_Test Activity Type")
+def make_timesheet(employee, simulate=False, billable = 0, activity_type="_Test Activity Type", project=None, task=None):
+	update_activity_type(activity_type)
 	timesheet = frappe.new_doc("Timesheet")
 	timesheet.employee = employee
 	timesheet_detail = timesheet.append('time_logs', {})
 	timesheet_detail.billable = billable
-	timesheet_detail.activity_type = "_Test Activity Type"
+	timesheet_detail.activity_type = activity_type
 	timesheet_detail.from_time = now_datetime()
 	timesheet_detail.hours = 2
 	timesheet_detail.to_time = timesheet_detail.from_time + datetime.timedelta(hours= timesheet_detail.hours)
+	timesheet_detail.project = project
+	timesheet_detail.task = task
 
 	for data in timesheet.get('time_logs'):
 		if simulate:
 			while True:
 				try:
-					timesheet.save()
+					timesheet.save(ignore_permissions=True)
 					break
 				except OverlapError:
 					data.from_time = data.from_time + datetime.timedelta(minutes=10)
 					data.to_time = data.from_time + datetime.timedelta(hours= data.hours)
 		else:
-			timesheet.save()
+			timesheet.save(ignore_permissions=True)
 
 	timesheet.submit()
 
