@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 import random, json
 from erpnext.demo.domains import data
 import frappe, erpnext
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, now_datetime, cstr
+from frappe import _
 
 def setup_data():
 	domain = frappe.flags.domain
@@ -28,6 +29,7 @@ def setup_data():
 	setup_employee()
 	setup_salary_structure()
 	setup_salary_structure_for_timesheet()
+	setup_account_to_expense_type()
 	setup_user_roles()
 	frappe.db.commit()
 	frappe.clear_cache()
@@ -64,11 +66,11 @@ def setup_demo_page():
 
 def setup_fiscal_year():
 	fiscal_year = None
-	for year in xrange(2014, frappe.utils.now_datetime().year + 1, 1):
+	for year in xrange(2014, now_datetime().year + 1, 1):
 		try:
 			fiscal_year = frappe.get_doc({
 				"doctype": "Fiscal Year",
-				"year": frappe.utils.cstr(year),
+				"year": cstr(year),
 				"year_start_date": "{0}-01-01".format(year),
 				"year_end_date": "{0}-12-31".format(year)
 			}).insert()
@@ -80,7 +82,7 @@ def setup_fiscal_year():
 
 def setup_holiday_list():
 	"""Setup Holiday List for the current year"""
-	year = frappe.utils.now_datetime().year
+	year = now_datetime().year
 	holiday_list = frappe.get_doc({
 		"doctype": "Holiday List",
 		"holiday_list_name": str(year),
@@ -306,6 +308,18 @@ def setup_account():
 		doc.parent_account = frappe.db.get_value('Account', {'account_name': doc.parent_account})
 		doc.insert()
 
+def setup_account_to_expense_type():
+	expense_types = [{'name': _('Calls'), "account": "Sales Expenses - WPL"},
+		{'name': _('Food'), "account": "Entertainment Expenses - WPL"},
+		{'name': _('Medical'), "account": "Utility Expenses - WPL"},
+		{'name': _('Others'), "account": "Miscellaneous Expenses - WPL"},
+		{'name': _('Travel'), "account": "Travel Expenses - WPL"}]
+		
+	for expense_type in expense_types:
+		doc = frappe.get_doc("Expense Claim Type", expense_type["name"])
+		doc.default_account = expense_type["account"]
+		doc.save(ignore_permissions=True)
+		
 def setup_user_roles():
 	if not frappe.db.get_global('demo_hr_user'):
 		user = frappe.get_doc('User', 'CharmaineGaudreau@example.com')

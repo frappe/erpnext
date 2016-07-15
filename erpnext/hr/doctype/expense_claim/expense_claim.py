@@ -68,3 +68,35 @@ def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
 		where u.name = r.parent and r.role = 'Expense Approver' 
 		and u.enabled = 1 and u.name like %s
 	""", ("%" + txt + "%"))
+
+@frappe.whitelist()
+def make_bank_entry(docname):
+	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+
+	expense_claim = frappe.get_doc("Expense Claim", docname)
+	default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Bank")
+
+	je = frappe.new_doc("Journal Entry")
+	je.voucher_type = 'Bank Entry'
+	je.company = expense_claim.company
+	je.remark = 'Payment against Expense Claim: ' + docname;
+
+	for expense in expense_claim.expenses:
+		je.append("accounts", {
+			"account": expense.default_account,
+			"debit_in_account_currency": expense.sanctioned_amount,
+			"reference_type": "Expense Claim",
+			"reference_name": expense_claim.name
+		})
+
+	je.append("accounts", {
+		"account": default_bank_cash_account.account,
+		"credit_in_account_currency": expense_claim.total_sanctioned_amount,
+		"reference_type": "Expense Claim",
+		"reference_name": expense_claim.name,
+		"balance": default_bank_cash_account.balance,
+		"account_currency": default_bank_cash_account.account_currency,
+		"account_type": default_bank_cash_account.account_type
+	})
+
+	return je.as_dict()

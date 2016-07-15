@@ -5,6 +5,7 @@ from frappe.utils import random_string
 from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from frappe.utils.make_random import how_many, get_random
+from erpnext.hr.doctype.expense_claim.expense_claim import get_expense_approver, make_bank_entry
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_hr_user'))
@@ -30,6 +31,59 @@ def work():
 	
 	if frappe.db.get_global('demo_hr_user'):
 		make_timesheet_records()
+	
+		#expense claim
+		expense_claim = frappe.new_doc("Expense Claim")
+		expense_claim.extend('expenses', get_expenses())
+		expense_claim.employee = get_random("Employee")
+		expense_claim.company = frappe.flags.company
+		expense_claim.posting_date = frappe.flags.current_date
+		expense_claim.exp_approver = filter((lambda x: x[0] != 'Administrator'), get_expense_approver(None, '', None, 0, 20, None))[0][0]
+		expense_claim.insert()
+
+		rand = random.random()
+
+		if rand >= 0.3 and rand <= 0.6 :
+			expense_claim.approval_status = "Approved"
+			update_sanctioned_amount(expense_claim)
+			expense_claim.submit()
+
+			if random.randint(0, 1):
+				#make journal entry against expense claim
+				je = frappe.get_doc(make_bank_entry(expense_claim.name))
+				je.posting_date = frappe.flags.current_date
+				je.cheque_no = random_string(10)
+				je.cheque_date = frappe.flags.current_date
+				je.flags.ignore_permissions = 1
+				je.submit()
+
+		if rand < 0.3:
+			expense_claim.approval_status = "Rejected"
+			expense_claim.submit()
+
+def get_expenses():
+	expenses = []
+	expese_types = frappe.db.sql("select name, default_account from `tabExpense Claim Type`",as_dict=1)
+
+	for expense_type in expese_types[:random.randint(1,4)]:
+		claim_amount = random.randint(1,20)*10
+
+		expenses.append({
+			"expense_date": frappe.flags.current_date,
+			"expense_type": expense_type.name,
+			"default_account": expense_type.default_account or "Miscellaneous Expenses - WPL",
+			"claim_amount": claim_amount,
+			"sanctioned_amount": claim_amount
+		})
+
+	return expenses
+
+def update_sanctioned_amount(expense_claim):
+	for expense in expense_claim.expenses:
+		sanctioned_amount = random.randint(1,20)*10
+
+		if sanctioned_amount < expense.claim_amount:
+			expense.sanctioned_amount = sanctioned_amount
 
 def get_timesheet_based_salary_slip_employee():
 	return frappe.get_all('Salary Structure', fields = ["distinct employee as name"],
