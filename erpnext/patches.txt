@@ -280,8 +280,8 @@ erpnext.patches.v6_20x.repost_valuation_rate_for_negative_inventory
 erpnext.patches.v7_0.re_route #2016-06-27
 erpnext.patches.v7_0.system_settings_setup_complete
 erpnext.patches.v7_0.set_naming_series_for_timesheet
-execute:frappe.reload_doc('projects', 'doctype', 'project', force=True)
-execute:frappe.reload_doc('projects', 'doctype', 'project_user', force=True)
+execute:frappe.reload_doc('projects', 'doctype', 'project')
+execute:frappe.reload_doc('projects', 'doctype', 'project_user')
 erpnext.patches.v7_0.convert_timelogbatch_to_timesheet
 erpnext.patches.v7_0.convert_timelog_to_timesheet
 erpnext.patches.v7_0.move_timelogbatch_from_salesinvoiceitem_to_salesinvoicetimesheet
