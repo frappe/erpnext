@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import random, json
 from erpnext.demo.domains import data
 import frappe, erpnext
-import frappe.utils
+from frappe.utils import cint, flt
 
 def setup_data():
 	domain = frappe.flags.domain
@@ -27,6 +27,7 @@ def setup_data():
 	setup_user()
 	setup_employee()
 	setup_salary_structure()
+	setup_salary_structure_for_timesheet()
 	setup_user_roles()
 	frappe.db.commit()
 	frappe.clear_cache()
@@ -286,6 +287,14 @@ def setup_salary_structure():
 		})
 
 		ss.insert()
+		
+def setup_salary_structure_for_timesheet():
+	for e in frappe.get_all('Salary Structure', fields=['name'], filters={'is_active': 'Yes'}, limit=2):
+		ss_doc = frappe.get_doc("Salary Structure", e.name)
+		ss_doc.salary_slip_based_on_timesheet = 1
+		ss_doc.salary_component = 'Basic'
+		ss_doc.hour_rate = flt(random.random() * 10, 2)
+		ss_doc.save(ignore_permissions=True)
 
 def setup_account():
 	frappe.flags.in_import = True
@@ -332,4 +341,9 @@ def setup_user_roles():
 		user = frappe.get_doc('User', 'LeonAbdulov@example.com')
 		user.add_roles('Accounts User', 'Accounts Manager', 'Sales User', 'Purchase User')
 		frappe.db.set_global('demo_accounts_user', user.name)
+		
+	if not frappe.db.get_global('demo_projects_user'):
+		user = frappe.get_doc('User', 'panca@example.com')
+		user.add_roles('HR User', 'Projects User')
+		frappe.db.set_global('demo_projects_user', user.name)
 
