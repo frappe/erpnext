@@ -7,6 +7,7 @@ import frappe
 import json
 from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate
 from frappe import _
+from frappe.utils import time_diff_in_seconds
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
@@ -262,12 +263,14 @@ class ProductionOrder(Document):
 				original_start_time = d.planned_start_time
 
 				# validate operating hours if workstation [not mandatory] is specified
-				self.check_operation_fits_in_working_hours(d)
 				try:
 					timesheet.validate_time_logs()
 				except OverlapError:
 					if frappe.message_log: frappe.message_log.pop()
-					timesheet.move_to_next_non_overlapping_slot(d.idx)
+					timesheet.schedule_for_production_order(d.idx)
+				except WorkstationHolidayError:
+					if frappe.message_log: frappe.message_log.pop()
+					timesheet.schedule_for_production_order(d.idx)
 
 				from_time, to_time = self.get_start_end_time(timesheet, d.name)
 
@@ -294,7 +297,7 @@ class ProductionOrder(Document):
 	def get_operations_data(self, data):
 		return {
 			'from_time': data.planned_start_time,
-			'hours': data.time_in_mins / 60,
+			'hours': data.time_in_mins / 60.0,
 			'to_time': data.planned_end_time,
 			'project': self.project,
 			'operation': data.operation,

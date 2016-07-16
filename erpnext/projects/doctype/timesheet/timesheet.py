@@ -6,9 +6,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 
+from datetime import timedelta
 from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, get_datetime_str
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
+	WorkstationHolidayError)
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 
 class OverlapError(frappe.ValidationError): pass
@@ -136,8 +139,8 @@ class Timesheet(Document):
 
 	def validate_time_logs(self):
 		for data in self.get('time_logs'):
-			self.validate_overlap(data)
 			self.check_workstation_timings(data)
+			self.validate_overlap(data)
 
 	def validate_overlap(self, data):
 		if self.production_order:
@@ -179,28 +182,44 @@ class Timesheet(Document):
 	def check_workstation_timings(self, args):
 		"""Checks if **Time Log** is between operating hours of the **Workstation**."""
 		if args.workstation and args.from_time and args.to_time:
-			from erpnext.manufacturing.doctype.workstation.workstation import check_if_within_operating_hours
 			check_if_within_operating_hours(args.workstation, args.operation, args.from_time, args.to_time)
 
-	def move_to_next_non_overlapping_slot(self, index):
-		from datetime import timedelta
-		if self.time_logs:
-			for data in self.time_logs:
-				if data.idx == index:
-					overlapping = self.get_overlap_for("workstation", data, data.workstation)
-					if not overlapping:
-						frappe.throw(_("Logical error: Must find overlapping"))
-					
-					if overlapping:
-						time_sheet = self.get_last_working_slot(overlapping.name, data.workstation)
-						data.from_time = get_datetime(time_sheet.to_time) + get_mins_between_operations()
-						data.to_time = get_datetime(data.from_time) + timedelta(hours=data.hours)
-					break
+	def schedule_for_production_order(self, index):
+		for data in self.time_logs:
+			if data.idx == index:
+				self.move_to_next_day(data) #check for workstation holiday
+				self.move_to_next_non_overlapping_slot(data) #check for overlap
+				break
+
+	def move_to_next_non_overlapping_slot(self, data):
+		overlapping = self.get_overlap_for("workstation", data, data.workstation)
+		if overlapping:
+			time_sheet = self.get_last_working_slot(overlapping.name, data.workstation)
+			data.from_time = get_datetime(time_sheet.to_time) + get_mins_between_operations()
+			data.to_time = self.get_to_time(data)
+			self.check_workstation_working_day(data)
 
 	def get_last_working_slot(self, time_sheet, workstation):
 		return frappe.db.sql(""" select max(from_time) as from_time, max(to_time) as to_time 
 			from `tabTimesheet Detail` where workstation = %(workstation)s""",
 			{'workstation': workstation}, as_dict=True)[0]
+
+	def move_to_next_day(self, data):
+		"""Move start and end time one day forward"""
+		self.check_workstation_working_day(data)
+
+	def check_workstation_working_day(self, data):
+		while True:
+			try:
+				self.check_workstation_timings(data)
+				break
+			except WorkstationHolidayError:
+				if frappe.message_log: frappe.message_log.pop()
+				data.from_time = get_datetime(data.from_time) + timedelta(hours=24)
+				data.to_time = self.get_to_time(data)
+
+	def get_to_time(self, data):
+		return get_datetime(data.from_time) + timedelta(hours=data.hours)
 
 	def update_cost(self):
 		for data in self.time_logs:
