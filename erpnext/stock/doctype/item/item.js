@@ -77,8 +77,8 @@ frappe.ui.form.on("Item", {
 
 		erpnext.item.toggle_attributes(frm);
 
-		frm.toggle_enable("is_fixed_asset", !frm.doc.is_stock_item &&
-			((frm.doc.__onload && frm.doc.__onload.asset_exists) ? false : true));
+		frm.toggle_enable("is_fixed_asset", (frm.doc.__islocal || (!frm.doc.is_stock_item &&
+			((frm.doc.__onload && frm.doc.__onload.asset_exists) ? false : true))));
 	},
 
 	validate: function(frm){
@@ -95,10 +95,6 @@ frappe.ui.form.on("Item", {
 		}
 	},
 	
-	is_stock_item: function(frm) {
-		frm.toggle_enable("is_fixed_asset", !frm.doc.is_stock_item);
-	},
-
 	page_name: frappe.utils.warn_page_name_change,
 
 	item_code: function(frm) {

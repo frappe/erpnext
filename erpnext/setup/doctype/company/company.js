@@ -138,8 +138,9 @@ erpnext.company.setup_queries = function(frm) {
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
 		["exchange_gain_loss_account", {"root_type": "Expense"}],
-		["accumulated_depreciation_account", {"root_type": "Asset"}],
-		["depreciation_expense_account", {"root_type": "Expense"}],
+		["accumulated_depreciation_account", 
+			{"root_type": "Asset", "account_type": "Accumulated Depreciation"}],
+		["depreciation_expense_account", {"root_type": "Expense", "account_type": "Depreciation"}],
 		["disposal_account", {"report_type": "Profit and Loss"}],
 		["cost_center", {}],
 		["round_off_cost_center", {}],
@@ -150,9 +151,12 @@ erpnext.company.setup_queries = function(frm) {
 
 	if (sys_defaults.auto_accounting_for_stock) {
 		$.each([
-			["stock_adjustment_account", {"root_type": "Expense"}],
-			["expenses_included_in_valuation", {"root_type": "Expense"}],
-			["stock_received_but_not_billed", {"report_type": "Balance Sheet"}]
+			["stock_adjustment_account", 
+				{"root_type": "Expense", "account_type": "Stock Adjustment"}],
+			["expenses_included_in_valuation", 
+				{"root_type": "Expense", "account_type": "Expenses Included in Valuation"}],
+			["stock_received_but_not_billed", 
+				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}]
 		], function(i, v) {
 			erpnext.company.set_custom_query(frm, v);
 		});

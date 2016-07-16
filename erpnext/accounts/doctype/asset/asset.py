@@ -229,6 +229,9 @@ def transfer_asset(args):
 def get_item_details(item_code):
 	asset_category = frappe.db.get_value("Item", item_code, "asset_category")
 	
+	if not asset_category:
+		frappe.throw(_("Please enter Asset Category in Item {0}").format(item_code))
+	
 	ret = frappe.db.get_value("Asset Category", asset_category, 
 		["depreciation_method", "total_number_of_depreciations", "frequency_of_depreciation"], as_dict=1)
 		
