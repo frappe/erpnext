@@ -5,7 +5,8 @@ cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
 		frm.get_field('time_logs').grid.editable_fields = [
-			{fieldname: 'activity_type', columns: 4},
+			{fieldname: 'billable', columns: 2},
+			{fieldname: 'activity_type', columns: 2},
 			{fieldname: 'from_time', columns: 2},
 			{fieldname: 'hours', columns: 2},
 			{fieldname: 'to_time', columns: 2},
@@ -37,7 +38,7 @@ frappe.ui.form.on("Timesheet", {
 	refresh: function(frm) {
 		if(frm.doc.docstatus==1) {
 			if(!frm.doc.sales_invoice && frm.doc.total_billing_amount > 0
-				&& frm.doc.employee){
+				&& !frm.doc.production_order){
 				frm.add_custom_button(__("Make Sales Invoice"), function() { frm.trigger("make_invoice") },
 					"icon-file-alt");
 			}
@@ -106,25 +107,20 @@ frappe.ui.form.on("Timesheet Detail", {
 
 	activity_type: function(frm, cdt, cdn) {
 		child = locals[cdt][cdn];
-		if(frm.doc.employee || frm.doc.production_order){
-			frappe.call({
-				method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
-				args: {
-					employee: frm.doc.employee,
-					activity_type: child.activity_type
-				},
-				callback: function(r){
-					if(r.message){
-						frappe.model.set_value(cdt, cdn, 'billing_rate', r.message['billing_rate']);
-						frappe.model.set_value(cdt, cdn, 'costing_rate', r.message['costing_rate']);
-						calculate_billing_costing_amount(frm, cdt, cdn)
-					}
+		frappe.call({
+			method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
+			args: {
+				employee: frm.doc.employee,
+				activity_type: child.activity_type
+			},
+			callback: function(r){
+				if(r.message){
+					frappe.model.set_value(cdt, cdn, 'billing_rate', r.message['billing_rate']);
+					frappe.model.set_value(cdt, cdn, 'costing_rate', r.message['costing_rate']);
+					calculate_billing_costing_amount(frm, cdt, cdn)
 				}
-			})
-		}else {
-			frappe.model.set_value(cdt, cdn, 'activity_type', null);
-			frappe.show_alert(__("Select employee"))
-		}
+			}
+		})
 	}
 });
 
