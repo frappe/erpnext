@@ -70,7 +70,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "remarks", 
-   "fieldtype": "Read Only", 
+   "fieldtype": "Text", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
@@ -85,7 +85,7 @@
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "print_width": "150px", 
-   "read_only": 0, 
+   "read_only": 1, 
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
@@ -214,7 +214,7 @@
  "istable": 1, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-07-11 03:28:04.828022", 
+ "modified": "2016-07-18 05:13:42.137419", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice Advance", 
@@ -223,5 +223,6 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "sort_order": "DESC", 
  "track_seen": 0
 }
