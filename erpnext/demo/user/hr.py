@@ -43,7 +43,7 @@ def work():
 
 		rand = random.random()
 
-		if rand >= 0.3 and rand <= 0.6 :
+		if rand < 0.4:
 			expense_claim.approval_status = "Approved"
 			update_sanctioned_amount(expense_claim)
 			expense_claim.submit()
@@ -57,7 +57,7 @@ def work():
 				je.flags.ignore_permissions = 1
 				je.submit()
 
-		if rand < 0.3:
+		elif rand < 0.2:
 			expense_claim.approval_status = "Rejected"
 			expense_claim.submit()
 
