@@ -16,6 +16,23 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 				frappe.set_route('Form', 'Journal Entry', r.message.name);
 			}
 		});
+	},
+	
+	expense_type: function(frm, cdt, cdn) {
+		var d = locals[cdt][cdn];
+
+		return frappe.call({
+			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account",
+			args: {
+				"expense_claim_type": d.expense_type,
+				"company": frm.company
+			},
+			callback: function(r) {
+				if (r.message) {
+					d.default_account = r.message.account;
+				}
+			}
+		});
 	}
 })
 
@@ -23,7 +40,6 @@ $.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}))
 
 cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
-cur_frm.add_fetch('expense_type', 'default_account', 'default_account');
 
 cur_frm.cscript.onload = function(doc,cdt,cdn) {
 	if(!doc.approval_status)

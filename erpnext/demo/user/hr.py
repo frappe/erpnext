@@ -63,7 +63,9 @@ def work():
 
 def get_expenses():
 	expenses = []
-	expese_types = frappe.db.sql("select name, default_account from `tabExpense Claim Type`",as_dict=1)
+	expese_types = frappe.db.sql("""select ect.name, eca.default_account from `tabExpense Claim Type` ect,
+		`tabExpense Claim Account` eca where eca.parent=ect.name
+		and eca.company=%s """, frappe.flags.company,as_dict=1)
 
 	for expense_type in expese_types[:random.randint(1,4)]:
 		claim_amount = random.randint(1,20)*10

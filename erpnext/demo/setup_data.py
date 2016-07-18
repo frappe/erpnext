@@ -317,7 +317,10 @@ def setup_account_to_expense_type():
 		
 	for expense_type in expense_types:
 		doc = frappe.get_doc("Expense Claim Type", expense_type["name"])
-		doc.default_account = expense_type["account"]
+		doc.append("accounts", {
+			"company" : erpnext.get_default_company(),
+			"default_account" : expense_type["account"]
+		})
 		doc.save(ignore_permissions=True)
 		
 def setup_user_roles():

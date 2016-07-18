@@ -20,6 +20,7 @@ class ExpenseClaim(Document):
 		self.validate_expense_approver()
 		self.calculate_total_amount()
 		set_employee_name(self)
+		self.set_expense_account()
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
 
@@ -59,7 +60,11 @@ class ExpenseClaim(Document):
 			if flt(d.sanctioned_amount) > flt(d.claim_amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
 
-
+	def set_expense_account(self):
+		for expense in self.expenses:
+			if not expense.default_account:
+				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
+		
 @frappe.whitelist()
 def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
@@ -100,3 +105,16 @@ def make_bank_entry(docname):
 	})
 
 	return je.as_dict()
+
+@frappe.whitelist()
+def get_expense_claim_account(expense_claim_type, company):
+	account = frappe.db.get_value("Expense Claim Account",
+		{"parent": expense_claim_type, "company": company}, "default_account")
+	
+	if not account:
+		frappe.throw(_("Please set default account in Expense Claim Type {0}")
+			.format(expense_claim_type))
+	
+	return {
+		"account": account
+	}
