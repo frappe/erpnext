@@ -9,7 +9,7 @@ frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
 		frm.get_field('accounts').grid.editable_fields = [
 			{fieldname: 'account', columns: 3},
-			{fieldname: 'party', columns: 4},
+			{fieldname: 'party', columns: 3},
 			{fieldname: 'debit_in_account_currency', columns: 2},
 			{fieldname: 'credit_in_account_currency', columns: 2}
 		];
@@ -283,7 +283,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 				type: "GET",
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
 				args: {
-					"account_type": (doc.voucher_type=="Bank Entry" ? 
+					"account_type": (doc.voucher_type=="Bank Entry" ?
 						"Bank" : (doc.voucher_type=="Cash" ? "Cash" : null)),
 					"company": doc.company
 				},

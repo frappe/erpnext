@@ -6,7 +6,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		if(this.frm.get_field('taxes')) {
 			this.frm.get_field('taxes').grid.editable_fields = [
 				{fieldname: 'charge_type', columns: 2},
-				{fieldname: 'account_head', columns: 3},
+				{fieldname: 'account_head', columns: 2},
 				{fieldname: 'rate', columns: 2},
 				{fieldname: 'tax_amount', columns: 2},
 				{fieldname: 'total', columns: 2}

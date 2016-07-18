@@ -454,13 +454,6 @@ frappe.ui.form.on('Sales Invoice', {
 				]
 			}
 		}
-
-		if(frm.doc.is_pos){
-			frm.get_field('payments').grid.editable_fields = [
-				{fieldname: 'mode_of_payment', columns: 2},
-				{fieldname: 'amount', columns: 2}
-			];
-		}
 	},
 })
 

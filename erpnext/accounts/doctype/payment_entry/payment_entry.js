@@ -12,7 +12,7 @@ frappe.ui.form.on('Payment Entry', {
 	setup: function(frm) {
 		frm.get_field('references').grid.editable_fields = [
 			{fieldname: 'reference_doctype', columns: 2},
-			{fieldname: 'reference_name', columns: 3},
+			{fieldname: 'reference_name', columns: 2},
 			{fieldname: 'outstanding_amount', columns: 3},
 			{fieldname: 'allocated_amount', columns: 3}
 		];

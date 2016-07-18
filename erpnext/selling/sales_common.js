@@ -15,7 +15,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.frm.get_field('items').grid.editable_fields = [
 			{fieldname: 'item_code', columns: 4},
 			{fieldname: 'qty', columns: 2},
-			{fieldname: 'rate', columns: 3},
+			{fieldname: 'rate', columns: 2},
 			{fieldname: 'amount', columns: 2}
 		];
 	},

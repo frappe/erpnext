@@ -14,7 +14,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this._super();
 		if(!in_list(["Material Request", "Request for Quotation"], this.frm.doc.doctype)){
 			this.frm.get_field('items').grid.editable_fields = [
-				{fieldname: 'item_code', columns: 4},
+				{fieldname: 'item_code', columns: 3},
 				{fieldname: 'qty', columns: 2},
 				{fieldname: 'rate', columns: 3},
 				{fieldname: 'amount', columns: 2}

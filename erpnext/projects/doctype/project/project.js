@@ -4,7 +4,7 @@
 frappe.ui.form.on("Project", {
 	setup: function(frm) {
 		frm.get_field('tasks').grid.editable_fields = [
-			{fieldname: 'title', columns: 4},
+			{fieldname: 'title', columns: 3},
 			{fieldname: 'status', columns: 3},
 			{fieldname: 'start_date', columns: 2},
 			{fieldname: 'end_date', columns: 2}

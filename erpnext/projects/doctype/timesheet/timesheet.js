@@ -5,7 +5,7 @@ cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
 		frm.get_field('time_logs').grid.editable_fields = [
-			{fieldname: 'activity_type', columns: 2},
+			{fieldname: 'activity_type', columns: 4},
 			{fieldname: 'from_time', columns: 2},
 			{fieldname: 'hours', columns: 2},
 			{fieldname: 'to_time', columns: 2},
@@ -36,7 +36,7 @@ frappe.ui.form.on("Timesheet", {
 
 	refresh: function(frm) {
 		if(frm.doc.docstatus==1) {
-			if(!frm.doc.sales_invoice && frm.doc.total_billing_amount > 0 
+			if(!frm.doc.sales_invoice && frm.doc.total_billing_amount > 0
 				&& frm.doc.employee){
 				frm.add_custom_button(__("Make Sales Invoice"), function() { frm.trigger("make_invoice") },
 					"icon-file-alt");

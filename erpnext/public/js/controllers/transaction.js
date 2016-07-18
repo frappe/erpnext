@@ -4,16 +4,16 @@
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
-		
+
 		if(in_list(["Sales Invoice", "Purchase Invoice"], this.frm.doc.doctype)) {
 			this.frm.get_field('advances').grid.editable_fields = [
-				{fieldname: 'reference_name', columns: 2},
+				{fieldname: 'reference_name', columns: 3},
 				{fieldname: 'remarks', columns: 3},
-				{fieldname: 'advance_amount', columns: 3},
-				{fieldname: 'allocated_amount', columns: 3}
+				{fieldname: 'advance_amount', columns: 2},
+				{fieldname: 'allocated_amount', columns: 2}
 			];
 		}
-		
+
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
@@ -432,7 +432,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		var company_currency = this.get_company_currency();
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
-		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency 
+		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
 				&& !this.frm.doc.ignore_pricing_rule) {
 			this.get_exchange_rate(this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
@@ -973,7 +973,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.item_selector = new erpnext.ItemSelector({frm: this.frm});
 		}
 	},
-	
+
 	get_advances: function() {
 		if(!this.frm.is_return) {
 			return this.frm.call({
@@ -985,7 +985,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			})
 		}
 	},
-	
+
 	make_payment_entry: function() {
 		return frappe.call({
 			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
