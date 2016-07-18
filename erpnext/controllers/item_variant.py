@@ -58,12 +58,13 @@ def validate_item_variant_attributes(item, args=None):
 			is_incremental = remainder==0 or remainder==increment
 
 			if not (is_in_range and is_incremental):
-				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3} for Item {2}")\
-					.format(attribute, from_range, to_range, increment, item.name), InvalidItemAttributeValueError)
+				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3} for Item {4}")\
+					.format(attribute, from_range, to_range, increment, item.name),
+					InvalidItemAttributeValueError, title=_('Invalid Attribute'))
 
 		elif value not in attribute_values.get(attribute.lower(), []):
 			frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values for Item {2}").format(
-				value, attribute, item.name), InvalidItemAttributeValueError)
+				value, attribute, item.name), InvalidItemAttributeValueError, title=_('Invalid Attribute'))
 
 def get_attribute_values():
 	if not frappe.flags.attribute_values:
