@@ -74,7 +74,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		this.highlight_selected_row()
 		this.payment_val = 0.0
 		if(this.frm.doc.outstanding_amount > 0 && flt(this.selected_mode.val()) == 0.0){
-			//When user first tithis click on row
+			//When user first time click on row
 			this.payment_val = flt(this.frm.doc.outstanding_amount)
 			this.selected_mode.val(format_number(this.payment_val, 2));
 			this.update_paid_amount()

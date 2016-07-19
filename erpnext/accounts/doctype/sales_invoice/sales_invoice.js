@@ -263,6 +263,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				});
 			}
 		}
+	},
+
+	amount: function(){
+		this.write_off_outstanding_amount_automatically()
 	}
 });
 

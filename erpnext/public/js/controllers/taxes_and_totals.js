@@ -549,13 +549,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		if(this.frm.doc.doctype == "Sales Invoice" || this.frm.doc.doctype == "Purchase Invoice") {
 			frappe.model.round_floats_in(this.frm.doc, ["paid_amount"]);
 
-			if(this.frm.doc.is_pos || this.frm.doc.is_paid) {
-				if(!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount) {
-					this.frm.doc.paid_amount = flt(total_amount_to_pay);
-				}
-			} else {
-				this.frm.doc.paid_amount = 0
-			}
 			this.set_in_company_currency(this.frm.doc, ["paid_amount"]);
 
 			if(this.frm.refresh_field){
@@ -564,6 +557,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			}
 
 			if(this.frm.doc.doctype == "Sales Invoice"){
+				this.set_default_payment(total_amount_to_pay, update_paid_amount)
 				this.calculate_paid_amount()
 			}
 
@@ -583,6 +577,19 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		this.frm.doc.outstanding_amount = outstanding_amount;
 		this.calculate_change_amount()
+	},
+
+	set_default_payment: function(total_amount_to_pay, update_paid_amount){
+		var me = this;
+		payment_status = true;
+		if(this.frm.doc.is_pos && (!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount)){
+			$.each(this.frm.doc['payments'] || [], function(index, data){
+				if(data.type == "Cash" && payment_status) {
+					data.amount = total_amount_to_pay;
+					payment_status = false;
+				}
+			})
+		}
 	},
 
 	calculate_paid_amount: function(){
