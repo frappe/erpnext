@@ -165,7 +165,7 @@ class Account(Document):
 		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 			return
 			
-		if self.account_type == "Stock" and not self.is_group:
+		if self.account_type == "Stock" and not cint(self.is_group):
 			if not self.warehouse:
 				throw(_("Warehouse is mandatory"))
 				
