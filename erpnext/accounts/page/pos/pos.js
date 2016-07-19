@@ -400,7 +400,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		// To search item as per the key enter
 
 		var me = this;
-		this.item_serial_no = {}
+		this.item_serial_no = {};
+		this.item_batch_no = {};
 
 		if(item_code){
 			return $.grep(window.items, function(item){
@@ -417,11 +418,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if( (item.item_code.toLowerCase().match(key)) ||
 				(item.item_name.toLowerCase().match(key)) || (item.item_group.toLowerCase().match(key)) ){
 					return true
-				}else if(item.barcode){
-					return item.barcode == me.search.$input.val()
-				} else if (in_list(item.serial_nos, me.search.$input.val())){
-					me.item_serial_no[item.item_code] = me.search.$input.val()
+				}else if(item.barcode == me.search.$input.val()){
+					return item.barcode == me.search.$input.val();
+				} else if (in_list(Object.keys(item.serial_nos), me.search.$input.val())){
+					me.item_serial_no[item.item_code] = [me.search.$input.val(), item.serial_nos[me.search.$input.val()]]
 					return true
+				} else if(in_list(item.batch_nos, me.search.$input.val())){
+					return me.item_batch_no[item.item_code] = me.search.$input.val()
 				}
 			})
 		}else{
@@ -467,6 +470,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.remove_item = []
 		$.each(this.frm.doc["items"] || [], function(i, d) {
+			if (d.item_code == item_code && d.serial_no
+				&& field == 'qty' && cint(value) != value) {
+				d.qty = 0.0;
+				me.refresh();
+				frappe.throw(__("Serial no item cannot be a fraction"))
+			}
+
 			if (d.item_code == item_code) {
 				d[field] = flt(value);
 				d.amount = flt(d.rate) * flt(d.qty);
@@ -536,7 +546,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var caught = false;
 		var no_of_items = me.wrapper.find(".pos-bill-item").length;
 
-		this.validate_serial_no()
+		this.customer_validate();
+		this.mandatory_batch_no();
+		this.validate_serial_no();
 		this.validate_warehouse();
 
 		if (no_of_items != 0) {
@@ -544,9 +556,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if (d.item_code == me.items[0].item_code) {
 					caught = true;
 					d.qty += 1;
-					d.amount = flt(d.rate) * flt(d.qty)
-					if(me.item_serial_no.length){
-						d.serial_no += '\n' + me.item_serial_no[d.item_code]
+					d.amount = flt(d.rate) * flt(d.qty);
+					if(me.item_serial_no[d.item_code]){
+						d.serial_no += '\n' + me.item_serial_no[d.item_code][0]
+						d.warehouse = me.item_serial_no[d.item_code][1]
+					}
+
+					if(me.item_batch_no.length){
+						d.batch_no = me.item_batch_no[d.item_code]
 					}
 				}
 			});
@@ -570,12 +587,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.item_group = this.items[0].item_group;
 		this.child.cost_center = this.items[0].cost_center;
 		this.child.income_account = this.items[0].income_account;
-		this.child.warehouse = this.items[0].default_warehouse;
+		this.child.warehouse = (this.item_serial_no[this.child.item_code]
+			? this.item_serial_no[this.child.item_code][1] : this.items[0].default_warehouse);
 		this.child.price_list_rate = flt(this.items[0].price_list_rate, 9) / flt(this.frm.doc.conversion_rate, 9);
 		this.child.rate = flt(this.items[0].price_list_rate, 9) / flt(this.frm.doc.conversion_rate, 9);
 		this.child.actual_qty = this.items[0].actual_qty;
 		this.child.amount = flt(this.child.qty) * flt(this.child.rate);
-		this.child.serial_no = this.item_serial_no[this.child.item_code];
+		this.child.batch_no = this.item_batch_no[this.child.item_code];
+		this.child.serial_no = (this.item_serial_no[this.child.item_code]
+			? this.item_serial_no[this.child.item_code][0] : '');
 	},
 
 	refresh: function() {
@@ -759,7 +779,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$(this.wrapper).find('input').attr("disabled", false);
 
 		if(this.frm.doc.docstatus == 1){
-			pointer_events = 'none'
+			pointer_events = 'none';
 			$(this.wrapper).find('input').attr("disabled", true);
 		}
 
@@ -789,7 +809,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$.each(this.si_docs, function(index, data){
 			for(key in data){
 				if(key == me.name){
-					me.si_docs[index][key] = me.frm.doc
+					me.si_docs[index][key] = me.frm.doc;
 					me.update_localstorage();
 				}
 			}
@@ -821,7 +841,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	sync_sales_invoice: function(){
 		var me = this;
-		this.si_docs = this.get_submitted_invoice()
+		this.si_docs = this.get_submitted_invoice();
 
 		if(this.si_docs.length){
 			frappe.call({
@@ -860,12 +880,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	remove_doc_from_localstorage: function(){
 		var me = this;
 		this.si_docs = this.get_doc_from_localstorage();
-		this.new_si_docs = []
+		this.new_si_docs = [];
 		if(this.removed_items){
 			$.each(this.si_docs, function(index, data){
 				for(key in data){
 					if(!in_list(me.removed_items, key)){
-						me.new_si_docs.push(data)
+						me.new_si_docs.push(data);
 					}
 				}
 			})
@@ -878,7 +898,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.customer_validate();
 		this.item_validate();
-		this.validate_mode_of_payments()
+		this.validate_mode_of_payments();
 	},
 
 	item_validate: function(){
@@ -898,7 +918,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var item_code = serial_no = '';
 		for (key in this.item_serial_no){
 			item_code = key;
-			serial_no = me.item_serial_no[key]
+			serial_no = me.item_serial_no[key][0];
 		}
 
 		if(item_code && serial_no){
@@ -911,6 +931,21 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					}
 				}
 			})
+		}
+
+		if(this.items[0].has_serial_no && serial_no == ""){
+			frappe.throw(__(repl("Error: Serial no is mandatory for item %(item)s", {
+				'item': this.items[0].item_code
+			})))
+		}
+	},
+
+	mandatory_batch_no: function(){
+		var me = this;
+		if(this.items[0].has_batch_no && !this.item_batch_no[this.items[0].item_code]){
+			frappe.throw(__(repl("Error: Batch no is mandatory for item %(item)s", {
+				'item': this.items[0].item_code
+			})))
 		}
 	},
 
