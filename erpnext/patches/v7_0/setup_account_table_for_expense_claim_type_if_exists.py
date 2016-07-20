@@ -3,6 +3,7 @@ import frappe
 
 def execute():
 	frappe.reload_doc("hr", "doctype", "expense_claim_type")
+	frappe.reload_doc("hr", "doctype", "expense_claim_account")
 	
 	for expense_claim_type in frappe.get_all("Expense Claim Type", fields=["name", "default_account"]):
 		if expense_claim_type.default_account:
