@@ -346,9 +346,8 @@ class update_entries_after(object):
 
 
 
-		if (frappe.local.flags.currently_saving
-			and frappe.local.flags.currently_saving.doctype==self.exceptions[0]["voucher_type"]
-			and frappe.local.flags.currently_saving.name==self.exceptions[0]["voucher_no"]):
+		if ((self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]) in
+			frappe.local.flags.currently_saving):
 			msg = _("{0} units of {1} needed in {2} to complete this transaction.").format(
 				abs(deficiency), frappe.get_desk_link('Item', self.item_code),
 				frappe.get_desk_link('Warehouse', self.warehouse))
