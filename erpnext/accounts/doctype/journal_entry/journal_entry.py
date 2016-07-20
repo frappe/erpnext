@@ -519,7 +519,7 @@ class JournalEntry(AccountsController):
 
 			if (d.party_type, d.party) not in party_balance:
 				party_balance[(d.party_type, d.party)] = get_balance_on(party_type=d.party_type,
-					party=d.party, date=self.posting_date)
+					party=d.party, date=self.posting_date, company=self.company)
 
 			d.account_balance = account_balance[d.account]
 			d.party_balance = party_balance[(d.party_type, d.party)]
@@ -553,6 +553,7 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 			"account_currency": account_details.account_currency,
 			"account_type": account_details.account_type
 		})
+	else: return frappe._dict()
 
 @frappe.whitelist()
 def get_payment_entry_against_order(dt, dn, amount=None, debit_in_account_currency=None, journal_entry=False, bank_account=None):
@@ -754,7 +755,7 @@ def get_party_account_and_balance(company, party_type, party):
 	account = get_party_account(party_type, party, company)
 
 	account_balance = get_balance_on(account=account)
-	party_balance = get_balance_on(party_type=party_type, party=party)
+	party_balance = get_balance_on(party_type=party_type, party=party, company=company)
 
 	return {
 		"account": account,
