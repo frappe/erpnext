@@ -124,4 +124,4 @@ def make_sales_invoice_for_timesheet(name):
 
 def get_random_item():
 	return frappe.db.sql_list(""" select name from `tabItem` where
-		has_variants = 0 order by rand() limit 1""")[0]
+		has_variants=0 and is_stock_item=0 and is_fixed_asset=0 order by rand() limit 1""")[0]

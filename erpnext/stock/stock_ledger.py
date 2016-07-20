@@ -344,10 +344,9 @@ class update_entries_after(object):
 	def raise_exceptions(self):
 		deficiency = min(e["diff"] for e in self.exceptions)
 
-
-
 		if ((self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]) in
 			frappe.local.flags.currently_saving):
+
 			msg = _("{0} units of {1} needed in {2} to complete this transaction.").format(
 				abs(deficiency), frappe.get_desk_link('Item', self.item_code),
 				frappe.get_desk_link('Warehouse', self.warehouse))

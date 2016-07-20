@@ -63,10 +63,10 @@ def make_depreciation_entry(asset_name, date=None):
 			d.db_set("journal_entry", je.name)
 			asset.value_after_depreciation -= d.depreciation_amount
 
-		asset.db_set("value_after_depreciation", asset.value_after_depreciation)
-		asset.set_status()
-		
-		return asset
+	asset.db_set("value_after_depreciation", asset.value_after_depreciation)
+	asset.set_status()
+
+	return asset
 
 def get_depreciation_accounts(asset):
 	fixed_asset_account = accumulated_depreciation_account = depreciation_expense_account = None
