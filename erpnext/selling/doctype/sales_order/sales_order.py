@@ -23,7 +23,7 @@ class WarehouseRequired(frappe.ValidationError): pass
 class SalesOrder(SellingController):
 	def __init__(self, arg1, arg2=None):
 		super(SalesOrder, self).__init__(arg1, arg2)
-		
+
 		self.prev_link_mapper = {
 			"Quotation": {
 				"fieldname": "prevdoc_docname",
@@ -34,7 +34,7 @@ class SalesOrder(SellingController):
 				]
 			}
 		}
-		
+
 	def validate(self):
 		super(SalesOrder, self).validate()
 
@@ -298,8 +298,8 @@ class SalesOrder(SellingController):
 			delivered_qty += item.delivered_qty
 			tot_qty += item.qty
 
-		frappe.db.set_value("Sales Order", self.name, "per_delivered", flt(delivered_qty/tot_qty) * 100,
-		update_modified=False)
+		self.db_set("per_delivered", flt(delivered_qty/tot_qty) * 100,
+			update_modified=False)
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
@@ -319,7 +319,7 @@ class SalesOrder(SellingController):
 		mcount = month_map[reference_doc.recurring_type]
 		self.set("delivery_date", get_next_date(reference_doc.delivery_date, mcount,
 						cint(reference_doc.repeat_on_day_of_month)))
-		
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)

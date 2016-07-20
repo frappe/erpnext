@@ -19,7 +19,7 @@ default_status = {
 	'Supplier': None
 }
 
-def notify_status(doc, method):
+def notify_status(doc, method=None):
 	'''Notify status to customer, supplier'''
 
 	party_type = None
@@ -59,6 +59,7 @@ def notify_status(doc, method):
 			update_status(party)
 
 	party.update_modified()
+	party.notify_update()
 
 def get_party_status(doc):
 	'''return party status based on open documents'''

@@ -92,8 +92,8 @@ class GLEntry(Document):
 					"Cost Center", self.cost_center, "company")
 
 			return self.cost_center_company[self.cost_center]
-		
-		if self.cost_center and _get_cost_center_company() != self.company:	
+
+		if self.cost_center and _get_cost_center_company() != self.company:
 			frappe.throw(_("Cost Center {0} does not belong to Company {1}").format(self.cost_center, self.company))
 
 	def validate_party(self):
@@ -181,8 +181,8 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 
 	# Update outstanding amt on against voucher
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
-		frappe.db.sql("update `tab%s` set outstanding_amount=%s where name=%s" %
-			(against_voucher_type, '%s', '%s'),	(bal, against_voucher))
+		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
+		ref_doc.db_set('outstanding_amount', bal)
 
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.db.get_value("Account", account, "freeze_account")

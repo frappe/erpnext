@@ -6,6 +6,7 @@ import frappe
 from frappe.utils import flt, comma_or
 from frappe import _
 from frappe.model.document import Document
+from erpnext.accounts.party_status import notify_status
 
 def validate_status(status, options):
 	if status not in options:
@@ -106,8 +107,7 @@ class StatusUpdater(Document):
 				self.add_comment("Label", _(self.status))
 
 			if update:
-				frappe.db.set_value(self.doctype, self.name, "status", self.status,
-					update_modified=update_modified)
+				self.db_set('status', self.status, update_modified = update_modified)
 
 	def validate_qty(self):
 		"""Validates qty at row level"""
@@ -263,6 +263,7 @@ class StatusUpdater(Document):
 			target = frappe.get_doc(args["target_parent_dt"], args["name"])
 			target.set_status(update=True)
 			target.notify_update()
+			notify_status(target)
 
 	def _update_modified(self, args, update_modified):
 		args['update_modified'] = ''
@@ -296,14 +297,16 @@ class StatusUpdater(Document):
 
 			per_billed = ((ref_doc_qty if billed_qty > ref_doc_qty else billed_qty)\
 				/ ref_doc_qty)*100
-			frappe.db.set_value(ref_dt, ref_dn, "per_billed", per_billed)
+
+			ref_doc = frappe.get_doc(ref_dt, ref_dn)
+
+			ref_doc.db_set("per_billed", per_billed)
 
 			if frappe.get_meta(ref_dt).get_field("billing_status"):
 				if per_billed < 0.001: billing_status = "Not Billed"
 				elif per_billed >= 99.99: billing_status = "Fully Billed"
 				else: billing_status = "Partly Billed"
-
-				frappe.db.set_value(ref_dt, ref_dn, "billing_status", billing_status)
+				ref_doc.db_set('billing_status', billing_status)
 
 def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 	"""

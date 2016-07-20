@@ -450,14 +450,14 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.copy_doc(pos)
 		si.insert()
 		si.submit()
-		
+
 		self.assertEquals(si.paid_amount, 600.0)
 
 		self.pos_gl_entry(si, pos, 300)
-		
+
 	def test_make_pos_invoice(self):
 		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
-		
+
 		set_perpetual_inventory()
 
 		self.make_pos_profile()
@@ -468,17 +468,17 @@ class TestSalesInvoice(unittest.TestCase):
 		pos["update_stock"] = 1
 		pos["payments"] = [{'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 300},
 							{'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 330}]
-		
-		invoice_data = [{'09052016142': pos}]					
+
+		invoice_data = [{'09052016142': pos}]
 		si = make_invoice(invoice_data)
 		self.assertEquals(si[0], '09052016142')
-		
+
 		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': '09052016142', 'docstatus': 1})
 		si = frappe.get_doc('Sales Invoice', sales_invoice[0].name)
 		self.assertEquals(si.grand_total, 630.0)
-		
+
 		self.pos_gl_entry(si, pos, 330)
-		
+
 	def pos_gl_entry(self, si, pos, cash_amount):
 		# check stock ledger entries
 		sle = frappe.db.sql("""select * from `tabStock Ledger Entry`
@@ -495,7 +495,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		stock_in_hand = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TC"})
-		
+
 		expected_gl_entries = sorted([
 			[si.debit_to, 630.0, 0.0],
 			[pos["items"][0]["income_account"], 0.0, 500.0],
@@ -951,6 +951,40 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		self.assertNotEquals(si.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
+
+	def test_party_status(self):
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+		from frappe.utils import random_string
+
+		customer_name = 'test customer for status'
+
+		if frappe.db.exists('Customer', customer_name):
+			customer = frappe.get_doc('Customer', customer_name)
+			customer.db_set('status', 'Active')
+		else:
+			customer = frappe.get_doc({
+				'doctype': 'Customer',
+				'customer_name': customer_name,
+				'customer_group': 'Commercial',
+				'customer_type': 'Individual',
+				'territory': 'Rest of the World'
+			}).insert()
+
+		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
+
+		invoice = create_sales_invoice(customer="test customer for status",
+			debit_to="_Test Receivable - _TC",
+			currency="USD", conversion_rate=50)
+
+		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Open')
+
+		pe = get_payment_entry(invoice.doctype, invoice.name)
+		pe.reference_no = random_string(10)
+		pe.reference_date = invoice.posting_date
+		pe.insert()
+		pe.submit()
+
+		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
