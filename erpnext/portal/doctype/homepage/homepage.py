@@ -17,9 +17,10 @@ class Homepage(Document):
 		for d in frappe.get_all('Item', fields=['name', 'item_name', 'description', 'image'],
 			filters={'show_in_website': 1}, limit=3):
 
-			# set missing routes (?)
 			doc = frappe.get_doc('Item', d.name)
-			doc.save()
+			if not doc.route:
+				# set missing route
+				doc.save()
 			self.append('products', dict(item_code=d.name,
 				item_name=d.item_name, description=d.description, image=d.image))
 

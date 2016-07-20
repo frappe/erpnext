@@ -5,8 +5,8 @@
 
 $.extend(frappe.document_flow, {
 	"Selling": {
-		"Sales Order": ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "Payment Entry"],
-		"Quotation": ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "Payment Entry"]
+		// "Sales Order": ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "Payment Entry"],
+		// "Quotation": ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "Payment Entry"]
 	},
 	"Accounts": {
 		"Sales Invoice": ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "Payment Entry"],
