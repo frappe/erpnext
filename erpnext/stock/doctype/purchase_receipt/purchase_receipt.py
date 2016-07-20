@@ -44,17 +44,6 @@ class PurchaseReceipt(BuyingController):
 			# 'overflow_type': 'receipt',
 			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
-		
-		self.prev_link_mapper = {
-			"Purchase Order": {
-				"fieldname": "purchase_order",
-				"doctype": "Purchase Receipt Item",
-				"filters": [
-					["Purchase Receipt Item", "parent", "=", self.name],
-					["Purchase Receipt Item", "purchase_order", "!=", ""]
-				]
-			}
-		}
 
 	def validate(self):
 		super(PurchaseReceipt, self).validate()
@@ -123,7 +112,7 @@ class PurchaseReceipt(BuyingController):
 		purchase_controller = frappe.get_doc("Purchase Common")
 
 		# Check for Approving Authority
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, 
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 
 		# Set status as Submitted
@@ -135,7 +124,7 @@ class PurchaseReceipt(BuyingController):
 		if not self.is_return:
 			purchase_controller.update_last_purchase_rate(self, 1)
 
-		# Updating stock ledger should always be called after updating prevdoc status, 
+		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		self.update_stock_ledger()
 
@@ -166,13 +155,13 @@ class PurchaseReceipt(BuyingController):
 
 		frappe.db.set(self,'status','Cancelled')
 
-		self.update_prevdoc_status()		
+		self.update_prevdoc_status()
 		self.update_billing_status()
 
 		if not self.is_return:
 			pc_obj.update_last_purchase_rate(self, 0)
-		
-		# Updating stock ledger should always be called after updating prevdoc status, 
+
+		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
@@ -199,8 +188,8 @@ class PurchaseReceipt(BuyingController):
 		for d in self.get("items"):
 			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
 				if warehouse_account.get(d.warehouse):
-					stock_value_diff = frappe.db.get_value("Stock Ledger Entry", 
-						{"voucher_type": "Purchase Receipt", "voucher_no": self.name, 
+					stock_value_diff = frappe.db.get_value("Stock Ledger Entry",
+						{"voucher_type": "Purchase Receipt", "voucher_no": self.name,
 						"voucher_detail_no": d.name}, "stock_value_difference")
 					if not stock_value_diff:
 						continue
@@ -251,15 +240,15 @@ class PurchaseReceipt(BuyingController):
 					valuation_amount_as_per_doc = flt(d.base_net_amount, d.precision("base_net_amount")) + \
 						flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost) + flt(d.item_tax_amount)
 
-					divisional_loss = flt(valuation_amount_as_per_doc - stock_value_diff, 
+					divisional_loss = flt(valuation_amount_as_per_doc - stock_value_diff,
 						d.precision("base_net_amount"))
-						
+
 					if divisional_loss:
 						if self.is_return or flt(d.item_tax_amount):
 							loss_account = expenses_included_in_valuation
 						else:
 							loss_account = stock_rbnb
-							
+
 						gl_entries.append(self.get_gl_dict({
 							"account": loss_account,
 							"against": warehouse_account[d.warehouse]["name"],

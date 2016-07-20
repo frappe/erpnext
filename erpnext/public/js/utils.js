@@ -33,7 +33,7 @@ $.extend(erpnext, {
 
 	setup_serial_no: function() {
 		var grid_row = cur_frm.open_grid_row();
-		if(!grid_row.fields_dict.serial_no ||
+		if(!grid_row || !grid_row.fields_dict.serial_no ||
 			grid_row.fields_dict.serial_no.get_status()!=="Write") return;
 
 		var $btn = $('<button class="btn btn-sm btn-default">'+__("Add Serial No")+'</button>')

@@ -24,17 +24,6 @@ class SalesOrder(SellingController):
 	def __init__(self, arg1, arg2=None):
 		super(SalesOrder, self).__init__(arg1, arg2)
 
-		self.prev_link_mapper = {
-			"Quotation": {
-				"fieldname": "prevdoc_docname",
-				"doctype": "Sales Order Item",
-				"filters": [
-					["Sales Order Item", "parent", "=", self.name],
-					["Sales Order Item", "prevdoc_docname", "!=", ""]
-				]
-			}
-		}
-
 	def validate(self):
 		super(SalesOrder, self).validate()
 
