@@ -15,8 +15,8 @@ class Asset(Document):
 	def validate(self):
 		self.status = self.get_status()
 		self.validate_item()
+		self.set_missing_values()
 		self.validate_asset_values()
-		self.set_depreciation_settings()
 		self.make_depreciation_schedule()
 		self.validate_expected_value_after_useful_life()
 		# Validate depreciation related accounts
@@ -41,10 +41,18 @@ class Asset(Document):
 			frappe.throw(_("Item {0} must be a Fixed Asset Item").format(self.item_code))
 		elif item.is_stock_item:
 			frappe.throw(_("Item {0} must be a non-stock item").format(self.item_code))
+			
+	def set_missing_values(self):
+		if self.item_code:
+			item_details = get_item_details(self.item_code)
+			for field, value in item_details.items():
+				if not self.get(field):
+					self.set(field, value)
+					
+		self.value_after_depreciation = (flt(self.gross_purchase_amount) - 
+			flt(self.opening_accumulated_depreciation))
 
 	def validate_asset_values(self):
-		self.value_after_depreciation = flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)
-		
 		if flt(self.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
 			frappe.throw(_("Expected Value After Useful Life must be less than Gross Purchase Amount"))
 
@@ -77,15 +85,6 @@ class Asset(Document):
 		if (flt(self.value_after_depreciation) > flt(self.expected_value_after_useful_life) 
 			and not self.next_depreciation_date):
 				frappe.throw(_("Please set Next Depreciation Date"))
-			
-		
-
-	def set_depreciation_settings(self):
-		asset_category = frappe.get_doc("Asset Category", self.asset_category)
-
-		for field in ("depreciation_method", "total_number_of_depreciations", "frequency_of_depreciation"):
-			if not self.get(field):
-				self.set(field, asset_category.get(field))
 
 	def make_depreciation_schedule(self):
 		self.schedules = []

@@ -41,18 +41,24 @@ def get():
 	            _("Capital Equipments"): {
 	                "account_type": "Fixed Asset"
 	            },
-	            _("Computers"): {
+	            _("Electronic Equipments"): {
 	                "account_type": "Fixed Asset"
 	            },
-	            _("Furniture and Fixture"): {
+	            _("Furnitures and Fixtures"): {
 	                "account_type": "Fixed Asset"
 	            },
 	            _("Office Equipments"): {
 	                "account_type": "Fixed Asset"
 	            },
-	            _("Plant and Machinery"): {
+	            _("Plants and Machineries"): {
 	                "account_type": "Fixed Asset"
 	            },
+				_("Buildings"): {
+					"account_type": "Fixed Asset"
+				},
+				_("Softwares"): {
+					"account_type": "Fixed Asset"
+				},
 	            _("Accumulated Depreciation"): {
 	            	"account_type": "Accumulated Depreciation"
 	            }
@@ -109,7 +115,10 @@ def get():
 	            _("Sales Expenses"): {},
 	            _("Telephone Expenses"): {},
 	            _("Travel Expenses"): {},
-	            _("Utility Expenses"): {}
+	            _("Utility Expenses"): {},
+				_("Write Off"): {},
+				_("Exchange Gain/Loss"): {},
+				_("Gain/Loss on Asset Disposal"): {}
 	        },
 			"root_type": "Expense"
 	    },

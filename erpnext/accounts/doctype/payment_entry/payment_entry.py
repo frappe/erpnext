@@ -77,7 +77,7 @@ class PaymentEntry(AccountsController):
 		if self.party:
 			if not self.party_balance:
 				self.party_balance = get_balance_on(party_type=self.party_type,
-					party=self.party, date=self.posting_date)
+					party=self.party, date=self.posting_date, company=self.company)
 			
 			if not self.party_account:
 				party_account = get_party_account(self.party_type, self.party, self.company)
@@ -251,7 +251,7 @@ class PaymentEntry(AccountsController):
 				self.unallocated_amount = party_amount - self.total_allocated_amount
 				
 	def set_difference_amount(self):
-		base_unallocated_amount = self.unallocated_amount * \
+		base_unallocated_amount = flt(self.unallocated_amount) * \
 			(self.source_exchange_rate if self.payment_type=="Receive" else self.target_exchange_rate)
 			
 		base_party_amount = flt(self.base_total_allocated_amount) + flt(base_unallocated_amount)
@@ -669,9 +669,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		"outstanding_amount": outstanding_amount,
 		"allocated_amount": outstanding_amount
 	})
-	
+
 	pe.setup_party_account_field()
 	pe.set_missing_values()
-	pe.set_exchange_rate()
-	pe.set_amounts()
+	if bank:
+		pe.set_exchange_rate()
+		pe.set_amounts()
 	return pe
