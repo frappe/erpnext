@@ -683,7 +683,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.validate()
 				me.create_invoice();
 				me.make_payment();
-			});
+			}, "octicon octicon-credit-card");
 		}else if(this.frm.doc.docstatus == 0 && this.frm.doc.items.length){
 			this.page.set_primary_action(__("Submit"), function() {
 				me.validate()
@@ -702,7 +702,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.page.set_secondary_action(__("New"), function() {
 			me.save_previous_entry();
 			me.create_new();
-		}).addClass("btn-primary");
+		}, "octicon octicon-plus").addClass("btn-primary");
 	},
 
 	print_document: function(html){
