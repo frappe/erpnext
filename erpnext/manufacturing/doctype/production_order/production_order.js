@@ -179,6 +179,7 @@ erpnext.production_order = {
 			}
 		}
 
+		frm.fields_dict.source_warehouse.get_query = company_filter;
 		frm.fields_dict.fg_warehouse.get_query = company_filter;
 		frm.fields_dict.wip_warehouse.get_query = company_filter;
 	},
