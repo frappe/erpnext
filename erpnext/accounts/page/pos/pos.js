@@ -678,19 +678,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	set_primary_action: function() {
 		var me = this;
 
-		if (this.frm.doc.docstatus==0 && this.frm.doc.outstanding_amount > 0) {
+		if (this.frm.doc.docstatus==0) {
 			this.page.set_primary_action(__("Pay"), function() {
 				me.validate()
 				me.create_invoice();
 				me.make_payment();
 			}, "octicon octicon-credit-card");
-		}else if(this.frm.doc.docstatus == 0 && this.frm.doc.items.length){
-			this.page.set_primary_action(__("Submit"), function() {
-				me.validate()
-				me.create_invoice();
-				me.write_off_amount()
-			})
-		}else if(this.frm.doc.docstatus == 1){
+		}else if(this.frm.doc.docstatus == 1) {
 			this.page.set_primary_action(__("Print"), function() {
 				html = frappe.render(me.print_template, me.frm.doc)
 				me.print_document(html)

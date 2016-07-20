@@ -58,11 +58,6 @@ erpnext.payments = erpnext.stock.StockController.extend({
 					currency: me.frm.doc.currency,
 					type: data.type
 				})).appendTo(multimode_payments)
-
-				if (data.type == 'Cash' && me.frm.doc.outstanding_amount > 0) {
-					me.idx = data.idx;
-					me.set_outstanding_amount();
-				}
 			})
 		}else{
 			$("<p>No payment mode selected in pos profile</p>").appendTo(multimode_payments)
@@ -157,7 +152,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 				data.amount = flt(me.selected_mode.val(), 2)
 			}
 		})
-		this.calculate_outstanding_amount();
+		this.calculate_outstanding_amount(false);
 		this.show_amounts();
 	},
 	
