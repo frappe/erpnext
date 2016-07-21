@@ -40,29 +40,18 @@ def work():
 			pi.submit()
 			frappe.db.commit()
 
-	if random.random() <= 0.5:
+	if random.random() < 0.5:
 		make_payment_entries("Sales Invoice", "Accounts Receivable")
 
-	if random.random() <= 0.5:
+	if random.random() < 0.5:
 		make_payment_entries("Purchase Invoice", "Accounts Payable")
 
 def make_payment_entries(ref_doctype, report):
 	outstanding_invoices = list(set([r[3] for r in query_report.run(report, 
 	{"report_date": frappe.flags.current_date })["result"] if r[2]==ref_doctype]))
 	
-	# make payment via JV
-	for inv in outstanding_invoices[:random.randint(1, 2)]:
-		jv = frappe.get_doc(get_payment_entry_against_invoice(ref_doctype, inv))
-		jv.posting_date = frappe.flags.current_date
-		jv.cheque_no = random_string(6)
-		jv.cheque_date = frappe.flags.current_date
-		jv.insert()
-		jv.submit()
-		frappe.db.commit()
-		outstanding_invoices.remove(inv)
-		
 	# make Payment Entry
-	for inv in outstanding_invoices[:random.randint(1, 3)]:
+	for inv in outstanding_invoices[:random.randint(1, 2)]:
 		pe = get_payment_entry(ref_doctype, inv)
 		pe.posting_date = frappe.flags.current_date
 		pe.reference_no = random_string(6)
@@ -70,3 +59,14 @@ def make_payment_entries(ref_doctype, report):
 		pe.insert()
 		pe.submit()
 		frappe.db.commit()
+		outstanding_invoices.remove(inv)
+		
+	# make payment via JV
+	for inv in outstanding_invoices[:1]:
+		jv = frappe.get_doc(get_payment_entry_against_invoice(ref_doctype, inv))
+		jv.posting_date = frappe.flags.current_date
+		jv.cheque_no = random_string(6)
+		jv.cheque_date = frappe.flags.current_date
+		jv.insert()
+		jv.submit()
+		frappe.db.commit()		
