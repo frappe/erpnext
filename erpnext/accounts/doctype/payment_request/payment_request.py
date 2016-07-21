@@ -13,7 +13,6 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 
 class PaymentRequest(Document):
 	def validate(self):
-		self.validate_payment_gateway_account()
 		self.validate_payment_request()
 		self.validate_currency()
 
@@ -24,18 +23,8 @@ class PaymentRequest(Document):
 
 	def validate_currency(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-		if ref_doc.currency != frappe.db.get_value("Account", self.payment_account, "account_currency"):
+		if self.payment_account and ref_doc.currency != frappe.db.get_value("Account", self.payment_account, "account_currency"):
 			frappe.throw(_("Transaction currency must be same as Payment Gateway currency"))
-
-	def validate_payment_gateway_account(self):
-		if not self.payment_gateway:
-			frappe.throw(_("Payment Gateway Account is not configured"))
-
-	def validate_payment_gateway(self):
-		if self.payment_gateway == "PayPal":
-			if not frappe.db.get_value("PayPal Settings", None, "api_username"):
-				if not frappe.conf.paypal_username:
-					frappe.throw(_("PayPal Settings missing"))
 
 	def on_submit(self):
 		send_mail = True
@@ -66,9 +55,13 @@ class PaymentRequest(Document):
 			si.submit()
 
 	def send_payment_request(self):
-		self.payment_url = get_url("/api/method/erpnext.accounts.doctype.payment_request.payment_request.generate_payment_request?name={0}".format(self.name))
+		if self.payment_account:
+			self.payment_url = get_url("/api/method/erpnext.accounts.doctype.payment_request.payment_request.generate_payment_request?name={0}".format(self.name))
+		
 		if self.payment_url:
 			self.db_set('payment_url', self.payment_url)
+			
+		if self.payment_url or not self.payment_gateway_account:
 			self.db_set('status', 'Initiated')
 
 	def set_as_paid(self):
@@ -118,11 +111,10 @@ class PaymentRequest(Document):
 				"cost_center": company_details.cost_center,
 				"amount": payment_entry.difference_amount
 			})
-		payment_entry.insert(ignore_permissions=True)
-		payment_entry.submit()
 
-		#set status as paid for Payment Request
-		self.db_set('status', 'Paid')
+		if not self.flags.make_draft_payment_entry:
+			payment_entry.insert(ignore_permissions=True)
+			payment_entry.submit()
 
 		return payment_entry
 
@@ -171,7 +163,7 @@ def make_payment_request(**args):
 
 	ref_doc = frappe.get_doc(args.dt, args.dn)
 
-	gateway_account = get_gateway_details(args)
+	gateway_account = get_gateway_details(args) or frappe._dict()
 
 	grand_total = get_amount(ref_doc, args.dt)
 
@@ -184,9 +176,9 @@ def make_payment_request(**args):
 	else:
 		pr = frappe.new_doc("Payment Request")
 		pr.update({
-			"payment_gateway_account": gateway_account.name,
-			"payment_gateway": gateway_account.payment_gateway,
-			"payment_account": gateway_account.payment_account,
+			"payment_gateway_account": gateway_account.get("name"),
+			"payment_gateway": gateway_account.get("payment_gateway"),
+			"payment_account": gateway_account.get("payment_account"),
 			"currency": ref_doc.currency,
 			"grand_total": grand_total,
 			"email_to": args.recipient_id or "",
@@ -239,9 +231,6 @@ def get_gateway_details(args):
 
 	gateway_account = get_payment_gateway_account({"is_default": 1})
 
-	if not gateway_account:
-		frappe.throw(_("Payment Gateway Account is not configured"))
-
 	return gateway_account
 
 def get_payment_gateway_account(args):
@@ -267,3 +256,19 @@ def generate_payment_request(name):
 @frappe.whitelist(allow_guest=True)
 def resend_payment_email(docname):
 	return frappe.get_doc("Payment Request", docname).send_email()
+
+@frappe.whitelist()
+def make_payment_entry(docname):
+	doc = frappe.get_doc("Payment Request", docname)
+	doc.flags.make_draft_payment_entry = True
+	return doc.set_as_paid().as_dict()
+
+def make_status_as_paid(doc, method):
+	for ref in doc.references:
+		payment_request_name = frappe.db.get_value("Payment Request",
+			{"reference_doctype": ref.reference_doctype, "reference_name": ref.reference_name,
+			"docstatus": 1})
+		
+		doc = frappe.get_doc("Payment Request", payment_request_name)
+		if doc.status != "Paid":
+			doc.db_set('status', 'Paid')
