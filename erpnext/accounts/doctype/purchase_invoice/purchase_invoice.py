@@ -553,8 +553,8 @@ class PurchaseInvoice(BuyingController):
 		self.update_status_updater_args()
 
 		if not self.is_return:
-			from erpnext.accounts.utils import remove_against_link_from_jv
-			remove_against_link_from_jv(self.doctype, self.name)
+			from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+			unlink_ref_doc_from_payment_entries(self.doctype, self.name)
 
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
