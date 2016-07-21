@@ -113,7 +113,7 @@ def make_sales_invoice_for_timesheet(name):
 	sales_invoice = make_sales_invoice(name)
 	sales_invoice.customer = get_random("Customer")
 	sales_invoice.append('items', {
-		'item_code': get_random_item(),
+		'item_code': get_random("Item", {"has_variants": 0, "is_stock_item": 0, "is_fixed_asset": 0}),
 		'qty': 1,
 		'rate': 1000
 	})
@@ -121,7 +121,3 @@ def make_sales_invoice_for_timesheet(name):
 	sales_invoice.calculate_taxes_and_totals()
 	sales_invoice.insert()
 	sales_invoice.submit()
-
-def get_random_item():
-	return frappe.db.sql_list(""" select name from `tabItem` where
-		has_variants=0 and is_stock_item=0 and is_fixed_asset=0 order by rand() limit 1""")[0]

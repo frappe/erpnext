@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import random, json
+from frappe.utils.make_random import add_random_children, get_random
 from erpnext.demo.domains import data
 import frappe, erpnext
 from frappe.utils import flt, now_datetime, cstr, nowdate, add_days
@@ -33,6 +34,7 @@ def setup_data():
 	setup_salary_structure_for_timesheet()
 	setup_account_to_expense_type()
 	setup_user_roles()
+	setup_budget()
 	frappe.db.commit()
 	frappe.clear_cache()
 
@@ -338,6 +340,26 @@ def setup_account_to_expense_type():
 			"default_account" : expense_type["account"]
 		})
 		doc.save(ignore_permissions=True)
+		
+def setup_budget():
+	fiscal_years = frappe.get_all("Fiscal Year", order_by="year_start_date")[-2:]
+		
+	for fy in fiscal_years:
+		budget = frappe.new_doc("Budget")
+		budget.cost_center = get_random("Cost Center")
+		budget.fiscal_year = fy.name
+		budget.action_if_annual_budget_exceeded = "Warn"
+		expense_ledger_count = frappe.db.count("Account", {"is_group": "0", "root_type": "Expense"})
+
+		add_random_children(budget, "accounts", rows=random.randint(10, expense_ledger_count), randomize = { 			"account": ("Account", {"is_group": "0", "root_type": "Expense"})
+		}, unique="account")
+			
+		for d in budget.accounts:
+			d.budget_amount = random.randint(5, 100) * 10000
+			
+		budget.save()
+		budget.submit()
+	
 		
 def setup_user_roles():
 	if not frappe.db.get_global('demo_hr_user'):
