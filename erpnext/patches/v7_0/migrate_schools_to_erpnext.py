@@ -11,9 +11,9 @@ def execute():
 		remove_from_installed_apps("schools")
 		domainify.setup_domain('Education')
 	else:
-		frappe.reload_doctype('Announcement')
-		frappe.reload_doctype('Course')
-		frappe.reload_doctype('Fees')
-		frappe.reload_doctype('Examination')
+		frappe.reload_doc('schools', 'doctype', 'announcement')
+		frappe.reload_doc('schools', 'doctype', 'course')
+		frappe.reload_doc('schools', 'doctype', 'fees')
+		frappe.reload_doc('schools', 'doctype', 'examination')
 		frappe.get_doc('Portal Settings', 'Portal Settings').sync_menu()
 		domainify.setup_sidebar_items(domainify.get_domain('Manufacturing'))
