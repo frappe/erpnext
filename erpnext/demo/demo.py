@@ -4,7 +4,7 @@ import frappe, sys
 import erpnext
 import frappe.utils
 from erpnext.demo.setup_data import setup_data
-from erpnext.demo.user import hr, sales, purchase, manufacturing, stock, accounts, projects
+from erpnext.demo.user import hr, sales, purchase, manufacturing, stock, accounts, projects, fixed_asset
 
 """
 Make a demo
@@ -53,6 +53,8 @@ def simulate():
 	if not runs_for:
 		runs_for = frappe.utils.date_diff(frappe.utils.nowdate(), current_date)
 		# runs_for = 100
+		
+	fixed_asset.work()
 
 	for i in xrange(runs_for):
 		sys.stdout.write("\rSimulating {0}".format(current_date.strftime("%Y-%m-%d")))

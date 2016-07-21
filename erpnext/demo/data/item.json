@@ -221,5 +221,59 @@
   "item_code": "Base Plate Un Painted",
   "item_group": "Raw Material",
   "item_name": "Base Plate Un Painted"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Furnitures",
+  "is_stock_item": 0,
+  "description": "Table",
+  "item_code": "Table",
+  "item_name": "Table",
+  "item_group": "Products"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Furnitures",
+  "is_stock_item": 0,
+  "description": "Chair",
+  "item_code": "Chair",
+  "item_name": "Chair",
+  "item_group": "Products"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Electronic Equipments",
+  "is_stock_item": 0,
+  "description": "Computer",
+  "item_code": "Computer",
+  "item_name": "Computer",
+  "item_group": "Products"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Electronic Equipments",
+  "is_stock_item": 0,
+  "description": "Mobile",
+  "item_code": "Mobile",
+  "item_name": "Mobile",
+  "item_group": "Products"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Softwares",
+  "is_stock_item": 0,
+  "description": "ERP",
+  "item_code": "ERP",
+  "item_name": "ERP",
+  "item_group": "All Item Groups"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Softwares",
+  "is_stock_item": 0,
+  "description": "Autocad",
+  "item_code": "Autocad",
+  "item_name": "Autocad",
+  "item_group": "All Item Groups"
  }
 ]

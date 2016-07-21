@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import random, json
 from erpnext.demo.domains import data
 import frappe, erpnext
-from frappe.utils import cint, flt, now_datetime, cstr
+from frappe.utils import flt, now_datetime, cstr, nowdate, add_days
 from frappe import _
 
 def setup_data():
@@ -14,8 +14,10 @@ def setup_data():
 	setup_holiday_list()
 	setup_customer()
 	setup_supplier()
+	import_json("Asset Category")
 	setup_item()
 	setup_warehouse()
+	setup_asset()
 	import_json('Address')
 	import_json('Contact')
 	setup_workstation()
@@ -158,6 +160,20 @@ def setup_warehouse():
 	w = frappe.new_doc('Warehouse')
 	w.warehouse_name = 'Supplier'
 	w.insert()
+	
+def setup_asset():
+	assets = json.loads(open(frappe.get_app_path('erpnext', 'demo', 'data', 'asset.json')).read())
+	for d in assets:
+		asset = frappe.new_doc('Asset')
+		asset.update(d)
+		asset.purchase_date = add_days(nowdate(), -random.randint(20, 1500))
+		asset.next_depreciation_date = add_days(asset.purchase_date, 30)
+		asset.warehouse = "Stores - WPL"
+		asset.set_missing_values()
+		asset.make_depreciation_schedule()
+		asset.flags.ignore_validate = True
+		asset.save()
+		asset.submit()
 
 def setup_currency_exchange():
 	frappe.get_doc({
