@@ -104,9 +104,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.page.add_menu_item(__("Sync Master Data"), function(){
 			me.get_data_from_server(function(){
-				me.load_data();
+				me.load_data(false);
 				me.make_customer();
 				me.make_item_list();
+				me.set_missing_values();
 			})
 		});
 
@@ -151,7 +152,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if(doc_data){
 					me.frm.doc = doc_data[0][me.name];
 					me.set_missing_values();
-					me.refresh();
+					me.refresh(false);
 					me.disable_input_field();
 					me.list_dialog.hide();
 				}
@@ -176,6 +177,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		doc = JSON.parse(localStorage.getItem('doc'))
 		if(this.frm.doc.payments.length == 0){
 			this.frm.doc.payments = doc.payments;
+		}
+
+		if(this.frm.doc.customer){
+			this.party_field.$input.val(this.frm.doc.customer);
 		}
 	},
 
@@ -222,15 +227,18 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.frm = {}
 		this.name = '';
-		this.load_data();
+		this.load_data(true);
 		this.setup();
 	},
 
-	load_data: function(){
+	load_data: function(load_doc){
 		this.items = window.items;
 		this.customers = window.customers;
 		this.pricing_rules = window.pricing_rules;
-		this.frm.doc =  JSON.parse(localStorage.getItem('doc'));
+
+		if(load_doc) {
+			this.frm.doc =  JSON.parse(localStorage.getItem('doc'));
+		}
 
 		$.each(window.meta, function(i, data){
 			frappe.meta.sync(data)
@@ -302,7 +310,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	make_customer: function() {
 		var me = this;
 
-		if(this.default_customer){
+		if(this.default_customer && !this.frm.doc.customer){
 			this.party_field.$input.val(this.default_customer);
 			this.frm.doc.customer = this.default_customer;
 		}
@@ -535,7 +543,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	customer_validate: function(){
 		var me = this;
-
 		if(!this.frm.doc.customer){
 			frappe.throw(__("Please select customer"))
 		}
@@ -598,21 +605,21 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			? this.item_serial_no[this.child.item_code][0] : '');
 	},
 
-	refresh: function() {
+	refresh: function(update_paid_amount) {
 		var me = this;
-		this.refresh_fields();
+		this.refresh_fields(update_paid_amount);
 		this.update_qty();
 		this.update_rate();
 		this.set_primary_action();
 	},
-	refresh_fields: function() {
+	refresh_fields: function(update_paid_amount) {
 		this.apply_pricing_rule();
 		this.discount_amount_applied = false;
 		this._calculate_taxes_and_totals();
 		this.calculate_discount_amount();
 		this.show_items_in_item_cart();
 		this.set_taxes();
-		this.calculate_outstanding_amount();
+		this.calculate_outstanding_amount(update_paid_amount);
 		this.set_totals();
 	},
 
