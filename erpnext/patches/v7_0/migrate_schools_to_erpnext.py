@@ -5,6 +5,7 @@ from erpnext.setup.setup_wizard import domainify
 def execute():
 	frappe.get_doc('Portal Settings', 'Portal Settings').sync_menu()
 	if 'schools' in frappe.get_installed_apps():
+		frappe.db.sql("""delete from `tabDesktop Icon`""")
 		frappe.db.sql("""update `tabDoctype` set module='Schools' where module='Academics'""")
 		from frappe.installer import remove_from_installed_apps
 		remove_from_installed_apps("schools")
