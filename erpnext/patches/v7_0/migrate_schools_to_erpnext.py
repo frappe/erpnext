@@ -6,6 +6,12 @@ def execute():
 	if 'schools' in frappe.get_installed_apps():
 		frappe.get_doc('Portal Settings', 'Portal Settings').sync_menu()
 		frappe.db.sql("""delete from `tabDesktop Icon`""")
+		if not frappe.db.exists('Module Def', 'Schools'):
+			frappe.get_doc({
+				'doctype': 'Module Def',
+				'module_name': 'Schools',
+				'app_name': 'erpnext'
+			}).insert()
 		frappe.db.sql("""update `tabDocType` set module='Schools' where module='Academics'""")
 		from frappe.installer import remove_from_installed_apps
 		remove_from_installed_apps("schools")
