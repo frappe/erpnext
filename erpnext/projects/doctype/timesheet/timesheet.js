@@ -78,15 +78,8 @@ frappe.ui.form.on("Timesheet Detail", {
 		var child = locals[cdt][cdn];
 
 		if(frm._setting_hours) return;
-
-		if(flt(child.hours) == 0.0){
-			frappe.model.set_value(cdt, cdn, "hours", moment(child.to_time).diff(moment(child.from_time),
-				"seconds") / 3600);
-		}else{
-			var d = moment(child.to_time);
-			d.add(child.hours, "hours");
-			frappe.model.set_value(cdt, cdn, "from_time", d.format(moment.defaultDatetimeFormat));
-		}
+		frappe.model.set_value(cdt, cdn, "hours", moment(child.to_time).diff(moment(child.from_time),
+			"seconds") / 3600);
 	},
 
 	hours: function(frm, cdt, cdn) {
