@@ -587,6 +587,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				if(data.type == "Cash" && payment_status) {
 					data.amount = total_amount_to_pay;
 					payment_status = false;
+				}else{
+					data.amount = 0.0;
 				}
 			})
 		}
