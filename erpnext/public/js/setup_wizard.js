@@ -435,7 +435,7 @@ frappe.wiz.on("before_load", function() {
 	frappe.wiz.add_slide(erpnext.wiz.instructor);
 	frappe.wiz.add_slide(erpnext.wiz.room);
 
-	if(frappe.wizard.domain && frappe.wizard.domain !== 'Education') {
+	if(frappe.wizard && frappe.wizard.domain && frappe.wizard.domain !== 'Education') {
 		frappe.wiz.welcome_page = "#welcome-to-erpnext";
 	}
 });
