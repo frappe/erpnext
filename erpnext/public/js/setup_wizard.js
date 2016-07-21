@@ -28,6 +28,7 @@ function load_erpnext_slides() {
 						{"label": __("Manufacturing"), "value": "Manufacturing"},
 						{"label": __("Retail"), "value": "Retail"},
 						{"label": __("Services"), "value": "Services"},
+						{"label": __("Education"), "value": "Education"},
 						{"label": __("Other"), "value": "Other"},
 					], reqd:1},
 				{fieldname:'chart_of_accounts', label: __('Chart of Accounts'),
