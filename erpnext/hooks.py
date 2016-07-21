@@ -98,7 +98,11 @@ portal_menu_items = [
 	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice"},
 	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note"},
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "show_always": True},
-	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"}
+	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
+	{"title": _("Announcements"), "route": "/announcement", "reference_doctype": "Announcement"},
+	{"title": _("Courses"), "route": "/course", "reference_doctype": "Course"},
+	{"title": _("Examination Schedule"), "route": "/examination", "reference_doctype": "Examination"},
+	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees"}
 ]
 
 has_website_permission = {
@@ -106,7 +110,8 @@ has_website_permission = {
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
-	"Address": "erpnext.utilities.doctype.address.address.has_website_permission"
+	"Address": "erpnext.utilities.doctype.address.address.has_website_permission",
+	"Discussion": "erpnext.schools.web_form.discussion.discussion.has_website_permission"
 }
 
 permission_query_conditions = {

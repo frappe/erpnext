@@ -1,0 +1,20 @@
+{% extends "templates/web.html" %}
+
+{% block header %}
+	<h1> {{doc.subject}} </h1>
+{% endblock %}
+
+{% block page_content %}
+
+<p class="post-description"> {{doc.description}} </p>
+<p class="post-by text-muted small">
+	{% for file in attached_files%}
+		<a href="{{file.file_url}}" target="_new">{{file.file_name}}</a>
+		<br>
+	{% endfor %}
+	<br>
+	<i>{{ doc.posted_by }}</i>
+	<i class="blog-dot"></i> {{ frappe.format_date(doc.modified) }}
+</p>
+
+{% endblock %}
