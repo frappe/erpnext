@@ -16,7 +16,6 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 from erpnext.controllers.item_variant import get_variant, copy_attributes_to_variant, ItemVariantExistsError
 
 class DuplicateReorderRows(frappe.ValidationError): pass
-class InvalidMaterialRequestType(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	website = frappe._dict(
@@ -502,8 +501,8 @@ class Item(WebsiteGenerator):
 			
 		for i in self.get("reorder_levels"):
 			if i.get("material_request_type") != mat_req_type:
-				frappe.throw(_("Row {0}: Material Request Type {1} does not match the default material request type")
-					.format(i.idx, i.material_request_type), InvalidMaterialRequestType)
+				frappe.msgprint(_("Row {0}: Material Request Type {1} does not match the default material request type")
+					.format(i.idx, i.material_request_type), alert=True)
 
 	def check_if_sle_exists(self):
 		sle = frappe.db.sql("""select name from `tabStock Ledger Entry`
