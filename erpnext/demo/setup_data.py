@@ -52,7 +52,7 @@ def complete_setup(domain='Manufacturing'):
 			"fy_start_date": "2015-01-01",
 			"fy_end_date": "2015-12-31",
 			"bank_account": "National Bank",
-			"industry": domain,
+			"domain": domain,
 			"company_name": data.get(domain).get('company_name'),
 			"chart_of_accounts": "Standard",
 			"company_abbr": ''.join([d[0] for d in data.get(domain).get('company_name').split()]).upper(),
@@ -162,7 +162,7 @@ def setup_warehouse():
 	w = frappe.new_doc('Warehouse')
 	w.warehouse_name = 'Supplier'
 	w.insert()
-	
+
 def setup_asset():
 	assets = json.loads(open(frappe.get_app_path('erpnext', 'demo', 'data', 'asset.json')).read())
 	for d in assets:
@@ -307,7 +307,7 @@ def setup_salary_structure():
 		})
 
 		ss.insert()
-		
+
 def setup_salary_structure_for_timesheet():
 	for e in frappe.get_all('Salary Structure', fields=['name'], filters={'is_active': 'Yes'}, limit=2):
 		ss_doc = frappe.get_doc("Salary Structure", e.name)
@@ -332,7 +332,7 @@ def setup_account_to_expense_type():
 		{'name': _('Medical'), "account": "Utility Expenses - WPL"},
 		{'name': _('Others'), "account": "Miscellaneous Expenses - WPL"},
 		{'name': _('Travel'), "account": "Travel Expenses - WPL"}]
-		
+
 	for expense_type in expense_types:
 		doc = frappe.get_doc("Expense Claim Type", expense_type["name"])
 		doc.append("accounts", {
@@ -340,10 +340,10 @@ def setup_account_to_expense_type():
 			"default_account" : expense_type["account"]
 		})
 		doc.save(ignore_permissions=True)
-		
+
 def setup_budget():
 	fiscal_years = frappe.get_all("Fiscal Year", order_by="year_start_date")[-2:]
-		
+
 	for fy in fiscal_years:
 		budget = frappe.new_doc("Budget")
 		budget.cost_center = get_random("Cost Center")
@@ -353,14 +353,14 @@ def setup_budget():
 
 		add_random_children(budget, "accounts", rows=random.randint(10, expense_ledger_count), randomize = { 			"account": ("Account", {"is_group": "0", "root_type": "Expense"})
 		}, unique="account")
-			
+
 		for d in budget.accounts:
 			d.budget_amount = random.randint(5, 100) * 10000
-			
+
 		budget.save()
 		budget.submit()
-	
-		
+
+
 def setup_user_roles():
 	if not frappe.db.get_global('demo_hr_user'):
 		user = frappe.get_doc('User', 'CharmaineGaudreau@example.com')
@@ -396,7 +396,7 @@ def setup_user_roles():
 		user = frappe.get_doc('User', 'LeonAbdulov@example.com')
 		user.add_roles('Accounts User', 'Accounts Manager', 'Sales User', 'Purchase User')
 		frappe.db.set_global('demo_accounts_user', user.name)
-		
+
 	if not frappe.db.get_global('demo_projects_user'):
 		user = frappe.get_doc('User', 'panca@example.com')
 		user.add_roles('HR User', 'Projects User')

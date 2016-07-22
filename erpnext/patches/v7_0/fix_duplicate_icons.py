@@ -2,9 +2,12 @@ import frappe
 
 from frappe.desk.doctype.desktop_icon.desktop_icon import (sync_desktop_icons,
 	get_desktop_icons, set_hidden)
+from erpnext.patches.v7_0.migrate_schools_to_erpnext import reload_doctypes_for_schools_icons
 
 def execute():
 	'''hide new style icons if old ones are set'''
+	reload_doctypes_for_schools_icons()
+
 	sync_desktop_icons()
 
 	for user in frappe.get_all('User', filters={'user_type': 'System User'}):

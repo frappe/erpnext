@@ -3,9 +3,7 @@ import frappe
 from erpnext.setup.setup_wizard import domainify
 
 def execute():
-	for name in ('student', 'student_group', 'course_schedule', 'student_attendance',
-		'course', 'program', 'student_applicant', 'examination', 'fees', 'instructor'):
-		frappe.reload_doc('schools', 'doctype', name)
+	reload_doctypes_for_schools_icons()
 
 	frappe.reload_doc('website', 'doctype', 'portal_settings')
 	frappe.reload_doc('website', 'doctype', 'portal_menu_item')
@@ -27,3 +25,8 @@ def execute():
 	else:
 		frappe.get_doc('Portal Settings', 'Portal Settings').sync_menu()
 		domainify.setup_sidebar_items(domainify.get_domain('Manufacturing'))
+
+def reload_doctypes_for_schools_icons():
+	for name in ('student', 'student_group', 'course_schedule', 'student_attendance',
+		'course', 'program', 'student_applicant', 'examination', 'fees', 'instructor'):
+		frappe.reload_doc('schools', 'doctype', name)
