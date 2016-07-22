@@ -3,6 +3,14 @@ import frappe
 from erpnext.setup.setup_wizard import domainify
 
 def execute():
+	for name in ('student', 'student_group', 'course_schedule', 'student_attendance',
+		'course', 'program', 'student_applicant', 'examination', 'fees', 'instructor'):
+		frappe.reload_doc('schools', 'doctype', name)
+
+	frappe.reload_doc('website', 'doctype', 'portal_settings')
+	frappe.reload_doc('website', 'doctype', 'portal_menu_item')
+	frappe.reload_doc('buying', 'doctype', 'request_for_quotation')
+
 	if 'schools' in frappe.get_installed_apps():
 		frappe.get_doc('Portal Settings', 'Portal Settings').sync_menu()
 		frappe.db.sql("""delete from `tabDesktop Icon`""")
@@ -17,9 +25,5 @@ def execute():
 		remove_from_installed_apps("schools")
 		domainify.setup_domain('Education')
 	else:
-		frappe.reload_doc('schools', 'doctype', 'announcement')
-		frappe.reload_doc('schools', 'doctype', 'course')
-		frappe.reload_doc('schools', 'doctype', 'fees')
-		frappe.reload_doc('schools', 'doctype', 'examination')
 		frappe.get_doc('Portal Settings', 'Portal Settings').sync_menu()
 		domainify.setup_sidebar_items(domainify.get_domain('Manufacturing'))
