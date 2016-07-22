@@ -108,6 +108,7 @@ def make_salary_slip_for_timesheet(name):
 	salary_slip = make_salary_slip(name)
 	salary_slip.insert()
 	salary_slip.submit()
+	frappe.db.commit()
 
 def make_sales_invoice_for_timesheet(name):
 	sales_invoice = make_sales_invoice(name)
@@ -117,7 +118,9 @@ def make_sales_invoice_for_timesheet(name):
 		'qty': 1,
 		'rate': 1000
 	})
+	sales_invoice.flags.ignore_permissions = 1
 	sales_invoice.set_missing_values()
 	sales_invoice.calculate_taxes_and_totals()
 	sales_invoice.insert()
 	sales_invoice.submit()
+	frappe.db.commit()
