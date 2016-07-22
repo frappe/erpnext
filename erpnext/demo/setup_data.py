@@ -4,7 +4,7 @@ import random, json
 from frappe.utils.make_random import add_random_children, get_random
 from erpnext.demo.domains import data
 import frappe, erpnext
-from frappe.utils import flt, now_datetime, cstr, nowdate, add_days
+from frappe.utils import flt, now_datetime, cstr, nowdate, add_days, add_years
 from frappe import _
 
 def setup_data():
@@ -32,6 +32,7 @@ def setup_data():
 	setup_employee()
 	setup_salary_structure()
 	setup_salary_structure_for_timesheet()
+	setup_leave_allocation()
 	setup_account_to_expense_type()
 	setup_user_roles()
 	setup_budget()
@@ -315,6 +316,25 @@ def setup_salary_structure_for_timesheet():
 		ss_doc.salary_component = 'Basic'
 		ss_doc.hour_rate = flt(random.random() * 10, 2)
 		ss_doc.save(ignore_permissions=True)
+
+def setup_leave_allocation():
+	for employee in frappe.get_all('Employee', fields=['name']):
+		leave_types = frappe.get_all("Leave Type", fields=['name', 'max_days_allowed'])
+		for leave_type in leave_types:
+			if not leave_type.max_days_allowed:
+				leave_type.max_days_allowed = 10
+	
+		leave_allocation = frappe.get_doc({
+			"doctype": "Leave Allocation",
+			"employee": employee.name,
+			"from_date": nowdate(),
+			"to_date": add_years(nowdate(), 1),
+			"leave_type": leave_type.name,
+			"new_leaves_allocated": random.randint(1, int(leave_type.max_days_allowed))
+		})
+		leave_allocation.insert()
+		leave_allocation.submit()
+		frappe.db.commit()			
 
 def setup_account():
 	frappe.flags.in_import = True
