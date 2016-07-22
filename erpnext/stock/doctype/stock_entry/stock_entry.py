@@ -49,7 +49,7 @@ class StockEntry(StockController):
 		self.validate_batch()
 
 		self.set_actual_qty()
-		self.calculate_rate_and_amount()
+		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -234,18 +234,20 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 
-	def calculate_rate_and_amount(self, force=False):
-		self.set_basic_rate(force)
+	def calculate_rate_and_amount(self, force=False, update_finished_item_rate=True):
+		self.set_basic_rate(force, update_finished_item_rate)
 		self.distribute_additional_costs()
 		self.update_valuation_rate()
 		self.set_total_incoming_outgoing_value()
 		self.set_total_amount()
 
-	def set_basic_rate(self, force=False):
+	def set_basic_rate(self, force=False, update_finished_item_rate=True):
 		"""get stock and incoming rate on posting date"""
 		raw_material_cost = 0.0
+		fg_basic_rate = 0.0
 
 		for d in self.get('items'):
+			if d.t_warehouse: fg_basic_rate = flt(d.basic_rate)
 			args = frappe._dict({
 				"item_code": d.item_code,
 				"warehouse": d.s_warehouse or d.t_warehouse,
@@ -266,13 +268,14 @@ class StockEntry(StockController):
 				if not d.t_warehouse:
 					raw_material_cost += flt(d.basic_amount)
 
-		self.set_basic_rate_for_finished_goods(raw_material_cost)
+		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
+		if (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
+			self.set_basic_rate_for_finished_goods(raw_material_cost)
 
 	def set_basic_rate_for_finished_goods(self, raw_material_cost):
 		if self.purpose in ["Manufacture", "Repack"]:
-			number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
 			for d in self.get("items"):
-				if d.bom_no or (d.t_warehouse and number_of_fg_items == 1):
+				if d.bom_no or d.t_warehouse:
 					d.basic_rate = flt(raw_material_cost / flt(d.transfer_qty), d.precision("basic_rate"))
 					d.basic_amount = flt(raw_material_cost, d.precision("basic_amount"))
 
