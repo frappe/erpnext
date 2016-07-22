@@ -4,9 +4,11 @@
 from __future__ import unicode_literals
 
 import frappe, random
+from frappe.utils import flt
 from frappe.utils.make_random import add_random_children, get_random
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.party import get_party_account_currency
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request, make_payment_entry
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_sales_user_2'))
@@ -33,6 +35,19 @@ def work():
 	if random.random() < 0.3:
 		for i in xrange(random.randint(1,3)):
 			make_sales_order()
+
+	if random.random() < 0.1:
+		#make payment request against Sales Order
+		sales_order_name = get_random("Sales Order", filters={"docstatus": 1})
+		if sales_order_name:
+			so = frappe.get_doc("Sales Order", sales_order_name)
+			if flt(so.per_billed) != 100:
+				payment_request = make_payment_request(dt="Sales Order", dn=so.name, recipient_id=so.contact_email,
+					submit_doc=True, mute_email=True, use_dummy_message=True)
+
+				payment_entry = frappe.get_doc(make_payment_entry(payment_request.name))
+				payment_entry.posting_date = frappe.flags.current_date
+				payment_entry.submit()
 
 def make_opportunity():
 	b = frappe.get_doc({
