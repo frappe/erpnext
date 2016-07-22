@@ -28,5 +28,5 @@ def execute():
 
 def reload_doctypes_for_schools_icons():
 	for name in ('student', 'student_group', 'course_schedule', 'student_attendance',
-		'course', 'program', 'student_applicant', 'examination', 'fees', 'instructor'):
+		'course', 'program', 'student_applicant', 'examination', 'fees', 'instructor', 'announcement'):
 		frappe.reload_doc('schools', 'doctype', name)
