@@ -73,7 +73,7 @@ class PaymentRequest(Document):
 
 		return payment_entry
 
-	def create_payment_entry(self):
+	def create_payment_entry(self, submit=True):
 		"""create entry"""
 		frappe.flags.ignore_account_permission = True
 
@@ -113,7 +113,7 @@ class PaymentRequest(Document):
 				"amount": payment_entry.difference_amount
 			})
 
-		if not self.flags.make_draft_payment_entry:
+		if submit:
 			payment_entry.insert(ignore_permissions=True)
 			payment_entry.submit()
 
@@ -264,10 +264,9 @@ def resend_payment_email(docname):
 	return frappe.get_doc("Payment Request", docname).send_email()
 
 @frappe.whitelist()
-def make_payment_entry(docname, make_draft_payment_entry=True):
+def make_payment_entry(docname):
 	doc = frappe.get_doc("Payment Request", docname)
-	doc.flags.make_draft_payment_entry = make_draft_payment_entry
-	return doc.set_as_paid().as_dict()
+	return doc.create_payment_entry(submit=False).as_dict()
 
 def make_status_as_paid(doc, method):
 	for ref in doc.references:

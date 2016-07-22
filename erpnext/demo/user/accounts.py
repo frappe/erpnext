@@ -57,12 +57,14 @@ def work():
 				payment_request = make_payment_request(dt="Sales Invoice", dn=si.name, recipient_id=si.contact_email,
 					submit_doc=True, mute_email=True, use_dummy_message=True)
 
-				make_payment_entry(payment_request.name, make_draft_payment_entry=False)
+				payment_entry = frappe.get_doc(make_payment_entry(payment_request.name))
+				payment_entry.posting_date = frappe.flags.current_date
+				payment_entry.submit()
 
 def make_payment_entries(ref_doctype, report):
 	outstanding_invoices = list(set([r[3] for r in query_report.run(report,
 	{"report_date": frappe.flags.current_date })["result"] if r[2]==ref_doctype]))
-	
+
 	# make Payment Entry
 	for inv in outstanding_invoices[:random.randint(1, 2)]:
 		pe = get_payment_entry(ref_doctype, inv)

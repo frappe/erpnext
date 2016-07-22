@@ -41,11 +41,13 @@ def work():
 		sales_order_name = get_random("Sales Order", filters={"docstatus": 1})
 		if sales_order_name:
 			so = frappe.get_doc("Sales Order", sales_order_name)
-			if (flt(so.grand_total) - flt(so.advance_paid)) > 0:
+			if flt(so.per_billed) != 100:
 				payment_request = make_payment_request(dt="Sales Order", dn=so.name, recipient_id=so.contact_email,
 					submit_doc=True, mute_email=True, use_dummy_message=True)
 
-				make_payment_entry(payment_request.name, make_draft_payment_entry=False)
+				payment_entry = frappe.get_doc(make_payment_entry(payment_request.name))
+				payment_entry.posting_date = frappe.flags.current_date
+				payment_entry.submit()
 
 def make_opportunity():
 	b = frappe.get_doc({
