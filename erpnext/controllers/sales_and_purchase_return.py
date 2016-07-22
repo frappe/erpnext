@@ -167,9 +167,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		target_doc.qty = -1* source_doc.qty
 		if doctype == "Purchase Receipt":
 			target_doc.received_qty = -1* source_doc.qty
-			target_doc.prevdoc_doctype = source_doc.prevdoc_doctype
-			target_doc.prevdoc_docname = source_doc.prevdoc_docname
-			target_doc.prevdoc_detail_docname = source_doc.prevdoc_detail_docname
+			target_doc.purchase_order = source_doc.purchase_order
 		elif doctype == "Purchase Invoice":
 			target_doc.received_qty = -1* source_doc.qty
 			target_doc.purchase_order = source_doc.purchase_order
