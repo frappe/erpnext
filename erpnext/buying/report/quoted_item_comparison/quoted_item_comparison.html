@@ -1,0 +1,110 @@
+
+<head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+		google.charts.load("current", {"packages":["corechart"]});
+		google.charts.setOnLoadCallback(drawChart);
+		function drawChart() {
+		var chartData = [];
+		{% var q = 0; %}
+		{% for(var i=1, l=report.columns.length; i<l; i++) { %}
+
+			{% if(__(report.columns[i].label) != __("Quotation")) { %}
+				var tempData{%=q%} = [];
+				var tempData{%=q+1%} = [];
+				{% if(i == 1) { %}
+					tempData{%=q%}[0] = \"{%= report.columns[i].label %}\";
+
+					{% for(var j=0, m=data.length; j<m; j++) { %}
+
+						tempData{%=q%}[{%=j%}+1] =\"{%= data[j][report.columns[i].field] %}\";
+
+					{% } %}
+				{% } else { %}
+
+					tempData{%=q%}[0] = parseInt(\"{%= report.columns[i].label %}\".replace(\"Qty: \",\"\"));
+
+					{% for(var j=0, m=data.length; j<m; j++) { %}
+
+						tempData{%=q%}[{%=j%}+1] = {% if(data[j][report.columns[i].field] == "") { if (i > 2) { %} chartData[{%=q%}-1][{%=j%}+1] {% } else { %} 0 {% } }else { %} {%=data[j][report.columns[i].field] %} {% } %};
+
+					{% } %}
+					chartData[{%=q%}] = tempData{%=q%};
+					{% q= q+1; %}
+					
+					{% if(i < report.columns.length -2){ %}
+						tempData{%=q%}[0] = parseInt(\"{%= report.columns[i+2].label %}\".replace(\"Qty: \",\"\")-1);
+
+					{% } else { %}
+						tempData{%=q%}[0] = chartData[{%=q-1%}][0]*2;
+					
+					{% } %}
+					
+					{% for(var j=0, m=data.length; j<m; j++) { %}
+
+						tempData{%=q%}[{%=j%}+1] = {% if(data[j][report.columns[i].field] == "") { if (i > 2) { %} chartData[{%=q-1%}-1][{%=j%}+1] {% } else { %} 0 {% } }else { %} {%=data[j][report.columns[i].field] %} {% } %};
+
+					{% } %}
+					
+					
+				{% } %}
+				chartData[{%=q%}] = tempData{%=q%};
+				{% q= q+1; %}
+			{% } %}
+
+		{% } %}
+		console.log(chartData);
+		
+			var data = google.visualization.arrayToDataTable(chartData);
+			var chart = new google.visualization.LineChart(document.getElementById("chart_div"));
+			
+			var options = {
+			  title: "Item Price Analysis for {%= filters.item %}" ,
+			  vAxis: {title: "Price ($)"},
+			  width: 652,
+			  height: 450,
+			  isStacked: false,
+			  hAxis: {logScale: true, minValue: 1,viewWindow:{ min: 1 }  }
+			};
+		
+			chart.draw(data, options);
+		}
+    </script>
+
+ </head>
+<div style="margin-bottom: 7px;" class="text-center">
+	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+</div>
+<h2 class="text-center">{%= __(report.report_name) %}</h2>
+<h4 class="text-center">{%= filters.item %} </h4>
+
+<hr>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			{% for(var i=0, l=report.columns.length; i<l; i++) { %}
+				<th style="width: 15%">{%= report.columns[i].label %}</th>
+			{% } %}
+
+		</tr>
+	</thead>
+	<tbody>
+
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+			
+				{% for(var j=0,m=report.columns.length; j<m; j++) { %}
+					<td style="width: 15%">{%= data[i][report.columns[j].field] %}</td>
+				{% } %}
+
+		</tr>
+		{% } %}
+	</tbody>
+</table>
+
+<h4 class="text-center"> Analysis Chart </h4>
+<div id="chart_div" align="center" style="width: auto;  display: inline-block !important; margin: auto !important"></div>
+
+
+		
+<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
