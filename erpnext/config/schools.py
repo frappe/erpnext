@@ -13,8 +13,22 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Student Batch"
+				},
+				{
+					"type": "doctype",
 					"name": "Student Group"
 				},
+				{
+					"type": "doctype",
+					"name": "Student Group Creation Tool"
+				}
+			]
+		},
+		{
+			"label": _("Admission"),
+			"items": [
+
 				{
 					"type": "doctype",
 					"name": "Student Applicant"
@@ -26,10 +40,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Program Enrollment Tool"
-				},
-				{
-					"type": "doctype",
-					"name": "Student Group Creation Tool"
 				}
 			]
 		},
@@ -47,11 +57,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Scheduling Tool"
+					"name": "Examination"
 				},
 				{
 					"type": "doctype",
-					"name": "Examination"
+					"name": "Scheduling Tool"
 				}
 			]
 		},
@@ -75,6 +85,23 @@ def get_data():
 					"name": "Student Fee Collection",
 					"doctype": "Fees",
 					"is_query_report": True
+				}
+			]
+		},
+		{
+			"label": _("LMS"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Announcement"
+				},
+				{
+					"type": "doctype",
+					"name": "Topic"
+				},
+				{
+					"type": "doctype",
+					"name": "Discussion"
 				}
 			]
 		},
