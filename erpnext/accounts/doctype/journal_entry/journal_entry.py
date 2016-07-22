@@ -61,8 +61,8 @@ class JournalEntry(AccountsController):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
 
 	def on_cancel(self):
-		from erpnext.accounts.utils import remove_against_link_from_jv
-		remove_against_link_from_jv(self.doctype, self.name)
+		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+		unlink_ref_doc_from_payment_entries(self.doctype, self.name)
 
 		self.make_gl_entries(1)
 		self.update_advance_paid()
