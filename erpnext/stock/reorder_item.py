@@ -16,7 +16,7 @@ def reorder_item():
 		return _reorder_item()
 
 def _reorder_item():
-	material_requests = {"Purchase": {}, "Transfer": {}}
+	material_requests = {"Purchase": {}, "Transfer": {}, "Issue": {}, "Manufacture": {}}
 	warehouse_company = frappe._dict(frappe.db.sql("""select name, company from `tabWarehouse`
 		where disabled=0"""))
 	default_company = (erpnext.get_default_company() or
@@ -121,7 +121,7 @@ def create_material_request(material_requests):
 				mr.update({
 					"company": company,
 					"transaction_date": nowdate(),
-					"material_request_type": "Material Transfer" if request_type=="Transfer" else request_type
+					"material_request_type": "Material Transfer" if request_type=="Transfer" else ("Material Issue" if request_type=="Issue" else request_type)
 				})
 
 				for d in items:

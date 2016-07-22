@@ -351,6 +351,16 @@ $.extend(erpnext.item, {
 	}
 });
 
+cur_frm.cscript.custom_reorder_levels_add = function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	var temp = frm.default_mr_type;
+	if (temp == "Material Issue") { temp = "Issue";}
+	else if (temp == "Material Transfer") { temp = "Transfer";}
+	console.log(temp);
+	d.material_request_type = temp;
+
+}
+
 cur_frm.add_fetch('attribute', 'numeric_values', 'numeric_values');
 cur_frm.add_fetch('attribute', 'from_range', 'from_range');
 cur_frm.add_fetch('attribute', 'to_range', 'to_range');

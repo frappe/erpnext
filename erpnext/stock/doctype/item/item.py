@@ -77,6 +77,7 @@ class Item(WebsiteGenerator):
 		self.validate_barcode()
 		self.cant_change()
 		self.validate_warehouse_for_reorder()
+		self.validate_reorder_material_request_type()
 		self.update_item_desc()
 		self.synced_with_hub = 0
 
@@ -486,6 +487,18 @@ class Item(WebsiteGenerator):
 			else:
 				frappe.throw(_("Row {0}: An Reorder entry already exists for this warehouse {1}")
 					.format(i.idx, i.warehouse), DuplicateReorderRows)
+	
+	def validate_reorder_material_request_type(self):
+		mat_req_type = self.get("default_mr_type")
+		if mat_req_type == "Material Issue":
+			mat_req_type = "Issue"
+		elif mat_req_type == "Material Transfer":
+			mat_req_type = "Transfer"
+			
+		for i in self.get("reorder_levels"):
+			if i.get("material_request_type") != mat_req_type:
+				frappe.msgprint(_("Row {0}: Material Request Type {1} does not match the default material request type")
+					.format(i.idx, i.material_request_type), alert=True)
 
 	def check_if_sle_exists(self):
 		sle = frappe.db.sql("""select name from `tabStock Ledger Entry`
