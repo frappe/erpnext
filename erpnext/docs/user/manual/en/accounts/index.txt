@@ -3,7 +3,7 @@ sales-invoice
 purchase-invoice
 payment-request
 chart-of-accounts
-making-payments
+payment-entry
 advance-payment-entry
 payment-request
 credit-limit
