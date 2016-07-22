@@ -77,7 +77,7 @@
    },
    {
     "amount": 2000.0,
-    "bom_no": "BOM/_Test Item Home Desktop Manufactured/001",
+    "bom_no": "BOM-_Test Item Home Desktop Manufactured-001",
     "doctype": "BOM Item",
     "item_code": "_Test Item Home Desktop Manufactured",
     "parentfield": "items",

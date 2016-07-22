@@ -20,11 +20,11 @@ frappe.ui.form.on("Job Applicant", {
 						"applicant_name": frm.doc.applicant_name,
 						"designation": frm.doc.job_opening,
 					};
-					new_doc("Offer Letter");
+					frappe.new_doc("Offer Letter");
 				}, __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
 		}
-		
+
 	}
 });

@@ -19,7 +19,7 @@ Sie werden bemerken, dass alle Informationen über nicht gelieferte Artikel und 
 
 ### Pakete oder Artikel mit Produkt-Bundles versenden
 
-Wenn Sie Artikel, die ein [Produkt-Bundle]({{docs_base_url}}/user/manual/en/selling/setup/sales-bom.html), ERPNext will automatically beinhalten, versenden, erstellt Ihnen ERPNext automatisch eine Tabelle "Packliste" basierend auf den Unterartikeln dieses Artikels.
+Wenn Sie Artikel, die ein [Produkt-Bundle]({{docs_base_url}}/user/manual/de/selling/setup/product-bundle.html), ERPNext will automatically beinhalten, versenden, erstellt Ihnen ERPNext automatisch eine Tabelle "Packliste" basierend auf den Unterartikeln dieses Artikels.
 
 Wenn Ihre Artikel serialisiert sind, dann müssen Sie für Artikel vom Typ Produkt-Bundle die Seriennummer in der Tabelle "Packliste" aktualisieren.
 

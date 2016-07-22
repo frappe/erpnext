@@ -1,7 +1,6 @@
 {
     "country_code": "de",
-    "name": "Deutscher Kontenplan SKR04",
-	"disabled": "Yes",
+    "name": "Germany - Kontenplan SKR04",
     "tree": {
         "Bilanz - Aktiva": {
             "Anlageverm\u00f6gen": {
@@ -222,24 +221,8 @@
                         "Forderungen aus Lieferungen und Leistungen gegen Gesellschafter - Restlaufzeit bis 1 Jahr": {},
                         "Forderungen aus Lieferungen und Leistungen gegen Gesellschafter - Restlaufzeit gr\u00f6\u00dfer 1 Jahr": {}
                     },
-                    "Forderungen geg. Untern.- m. d. e. Beteiligungsverh\u00e4ltnis besteht od. Verbindl. gegen Untern. - mit denen ein Beteiligungsverh\u00e4ltnis besteht": {
-                        "Forderungen gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht": {
-                            "Besitzwechsel gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht": {},
-                            "Besitzwechsel gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht - Restlaufzeit bis 1 Jahr": {},
-                            "Besitzwechsel gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht - Restlaufzeit gr\u00f6\u00dfer 1 Jahr": {},
-                            "Besitzwechsel gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht- bundesbankf\u00e4hig": {},
-                            "Forderungen aus Lieferungen und Leistungen gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht": {
-                                "account_type": "Receivable"
-                            },
-                            "Forderungen aus Lieferungen und Leistungen gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht - Restlaufzeit bis 1 Jahr": {},
-                            "Forderungen aus Lieferungen und Leistungen gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht - Restlaufzeit gr\u00f6\u00dfer 1 Jahr": {},
-                            "Forderungen gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht - Restlaufzeit bis 1 Jahr": {},
-                            "Forderungen gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht - Restlaufzeit gr\u00f6\u00dfer 1 Jahr": {}
-                        }
-                    },
                     "Forderungen gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht H-Saldo": {
-                        "Wertberichtigungen zu Forderungen mit einer Restlaufzeit bis zu 1 Jahr gegen Unternhemen- mit denen ein Beteiligungsverh\u00e4ltnis besteht": {},
-                        "Wertberichtigungen zu Forderungen mit einer Restlaufzeit von mehr als 1 Jahr gegen Unternhemen- mit denen ein Beteiligungsverh\u00e4ltnis besteht": {}
+                    	"is_group": 1
                     },
                     "Forderungen gegen verbundene Unternehmen H-Saldo": {
                         "Wertberichtigungen zu Forderungen mit einer Restlaufzeit bis zu 1 Jahr gegen verbundene Unternehmen": {},
@@ -459,7 +442,7 @@
                         "Gezeichnetes Kapital": {}
                     },
                     "Nicht eingeforderte ausstehende Einlagen": {
-                        "Ausstehende Einlagen auf das gezeichnete Kapital- nicht eingefordert (Passivausweis- von gezeichnetem Kapital offen abgesetzt eingeforderte ausstehende Einlagen s. Konto 1298)": {}
+						"is_group": 1
                     }
                 },
                 "Kapital Teilhaber": {
@@ -758,19 +741,6 @@
                             "Verbindlichkeiten gegen\u00fcber Kreditinstituten aus Teilzahlungsvertr\u00e4gen Restlaufzeit gr\u00f6\u00dfer 5 Jahre": {}
                         }
                     },
-                    "Verbindlichkeiten gegen\u00fcber Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht oder Forderungen gegen Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht": {
-                        "Verbindlichkeiten gegen\u00fcber Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht ": {
-                            "Verbindlichkeiten aus Lieferungen und Leistungen gegen\u00fcber Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht": {
-                                "account_type": "Payable"
-                            },
-                            "Verbindlichkeiten aus Lieferungen und Leistungen gegen\u00fcber Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht - Restlaufzeit 1 bis 5 Jahre": {},
-                            "Verbindlichkeiten aus Lieferungen und Leistungen gegen\u00fcber Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht - Restlaufzeit bis 1 Jahr": {},
-                            "Verbindlichkeiten aus Lieferungen und Leistungen gegen\u00fcber Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht - Restlaufzeit gr\u00f6\u00dfer 5 Jahre": {},
-                            "Verbindlichkeiten gegen\u00fcber Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht Restlaufzeit 1 bis 5 Jahre": {},
-                            "Verbindlichkeiten gegen\u00fcber Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht Restlaufzeit bis 1 Jahr": {},
-                            "Verbindlichkeiten gegen\u00fcber Unternehmen- mit denen ein Beteiligungsverh\u00e4ltnis besteht Restlaufzeit gr\u00f6\u00dfer 5 Jahre": {}
-                        }
-                    },
                     "Verbindlichkeiten gegen\u00fcber verbundenen Unternehmen oder Forderungen gegen verbundene Unternehmen": {
                         "Verbindlichkeiten gegen\u00fcber verbundenen Unternehmen": {
                             "Verbindlichkeiten aus Lieferungen und Leistungen gegen\u00fcber verbundenen Unternehmen": {
@@ -883,10 +853,6 @@
             "Statistische Konten f\u00fcr Gewinnzuschlag": {
                 "Statistische Konten f\u00fcr den Gewinnzuschlag nach \u00a7\u00a7 6b- 6c und 7g EStG (Haben-Buchung)": {},
                 "Statistische Konten f\u00fcr den Gewinnzuschlag- Gegenkonto zu 9890": {}
-            },
-            "Statistische Konten f\u00fcr den GuV-Ausweis in \"Gutschrift bzw. Belastung auf Verbindlichkeitskonten\" bei den Zuordnungstabellen f\u00fcr PersHG nach KapCoRiLiG": {
-                "Anteil f\u00fcr Verbindlichkeitskonten": {},
-                "Verrechnungskonto f\u00fcr Anteil Verbindlichkeitskonten": {}
             },
             "Statistische Konten f\u00fcr den Kennziffernteil der Bilanz": {
                 "Besch\u00e4ftigte Personen": {},
@@ -1028,7 +994,6 @@
                 "Verbindlichkeiten aus Gew\u00e4hrleistungsvertr\u00e4gen": {},
                 "Verbindlichkeiten aus Gew\u00e4hrleistungsvertr\u00e4gen gegen\u00fcber verbundenen Unternehmen": {},
                 "Verbindlichkeiten aus der Begebung und \u00fcbertragung von Wechseln": {},
-                "Verbindlichkeiten aus der Begebung und \u00fcbertragung von Wechseln gegen\u00fcber verbundenen Unternehmen": {},
                 "Verpflichtungen aus Treuhandverm\u00f6gen": {}
             },
             "Statistische Konten zu \u00a7 4 (4a) EStG": {
@@ -1108,30 +1073,6 @@
                         "Forderungsverluste 19% USt (soweit un\u00fcblich hoch)": {},
                         "Forderungsverluste 7% USt (soweit un\u00fcblich hoch)": {},
                         "Vorwegnahme k\u00fcnftiger Wertschwankungen im Umlaufverm\u00f6gen (soweit un\u00fcblich hoch)": {}
-                    }
-                },
-                "Abschreibungen auf immaterielle Verm\u00f6gensgegenst\u00e4nde des Anlageverm\u00f6gens und Sachanlagen sowie auf aktivierte Aufwendungen f\u00fcr die Ingangsetzung und Erweiterung des Gesch\u00e4ftsbetriebs": {
-                    "Abschreibungen auf immaterielle Verm\u00f6gensgegenst\u00e4nde des Anlageverm\u00f6gens und Sachanlagen sowie auf aktivierte Aufwendungen f\u00fcr die Ingangsetzung und Erweiterung des Gesch\u00e4ftsbetriebs": {
-                        "Abschreibungen auf Aufwendungen f\u00fcr die Ingangsetzung und Erweiterung des Gesch\u00e4ftsbetriebs": {},
-                        "Abschreibungen auf Aufwendungen f\u00fcr die W\u00e4hrungsumstellung auf den Euro": {},
-                        "Abschreibungen auf Geb\u00e4ude": {},
-                        "Abschreibungen auf Geb\u00e4udeteil des h\u00e4uslischen Arbeitszimmers": {},
-                        "Abschreibungen auf Kfz": {},
-                        "Abschreibungen auf Sachanlagen (ohne AfA auf Kfz und Geb\u00e4ude)": {},
-                        "Abschreibungen auf Sachanlagen auf Grund steuerlicher Sondervorschriften ": {},
-                        "Abschreibungen auf aktivierte- geringwertige Wirtschaftsg\u00fcter": {},
-                        "Abschreibungen auf den Gesch\u00e4fts- oder Firmenwert": {},
-                        "Abschreibungen auf immaterielle Verm\u00f6gensgegenst\u00e4nde": {},
-                        "Absetzung f\u00fcr Au\u00dfergew\u00f6hnliche technische und wirtschaftliche Abnutzung der Geb\u00e4ude": {},
-                        "Absetzung f\u00fcr Au\u00dfergew\u00f6hnliche technische und wirtschaftliche Abnutzung des Kfz": {},
-                        "Absetzung f\u00fcr Au\u00dfergew\u00f6hnliche technische und wirtschaftliche Abnutzung sonstiger Wirtschaftsg\u00fcter": {},
-                        "Au\u00dferplanma\u00dfige Abschreibungen auf aktivierte- geringwertige Wirtschaftsg\u00fcter": {},
-                        "Au\u00dferplanm\u00e4\u00dfige Abschreibungen auf Sachanlagen": {},
-                        "Au\u00dferplanm\u00e4\u00dfige Abschreibungen auf immaterielle Verm\u00f6gensgegenst\u00e4nde": {},
-                        "Kaufleasing": {},
-                        "Sofortabschreibungen geringwertiger Wirtschaftsg\u00fcter": {},
-                        "Sonderabschreibungen nach \u00a7 7g Abs. 1 u. 2 EStG (f\u00fcr Kfz)": {},
-                        "Sonderabschreibungen nach \u00a7 7g Abs. 1 u. 2 EStG (ohne Kfz)": {}
                     }
                 },
                 "Kalkulatorische Kosten": {
@@ -1369,16 +1310,6 @@
                         "Vorwegnahme k\u00fcnftiger Wertschwankungen bei Wertpapieren des Umlaufverm\u00f6gens": {}
                     }
                 },
-                "Aufwendungen aus Verlust\u00fcbernahme und auf Grund einer Gewinngemeinschaft- eines Gewinn- oder Teilgewinnabf\u00fchrungsvertrags abgef\u00fchrte Gewinne": {
-                    "Auf Grund einer Gewinngemeinschaft- eines Gewinn- oder Teilgewinnabf\u00fchrungsvertrags abgef\u00fchrte Gewinne": {
-                        "Abgef\u00fchrte Gewinnanteile an stille Gesellschafter \u00a7 8 GewStG": {},
-                        "Abgef\u00fchrte Gewinne auf Grund einer Gewinngemeinschaft": {},
-                        "Abgef\u00fchrte Gewinne auf Grund eines Gewinn- oder Teilgewinnabf\u00fchrungsvertrags": {}
-                    },
-                    "Aufwendungen aus Verlust\u00fcbernahme": {
-                        "Aufwendungen aus Verlust\u00fcbernahme": {}
-                    }
-                },
                 "Au\u00dferordentliche Aufwendungen": {
                     "Au\u00dferordentliche Aufwendungen": {
                         "Au\u00dferordentliche Aufwendungen": {},
@@ -1494,18 +1425,13 @@
                         "Anlagenabg\u00e4nge immaterielle Verm\u00f6gensgegenst\u00e4nde (Restbuchwert bei Buchgewinn)": {},
                         "Bank Bewertungsertrag": {},
                         "Bank Waehrungsverlust (Konto)": {},
-                        "Erl. a. Verk. v. Wirtschaftsg. d. Umlaufv.- umsatzsteuerf. \u00a7 4 Nr. 8 ff UStG i. V. m. \u00a7 4 Abs. 3 Satz 4 EStG- 100%/50% steuerf.(inlandische Kap. Ges.)": {},
-                        "Erl\u00f6se aus Verkauen von Wirtschaftsg\u00fctern des Umlaufverm\u00f6gens 19% USt f\u00fcr \u00a7 4 Abs. 3 Satz 4 EStG": {},
-                        "Erl\u00f6se aus Verkauen von Wirtschaftsg\u00fctern des Umlaufverm\u00f6gens- umsatzsteuerfrei \u00a7 4 Nr. 8 ff UStG i. V. m. \u00a7 4 Abs. 3 Satz 4 EStG": {},
                         "Erl\u00f6se aus Verkauf immaterieller Verm\u00f6gensgegenst\u00e4nde (bei Buchgewinn)": {},
                         "Erl\u00f6se aus Verk\u00e4ufen Finanzanlagen (bei Buchgewinn)": {},
-                        "Erl\u00f6se aus Verk\u00e4ufen Finanzanlagen 100% / 50% steuerfrei (inlandische Kap.Ges.)(bei Buchgewinn)": {},
                         "Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen (bei Buchgewinn)": {},
                         "Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen 16% USt (bei Buchgewinn)": {},
                         "Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen 19% USt (bei Buchgewinn)": {},
                         "Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen steuerfrei \u00a7 4 Nr. 1a UStG (bei Buchgewinn)": {},
                         "Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen steuerfrei \u00a7 4 Nr. 1b UStG (bei Buchgewinn)": {},
-                        "Erl\u00f6se aus Verk\u00e4ufen von Wirtschaftsg\u00fctern des Umlaufverm\u00f6gens nach \u00a7 4 Abs. 3 Satz 4 EStG": {},
                         "Ertraege a. Waehrungsumstellung auf Euro": {},
                         "Ertr\u00e4ge aus Bewertung Finanzmittelfonds": {},
                         "Ertr\u00e4ge aus Kursdifferenzen": {},
@@ -1715,27 +1641,11 @@
                         "Ertr\u00e4ge aus Beteiligungen": {},
                         "Ertr\u00e4ge aus Beteiligungen an verbundenen Unternehmen": {},
                         "Gewinnanteile aus Mitunternehmerschaften \u00a7 9 GewStG": {},
-                        "Gewinne aus Anteilen an nicht steuerbefreiten inl\u00e4ndischen Kapitalgesellschaften \u00a7 9 Nr. 2a GewStG": {},
-                        "Laufende Ertr\u00e4ge aus Anteilen an Kapitalgesellschaften (Beteiligung) 100% / 50% steuerfrei (inl\u00e4ndische Kap. Ges.)": {},
-                        "Laufende Ertr\u00e4ge aus Anteilen an Kapitalgesellschaften (verbundene Unternehmen) 100% / 50% steuerfrei (inl\u00e4ndische Kap. Ges.)": {}
-                    }
-                },
-                "Ertr\u00e4ge aus Verlust\u00fcbernahme und auf Grund einer Gewinngemeinschaft- eines Gewinn- oder Teilgewinnabf\u00fchrungsvertrags erhaltene Gewinne": {
-                    "Auf Grund einer Gewinngemeinschaft- eines Gewinn- oder Teilgewinnabf\u00fchrungsvertrags erhaltene ": {
-                        "Erhaltene Gewinne auf Grund einer Gewinngemeinschaft": {},
-                        "Erhaltene Gewinne auf Grund eines Gewinn- oder Teilgewinnabf\u00fchrungsvertrags": {}
-                    },
-                    "Ertr\u00e4ge aus Verlust\u00fcbernahme ": {
-                        "Ertr\u00e4ge aus Verlust\u00fcbernahme": {}
+                        "Gewinne aus Anteilen an nicht steuerbefreiten inl\u00e4ndischen Kapitalgesellschaften \u00a7 9 Nr. 2a GewStG": {}
                     }
                 },
                 "Ertr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Finanzanlageverm\u00f6gens": {
-                    "Ertr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Finanzanlageverm\u00f6gens": {
-                        "Ertr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Finanzanlageverm\u00f6gens": {},
-                        "Etr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Finanzanlageverm\u00f6gens aus verbundenen Unternehmen": {},
-                        "Laufende Ertr\u00e4ge aus Anteilen an Kapitalgesellschaften (Finanzanlageverm\u00f6gen) 100% / 50% steuerfrei (inl\u00e4ndische Kap. Ges.)": {},
-                        "Laufende Ertr\u00e4ge aus Anteilen an Kapitalgesellschaften (verbundene Unternehmen) 100% / 50% steuerfrei (inl\u00e4ndische Kap. Ges.)": {}
-                    }
+                    "Ertr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Finanzanlageverm\u00f6gens": {}
                 },
                 "Gewinnvortrag": {
                     "Gewinnvortrag nach Verwendung": {}

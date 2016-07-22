@@ -10,6 +10,9 @@ def get_notification_config():
 			"Warranty Claim": {"status": "Open"},
 			"Task": {"status": "Overdue"},
 			"Project": {"status": "Open"},
+			"Item": {"total_projected_qty": ("<", 0)},
+			"Customer": {"status": "Open"},
+			"Supplier": {"status": "Open"},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
 			"Opportunity": {"status": "Open"},
@@ -24,7 +27,6 @@ def get_notification_config():
 			"Leave Application": {"status": "Open"},
 			"Expense Claim": {"approval_status": "Draft"},
 			"Job Applicant": {"status": "Open"},
-			"Purchase Receipt": {"docstatus": 0},
 			"Delivery Note": {"docstatus": 0},
 			"Stock Entry": {"docstatus": 0},
 			"Material Request": {
@@ -32,14 +34,15 @@ def get_notification_config():
 				"status": ("not in", ("Stopped",)),
 				"per_ordered": ("<", 100)
 			},
+			"Request for Quotation": { "docstatus": 0 },
+			"Supplier Quotation": {"docstatus": 0},
 			"Purchase Order": {
 				"status": ("not in", ("Completed", "Closed")),
 				"docstatus": ("<", 2)
 			},
-			"Production Order": { "status": "In Process" },
+			"Purchase Receipt": {"docstatus": 0},
+			"Production Order": { "status": ("in", ("Draft", "Not Started", "In Process")) },
 			"BOM": {"docstatus": 0},
-			"Timesheet": {"docstatus": 0},
-			"Time Log": {"status": "Draft"},
-			"Time Log Batch": {"status": "Draft"}
+			"Timesheet": {"status": "Draft"}
 		}
 	}

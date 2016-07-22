@@ -6,7 +6,8 @@ import unittest
 import frappe
 
 from frappe.test_runner import make_test_records
-from erpnext.controllers.item_variant import create_variant, ItemVariantExistsError, InvalidItemAttributeValueError
+from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
+	InvalidItemAttributeValueError)
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
@@ -35,6 +36,9 @@ def make_item(item_code, properties=None):
 	return item
 
 class TestItem(unittest.TestCase):
+	def setUp(self):
+		frappe.flags.attribute_values = None
+
 	def get_item(self, idx):
 		item_code = test_records[idx].get("item_code")
 		if not frappe.db.exists("Item", item_code):
@@ -86,6 +90,21 @@ class TestItem(unittest.TestCase):
 		for key, value in to_check.iteritems():
 			self.assertEquals(value, details.get(key))
 
+	def test_item_attribute_change_after_variant(self):
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
+
+		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		variant.save()
+
+		attribute = frappe.get_doc('Item Attribute', 'Test Size')
+		attribute.item_attribute_values = []
+
+		# reset flags
+		frappe.flags.attribute_values = None
+
+		self.assertRaises(InvalidItemAttributeValueError, attribute.save)
+		frappe.db.rollback()
+
 	def test_make_item_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
 
@@ -99,9 +118,17 @@ class TestItem(unittest.TestCase):
 
 	def test_make_item_variant_with_numeric_values(self):
 		# cleanup
+		for d in frappe.db.get_all('Item', filters={'variant_of':
+				'_Test Numeric Template Item'}):
+			frappe.delete_doc_if_exists("Item", d.name)
+
 		frappe.delete_doc_if_exists("Item", "_Test Numeric Template Item")
-		frappe.delete_doc_if_exists("Item", "_Test Numeric Variant-L-1.5")
 		frappe.delete_doc_if_exists("Item Attribute", "Test Item Length")
+
+		frappe.db.sql('''delete from `tabItem Variant Attribute`
+			where attribute="Test Item Length"''')
+
+		frappe.flags.attribute_values = None
 
 		# make item attribute
 		frappe.get_doc({
@@ -130,7 +157,8 @@ class TestItem(unittest.TestCase):
 			"default_warehouse": "_Test Warehouse - _TC"
 		})
 
-		variant = create_variant("_Test Numeric Template Item", {"Test Size": "Large", "Test Item Length": 1.1})
+		variant = create_variant("_Test Numeric Template Item",
+			{"Test Size": "Large", "Test Item Length": 1.1})
 		self.assertEquals(variant.item_code, None)
 		variant.item_code = "_Test Numeric Variant-L-1.1"
 		variant.item_name = "_Test Numeric Variant Large 1.1m"

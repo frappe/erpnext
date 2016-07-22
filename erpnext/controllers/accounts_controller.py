@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import today, flt, cint, fmt_money
+from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
-from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year, get_account_currency
+from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return
@@ -33,6 +33,7 @@ class AccountsController(TransactionBase):
 
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
+
 			if not self.meta.get_field("is_return") or not self.is_return:
 				self.validate_value("base_grand_total", ">=", 0)
 
@@ -41,16 +42,39 @@ class AccountsController(TransactionBase):
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
 			self.validate_due_date()
+			self.validate_advance_entries()
 
 		if self.meta.get_field("taxes_and_charges"):
 			self.validate_enabled_taxes_and_charges()
 
 		self.validate_party()
 		self.validate_currency()
-		
-		if self.meta.get_field("is_recurring") and not self.get("__islocal"):
-			validate_recurring_document(self)
-			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
+
+		if self.meta.get_field("is_recurring"):
+			if self.amended_from and self.recurring_id:
+				self.recurring_id = None
+			if not self.get("__islocal"):
+				validate_recurring_document(self)
+				convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
+
+		if self.doctype == 'Purchase Invoice':
+			self.validate_paid_amount()
+
+	def validate_paid_amount(self):
+		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
+			is_paid = self.get("is_pos") or self.get("is_paid")
+			if cint(is_paid) == 1:
+				if flt(self.paid_amount) == 0 and flt(self.outstanding_amount) > 0:
+					if self.cash_bank_account:
+						self.paid_amount = flt(flt(self.grand_total) - flt(self.write_off_amount),
+							self.precision("paid_amount"))
+						self.base_paid_amount = flt(self.paid_amount * self.conversion_rate, self.precision("base_paid_amount"))
+					else:
+						# show message that the amount is not paid
+						self.paid_amount = 0
+						frappe.throw(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
+			else:
+				frappe.db.set(self,'paid_amount',0)
 
 	def on_update_after_submit(self):
 		if self.meta.get_field("is_recurring"):
@@ -58,12 +82,11 @@ class AccountsController(TransactionBase):
 			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
 
 	def set_missing_values(self, for_validate=False):
-		for fieldname in ["posting_date", "transaction_date"]:
-			if not self.get(fieldname) and self.meta.get_field(fieldname):
-				self.set(fieldname, today())
-				if self.meta.get_field("fiscal_year") and not self.fiscal_year:
-					self.fiscal_year = get_fiscal_year(self.get(fieldname))[0]
-				break
+		if frappe.flags.in_test:
+			for fieldname in ["posting_date","transaction_date"]:
+				if self.meta.get_field(fieldname) and not self.get(fieldname):
+					self.set(fieldname, today())
+					break
 
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
@@ -125,18 +148,14 @@ class AccountsController(TransactionBase):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
 
-		if self.doctype == "Purchase Invoice":
-			auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
-
-			if auto_accounting_for_stock:
-				stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
-
-			stock_items = self.get_stock_items()
-
 		if hasattr(self, "items"):
 			parent_dict = {}
 			for fieldname in self.meta.get_valid_columns():
 				parent_dict[fieldname] = self.get(fieldname)
+
+			if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+				document_type = "{} Item".format(self.doctype)
+				parent_dict.update({"document_type": document_type})
 
 			for item in self.get("items"):
 				if item.get("item_code"):
@@ -154,6 +173,7 @@ class AccountsController(TransactionBase):
 
 					ret = get_item_details(args)
 
+
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (item.get(fieldname) is None or fieldname in force_item_fields):
@@ -166,6 +186,7 @@ class AccountsController(TransactionBase):
 								item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
+						# if user changed the discount percentage then set user's discount percentage ?
 						item.set("discount_percentage", ret.get("discount_percentage"))
 						if ret.get("pricing_rule_for") == "Price":
 							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
@@ -174,14 +195,8 @@ class AccountsController(TransactionBase):
 							item.rate = flt(item.price_list_rate *
 								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
 
-					if self.doctype == "Purchase Invoice":
-						if auto_accounting_for_stock and item.item_code in stock_items \
-							and self.is_opening == 'No' \
-							and (not item.po_detail or not frappe.db.get_value("Purchase Order Item",
-								item.po_detail, "delivered_by_supplier")):
-
-								item.expense_account = stock_not_billed_account
-								item.cost_center = None
+			if self.doctype == "Purchase Invoice":
+				self.set_expense_account()
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):
@@ -214,10 +229,17 @@ class AccountsController(TransactionBase):
 
 	def get_gl_dict(self, args, account_currency=None):
 		"""this method populates the common properties of a gl entry record"""
+
+		fiscal_years = get_fiscal_years(self.posting_date, company=self.company)
+		if len(fiscal_years) > 1:
+			frappe.throw(_("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(formatdate(self.posting_date)))
+		else:
+			fiscal_year = fiscal_years[0][0]
+
 		gl_dict = frappe._dict({
 			'company': self.company,
 			'posting_date': self.posting_date,
-			'fiscal_year': get_fiscal_year(self.posting_date, company=self.company)[0],
+			'fiscal_year': fiscal_year,
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,
 			'remarks': self.get("remarks"),
@@ -227,14 +249,15 @@ class AccountsController(TransactionBase):
 			'credit_in_account_currency': 0,
 			'is_opening': self.get("is_opening") or "No",
 			'party_type': None,
-			'party': None
+			'party': None,
+			'project': self.get("project")
 		})
 		gl_dict.update(args)
 
 		if not account_currency:
 			account_currency = get_account_currency(gl_dict.account)
 
-		if self.doctype not in ["Journal Entry", "Period Closing Voucher"]:
+		if self.doctype not in ["Journal Entry", "Period Closing Voucher", "Payment Entry"]:
 			self.validate_account_currency(gl_dict.account, account_currency)
 			set_balance_in_account_currency(gl_dict, account_currency, self.get("conversion_rate"), self.company_currency)
 
@@ -255,71 +278,114 @@ class AccountsController(TransactionBase):
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s
 			and allocated_amount = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
-	def get_advances(self, account_head, party_type, party, child_doctype, parentfield, dr_or_cr, against_order_field):
+	def set_advances(self):
 		"""Returns list of advances against Account, Party, Reference"""
-		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
 
-		# conver sales_order to "Sales Order"
-		reference_type = against_order_field.replace("_", " ").title()
+		res = self.get_advance_entries()
 
-		condition = ""
-		if order_list:
-			in_placeholder = ', '.join(['%s'] * len(order_list))
-			condition = "or (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))"\
-				.format(reference_type, in_placeholder)
-
-		res = frappe.db.sql("""
-			select
-				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no,
-				reference_name as against_order
-			from
-				`tabJournal Entry` t1, `tabJournal Entry Account` t2
-			where
-				t1.name = t2.parent and t2.account = %s
-				and t2.party_type = %s and t2.party = %s
-				and t2.is_advance = 'Yes' and t1.docstatus = 1
-				and (ifnull(t2.reference_type, '')='' {1})
-			order by t1.posting_date""".format(dr_or_cr, condition),
-			[account_head, party_type, party] + order_list, as_dict=1)
-
-		self.set(parentfield, [])
+		self.set("advances", [])
 		for d in res:
-			self.append(parentfield, {
-				"doctype": child_doctype,
-				"journal_entry": d.jv_no,
-				"jv_detail_no": d.jv_detail_no,
-				"remarks": d.remark,
+			self.append("advances", {
+				"doctype": self.doctype + " Advance",
+				"reference_type": d.reference_type,
+				"reference_name": d.reference_name,
+				"reference_row": d.reference_row,
+				"remarks": d.remarks,
 				"advance_amount": flt(d.amount),
 				"allocated_amount": flt(d.amount) if d.against_order else 0
 			})
 
-	def validate_advance_jv(self, reference_type):
-		against_order_field = frappe.scrub(reference_type)
-		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
-		if order_list:
-			account = self.get("debit_to" if self.doctype=="Sales Invoice" else "credit_to")
+	def get_advance_entries(self, include_unallocated=True):
+		if self.doctype == "Sales Invoice":
+			party_account = self.debit_to
+			party_type = "Customer"
+			party = self.customer
+			amount_field = "credit_in_account_currency"
+			order_field = "sales_order"
+			order_doctype = "Sales Order"
+		else:
+			party_account = self.credit_to
+			party_type = "Supplier"
+			party = self.supplier
+			amount_field = "debit_in_account_currency"
+			order_field = "purchase_order"
+			order_doctype = "Purchase Order"
 
-			jv_against_order = frappe.db.sql("""select parent, reference_name as against_order
-				from `tabJournal Entry Account`
-				where docstatus=1 and account=%s and ifnull(is_advance, 'No') = 'Yes'
-				and reference_type=%s
-				and ifnull(reference_name, '') in ({0})
-				group by parent, reference_name""".format(', '.join(['%s']*len(order_list))),
-					tuple([account, reference_type] + order_list), as_dict=1)
+		order_list = list(set([d.get(order_field)
+			for d in self.get("items") if d.get(order_field)]))
 
-			if jv_against_order:
-				order_jv_map = {}
-				for d in jv_against_order:
-					order_jv_map.setdefault(d.against_order, []).append(d.parent)
+		journal_entries = get_advance_journal_entries(party_type, party, party_account,
+			amount_field, order_doctype, order_list, include_unallocated)
 
-				advance_jv_against_si = [d.journal_entry for d in self.get("advances")]
+		payment_entries = get_advance_payment_entries(party_type, party, party_account,
+			order_doctype, order_list, include_unallocated)
 
-				for order, jv_list in order_jv_map.items():
-					for jv in jv_list:
-						if not advance_jv_against_si or jv not in advance_jv_against_si:
-							frappe.msgprint(_("Journal Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice.")
-								.format(jv, order))
+		res = journal_entries + payment_entries
 
+		return res
+
+	def validate_advance_entries(self):
+		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
+		order_list = list(set([d.get(order_field)
+			for d in self.get("items") if d.get(order_field)]))
+
+		if not order_list: return
+
+		advance_entries = self.get_advance_entries(include_unallocated=False)
+
+		if advance_entries:
+			advance_entries_against_si = [d.reference_name for d in self.get("advances")]
+			for d in advance_entries:
+				if not advance_entries_against_si or d.reference_name not in advance_entries_against_si:
+					frappe.msgprint(_("Payment Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice.")
+						.format(d.reference_name, d.against_order))
+
+	def update_against_document_in_jv(self):
+		"""
+			Links invoice and advance voucher:
+				1. cancel advance voucher
+				2. split into multiple rows if partially adjusted, assign against voucher
+				3. submit advance voucher
+		"""
+
+		if self.doctype == "Sales Invoice":
+			party_type = "Customer"
+			party = self.customer
+			party_account = self.debit_to
+			dr_or_cr = "credit_in_account_currency"
+		else:
+			party_type = "Supplier"
+			party = self.supplier
+			party_account = self.credit_to
+			dr_or_cr = "debit_in_account_currency"
+
+		lst = []
+		for d in self.get('advances'):
+			if flt(d.allocated_amount) > 0:
+				args = frappe._dict({
+					'voucher_type': d.reference_type,
+					'voucher_no' : d.reference_name,
+					'voucher_detail_no' : d.reference_row,
+					'against_voucher_type' : self.doctype,
+					'against_voucher'  : self.name,
+					'account' : party_account,
+					'party_type': party_type,
+					'party': party,
+					'is_advance' : 'Yes',
+					'dr_or_cr' : dr_or_cr,
+					'unadjusted_amount' : flt(d.advance_amount),
+					'allocated_amount' : flt(d.allocated_amount),
+					'exchange_rate': (self.conversion_rate
+						if self.party_account_currency != self.company_currency else 1),
+					'grand_total': (self.base_grand_total
+						if self.party_account_currency==self.company_currency else self.grand_total),
+					'outstanding_amount': self.outstanding_amount
+				})
+				lst.append(args)
+
+		if lst:
+			from erpnext.accounts.utils import reconcile_against_document
+			reconcile_against_document(lst)
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_tolerance_for
@@ -375,10 +441,10 @@ class AccountsController(TransactionBase):
 			select
 				account_currency, sum({dr_or_cr}) as amount
 			from
-				`tabJournal Entry Account`
+				`tabGL Entry`
 			where
-				reference_type = %s and reference_name = %s and party=%s
-				and docstatus = 1 and is_advance = "Yes"
+				against_voucher_type = %s and against_voucher = %s and party=%s
+				and docstatus = 1
 		""".format(dr_or_cr=dr_or_cr), (self.doctype, self.name, party), as_dict=1)
 
 		if advance:
@@ -399,11 +465,11 @@ class AccountsController(TransactionBase):
 				formatted_order_total = fmt_money(order_total, precision=self.precision("base_grand_total"),
 					currency=advance.account_currency)
 
-			if order_total >= advance_paid:
-				frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
-			else:
+			if self.currency == self.company_currency and advance_paid > order_total:
 				frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2})")
 					.format(formatted_advance_paid, self.name, formatted_order_total))
+
+			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
 
 	@property
 	def company_abbr(self):
@@ -451,9 +517,50 @@ class AccountsController(TransactionBase):
 				# at quotation / sales order level and we shouldn't stop someone
 				# from creating a sales invoice if sales order is already created
 
+	def validate_fixed_asset(self):
+		for d in self.get("items"):
+			if d.is_fixed_asset:
+				if d.qty > 1:
+					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
+
+				if d.meta.get_field("asset"):
+					if not d.asset:
+						frappe.throw(_("Row #{0}: Asset is mandatory for fixed asset purchase/sale")
+							.format(d.idx))
+					else:
+						asset = frappe.get_doc("Asset", d.asset)
+
+						if asset.company != self.company:
+							frappe.throw(_("Row #{0}: Asset {1} does not belong to company {2}")
+								.format(d.idx, d.asset, self.company))
+
+						elif asset.item_code != d.item_code:
+							frappe.throw(_("Row #{0}: Asset {1} does not linked to Item {2}")
+								.format(d.idx, d.asset, d.item_code))
+
+						elif asset.docstatus != 1:
+							frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
+
+						elif self.doctype == "Purchase Invoice":
+							if asset.status != "Submitted":
+								frappe.throw(_("Row #{0}: Asset {1} is already {2}")
+									.format(d.idx, d.asset, asset.status))
+							elif getdate(asset.purchase_date) != getdate(self.posting_date):
+								frappe.throw(_("Row #{0}: Posting Date must be same as purchase date {1} of asset {2}").format(d.idx, asset.purchase_date, d.asset))
+							elif asset.is_existing_asset:
+								frappe.throw(_("Row #{0}: Purchase Invoice cannot be made against an existing asset {1}").format(d.idx, d.asset))
+
+						elif self.docstatus=="Sales Invoice" and self.docstatus == 1:
+							if self.update_stock:
+								frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
+
+							elif asset.status in ("Scrapped", "Cancelled", "Sold"):
+								frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
+									.format(d.idx, d.asset, asset.status))
+
 @frappe.whitelist()
 def get_tax_rate(account_head):
-	return frappe.db.get_value("Account", account_head, "tax_rate")
+	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 @frappe.whitelist()
 def get_default_taxes_and_charges(master_doctype):
@@ -538,3 +645,77 @@ def set_balance_in_account_currency(gl_dict, account_currency=None, conversion_r
 	if flt(gl_dict.credit) and not flt(gl_dict.credit_in_account_currency):
 		gl_dict.credit_in_account_currency = gl_dict.credit if account_currency==company_currency \
 			else flt(gl_dict.credit / conversion_rate, 2)
+
+
+def get_advance_journal_entries(party_type, party, party_account, amount_field,
+		order_doctype, order_list, include_unallocated=True):
+
+	dr_or_cr = "credit_in_account_currency" if party_type=="Customer" else "debit_in_account_currency"
+
+	conditions = []
+	if include_unallocated:
+		conditions.append("ifnull(t2.reference_name, '')=''")
+
+	if order_list:
+		order_condition = ', '.join(['%s'] * len(order_list))
+		conditions.append(" (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))"\
+			.format(order_doctype, order_condition))
+
+	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
+
+	journal_entries = frappe.db.sql("""
+		select
+			"Journal Entry" as reference_type, t1.name as reference_name,
+			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
+			t2.reference_name as against_order
+		from
+			`tabJournal Entry` t1, `tabJournal Entry Account` t2
+		where
+			t1.name = t2.parent and t2.account = %s
+			and t2.party_type = %s and t2.party = %s
+			and t2.is_advance = 'Yes' and t1.docstatus = 1
+			and {1} > 0
+			and (ifnull(t2.reference_name, '')='' {2})
+		order by t1.posting_date""".format(amount_field, dr_or_cr, reference_condition),
+		[party_account, party_type, party] + order_list, as_dict=1)
+
+	return list(journal_entries)
+
+def get_advance_payment_entries(party_type, party, party_account,
+		order_doctype, order_list=None, include_unallocated=True, against_all_orders=False):
+	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
+	payment_type = "Receive" if party_type == "Customer" else "Pay"
+	payment_entries_against_order, unallocated_payment_entries = [], []
+
+	if order_list or against_all_orders:
+		if order_list:
+			reference_condition = " and t2.reference_name in ({0})"\
+				.format(', '.join(['%s'] * len(order_list)))
+		else:
+			reference_condition = ""
+			order_list = []
+
+		payment_entries_against_order = frappe.db.sql("""
+			select
+				"Payment Entry" as reference_type, t1.name as reference_name,
+				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
+				t2.reference_name as against_order, t1.posting_date
+			from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
+			where
+				t1.name = t2.parent and t1.{0} = %s and t1.payment_type = %s
+				and t1.party_type = %s and t1.party = %s and t1.docstatus = 1
+				and t2.reference_doctype = %s {1}
+		""".format(party_account_field, reference_condition),
+		[party_account, payment_type, party_type, party, order_doctype] + order_list, as_dict=1)
+
+	if include_unallocated:
+		unallocated_payment_entries = frappe.db.sql("""
+				select "Payment Entry" as reference_type, name as reference_name,
+				remarks, unallocated_amount as amount
+				from `tabPayment Entry`
+				where
+					{0} = %s and party_type = %s and party = %s and payment_type = %s
+					and docstatus = 1 and unallocated_amount > 0
+			""".format(party_account_field), (party_account, party_type, party, payment_type), as_dict=1)
+
+	return list(payment_entries_against_order) + list(unallocated_payment_entries)

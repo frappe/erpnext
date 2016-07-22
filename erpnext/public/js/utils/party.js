@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.utils");
+
 erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	if(!method) {
 		method = "erpnext.accounts.party.get_party_details";

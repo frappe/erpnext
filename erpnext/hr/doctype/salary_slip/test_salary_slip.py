@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import unittest
 import frappe
-from frappe.utils import today
+from frappe.utils import today, now_datetime, getdate, cstr
 from erpnext.hr.doctype.employee.employee import make_salary_structure
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.leave_application.test_leave_application import make_allocation_record
@@ -35,10 +35,10 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEquals(ss.total_days_in_month, 31)
 		self.assertEquals(ss.payment_days, 30)
-		self.assertEquals(ss.earnings[0].e_modified_amount, 14516.13)
-		self.assertEquals(ss.earnings[1].e_modified_amount, 500)
-		self.assertEquals(ss.deductions[0].d_modified_amount, 100)
-		self.assertEquals(ss.deductions[1].d_modified_amount, 48.39)
+		self.assertEquals(ss.earnings[0].amount, 14516.13)
+		self.assertEquals(ss.earnings[1].amount, 500)
+		self.assertEquals(ss.deductions[0].amount, 100)
+		self.assertEquals(ss.deductions[1].amount, 48.39)
 		self.assertEquals(ss.gross_pay, 15016.13)
 		self.assertEquals(ss.net_pay, 14867.74)
 
@@ -49,12 +49,12 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEquals(ss.total_days_in_month, 29)
 		self.assertEquals(ss.payment_days, 28)
-		self.assertEquals(ss.earnings[0].e_modified_amount, 14482.76)
-		self.assertEquals(ss.earnings[1].e_modified_amount, 500)
-		self.assertEquals(ss.deductions[0].d_modified_amount, 100)
-		self.assertEquals(ss.deductions[1].d_modified_amount, 48.28)
-		self.assertEquals(ss.gross_pay, 14982.76)
-		self.assertEquals(ss.net_pay, 14834.48)
+		self.assertEquals(ss.earnings[0].amount, 14516.13)
+		self.assertEquals(ss.earnings[1].amount, 500)
+		self.assertEquals(ss.deductions[0].amount, 100)
+		self.assertEquals(ss.deductions[1].amount, 48.39)
+		self.assertEquals(ss.gross_pay, 15016.13)
+		self.assertEquals(ss.net_pay, 14867.74)
 
 	def test_payment_days(self):
 		# Holidays not included in working days
@@ -97,6 +97,19 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.set_user("test_employee@example.com")
 		self.assertTrue(salary_slip_test_employee.has_permission("read"))
 
+	def test_email_salary_slip(self):
+		frappe.db.sql("delete from `tabEmail Queue`")
+
+		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
+		hr_settings.email_salary_slip_to_employee = 1
+		hr_settings.save()
+
+		self.make_employee("test_employee@example.com")
+		self.make_employee_salary_slip("test_employee@example.com")
+		email_queue = frappe.db.sql("""select name from `tabEmail Queue`""")
+		self.assertTrue(email_queue)
+
+
 	def make_employee(self, user):
 		if not frappe.db.get_value("User", user):
 			frappe.get_doc({
@@ -118,6 +131,7 @@ class TestSalarySlip(unittest.TestCase):
 				"date_of_joining": "2013-01-01",
 				"department": "_Test Department 1",
 				"gender": "Female",
+				"company_email": user,
 				"status": "Active"
 			}).insert()
 
@@ -138,6 +152,13 @@ class TestSalarySlip(unittest.TestCase):
 			salary_slip = salary_slip.name
 
 		return salary_slip
+
+	def make_activity_for_employee(self):
+		activity_type = frappe.get_doc("Activity Type", "_Test Activity Type")
+		activity_type.billing_rate = 50
+		activity_type.costing_rate = 20
+		activity_type.wage_rate = 25
+		activity_type.save()
 
 test_dependencies = ["Leave Application", "Holiday List"]
 

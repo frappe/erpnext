@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cstr, validate_email_add, cint, comma_and
+from frappe.utils import cstr, validate_email_add, cint, comma_and, has_gravatar
 from frappe import session
 from frappe.model.mapper import get_mapped_doc
 
@@ -43,6 +43,8 @@ class Lead(SellingController):
 			if self.email_id == self.lead_owner:
 				# Lead Owner cannot be same as the Lead
 				self.lead_owner = None
+
+			self.image = has_gravatar(self.email_id)
 
 	def on_update(self):
 		self.add_calendar_event()

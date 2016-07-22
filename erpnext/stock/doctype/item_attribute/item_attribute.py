@@ -6,13 +6,28 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 
+from erpnext.controllers.item_variant import validate_item_variant_attributes, InvalidItemAttributeValueError
+
+
 class ItemAttributeIncrementError(frappe.ValidationError): pass
 
 class ItemAttribute(Document):
+	def __setup__(self):
+		self.flags.ignore_these_exceptions_in_test = [InvalidItemAttributeValueError]
+
 	def validate(self):
+		frappe.flags.attribute_values = None
 		self.validate_numeric()
 		self.validate_duplication()
-		self.validate_attribute_values()
+
+	def on_update(self):
+		self.validate_exising_items()
+
+	def validate_exising_items(self):
+		'''Validate that if there are existing items with attributes, they are valid'''
+		for item in frappe.db.sql('''select distinct i.name from `tabItem Variant Attribute` iva, `tabItem` i
+			where iva.attribute = %s and iva.parent = i.name and i.has_variants = 0''', self.name):
+			validate_item_variant_attributes(item[0])
 
 	def validate_numeric(self):
 		if self.numeric_values:
@@ -39,19 +54,3 @@ class ItemAttribute(Document):
 			if d.abbr in abbrs:
 				frappe.throw(_("{0} must appear only once").format(d.abbr))
 			abbrs.append(d.abbr)
-
-	def validate_attribute_values(self):
-		# don't validate numeric values
-		if self.numeric_values:
-			return
-
-		attribute_values = []
-		for d in self.item_attribute_values:
-			attribute_values.append(d.attribute_value)
-
-		variant_attributes = frappe.db.sql("select DISTINCT attribute_value from `tabItem Variant Attribute` where attribute=%s", self.name)
-		if variant_attributes:
-			for d in variant_attributes:
-				if d[0] and d[0] not in attribute_values:
-					frappe.throw(_("Attribute Value {0} cannot be removed from {1} as Item Variants \
-						exist with this Attribute.").format(d[0], self.name))

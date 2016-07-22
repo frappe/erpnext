@@ -7,7 +7,7 @@ import unittest
 import frappe
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 	import set_perpetual_inventory, get_gl_entries, test_records as pr_test_records
-
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 
 class TestLandedCostVoucher(unittest.TestCase):
 	def test_landed_cost_voucher(self):
@@ -21,10 +21,9 @@ class TestLandedCostVoucher(unittest.TestCase):
 				"item_code": "_Test Item",
 				"warehouse": "_Test Warehouse - _TC"
 			},
-			fieldname=["qty_after_transaction", "stock_value"],
-			as_dict=1)
+			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
 
-		self.submit_landed_cost_voucher(pr)
+		self.submit_landed_cost_voucher("Purchase Receipt", pr.name)
 
 		pr_lc_value = frappe.db.get_value("Purchase Receipt Item", {"parent": pr.name}, "landed_cost_voucher_amount")
 		self.assertEquals(pr_lc_value, 25.0)
@@ -35,8 +34,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 				"item_code": "_Test Item",
 				"warehouse": "_Test Warehouse - _TC"
 			},
-			fieldname=["qty_after_transaction", "stock_value"],
-			as_dict=1)
+			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
 
 		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
 
@@ -62,7 +60,56 @@ class TestLandedCostVoucher(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][1], gle.credit)
 
 		set_perpetual_inventory(0)
+		
+	def test_landed_cost_voucher_against_purchase_invoice(self):
+		set_perpetual_inventory(1)
+		
+		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
+			posting_time=frappe.utils.nowtime())
 
+		last_sle = frappe.db.get_value("Stock Ledger Entry", {
+				"voucher_type": pi.doctype,
+				"voucher_no": pi.name,
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC"
+			},
+			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
+
+		self.submit_landed_cost_voucher("Purchase Invoice", pi.name)
+		
+		pi_lc_value = frappe.db.get_value("Purchase Invoice Item", {"parent": pi.name}, 
+			"landed_cost_voucher_amount")
+			
+		self.assertEquals(pi_lc_value, 50.0)
+
+		last_sle_after_landed_cost = frappe.db.get_value("Stock Ledger Entry", {
+				"voucher_type": pi.doctype,
+				"voucher_no": pi.name,
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC"
+			},
+			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
+
+		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
+
+		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 50.0)
+
+		gl_entries = get_gl_entries("Purchase Invoice", pi.name)
+
+		self.assertTrue(gl_entries)
+
+		expected_values = {
+			pi.get("items")[0].warehouse: [300.0, 0.0],
+			"Creditors - _TC": [0.0, 250.0],
+			"Expenses Included In Valuation - _TC": [0.0, 50.0]
+		}
+
+		for gle in gl_entries:
+			self.assertEquals(expected_values[gle.account][0], gle.debit)
+			self.assertEquals(expected_values[gle.account][1], gle.credit)
+
+		set_perpetual_inventory(0)
+		
 	def test_landed_cost_voucher_for_serialized_item(self):
 		set_perpetual_inventory(1)
 		frappe.db.sql("delete from `tabSerial No` where name in ('SN001', 'SN002', 'SN003', 'SN004', 'SN005')")
@@ -74,7 +121,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 		serial_no_rate = frappe.db.get_value("Serial No", "SN001", "purchase_rate")
 
-		self.submit_landed_cost_voucher(pr)
+		self.submit_landed_cost_voucher("Purchase Receipt", pr.name)
 
 		serial_no = frappe.db.get_value("Serial No", "SN001",
 			["warehouse", "purchase_rate"], as_dict=1)
@@ -84,19 +131,23 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 		set_perpetual_inventory(0)
 
-	def submit_landed_cost_voucher(self, pr):
+	def submit_landed_cost_voucher(self, receipt_document_type, receipt_document):
+		ref_doc = frappe.get_doc(receipt_document_type, receipt_document)
+		
 		lcv = frappe.new_doc("Landed Cost Voucher")
 		lcv.company = "_Test Company"
 		lcv.set("purchase_receipts", [{
-			"purchase_receipt": pr.name,
-			"supplier": pr.supplier,
-			"posting_date": pr.posting_date,
-			"grand_total": pr.base_grand_total
+			"receipt_document_type": receipt_document_type,
+			"receipt_document": receipt_document,
+			"supplier": ref_doc.supplier,
+			"posting_date": ref_doc.posting_date,
+			"grand_total": ref_doc.base_grand_total
 		}])
+		
 		lcv.set("taxes", [{
 			"description": "Insurance Charges",
 			"account": "_Test Account Insurance Charges - _TC",
-			"amount": 50.0
+			"amount": 50
 		}])
 
 		lcv.insert()

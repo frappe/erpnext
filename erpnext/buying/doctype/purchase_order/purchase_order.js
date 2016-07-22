@@ -3,13 +3,17 @@
 
 frappe.provide("erpnext.buying");
 
-{% include 'buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
 
 frappe.ui.form.on("Purchase Order", {
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
+
 	}
 });
 
@@ -17,7 +21,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	refresh: function(doc, cdt, cdn) {
 		var me = this;
 		this._super();
-		// this.frm.dashboard.reset();
 		var allow_receipt = false;
 		var is_drop_ship = false;
 
@@ -76,7 +79,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					this.make_purchase_invoice, __("Make"));
 
 			if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
-				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry, __("Make"));
+				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
 			}
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 
@@ -84,13 +87,22 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	},
 
 	get_items_from_open_material_requests: function() {
-		frappe.model.map_current_doc({
+		erpnext.utils.map_current_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
 			source_name: this.frm.doc.supplier,
 			get_query_filters: {
 				docstatus: ["!=", 2],
 			}
 		});
+	},
+
+	validate: function() {
+		// set default schedule date as today if missing.
+		(this.frm.doc.items || []).forEach(function(d) {
+			if(!d.schedule_date) {
+				d.schedule_date = frappe.datetime.nowdate();
+			}
+		})
 	},
 
 	make_stock_entry: function() {
@@ -138,7 +150,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	add_from_mappers: function() {
 		cur_frm.add_custom_button(__('Material Request'),
 			function() {
-				frappe.model.map_current_doc({
+				erpnext.utils.map_current_doc({
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					source_doctype: "Material Request",
 					get_query_filters: {
@@ -153,7 +165,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		cur_frm.add_custom_button(__('Supplier Quotation'),
 			function() {
-				frappe.model.map_current_doc({
+				erpnext.utils.map_current_doc({
 					method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
 					source_doctype: "Supplier Quotation",
 					get_query_filters: {
@@ -173,20 +185,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
-	},
-
-	make_bank_entry: function() {
-		return frappe.call({
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order",
-			args: {
-				"dt": "Purchase Order",
-				"dn": cur_frm.doc.name
-			},
-			callback: function(r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			}
-		});
 	},
 
 	unclose_purchase_order: function(){

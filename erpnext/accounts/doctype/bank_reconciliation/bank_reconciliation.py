@@ -12,7 +12,7 @@ form_grid_templates = {
 }
 
 class BankReconciliation(Document):
-	def get_details(self):
+	def get_payment_entries(self):
 		if not (self.bank_account and self.from_date and self.to_date):
 			msgprint("Bank Account, From Date and To Date are Mandatory")
 			return
@@ -22,48 +22,68 @@ class BankReconciliation(Document):
 			condition = "and (clearance_date is null or clearance_date='0000-00-00')"
 
 
-		dl = frappe.db.sql("""select t1.name, t1.cheque_no, t1.cheque_date, t2.debit_in_account_currency,
-				t2.credit_in_account_currency, t1.posting_date, t2.against_account, t1.clearance_date
+		journal_entries = frappe.db.sql("""
+			select 
+				"Journal Entry" as payment_document, t1.name as payment_entry, 
+				t1.cheque_no as cheque_number, t1.cheque_date, 
+				abs(t2.debit_in_account_currency - t2.credit_in_account_currency) as amount, 
+				t1.posting_date, t2.against_account, t1.clearance_date
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
-				t2.parent = t1.name and t2.account = %s
-				and t1.posting_date >= %s and t1.posting_date <= %s and t1.docstatus=1
-				and ifnull(t1.is_opening, 'No') = 'No' %s
-				order by t1.posting_date DESC, t1.name DESC""" %
-				('%s', '%s', '%s', condition), (self.bank_account, self.from_date, self.to_date), as_dict=1)
-
-		self.set('journal_entries', [])
+				t2.parent = t1.name and t2.account = %s and t1.docstatus=1
+				and t1.posting_date >= %s and t1.posting_date <= %s 
+				and ifnull(t1.is_opening, 'No') = 'No' {0}
+			order by t1.posting_date ASC, t1.name DESC
+		""".format(condition), (self.bank_account, self.from_date, self.to_date), as_dict=1)
+				
+		payment_entries = frappe.db.sql("""
+			select 
+				"Payment Entry" as payment_document, name as payment_entry, 
+				reference_no as cheque_number, reference_date as cheque_date, 
+				if(paid_from=%s, paid_amount, received_amount) as amount, 
+				posting_date, party as against_account, clearance_date
+			from `tabPayment Entry`
+			where
+				(paid_from=%s or paid_to=%s) and docstatus=1
+				and posting_date >= %s and posting_date <= %s {0}
+			order by 
+				posting_date ASC, name DESC
+		""".format(condition), 
+		(self.bank_account, self.bank_account, self.bank_account, self.from_date, self.to_date), as_dict=1)
+		
+		entries = sorted(list(payment_entries)+list(journal_entries), 
+			key=lambda k: k['posting_date'] or getdate(nowdate()))
+				
+		self.set('payment_entries', [])
 		self.total_amount = 0.0
 
-		for d in dl:
-			nl = self.append('journal_entries', {})
-			nl.posting_date = d.posting_date
-			nl.voucher_id = d.name
-			nl.cheque_number = d.cheque_no
-			nl.cheque_date = d.cheque_date
-			nl.debit = d.debit_in_account_currency
-			nl.credit = d.credit_in_account_currency
-			nl.against_account = d.against_account
-			nl.clearance_date = d.clearance_date
-			self.total_amount += flt(d.debit_in_account_currency) - flt(d.credit_in_account_currency)
+		for d in entries:
+			row = self.append('payment_entries', {})
+			row.update(d)
+			self.total_amount += flt(d.amount)
 
-	def update_details(self):
-		vouchers = []
-		for d in self.get('journal_entries'):
+	def update_clearance_date(self):
+		clearance_date_updated = False
+		for d in self.get('payment_entries'):
 			if d.clearance_date:
 				if d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
-					frappe.throw(_("Clearance date cannot be before check date in row {0}").format(d.idx))
+					frappe.throw(_("Row #{0}: Clearance date {1} cannot be before Cheque Date {2}")
+						.format(d.idx, d.clearance_date, d.cheque_date))
 
 			if d.clearance_date or self.include_reconciled_entries:
 				if not d.clearance_date:
 					d.clearance_date = None
-				frappe.db.set_value("Journal Entry", d.voucher_id, "clearance_date", d.clearance_date)
-				frappe.db.sql("""update `tabJournal Entry` set clearance_date = %s, modified = %s
-					where name=%s""", (d.clearance_date, nowdate(), d.voucher_id))
-				vouchers.append(d.voucher_id)
 
-		if vouchers:
-			msgprint("Clearance Date updated in: {0}".format(", ".join(vouchers)))
+				frappe.db.set_value(d.payment_document, d.payment_entry, "clearance_date", d.clearance_date)
+				frappe.db.sql("""update `tab{0}` set clearance_date = %s, modified = %s 
+					where name=%s""".format(d.payment_document), 
+				(d.clearance_date, nowdate(), d.payment_entry))
+				
+				clearance_date_updated = True
+
+		if clearance_date_updated:
+			self.get_payment_entries()
+			msgprint(_("Clearance Date updated"))
 		else:
 			msgprint(_("Clearance Date not mentioned"))

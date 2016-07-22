@@ -1,0 +1,18 @@
+[{
+  "account_name": "Debtors EUR",
+  "parent_account": "Accounts Receivable",
+  "account_type": "Receivable",
+  "account_currency": "EUR"
+},
+{
+  "account_name": "Creditors EUR",
+  "parent_account": "Accounts Payable",
+  "account_type": "Payable",
+  "account_currency": "EUR"
+},
+{
+  "account_name": "Paypal",
+  "parent_account": "Bank Accounts",
+  "account_type": "Bank",
+  "account_currency": "EUR"
+}]

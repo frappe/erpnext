@@ -1,17 +1,14 @@
 {% macro product_image_square(website_image, css_class="") %}
+{% if website_image -%} <meta itemprop="image" content="{{ frappe.utils.quoted(website_image) | abs_url }}"></meta>{%- endif %}
 <div class="product-image product-image-square {% if not website_image -%} missing-image {%- endif %} {{ css_class }}"
 	{% if website_image -%} style="background-image: url('{{ frappe.utils.quoted(website_image) | abs_url }}');" {%- endif %}>
-	{% if not website_image -%}<i class="centered octicon octicon-device-camera"></i>{%- endif %}
 </div>
 {% endmacro %}
 
 {% macro product_image(website_image, css_class="") %}
     <div class="product-image {% if not website_image -%} missing-image {%- endif %} {{ css_class }}">
     	{% if website_image -%}
-    		<img src="{{ frappe.utils.quoted(website_image) | abs_url }}" class="img-responsive">
-    	{%- else -%}
-    		<i class="centered octicon octicon-device-camera"></i>
+    		<img itemprop="image" src="{{ frappe.utils.quoted(website_image) | abs_url }}" class="img-responsive">
     	{%- endif %}
     </div>
 {% endmacro %}
-

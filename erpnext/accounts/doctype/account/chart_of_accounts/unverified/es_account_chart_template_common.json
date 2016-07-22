@@ -1,7 +1,6 @@
 {
     "country_code": "es", 
-    "name": "PGCE com\u00fan", 
-	"disabled": "Yes",
+    "name": "Spain - PGCE com\u00fan", 
     "tree": {
         "Acreedores y deudores por operaciones comerciales": {
             "Acreedores varios": {
@@ -1482,10 +1481,7 @@
                 }
             }, 
             "Deterioro del valor de inversiones financieras a corto plazo y de activos no corrientes mantenidos para la venta": {
-                "Deterioro de valor de activos no corrientes mantenidos para la venta": {
-                    "Deterioro de valor de existencias, deudores comerciales y otras cuentas a cobrar integrados en un grupo enajenable mantenido para la venta": {
-                        "Deterioro de valor de existencias, deudores comerciales y otras cuentas a cobrar integrados en un grupo enajenable mantenido para la venta": {}
-                    }, 
+                "Deterioro de valor de activos no corrientes mantenidos para la venta": { 
                     "Deterioro de valor de inmovilizado no corriente mantenido para la venta": {
                         "Deterioro de valor de inmovilizado no corriente mantenido para la venta": {}
                     }, 

@@ -32,13 +32,16 @@ notification_config = "erpnext.startup.notifications.get_notification_config"
 on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
 on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 
+remember_selected = ['Company', 'Cost Center', 'Project']
+treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', "BOM"]
+
 # website
 update_website_context = "erpnext.shopping_cart.utils.update_website_context"
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 
 email_append_to = ["Job Applicant", "Opportunity", "Issue"]
 
-calendars = ["Task", "Production Order", "Time Log", "Leave Application", "Sales Order", "Holiday List"]
+calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Holiday List"]
 
 fixtures = ["Web Form"]
 
@@ -71,7 +74,35 @@ website_route_rules = [
 			"parents": [{"title": _("Shipments"), "name": "shipments"}]
 		}
 	},
+	{"from_route": "/rfq", "to_route": "Request for Quotation"},
+	{"from_route": "/rfq/<path:name>", "to_route": "rfq",
+		"defaults": {
+			"doctype": "Request for Quotation",
+			"parents": [{"title": _("Request for Quotation"), "name": "rfq"}]
+		}
+	},
+	{"from_route": "/addresses", "to_route": "Address"},
+	{"from_route": "/addresses/<path:name>", "to_route": "addresses",
+		"defaults": {
+			"doctype": "Address",
+			"parents": [{"title": _("Addresses"), "name": "addresses"}]
+		}
+	},
 	{"from_route": "/jobs", "to_route": "Job Opening"},
+]
+
+portal_menu_items = [
+	{"title": _("Projects"), "route": "/project", "reference_doctype": "Project"},
+	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation"},
+	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order"},
+	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice"},
+	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note"},
+	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "show_always": True},
+	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
+	{"title": _("Announcements"), "route": "/announcement", "reference_doctype": "Announcement"},
+	{"title": _("Courses"), "route": "/course", "reference_doctype": "Course"},
+	{"title": _("Examination Schedule"), "route": "/examination", "reference_doctype": "Examination"},
+	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees"}
 ]
 
 has_website_permission = {
@@ -79,7 +110,8 @@ has_website_permission = {
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
-	"Address": "erpnext.utilities.doctype.address.address.has_website_permission"
+	"Address": "erpnext.utilities.doctype.address.address.has_website_permission",
+	"Discussion": "erpnext.schools.web_form.discussion.discussion.has_website_permission"
 }
 
 permission_query_conditions = {
@@ -107,16 +139,28 @@ doc_events = {
 	},
 	"User": {
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
-		"on_update": "erpnext.hr.doctype.employee.employee.update_user_permissions"
+		"on_update": "erpnext.hr.doctype.employee.employee.update_user_permissions",
+		"on_update": "erpnext.utilities.doctype.contact.contact.update_contact"
 	},
-	"Sales Taxes and Charges Template": {
-		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
-	},
-	"Price List": {
+	("Sales Taxes and Charges Template", 'Price List'): {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
 	"Address": {
 		"validate": "erpnext.shopping_cart.cart.set_customer_in_address"
+	},
+
+	# bubble transaction notification on master
+	('Opportunity', 'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
+		'Supplier Quotation', 'Purchase Order', 'Purchase Receipt',
+		'Purchase Invoice', 'Project', 'Issue'): {
+			'on_change': 'erpnext.accounts.party_status.notify_status'
+		},
+
+	"Website Settings": {
+		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
+	},
+	"Payment Entry": {
+		"on_submit": "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"
 	}
 }
 
@@ -130,7 +174,8 @@ scheduler_events = {
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
-		"erpnext.projects.doctype.task.task.set_tasks_as_overdue"
+		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
+		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries"
 	]
 }
 
@@ -143,3 +188,9 @@ default_mail_footer = """<div style="text-align: center;">
 get_translated_dict = {
 	("doctype", "Global Defaults"): "frappe.geo.country_info.get_translated_dict"
 }
+
+bot_parsers = [
+	'erpnext.utilities.bot.FindItemBot',
+]
+
+get_site_info = 'erpnext.utilities.get_site_info'

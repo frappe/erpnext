@@ -58,7 +58,8 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 	});
 }
 
-
-frappe.ui.form.on("Process Payroll", "refresh", function(frm) {
-	frm.disable_save();
-});
+frappe.ui.form.on("Process Payroll", {
+	refresh: function(frm) {
+		frm.disable_save();
+	}
+})

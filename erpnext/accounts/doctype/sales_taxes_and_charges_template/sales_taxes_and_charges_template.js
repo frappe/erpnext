@@ -3,5 +3,5 @@
 
 cur_frm.cscript.tax_table = "Sales Taxes and Charges";
 
-{% include "public/js/controllers/accounts.js" %}
+{% include "erpnext/public/js/controllers/accounts.js" %}
 

@@ -1,6 +1,6 @@
 {
     "country_code": "in",
-    "name": "Chart of Accounts - India",
+    "name": "India - Chart of Accounts",
     "tree": {
 	    "Application of Funds (Assets)": {
 	        "Current Assets": {
@@ -37,18 +37,24 @@
 	            "Capital Equipments": {
 	                "account_type": "Fixed Asset"
 	            },
-	            "Computers": {
+	            "Electronic Equipments": {
 	                "account_type": "Fixed Asset"
 	            },
-	            "Furniture and Fixture": {
+	            "Furnitures and Fixtures": {
 	                "account_type": "Fixed Asset"
 	            },
 	            "Office Equipments": {
 	                "account_type": "Fixed Asset"
 	            },
-	            "Plant and Machinery": {
+	            "Plants and Machineries": {
 	                "account_type": "Fixed Asset"
-	            }
+	            },
+				"Buildings": {
+					"account_type": "Fixed Asset"
+				},
+				"Accumulated Depreciations": {
+					"account_type": "Accumulated Depreciation"
+				}
 	        },
 	        "Investments": {
 	        	"is_group": 1
@@ -71,67 +77,37 @@
 	                },
 	                "Stock Adjustment": {
 	                    "account_type": "Stock Adjustment"
-	                },
-	                "account_type": "Expense Account"
-	            },
-	            "account_type": "Expense Account"
+	                }
+	            }
 	        },
 	        "Indirect Expenses": {
-	            "Administrative Expenses": {
-	                "account_type": "Expense Account"
-	            },
-	            "Commission on Sales": {
-	                "account_type": "Expense Account"
-	            },
+	            "Administrative Expenses": {},
+	            "Commission on Sales": {},
 	            "Depreciation": {
-	                "account_type": "Expense Account"
+	                "account_type": "Depreciation"
 	            },
-	            "Entertainment Expenses": {
-	                "account_type": "Expense Account"
-	            },
+	            "Entertainment Expenses": {},
 	            "Freight and Forwarding Charges": {
 	                "account_type": "Chargeable"
 	            },
-	            "Legal Expenses": {
-	                "account_type": "Expense Account"
-	            },
-	            "Marketing Expenses": {
-	                "account_type": "Chargeable"
-	            },
-	            "Miscellaneous Expenses": {
-	                "account_type": "Chargeable"
-	            },
-	            "Office Maintenance Expenses": {
-	                "account_type": "Expense Account"
-	            },
-	            "Office Rent": {
-	                "account_type": "Expense Account"
-	            },
-	            "Postal Expenses": {
-	                "account_type": "Expense Account"
-	            },
-	            "Print and Stationary": {
-	                "account_type": "Expense Account"
-	            },
+	            "Legal Expenses": {},
+	            "Marketing Expenses": {},
+	            "Miscellaneous Expenses": {},
+	            "Office Maintenance Expenses": {},
+	            "Office Rent": {},
+	            "Postal Expenses": {},
+	            "Print and Stationary": {},
 	            "Rounded Off": {
-	                "account_type": "Expense Account"
+	                "account_type": "Round Off"
 	            },
-	            "Salary": {
-	                "account_type": "Expense Account"
-	            },
-	            "Sales Expenses": {
-	                "account_type": "Expense Account"
-	            },
-	            "Telephone Expenses": {
-	                "account_type": "Expense Account"
-	            },
-	            "Travel Expenses": {
-	                "account_type": "Expense Account"
-	            },
-	            "Utility Expenses": {
-	                "account_type": "Expense Account"
-	            },
-	            "account_type": "Expense Account"
+	            "Salary": {},
+	            "Sales Expenses": {},
+	            "Telephone Expenses": {},
+	            "Travel Expenses": {},
+	            "Utility Expenses": {},
+				"Write Off": {},
+				"Exchange Gain/Loss": {},
+				"Gain/Loss on Asset Disposal": {}
 	        },
 			"root_type": "Expense"
 	    },

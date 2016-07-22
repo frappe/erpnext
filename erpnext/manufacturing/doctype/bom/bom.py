@@ -30,7 +30,7 @@ class BOM(Document):
 		else:
 			idx = 1
 
-		self.name = 'BOM/' + self.item + ('/%.3i' % idx)
+		self.name = 'BOM-' + self.item + ('-%.3i' % idx)
 
 	def validate(self):
 		self.clear_operations()
@@ -41,8 +41,8 @@ class BOM(Document):
 
 		self.validate_materials()
 		self.set_bom_material_details()
-		self.calculate_cost()
 		self.validate_operations()
+		self.calculate_cost()
 
 	def on_update(self):
 		self.check_recursion()
@@ -64,9 +64,8 @@ class BOM(Document):
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = frappe.db.sql("""select name, item_name, is_asset_item, is_purchase_item,
-			docstatus, description, image, is_sub_contracted_item, stock_uom, default_bom,
-			last_purchase_rate
+		item = frappe.db.sql("""select name, item_name, docstatus, description, image,
+			is_sub_contracted_item, stock_uom, default_bom, last_purchase_rate
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
 		if not item:
@@ -118,7 +117,7 @@ class BOM(Document):
 		rate = 0
 		if arg['bom_no']:
 			rate = self.get_bom_unitcost(arg['bom_no'])
-		elif arg and (arg['is_purchase_item'] == 1 or arg['is_sub_contracted_item'] == 1):
+		elif arg:
 			if self.rm_cost_as_per == 'Valuation Rate':
 				rate = self.get_valuation_rate(arg)
 			elif self.rm_cost_as_per == 'Last Purchase Rate':
@@ -186,13 +185,13 @@ class BOM(Document):
 			item = frappe.get_doc("Item", self.item)
 			if item.default_bom != self.name:
 				item.default_bom = self.name
-				item.save()
+				item.save(ignore_permissions = True)
 		else:
 			frappe.db.set(self, "is_default", 0)
 			item = frappe.get_doc("Item", self.item)
 			if item.default_bom == self.name:
 				item.default_bom = None
-				item.save()
+				item.save(ignore_permissions = True)
 
 	def clear_operations(self):
 		if not self.with_operations:
@@ -371,7 +370,12 @@ class BOM(Document):
 
 	def validate_operations(self):
 		if self.with_operations and not self.get('operations'):
-			frappe.throw(_("Operations cannot be left blank."))
+			frappe.throw(_("Operations cannot be left blank"))
+
+		if self.with_operations:
+			for d in self.operations:
+				if not d.description:
+					d.description = frappe.db.get_value('Operation', d.operation, 'description')
 
 def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
 	item_dict = {}
@@ -439,3 +443,14 @@ def validate_bom_no(item, bom_no):
 	if item and not (bom.item.lower() == item.lower() or \
 		bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()):
 		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
+@frappe.whitelist()
+def get_children(parent=None):
+	if parent:
+		return frappe.db.sql("""select item_code,
+			bom_no as value, qty,
+			if(ifnull(bom_no, "")!="", 1, 0) as expandable
+			from `tabBOM Item`
+			where parent=%s
+			order by idx
+			""", parent, as_dict=True)

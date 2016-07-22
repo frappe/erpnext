@@ -13,7 +13,7 @@
 	<div class="row">
 		<div class="col-sm-6 col-xs-8">
 			{% if(doc.warehouse) {
-				var label_class = "label-default",
+				var color = "grey",
 					title = "Warehouse",
 					actual_qty = (frm.doc.doctype==="Sales Order"
 						? doc.projected_qty : doc.actual_qty);
@@ -21,16 +21,16 @@
                     && in_list(["Sales Order Item", "Delivery Note Item"], doc.doctype)) {
     				if(actual_qty != undefined) {
     					if(actual_qty >= doc.qty) {
-    						var label_class = "label-success";
+    						var color = "green";
     						var title = "In Stock"
     					} else {
-    						var label_class = "label-danger";
+    						var color = "red";
     						var title = "Not In Stock"
     					}
     				}
                 } %}
-				<span class="pull-right" title="{%= title %}">
-					<span class="label {%= label_class %}">
+				<span class="pull-right" title="{%= title %}" style="margin-left: 10px;">
+					<span class="indicator {{ color }}">
 						{%= doc.warehouse %}
 					</span>
 				</span>

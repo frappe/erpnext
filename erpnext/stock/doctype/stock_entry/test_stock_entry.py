@@ -12,6 +12,7 @@ from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFre
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from frappe.tests.test_permissions import set_user_permission_doctypes
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 def get_sle(**args):
 	condition, values = "", []
@@ -78,8 +79,11 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_auto_material_request_for_variant(self):
 		self._test_auto_material_request("_Test Variant Item-S")
-
-	def _test_auto_material_request(self, item_code, material_request_type="Purchase"):
+	
+	def test_auto_material_request_for_warehouse_group(self):
+		self._test_auto_material_request("_Test Item Warehouse Group Wise Reorder", warehouse="_Test Warehouse Group-C1 - _TC")
+		
+	def _test_auto_material_request(self, item_code, material_request_type="Purchase", warehouse="_Test Warehouse - _TC"):
 		item = frappe.get_doc("Item", item_code)
 
 		if item.variant_of:
@@ -88,14 +92,14 @@ class TestStockEntry(unittest.TestCase):
 			template = item
 
 		projected_qty, actual_qty = frappe.db.get_value("Bin", {"item_code": item_code,
-			"warehouse": "_Test Warehouse - _TC"}, ["projected_qty", "actual_qty"]) or [0, 0]
+			"warehouse": warehouse}, ["projected_qty", "actual_qty"]) or [0, 0]
 
 		# stock entry reqd for auto-reorder
-		create_stock_reconciliation(item_code=item_code, warehouse="_Test Warehouse - _TC",
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse,
 			qty = actual_qty + abs(projected_qty) + 10, rate=100)
 
 		projected_qty = frappe.db.get_value("Bin", {"item_code": item_code,
-			"warehouse": "_Test Warehouse - _TC"}, "projected_qty") or 0
+			"warehouse": warehouse}, "projected_qty") or 0
 
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
 
@@ -121,9 +125,9 @@ class TestStockEntry(unittest.TestCase):
 		set_perpetual_inventory()
 
 		mr = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, basic_rate=100)
-
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
+			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC")
+					
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
 			"warehouse": mr.get("items")[0].t_warehouse})
 
 		self.check_stock_ledger_entries("Stock Entry", mr.name,
@@ -148,14 +152,15 @@ class TestStockEntry(unittest.TestCase):
 		set_perpetual_inventory()
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, basic_rate=100)
+			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC")
 
-		mi = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC", qty=40)
+		mi = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC", 
+			qty=40, expense_account="Stock Adjustment - _TC")
 
 		self.check_stock_ledger_entries("Stock Entry", mi.name,
 			[["_Test Item", "_Test Warehouse - _TC", -40.0]])
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
 			"warehouse": "_Test Warehouse - _TC"})
 
 		stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
@@ -187,10 +192,10 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mtn.name,
 			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
 			"warehouse": mtn.get("items")[0].s_warehouse})
 
-		fixed_asset_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
+		fixed_asset_account = frappe.db.get_value("Account", {"account_type": "Stock",
 			"warehouse": mtn.get("items")[0].t_warehouse})
 
 		stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
@@ -255,7 +260,7 @@ class TestStockEntry(unittest.TestCase):
 		repack.insert()
 		repack.submit()
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
 			"warehouse": repack.get("items")[1].t_warehouse})
 
 		rm_stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
@@ -603,48 +608,6 @@ def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se.insert()
 	se.submit()
 	return se
-
-def make_stock_entry(**args):
-	s = frappe.new_doc("Stock Entry")
-	args = frappe._dict(args)
-	if args.posting_date:
-		s.posting_date = args.posting_date
-	if args.posting_time:
-		s.posting_time = args.posting_time
-
-	if not args.purpose:
-		if args.source and args.target:
-			s.purpose = "Material Transfer"
-		elif args.source:
-			s.purpose = "Material Issue"
-		else:
-			s.purpose = "Material Receipt"
-	else:
-		s.purpose = args.purpose
-
-	s.company = args.company or "_Test Company"
-	s.purchase_receipt_no = args.purchase_receipt_no
-	s.delivery_note_no = args.delivery_note_no
-	s.sales_invoice_no = args.sales_invoice_no
-	s.difference_account = args.difference_account or "Stock Adjustment - _TC"
-
-	s.append("items", {
-		"item_code": args.item or args.item_code or "_Test Item",
-		"s_warehouse": args.from_warehouse or args.source,
-		"t_warehouse": args.to_warehouse or args.target,
-		"qty": args.qty,
-		"basic_rate": args.basic_rate,
-		"expense_account": args.expense_account or "Stock Adjustment - _TC",
-		"conversion_factor": 1.0,
-		"cost_center": "_Test Cost Center - _TC",
-		"serial_no": args.serial_no
-	})
-
-	if not args.do_not_save:
-		s.insert()
-		if not args.do_not_submit:
-			s.submit()
-	return s
 
 def get_qty_after_transaction(**args):
 	args = frappe._dict(args)

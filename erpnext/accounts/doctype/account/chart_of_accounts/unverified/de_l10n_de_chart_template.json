@@ -1,7 +1,6 @@
 {
     "country_code": "de",
-    "name": "Deutscher Kontenplan SKR03",
-	"disabled": "Yes",
+    "name": "Germany - Kontenplan SKR03",
     "tree": {
         "Aktiva": {
             "Abgrenzung latenter Steuern": {
@@ -399,8 +398,7 @@
                 "Jahres\u00fcberschuss Jahresfehlbetrag": {}
             },
             "Rechnungsabgrenzungsposten": {
-                "Passive Rechnungsabgrenzung": {},
-                "Verbindlichkeiten aus der Begebung und \u00dcbertragung von Wechseln, aus B\u00fcrgschaften, Wechsel- und Scheckb\u00fcrgschaften und aus Gew\u00e4hrleistungsvertr\u00e4gen sowie Haftung aus Bestellung von Sicherheiten f\u00fcr fremde Verbindlichkeiten": {}
+                "Passive Rechnungsabgrenzung": {}
             },
             "R\u00fcckstellungen": {
                 "R\u00fcckstellungen f\u00fcr Pensionen und \u00e4hnliche Verpflichtungen": {
@@ -1345,10 +1343,6 @@
             "Statistische Konten f\u00fcr Gewinnzuschlag": {
                 "Statistische Konten f\u00fcr den Gewinnzuschlag nach \u00a7\u00a7 6b- 6c und 7g EStG (Haben-Buchung)": {},
                 "Statistische Konten f\u00fcr den Gewinnzuschlag- Gegenkonto zu 9890": {}
-            },
-            "Statistische Konten f\u00fcr den GuV-Ausweis in \"Gutschrift bzw. Belastung auf Verbindlichkeitskonten\" bei den Zuordnungstabellen f\u00fcr PersHG nach KapCoRiLiG": {
-                "Anteil f\u00fcr Verbindlichkeitskonten": {},
-                "Verrechnungskonto f\u00fcr Anteil Verbindlichkeitskonten": {}
             },
             "Statistische Konten f\u00fcr den Kennziffernteil der Bilanz": {
                 "Besch\u00e4ftigte Personen": {},

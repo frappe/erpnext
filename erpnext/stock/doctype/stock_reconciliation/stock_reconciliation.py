@@ -246,6 +246,18 @@ class StockReconciliation(StockController):
 		for item in get_items(warehouse, self.posting_date, self.posting_time):
 			self.append("items", item)
 
+	def submit(self):
+		if len(self.items) > 100:
+			self.queue_action('submit')
+		else:
+			self._submit()
+
+	def cancel(self):
+		if len(self.items) > 100:
+			self.queue_action('cancel')
+		else:
+			self._cancel()
+
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time):
 	items = frappe.get_list("Bin", fields=["item_code"], filters={"warehouse": warehouse}, as_list=1)

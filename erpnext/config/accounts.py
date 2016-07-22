@@ -22,9 +22,14 @@ def get_data():
 					"description": _("Payment Request")
 				},
 				{
+					"type": "doctype",
+					"name": "Payment Entry",
+					"description": _("Bank/Cash transactions against party or for internal transfer")
+				},
+				{
 					"type": "report",
 					"name": "Accounts Receivable",
-					"doctype": "Sales Invoice",
+					"doctype": "Sales Invoice",	
 					"is_query_report": True
 				},
 				{
@@ -50,13 +55,12 @@ def get_data():
 					"description": _("Accounting journal entries.")
 				},
 				{
-					"type": "page",
-					"name": "Accounts Browser",
+					"type": "doctype",
+					"name": "Account",
 					"icon": "icon-sitemap",
 					"label": _("Chart of Accounts"),
-					"route": "Accounts Browser/Account",
+					"route": "Tree/Account",
 					"description": _("Tree of financial accounts."),
-					"doctype": "Account",
 				},
 				{
 					"type": "report",
@@ -83,6 +87,14 @@ def get_data():
 					"type": "doctype",
 					"name": "Item",
 				},
+				{
+					"type": "doctype",
+					"name": "Asset",
+				},
+				{
+					"type": "doctype",
+					"name": "Asset Category",
+				}
 			]
 		},
 		{
@@ -117,11 +129,6 @@ def get_data():
 		{
 			"label": _("Banking and Payments"),
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Payment Tool",
-					"description": _("Create Payment Entries against Orders or Invoices.")
-				},
 				{
 					"type": "doctype",
 					"label": _("Update Bank Transaction Dates"),
@@ -184,13 +191,17 @@ def get_data():
 			"label": _("Budget and Cost Center"),
 			"items": [
 				{
-					"type": "page",
-					"name": "Accounts Browser",
+					"type": "doctype",
+					"name": "Cost Center",
 					"icon": "icon-sitemap",
 					"label": _("Chart of Cost Centers"),
-					"route": "Accounts Browser/Cost Center",
+					"route": "Tree/Cost Center",
 					"description": _("Tree of financial Cost Centers."),
-					"doctype": "Cost Center",
+				},
+				{
+					"type": "doctype",
+					"name": "Budget",
+					"description": _("Define budget for a financial year.")
 				},
 				{
 					"type": "report",
@@ -212,6 +223,16 @@ def get_data():
 					"type": "doctype",
 					"name": "Period Closing Voucher",
 					"description": _("Close Balance Sheet and book Profit or Loss.")
+				},
+				{
+					"type": "doctype",
+					"name": "Asset Movement",
+					"description": _("Transfer an asset from one warehouse to another")
+				},
+				{
+					"type": "doctype",
+					"name": "Cheque Print Template",
+					"description": _("Setup cheque dimensions for printing")
 				},
 			]
 		},
@@ -303,12 +324,6 @@ def get_data():
 			"label": _("Analytics"),
 			"items": [
 				{
-					"type": "page",
-					"name": "financial-analytics",
-					"label": _("Financial Analytics"),
-					"icon": "icon-bar-chart",
-				},
-				{
 					"type": "report",
 					"name": "Gross Profit",
 					"doctype": "Sales Invoice",
@@ -332,6 +347,18 @@ def get_data():
 			"label": _("Other Reports"),
 			"icon": "icon-table",
 			"items": [
+				{
+					"type": "report",
+					"name": "Asset Depreciation Ledger",
+					"doctype": "Asset",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Asset Depreciations and Balances",
+					"doctype": "Asset",
+					"is_query_report": True,
+				},
 				{
 					"type": "report",
 					"name": "Trial Balance for Party",

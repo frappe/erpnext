@@ -3,16 +3,18 @@
  "allow_import": 0, 
  "allow_rename": 0, 
  "autoname": "JA-.######", 
+ "beta": 0, 
  "creation": "2013-01-29 19:25:37", 
  "custom": 0, 
  "description": "Applicant for a Job", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Document", 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "applicant_name", 
    "fieldtype": "Data", 
@@ -29,14 +31,14 @@
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "report_hide": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "email_id", 
    "fieldtype": "Data", 
@@ -54,7 +56,7 @@
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "report_hide": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -212,13 +214,14 @@
  "hide_toolbar": 0, 
  "icon": "icon-user", 
  "idx": 1, 
+ "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-02 02:22:31.941850", 
+ "modified": "2016-07-15 07:10:58.195489", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Job Applicant", 
@@ -245,9 +248,11 @@
    "write": 1
   }
  ], 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "applicant_name", 
  "sort_order": "ASC", 
- "title_field": "applicant_name"
+ "title_field": "applicant_name", 
+ "track_seen": 0
 }

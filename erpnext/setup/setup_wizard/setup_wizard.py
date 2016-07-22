@@ -10,9 +10,9 @@ from frappe.utils.file_manager import save_file
 from .default_website import website_maker
 import install_fixtures
 from .sample_data import make_sample_data
-from erpnext.accounts.utils import FiscalYearError
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from frappe.core.doctype.communication.comment import add_info_comment
+from erpnext.setup.setup_wizard.domainify import setup_domain
 
 def setup_complete(args=None):
 	if frappe.db.sql("select name from tabCompany"):
@@ -20,12 +20,11 @@ def setup_complete(args=None):
 
 	install_fixtures.install(args.get("country"))
 
-	update_setup_wizard_access()
+	create_price_lists(args)
 	create_fiscal_year_and_company(args)
 	create_users(args)
 	set_defaults(args)
 	create_territories()
-	create_price_lists(args)
 	create_feed_and_todo()
 	create_email_digest()
 	create_letter_head(args)
@@ -33,13 +32,24 @@ def setup_complete(args=None):
 	create_items(args)
 	create_customers(args)
 	create_suppliers(args)
-	frappe.local.message_log = []
 
-	website_maker(args.company_name.strip(), args.company_tagline, args.name)
+	if args.domain.lower() == 'education':
+		create_academic_term()
+		create_academic_year()
+		create_program(args)
+		create_course(args)
+		create_instructor(args)
+		create_room(args)
+
+	frappe.local.message_log = []
+	setup_domain(args.get('domain'))
+
+	website_maker(args)
 	create_logo(args)
 
 	frappe.db.commit()
 	login_as_first_user(args)
+
 	frappe.db.commit()
 	frappe.clear_cache()
 
@@ -47,20 +57,12 @@ def setup_complete(args=None):
 		try:
 			make_sample_data()
 			frappe.clear_cache()
-		except FiscalYearError:
+		except:
 			# clear message
 			if frappe.message_log:
 				frappe.message_log.pop()
 
 			pass
-
-def update_setup_wizard_access():
-	setup_wizard = frappe.get_doc('Page', 'setup-wizard')
-	for roles in setup_wizard.roles:
-		if roles.role == 'System Manager':
-			roles.role = 'Administrator'
-	setup_wizard.flags.ignore_permissions = 1
-	setup_wizard.save()
 
 def create_fiscal_year_and_company(args):
 	if (args.get('fy_start_date')):
@@ -85,8 +87,21 @@ def create_fiscal_year_and_company(args):
 			'domain': args.get('domain')
 		}).insert()
 
+		#Enable shopping cart
+		enable_shopping_cart(args)
+
 		# Bank Account
 		create_bank_account(args)
+
+def enable_shopping_cart(args):
+	frappe.get_doc({
+		"doctype": "Shopping Cart Settings",
+		"enabled": 1,
+		'company': args.get('company_name').strip(),
+		'price_list': frappe.db.get_value("Price List", {"selling": 1}),
+		'default_customer_group': _("Individual"),
+		'quotation_series': "QTN-",
+	}).insert()
 
 def create_bank_account(args):
 	if args.get("bank_account"):
@@ -145,6 +160,7 @@ def set_defaults(args):
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
 	stock_settings.valuation_method = "FIFO"
+	stock_settings.default_warehouse = frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')})
 	stock_settings.stock_uom = _("Nos")
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
@@ -286,7 +302,6 @@ def create_items(args):
 			is_sales_item = args.get("is_sales_item_" + str(i))
 			is_purchase_item = args.get("is_purchase_item_" + str(i))
 			is_stock_item = item_group!=_("Services")
-			is_pro_applicable = item_group!=_("Services")
 			default_warehouse = ""
 			if is_stock_item:
 				default_warehouse = frappe.db.get_value("Warehouse", filters={
@@ -300,11 +315,8 @@ def create_items(args):
 					"item_code": item,
 					"item_name": item,
 					"description": item,
-					"is_sales_item": 1 if is_sales_item else 0,
-					"is_purchase_item": 1 if is_purchase_item else 0,
 					"show_in_website": 1,
 					"is_stock_item": is_stock_item and 1 or 0,
-					"is_pro_applicable": is_pro_applicable and 1 or 0,
 					"item_group": item_group,
 					"stock_uom": args.get("item_uom_" + str(i)),
 					"default_warehouse": default_warehouse
@@ -432,6 +444,9 @@ def login_as_first_user(args):
 		frappe.local.login_manager.login_as(args.get("email"))
 
 def create_users(args):
+	if frappe.session.user == 'Administrator':
+		return
+
 	# create employee for self
 	emp = frappe.get_doc({
 		"doctype": "Employee",
@@ -486,4 +501,48 @@ def create_users(args):
 				})
 				emp.flags.ignore_mandatory = True
 				emp.insert(ignore_permissions = True)
+
+def create_academic_term():
+	at = ["Semester 1", "Semester 2", "Semester 3"]
+	for d in at:
+		academic_term = frappe.new_doc("Academic Term")
+		academic_term.term_name = d
+		academic_term.save()
+
+def create_academic_year():
+	ac = ["2013-14", "2014-15", "2015-16", "2016-17", "2017-18"]
+	for d in ac:
+		academic_year = frappe.new_doc("Academic Year")
+		academic_year.academic_year_name = d
+		academic_year.save()
+
+def create_program(args):
+	for i in xrange(1,6):
+		if args.get("program_" + str(i)):
+			program = frappe.new_doc("Program")
+			program.program_name = args.get("program_" + str(i))
+			program.save()
+
+def create_course(args):
+	for i in xrange(1,6):
+		if args.get("course_" + str(i)):
+			course = frappe.new_doc("Course")
+			course.course_name = args.get("course_" + str(i))
+			course.save()
+
+def create_instructor(args):
+	for i in xrange(1,6):
+		if args.get("instructor_" + str(i)):
+			instructor = frappe.new_doc("Instructor")
+			instructor.instructor_name = args.get("instructor_" + str(i))
+			instructor.save()
+
+def create_room(args):
+	for i in xrange(1,6):
+		if args.get("room_" + str(i)):
+			room = frappe.new_doc("Room")
+			room.room_name = args.get("room_" + str(i))
+			room.seating_capacity = args.get("room_capacity_" + str(i))
+			room.save()
+
 

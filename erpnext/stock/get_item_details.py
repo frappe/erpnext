@@ -48,7 +48,7 @@ def get_item_details(args):
 	if frappe.db.exists("Product Bundle", args.item_code):
 		valuation_rate = 0.0
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
-		
+
 		for bundle_item in bundled_items.items:
 			valuation_rate += \
 				flt(get_valuation_rate(bundle_item.item_code, out.get("warehouse")).get("valuation_rate") \
@@ -83,7 +83,7 @@ def get_item_details(args):
 
 	if args.get("is_subcontracted") == "Yes":
 		out.bom = get_default_bom(args.item_code)
-		
+
 	get_gross_profit(out)
 
 	return out
@@ -103,7 +103,6 @@ def process_args(args):
 		args.item_code = get_item_code(serial_no=args.serial_no)
 
 	set_transaction_type(args)
-
 	return args
 
 @frappe.whitelist()
@@ -126,19 +125,10 @@ def validate_item_details(args, item):
 	from erpnext.stock.doctype.item.item import validate_end_of_life
 	validate_end_of_life(item.name, item.end_of_life, item.disabled)
 
-	if args.transaction_type=="selling":
-		# validate if sales item or service item
-		if item.is_sales_item != 1:
-			throw(_("Item {0} must be a Sales Item").format(item.name))
-
-		if cint(item.has_variants):
-			throw(_("Item {0} is a template, please select one of its variants").format(item.name))
+	if args.transaction_type=="selling" and cint(item.has_variants):
+		throw(_("Item {0} is a template, please select one of its variants").format(item.name))
 
 	elif args.transaction_type=="buying" and args.doctype != "Material Request":
-		# validate if purchase item or subcontracted item
-		if item.is_purchase_item != 1:
-			throw(_("Item {0} must be a Purchase Item").format(item.name))
-
 		if args.get("is_subcontracted") == "Yes" and item.is_sub_contracted_item != 1:
 			throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
 
@@ -153,7 +143,7 @@ def get_basic_details(args, item):
 	user_default_warehouse_list = get_user_default_as_list('Warehouse')
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list)==1 else ""
-	
+
 	warehouse = user_default_warehouse or args.warehouse or item.default_warehouse
 
 	out = frappe._dict({
@@ -183,12 +173,13 @@ def get_basic_details(args, item):
 		"net_amount": 0.0,
 		"discount_percentage": 0.0,
 		"supplier": item.default_supplier,
-		"delivered_by_supplier": item.delivered_by_supplier
+		"delivered_by_supplier": item.delivered_by_supplier,
+		"is_fixed_asset": item.is_fixed_asset
 	})
 
 	# if default specified in item is for another company, fetch from company
-	for d in [["Account", "income_account", "default_income_account"], 
-		["Account", "expense_account", "default_expense_account"], 
+	for d in [["Account", "income_account", "default_income_account"],
+		["Account", "expense_account", "default_expense_account"],
 		["Cost Center", "cost_center", "cost_center"], ["Warehouse", "warehouse", ""]]:
 			company = frappe.db.get_value(d[0], out.get(d[1]), "company")
 			if not out[d[1]] or (company and args.company != company):
@@ -247,10 +238,9 @@ def insert_item_price(args):
 	if frappe.db.get_value("Price List", args.price_list, "currency") == args.currency \
 		and cint(frappe.db.get_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing")):
 		if frappe.has_permission("Item Price", "write"):
-
 			price_list_rate = args.rate / args.conversion_factor \
 				if args.get("conversion_factor") else args.rate
-
+		
 			item_price = frappe.get_doc({
 				"doctype": "Item Price",
 				"price_list": args.price_list,
@@ -258,9 +248,19 @@ def insert_item_price(args):
 				"currency": args.currency,
 				"price_list_rate": price_list_rate
 			})
-			item_price.insert()
-			frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
-				args.price_list))
+			
+			name = frappe.db.get_value('Item Price', {'item_code': args.item_code, 'price_list': args.price_list, 'currency': args.currency}, 'name')
+			
+			if name:
+				item_price = frappe.get_doc('Item Price', name)
+				item_price.price_list_rate = price_list_rate
+				item_price.save()	
+				frappe.msgprint(_("Item Price updated for {0} in Price List {1}").format(args.item_code,
+					args.price_list))
+			else:	
+				item_price.insert()
+				frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
+					args.price_list))
 
 def get_price_list_rate_for(price_list, item_code):
 	return frappe.db.get_value("Item Price",
@@ -375,7 +375,7 @@ def get_projected_qty(item_code, warehouse):
 def get_bin_details(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		["projected_qty", "actual_qty"], as_dict=True) \
-		or {"projected_qty": 0, "actual_qty": 0, "valuation_rate": 0}
+		or {"projected_qty": 0, "actual_qty": 0}
 
 @frappe.whitelist()
 def get_batch_qty(batch_no,warehouse,item_code):
@@ -433,7 +433,6 @@ def apply_price_list(args, as_doc=False):
 					# update the value
 					if fieldname in item and fieldname not in ("name", "doctype"):
 						item[fieldname] = children[i][fieldname]
-
 		return args
 	else:
 		return {
@@ -484,31 +483,31 @@ def get_default_bom(item_code=None):
 			return bom
 		else:
 			frappe.throw(_("No default BOM exists for Item {0}").format(item_code))
-			
+
 def get_valuation_rate(item_code, warehouse=None):
 	item = frappe.get_doc("Item", item_code)
 	if item.is_stock_item:
 		if not warehouse:
 			warehouse = item.default_warehouse
-			
-		return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, 
+
+		return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 			["valuation_rate"], as_dict=True) or {"valuation_rate": 0}
-			
+
 	elif not item.is_stock_item:
-		valuation_rate =frappe.db.sql("""select sum(base_net_amount) / sum(qty) 
-			from `tabPurchase Invoice Item` 
+		valuation_rate =frappe.db.sql("""select sum(base_net_amount) / sum(qty)
+			from `tabPurchase Invoice Item`
 			where item_code = %s and docstatus=1""", item_code)
-		
+
 		if valuation_rate:
 			return {"valuation_rate": valuation_rate[0][0] or 0.0}
 	else:
 		return {"valuation_rate": 0.0}
-		
+
 def get_gross_profit(out):
 	if out.valuation_rate:
 		out.update({
 			"gross_profit": ((out.base_rate - out.valuation_rate) * out.qty)
 		})
-	
+
 	return out
-	
+

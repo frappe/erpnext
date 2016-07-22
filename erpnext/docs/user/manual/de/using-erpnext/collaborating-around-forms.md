@@ -13,6 +13,6 @@ Kommentare sind ein großartiger Weg Informationen über eine Transaktion, die a
 
 ### Schlagworte
 
-Lesen Sie hier mehr über [Schlagworte]({{docs_base_url}}/user/manual/en/collaboration-tools/tags.html)
+Lesen Sie hier mehr über [Schlagworte]({{docs_base_url}}/user/manual/de/using-erpnext/tags.html)
 
 {next}

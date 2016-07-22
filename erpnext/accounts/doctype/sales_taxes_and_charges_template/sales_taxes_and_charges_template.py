@@ -12,8 +12,9 @@ class SalesTaxesandChargesTemplate(Document):
 		valdiate_taxes_and_charges_template(self)
 
 def valdiate_taxes_and_charges_template(doc):
-	if not doc.is_default and not frappe.get_all(doc.doctype, filters={"is_default": 1}):
-		doc.is_default = 1
+	# default should not be disabled
+	# if not doc.is_default and not frappe.get_all(doc.doctype, filters={"is_default": 1}):
+	# 	doc.is_default = 1
 
 	if doc.is_default == 1:
 		frappe.db.sql("""update `tab{0}` set is_default = 0

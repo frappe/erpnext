@@ -16,6 +16,7 @@ frappe.ui.form.on("Item", {
 	},
 
 	refresh: function(frm) {
+
 		if(frm.doc.is_stock_item) {
 			frm.add_custom_button(__("Balance"), function() {
 				frappe.route_options = {
@@ -39,7 +40,9 @@ frappe.ui.form.on("Item", {
 
 		// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
 		// read only if any stock ledger entry exists
-		erpnext.item.make_dashboard(frm);
+		if(!frm.doc.is_fixed_asset) {
+			erpnext.item.make_dashboard(frm);
+		}
 
 		// clear intro
 		frm.set_intro();
@@ -73,6 +76,9 @@ frappe.ui.form.on("Item", {
 		}
 
 		erpnext.item.toggle_attributes(frm);
+
+		frm.toggle_enable("is_fixed_asset", (frm.doc.__islocal || (!frm.doc.is_stock_item &&
+			((frm.doc.__onload && frm.doc.__onload.asset_exists) ? false : true))));
 	},
 
 	validate: function(frm){
@@ -82,7 +88,13 @@ frappe.ui.form.on("Item", {
 	image: function(frm) {
 		refresh_field("image_view");
 	},
-
+	
+	is_fixed_asset: function(frm) {
+		if (frm.doc.is_fixed_asset) {
+			frm.set_value("is_stock_item", 0);
+		}
+	},
+	
 	page_name: frappe.utils.warn_page_name_change,
 
 	item_code: function(frm) {
@@ -99,11 +111,6 @@ frappe.ui.form.on("Item", {
 		});
 	},
 
-	is_stock_item: function(frm) {
-		if(frm.doc.is_pro_applicable && !frm.doc.is_stock_item)
-			frm.set_value("is_pro_applicable", 0);
-	},
-
 	has_variants: function(frm) {
 		erpnext.item.toggle_attributes(frm);
 	}
@@ -111,40 +118,27 @@ frappe.ui.form.on("Item", {
 
 $.extend(erpnext.item, {
 	setup_queries: function(frm) {
-		// Expense Account
-		// ---------------------------------
 		frm.fields_dict['expense_account'].get_query = function(doc) {
 			return {
-				filters: {
-					"report_type": "Profit and Loss",
-					"is_group": 0
-				}
+				query: "erpnext.controllers.queries.get_expense_account",
 			}
 		}
 
-		// Income Account
-		// --------------------------------
 		frm.fields_dict['income_account'].get_query = function(doc) {
 			return {
 				query: "erpnext.controllers.queries.get_income_account"
 			}
 		}
 
-
-		// Purchase Cost Center
-		// -----------------------------
 		frm.fields_dict['buying_cost_center'].get_query = function(doc) {
 			return {
-				filters:{ "is_group": 0 }
+				filters: { "is_group": 0 }
 			}
 		}
 
-
-		// Sales Cost Center
-		// -----------------------------
 		frm.fields_dict['selling_cost_center'].get_query = function(doc) {
 			return {
-				filters:{ "is_group": 0 }
+				filters: { "is_group": 0 }
 			}
 		}
 
@@ -159,7 +153,7 @@ $.extend(erpnext.item, {
 			}
 		}
 
-		frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
+		frm.fields_dict['item_group'].get_query = function(doc, cdt, cdn) {
 			return {
 				filters: [
 					['Item Group', 'docstatus', '!=', 2]
@@ -175,12 +169,48 @@ $.extend(erpnext.item, {
 			return { query: "erpnext.controllers.queries.supplier_query" }
 		}
 
+		frm.fields_dict['default_warehouse'].get_query = function(doc) {
+			return {
+				filters: { "is_group": 0 }
+			}
+		}
+
+		frm.fields_dict.reorder_levels.grid.get_field("warehouse_group").get_query = function(doc, cdt, cdn) {
+			return {
+				filters: { "is_group": 1 }
+			}
+		}
+
+		frm.fields_dict.reorder_levels.grid.get_field("warehouse").get_query = function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			
+			var filters = {
+				"is_group": 0
+			}
+			
+			if (d.parent_warehouse) {
+				filters.extend({"parent_warehouse": d.warehouse_group})
+			}
+			
+			return {
+				filters: filters
+			}
+		}
+
 	},
 
 	make_dashboard: function(frm) {
-		frm.dashboard.reset();
 		if(frm.doc.__islocal)
 			return;
+
+		frappe.require('assets/js/item-dashboard.min.js', function() {
+			var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;"><a href="#stock-balance">Stock Levels</a></h5>');
+			erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
+				parent: section,
+				item_code: frm.doc.name
+			});
+			erpnext.item.item_dashboard.refresh();
+		});
 	},
 
 	edit_prices_button: function(frm) {

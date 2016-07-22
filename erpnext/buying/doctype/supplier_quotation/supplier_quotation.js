@@ -2,12 +2,11 @@
 // License: GNU General Public License v3. See license.txt
 
 // attach required files
-{% include 'buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
 
 erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
-
 		if (this.frm.doc.docstatus === 1) {
 			cur_frm.add_custom_button(__("Purchase Order"), this.make_purchase_order,
 				__("Make"));
@@ -16,7 +15,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 		else if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Material Request'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
 						source_doctype: "Material Request",
 						get_query_filters: {

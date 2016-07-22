@@ -1,0 +1,60 @@
+{
+ "allow_comments": 1, 
+ "allow_delete": 1, 
+ "allow_edit": 1, 
+ "allow_multiple": 1, 
+ "breadcrumbs": "[{\"title\":\"Issues\", \"name\":\"issues\"}]", 
+ "creation": "2016-06-24 15:50:33.186483", 
+ "doc_type": "Issue", 
+ "docstatus": 0, 
+ "doctype": "Web Form", 
+ "idx": 0, 
+ "is_standard": 1, 
+ "login_required": 1, 
+ "modified": "2016-06-24 15:52:24.768558", 
+ "modified_by": "Administrator", 
+ "module": "Support", 
+ "name": "issues", 
+ "owner": "Administrator", 
+ "published": 1, 
+ "route": "issues", 
+ "success_message": "", 
+ "success_url": "/issues", 
+ "title": "Issue", 
+ "web_form_fields": [
+  {
+   "fieldname": "subject", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "Subject", 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "default": "Open", 
+   "fieldname": "status", 
+   "fieldtype": "Select", 
+   "hidden": 0, 
+   "label": "Status", 
+   "options": "Open\nReplied\nHold\nClosed", 
+   "read_only": 1, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "description", 
+   "fieldtype": "Text", 
+   "hidden": 0, 
+   "label": "Description", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "attachment", 
+   "fieldtype": "Attach", 
+   "hidden": 0, 
+   "label": "Attachment", 
+   "read_only": 0, 
+   "reqd": 0
+  }
+ ]
+}

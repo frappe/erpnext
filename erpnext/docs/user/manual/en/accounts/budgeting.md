@@ -1,58 +1,56 @@
-ERPNext will help you set and manage budgets on your Cost Centers. This is
-useful when, for example, you are doing online sales. You have a budget for
-search ads, and you want ERPNext to stop or warn you from over spending, based
-on that budget.
+In ERPNext, you can set and manage Budgets against a specific Account. This is useful when, for example, you are doing online sales. You have a budget for search ads, and you want ERPNext to stop or warn you from over spending, based on that budget.
 
-Budgets are also great for planning purposes. When you are making plans for
-the next financial year, you would typically target a revenue based on which
-you would set your expenses. Setting a budget will ensure that your expenses
-do not get out of hand, at any point, as per your plans.
+Budgets are also great for planning purposes. When you are making plans for the next financial year, you would typically target a revenue based on which you would set your expenses. Setting a budget will ensure that your expenses do not get out of hand, at any point, as per your plans.
 
-You can define it in the Cost Center. If you have seasonal sales you can also
-define a budget distribution that the budget will follow.
+In ERPNext, budget against an Account is defined via Cost Center. Following are the steps to define a Budget.
 
-In order to allocate budget, go to Accounts > Setup > Chart of Cost Centers and click on Chart of Cost Center.
-Select a Cost Center and click on Open.
+###Cost Center
 
-#### Step 1: Click on Edit.
+To create new Cost Center, go to:
 
-![]({{docs_base_url}}/assets/old_images/erpnext/budgeting-1.png)  
+> Accounts > Budget and Cost Center > Chart of Cost Center > Add New Cost Center
 
-<img alt="Accounts Receivable" class="screenshot" src="{{docs_base_url}}/assets/img/accounts/accounts-receivable.png">
+<img class="screenshot" alt="Budget" src="{{docs_base_url}}/assets/img/accounts/budgeting-cost-center.png">
 
-#### Step 2: Enter Monthly Distribution.
+###Budgeting
 
-![]({{docs_base_url}}/assets/old_images/erpnext/budgeting-2-1.png)
+####Step 1: Create a new Budget
 
+To define a Budget, go to:
 
-If you leave the** **distribution ID blank, ERPNext will calculate on a yearly
+> Accounts > Budget and Cost Center > Budget > New
+
+####Step 2: Select Cost Center
+
+In the Budget form, select a Cost Center. Budgets can be defined against any Cost Center whether it is a Group / Leaf node in the Chart of Cost Centers. 
+
+####Step 3: Select Account
+
+In the Budgets table, select Income / Expense account for which Budget is to be defined. 
+
+<img class="screenshot" alt="Budget" src="{{docs_base_url}}/assets/img/accounts/budget-account.png">
+
+####Step 4: Monthly Distribution
+
+If you have seasonal business, you can also define a Monthly Distribution record, to distribute the budget between months. If you don't set the monthly distribution, ERPNext will calculate the budget on yearly
 basis or in equal proportion for every month.
 
-#### Step 3:Add New Row and select budget account.  
+<img class="screenshot" alt="Monthly Distribution" src="{{docs_base_url}}/assets/img/accounts/monthly-budget-distribution.png">
 
+####Step 5: Alert on Budget
 
+While setting budget, you can also define the actions when expenses will exceed the allocated budget for a period. You can set separate action for monthly and annual budgets. There are 3 types of actions: Stop, Warn and Ignore. If Stop, system will not allow to book expenses more than allocated budget. In Case of Warn, it will just warn the user that expenses has been exceeded from the allocated budget. And Ignore will do nothing.
 
-![]({{docs_base_url}}/assets/old_images/erpnext/budgeting-3.png)  
+<img class="screenshot" alt="Monthly Distribution" src="{{docs_base_url}}/assets/img/accounts/budget-warning.png">
 
+####Budget Variance Report
 
+At any point of time, user can check Budget Variance Report to analysis the expense vs budget against a cost center.
 
-### To Create New Distribution ID
+To check Budget Variance report, go to:
 
-ERPNext allows you to take a few budget actions. It signifies whether to stop
-, warn or Ignore  if you exceed budgets.  
+Accounts > Budget and Cost Center > Budget Variance Report
 
-![]({{docs_base_url}}/assets/old_images/erpnext/budgeting-4.png)
-
-
-
-These can be defined from the Company record.
-
-![]({{docs_base_url}}/assets/old_images/erpnext/budgeting-4-1.png)  
-
-
-
-Even if you choose to “ignore” budget overruns, you will get a wealth of
-information from the “Budget vs Actual” variance report. This report shows
-month wise actual expenses as compared to the budgeted expenses.
+<img class="screenshot" alt="Budget Variance Report" src="{{docs_base_url}}/assets/img/accounts/budget-variance-report.png">
 
 {next}

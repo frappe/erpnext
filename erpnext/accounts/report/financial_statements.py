@@ -112,7 +112,7 @@ def get_data(company, root_type, balance_must_be, period_list,
 	out = filter_out_zero_value_rows(out, parent_children_map)
 	
 	if out:
-		add_total_row(out, balance_must_be, period_list, company_currency)
+		add_total_row(out, root_type, balance_must_be, period_list, company_currency)
 
 	return out
 
@@ -125,14 +125,20 @@ def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accum
 				if entry.posting_date <= period.to_date:
 					if accumulated_values or entry.posting_date >= period.from_date:
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
+						
+			if entry.posting_date < period_list[0].year_start_date:
+				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
 
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values):
 	"""accumulate children's values in parent accounts"""
 	for d in reversed(accounts):
 		if d.parent_account:
 			for period in period_list:
-				accounts_by_name[d.parent_account][period.key] = accounts_by_name[d.parent_account].get(period.key, 0.0) + \
-					d.get(period.key, 0.0)
+				accounts_by_name[d.parent_account][period.key] = \
+					accounts_by_name[d.parent_account].get(period.key, 0.0) + d.get(period.key, 0.0)
+			
+			accounts_by_name[d.parent_account]["opening_balance"] = \
+				accounts_by_name[d.parent_account].get("opening_balance", 0.0) + d.get("opening_balance", 0.0)
 
 def prepare_data(accounts, balance_must_be, period_list, company_currency):
 	data = []
@@ -150,13 +156,14 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 			"indent": flt(d.indent),
 			"year_start_date": year_start_date,
 			"year_end_date": year_end_date,
-			"currency": company_currency
+			"currency": company_currency,
+			"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be=="Debit" else -1)
 		})
 		for period in period_list:
-			if d.get(period.key):
+			if d.get(period.key) and balance_must_be=="Credit":
 				# change sign based on Debit or Credit, since calculation is done using (debit - credit)
-				d[period.key] *= (1 if balance_must_be=="Debit" else -1)
-
+				d[period.key] *= -1
+		
 			row[period.key] = flt(d.get(period.key, 0.0), 3)
 
 			if abs(row[period.key]) >= 0.005:
@@ -186,9 +193,9 @@ def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False
 
 	return data_with_value
 
-def add_total_row(out, balance_must_be, period_list, company_currency):
+def add_total_row(out, root_type, balance_must_be, period_list, company_currency):
 	total_row = {
-		"account_name": "'" + _("Total ({0})").format(balance_must_be) + "'",
+		"account_name": "'" + _("Total {0} ({1})").format(root_type, balance_must_be) + "'",
 		"account": None,
 		"currency": company_currency
 	}

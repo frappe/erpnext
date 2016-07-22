@@ -79,11 +79,6 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Features Setup",
-					"description": _("Show / Hide features like Serial Nos, POS etc.")
-				},
-				{
-					"type": "doctype",
 					"name": "Authorization Rule",
 					"description": _("Create rules to restrict transactions based on values.")
 				},

@@ -13,11 +13,9 @@ Wäre es nicht toll, wenn es einen Weg gäbe, Ihren Produktkatalog auf Ihrer Web
 
 Wir haben uns genau das gleiche gedacht und haben deshalb eine kleine aber feine App zur Webseitenentwicklung gebaut, direkt in ERPNext! Wenn Sie das Webseitenmodul von ERPNext nutzen, können Sie:
 
-1\. Webseiten erstellen
-
-2\. Einen Blog schreiben
-
-3\. Ihren Produktkatalog basierend auf den Artikelstammdaten erstellen 
+1. Webseiten erstellen
+2. Einen Blog schreiben
+3. Ihren Produktkatalog basierend auf den Artikelstammdaten erstellen 
 
 In Kürze werden wir einen Einkaufswagen mit bereit stellen, so dass Ihre Kunden Bestellung aufgeben können und online zahlen können.
 

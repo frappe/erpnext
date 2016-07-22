@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 
-frappe.require("assets/erpnext/js/utils.js");
+
 frappe.provide("erpnext.hr");
 
 erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({

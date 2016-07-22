@@ -7,10 +7,6 @@ from __future__ import unicode_literals
 import frappe
 
 @frappe.whitelist()
-def get_time_log_list(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.get_values("Time Log", filters, ["name", "activity_type", "owner"])
-
-@frappe.whitelist()
 def query_task(doctype, txt, searchfield, start, page_len, filters):
 	from frappe.desk.reportview import build_match_conditions
 

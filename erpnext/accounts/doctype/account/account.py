@@ -16,7 +16,7 @@ class Account(Document):
 		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings",
 			"frozen_accounts_modifier")
 		if not frozen_accounts_modifier or frozen_accounts_modifier in frappe.get_roles():
-			self.get("__onload").can_freeze_account = True
+			self.set_onload("can_freeze_account", True)
 
 	def autoname(self):
 		# first validate if company exists
@@ -91,11 +91,11 @@ class Account(Document):
 			return
 
 		existing_is_group = frappe.db.get_value("Account", self.name, "is_group")
-		if self.is_group != existing_is_group:
+		if cint(self.is_group) != cint(existing_is_group):
 			if self.check_gle_exists():
 				throw(_("Account with existing transaction cannot be converted to ledger"))
 			elif self.is_group:
-				if self.account_type:
+				if self.account_type and not self.flags.exclude_account_type_check:
 					throw(_("Cannot covert to Group because Account Type is selected."))
 			elif self.check_if_child_exists():
 				throw(_("Account with child nodes cannot be set as ledger"))
@@ -139,7 +139,7 @@ class Account(Document):
 	def convert_ledger_to_group(self):
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be converted to group."))
-		elif self.account_type:
+		elif self.account_type and not self.flags.exclude_account_type_check:
 			throw(_("Cannot covert to Group because Account Type is selected."))
 		else:
 			self.is_group = 1
@@ -164,23 +164,28 @@ class Account(Document):
 	def validate_warehouse_account(self):
 		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 			return
-
-		if self.account_type == "Warehouse":
+			
+		if self.account_type == "Stock" and not cint(self.is_group):
 			if not self.warehouse:
-				throw(_("Warehouse is mandatory if account type is Warehouse"))
-
+				throw(_("Warehouse is mandatory"))
+				
 			old_warehouse = cstr(frappe.db.get_value("Account", self.name, "warehouse"))
 			if old_warehouse != cstr(self.warehouse):
 				if old_warehouse:
 					self.validate_warehouse(old_warehouse)
 				if self.warehouse:
 					self.validate_warehouse(self.warehouse)
+					
 		elif self.warehouse:
 			self.warehouse = None
-
+	
 	def validate_warehouse(self, warehouse):
-		if frappe.db.get_value("Stock Ledger Entry", {"warehouse": warehouse}):
-			throw(_("Stock entries exist against warehouse {0}, hence you cannot re-assign or modify Warehouse").format(warehouse))
+		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+
+		if lft and rgt:
+			if frappe.db.sql_list("""select sle.name from `tabStock Ledger Entry` sle where exists (select wh.name from
+				tabWarehouse wh where lft >= %s and rgt <= %s and sle.warehouse = wh.name)""", (lft, rgt)):
+				throw(_("Stock entries exist against Warehouse {0}, hence you cannot re-assign or modify it").format(warehouse))
 
 	def update_nsm_model(self):
 		"""update lft, rgt indices for nested set model"""

@@ -167,7 +167,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "customer_name", 
    "fieldtype": "Data", 
@@ -578,7 +578,7 @@
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -594,7 +594,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-03 02:27:41.801292", 
+ "modified": "2016-04-06 03:15:14.774949", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Installation Note", 
@@ -646,5 +646,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "timeline_field": "customer", 
- "title_field": "customer_name"
+ "title_field": "customer_name", 
+ "track_seen": 0
 }

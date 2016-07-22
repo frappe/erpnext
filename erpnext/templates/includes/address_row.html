@@ -1,8 +1,14 @@
 <div class="web-list-item">
     <a href="/addresses?name={{ doc.name | urlencode }}" class="no-decoration">
-        <h4 class="strong">{{ doc.address_title }}</h4>
-        <p class="text-muted small">
-            {{ frappe.get_doc(doc).get_display() }}
-        </p>
+	    <div class="row">
+	        <div class="col-xs-3">
+	                 <span class="indicator {{ "red" if doc.address_type=="Office" else "green" if doc.address_type=="Billing" else "blue" if doc.address_type=="Shipping" else "darkgrey" }}">{{ doc.address_title }}</span>
+			</div>
+			<div class="col-xs-2"> {{ doc.address_type }} </div>
+			<div class="col-xs-2"> {{ doc.city }} </div>
+			<div class="col-xs-5 text-right small text-muted">
+	            {{ frappe.get_doc(doc).get_display() }}
+	        </div>
+	    </div>
     </a>
 </div>

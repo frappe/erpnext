@@ -7,7 +7,7 @@ To create a new Quotation go to:
 
 > Selling > Quotation > New Quotation
 
-###Creating Quotation from Oppurtunity
+###Creating Quotation from Opportunity
 
 You can also create a Quotation from an Opportunity.
 
@@ -35,7 +35,7 @@ attach the corresponding image in the Item master.
 
 The rates you quote may depend on two things.
 
-  * The Price List: If you have multiple Price Lists, you can select a Price List or tag it to the Customer (so that it is auto-selected). Your Item prices will automatically be updated from the Price List.For details refer [Price List]({{docs_base_url}}/user/manual/en/setting-up/price-lists.html)
+  * The Price List: If you have multiple Price Lists, you can select a Price List or tag it to the Customer (so that it is auto-selected). Your Item prices will automatically be updated from the Price List. For details refer [Price List]({{docs_base_url}}/user/manual/en/setting-up/price-lists.html)
 
   * The Currency: If you are quoting to a Customer in a different currency, you will have to update the conversion rates to enable ERPNext to save the information in your standard Currency. This will help you to analyze the value of your Quotations in standard Currency.
 

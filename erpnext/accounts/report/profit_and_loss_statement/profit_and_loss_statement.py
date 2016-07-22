@@ -24,8 +24,10 @@ def execute(filters=None):
 		data.append(net_profit_loss)
 
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
+	
+	chart = get_chart_data(filters, columns, income, expense, net_profit_loss)
 
-	return columns, data
+	return columns, data, None, chart
 
 def get_net_profit_loss(income, expense, period_list, company):
 	if income and expense:
@@ -50,3 +52,36 @@ def get_net_profit_loss(income, expense, period_list, company):
 		
 		if has_value:
 			return net_profit_loss
+
+def get_chart_data(filters, columns, income, expense, net_profit_loss):
+	x_intervals = ['x'] + [d.get("label") for d in columns[2:-1]]
+	
+	income_data, expense_data, net_profit = [], [], []
+	
+	for p in columns[2:]:
+		if income:
+			income_data.append(income[-2].get(p.get("fieldname")))
+		if expense:
+			expense_data.append(expense[-2].get(p.get("fieldname")))
+		if net_profit_loss:
+			net_profit.append(net_profit_loss.get(p.get("fieldname")))
+			
+	columns = [x_intervals]
+	if income_data:
+		columns.append(["Income"] + income_data)
+	if expense_data:
+		columns.append(["Expense"] + expense_data)
+	if net_profit:
+		columns.append(["Net Profit/Loss"] + net_profit)
+		
+	chart = {
+		"data": {
+			'x': 'x',
+			'columns': columns
+		}
+	}
+	
+	if not filters.accumulated_values:
+		chart["chart_type"] = "bar"
+		
+	return chart

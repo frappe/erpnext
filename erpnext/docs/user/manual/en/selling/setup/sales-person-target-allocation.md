@@ -20,7 +20,7 @@ In this table, you should select Item Group, Fiscal Year, Target Qty and Amount.
 
 ####1.3 Target Distribution
 
-If you wish to spread allocated target across months, then you shoult setup Target Distribution master, and select it in the Sales Person master. Considering our example, target for the month of December will be set as 5 qty (10% of total allocation).
+If you wish to spread allocated target across months, then you should setup Monthly Distribution master, and select it in the Sales Person master. Considering our example, target for the month of December will be set as 5 qty (10% of total allocation).
 
 ![Sales Person Target Distribution]({{docs_base_url}}/assets/old_images/erpnext/sales-person-target-distribution.png)
 
@@ -52,11 +52,11 @@ In the Territory master, you will find field to select Territory Manager. This f
 
 ####2.2 Allocating Target
 
-Allocation Target in the Territory master is same as in Sales Person master. You can follow same steps as given above to specify target in the Territory master as well.
+Target Allocation in the Territory master is same as in Sales Person master. You can follow same steps as given above to specify target in the Territory master as well.
 
 ####2.3 Target Distribution
 
-Using this master, you can divide target Qty or Amount across various months.
+Using this Monthly Distribution document, you can divide target Qty or Amount across various months.
 
 ####2.4 Report - Territory Target Variance Item Groupwise
 
@@ -68,15 +68,15 @@ This report will provide you variance between target and actual performance of S
 
 ###3. Target Distribution
 
-Target Distribution master allows you to divide allocated target across multiple months. If your product and services is seasonal, you can distribute the sales target accordingly. For example, if you are into umbrella business, then target allocated in the monsoon seasion will be higher than in other months.
+Target Distribution document allows you to divide allocated target across multiple months. If your product and services is seasonal, you can distribute the sales target accordingly. For example, if you are into umbrella business, then target allocated in the monsoon seasion will be higher than in other months.
 
-To create new Budget Distriibution master, go to:
+To create new Monthly Distriibution, go to:
 
-`Accounts > Setup > Budget Distributon`
+`Accounts > Monthly Distributon`
 
 ![Target Distribution]({{docs_base_url}}/assets/old_images/erpnext/target-distribution.png)
 
-You can link target distribution while allocation targets in Sales Person as well as in Territory master.
+You can link Monthly Distribution while allocating targets in Sales Person as well as in Territory master.
 
 ###See Also
 

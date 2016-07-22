@@ -1,7 +1,5 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors // License: GNU General Public License v3. See license.txt
 
-frappe.require("assets/erpnext/js/controllers/stock_controller.js");
-frappe.require("assets/erpnext/js/utils.js");
 frappe.provide("erpnext.stock");
 
 erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
@@ -51,16 +49,27 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				};
 			});
 		}
+
+		this.frm.get_field('items').grid.editable_fields = [
+			{fieldname: 'item_code', columns: 3},
+			{fieldname: 'qty', columns: 3},
+			{fieldname: 's_warehouse', columns: 2},
+			{fieldname: 't_warehouse', columns: 2}
+		];
+
 	},
 
 	onload_post_render: function() {
 		var me = this;
-		cur_frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 		this.set_default_account(function() {
 			if(me.frm.doc.__islocal && me.frm.doc.company && !me.frm.doc.amended_from) {
 				cur_frm.script_manager.trigger("company");
 			}
 		});
+
+		if(!this.item_selector && false) {
+			this.item_selector = new erpnext.ItemSelector({frm: this.frm});
+		}
 	},
 
 	refresh: function() {
@@ -72,6 +81,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
 			this.show_general_ledger();
 		}
+		erpnext.hide_company();
 	},
 
 	on_submit: function() {
@@ -180,7 +190,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				var excise = frappe.model.make_new_doc_and_get_name('Journal Entry');
 				excise = locals['Journal Entry'][excise];
 				excise.voucher_type = 'Excise Entry';
-				loaddoc('Journal Entry', excise.name);
+				frappe.set_route('Form', 'Journal Entry', excise.name);
 			}, __("Make"));
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 	},

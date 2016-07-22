@@ -62,7 +62,7 @@ $.extend(erpnext.queries, {
 	},
 
 	not_a_group_filter: function() {
-		return { filters: { is_group: "No" } };
+		return { filters: { is_group: 0 } };
 	},
 
 	employee: function() {
@@ -71,7 +71,11 @@ $.extend(erpnext.queries, {
 
 	warehouse: function(doc) {
 		return {
-			filters: [["Warehouse", "company", "in", ["", cstr(doc.company)]]]
+			filters: [
+				["Warehouse", "company", "in", ["", cstr(doc.company)]],
+				["Warehouse", "is_group", "=",0]
+				
+			]
 		}
 	}
 });

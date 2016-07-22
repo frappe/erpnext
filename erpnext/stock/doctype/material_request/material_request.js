@@ -1,9 +1,23 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
 
-frappe.require("assets/erpnext/js/utils.js");
+frappe.ui.form.on('Material Request', {
+	setup: function(frm) {
+		frm.get_field('items').grid.editable_fields = [
+			{fieldname: 'item_code', columns: 3},
+			{fieldname: 'qty', columns: 2},
+			{fieldname: 'warehouse', columns: 3},
+			{fieldname: 'schedule_date', columns: 2},
+		];
+	},
+	onload: function(frm) {
+		// formatter for material request item
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange" })
+	}
+});
 
 frappe.ui.form.on("Material Request Item", {
 	"qty": function(frm, doctype, name) {
@@ -26,6 +40,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	},
 
 	refresh: function(doc) {
+		var me = this;
 		this._super();
 
 		if(doc.docstatus==0) {
@@ -34,7 +49,6 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 
 		if(doc.docstatus == 1 && doc.status != 'Stopped') {
-
 			if(flt(doc.per_ordered, 2) < 100) {
 				// make
 				if(doc.material_request_type === "Material Transfer" && doc.status === "Submitted")
@@ -50,9 +64,13 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						this.make_purchase_order, __("Make"));
 
 				if(doc.material_request_type === "Purchase")
+					cur_frm.add_custom_button(__("Request for Quotation"),
+						this.make_request_for_quotation, __("Make"));
+
+				if(doc.material_request_type === "Purchase")
 					cur_frm.add_custom_button(__("Supplier Quotation"),
 					this.make_supplier_quotation, __("Make"));
-				
+
 				if(doc.material_request_type === "Manufacture" && doc.status === "Submitted")
 					cur_frm.add_custom_button(__("Production Order"),
 					this.raise_production_orders, __("Make"));
@@ -69,7 +87,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Sales Order'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
 						source_doctype: "Sales Order",
 						get_query_filters: {
@@ -123,14 +141,18 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				method: "erpnext.manufacturing.doctype.bom.bom.get_bom_items",
 				args: values,
 				callback: function(r) {
-					$.each(r.message, function(i, item) {
-						var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
-						d.item_code = item.item_code;
-						d.description = item.description;
-						d.warehouse = values.warehouse;
-						d.uom = item.stock_uom;
-						d.qty = item.qty;
-					});
+					if(!r.message) {
+						frappe.throw(__("BOM does not contain any stock item"))
+					} else {
+						$.each(r.message, function(i, item) {
+							var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
+							d.item_code = item.item_code;
+							d.description = item.description;
+							d.warehouse = values.warehouse;
+							d.uom = item.stock_uom;
+							d.qty = item.qty;
+						});
+					}
 					d.hide();
 					refresh_field("items");
 				}
@@ -154,6 +176,14 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	make_purchase_order: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
+			frm: cur_frm,
+			run_link_triggers: true
+		});
+	},
+
+	make_request_for_quotation: function(){
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.material_request.material_request.make_request_for_quotation",
 			frm: cur_frm,
 			run_link_triggers: true
 		});

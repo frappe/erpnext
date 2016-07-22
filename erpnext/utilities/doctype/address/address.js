@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'controllers/js/contact_address_common.js' %};
+{% include 'erpnext/controllers/js/contact_address_common.js' %};
 
 frappe.ui.form.on("Address", "validate", function(frm) {
 	// clear linked customer / supplier / sales partner on saving...

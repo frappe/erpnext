@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 from frappe.utils import cstr, flt
-from frappe import msgprint, _, throw
+from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.item.item import get_last_purchase_details
@@ -23,13 +23,13 @@ class PurchaseOrder(BuyingController):
 		self.status_updater = [{
 			'source_dt': 'Purchase Order Item',
 			'target_dt': 'Material Request Item',
-			'join_field': 'prevdoc_detail_docname',
+			'join_field': 'material_request_item',
 			'target_field': 'ordered_qty',
 			'target_parent_dt': 'Material Request',
 			'target_parent_field': 'per_ordered',
 			'target_ref_field': 'qty',
 			'source_field': 'stock_qty',
-			'percent_join_field': 'prevdoc_docname',
+			'percent_join_field': 'material_request',
 			'overflow_type': 'order'
 		}]
 
@@ -81,9 +81,9 @@ class PurchaseOrder(BuyingController):
 
 	def get_schedule_dates(self):
 		for d in self.get('items'):
-			if d.prevdoc_detail_docname and not d.schedule_date:
+			if d.material_request_item and not d.schedule_date:
 				d.schedule_date = frappe.db.get_value("Material Request Item",
-						d.prevdoc_detail_docname, "schedule_date")
+						d.material_request_item, "schedule_date")
 
 
 	def get_last_purchase_rate(self):
@@ -103,10 +103,7 @@ class PurchaseOrder(BuyingController):
 					d.price_list_rate = d.base_price_list_rate / conversion_rate
 					d.rate = d.base_rate / conversion_rate
 				else:
-					# if no last purchase found, reset all values to 0
-					for field in ("base_price_list_rate", "base_rate",
-						"price_list_rate", "rate", "discount_percentage"):
-							d.set(field, 0)
+					msgprint(_("Last purchase rate not found"))
 
 					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
 					if item_last_purchase_rate:
@@ -117,15 +114,15 @@ class PurchaseOrder(BuyingController):
 	def check_for_closed_status(self, pc_obj):
 		check_list =[]
 		for d in self.get('items'):
-			if d.meta.get_field('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
-				check_list.append(d.prevdoc_docname)
-				pc_obj.check_for_closed_status( d.prevdoc_doctype, d.prevdoc_docname)
+			if d.meta.get_field('material_request') and d.material_request and d.material_request not in check_list:
+				check_list.append(d.material_request)
+				pc_obj.check_for_closed_status('Material Request', d.material_request)
 
 	def update_requested_qty(self):
 		material_request_map = {}
 		for d in self.get("items"):
-			if d.prevdoc_doctype and d.prevdoc_doctype == "Material Request" and d.prevdoc_detail_docname:
-				material_request_map.setdefault(d.prevdoc_docname, []).append(d.prevdoc_detail_docname)
+			if d.material_request_item:
+				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
 
 		for mr, mr_item_rows in material_request_map.items():
 			if mr and mr_item_rows:
@@ -192,17 +189,6 @@ class PurchaseOrder(BuyingController):
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_closed_status(pc_obj)
 
-		# Check if Purchase Receipt has been submitted against current Purchase Order
-		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.name, detail_doctype = 'Purchase Receipt Item')
-
-		# Check if Purchase Invoice has been submitted against current Purchase Order
-		submitted = frappe.db.sql_list("""select t1.name
-			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
-			where t1.name = t2.parent and t2.purchase_order = %s and t1.docstatus = 1""",
-			self.name)
-		if submitted:
-			throw(_("Purchase Invoice {0} is already submitted").format(", ".join(submitted)))
-
 		frappe.db.set(self,'status','Cancelled')
 
 		self.update_prevdoc_status()
@@ -228,9 +214,9 @@ class PurchaseOrder(BuyingController):
 		"""Update delivered qty in Sales Order for drop ship"""
 		sales_orders_to_update = []
 		for item in self.items:
-			if item.prevdoc_doctype == "Sales Order" and item.delivered_by_supplier == 1:
-				if item.prevdoc_docname not in sales_orders_to_update:
-					sales_orders_to_update.append(item.prevdoc_docname)
+			if item.sales_order and item.delivered_by_supplier == 1:
+				if item.sales_order not in sales_orders_to_update:
+					sales_orders_to_update.append(item.sales_order)
 
 		for so_name in sales_orders_to_update:
 			so = frappe.get_doc("Sales Order", so_name)
@@ -242,7 +228,7 @@ class PurchaseOrder(BuyingController):
 		return any([d.delivered_by_supplier for d in self.items])
 
 	def is_against_so(self):
-		return any([d.prevdoc_doctype for d in self.items if d.prevdoc_doctype=="Sales Order"])
+		return any([d.sales_order for d in self.items if d.sales_order])
 
 	def set_received_qty_for_drop_ship_items(self):
 		for item in self.items:
@@ -291,9 +277,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 		"Purchase Order Item": {
 			"doctype": "Purchase Receipt Item",
 			"field_map": {
-				"name": "prevdoc_detail_docname",
-				"parent": "prevdoc_docname",
-				"parenttype": "prevdoc_doctype",
+				"name": "purchase_order_item",
+				"parent": "purchase_order",
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
@@ -311,7 +296,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Purchase Invoice Advance
-		target.get_advances()
+		target.set_advances()
 
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)

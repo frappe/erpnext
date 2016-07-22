@@ -3,13 +3,14 @@ sales-invoice
 purchase-invoice
 payment-request
 chart-of-accounts
-making-payments
+payment-entry
 advance-payment-entry
 payment-request
 credit-limit
 opening-entry
 accounting-reports
 accounting-entries
+managing-fixed-assets
 budgeting
 opening-accounts
 item-wise-tax

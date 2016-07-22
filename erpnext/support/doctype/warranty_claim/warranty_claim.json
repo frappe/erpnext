@@ -559,7 +559,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "depends_on": "customer", 
    "fieldname": "customer_name", 
@@ -1007,7 +1007,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-03-03 05:42:57.634257", 
+ "modified": "2016-04-06 03:15:18.376985", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Warranty Claim", 
@@ -1040,5 +1040,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "timeline_field": "customer", 
- "title_field": "customer_name"
+ "title_field": "customer_name", 
+ "track_seen": 0
 }

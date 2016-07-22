@@ -12,7 +12,9 @@ from frappe.model.document import Document
 class FiscalYear(Document):
 	def set_as_default(self):
 		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.name)
-		frappe.get_doc("Global Defaults").on_update()
+		global_defaults = frappe.get_doc("Global Defaults")
+		global_defaults.check_permission("write")
+		global_defaults.on_update()
 
 		# clear cache
 		frappe.clear_cache()
@@ -21,6 +23,7 @@ class FiscalYear(Document):
 
 	def validate(self):
 		self.validate_dates()
+		self.validate_overlap()
 
 		if not self.is_new():
 			year_start_end_dates = frappe.db.sql("""select year_start_date, year_end_date
@@ -45,6 +48,37 @@ class FiscalYear(Document):
 		global_defaults = frappe.get_doc("Global Defaults")
 		if global_defaults.current_fiscal_year == self.name:
 			frappe.throw(_("You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings").format(self.name))
+
+	def validate_overlap(self):
+		existing_fiscal_years = frappe.db.sql("""select name from `tabFiscal Year`
+			where (
+				(%(year_start_date)s between year_start_date and year_end_date)
+				or (%(year_end_date)s between year_start_date and year_end_date)
+				or (year_start_date between %(year_start_date)s and %(year_end_date)s)
+				or (year_end_date between %(year_start_date)s and %(year_end_date)s)
+			) and name!=%(name)s""",
+			{
+				"year_start_date": self.year_start_date,
+				"year_end_date": self.year_end_date,
+				"name": self.name or "No Name"
+			}, as_dict=True)
+
+		if existing_fiscal_years:
+			for existing in existing_fiscal_years:
+				company_for_existing = frappe.db.sql_list("""select company from `tabFiscal Year Company`
+					where parent=%s""", existing.name)
+
+				overlap = False
+				if not self.get("companies") or not company_for_existing:
+					overlap = True
+
+				for d in self.get("companies"):
+					if d.company in company_for_existing:
+						overlap = True
+
+				if overlap:
+					frappe.throw(_("Year start date or end date is overlapping with {0}. To avoid please set company")
+						.format(existing.name), frappe.NameError)
 
 @frappe.whitelist()
 def check_duplicate_fiscal_year(doc):

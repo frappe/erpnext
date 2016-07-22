@@ -37,12 +37,15 @@ def create_charts(chart_name, company):
 						"root_type": root_type,
 						"report_type": report_type,
 						"account_type": child.get("account_type"),
-						"account_currency": frappe.db.get_value("Company", company, "default_currency")
+						"account_currency": frappe.db.get_value("Company", company, "default_currency"),
+						"tax_rate": child.get("tax_rate")
 					})
 
 					if root_account or frappe.local.flags.allow_unverified_charts:
 						account.flags.ignore_mandatory = True
 						
+					account.flags.ignore_permissions = True
+					
 					account.insert()
 
 					accounts.append(account_name_in_db)
@@ -86,8 +89,9 @@ def get_charts_for_country(country):
 	def _get_chart_name(content):
 		if content:
 			content = json.loads(content)
-			if content and content.get("disabled", "No") == "No":
-				charts.append(content["name"])
+			if (content and content.get("disabled", "No") == "No") \
+				or frappe.local.flags.allow_unverified_charts:
+					charts.append(content["name"])
 
 	country_code = frappe.db.get_value("Country", country, "code")
 	if country_code:

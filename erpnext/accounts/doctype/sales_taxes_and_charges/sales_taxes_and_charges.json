@@ -3,10 +3,12 @@
  "allow_import": 0, 
  "allow_rename": 0, 
  "autoname": "INVTD.######", 
+ "beta": 0, 
  "creation": "2013-04-24 11:39:32", 
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -508,18 +510,22 @@
  "hide_heading": 1, 
  "hide_toolbar": 0, 
  "idx": 1, 
+ "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-02-22 09:35:25.423372", 
+ "modified": "2016-07-11 03:28:08.283145", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Taxes and Charges", 
  "owner": "Administrator", 
  "permissions": [], 
+ "quick_entry": 0, 
  "read_only": 0, 
- "read_only_onload": 0
+ "read_only_onload": 0, 
+ "sort_order": "ASC", 
+ "track_seen": 0
 }

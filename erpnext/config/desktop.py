@@ -4,37 +4,108 @@ from frappe import _
 def get_data():
 	return [
 		{
+			"module_name": "Item",
+			"_doctype": "Item",
+			"color": "#f39c12",
+			"icon": "octicon octicon-package",
+			"type": "link",
+			"link": "List/Item"
+		},
+		{
+			"module_name": "Customer",
+			"_doctype": "Customer",
+			"color": "#1abc9c",
+			"icon": "octicon octicon-tag",
+			"type": "link",
+			"link": "List/Customer"
+		},
+		{
+			"module_name": "Supplier",
+			"_doctype": "Supplier",
+			"color": "#c0392b",
+			"icon": "octicon octicon-briefcase",
+			"type": "link",
+			"link": "List/Supplier"
+		},
+		{
+			"_doctype": "Employee",
+			"module_name": "Employee",
+			"color": "#2ecc71",
+			"icon": "octicon octicon-organization",
+			"type": "link",
+			"link": "List/Employee"
+		},
+		{
+			"module_name": "Project",
+			"_doctype": "Project",
+			"color": "#8e44ad",
+			"icon": "octicon octicon-rocket",
+			"type": "link",
+			"link": "List/Project"
+		},
+		{
+			"module_name": "Issue",
+			"color": "#2c3e50",
+			"icon": "octicon octicon-issue-opened",
+			"_doctype": "Issue",
+			"type": "link",
+			"link": "List/Issue"
+		},
+		{
+			"module_name": "Lead",
+			"icon": "octicon octicon-broadcast",
+			"type": "module",
+			"_doctype": "Lead",
+			"type": "link",
+			"link": "List/Lead"
+		},
+		{
+			"module_name": "Profit and Loss Statment",
+			"_doctype": "Account",
+			"color": "#3498db",
+			"icon": "octicon octicon-repo",
+			"type": "link",
+			"link": "query-report/Profit and Loss Statement"
+		},
+
+		# old
+		{
 			"module_name": "Accounts",
 			"color": "#3498db",
 			"icon": "octicon octicon-repo",
-			"type": "module"
+			"type": "module",
+			"hidden": 1
 		},
 		{
 			"module_name": "Stock",
 			"color": "#f39c12",
 			"icon": "icon-truck",
 			"icon": "octicon octicon-package",
-			"type": "module"
+			"type": "module",
+			"hidden": 1
 		},
 		{
 			"module_name": "CRM",
 			"color": "#EF4DB6",
 			"icon": "octicon octicon-broadcast",
-			"type": "module"
+			"type": "module",
+			"hidden": 1
 		},
 		{
 			"module_name": "Selling",
 			"color": "#1abc9c",
 			"icon": "icon-tag",
 			"icon": "octicon octicon-tag",
-			"type": "module"
+			"type": "module",
+			"hidden": 1
 		},
 		{
 			"module_name": "Buying",
 			"color": "#c0392b",
 			"icon": "icon-shopping-cart",
 			"icon": "octicon octicon-briefcase",
-			"type": "module"
+			"type": "module",
+			"hidden": 1
 		},
 		{
 			"module_name": "HR",
@@ -42,14 +113,16 @@ def get_data():
 			"icon": "icon-group",
 			"icon": "octicon octicon-organization",
 			"label": _("Human Resources"),
-			"type": "module"
+			"type": "module",
+			"hidden": 1
 		},
 		{
 			"module_name": "Manufacturing",
 			"color": "#7f8c8d",
 			"icon": "icon-cogs",
 			"icon": "octicon octicon-tools",
-			"type": "module"
+			"type": "module",
+			"hidden": 1
 		},
 		{
 			"module_name": "POS",
@@ -65,14 +138,16 @@ def get_data():
 			"color": "#8e44ad",
 			"icon": "icon-puzzle-piece",
 			"icon": "octicon octicon-rocket",
-			"type": "module"
+			"type": "module",
+			"hidden": 1
 		},
 		{
 			"module_name": "Support",
 			"color": "#2c3e50",
 			"icon": "icon-phone",
 			"icon": "octicon octicon-issue-opened",
-			"type": "module"
+			"type": "module",
+			"hidden": 1
 		},
 		{
 			"module_name": "Learn",
@@ -80,6 +155,120 @@ def get_data():
 			"icon": "octicon octicon-device-camera-video",
 			"type": "module",
 			"is_help": True,
-			"label": _("Learn")
+			"label": _("Learn"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Maintenance",
+			"color": "#FF888B",
+			"icon": "octicon octicon-tools",
+			"type": "module",
+			"label": _("Maintenance")
+		},
+		{
+			"module_name": "Student",
+			"color": "#c0392b",
+			"icon": "octicon octicon-person",
+			"label": _("Student"),
+			"link": "List/Student",
+			"_doctype": "Student",
+			"type": "list"
+		},
+		{
+			"module_name": "Student Group",
+			"color": "#d59919",
+			"icon": "octicon octicon-organization",
+			"label": _("Student Group"),
+			"link": "List/Student Group",
+			"_doctype": "Student Group",
+			"type": "list"
+		},
+		{
+			"module_name": "Course Schedule",
+			"color": "#fd784f",
+			"icon": "octicon octicon-calendar",
+			"label": _("Course Schedule"),
+			"link": "Calendar/Course Schedule",
+			"_doctype": "Course Schedule",
+			"type": "list"
+		},
+		{
+			"module_name": "Student Attendance",
+			"color": "#3aacba",
+			"icon": "octicon octicon-checklist",
+			"label": _("Student Attendance"),
+			"link": "List/Student Attendance",
+			"_doctype": "Student Attendance",
+			"type": "list"
+		},
+		{
+			"module_name": "Course",
+			"color": "#8e44ad",
+			"icon": "octicon octicon-book",
+			"label": _("Course"),
+			"link": "List/Course",
+			"_doctype": "Course",
+			"type": "list"
+		},
+		{
+			"module_name": "Program",
+			"color": "#9b59b6",
+			"icon": "octicon octicon-repo",
+			"label": _("Program"),
+			"link": "List/Program",
+			"_doctype": "Program",
+			"type": "list"
+		},
+		{
+			"module_name": "Student Applicant",
+			"color": "#4d927f",
+			"icon": "octicon octicon-clippy",
+			"label": _("Student Applicant"),
+			"link": "List/Student Applicant",
+			"_doctype": "Student Applicant",
+			"type": "list"
+		},
+		{
+			"module_name": "Examination",
+			"color": "#8a70be",
+			"icon": "icon-file-text-alt",
+			"label": _("Examination"),
+			"link": "List/Examination",
+			"_doctype": "Examination",
+			"type": "list"
+		},
+		{
+			"module_name": "Fees",
+			"color": "#83C21E",
+			"icon": "icon-money",
+			"label": _("Fees"),
+			"link": "List/Fees",
+			"_doctype": "Fees",
+			"type": "list"
+		},
+		{
+			"module_name": "Instructor",
+			"color": "#a99e4c",
+			"icon": "octicon octicon-broadcast",
+			"label": _("Instructor"),
+			"link": "List/Instructor",
+			"_doctype": "Instructor",
+			"type": "list"
+		},
+		{
+			"module_name": "Room",
+			"color": "#f22683",
+			"icon": "icon-map-marker",
+			"label": _("Room"),
+			"link": "List/Room",
+			"_doctype": "Examination",
+			"type": "list"
+		},
+		{
+			"module_name": "Schools",
+			"color": "#DE2B37",
+			"icon": "octicon octicon-mortar-board",
+			"type": "module",
+			"label": _("Schools")
 		}
 	]

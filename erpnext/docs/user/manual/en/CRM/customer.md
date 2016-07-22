@@ -21,9 +21,9 @@ have multiple Contacts and Addresses.
 Contacts and Addresses in ERPNext are stored separately so that you can
 attach multiple Contacts or Addresses to Customers and Suppliers.
 
-Read [Contact]({{docs_base_url}}/user/manual/en/crm/contact.html) to know more.
+Read [Contact]({{docs_base_url}}/user/manual/en/CRM/contact.html) to know more.
 
-Thus we may have identical Customer Names that are uniquely identified by the ID. Since the email address is not part of the customer information the linking of customer and User is through [Contacts]({{docs_base_url}}/user/manual/en/crm/contact.html)
+Thus we may have identical Customer Names that are uniquely identified by the ID. Since the email address is not part of the customer information the linking of customer and User is through [Contacts]({{docs_base_url}}/user/manual/en/CRM/contact.html)
 
 ### Integration with Accounts
 
@@ -52,12 +52,12 @@ You can set how much credit you want to allow for a Customer by adding the
 “Credit Limit”. You can also set a global “Credit Limit” in the Company
 master. Classifying Customers
 
-ERPNext allows you to group your Customers using [Customer Group]({{docs_base_url}}/user/manual/en/crm/setup/customer-group.html) 
-and also divide them into [Territories]({{docs_base_url}}/user/manual/en/crm/setup/territory.html)
+ERPNext allows you to group your Customers using [Customer Group]({{docs_base_url}}/user/manual/en/CRM/setup/customer-group.html) 
+and also divide them into [Territories]({{docs_base_url}}/user/manual/en/CRM/setup/territory.html)
 Grouping will help you get better analysis of your data and
 identify which Customers are profitable and which are not. Territories will
 help you set sales targets for the respective territories.
-You can also mention [Sales Person]({{docs_base_url}}/user/manual/en/crm/setup/sales-person.html) against a customer.
+You can also mention [Sales Person]({{docs_base_url}}/user/manual/en/CRM/setup/sales-person.html) against a customer.
 
 ### Sales Partner
 

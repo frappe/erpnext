@@ -5,6 +5,6 @@ Guter Kundensupport und Wartung sind das Herzstück jeden erfolgreichen kleinere
 
 In diesem Modul können Sie eingehende Supportanfragen über Supporttickets abwickeln. Sie können somit auch Kundenanfragen zu bestimmten Seriennummern im Auge behalten und diese basierend auf der Garantie und anderen Informationen beantworten. Weiterhin können Sie Wartungspläne für Seriennummern erstellen und Wartungsbesuche bei Ihren Kunden aufzeichnen.
 
-Themen
+### Themen
 
 {index}

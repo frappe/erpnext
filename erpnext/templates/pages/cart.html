@@ -8,12 +8,6 @@
 <script>{% include "templates/includes/cart.js" %}</script>
 {% endblock %}
 
-{% block style %}
-<style>
-    {% include "templates/includes/cart.css" %}
-</style>
-{% endblock %}
-
 
 {% block header_actions %}
 {% if doc.items %}
@@ -27,49 +21,59 @@
 
 {% from "templates/includes/macros.html" import item_name_and_description %}
 
-<div class="cart-content">
+<div class="cart-container">
 	<div id="cart-container">
-		<div id="cart-error" class="alert alert-danger"
-            style="display: none;"></div>
-    	<div id="cart-items">
-            <div class="row cart-item-header">
-                <div class="col-sm-8 col-xs-6">
-                    Items
-                </div>
-                <div class="col-sm-2 col-xs-3 text-right">
-                    Qty
-            	</div>
-                <div class="col-sm-2 col-xs-3 text-right">
-                    Amount
-            	</div>
-            </div>
-            {% if doc.items %}
-            <div class="cart-items">
-            {% include "templates/includes/cart/cart_items.html" %}
-            </div>
-            {% else %}
-            <p>{{ _("Cart is Empty") }}</p>
-            {% endif %}
-    	</div>
-        {% if doc.items %}
-        <!-- taxes -->
-        <div class="cart-taxes row small">
-            <div class="col-sm-8"><!-- empty --></div>
-            <div class="col-sm-4 cart-tax-items">
-                {% include "templates/includes/order/order_taxes.html" %}
-            </div>
-        </div>
-    	<div id="cart-totals">
-    	</div>
-    	<div class="cart-addresses">
-            {% include "templates/includes/cart/cart_address.html" %}
-    	</div>
-    	<p class="cart-footer text-right">
-            <button class="btn btn-primary btn-place-order btn-sm" type="button">
-    		{{ _("Place Order") }}</button></p>
-        {% endif %}
-    </div>
+			<div id="cart-error" class="alert alert-danger"
+		style="display: none;"></div>
+		<div id="cart-items">
+			<div class="row cart-item-header text-muted">
+				<div class="col-sm-8 col-xs-6 h6 text-uppercase">
+				{{ _("Item") }}
+				</div>
+				<div class="col-sm-2 col-xs-3 text-center h6 text-uppercase">
+				{{ _("Qty") }}
+				</div>
+				<div class="col-sm-2 col-xs-3 text-right h6 text-uppercase">
+				{{ _("Subtotal") }}
+				</div>
+			</div>
+			{% if doc.items %}
+				<div class="cart-items">
+					{% include "templates/includes/cart/cart_items.html" %}
+				</div>
+			{% else %}
+				<p class="empty-cart">{{ _("Cart is Empty") }}</p>
+			{% endif %}
+		</div>
+		{% if doc.items %}
+		<!-- taxes -->
+		<div class="row cart-taxes">
+			<div class="col-sm-6"><!-- empty --></div>
+			<div class="col-sm-6 text-right cart-tax-items">
+			{% include "templates/includes/order/order_taxes.html" %}
+			</div>
+		</div>
+
+		{% if doc.tc_name %}
+			<div class="cart-terms" style="display: none;" title={{doc.tc_name}}>
+				{{doc.tc_name}}
+				{{doc.terms}}
+			</div>
+			<div class="cart-link">
+				<a href="#" onclick="show_terms();return false;">*Terms and Conditions</a>
+			</div>
+		{% endif %}
+
+		<div class="cart-addresses">
+		{% include "templates/includes/cart/cart_address.html" %}
+		</div>
+
+		<p class="cart-footer text-right">
+		<button class="btn btn-primary btn-place-order btn-sm" type="button">
+		{{ _("Place Order") }}</button></p>
+		{% endif %}
+	</div>
 </div>
 
-<!-- no-sidebar -->
+
 {% endblock %}

@@ -15,7 +15,7 @@ def execute():
 				"warehouse": item.default_warehouse,
 				"warehouse_reorder_level": item.re_order_level,
 				"warehouse_reorder_qty": item.re_order_qty,
-				"material_request_type": "Purchase" if item_doc.is_purchase_item else "Transfer"
+				"material_request_type": "Purchase"
 			})
 
 			try:

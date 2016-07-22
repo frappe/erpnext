@@ -9,6 +9,6 @@ Um zu verstehen, wie sie soziale Netzwerke für ERPNext aktivieren, sehen Sie si
 
 * Für Facebook: https://www.youtube.com/watch?v=zC6Q6gIfiw8
 * Für Google: https://www.youtube.com/watch?v=w_EAttrE9sw
-* Für GutHub: https://www.youtube.com/watch?v=bG71DxxkVjQ
+* Für GitHub: https://www.youtube.com/watch?v=bG71DxxkVjQ
 
 {next}

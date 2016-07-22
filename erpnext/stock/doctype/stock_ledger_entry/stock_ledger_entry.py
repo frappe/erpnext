@@ -25,6 +25,7 @@ class StockLedgerEntry(Document):
 		validate_warehouse_company(self.warehouse, self.company)
 		self.scrub_posting_time()
 		self.validate_and_set_fiscal_year()
+		self.block_transactions_against_group_warehouse()
 
 		from erpnext.accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.posting_date, self.fiscal_year, self.meta.get_label("posting_date"), self)
@@ -117,6 +118,9 @@ class StockLedgerEntry(Document):
 		if not self.fiscal_year:
 			self.fiscal_year = get_fiscal_year(self.posting_date, company=self.company)[0]
 
+	def block_transactions_against_group_warehouse(self):
+		from erpnext.stock.utils import is_group_warehouse
+		is_group_warehouse(self.warehouse)
 
 def on_doctype_update():
 	if not frappe.db.sql("""show index from `tabStock Ledger Entry`

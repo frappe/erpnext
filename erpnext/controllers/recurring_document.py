@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import frappe
+import calendar
 import frappe.utils
 import frappe.defaults
 
@@ -166,14 +167,24 @@ def validate_recurring_document(doc):
 
 		elif not (doc.from_date and doc.to_date):
 			frappe.throw(_("Period From and Period To dates mandatory for recurring {0}").format(doc.doctype))
-			
+
 def validate_recurring_next_date(doc):
 	posting_date = doc.get("posting_date") or doc.get("transaction_date")
 	if getdate(posting_date) > getdate(doc.next_date):
 		frappe.throw(_("Next Date must be greater than Posting Date"))
 
-	if getdate(doc.next_date).day != doc.repeat_on_day_of_month:
-		frappe.throw(_("Next Date's day and Repeat on Day of Month must be equal"))
+	next_date = getdate(doc.next_date)
+	if next_date.day != doc.repeat_on_day_of_month:
+
+		# if the repeat day is the last day of the month (31)
+		# and the current month does not have as many days,
+		# then the last day of the current month is a valid date
+		lastday = calendar.monthrange(next_date.year, next_date.month)[1]
+		if doc.repeat_on_day_of_month < lastday:
+
+			# the specified day of the month is not same as the day specified
+			# or the last day of the month
+			frappe.throw(_("Next Date's day and Repeat on Day of Month must be equal"))
 
 def convert_to_recurring(doc, posting_date):
 	if doc.is_recurring:
@@ -182,12 +193,11 @@ def convert_to_recurring(doc, posting_date):
 
 		set_next_date(doc, posting_date)
 
+		if doc.next_date:
+			validate_recurring_next_date(doc)
+
 	elif doc.recurring_id:
-		frappe.db.sql("""update `tab%s` set is_recurring = 0
-			where recurring_id = %s""" % (doc.doctype, '%s'), (doc.recurring_id))
-			
-	if doc.next_date:
-		validate_recurring_next_date(doc)
+		doc.db_set("recurring_id", None)
 
 def validate_notification_email_id(doc):
 	if doc.notify_by_email:

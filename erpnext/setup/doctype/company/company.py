@@ -13,7 +13,7 @@ from frappe.model.document import Document
 
 class Company(Document):
 	def onload(self):
-		self.get("__onload").transactions_exist = self.check_if_transactions_exist()
+		self.get("__onload")["transactions_exist"] = self.check_if_transactions_exist()
 
 	def check_if_transactions_exist(self):
 		exists = False
@@ -30,16 +30,16 @@ class Company(Document):
 		self.validate_abbr()
 		self.validate_default_accounts()
 		self.validate_currency()
-		
+
 	def validate_abbr(self):
 		self.abbr = self.abbr.strip()
-		
+
 		if self.get('__islocal') and len(self.abbr) > 5:
 			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
 
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
-			
+
 		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
 			frappe.throw(_("Abbreviation already used for another company"))
 
@@ -63,14 +63,17 @@ class Company(Document):
 	def on_update(self):
 		if not frappe.db.sql("""select name from tabAccount
 				where company=%s and docstatus<2 limit 1""", self.name):
-			self.create_default_accounts()
-			self.create_default_warehouses()
-			self.install_country_fixtures()
+			if not frappe.local.flags.ignore_chart_of_accounts:
+				self.create_default_accounts()
+				self.create_default_warehouses()
+			
+				self.install_country_fixtures()
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
 
-		self.set_default_accounts()
+		if not frappe.local.flags.ignore_chart_of_accounts:
+			self.set_default_accounts()
 
 		if self.default_currency:
 			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
@@ -80,20 +83,31 @@ class Company(Document):
 	def install_country_fixtures(self):
 		path = os.path.join(os.path.dirname(__file__), "fixtures", self.country.lower())
 		if os.path.exists(path.encode("utf-8")):
-			frappe.get_attr("erpnext.setup.doctype.company.fixtures.{0}.install".format(self.country.lower()))(self)
+			frappe.get_attr("erpnext.setup.doctype.company.fixtures.{0}.install"
+				.format(self.country.lower()))(self)
 
 	def create_default_warehouses(self):
-		for whname in (_("Stores"), _("Work In Progress"), _("Finished Goods")):
-			if not frappe.db.exists("Warehouse", whname + " - " + self.abbr):
+		for wh_detail in [
+			{"warehouse_name": _("All Warehouses"), "is_group": 1},
+			{"warehouse_name": _("Stores"), "is_group": 0},
+			{"warehouse_name": _("Work In Progress"), "is_group": 0},
+			{"warehouse_name": _("Finished Goods"), "is_group": 0}]:
+			
+			if not frappe.db.exists("Warehouse", "{0} - {1}".format(wh_detail["warehouse_name"], self.abbr)):
 				stock_group = frappe.db.get_value("Account", {"account_type": "Stock",
 					"is_group": 1, "company": self.name})
 				if stock_group:
-					frappe.get_doc({
+					warehouse = frappe.get_doc({
 						"doctype":"Warehouse",
-						"warehouse_name": whname,
+						"warehouse_name": wh_detail["warehouse_name"],
+						"is_group": wh_detail["is_group"],
 						"company": self.name,
+						"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr) \
+							if not wh_detail["is_group"] else "",
 						"create_account_under": stock_group
-					}).insert()
+					})
+					warehouse.flags.ignore_permissions = True
+					warehouse.insert()
 
 	def create_default_accounts(self):
 		if not self.chart_of_accounts:
@@ -111,6 +125,8 @@ class Company(Document):
 		self._set_default_account("default_cash_account", "Cash")
 		self._set_default_account("default_bank_account", "Bank")
 		self._set_default_account("round_off_account", "Round Off")
+		self._set_default_account("accumulated_depreciation_account", "Accumulated Depreciation")
+		self._set_default_account("depreciation_expense_account", "Depreciation")
 
 		if cint(frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock")):
 			self._set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
@@ -159,6 +175,7 @@ class Company(Document):
 
 		frappe.db.set(self, "cost_center", _("Main") + " - " + self.abbr)
 		frappe.db.set(self, "round_off_cost_center", _("Main") + " - " + self.abbr)
+		frappe.db.set(self, "depreciation_cost_center", _("Main") + " - " + self.abbr)
 
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
@@ -185,17 +202,12 @@ class Company(Document):
 
 		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
 		if not rec:
-			# delete Account
-			frappe.db.sql("delete from `tabAccount` where company = %s", self.name)
-
-			# delete cost center child table - budget detail
-			frappe.db.sql("""delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc
-				where bd.parent = cc.name and cc.company = %s""", self.name)
-			#delete cost center
-			frappe.db.sql("delete from `tabCost Center` WHERE company = %s", self.name)
-
-			# delete account from customer and supplier
-			frappe.db.sql("delete from `tabParty Account` where company=%s", self.name)
+			frappe.db.sql("""delete from `tabBudget Account`
+				where exists(select name from tabBudget 
+					where name=`tabBudget Account`.parent and company = %s)""", self.name)
+			
+			for doctype in ["Account", "Cost Center", "Budget", "Party Account"]:
+				frappe.db.sql("delete from `tab{0}` where company = %s".format(doctype), self.name)
 
 		if not frappe.db.get_value("Stock Ledger Entry", {"company": self.name}):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)

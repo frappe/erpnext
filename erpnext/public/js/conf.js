@@ -20,12 +20,12 @@ $(document).bind('toolbar_setup', function() {
 
 // doctypes created via tree
 $.extend(frappe.create_routes, {
-	"Customer Group": "Sales Browser/Customer Group",
-	"Territory": "Sales Browser/Territory",
-	"Item Group": "Sales Browser/Item Group",
-	"Sales Person": "Sales Browser/Sales Person",
-	"Account": "Accounts Browser/Account",
-	"Cost Center": "Accounts Browser/Cost Center"
+	"Customer Group": "Tree/Customer Group",
+	"Territory": "Tree/Territory",
+	"Item Group": "Tree/Item Group",
+	"Sales Person": "Tree/Sales Person",
+	"Account": "Tree/Account",
+	"Cost Center": "Tree/Cost Center"
 });
 
 // preferred modules for breadcrumbs

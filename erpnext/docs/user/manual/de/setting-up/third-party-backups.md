@@ -27,7 +27,7 @@ Sie müssen sich mit Ihrer ID und Ihrem Passwort an Ihrem Dropbox-Konto anmelden
 
 ![Dropbox-Zugriff]({{docs_base_url}}/assets/old_images/erpnext/dropbox-access.png)
 
-## Für OpenSource-Nutzer:
+## Für OpenSource-Nutzer
 
 Voreinstellungen:
 

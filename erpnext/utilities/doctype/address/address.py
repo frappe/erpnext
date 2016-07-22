@@ -9,6 +9,7 @@ from frappe.utils import cstr
 
 from frappe.model.document import Document
 from jinja2 import TemplateSyntaxError
+from frappe.utils.user import is_website_user
 
 class Address(Document):
 	def __setup__(self):
@@ -122,11 +123,23 @@ def get_territory_from_address(address):
 def get_list_context(context=None):
 	from erpnext.shopping_cart.cart import get_address_docs
 	return {
-		"title": _("My Addresses"),
-		"get_list": get_address_docs,
+		"title": _("Addresses"),
+		"get_list": get_address_list,
 		"row_template": "templates/includes/address_row.html",
+		'no_breadcrumbs': True,
 	}
+	
+def get_address_list(doctype, txt, filters, limit_start, limit_page_length=20):
+	from frappe.www.list import get_list
+	user = frappe.session.user
+	ignore_permissions = False
+	if is_website_user():
+		if not filters: filters = []
+		filters.append(("Address", "owner", "=", user))
+		ignore_permissions = True
 
+	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=ignore_permissions)
+	
 def has_website_permission(doc, ptype, user, verbose=False):
 	"""Returns true if customer or lead matches with user"""
 	customer = frappe.db.get_value("Contact", {"email_id": frappe.session.user}, "customer")

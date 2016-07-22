@@ -3,7 +3,7 @@
 
 cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
 
-{% include "public/js/controllers/accounts.js" %}
+{% include "erpnext/public/js/controllers/accounts.js" %}
 
 frappe.ui.form.on("Purchase Taxes and Charges", "add_deduct_tax", function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];

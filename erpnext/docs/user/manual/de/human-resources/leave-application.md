@@ -14,8 +14,8 @@ Wenn Ihre Firma ein formales System hat, wo Mitarbeiter einen Antrag für Ihren 
 
 <img class="screenshot" alt="Urlaubsgenehmiger" src="{{docs_base_url}}/assets/img/human-resources/employee-leave-approver.png">
 
-> Tipp: Wenn Sie möchten, dass alle Benutzer ihre Urlaubsanträge selbst erstellen, können Sie in den Einstellungen zur Urlaubsgenehmigung Ihre Mitarbeiter-IDs als so einstellen, dass sie für die Regel zutreffend sind. Für weiterführende Informationen kesen Sie hierzu die Diskussion zum Thema [Einstellungen zu Genehmigungen]({{docs_base_url}}/user/manual/en/setting-up/users-and-permissions.html).
+> Tipp: Wenn Sie möchten, dass alle Benutzer ihre Urlaubsanträge selbst erstellen, können Sie in den Einstellungen zur Urlaubsgenehmigung Ihre Mitarbeiter-IDs als so einstellen, dass sie für die Regel zutreffend sind. Für weiterführende Informationen kesen Sie hierzu die Diskussion zum Thema [Einstellungen zu Genehmigungen]({{docs_base_url}}/user/manual/de/setting-up/users-and-permissions/user-permissions.html).
 
-Um einem Mitarbeiter Urlaub zuzuteilen, kreuzen Sie [Urlaubszuteilung]({{docs_base_url}}/user/manual/en/human-resources/setup/leave-allocation.html) an.
+Um einem Mitarbeiter Urlaub zuzuteilen, kreuzen Sie [Urlaubszuteilung]({{docs_base_url}}/user/manual/de/human-resources/setup/leave-allocation.html) an.
 
 {next}

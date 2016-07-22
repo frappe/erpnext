@@ -64,17 +64,12 @@ Bei anderen Feldtypen, wie Daten, Datum, Währung usw. lassen Sie das Optionen-F
 
 Sie können weitere Eigenschaften auswählen wie:
 
-1\. Ist Pflichtfeld: Ist das Feld zwingend erforderlich oder nicht?
-
-2\. Beim Drucken verbergen: Soll dieses Feld beim Ausdruck sichtbar sein oder nicht?
-
-3\. Feldbeschreibung: Hier steht eine kurze Beschreibung des Feldes die gleich unter dem Feld erscheint.
-
-4\. Standardwert: Der Wert in diesem Feld wird automatisch aktualisiert.
-
-5\. Schreibgeschützt: Wenn diese Option aktiviert ist, kann das benutzerdefinierte Feld nicht geändert werden.
-
-6\. Beim Übertragen zulassen: Wenn diese Option ausgewählt wird, ist es erlaubt den Wert des Feldes zu ändern, wenn er in einer Transaktion übertragen wird.
+1. Ist Pflichtfeld: Ist das Feld zwingend erforderlich oder nicht?
+2. Beim Drucken verbergen: Soll dieses Feld beim Ausdruck sichtbar sein oder nicht?
+3. Feldbeschreibung: Hier steht eine kurze Beschreibung des Feldes die gleich unter dem Feld erscheint.
+4. Standardwert: Der Wert in diesem Feld wird automatisch aktualisiert.
+5. Schreibgeschützt: Wenn diese Option aktiviert ist, kann das benutzerdefinierte Feld nicht geändert werden.
+6. Beim Übertragen zulassen: Wenn diese Option ausgewählt wird, ist es erlaubt den Wert des Feldes zu ändern, wenn er in einer Transaktion übertragen wird.
 
 ![Eigenschaften von benutzerdefinierten Feldern]({{docs_base_url}}/assets/old_images/erpnext/custom-field-properties.png)
 

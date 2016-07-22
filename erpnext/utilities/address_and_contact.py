@@ -8,13 +8,13 @@ def load_address_and_contact(doc, key):
 	"""Loads address list and contact list in `__onload`"""
 	from erpnext.utilities.doctype.address.address import get_address_display
 
-	doc.get("__onload").addr_list = [a.update({"display": get_address_display(a)}) \
+	doc.get("__onload")["addr_list"] = [a.update({"display": get_address_display(a)}) \
 		for a in frappe.get_all("Address",
 			fields="*", filters={key: doc.name},
 			order_by="is_primary_address desc, modified desc")]
 
 	if doc.doctype != "Lead":
-		doc.get("__onload").contact_list = frappe.get_all("Contact",
+		doc.get("__onload")["contact_list"] = frappe.get_all("Contact",
 			fields="*", filters={key: doc.name},
 			order_by="is_primary_contact desc, modified desc")
 
@@ -80,7 +80,7 @@ def get_permitted_and_not_permitted_links(doctype):
 	meta = frappe.get_meta(doctype)
 
 	for df in meta.get_link_fields():
-		if df.options not in ("Customer", "Supplier", "Sales Partner"):
+		if df.options not in ("Customer", "Supplier", "Company", "Sales Partner"):
 			continue
 
 		if frappe.has_permission(df.options):

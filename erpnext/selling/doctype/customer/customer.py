@@ -10,7 +10,8 @@ from frappe.utils import flt, cint, cstr
 from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.utilities.address_and_contact import load_address_and_contact
-from erpnext.accounts.party import validate_party_accounts
+from erpnext.accounts.party import validate_party_accounts, get_timeline_data # keep this
+from erpnext.accounts.party_status import get_party_status
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -42,6 +43,7 @@ class Customer(TransactionBase):
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()
 		validate_party_accounts(self)
+		self.status = get_party_status(self)
 
 	def update_lead_status(self):
 		if self.lead_name:
@@ -124,33 +126,6 @@ class Customer(TransactionBase):
 		frappe.db.sql("""update `tabAddress` set address_title=%(newdn)s
 			{set_field} where customer=%(newdn)s"""\
 			.format(set_field=set_field), ({"newdn": newdn}))
-
-@frappe.whitelist()
-def get_dashboard_info(customer):
-	if not frappe.has_permission("Customer", "read", customer):
-		frappe.msgprint(_("Not permitted"), raise_exception=True)
-
-	out = {}
-	for doctype in ["Opportunity", "Quotation", "Sales Order", "Delivery Note",
-		"Sales Invoice", "Project"]:
-		out[doctype] = frappe.db.get_value(doctype,
-			{"customer": customer, "docstatus": ["!=", 2] }, "count(*)")
-
-	billing_this_year = frappe.db.sql("""
-		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-		from `tabGL Entry`
-		where voucher_type='Sales Invoice' and party_type = 'Customer'
-			and party=%s and fiscal_year = %s""",
-		(customer, frappe.db.get_default("fiscal_year")))
-
-	total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
-		from `tabSales Invoice`
-		where customer=%s and docstatus = 1""", customer)
-
-	out["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
-	out["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
-
-	return out
 
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters):

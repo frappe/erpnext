@@ -1,20 +1,23 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'selling/sales_common.js' %}
+{% include 'erpnext/selling/sales_common.js' %}
 
 frappe.ui.form.on("Sales Order", {
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+
+		// formatter for material request item
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.delivered_qty) ? "green" : "orange" })
 	}
 });
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
 		this._super();
-		this.frm.dashboard.reset();
 		var allow_purchase = false;
 		var allow_delivery = false;
 
@@ -72,11 +75,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				if(flt(doc.per_billed)==0) {
 					cur_frm.add_custom_button(__('Payment Request'), this.make_payment_request, __("Make"));
-					cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry, __("Make"));
+					cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
 				}
 
 				// maintenance
-				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
+				if(flt(doc.per_delivered, 2) < 100 &&
+						["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
 					cur_frm.add_custom_button(__('Maintenance Visit'), this.make_maintenance_visit, __("Make"));
 					cur_frm.add_custom_button(__('Maintenance Schedule'), this.make_maintenance_schedule, __("Make"));
 				}
@@ -93,7 +97,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Quotation'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
 						get_query_filters: {
@@ -117,7 +121,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	tc_name: function() {
 		this.get_terms();
 	},
-	
+
 	make_material_request: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
@@ -153,19 +157,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		})
 	},
 
-	make_bank_entry: function() {
-		return frappe.call({
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order",
-			args: {
-				"dt": "Sales Order",
-				"dn": cur_frm.doc.name
-			},
-			callback: function(r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			}
-		});
-	},
 	make_purchase_order: function(){
 		var dialog = new frappe.ui.Dialog({
 			title: __("For Supplier"),
@@ -216,7 +207,7 @@ cur_frm.cscript.new_contact = function(){
 	tn = frappe.model.make_new_doc_and_get_name('Contact');
 	locals['Contact'][tn].is_customer = 1;
 	if(doc.customer) locals['Contact'][tn].customer = doc.customer;
-	loaddoc('Contact', tn);
+	frappe.set_route('Form', 'Contact', tn);
 }
 
 cur_frm.fields_dict['project'].get_query = function(doc, cdt, cdn) {

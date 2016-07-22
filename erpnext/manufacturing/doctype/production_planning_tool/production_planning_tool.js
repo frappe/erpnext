@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.require("assets/erpnext/js/utils.js");
+
 
 cur_frm.cscript.onload = function(doc) {
 	cur_frm.set_value("company", frappe.defaults.get_user_default("Company"))
@@ -18,6 +18,10 @@ cur_frm.add_fetch("sales_order", "customer", "customer");
 cur_frm.add_fetch("sales_order", "base_grand_total", "grand_total");
 
 frappe.ui.form.on("Production Planning Tool", {
+	onload_post_render: function(frm) {
+	 		frm.get_field("items").grid.set_multiple_add("item_code", "planned_qty");
+	 },	
+	 
 	get_sales_orders: function(frm) {
 		frappe.call({
 			doc: frm.doc,
@@ -97,7 +101,7 @@ cur_frm.fields_dict['sales_orders'].grid.get_field('sales_order').get_query = fu
 
 cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc) {
  	return erpnext.queries.item({
-		'is_pro_applicable': 1
+		'is_stock_item': 1
 	});
 }
 

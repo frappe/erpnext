@@ -1,0 +1,11 @@
+<div class="row pos-payment-row" type="{{type}}" idx={{idx}}>
+    <div class="col-xs-6">{{mode_of_payment}}</div>
+	<div class="col-xs-6">
+		<div class="input-group">
+			<input disabled class="form-control text-right amount" idx="{{idx}}" type="text" value="{{format_number(amount, 2)}}">
+			<span class="input-group-btn">
+				<button type="button" class="btn btn-default clr" idx="{{idx}}" style="border:1px solid #d1d8dd">C</button>
+			</span>
+		</div>
+	</div>
+</div>

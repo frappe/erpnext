@@ -7,7 +7,7 @@ import unittest
 import frappe
 import json
 import frappe.defaults
-from frappe.utils import cint, nowdate, nowtime, cstr, add_days, flt
+from frappe.utils import cint, nowdate, nowtime, cstr, add_days, flt, today
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.accounts.utils import get_balance_on
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
@@ -516,8 +516,7 @@ class TestDeliveryNote(unittest.TestCase):
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
 	args = frappe._dict(args)
-	if args.posting_date:
-		dn.posting_date = args.posting_date
+	dn.posting_date = args.posting_date or today()
 	if args.posting_time:
 		dn.posting_time = args.posting_time
 

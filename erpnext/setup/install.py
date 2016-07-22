@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
+from frappe import _
 
 default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
 	<a style="color: #888" href="http://erpnext.org">ERPNext</a></div>"""
@@ -11,7 +12,7 @@ default_mail_footer = """<div style="padding: 7px; text-align: right; color: #88
 def after_install():
 	frappe.get_doc({'doctype': "Role", "role_name": "Analytics"}).insert()
 	set_single_defaults()
-	feature_setup()
+	create_compact_item_print_custom_field()
 	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
 	frappe.db.commit()
@@ -23,23 +24,6 @@ def check_setup_wizard_not_completed():
 		print "You can reinstall this site (after saving your data) using: bench --site [sitename] reinstall"
 		print
 		return False
-
-def feature_setup():
-	"""save global defaults and features setup"""
-	doc = frappe.get_doc("Features Setup", "Features Setup")
-	doc.flags.ignore_permissions = True
-
-	# store value as 1 for all these fields
-	flds = ['fs_item_serial_nos', 'fs_item_batch_nos', 'fs_brands', 'fs_item_barcode',
-		'fs_item_advanced', 'fs_packing_details', 'fs_item_group_in_details',
-		'fs_exports', 'fs_imports', 'fs_discounts', 'fs_purchase_discounts',
-		'fs_after_sales_installations', 'fs_projects', 'fs_sales_extras',
-		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
-		'fs_page_break', 'fs_more_info', 'fs_pos_view', 'compact_item_print'
-	]
-	for f in flds:
-		doc.set(f, 1)
-	doc.save()
 
 def set_single_defaults():
 	for dt in frappe.db.sql_list("""select name from `tabDocType` where issingle=1"""):
@@ -56,3 +40,12 @@ def set_single_defaults():
 
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
 
+def create_compact_item_print_custom_field():
+	from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+	create_custom_field('Print Settings', {
+		'label': _('Compact Item Print'),
+		'fieldname': 'compact_item_print',
+		'fieldtype': 'Check',
+		'default': 1,
+		'insert_after': 'with_letterhead'
+	})

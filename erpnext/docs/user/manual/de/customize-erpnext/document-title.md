@@ -13,11 +13,9 @@ Sie können für diese Eigenschaft den Standardwert übernehmen indem Sie in **S
 
 Um eine Standard-Bezeichnung einzufügen, gehen Sie zu:
 
-1\. Einstellungen > Anpassen > Formular anpassen
-
-2\. Wählen Sie Ihre Transaktion aus
-
-3\. Bearbeiten Sie das Feld "Standard" in Ihrem Formular
+1. Einstellungen > Anpassen > Formular anpassen
+2. Wählen Sie Ihre Transaktion aus
+3. Bearbeiten Sie das Feld "Standard" in Ihrem Formular
 
 ### Bezeichnungen definieren
 

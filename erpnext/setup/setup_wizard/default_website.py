@@ -8,34 +8,27 @@ from frappe import _
 from frappe.utils import nowdate
 
 class website_maker(object):
-	def __init__(self, company, tagline, user):
-		self.company = company
-		self.tagline = tagline
-		self.user = user
+	def __init__(self, args):
+		self.args = args
+		self.company = args.company_name
+		self.tagline = args.company_tagline
+		self.user = args.name
 		self.make_web_page()
 		self.make_website_settings()
 		self.make_blog()
 
 	def make_web_page(self):
 		# home page
-		self.webpage = frappe.get_doc({
-			"doctype": "Web Page",
-			"title": self.company,
-			"published": 1,
-			"header": "<div class='hero text-center'><h1>{0}</h1>".format(self.tagline or "Headline")+\
-				'<p>'+_("This is an example website auto-generated from ERPNext")+"</p>"+\
-				'<p><a class="btn btn-primary" href="/login">Login</a></p></div>',
-			"description": self.company + ":" + (self.tagline or ""),
-			"css": frappe.get_template("setup/setup_wizard/data/sample_home_page.css").render(),
-			"main_section": frappe.get_template("setup/setup_wizard/data/sample_home_page.html").render({
-				"company": self.company, "tagline": (self.tagline or "")
-			})
-		}).insert()
+		homepage = frappe.get_doc('Homepage', 'Homepage')
+		homepage.company = self.company
+		homepage.tag_line = self.tagline
+		homepage.setup_items()
+		homepage.save()
 
 	def make_website_settings(self):
 		# update in home page in settings
 		website_settings = frappe.get_doc("Website Settings", "Website Settings")
-		website_settings.home_page = self.webpage.name
+		website_settings.home_page = 'home'
 		website_settings.brand_html = self.company
 		website_settings.copyright = self.company
 		website_settings.top_bar_items = []
@@ -88,5 +81,5 @@ def test():
 	frappe.delete_doc("Blog Post", "welcome")
 	frappe.delete_doc("Blogger", "administrator")
 	frappe.delete_doc("Blog Category", "general")
-	website_maker("Test Company", "Better Tools for Everyone", "Administrator")
+	website_maker({'company':"Test Company", 'company_tagline': "Better Tools for Everyone", 'name': "Administrator"})
 	frappe.db.commit()

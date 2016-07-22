@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+import erpnext
 from frappe.utils import flt, nowdate, add_days, cint
 from frappe import _
 
@@ -18,12 +19,11 @@ def _reorder_item():
 	material_requests = {"Purchase": {}, "Transfer": {}}
 	warehouse_company = frappe._dict(frappe.db.sql("""select name, company from `tabWarehouse`
 		where disabled=0"""))
-	default_company = (frappe.defaults.get_defaults().get("company") or
+	default_company = (erpnext.get_default_company() or
 		frappe.db.sql("""select name from tabCompany limit 1""")[0][0])
 
 	items_to_consider = frappe.db.sql_list("""select name from `tabItem` item
 		where is_stock_item=1 and has_variants=0
-			and (is_purchase_item=1 or is_sub_contracted_item=1)
 			and disabled=0
 			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)
 			and (exists (select name from `tabItem Reorder` ir where ir.parent=item.name)
@@ -37,7 +37,7 @@ def _reorder_item():
 
 	item_warehouse_projected_qty = get_item_warehouse_projected_qty(items_to_consider)
 
-	def add_to_material_request(item_code, warehouse, reorder_level, reorder_qty, material_request_type):
+	def add_to_material_request(item_code, warehouse, reorder_level, reorder_qty, material_request_type, warehouse_group=None):
 		if warehouse not in warehouse_company:
 			# a disabled warehouse
 			return
@@ -46,7 +46,10 @@ def _reorder_item():
 		reorder_qty = flt(reorder_qty)
 
 		# projected_qty will be 0 if Bin does not exist
-		projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse))
+		if warehouse_group:
+			projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse_group))
+		else:
+			projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse))
 
 		if (reorder_level or reorder_qty) and projected_qty < reorder_level:
 			deficiency = reorder_level - projected_qty
@@ -70,7 +73,7 @@ def _reorder_item():
 		if item.get("reorder_levels"):
 			for d in item.get("reorder_levels"):
 				add_to_material_request(item_code, d.warehouse, d.warehouse_reorder_level,
-					d.warehouse_reorder_qty, d.material_request_type)
+					d.warehouse_reorder_qty, d.material_request_type, warehouse_group=d.warehouse_group)
 
 	if material_requests:
 		return create_material_request(material_requests)
@@ -82,9 +85,17 @@ def get_item_warehouse_projected_qty(items_to_consider):
 		from tabBin where item_code in ({0})
 			and (warehouse != "" and warehouse is not null)"""\
 		.format(", ".join(["%s"] * len(items_to_consider))), items_to_consider):
-
+		
 		item_warehouse_projected_qty.setdefault(item_code, {})[warehouse] = flt(projected_qty)
-
+		
+		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
+		
+		if warehouse_doc.parent_warehouse:
+			if not item_warehouse_projected_qty.get(item_code, {}).get(warehouse_doc.parent_warehouse):
+				item_warehouse_projected_qty.setdefault(item_code, {})[warehouse_doc.parent_warehouse] = flt(projected_qty)
+			else:
+				item_warehouse_projected_qty[item_code][warehouse_doc.parent_warehouse] += flt(projected_qty)
+				
 	return item_warehouse_projected_qty
 
 def create_material_request(material_requests):

@@ -36,10 +36,10 @@ Fügen Sie abschliessend die CSV-Datei im Abschnitt Import hinzu. Klicken Sie au
 
 <img alt="Upload" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-3.png">
 
-#### Anmerkungen:
+#### Anmerkungen
 
-1\. Stellen Sie sicher, dass Sie als Verschlüsselung UTF-8 verwenden, wenn Ihre Anwendung das zulässt.
-2\. Lassen Sie die Spalte ID für einen neuen Datensatz leer.
+1. Stellen Sie sicher, dass Sie als Verschlüsselung UTF-8 verwenden, wenn Ihre Anwendung das zulässt.
+2. Lassen Sie die Spalte ID für einen neuen Datensatz leer.
 
 ### 4. Hochladen aller Tabellen (übergeordnete und Untertabellen)
 

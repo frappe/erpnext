@@ -15,7 +15,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Employee Attendance Tool",
 					"label": _("Employee Attendance Tool"),
-					"description":_("Mark Employee Attendance in Bulk"),
+					"description":_("Mark Attendance for multiple employees"),
 					"hide_count": True
 				},
 				{
@@ -111,13 +111,9 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Earning Type",
-					"description": _("Salary components.")
-				},
-				{
-					"type": "doctype",
-					"name": "Deduction Type",
-					"description": _("Tax and other salary deductions.")
+					"name": "Salary Component",
+					"label": _("Salary Components"),
+					"description": _("Earnings, Deductions and other Salary components")
 				},
 
 			]
@@ -210,7 +206,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Employee Holiday Attendance",
+					"name": "Employees working on a holiday",
 					"doctype": "Employee"
 				},
 				{

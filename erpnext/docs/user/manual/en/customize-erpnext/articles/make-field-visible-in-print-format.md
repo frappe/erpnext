@@ -22,6 +22,6 @@ click to open field to be made visible in the Standard Print Format. Uncheck **P
 
 <img alt="Uncheck Print Hide " class="screenshot" src="{{docs_base_url}}/assets/img/articles/print-visible-2.gif">
 
-#### Step 5: Update
+#### Step 4: Update
 
-Customize Customize Form to save changed. Reload your ERPNext account, and then check Print Format for confirmation.
+Update Customize Form to save changed. Reload your ERPNext account, and then check Print Format for confirmation.

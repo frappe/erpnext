@@ -9,7 +9,7 @@ def execute():
 		item = frappe.get_doc("Item", item_code)
 		item.db_set("show_in_website", 1, update_modified=False)
 
-		item.get_route()
-		item.db_set("page_name", item.page_name, update_modified=False)
+		item.make_route()
+		item.db_set("route", item.route, update_modified=False)
 
 	frappe.website.render.clear_cache()

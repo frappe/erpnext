@@ -4,7 +4,7 @@
 
 [https://erpnext.com](https://erpnext.com)
 
-Includes: Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Requires MariaDB.
+Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Management, HRMS. Requires MariaDB.
 
 ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & JavaScript.
 

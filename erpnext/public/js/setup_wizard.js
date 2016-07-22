@@ -9,27 +9,49 @@ frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
 
 function load_erpnext_slides() {
 	$.extend(erpnext.wiz, {
-		org: {
-			app_name: "erpnext",
-			title: __("The Organization"),
-			icon: "icon-building",
+		select_domain: {
+			domains: ["all"],
+			title: __('Select your Domain'),
 			fields: [
-				{fieldname:'company_name', label: __('Company Name'), fieldtype:'Data', reqd:1,
-					placeholder: __('e.g. "My Company LLC"')},
-				{fieldname:'company_abbr', label: __('Company Abbreviation'), fieldtype:'Data',
-					description: __('Max 5 characters'), placeholder: __('e.g. "MC"'), reqd:1},
-				{fieldname:'company_tagline', label: __('What does it do?'), fieldtype:'Data',
-					placeholder:__('e.g. "Build tools for builders"'), reqd:1},
-				{fieldname:'bank_account', label: __('Bank Account'), fieldtype:'Data',
-					placeholder: __('e.g. "XYZ National Bank"'), reqd:1 },
 				{fieldname:'domain', label: __('Domain'), fieldtype:'Select',
 					options: [
 						{"label": __("Distribution"), "value": "Distribution"},
+						{"label": __("Education"), "value": "Education"},
 						{"label": __("Manufacturing"), "value": "Manufacturing"},
 						{"label": __("Retail"), "value": "Retail"},
-						{"label": __("Services"), "value": "Services"},
-						{"label": __("Other"), "value": "Other"},
+						{"label": __("Services"), "value": "Services"}
 					], reqd:1},
+			],
+			help: __('Select the nature of your business.'),
+			onload: function(slide) {
+				slide.get_input("domain").on("change", function() {
+					frappe.wiz.domain = $(this).val();
+					frappe.wizard.refresh_slides();
+				});
+			},
+			css_class: "single-column"
+		},
+		org: {
+			domains: ["all"],
+			title: __("The Organization"),
+			icon: "icon-building",
+			fields: [
+				{fieldname:'company_name',
+					label: frappe.wiz.domain==='Education' ?
+					 	__('Institute Name') : __('Company Name'),
+					fieldtype:'Data', reqd:1},
+				{fieldname:'company_abbr',
+					label: frappe.wiz.domain==='Education' ?
+					 	__('Institute Abbreviation') : __('Company Abbreviation'),
+					fieldtype:'Data'},
+				{fieldname:'company_tagline',
+					label: __('What does it do?'),
+					fieldtype:'Data',
+					placeholder: frappe.wiz.domain==='Education' ?
+					 	__('e.g. "Primary School" or "University"') :
+						__('e.g. "Build tools for builders"'),
+					reqd:1},
+				{fieldname:'bank_account', label: __('Bank Name'), fieldtype:'Data', reqd:1},
 				{fieldname:'chart_of_accounts', label: __('Chart of Accounts'),
 					options: "", fieldtype: 'Select'},
 
@@ -40,7 +62,9 @@ function load_erpnext_slides() {
 				{fieldname:'fy_end_date', label:__('Financial Year End Date'), fieldtype:'Date',
 					description: __('Your financial year ends on'), reqd:1},
 			],
-			help: __('The name of your company for which you are setting up this system.'),
+			help: (frappe.wiz.domain==='Education' ?
+				__('The name of the institute for which you are setting up this system.'):
+				__('The name of your company for which you are setting up this system.')),
 
 			onload: function(slide) {
 				erpnext.wiz.org.load_chart_of_accounts(slide);
@@ -66,7 +90,7 @@ function load_erpnext_slides() {
 			css_class: "single-column",
 
 			set_fy_dates: function(slide) {
-				var country = slide.wiz.get_values().country;
+				var country = frappe.wizard.values.country;
 
 				if(country) {
 					var fy = erpnext.wiz.fiscal_years[country];
@@ -84,7 +108,7 @@ function load_erpnext_slides() {
 			},
 
 			load_chart_of_accounts: function(slide) {
-				var country = slide.wiz.get_values().country;
+				var country = frappe.wizard.values.country;
 
 				if(country) {
 					frappe.call({
@@ -133,7 +157,7 @@ function load_erpnext_slides() {
 		},
 
 		branding: {
-			app_name: "erpnext",
+			domains: ["all"],
 			icon: "icon-bookmark",
 			title: __("The Brand"),
 			help: __('Upload your letter head and logo. (you can edit them later).'),
@@ -155,7 +179,7 @@ function load_erpnext_slides() {
 		},
 
 		users: {
-			app_name: "erpnext",
+			domains: ["all"],
 			icon: "icon-money",
 			title: __("Add Users"),
 			help: __("Add users to your organization, other than yourself"),
@@ -172,11 +196,14 @@ function load_erpnext_slides() {
 							options: "Email"},
 						{fieldtype:"Column Break"},
 						{fieldtype: "Check", fieldname: "user_sales_" + i,
-							label:__("Sales"), default: 1},
+							label:__("Sales"), "default": 1,
+							hidden: frappe.wiz.domain==='Education' ? 1 : 0},
 						{fieldtype: "Check", fieldname: "user_purchaser_" + i,
-							label:__("Purchaser"), default: 1},
+							label:__("Purchaser"), "default": 1,
+							hidden: frappe.wiz.domain==='Education' ? 1 : 0},
 						{fieldtype: "Check", fieldname: "user_accountant_" + i,
-							label:__("Accountant"), default: 1},
+							label:__("Accountant"), "default": 1,
+							hidden: frappe.wiz.domain==='Education' ? 1 : 0},
 					]);
 				}
 			},
@@ -184,7 +211,7 @@ function load_erpnext_slides() {
 		},
 
 		taxes: {
-			app_name: "erpnext",
+			domains: ['manufacturing', 'services', 'retail', 'distribution'],
 			icon: "icon-money",
 			title: __("Add Taxes"),
 			help: __("List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
@@ -205,7 +232,7 @@ function load_erpnext_slides() {
 		},
 
 		customers: {
-			app_name: "erpnext",
+			domains: ['manufacturing', 'services', 'retail', 'distribution'],
 			icon: "icon-group",
 			title: __("Your Customers"),
 			help: __("List a few of your customers. They could be organizations or individuals."),
@@ -228,7 +255,7 @@ function load_erpnext_slides() {
 		},
 
 		suppliers: {
-			app_name: "erpnext",
+			domains: ['manufacturing', 'services', 'retail', 'distribution'],
 			icon: "icon-group",
 			title: __("Your Suppliers"),
 			help: __("List a few of your suppliers. They could be organizations or individuals."),
@@ -251,7 +278,7 @@ function load_erpnext_slides() {
 		},
 
 		items: {
-			app_name: "erpnext",
+			domains: ['manufacturing', 'services', 'retail', 'distribution'],
 			icon: "icon-barcode",
 			title: __("Your Products or Services"),
 			help: __("List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
@@ -269,7 +296,7 @@ function load_erpnext_slides() {
 							"default": __("Products")},
 						{fieldtype:"Select", fieldname:"item_uom_" + i, label:__("UOM"),
 							options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"),
-								__("Hour"), __("Minute")],
+								__("Hour"), __("Minute"), __("Litre"), __("Meter"), __("Gram")],
 							"default": __("Unit")},
 						{fieldtype: "Check", fieldname: "is_sales_item_" + i, label:__("We sell this Item"), default: 1},
 						{fieldtype: "Check", fieldname: "is_purchase_item_" + i, label:__("We buy this Item")},
@@ -284,6 +311,81 @@ function load_erpnext_slides() {
 				slide.fields.push({fieldtype: "Section Break"});
 				slide.fields.push({fieldtype: "Check", fieldname: "add_sample_data",
 					label: __("Add a few sample records"), "default": 1});
+			},
+			css_class: "two-column"
+		},
+
+		program: {
+			domains: ["education"],
+			title: __("Program"),
+			help: __("Example: Masters in Computer Science"),
+			fields: [],
+			before_load: function(slide) {
+				slide.fields = [];
+				for(var i=1; i<6; i++) {
+					slide.fields = slide.fields.concat([
+						{fieldtype:"Section Break", show_section_border: true},
+						{fieldtype:"Data", fieldname:"program_" + i, label:__("Program") + " " + i, placeholder: __("Program Name")},
+					])
+				}
+				slide.fields[1].reqd = 1;
+			},
+			css_class: "single-column"
+		},
+
+		course: {
+			domains: ["education"],
+			title: __("Course"),
+			help: __("Example: Basic Mathematics"),
+			fields: [],
+			before_load: function(slide) {
+				slide.fields = [];
+				for(var i=1; i<6; i++) {
+					slide.fields = slide.fields.concat([
+						{fieldtype:"Section Break", show_section_border: true},
+						{fieldtype:"Data", fieldname:"course_" + i, label:__("Course") + " " + i,  placeholder: __("Course Name")},
+					])
+				}
+				slide.fields[1].reqd = 1;
+			},
+			css_class: "single-column"
+		},
+
+
+		instructor: {
+			domains: ["education"],
+			title: __("Instructor"),
+			help: __("People who teach at your organisation"),
+			fields: [],
+			before_load: function(slide) {
+				slide.fields = [];
+				for(var i=1; i<6; i++) {
+					slide.fields = slide.fields.concat([
+						{fieldtype:"Section Break", show_section_border: true},
+						{fieldtype:"Data", fieldname:"instructor_" + i, label:__("Instructor") + " " + i,  placeholder: __("Instructor Name")},
+					])
+				}
+				slide.fields[1].reqd = 1;
+			},
+			css_class: "single-column"
+		},
+
+		room: {
+			domains: ["education"],
+			title: __("Room"),
+			help: __("Classrooms/ Laboratories etc where lectures can be scheduled."),
+			fields: [],
+			before_load: function(slide) {
+				slide.fields = [];
+				for(var i=1; i<4; i++) {
+					slide.fields = slide.fields.concat([
+						{fieldtype:"Section Break", show_section_border: true},
+						{fieldtype:"Data", fieldname:"room_" + i, label:__("Room") + " " + i},
+						{fieldtype:"Column Break"},
+						{fieldtype:"Int", fieldname:"room_capacity_" + i, label:__("Room") + " " + i + " Capacity"},
+					])
+				}
+				slide.fields[1].reqd = 1;
 			},
 			css_class: "two-column"
 		},
@@ -315,12 +417,42 @@ function load_erpnext_slides() {
 
 frappe.wiz.on("before_load", function() {
 	load_erpnext_slides();
+
+	frappe.wiz.add_slide(erpnext.wiz.select_domain);
 	frappe.wiz.add_slide(erpnext.wiz.org);
 	frappe.wiz.add_slide(erpnext.wiz.branding);
-	frappe.wiz.add_slide(erpnext.wiz.users);
+
+	if (!(frappe.boot.limits && frappe.boot.limits.users===1)) {
+		frappe.wiz.add_slide(erpnext.wiz.users);
+	}
+
 	frappe.wiz.add_slide(erpnext.wiz.taxes);
 	frappe.wiz.add_slide(erpnext.wiz.customers);
 	frappe.wiz.add_slide(erpnext.wiz.suppliers);
 	frappe.wiz.add_slide(erpnext.wiz.items);
-	frappe.wiz.welcome_page = "#welcome-to-erpnext";
+	frappe.wiz.add_slide(erpnext.wiz.program);
+	frappe.wiz.add_slide(erpnext.wiz.course);
+	frappe.wiz.add_slide(erpnext.wiz.instructor);
+	frappe.wiz.add_slide(erpnext.wiz.room);
+
+	if(frappe.wizard && frappe.wizard.domain && frappe.wizard.domain !== 'Education') {
+		frappe.wiz.welcome_page = "#welcome-to-erpnext";
+	}
 });
+
+test_values_edu = {
+	"language":"english",
+	"domain":"Education",
+	"country":"India",
+	"timezone":"Asia/Kolkata",
+	"currency":"INR",
+	"first_name":"Tester",
+	"email":"test@example.com",
+	"password":"test",
+	"company_name":"Hogwarts",
+	"company_abbr":"HS",
+	"company_tagline":"School for magicians",
+	"bank_account":"Gringotts Wizarding Bank",
+	"fy_start_date":"2016-04-01",
+	"fy_end_date":"2017-03-31"
+}

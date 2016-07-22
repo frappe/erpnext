@@ -7,6 +7,6 @@ In den richtigen Mengen einzukaufen, kann sich auf Ihren Cash Flow und Ihre Prof
 
 ERPNext beinhaltet einen Satz an Transaktionen, die Ihren Einkaufprozess so effektiv und störungsfrei machen, wie nur möglich.
 
-### Topics
+### Themen
 
 {index}

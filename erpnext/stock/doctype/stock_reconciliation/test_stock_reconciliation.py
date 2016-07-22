@@ -116,10 +116,11 @@ def create_stock_reconciliation(**args):
 def set_valuation_method(item_code, valuation_method):
 	frappe.db.set_value("Item", item_code, "valuation_method", valuation_method)
 
-	for warehouse in frappe.get_all("Warehouse", filters={"company": "_Test Company"}):
-		update_entries_after({
-			"item_code": item_code,
-			"warehouse": warehouse.name
-		}, allow_negative_stock=1)
+	for warehouse in frappe.get_all("Warehouse", filters={"company": "_Test Company"}, fields=["name", "is_group"]):
+		if not warehouse.is_group:
+			update_entries_after({
+				"item_code": item_code,
+				"warehouse": warehouse.name
+			}, allow_negative_stock=1)
 
 test_dependencies = ["Item", "Warehouse"]

@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import flt, cstr, cint
 from frappe import _
 from frappe.model.meta import get_field_precision
-from erpnext.accounts.utils import validate_expense_against_budget
+from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 
 
 class StockAccountInvalidTransaction(frappe.ValidationError): pass
@@ -25,7 +25,6 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, upd
 def process_gl_map(gl_map, merge_entries=True):
 	if merge_entries:
 		gl_map = merge_similar_entries(gl_map)
-
 	for entry in gl_map:
 		# toggle debit, credit if negative entry
 		if flt(entry.debit) < 0:
@@ -75,7 +74,8 @@ def check_if_in_list(gle, gl_map):
 			and cstr(e.get('party'))==cstr(gle.get('party')) \
 			and cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
 			and cstr(e.get('against_voucher_type')) == cstr(gle.get('against_voucher_type')) \
-			and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')):
+			and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')) \
+			and cstr(e.get('project')) == cstr(gle.get('project')):
 				return e
 
 def save_entries(gl_map, adv_adj, update_outstanding):
@@ -99,7 +99,7 @@ def validate_account_for_auto_accounting_for_stock(gl_map):
 	if cint(frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock")) \
 		and gl_map[0].voucher_type=="Journal Entry":
 			aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
-				where account_type = 'Warehouse' and (warehouse != '' and warehouse is not null)""")]
+				where account_type = 'Stock' and (warehouse != '' and warehouse is not null) and is_group=0""")]
 
 			for entry in gl_map:
 				if entry.account in aii_accounts:
@@ -160,7 +160,6 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 
 	gl_map.append(round_off_gle)
 
-
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		adv_adj=False, update_outstanding="Yes"):
 
@@ -168,8 +167,12 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		check_freezing_date, update_outstanding_amt, validate_frozen_account
 
 	if not gl_entries:
-		gl_entries = frappe.db.sql("""select * from `tabGL Entry`
+		gl_entries = frappe.db.sql("""
+			select account, posting_date, party_type, party, cost_center, fiscal_year,
+			voucher_type, voucher_no, against_voucher_type, against_voucher, cost_center
+			from `tabGL Entry`
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no), as_dict=True)
+
 	if gl_entries:
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 
@@ -180,7 +183,7 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		validate_frozen_account(entry["account"], adv_adj)
 		validate_balance_type(entry["account"], adv_adj)
 		validate_expense_against_budget(entry)
-
+		
 		if entry.get("against_voucher") and update_outstanding == 'Yes':
 			update_outstanding_amt(entry["account"], entry.get("party_type"), entry.get("party"), entry.get("against_voucher_type"),
 				entry.get("against_voucher"), on_cancel=True)

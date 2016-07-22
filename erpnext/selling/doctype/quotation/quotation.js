@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 
-{% include 'selling/sales_common.js' %}
+{% include 'erpnext/selling/sales_common.js' %}
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
@@ -16,23 +16,20 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
-
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
-			cur_frm.add_custom_button(__('Sales Order'),
-				cur_frm.cscript['Make Sales Order'], __("Make"));
+			cur_frm.add_custom_button(__('Make Sales Order'),
+				cur_frm.cscript['Make Sales Order']);
 
 			if(doc.status!=="Ordered") {
-				cur_frm.add_custom_button(__('Lost'),
-					cur_frm.cscript['Declare Order Lost'], __("Status"));
+				cur_frm.add_custom_button(__('Set as Lost'),
+					cur_frm.cscript['Declare Order Lost']);
 			}
-
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Opportunity'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
 						get_query_filters: {

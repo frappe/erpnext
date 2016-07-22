@@ -1,0 +1,49 @@
+{
+ "allow_comments": 1, 
+ "allow_delete": 1, 
+ "allow_edit": 1, 
+ "allow_multiple": 1, 
+ "creation": "2016-06-26 20:46:09.598755", 
+ "doc_type": "Discussion", 
+ "docstatus": 0, 
+ "doctype": "Web Form", 
+ "idx": 0, 
+ "is_standard": 1, 
+ "login_required": 1, 
+ "modified": "2016-07-19 07:55:37.826664", 
+ "modified_by": "Administrator", 
+ "module": "Schools", 
+ "name": "discussion", 
+ "owner": "Administrator", 
+ "published": 1, 
+ "route": "discussion", 
+ "success_url": "", 
+ "title": "Discussion", 
+ "web_form_fields": [
+  {
+   "fieldname": "course", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "Course", 
+   "options": "Course", 
+   "read_only": 1, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "subject", 
+   "fieldtype": "Text", 
+   "hidden": 0, 
+   "label": "Subject", 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "description", 
+   "fieldtype": "Text", 
+   "hidden": 0, 
+   "label": "Description", 
+   "read_only": 0, 
+   "reqd": 0
+  }
+ ]
+}

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import flt, getdate
+from frappe.utils import flt, getdate, get_url
 from frappe import _
 
 from frappe.model.document import Document
@@ -15,19 +15,27 @@ class Project(Document):
 
 	def onload(self):
 		"""Load project tasks for quick view"""
-		if not self.get("tasks"):
-			for task in self.get_tasks():
-				self.append("tasks", {
-					"title": task.subject,
-					"status": task.status,
-					"start_date": task.exp_start_date,
-					"end_date": task.exp_end_date,
-					"description": task.description,
-					"task_id": task.name
-				})
+		if not self.get('__unsaved') and not self.get("tasks"):
+			self.load_tasks()
+
+		self.set_onload('activity_summary', frappe.db.sql('''select activity_type, sum(hours) as total_hours
+			from `tabTimesheet Detail` where project=%s group by activity_type order by total_hours desc''', self.name, as_dict=True))
 
 	def __setup__(self):
 		self.onload()
+
+	def load_tasks(self):
+		"""Load `tasks` from the database"""
+		self.tasks = []
+		for task in self.get_tasks():
+			self.append("tasks", {
+				"title": task.subject,
+				"status": task.status,
+				"start_date": task.exp_start_date,
+				"end_date": task.exp_end_date,
+				"description": task.description,
+				"task_id": task.name
+			})
 
 	def get_tasks(self):
 		return frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc")
@@ -36,6 +44,7 @@ class Project(Document):
 		self.validate_dates()
 		self.sync_tasks()
 		self.tasks = []
+		self.send_welcome_email()
 
 	def validate_dates(self):
 		if self.expected_start_date and self.expected_end_date:
@@ -79,7 +88,7 @@ class Project(Document):
 		self.update_percent_complete()
 		self.update_costing()
 		self.flags.dont_sync_tasks = True
-		self.save()
+		self.save(ignore_permissions = True)
 
 	def update_percent_complete(self):
 		total = frappe.db.sql("""select count(*) from tabTask where project=%s""", self.name)[0][0]
@@ -90,13 +99,13 @@ class Project(Document):
 			self.percent_complete = flt(flt(completed) / total * 100, 2)
 
 	def update_costing(self):
-		from_time_log = frappe.db.sql("""select
+		from_time_sheet = frappe.db.sql("""select
 			sum(costing_amount) as costing_amount,
 			sum(billing_amount) as billing_amount,
 			min(from_time) as start_date,
 			max(to_time) as end_date,
 			sum(hours) as time
-			from `tabTime Log` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
+			from `tabTimesheet Detail` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
 
 		from_expense_claim = frappe.db.sql("""select
 			sum(total_sanctioned_amount) as total_sanctioned_amount
@@ -104,12 +113,12 @@ class Project(Document):
 			and docstatus = 1""",
 			self.name, as_dict=1)[0]
 
-		self.actual_start_date = from_time_log.start_date
-		self.actual_end_date = from_time_log.end_date
+		self.actual_start_date = from_time_sheet.start_date
+		self.actual_end_date = from_time_sheet.end_date
 
-		self.total_costing_amount = from_time_log.costing_amount
-		self.total_billing_amount = from_time_log.billing_amount
-		self.actual_time = from_time_log.time
+		self.total_costing_amount = from_time_sheet.costing_amount
+		self.total_billing_amount = from_time_sheet.billing_amount
+		self.actual_time = from_time_sheet.time
 
 		self.total_expense_claim = from_expense_claim.total_sanctioned_amount
 
@@ -123,6 +132,61 @@ class Project(Document):
 			from `tabPurchase Invoice Item` where project = %s and docstatus=1""", self.name)
 
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
+
+	def send_welcome_email(self):
+		url = get_url("/project/?name={0}".format(self.name))
+		messages = (
+		_("You have been invited to collaborate on the project: {0}".format(self.name)),
+		url,
+		_("Join")
+		)
+
+		content = """
+		<p>{0}.</p>
+		<p><a href="{1}">{2}</a></p>
+		"""
+
+		for user in self.users:
+			if user.welcome_email_sent==0:
+				frappe.sendmail(user.user, subject=_("Project Collaboration Invitation"), content=content.format(*messages))
+				user.welcome_email_sent=1
+
+	def on_update(self):
+		self.load_tasks()
+		self.sync_tasks()
+
+def get_timeline_data(doctype, name):
+	'''Return timeline for attendance'''
+	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
+		from `tabTimesheet Detail` where project=%s
+			and from_time > date_sub(curdate(), interval 1 year)
+			and docstatus < 2
+			group by date(from_time)''', name))
+
+def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20):
+	return frappe.db.sql('''select distinct project.*
+		from tabProject project, `tabProject User` project_user
+		where
+			(project_user.user = %(user)s
+			and project_user.parent = project.name)
+			or project.owner = %(user)s
+			order by project.modified desc
+			limit {0}, {1}
+		'''.format(limit_start, limit_page_length),
+			{'user':frappe.session.user},
+			as_dict=True,
+			update={'doctype':'Project'})
+
+def get_list_context(context=None):
+	return {
+		"show_sidebar": True,
+		"show_search": True,
+		'no_breadcrumbs': True,
+		"title": _("Projects"),
+		"get_list": get_project_list,
+		"row_template": "templates/includes/projects/project_row.html"
+	}
+
 
 @frappe.whitelist()
 def get_cost_center_name(project):

@@ -13,7 +13,7 @@ before_install:
 install:
   - sudo apt-get purge -y mysql-common
   - wget https://raw.githubusercontent.com/frappe/bench/master/install_scripts/setup_frappe.sh
-  - sudo bash setup_frappe.sh --skip-setup-bench --mysql-root-password travis
+  - sudo bash setup_frappe.sh --skip-setup-bench --mysql-root-password travis --bench-branch develop
   - sudo pip install --upgrade pip
   - rm $TRAVIS_BUILD_DIR/.git/shallow
   - bash $TRAVIS_BUILD_DIR/travis/bench_init.sh
@@ -25,7 +25,6 @@ script:
   - bench use test_site
   - bench reinstall
   - bench build
-  - bench build-website
   - bench start &
   - sleep 10
   - bench --verbose run-tests --driver Firefox

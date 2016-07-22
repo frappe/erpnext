@@ -1,0 +1,15 @@
+{% extends "templates/web.html" %}
+
+{% block header %}
+	<h2> {{doc.subject}} </h2>
+	<p> {{doc.description}} </p>
+	<p class="text-muted small">Started by: {{doc.owner}} </p>
+{% endblock %}
+
+{% block page_content %}
+
+<div>
+	{% include 'templates/includes/comments/comments.html' %}
+</div>
+
+{% endblock %}

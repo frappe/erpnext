@@ -21,7 +21,7 @@ Lagerbuchungen können aus folgenden Gründen erstellt werden:
 
 In einer Lagerbuchung müssen Sie die Artikelliste mit all Ihren Transaktionen aktualisieren. Für jede Zeile müssen Sie ein Ausgangslager oder ein Eingangslager oder beides eingeben (wenn Sie eine Bewegung erfassen).
 
-#### Zusätzliche Kosten:
+#### Zusätzliche Kosten
 
 Wenn die Lagerbuchung eine Eingangsbuchung ist, d. h. wenn ein beliebiger Artikel an einem Ziellager angenommen wird, können Sie zusätzliche Kosten erfassen (wie Versandgebühren, Zollgebühren, Betriebskosten, usw.), die mit dem Prozess verbunden sind. Die Zusatzkosten werden berücksichtigt, um den Wert des Artikels zu kalkulieren.
 

@@ -60,7 +60,6 @@ class EmailDigest(Document):
 						recipients=user_id,
 						subject="{frequency} Digest".format(frequency=self.frequency),
 						message=msg_for_this_receipient,
-						bulk=True,
 						reference_doctype = self.doctype,
 						reference_name = self.name,
 						unsubscribe_message = _("Unsubscribe from this Email Digest"))
