@@ -10,6 +10,8 @@ from frappe.utils import random_string
 from frappe.desk import query_report
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry_against_invoice
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from frappe.utils.make_random import get_random
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request, make_payment_entry
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_accounts_user'))
@@ -46,8 +48,19 @@ def work():
 	if random.random() < 0.5:
 		make_payment_entries("Purchase Invoice", "Accounts Payable")
 
+	if random.random() < 0.1:
+		#make payment request against sales invoice
+		sales_invoice_name = get_random("Sales Invoice", filters={"docstatus": 1})
+		if sales_invoice_name:
+			si = frappe.get_doc("Sales Invoice", sales_invoice_name)
+			if si.outstanding_amount > 0:
+				payment_request = make_payment_request(dt="Sales Invoice", dn=si.name, recipient_id=si.contact_email,
+					submit_doc=True, mute_email=True, use_dummy_message=True)
+
+				make_payment_entry(payment_request.name, make_draft_payment_entry=False)
+
 def make_payment_entries(ref_doctype, report):
-	outstanding_invoices = list(set([r[3] for r in query_report.run(report, 
+	outstanding_invoices = list(set([r[3] for r in query_report.run(report,
 	{"report_date": frappe.flags.current_date })["result"] if r[2]==ref_doctype]))
 	
 	# make Payment Entry
@@ -69,4 +82,4 @@ def make_payment_entries(ref_doctype, report):
 		jv.cheque_date = frappe.flags.current_date
 		jv.insert()
 		jv.submit()
-		frappe.db.commit()		
+		frappe.db.commit()

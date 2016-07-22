@@ -34,7 +34,7 @@ class PaymentRequest(Document):
 		if hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart":
 			send_mail = False
 
-		if send_mail:
+		if send_mail and not self.flags.mute_email:
 			self.send_payment_request()
 			self.send_email()
 
@@ -104,8 +104,9 @@ class PaymentRequest(Document):
 				self.reference_name, self.name)
 		})
 
-		company_details = get_company_defaults(ref_doc.company)
 		if payment_entry.difference_amount:
+			company_details = get_company_defaults(ref_doc.company)
+
 			payment_entry.append("deductions", {
 				"account": company_details.exchange_gain_loss_account,
 				"cost_center": company_details.cost_center,
@@ -132,7 +133,8 @@ class PaymentRequest(Document):
 			"payment_url": self.payment_url
 		}
 
-		return frappe.render_template(self.message, context)
+		if self.message:
+			return frappe.render_template(self.message, context)
 
 	def set_failed(self):
 		pass
@@ -183,13 +185,17 @@ def make_payment_request(**args):
 			"grand_total": grand_total,
 			"email_to": args.recipient_id or "",
 			"subject": "Payment Request for %s"%args.dn,
-			"message": gateway_account.message,
+			"message": gateway_account.get("message") or get_dummy_message(args.use_dummy_message),
 			"reference_doctype": args.dt,
 			"reference_name": args.dn
 		})
 
 		if args.return_doc:
 			return pr
+
+		if args.mute_email:
+			pr.flags.mute_email = True
+
 		if args.submit_doc:
 			pr.insert(ignore_permissions=True)
 			pr.submit()
@@ -258,9 +264,9 @@ def resend_payment_email(docname):
 	return frappe.get_doc("Payment Request", docname).send_email()
 
 @frappe.whitelist()
-def make_payment_entry(docname):
+def make_payment_entry(docname, make_draft_payment_entry=True):
 	doc = frappe.get_doc("Payment Request", docname)
-	doc.flags.make_draft_payment_entry = True
+	doc.flags.make_draft_payment_entry = make_draft_payment_entry
 	return doc.set_as_paid().as_dict()
 
 def make_status_as_paid(doc, method):
@@ -269,6 +275,17 @@ def make_status_as_paid(doc, method):
 			{"reference_doctype": ref.reference_doctype, "reference_name": ref.reference_name,
 			"docstatus": 1})
 		
-		doc = frappe.get_doc("Payment Request", payment_request_name)
-		if doc.status != "Paid":
-			doc.db_set('status', 'Paid')
+		if payment_request_name:
+			doc = frappe.get_doc("Payment Request", payment_request_name)
+			if doc.status != "Paid":
+				doc.db_set('status', 'Paid')
+
+def get_dummy_message(use_dummy_message=True):
+	return """
+		<p> Hope you are enjoying a service. Please consider bank details for payment </p>
+		<p> Bank Details <p><br>
+		<p> Bank Name : National Bank </p>
+		<p> Account Number : 123456789000872 </p>
+		<p> IFSC code : NB000001 </p>
+		<p> Account Name : Wind Power LLC </p>
+	"""
