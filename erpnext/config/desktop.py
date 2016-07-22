@@ -171,7 +171,7 @@ def get_data():
 			"icon": "octicon octicon-person",
 			"label": _("Student"),
 			"link": "List/Student",
-			"doctype": "Student",
+			"_doctype": "Student",
 			"type": "list"
 		},
 		{
@@ -180,7 +180,7 @@ def get_data():
 			"icon": "octicon octicon-organization",
 			"label": _("Student Group"),
 			"link": "List/Student Group",
-			"doctype": "Student Group",
+			"_doctype": "Student Group",
 			"type": "list"
 		},
 		{
@@ -189,7 +189,7 @@ def get_data():
 			"icon": "octicon octicon-calendar",
 			"label": _("Course Schedule"),
 			"link": "Calendar/Course Schedule",
-			"doctype": "Course Schedule",
+			"_doctype": "Course Schedule",
 			"type": "list"
 		},
 		{
@@ -198,7 +198,7 @@ def get_data():
 			"icon": "octicon octicon-checklist",
 			"label": _("Student Attendance"),
 			"link": "List/Student Attendance",
-			"doctype": "Student Attendance",
+			"_doctype": "Student Attendance",
 			"type": "list"
 		},
 		{
@@ -207,7 +207,7 @@ def get_data():
 			"icon": "octicon octicon-book",
 			"label": _("Course"),
 			"link": "List/Course",
-			"doctype": "Course",
+			"_doctype": "Course",
 			"type": "list"
 		},
 		{
@@ -216,7 +216,7 @@ def get_data():
 			"icon": "octicon octicon-repo",
 			"label": _("Program"),
 			"link": "List/Program",
-			"doctype": "Program",
+			"_doctype": "Program",
 			"type": "list"
 		},
 		{
@@ -225,7 +225,7 @@ def get_data():
 			"icon": "octicon octicon-clippy",
 			"label": _("Student Applicant"),
 			"link": "List/Student Applicant",
-			"doctype": "Student Applicant",
+			"_doctype": "Student Applicant",
 			"type": "list"
 		},
 		{
@@ -234,7 +234,7 @@ def get_data():
 			"icon": "icon-file-text-alt",
 			"label": _("Examination"),
 			"link": "List/Examination",
-			"doctype": "Examination",
+			"_doctype": "Examination",
 			"type": "list"
 		},
 		{
@@ -243,7 +243,7 @@ def get_data():
 			"icon": "icon-money",
 			"label": _("Fees"),
 			"link": "List/Fees",
-			"doctype": "Fees",
+			"_doctype": "Fees",
 			"type": "list"
 		},
 		{
@@ -252,7 +252,7 @@ def get_data():
 			"icon": "octicon octicon-broadcast",
 			"label": _("Instructor"),
 			"link": "List/Instructor",
-			"doctype": "Instructor",
+			"_doctype": "Instructor",
 			"type": "list"
 		},
 		{
@@ -261,7 +261,7 @@ def get_data():
 			"icon": "icon-map-marker",
 			"label": _("Room"),
 			"link": "List/Room",
-			"doctype": "Examination",
+			"_doctype": "Examination",
 			"type": "list"
 		},
 		{

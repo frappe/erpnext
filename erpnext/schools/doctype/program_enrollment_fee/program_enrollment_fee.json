@@ -8,6 +8,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -139,13 +140,14 @@
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "idx": 0, 
+ "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-07-18 10:30:50.243271",
+ "modified": "2016-07-21 12:27:02.547926", 
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "Program Enrollment Fee", 

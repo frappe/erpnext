@@ -9,7 +9,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
- "editable_grid": 0, 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -104,8 +104,8 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-07-18 10:30:50.243271",
- "modified_by": "Administrator", 
+ "modified": "2016-07-21 12:25:44.368245", 
+ "modified_by": "r@r.com", 
  "module": "Schools", 
  "name": "Fee Amount", 
  "name_case": "", 
