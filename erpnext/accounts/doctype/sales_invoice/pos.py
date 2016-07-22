@@ -71,7 +71,7 @@ def get_root(table):
 def update_multi_mode_option(doc, pos_profile):
 	from frappe.model import default_fields
 
-	if not pos_profile:
+	if not pos_profile or not pos_profile.get('payments'):
 		for payment in get_mode_of_payment(doc):
 			payments = doc.append('payments', {})
 			payments.mode_of_payment = payment.parent
@@ -166,13 +166,14 @@ def make_invoice(doc_list):
 
 	for docs in doc_list:
 		for name, doc in docs.items():
-			validate_customer(doc)
-			validate_item(doc)
-			si_doc = frappe.new_doc('Sales Invoice')
-			si_doc.offline_pos_name = name
-			si_doc.update(doc)
-			submit_invoice(si_doc, name)
-			name_list.append(name)
+			if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
+				validate_customer(doc)
+				validate_item(doc)
+				si_doc = frappe.new_doc('Sales Invoice')
+				si_doc.offline_pos_name = name
+				si_doc.update(doc)
+				submit_invoice(si_doc, name)
+				name_list.append(name)
 
 	return name_list
 
@@ -213,7 +214,6 @@ def submit_invoice(si_doc, name):
 		save_invoice(e, si_doc, name)
 
 def save_invoice(e, si_doc, name):
-	if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name, 'docstatus': 1}):
 		si_doc.docstatus = 0
 		si_doc.name = ''
 		si_doc.save(ignore_permissions=True)
