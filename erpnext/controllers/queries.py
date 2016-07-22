@@ -85,6 +85,9 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 		fields = ["name", "customer_group", "territory"]
 	else:
 		fields = ["name", "customer_name", "customer_group", "territory"]
+		
+	meta = frappe.get_meta("Customer")
+	fields = fields + [f for f in meta.get_search_fields() if not f in fields]
 
 	fields = ", ".join(fields)
 
