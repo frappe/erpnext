@@ -1,7 +1,6 @@
 from frappe import _
 
 data = {
-	'docstatus': 1,
 	'fieldname': 'material_request',
 	'transactions': [
 		{
