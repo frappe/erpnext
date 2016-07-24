@@ -91,9 +91,6 @@ class Timesheet(Document):
 				frappe.throw(_("Row {0}: Completed Qty cannot be more than {0} for operation {1}").format(data.idx, pending_qty, self.operation),
 					OverProductionLoggedError)
 
-			if data.billable and flt(data.billing_rate) == 0.0 and data.activity_type:
-				frappe.throw(_("Row {0}: Billing Rate must be greater than zero.").format(data.idx))
-
 	def update_production_order(self, time_sheet):
 		if self.production_order:
 			pro = frappe.get_doc('Production Order', self.production_order)
