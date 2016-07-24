@@ -162,7 +162,10 @@
 }
 
 .payment-toolbar {
-	margin-left: 35px;
+	.row {
+		width: 323px;
+		margin: 0 auto;
+	}
 }
 
 .payment-mode {
@@ -195,6 +198,41 @@
 	font-weight:200;
 	background-color: #FDFDFD;
 	border-color: #e8e8e8;
+}
+
+.multimode-payments {
+	padding-left: 30px;
+}
+
+.payment-toolbar {
+	padding-right: 30px;
+}
+
+body[data-route="pos"] .modal-dialog {
+	width: 750px;
+
+	@media (max-width: @screen-xs) {
+		width: auto;
+
+		.modal-content {
+			height: auto;
+		}
+	}
+}
+
+@media (max-width: @screen-xs) {
+	.amount-row h3 {
+		font-size: 15px;
+	}
+	.pos-keyboard-key, .delete-btn {
+		height: 50px;
+	}
+	.multimode-payments {
+		padding-left: 15px;
+	}
+	.payment-toolbar {
+		padding-right: 15px;
+	}
 }
 
 .amount-label {

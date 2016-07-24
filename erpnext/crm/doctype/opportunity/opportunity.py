@@ -43,15 +43,15 @@ class Opportunity(TransactionBase):
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
-		if not (self.lead or self.customer):
+		if not (self.lead or self.customer) and self.contact_email:
 			lead_name = frappe.db.get_value("Lead", {"email_id": self.contact_email})
 			if not lead_name:
 				sender_name = get_fullname(self.contact_email)
 				if sender_name == self.contact_email:
 					sender_name = None
 
-				if not sender_name and self.contact_email.index('@'):
-					email_name = self.contact_email[0:self.contact_email.index('@')]
+				if not sender_name and ('@' in self.contact_email):
+					email_name = self.contact_email.split('@')[0]
 
 					email_split = email_name.split('.')
 					sender_name = ''
