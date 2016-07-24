@@ -23,7 +23,7 @@ script:
   - cd ~/frappe-bench
   - bench get-app erpnext $TRAVIS_BUILD_DIR
   - bench use test_site
-  - bench reinstall
+  - bench reinstall --yes
   - bench build
   - bench start &
   - sleep 10
