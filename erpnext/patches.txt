@@ -28,10 +28,11 @@ execute:frappe.reload_doc('support', 'doctype', 'newsletter') # 2014-01-31
 execute:frappe.reload_doc('hr', 'doctype', 'employee') # 2014-02-03
 execute:frappe.db.sql("update tabPage set module='Core' where name='Setup'")
 
-# inserted this patch here since Item types are being changed
 erpnext.patches.v5_2.change_item_selects_to_checks
 erpnext.patches.v4_0.fields_to_be_renamed
 erpnext.patches.v4_0.rename_sitemap_to_route
+erpnext.patches.v7_0.re_route #2016-06-27
+
 erpnext.patches.v4_0.fix_contact_address
 erpnext.patches.v4_0.customer_discount_to_pricing_rule
 execute:frappe.db.sql("""delete from `tabWebsite Item Group` where ifnull(item_group, '')=''""")
@@ -277,7 +278,6 @@ execute:frappe.db.sql('update tabQuotation set status="Cancelled" where docstatu
 execute:frappe.rename_doc("DocType", "Payments", "Sales Invoice Payment", force=True)
 erpnext.patches.v7_0.update_mins_to_first_response
 erpnext.patches.v6_20x.repost_valuation_rate_for_negative_inventory
-erpnext.patches.v7_0.re_route #2016-06-27
 erpnext.patches.v7_0.system_settings_setup_complete
 erpnext.patches.v7_0.set_naming_series_for_timesheet
 execute:frappe.reload_doc('projects', 'doctype', 'project')
