@@ -98,7 +98,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-07-25 01:27:20.083617", 
+ "modified": "2016-07-25 05:24:22.881854", 
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "Room", 
@@ -126,7 +126,7 @@
    "write": 1
   }
  ], 
- "quick_entry": 0, 
+ "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_field": "modified", 

@@ -79,7 +79,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-07-25 01:26:07.345474", 
+ "modified": "2016-07-25 05:24:22.972715", 
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "Fee Category", 
@@ -107,7 +107,7 @@
    "write": 1
   }
  ], 
- "quick_entry": 0, 
+ "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "description", 

@@ -3,11 +3,13 @@
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:brand", 
+ "beta": 0, 
  "creation": "2013-02-22 01:27:54", 
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -17,6 +19,7 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_list_view": 0, 
    "label": "Brand Name", 
@@ -26,6 +29,7 @@
    "oldfieldtype": "Data", 
    "permlevel": 0, 
    "print_hide": 0, 
+   "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "report_hide": 0, 
    "reqd": 1, 
@@ -41,6 +45,7 @@
    "fieldtype": "Text", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_list_view": 1, 
    "label": "Description", 
@@ -50,6 +55,7 @@
    "oldfieldtype": "Text", 
    "permlevel": 0, 
    "print_hide": 0, 
+   "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -63,13 +69,14 @@
  "hide_toolbar": 0, 
  "icon": "icon-certificate", 
  "idx": 1, 
+ "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2015-11-16 06:29:43.008609", 
+ "modified": "2016-07-25 05:24:26.450436", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Brand", 
@@ -176,6 +183,8 @@
    "write": 0
   }
  ], 
+ "quick_entry": 1, 
  "read_only": 0, 
- "read_only_onload": 0
+ "read_only_onload": 0, 
+ "track_seen": 0
 }
