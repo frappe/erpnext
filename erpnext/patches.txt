@@ -300,3 +300,4 @@ execute:frappe.delete_doc_if_exists("DocType", "Payment Tool")
 execute:frappe.delete_doc_if_exists("DocType", "Payment Tool Detail")
 erpnext.patches.v7_0.setup_account_table_for_expense_claim_type_if_exists
 erpnext.patches.v7_0.migrate_schools_to_erpnext
+erpnext.patches.v7_0.remove_administrator_role_in_doctypes
