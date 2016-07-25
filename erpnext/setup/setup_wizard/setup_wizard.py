@@ -41,11 +41,11 @@ def setup_complete(args=None):
 		create_instructor(args)
 		create_room(args)
 
-	frappe.local.message_log = []
-	setup_domain(args.get('domain'))
-
 	website_maker(args)
 	create_logo(args)
+
+	frappe.local.message_log = []
+	setup_domain(args.get('domain'))
 
 	frappe.db.commit()
 	login_as_first_user(args)
