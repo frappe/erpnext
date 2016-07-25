@@ -323,8 +323,19 @@ def update_reference_in_payment_entry(d, payment_entry):
 	payment_entry.set_missing_values()
 	payment_entry.set_amounts()
 	payment_entry.save(ignore_permissions=True)
+	
+def unlink_ref_doc_from_payment_entries(ref_type, ref_no):
+	remove_ref_doc_link_from_jv(ref_type, ref_no)
+	remove_ref_doc_link_from_pe(ref_type, ref_no)
+	
+	frappe.db.sql("""update `tabGL Entry`
+		set against_voucher_type=null, against_voucher=null,
+		modified=%s, modified_by=%s
+		where against_voucher_type=%s and against_voucher=%s
+		and voucher_no != ifnull(against_voucher, '')""",
+		(now(), frappe.session.user, ref_type, ref_no))
 
-def remove_against_link_from_jv(ref_type, ref_no):
+def remove_ref_doc_link_from_jv(ref_type, ref_no):
 	linked_jv = frappe.db.sql_list("""select parent from `tabJournal Entry Account`
 		where reference_type=%s and reference_name=%s and docstatus < 2""", (ref_type, ref_no))
 
@@ -335,15 +346,30 @@ def remove_against_link_from_jv(ref_type, ref_no):
 			where reference_type=%s and reference_name=%s
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
-		frappe.db.sql("""update `tabGL Entry`
-			set against_voucher_type=null, against_voucher=null,
-			modified=%s, modified_by=%s
-			where against_voucher_type=%s and against_voucher=%s
-			and voucher_no != ifnull(against_voucher, '')""",
-			(now(), frappe.session.user, ref_type, ref_no))
-
 		frappe.msgprint(_("Journal Entries {0} are un-linked".format("\n".join(linked_jv))))
+		
+def remove_ref_doc_link_from_pe(ref_type, ref_no):
+	linked_pe = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
+		where reference_doctype=%s and reference_name=%s and docstatus < 2""", (ref_type, ref_no))
 
+	if linked_pe:
+		frappe.db.sql("""update `tabPayment Entry Reference`
+			set allocated_amount=0, modified=%s, modified_by=%s
+			where reference_doctype=%s and reference_name=%s
+			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
+			
+		for pe in linked_pe:
+			pe_doc = frappe.get_doc("Payment Entry", pe)
+			pe_doc.set_total_allocated_amount()
+			pe_doc.set_unallocated_amount()
+			pe_doc.clear_unallocated_reference_document_rows()
+			
+			frappe.db.sql("""update `tabPayment Entry` set total_allocated_amount=%s, 
+				base_total_allocated_amount=%s, unallocated_amount=%s, modified=%s, modified_by=%s 
+				where name=%s""", (pe_doc.total_allocated_amount, pe_doc.base_total_allocated_amount, 
+					pe_doc.unallocated_amount, now(), frappe.session.user, pe))
+		
+		frappe.msgprint(_("Payment Entries {0} are un-linked".format("\n".join(linked_pe))))
 
 @frappe.whitelist()
 def get_company_default(company, fieldname):

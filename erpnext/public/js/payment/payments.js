@@ -11,7 +11,6 @@ erpnext.payments = erpnext.stock.StockController.extend({
 	
 		this.dialog.show();
 		this.$body = this.dialog.body;
-		this.dialog.$wrapper.find('.modal-dialog').css("width", "750px");
 		this.set_payment_primary_action();
 		this.make_keyboard();
 	},

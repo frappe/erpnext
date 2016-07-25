@@ -3,12 +3,14 @@
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:title", 
+ "beta": 0, 
  "creation": "2013-01-10 16:34:24", 
  "custom": 0, 
  "description": "Standard Terms and Conditions that can be added to Sales and Purchases.\n\nExamples:\n\n1. Validity of the offer.\n1. Payment Terms (In Advance, On Credit, part advance etc).\n1. What is extra (or payable by the Customer).\n1. Safety / usage warning.\n1. Warranty if any.\n1. Returns Policy.\n1. Terms of shipping, if applicable.\n1. Ways of addressing disputes, indemnity, liability, etc.\n1. Address and Contact of your Company.", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -18,6 +20,7 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
    "in_filter": 1, 
    "in_list_view": 0, 
    "label": "Title", 
@@ -43,6 +46,7 @@
    "fieldtype": "Check", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_list_view": 1, 
    "label": "Disabled", 
@@ -67,6 +71,7 @@
    "fieldtype": "Text Editor", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_list_view": 0, 
    "label": "Terms and Conditions", 
@@ -89,13 +94,14 @@
  "hide_toolbar": 0, 
  "icon": "icon-legal", 
  "idx": 1, 
+ "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-01-11 23:54:33.491719", 
+ "modified": "2016-07-25 05:24:25.093905", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Terms and Conditions", 
@@ -222,6 +228,8 @@
    "write": 0
   }
  ], 
+ "quick_entry": 1, 
  "read_only": 0, 
- "read_only_onload": 0
+ "read_only_onload": 0, 
+ "track_seen": 0
 }

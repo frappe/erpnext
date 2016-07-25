@@ -33,9 +33,11 @@ def setup_data():
 	setup_salary_structure()
 	setup_salary_structure_for_timesheet()
 	setup_leave_allocation()
+	setup_mode_of_payment()
 	setup_account_to_expense_type()
 	setup_user_roles()
 	setup_budget()
+	setup_pos_profile()
 	frappe.db.commit()
 	frappe.clear_cache()
 
@@ -317,7 +319,9 @@ def setup_salary_structure_for_timesheet():
 		ss_doc.hour_rate = flt(random.random() * 10, 2)
 		ss_doc.save(ignore_permissions=True)
 
+
 def setup_leave_allocation():
+	year = now_datetime().year
 	for employee in frappe.get_all('Employee', fields=['name']):
 		leave_types = frappe.get_all("Leave Type", fields=['name', 'max_days_allowed'])
 		for leave_type in leave_types:
@@ -327,14 +331,26 @@ def setup_leave_allocation():
 		leave_allocation = frappe.get_doc({
 			"doctype": "Leave Allocation",
 			"employee": employee.name,
-			"from_date": nowdate(),
-			"to_date": add_years(nowdate(), 1),
+			"from_date": "{0}-01-01".format(year),
+			"to_date": "{0}-12-31".format(year),
 			"leave_type": leave_type.name,
 			"new_leaves_allocated": random.randint(1, int(leave_type.max_days_allowed))
 		})
 		leave_allocation.insert()
 		leave_allocation.submit()
 		frappe.db.commit()			
+
+def setup_mode_of_payment():
+	account_dict = {'Cash': 'Cash - WPL', 'Bank': 'National Bank - WPL'}
+	for payment_mode in frappe.get_all('Mode of Payment', fields = ["name", "type"]):
+		if payment_mode.type:
+			mop = frappe.get_doc('Mode of Payment', payment_mode.name)
+			mop.append('accounts', {
+				'company': erpnext.get_default_company(),
+				'default_account': account_dict.get(payment_mode.type)
+			})
+
+			mop.save(ignore_permissions=True)
 
 def setup_account():
 	frappe.flags.in_import = True
@@ -422,3 +438,17 @@ def setup_user_roles():
 		user.add_roles('HR User', 'Projects User')
 		frappe.db.set_global('demo_projects_user', user.name)
 
+def setup_pos_profile():
+	pos = frappe.new_doc('POS Profile')
+	pos.user = frappe.db.get_global('demo_accounts_user')
+	pos.naming_series = 'SINV-'
+	pos.update_stock = 0
+	pos.write_off_account = 'Cost of Goods Sold - WPL'
+	pos.write_off_cost_center = 'Main - WPL'
+
+	pos.append('payments', {
+		'mode_of_payment': frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name'),
+		'amount': 0.0
+	})
+
+	pos.insert()

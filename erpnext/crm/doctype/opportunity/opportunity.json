@@ -10,6 +10,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Document", 
+ "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -266,7 +267,7 @@
    "no_copy": 1, 
    "oldfieldname": "status", 
    "oldfieldtype": "Select", 
-   "options": "Open\nQuotation\nLost\nReplied\nClosed", 
+   "options": "Open\nQuotation\nConverted\nLost\nReplied\nClosed", 
    "permlevel": 0, 
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 
@@ -1001,7 +1002,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-06-14 15:50:55.080217", 
+ "modified": "2016-07-28 15:58:06.614493", 
  "modified_by": "Administrator", 
  "module": "CRM", 
  "name": "Opportunity", 

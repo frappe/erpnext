@@ -112,8 +112,10 @@ class ProductionOrder(Document):
 
 
 	def update_status(self, status=None):
-		'''Update status of production order'''
-		status = self.get_status()
+		'''Update status of production order if unknown'''
+		if not status:
+			status = self.get_status()
+			
 		if status != self.status:
 			self.db_set("status", status)
 

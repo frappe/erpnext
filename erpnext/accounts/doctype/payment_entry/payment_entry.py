@@ -251,8 +251,8 @@ class PaymentEntry(AccountsController):
 				self.unallocated_amount = party_amount - self.total_allocated_amount
 				
 	def set_difference_amount(self):
-		base_unallocated_amount = flt(self.unallocated_amount) * \
-			(self.source_exchange_rate if self.payment_type=="Receive" else self.target_exchange_rate)
+		base_unallocated_amount = flt(self.unallocated_amount) * (flt(self.source_exchange_rate) 
+			if self.payment_type=="Receive" else flt(self.target_exchange_rate))
 			
 		base_party_amount = flt(self.base_total_allocated_amount) + flt(base_unallocated_amount)
 		
@@ -266,6 +266,8 @@ class PaymentEntry(AccountsController):
 		for d in self.get("deductions"):
 			if d.amount:
 				self.difference_amount -= flt(d.amount)
+				
+		self.difference_amount = flt(self.difference_amount, self.precision("difference_amount"))
 				
 	def clear_unallocated_reference_document_rows(self):
 		self.set("references", self.get("references", {"allocated_amount": ["not in", [0, None, ""]]}))
@@ -672,7 +674,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	pe.setup_party_account_field()
 	pe.set_missing_values()
-	if bank:
+	if party_account and bank:
 		pe.set_exchange_rate()
 		pe.set_amounts()
 	return pe

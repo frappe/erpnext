@@ -158,6 +158,9 @@ doc_events = {
 
 	"Website Settings": {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
+	},
+	"Payment Entry": {
+		"on_submit": "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"
 	}
 }
 

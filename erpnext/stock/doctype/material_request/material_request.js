@@ -79,7 +79,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 
 				// stop
 				cur_frm.add_custom_button(__('Stop'),
-					cur_frm.cscript['Stop Material Request'], __("Status"));
+					cur_frm.cscript['Stop Material Request']);
 
 			}
 		}
@@ -102,7 +102,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
 			cur_frm.add_custom_button(__('Re-open'),
-				cur_frm.cscript['Unstop Material Request'], __("Status"));
+				cur_frm.cscript['Unstop Material Request']);
 
 	},
 

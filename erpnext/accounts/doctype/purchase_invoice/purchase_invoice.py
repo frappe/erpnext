@@ -147,6 +147,14 @@ class PurchaseInvoice(BuyingController):
 				["Purchase Receipt", "purchase_receipt", "pr_detail"]
 			])
 
+	def validate_warehouse(self):
+		if self.update_stock:
+			for d in self.get('items'):
+				if not d.warehouse:
+					frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
+
+		super(PurchaseInvoice, self).validate_warehouse()
+
 	def set_expense_account(self):
 		auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
@@ -155,6 +163,7 @@ class PurchaseInvoice(BuyingController):
 			stock_items = self.get_stock_items()
 
 		if self.update_stock:
+			self.validate_warehouse()
 			warehouse_account = get_warehouse_account()
 
 		for item in self.get("items"):
@@ -553,8 +562,8 @@ class PurchaseInvoice(BuyingController):
 		self.update_status_updater_args()
 
 		if not self.is_return:
-			from erpnext.accounts.utils import remove_against_link_from_jv
-			remove_against_link_from_jv(self.doctype, self.name)
+			from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+			unlink_ref_doc_from_payment_entries(self.doctype, self.name)
 
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")

@@ -1,13 +1,11 @@
 [
 	{
-		"group_name": "_Test Student Group",
 		"program": "_Test Program",
 		"course": "_Test Course",
 		"academic_year": "2014-2015",
 		"academic_term": "_Test Academic Term"
 	},
 	{
-		"group_name": "_Test Student Group 1",
 		"program": "_Test Program",
 		"course": "_Test Course 2",
 		"academic_year": "2014-2015",

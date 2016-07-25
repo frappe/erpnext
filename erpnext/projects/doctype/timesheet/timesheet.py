@@ -20,14 +20,21 @@ class OverProductionLoggedError(frappe.ValidationError): pass
 class Timesheet(Document):
 	def validate(self):
 		self.set_status()
-		self.total_hours = 0.0
-		self.total_billing_amount = 0.0
 		self.validate_dates()
 		self.validate_time_logs()
 		self.update_cost()
+		self.calculate_total_amounts()
+
+	def calculate_total_amounts(self):
+		self.total_hours = 0.0
+		self.total_billing_amount = 0.0
+		self.total_costing_amount = 0.0
+
 		for d in self.get("time_logs"):
 			self.total_hours += flt(d.hours)
-			if d.billable: self.total_billing_amount += flt(d.billing_amount)
+			if d.billable: 
+				self.total_billing_amount += flt(d.billing_amount)
+				self.total_costing_amount += flt(d.costing_amount)
 
 	def set_status(self):
 		self.status = {
@@ -88,11 +95,8 @@ class Timesheet(Document):
 				frappe.throw(_("Row {0}: Completed Qty must be greater than zero.").format(data.idx))
 
 			if self.production_order and flt(pending_qty) < flt(data.completed_qty):
-				frappe.throw(_("Row {0}: Completed Qty cannot be more than {0} for operation {1}").format(data.idx, pending_qty, self.operation),
+				frappe.throw(_("Row {0}: Completed Qty cannot be more than {1} for operation {2}").format(data.idx, pending_qty, data.operation),
 					OverProductionLoggedError)
-
-			if data.billable and flt(data.billing_rate) == 0.0 and data.activity_type:
-				frappe.throw(_("Row {0}: Billing Rate must be greater than zero.").format(data.idx))
 
 	def update_production_order(self, time_sheet):
 		if self.production_order:
@@ -223,7 +227,7 @@ class Timesheet(Document):
 
 	def update_cost(self):
 		for data in self.time_logs:
-			if data.activity_type and not data.billing_amount:
+			if data.activity_type and (not data.billing_amount or not data.costing_amount):
 				rate = get_activity_cost(self.employee, data.activity_type)
 				hours =  data.hours or 0
 				if rate:

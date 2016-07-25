@@ -134,8 +134,8 @@ class SalesInvoice(SellingController):
 	def on_cancel(self):
 		self.check_close_sales_order("sales_order")
 
-		from erpnext.accounts.utils import remove_against_link_from_jv
-		remove_against_link_from_jv(self.doctype, self.name)
+		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+		unlink_ref_doc_from_payment_entries(self.doctype, self.name)
 
 		if self.is_return:
 			# NOTE status updating bypassed for is_return
