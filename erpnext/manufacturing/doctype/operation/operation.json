@@ -98,7 +98,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-07-08 08:42:35.126397", 
+ "modified": "2016-07-25 05:24:23.398894", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Operation", 
@@ -146,7 +146,7 @@
    "write": 1
   }
  ], 
- "quick_entry": 0, 
+ "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_field": "modified", 

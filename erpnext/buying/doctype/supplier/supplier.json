@@ -3,12 +3,14 @@
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "naming_series:", 
+ "beta": 0, 
  "creation": "2013-01-10 16:34:11", 
  "custom": 0, 
  "description": "Supplier of Goods or Services.", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -705,16 +707,18 @@
  "icon": "icon-user", 
  "idx": 370, 
  "image_field": "image", 
+ "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-04-28 17:36:44.742525", 
+ "modified": "2016-07-25 05:20:29.238820", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier", 
+ "name_case": "Title Case", 
  "owner": "Administrator", 
  "permissions": [
   {
@@ -858,7 +862,7 @@
    "write": 0
   }
  ], 
- "quick_entry": 0, 
+ "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "supplier_name, supplier_type", 

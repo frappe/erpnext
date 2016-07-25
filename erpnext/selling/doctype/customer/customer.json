@@ -10,6 +10,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -956,10 +957,11 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-06-09 14:39:17.712638", 
+ "modified": "2016-07-25 05:20:22.976925", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Customer", 
+ "name_case": "Title Case", 
  "owner": "Administrator", 
  "permissions": [
   {
@@ -1143,7 +1145,7 @@
    "write": 0
   }
  ], 
- "quick_entry": 0, 
+ "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "customer_name,customer_group,territory", 

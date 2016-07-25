@@ -47,7 +47,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-07-25 01:35:33.540019", 
+ "modified": "2016-07-25 05:24:22.726993", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Gateway", 
@@ -95,7 +95,7 @@
    "write": 0
   }
  ], 
- "quick_entry": 0, 
+ "quick_entry": 1, 
  "read_only": 1, 
  "read_only_onload": 0, 
  "sort_field": "modified", 
