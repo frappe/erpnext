@@ -10,5 +10,6 @@ def execute():
 			ts = frappe.get_doc('Timesheet', data.name)
 			ts.update_cost()
 			ts.calculate_total_amounts()
+			ts.flags.ignore_validate = True
 			ts.flags.ignore_validate_update_after_submit = True
 			ts.save()
