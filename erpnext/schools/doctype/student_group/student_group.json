@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
- "allow_import": 0, 
- "allow_rename": 0, 
+ "allow_import": 1, 
+ "allow_rename": 1, 
  "autoname": "", 
  "beta": 0, 
  "creation": "2015-09-07 12:55:52.072792", 
@@ -280,7 +280,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-07-25 01:32:57.819189", 
+ "modified": "2016-07-25 06:23:43.903111", 
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "Student Group", 

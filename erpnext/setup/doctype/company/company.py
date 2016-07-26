@@ -32,6 +32,9 @@ class Company(Document):
 		self.validate_currency()
 
 	def validate_abbr(self):
+		if not self.abbr:
+			self.abbr = ''.join([c[0] for c in self.company_name.split()]).upper()
+
 		self.abbr = self.abbr.strip()
 
 		if self.get('__islocal') and len(self.abbr) > 5:
@@ -66,7 +69,7 @@ class Company(Document):
 			if not frappe.local.flags.ignore_chart_of_accounts:
 				self.create_default_accounts()
 				self.create_default_warehouses()
-			
+
 				self.install_country_fixtures()
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
@@ -92,7 +95,7 @@ class Company(Document):
 			{"warehouse_name": _("Stores"), "is_group": 0},
 			{"warehouse_name": _("Work In Progress"), "is_group": 0},
 			{"warehouse_name": _("Finished Goods"), "is_group": 0}]:
-			
+
 			if not frappe.db.exists("Warehouse", "{0} - {1}".format(wh_detail["warehouse_name"], self.abbr)):
 				stock_group = frappe.db.get_value("Account", {"account_type": "Stock",
 					"is_group": 1, "company": self.name})
@@ -203,9 +206,9 @@ class Company(Document):
 		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
 		if not rec:
 			frappe.db.sql("""delete from `tabBudget Account`
-				where exists(select name from tabBudget 
+				where exists(select name from tabBudget
 					where name=`tabBudget Account`.parent and company = %s)""", self.name)
-			
+
 			for doctype in ["Account", "Cost Center", "Budget", "Party Account"]:
 				frappe.db.sql("delete from `tab{0}` where company = %s".format(doctype), self.name)
 

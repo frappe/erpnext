@@ -69,13 +69,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		// navigator.onLine
 		this.connection_status = false;
-		this.page.set_indicator("Offline", "grey")
+		this.page.set_indicator(__("Offline"), "grey")
 		frappe.call({
 			method:"frappe.handler.ping",
 			callback: function(r){
 				if(r.message){
 					me.connection_status = true;
-					me.page.set_indicator("Online", "green")
+					me.page.set_indicator(__("Online"), "green")
 				}
 			}
 		})
@@ -278,7 +278,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				"fieldtype": "Data",
 				"label": "Item",
 				"fieldname": "pos_item",
-				"placeholder": "Search Item"
+				"placeholder": __("Search Item")
 			},
 			parent: this.wrapper.find(".search-area"),
 			only_input: true,

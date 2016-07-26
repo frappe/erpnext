@@ -5,11 +5,11 @@ cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
 		frm.get_field('time_logs').grid.editable_fields = [
-			{fieldname: 'billable', columns: 2},
+			{fieldname: 'billable', columns: 1},
 			{fieldname: 'activity_type', columns: 2},
-			{fieldname: 'from_time', columns: 2},
-			{fieldname: 'hours', columns: 2},
-			{fieldname: 'to_time', columns: 2},
+			{fieldname: 'from_time', columns: 3},
+			{fieldname: 'hours', columns: 1},
+			{fieldname: 'project', columns: 3}
 		];
 
 		frm.fields_dict.employee.get_query = function() {
@@ -22,7 +22,8 @@ frappe.ui.form.on("Timesheet", {
 			child = locals[cdt][cdn];
 			return{
 				filters: {
-					'project': child.project
+					'project': child.project,
+					'status': ["!=", "Closed"]
 				}
 			}
 		}
@@ -37,8 +38,7 @@ frappe.ui.form.on("Timesheet", {
 
 	refresh: function(frm) {
 		if(frm.doc.docstatus==1) {
-			if(!frm.doc.sales_invoice && frm.doc.total_billing_amount > 0
-				&& !frm.doc.production_order){
+			if(!frm.doc.sales_invoice && frm.doc.total_billing_amount > 0){
 				frm.add_custom_button(__("Make Sales Invoice"), function() { frm.trigger("make_invoice") },
 					"icon-file-alt");
 			}
@@ -147,13 +147,16 @@ var calculate_time_and_amount = function(frm) {
 	var tl = frm.doc.time_logs || [];
 	total_hr = 0;
 	total_billing_amount = 0;
+	total_costing_amount = 0;
 	for(var i=0; i<tl.length; i++) {
 		if (tl[i].hours) {
 			total_hr += tl[i].hours;
 			total_billing_amount += tl[i].billing_amount;
+			total_costing_amount += tl[i].costing_amount;
 		}
 	}
 
 	cur_frm.set_value("total_hours", total_hr);
 	cur_frm.set_value("total_billing_amount", total_billing_amount);
+	cur_frm.set_value("total_costing_amount", total_costing_amount);
 }
