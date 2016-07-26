@@ -58,7 +58,7 @@ class MaintenanceSchedule(TransactionBase):
 			if no_email_sp:
 				frappe.msgprint(
 					frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
-						doc.owner, "<br>"+no_email_sp.join("<br>")
+						self.owner, "<br>"+no_email_sp.join("<br>")
 				))
 
 			scheduled_date = frappe.db.sql("""select scheduled_date from
@@ -153,7 +153,7 @@ class MaintenanceSchedule(TransactionBase):
 			elif not d.sales_person:
 				throw(_("Please select Incharge Person's name"))
 
-			if getdate(d.start_date) > getdate(d.end_date):
+			if getdate(d.start_date) >= getdate(d.end_date):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
 
 	def validate_sales_order(self):
