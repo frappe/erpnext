@@ -293,8 +293,7 @@ def get_activity_cost(employee=None, activity_type=None):
 
 @frappe.whitelist()
 def get_employee_list(doctype, txt, searchfield, start, page_len, filters):
-	test = frappe.db.sql("""select distinct employee, employee_name
+	return frappe.db.sql("""select distinct employee, employee_name
 		from `tabSalary Structure` where salary_slip_based_on_timesheet=1
 		and employee like %(txt)s limit %(start)s, %(page_len)s""", 
 		{'txt': "%%%s%%"% txt, '_txt': txt.replace("%", ""), 'start': start, 'page_len': page_len})
-	return test
