@@ -1,75 +1,96 @@
 
 <head>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	
+	
+	<link href="/assets/frappe/css/c3.min.css" rel="stylesheet" type="text/css">
+	
+	
+	<script type="text/javascript" src="/assets/frappe/js/lib/d3.min.js"></script>
+	<script type="text/javascript" src="/assets/frappe/js/lib/c3.min.js"></script>
     <script type="text/javascript">
-		google.charts.load("current", {"packages":["corechart"]});
-		google.charts.setOnLoadCallback(drawChart);
-		function drawChart() {
-		var chartData = [];
-		{% var q = 0; %}
-		{% for(var i=1, l=report.columns.length; i<l; i++) { %}
 
-			{% if(__(report.columns[i].label) != __("Quotation")) { %}
-				var tempData{%=q%} = [];
-				var tempData{%=q+1%} = [];
-				{% if(i == 1) { %}
-					tempData{%=q%}[0] = \"{%= report.columns[i].label %}\";
-
-					{% for(var j=0, m=data.length; j<m; j++) { %}
-
-						tempData{%=q%}[{%=j%}+1] =\"{%= data[j][report.columns[i].field] %}\";
-
-					{% } %}
-				{% } else { %}
-
-					tempData{%=q%}[0] = parseInt(\"{%= report.columns[i].label %}\".replace(\"Qty: \",\"\"));
-
-					{% for(var j=0, m=data.length; j<m; j++) { %}
-
-						tempData{%=q%}[{%=j%}+1] = {% if(data[j][report.columns[i].field] == "") { if (i > 2) { %} chartData[{%=q%}-1][{%=j%}+1] {% } else { %} 0 {% } }else { %} {%=data[j][report.columns[i].field] %} {% } %};
-
-					{% } %}
-					chartData[{%=q%}] = tempData{%=q%};
-					{% q= q+1; %}
+		onReady("#chart_div", function() {
+			var chartData = [];
+			{% var q = 0; %}
+			{% for(var j=0, m=data.length+1; j<m; j++) { %}
+			
+				var tempData{%=j%} = [];
+				
+				{% for(var i=1, l=report.columns.length; i<l; i++) { %}
+					{% if(__(report.columns[i].label) != __("Quotation")) { %}
 					
-					{% if(i < report.columns.length -2){ %}
-						tempData{%=q%}[0] = parseInt(\"{%= report.columns[i+2].label %}\".replace(\"Qty: \",\"\")-1);
+						{% if(j == 0) { %}
+							{% if(i == 1) { %}
+								tempData{%=j%}[{%=i%}-1] = \"x\";
+							{% } else { %}
 
+								tempData{%=j%}[{%=i%}-1] = Math.log(parseInt(\"{%= report.columns[i].label %}\".replace(\"Qty: \",\"\"))) / Math.LN10;
+							{% } %}
+						{% } else { %}
+							{% if(i == 1) { %}
+								tempData{%=j%}[{%=i%}-1] = \"{%= data[j-1][report.columns[i].field] %} \";
+							{% } else { %}
+							tempData{%=j%}[{%=i%}-1] = {% if(data[j-1][report.columns[i].field] == "") { if (i > 2) { %} 
+										tempData{%=j%}[{%=i%}-2] 
+									{% } else { %} 
+										0 
+								{% } } else { %} 
+									{%= data[j-1][report.columns[i].field] %} 
+							{% } %};
+							{% } %};
+						{% } %}
 					{% } else { %}
-						tempData{%=q%}[0] = chartData[{%=q-1%}][0]*2;
-					
-					{% } %}
-					
-					{% for(var j=0, m=data.length; j<m; j++) { %}
+						{% if(j == 0) { %}
+							{% if(i < l-1) { %}
+								tempData{%=j%}[{%=i%}-1] = Math.log(parseInt(\"{%= report.columns[i+1].label %}\".replace(\"Qty: \",\"\"))-1) / Math.LN10;
+							{% } else { %}
+								tempData{%=j%}[{%=i%}-1] = Math.log(2*parseInt(\"{%= report.columns[i-1].label %}\".replace(\"Qty: \",\"\"))) / Math.LN10;
+							{% } %}
+						{% } else { %}
 
-						tempData{%=q%}[{%=j%}+1] = {% if(data[j][report.columns[i].field] == "") { if (i > 2) { %} chartData[{%=q-1%}-1][{%=j%}+1] {% } else { %} 0 {% } }else { %} {%=data[j][report.columns[i].field] %} {% } %};
+							tempData{%=j%}[{%=i%}-1] = tempData{%=j%}[{%=i%}-2];
+						{% } %}
 
 					{% } %}
-					
 					
 				{% } %}
-				chartData[{%=q%}] = tempData{%=q%};
-				{% q= q+1; %}
+				chartData[{%=j%}] = tempData{%=j%};
 			{% } %}
-
-		{% } %}
-		console.log(chartData);
-		
-			var data = google.visualization.arrayToDataTable(chartData);
-			var chart = new google.visualization.LineChart(document.getElementById("chart_div"));
+			console.log(chartData);
 			
-			var options = {
-			  title: "Item Price Analysis for {%= filters.item %}" ,
-			  vAxis: {title: "Price ($)"},
-			  width: 652,
-			  height: 450,
-			  isStacked: false,
-			  enableInteractivity: false,
-			  hAxis: {logScale: true, minValue: 1,viewWindow:{ min: 1 }  }
+			hold = {
+			bindto: "#chart_div" ,data: {
+				x: "x",
+				columns: chartData
+			},
+			axis: {
+				x: {
+					tick: {
+					   format: function (x22) { return Math.pow(10,x22).toFixed(0); },
+						culling: {
+							max: {%=report.columns.length%} / 2
+						}
+
+					}
+				}
+			},
+			point: {
+			  show: false
+			}
 			};
+			console.log(hold);
+			var chart = c3.generate(hold);
+		});
 		
-			chart.draw(data, options);
-		}
+		function onReady(selector, callback) {
+        var intervalID = window.setInterval(function() {
+          if (document.querySelector(selector) !== undefined) {
+            window.clearInterval(intervalID);
+            callback.call(this);
+          }
+        }, 500);}
+				
+		
     </script>
 
  </head>
@@ -104,7 +125,7 @@
 </table>
 
 <h4 class="text-center"> Analysis Chart </h4>
-<div id="chart_div" align="center" style="width: auto;  display: inline-block !important; margin: auto !important"></div>
+<div id="chart_div"></div>
 
 
 		
