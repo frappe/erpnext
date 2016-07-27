@@ -13,6 +13,6 @@ class FeeStructure(Document):
 	def calculate_total(self):
 		"""Calculates total amount."""
 		self.total_amount = 0
-		for d in self.amount:
+		for d in self.components:
 			self.total_amount += d.amount
 	
