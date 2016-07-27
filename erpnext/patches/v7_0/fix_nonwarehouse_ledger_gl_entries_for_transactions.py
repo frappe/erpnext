@@ -20,7 +20,7 @@ def execute():
 			from `tabStock Ledger Entry` sle
 			where sle.warehouse in (%s) and creation > '2016-05-01'
 			and not exists(select name from `tabGL Entry` 
-				where account=sle.warehosue and voucher_type=sle.voucher_type and voucher_no=sle.voucher_no)
+				where account=sle.warehouse and voucher_type=sle.voucher_type and voucher_no=sle.voucher_no)
 			order by sle.posting_date""" %
 			', '.join(['%s']*len(warehouses)), tuple(warehouses))
 
