@@ -279,7 +279,7 @@ execute:frappe.rename_doc("DocType", "Payments", "Sales Invoice Payment", force=
 erpnext.patches.v7_0.update_mins_to_first_response
 erpnext.patches.v6_20x.repost_valuation_rate_for_negative_inventory
 erpnext.patches.v7_0.system_settings_setup_complete
-erpnext.patches.v7_0.set_naming_series_for_timesheet
+erpnext.patches.v7_0.set_naming_series_for_timesheet #2016-07-27
 execute:frappe.reload_doc('projects', 'doctype', 'project')
 execute:frappe.reload_doc('projects', 'doctype', 'project_user')
 erpnext.patches.v7_0.convert_timelogbatch_to_timesheet
@@ -303,3 +303,4 @@ erpnext.patches.v7_0.migrate_schools_to_erpnext
 erpnext.patches.v7_0.remove_administrator_role_in_doctypes
 erpnext.patches.v7_0.rename_fee_amount_to_fee_component
 erpnext.patches.v7_0.calculate_total_costing_amount
+erpnext.patches.v7_0.fix_nonwarehouse_ledger_gl_entries_for_transactions
