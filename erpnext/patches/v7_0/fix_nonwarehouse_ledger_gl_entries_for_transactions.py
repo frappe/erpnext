@@ -15,6 +15,8 @@ def execute():
 		and (warehouse is null or warehouse = '')""")
 	if warehouses:
 		warehouses = set_warehouse_for_stock_account(warehouses)
+		if not warehouses:
+			return
 
 		stock_vouchers = frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 			from `tabStock Ledger Entry` sle
