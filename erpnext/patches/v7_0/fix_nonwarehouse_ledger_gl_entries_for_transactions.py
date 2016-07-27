@@ -5,17 +5,22 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	if not frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock"):
+		return
+	
 	frappe.reload_doctype("Account")
 
 	warehouses = frappe.db.sql_list("""select name from tabAccount
-		where ifnull(account_type, '') = 'Stock' and ifnull(is_group, 0) = 0
-		and warehouse is null""")
+		where account_type = 'Stock' and is_group = 0
+		and (warehouse is null or warehouse = '')""")
 	if warehouses:
 		warehouses = set_warehouse_for_stock_account(warehouses)
 
 		stock_vouchers = frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 			from `tabStock Ledger Entry` sle
-			where sle.warehouse in (%s)
+			where sle.warehouse in (%s) and creation > '2016-05-01'
+			and not exists(select name from `tabGL Entry` 
+				where account=sle.warehosue and voucher_type=sle.voucher_type and voucher_no=sle.voucher_no)
 			order by sle.posting_date""" %
 			', '.join(['%s']*len(warehouses)), tuple(warehouses))
 
