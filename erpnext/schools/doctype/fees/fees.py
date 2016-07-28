@@ -14,8 +14,9 @@ class Fees(Document):
 	def calculate_total(self):
 		"""Calculates total amount."""
 		self.total_amount = 0
-		for d in self.amount:
+		for d in self.components:
 			self.total_amount += d.amount
+		self.outstanding_amount = self.total_amount
 
 def get_fee_list(doctype, txt, filters, limit_start, limit_page_length=20):
 	user = frappe.session.user
