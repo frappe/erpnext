@@ -15,7 +15,7 @@ frappe.ui.form.on('Homepage Featured Product', {
 				method: 'frappe.client.get_value',
 				args: {
 					'doctype': 'Item',
-					'filters': featured_product.item_code,
+					'filters': {'name': featured_product.item_code},
 					'fieldname': [
 						'item_name',
 						'web_long_description',
