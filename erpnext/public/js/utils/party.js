@@ -45,6 +45,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 				frm.set_value(r.message);
 				frm.updating_party_details = false;
 				if(callback) callback();
+				frm.refresh();
 			}
 		}
 	});
