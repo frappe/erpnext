@@ -295,5 +295,5 @@ def get_activity_cost(employee=None, activity_type=None):
 def get_employee_list(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select distinct employee, employee_name
 		from `tabSalary Structure` where salary_slip_based_on_timesheet=1
-		and employee like %(txt)s limit %(start)s, %(page_len)s""", 
-		{'txt': "%%%s%%"% txt, '_txt': txt.replace("%", ""), 'start': start, 'page_len': page_len})
+		and employee like %(txt)s or employee_name like %(txt)s) limit %(start)s, %(page_len)s""", 
+		{'txt': "%%%s%%"% txt, 'start': start, 'page_len': page_len})
