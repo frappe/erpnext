@@ -33,13 +33,13 @@ $.extend(erpnext, {
 
 	setup_serial_no: function() {
 		var grid_row = cur_frm.open_grid_row();
-		if(!grid_row || !grid_row.fields_dict.serial_no ||
-			grid_row.fields_dict.serial_no.get_status()!=="Write") return;
+		if(!grid_row || !grid_row.grid_form.fields_dict.serial_no ||
+			grid_row.grid_form.fields_dict.serial_no.get_status()!=="Write") return;
 
 		var $btn = $('<button class="btn btn-sm btn-default">'+__("Add Serial No")+'</button>')
 			.appendTo($("<div>")
 				.css({"margin-bottom": "10px", "margin-top": "10px"})
-				.appendTo(grid_row.fields_dict.serial_no.$wrapper));
+				.appendTo(grid_row.grid_form.fields_dict.serial_no.$wrapper));
 
 		$btn.on("click", function() {
 			var d = new frappe.ui.Dialog({
@@ -69,7 +69,7 @@ $.extend(erpnext, {
 				var serial_no = d.get_value("serial_no");
 				if(serial_no) {
 					var val = (grid_row.doc.serial_no || "").split("\n").concat([serial_no]).join("\n");
-					grid_row.fields_dict.serial_no.set_model_value(val.trim());
+					grid_row.grid_form.fields_dict.serial_no.set_model_value(val.trim());
 				}
 				d.hide();
 				return false;
