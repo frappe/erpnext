@@ -87,7 +87,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	refresh: function(doc) {
 		this.frm.toggle_display("supplier_name",
-			(this.supplier_name && this.frm.doc.supplier_name!==this.frm.doc.supplier));
+			(this.frm.doc.supplier_name && this.frm.doc.supplier_name!==this.frm.doc.supplier));
 
 		if(this.frm.docstatus==0 &&
 			(this.frm.doctype==="Purchase Order" || this.frm.doctype==="Material Request")) {
