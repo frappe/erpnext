@@ -16,7 +16,7 @@ def reorder_item():
 		return _reorder_item()
 
 def _reorder_item():
-	material_requests = {"Purchase": {}, "Transfer": {}}
+	material_requests = {"Purchase": {}, "Transfer": {}, "Material Issue": {}, "Manufacture": {}}
 	warehouse_company = frappe._dict(frappe.db.sql("""select name, company from `tabWarehouse`
 		where disabled=0"""))
 	default_company = (erpnext.get_default_company() or
