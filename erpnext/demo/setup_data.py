@@ -32,6 +32,7 @@ def setup_data():
 	setup_employee()
 	setup_salary_structure()
 	setup_salary_structure_for_timesheet()
+	setup_leave_allocation()
 	setup_mode_of_payment()
 	setup_account_to_expense_type()
 	setup_user_roles()
@@ -430,3 +431,23 @@ def setup_pos_profile():
 	})
 
 	pos.insert()
+
+def setup_leave_allocation():
+	year = now_datetime().year
+	for employee in frappe.get_all('Employee', fields=['name']):
+		leave_types = frappe.get_all("Leave Type", fields=['name', 'max_days_allowed'])
+		for leave_type in leave_types:
+			if not leave_type.max_days_allowed:
+				leave_type.max_days_allowed = 10
+	
+		leave_allocation = frappe.get_doc({
+			"doctype": "Leave Allocation",
+			"employee": employee.name,
+			"from_date": "{0}-01-01".format(year),
+			"to_date": "{0}-12-31".format(year),
+			"leave_type": leave_type.name,
+			"new_leaves_allocated": random.randint(1, int(leave_type.max_days_allowed))
+		})
+		leave_allocation.insert()
+		leave_allocation.submit()
+		frappe.db.commit()			
