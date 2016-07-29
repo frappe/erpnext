@@ -120,7 +120,10 @@ class Item(WebsiteGenerator):
 		'''set opening stock'''
 		if not self.is_stock_item or self.has_serial_no or self.has_batch_no:
 			return
-		
+
+		if not self.valuation_rate and self.standard_rate:
+			self.valuation_rate = self.standard_rate
+
 		if not self.valuation_rate:
 			frappe.throw(_("Valuation Rate is mandatory if Opening Stock entered"))
 
