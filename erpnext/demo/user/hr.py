@@ -1,15 +1,19 @@
 from __future__ import unicode_literals
 import frappe
 import random
-from frappe.utils import random_string
+from frappe.utils import random_string, add_days
 from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from frappe.utils.make_random import how_many, get_random
 from erpnext.hr.doctype.expense_claim.expense_claim import get_expense_approver, make_bank_entry
+from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on, OverlapError
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_hr_user'))
 	year, month = frappe.flags.current_date.strftime("%Y-%m").split("-")
+	
+	mark_attendance()
+	make_leave_application()
 
 	# process payroll
 	if not frappe.db.get_value("Salary Slip", {"month": month, "fiscal_year": year}):
@@ -124,3 +128,52 @@ def make_sales_invoice_for_timesheet(name):
 	sales_invoice.insert()
 	sales_invoice.submit()
 	frappe.db.commit()
+	
+def make_leave_application():
+	allocated_leaves = frappe.get_all("Leave Allocation", fields=['employee', 'leave_type'])
+	
+	for allocated_leave in allocated_leaves:
+		leave_balance = get_leave_balance_on(allocated_leave.employee, allocated_leave.leave_type, frappe.flags.current_date,
+			consider_all_leaves_in_the_allocation_period=True)
+		if leave_balance != 0:
+			if leave_balance == 1:
+				to_date = frappe.flags.current_date
+			else:
+				to_date = add_days(frappe.flags.current_date, random.randint(0, leave_balance-1))
+				
+			leave_application = frappe.get_doc({
+				"doctype": "Leave Application",
+				"employee": allocated_leave.employee,
+				"from_date": frappe.flags.current_date,
+				"to_date": to_date,
+				"leave_type": allocated_leave.leave_type,
+				"status": "Approved"
+			})
+			try:
+				leave_application.insert()
+				leave_application.submit()
+				frappe.db.commit()
+			except (OverlapError):
+				frappe.db.rollback()
+			
+def mark_attendance():
+	att_date = frappe.flags.current_date
+	for employee in frappe.get_all('Employee', fields=['name'], filters = {'status': 'Active'}):
+		
+		if not frappe.db.get_value("Attendance", {"employee": employee.name, "att_date": att_date}):
+			attendance = frappe.get_doc({
+				"doctype": "Attendance",
+				"employee": employee.name,
+				"att_date": att_date
+			})
+			leave = frappe.db.sql("""select name from `tabLeave Application`
+				where employee = %s and %s between from_date and to_date and status = 'Approved'
+				and docstatus = 1""", (employee.name, att_date))
+			
+			if leave:
+				attendance.status = "Absent"
+			else:
+				attendance.status = "Present"		
+			attendance.save()
+			attendance.submit()		
+			frappe.db.commit()	
