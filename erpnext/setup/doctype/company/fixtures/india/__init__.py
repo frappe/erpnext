@@ -7,9 +7,9 @@ import frappe
 
 def install(company):
 	docs = [
-		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax', 'salary_component': 'Professional Tax'},
-		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund', 'description': 'Provident fund', 'salary_component': 'Provident Fund'},
-		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance', 'description': 'House Rent Allowance', 'salary_component': 'House Rent Allowance', 'taxable': 'No'},
+		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax'},
+		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund', 'description': 'Provident fund'},
+		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance', 'description': 'House Rent Allowance'}
 	]
 
 	for d in docs:
