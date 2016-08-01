@@ -9,11 +9,11 @@ frappe.ui.form.on("Student Group", "refresh", function(frm) {
 			frappe.set_route("List", "Course Schedule");
 		});
 		
-		frm.add_custom_button(__("Examination"), function() {
+		frm.add_custom_button(__("Assessment"), function() {
 			frappe.route_options = {
 				student_group: frm.doc.name
 			}
-			frappe.set_route("List", "Examination");
+			frappe.set_route("List", "Assessment");
 		});
 	}
 });

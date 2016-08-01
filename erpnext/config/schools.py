@@ -61,7 +61,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Examination"
+					"name": "Assessment"
+				},
+				{
+					"type": "doctype",
+					"name": "Assessment Group"
 				},
 				{
 					"type": "doctype",

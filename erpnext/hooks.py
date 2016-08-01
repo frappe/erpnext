@@ -101,7 +101,7 @@ portal_menu_items = [
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
 	{"title": _("Announcements"), "route": "/announcement", "reference_doctype": "Announcement"},
 	{"title": _("Courses"), "route": "/course", "reference_doctype": "Course"},
-	{"title": _("Examination Schedule"), "route": "/examination", "reference_doctype": "Examination"},
+	{"title": _("Assessment Schedule"), "route": "/Assessment", "reference_doctype": "Assessment"},
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees"}
 ]
 
