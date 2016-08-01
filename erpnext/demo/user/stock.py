@@ -7,6 +7,8 @@ import frappe, random
 from frappe.desk import query_report
 from erpnext.stock.stock_ledger import NegativeStockError
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoRequiredError, SerialNoQtyError
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_manufacturing_user'))
@@ -15,6 +17,8 @@ def work():
 	make_delivery_note()
 	make_stock_reconciliation()
 	submit_draft_stock_entries()
+	make_sales_return_records()
+	make_purchase_return_records()
 
 def make_purchase_receipt():
 	if random.random() < 0.6:
@@ -95,3 +99,26 @@ def submit_draft_stock_entries():
 			OperationsNotCompleteError):
 			frappe.db.rollback()
 
+def make_sales_return_records():
+	for data in frappe.get_all('Delivery Note', fields=["name"], filters={"docstatus": 1}):
+		if random.random() < 0.2:
+			print "dn"
+			try:
+				dn = make_sales_return(data.name)
+				dn.insert()
+				dn.submit()
+				frappe.db.commit()
+			except Exception, e:
+				frappe.db.rollback()
+
+def make_purchase_return_records():
+	for data in frappe.get_all('Purchase Receipt', fields=["name"], filters={"docstatus": 1}):
+		if random.random() < 0.2:
+			print "purchase"
+			try:
+				pr = make_purchase_return(data.name)
+				pr.insert()
+				pr.submit()
+				frappe.db.commit()
+			except Exception, e:
+				frappe.db.rollback()
