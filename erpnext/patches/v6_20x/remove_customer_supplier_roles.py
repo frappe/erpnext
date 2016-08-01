@@ -3,6 +3,7 @@ import frappe
 
 def execute():
 	frappe.reload_doc("buying", "doctype", "request_for_quotation_supplier")
+	frappe.reload_doc("buying", "doctype", "request_for_quotation_item")
 	frappe.reload_doc("buying", "doctype", "request_for_quotation")
 	frappe.reload_doc("projects", "doctype", "timesheet")
 	
