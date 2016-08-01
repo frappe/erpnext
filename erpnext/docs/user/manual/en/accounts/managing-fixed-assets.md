@@ -2,30 +2,33 @@ In ERPNext, you can maintain fixed asset records like Computers, Furnitures, Car
 
 ## Asset Category
 
-To start first you should create an Asset Category, depending on the type of assets. For example, all your desktops and laptops can be part of an Asset Category named "Computers". Here, you can set default depreciation method, periodicity and depreciation related accounts, which will be applicable to all the assets under the category.
+Based on the type of assets, create Asset Category. For example, all your desktops and laptops can be part of an Asset Category named "Computers". Here you can set default depreciation method, periodicity and depreciation related accounts, which will be applicable to all the assets under the category.
 
 <img class="screenshot" alt="Asset Category" src="{{docs_base_url}}/assets/img/accounts/asset-category.png">
 
-> **Note:** You can also set default depreciation related Accounts and Cost Centers in Company.
-
+> **Note:** You can also set default depreciation related Accounts and Cost Centers in Company master.
 
 ## Asset
 
-Next step will be creating the fixed asset record. Asset record is the heart of fixed asset management, all the activities like purchasing, depreciation, scrapping or sales are managed against it.
+Asset master is the heart of fixed asset management feature. All the transactions related to Asset like purchasing, sales, depreciation, scrapping will be managed from the Asset master.
 
 <img class="screenshot" alt="Asset" src="{{docs_base_url}}/assets/img/accounts/asset.png">
 
 Explanation of the fields:
 
-1. Asset Category: The category of assets it belongs to.
-2. Is Existing Asset: Check if the asset is being carried forward from the previous Fiscal Year. The existing assets which are partially / fully depreciated can also be created/maintained for the future reference.
-3. Status: The options are - Draft, Submitted, Partially Depreciated, Fully Depreciated, Sold and Scrapped.
-4. Warehouse: Set the location of the asset.
-5. Gross Purchase Amount: The purchase cost of the asset
-6. Expected Value After Useful Life: Useful Life is the time period over in which the company expects that the asset will be productive. After that period, either the asset is scrapped or sold. In case it is sold, mention the estimated value here. This value is also known as Salvage Value, Scrap Value or Residual Value.
-7. Opening Accumulated Depreciation: The accumulated depreciation amount which has already been booked for an existing asset.
-8. Current Value (After Depreciation): In case you are creating record of an existing asset which has already been partially/fully depreciated, mention the currect value of the asset. In case of new asset, mention the purchase amount or leave it blank.
-9. Depreciation Method: There are two options: Straight Line and Double Declining Balance.
+1. Item Code: An Item for the Asset must be a non-stock item, with "Is Asset" field checked.
+
+	<img class="screenshot" alt="Asset Item" src="{{docs_base_url}}/assets/img/accounts/asset-item.png">
+
+2. Asset Category: The category of assets it belongs to.
+3. Is Existing Asset: Check if the asset is being carried forward from the previous Fiscal Year. The existing assets which are partially / fully depreciated can also be created/maintained for the future reference.
+4. Status: The options are - Draft, Submitted, Partially Depreciated, Fully Depreciated, Sold and Scrapped.
+5. Warehouse: Set the location of the asset.
+6. Gross Purchase Amount: The purchase cost of the asset.
+7. Expected Value After Useful Life: Useful Life is the time period over in which the company expects that the asset will be productive. After that period, either the asset is scrapped or sold. In case it is sold, mention the estimated value here. This value is also known as Salvage Value, Scrap Value or Residual Value.
+8. Opening Accumulated Depreciation: The accumulated depreciation amount which has already been booked for an existing asset.
+9. Current Value (After Depreciation): In case you are creating record of an existing asset which has already been partially/fully depreciated, mention the current value of the asset. In case of new asset, mention the purchase amount or leave it blank.
+10. Depreciation Method: There are two options: Straight Line and Double Declining Balance.
 	- Straight Line: This method spreads the cost of the fixed asset evenly over its useful life.
 	- Double Declining Method: An accelerated method of depreciation, it results in higher depreciation expense in the earlier years of ownership.
 10. Total Number of Depreciations: The total number of depreciations during the useful life. In case of existing assets which are partially depreciated, mention the number of pending depreciations.
@@ -52,16 +55,16 @@ For better visibility, net value of the asset on different depreciation dates ar
 
 ## Purchase an Asset
 
-For purchasing a new asset, create and submit the asset record with all the depreciation settings. Then create a Purchase Invoice via "Make Purchase Invoice" button. On clicking the button, system will load a new Purchase Invoice form with pre-loaded items table. It will also set proper fixed asset account (defined in teh Asset Category) in the Expense Account field. You need to select Supplier and other necessary details and submit the Purchase Invoice. 
+For purchasing a new asset, create and submit the asset record with all the depreciation settings. Then create a Purchase Invoice via "Make Purchase Invoice" button. On clicking the button, system will load a new Purchase Invoice form with pre-loaded items table. It will also set proper fixed asset account (defined in the Asset Category) in the Expense Account field. You need to select Supplier and other necessary details and submit the Purchase Invoice.
 
 <img class="screenshot" alt="Asset" src="{{docs_base_url}}/assets/img/accounts/asset-purchase-invoice.png">
 
-On submission of the invoice, the "Fixed Asset Account" will be debited and payable account will be credited. It also updates purchase date, supplier and Purchase Invoice no in the Asset record.
+On submission of the invoice, the "Fixed Asset Account" will be debited and payable account will be credited. It also updates purchase date, supplier and Purchase Invoice no. in the Asset master.
 
 
 ## Sale an Asset
 
-To sale an asset, open the asset record and create a Sales Invoice using "Sale Asset" button. On submission of the Sales Invoice, following entries will take place:
+To sale an asset, open the asset record and create a Sales Invoice by clicking on "Sale Asset". On submission of the Sales Invoice, following entries will take place:
 
 - "Receivable Account" (Debtors) will be debited by the sales amount.
 - "Fixed Asset Account" will be credited by the purchase amount of asset.

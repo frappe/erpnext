@@ -4,3 +4,4 @@ print-headings
 letter-head
 address-template
 terms-and-conditions
+cheque-print-template
