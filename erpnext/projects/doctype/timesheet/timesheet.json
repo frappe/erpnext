@@ -1,6 +1,6 @@
 {
  "allow_copy": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "naming_series:", 
  "beta": 0, 
@@ -662,7 +662,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-07-26 00:01:56.055046", 
+ "modified": "2016-08-01 08:54:31.840829", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Timesheet", 

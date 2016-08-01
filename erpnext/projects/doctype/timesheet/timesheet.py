@@ -94,7 +94,7 @@ class Timesheet(Document):
 			if self.production_order and flt(data.completed_qty) == 0:
 				frappe.throw(_("Row {0}: Completed Qty must be greater than zero.").format(data.idx))
 
-			if self.production_order and flt(pending_qty) < flt(data.completed_qty):
+			if self.production_order and flt(pending_qty) < flt(data.completed_qty) and flt(pending_qty) > 0:
 				frappe.throw(_("Row {0}: Completed Qty cannot be more than {1} for operation {2}").format(data.idx, pending_qty, data.operation),
 					OverProductionLoggedError)
 
@@ -290,10 +290,3 @@ def get_activity_cost(employee=None, activity_type=None):
 			["costing_rate", "billing_rate"], as_dict=True)
 
 	return rate[0] if rate else {}
-
-@frappe.whitelist()
-def get_employee_list(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("""select distinct employee, employee_name
-		from `tabSalary Structure` where salary_slip_based_on_timesheet=1
-		and employee like %(txt)s or employee_name like %(txt)s limit %(start)s, %(page_len)s""", 
-		{'txt': "%%%s%%"% txt, 'start': start, 'page_len': page_len})

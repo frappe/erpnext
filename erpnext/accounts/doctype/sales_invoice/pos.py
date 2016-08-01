@@ -108,13 +108,14 @@ def get_items(doc, pos_profile):
 
 		item.price_list_rate = frappe.db.get_value('Item Price', {'item_code': item.name,
 									'price_list': doc.selling_price_list}, 'price_list_rate') or 0
-		item.default_warehouse = pos_profile.get('warehouse') or item.default_warehouse or None
+		item.default_warehouse = pos_profile.get('warehouse') or \
+			get_item_warehouse_for_company(doc.company, item.default_warehouse) or None
 		item.expense_account = pos_profile.get('expense_account') or item.expense_account
 		item.income_account = pos_profile.get('income_account') or item_doc.income_account
 		item.cost_center = pos_profile.get('cost_center') or item_doc.selling_cost_center
 		item.actual_qty = frappe.db.get_value('Bin', {'item_code': item.name,
 								'warehouse': item.default_warehouse}, 'actual_qty') or 0
-		item.serial_nos = get_serial_nos(item, pos_profile)
+		item.serial_nos = get_serial_nos(item, pos_profile, doc.company)
 		item.batch_nos = frappe.db.sql_list("""select name from `tabBatch` where ifnull(expiry_date, '4000-10-10') > curdate()
 			and item = %(item_code)s""", {'item_code': item.item_code})
 
@@ -122,13 +123,19 @@ def get_items(doc, pos_profile):
 
 	return item_list
 
-def get_serial_nos(item, pos_profile):
+def get_item_warehouse_for_company(company, warehouse):
+	if frappe.db.get_value('Warehouse', warehouse, 'company') != company:
+		warehouse = None
+	return warehouse
+
+def get_serial_nos(item, pos_profile, company):
 	cond = "1=1"
 	if pos_profile.get('update_stock') and pos_profile.get('warehouse'):
 		cond = "warehouse = '{0}'".format(pos_profile.get('warehouse'))
 
 	serial_nos = frappe.db.sql("""select name, warehouse from `tabSerial No` where {0}
-				and item_code = %(item_code)s""".format(cond), {'item_code': item.item_code}, as_dict=1)
+				and item_code = %(item_code)s and company = %(company)s
+				""".format(cond), {'item_code': item.item_code, 'company': company}, as_dict=1)
 
 	serial_no_list = {}
 	for serial_no in serial_nos:
@@ -214,9 +221,9 @@ def submit_invoice(si_doc, name):
 		save_invoice(e, si_doc, name)
 
 def save_invoice(e, si_doc, name):
-		si_doc.docstatus = 0
-		si_doc.name = ''
-		si_doc.save(ignore_permissions=True)
+	if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
+		si_doc.flags.ignore_mandatory = True
+		si_doc.insert()
 		make_scheduler_log(e, si_doc.name)
 
 def make_scheduler_log(e, sales_invoice):
