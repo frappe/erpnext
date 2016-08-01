@@ -9,4 +9,8 @@ def execute():
 		for dt in ("Salary Structure Earning", "Salary Structure Deduction", "Salary Slip Earning", 
 			"Salary Slip Deduction", "Earning Type", "Deduction Type"):
 				frappe.delete_doc("DocType", dt)
-			
+				
+					
+		for d in frappe.db.sql("""select name from `tabCustom Field` 
+			where dt in ('Salary Detail', 'Salary Component')"""):
+				frappe.get_doc("Custom Field", d[0]).save()
