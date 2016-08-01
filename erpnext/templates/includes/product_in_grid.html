@@ -1,8 +1,0 @@
-{% from "erpnext/templates/includes/macros.html" import product_image_square %}
-
-<a class="product-link" href="{{ (route or page_name)|abs_url }}">
-	<div class="col-sm-2 col-xs-4 product-image-wrapper">
-		{{ product_image_square(thumbnail or website_image) }}
-		<div class="text-ellipsis inline-block small product-text">{{ item_name }}</div>
-	</div>
-</a>

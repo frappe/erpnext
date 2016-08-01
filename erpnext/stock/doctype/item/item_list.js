@@ -1,10 +1,12 @@
 frappe.listview_settings['Item'] = {
 	add_fields: ["item_name", "stock_uom", "item_group", "image", "variant_of",
-		"has_variants", "end_of_life", "disabled", "is_sales_item"],
+		"has_variants", "end_of_life", "disabled", "total_projected_qty"],
 	filters: [["disabled", "=", "0"]],
 
 	get_indicator: function(doc) {
-		if (doc.disabled) {
+		if(doc.total_projected_qty < 0) {
+			return [__("Shortage"), "red", "total_projected_qty,<,0"];
+		} else if (doc.disabled) {
 			return [__("Disabled"), "grey", "disabled,=,Yes"];
 		} else if (doc.end_of_life && doc.end_of_life < frappe.datetime.get_today()) {
 			return [__("Expired"), "grey", "end_of_life,<,Today"];
@@ -12,10 +14,29 @@ frappe.listview_settings['Item'] = {
 			return [__("Template"), "blue", "has_variants,=,Yes"];
 		} else if (doc.variant_of) {
 			return [__("Variant"), "green", "variant_of,=," + doc.variant_of];
-		} else {
-			return [__("Active"), "blue", "end_of_life,>=,Today"];
 		}
-	}
+	},
+
+	reports: [
+		{
+			name: 'Stock Summary',
+			report_type: 'Page',
+			route: 'stock-balance'
+		},
+		{
+			name: 'Stock Ledger',
+			report_type: 'Script Report'
+		},
+		{
+			name: 'Stock Balance',
+			report_type: 'Script Report'
+		},
+		{
+			name: 'Stock Projected Qty',
+			report_type: 'Script Report'
+		}
+
+	]
 };
 
 frappe.help.youtube_id["Item"] = "qXaEwld4_Ps";

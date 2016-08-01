@@ -20,7 +20,7 @@ class TestEmployee(unittest.TestCase):
 
 		self.assertTrue(employee.name in [e.name for e in get_employees_who_are_born_today()])
 
-		frappe.db.sql("delete from `tabBulk Email`")
+		frappe.db.sql("delete from `tabEmail Queue`")
 
 		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
 		hr_settings.stop_birthday_reminders = 0
@@ -28,7 +28,7 @@ class TestEmployee(unittest.TestCase):
 
 		send_birthday_reminders()
 
-		bulk_mails = frappe.db.sql("""select * from `tabBulk Email`""", as_dict=True)
+		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
 		self.assertTrue("Subject: Birthday Reminder for {0}".format(employee.employee_name) \
-			in bulk_mails[0].message)
+			in email_queue[0].message)
 

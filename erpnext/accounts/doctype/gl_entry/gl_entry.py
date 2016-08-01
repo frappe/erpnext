@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from erpnext.accounts.party import validate_party_gle_currency, validate_party_frozen_disabled
 from erpnext.accounts.utils import get_account_currency
 from erpnext.setup.doctype.company.company import get_company_currency
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
 
 exclude_from_linked_with = True
@@ -18,11 +19,11 @@ class GLEntry(Document):
 		self.flags.ignore_submit_comment = True
 		self.check_mandatory()
 		self.pl_must_have_cost_center()
-		self.validate_posting_date()
 		self.check_pl_account()
 		self.validate_cost_center()
 		self.validate_party()
 		self.validate_currency()
+		self.validate_and_set_fiscal_year()
 
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes'):
 		self.validate_account_details(adv_adj)
@@ -37,10 +38,10 @@ class GLEntry(Document):
 					self.against_voucher)
 
 	def check_mandatory(self):
-		mandatory = ['account','remarks','voucher_type','voucher_no','fiscal_year','company']
+		mandatory = ['account','voucher_type','voucher_no','company']
 		for k in mandatory:
 			if not self.get(k):
-				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
+				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
 
 		account_type = frappe.db.get_value("Account", self.account, "account_type")
 		if account_type in ["Receivable", "Payable"] and not (self.party_type and self.party):
@@ -53,13 +54,13 @@ class GLEntry(Document):
 	def pl_must_have_cost_center(self):
 		if frappe.db.get_value("Account", self.account, "report_type") == "Profit and Loss":
 			if not self.cost_center and self.voucher_type != 'Period Closing Voucher':
-				frappe.throw(_("Cost Center is required for 'Profit and Loss' account {0}").format(self.account))
-		elif self.cost_center:
-			self.cost_center = None
-
-	def validate_posting_date(self):
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year, _("Posting Date"), self)
+				frappe.throw(_("Cost Center is required for 'Profit and Loss' account {0}")
+					.format(self.account))
+		else:
+			if self.cost_center:
+				self.cost_center = None
+			if self.project:
+				self.project = None
 
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \
@@ -111,6 +112,12 @@ class GLEntry(Document):
 
 		if self.party_type and self.party:
 			validate_party_gle_currency(self.party_type, self.party, self.company, self.account_currency)
+
+
+	def validate_and_set_fiscal_year(self):
+		if not self.fiscal_year:
+			self.fiscal_year = get_fiscal_year(self.posting_date, company=self.company)[0]
+
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
@@ -174,8 +181,8 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 
 	# Update outstanding amt on against voucher
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
-		frappe.db.sql("update `tab%s` set outstanding_amount=%s where name=%s" %
-			(against_voucher_type, '%s', '%s'),	(bal, against_voucher))
+		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
+		ref_doc.db_set('outstanding_amount', bal)
 
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.db.get_value("Account", account, "freeze_account")

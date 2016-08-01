@@ -17,7 +17,7 @@ Der **Fertigungsauftrag** wird aus dem **Werkzeug zur Fertigungsplanung** generi
 * Geben Sie das geplante Startdatum an (ein geschätztes Datum zu dem die Produktion beginnen soll).
 * Wählen Sie das Lager aus. Das Fertigungslager ist der Ort zu dem die Artikel gelangen, wenn Sie mit der Herstellung beginnen, und das Eingangslager ist der Ort, wo fertige Erzeugnisse lagern, bevor sie versandt werden.
 
-> Anmerkung: Sie können einen Fertigungsauftrag abspeichern ohne ein Lager auszuwählen. Läger sind jedoch zwingend erforderlich um einen Fertigungsauftrag zu übertragen.
+> Anmerkung: Sie können einen Fertigungsauftrag abspeichern ohne ein Lager auszuwählen. Lager sind jedoch zwingend erforderlich um einen Fertigungsauftrag zu übertragen.
 
 ### Arbeitsplätze neu zuordnen/Dauer von Arbeitsgängen
 
@@ -84,11 +84,11 @@ Der **Fertigungsauftrag** wird aus dem **Werkzeug zur Fertigungsplanung** generi
 * Wenn Sie einen Fertigungsauftrag anhalten, wird sein Status auf "Angehalten" gesetzt, mit der Folge, dass alle Herstellungsprozesse für diesen Fertigungsauftrag eingestellt werden.
 * Um den Fertigungsauftrag anzuhalten klicken Sie auf die Schaltfläche "Anhalten".
 
-1\. Wenn Sie den Fertigungsauftrag übertragen, reserviert das System für jeden Arbeitsgang des Fertigungsauftrags in Serie gemäß dem geplanten Startdatum basierend auf der Verfügbarkeit des Arbeitsplatzes ein Zeitfenster. Die Verfügbarkeit des Arbeitsplatzes hängt von den Arbeitszeiten des Arbeitsplatzes und der Urlaubsliste ab und davon, ob ein anderer Arbeitsgang des Fertigungsauftrages in diesem Zeitfenster eingeplant wurde. Sie können in den Fertigungseinstellungen die Anzahl der Tage angeben, in denen das System versucht den Arbeitsgang einzuplanen. Standardmäßig ist dieser Wert auf 30 Tage eingestellt. Wenn der Arbeitsgang über das verfügbare Zeitfenster hinaus Zeit benötigt, fragt Sie das System, ob der Arbeitsgang pausieren soll. Wenn das System die Terminplanung erstellen konnte, legt es Zeitprotokolle an und speichert sie. Sie können diese verändern und später übertragen.
-2\. Sie können außerdem zusätzliche Zeitprotokolle für einen Arbeitsgang erstellen. Hierzu wählen Sie den betreffenden Arbeitsgang aus und klicken Sie auf "Zeitprotokoll erstellen".
-3\. Rohmaterial übertragen: Dieser Schritt erstellt eine Lagerbuchung mit allen Artikeln, die benötigt werden, um dem Fertigungsauftrag abzuschliessen, und dem Fertigungslager hinzugefügt werden müssen (Unterartikel werden entweder als EIN Artikel mit Stücklister ODER in aufgelöster Form gemäß Ihren Einstellungen hinzugefügt).
-4\. Fertigerzeugnisse aktualisieren: Dieser Schritt erstellt eine Lagerbuchung, welche alle Unterartikel vom Fertigungslager abzieht und dem Lager Fertige Erzeugnisse hinzufügt.
-5\. Um die zum Fertigungsauftrag erstellten Zeitprotokolle anzusehen, klicken Sie auf "Zeitprotokolle anzeigen".
+1. Wenn Sie den Fertigungsauftrag übertragen, reserviert das System für jeden Arbeitsgang des Fertigungsauftrags in Serie gemäß dem geplanten Startdatum basierend auf der Verfügbarkeit des Arbeitsplatzes ein Zeitfenster. Die Verfügbarkeit des Arbeitsplatzes hängt von den Arbeitszeiten des Arbeitsplatzes und der Urlaubsliste ab und davon, ob ein anderer Arbeitsgang des Fertigungsauftrages in diesem Zeitfenster eingeplant wurde. Sie können in den Fertigungseinstellungen die Anzahl der Tage angeben, in denen das System versucht den Arbeitsgang einzuplanen. Standardmäßig ist dieser Wert auf 30 Tage eingestellt. Wenn der Arbeitsgang über das verfügbare Zeitfenster hinaus Zeit benötigt, fragt Sie das System, ob der Arbeitsgang pausieren soll. Wenn das System die Terminplanung erstellen konnte, legt es Zeitprotokolle an und speichert sie. Sie können diese verändern und später übertragen.
+2. Sie können außerdem zusätzliche Zeitprotokolle für einen Arbeitsgang erstellen. Hierzu wählen Sie den betreffenden Arbeitsgang aus und klicken Sie auf "Zeitprotokoll erstellen".
+3. Rohmaterial übertragen: Dieser Schritt erstellt eine Lagerbuchung mit allen Artikeln, die benötigt werden, um dem Fertigungsauftrag abzuschliessen, und dem Fertigungslager hinzugefügt werden müssen (Unterartikel werden entweder als EIN Artikel mit Stücklister ODER in aufgelöster Form gemäß Ihren Einstellungen hinzugefügt).
+4. Fertigerzeugnisse aktualisieren: Dieser Schritt erstellt eine Lagerbuchung, welche alle Unterartikel vom Fertigungslager abzieht und dem Lager Fertige Erzeugnisse hinzufügt.
+5. Um die zum Fertigungsauftrag erstellten Zeitprotokolle anzusehen, klicken Sie auf "Zeitprotokolle anzeigen".
 
 <img class="screenshot" alt="Fertigungsauftrag anhalten" src="{{docs_base_url}}/assets/img/manufacturing/PO-stop.png">
 

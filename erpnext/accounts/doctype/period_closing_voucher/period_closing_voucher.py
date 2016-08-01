@@ -55,6 +55,7 @@ class PeriodClosingVoucher(AccountsController):
 			if flt(acc.balance_in_company_currency):
 				gl_entries.append(self.get_gl_dict({
 					"account": acc.account,
+					"cost_center": acc.cost_center,
 					"account_currency": acc.account_currency,
 					"debit_in_account_currency": abs(flt(acc.balance_in_account_currency)) \
 						if flt(acc.balance_in_account_currency) < 0 else 0,
@@ -84,12 +85,12 @@ class PeriodClosingVoucher(AccountsController):
 		"""Get balance for pl accounts"""
 		return frappe.db.sql("""
 			select
-				t1.account, t2.account_currency,
+				t1.account, t1.cost_center, t2.account_currency,
 				sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as balance_in_account_currency,
 				sum(t1.debit) - sum(t1.credit) as balance_in_company_currency
 			from `tabGL Entry` t1, `tabAccount` t2
 			where t1.account = t2.name and t2.report_type = 'Profit and Loss'
 			and t2.docstatus < 2 and t2.company = %s
 			and t1.posting_date between %s and %s
-			group by t1.account
+			group by t1.account, t1.cost_center
 		""", (self.company, self.get("year_start_date"), self.posting_date), as_dict=1)

@@ -51,13 +51,13 @@ class PurchaseCommon(BuyingController):
 				item_code = %s and warehouse = %s""", (d.item_code, d.warehouse), as_dict=1)
 
 			f_lst ={'projected_qty': bin and flt(bin[0]['projected_qty']) or 0, 'ordered_qty': 0, 'received_qty' : 0}
-			if d.doctype == 'Purchase Receipt Item':
+			if d.doctype in ('Purchase Receipt Item', 'Purchase Invoice Item'):
 				f_lst.pop('received_qty')
 			for x in f_lst :
 				if d.meta.get_field(x):
 					d.set(x, f_lst[x])
 
-			item = frappe.db.sql("""select is_stock_item, is_purchase_item,
+			item = frappe.db.sql("""select is_stock_item,
 				is_sub_contracted_item, end_of_life, disabled from `tabItem` where name=%s""",
 				d.item_code, as_dict=1)[0]
 
@@ -68,34 +68,15 @@ class PurchaseCommon(BuyingController):
 			if item.is_stock_item==1 and d.qty and not d.warehouse:
 				frappe.throw(_("Warehouse is mandatory for stock Item {0} in row {1}").format(d.item_code, d.idx))
 
-			# validate purchase item
-			if not (obj.doctype=="Material Request" and getattr(obj, "material_request_type", None)=="Material Transfer"):
-				if item.is_purchase_item != 1 and item.is_sub_contracted_item != 1:
-					frappe.throw(_("{0} must be a Purchased or Sub-Contracted Item in row {1}").format(d.item_code, d.idx))
-
 			items.append(cstr(d.item_code))
 
 		if items and len(items) != len(set(items)) and \
 			not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items") or 0):
-			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
+			frappe.msgprint(_("Warning: Same item has been entered multiple times."), alert=True)
 
 
 	def check_for_closed_status(self, doctype, docname):
 		status = frappe.db.get_value(doctype, docname, "status")
-		
+
 		if status == "Closed":
 			frappe.throw(_("{0} {1} status is {2}").format(doctype, docname, status), frappe.InvalidStatusError)
-		
-	def check_docstatus(self, check, doctype, docname, detail_doctype = ''):
-		if check == 'Next':
-			submitted = frappe.db.sql("""select t1.name from `tab%s` t1,`tab%s` t2
-				where t1.name = t2.parent and t2.prevdoc_docname = %s and t1.docstatus = 1"""
-				% (doctype, detail_doctype, '%s'), docname)
-			if submitted:
-				frappe.throw(_("{0} {1} has already been submitted").format(doctype, submitted[0][0]))
-
-		if check == 'Previous':
-			submitted = frappe.db.sql("""select name from `tab%s`
-				where docstatus = 1 and name = %s""" % (doctype, '%s'), docname)
-			if not submitted:
-				frappe.throw(_("{0} {1} is not submitted").format(doctype, submitted[0][0]))

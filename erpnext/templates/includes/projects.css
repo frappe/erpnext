@@ -1,0 +1,89 @@
+/* CSS used here will be applied after bootstrap.css */
+
+.underline {
+	text-decoration: underline;
+}
+
+.project-item:hover {
+  background-color: #f7f7f7;
+}
+
+.project-item {
+  color: #6c7680;
+  font-size: 14px;
+}
+
+.task-subject
+{
+	margin: 0px;
+}
+
+.item-timestamp
+{
+	font-size: 10px;
+	margin-left: 15px;
+}
+.page-container .project-item {
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+#project-search {
+	position: relative;
+	outline:none;
+	border:none;
+}
+
+.task-link, .timelog-link {
+	font-weight: bold;
+}
+
+.task-link.seen, .timelog-link.seen {
+	font-weight: normal;
+}
+
+.row-header {
+    font-size: 14px;
+    font-weight: 500;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #d1d8dd;
+    margin: 0!important;
+}
+
+.content_display{
+  padding: 5px;
+  font-weight: normal;
+  font-size: 12px;
+  vertical-align: middle;
+  color: #6c7680;
+}
+
+.close-btn{
+  display: none;
+}
+
+.content_display:hover .close-btn{
+	display : block;
+}
+
+.btn-link{
+	padding: 0 10px 0 0;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+
+.task-btn, .issue-btn, .timelog-btn{
+	padding: 8px;
+}
+
+.gravatar-top{
+	margin-top:8px;
+}
+
+.progress-hg{
+	margin-bottom: 30!important;
+	height:2px;
+}

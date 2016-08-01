@@ -197,7 +197,6 @@ class StockReconciliation(StockController):
 			"voucher_no": self.name,
 			"company": self.company,
 			"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
-			"fiscal_year": self.fiscal_year,
 			"is_cancelled": "No",
 			"qty_after_transaction": row.qty,
 			"valuation_rate": row.valuation_rate
@@ -246,6 +245,18 @@ class StockReconciliation(StockController):
 		self.items = []
 		for item in get_items(warehouse, self.posting_date, self.posting_time):
 			self.append("items", item)
+
+	def submit(self):
+		if len(self.items) > 100:
+			self.queue_action('submit')
+		else:
+			self._submit()
+
+	def cancel(self):
+		if len(self.items) > 100:
+			self.queue_action('cancel')
+		else:
+			self._cancel()
 
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time):

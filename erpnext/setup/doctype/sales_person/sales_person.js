@@ -1,7 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.list_route = "Sales Browser/Sales Person";
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.cscript.set_root_readonly(doc);
@@ -21,7 +20,7 @@ cur_frm.cscript.set_root_readonly = function(doc) {
 cur_frm.fields_dict['parent_sales_person'].get_query = function(doc, cdt, cdn) {
 	return{
 		filters: [
-			['Sales Person', 'is_group', '=', 'Yes'],
+			['Sales Person', 'is_group', '=', 1],
 			['Sales Person', 'name', '!=', doc.sales_person_name]
 		]
 	}

@@ -16,7 +16,10 @@ class ReceivablePayableReport(object):
 
 	def run(self, args):
 		party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
-		return self.get_columns(party_naming_by, args), self.get_data(party_naming_by, args)
+		columns = self.get_columns(party_naming_by, args)
+		data = self.get_data(party_naming_by, args)
+		chart = self.get_chart_data(columns, data)
+		return columns, data, None, chart
 
 	def get_columns(self, party_naming_by, args):
 		columns = [_("Posting Date") + ":Date:80", _(args.get("party_type")) + ":Link/" + args.get("party_type") + ":200"]
@@ -39,6 +42,8 @@ class ReceivablePayableReport(object):
 			})
 
 		columns += [_("Age (Days)") + ":Int:80"]
+		
+		self.ageing_col_idx_start = len(columns)
 
 		if not "range1" in self.filters:
 			self.filters["range1"] = "30"
@@ -46,7 +51,7 @@ class ReceivablePayableReport(object):
 			self.filters["range2"] = "60"
 		if not "range3" in self.filters:
 			self.filters["range3"] = "90"
-
+			
 		for label in ("0-{range1}".format(**self.filters),
 			"{range1}-{range2}".format(**self.filters),
 			"{range2}-{range3}".format(**self.filters),
@@ -58,21 +63,19 @@ class ReceivablePayableReport(object):
 					"width": 120
 				})
 
+		columns.append({
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Data",
+			"width": 100
+		})
 		if args.get("party_type") == "Customer":
 			columns += [_("Territory") + ":Link/Territory:80"]
 		if args.get("party_type") == "Supplier":
 			columns += [_("Supplier Type") + ":Link/Supplier Type:80"]
-		columns += [
-			{
-				"fieldname": "currency",
-				"label": _("Currency"),
-				"fieldtype": "Data",
-				"width": 100,
-				"hidden": 1
-			},
-			_("Remarks") + "::200"
-		]
-
+			
+		columns.append(_("Remarks") + "::200")
+		
 		return columns
 
 	def get_data(self, party_naming_by, args):
@@ -120,16 +123,16 @@ class ReceivablePayableReport(object):
 					row += get_ageing_data(cint(self.filters.range1), cint(self.filters.range2),
 						cint(self.filters.range3), self.age_as_on, entry_date, outstanding_amount)
 
+					if self.filters.get(scrub(args.get("party_type"))):
+						row.append(gle.account_currency)
+					else:
+						row.append(company_currency)
+
 					# customer territory / supplier type
 					if args.get("party_type") == "Customer":
 						row += [self.get_territory(gle.party)]
 					if args.get("party_type") == "Supplier":
 						row += [self.get_supplier_type(gle.party)]
-
-					if self.filters.get(scrub(args.get("party_type"))):
-						row.append(gle.account_currency)
-					else:
-						row.append(company_currency)
 
 					row.append(gle.remarks)
 					data.append(row)
@@ -252,6 +255,23 @@ class ReceivablePayableReport(object):
 		return self.gl_entries_map.get(party, {})\
 			.get(against_voucher_type, {})\
 			.get(against_voucher, [])
+			
+	def get_chart_data(self, columns, data):
+		ageing_columns = columns[self.ageing_col_idx_start : self.ageing_col_idx_start+4]
+		
+		rows = []
+		for d in data:
+			rows.append(d[self.ageing_col_idx_start : self.ageing_col_idx_start+4])
+
+		if rows:
+			rows.insert(0, [[d.get("label")] for d in ageing_columns])
+		
+		return {
+			"data": {
+				'rows': rows
+			},
+			"chart_type": 'pie'
+		}
 
 def execute(filters=None):
 	args = {

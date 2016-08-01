@@ -107,6 +107,24 @@ class TransactionBase(StatusUpdater):
 						frappe.throw(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ")
 							.format(d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
 
+	def get_link_filters(self, for_doctype):
+		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
+			fieldname = self.prev_link_mapper[for_doctype]["fieldname"]
+			
+			values = filter(None, tuple([item.as_dict()[fieldname] for item in self.items]))
+
+			if values:
+				ret = {
+					for_doctype : {
+						"filters": [[for_doctype, "name", "in", values]]
+					}
+				}
+			else:
+				ret = None
+		else:
+			ret = None
+		
+		return ret
 
 def delete_events(ref_type, ref_name):
 	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`

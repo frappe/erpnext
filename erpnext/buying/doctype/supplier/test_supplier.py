@@ -70,3 +70,18 @@ class TestSupplier(unittest.TestCase):
         frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 0)
 
         po.save()
+
+
+    def test_supplier_country(self):
+        # Test that country field exists in Supplier DocType
+        supplier = frappe.get_doc('Supplier', '_Test Supplier with Country')
+        self.assertTrue('country' in supplier.as_dict())
+
+        # Test if test supplier field record is 'Greece'
+        self.assertEqual(supplier.country, "Greece")
+
+        # Test update Supplier instance country value
+        supplier = frappe.get_doc('Supplier', '_Test Supplier')
+        supplier.country = 'Greece'
+        supplier.save()
+        self.assertEqual(supplier.country, "Greece")

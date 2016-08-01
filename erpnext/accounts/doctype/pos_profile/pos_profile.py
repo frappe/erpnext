@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
 from frappe.utils import cint
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_account_for_mode_of_payment
 
 from frappe.model.document import Document
 
@@ -26,7 +27,7 @@ class POSProfile(Document):
 					self.company), raise_exception=1)
 
 	def validate_all_link_fields(self):
-		accounts = {"Account": [self.cash_bank_account, self.income_account,
+		accounts = {"Account": [self.income_account,
 			self.expense_account], "Cost Center": [self.cost_center],
 			"Warehouse": [self.warehouse]}
 
@@ -35,6 +36,9 @@ class POSProfile(Document):
 				if link_dn and not frappe.db.exists({"doctype": link_dt,
 						"company": self.company, "name": link_dn}):
 					frappe.throw(_("{0} does not belong to Company {1}").format(link_dn, self.company))
+
+	def before_save(self):
+		set_account_for_mode_of_payment(self)
 
 	def on_update(self):
 		self.set_defaults()

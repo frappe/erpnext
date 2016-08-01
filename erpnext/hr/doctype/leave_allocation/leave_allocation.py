@@ -77,7 +77,9 @@ class LeaveAllocation(Document):
 			frappe.throw(_("Total leaves allocated is mandatory"))
 
 	def validate_total_leaves_allocated(self):
-		if date_diff(self.to_date, self.from_date) <= flt(self.total_leaves_allocated):
+		# Adding a day to include To Date in the difference
+		date_difference = date_diff(self.to_date, self.from_date) + 1
+		if date_difference < self.total_leaves_allocated:
 			frappe.throw(_("Total allocated leaves are more than days in the period"), OverAllocationError)
 			
 	def validate_against_leave_applications(self):

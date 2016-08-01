@@ -21,6 +21,6 @@ Das Lager abzubilden bedeutet nicht nur, Mengen zu addieren und subtrahieren. Sc
 
 Um dies umzusetzen, sammelt ERPNext alle Bestandstransaktionen in einer Tabelle, die als Lagerhauptbuch bezeichnet wird. Alle Kaufbelege, Lagerbuchungen und Lieferscheine aktualisieren diese Tabelle.
 
-### Themen:
+### Themen
 
 {index}

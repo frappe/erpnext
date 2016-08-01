@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import frappe
-from frappe.templates.pages.style_settings import default_properties
+from frappe.www.style_settings import default_properties
 
 def execute():
 	frappe.reload_doc('website', 'doctype', 'style_settings')

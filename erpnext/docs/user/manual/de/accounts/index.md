@@ -9,6 +9,6 @@ In ERPNext bestehen Ihre Arbeitsgänge aus drei Haupttätigkeiten:
 * Eingangsrechnung: Rechnungen, die Sie von Ihren Lieferanten für deren Produkte oder Dienstleistungen erhalten.
 * Journalbuchungen / Buchungssätze: Für Buchungen wie Zahlung, Gutschrift und andere.
 
-#### Themen
+### Themen
 
 {index}

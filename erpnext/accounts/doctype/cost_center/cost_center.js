@@ -3,38 +3,20 @@
 
 frappe.provide("erpnext.accounts");
 
-cur_frm.list_route = "Accounts Browser/Cost Center";
 
-erpnext.accounts.CostCenterController = frappe.ui.form.Controller.extend({
-	onload: function() {
-		this.setup_queries();
-	},
 
-	setup_queries: function() {
-		var me = this;
-		if(this.frm.fields_dict["budgets"].grid.get_field("account")) {
-			this.frm.set_query("account", "budgets", function() {
-				return {
-					filters:[
-						['Account', 'company', '=', me.frm.doc.company],
-						['Account', 'is_group', '=', '0']
-					]
-				}
-			});
-		}
-
-		this.frm.set_query("parent_cost_center", function() {
+frappe.ui.form.on('Cost Center', {
+	onload: function(frm) {
+		frm.set_query("parent_cost_center", function() {
 			return {
-				filters:[
-					['Cost Center', 'is_group', '=', '1'],
-					['Cost Center', 'company', '=', me.frm.doc.company],
-				]
+				filters: {
+					company: frm.doc.company,
+					is_group: 1
+				}
 			}
-		});
+		})
 	}
-});
-
-$.extend(cur_frm.cscript, new erpnext.accounts.CostCenterController({frm: cur_frm}));
+})
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	var intro_txt = '';
@@ -51,7 +33,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.set_intro(intro_txt);
 
 	cur_frm.add_custom_button(__('Chart of Cost Centers'),
-		function() { frappe.set_route("Accounts Browser", "Cost Center"); }, __("View"))
+		function() { frappe.set_route("Tree", "Cost Center"); }, __("View"))
 }
 
 cur_frm.cscript.parent_cost_center = function(doc, cdt, cdn) {

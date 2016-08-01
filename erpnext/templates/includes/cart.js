@@ -16,9 +16,9 @@ $.extend(shopping_cart, {
 		shopping_cart.bind_address_select();
 		shopping_cart.bind_place_order();
 		shopping_cart.bind_change_qty();
-
+		shopping_cart.bind_dropdown_cart_buttons();
 	},
-
+	
 	bind_address_select: function() {
 		$(".cart-addresses").find('input[data-address-name]').on("click", function() {
 			if($(this).prop("checked")) {
@@ -54,24 +54,29 @@ $.extend(shopping_cart, {
 		// bind update button
 		$(".cart-items").on("change", ".cart-qty", function() {
 			var item_code = $(this).attr("data-item-code");
-			frappe.freeze();
-			shopping_cart.update_cart({
-				item_code: item_code,
-				qty: $(this).val(),
-				with_items: 1,
-				btn: this,
-				callback: function(r) {
-					frappe.unfreeze();
-					if(!r.exc) {
-						$(".cart-items").html(r.message.items);
-						$(".cart-tax-items").html(r.message.taxes);
-						$(".cart-icon").hide();
-					}
-				},
-			});
+			var newVal = $(this).val();
+			shopping_cart.shopping_cart_update(item_code, newVal);
+		});
+		
+		$(".cart-items").on('click', '.number-spinner button', function () {  
+			var btn = $(this),
+				input = btn.closest('.number-spinner').find('input'),
+				oldValue = input.val().trim(),
+				newVal = 0;
+	
+			if (btn.attr('data-dir') == 'up') {
+				newVal = parseInt(oldValue) + 1;
+			} else {
+				if (oldValue > 1) {
+					newVal = parseInt(oldValue) - 1;
+				}
+			}
+			input.val(newVal);
+			var item_code = input.attr("data-item-code"); 
+			shopping_cart.shopping_cart_update(item_code, newVal);
 		});
 	},
-
+	
 	render_tax_row: function($cart_taxes, doc, shipping_rules) {
 		var shipping_selector;
 		if(shipping_rules) {
@@ -143,7 +148,12 @@ $.extend(shopping_cart, {
 	}
 });
 
-$(document).ready(function() {
+frappe.ready(function() {
 	$(".cart-icon").hide();
 	shopping_cart.bind_events();
 });
+
+function show_terms() {
+  var html = $(".cart-terms").html();
+    frappe.msgprint(html);
+}

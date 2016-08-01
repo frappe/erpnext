@@ -15,17 +15,15 @@ Das Programm zum Erstellen von Vorlagen basiert auf HTML und [Jinja Templating](
 
 Hier sehen Sie die Standardvorlage:
 
-
-
-{{ address_line1 }}<br>
-{% if address_line2 %}{{ address_line2 }}<br>{% endif -%}
-{{ city }}<br>
-{% if state %}{{ state }}<br>{% endif -%}
-{% if pincode %}PIN:  {{ pincode }}<br>{% endif -%}
-{{ country }}<br>
-{% if phone %}Phone: {{ phone }}<br>{% endif -%}
-{% if fax %}Fax: {{ fax }}<br>{% endif -%}
-{% if email_id %}Email: {{ email_id }}<br>{% endif -%}
+	{% raw %}{{ address_line1 }}<br>
+	{% if address_line2 %}{{ address_line2 }}<br>{% endif -%}
+	{{ city }}<br>
+	{% if state %}{{ state }}<br>{% endif -%}
+	{% if pincode %}PIN:  {{ pincode }}<br>{% endif -%}
+	{{ country }}<br>
+	{% if phone %}Phone: {{ phone }}<br>{% endif -%}
+	{% if fax %}Fax: {{ fax }}<br>{% endif -%}
+	{% if email_id %}Email: {{ email_id }}<br>{% endif -%}{% endraw %}
 
 
 ### Beispiel

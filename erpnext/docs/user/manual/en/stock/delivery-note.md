@@ -22,7 +22,7 @@ details are carried over from your Sales Order.
 
 ### Shipping Packets or Items with Product Bundle
 
-If you are shipping Items that have a [Product Bundle]({{docs_base_url}}/user/manual/en/selling/setup/sales-bom.html), ERPNext will automatically
+If you are shipping Items that have a [Product Bundle]({{docs_base_url}}/user/manual/en/selling/setup/product-bundle.html), ERPNext will automatically
 create a “Packing List” table for you based on the sub-Items in that Item.
 
 If your Items are serialized, then for Product Bundle type of Items, you will have

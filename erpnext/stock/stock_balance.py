@@ -7,7 +7,6 @@ import frappe
 from frappe.utils import flt, cstr, nowdate, nowtime
 from erpnext.stock.utils import update_bin
 from erpnext.stock.stock_ledger import update_entries_after
-from erpnext.accounts.utils import get_fiscal_year
 
 def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False, only_bin=False):
 	"""
@@ -149,8 +148,9 @@ def update_bin_qty(item_code, warehouse, qty_dict=None):
 			mismatch = True
 
 	if mismatch:
-		bin.projected_qty = flt(bin.actual_qty) + flt(bin.ordered_qty) + \
+		bin.projected_qty = (flt(bin.actual_qty) + flt(bin.ordered_qty) +
 			flt(bin.indented_qty) + flt(bin.planned_qty) - flt(bin.reserved_qty)
+			- flt(bin.reserved_qty_for_production))
 
 		bin.save()
 
@@ -158,7 +158,6 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 	 	fiscal_year=None):
 	if not posting_date: posting_date = nowdate()
 	if not posting_time: posting_time = nowtime()
-	if not fiscal_year: fiscal_year = get_fiscal_year(posting_date)[0]
 
 	condition = " and item.name='%s'" % item_code.replace("'", "\'") if item_code else ""
 
@@ -191,7 +190,6 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			'stock_uom'					: d[3],
 			'incoming_rate'				: sle and flt(serial_nos[0][0]) > flt(d[2]) and flt(sle[0][0]) or 0,
 			'company'					: sle and cstr(sle[0][1]) or 0,
-			'fiscal_year'				: fiscal_year,
 			'is_cancelled'			 	: 'No',
 			'batch_no'					: '',
 			'serial_no'					: ''
@@ -233,7 +231,8 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 
 def repost_all_stock_vouchers():
 	warehouses_with_account = frappe.db.sql_list("""select master_name from tabAccount
-		where ifnull(account_type, '') = 'Warehouse'""")
+		where ifnull(account_type, '') = 'Stock' and (warehouse is not null and warehouse != '')
+		and is_group=0""")
 
 	vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
 		from `tabStock Ledger Entry` sle

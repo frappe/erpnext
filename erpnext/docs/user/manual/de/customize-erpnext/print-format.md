@@ -14,7 +14,7 @@ Um Ihre eigenen Versionen zu erstellen, öffnen Sie eine bereits vorhandene Vorl
 
 > Einstellungen > Druck > Druckformate
 
-![Druckformat]({{docs_base_url}}/assets/old_images/erpnext/customize/print-format.png)
+![Druckformat]({{docs_base_url}}/assets/img/customize/print-settings.png)
 
 Wählen Sie den Typ des Druckformats, welches Sie bearbeiten wollen, und klicken Sie auf die Schaltfläche "Kopieren" in der rechten Spalte. Es öffnet sich ein neues Druckformat mit der Einstellung NEIN für "für "Ist Standard" und Sie kännen das Druckformat bearbeiten.
 
@@ -26,11 +26,10 @@ Zum Bearbeiten des Erscheinungsbildes bietet sich das [Bootstrap CSS Framework](
 
 > Anmerkung: Vorgedrucktes Briefpapier zu verwenden ist normalerweise keine gute Idee, weil Ihre Ausdrucke unfertig (inkonsistent) aussehen, wenn Sie per E-mail verschickt werden.
 
-### Referenzen:
+### Referenzen
 
-1\. [Programmiersprache Jinja Templating: Referenz](http://jinja.pocoo.org/docs/templates/)
-
-2\. [Bootstrap CSS Framework](http://getbootstrap.com/)
+1. [Programmiersprache Jinja Templating: Referenz](http://jinja.pocoo.org/docs/templates/)
+2. [Bootstrap CSS Framework](http://getbootstrap.com/)
 
 ### Druckeinstellungen
 
@@ -38,55 +37,54 @@ Um Ihre Druck- und PDF-Einstellungen zu bearbeiten/zu aktualisieren, gehen Sie z
 
 > Einstellungen > Druck und Branding > Druckeinstellungen
 
-![Druckformat]({{docs_base_url}}/assets/old_images/erpnext/customize/print-settings.png)
+![Druckformat]({{docs_base_url}}/assets/img/customize/print-settings.png)
 
-### Beispiel:
+### Beispiel
 
-<h3>{{ doc.select<em>print</em>heading or "Invoice" }}</h3>
-    <div class="row">
-        <div class="col-md-3 text-right">Customer Name</div>
-        <div class="col-md-9">{{ doc.customer<em>name }}</div>
-    </div>
-    <div class="row">
-        <div class="col-md-3 text-right">Date</div>
-        <div class="col-md-9">{{ doc.get</em>formatted("invoice<em>date") }}</div>
-    </div>
-    <table class="table table-bordered">
-        <tbody>
-            <tr>
-                <th>Sr</th>
-                <th>Item Name</th>
-                <th>Description</th>
-                <th class="text-right">Qty</th>
-                <th class="text-right">Rate</th>
-                <th class="text-right">Amount</th>
-            </tr>
-            {%- for row in doc.items -%}
-            <tr>
-                <td style="width: 3%;">{{ row.idx }}</td>
-                <td style="width: 20%;">
-                    {{ row.item</em>name }}
-                    {% if row.item<em>code != row.item</em>name -%}
-                    <br>Item Code: {{ row.item<em>code}}
-                    {%- endif %}
-                </td>
-                <td style="width: 37%;">
-                    <div style="border: 0px;">{{ row.description }}</div></td>
-                <td style="width: 10%; text-align: right;">{{ row.qty }} {{ row.uom or row.stock</em>uom }}</td>
-                <td style="width: 15%; text-align: right;">{{
-                    row.get<em>formatted("rate", doc) }}</td>
-                <td style="width: 15%; text-align: right;">{{
-                    row.get</em>formatted("amount", doc) }}</td>
-            </tr>
-            {%- endfor -%}
-        </tbody>
-    </table>
+ {% raw %}<h3>{{ doc.select_print_heading or "Invoice" }}</h3>
+ <div class="row">
+    <div class="col-md-3 text-right">Customer Name</div>
+    <div class="col-md-9">{{ doc.customer_name }}</div>
+ </div>
+ <div class="row">
+    <div class="col-md-3 text-right">Date</div>
+    <div class="col-md-9">{{ doc.get_formatted("invoice_date") }}</div>
+ </div>
+ <table class="table table-bordered">
+    <tbody>
+        <tr>
+            <th>Sr</th>
+            <th>Item Name</th>
+            <th>Description</th>
+            <th class="text-right">Qty</th>
+            <th class="text-right">Rate</th>
+            <th class="text-right">Amount</th>
+        </tr>
+        {%- for row in doc.items -%}
+        <tr>
+            <td style="width: 3%;">{{ row.idx }}</td>
+            <td style="width: 20%;">
+                {{ row.item_name }}
+                {% if row.item_code != row.item_name -%}
+                <br>Item Code: {{ row.item_code}}
+                {%- endif %}
+            </td>
+            <td style="width: 37%;">
+                <div style="border: 0px;">{{ row.description }}</div></td>
+            <td style="width: 10%; text-align: right;">{{ row.qty }} {{ row.uom or row.stock_uom }}</td>
+            <td style="width: 15%; text-align: right;">{{
+                row.get_formatted("rate", doc) }}</td>
+            <td style="width: 15%; text-align: right;">{{
+                row.get_formatted("amount", doc) }}</td>
+        </tr>
+        {%- endfor -%}
+    </tbody>
+    </table>{% endraw %}
 
 ### Anmerkungen
 
-1\. Um nach Datum und Währung formatiert Werte zu erhalten, verwenden Sie: `doc.get_formatted("fieldname")`
-
-2\. Für übersetzbare Zeichenfolgen verwenden Sie: `{{ _("This string is translated") }}`
+1. Um nach Datum und Währung formatiert Werte zu erhalten, verwenden Sie: `doc.get_formatted("fieldname")`
+1. Für übersetzbare Zeichenfolgen verwenden Sie: `{{ _("This string is translated") }}`
 
 ### Fußzeilen
 

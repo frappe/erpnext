@@ -1,36 +1,36 @@
 [
  {
   "company": "_Test Company", 
+  "doctype": "Salary Slip", 
   "deductions": [
    {
-    "d_amount": 100, 
-    "d_depends_on_lwp": 0, 
-    "d_type": "_Test Professional Tax", 
-    "doctype": "Salary Slip Deduction", 
+	"doctype": "Salary Detail",
+    "amount": 100, 
+    "depends_on_lwp": 0, 
+    "salary_component": "_Test Professional Tax", 
     "parentfield": "deductions"
    }, 
    {
-    "d_amount": 50, 
-    "d_depends_on_lwp": 1, 
-    "d_type": "_Test TDS", 
-    "doctype": "Salary Slip Deduction", 
+	"doctype": "Salary Detail",
+    "amount": 48.39, 
+    "depends_on_lwp": 0, 
+    "salary_component": "_Test TDS", 
     "parentfield": "deductions"
    }
-  ], 
-  "doctype": "Salary Slip", 
+  ],   
   "earnings": [
    {
-    "doctype": "Salary Slip Earning", 
-    "e_amount": 15000, 
-    "e_depends_on_lwp": 1, 
-    "e_type": "_Test Basic Salary", 
+    "doctype": "Salary Detail", 
+    "amount": 14516.13, 
+    "depends_on_lwp": 0, 
+    "salary_component": "_Test Basic Salary", 
     "parentfield": "earnings"
    }, 
    {
-    "doctype": "Salary Slip Earning", 
-    "e_amount": 500, 
-    "e_depends_on_lwp": 0, 
-    "e_type": "_Test Allowance", 
+    "doctype": "Salary Detail",
+    "amount": 500, 
+    "depends_on_lwp": 0, 
+    "salary_component": "_Test Allowance", 
     "parentfield": "earnings"
    }
   ], 

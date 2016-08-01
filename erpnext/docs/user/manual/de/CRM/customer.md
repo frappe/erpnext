@@ -17,7 +17,7 @@ oder einen Upload über ein Datenimportwerkzeug durchführen.
 
 Kontakte und Adressen werden in ERPNext getrennt gespeichert, damit Sie mehrere verschiedene Kontakte oder Adressen mit Kunden und Lieferanten verknüpfen können.
 
-Lesen Sie hierzu auch [Kontakt]({{docs_base_url}}/user/manual/en/crm/contact.html).
+Lesen Sie hierzu auch [Kontakt]({{docs_base_url}}/user/manual/de/CRM/contact.html).
 
 ### Einbindung in Konten
 

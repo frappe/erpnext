@@ -17,7 +17,7 @@ Sie können den Nummernkreis selbst definieren oder einstellen:
 
 > Einstellungen > Einstellungen > Nummernkreis
 
-[Klicken Sie hier, wenn Sie mehr über Nummernkreise wissen möchten]({{docs_base_url}}/user/manual/en/setting-up/settings/naming-series.html)
+[Klicken Sie hier, wenn Sie mehr über Nummernkreise wissen möchten]({{docs_base_url}}/user/manual/de/setting-up/settings/naming-series.html)
 
 ### 2. Standard-Lieferantentyp
 

@@ -9,6 +9,7 @@ frappe.listview_settings['Production Order'] = {
 			return [__(doc.status), {
 				"Draft": "red",
 				"Stopped": "red",
+				"Not Started": "red",
 				"In Process": "orange",
 				"Completed": "green",
 				"Cancelled": "darkgrey"

@@ -7,22 +7,19 @@ Wenn Artikel in einem bestimmten Lager ankommen, erhöht sich der Stand des Verm
 
 ### Aktivierung
 
-1\. Richten Sie die folgenden Standard-Konten für jede Firma ein:
-
-* Lagerwaren erhalten aber noch nicht abgerechnet
-* Lagerabgleichskonto
-* In der Bewertung enthaltene Kosten
-* Kostenstelle
-
-2\. In der Ständigen Inventur verwaltet das System für jedes Lager einen eigenen Kontostand unter einer eigenen Kontobezeichnung. Um diese Kontobezeichnung zu erstellen, gehen Sie zu "Konto erstellen unter" in den Lagerstammdaten.
-
-3\. Aktivieren Sie die Ständige Inventur.
+1. Richten Sie die folgenden Standard-Konten für jede Firma ein:
+    * Lagerwaren erhalten aber noch nicht abgerechnet
+    * Lagerabgleichskonto
+    * In der Bewertung enthaltene Kosten
+    * Kostenstelle
+2. In der Ständigen Inventur verwaltet das System für jedes Lager einen eigenen Kontostand unter einer eigenen Kontobezeichnung. Um diese Kontobezeichnung zu erstellen, gehen Sie zu "Konto erstellen unter" in den Lagerstammdaten.
+3. Aktivieren Sie die Ständige Inventur.
 
 > Einstellungen > Rechnungswesen > Kontoeinstellungen > Eine Buchung für jede Lagerbewegung erstellen
 
 ---
 
-### Beispiel:
+### Beispiel
 
 Wir nehmen folgenden Kontenplan und folgende Lagereinstellungen für Ihre Firma an:
 
@@ -60,7 +57,7 @@ Kontenplan
       * Versandgebühren
       * Zoll
 
-#### Kontenkonfiguration des Lagers:
+#### Kontenkonfiguration des Lagers
 
 * In Verkaufsstellen
 * In der Fertigung

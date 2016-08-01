@@ -5,14 +5,18 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from frappe.utils import flt, time_diff_in_hours, now, add_days
+from frappe.utils import flt, time_diff_in_hours, now, add_days, cint
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.manufacturing.doctype.production_order.production_order \
-	import make_stock_entry, ProductionNotApplicableError,ItemHasVariantError
+	import make_stock_entry, ItemHasVariantError
 from erpnext.stock.doctype.stock_entry import test_stock_entry
-from erpnext.projects.doctype.time_log.time_log import OverProductionLoggedError
+from erpnext.stock.utils import get_bin
 
 class TestProductionOrder(unittest.TestCase):
+	def setUp(self):
+		self.warehouse = '_Test Warehouse 2 - _TC'
+		self.item = '_Test Item'
+
 	def check_planned_qty(self):
 		set_perpetual_inventory(0)
 
@@ -67,25 +71,25 @@ class TestProductionOrder(unittest.TestCase):
 
 		self.assertRaises(StockOverProductionError, s.submit)
 
-	def test_make_time_log(self):
-		from erpnext.projects.doctype.time_log.test_time_log import make_time_log_test_record
+	def test_make_time_sheet(self):
+		from erpnext.manufacturing.doctype.production_order.production_order import make_timesheet
 		prod_order = make_prod_order_test_record(item="_Test FG Item 2",
 			planned_start_date=now(), qty=1, do_not_save=True)
 
 		prod_order.set_production_order_operations()
 		prod_order.insert()
 		prod_order.submit()
-
+		
 		d = prod_order.operations[0]
-
 		d.completed_qty = flt(d.completed_qty)
 
-		time_log = make_time_log_test_record(hours=1, production_order= prod_order.name, operation= d.operation,
-			completed_qty= prod_order.qty - d.completed_qty, operation_id=d.name, for_manufacturing=1, simulate=True)
+		name = frappe.db.get_value('Timesheet', {'production_order': prod_order.name}, 'name')
+		time_sheet_doc = frappe.get_doc('Timesheet', name)
+		time_sheet_doc.submit()
+		
 
-		self.assertEqual(prod_order.name, time_log.production_order)
-		self.assertEqual((prod_order.qty - d.completed_qty), time_log.completed_qty)
-		self.assertEqual(time_diff_in_hours(d.planned_end_time, d.planned_start_time),time_log.hours)
+		self.assertEqual(prod_order.name, time_sheet_doc.production_order)
+		self.assertEqual((prod_order.qty - d.completed_qty), sum([d.completed_qty for d in time_sheet_doc.time_logs]))
 
 		manufacturing_settings = frappe.get_doc({
 			"doctype": "Manufacturing Settings",
@@ -100,8 +104,11 @@ class TestProductionOrder(unittest.TestCase):
 
 		self.assertEqual(prod_order.operations[0].actual_operation_time, 60)
 		self.assertEqual(prod_order.operations[0].actual_operating_cost, 100)
+		
+		time_sheet_doc1 = make_timesheet(prod_order.name)
+		self.assertEqual(len(time_sheet_doc1.get('time_logs')), 0)
 
-		time_log.cancel()
+		time_sheet_doc.cancel()
 
 		prod_order.load_from_db()
 		self.assertEqual(prod_order.operations[0].status, "Pending")
@@ -109,11 +116,6 @@ class TestProductionOrder(unittest.TestCase):
 
 		self.assertEqual(flt(prod_order.operations[0].actual_operation_time), 0)
 		self.assertEqual(flt(prod_order.operations[0].actual_operating_cost), 0)
-
-		time_log2 = make_time_log_test_record(from_time= add_days(time_log.to_time, 1) ,production_order= prod_order.name, operation= d.operation,
-			completed_qty= 5, operation_id=d.name, for_manufacturing=1, do_not_save=True)
-
-		self.assertRaises(OverProductionLoggedError, time_log2.save)
 
 	def test_planned_operating_cost(self):
 		prod_order = make_prod_order_test_record(item="_Test FG Item 2",
@@ -125,12 +127,7 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertEqual(prod_order.planned_operating_cost, cost*2)
 
 	def test_production_item(self):
-		frappe.db.set_value("Item", "_Test FG Item", "is_pro_applicable", 0)
-
 		prod_order = make_prod_order_test_record(item="_Test FG Item", qty=1, do_not_save=True)
-		self.assertRaises(ProductionNotApplicableError, prod_order.save)
-
-		frappe.db.set_value("Item", "_Test FG Item", "is_pro_applicable", 1)
 		frappe.db.set_value("Item", "_Test FG Item", "end_of_life", "2000-1-1")
 
 		self.assertRaises(frappe.ValidationError, prod_order.save)
@@ -145,6 +142,73 @@ class TestProductionOrder(unittest.TestCase):
 		prod_order = make_prod_order_test_record(item="_Test Variant Item", qty=1, do_not_save=True)
 		self.assertRaises(ItemHasVariantError, prod_order.save)
 
+	def test_reserved_qty_for_production_submit(self):
+		self.bin1_at_start = get_bin(self.item, self.warehouse)
+
+		# reset to correct value
+		self.bin1_at_start.update_reserved_qty_for_production()
+
+		self.pro_order = make_prod_order_test_record(item="_Test FG Item", qty=2,
+			source_warehouse=self.warehouse)
+
+		self.bin1_on_submit = get_bin(self.item, self.warehouse)
+
+		# reserved qty for production is updated
+		self.assertEqual(cint(self.bin1_at_start.reserved_qty_for_production) + 2,
+			cint(self.bin1_on_submit.reserved_qty_for_production))
+		self.assertEqual(cint(self.bin1_at_start.projected_qty),
+			cint(self.bin1_on_submit.projected_qty) + 2)
+
+	def test_reserved_qty_for_production_cancel(self):
+		self.test_reserved_qty_for_production_submit()
+
+		self.pro_order.cancel()
+
+		bin1_on_cancel = get_bin(self.item, self.warehouse)
+
+		# reserved_qty_for_producion updated
+		self.assertEqual(cint(self.bin1_at_start.reserved_qty_for_production),
+			cint(bin1_on_cancel.reserved_qty_for_production))
+		self.assertEqual(self.bin1_at_start.projected_qty,
+			cint(bin1_on_cancel.projected_qty))
+
+	def test_reserved_qty_for_production_on_stock_entry(self):
+		test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target= self.warehouse, qty=100, basic_rate=100)
+		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target= self.warehouse, qty=100, basic_rate=100)
+
+		self.test_reserved_qty_for_production_submit()
+
+		s = frappe.get_doc(make_stock_entry(self.pro_order.name,
+			"Material Transfer for Manufacture", 2))
+
+		s.submit()
+
+		bin1_on_start_production = get_bin(self.item, self.warehouse)
+
+		# reserved_qty_for_producion updated
+		self.assertEqual(cint(self.bin1_at_start.reserved_qty_for_production),
+			cint(bin1_on_start_production.reserved_qty_for_production))
+
+		# projected qty will now be 2 less (becuase of item movement)
+		self.assertEqual(cint(self.bin1_at_start.projected_qty),
+			cint(bin1_on_start_production.projected_qty) + 2)
+
+		s = frappe.get_doc(make_stock_entry(self.pro_order.name, "Manufacture", 2))
+
+		bin1_on_end_production = get_bin(self.item, self.warehouse)
+
+		# no change in reserved / projected
+		self.assertEqual(cint(bin1_on_end_production.reserved_qty_for_production),
+			cint(bin1_on_start_production.reserved_qty_for_production))
+		self.assertEqual(cint(bin1_on_end_production.projected_qty),
+			cint(bin1_on_end_production.projected_qty))
+
+		# required_items removed
+		self.pro_order.reload()
+		self.assertEqual(len(self.pro_order.required_items), 0)
+
 def make_prod_order_test_record(**args):
 	args = frappe._dict(args)
 
@@ -156,7 +220,12 @@ def make_prod_order_test_record(**args):
 	pro_order.wip_warehouse = args.wip_warehouse or "_Test Warehouse - _TC"
 	pro_order.fg_warehouse = args.fg_warehouse or "_Test Warehouse 1 - _TC"
 	pro_order.company = args.company or "_Test Company"
-	pro_order.stock_uom = "_Test UOM"
+	pro_order.stock_uom = args.stock_uom or "_Test UOM"
+	pro_order.set_production_order_operations()
+
+	if args.source_warehouse:
+		pro_order.source_warehouse = args.source_warehouse
+
 	if args.planned_start_date:
 		pro_order.planned_start_date = args.planned_start_date
 

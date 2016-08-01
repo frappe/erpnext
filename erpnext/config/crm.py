@@ -3,7 +3,7 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
+			"label": _("Sales Pipeline"),
 			"icon": "icon-star",
 			"items": [
 				{
@@ -13,98 +13,24 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Customer",
-					"description": _("Customer database."),
+					"name": "Opportunity",
+					"description": _("Potential opportunities for selling."),
 				},
 				{
 					"type": "doctype",
-					"name": "Opportunity",
-					"description": _("Potential opportunities for selling."),
+					"name": "Customer",
+					"description": _("Customer database."),
 				},
 				{
 					"type": "doctype",
 					"name": "Contact",
 					"description": _("All Contacts."),
 				},
-				{
-					"type": "doctype",
-					"name": "Newsletter",
-					"description": _("Newsletters to contacts, leads."),
-				},
-				{
-					"type": "doctype",
-					"name": "Communication",
-					"description": _("Record of all communications of type email, phone, chat, visit, etc."),
-				},
 			]
 		},
 		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "SMS Center",
-					"description":_("Send mass SMS to your contacts"),
-				},
-				{
-					"type": "doctype",
-					"name": "SMS Log",
-					"description":_("Logs for maintaining sms delivery status"),
-				}
-			]
-		},
-		{
-			"label": _("Setup"),
-			"icon": "icon-cog",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Campaign",
-					"description": _("Sales campaigns."),
-				},
-				{
-					"type": "page",
-					"label": _("Customer Group"),
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"link": "Sales Browser/Customer Group",
-					"description": _("Manage Customer Group Tree."),
-					"doctype": "Customer Group",
-				},
-				{
-					"type": "page",
-					"label": _("Territory"),
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"link": "Sales Browser/Territory",
-					"description": _("Manage Territory Tree."),
-					"doctype": "Territory",
-				},
-				{
-					"type": "page",
-					"label": _("Sales Person"),
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"link": "Sales Browser/Sales Person",
-					"description": _("Manage Sales Person Tree."),
-					"doctype": "Sales Person",
-				},
-				{
-					"type": "doctype",
-					"name": "Newsletter List",
-					"description": _("Newsletter Mailing List"),
-				},
-				{
-					"type": "doctype",
-					"name": "SMS Settings",
-					"description": _("Setup SMS gateway settings")
-				},
-			]
-		},
-		{
-			"label": _("Main Reports"),
-			"icon": "icon-table",
+			"label": _("Reports"),
+			"icon": "icon-list",
 			"items": [
 				{
 					"type": "page",
@@ -112,12 +38,12 @@ def get_data():
 					"label": _("Sales Funnel"),
 					"icon": "icon-bar-chart",
 				},
-			]
-		},
-		{
-			"label": _("Standard Reports"),
-			"icon": "icon-list",
-			"items": [
+				{
+					"type": "report",
+					"name": "Minutes to First Response for Opportunity",
+					"doctype": "Opportunity",
+					"is_query_report": True
+				},
 				{
 					"type": "report",
 					"is_query_report": True,
@@ -133,9 +59,76 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Customers Not Buying Since Long Time",
+					"name": "Inactive Customers",
 					"doctype": "Sales Order"
 				},
+			]
+		},
+		{
+			"label": _("Communication"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Communication",
+					"description": _("Record of all communications of type email, phone, chat, visit, etc."),
+				},
+			]
+		},
+		{
+			"label": _("Setup"),
+			"icon": "icon-cog",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Campaign",
+					"description": _("Sales campaigns."),
+				},
+				{
+					"type": "doctype",
+					"label": _("Customer Group"),
+					"name": "Customer Group",
+					"icon": "icon-sitemap",
+					"link": "Tree/Customer Group",
+					"description": _("Manage Customer Group Tree."),
+				},
+				{
+					"type": "doctype",
+					"label": _("Territory"),
+					"name": "Territory",
+					"icon": "icon-sitemap",
+					"link": "Tree/Territory",
+					"description": _("Manage Territory Tree."),
+				},
+				{
+					"type": "doctype",
+					"label": _("Sales Person"),
+					"name": "Sales Person",
+					"icon": "icon-sitemap",
+					"link": "Tree/Sales Person",
+					"description": _("Manage Sales Person Tree."),
+				},
+			]
+		},
+		{
+			"label": _("SMS"),
+			"icon": "icon-wrench",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "SMS Center",
+					"description":_("Send mass SMS to your contacts"),
+				},
+				{
+					"type": "doctype",
+					"name": "SMS Log",
+					"description":_("Logs for maintaining sms delivery status"),
+				},
+				{
+					"type": "doctype",
+					"name": "SMS Settings",
+					"description": _("Setup SMS gateway settings")
+				}
 			]
 		},
 		{

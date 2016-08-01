@@ -14,3 +14,20 @@ def update_doctypes():
 				f.fieldtype = "Text Editor"
 				dt.save()
 				break
+
+def get_site_info(site_info):
+	# called via hook
+	company = frappe.db.get_single_value('Global Defaults', 'default_company')
+	domain = None
+
+	if not company:
+		company = frappe.db.sql('select name from `tabCompany` order by creation asc')
+		company = company[0][0] if company else None
+
+	if company:
+		domain = frappe.db.get_value('Company', company, 'domain')
+
+	return {
+		'company': company,
+		'domain': domain
+	}

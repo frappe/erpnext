@@ -24,24 +24,23 @@ def get_variant(template, args, variant=None):
 	if not args:
 		frappe.throw(_("Please specify at least one attribute in the Attributes table"))
 
-	validate_item_variant_attributes(template, args)
-
 	return find_variant(template, args, variant)
 
-def validate_item_variant_attributes(item, args):
-	attribute_values = {}
-	for t in frappe.get_all("Item Attribute Value", fields=["parent", "attribute_value"],
-		filters={"parent": ["in", args.keys()]}):
-		
-		(attribute_values.setdefault(t.parent.lower(), [])).append(t.attribute_value)
+def validate_item_variant_attributes(item, args=None):
+	if isinstance(item, basestring):
+		item = frappe.get_doc('Item', item)
 
-	numeric_attributes = frappe._dict((t.attribute.lower(), t) for t in \
-		frappe.db.sql("""select attribute, from_range, to_range, increment from `tabItem Variant Attribute`
-		where parent = %s and numeric_values=1""", (item), as_dict=1))
-		
+	if not args:
+		args = {d.attribute.lower():d.attribute_value for d in item.attributes}
+
+	attribute_values, numeric_values = get_attribute_values()
+
 	for attribute, value in args.items():
-		if attribute.lower() in numeric_attributes:
-			numeric_attribute = numeric_attributes[attribute.lower()]
+		if not value:
+			continue
+
+		if attribute.lower() in numeric_values:
+			numeric_attribute = numeric_values[attribute.lower()]
 
 			from_range = numeric_attribute.from_range
 			to_range = numeric_attribute.to_range
@@ -56,15 +55,32 @@ def validate_item_variant_attributes(item, args):
 			#avoid precision error by rounding the remainder
 			remainder = flt((flt(value) - from_range) % increment, precision)
 
-			is_incremental = remainder==0 or remainder==0 or remainder==increment
+			is_incremental = remainder==0 or remainder==increment
 
 			if not (is_in_range and is_incremental):
-				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3}")\
-					.format(attribute, from_range, to_range, increment), InvalidItemAttributeValueError)
-		
+				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3} for Item {4}")\
+					.format(attribute, from_range, to_range, increment, item.name),
+					InvalidItemAttributeValueError, title=_('Invalid Attribute'))
+
 		elif value not in attribute_values.get(attribute.lower(), []):
-			frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values").format(
-				value, attribute))
+			frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values for Item {2}").format(
+				value, attribute, item.name), InvalidItemAttributeValueError, title=_('Invalid Attribute'))
+
+def get_attribute_values():
+	if not frappe.flags.attribute_values:
+		attribute_values = {}
+		numeric_values = {}
+		for t in frappe.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
+			attribute_values.setdefault(t.parent.lower(), []).append(t.attribute_value)
+
+		for t in frappe.get_all('Item Attribute',
+			fields=["name", "from_range", "to_range", "increment"], filters={'numeric_values': 1}):
+			numeric_values[t.name.lower()] = t
+
+		frappe.flags.attribute_values = attribute_values
+		frappe.flags.numeric_values = numeric_values
+
+	return frappe.flags.attribute_values, frappe.flags.numeric_values
 
 def find_variant(template, args, variant_item_code=None):
 	conditions = ["""(iv_attribute.attribute="{0}" and iv_attribute.attribute_value="{1}")"""\
@@ -118,7 +134,7 @@ def create_variant(item, args):
 
 	variant.set("attributes", variant_attributes)
 	copy_attributes_to_variant(template, variant)
-	make_variant_item_code(template, variant)
+	make_variant_item_code(template.item_code, variant)
 
 	return variant
 
@@ -136,7 +152,7 @@ def copy_attributes_to_variant(item, variant):
 		for d in variant.attributes:
 			variant.description += "<p>" + d.attribute + ": " + cstr(d.attribute_value) + "</p>"
 
-def make_variant_item_code(template, variant):
+def make_variant_item_code(template_item_code, variant):
 	"""Uses template's item code and abbreviations to make variant's item code"""
 	if variant.item_code:
 		return
@@ -152,8 +168,10 @@ def make_variant_item_code(template, variant):
 			}, as_dict=True)
 
 		if not item_attribute:
-			# somehow an invalid item attribute got used
 			return
+			# frappe.throw(_('Invalid attribute {0} {1}').format(frappe.bold(attr.attribute),
+			# 	frappe.bold(attr.attribute_value)), title=_('Invalid Attribute'),
+			# 	exc=InvalidItemAttributeValueError)
 
 		if item_attribute[0].numeric_values:
 			# don't generate item code if one of the attributes is numeric
@@ -162,7 +180,7 @@ def make_variant_item_code(template, variant):
 		abbreviations.append(item_attribute[0].abbr)
 
 	if abbreviations:
-		variant.item_code = "{0}-{1}".format(template.item_code, "-".join(abbreviations))
+		variant.item_code = "{0}-{1}".format(template_item_code, "-".join(abbreviations))
 
 	if variant.item_code:
 		variant.item_name = variant.item_code

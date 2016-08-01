@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.require("assets/erpnext/js/utils.js");
+
 
 frappe.ui.form.on_change("Installation Note", "customer",
 	function(frm) { erpnext.utils.get_party_details(frm); });
@@ -49,7 +49,7 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('From Delivery Note'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
 						source_doctype: "Delivery Note",
 						get_query_filters: {
@@ -67,11 +67,3 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 });
 
 $.extend(cur_frm.cscript, new erpnext.selling.InstallationNote({frm: cur_frm}));
-
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.inst_date);
-}
-
-cur_frm.cscript.inst_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.inst_date);
-}

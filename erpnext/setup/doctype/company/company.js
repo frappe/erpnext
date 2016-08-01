@@ -18,11 +18,11 @@ frappe.ui.form.on("Company", {
 				!frm.doc.__onload.transactions_exist));
 
 			frm.add_custom_button(__('Cost Centers'), function() {
-				frappe.set_route('Accounts Browser', 'Cost Center', {'company': frm.doc.name})
+				frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name})
 			})
 
 			frm.add_custom_button(__('Chart of Accounts'), function() {
-				frappe.set_route('Accounts Browser', 'Account', {'company': frm.doc.name})
+				frappe.set_route('Tree', 'Account', {'company': frm.doc.name})
 			})
 		}
 
@@ -136,17 +136,27 @@ erpnext.company.setup_queries = function(frm) {
 		["default_expense_account", {"root_type": "Expense"}],
 		["default_income_account", {"root_type": "Income"}],
 		["round_off_account", {"root_type": "Expense"}],
+		["write_off_account", {"root_type": "Expense"}],
+		["exchange_gain_loss_account", {"root_type": "Expense"}],
+		["accumulated_depreciation_account", 
+			{"root_type": "Asset", "account_type": "Accumulated Depreciation"}],
+		["depreciation_expense_account", {"root_type": "Expense", "account_type": "Depreciation"}],
+		["disposal_account", {"report_type": "Profit and Loss"}],
 		["cost_center", {}],
-		["round_off_cost_center", {}]
+		["round_off_cost_center", {}],
+		["depreciation_cost_center", {}]
 	], function(i, v) {
 		erpnext.company.set_custom_query(frm, v);
 	});
 
 	if (sys_defaults.auto_accounting_for_stock) {
 		$.each([
-			["stock_adjustment_account", {"root_type": "Expense"}],
-			["expenses_included_in_valuation", {"root_type": "Expense"}],
-			["stock_received_but_not_billed", {"report_type": "Balance Sheet"}]
+			["stock_adjustment_account", 
+				{"root_type": "Expense", "account_type": "Stock Adjustment"}],
+			["expenses_included_in_valuation", 
+				{"root_type": "Expense", "account_type": "Expenses Included in Valuation"}],
+			["stock_received_but_not_billed", 
+				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}]
 		], function(i, v) {
 			erpnext.company.set_custom_query(frm, v);
 		});

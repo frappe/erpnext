@@ -1,0 +1,70 @@
+{% extends "templates/web.html" %}
+
+{% block script %}
+<script>
+$(document).ready(function() {
+    $("#login_btn").click(function() {
+        var me = this;
+        $(this).html("Logging In...").prop("disabled", true);
+        frappe.call({
+            "method": "login",
+            args: {
+                usr: "demo@erpnext.com",
+                pwd: "demo",
+                lead_email: $("#lead-email").val(),
+            },
+            callback: function(r) {
+                $(me).prop("disabled", false);
+                if(r.exc) {
+                    alert("Error, please contact support@erpnext.com");
+                } else {
+                    console.log("Logged In");
+                    window.location.href = "desk";
+                }
+            }
+        })
+        return false;
+    })
+    .prop("disabled", false);
+})
+
+</script>
+{% endblock %}
+
+{% block style %}
+<style>
+	footer, .navbar {
+		display: none;
+	}
+	.page-content {
+		right: 0%;
+		width: 100%;
+	}
+</style>
+{% endblock %}
+
+{% block title %}
+{{ _("Login") }}
+{% endblock %}
+
+{% block page_content %}
+
+<!-- no-header -->
+<div class="page-hero text-center">
+	<img src="/assets/erpnext_demo/images/erp-icon-box.svg" style="max-width: 100px; max-height: 100px;">
+	<h1>ERPNext Demo</h1>
+	<p style="margin-top: 60px;">
+		<input id="lead-email" type="email"
+			class="form-control" placeholder="Your Email Id (optional)"
+			style="width: 75%; max-width: 400px; margin: auto;">
+	</p>
+
+	<button type="submit" id="login_btn" class="btn btn-default">Launch Demo</button>
+
+	<hr style="margin: 60px 0px;">
+	<p class="text-muted small">Some functionality is disabled for the demo app. The demo data will be cleared regulary.
+		<br class="hidden-xs">
+		To start your free ERPNext account, <a href="https://erpnext.com/signup?plan=Free-Solo">click here</a></p>
+</div>
+
+{% endblock %}

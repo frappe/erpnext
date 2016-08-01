@@ -34,5 +34,29 @@
   "year": "_Test Fiscal Year 2017",
   "year_end_date": "2017-12-31",
   "year_start_date": "2017-01-01"
+ },
+ {
+  "doctype": "Fiscal Year",
+  "year": "_Test Fiscal Year 2018",
+  "year_end_date": "2018-12-31",
+  "year_start_date": "2018-01-01"
+ },
+ {
+  "doctype": "Fiscal Year",
+  "year": "_Test Fiscal Year 2019",
+  "year_end_date": "2019-12-31",
+  "year_start_date": "2019-01-01"
+ },
+ {
+  "doctype": "Fiscal Year",
+  "year": "_Test Fiscal Year 2020",
+  "year_end_date": "2020-12-31",
+  "year_start_date": "2020-01-01"
+ },
+ {
+  "doctype": "Fiscal Year",
+  "year": "_Test Fiscal Year 2021",
+  "year_end_date": "2021-12-31",
+  "year_start_date": "2021-01-01"
  }
 ]

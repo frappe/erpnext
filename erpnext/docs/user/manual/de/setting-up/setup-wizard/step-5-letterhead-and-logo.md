@@ -15,7 +15,7 @@ Klicken Sie die Box "Briefkopf anhängen" an. Wählen Sie eine Bilddatei aus und
 
 Wenn Ihr Briefkopf noch nicht fertig ist, können Sie diesen Schritt auch überspringen.
 
-Um später einen Briefkopf über das Modul "Einstellungen" auszuwählen, lesen Sie im Bereich [Briefkopf]({{docs_base_url}}/user/manual/en/setting-up/print/letter-head.html) weiter.
+Um später einen Briefkopf über das Modul "Einstellungen" auszuwählen, lesen Sie im Bereich [Briefkopf]({{docs_base_url}}/user/manual/de/setting-up/print/letter-head.html) weiter.
 
 ### Anhang als Internetverknüpfung
 

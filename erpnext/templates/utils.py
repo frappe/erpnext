@@ -9,7 +9,7 @@ from frappe.utils import cint, formatdate
 
 @frappe.whitelist(allow_guest=True)
 def send_message(subject="Website Query", message="", sender="", status="Open"):
-	from frappe.templates.pages.contact import send_message as website_send_message
+	from frappe.www.contact import send_message as website_send_message
 
 	website_send_message(subject, message, sender)
 

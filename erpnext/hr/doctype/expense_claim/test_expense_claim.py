@@ -30,7 +30,7 @@ class TestExpenseClaim(unittest.TestCase):
 			 "project": "_Test Project 1",
 			 "task": task_name,
 			 "expenses":
-			 	[{ "expense_type": "Food", "claim_amount": 300, "sanctioned_amount": 200 }]
+			 	[{ "expense_type": "Food", "default_account": "Entertainment Expenses - _TC", "claim_amount": 300, "sanctioned_amount": 200 }]
 		})
 		expense_claim.submit()
 
@@ -44,7 +44,7 @@ class TestExpenseClaim(unittest.TestCase):
 			 "project": "_Test Project 1",
 			 "task": task_name,
 			 "expenses":
-			 	[{ "expense_type": "Food", "claim_amount": 600, "sanctioned_amount": 500 }]
+			 	[{ "expense_type": "Food", "default_account": "Entertainment Expenses - _TC", "claim_amount": 600, "sanctioned_amount": 500 }]
 		})
 		expense_claim2.submit()
 

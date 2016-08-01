@@ -4,12 +4,13 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cstr, validate_email_add, cint, comma_and
+from frappe.utils import cstr, validate_email_add, cint, comma_and, has_gravatar
 from frappe import session
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.utilities.address_and_contact import load_address_and_contact
+from erpnext.accounts.party import set_taxes
 
 sender_field = "email_id"
 
@@ -43,6 +44,8 @@ class Lead(SellingController):
 				# Lead Owner cannot be same as the Lead
 				self.lead_owner = None
 
+			self.image = has_gravatar(self.email_id)
+
 	def on_update(self):
 		self.add_calendar_event()
 
@@ -58,7 +61,7 @@ class Lead(SellingController):
 	def check_email_id_is_unique(self):
 		if self.email_id:
 			# validate email is unique
-			duplicate_leads = frappe.db.sql_list("""select name from tabLead 
+			duplicate_leads = frappe.db.sql_list("""select name from tabLead
 				where email_id=%s and name!=%s""", (self.email_id, self.name))
 
 			if duplicate_leads:
@@ -138,7 +141,7 @@ def make_quotation(source_name, target_doc=None):
 	return target_doc
 
 @frappe.whitelist()
-def get_lead_details(lead):
+def get_lead_details(lead, posting_date=None, company=None):
 	if not lead: return {}
 
 	from erpnext.accounts.party import set_address_details
@@ -157,5 +160,10 @@ def get_lead_details(lead):
 	})
 
 	set_address_details(out, lead, "Lead")
+
+	taxes_and_charges = set_taxes(None, 'Lead', posting_date, company,
+		billing_address=out.get('customer_address'), shipping_address=out.get('shipping_address_name'))
+	if taxes_and_charges:
+		out['taxes_and_charges'] = taxes_and_charges
 
 	return out

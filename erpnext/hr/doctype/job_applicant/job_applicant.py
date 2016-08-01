@@ -29,6 +29,10 @@ class JobApplicant(Document):
 		self.check_email_id_is_unique()
 		validate_email_add(self.email_id, True)
 
+		if not self.applicant_name and self.email_id:
+			guess = self.email_id.split('@')[0]
+			self.applicant_name = ' '.join([p.capitalize() for p in guess.split('.')])
+
 	def check_email_id_is_unique(self):
 		if self.email_id:
 			names = frappe.db.sql_list("""select name from `tabJob Applicant`

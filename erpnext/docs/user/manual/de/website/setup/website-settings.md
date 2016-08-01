@@ -7,7 +7,7 @@ Die meisten der Einstellungen, die Ihre Webseite betreffen, können hier eingest
 
 ### Zielseite
 
-* Homepage: Sie können angeben, welche [Webseite]({{docs_base_url}}/user/manual/en/website/web-page.html) die Startseite der Homepage ist.
+* Homepage: Sie können angeben, welche [Webseite]({{docs_base_url}}/user/manual/de/website/web-page.html) die Startseite der Homepage ist.
 * Startseite ist "Products": Wenn diese Option markiert ist, ist die Standard-Artikelgruppe die Startseite der Webseite.
 * Titel-Präfix: Stellt den Browser-Titel ein.
 

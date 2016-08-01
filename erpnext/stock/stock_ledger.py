@@ -141,7 +141,7 @@ class update_entries_after(object):
 			"stock_value": self.stock_value
 		})
 		bin_doc.flags.via_stock_ledger_entry = True
-		
+
 		bin_doc.save(ignore_permissions=True)
 
 	def process_sle(self, sle):
@@ -211,7 +211,7 @@ class update_entries_after(object):
 		if incoming_rate < 0:
 			# wrong incoming rate
 			incoming_rate = self.valuation_rate
-			
+
 		stock_value_change = 0
 		if incoming_rate:
 			stock_value_change = actual_qty * incoming_rate
@@ -232,24 +232,32 @@ class update_entries_after(object):
 
 	def get_moving_average_values(self, sle):
 		actual_qty = flt(sle.actual_qty)
+		new_stock_qty = flt(self.qty_after_transaction) + actual_qty
+		if new_stock_qty >= 0:
+			if actual_qty > 0:
+				if flt(self.qty_after_transaction) <= 0:
+					self.valuation_rate = sle.incoming_rate
+				else:
+					new_stock_value = (self.qty_after_transaction * self.valuation_rate) + \
+						(actual_qty * sle.incoming_rate)
 
-		if actual_qty > 0 or flt(sle.outgoing_rate) > 0:
-			rate = flt(sle.incoming_rate) if actual_qty > 0 else flt(sle.outgoing_rate)
+					self.valuation_rate = new_stock_value / new_stock_qty
 
-			if self.qty_after_transaction < 0 and not self.valuation_rate:
-				# if negative stock, take current valuation rate as incoming rate
-				self.valuation_rate = rate
+			elif sle.outgoing_rate:
+				if new_stock_qty:
+					new_stock_value = (self.qty_after_transaction * self.valuation_rate) + \
+						(actual_qty * sle.outgoing_rate)
 
-			new_stock_qty = abs(self.qty_after_transaction) + actual_qty
-			new_stock_value = (abs(self.qty_after_transaction) * self.valuation_rate) + (actual_qty * rate)
+					self.valuation_rate = new_stock_value / new_stock_qty
+				else:
+					self.valuation_rate = sle.outgoing_rate
 
-			if new_stock_qty:
-				self.valuation_rate = new_stock_value / flt(new_stock_qty)
+		else:
+			if flt(self.qty_after_transaction) >= 0 and sle.outgoing_rate:
+				self.valuation_rate = sle.outgoing_rate
 
-		elif not self.valuation_rate and self.qty_after_transaction <= 0:
-			self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, self.allow_zero_rate)
-
-		self.valuation_rate = abs(flt(self.valuation_rate))
+			if not self.valuation_rate and actual_qty > 0:
+				self.valuation_rate = sle.incoming_rate
 
 	def get_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
@@ -268,10 +276,7 @@ class update_entries_after(object):
 					self.stock_queue.append([actual_qty, incoming_rate])
 				else:
 					qty = self.stock_queue[-1][0] + actual_qty
-					if qty == 0:
-						self.stock_queue.pop(-1)
-					else:
-						self.stock_queue[-1] = [qty, incoming_rate]
+					self.stock_queue[-1] = [qty, incoming_rate]
 		else:
 			qty_to_pop = abs(actual_qty)
 			while qty_to_pop:
@@ -320,7 +325,11 @@ class update_entries_after(object):
 		stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
 		stock_qty = sum((flt(batch[0]) for batch in self.stock_queue))
 
-		self.valuation_rate = (stock_value / flt(stock_qty)) if stock_qty else 0
+		if stock_qty:
+			self.valuation_rate = stock_value / flt(stock_qty)
+
+		if not self.stock_queue:
+			self.stock_queue.append([0, sle.incoming_rate or sle.outgoing_rate or self.valuation_rate])
 
 	def get_sle_before_datetime(self):
 		"""get previous stock ledger entry before current time-bucket"""
@@ -334,11 +343,22 @@ class update_entries_after(object):
 
 	def raise_exceptions(self):
 		deficiency = min(e["diff"] for e in self.exceptions)
-		msg = _("Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5}").format(self.item_code,
-			self.warehouse, self.exceptions[0]["posting_date"], self.exceptions[0]["posting_time"],
-			_(self.exceptions[0]["voucher_type"]), self.exceptions[0]["voucher_no"], deficiency)
+
+		if ((self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]) in
+			frappe.local.flags.currently_saving):
+
+			msg = _("{0} units of {1} needed in {2} to complete this transaction.").format(
+				abs(deficiency), frappe.get_desk_link('Item', self.item_code),
+				frappe.get_desk_link('Warehouse', self.warehouse))
+		else:
+			msg = _("{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction.").format(
+				abs(deficiency), frappe.get_desk_link('Item', self.item_code),
+				frappe.get_desk_link('Warehouse', self.warehouse),
+				self.exceptions[0]["posting_date"], self.exceptions[0]["posting_time"],
+				frappe.get_desk_link(self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]))
+
 		if self.verbose:
-			frappe.throw(msg, NegativeStockError)
+			frappe.throw(msg, NegativeStockError, title='Insufficent Stock')
 		else:
 			raise NegativeStockError, msg
 

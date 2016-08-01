@@ -3,25 +3,32 @@
 
 
 frappe.provide("erpnext.stock");
-frappe.require("assets/erpnext/js/controllers/stock_controller.js");
 
 erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	setup: function() {
 		var me = this;
-		this.frm.fields_dict.purchase_receipts.grid.get_field('purchase_receipt').get_query =
-			function() {
+		this.frm.fields_dict.purchase_receipts.grid.get_field('receipt_document').get_query =
+			function(doc, cdt ,cdn) {
+				var d = locals[cdt][cdn]
+
+				var filters = [
+					[d.receipt_document_type, 'docstatus', '=', '1'],
+					[d.receipt_document_type, 'company', '=', me.frm.doc.company],
+				]
+
+				if(d.receipt_document_type == "Purchase Invoice") {
+					filters.push(["Purchase Invoice", "update_stock", "=", "1"])
+				}
+
 				if(!me.frm.doc.company) msgprint(__("Please enter company first"));
 				return {
-					filters:[
-						['Purchase Receipt', 'docstatus', '=', '1'],
-						['Purchase Receipt', 'company', '=', me.frm.doc.company],
-					]
+					filters:filters
 				}
 		};
 
-		this.frm.add_fetch("purchase_receipt", "supplier", "supplier");
-		this.frm.add_fetch("purchase_receipt", "posting_date", "posting_date");
-		this.frm.add_fetch("purchase_receipt", "base_grand_total", "grand_total");
+		this.frm.add_fetch("receipt_document", "supplier", "supplier");
+		this.frm.add_fetch("receipt_document", "posting_date", "posting_date");
+		this.frm.add_fetch("receipt_document", "base_grand_total", "grand_total");
 
 	},
 

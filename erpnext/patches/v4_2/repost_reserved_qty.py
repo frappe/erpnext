@@ -6,7 +6,8 @@ import frappe
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 
 def execute():
-	frappe.reload_doctype("Sales Order Item")
+	for doctype in ("Sales Order Item", "Bin"):
+		frappe.reload_doctype(doctype)
 
 	repost_for = frappe.db.sql("""
 		select

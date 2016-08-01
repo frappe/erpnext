@@ -4,14 +4,9 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
+			"label": _("Projects"),
 			"icon": "icon-star",
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Task",
-					"description": _("Project activity / task."),
-				},
 				{
 					"type": "doctype",
 					"name": "Project",
@@ -19,30 +14,9 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Time Log",
-					"description": _("Time Log for tasks."),
+					"name": "Task",
+					"description": _("Project activity / task."),
 				},
-				{
-					"type": "doctype",
-					"name": "Time Log Batch",
-					"description": _("Batch Time Logs for billing."),
-				},
-				{
-					"type": "doctype",
-					"name": "Activity Type",
-					"description": _("Types of activities for Time Sheets"),
-				},
-				{
-					"type": "doctype",
-					"name": "Activity Cost",
-					"description": _("Cost of various activities"),
-				},
-			]
-		},
-		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
-			"items": [
 				{
 					"type": "report",
 					"route": "Gantt/Task",
@@ -53,14 +27,34 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Standard Reports"),
+			"label": _("Time Tracking"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Timesheet",
+					"description": _("Timesheet for tasks."),
+				},
+				{
+					"type": "doctype",
+					"name": "Activity Type",
+					"description": _("Types of activities for Time Logs"),
+				},
+				{
+					"type": "doctype",
+					"name": "Activity Cost",
+					"description": _("Cost of various activities"),
+				},
+			]
+		},
+		{
+			"label": _("Reports"),
 			"icon": "icon-list",
 			"items": [
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Daily Time Log Summary",
-					"doctype": "Time Log"
+					"name": "Daily Timesheet Summary",
+					"doctype": "Timesheet"
 				},
 				{
 					"type": "report",

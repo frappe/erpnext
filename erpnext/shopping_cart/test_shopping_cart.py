@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from erpnext.shopping_cart.cart import _get_cart_quotation, update_cart, get_customer
+from erpnext.shopping_cart.cart import _get_cart_quotation, update_cart, get_party
 
 class TestShoppingCart(unittest.TestCase):
 	"""
@@ -96,19 +96,12 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEquals(quotation.net_total, 20)
 		self.assertEquals(len(quotation.get("items")), 1)
 
-		# remove second item
-		update_cart("_Test Item 2", 0)
-		quotation = self.test_get_cart_customer()
-
-		self.assertEquals(len(quotation.get("items")), 0)
-		self.assertEquals(quotation.net_total, 0)
-
 	def test_tax_rule(self):
 		self.login_as_customer()
 		quotation = self.create_quotation()
 
 		from erpnext.accounts.party import set_taxes
-
+		
 		tax_rule_master = set_taxes(quotation.customer, "Customer", \
 			quotation.transaction_date, quotation.company, None, None, \
 			quotation.customer_address, quotation.shipping_address_name, 1)
@@ -125,7 +118,7 @@ class TestShoppingCart(unittest.TestCase):
 			"doctype": "Quotation",
 			"quotation_to": "Customer",
 			"order_type": "Shopping Cart",
-			"customer": get_customer(frappe.session.user).name,
+			"customer": get_party(frappe.session.user).name,
 			"docstatus": 0,
 			"contact_email": frappe.session.user,
 			"selling_price_list": "_Test Price List Rest of the World",
@@ -191,15 +184,16 @@ class TestShoppingCart(unittest.TestCase):
 		frappe.set_user("test_cart_user@example.com")
 
 	def login_as_customer(self):
-		self.create_user_if_not_exists("test_contact_customer@example.com")
+		self.create_user_if_not_exists("test_contact_customer@example.com",
+			"_Test Contact For _Test Customer")
 		frappe.set_user("test_contact_customer@example.com")
 
 	def remove_all_items_from_cart(self):
 		quotation = _get_cart_quotation()
-		quotation.set("items", [])
-		quotation.save(ignore_permissions=True)
+		quotation.flags.ignore_permissions=True
+		quotation.delete()
 
-	def create_user_if_not_exists(self, email):
+	def create_user_if_not_exists(self, email, first_name = None):
 		if frappe.db.exists("User", email):
 			return
 
@@ -208,7 +202,7 @@ class TestShoppingCart(unittest.TestCase):
 			"user_type": "Website User",
 			"email": email,
 			"send_welcome_email": 0,
-			"first_name": email.split("@")[0]
+			"first_name": first_name or email.split("@")[0]
 		}).insert(ignore_permissions=True)
 
 test_dependencies = ["Sales Taxes and Charges Template", "Price List", "Item Price", "Shipping Rule", "Currency Exchange",

@@ -15,9 +15,9 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
 
 
-form_grid_templates = {
-	"items": "templates/form_grid/material_request_grid.html"
-}
+# form_grid_templates = {
+# 	"items": "templates/form_grid/material_request_grid.html"
+# }
 
 class MaterialRequest(BuyingController):
 	def get_feed(self):
@@ -75,9 +75,23 @@ class MaterialRequest(BuyingController):
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 
+		self.set_title()
+
+
 		# self.validate_qty_against_so()
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
+
+	def set_title(self):
+		'''Set title as comma separated list of items'''
+		items = []
+		for d in self.items:
+			if d.item_code not in items:
+				items.append(d.item_code)
+			if(len(items)==4):
+				break
+
+		self.title = ', '.join(items)
 
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
@@ -101,7 +115,6 @@ class MaterialRequest(BuyingController):
 		pc_obj = frappe.get_doc('Purchase Common')
 
 		pc_obj.check_for_closed_status(self.doctype, self.name)
-		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Order', docname = self.name, detail_doctype = 'Purchase Order Item')
 
 		self.update_requested_qty()
 
@@ -200,9 +213,8 @@ def make_purchase_order(source_name, target_doc=None):
 		"Material Request Item": {
 			"doctype": "Purchase Order Item",
 			"field_map": [
-				["name", "prevdoc_detail_docname"],
-				["parent", "prevdoc_docname"],
-				["parenttype", "prevdoc_doctype"],
+				["name", "material_request_item"],
+				["parent", "material_request"],
 				["uom", "stock_uom"],
 				["uom", "uom"]
 			],
@@ -210,6 +222,28 @@ def make_purchase_order(source_name, target_doc=None):
 			"condition": lambda doc: doc.ordered_qty < doc.qty
 		}
 	}, target_doc, postprocess)
+
+	return doclist
+
+@frappe.whitelist()
+def make_request_for_quotation(source_name, target_doc=None):
+	doclist = get_mapped_doc("Material Request", source_name, 	{
+		"Material Request": {
+			"doctype": "Request for Quotation",
+			"validation": {
+				"docstatus": ["=", 1],
+				"material_request_type": ["=", "Purchase"]
+			}
+		},
+		"Material Request Item": {
+			"doctype": "Request for Quotation Item",
+			"field_map": [
+				["name", "material_request_item"],
+				["parent", "material_request"],
+				["uom", "uom"]
+			]
+		}
+	}, target_doc)
 
 	return doclist
 
@@ -239,9 +273,8 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 			"Material Request Item": {
 				"doctype": "Purchase Order Item",
 				"field_map": [
-					["name", "prevdoc_detail_docname"],
-					["parent", "prevdoc_docname"],
-					["parenttype", "prevdoc_doctype"],
+					["name", "material_request_item"],
+					["parent", "material_request"],
 					["uom", "stock_uom"],
 					["uom", "uom"]
 				],
@@ -286,9 +319,8 @@ def make_supplier_quotation(source_name, target_doc=None):
 		"Material Request Item": {
 			"doctype": "Supplier Quotation Item",
 			"field_map": {
-				"name": "prevdoc_detail_docname",
-				"parent": "prevdoc_docname",
-				"parenttype": "prevdoc_doctype"
+				"name": "material_request_item",
+				"parent": "material_request"
 			}
 		}
 	}, target_doc, postprocess)
@@ -341,8 +373,8 @@ def raise_production_orders(material_request):
 	errors =[]
 	production_orders = []
 	for d in mr.items:
-		if (d.qty - d.ordered_qty) >0 :
-			if frappe.db.get_value("Item", d.item_code, "is_pro_applicable"):
+		if (d.qty - d.ordered_qty) >0:
+			if frappe.db.get_value("BOM", {"item": d.item_code, "is_default": 1}):
 				prod_order = frappe.new_doc("Production Order")
 				prod_order.production_item = d.item_code
 				prod_order.qty = d.qty - d.ordered_qty

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from frappe.utils import flt, today
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year, now
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 class TestPeriodClosingVoucher(unittest.TestCase):
@@ -14,10 +14,10 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		year_start_date = get_fiscal_year(today())[1]
 
 		make_journal_entry("_Test Bank - _TC", "Sales - _TC", 400,
-			"_Test Cost Center - _TC", submit=True)
+			"_Test Cost Center - _TC", posting_date=now(), submit=True)
 
 		make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 600, "_Test Cost Center - _TC", submit=True)
+			"_Test Bank - _TC", 600, "_Test Cost Center - _TC", posting_date=now(), submit=True)
 
 		random_expense_account = frappe.db.sql("""
 			select t1.account,

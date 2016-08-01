@@ -4,8 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt, comma_or
-from frappe import msgprint, _, throw
+from frappe import _
 from frappe.model.document import Document
+from erpnext.accounts.party_status import notify_status
 
 def validate_status(status, options):
 	if status not in options:
@@ -17,9 +18,11 @@ status_map = {
 		["Opportunity", "has_opportunity"],
 	],
 	"Opportunity": [
-		["Lost", "eval:self.status=='Lost'"],
 		["Quotation", "has_quotation"],
-		["Converted", "has_ordered_quotation"]
+		["Converted", "has_ordered_quotation"],
+		["Lost", "eval:self.status=='Lost'"],
+		["Closed", "eval:self.status=='Closed'"]
+
 	],
 	"Quotation": [
 		["Draft", None],
@@ -104,8 +107,7 @@ class StatusUpdater(Document):
 				self.add_comment("Label", _(self.status))
 
 			if update:
-				frappe.db.set_value(self.doctype, self.name, "status", self.status,
-					update_modified=update_modified)
+				self.db_set('status', self.status, update_modified = update_modified)
 
 	def validate_qty(self):
 		"""Validates qty at row level"""
@@ -133,15 +135,12 @@ class StatusUpdater(Document):
 						item['idx'] = d.idx
 						item['target_ref_field'] = args['target_ref_field'].replace('_', ' ')
 
-						if not item[args['target_ref_field']]:
-							msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
-						elif args.get('no_tolerance'):
+						# if not item[args['target_ref_field']]:
+						# 	msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
+						if args.get('no_tolerance'):
 							item['reduce_by'] = item[args['target_field']] - item[args['target_ref_field']]
 							if item['reduce_by'] > .01:
-								msgprint(_("Allowance for over-{0} crossed for Item {1}")
-									.format(args["overflow_type"], item.item_code))
-								throw(_("{0} must be reduced by {1} or you should increase overflow tolerance")
-									.format(_(item.target_ref_field.title()), item["reduce_by"]))
+								self.limits_crossed_error(args, item)
 
 						else:
 							self.check_overflow_with_tolerance(item, args)
@@ -160,10 +159,20 @@ class StatusUpdater(Document):
 			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+tolerance)/100)
 			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
 
-			msgprint(_("Allowance for over-{0} crossed for Item {1}.")
-				.format(args["overflow_type"], item["item_code"]))
-			throw(_("{0} must be reduced by {1} or you should increase overflow tolerance")
-				.format(_(item["target_ref_field"].title()), item["reduce_by"]))
+			self.limits_crossed_error(args, item)
+
+	def limits_crossed_error(self, args, item):
+		'''Raise exception for limits crossed'''
+		frappe.throw(_('This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?')
+			.format(
+				frappe.bold(_(item["target_ref_field"].title())),
+				frappe.bold(item["reduce_by"]),
+				frappe.bold(_(args.get('target_dt'))),
+				frappe.bold(_(self.doctype)),
+				frappe.bold(item.get('item_code'))
+			) + '<br><br>' +
+				_('To allow over-billing or over-ordering, update "Allowance" in Stock Settings or the Item.'),
+			title = _('Limit Crossed'))
 
 	def update_qty(self, update_modified=True):
 		"""Updates qty or amount at row level
@@ -254,6 +263,7 @@ class StatusUpdater(Document):
 			target = frappe.get_doc(args["target_parent_dt"], args["name"])
 			target.set_status(update=True)
 			target.notify_update()
+			notify_status(target)
 
 	def _update_modified(self, args, update_modified):
 		args['update_modified'] = ''
@@ -287,14 +297,16 @@ class StatusUpdater(Document):
 
 			per_billed = ((ref_doc_qty if billed_qty > ref_doc_qty else billed_qty)\
 				/ ref_doc_qty)*100
-			frappe.db.set_value(ref_dt, ref_dn, "per_billed", per_billed)
+
+			ref_doc = frappe.get_doc(ref_dt, ref_dn)
+
+			ref_doc.db_set("per_billed", per_billed)
 
 			if frappe.get_meta(ref_dt).get_field("billing_status"):
 				if per_billed < 0.001: billing_status = "Not Billed"
 				elif per_billed >= 99.99: billing_status = "Fully Billed"
 				else: billing_status = "Partly Billed"
-
-				frappe.db.set_value(ref_dt, ref_dn, "billing_status", billing_status)
+				ref_doc.db_set('billing_status', billing_status)
 
 def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 	"""

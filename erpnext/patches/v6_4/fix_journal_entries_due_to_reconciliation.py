@@ -5,6 +5,9 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doctype("Sales Invoice Advance")
+	frappe.reload_doctype("Purchase Invoice Advance")
+	
 	je_rows = frappe.db.sql("""
 		select name, parent, reference_type, reference_name, debit, credit
 		from `tabJournal Entry Account`
@@ -23,7 +26,7 @@ def execute():
 		is_advance_entry=None
 		if d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name:
 			is_advance_entry = frappe.db.sql("""select name from `tab{0}` 
-				where journal_entry=%s and jv_detail_no=%s 
+				where reference_name=%s and reference_row=%s 
 					and ifnull(allocated_amount, 0) > 0 and docstatus=1"""
 				.format(d.reference_type + " Advance"), (d.parent, d.name))
 				

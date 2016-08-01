@@ -7,6 +7,6 @@ src="{{docs_base_url}}/assets/img/setup-wizard/step-9.png">
 
 ---
 
-To understand Suppliers in detail visit [Supplier Master]({{docs_base_url}}/user/manual/en/buying/supplier-master.html)
+To understand Suppliers in detail visit [Supplier Master]({{docs_base_url}}/user/manual/en/buying/supplier.html)
 
 {next}

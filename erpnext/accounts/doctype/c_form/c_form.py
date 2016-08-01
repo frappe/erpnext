@@ -18,17 +18,17 @@ class CForm(Document):
 					`tabSales Invoice` where name = %s and docstatus = 1""", d.invoice_no)
 
 				if inv and inv[0][0] != 'Yes':
-					frappe.throw("C-form is not applicable for Invoice: {0}".format(d.invoice_no))
+					frappe.throw(_("C-form is not applicable for Invoice: {0}".format(d.invoice_no)))
 
 				elif inv and inv[0][1] and inv[0][1] != self.name:
-					frappe.throw("""Invoice {0} is tagged in another C-form: {1}.
+					frappe.throw(_("""Invoice {0} is tagged in another C-form: {1}.
 						If you want to change C-form no for this invoice,
 						please remove invoice no from the previous c-form and then try again"""\
-						.format(d.invoice_no, inv[0][1]))
+						.format(d.invoice_no, inv[0][1])))
 
 				elif not inv:
-					frappe.throw("Row {0}: Invoice {1} is invalid, it might be cancelled / does not exist. \
-						Please enter a valid Invoice".format(d.idx, d.invoice_no))
+					frappe.throw(_("Row {0}: Invoice {1} is invalid, it might be cancelled / does not exist. \
+						Please enter a valid Invoice".format(d.idx, d.invoice_no)))
 
 	def on_update(self):
 		"""	Update C-Form No on invoices"""

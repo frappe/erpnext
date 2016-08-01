@@ -9,8 +9,7 @@
                 </div>
                 {% if(actual_qty != null) { %}
                 <div style="margin-top: 5px;" class="text-muted small text-right">
-                    <span title="{%= __("In Stock") %}">{%= actual_qty || 0 %}<span>
-                    <span title="{%= __("Projected") %}">({%= projected_qty || 0 %})<span>
+                    <span title="{%= __("In Stock") %}">{%= actual_qty || 0 %}<span>                
                 </div>
                 {% } %}
             </div>
@@ -18,6 +17,7 @@
         </div>
     </div>
     <div class="col-xs-3 text-right">
-        <h6>{%= amount %}<div class="text-muted" style="margin-top: 5px;">{%= rate %}</div></h6>
+        <div class="text-muted" style="margin-top: 5px;"><input type="text" value="{%= rate %}" class="form-control input-sm pos-item-rate text-right"></div>
+		<p><h6>{%= amount %}</h6></p>
     </div>
 </div>

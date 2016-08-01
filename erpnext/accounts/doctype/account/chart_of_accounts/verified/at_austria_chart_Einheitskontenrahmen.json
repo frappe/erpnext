@@ -1,6 +1,6 @@
 {
     "country_code": "at",
-    "name": "Austria - Chart of Accounts - Einheitskontenrahmen provided by fairkom.eu",
+    "name": "Austria - Chart of Accounts - Einheitskontenrahmen",
     "tree": {
         "Klasse 0 Aktiva: Anlageverm\u00f6gen": {
 				"0100 Konzessionen ": {"account_type": "Fixed Asset"},

@@ -22,7 +22,6 @@ class JournalEntry(AccountsController):
 			self.is_opening='No'
 		self.clearance_date = None
 
-		super(JournalEntry, self).validate_date_with_fiscal_year()
 		self.validate_party()
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()
@@ -62,8 +61,8 @@ class JournalEntry(AccountsController):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
 
 	def on_cancel(self):
-		from erpnext.accounts.utils import remove_against_link_from_jv
-		remove_against_link_from_jv(self.doctype, self.name)
+		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+		unlink_ref_doc_from_payment_entries(self.doctype, self.name)
 
 		self.make_gl_entries(1)
 		self.update_advance_paid()
@@ -354,25 +353,31 @@ class JournalEntry(AccountsController):
 			self.remark = ("\n").join(r) #User Remarks is not mandatory
 
 	def set_print_format_fields(self):
-		total_amount = 0.0
-		bank_account_currency = None
-		pay_to_recd_from = None
+		bank_amount = party_amount = total_amount = 0.0
+		currency = bank_account_currency = party_account_currency = pay_to_recd_from= None
 		for d in self.get('accounts'):
 			if d.party_type and d.party:
 				if not pay_to_recd_from:
 					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
 
+				party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
+				party_account_currency = d.account_currency
+
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
-				total_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
+				bank_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				bank_account_currency = d.account_currency
 
 		if pay_to_recd_from:
 			self.pay_to_recd_from = pay_to_recd_from
-		else:
-			total_amount = 0
+			if bank_amount:
+				total_amount = bank_amount
+				currency = bank_account_currency
+			else:
+				total_amount = party_amount
+				currency = party_account_currency
 
-		self.set_total_amount(total_amount, bank_account_currency)
+		self.set_total_amount(total_amount, currency)
 
 	def set_total_amount(self, amt, currency):
 		self.total_amount = amt
@@ -399,7 +404,8 @@ class JournalEntry(AccountsController):
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
-						"cost_center": d.cost_center
+						"cost_center": d.cost_center,
+						"project": d.project
 					})
 				)
 
@@ -502,7 +508,7 @@ class JournalEntry(AccountsController):
 
 	def validate_empty_accounts_table(self):
 		if not self.get('accounts'):
-			frappe.throw("Accounts table cannot be blank.")
+			frappe.throw(_("Accounts table cannot be blank."))
 
 	def set_account_and_party_balance(self):
 		account_balance = {}
@@ -513,28 +519,25 @@ class JournalEntry(AccountsController):
 
 			if (d.party_type, d.party) not in party_balance:
 				party_balance[(d.party_type, d.party)] = get_balance_on(party_type=d.party_type,
-					party=d.party, date=self.posting_date)
+					party=d.party, date=self.posting_date, company=self.company)
 
 			d.account_balance = account_balance[d.account]
 			d.party_balance = party_balance[(d.party_type, d.party)]
 
 @frappe.whitelist()
-def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None, account=None):
+def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 	if mode_of_payment:
-		account = get_bank_cash_account(mode_of_payment, company)
-		if account.get("account"):
-			account.update({"balance": get_balance_on(account.get("account"))})
-			return account
+		account = get_bank_cash_account(mode_of_payment, company).get("account")
 
 	if not account:
-		if voucher_type=="Bank Entry":
+		if account_type=="Bank":
 			account = frappe.db.get_value("Company", company, "default_bank_account")
 			if not account:
 				account = frappe.db.get_value("Account",
 					{"company": company, "account_type": "Bank", "is_group": 0})
 
-		elif voucher_type=="Cash Entry":
+		elif account_type=="Cash":
 			account = frappe.db.get_value("Company", company, "default_cash_account")
 			if not account:
 				account = frappe.db.get_value("Account",
@@ -543,12 +546,14 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None, a
 	if account:
 		account_details = frappe.db.get_value("Account", account,
 			["account_currency", "account_type"], as_dict=1)
-		return {
+			
+		return frappe._dict({
 			"account": account,
 			"balance": get_balance_on(account),
 			"account_currency": account_details.account_currency,
 			"account_type": account_details.account_type
-		}
+		})
+	else: return frappe._dict()
 
 @frappe.whitelist()
 def get_payment_entry_against_order(dt, dn, amount=None, debit_in_account_currency=None, journal_entry=False, bank_account=None):
@@ -656,7 +661,7 @@ def get_payment_entry(ref_doc, args):
 	bank_row = je.append("accounts")
 
 	#make it bank_details
-	bank_account = get_default_bank_cash_account(ref_doc.company, "Bank Entry", account=args.get("bank_account"))
+	bank_account = get_default_bank_cash_account(ref_doc.company, "Bank", account=args.get("bank_account"))
 	if bank_account:
 		bank_row.update(bank_account)
 		bank_row.exchange_rate = get_exchange_rate(bank_account["account"],
@@ -665,7 +670,7 @@ def get_payment_entry(ref_doc, args):
 	bank_row.cost_center = cost_center
 
 	amount = args.get("debit_in_account_currency") or args.get("amount")
-	
+
 	if bank_row.account_currency == args.get("party_account_currency"):
 		bank_row.set(args.get("amount_field_bank"), amount)
 	else:
@@ -722,8 +727,9 @@ def get_outstanding(args):
 			amount_field: abs(against_jv_amount)
 		}
 	elif args.get("doctype") in ("Sales Invoice", "Purchase Invoice"):
+		party_type = "Customer" if args.get("doctype") == "Sales Invoice" else "Supplier"
 		invoice = frappe.db.get_value(args["doctype"], args["docname"],
-			["outstanding_amount", "conversion_rate"], as_dict=1)
+			["outstanding_amount", "conversion_rate", scrub(party_type)], as_dict=1)
 
 		exchange_rate = invoice.conversion_rate if (args.get("account_currency") != company_currency) else 1
 
@@ -736,7 +742,9 @@ def get_outstanding(args):
 
 		return {
 			amount_field: abs(flt(invoice.outstanding_amount)),
-			"exchange_rate": exchange_rate
+			"exchange_rate": exchange_rate,
+			"party_type": party_type,
+			"party": invoice.get(scrub(party_type))
 		}
 
 @frappe.whitelist()
@@ -747,7 +755,7 @@ def get_party_account_and_balance(company, party_type, party):
 	account = get_party_account(party_type, party, company)
 
 	account_balance = get_balance_on(account=account)
-	party_balance = get_balance_on(party_type=party_type, party=party)
+	party_balance = get_balance_on(party_type=party_type, party=party, company=company)
 
 	return {
 		"account": account,
@@ -805,7 +813,7 @@ def get_exchange_rate(account, account_currency=None, company=None,
 	company_currency = get_company_currency(company)
 
 	if account_currency != company_currency:
-		if reference_type and reference_name and frappe.get_meta(reference_type).get_field("conversion_rate"):
+		if reference_type in ("Sales Invoice", "Purchase Invoice") and reference_name:
 			exchange_rate = frappe.db.get_value(reference_type, reference_name, "conversion_rate")
 
 		elif account_details and account_details.account_type == "Bank" and \
@@ -822,6 +830,7 @@ def get_exchange_rate(account, account_currency=None, company=None,
 	# don't return None or 0 as it is multipled with a value and that value could be lost
 	return exchange_rate or 1
 
+@frappe.whitelist()
 def get_average_exchange_rate(account):
 	exchange_rate = 0
 	bank_balance_in_account_currency = get_balance_on(account)

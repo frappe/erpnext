@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import frappe, json
+import frappe
 from frappe.utils import flt
 import unittest
 
@@ -32,5 +32,99 @@ class TestQuotation(unittest.TestCase):
 		sales_order.transaction_date = "2013-05-12"
 		sales_order.insert()
 
+	def test_create_quotation_with_margin(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.sales_order.sales_order \
+			import make_delivery_note, make_sales_invoice
+
+		total_margin = flt((1500*18.75)/100 + 1500)
+
+		test_records[0]['items'][0]['price_list_rate'] = 1500
+		test_records[0]['items'][0]['margin_type'] = 'Percentage'
+		test_records[0]['items'][0]['margin_rate_or_amount'] = 18.75
+
+		quotation = frappe.copy_doc(test_records[0])
+		quotation.insert()
+
+		self.assertEquals(quotation.get("items")[0].rate, total_margin)
+		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
+		quotation.submit()
+
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = "2016-01-02"
+		sales_order.naming_series = "_T-Quotation-"
+		sales_order.transaction_date = "2016-01-01"
+		sales_order.insert()
+
+		self.assertEquals(quotation.get("items")[0].rate, total_margin)
+
+		sales_order.submit()
+
+		dn = make_delivery_note(sales_order.name)
+		self.assertEquals(quotation.get("items")[0].rate, total_margin)
+		dn.save()
+
+		si = make_sales_invoice(sales_order.name)
+		self.assertEquals(quotation.get("items")[0].rate, total_margin)
+		si.save()
+
+	def test_party_status_open(self):
+		from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+
+		customer = frappe.get_doc(get_customer_dict('Party Status Test')).insert()
+		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
+
+		quotation = frappe.get_doc(get_quotation_dict(customer=customer.name)).insert()
+		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Open')
+
+		quotation.submit()
+		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
+
+		quotation.cancel()
+		quotation.delete()
+		customer.delete()
+
+	def test_party_status_close(self):
+		from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+
+		customer = frappe.get_doc(get_customer_dict('Party Status Test')).insert()
+		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
+
+		# open quotation
+		quotation = frappe.get_doc(get_quotation_dict(customer=customer.name)).insert()
+		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Open')
+
+		# close quotation (submit)
+		quotation.submit()
+
+		quotation1 = frappe.get_doc(get_quotation_dict(customer=customer.name)).insert()
+
+		# still open
+		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Open')
+
+		quotation.cancel()
+		quotation.delete()
+
+		quotation1.delete()
+
+		customer.delete()
 
 test_records = frappe.get_test_records('Quotation')
+
+def get_quotation_dict(customer=None, item_code=None):
+	if not customer:
+		customer = '_Test Customer'
+	if not item_code:
+		item_code = '_Test Item'
+
+	return {
+		'doctype': 'Quotation',
+		'customer': customer,
+		'items': [
+			{
+				'item_code': item_code,
+				'qty': 1,
+				'rate': 100
+			}
+		]
+	}

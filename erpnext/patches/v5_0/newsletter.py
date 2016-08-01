@@ -10,9 +10,9 @@ def execute():
 	frappe.reload_doctype("Lead")
 	frappe.reload_doctype("Contact")
 
-	frappe.reload_doc('crm', 'doctype', 'newsletter_list')
-	frappe.reload_doc('crm', 'doctype', 'newsletter_list_subscriber')
-	frappe.reload_doc('crm', 'doctype', 'newsletter')
+	frappe.reload_doc('email', 'doctype', 'email_group')
+	frappe.reload_doc('email', 'doctype', 'email_group_member')
+	frappe.reload_doc('email', 'doctype', 'newsletter')
 
 	frappe.permissions.reset_perms("Newsletter")
 
@@ -30,7 +30,7 @@ def execute():
 			user.save()
 
 	# create default lists
-	general = frappe.new_doc("Newsletter List")
+	general = frappe.new_doc("Email Group")
 	general.title = "General"
 	general.insert()
 	general.import_from("Lead")

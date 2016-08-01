@@ -19,7 +19,7 @@ def get_list_context(context=None):
 	}
 
 def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20):
-	from frappe.templates.pages.list import get_list
+	from frappe.www.list import get_list
 	user = frappe.session.user
 	key = None
 
@@ -28,15 +28,16 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 	filters.append((doctype, "docstatus", "=", 1))
 
 	if user != "Guest" and is_website_user():
+		parties_doctype = 'Request for Quotation Supplier' if doctype == 'Request for Quotation' else doctype
 		# find party for this contact
-		customers, suppliers = get_customers_suppliers(doctype, user)
+		customers, suppliers = get_customers_suppliers(parties_doctype, user)
 
-		if customers:
-			key, parties = "customer", customers
-		elif suppliers:
-			key, parties = "supplier", suppliers
-		else:
-			key, parties = "customer", []
+		if not customers and not suppliers: return []
+
+		key, parties = get_party_details(customers, suppliers)
+
+		if doctype == 'Request for Quotation':
+			return rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length)
 
 		filters.append((doctype, key, "in", parties))
 
@@ -51,6 +52,23 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 
 	return post_process(doctype, get_list(doctype, txt, filters, limit_start, limit_page_length,
 		fields="name", order_by = "modified desc"))
+
+def get_party_details(customers, suppliers):
+	if customers:
+		key, parties = "customer", customers
+	elif suppliers:
+		key, parties = "supplier", suppliers
+	else:
+		key, parties = "customer", []
+
+	return key, parties
+
+def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length):
+	data = frappe.db.sql("""select distinct parent as name, supplier from `tab{doctype}`
+			where supplier = '{supplier}' and docstatus=1  order by modified desc limit {start}, {len}""".
+			format(doctype=parties_doctype, supplier=parties[0], start=limit_start, len = limit_page_length), as_dict=1)
+
+	return post_process(doctype, data)
 
 def post_process(doctype, data):
 	result = []
@@ -72,7 +90,7 @@ def post_process(doctype, data):
 			doc.set_indicator()
 
 		doc.status_display = ", ".join(doc.status_display)
-		doc.items_preview = ", ".join([d.item_name for d in doc.items])
+		doc.items_preview = ", ".join([d.item_name for d in doc.items if d.item_name])
 		result.append(doc)
 
 	return result

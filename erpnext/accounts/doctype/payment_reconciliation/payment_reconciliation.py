@@ -7,31 +7,49 @@ from frappe.utils import flt
 from frappe import msgprint, _
 from frappe.model.document import Document
 from erpnext.accounts.utils import get_outstanding_invoices
+from erpnext.controllers.accounts_controller import get_advance_payment_entries
 
 class PaymentReconciliation(Document):
 	def get_unreconciled_entries(self):
-		self.get_jv_entries()
+		self.get_nonreconciled_payment_entries()
 		self.get_invoice_entries()
+		
+	def get_nonreconciled_payment_entries(self):
+		self.check_mandatory_to_fetch()
+		
+		payment_entries = self.get_payment_entries()
+		journal_entries = self.get_jv_entries()
+				
+		self.add_payment_entries(payment_entries + journal_entries)
+		
+	def get_payment_entries(self):
+		order_doctype = "Sales Order" if self.party_type=="Customer" else "Purchase Order"
+		payment_entries = get_advance_payment_entries(self.party_type, self.party, 
+			self.receivable_payable_account, order_doctype, against_all_orders=True)
+			
+		return payment_entries
 
 	def get_jv_entries(self):
-		self.check_mandatory_to_fetch()
 		dr_or_cr = "credit_in_account_currency" if self.party_type == "Customer" \
 			else "debit_in_account_currency"
 
 		bank_account_condition = "t2.against_account like %(bank_cash_account)s" \
 				if self.bank_cash_account else "1=1"
 
-		jv_entries = frappe.db.sql("""
+		journal_entries = frappe.db.sql("""
 			select
-				t1.name as voucher_no, t1.posting_date, t1.remark,
-				t2.name as voucher_detail_no, {dr_or_cr} as payment_amount, t2.is_advance
+				"Journal Entry" as reference_type, t1.name as reference_name, 
+				t1.posting_date, t1.remark as remarks, t2.name as reference_row, 
+				{dr_or_cr} as amount, t2.is_advance
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
 				t1.name = t2.parent and t1.docstatus = 1 and t2.docstatus = 1
 				and t2.party_type = %(party_type)s and t2.party = %(party)s
 				and t2.account = %(account)s and {dr_or_cr} > 0
-				and (t2.reference_type is null or t2.reference_type in ('', 'Sales Order', 'Purchase Order'))
+				and (t2.reference_type is null or t2.reference_type = '' or 
+					(t2.reference_type in ('Sales Order', 'Purchase Order') 
+						and t2.reference_name is not null and t2.reference_name != ''))
 				and (CASE
 					WHEN t1.voucher_type in ('Debit Note', 'Credit Note')
 					THEN 1=1
@@ -47,18 +65,13 @@ class PaymentReconciliation(Document):
 				"bank_cash_account": "%%%s%%" % self.bank_cash_account
 			}, as_dict=1)
 
-		self.add_payment_entries(jv_entries)
+		return list(journal_entries)
 
-	def add_payment_entries(self, jv_entries):
+	def add_payment_entries(self, entries):
 		self.set('payments', [])
-		for e in jv_entries:
-			ent = self.append('payments', {})
-			ent.journal_entry = e.get('voucher_no')
-			ent.posting_date = e.get('posting_date')
-			ent.amount = flt(e.get('payment_amount'))
-			ent.remark = e.get('remark')
-			ent.voucher_detail_number = e.get('voucher_detail_no')
-			ent.is_advance = e.get('is_advance')
+		for e in entries:
+			row = self.append('payments', {})
+			row.update(e)
 
 	def get_invoice_entries(self):
 		#Fetch JVs, Sales and Purchase Invoices for 'invoices' to reconcile against
@@ -90,14 +103,16 @@ class PaymentReconciliation(Document):
 
 		self.get_invoice_entries()
 		self.validate_invoice()
-		dr_or_cr = "credit_in_account_currency" if self.party_type == "Customer" \
-			else "debit_in_account_currency"
+		dr_or_cr = "credit_in_account_currency" \
+			if self.party_type == "Customer" else "debit_in_account_currency"
+			
 		lst = []
 		for e in self.get('payments'):
 			if e.invoice_number and e.allocated_amount:
-				lst.append({
-					'voucher_no' : e.journal_entry,
-					'voucher_detail_no' : e.voucher_detail_number,
+				lst.append(frappe._dict({
+					'voucher_type': e.reference_type,
+					'voucher_no' : e.reference_name,
+					'voucher_detail_no' : e.reference_row,
 					'against_voucher_type' : e.invoice_type,
 					'against_voucher'  : e.invoice_number,
 					'account' : self.receivable_payable_account,
@@ -105,13 +120,14 @@ class PaymentReconciliation(Document):
 					'party': self.party,
 					'is_advance' : e.is_advance,
 					'dr_or_cr' : dr_or_cr,
-					'unadjusted_amt' : flt(e.amount),
-					'allocated_amt' : flt(e.allocated_amount)
-				})
-
+					'unadjusted_amount' : flt(e.amount),
+					'allocated_amount' : flt(e.allocated_amount)
+				}))
+				
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
+			
 			msgprint(_("Successfully Reconciled"))
 			self.get_unreconciled_entries()
 
@@ -142,7 +158,7 @@ class PaymentReconciliation(Document):
 						.format(p.invoice_type, p.invoice_number))
 
 				if flt(p.allocated_amount) > flt(p.amount):
-					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to JV amount {2}")
+					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to Payment Entry amount {2}")
 						.format(p.idx, p.allocated_amount, p.amount))
 
 				invoice_outstanding = unreconciled_invoices.get(p.invoice_type, {}).get(p.invoice_number)

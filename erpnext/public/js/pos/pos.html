@@ -24,22 +24,24 @@
 							<div class="tax-table small"></div>
 						</div>
                     </div>
-                    <div class="row pos-bill-row discount-amount-area">
-                        <div class="col-xs-6"><h6 class="text-muted">{%= __("Discount") %}</h6></div>
-						<div class="col-xs-3 discount-field-col">
-							<div class="input-group input-group-sm">
-								<span class="input-group-addon">%</span>
-								<input type="text" class="form-control discount-percentage text-right">
+					{% if (apply_discount_on) { %}
+	                    <div class="row pos-bill-row discount-amount-area">
+	                        <div class="col-xs-6"><h6 class="text-muted">{%= __("Discount") %}</h6></div>
+							<div class="col-xs-3 discount-field-col">
+								<div class="input-group input-group-sm">
+									<span class="input-group-addon">%</span>
+									<input type="text" class="form-control discount-percentage text-right">
+								</div>
 							</div>
-						</div>
-                        <div class="col-xs-3 discount-field-col">
-							<div class="input-group input-group-sm">
-								<span class="input-group-addon">{%= get_currency_symbol(currency) %}</span>
-								<input type="text" class="form-control discount-amount text-right"
-							  		placeholder="{%= 0.00 %}">
+	                        <div class="col-xs-3 discount-field-col">
+								<div class="input-group input-group-sm">
+									<span class="input-group-addon">{%= get_currency_symbol(currency) %}</span>
+									<input type="text" class="form-control discount-amount text-right"
+								  		placeholder="{%= 0.00 %}">
+								</div>
 							</div>
-						</div>
-                    </div>
+	                    </div>
+					{% } %} 
                     <div class="row pos-bill-row grand-total-area">
                         <div class="col-xs-6"><h6>{%= __("Grand Total") %}</h6></div>
                         <div class="col-xs-6"><h6 class="grand-total text-right"></h6></div>
@@ -47,12 +49,16 @@
     			</div>
     		</div>
     	</div>
-    	<div class="col-sm-7 pos-item-area">
+    	<div class="col-sm-7 pos-items-section">
+			<div class="row pos-item-area">
+
+			</div>
+			<span id="customer-results" style="color:#68a;"></span>
             <div class="row pos-item-toolbar">
             	<div class="search-area col-xs-12"></div>
             </div>
     		<div class="item-list-area">
-				<div class="item-list"></div>
+				<div class="app-listing item-list"></ul>
     		</div>
     	</div>
     </div>

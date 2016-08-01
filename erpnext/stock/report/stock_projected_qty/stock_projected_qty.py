@@ -14,7 +14,8 @@ def get_columns():
 	return [_("Item Code") + ":Link/Item:140", _("Item Name") + "::100", _("Description") + "::200",
 		_("Item Group") + ":Link/Item Group:100", _("Brand") + ":Link/Brand:100", _("Warehouse") + ":Link/Warehouse:120",
 		_("UOM") + ":Link/UOM:100", _("Actual Qty") + ":Float:100", _("Planned Qty") + ":Float:100",
-		_("Requested Qty") + ":Float:110", _("Ordered Qty") + ":Float:100", _("Reserved Qty") + ":Float:100",
+		_("Requested Qty") + ":Float:110", _("Ordered Qty") + ":Float:100",
+		_("Reserved Qty") + ":Float:100", _("Reserved Qty for Production") + ":Float:100",
 		_("Projected Qty") + ":Float:100", _("Reorder Level") + ":Float:100", _("Reorder Qty") + ":Float:100",
 		_("Shortage Qty") + ":Float:100"]
 
@@ -51,20 +52,28 @@ def get_data(filters):
 
 		data.append([item.name, item.item_name, item.description, item.item_group, item.brand, bin.warehouse,
 			item.stock_uom, bin.actual_qty, bin.planned_qty, bin.indented_qty, bin.ordered_qty,
-			bin.reserved_qty, bin.projected_qty, re_order_level, re_order_qty, shortage_qty])
+			bin.reserved_qty, bin.reserved_qty_for_production, bin.projected_qty, re_order_level, re_order_qty, shortage_qty])
 
 	return data
 
 def get_bin_list(filters):
-	bin_filters = frappe._dict()
+	conditions = []
+	
 	if filters.item_code:
-		bin_filters.item_code = filters.item_code
+		conditions.append("item_code = '%s' "%filters.item_code)
+		
 	if filters.warehouse:
-		bin_filters.warehouse = filters.warehouse
+		warehouse_details = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"], as_dict=1)
 
-	bin_list = frappe.get_all("Bin", fields=["item_code", "warehouse",
-		"actual_qty", "planned_qty", "indented_qty", "ordered_qty", "reserved_qty", "projected_qty"],
-		filters=bin_filters, order_by="item_code, warehouse")
+		if warehouse_details:
+			conditions.append(" exists (select name from `tabWarehouse` wh \
+				where wh.lft >= %s and wh.rgt <= %s and bin.warehouse = wh.name)"%(warehouse_details.lft,
+				warehouse_details.rgt))
+
+	bin_list = frappe.db.sql("""select item_code, warehouse, actual_qty, planned_qty, indented_qty,
+		ordered_qty, reserved_qty, reserved_qty_for_production, projected_qty
+		from tabBin bin {conditions} order by item_code, warehouse
+		""".format(conditions=" where " + " and ".join(conditions) if conditions else ""), as_dict=1)
 
 	return bin_list
 

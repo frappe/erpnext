@@ -12,6 +12,7 @@ def _make_test_records(verbose):
 		["_Test Bank", "Bank Accounts", 0, "Bank", None],
 		["_Test Bank USD", "Bank Accounts", 0, "Bank", "USD"],
 		["_Test Bank EUR", "Bank Accounts", 0, "Bank", "EUR"],
+		["_Test Cash", "Cash In Hand", 0, "Cash", None],
 
 		["_Test Account Stock Expenses", "Direct Expenses", 1, None, None],
 		["_Test Account Shipping Charges", "_Test Account Stock Expenses", 0, "Chargeable", None],
@@ -32,10 +33,16 @@ def _make_test_records(verbose):
 		["_Test Account CST", "Direct Expenses", 0, "Tax", None],
 		["_Test Account Discount", "Direct Expenses", 0, None, None],
 		["_Test Write Off", "Indirect Expenses", 0, None, None],
+		["_Test Exchange Gain/Loss", "Indirect Expenses", 0, None, None],
 
 		# related to Account Inventory Integration
 		["_Test Account Stock In Hand", "Current Assets", 0, None, None],
-		["_Test Account Fixed Assets", "Current Assets", 0, None, None],
+		
+		# fixed asset depreciation
+		["_Test Fixed Asset", "Current Assets", 0, "Fixed Asset", None],
+		["_Test Accumulated Depreciations", "Current Assets", 0, None, None],
+		["_Test Depreciations", "Expenses", 0, None, None],
+		["_Test Gain/Loss on Asset Disposal", "Expenses", 0, None, None],
 
 		# Receivable / Payable Account
 		["_Test Receivable", "Current Assets", 0, "Receivable", None],

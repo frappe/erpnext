@@ -25,7 +25,7 @@ Sie können eine Liste von abhängigen Aufgaben im Bereich "Hängt ab von" erste
 
 ### Zeitmanagement
 
-ERPNext verwendet [Zeitprotokolle]({{docs_base_url}}/user/manual/en/projects/time-log.html) um den Fortschritt einer Aufgabe mitzuprotokollieren. Sie können mehrere unterschiedliche Zeitprotokolle zu jeder Aufgabe erstellen. Das aktuelle Start- und Enddatum kann dann zusammen mit der auf dem Zeitprotokoll basierenden Kostenberechnung aktualisiert werden.
+ERPNext verwendet [Zeitprotokolle]({{docs_base_url}}/user/manual/de/projects/time-log.html) um den Fortschritt einer Aufgabe mitzuprotokollieren. Sie können mehrere unterschiedliche Zeitprotokolle zu jeder Aufgabe erstellen. Das aktuelle Start- und Enddatum kann dann zusammen mit der auf dem Zeitprotokoll basierenden Kostenberechnung aktualisiert werden.
 
 * Um ein zu einer Aufgabe erstelltes Zeitprotokoll anzuschauen, klicken Sie auf "Zeitprotokolle".
 
@@ -39,7 +39,7 @@ ERPNext verwendet [Zeitprotokolle]({{docs_base_url}}/user/manual/en/projects/tim
 
 ### Ausgabenmanagement
 
-Sie können [Aufwandsabrechnungen]({{docs_base_url}}/user/manual/en/human-resource-management/expense-claim.html) mit einer Aufgabe verbuchen. Das System aktualisiert den Gesamtbetrag der Aufwandsabrechnungen im Abschnitt Kostenberechnung.
+Sie können [Aufwandsabrechnungen]({{docs_base_url}}/user/manual/de/human-resources/expense-claim.html) mit einer Aufgabe verbuchen. Das System aktualisiert den Gesamtbetrag der Aufwandsabrechnungen im Abschnitt Kostenberechnung.
 
 * Um eine Aufwandsabrechnung, die zu einer Aufgabe erstellt wurde, anzuschauen, klicken Sie auf "Aufwandsabrechnung".
 

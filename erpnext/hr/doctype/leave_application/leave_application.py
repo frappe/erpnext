@@ -8,6 +8,8 @@ from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_li
 	comma_or, get_fullname
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.doctype.employee_leave_approver.employee_leave_approver import get_approver_list
 
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
@@ -131,6 +133,7 @@ class LeaveApplication(Document):
 
 	def validate_leave_overlap(self):
 		if not self.name:
+			# hack! if name is null, it could cause problems with !=
 			self.name = "New Leave Application"
 
 		for d in frappe.db.sql("""select name, leave_type, posting_date, from_date, to_date, total_leave_days
@@ -236,7 +239,7 @@ class LeaveApplication(Document):
 
 	def notify(self, args):
 		args = frappe._dict(args)
-		from frappe.desk.page.messages.messages import post
+		from frappe.desk.page.chat.chat import post
 		post(**{"txt": args.message, "contact": args.message_to, "subject": args.subject,
 			"notify": cint(self.follow_via_email)})
 
@@ -245,11 +248,17 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 	if not filters.get("employee"):
 		frappe.throw(_("Please select Employee Record first."))
 
-	return frappe.db.sql("""select user.name, user.first_name, user.last_name from
+	employee_user = frappe.get_value("Employee", filters.get("employee"), "user_id")
+
+	approvers_list = frappe.db.sql("""select user.name, user.first_name, user.last_name from
 		tabUser user, `tabEmployee Leave Approver` approver where
 		approver.parent = %s
 		and user.name like %s
 		and approver.leave_approver=user.name""", (filters.get("employee"), "%" + txt + "%"))
+
+	if not approvers_list:
+		approvers_list = get_approver_list(employee_user)
+	return approvers_list
 
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day=None):
@@ -326,16 +335,14 @@ def get_leave_allocation_records(date, employee=None):
 
 
 def get_holidays(employee, from_date, to_date):
-	tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1
-		where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name
-		and h1.holiday_date between %s and %s""", (employee, from_date, to_date))[0][0]
+	'''get holidays between two dates for the given employee'''
+	holiday_list = get_holiday_list_for_employee(employee)
 
-	if not tot_hol:
-		tot_hol = frappe.db.sql("""select count(distinct holiday_date) from `tabHoliday` h1, `tabHoliday List` h2
-			where h1.parent = h2.name and h1.holiday_date between %s and %s
-			and h2.is_default = 1""", (from_date, to_date))[0][0]
+	holidays = frappe.db.sql("""select count(distinct holiday_date) from `tabHoliday` h1, `tabHoliday List` h2
+		where h1.parent = h2.name and h1.holiday_date between %s and %s
+		and h2.name = %s""", (from_date, to_date, holiday_list))[0][0]
 
-	return tot_hol
+	return holidays
 
 def is_lwp(leave_type):
 	lwp = frappe.db.sql("select is_lwp from `tabLeave Type` where name = %s", leave_type)
@@ -421,7 +428,7 @@ def add_block_dates(events, start, end, employee, company):
 		cnt+=1
 
 def add_holidays(events, start, end, employee, company):
-	applicable_holiday_list = frappe.db.get_value("Employee", employee, "holiday_list")
+	applicable_holiday_list = get_holiday_list_for_employee(employee, company)
 	if not applicable_holiday_list:
 		return
 

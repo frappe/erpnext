@@ -15,16 +15,17 @@ $(document).bind('toolbar_setup', function() {
 			frappe.urllib.get_base_url()+'/assets/erpnext/images/erp-icon.svg" />');
 
 	$('[data-link="docs"]').attr("href", "https://manual.erpnext.com")
+	$('[data-link="issues"]').attr("href", "https://github.com/frappe/erpnext/issues")
 });
 
 // doctypes created via tree
 $.extend(frappe.create_routes, {
-	"Customer Group": "Sales Browser/Customer Group",
-	"Territory": "Sales Browser/Territory",
-	"Item Group": "Sales Browser/Item Group",
-	"Sales Person": "Sales Browser/Sales Person",
-	"Account": "Accounts Browser/Account",
-	"Cost Center": "Accounts Browser/Cost Center"
+	"Customer Group": "Tree/Customer Group",
+	"Territory": "Tree/Territory",
+	"Item Group": "Tree/Item Group",
+	"Sales Person": "Tree/Sales Person",
+	"Account": "Tree/Account",
+	"Cost Center": "Tree/Cost Center"
 });
 
 // preferred modules for breadcrumbs

@@ -1,29 +1,21 @@
 # Point of Sale Invoice
 
-Point of Sale (POS) is the place where a retail transaction is completed. It
-is the point at which a customer makes a payment to the merchant in exchange
-for goods or services. For retail operations, the delivery of goods, accrual
-of sale and payment all happens in one event, that is usually called the
-“Point of Sale”.
+For retail operations, the delivery of goods, accrual of sale and payment all happens in one event, that is usually called the “Point of Sale” (POS).
 
-You can make a Sales Invoice of type POS by checking on “Is POS”. When you
-check this, you will notice that some fields get hidden and some new ones
-emerge.
+<iframe width="660" height="371" src="https://www.youtube.com/embed/4WkelWkbP_c" frameborder="0" allowfullscreen></iframe>
 
-> Tip: In retail, you may not create a separate Customer record for each
-customer. You can create a general Customer called “Walk-in Customer” and make
-all your transactions against this Customer record.
+###Offline POS
 
-#### Setting Up POS
+POS transactions are generally quick, hence should have as less dependency as possible. In ERPNext, you can create POS Invoices even when not connected to the internet.
+
+POS Invoices created in the offline mode will be saved locally in the browser. If internet connection is lost which creating POS Invoice, you will still be able can proceed forward. Once internet connection is available again, offline invoices will be synced, and pushed onto your ERPNext account. To learn more on how POS Invoices can be created when offline, [check here.](https://frappe.io/blog/blog/erpnext-features/offline-pos-in-erpnext-7)
+
+#### POS Profile
 
 In ERPNext all Sales and Purchase transactions, like Sales Invoice, Quotation, Sales Order, Purchase Order etc. can be edited via the POS. There two steps to Setup POS:
 
 1. Enable POS View via (Setup > Customize > Feature Setup)
 2. Create a [POS Setting]({{docs_base_url}}/user/manual/en/setting-up/pos-setting.html) record
-
-#### Switch to POS View
-
-Open any sales / purchase transaction. Click on the Computer <i class="icon-desktop"></i> Icon.
 
 #### Different sections of the POS
 
@@ -32,17 +24,22 @@ Open any sales / purchase transaction. Click on the Computer <i class="icon-desk
   * Update Payment Details like your Bank / Cash Account, Paid amount etc.
   * If you are writing off certain amount. For example when you receive extra cash as a result of not having exact denomination of change, check on ‘Write off Outstanding Amount’ and set the Account.
 
+
+### Customer
+
+You can select one of the existing Customer from the Customer master. If Customer doesn't exist in the Customer master, enter Customer Name in the POS Invoice view itself. On creation of POS Invoice, Customer will be auto-created in the Customer master.
+
+<img class="screenshot" alt="POS Customer" src="{{docs_base_url}}/assets/img/accounts/pos-customer.png">
+
 ### Adding an Item
 
-At the billing counter, the retailer needs to select Items which the consumer
-buys. In the POS interface you can select an Item by two methods. One, is by
-clicking on the Item image and the other, is through the Barcode / Serial No.
+At the billing counter, the retailer needs to select Items which the consumer buys. In the POS interface you can select an Item by two methods. One, is by clicking on the Item image and the other, is through the Barcode / Serial No.
 
 **Select Item** \- To select a product click on the Item image and add it into the cart. A cart is an area that prepares a customer for checkout by allowing to edit product information, adjust taxes and add discounts.
 
 **Barcode / Serial No** \- A Barcode / Serial No is an optical machine-readable representation of data relating to the object to which it is attached. Enter Barcode / Serial No in the box as shown in the image below and pause for a second, the item will be automatically added to the cart.
 
-![POS]({{docs_base_url}}/assets/old_images/erpnext/pos-add-item.png)
+<img class="screenshot" alt="POS Item" src="{{docs_base_url}}/assets/img/accounts/pos-item.png">
 
 > Tip: To change the quantity of an Item, enter your desired quantity in the
 quantity box. These are mostly used if the same Item is purchased in bulk.
@@ -52,18 +49,11 @@ in Search box.
 
 ### Removing an Item
 
-There are two ways to remove an Item.
+Set Qty as zero to remove Item from the POS invoice. There are two ways to remove an Item.
 
-  * Select an Item by clicking on the row of that Item from Item cart. Then click on “Del” button. OR
+  * If Item's Qty is 1, click on a minus sign to make it zero.
 
-  * Enter 0(zero) quantity of any item to delete that item.
-
-To remove multiple Items together, select multiple rows & click on “Del”
-button.
-
-> Delete button appears only when Items are selected.
-
-![POS]({{docs_base_url}}/assets/old_images/erpnext/pos-remove-item.png)
+  * Manually enter 0(zero) quantity.
 
 ### Make Payment
 
@@ -73,8 +63,8 @@ ready to make the Payment. Payment process is divided into 3 steps -
   1. Click on “Make Payment” to get the Payment window.
   2. Select your “Mode of Payment”.
   3. Click on “Pay” button to Save the document.
-
-![POS Payment]({{docs_base_url}}/assets/old_images/erpnext/pos-make-payment.png)
+  
+<img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/pos-payment.png">
 
 Submit the document to finalise the record. After the document is submitted,
 you can either print or email it directly to the customer.

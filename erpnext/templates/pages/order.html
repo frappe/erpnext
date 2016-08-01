@@ -1,32 +1,24 @@
-t{% extends "templates/web.html" %}
-
-{% block header %}
-<h1>{{ doc.name }}</h1>
-<!-- <h6 class="text-muted">{{ doc._title or doc.doctype }}</h6> -->
-{% endblock %}
+{% extends "templates/web.html" %}
+{% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description %}
 
 {% block breadcrumbs %}
 	{% include "templates/includes/breadcrumbs.html" %}
 {% endblock %}
 
-{% block style %}
-<style>
-    {% include "templates/includes/order/order.css" %}
-</style>
-{% endblock %}
+{% block title %}{{ doc.name }}{% endblock %}
+
+{% block header %}<h1>{{ doc.name }}</h1>{% endblock %}
 
 {% block page_content %}
 
-{% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description %}
-
-<div class="row">
+<div class="row transaction-subheading">
     <div class="col-xs-6">
         <span class="indicator {{ doc.indicator_color or "darkgrey" }}">
             {{ doc.indicator_title or doc.status or "Submitted" }}
         </span>
 	</div>
-    <div class="col-xs-6 text-muted text-right h6">
-        {{ doc.get_formatted("transaction_date") }}
+    <div class="col-xs-6 text-muted text-right small">
+        {{ frappe.utils.formatdate(doc.transaction_date, 'medium') }}
     </div>
 </div>
 
@@ -38,14 +30,14 @@ t{% extends "templates/web.html" %}
 
     <!-- items -->
     <div class="order-item-table">
-        <div class="row order-items order-item-header">
-            <div class="col-sm-8 col-xs-6 h6">
+        <div class="row order-items order-item-header text-muted">
+            <div class="col-sm-8 col-xs-6 h6 text-uppercase">
                 {{ _("Item") }}
             </div>
-            <div class="col-sm-2 col-xs-3 text-right h6">
+            <div class="col-sm-2 col-xs-3 text-right h6 text-uppercase">
                 {{ _("Quantity") }}
             </div>
-            <div class="col-sm-2 col-xs-3 text-right h6">
+            <div class="col-sm-2 col-xs-3 text-right h6 text-uppercase">
                 {{ _("Amount") }}
             </div>
         </div>
@@ -64,16 +56,16 @@ t{% extends "templates/web.html" %}
             <div class="col-sm-2 col-xs-3 text-right">
                 {{ d.get_formatted("amount")	 }}
                 <p class="text-muted small">{{
-                    _("Rate: {0}").format(d.get_formatted("rate")) }}</p>
+                    _("@ {0}").format(d.get_formatted("rate")) }}</p>
             </div>
         </div>
         {% endfor %}
     </div>
 
     <!-- taxes -->
-    <div class="order-taxes row small">
-        <div class="col-sm-8"><!-- empty --></div>
-        <div class="col-sm-4">
+    <div class="order-taxes row">
+        <div class="col-sm-6"><!-- empty --></div>
+        <div class="col-sm-6 text-right">
             {% include "erpnext/templates/includes/order/order_taxes.html" %}
         </div>
     </div>
@@ -87,7 +79,7 @@ t{% extends "templates/web.html" %}
 				or (doc.doctype=="Sales Invoice" and doc.outstanding_amount > 0) %}
 			<div class="page-header-actions-block" data-html-block="header-actions">
 				<p>
-				    <a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&mute_email=1&cart=1"
+				    <a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1"
 				        class="btn btn-primary btn-sm">Pay {{ doc.get_formatted("grand_total") }} </a>
 				</p>
 			</div>

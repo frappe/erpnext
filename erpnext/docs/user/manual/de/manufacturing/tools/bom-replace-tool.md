@@ -11,37 +11,26 @@ Stellen wir uns folgendes Szenario vor, um den Sachverhalt besser zu verstehen:
 
 Wenn eine Firma Computer herstellt, besteht die Stückliste des fertigen Erzeugnisses in etwa so aus:
 
-1\. Bildschirm
-
-2\. Tastatur
-
-3\. Maus
-
-4\. Zentraleinheit
+1. Bildschirm
+2. Tastatur
+3. Maus
+4. Zentraleinheit
 
 Von den oben aufgelisteten Artikeln wird die Zentraleinheit separat zusammengebaut. Somit wird eine eigenständige Stückliste für die Zentraleinheit ersellt. Im folgenden werden die Artikel der Stückliste der Zentraleinheit angegeben:
 
-1\. 250 GByte Festplatte
-
-2\. Hauptplatine
-
-3\. Prozessor
-
-4\. SMTP
-
-5\. DVD-Laufwerk
+1. 250 GByte Festplatte
+2. Hauptplatine
+3. Prozessor
+4. SMTP
+5. DVD-Laufwerk
 
 Wenn zur Stückliste der Zentraleinheit weitere Artikel hinzugefügt werden sollen, oder enthaltene Artikel bearbeitet werden sollen, sollte eine neue Stückliste erstellt werden.
 
-1\. _350 GByte Festplatte_
-
-2\. Hauptplatine
-
-3\. Prozessor
-
-4\. SMTP
-
-5\. DVD-Laufwerk
+1. _350 GByte Festplatte_
+2. Hauptplatine
+3. Prozessor
+4. SMTP
+5. DVD-Laufwerk
 
 Um die Stückliste, bei der die Zentraleinheit als Rohmaterial enthalten ist, in der Stückliste des fertigen Produktes zu aktualisieren, können Sie das Stücklisten-Austauschwerkzeug verwenden.
 

@@ -17,8 +17,8 @@ Type and the period for which the leave is taken.
 
 > Tip : If you want all users to create their own Leave Applications, you can set
 their “Employee ID” as a match rule in the Leave Application Permission
-settings. See the earlier discussion on [Setting Up Permissions]({{docs_base_url}}/user/manual/en/setting-up/users-and-permissions.html)
+settings. See the earlier discussion on [Setting Up Permissions]({{docs_base_url}}/user/manual/en/setting-up/users-and-permissions/user-permissions.html)
 for more info.
 
-You assign Leaves aginast an Employee check [Leave Allocation]({{docs_base_url}}/user/manual/en/human-resources/setup/leave-allocation.html)
+You assign Leaves aginast an Employee check [Leave Allocation]({{docs_base_url}}/user/manual/en/human-resources/leave.html)
 {next}

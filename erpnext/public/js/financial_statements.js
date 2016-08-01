@@ -28,7 +28,7 @@ erpnext.financial_statements = {
 				{ "value": "Half-Yearly", "label": __("Half-Yearly") },
 				{ "value": "Yearly", "label": __("Yearly") }
 			],
-			"default": "Yearly",
+			"default": "Monthly",
 			"reqd": 1
 		}
 	],
@@ -68,5 +68,20 @@ erpnext.financial_statements = {
 	"tree": true,
 	"name_field": "account",
 	"parent_field": "parent_account",
-	"initial_depth": 3
+	"initial_depth": 3,
+	onload: function(report) {
+		// dropdown for links to other financial statements
+		report.page.add_inner_button(__("Balance Sheet"), function() {
+			var filters = report.get_values();
+			frappe.set_route('query-report', 'Balance Sheet', {company: filters.company});
+		}, 'Financial Statements');
+		report.page.add_inner_button(__("Profit and Loss"), function() {
+			var filters = report.get_values();
+			frappe.set_route('query-report', 'Profit and Loss Statement', {company: filters.company});
+		}, 'Financial Statements');
+		report.page.add_inner_button(__("Cash Flow Statement"), function() {
+			var filters = report.get_values();
+			frappe.set_route('query-report', 'Cash Flow', {company: filters.company});
+		}, 'Financial Statements');
+	}
 };

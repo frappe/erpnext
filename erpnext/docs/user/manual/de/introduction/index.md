@@ -31,6 +31,6 @@ ERPNext hilft Ihnen unter anderem dabei:
 
 Und vieles vieles mehr.
 
-#### Themen:
+#### Themen
 
 {index}

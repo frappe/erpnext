@@ -2,33 +2,25 @@
 
 {% block title %} {{ title }} {% endblock %}
 
-{% block header %}<h2>{{ title }}</h2>{% endblock %}
-
-{% block header_actions %}
-{% include 'templates/includes/product_search_box.html' %}
-{% endblock %}
-
 {% block breadcrumbs %}
     {% include "templates/includes/breadcrumbs.html" %}
 {% endblock %}
 
 {% block page_content %}
 {% from "erpnext/templates/includes/macros.html" import product_image %}
-<div class="item-content">
+<div class="item-content" style="margin-top:20px;">
 	<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
-			<div class="col-sm-5">
+			<div class="col-sm-6">
 				{% if slideshow %}
 					{% include "templates/includes/slideshow.html" %}
 				{% else %}
 					{{ product_image(website_image, "product-full-image") }}
 				{% endif %}
 			</div>
-			<div class="col-sm-7">
-				<!-- <h3 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h3> -->
-				<div itemprop="description">
-				{{ web_long_description or description or _("No description given") }}
-				</div>
+			<div class="col-sm-6" style="padding-left:20px;">
+				 <h2 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h2>
+
 				<p class="text-muted">
 					{{ _("Item Code") }}: <span itemprop="productID">{{ variant and variant.name or name }}</span></p>
 				<br>
@@ -60,8 +52,10 @@
 				</div>
 				<br>
 				<div style="min-height: 100px; margin: 10px 0;">
-					<h4 class="item-price" itemprop="price"></h4>
-					<div class="item-stock" itemprop="availablity"></div>
+					<div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+						<h4 class="item-price" itemprop="price"></h4>
+						<div class="item-stock" itemprop="availability"></div>
+					</div>
                     <div class="item-cart hide">
     					<div id="item-add-to-cart">
     						<button class="btn btn-primary btn-sm">
@@ -77,15 +71,24 @@
 				</div>
 			</div>
 		</div>
-		{% if website_specifications -%}
-		<div class="row item-website-specification" style="margin-top: 20px">
+		<div class="row item-website-description" style="margin-top:30px; margin-bottom:20px">
 			<div class="col-md-12">
-				<h4>{{ _("Specifications") }}</h4>
+		<div class="h6 text-uppercase">{{ _("Description") }}</div>
+		<div itemprop="description" class="item-desc">
+		{{ web_long_description or description or _("No description given") }}
+		</div>
+		</div>
+		</div>
 
-				<table class="table table-bordered" style="width: 100%">
+		{% if website_specifications -%}
+		<div class="row item-website-specification" style="margin-top: 40px">
+			<div class="col-md-12">
+				<div class="h6 text-uppercase">{{ _("Specifications") }}</div>
+
+				<table class="table borderless" style="width: 100%">
 				{% for d in website_specifications -%}
 					<tr>
-						<td style="width: 30%;">{{ d.label }}</td>
+						<td class="product-label text-muted" style="width: 30%;">{{ d.label }}</td>
 						<td>{{ d.description }}</td>
 					</tr>
 				{%- endfor %}

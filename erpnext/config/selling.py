@@ -4,14 +4,9 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
+			"label": _("Sales"),
 			"icon": "icon-star",
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Customer",
-					"description": _("Customer database."),
-				},
 				{
 					"type": "doctype",
 					"name": "Quotation",
@@ -21,6 +16,24 @@ def get_data():
 					"type": "doctype",
 					"name": "Sales Order",
 					"description": _("Confirmed orders from Customers."),
+				},
+			]
+		},
+		{
+			"label": _("Customers"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Customer",
+					"description": _("Customer database."),
+				},
+				{
+					"type": "doctype",
+					"label": _("Customer Group"),
+					"name": "Customer Group",
+					"icon": "icon-sitemap",
+					"link": "Tree/Customer Group",
+					"description": _("Manage Customer Group Tree."),
 				},
 				{
 					"type": "doctype",
@@ -32,31 +45,91 @@ def get_data():
 					"name": "Address",
 					"description": _("All Addresses."),
 				},
+
+			]
+		},
+		{
+			"label": _("Items and Pricing"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Item",
 					"description": _("All Products or Services."),
 				},
+				{
+					"type": "doctype",
+					"name": "Product Bundle",
+					"description": _("Bundle items at time of sale."),
+				},
+				{
+					"type": "doctype",
+					"name": "Price List",
+					"description": _("Price List master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Item Group",
+					"icon": "icon-sitemap",
+					"label": _("Item Group"),
+					"link": "Tree/Item Group",
+					"description": _("Tree of Item Groups."),
+				},
+				{
+					"type": "doctype",
+					"name": "Item Price",
+					"description": _("Multiple Item prices."),
+					"route": "Report/Item Price"
+				},
+				{
+					"type": "doctype",
+					"name": "Shipping Rule",
+					"description": _("Rules for adding shipping costs.")
+				},
+				{
+					"type": "doctype",
+					"name": "Pricing Rule",
+					"description": _("Rules for applying pricing and discount.")
+				},
+
 			]
 		},
 		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
+			"label": _("Sales Partners and Territory"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "SMS Center",
-					"description":_("Send mass SMS to your contacts"),
+					"label": _("Territory"),
+					"name": "Territory",
+					"icon": "icon-sitemap",
+					"link": "Tree/Territory",
+					"description": _("Manage Territory Tree."),
 				},
 				{
 					"type": "doctype",
-					"name": "SMS Log",
-					"description":_("Logs for maintaining sms delivery status"),
+					"name": "Sales Partner",
+					"description": _("Manage Sales Partners."),
 				},
 				{
 					"type": "doctype",
-					"name": "Newsletter",
-					"description": _("Newsletters to contacts, leads."),
+					"label": _("Sales Person"),
+					"name": "Sales Person",
+					"icon": "icon-sitemap",
+					"link": "Tree/Sales Person",
+					"description": _("Manage Sales Person Tree."),
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Territory Target Variance (Item Group-Wise)",
+					"route": "query-report/Territory Target Variance Item Group-Wise",
+					"doctype": "Territory"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Person Target Variance (Item Group-Wise)",
+					"route": "query-report/Sales Person Target Variance Item Group-Wise",
+					"doctype": "Sales Person",
 				},
 			]
 		},
@@ -75,47 +148,6 @@ def get_data():
 					"description": _("Sales campaigns."),
 				},
 				{
-					"type": "page",
-					"label": _("Customer Group"),
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"link": "Sales Browser/Customer Group",
-					"description": _("Manage Customer Group Tree."),
-					"doctype": "Customer Group",
-				},
-				{
-					"type": "page",
-					"label": _("Territory"),
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"link": "Sales Browser/Territory",
-					"description": _("Manage Territory Tree."),
-					"doctype": "Territory",
-				},
-				{
-					"type": "doctype",
-					"name": "Sales Partner",
-					"description": _("Manage Sales Partners."),
-				},
-				{
-					"type": "page",
-					"label": _("Sales Person"),
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"link": "Sales Browser/Sales Person",
-					"description": _("Manage Sales Person Tree."),
-					"doctype": "Sales Person",
-				},
-				{
-					"type": "page",
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"label": _("Item Group Tree"),
-					"link": "Sales Browser/Item Group",
-					"description": _("Tree of Item Groups."),
-					"doctype": "Item Group",
-				},
-				{
 					"type": "doctype",
 					"name":"Terms and Conditions",
 					"label": _("Terms and Conditions Template"),
@@ -128,49 +160,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Shipping Rule",
-					"description": _("Rules for adding shipping costs.")
-				},
-				{
-					"type": "doctype",
-					"name": "Price List",
-					"description": _("Price List master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Item Price",
-					"description": _("Multiple Item prices."),
-					"route": "Report/Item Price"
-				},
-				{
-					"type": "doctype",
-					"name": "Pricing Rule",
-					"description": _("Rules for applying pricing and discount.")
-				},
-				{
-					"type": "doctype",
-					"name": "Product Bundle",
-					"description": _("Bundle items at time of sale."),
-				},
-				{
-					"type": "doctype",
-					"name": "Email Account",
-					"description": _("Setup incoming server for sales email id. (e.g. sales@example.com)")
-				},
-				{
-					"type": "doctype",
 					"name": "Industry Type",
 					"description": _("Track Leads by Industry Type.")
-				},
-				{
-					"type": "doctype",
-					"name": "SMS Settings",
-					"description": _("Setup SMS gateway settings")
 				},
 			]
 		},
 		{
-			"label": _("Main Reports"),
+			"label": _("Analytics"),
 			"icon": "icon-table",
 			"items": [
 				{
@@ -192,10 +188,22 @@ def get_data():
 					"doctype": "Customer",
 					"icon": "icon-bar-chart",
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Quotation Trends",
+					"doctype": "Quotation"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Order Trends",
+					"doctype": "Sales Order"
+				},
 			]
 		},
 		{
-			"label": _("Standard Reports"),
+			"label": _("Other Reports"),
 			"icon": "icon-list",
 			"items": [
 				{
@@ -231,39 +239,13 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Territory Target Variance (Item Group-Wise)",
-					"route": "query-report/Territory Target Variance Item Group-Wise",
-					"doctype": "Territory"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Person Target Variance (Item Group-Wise)",
-					"route": "query-report/Sales Person Target Variance Item Group-Wise",
-					"doctype": "Sales Person",
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
 					"name": "BOM Search",
 					"doctype": "BOM"
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Customers Not Buying Since Long Time",
-					"doctype": "Sales Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Quotation Trends",
-					"doctype": "Quotation"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Order Trends",
+					"name": "Inactive Customers",
 					"doctype": "Sales Order"
 				},
 				{
@@ -283,6 +265,27 @@ def get_data():
 					"is_query_report": True,
 					"name": "Customer Credit Balance",
 					"doctype": "Customer"
+				},
+			]
+		},
+		{
+			"label": _("SMS"),
+			"icon": "icon-wrench",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "SMS Center",
+					"description":_("Send mass SMS to your contacts"),
+				},
+				{
+					"type": "doctype",
+					"name": "SMS Log",
+					"description":_("Logs for maintaining sms delivery status"),
+				},
+				{
+					"type": "doctype",
+					"name": "SMS Settings",
+					"description": _("Setup SMS gateway settings")
 				},
 			]
 		},
