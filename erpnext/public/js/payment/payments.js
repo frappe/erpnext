@@ -57,6 +57,13 @@ erpnext.payments = erpnext.stock.StockController.extend({
 					currency: me.frm.doc.currency,
 					type: data.type
 				})).appendTo(multimode_payments)
+
+				if (data.type == 'Cash' && data.amount == me.frm.doc.paid_amount) {
+					me.idx = data.idx;
+					me.selected_mode = $(me.$body).find(repl("input[idx='%(idx)s']",{'idx': me.idx}));
+					me.highlight_selected_row();
+					me.bind_amount_change_event();
+				}
 			})
 		}else{
 			$("<p>No payment mode selected in pos profile</p>").appendTo(multimode_payments)
@@ -90,8 +97,10 @@ erpnext.payments = erpnext.stock.StockController.extend({
 	bind_payment_mode_keys_event: function(){
 		var me = this;
 		$(this.$body).find('.pos-payment-row').click(function(){
-			me.idx = $(this).attr("idx");
-			me.set_outstanding_amount()
+			if(me.frm.doc.outstanding_amount > 0){
+				me.idx = $(this).attr("idx");
+				me.set_outstanding_amount()
+			}
 		})
 	},
 
@@ -124,11 +133,15 @@ erpnext.payments = erpnext.stock.StockController.extend({
 	
 	bind_amount_change_event: function(){
 		var me = this;
-		me.selected_mode.change(function(){
+		this.selected_mode.change(function(){
 			me.payment_val =  flt($(this).val()) || 0.0;
 			me.selected_mode.val(format_number(me.payment_val, 2))
 			me.idx = me.selected_mode.attr("idx")
 			me.update_paid_amount()
+		})
+
+		this.selected_mode.click(function(){
+			me.selected_mode.select();
 		})
 	},
 
@@ -140,6 +153,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 			me.selected_mode = $(me.$body).find(repl("input[idx='%(idx)s']",{'idx': me.idx}));
 			me.payment_val = 0.0;
 			me.selected_mode.val(0.0);
+			me.highlight_selected_row();
 			me.update_paid_amount();
 		})
 	},

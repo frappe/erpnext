@@ -582,7 +582,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	set_default_payment: function(total_amount_to_pay, update_paid_amount){
 		var me = this;
 		payment_status = true;
-		if(this.frm.doc.is_pos && (!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount)){
+		if(this.frm.doc.is_pos && (update_paid_amount===undefined || update_paid_amount)){
 			$.each(this.frm.doc['payments'] || [], function(index, data){
 				if(data.type == "Cash" && payment_status) {
 					data.amount = total_amount_to_pay;

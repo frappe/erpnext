@@ -20,7 +20,7 @@ def get_pos_data():
 	if pos_profile.get('name'):
 		pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
 	else:
-		frappe.msgprint('<a href="#Form/POS Profile/New POS Profile">'
+		frappe.msgprint('<a href="#List/POS Profile">'
 			+ _("Welcome to POS: Create your POS Profile") + '</a>');
 
 	update_pos_profile_data(doc, pos_profile)
@@ -115,7 +115,7 @@ def get_items(doc, pos_profile):
 		item.actual_qty = frappe.db.get_value('Bin', {'item_code': item.name,
 								'warehouse': item.default_warehouse}, 'actual_qty') or 0
 		item.serial_nos = get_serial_nos(item, pos_profile)
-		item.batch_nos = frappe.db.sql_list("""select name from `tabBatch` where expiry_date > curdate()
+		item.batch_nos = frappe.db.sql_list("""select name from `tabBatch` where ifnull(expiry_date, '4000-10-10') > curdate()
 			and item = %(item_code)s""", {'item_code': item.item_code})
 
 		item_list.append(item)
