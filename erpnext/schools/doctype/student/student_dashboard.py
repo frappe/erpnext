@@ -6,10 +6,10 @@ data = {
 	'fieldname': 'student',
 	'transactions': [
 		{
-			'items': ['Student Group', 'Student Attendance', 'Program Enrollment' ]
+			'items': ['Student Log', 'Student Group', 'Student Attendance']
 		},
 		{
-			'items': ['Fees', 'Examination']
+			'items': ['Program Enrollment', 'Fees', 'Examination']
 		}
 	]
 }
