@@ -2,6 +2,10 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doc("buying", "doctype", "request_for_quotation_supplier")
+	frappe.reload_doc("buying", "doctype", "request_for_quotation")
+	frappe.reload_doc("projects", "doctype", "timesheet")
+	
 	for role in ('Customer', 'Supplier'):
 		frappe.db.sql('''delete from `tabUserRole`
 			where role=%s and parent in ("Administrator", "Guest")''', role)
