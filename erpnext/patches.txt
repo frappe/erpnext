@@ -305,3 +305,4 @@ erpnext.patches.v7_0.rename_fee_amount_to_fee_component
 erpnext.patches.v7_0.calculate_total_costing_amount
 erpnext.patches.v7_0.fix_nonwarehouse_ledger_gl_entries_for_transactions
 erpnext.patches.v7_0.remove_old_earning_deduction_doctypes
+erpnext.patches.v7_0.make_guardian

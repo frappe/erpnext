@@ -9,7 +9,7 @@ data = {
 			'items': ['Student Log', 'Student Group', 'Student Attendance']
 		},
 		{
-			'items': ['Program Enrollment', 'Fees', 'Examination']
+			'items': ['Program Enrollment', 'Fees', 'Examination', 'Guardian']
 		}
 	]
 }
