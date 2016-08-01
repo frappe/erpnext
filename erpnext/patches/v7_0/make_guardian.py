@@ -5,6 +5,7 @@ def execute():
 	if frappe.db.exists("DocType", "Student") and "father_name" in frappe.db.get_table_columns("Student"):
 		frappe.reload_doc("schools", "doctype", "student")
 		frappe.reload_doc("schools", "doctype", "guardian")
+		frappe.reload_doc("schools", "doctype", "guardian_interest")
 	
 		students = frappe.get_all("Student", fields=["name", "father_name", "father_email_id", 
 			"mother_name", "mother_email_id"])
