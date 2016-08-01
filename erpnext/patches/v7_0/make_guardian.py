@@ -4,8 +4,9 @@ import frappe
 def execute():
 	if frappe.db.exists("DocType", "Student") and "father_name" in frappe.db.get_table_columns("Student"):
 		frappe.reload_doc("schools", "doctype", "student")
+		frappe.reload_doc("schools", "doctype", "guardian")
 	
-		students = frappe.get_list("Student", fields=["name", "father_name", "father_email_id", 
+		students = frappe.get_all("Student", fields=["name", "father_name", "father_email_id", 
 			"mother_name", "mother_email_id"])
 		for stud in students:
 			if stud.father_name:
