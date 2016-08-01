@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe.utils import cstr, cint, get_fullname
+from frappe.utils import cstr, cint, get_fullname, validate_email_add
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
@@ -43,7 +43,7 @@ class Opportunity(TransactionBase):
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
-		if not (self.lead or self.customer) and self.contact_email:
+		if not (self.lead or self.customer) and self.contact_email and validate_email_add(self.contact_email):
 			lead_name = frappe.db.get_value("Lead", {"email_id": self.contact_email})
 			if not lead_name:
 				sender_name = get_fullname(self.contact_email)
@@ -63,6 +63,7 @@ class Opportunity(TransactionBase):
 					"email_id": self.contact_email,
 					"lead_name": sender_name
 				})
+
 				lead.insert(ignore_permissions=True)
 				lead_name = lead.name
 
