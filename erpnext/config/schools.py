@@ -13,6 +13,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Student Log"
+				},
+				{
+					"type": "doctype",
 					"name": "Student Batch"
 				},
 				{

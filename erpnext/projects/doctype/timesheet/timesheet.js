@@ -31,7 +31,6 @@ frappe.ui.form.on("Timesheet", {
 
 	onload: function(frm){
 		if (frm.doc.__islocal && frm.doc.time_logs) {
-			frm.set_value("employee", "")
 			calculate_time_and_amount(frm);
 		}
 	},

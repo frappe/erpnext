@@ -27,12 +27,10 @@ def install(country=None):
 		{'doctype': 'Item Group', 'item_group_name': _('Consumable'),
 			'is_group': 0, 'parent_item_group': _('All Item Groups') },
 
-		# deduction type
-		{'doctype': 'Deduction Type', 'name': _('Income Tax'), 'description': _('Income Tax'), 'deduction_name': _('Income Tax')},
-
-		# earning type
-		{'doctype': 'Earning Type', 'name': _('Basic'), 'description': _('Basic'), 'earning_name': _('Basic'), 'taxable': 'Yes'},
-
+		# salary component
+		{'doctype': 'Salary Component', 'salary_component': _('Income Tax'), 'description': _('Income Tax')},
+		{'doctype': 'Salary Component', 'salary_component': _('Basic'), 'description': _('Basic')},
+		
 		# expense claim type
 		{'doctype': 'Expense Claim Type', 'name': _('Calls'), 'expense_type': _('Calls')},
 		{'doctype': 'Expense Claim Type', 'name': _('Food'), 'expense_type': _('Food')},

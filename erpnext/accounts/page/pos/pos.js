@@ -423,16 +423,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if(key){
 			return $.grep(window.items, function(item){
-				if( (item.item_code.toLowerCase().match(key)) ||
-				(item.item_name.toLowerCase().match(key)) || (item.item_group.toLowerCase().match(key)) ){
+				if(in_list(item.batch_nos, me.search.$input.val())){
+					return me.item_batch_no[item.item_code] = me.search.$input.val()
+				} else if((item.item_code.toLowerCase().match(key)) ||
+				(item.item_name.toLowerCase().match(key)) || (item.item_group.toLowerCase().match(key))){
 					return true
 				}else if(item.barcode == me.search.$input.val()){
 					return item.barcode == me.search.$input.val();
 				} else if (in_list(Object.keys(item.serial_nos), me.search.$input.val())){
 					me.item_serial_no[item.item_code] = [me.search.$input.val(), item.serial_nos[me.search.$input.val()]]
 					return true
-				} else if(in_list(item.batch_nos, me.search.$input.val())){
-					return me.item_batch_no[item.item_code] = me.search.$input.val()
 				}
 			})
 		}else{
