@@ -6,6 +6,7 @@ def execute():
 		frappe.reload_doc("schools", "doctype", "student")
 		frappe.reload_doc("schools", "doctype", "guardian")
 		frappe.reload_doc("schools", "doctype", "guardian_interest")
+		frappe.reload_doc("hr", "doctype", "interest")
 	
 		students = frappe.get_all("Student", fields=["name", "father_name", "father_email_id", 
 			"mother_name", "mother_email_id"])
