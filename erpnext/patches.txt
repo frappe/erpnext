@@ -307,4 +307,4 @@ erpnext.patches.v7_0.fix_nonwarehouse_ledger_gl_entries_for_transactions
 erpnext.patches.v7_0.remove_old_earning_deduction_doctypes
 erpnext.patches.v7_0.make_guardian
 erpnext.patches.v7_0.update_refdoc_in_landed_cost_voucher
-execute:frappe.db.sql("update `tabItem` set default_material_request_type= case when default_bom is not null then 'Manufacture' else 'Purchase' end")
+erpnext.patches.v7_0.set_material_request_type_in_item
