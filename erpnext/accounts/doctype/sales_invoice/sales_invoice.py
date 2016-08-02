@@ -87,15 +87,6 @@ class SalesInvoice(SellingController):
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 
-	def update_change_amount(self):
-		self.base_paid_amount = 0.0
-		if self.paid_amount:
-			self.base_paid_amount = flt(self.paid_amount * self.conversion_rate, self.precision("base_paid_amount"))
-			self.change_amount = self.base_change_amount = 0.0
-			if self.paid_amount > self.grand_total:
-				self.change_amount = flt(self.paid_amount - self.grand_total, self.precision("change_amount"))
-				self.base_change_amount = flt(self.change_amount * self.conversion_rate, self.precision("base_change_amount"))
-
 	def on_submit(self):
 		if not self.recurring_id:
 			frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
@@ -110,6 +101,7 @@ class SalesInvoice(SellingController):
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.update_billing_status_in_dn()
+		self.clear_unallocated_mode_of_payments()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
@@ -296,6 +288,12 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Debit To account must be a Receivable account"))
 
 		self.party_account_currency = account.account_currency
+		
+	def clear_unallocated_mode_of_payments(self):
+		self.set("payments", self.get("payments", {"amount": ["not in", [0, None, ""]]}))
+
+		frappe.db.sql("""delete from `tabSales Invoice Payment` where parent = %s
+			and amount = 0""", self.name)
 
 	def validate_with_previous_doc(self):
 		super(SalesInvoice, self).validate_with_previous_doc({
@@ -504,6 +502,7 @@ class SalesInvoice(SellingController):
 		gl_entries = merge_similar_entries(gl_entries)
 
 		self.make_pos_gl_entries(gl_entries)
+		self.make_gle_for_change(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 
@@ -578,27 +577,24 @@ class SalesInvoice(SellingController):
 
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos) and self.paid_amount:
-			# POS, make payment entries
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": self.debit_to,
-					"party_type": "Customer",
-					"party": self.customer,
-					"against": self.cash_bank_account,
-					"credit": flt(self.base_paid_amount - self.base_change_amount),
-					"credit_in_account_currency": flt(self.base_paid_amount - self.base_change_amount) \
-						if self.party_account_currency==self.company_currency else flt(self.paid_amount - self.change_amount),
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
-					"against_voucher_type": self.doctype,
-				}, self.party_account_currency)
-			)
-
-			cash_account = ''
 			for payment_mode in self.payments:
-				if payment_mode.type == 'Cash':
-					cash_account = payment_mode.account
-
 				if payment_mode.base_amount > 0:
+					# POS, make payment entries
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": self.debit_to,
+							"party_type": "Customer",
+							"party": self.customer,
+							"against": payment_mode.account,
+							"credit": payment_mode.base_amount,
+							"credit_in_account_currency": payment_mode.base_amount \
+								if self.party_account_currency==self.company_currency \
+								else payment_mode.amount,
+							"against_voucher": self.return_against if cint(self.is_return) else self.name,
+							"against_voucher_type": self.doctype,
+						}, self.party_account_currency)
+					)
+					
 					payment_mode_account_currency = get_account_currency(payment_mode.account)
 					gl_entries.append(
 						self.get_gl_dict({
@@ -609,20 +605,44 @@ class SalesInvoice(SellingController):
 								if payment_mode_account_currency==self.company_currency else payment_mode.amount
 						}, payment_mode_account_currency)
 					)
-
-			if self.change_amount:
-				cash_account = cash_account or self.payments[0].account
-				cash_account_currency = get_account_currency(cash_account)
+				
+	def make_gle_for_change(self, gl_entries):
+		if cint(self.is_pos) and self.change_amount:
+			cash_account = self.get_cash_account()
+			if cash_account:
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.customer,
+						"against": cash_account,
+						"debit": flt(self.base_change_amount),
+						"debit_in_account_currency": flt(self.base_change_amount) \
+							if self.party_account_currency==self.company_currency else flt(self.change_amount),
+						"against_voucher": self.return_against if cint(self.is_return) else self.name,
+						"against_voucher_type": self.doctype
+					}, self.party_account_currency)
+				)
+				
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": cash_account,
 						"against": self.customer,
-						"credit": self.base_change_amount,
-						"credit_in_account_currency": self.base_change_amount \
-							if payment_mode_account_currency==self.company_currency else self.change_amount
-					}, payment_mode_account_currency)
+						"credit": self.base_change_amount
+					})
 				)
-
+		
+				
+	def get_cash_account(self):
+		cash_account = [d.account for d in self.payments if d.type=="Cash"]
+		if cash_account:
+			cash_account = cash_account[0]
+		else:
+			cash_account = frappe.db.get_value("Account", 
+				filters={"company": self.company, "account_type": "Cash", "is_group": 0})
+				
+		return cash_account
+		
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
 		if self.write_off_account and self.write_off_amount:

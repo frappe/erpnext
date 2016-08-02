@@ -451,10 +451,8 @@ class ProductionPlanningTool(Document):
 					"company": self.company,
 					"requested_by": frappe.session.user
 				})
-				if item_wrapper.default_bom:
-					material_request.update({"material_request_type": "Manufacture"}) 
-				else:
-					material_request.update({"material_request_type": "Purchase"})
+				material_request.update({"material_request_type": item_wrapper.default_material_request_type})
+
 				for sales_order, requested_qty in items_to_be_requested[item].items():
 					material_request.append("items", {
 						"doctype": "Material Request Item",

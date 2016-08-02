@@ -503,7 +503,8 @@ class TestSalesInvoice(unittest.TestCase):
 			[pos["taxes"][1]["account_head"], 0.0, 50.0],
 			[stock_in_hand, 0.0, abs(sle.stock_value_difference)],
 			[pos["items"][0]["expense_account"], abs(sle.stock_value_difference), 0.0],
-			[si.debit_to, 0.0, si.paid_amount],
+			[si.debit_to, 0.0, 300.0],
+			[si.debit_to, 0.0, cash_amount],
 			["_Test Bank - _TC", 300.0, 0.0],
 			["Cash - _TC", cash_amount, 0.0]
 		])

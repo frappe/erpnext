@@ -27,6 +27,12 @@ def get_data():
 					"description": _("Bank/Cash transactions against party or for internal transfer")
 				},
 				{
+					"type": "page",
+					"name": "pos",
+					"label": _("POS"),
+					"description": _("Point of Sale")
+				},
+				{
 					"type": "report",
 					"name": "Accounts Receivable",
 					"doctype": "Sales Invoice",	

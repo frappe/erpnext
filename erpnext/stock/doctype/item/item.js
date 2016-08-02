@@ -116,6 +116,14 @@ frappe.ui.form.on("Item", {
 	}
 });
 
+frappe.ui.form.on('Item Reorder', {
+	reorder_levels_add: function(frm, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		type = frm.doc.default_material_request_type
+		row.material_request_type = (type == 'Material Transfer')? 'Transfer' : type;
+	}
+})
+
 $.extend(erpnext.item, {
 	setup_queries: function(frm) {
 		frm.fields_dict['expense_account'].get_query = function(doc) {
@@ -350,6 +358,7 @@ $.extend(erpnext.item, {
 		frm.fields_dict.attributes.grid.toggle_enable("attribute_value", !frm.doc.variant_of);
 	}
 });
+
 
 cur_frm.add_fetch('attribute', 'numeric_values', 'numeric_values');
 cur_frm.add_fetch('attribute', 'from_range', 'from_range');
