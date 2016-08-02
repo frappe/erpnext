@@ -569,10 +569,9 @@ def get_company_defaults(company):
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency):
 	total_amount = outstanding_amount = exchange_rate = None
+	ref_doc = frappe.get_doc(reference_doctype, reference_name)
 	
 	if reference_doctype != "Journal Entry":
-		ref_doc = frappe.get_doc(reference_doctype, reference_name)
-
 		if party_account_currency == ref_doc.company_currency:
 			total_amount = ref_doc.base_grand_total
 			exchange_rate = 1
