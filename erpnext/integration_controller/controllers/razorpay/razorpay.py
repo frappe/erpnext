@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from erpnext.integration_controller.utils.request_handler import get_request
-from erpnext.integration_controller.utils.gateway_accounts_handler import create_payment_gateway_and_account
+from erpnext.integration_controller.utils.payment_gateway_handler import create_payment_gateway_and_account
 
 def enable_service(doc=None):
 	create_payment_gateway_and_account("Razorpay")

@@ -105,6 +105,17 @@ def get_data():
 					"description": _("Setup SMS gateway settings")
 				},
 			]
+		},
+		{
+			"label": _("Integrations"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Integration Service",
+					"description": _("Integration Controller"),
+				}
+			]
 		}
 	]
 

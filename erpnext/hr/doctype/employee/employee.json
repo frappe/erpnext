@@ -3,11 +3,13 @@
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "naming_series:", 
+ "beta": 0, 
  "creation": "2013-03-07 09:04:18", 
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -1948,13 +1950,14 @@
  "icon": "icon-user", 
  "idx": 24, 
  "image_field": "image", 
+ "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-04-04 06:44:59.778649", 
+ "modified": "2016-08-03 11:28:33.510354", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 
@@ -1962,7 +1965,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -2022,6 +2025,7 @@
    "write": 1
   }
  ], 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "employee_name", 
