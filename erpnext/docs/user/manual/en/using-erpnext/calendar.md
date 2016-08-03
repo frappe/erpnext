@@ -1,36 +1,46 @@
-The Calendar is a tool where you can create and share Events and also see
-auto-generated events from the system.
+The Calendar is a tool where you can create and share Events and also see auto-generated events from the system.
 
-You can switch calender view based on Month, Week and Day.
+You can access Calendar from
 
-###Creating Events in Calender
+`Explore > Tools > Calendar`
+
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/calendar-1.png">
+
+###Creating new Event
 
 ####Creating Event Manually
 
-To create event manually, you should first determine Calender View. If Event's start and end time will be within one day, then you should first switch to Day view.
+To create event manually, you should first select the Calender View (Day, Month, Year). If Event's start and end time will be within one day, then select Week or Day view.
 
-This view will 24 hours of a day broken in various slots. You should click on slot for Event Start Time, and drag it down till you reach event end time.
+Select the Time from for the Event via drag and drop.
 
-![Calender Event Manually]({{docs_base_url}}/assets/old_images/erpnext/calender-event-manually.png)
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/calendar-2.gif">
 
-Based on the selection of time slot, Start Time and End Time will be updated in the Event master. Then you can set subject for an event, and save it.
+Based on the selection of time slot, Start Time and End Time will be updated in the Event master.
 
-####Event Based on Lead
+####Subject
+
+Enter Subject for the Event.
+
+####Event Type
+
+Event Type can be Public or Private. Public Events will be visible to all the Users.
+
+###Event Based on Lead
 
 In the Lead form, you will find a field called Next Contact By and Next Contact Date. Event will be auto created for date and person specified in this field.
 
-![Calender Event Lead]({{docs_base_url}}/assets/old_images/erpnext/calender-event-lead.png)
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/calendar-3.png">
 
-####Birthday Event
+###Birthday Events
 
-Birthday Event is created based on Date of Birth specified in the Employee master.
+Birthday Events are auto-created based on Date of Birth of the Employee.
 
 ###Recurring Events
 
-You can set events as recurring in specific interval by Checking the "Repeat This
-Event".
+You can set events as recurring in specific interval by Checking the "Repeat This Event".
 
-![Calender Event Recurring]({{docs_base_url}}/assets/old_images/erpnext/calender-event-recurring.png)
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/calendar-4.png">
 
 ###Permission for Event
 
@@ -38,7 +48,7 @@ You can set Event as Private or Public. Private Events will be visible only to y
 
 Public Event, like Birthday will be visible to all.
 
-![Calender Event Permission]({{docs_base_url}}/assets/old_images/erpnext/calender-event-permission.png)
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/calendar-5.png">
 
 ###Event Reminders
 
@@ -48,16 +58,12 @@ There are two ways you can receive email reminder for an event.
 
 In the Event master, checking "Send an email reminder in the morning" will trigger notification email to all the participants for this event.
 
-![Calender Event Notification]({{docs_base_url}}/assets/old_images/erpnext/calender-event-notification.png)
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/calendar-6.png">
 
-####Create Email Digest
+###Calendar Views
 
-To get email reminders for event, you should set Email Digest for Calender Events.
+Calendar view is available for the documents like Sales Order, Production Order, Holiday List, Leave Application etc. Based on the posting date of the document, it's link will be visible in the Calendar.
 
-Email Digest can be set from:
-
-`Setup > Email > Email Digest`
-
-![Calender Email Digest]({{docs_base_url}}/assets/old_images/erpnext/calender-email-digest.png)
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/calendar-7.png">
 
 {next}

@@ -1,10 +1,9 @@
 to-do
 collaborating-around-forms
-messages
+chat
 notes
 calendar
 assignment
 tags
 articles
 pos-view
-multilingual_print_format
