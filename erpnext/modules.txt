@@ -14,4 +14,3 @@ Hub Node
 Portal
 Maintenance
 Schools
-Integration Controller
