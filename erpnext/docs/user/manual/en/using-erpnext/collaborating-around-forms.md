@@ -2,7 +2,7 @@ Following are the tools in each document using which you can collaborate with ot
 
 ### Assigned to
 
-If some document requires an action from User, you can Assign that document to that User. On assignment, User to whom document is assigned is intimated via email. To learn about Assign To feature, [click here.]({{docs_base_url}}//user/manual/en/using-erpnext/assignment.html)
+If some document requires an action from User, you can Assign that document to that User. On assignment, User to whom document is assigned is intimated via email. To learn about Assign To feature, [click here.]({{docs_base_url}}/user/manual/en/using-erpnext/assignment.html)
 
 ### Comments
 

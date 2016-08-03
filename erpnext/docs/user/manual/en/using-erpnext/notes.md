@@ -10,10 +10,8 @@ Enter Title and Context.
 
 ####Set Permissions to select Users
 
-To make Note accessible for all, check "Public" under links section. If specific Note is to be made accessible to specific user, they shall be selected in the Share With table.
+To make Note accessible for all, check "Public" under links section. Else you can share it with the specific User by using Share feature.
 
-<img class="screenshot" alt="Note Permissions" src="{{docs_base_url}}/assets/img/collaboration-tools/note-2.png">
-
-<div class=well>Notes can also be used as a knowledge base internally. You can also attach file in the Notes, and make it accessible to specific set of users only.</div>
+<img class="screenshot" alt="Note New" src="{{docs_base_url}}/assets/img/collaboration-tools/share-1.gif">
 
 {next}

@@ -12,12 +12,11 @@ Assign to option is located at the footer of document. Clicking on Assignment Ic
 
 <img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/assign-1.png">
 
-
 #### Step 2: Assign to User
 
 In the Assign To section, you will find option to select User to whom this document will be assigned to. You can assign one document to multiple people at a time.
 
-<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/accounts/assign-2.png">
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/assign-2.png">
 
 With assignment, you can also leave a comment for the review of assignee.
 
@@ -25,13 +24,13 @@ With assignment, you can also leave a comment for the review of assignee.
 
 This transaction will appear in the To-do list of the ser in “Todo” section.
 
-<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/accounts/assign-3.png">
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/assign-3.png">
 
 ####Removing Assignment
 
 User will be able to remove assignment by clicking on "Assignment Completed" button in the document.
 
-<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/accounts/assign-4.png">
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/assign-4.png">
 
 Once assignment is set as completed, Status of its ToDo record will be set as Closed.
 
