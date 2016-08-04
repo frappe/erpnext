@@ -19,7 +19,7 @@ asset account will be reduced, based on the valuation amount of those items.
     * Stock Adjustment Account
     * Expenses Included In Valuation
     * Cost Center
-  2. In perpetual inventory, the system will maintain seperate account balance for each warehouse under separate account head. To create that account head, enter "Create Account Under" in Warehouse master.
+  2. In perpetual inventory, the system will maintain separate account balance for each warehouse under separate account head. To create that account head, enter "Create Account Under" in Warehouse master.
 
   3. Activate Perpetual Inventory
 
@@ -370,4 +370,4 @@ Goods Sold" accounts are also affected based on the valuation amount.
 
 <img alt="Stock" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-14.png">
 
-{ next }
+{next}

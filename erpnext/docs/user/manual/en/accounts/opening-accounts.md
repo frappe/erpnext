@@ -1,5 +1,3 @@
-	Now that you have completed most of the setup, its time to start moving in!
-
 There are two important sets of data you need to enter before you start your
 operations.
 
@@ -46,7 +44,7 @@ Complete Journal Entries on the Debit and Credit side.
 
  To update opening balance is to make Journal Entry for an individual/group of accounts.
 
-For example, if you want to update balance in three bank accounts, then make Journal Entrys in this manner.
+For example, if you want to update balance in three bank accounts, then make Journal Entries in this manner.
 
 ![Opening Temp Entry]({{docs_base_url}}/assets/old_images/erpnext/image-temp-opening.png)
 
@@ -56,11 +54,11 @@ Temporary Asset and Liability account is used for balancing purpose. When you up
 
 This way, you can update opening balance in Asset and Liability accounts.
 
-You can make two Opening Journal Entrys:
+You can make two Opening Journal Entries:
 
   * For all assets (excluding Accounts Receivables): This entry will contain all your assets except the amounts you are expecting from your Customers against outstanding Sales Invoices. You will have to update your receivables by making an individual entry for each Invoice (this is because, the system will help you track the invoices which are yet to be paid). You can credit the sum of all these debits against the **Temporary Opening** account.
   * For all liabilities: Similarly you need to pass a Journal Entry for your Opening Liabilities (except for the bills you have to pay) against **Temporary Opening** account.
-  * In this method you can update opening balance of specific balancesheet accounts and not for all.
+  * In this method you can update opening balance of specific balance sheet accounts and not for all.
   * Opening entry is only for balance sheet accounts and not for expense or Income accounts.
 
 After completing the accounting entries, the trial balance report will look like the one given below:
@@ -69,7 +67,7 @@ After completing the accounting entries, the trial balance report will look like
 
 #### Outstanding Invoices
 
-After your Opening Journal Entrys are made, you will need to enter each Sales Invoice and Purchase Invoice that is yet to be paid.
+After your Opening Journal Entries are made, you will need to enter each Sales Invoice and Purchase Invoice that is yet to be paid.
 
 Since you have already booked the income or expense on these invoices in the previous period, select the temp opening account **Temporary Opening** in the “Income” and “Expense” accounts.
 
