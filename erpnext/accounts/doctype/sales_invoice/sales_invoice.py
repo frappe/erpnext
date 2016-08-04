@@ -233,6 +233,10 @@ class SalesInvoice(SellingController):
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
 		pos = get_pos_profile(self.company)
 
+		if not self.get('payments'):
+			pos_profile = frappe.get_doc('POS Profile', pos.name) if pos else None
+			update_multi_mode_option(self, pos_profile)
+
 		if pos:
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
@@ -264,10 +268,6 @@ class SalesInvoice(SellingController):
 			# fetch charges
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
-
-			if not self.get('payments'):
-				pos_profile = frappe.get_doc('POS Profile', pos.name)
-				update_multi_mode_option(self, pos_profile)
 
 		return pos
 

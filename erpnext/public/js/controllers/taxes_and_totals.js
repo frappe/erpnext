@@ -615,4 +615,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.doc.base_change_amount = flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate,
 			precision("base_change_amount"));
 	},
+
+	calculate_write_off_amount: function(){
+		this.frm.set_value("write_off_amount",
+			flt(this.frm.doc.grand_total - this.frm.doc.paid_amount + this.frm.doc.change_amount,
+				precision("write_off_amount")));
+	}
 })
