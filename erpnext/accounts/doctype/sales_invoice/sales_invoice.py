@@ -268,6 +268,7 @@ class SalesInvoice(SellingController):
 			# fetch charges
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
+			self.change_amount_account = pos.change_amount_account
 
 		return pos
 
@@ -608,14 +609,13 @@ class SalesInvoice(SellingController):
 				
 	def make_gle_for_change(self, gl_entries):
 		if cint(self.is_pos) and self.change_amount:
-			cash_account = self.get_cash_account()
-			if cash_account:
+			if self.change_amount_account:
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": self.debit_to,
 						"party_type": "Customer",
 						"party": self.customer,
-						"against": cash_account,
+						"against": self.change_amount_account,
 						"debit": flt(self.base_change_amount),
 						"debit_in_account_currency": flt(self.base_change_amount) \
 							if self.party_account_currency==self.company_currency else flt(self.change_amount),
@@ -626,22 +626,13 @@ class SalesInvoice(SellingController):
 				
 				gl_entries.append(
 					self.get_gl_dict({
-						"account": cash_account,
+						"account": self.change_amount_account,
 						"against": self.customer,
 						"credit": self.base_change_amount
 					})
 				)
-		
-				
-	def get_cash_account(self):
-		cash_account = [d.account for d in self.payments if d.type=="Cash"]
-		if cash_account:
-			cash_account = cash_account[0]
-		else:
-			cash_account = frappe.db.get_value("Account", 
-				filters={"company": self.company, "account_type": "Cash", "is_group": 0})
-				
-		return cash_account
+			else:
+				frappe.throw(_("Select change amount account"), title="Mandatory Field")
 		
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
