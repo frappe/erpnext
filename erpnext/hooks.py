@@ -161,6 +161,9 @@ doc_events = {
 	},
 	"Payment Entry": {
 		"on_submit": "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"
+	},
+	"Payment Request": {
+		"get_payment_url": "erpnext.integrations.event_controllers.payment_initialization."
 	}
 }
 

@@ -11,7 +11,7 @@ from frappe.integration_broker.integration_controller import IntegrationControll
 
 class Controller(IntegrationController):
 	service_name = 'RazorPay'
-	events = [
+	_events = [
 		{
 			"event": "Payment Initialization",
 			'called_by': 'Host',
@@ -25,7 +25,7 @@ class Controller(IntegrationController):
 		},
 	]
 
-	parameters = [
+	_parameters = [
 		{
 			"label": "API Key",
 			'fieldname': 'api_key',
@@ -38,12 +38,13 @@ class Controller(IntegrationController):
 		}
 	]
 	
-	def enable(self, doc=None):
+	def enable(self, parameters):
+		self.parameters = parameters
 		create_payment_gateway_and_account("Razorpay")
-		self.validate_razorpay_credentails(doc)
+		self.validate_razorpay_credentails()
 
-	def validate_razorpay_credentails(self, doc=None, method=None):
-		razorpay_settings = self.get_parameters(doc)
+	def validate_razorpay_credentails(self):
+		razorpay_settings = frappe._dict(self.get_parameters())
 
 		if razorpay_settings.get("api_key"):
 			try:
@@ -51,5 +52,7 @@ class Controller(IntegrationController):
 					razorpay_settings.api_secret))
 			except Exception, e:
 				frappe.throw(_(e.message))
-
+				
+	def get_payemnt_url(self):
+		pass
 		
