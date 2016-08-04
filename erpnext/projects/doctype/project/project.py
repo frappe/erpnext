@@ -187,6 +187,13 @@ def get_list_context(context=None):
 		"row_template": "templates/includes/projects/project_row.html"
 	}
 
+def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):	
+	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name)
+		from `tabUser` 
+		where enabled=1 
+		and name not in ("Guest", "Administrator")
+		order by 
+		name asc""")
 
 @frappe.whitelist()
 def get_cost_center_name(project):
