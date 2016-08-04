@@ -1,4 +1,4 @@
-Human Resources Reports
+# Human Resources Reports
 
 ### Employee Leave Balance
 
