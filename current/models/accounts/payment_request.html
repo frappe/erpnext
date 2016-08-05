@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Payment Request </title>
+	<title>Payment Request</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="current/models/accounts/payment_request">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-payment_request" data-path="current/models/accounts/payment_request"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-current/models/accounts/payment_request" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,21 +120,20 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>Payment Request</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Payment Request</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="payment_request" style="text-align: Left">
-	<!-- title: Payment Request -->
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
+<!-- title: Payment Request -->
 
 
 
@@ -150,11 +175,11 @@
         
         <tr class="info">
             <td>1</td>
-            <td ><code>payment_details</code></td>
+            <td ><code>recipient_and_message</code></td>
             <td >
                 Section Break</td>
             <td >
-                Payment Details
+                Recipient Message And Payment Details
                 
             </td>
             <td></td>
@@ -162,43 +187,43 @@
         
         <tr >
             <td>2</td>
-            <td ><code>currency</code></td>
+            <td ><code>print_format</code></td>
             <td >
-                Link</td>
+                Select</td>
             <td >
-                Transaction Currency
+                Print Format
                 
             </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/geo/currency">Currency</a>
-
-
-                
-            </td>
+            <td></td>
         </tr>
         
         <tr >
             <td>3</td>
-            <td ><code>grand_total</code></td>
+            <td ><code>email_to</code></td>
             <td >
-                Currency</td>
+                Data</td>
             <td >
-                Grand Total
-                <p class="text-muted small">
-                    Amount in customer's currency</p>
+                To
+                
             </td>
-            <td>
-                <pre>currency</pre>
-            </td>
+            <td></td>
         </tr>
         
         <tr >
             <td>4</td>
-            <td ><code>column_break_5</code></td>
+            <td ><code>subject</code></td>
+            <td >
+                Data</td>
+            <td >
+                Subject
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>column_break_9</code></td>
             <td class="info">
                 Column Break</td>
             <td >
@@ -209,50 +234,7 @@
         </tr>
         
         <tr >
-            <td>5</td>
-            <td ><code>status</code></td>
-            <td >
-                Select</td>
-            <td >
-                Status
-                
-            </td>
-            <td>
-                <pre>
-Draft
-Initiated
-Paid
-Failed
-Cancelled</pre>
-            </td>
-        </tr>
-        
-        <tr >
             <td>6</td>
-            <td ><code>make_sales_invoice</code></td>
-            <td >
-                Check</td>
-            <td >
-                Make Sales Invoice
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr class="info">
-            <td>7</td>
-            <td ><code>section_break_7</code></td>
-            <td >
-                Section Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>8</td>
             <td ><code>payment_gateway_account</code></td>
             <td >
                 Link</td>
@@ -273,10 +255,77 @@ Cancelled</pre>
         </tr>
         
         <tr >
+            <td>7</td>
+            <td ><code>currency</code></td>
+            <td >
+                Link</td>
+            <td >
+                Transaction Currency
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/geo/currency">Currency</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>grand_total</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Amount
+                <p class="text-muted small">
+                    Amount in customer's currency</p>
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
             <td>9</td>
-            <td ><code>column_break_9</code></td>
-            <td class="info">
-                Column Break</td>
+            <td ><code>status</code></td>
+            <td >
+                Select</td>
+            <td class="text-muted" title="Hidden">
+                Status
+                
+            </td>
+            <td>
+                <pre>
+Draft
+Initiated
+Paid
+Failed
+Cancelled</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>make_sales_invoice</code></td>
+            <td >
+                Check</td>
+            <td class="text-muted" title="Hidden">
+                Make Sales Invoice
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>11</td>
+            <td ><code>section_break_10</code></td>
+            <td >
+                Section Break</td>
             <td >
                 
                 
@@ -285,40 +334,12 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>10</td>
-            <td ><code>payment_gateway</code></td>
-            <td >
-                Read Only</td>
-            <td >
-                Payment Gateway
-                
-            </td>
-            <td>
-                <pre>payment_gateway_account.payment_gateway</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>11</td>
-            <td ><code>payment_account</code></td>
-            <td >
-                Read Only</td>
-            <td >
-                Payment Account
-                
-            </td>
-            <td>
-                <pre>payment_gateway_account.payment_account</pre>
-            </td>
-        </tr>
-        
-        <tr class="info">
             <td>12</td>
-            <td ><code>recipient_and_message</code></td>
+            <td ><code>message</code></td>
             <td >
-                Section Break</td>
+                Small Text</td>
             <td >
-                Recipient and Message
+                Message
                 
             </td>
             <td></td>
@@ -326,11 +347,11 @@ Cancelled</pre>
         
         <tr >
             <td>13</td>
-            <td ><code>print_format</code></td>
+            <td ><code>message_examples</code></td>
             <td >
-                Select</td>
+                HTML</td>
             <td >
-                Print Format
+                Message Examples
                 
             </td>
             <td></td>
@@ -350,54 +371,6 @@ Cancelled</pre>
         
         <tr >
             <td>15</td>
-            <td ><code>email_to</code></td>
-            <td >
-                Data</td>
-            <td >
-                Email To
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>16</td>
-            <td ><code>subject</code></td>
-            <td >
-                Data</td>
-            <td >
-                Subject
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>17</td>
-            <td ><code>message</code></td>
-            <td >
-                Text Editor</td>
-            <td >
-                Message
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>18</td>
-            <td ><code>payment_url_message</code></td>
-            <td >
-                Data</td>
-            <td >
-                Payment URL Message
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>19</td>
             <td ><code>payment_url</code></td>
             <td >
                 Data</td>
@@ -409,7 +382,47 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>20</td>
+            <td>16</td>
+            <td ><code>section_break_7</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Payment Gateway Details
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>payment_gateway</code></td>
+            <td >
+                Read Only</td>
+            <td >
+                Payment Gateway
+                
+            </td>
+            <td>
+                <pre>payment_gateway_account.payment_gateway</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>payment_account</code></td>
+            <td >
+                Read Only</td>
+            <td >
+                Payment Account
+                
+            </td>
+            <td>
+                <pre>payment_gateway_account.payment_account</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>19</td>
             <td ><code>reference_details</code></td>
             <td >
                 Section Break</td>
@@ -421,7 +434,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>20</td>
             <td ><code>reference_doctype</code></td>
             <td >
                 Link</td>
@@ -442,7 +455,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>21</td>
             <td ><code>reference_name</code></td>
             <td >
                 Dynamic Link</td>
@@ -456,7 +469,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>23</td>
+            <td>22</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -502,10 +515,10 @@ Cancelled</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="create_journal_entry" href="#create_journal_entry" class="text-muted small">
+        <a name="create_payment_entry" href="#create_payment_entry" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>create_journal_entry</b>
-        <i class="text-muted">(self)</i>
+		<b>create_payment_entry</b>
+        <i class="text-muted">(self, submit=True)</i>
     </p>
 	<div class="docs-attr-desc"><p>create entry</p>
 </div>
@@ -713,34 +726,6 @@ which will return respective payment gateway</p>
     
     
 	<p class="docs-attr-name">
-        <a name="validate_payment_gateway" href="#validate_payment_gateway" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>validate_payment_gateway</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="validate_payment_gateway_account" href="#validate_payment_gateway_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>validate_payment_gateway_account</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
         <a name="validate_payment_request" href="#validate_payment_request" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>validate_payment_request</b>
@@ -785,6 +770,22 @@ which will return respective payment gateway</p>
         <i class="text-muted">(ref_doc, dt)</i>
     </p>
 	<div class="docs-attr-desc"><p>get amount based on doctype</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_request.payment_request.get_dummy_message" href="#erpnext.accounts.doctype.payment_request.payment_request.get_dummy_message" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_request.payment_request.<b>get_dummy_message</b>
+        <i class="text-muted">(use_dummy_message=True)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -844,6 +845,24 @@ which will return respective payment gateway</p>
         
     
     <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_entry</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_request.payment_request.make_payment_entry" href="#erpnext.accounts.doctype.payment_request.payment_request.make_payment_entry" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_request.payment_request.<b>make_payment_entry</b>
+        <i class="text-muted">(docname)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request</code>
     </p>
 	<p class="docs-attr-name">
@@ -853,6 +872,22 @@ which will return respective payment gateway</p>
         <i class="text-muted">()</i>
     </p>
 	<div class="docs-attr-desc"><p>Make payment request</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid" href="#erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_request.payment_request.<b>make_status_as_paid</b>
+        <i class="text-muted">(doc, method)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -898,78 +933,46 @@ which will return respective payment gateway</p>
 <!-- autodoc -->
 <!-- jinja -->
 <!-- static -->
-	</article>
-	
 </div>
-</div>
-    	</div>
-	</div>
-</div>
-
-						<!-- edit-link -->
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
-
-                    </div>
-					</footer>
 				</div>
 			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
+</div>
 
-</ul>
-				</div>
-			</div>
+				<!-- edit-link -->
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -982,8 +985,6 @@ which will return respective payment gateway</p>
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>

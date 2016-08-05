@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Stock Entry </title>
+	<title>Stock Entry</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="current/models/stock/stock_entry">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-stock_entry" data-path="current/models/stock/stock_entry"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-current/models/stock/stock_entry" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,21 +120,20 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>Stock Entry</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Stock Entry</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="stock_entry" style="text-align: Left">
-	<!-- title: Stock Entry -->
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
+<!-- title: Stock Entry -->
 
 
 
@@ -208,6 +233,27 @@ Subcontract</pre>
         
         <tr >
             <td>5</td>
+            <td class="danger" title="Mandatory"><code>company</code></td>
+            <td >
+                Link</td>
+            <td >
+                Company
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
             <td ><code>production_order</code></td>
             <td >
                 Link</td>
@@ -228,7 +274,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>7</td>
             <td ><code>purchase_order</code></td>
             <td >
                 Link</td>
@@ -249,7 +295,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>7</td>
+            <td>8</td>
             <td ><code>delivery_note_no</code></td>
             <td >
                 Link</td>
@@ -270,7 +316,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>8</td>
+            <td>9</td>
             <td ><code>sales_invoice_no</code></td>
             <td >
                 Link</td>
@@ -291,7 +337,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>9</td>
+            <td>10</td>
             <td ><code>purchase_receipt_no</code></td>
             <td >
                 Link</td>
@@ -312,7 +358,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>11</td>
             <td ><code>from_bom</code></td>
             <td >
                 Check</td>
@@ -324,7 +370,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>12</td>
             <td ><code>col2</code></td>
             <td class="info">
                 Column Break</td>
@@ -336,7 +382,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>13</td>
             <td class="danger" title="Mandatory"><code>posting_date</code></td>
             <td >
                 Date</td>
@@ -348,7 +394,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>14</td>
             <td class="danger" title="Mandatory"><code>posting_time</code></td>
             <td >
                 Time</td>
@@ -360,7 +406,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>14</td>
+            <td>15</td>
             <td ><code>sb1</code></td>
             <td >
                 Section Break</td>
@@ -372,7 +418,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>16</td>
             <td ><code>bom_no</code></td>
             <td >
                 Link</td>
@@ -393,7 +439,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>17</td>
             <td ><code>fg_completed_qty</code></td>
             <td >
                 Float</td>
@@ -406,7 +452,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>18</td>
             <td ><code>cb1</code></td>
             <td class="info">
                 Column Break</td>
@@ -418,7 +464,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>19</td>
             <td ><code>use_multi_level_bom</code></td>
             <td >
                 Check</td>
@@ -431,7 +477,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>20</td>
             <td ><code>get_items</code></td>
             <td >
                 Button</td>
@@ -443,7 +489,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>20</td>
+            <td>21</td>
             <td ><code>section_break_12</code></td>
             <td >
                 Section Break</td>
@@ -455,7 +501,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>22</td>
             <td ><code>from_warehouse</code></td>
             <td >
                 Link</td>
@@ -476,7 +522,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>23</td>
             <td ><code>cb0</code></td>
             <td class="info">
                 Column Break</td>
@@ -488,7 +534,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>23</td>
+            <td>24</td>
             <td ><code>to_warehouse</code></td>
             <td >
                 Link</td>
@@ -509,7 +555,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>24</td>
+            <td>25</td>
             <td ><code>sb0</code></td>
             <td >
                 Section Break</td>
@@ -523,7 +569,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>25</td>
+            <td>26</td>
             <td class="danger" title="Mandatory"><code>items</code></td>
             <td >
                 Table</td>
@@ -544,7 +590,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>26</td>
+            <td>27</td>
             <td ><code>get_stock_and_rate</code></td>
             <td >
                 Button</td>
@@ -558,7 +604,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>27</td>
+            <td>28</td>
             <td ><code>section_break_19</code></td>
             <td >
                 Section Break</td>
@@ -570,7 +616,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>28</td>
+            <td>29</td>
             <td ><code>total_incoming_value</code></td>
             <td >
                 Currency</td>
@@ -584,7 +630,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>29</td>
+            <td>30</td>
             <td ><code>column_break_22</code></td>
             <td class="info">
                 Column Break</td>
@@ -596,7 +642,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>30</td>
+            <td>31</td>
             <td ><code>total_outgoing_value</code></td>
             <td >
                 Currency</td>
@@ -610,7 +656,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>31</td>
+            <td>32</td>
             <td ><code>value_difference</code></td>
             <td >
                 Currency</td>
@@ -624,7 +670,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>32</td>
+            <td>33</td>
             <td ><code>difference_account</code></td>
             <td >
                 Link</td>
@@ -645,7 +691,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>33</td>
+            <td>34</td>
             <td ><code>additional_costs_section</code></td>
             <td >
                 Section Break</td>
@@ -657,7 +703,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>34</td>
+            <td>35</td>
             <td ><code>additional_costs</code></td>
             <td >
                 Table</td>
@@ -678,7 +724,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>35</td>
+            <td>36</td>
             <td ><code>total_additional_costs</code></td>
             <td >
                 Currency</td>
@@ -692,7 +738,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>36</td>
+            <td>37</td>
             <td ><code>contact_section</code></td>
             <td >
                 Section Break</td>
@@ -704,7 +750,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>37</td>
+            <td>38</td>
             <td ><code>supplier</code></td>
             <td >
                 Link</td>
@@ -725,7 +771,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>38</td>
+            <td>39</td>
             <td ><code>supplier_name</code></td>
             <td >
                 Data</td>
@@ -737,7 +783,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>39</td>
+            <td>40</td>
             <td ><code>supplier_address</code></td>
             <td >
                 Small Text</td>
@@ -749,7 +795,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>40</td>
+            <td>41</td>
             <td ><code>column_break_39</code></td>
             <td class="info">
                 Column Break</td>
@@ -761,7 +807,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>41</td>
+            <td>42</td>
             <td ><code>customer</code></td>
             <td >
                 Link</td>
@@ -782,7 +828,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>42</td>
+            <td>43</td>
             <td ><code>customer_name</code></td>
             <td >
                 Data</td>
@@ -794,7 +840,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>43</td>
+            <td>44</td>
             <td ><code>customer_address</code></td>
             <td >
                 Small Text</td>
@@ -806,7 +852,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>44</td>
+            <td>45</td>
             <td ><code>printing_settings</code></td>
             <td >
                 Section Break</td>
@@ -818,7 +864,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>45</td>
+            <td>46</td>
             <td ><code>select_print_heading</code></td>
             <td >
                 Link</td>
@@ -839,7 +885,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>46</td>
+            <td>47</td>
             <td ><code>letter_head</code></td>
             <td >
                 Link</td>
@@ -860,7 +906,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>47</td>
+            <td>48</td>
             <td ><code>more_info</code></td>
             <td >
                 Section Break</td>
@@ -872,7 +918,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>48</td>
+            <td>49</td>
             <td ><code>project</code></td>
             <td >
                 Link</td>
@@ -893,7 +939,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>49</td>
+            <td>50</td>
             <td ><code>remarks</code></td>
             <td >
                 Text</td>
@@ -905,7 +951,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>50</td>
+            <td>51</td>
             <td ><code>col5</code></td>
             <td class="info">
                 Column Break</td>
@@ -917,7 +963,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>51</td>
+            <td>52</td>
             <td ><code>total_amount</code></td>
             <td >
                 Currency</td>
@@ -927,27 +973,6 @@ Subcontract</pre>
             </td>
             <td>
                 <pre>Company:company:default_currency</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>52</td>
-            <td class="danger" title="Mandatory"><code>company</code></td>
-            <td >
-                Link</td>
-            <td >
-                Company
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
-
-
-                
             </td>
         </tr>
         
@@ -1081,7 +1106,7 @@ Subcontract</pre>
         <a name="calculate_rate_and_amount" href="#calculate_rate_and_amount" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>calculate_rate_and_amount</b>
-        <i class="text-muted">(self, force=False)</i>
+        <i class="text-muted">(self, force=False, update_finished_item_rate=True)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1111,7 +1136,7 @@ Subcontract</pre>
 		<b>check_if_operations_completed</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Check if Time Logs are completed against before manufacturing to capture operating costs.</p>
+	<div class="docs-attr-desc"><p>Check if Time Sheets are completed against before manufacturing to capture operating costs.</p>
 </div>
 	<br>
 
@@ -1354,7 +1379,7 @@ whichever is less</p>
         <a name="set_basic_rate" href="#set_basic_rate" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>set_basic_rate</b>
-        <i class="text-muted">(self, force=False)</i>
+        <i class="text-muted">(self, force=False, update_finished_item_rate=True)</i>
     </p>
 	<div class="docs-attr-desc"><p>get stock and incoming rate on posting date</p>
 </div>
@@ -1704,78 +1729,46 @@ the raw materials supplied table</p>
 <!-- autodoc -->
 <!-- jinja -->
 <!-- static -->
-	</article>
-	
 </div>
-</div>
-    	</div>
-	</div>
-</div>
-
-						<!-- edit-link -->
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
-
-                    </div>
-					</footer>
 				</div>
 			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
+</div>
 
-</ul>
-				</div>
-			</div>
+				<!-- edit-link -->
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -1788,8 +1781,6 @@ the raw materials supplied table</p>
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>

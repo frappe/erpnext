@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Asset </title>
+	<title>Asset</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="current/models/accounts/asset">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-asset" data-path="current/models/accounts/asset"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-current/models/accounts/asset" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,21 +120,20 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>Asset</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Asset</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="asset" style="text-align: Left">
-	<!-- title: Asset -->
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
+<!-- title: Asset -->
 
 
 
@@ -162,27 +187,6 @@
         
         <tr >
             <td>2</td>
-            <td class="danger" title="Mandatory"><code>asset_category</code></td>
-            <td >
-                Link</td>
-            <td >
-                Asset Category
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/accounts/asset_category">Asset Category</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>3</td>
             <td class="danger" title="Mandatory"><code>item_code</code></td>
             <td >
                 Link</td>
@@ -196,6 +200,27 @@
 
 
 <a href="https://frappe.github.io/erpnext/current/models/stock/item">Item</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>asset_category</code></td>
+            <td >
+                Link</td>
+            <td >
+                Asset Category
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/asset_category">Asset Category</a>
 
 
                 
@@ -223,6 +248,18 @@ Scrapped</pre>
         
         <tr >
             <td>5</td>
+            <td ><code>image</code></td>
+            <td >
+                Attach Image</td>
+            <td class="text-muted" title="Hidden">
+                Image
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
             <td ><code>column_break_3</code></td>
             <td class="info">
                 Column Break</td>
@@ -234,61 +271,7 @@ Scrapped</pre>
         </tr>
         
         <tr >
-            <td>6</td>
-            <td class="danger" title="Mandatory"><code>purchase_date</code></td>
-            <td >
-                Date</td>
-            <td >
-                Purchase Date
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
             <td>7</td>
-            <td ><code>supplier</code></td>
-            <td >
-                Link</td>
-            <td >
-                Supplier
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/buying/supplier">Supplier</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>8</td>
-            <td ><code>purchase_invoice</code></td>
-            <td >
-                Link</td>
-            <td >
-                Purchase Invoice
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/accounts/purchase_invoice">Purchase Invoice</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>9</td>
             <td class="danger" title="Mandatory"><code>company</code></td>
             <td >
                 Link</td>
@@ -309,7 +292,106 @@ Scrapped</pre>
         </tr>
         
         <tr >
+            <td>8</td>
+            <td class="danger" title="Mandatory"><code>warehouse</code></td>
+            <td >
+                Link</td>
+            <td >
+                Warehouse
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/warehouse">Warehouse</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>is_existing_asset</code></td>
+            <td >
+                Check</td>
+            <td >
+                Is Existing Asset
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
             <td>10</td>
+            <td class="danger" title="Mandatory"><code>purchase_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Purchase Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td ><code>supplier</code></td>
+            <td >
+                Link</td>
+            <td >
+                Supplier
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/supplier">Supplier</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>purchase_invoice</code></td>
+            <td >
+                Link</td>
+            <td >
+                Purchase Invoice
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/purchase_invoice">Purchase Invoice</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td ><code>disposal_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Disposal Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
             <td ><code>journal_entry_for_scrap</code></td>
             <td >
                 Link</td>
@@ -330,7 +412,7 @@ Scrapped</pre>
         </tr>
         
         <tr class="info">
-            <td>11</td>
+            <td>15</td>
             <td ><code>section_break_5</code></td>
             <td >
                 Section Break</td>
@@ -342,7 +424,75 @@ Scrapped</pre>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>16</td>
+            <td class="danger" title="Mandatory"><code>gross_purchase_amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Gross Purchase Amount
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>expected_value_after_useful_life</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Expected Value After Useful Life
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>opening_accumulated_depreciation</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Opening Accumulated Depreciation
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>value_after_depreciation</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Value After Depreciation
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
+            <td ><code>column_break_11</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>21</td>
             <td ><code>depreciation_method</code></td>
             <td >
                 Select</td>
@@ -358,31 +508,43 @@ Double Declining Balance</pre>
         </tr>
         
         <tr >
-            <td>13</td>
-            <td ><code>number_of_depreciations</code></td>
+            <td>22</td>
+            <td ><code>total_number_of_depreciations</code></td>
             <td >
                 Int</td>
             <td >
-                Number of Depreciations
+                Total Number of Depreciations
                 
             </td>
             <td></td>
         </tr>
         
         <tr >
-            <td>14</td>
-            <td ><code>number_of_months_in_a_period</code></td>
+            <td>23</td>
+            <td ><code>number_of_depreciations_booked</code></td>
             <td >
                 Int</td>
             <td >
-                Number of Months in a Period
+                Number of Depreciations Booked
                 
             </td>
             <td></td>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>24</td>
+            <td ><code>frequency_of_depreciation</code></td>
+            <td >
+                Int</td>
+            <td >
+                Frequency of Depreciation (Months)
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>25</td>
             <td ><code>next_depreciation_date</code></td>
             <td >
                 Date</td>
@@ -393,62 +555,8 @@ Double Declining Balance</pre>
             <td></td>
         </tr>
         
-        <tr >
-            <td>16</td>
-            <td ><code>column_break_11</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>17</td>
-            <td class="danger" title="Mandatory"><code>gross_purchase_amount</code></td>
-            <td >
-                Currency</td>
-            <td >
-                Gross Purchase Amount
-                
-            </td>
-            <td>
-                <pre>Company:company:default_currency</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>18</td>
-            <td ><code>expected_value_after_useful_life</code></td>
-            <td >
-                Currency</td>
-            <td >
-                Expected Value After Useful Life
-                
-            </td>
-            <td>
-                <pre>Company:company:default_currency</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>19</td>
-            <td ><code>current_value</code></td>
-            <td >
-                Currency</td>
-            <td >
-                Current Value (After Depreciation)
-                
-            </td>
-            <td>
-                <pre>Company:company:default_currency</pre>
-            </td>
-        </tr>
-        
         <tr class="info">
-            <td>20</td>
+            <td>26</td>
             <td ><code>section_break_14</code></td>
             <td >
                 Section Break</td>
@@ -460,7 +568,7 @@ Double Declining Balance</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>27</td>
             <td ><code>schedules</code></td>
             <td >
                 Table</td>
@@ -481,7 +589,7 @@ Double Declining Balance</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>28</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -611,9 +719,9 @@ Double Declining Balance</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="set_depreciation_settings" href="#set_depreciation_settings" class="text-muted small">
+        <a name="set_missing_values" href="#set_missing_values" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>set_depreciation_settings</b>
+		<b>set_missing_values</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -630,7 +738,7 @@ Double Declining Balance</pre>
 		<b>set_status</b>
         <i class="text-muted">(self, status=None)</i>
     </p>
-	<div class="docs-attr-desc"><p>Set asset and update status</p>
+	<div class="docs-attr-desc"><p>Get and update status</p>
 </div>
 	<br>
 
@@ -681,9 +789,9 @@ Double Declining Balance</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="validate_depreciation_settings_in_company" href="#validate_depreciation_settings_in_company" class="text-muted small">
+        <a name="validate_expected_value_after_useful_life" href="#validate_expected_value_after_useful_life" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>validate_depreciation_settings_in_company</b>
+		<b>validate_expected_value_after_useful_life</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -695,9 +803,9 @@ Double Declining Balance</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="validate_fixed_asset_item" href="#validate_fixed_asset_item" class="text-muted small">
+        <a name="validate_item" href="#validate_item" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>validate_fixed_asset_item</b>
+		<b>validate_item</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -707,6 +815,78 @@ Double Declining Balance</pre>
         
     </div>
     <hr>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.asset.asset.get_item_details</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.asset.asset.get_item_details" href="#erpnext.accounts.doctype.asset.asset.get_item_details" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.asset.asset.<b>get_item_details</b>
+        <i class="text-muted">(item_code)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.asset.asset.make_purchase_invoice</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.asset.asset.make_purchase_invoice" href="#erpnext.accounts.doctype.asset.asset.make_purchase_invoice" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.asset.asset.<b>make_purchase_invoice</b>
+        <i class="text-muted">(asset, item_code, gross_purchase_amount, company, posting_date)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.asset.asset.make_sales_invoice</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.asset.asset.make_sales_invoice" href="#erpnext.accounts.doctype.asset.asset.make_sales_invoice" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.asset.asset.<b>make_sales_invoice</b>
+        <i class="text-muted">(asset, item_code, company)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.asset.asset.transfer_asset</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.asset.asset.transfer_asset" href="#erpnext.accounts.doctype.asset.asset.transfer_asset" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.asset.asset.<b>transfer_asset</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
 
 	
 
@@ -721,6 +901,15 @@ Double Declining Balance</pre>
 
 
 <a href="https://frappe.github.io/erpnext/current/models/accounts/asset">Asset</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/asset_movement">Asset Movement</a>
 
 </li>
 			
@@ -750,78 +939,46 @@ Double Declining Balance</pre>
 <!-- autodoc -->
 <!-- jinja -->
 <!-- static -->
-	</article>
-	
 </div>
-</div>
-    	</div>
-	</div>
-</div>
-
-						<!-- edit-link -->
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
-
-                    </div>
-					</footer>
 				</div>
 			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
+</div>
 
-</ul>
-				</div>
-			</div>
+				<!-- edit-link -->
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -834,8 +991,6 @@ Double Declining Balance</pre>
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>

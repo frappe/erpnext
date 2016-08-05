@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Item </title>
+	<title>Item</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="current/models/stock/item">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-item" data-path="current/models/stock/item"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-current/models/stock/item" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,21 +120,20 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>Item</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Item</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="item" style="text-align: Left">
-	<!-- title: Item -->
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
+<!-- title: Item -->
 
 
 
@@ -224,6 +249,18 @@ A Product or a Service that is bought, sold or kept in stock.
         
         <tr >
             <td>6</td>
+            <td ><code>barcode</code></td>
+            <td >
+                Data</td>
+            <td >
+                Barcode
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
             <td class="danger" title="Mandatory"><code>item_group</code></td>
             <td >
                 Link</td>
@@ -244,7 +281,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr >
-            <td>7</td>
+            <td>8</td>
             <td class="danger" title="Mandatory"><code>stock_uom</code></td>
             <td >
                 Link</td>
@@ -265,7 +302,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr >
-            <td>8</td>
+            <td>9</td>
             <td ><code>column_break0</code></td>
             <td class="info">
                 Column Break</td>
@@ -277,31 +314,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr >
-            <td>9</td>
-            <td class="danger" title="Mandatory"><code>is_stock_item</code></td>
-            <td >
-                Check</td>
-            <td >
-                Maintain Stock
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
             <td>10</td>
-            <td ><code>is_fixed_asset</code></td>
-            <td >
-                Check</td>
-            <td >
-                Is Fixed Asset
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>11</td>
             <td ><code>disabled</code></td>
             <td >
                 Check</td>
@@ -313,7 +326,88 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr >
+            <td>11</td>
+            <td class="danger" title="Mandatory"><code>is_stock_item</code></td>
+            <td >
+                Check</td>
+            <td >
+                Maintain Stock
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
             <td>12</td>
+            <td ><code>opening_stock</code></td>
+            <td >
+                Int</td>
+            <td >
+                Opening Stock
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td ><code>valuation_rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Valuation Rate
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>standard_rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Standard Selling Rate
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td ><code>is_fixed_asset</code></td>
+            <td >
+                Check</td>
+            <td >
+                Is Fixed Asset
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>16</td>
+            <td ><code>asset_category</code></td>
+            <td >
+                Link</td>
+            <td >
+                Asset Category
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/asset_category">Asset Category</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
             <td ><code>image</code></td>
             <td >
                 Attach Image</td>
@@ -327,7 +421,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr class="info">
-            <td>13</td>
+            <td>18</td>
             <td ><code>section_break_11</code></td>
             <td >
                 Section Break</td>
@@ -339,7 +433,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>19</td>
             <td ><code>brand</code></td>
             <td >
                 Link</td>
@@ -360,19 +454,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr >
-            <td>15</td>
-            <td ><code>barcode</code></td>
-            <td >
-                Data</td>
-            <td >
-                Barcode
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>16</td>
+            <td>20</td>
             <td ><code>description</code></td>
             <td >
                 Text Editor</td>
@@ -384,7 +466,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr class="info">
-            <td>17</td>
+            <td>21</td>
             <td ><code>inventory</code></td>
             <td >
                 Section Break</td>
@@ -398,7 +480,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>22</td>
             <td ><code>default_warehouse</code></td>
             <td >
                 Link</td>
@@ -419,7 +501,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>23</td>
             <td ><code>end_of_life</code></td>
             <td >
                 Date</td>
@@ -431,7 +513,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>24</td>
             <td ><code>has_batch_no</code></td>
             <td >
                 Check</td>
@@ -443,7 +525,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>25</td>
             <td ><code>has_serial_no</code></td>
             <td >
                 Check</td>
@@ -456,7 +538,7 @@ A Product or a Service that is bought, sold or kept in stock.
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>26</td>
             <td ><code>serial_no_series</code></td>
             <td >
                 Data</td>
@@ -470,7 +552,24 @@ If series is set and Serial No is not mentioned in transactions, then automatic 
         </tr>
         
         <tr >
-            <td>23</td>
+            <td>27</td>
+            <td ><code>default_material_request_type</code></td>
+            <td >
+                Select</td>
+            <td >
+                Default Material Request Type
+                
+            </td>
+            <td>
+                <pre>Purchase
+Material Transfer
+Material Issue
+Manufacture</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>28</td>
             <td ><code>column_break1</code></td>
             <td class="info">
                 Column Break</td>
@@ -482,7 +581,7 @@ If series is set and Serial No is not mentioned in transactions, then automatic 
         </tr>
         
         <tr >
-            <td>24</td>
+            <td>29</td>
             <td ><code>tolerance</code></td>
             <td >
                 Float</td>
@@ -494,7 +593,7 @@ If series is set and Serial No is not mentioned in transactions, then automatic 
         </tr>
         
         <tr >
-            <td>25</td>
+            <td>30</td>
             <td ><code>valuation_method</code></td>
             <td >
                 Select</td>
@@ -510,7 +609,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>26</td>
+            <td>31</td>
             <td ><code>warranty_period</code></td>
             <td >
                 Data</td>
@@ -522,7 +621,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>27</td>
+            <td>32</td>
             <td ><code>net_weight</code></td>
             <td >
                 Float</td>
@@ -534,7 +633,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>28</td>
+            <td>33</td>
             <td ><code>weight_uom</code></td>
             <td >
                 Link</td>
@@ -555,7 +654,7 @@ Moving Average</pre>
         </tr>
         
         <tr class="info">
-            <td>29</td>
+            <td>34</td>
             <td ><code>reorder_section</code></td>
             <td >
                 Section Break</td>
@@ -569,7 +668,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>30</td>
+            <td>35</td>
             <td ><code>reorder_levels</code></td>
             <td >
                 Table</td>
@@ -591,7 +690,7 @@ Moving Average</pre>
         </tr>
         
         <tr class="info">
-            <td>31</td>
+            <td>36</td>
             <td ><code>variants_section</code></td>
             <td >
                 Section Break</td>
@@ -603,7 +702,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>32</td>
+            <td>37</td>
             <td ><code>has_variants</code></td>
             <td >
                 Check</td>
@@ -616,7 +715,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>33</td>
+            <td>38</td>
             <td ><code>attributes</code></td>
             <td >
                 Table</td>
@@ -637,7 +736,7 @@ Moving Average</pre>
         </tr>
         
         <tr class="info">
-            <td>34</td>
+            <td>39</td>
             <td ><code>purchase_details</code></td>
             <td >
                 Section Break</td>
@@ -651,19 +750,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>35</td>
-            <td ><code>is_purchase_item</code></td>
-            <td >
-                Check</td>
-            <td >
-                Is Purchase Item
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>36</td>
+            <td>40</td>
             <td ><code>min_order_qty</code></td>
             <td >
                 Float</td>
@@ -675,7 +762,19 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>37</td>
+            <td>41</td>
+            <td ><code>safety_stock</code></td>
+            <td >
+                Float</td>
+            <td >
+                Safety Stock
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>42</td>
             <td ><code>lead_time_days</code></td>
             <td >
                 Int</td>
@@ -688,7 +787,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>38</td>
+            <td>43</td>
             <td ><code>buying_cost_center</code></td>
             <td >
                 Link</td>
@@ -709,7 +808,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>39</td>
+            <td>44</td>
             <td ><code>expense_account</code></td>
             <td >
                 Link</td>
@@ -730,7 +829,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>40</td>
+            <td>45</td>
             <td ><code>unit_of_measure_conversion</code></td>
             <td class="info">
                 Column Break</td>
@@ -742,7 +841,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>41</td>
+            <td>46</td>
             <td ><code>uoms</code></td>
             <td >
                 Table</td>
@@ -764,7 +863,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>42</td>
+            <td>47</td>
             <td ><code>last_purchase_rate</code></td>
             <td >
                 Float</td>
@@ -776,7 +875,7 @@ Moving Average</pre>
         </tr>
         
         <tr class="info">
-            <td>43</td>
+            <td>48</td>
             <td ><code>supplier_details</code></td>
             <td >
                 Section Break</td>
@@ -788,7 +887,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>44</td>
+            <td>49</td>
             <td ><code>default_supplier</code></td>
             <td >
                 Link</td>
@@ -809,7 +908,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>45</td>
+            <td>50</td>
             <td ><code>delivered_by_supplier</code></td>
             <td >
                 Check</td>
@@ -821,7 +920,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>46</td>
+            <td>51</td>
             <td ><code>manufacturer</code></td>
             <td >
                 Link</td>
@@ -842,7 +941,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>47</td>
+            <td>52</td>
             <td ><code>manufacturer_part_no</code></td>
             <td >
                 Data</td>
@@ -854,7 +953,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>48</td>
+            <td>53</td>
             <td ><code>column_break2</code></td>
             <td class="info">
                 Column Break</td>
@@ -866,7 +965,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>49</td>
+            <td>54</td>
             <td ><code>supplier_items</code></td>
             <td >
                 Table</td>
@@ -887,7 +986,7 @@ Moving Average</pre>
         </tr>
         
         <tr class="info">
-            <td>50</td>
+            <td>55</td>
             <td ><code>sales_details</code></td>
             <td >
                 Section Break</td>
@@ -901,32 +1000,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>51</td>
-            <td ><code>is_sales_item</code></td>
-            <td >
-                Check</td>
-            <td >
-                Is Sales Item
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>52</td>
-            <td ><code>is_service_item</code></td>
-            <td >
-                Check</td>
-            <td >
-                Is Service Item
-                <p class="text-muted small">
-                    Allow in Sales Order of type "Service"</p>
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>53</td>
+            <td>56</td>
             <td ><code>publish_in_hub</code></td>
             <td >
                 Check</td>
@@ -939,7 +1013,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>54</td>
+            <td>57</td>
             <td ><code>synced_with_hub</code></td>
             <td >
                 Check</td>
@@ -951,7 +1025,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>55</td>
+            <td>58</td>
             <td ><code>income_account</code></td>
             <td >
                 Link</td>
@@ -972,7 +1046,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>56</td>
+            <td>59</td>
             <td ><code>selling_cost_center</code></td>
             <td >
                 Link</td>
@@ -993,7 +1067,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>57</td>
+            <td>60</td>
             <td ><code>column_break3</code></td>
             <td class="info">
                 Column Break</td>
@@ -1005,7 +1079,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>58</td>
+            <td>61</td>
             <td ><code>customer_items</code></td>
             <td >
                 Table</td>
@@ -1026,7 +1100,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>59</td>
+            <td>62</td>
             <td ><code>max_discount</code></td>
             <td >
                 Float</td>
@@ -1038,7 +1112,7 @@ Moving Average</pre>
         </tr>
         
         <tr class="info">
-            <td>60</td>
+            <td>63</td>
             <td ><code>item_tax_section_break</code></td>
             <td >
                 Section Break</td>
@@ -1052,7 +1126,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>61</td>
+            <td>64</td>
             <td ><code>taxes</code></td>
             <td >
                 Table</td>
@@ -1074,7 +1148,7 @@ Moving Average</pre>
         </tr>
         
         <tr class="info">
-            <td>62</td>
+            <td>65</td>
             <td ><code>inspection_criteria</code></td>
             <td >
                 Section Break</td>
@@ -1088,7 +1162,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>63</td>
+            <td>66</td>
             <td ><code>inspection_required</code></td>
             <td >
                 Check</td>
@@ -1100,7 +1174,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>64</td>
+            <td>67</td>
             <td ><code>quality_parameters</code></td>
             <td >
                 Table</td>
@@ -1122,7 +1196,7 @@ Moving Average</pre>
         </tr>
         
         <tr class="info">
-            <td>65</td>
+            <td>68</td>
             <td ><code>manufacturing</code></td>
             <td >
                 Section Break</td>
@@ -1133,43 +1207,6 @@ Moving Average</pre>
             <td>
                 <pre>icon-cogs</pre>
             </td>
-        </tr>
-        
-        <tr >
-            <td>66</td>
-            <td ><code>is_pro_applicable</code></td>
-            <td >
-                Check</td>
-            <td >
-                Allow Production Order
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>67</td>
-            <td ><code>is_sub_contracted_item</code></td>
-            <td >
-                Check</td>
-            <td >
-                Supply Raw Materials for Purchase
-                <p class="text-muted small">
-                    If subcontracted to a vendor</p>
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>68</td>
-            <td ><code>column_break_74</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
         </tr>
         
         <tr >
@@ -1195,6 +1232,31 @@ Moving Average</pre>
         
         <tr >
             <td>70</td>
+            <td ><code>is_sub_contracted_item</code></td>
+            <td >
+                Check</td>
+            <td >
+                Supply Raw Materials for Purchase
+                <p class="text-muted small">
+                    If subcontracted to a vendor</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>71</td>
+            <td ><code>column_break_74</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>72</td>
             <td ><code>customer_code</code></td>
             <td >
                 Data</td>
@@ -1206,7 +1268,7 @@ Moving Average</pre>
         </tr>
         
         <tr class="info">
-            <td>71</td>
+            <td>73</td>
             <td ><code>website_section</code></td>
             <td >
                 Section Break</td>
@@ -1220,7 +1282,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>72</td>
+            <td>74</td>
             <td ><code>show_in_website</code></td>
             <td >
                 Check</td>
@@ -1232,20 +1294,19 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>73</td>
-            <td ><code>page_name</code></td>
+            <td>75</td>
+            <td ><code>route</code></td>
             <td >
-                Data</td>
+                Small Text</td>
             <td >
-                Page Name
-                <p class="text-muted small">
-                    website page link</p>
+                Route
+                
             </td>
             <td></td>
         </tr>
         
         <tr >
-            <td>74</td>
+            <td>76</td>
             <td ><code>weightage</code></td>
             <td >
                 Int</td>
@@ -1258,7 +1319,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>75</td>
+            <td>77</td>
             <td ><code>slideshow</code></td>
             <td >
                 Link</td>
@@ -1280,7 +1341,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>76</td>
+            <td>78</td>
             <td ><code>website_image</code></td>
             <td >
                 Attach</td>
@@ -1293,7 +1354,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>77</td>
+            <td>79</td>
             <td ><code>thumbnail</code></td>
             <td >
                 Data</td>
@@ -1305,7 +1366,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>78</td>
+            <td>80</td>
             <td ><code>cb72</code></td>
             <td class="info">
                 Column Break</td>
@@ -1317,7 +1378,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>79</td>
+            <td>81</td>
             <td ><code>website_warehouse</code></td>
             <td >
                 Link</td>
@@ -1339,7 +1400,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>80</td>
+            <td>82</td>
             <td ><code>website_item_groups</code></td>
             <td >
                 Table</td>
@@ -1361,7 +1422,7 @@ Moving Average</pre>
         </tr>
         
         <tr class="info">
-            <td>81</td>
+            <td>83</td>
             <td ><code>sb72</code></td>
             <td >
                 Section Break</td>
@@ -1373,7 +1434,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>82</td>
+            <td>84</td>
             <td ><code>copy_from_item_group</code></td>
             <td >
                 Button</td>
@@ -1385,7 +1446,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>83</td>
+            <td>85</td>
             <td ><code>website_specifications</code></td>
             <td >
                 Table</td>
@@ -1406,7 +1467,7 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>84</td>
+            <td>86</td>
             <td ><code>web_long_description</code></td>
             <td >
                 Text Editor</td>
@@ -1418,12 +1479,12 @@ Moving Average</pre>
         </tr>
         
         <tr >
-            <td>85</td>
-            <td ><code>parent_website_route</code></td>
+            <td>87</td>
+            <td ><code>total_projected_qty</code></td>
             <td >
-                Read Only</td>
-            <td >
-                Parent Website Route
+                Float</td>
+            <td class="text-muted" title="Hidden">
+                Total Projected Qty
                 
             </td>
             <td></td>
@@ -1484,10 +1545,38 @@ Moving Average</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="add_price" href="#add_price" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>add_price</b>
+        <i class="text-muted">(self, price_list=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Add a new price</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="after_insert" href="#after_insert" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>after_insert</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>set opening stock and item price</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="after_rename" href="#after_rename" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>after_rename</b>
-        <i class="text-muted">(self, olddn, newdn, merge)</i>
+        <i class="text-muted">(self, old_name, new_name, merge)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1529,7 +1618,7 @@ Moving Average</pre>
         <a name="before_rename" href="#before_rename" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>before_rename</b>
-        <i class="text-muted">(self, olddn, newdn, merge=False)</i>
+        <i class="text-muted">(self, old_name, new_name, merge=False)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1557,6 +1646,20 @@ Moving Average</pre>
         <a name="check_for_active_boms" href="#check_for_active_boms" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>check_for_active_boms</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="check_if_linked_document_exists" href="#check_if_linked_document_exists" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>check_if_linked_document_exists</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -1638,6 +1741,34 @@ Moving Average</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="get_parents" href="#get_parents" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_parents</b>
+        <i class="text-muted">(self, context)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="make_route" href="#make_route" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>make_route</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="make_thumbnail" href="#make_thumbnail" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>make_thumbnail</b>
@@ -1697,7 +1828,7 @@ Moving Average</pre>
         <a name="recalculate_bin_qty" href="#recalculate_bin_qty" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>recalculate_bin_qty</b>
-        <i class="text-muted">(self, newdn)</i>
+        <i class="text-muted">(self, new_name)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1739,9 +1870,23 @@ Moving Average</pre>
         <a name="set_last_purchase_rate" href="#set_last_purchase_rate" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>set_last_purchase_rate</b>
-        <i class="text-muted">(self, newdn)</i>
+        <i class="text-muted">(self, new_name)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_opening_stock" href="#set_opening_stock" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_opening_stock</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>set opening stock</p>
 </div>
 	<br>
 
@@ -1890,9 +2035,9 @@ Moving Average</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="validate_fixed_asset_item" href="#validate_fixed_asset_item" class="text-muted small">
+        <a name="validate_fixed_asset" href="#validate_fixed_asset" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>validate_fixed_asset_item</b>
+		<b>validate_fixed_asset</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -1935,20 +2080,6 @@ Moving Average</pre>
         <a name="validate_name_with_item_group" href="#validate_name_with_item_group" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>validate_name_with_item_group</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="validate_reorder_level" href="#validate_reorder_level" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>validate_reorder_level</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -2060,6 +2191,22 @@ Moving Average</pre>
         <i class="text-muted">(item_code, doc_name=None, conversion_rate=1.0)</i>
     </p>
 	<div class="docs-attr-desc"><p>returns last purchase details in stock uom</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.doctype.item.item.get_timeline_data" href="#erpnext.stock.doctype.item.item.get_timeline_data" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.doctype.item.item.<b>get_timeline_data</b>
+        <i class="text-muted">(doctype, name)</i>
+    </p>
+	<div class="docs-attr-desc"><p>returns timeline data based on stock ledger entry</p>
 </div>
 	<br>
 
@@ -2202,6 +2349,15 @@ Moving Average</pre>
             <li>
 
 
+<a href="https://frappe.github.io/erpnext/current/models/portal/homepage_featured_product">Homepage Featured Product</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
 <a href="https://frappe.github.io/erpnext/current/models/selling/installation_note_item">Installation Note Item</a>
 
 </li>
@@ -2238,7 +2394,7 @@ Moving Average</pre>
             <li>
 
 
-<a href="https://frappe.github.io/erpnext/current/models/support/maintenance_schedule_detail">Maintenance Schedule Detail</a>
+<a href="https://frappe.github.io/erpnext/current/models/maintenance/maintenance_schedule_detail">Maintenance Schedule Detail</a>
 
 </li>
 			
@@ -2247,7 +2403,7 @@ Moving Average</pre>
             <li>
 
 
-<a href="https://frappe.github.io/erpnext/current/models/support/maintenance_schedule_item">Maintenance Schedule Item</a>
+<a href="https://frappe.github.io/erpnext/current/models/maintenance/maintenance_schedule_item">Maintenance Schedule Item</a>
 
 </li>
 			
@@ -2256,7 +2412,7 @@ Moving Average</pre>
             <li>
 
 
-<a href="https://frappe.github.io/erpnext/current/models/support/maintenance_visit_purpose">Maintenance Visit Purpose</a>
+<a href="https://frappe.github.io/erpnext/current/models/maintenance/maintenance_visit_purpose">Maintenance Visit Purpose</a>
 
 </li>
 			
@@ -2329,6 +2485,15 @@ Moving Average</pre>
 
 
 <a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_order">Production Order</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_order_item">Production Order Item</a>
 
 </li>
 			
@@ -2484,78 +2649,46 @@ Moving Average</pre>
 <!-- autodoc -->
 <!-- jinja -->
 <!-- static -->
-	</article>
-	
 </div>
-</div>
-    	</div>
-	</div>
-</div>
-
-						<!-- edit-link -->
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
-
-                    </div>
-					</footer>
 				</div>
 			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
+</div>
 
-</ul>
-				</div>
-			</div>
+				<!-- edit-link -->
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -2568,8 +2701,6 @@ Moving Average</pre>
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>

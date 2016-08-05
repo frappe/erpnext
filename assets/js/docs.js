@@ -7,21 +7,6 @@ $(function() {
 		});
 	}
 
-	$(".toggle-sidebar").on("click", function() {
-		$(".offcanvas").addClass("active-right");
-		return false;
-	});
-
-	// collapse offcanvas sidebars!
-	$(".offcanvas .sidebar").on("click", "a", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-	});
-
-	$(".offcanvas-main-section-overlay").on("click", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-		return false;
-	});
-
 	// search
 	$('.sidebar-navbar-items .octicon-search, .navbar .octicon-search').parent().on("click", function() {
 		var modal = frappe.get_modal("Search",

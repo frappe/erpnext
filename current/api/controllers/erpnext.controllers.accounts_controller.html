@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> erpnext.controllers.accounts_controller </title>
+	<title>erpnext.controllers.accounts_controller</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="current/api/controllers/erpnext.controllers.accounts_controller">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-erpnext.controllers.accounts_controller" data-path="current/api/controllers/erpnext.controllers.accounts_controller"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-current/api/controllers/erpnext.controllers.accounts_controller" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,21 +120,20 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>erpnext.controllers.accounts_controller</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>erpnext.controllers.accounts_controller</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="erpnext.controllers.accounts_controller" style="text-align: Left">
-	<!-- title: erpnext.controllers.accounts_controller --><div class="dev-header">
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
+<!-- title: erpnext.controllers.accounts_controller --><div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
 	Version 6.x.x</a>
@@ -193,12 +218,12 @@
     
     
 	<p class="docs-attr-name">
-        <a name="get_advances" href="#get_advances" class="text-muted small">
+        <a name="get_advance_entries" href="#get_advance_entries" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>get_advances</b>
-        <i class="text-muted">(self, account_head, party_type, party, child_doctype, parentfield, dr_or_cr, against_order_field)</i>
+		<b>get_advance_entries</b>
+        <i class="text-muted">(self, include_unallocated=True)</i>
     </p>
-	<div class="docs-attr-desc"><p>Returns list of advances against Account, Party, Reference</p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -269,6 +294,20 @@
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_advances" href="#set_advances" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_advances</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns list of advances against Account, Party, Reference</p>
 </div>
 	<br>
 
@@ -361,6 +400,23 @@
     
     
 	<p class="docs-attr-name">
+        <a name="update_against_document_in_jv" href="#update_against_document_in_jv" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_against_document_in_jv</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Links invoice and advance voucher:
+    1. cancel advance voucher
+    2. split into multiple rows if partially adjusted, assign against voucher
+    3. submit advance voucher</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
@@ -389,24 +445,10 @@
     
     
 	<p class="docs-attr-name">
-        <a name="validate_advance_jv" href="#validate_advance_jv" class="text-muted small">
+        <a name="validate_advance_entries" href="#validate_advance_entries" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>validate_advance_jv</b>
-        <i class="text-muted">(self, reference_type)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="validate_asset" href="#validate_asset" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>validate_asset</b>
-        <i class="text-muted">(self, asset, item_row)</i>
+		<b>validate_advance_entries</b>
+        <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -473,10 +515,38 @@
     
     
 	<p class="docs-attr-name">
+        <a name="validate_fixed_asset" href="#validate_fixed_asset" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_fixed_asset</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="validate_multiple_billing" href="#validate_multiple_billing" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>validate_multiple_billing</b>
         <i class="text-muted">(self, ref_dt, item_ref_dn, based_on, parentfield)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_paid_amount" href="#validate_paid_amount" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_paid_amount</b>
+        <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -499,6 +569,38 @@
         
     </div>
     <hr>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.accounts_controller.get_advance_journal_entries" href="#erpnext.controllers.accounts_controller.get_advance_journal_entries" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.accounts_controller.<b>get_advance_journal_entries</b>
+        <i class="text-muted">(party_type, party, party_account, amount_field, order_doctype, order_list, include_unallocated=True)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.accounts_controller.get_advance_payment_entries" href="#erpnext.controllers.accounts_controller.get_advance_payment_entries" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.accounts_controller.<b>get_advance_payment_entries</b>
+        <i class="text-muted">(party_type, party, party_account, order_doctype, order_list=None, include_unallocated=True, against_all_orders=False)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
 
 	
 
@@ -623,78 +725,46 @@
 
 
 <!-- autodoc -->
-	</article>
-	
 </div>
-</div>
-    	</div>
-	</div>
-</div>
-
-						<!-- edit-link -->
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
-
-                    </div>
-					</footer>
 				</div>
 			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
+</div>
 
-</ul>
-				</div>
-			</div>
+				<!-- edit-link -->
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -707,8 +777,6 @@
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>

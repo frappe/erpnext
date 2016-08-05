@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Managing Fixed Assets </title>
+	<title>Managing Fixed Assets</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="user/manual/en/accounts/managing-fixed-assets">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-managing-fixed-assets" data-path="user/manual/en/accounts/managing-fixed-assets"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-user/manual/en/accounts/managing-fixed-assets" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,55 +120,60 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>Managing Fixed Assets</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Managing Fixed Assets</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="managing-fixed-assets" style="text-align: Left">
-	<p>In ERPNext, you can maintain your fixed asset records like Computers, Building, Cars etc and manage depreciations, sell or disposal of those assets.</p>
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
+<p>In ERPNext, you can maintain fixed asset records like Computers, Furnitures, Cars, etc. and manage depreciations, sale or disposal of those assets.</p>
 
 <h2>Asset Category</h2>
 
-<p>To start first you should create Asset Category, depending on the type of assets. For example, all your desktops and laptops can be part of a Asset Category named "Computers". Here, you can set default depreciation method, periodicity and depreciation related accounts, which will be applicable to all the assets under the category.</p>
+<p>Based on the type of assets, create Asset Category. For example, all your desktops and laptops can be part of an Asset Category named "Computers". Here you can set default depreciation method, periodicity and depreciation related accounts, which will be applicable to all the assets under the category.</p>
 
 <p><img class="screenshot" alt="Asset Category" src="https://frappe.github.io/erpnext/assets/img/accounts/asset-category.png"></p>
 
 <blockquote>
-  <p><strong>Note:</strong> You can also set default depreciation related Accounts and Cost Centers in Company.</p>
+  <p><strong>Note:</strong> You can also set default depreciation related Accounts and Cost Centers in Company master.</p>
 </blockquote>
 
 <h2>Asset</h2>
 
-<p>Next step will be creating the fixed asset records. The assets which are partially / fully depreciated can also be created/maintained for the future reference.</p>
+<p>Asset master is the heart of fixed asset management feature. All the transactions related to Asset like purchasing, sales, depreciation, scrapping will be managed from the Asset master.</p>
 
 <p><img class="screenshot" alt="Asset" src="https://frappe.github.io/erpnext/assets/img/accounts/asset.png"></p>
 
 <p>Explanation of the fields:</p>
 
 <ol>
-<li>Asset Category: The category of assets it belongs to.</li>
-<li>Item Code: The item/product code for the asset, which must be marked as a fixed asset and a non-stock item.</li>
+<li><p>Item Code: An Item for the Asset must be a non-stock item, with "Is Asset" field checked.</p>
+
+<p><img class="screenshot" alt="Asset Item" src="https://frappe.github.io/erpnext/assets/img/accounts/asset-item.png"></p></li>
+<li><p>Asset Category: The category of assets it belongs to.</p></li>
+<li>Is Existing Asset: Check if the asset is being carried forward from the previous Fiscal Year. The existing assets which are partially / fully depreciated can also be created/maintained for the future reference.</li>
 <li>Status: The options are - Draft, Submitted, Partially Depreciated, Fully Depreciated, Sold and Scrapped.</li>
-<li>Gross Purchase Amount: The purchase cost of the asset</li>
+<li>Warehouse: Set the location of the asset.</li>
+<li>Gross Purchase Amount: The purchase cost of the asset.</li>
 <li>Expected Value After Useful Life: Useful Life is the time period over in which the company expects that the asset will be productive. After that period, either the asset is scrapped or sold. In case it is sold, mention the estimated value here. This value is also known as Salvage Value, Scrap Value or Residual Value.</li>
-<li>Current Value (After Depreciation): In case you are creating record of an existing asset which has already been partially/fully depreciated, mention the currect value of the asset. In case of new asset, mention the purchase amount or leave it blank.</li>
+<li>Opening Accumulated Depreciation: The accumulated depreciation amount which has already been booked for an existing asset.</li>
+<li>Current Value (After Depreciation): In case you are creating record of an existing asset which has already been partially/fully depreciated, mention the current value of the asset. In case of new asset, mention the purchase amount or leave it blank.</li>
 <li>Depreciation Method: There are two options: Straight Line and Double Declining Balance.
 <ul>
 <li>Straight Line: This method spreads the cost of the fixed asset evenly over its useful life.</li>
 <li>Double Declining Method: An accelerated method of depreciation, it results in higher depreciation expense in the earlier years of ownership.</li>
 </ul></li>
-<li>Number of Depreciations: The number of depreciations during the useful life. In case of existing assets which are partially depreciated, mention the number of pending depreciations.</li>
-<li>Number of Months in a Period: The number of months between two depreciations.</li>
-<li>Next Depreciation Date: Mention the next depreciation date, even if it is the first one. If depreciation already completed, leave it blank.</li>
+<li>Total Number of Depreciations: The total number of depreciations during the useful life. In case of existing assets which are partially depreciated, mention the number of pending depreciations.</li>
+<li>Number of Depreciations Booked: Enter the number of already booked depreciations for an existing asset.</li>
+<li>Frequency of Depreciation (Months): The number of months between two depreciations.</li>
+<li>Next Depreciation Date: Mention the next depreciation date, even if it is the first one. If the asset is an existing one and depreciation has already been completed, leave it blank.</li>
 </ol>
 
 <h3>Depreciations</h3>
@@ -157,17 +188,21 @@
 
 <p>In the depreciation entry, the "Accumulated Depreciation Account" is credited and "Depreciation Expense Account" is debited. The related accounts can be set in the Asset Category or Company.</p>
 
-<h2>Purchase an asset</h2>
+<p>For better visibility, net value of the asset on different depreciation dates are shown in a line graph.</p>
 
-<p>For purchasing an asset, first create an item for the asset with "Is Fixed Asset" checked. Then create a Purchase Invoice against that item. In the Purchase Invoice Item row, you have to mention Asset name and associated fixed asset account should be set as Expense Account. Fixed asset accounts are identified based on "Fixed Asset" account type.</p>
+<p><img class="screenshot" alt="Asset" src="https://frappe.github.io/erpnext/assets/img/accounts/asset-graph.png"></p>
+
+<h2>Purchase an Asset</h2>
+
+<p>For purchasing a new asset, create and submit the asset record with all the depreciation settings. Then create a Purchase Invoice via "Make Purchase Invoice" button. On clicking the button, system will load a new Purchase Invoice form with pre-loaded items table. It will also set proper fixed asset account (defined in the Asset Category) in the Expense Account field. You need to select Supplier and other necessary details and submit the Purchase Invoice.</p>
 
 <p><img class="screenshot" alt="Asset" src="https://frappe.github.io/erpnext/assets/img/accounts/asset-purchase-invoice.png"></p>
 
-<p>System will validate purchase date, supplier with the value mentioned in the Asset record. On submission of the Invoice, the "Fixed Asset Account" will be debited. It will also update Purchase Invoice number in the Asset.</p>
+<p>On submission of the invoice, the "Fixed Asset Account" will be debited and payable account will be credited. It also updates purchase date, supplier and Purchase Invoice no. in the Asset master.</p>
 
-<h2>Sell an ssset</h2>
+<h2>Sale an Asset</h2>
 
-<p>To sale an asset, create a Sales Invoice against the item linked with the asset. On submission of Sales Invoice, following entries will take place:</p>
+<p>To sale an asset, open the asset record and create a Sales Invoice by clicking on "Sale Asset". On submission of the Sales Invoice, following entries will take place:</p>
 
 <ul>
 <li>"Receivable Account" (Debtors) will be debited by the sales amount.</li>
@@ -180,19 +215,26 @@
 
 <h2>Scrap an Asset</h2>
 
-<p>You can scrap an asset anytime using the "Scrap Asset" button in the Asset record. The "Gain/Loss Account on Asset Disposal" mentioned in the Company is debited by the Current Value (After Depreciation) of the asset. , After scrapping, you can also restore the asset using "Restore Asset" button.</p>
+<p>You can scrap an asset anytime using the "Scrap Asset" button in the Asset record. The "Gain/Loss Account on Asset Disposal" mentioned in the Company is debited by the Current Value (After Depreciation) of the asset. After scrapping, you can also restore the asset using "Restore Asset" button.</p>
 
 <p><img class="screenshot" alt="Asset" src="https://frappe.github.io/erpnext/assets/img/accounts/scrap-journal-entry.png"></p>
 
-	</article>
-	
+<h2>Asset Movement</h2>
+
+<p>The movement of the assets (from one warehouse to another) is also tracked via Asset Movement form.</p>
+
+<p><img class="screenshot" alt="Asset" src="https://frappe.github.io/erpnext/assets/img/accounts/asset-movement.png"></p>
+
+<p>There is also a dedicated button "Transfer Asset" inside the Asset form to track the Asset Movement.</p>
+
+<p><img class="screenshot" alt="Asset" src="https://frappe.github.io/erpnext/assets/img/accounts/asset-movement-using-button.png"></p>
+
 </div>
-</div>
-    	</div>
-	</div>
+				</div>
+			</div>
 </div>
 
-						
+				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
@@ -203,69 +245,40 @@
 	</div>
 	</div>
 </div>
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
 
-                    </div>
-					</footer>
-				</div>
-			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
-
-</ul>
-				</div>
-			</div>
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -278,8 +291,6 @@
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>

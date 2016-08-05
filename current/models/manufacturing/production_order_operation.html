@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Production Order Operation </title>
+	<title>Production Order Operation</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="current/models/manufacturing/production_order_operation">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-production_order_operation" data-path="current/models/manufacturing/production_order_operation"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-current/models/manufacturing/production_order_operation" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,21 +120,20 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>Production Order Operation</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Production Order Operation</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="production_order_operation" style="text-align: Left">
-	<!-- title: Production Order Operation -->
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
+<!-- title: Production Order Operation -->
 
 
 
@@ -255,20 +280,8 @@ Completed</pre>
             </td>
         </tr>
         
-        <tr >
-            <td>8</td>
-            <td ><code>show_time_logs</code></td>
-            <td >
-                Button</td>
-            <td >
-                Show Time Logs
-                
-            </td>
-            <td></td>
-        </tr>
-        
         <tr class="info">
-            <td>9</td>
+            <td>8</td>
             <td ><code>estimated_time_and_cost</code></td>
             <td >
                 Section Break</td>
@@ -280,7 +293,7 @@ Completed</pre>
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>9</td>
             <td ><code>planned_start_time</code></td>
             <td >
                 Datetime</td>
@@ -292,7 +305,7 @@ Completed</pre>
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>10</td>
             <td ><code>planned_end_time</code></td>
             <td >
                 Datetime</td>
@@ -304,7 +317,7 @@ Completed</pre>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>11</td>
             <td ><code>column_break_10</code></td>
             <td class="info">
                 Column Break</td>
@@ -316,7 +329,7 @@ Completed</pre>
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>12</td>
             <td class="danger" title="Mandatory"><code>time_in_mins</code></td>
             <td >
                 Float</td>
@@ -329,7 +342,7 @@ Completed</pre>
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>13</td>
             <td ><code>hour_rate</code></td>
             <td >
                 Float</td>
@@ -341,7 +354,7 @@ Completed</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>14</td>
             <td ><code>planned_operating_cost</code></td>
             <td >
                 Currency</td>
@@ -355,7 +368,7 @@ Completed</pre>
         </tr>
         
         <tr class="info">
-            <td>16</td>
+            <td>15</td>
             <td ><code>section_break_9</code></td>
             <td >
                 Section Break</td>
@@ -367,7 +380,7 @@ Completed</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>16</td>
             <td ><code>actual_start_time</code></td>
             <td >
                 Datetime</td>
@@ -379,7 +392,7 @@ Completed</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>17</td>
             <td ><code>actual_end_time</code></td>
             <td >
                 Datetime</td>
@@ -392,7 +405,7 @@ Completed</pre>
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>18</td>
             <td ><code>column_break_11</code></td>
             <td class="info">
                 Column Break</td>
@@ -404,7 +417,7 @@ Completed</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>19</td>
             <td ><code>actual_operation_time</code></td>
             <td >
                 Float</td>
@@ -418,7 +431,7 @@ Updated via 'Time Log'</p>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>20</td>
             <td ><code>actual_operating_cost</code></td>
             <td >
                 Currency</td>
@@ -430,18 +443,6 @@ Updated via 'Time Log'</p>
             <td>
                 <pre>Company:company:default_currency</pre>
             </td>
-        </tr>
-        
-        <tr >
-            <td>22</td>
-            <td ><code>make_time_log</code></td>
-            <td >
-                Button</td>
-            <td >
-                Make Time Log
-                
-            </td>
-            <td></td>
         </tr>
         
     </tbody>
@@ -467,78 +468,46 @@ Updated via 'Time Log'</p>
 <!-- autodoc -->
 <!-- jinja -->
 <!-- static -->
-	</article>
-	
 </div>
-</div>
-    	</div>
-	</div>
-</div>
-
-						<!-- edit-link -->
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
-
-                    </div>
-					</footer>
 				</div>
 			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
+</div>
 
-</ul>
-				</div>
-			</div>
+				<!-- edit-link -->
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -551,8 +520,6 @@ Updated via 'Time Log'</p>
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Production Order </title>
+	<title>Production Order</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="current/models/manufacturing/production_order">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-production_order" data-path="current/models/manufacturing/production_order"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-current/models/manufacturing/production_order" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,21 +120,20 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>Production Order</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Production Order</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="production_order" style="text-align: Left">
-	<!-- title: Production Order -->
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
+<!-- title: Production Order -->
 
 
 
@@ -189,6 +214,7 @@
                 <pre>
 Draft
 Submitted
+Not Started
 Stopped
 In Process
 Completed
@@ -265,6 +291,27 @@ Cancelled</pre>
         
         <tr >
             <td>8</td>
+            <td ><code>sales_order</code></td>
+            <td >
+                Link</td>
+            <td >
+                Sales Order
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/selling/sales_order">Sales Order</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
             <td class="danger" title="Mandatory"><code>qty</code></td>
             <td >
                 Float</td>
@@ -276,7 +323,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>9</td>
+            <td>10</td>
             <td ><code>material_transferred_for_manufacturing</code></td>
             <td >
                 Float</td>
@@ -288,7 +335,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>11</td>
             <td ><code>produced_qty</code></td>
             <td >
                 Float</td>
@@ -300,7 +347,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>11</td>
+            <td>12</td>
             <td ><code>warehouses</code></td>
             <td >
                 Section Break</td>
@@ -314,7 +361,29 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>13</td>
+            <td ><code>source_warehouse</code></td>
+            <td >
+                Link</td>
+            <td >
+                Source Warehouse
+                <p class="text-muted small">
+                    Warehouse for reserving items</p>
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/warehouse">Warehouse</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
             <td ><code>wip_warehouse</code></td>
             <td >
                 Link</td>
@@ -335,7 +404,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>15</td>
             <td ><code>column_break_12</code></td>
             <td class="info">
                 Column Break</td>
@@ -347,7 +416,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>16</td>
             <td ><code>fg_warehouse</code></td>
             <td >
                 Link</td>
@@ -368,7 +437,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>15</td>
+            <td>17</td>
             <td ><code>time</code></td>
             <td >
                 Section Break</td>
@@ -382,7 +451,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>18</td>
             <td ><code>expected_delivery_date</code></td>
             <td >
                 Date</td>
@@ -394,7 +463,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>19</td>
             <td class="danger" title="Mandatory"><code>planned_start_date</code></td>
             <td >
                 Datetime</td>
@@ -406,7 +475,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>20</td>
             <td ><code>planned_end_date</code></td>
             <td >
                 Datetime</td>
@@ -418,7 +487,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>21</td>
             <td ><code>column_break_13</code></td>
             <td class="info">
                 Column Break</td>
@@ -430,7 +499,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>22</td>
             <td ><code>actual_start_date</code></td>
             <td >
                 Datetime</td>
@@ -442,7 +511,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>23</td>
             <td ><code>actual_end_date</code></td>
             <td >
                 Datetime</td>
@@ -454,7 +523,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>22</td>
+            <td>24</td>
             <td ><code>operations_section</code></td>
             <td >
                 Section Break</td>
@@ -468,7 +537,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>23</td>
+            <td>25</td>
             <td ><code>operations</code></td>
             <td >
                 Table</td>
@@ -489,7 +558,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>24</td>
+            <td>26</td>
             <td ><code>section_break_22</code></td>
             <td >
                 Section Break</td>
@@ -501,7 +570,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>25</td>
+            <td>27</td>
             <td ><code>planned_operating_cost</code></td>
             <td >
                 Currency</td>
@@ -515,7 +584,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>26</td>
+            <td>28</td>
             <td ><code>actual_operating_cost</code></td>
             <td >
                 Currency</td>
@@ -529,7 +598,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>27</td>
+            <td>29</td>
             <td ><code>additional_operating_cost</code></td>
             <td >
                 Currency</td>
@@ -543,7 +612,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>28</td>
+            <td>30</td>
             <td ><code>column_break_24</code></td>
             <td class="info">
                 Column Break</td>
@@ -555,7 +624,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>29</td>
+            <td>31</td>
             <td ><code>total_operating_cost</code></td>
             <td >
                 Currency</td>
@@ -569,7 +638,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>30</td>
+            <td>32</td>
             <td ><code>more_info</code></td>
             <td >
                 Section Break</td>
@@ -583,7 +652,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>31</td>
+            <td>33</td>
             <td ><code>description</code></td>
             <td >
                 Small Text</td>
@@ -595,7 +664,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>32</td>
+            <td>34</td>
             <td ><code>stock_uom</code></td>
             <td >
                 Link</td>
@@ -616,7 +685,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>33</td>
+            <td>35</td>
             <td class="danger" title="Mandatory"><code>company</code></td>
             <td >
                 Link</td>
@@ -637,7 +706,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>34</td>
+            <td>36</td>
             <td ><code>column_break2</code></td>
             <td class="info">
                 Column Break</td>
@@ -649,7 +718,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>35</td>
+            <td>37</td>
             <td ><code>project</code></td>
             <td >
                 Link</td>
@@ -670,29 +739,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>36</td>
-            <td ><code>sales_order</code></td>
-            <td >
-                Link</td>
-            <td >
-                Sales Order
-                <p class="text-muted small">
-                    Manufacture against Sales Order</p>
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/selling/sales_order">Sales Order</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>37</td>
+            <td>38</td>
             <td ><code>material_request</code></td>
             <td >
                 Link</td>
@@ -714,7 +761,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>38</td>
+            <td>39</td>
             <td ><code>material_request_item</code></td>
             <td >
                 Data</td>
@@ -726,7 +773,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>39</td>
+            <td>40</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -740,6 +787,27 @@ Cancelled</pre>
 
 
 <a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_order">Production Order</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>41</td>
+            <td ><code>required_items</code></td>
+            <td >
+                Table</td>
+            <td class="text-muted" title="Hidden">
+                Required Items
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_order_item">Production Order Item</a>
 
 
                 
@@ -805,21 +873,6 @@ Cancelled</pre>
 
 	
         
-	<h3 style="font-weight: normal;">Class <b>ProductionNotApplicableError</b></h3>
-    
-    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
-    
-    <div class="docs-attr-desc"><p></p>
-</div>
-    <div style="padding-left: 30px;">
-        
-    </div>
-    <hr>
-
-	
-
-	
-        
 	<h3 style="font-weight: normal;">Class <b>ProductionOrder</b></h3>
     
     <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
@@ -827,6 +880,20 @@ Cancelled</pre>
     <div class="docs-attr-desc"><p></p>
 </div>
     <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="before_submit" href="#before_submit" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>before_submit</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
         
         
     
@@ -874,9 +941,23 @@ Cancelled</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="delete_time_logs" href="#delete_time_logs" class="text-muted small">
+        <a name="clear_required_items" href="#clear_required_items" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>delete_time_logs</b>
+		<b>clear_required_items</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Remove the required_items table and update the bins</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="delete_timesheet" href="#delete_timesheet" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>delete_timesheet</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -902,10 +983,52 @@ Cancelled</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="get_operations_data" href="#get_operations_data" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_operations_data</b>
+        <i class="text-muted">(self, data)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_start_end_time" href="#get_start_end_time" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_start_end_time</b>
+        <i class="text-muted">(self, timesheet, operation_id)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_status" href="#get_status" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_status</b>
+        <i class="text-muted">(self, status=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Return the status based on stock entries against this production order</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="make_time_logs" href="#make_time_logs" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>make_time_logs</b>
-        <i class="text-muted">(self)</i>
+        <i class="text-muted">(self, open_new=False)</i>
     </p>
 	<div class="docs-attr-desc"><p>Capacity Planning. Plan time logs based on earliest availablity of workstation after
 Planned Start Date. Time logs will be created and remain in Draft mode and must be submitted
@@ -960,13 +1083,12 @@ before manufacturing entry can be made.</p>
     
     
 	<p class="docs-attr-name">
-        <a name="set_operation_start_end_time" href="#set_operation_start_end_time" class="text-muted small">
+        <a name="set_production_order_operations" href="#set_production_order_operations" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>set_operation_start_end_time</b>
-        <i class="text-muted">(self, i, d)</i>
+		<b>set_production_order_operations</b>
+        <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Set start and end time for given operation. If first operation, set start as
-<code>planned_start_date</code>, else add time diff to end time of earlier operation.</p>
+	<div class="docs-attr-desc"><p>Fetch operations from BOM and set in 'Production Order'</p>
 </div>
 	<br>
 
@@ -975,12 +1097,27 @@ before manufacturing entry can be made.</p>
     
     
 	<p class="docs-attr-name">
-        <a name="set_production_order_operations" href="#set_production_order_operations" class="text-muted small">
+        <a name="set_required_items" href="#set_required_items" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>set_production_order_operations</b>
+		<b>set_required_items</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Fetch operations from BOM and set in 'Production Order'</p>
+	<div class="docs-attr-desc"><p>set required_items for production to keep track of reserved qty</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_start_end_time_for_workstation" href="#set_start_end_time_for_workstation" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_start_end_time_for_workstation</b>
+        <i class="text-muted">(self, data, workstation_list, index)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Set start and end time for given operation. If first operation, set start as
+<code>planned_start_date</code>, else add time diff to end time of earlier operation.</p>
 </div>
 	<br>
 
@@ -1060,12 +1197,56 @@ based on Stock Entry</p>
     
     
 	<p class="docs-attr-name">
+        <a name="update_required_items" href="#update_required_items" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_required_items</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>update bin reserved<em>qty</em>for_production
+called from Stock Entry for production, after submit, cancel</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_reserved_qty_for_production" href="#update_reserved_qty_for_production" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_reserved_qty_for_production</b>
+        <i class="text-muted">(self, items=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>update reserved<em>qty</em>for_production in bins</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="update_status" href="#update_status" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>update_status</b>
         <i class="text-muted">(self, status=None)</i>
     </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+	<div class="docs-attr-desc"><p>Update status of production order if unknown</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_transaferred_qty_for_required_items" href="#update_transaferred_qty_for_required_items" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_transaferred_qty_for_required_items</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>update transferred qty from submitted stock entries for that item against
+the production order</p>
 </div>
 	<br>
 
@@ -1206,6 +1387,24 @@ based on Stock Entry</p>
         
     
     <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.manufacturing.doctype.production_order.production_order.add_timesheet_detail</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.manufacturing.doctype.production_order.production_order.add_timesheet_detail" href="#erpnext.manufacturing.doctype.production_order.production_order.add_timesheet_detail" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.manufacturing.doctype.production_order.production_order.<b>add_timesheet_detail</b>
+        <i class="text-muted">(timesheet, args)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.manufacturing.doctype.production_order.production_order.get_default_warehouse</code>
     </p>
 	<p class="docs-attr-name">
@@ -1268,6 +1467,24 @@ based on Stock Entry</p>
         
     
     <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.manufacturing.doctype.production_order.production_order.make_new_timesheet</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.manufacturing.doctype.production_order.production_order.make_new_timesheet" href="#erpnext.manufacturing.doctype.production_order.production_order.make_new_timesheet" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.manufacturing.doctype.production_order.production_order.<b>make_new_timesheet</b>
+        <i class="text-muted">(source_name, target_doc=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.manufacturing.doctype.production_order.production_order.make_stock_entry</code>
     </p>
 	<p class="docs-attr-name">
@@ -1286,13 +1503,13 @@ based on Stock Entry</p>
         
     
     <p><span class="label label-info">Public API</span>
-        <br><code>/api/method/erpnext.manufacturing.doctype.production_order.production_order.make_time_log</code>
+        <br><code>/api/method/erpnext.manufacturing.doctype.production_order.production_order.make_timesheet</code>
     </p>
 	<p class="docs-attr-name">
-        <a name="erpnext.manufacturing.doctype.production_order.production_order.make_time_log" href="#erpnext.manufacturing.doctype.production_order.production_order.make_time_log" class="text-muted small">
+        <a name="erpnext.manufacturing.doctype.production_order.production_order.make_timesheet" href="#erpnext.manufacturing.doctype.production_order.production_order.make_timesheet" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.manufacturing.doctype.production_order.production_order.<b>make_time_log</b>
-        <i class="text-muted">(name, operation, from_time=None, to_time=None, qty=None, project=None, workstation=None, operation_id=None)</i>
+		erpnext.manufacturing.doctype.production_order.production_order.<b>make_timesheet</b>
+        <i class="text-muted">(production_order)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1328,7 +1545,7 @@ based on Stock Entry</p>
             <li>
 
 
-<a href="https://frappe.github.io/erpnext/current/models/projects/time_log">Time Log</a>
+<a href="https://frappe.github.io/erpnext/current/models/projects/timesheet">Timesheet</a>
 
 </li>
 			
@@ -1340,78 +1557,46 @@ based on Stock Entry</p>
 <!-- autodoc -->
 <!-- jinja -->
 <!-- static -->
-	</article>
-	
 </div>
-</div>
-    	</div>
-	</div>
-</div>
-
-						<!-- edit-link -->
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
-
-                    </div>
-					</footer>
 				</div>
 			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
+</div>
 
-</ul>
-				</div>
-			</div>
+				<!-- edit-link -->
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -1424,8 +1609,6 @@ based on Stock Entry</p>
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>

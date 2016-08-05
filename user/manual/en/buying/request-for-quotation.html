@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Request For Quotation </title>
+	<title>Request For Quotation</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="user/manual/en/buying/request-for-quotation">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-request-for-quotation" data-path="user/manual/en/buying/request-for-quotation"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-user/manual/en/buying/request-for-quotation" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,43 +120,84 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>Request For Quotation</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Request For Quotation</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="request-for-quotation" style="text-align: Left">
-	<p>A Request for Quotation is a document that an organization submits to one or more suppliers eliciting quotation for items.</p>
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
+<p>A Request for Quotation is a document that an organization submits to one or more suppliers eliciting quotation for items.</p>
 
 <p>In ERPNext, You can create request for quotation directly by going to:</p>
 
-<p><code>Buying &gt; Documents &gt; Request for Quotation &gt; New Request for Quotation</code></p>
-
-<p>Create Request for Quotation:</p>
+<blockquote>
+  <p>Buying &gt; Documents &gt; Request for Quotation &gt; New Request for Quotation</p>
+</blockquote>
 
 <p><img src="https://frappe.github.io/erpnext/assets/img/buying/request-for-quotation.png" alt="Request For Quotation" /></p>
 
-<p>Create Supplier Quotation from Request for Quotation form:</p>
+<p>After creation of request for quotation, there are two ways to generate supplier quotation from request for quotation.</p>
+
+<h4>For User</h4>
+
+<p><strong>Step 1:</strong> Open request for quotation and click on make supplier quotation.</p>
 
 <p><img src="https://frappe.github.io/erpnext/assets/img/buying/make-supplier-quotation-from-rfq.png" alt="Request For Quotation" /></p>
 
-	</article>
-	
+<p><strong>Step 2:</strong> Select supplier and click on make supplier quotation.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/buying/supplier-selection-from-rfq.png" alt="Request For Quotation" /></p>
+
+<p><strong>Step 3:</strong> System will open the supplier quotation, user has to enter the rate and submit it.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/buying/supplier-quotation-from-rfq.png" alt="Request For Quotation" /></p>
+
+<h4>For Supplier</h4>
+
+<p><strong>Step 1:</strong> User has to create contact or enter email id against the supplier on request for quotation.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/buying/set-email-id.png" alt="Request For Quotation" /></p>
+
+<p><strong>Step 2:</strong> User has to click on send supplier emails button.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/buying/send-supplier-emails.png" alt="Request For Quotation" /></p>
+
+<ul>
+<li>If supplier's user not available: system will create supplier's user and send details to the supplier, supplier will need to click on the link(Password Update) present in the email. After password update supplier can access his portal with the request for quotation form.</li>
+</ul>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/buying/supplier-password-update-link.png" alt="Request For Quotation" /></p>
+
+<ul>
+<li>If supplier's user available: system will send request for quotation link to supplier, supplier has to login using his credentials to view request for quotation form on portal. </li>
+</ul>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/buying/send-rfq-link.png" alt="Request For Quotation" /></p>
+
+<p><strong>Step 3:</strong> Supplier has to enter amount and notes(payment terms) on the form and click on submit</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/buying/supplier-portal-rfq.png" alt="Request For Quotation" /></p>
+
+<p><strong>Step 4:</strong> On submission, system will create supplier quotation(draft mode) against the supplier. User has to review the supplier quotation
+            and submit it.</p>
+
+<p>More details:-</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/buying/request-for-quotation.gif" alt="Request For Quotation" /></p>
+
 </div>
-</div>
-    	</div>
-	</div>
+				</div>
+			</div>
 </div>
 
-						
+				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
@@ -141,69 +208,40 @@
 	</div>
 	</div>
 </div>
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
 
-                    </div>
-					</footer>
-				</div>
-			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
-
-</ul>
-				</div>
-			</div>
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -216,8 +254,6 @@
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>

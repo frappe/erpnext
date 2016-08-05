@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Print Format </title>
+	<title>Print Format</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="user/manual/en/customize-erpnext/print-format">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-print-format-1" data-path="user/manual/en/customize-erpnext/print-format"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-user/manual/en/customize-erpnext/print-format" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,22 +120,19 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>Print Format</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Print Format</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="print-format-1" style="text-align: Left">
-	<!-- no-jinja -->
-
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
 <p>Print Formats are the layouts that are generated when you want to Print or
 Email a transaction like a Sales Invoice. There are two types of Print
 Formats,</p>
@@ -151,7 +174,7 @@ HTML, CSS, Python to learn this. For help, please post on our forum.</p>
 <h4>References</h4>
 
 <ol>
-<li><a href="http://jinja.pocoo.org/docs/templates/">Jinja Tempalting Language: Reference</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/">Jinja Templating Language: Reference</a></li>
 <li><a href="http://getbootstrap.com/">Bootstrap CSS Framework</a></li>
 </ol>
 
@@ -165,52 +188,52 @@ HTML, CSS, Python to learn this. For help, please post on our forum.</p>
 
 <h4>Example</h4>
 
-<pre><code>&amp;lt;h3&amp;gt;{{ doc.select_print_heading or &amp;#34;Invoice&amp;#34; }}&amp;lt;/h3&amp;gt;
-&amp;lt;div class=&amp;#34;row&amp;#34;&amp;gt;
-    &amp;lt;div class=&amp;#34;col-md-3 text-right&amp;#34;&amp;gt;Customer Name&amp;lt;/div&amp;gt;
-    &amp;lt;div class=&amp;#34;col-md-9&amp;#34;&amp;gt;{{ doc.customer_name }}&amp;lt;/div&amp;gt;
-&amp;lt;/div&amp;gt;
-&amp;lt;div class=&amp;#34;row&amp;#34;&amp;gt;
-    &amp;lt;div class=&amp;#34;col-md-3 text-right&amp;#34;&amp;gt;Date&amp;lt;/div&amp;gt;
-    &amp;lt;div class=&amp;#34;col-md-9&amp;#34;&amp;gt;{{ doc.get_formatted(&amp;#34;invoice_date&amp;#34;) }}&amp;lt;/div&amp;gt;
-&amp;lt;/div&amp;gt;
-&amp;lt;table class=&amp;#34;table table-bordered&amp;#34;&amp;gt;
-    &amp;lt;tbody&amp;gt;
-        &amp;lt;tr&amp;gt;
-            &amp;lt;th&amp;gt;Sr&amp;lt;/th&amp;gt;
-            &amp;lt;th&amp;gt;Item Name&amp;lt;/th&amp;gt;
-            &amp;lt;th&amp;gt;Description&amp;lt;/th&amp;gt;
-            &amp;lt;th class=&amp;#34;text-right&amp;#34;&amp;gt;Qty&amp;lt;/th&amp;gt;
-            &amp;lt;th class=&amp;#34;text-right&amp;#34;&amp;gt;Rate&amp;lt;/th&amp;gt;
-            &amp;lt;th class=&amp;#34;text-right&amp;#34;&amp;gt;Amount&amp;lt;/th&amp;gt;
-        &amp;lt;/tr&amp;gt;
-        {%- for row in doc.items -%}
-        &amp;lt;tr&amp;gt;
-            &amp;lt;td style=&amp;#34;width: 3%;&amp;#34;&amp;gt;{{ row.idx }}&amp;lt;/td&amp;gt;
-            &amp;lt;td style=&amp;#34;width: 20%;&amp;#34;&amp;gt;
-                {{ row.item_name }}
-                {% if row.item_code != row.item_name -%}
-                &amp;lt;br&amp;gt;Item Code: {{ row.item_code}}
-                {%- endif %}
-            &amp;lt;/td&amp;gt;
-            &amp;lt;td style=&amp;#34;width: 37%;&amp;#34;&amp;gt;
-                &amp;lt;div style=&amp;#34;border: 0px;&amp;#34;&amp;gt;{{ row.description }}&amp;lt;/div&amp;gt;&amp;lt;/td&amp;gt;
-            &amp;lt;td style=&amp;#34;width: 10%; text-align: right;&amp;#34;&amp;gt;{{ row.qty }} {{ row.uom or row.stock_uom }}&amp;lt;/td&amp;gt;
-            &amp;lt;td style=&amp;#34;width: 15%; text-align: right;&amp;#34;&amp;gt;{{
-                row.get_formatted(&amp;#34;rate&amp;#34;, doc) }}&amp;lt;/td&amp;gt;
-            &amp;lt;td style=&amp;#34;width: 15%; text-align: right;&amp;#34;&amp;gt;{{
-                row.get_formatted(&amp;#34;amount&amp;#34;, doc) }}&amp;lt;/td&amp;gt;
-        &amp;lt;/tr&amp;gt;
-        {%- endfor -%}
-    &amp;lt;/tbody&amp;gt;
-&amp;lt;/table&amp;gt;
+<pre><code>    &lt;h3&gt;{{ doc.select_print_heading or "Invoice" }}&lt;/h3&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-3 text-right"&gt;Customer Name&lt;/div&gt;
+        &lt;div class="col-md-9"&gt;{{ doc.customer_name }}&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-3 text-right"&gt;Date&lt;/div&gt;
+        &lt;div class="col-md-9"&gt;{{ doc.get_formatted("invoice_date") }}&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;table class="table table-bordered"&gt;
+        &lt;tbody&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Sr&lt;/th&gt;
+                &lt;th&gt;Item Name&lt;/th&gt;
+                &lt;th&gt;Description&lt;/th&gt;
+                &lt;th class="text-right"&gt;Qty&lt;/th&gt;
+                &lt;th class="text-right"&gt;Rate&lt;/th&gt;
+                &lt;th class="text-right"&gt;Amount&lt;/th&gt;
+            &lt;/tr&gt;
+            {%- for row in doc.items -%}
+            &lt;tr&gt;
+                &lt;td style="width: 3%;"&gt;{{ row.idx }}&lt;/td&gt;
+                &lt;td style="width: 20%;"&gt;
+                    {{ row.item_name }}
+                    {% if row.item_code != row.item_name -%}
+                    &lt;br&gt;Item Code: {{ row.item_code}}
+                    {%- endif %}
+                &lt;/td&gt;
+                &lt;td style="width: 37%;"&gt;
+                    &lt;div style="border: 0px;"&gt;{{ row.description }}&lt;/div&gt;&lt;/td&gt;
+                &lt;td style="width: 10%; text-align: right;"&gt;{{ row.qty }} {{ row.uom or row.stock_uom }}&lt;/td&gt;
+                &lt;td style="width: 15%; text-align: right;"&gt;{{
+                    row.get_formatted("rate", doc) }}&lt;/td&gt;
+                &lt;td style="width: 15%; text-align: right;"&gt;{{
+                    row.get_formatted("amount", doc) }}&lt;/td&gt;
+            &lt;/tr&gt;
+            {%- endfor -%}
+        &lt;/tbody&gt;
+    &lt;/table&gt;
 </code></pre>
 
 <h4>Notes</h4>
 
 <ol>
 <li>To get date and currency formatted values use, <code>doc.get_formatted("fieldname")</code></li>
-<li>For translatable strings, us <code>This string is translated</code></li>
+<li>For translatable strings, us <code>{{ _("This string is translated") }}</code></li>
 </ol>
 
 <h4>Footers</h4>
@@ -220,17 +243,14 @@ address and contact information. Unfortunately due to the limited print
 support in HTML pages, it is not possible unless you get it scripted. Either
 you can use pre-printed stationary or add this information in your header.</p>
 
-<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="custom-scripts">Custom Scripts</a></p></p>
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnextuser/manual/en/customize-erpnext/custom-scripts">Custom Scripts</a></p></p>
 
-	</article>
-	
 </div>
-</div>
-    	</div>
-	</div>
+				</div>
+			</div>
 </div>
 
-						
+				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
@@ -241,69 +261,40 @@ you can use pre-printed stationary or add this information in your header.</p>
 	</div>
 	</div>
 </div>
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
 
-                    </div>
-					</footer>
-				</div>
-			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
-
-</ul>
-				</div>
-			</div>
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -316,8 +307,6 @@ you can use pre-printed stationary or add this information in your header.</p>
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Purchase Order Item </title>
+	<title>Purchase Order Item</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="current/models/buying/purchase_order_item">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-purchase_order_item" data-path="current/models/buying/purchase_order_item"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-current/models/buying/purchase_order_item" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,21 +120,20 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>Purchase Order Item</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Purchase Order Item</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="purchase_order_item" style="text-align: Left">
-	<!-- title: Purchase Order Item -->
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
+<!-- title: Purchase Order Item -->
 
 
 
@@ -670,11 +695,11 @@
         
         <tr >
             <td>38</td>
-            <td ><code>prevdoc_doctype</code></td>
+            <td ><code>material_request</code></td>
             <td >
                 Link</td>
-            <td class="text-muted" title="Hidden">
-                Reference Document Type
+            <td >
+                Material Request
                 
             </td>
             <td>
@@ -682,7 +707,7 @@
                 
 
 
-<a href="https://frappe.github.io/erpnext/current/models/core/doctype">DocType</a>
+<a href="https://frappe.github.io/erpnext/current/models/stock/material_request">Material Request</a>
 
 
                 
@@ -691,32 +716,51 @@
         
         <tr >
             <td>39</td>
-            <td ><code>prevdoc_docname</code></td>
-            <td >
-                Dynamic Link</td>
-            <td >
-                Reference Name
-                
-            </td>
-            <td>
-                <pre>prevdoc_doctype</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>40</td>
-            <td ><code>prevdoc_detail_docname</code></td>
+            <td ><code>material_request_item</code></td>
             <td >
                 Data</td>
             <td class="text-muted" title="Hidden">
-                Material Request Detail No
+                Material Request Item
                 
             </td>
             <td></td>
         </tr>
         
         <tr >
+            <td>40</td>
+            <td ><code>sales_order</code></td>
+            <td >
+                Link</td>
+            <td >
+                Sales Order
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/selling/sales_order">Sales Order</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
             <td>41</td>
+            <td ><code>sales_order_item</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                Sales Order Item
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>42</td>
             <td ><code>supplier_quotation</code></td>
             <td >
                 Link</td>
@@ -737,7 +781,7 @@
         </tr>
         
         <tr >
-            <td>42</td>
+            <td>43</td>
             <td ><code>supplier_quotation_item</code></td>
             <td >
                 Link</td>
@@ -758,7 +802,7 @@
         </tr>
         
         <tr >
-            <td>43</td>
+            <td>44</td>
             <td ><code>delivered_by_supplier</code></td>
             <td >
                 Check</td>
@@ -770,7 +814,7 @@
         </tr>
         
         <tr >
-            <td>44</td>
+            <td>45</td>
             <td ><code>col_break5</code></td>
             <td class="info">
                 Column Break</td>
@@ -782,7 +826,7 @@
         </tr>
         
         <tr >
-            <td>45</td>
+            <td>46</td>
             <td ><code>item_group</code></td>
             <td >
                 Link</td>
@@ -803,7 +847,7 @@
         </tr>
         
         <tr >
-            <td>46</td>
+            <td>47</td>
             <td ><code>brand</code></td>
             <td >
                 Link</td>
@@ -824,7 +868,7 @@
         </tr>
         
         <tr >
-            <td>47</td>
+            <td>48</td>
             <td ><code>bom</code></td>
             <td >
                 Link</td>
@@ -845,7 +889,7 @@
         </tr>
         
         <tr >
-            <td>48</td>
+            <td>49</td>
             <td ><code>stock_qty</code></td>
             <td >
                 Float</td>
@@ -857,7 +901,7 @@
         </tr>
         
         <tr >
-            <td>49</td>
+            <td>50</td>
             <td ><code>received_qty</code></td>
             <td >
                 Float</td>
@@ -869,7 +913,7 @@
         </tr>
         
         <tr >
-            <td>50</td>
+            <td>51</td>
             <td ><code>returned_qty</code></td>
             <td >
                 Float</td>
@@ -881,7 +925,7 @@
         </tr>
         
         <tr >
-            <td>51</td>
+            <td>52</td>
             <td ><code>billed_amt</code></td>
             <td >
                 Currency</td>
@@ -895,7 +939,7 @@
         </tr>
         
         <tr >
-            <td>52</td>
+            <td>53</td>
             <td ><code>item_tax_rate</code></td>
             <td >
                 Code</td>
@@ -909,7 +953,7 @@ Used for Taxes and Charges</p>
         </tr>
         
         <tr >
-            <td>53</td>
+            <td>54</td>
             <td ><code>page_break</code></td>
             <td >
                 Check</td>
@@ -943,78 +987,46 @@ Used for Taxes and Charges</p>
 <!-- autodoc -->
 <!-- jinja -->
 <!-- static -->
-	</article>
-	
 </div>
-</div>
-    	</div>
-	</div>
-</div>
-
-						<!-- edit-link -->
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
-
-                    </div>
-					</footer>
 				</div>
 			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
+</div>
 
-</ul>
-				</div>
-			</div>
+				<!-- edit-link -->
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -1027,8 +1039,6 @@ Used for Taxes and Charges</p>
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>

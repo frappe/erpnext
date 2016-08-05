@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title> Request for Quotation </title>
+	<title>Request for Quotation</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -21,26 +21,50 @@
 		type="image/x-icon">
     
 
-		
-<style>
-
-</style>
-</head>
+		</head>
 <body data-path="current/models/buying/request_for_quotation">
-	<div class="offcanvas-container">
-		<div class="offcanvas">
-			<div class="offcanvas-main-section">
-				<div>
-						<header>
+	<div class="main-section">
+		<div>
+				<header>
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/"> -->
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext/">
 					<span>ERPNext</span>
 				</a>
-				<a class="pull-right toggle-sidebar visible-xs">
+				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
-				</a>
+				</a> -->
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API Documentation' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API Documentation</a></li>
+
+<li class="divider"></li>
+<!-- post login tools -->
+
+</ul>
+				</div>
 			</div>
 			<div class="hidden-xs">
 				
@@ -63,6 +87,7 @@
 		
 		>
 	API Documentation</a></li>
+	
 	<!-- post login tools -->
 
 </ul>
@@ -71,20 +96,21 @@
 		</div>
 	</nav>
 </header><div class="hero-and-content">
-                        <div data-html-block="hero"></div>
-                        <div class="container" data-html-block="content">
-                        
-<div class="page-container" id="page-request_for_quotation" data-path="current/models/buying/request_for_quotation"
-    data-doctype="Web Page">
-	<div class="page-content">
-    	<div class="page-content-wrapper">
-            <div class="row">
-				<div class=" col-sm-12 ">
-					
-	                <div class="page-breadcrumbs" data-html-block="breadcrumbs">
-	                    
-    
-    
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-current/models/buying/request_for_quotation" data-path="{{ pathname }}"
+	>
+			<div class="row ">
+				
+				<div class=" page-content col-sm-12 ">
+					<div class="page-content-wrapper">
+						<div class="row page-head">
+							<div class="col-sm-8 col-xs-6">
+								
+								<div class="page-breadcrumbs">
+									
+									
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -94,21 +120,20 @@
 	
 </ul>
 
-    
+									
+								</div>
+								
+								<h1>Request for Quotation</h1>
+							</div>
+							<div class="col-sm-4 col-xs-6">
+								
 
-	                </div>
-					
-	        		<div class="page-header-block" data-html-block="header">
-	                    <h1>Request for Quotation</h1>
-	        		</div>
-                </div>
-				
-            </div>
-    	    <div class="page-content-block">
-<div class="webpage-content">
-	
-	<article class="web-page-content" id="request_for_quotation" style="text-align: Left">
-	<!-- title: Request for Quotation -->
+								
+							</div>
+						</div>
+					</div>
+					<div class="page_content">
+<!-- title: Request for Quotation -->
 
 
 
@@ -185,6 +210,28 @@
         
         <tr >
             <td>3</td>
+            <td ><code>vendor</code></td>
+            <td >
+                Link</td>
+            <td class="text-muted" title="Hidden">
+                Supplier
+                <p class="text-muted small">
+                    For individual supplier</p>
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/supplier">Supplier</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
             <td ><code>column_break1</code></td>
             <td class="info">
                 Column Break</td>
@@ -196,7 +243,7 @@
         </tr>
         
         <tr >
-            <td>4</td>
+            <td>5</td>
             <td class="danger" title="Mandatory"><code>transaction_date</code></td>
             <td >
                 Date</td>
@@ -208,7 +255,7 @@
         </tr>
         
         <tr class="info">
-            <td>5</td>
+            <td>6</td>
             <td ><code>suppliers_section</code></td>
             <td >
                 Section Break</td>
@@ -220,7 +267,7 @@
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>7</td>
             <td class="danger" title="Mandatory"><code>suppliers</code></td>
             <td >
                 Table</td>
@@ -241,7 +288,7 @@
         </tr>
         
         <tr class="info">
-            <td>7</td>
+            <td>8</td>
             <td ><code>items_section</code></td>
             <td >
                 Section Break</td>
@@ -255,7 +302,7 @@
         </tr>
         
         <tr >
-            <td>8</td>
+            <td>9</td>
             <td class="danger" title="Mandatory"><code>items</code></td>
             <td >
                 Table</td>
@@ -276,7 +323,7 @@
         </tr>
         
         <tr class="info">
-            <td>9</td>
+            <td>10</td>
             <td ><code>supplier_response_section</code></td>
             <td >
                 Section Break</td>
@@ -288,7 +335,7 @@
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>11</td>
             <td ><code>standard_reply</code></td>
             <td >
                 Link</td>
@@ -309,7 +356,7 @@
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>12</td>
             <td class="danger" title="Mandatory"><code>message_for_supplier</code></td>
             <td >
                 Text Editor</td>
@@ -321,7 +368,7 @@
         </tr>
         
         <tr class="info">
-            <td>12</td>
+            <td>13</td>
             <td ><code>terms_section_break</code></td>
             <td >
                 Section Break</td>
@@ -335,7 +382,7 @@
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>14</td>
             <td ><code>tc_name</code></td>
             <td >
                 Link</td>
@@ -356,7 +403,7 @@
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>15</td>
             <td ><code>terms</code></td>
             <td >
                 Text Editor</td>
@@ -368,7 +415,7 @@
         </tr>
         
         <tr class="info">
-            <td>15</td>
+            <td>16</td>
             <td ><code>printing_settings</code></td>
             <td >
                 Section Break</td>
@@ -380,7 +427,7 @@
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>17</td>
             <td ><code>select_print_heading</code></td>
             <td >
                 Link</td>
@@ -401,7 +448,7 @@
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>18</td>
             <td ><code>letter_head</code></td>
             <td >
                 Link</td>
@@ -422,7 +469,7 @@
         </tr>
         
         <tr class="info">
-            <td>18</td>
+            <td>19</td>
             <td ><code>more_info</code></td>
             <td >
                 Section Break</td>
@@ -436,7 +483,7 @@
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>20</td>
             <td class="danger" title="Mandatory"><code>status</code></td>
             <td >
                 Select</td>
@@ -453,7 +500,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>21</td>
             <td class="danger" title="Mandatory"><code>fiscal_year</code></td>
             <td >
                 Link</td>
@@ -474,7 +521,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>22</td>
             <td ><code>column_break3</code></td>
             <td class="info">
                 Column Break</td>
@@ -486,7 +533,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>23</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -532,12 +579,12 @@ Cancelled</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="create_supplier_user" href="#create_supplier_user" class="text-muted small">
+        <a name="create_user" href="#create_user" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>create_supplier_user</b>
+		<b>create_user</b>
         <i class="text-muted">(self, rfq_supplier, link)</i>
     </p>
-	<div class="docs-attr-desc"><p>Create a new user for the supplier if not set in contact</p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -546,10 +593,24 @@ Cancelled</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="create_user" href="#create_user" class="text-muted small">
+        <a name="get_attachments" href="#get_attachments" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>create_user</b>
-        <i class="text-muted">(self, rfq_supplier, link)</i>
+		<b>get_attachments</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_link" href="#get_link" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_link</b>
+        <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -588,6 +649,20 @@ Cancelled</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="send_email" href="#send_email" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>send_email</b>
+        <i class="text-muted">(self, data, sender, subject, message, attachments)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="send_to_supplier" href="#send_to_supplier" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>send_to_supplier</b>
@@ -606,6 +681,62 @@ Cancelled</pre>
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>supplier_rfq_mail</b>
         <i class="text-muted">(self, data, update_password_link, rfq_link)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_contact_of_supplier" href="#update_contact_of_supplier" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_contact_of_supplier</b>
+        <i class="text-muted">(self, rfq_supplier, user)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_email_id" href="#update_email_id" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_email_id</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_supplier_contact" href="#update_supplier_contact" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_supplier_contact</b>
+        <i class="text-muted">(self, rfq_supplier, link)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Create a new user for the supplier if not set in contact</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_supplier_part_no" href="#update_supplier_part_no" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_supplier_part_no</b>
+        <i class="text-muted">(self, args)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -654,6 +785,20 @@ Cancelled</pre>
 	<br>
 
         
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_email_id" href="#validate_email_id" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_email_id</b>
+        <i class="text-muted">(self, args)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
     </div>
     <hr>
 
@@ -668,6 +813,22 @@ Cancelled</pre>
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.buying.doctype.request_for_quotation.request_for_quotation.<b>add_items</b>
         <i class="text-muted">(sq_doc, supplier, items)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.buying.doctype.request_for_quotation.request_for_quotation.check_portal_enabled" href="#erpnext.buying.doctype.request_for_quotation.request_for_quotation.check_portal_enabled" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.buying.doctype.request_for_quotation.request_for_quotation.<b>check_portal_enabled</b>
+        <i class="text-muted">(reference_doctype)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -729,6 +890,40 @@ Cancelled</pre>
         
     
     <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_pdf</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_pdf" href="#erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_pdf" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.buying.doctype.request_for_quotation.request_for_quotation.<b>get_pdf</b>
+        <i class="text-muted">(doctype, name, supplier_idx)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_rfq_doc" href="#erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_rfq_doc" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.buying.doctype.request_for_quotation.request_for_quotation.<b>get_rfq_doc</b>
+        <i class="text-muted">(doctype, name, supplier_idx)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation</code>
     </p>
 	<p class="docs-attr-name">
@@ -754,6 +949,24 @@ Cancelled</pre>
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		erpnext.buying.doctype.request_for_quotation.request_for_quotation.<b>send_supplier_emails</b>
         <i class="text-muted">(rfq_name)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.buying.doctype.request_for_quotation.request_for_quotation.validate_duplicate_supplier_quotation</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.buying.doctype.request_for_quotation.request_for_quotation.validate_duplicate_supplier_quotation" href="#erpnext.buying.doctype.request_for_quotation.request_for_quotation.validate_duplicate_supplier_quotation" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.buying.doctype.request_for_quotation.request_for_quotation.<b>validate_duplicate_supplier_quotation</b>
+        <i class="text-muted">(args)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -792,78 +1005,46 @@ Cancelled</pre>
 <!-- autodoc -->
 <!-- jinja -->
 <!-- static -->
-	</article>
-	
 </div>
-</div>
-    	</div>
-	</div>
-</div>
-
-						<!-- edit-link -->
-                        </div>
-                    </div>
-					<footer class="docs-footer">
-						<div class="container"><div class="built-with-frappe text-center">
-                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
-                            <h3>By Frappe Technologies Pvt. Ltd.</h3>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext">
-                                    Source</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/frappe/erpnext/issues">
-                                    Issues</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
-                                    License</a>
-                                </li>
-                                <li>
-                                    <a href="https://discuss.erpnext.com">
-                                    Forum</a>
-                                </li>
-                                <li>
-                                    <a href="https://frappe.io/apps">
-                                    Frappe Apps</a>
-                                </li>
-                            </ul>
-                        </div>
-
-                    </div>
-					</footer>
 				</div>
 			</div>
-			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
-			<div class="sidebar sidebar-right visible-xs">
-				<div class="sidebar-navbar-items">
-					<ul class="nav navbar-nav navbar-left">
-</ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
-	<a href="/#"
-		
-		>
-	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
-	<a href="https://frappe.github.io/erpnext/user/manual"
-		
-		>
-	User Manual</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
-		
-		>
-	Videos</a></li><li data-label='API Documentation' >
-	<a href="https://frappe.github.io/erpnext/current"
-		
-		>
-	API Documentation</a></li>
-	<!-- post login tools -->
+</div>
 
-</ul>
-				</div>
-			</div>
+				<!-- edit-link -->
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.io/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+			</footer>
 		</div>
 	</div>
 
@@ -876,8 +1057,6 @@ Cancelled</pre>
 	<script>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
-    <script></script>
-
 
 	<!-- csrf_token --></body>
 </html>
