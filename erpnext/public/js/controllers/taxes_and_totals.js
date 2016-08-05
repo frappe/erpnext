@@ -617,8 +617,16 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	calculate_write_off_amount: function(){
-		this.frm.set_value("write_off_amount",
-			flt(this.frm.doc.grand_total - this.frm.doc.paid_amount + this.frm.doc.change_amount,
-				precision("write_off_amount")));
+		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
+			this.frm.doc.write_off_amount = flt(this.frm.doc.grand_total - this.frm.doc.paid_amount + this.frm.doc.change_amount,
+					precision("write_off_amount"))
+		
+			this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
+				precision("base_write_off_amount"));
+		}else{
+			this.frm.doc.paid_amount = 0.0
+		}
+		
+		this.calculate_outstanding_amount(false)
 	}
 })

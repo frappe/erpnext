@@ -237,11 +237,17 @@ class SalesInvoice(SellingController):
 			pos_profile = frappe.get_doc('POS Profile', pos.name) if pos else None
 			update_multi_mode_option(self, pos_profile)
 
+		if not self.change_amount_account:
+			self.change_amount_account = frappe.db.get_value('Company', self.company, 'default_cash_account')
+
 		if pos:
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
 				self.mode_of_payment = pos.mode_of_payment
 				# self.set_customer_defaults()
+
+			if not self.change_amount_account:
+				self.change_amount_account = pos.get('change_amount_account')
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
 				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account',
@@ -268,7 +274,6 @@ class SalesInvoice(SellingController):
 			# fetch charges
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
-			self.change_amount_account = pos.change_amount_account
 
 		return pos
 
@@ -503,7 +508,7 @@ class SalesInvoice(SellingController):
 		gl_entries = merge_similar_entries(gl_entries)
 
 		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change(gl_entries)
+		self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 
@@ -607,7 +612,7 @@ class SalesInvoice(SellingController):
 						}, payment_mode_account_currency)
 					)
 				
-	def make_gle_for_change(self, gl_entries):
+	def make_gle_for_change_amount(self, gl_entries):
 		if cint(self.is_pos) and self.change_amount:
 			if self.change_amount_account:
 				gl_entries.append(

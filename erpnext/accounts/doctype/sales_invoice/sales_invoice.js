@@ -275,6 +275,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			frappe.msgprint(__("You can not return change amount, limit has been exceeded"))
 		}else{
 			this.calculate_write_off_amount()
+			this.frm.refresh_fields();
 		}
 	}
 });
@@ -467,7 +468,7 @@ frappe.ui.form.on('Sales Invoice', {
 				]
 			}
 		}
-	},
+	}
 })
 
 frappe.ui.form.on('Sales Invoice Timesheet', {
