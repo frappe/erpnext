@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import get_url
 
 def create_payment_gateway_and_account(gateway):
 	"""If ERPNext is installed, create Payment Gateway and Payment Gateway Account"""
@@ -62,3 +63,41 @@ def create_payment_gateway_account(gateway):
 	except frappe.DuplicateEntryError:
 		# already exists, due to a reinstall?
 		pass
+
+def set_redirect(doc):
+	if "erpnext" not in frappe.get_installed_apps():
+		return
+
+	if not doc.flags.status_changed_to:
+		return
+
+	reference_doctype = doc.reference_doctype
+	reference_docname = doc.reference_docname
+
+	if not (reference_doctype and reference_docname):
+		return
+
+	reference_doc = frappe.get_doc(reference_doctype,  reference_docname)
+	shopping_cart_settings = frappe.get_doc("Shopping Cart Settings")
+
+	if doc.flags.status_changed_to in ["Authorized", "Completed"]:
+		reference_doc.run_method("set_as_paid")
+
+		# if shopping cart enabled and in session
+		if (shopping_cart_settings.enabled
+			and hasattr(frappe.local, "session")
+			and frappe.local.session.user != "Guest"):
+
+			success_url = shopping_cart_settings.payment_success_url
+			if success_url:
+				doc.flags.redirect_to = ({
+					"Orders": "orders",
+					"Invoices": "invoices",
+					"My Account": "me"
+				}).get(success_url, "me")
+			else:
+				doc.flags.redirect_to = get_url("/orders/{0}".format(reference_doc.reference_name))
+
+def validate_transaction_currency(supported_currencies, transaction_currency, service_name):
+	if transaction_currency not in supported_currencies:
+		frappe.throw(_("Please select another payment method. {0} does not support transactions in currency '{1}'").format(service_name, transaction_currency))

@@ -11,15 +11,14 @@ $(document).ready(function(){
 			},
 			"prefill": {
 				"name": "{{ payer_name }}",
-				"email": "{{ payer_email }}",
+				"email": "saurabh@erpnext.com",
 				"order_id": "{{ order_id }}",
+				"phone": "9773595372"
 			},
 			"notes": {
 				"doctype": "{{ doctype }}",
 				"name": "{{ name }}",
-				"payment_request": "{{ name }}", // backward compatibility
-				"reference_doctype": "{{ reference_doctype }}",
-				"reference_docname": "{{ reference_name }}"
+				"payment_request": "{{ name }}" // backward compatibility
 			},
 			"theme": {
 				"color": "#4B4C9D"
@@ -27,6 +26,7 @@ $(document).ready(function(){
 		};
 
 		var rzp = new Razorpay(options);
+		console.log(options)
 		rzp.open();
 		//	e.preventDefault();
 	})();
@@ -39,7 +39,7 @@ razorpay.make_payment_log = function(response, options, doctype, docname){
 	$('.razorpay-confirming').removeClass('hidden');
 
 	frappe.call({
-		method:"razorpay_integration.templates.pages.razorpay_checkout.make_payment",
+		method:"erpnext.templates.pages.razorpay_checkout.make_payment",
 		freeze:true,
 		headers: {"X-Requested-With": "XMLHttpRequest"},
 		args: {

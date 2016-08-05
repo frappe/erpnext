@@ -29,15 +29,26 @@ def post_request(url, auth=None, data=None):
 		auth = ''
 	if not data:
 		data = {}
-
 	try:
 		s = get_request_session()
-		res = s.post(url, data=data, auth=(auth.api_key, auth.api_secret))
+		res = s.post(url, data=data, auth=auth)
 		res.raise_for_status()
-		
 		if res.headers.get("content-type") == "text/plain":
 			return urlparse.parse_qs(res.text)
 		
 		return res.json()
 	except Exception, exc:
 		raise exc
+
+def make_request(data, integration_type, service_name):
+	if not isinstance(data, basestring):
+		data = json.dumps(data)
+	
+	integration_request = frappe.get_doc({
+		"doctype": "Integration Request",
+		"integration_type": integration_type,
+		"integration_request_service": service_name,
+		"data": data
+	}).insert(ignore_permissions=True)
+	
+	return integration_request
