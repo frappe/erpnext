@@ -247,8 +247,13 @@ class PaymentEntry(AccountsController):
 		if self.party:
 			party_amount = self.paid_amount if self.payment_type=="Receive" else self.received_amount
 			
+			total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
+			
 			if self.total_allocated_amount < party_amount:
-				self.unallocated_amount = party_amount - self.total_allocated_amount
+				if self.payment_type == "Receive":
+					self.unallocated_amount = party_amount - (self.total_allocated_amount - total_deductions)
+				else:
+					self.unallocated_amount = party_amount - (self.total_allocated_amount + total_deductions)
 				
 	def set_difference_amount(self):
 		base_unallocated_amount = flt(self.unallocated_amount) * (flt(self.source_exchange_rate) 
