@@ -1,28 +1,26 @@
-####What is Multlingual Print Format?
+#Multi-lngual Print Formats
 
 User can print the customer's and supplier's document in their local language. For an example if I have customers from germany, france who want quotation in german, french language will be possible with these feature.
 
-####How does it work?
-Set print language for customer, supplier on their respective form.
+####Set Language
 
-`Selling -> Customer -> Customer List -> Click on New`
+In the Customer master, select default Language. Say default language for the Customer is <b>deutsch</b>.
 
-Here user has set default language for customer Adalbert as <b>deutsch</b>.
+<img src="{{docs_base_url}}/assets/img/multilingual_print_format/set_customer_default_lang.png" class="screenshot">
 
-<img src="{{ docs_base_url }}/assets/img/multilingual_print_format/set_customer_default_lang.png" class="screenshot">
+Same way, you can also set default language in the Supplier master.
 
-`Buying -> Supplier -> Supplier List -> Click on New`
+<img src="{{docs_base_url}}/assets/img/multilingual_print_format/set_supplier_default_lang.png" class="screenshot">
 
-Here user has set default language for supplier Piero as <b>Italiano</b>.
-<img src="{{ docs_base_url }}/assets/img/multilingual_print_format/set_supplier_default_lang.png" class="screenshot">
+####Print Preview in the Party's Language
 
-When user click on print icon on the document, system will load the print preview in their default language.
+In the Print Preview of a transaction, values will be translated into party's language.
 
-Customer quotation standard print preview in customer's default language.
+Customer Quotation print preview in customer's default language.
 
 <img src="{{ docs_base_url }}/assets/img/multilingual_print_format/customer_quotation.png" class="screenshot">
 
-Supplier quotation standard print preview in supplier's default language.
+Supplier Quotation print preview in supplier's default language.
 
 <img src="{{ docs_base_url }}/assets/img/multilingual_print_format/supplier_quotation.png" class="screenshot">
 
@@ -32,16 +30,15 @@ User can have option to select alternate language on print view.
 
 <img src="{{ docs_base_url }}/assets/img/multilingual_print_format/alternate_language.png" class="screenshot">
 
-
 ####Custom Translation
 
 User can set their custom translations using translation form. For example user want to set description of the product in customer's language(Italiano). For that create new translation with language as Italiano, enter source data and Translated information.
 
-`Setup -> Settings -> Translation List -> Click on New`
+`Setup > Settings > Translation List > New`
 
 <img src="{{ docs_base_url }}/assets/img/multilingual_print_format/translation.png" class="screenshot">
 
-The translation is applied when user select language as Italiano on supplier quotation's print prieview.
+The translation is applied when user select language as Italiano on supplier quotation's print preview.
 
 <img src="{{ docs_base_url }}/assets/img/multilingual_print_format/custom_translation.png" class="screenshot">
 

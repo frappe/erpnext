@@ -38,7 +38,8 @@ class Lead(SellingController):
 			frappe.throw(_("Campaign Name is required"))
 
 		if self.email_id:
-			validate_email_add(self.email_id, True)
+			if not self.flags.ignore_email_validation:
+				validate_email_add(self.email_id, True)
 
 			if self.email_id == self.lead_owner:
 				# Lead Owner cannot be same as the Lead

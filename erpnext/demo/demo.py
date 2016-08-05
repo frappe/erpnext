@@ -53,7 +53,7 @@ def simulate():
 	if not runs_for:
 		runs_for = frappe.utils.date_diff(frappe.utils.nowdate(), current_date)
 		# runs_for = 100
-		
+
 	fixed_asset.work()
 
 	for i in xrange(runs_for):
@@ -72,9 +72,6 @@ def simulate():
 		stock.work()
 		accounts.work()
 		projects.run_projects(current_date)
-		# run_stock()
-		# run_accounts()
-		# run_projects()
 		# run_messages()
 
 		current_date = frappe.utils.add_days(current_date, 1)

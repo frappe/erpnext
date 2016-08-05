@@ -10,6 +10,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "", 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -1135,7 +1136,7 @@
    "no_copy": 0, 
    "permlevel": 0, 
    "precision": "2", 
-   "print_hide": 0, 
+   "print_hide": 1, 
    "print_hide_if_no_value": 0, 
    "read_only": 1, 
    "report_hide": 0, 
@@ -3676,7 +3677,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-07-07 13:40:27.977803", 
+ "modified": "2016-08-03 11:50:49.680278", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 

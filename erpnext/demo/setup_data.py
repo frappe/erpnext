@@ -212,7 +212,7 @@ def setup_user():
 		user = frappe.new_doc("User")
 		user.update(u)
 		user.flags.no_welcome_mail
-		user.password = 'demo'
+		user.new_password = 'demo'
 		user.insert()
 
 def import_json(doctype, submit=False, values=None):
@@ -377,6 +377,12 @@ def setup_budget():
 
 
 def setup_user_roles():
+	user = frappe.get_doc('User', 'demo@erpnext.com')
+	user.add_roles('HR User', 'HR Manager', 'Accounts User', 'Accounts Manager',
+		'Stock User', 'Stock Manager', 'Sales User', 'Sales Manager', 'Purchase User',
+		'Purchase Manager', 'Projects User', 'Manufacturing User', 'Manufacturing Manager',
+		'Support Team')
+
 	if not frappe.db.get_global('demo_hr_user'):
 		user = frappe.get_doc('User', 'CharmaineGaudreau@example.com')
 		user.add_roles('HR User', 'HR Manager', 'Accounts User')
@@ -439,7 +445,7 @@ def setup_leave_allocation():
 		for leave_type in leave_types:
 			if not leave_type.max_days_allowed:
 				leave_type.max_days_allowed = 10
-	
+
 		leave_allocation = frappe.get_doc({
 			"doctype": "Leave Allocation",
 			"employee": employee.name,
@@ -450,4 +456,4 @@ def setup_leave_allocation():
 		})
 		leave_allocation.insert()
 		leave_allocation.submit()
-		frappe.db.commit()			
+		frappe.db.commit()

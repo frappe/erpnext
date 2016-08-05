@@ -6,7 +6,7 @@ For retail operations, the delivery of goods, accrual of sale and payment all ha
 
 ###Offline POS
 
-POS transactions are generally quick, hence should have as less dependency as possible. In ERPNext, you can create POS Invoices even when not connected to the internet.
+In the retails business, invoicing needs to done very quickly, hence should less dependency. In the ERPNext, you can create POS Invoices, even when not connected to the internet.
 
 POS Invoices created in the offline mode will be saved locally in the browser. If internet connection is lost which creating POS Invoice, you will still be able can proceed forward. Once internet connection is available again, offline invoices will be synced, and pushed onto your ERPNext account. To learn more on how POS Invoices can be created when offline, [check here.](https://frappe.io/blog/blog/erpnext-features/offline-pos-in-erpnext-7)
 

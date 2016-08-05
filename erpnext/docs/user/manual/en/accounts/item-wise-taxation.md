@@ -1,4 +1,3 @@
-
 Taxes selected in the Tax and Other Charges in transactions are applied on all the items. If you need different taxes applied on items selected in the same transaction, you should setup you item and tax master as explained in the steps below.
 
 ####Step 1: Mention Tax Applicable in the Item master
