@@ -177,6 +177,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		doc = JSON.parse(localStorage.getItem('doc'))
 		if(this.frm.doc.payments.length == 0){
 			this.frm.doc.payments = doc.payments;
+			this.calculate_outstanding_amount();
 		}
 
 		if(this.frm.doc.customer){
@@ -869,6 +870,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				for(key in data){
 					if(data[key].docstatus == 1 && index < 50){
 						index++
+						data[key].docstatus = 0;
 						return data
 					}
 				}
