@@ -36,6 +36,7 @@ class LeaveApplication(Document):
 		self.validate_max_days()
 		self.show_block_day_warning()
 		self.validate_block_days()
+		self.validate_salary_processed_days()
 		self.validate_leave_approver()
 
 	def on_update(self):
@@ -94,6 +95,15 @@ class LeaveApplication(Document):
 		if future_allocation:
 			frappe.throw(_("Leave cannot be applied/cancelled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}")
 				.format(formatdate(future_allocation[0].from_date), future_allocation[0].name))
+
+	def validate_salary_processed_days(self):
+		last_processed_pay_slip = frappe.db.sql("""select start_date, end_date from `tabSalary Slip`
+						where docstatus != 2 and employee = %s and ((%s between start_date and end_date) or (%s between start_date and end_date)) order by modified desc limit 1""",(self.employee, self.to_date, self.from_date))
+
+		if last_processed_pay_slip:
+			frappe.throw(_("Salary already processed for period between {0} and {1}, Leave application period cannot be between this date range.").
+					format(formatdate(last_processed_pay_slip[0][0]), formatdate(last_processed_pay_slip[0][1])))
+
 
 	def show_block_day_warning(self):
 		block_dates = get_applicable_block_dates(self.from_date, self.to_date,
