@@ -9,6 +9,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Document", 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -296,7 +297,7 @@
    "options": "Standard Reply", 
    "permlevel": 0, 
    "precision": "", 
-   "print_hide": 0, 
+   "print_hide": 1, 
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "report_hide": 0, 
@@ -638,7 +639,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-06-30 01:57:49.233065", 
+ "modified": "2016-08-01 08:45:39.777405", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Request for Quotation", 
