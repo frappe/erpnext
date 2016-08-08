@@ -55,9 +55,8 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		if random_expense_account:
 			# Check posted value for teh above random_expense_account
 			gle_for_random_expense_account = frappe.db.sql("""
-				select debit - credit as amount,
-					debit_in_account_currency - credit_in_account_currency
-						as amount_in_account_currency
+				select sum(debit - credit) as amount,
+					sum(debit_in_account_currency - credit_in_account_currency) as amount_in_account_currency
 				from `tabGL Entry`
 				where voucher_type='Period Closing Voucher' and voucher_no=%s and account =%s""",
 				(pcv.name, random_expense_account[0].account), as_dict=True)
