@@ -38,6 +38,7 @@ class StockController(AccountsController):
 
 		gl_list = []
 		warehouse_with_no_account = []
+		
 		for detail in voucher_details:
 			sle_list = sle_map.get(detail.name)
 			if sle_list:
@@ -266,10 +267,9 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
 		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
 		if expected_gle:
-			if not existing_gle or not compare_existing_and_expected_gle(existing_gle,
-				expected_gle):
-					_delete_gl_entries(voucher_type, voucher_no)
-					voucher_obj.make_gl_entries(repost_future_gle=False)
+			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
+				_delete_gl_entries(voucher_type, voucher_no)
+				voucher_obj.make_gl_entries(repost_future_gle=False)
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
 
