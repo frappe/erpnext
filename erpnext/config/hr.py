@@ -150,12 +150,19 @@ def get_data():
 		},
 
 		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
+			"label": _("Training"),
 			"items": [
-
+				{
+					"type": "doctype",
+					"name": "Training Event"
+				},
+				{
+					"type": "doctype",
+					"name": "Training Feedback"
+				},
 			]
 		},
+
 		{
 			"label": _("Setup"),
 			"icon": "icon-cog",
