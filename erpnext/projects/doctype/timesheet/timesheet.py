@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 
+import json
+
 from datetime import timedelta
 from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, get_datetime_str
 from frappe.model.document import Document
@@ -290,3 +292,31 @@ def get_activity_cost(employee=None, activity_type=None):
 			["costing_rate", "billing_rate"], as_dict=True)
 
 	return rate[0] if rate else {}
+	
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	"""Returns events for Gantt / Calendar view rendering.
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	from frappe.desk.calendar import get_event_conditions
+	filters = json.loads(filters)
+
+	data = []
+	if "employee" in filters:
+		employee = filters["employee"]
+		del filters["employee"]
+		filters = json.dumps(filters)
+		conditions = get_event_conditions("Timesheet", filters)
+		data = frappe.db.sql("""select name, parent, from_time, hours, activity_type, project, docstatus from `tabTimesheet Detail` where (ifnull(from_time, '0000-00-00')!= '0000-00-00') \
+						and (from_time between %(start)s and %(end)s) \
+						and parent in (select name from `tabTimesheet` where employee = %(employee)s)	{conditions}""".format(conditions=conditions), {
+					"start": start,
+					"end": end,
+					"employee": employee
+				}, as_dict=True, update={"allDay": 0})
+		for r in data:
+			tmp = {"end_time": r.from_time + timedelta(hours=r.hours)}
+			r.update(tmp)
+	return data
