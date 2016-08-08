@@ -94,13 +94,13 @@ def get_fee_structure(program, academic_term=None):
 	return fee_structure[0].name if fee_structure else None
 
 @frappe.whitelist()
-def get_fee_amount(fee_structure):
-	"""Returns Fee Amount.
+def get_fee_components(fee_structure):
+	"""Returns Fee Components.
 
 	:param fee_structure: Fee Structure.
 	"""
 	if fee_structure:
-		fs = frappe.get_list("Fee Amount", fields=["fees_category", "amount"] , filters={"parent": fee_structure}, order_by= "idx")
+		fs = frappe.get_list("Fee Component", fields=["fees_category", "amount"] , filters={"parent": fee_structure}, order_by= "idx")
 		return fs
 
 @frappe.whitelist()

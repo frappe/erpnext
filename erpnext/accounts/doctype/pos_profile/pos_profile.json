@@ -8,6 +8,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -832,7 +833,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-06-13 21:20:13.805101", 
+ "modified": "2016-08-06 17:05:59.990031", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "POS Profile", 
@@ -879,7 +880,7 @@
    "write": 0
   }
  ], 
- "quick_entry": 1, 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_field": "modified", 

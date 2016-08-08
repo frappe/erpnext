@@ -772,6 +772,9 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 	company_currency = get_company_currency(company)
 	account_details = frappe.db.get_value("Account", account, ["account_type", "account_currency"], as_dict=1)
 
+	if not account_details:
+		return
+
 	if account_details.account_type == "Receivable":
 		party_type = "Customer"
 	elif account_details.account_type == "Payable":

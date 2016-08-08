@@ -31,7 +31,7 @@ class CourseSchedule(Document):
 		validate_overlap_for(self, "Course Schedule", "instructor")
 		validate_overlap_for(self, "Course Schedule", "room")
 
-		validate_overlap_for(self, "Examination", "student_group")
-		validate_overlap_for(self, "Examination", "room")
-		validate_overlap_for(self, "Examination", "supervisor", self.instructor)
+		validate_overlap_for(self, "Assessment", "student_group")
+		validate_overlap_for(self, "Assessment", "room")
+		validate_overlap_for(self, "Assessment", "supervisor", self.instructor)
 

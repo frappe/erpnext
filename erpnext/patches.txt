@@ -308,3 +308,5 @@ erpnext.patches.v7_0.remove_old_earning_deduction_doctypes
 erpnext.patches.v7_0.make_guardian
 erpnext.patches.v7_0.update_refdoc_in_landed_cost_voucher
 erpnext.patches.v7_0.set_material_request_type_in_item
+erpnext.patches.v7_0.rename_examination_to_assessment
+erpnext.patches.v7_0.repost_future_gle_for_purchase_invoice

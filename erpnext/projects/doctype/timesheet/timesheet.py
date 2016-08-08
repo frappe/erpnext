@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 
+import json
 from datetime import timedelta
 from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, get_datetime_str
 from frappe.model.document import Document
@@ -290,3 +291,31 @@ def get_activity_cost(employee=None, activity_type=None):
 			["costing_rate", "billing_rate"], as_dict=True)
 
 	return rate[0] if rate else {}
+		
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	"""Returns events for Gantt / Calendar view rendering.
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	filters = json.loads(filters)
+
+	conditions = get_conditions(filters)
+	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, `tabTimesheet Detail`.parent as parent,
+		from_time, hours, activity_type, project, to_time from `tabTimesheet Detail`, 
+		`tabTimesheet` where `tabTimesheet Detail`.parent = `tabTimesheet`.name and 
+		(from_time between %(start)s and %(end)s) {conditions}""".format(conditions=conditions),
+		{
+			"start": start,
+			"end": end
+		}, as_dict=True, update={"allDay": 0})
+
+def get_conditions(filters):
+	conditions = []
+	abbr = {'employee': 'tabTimesheet', 'project': 'tabTimesheet Detail'}
+	for key in filters:
+		if filters.get(key):
+			conditions.append("`%s`.%s = '%s'"%(abbr.get(key), key, filters.get(key)))
+
+	return " and {}".format(" and ".join(conditions)) if conditions else ""
