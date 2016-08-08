@@ -52,10 +52,10 @@ class ReceivablePayableReport(object):
 		if not "range3" in self.filters:
 			self.filters["range3"] = "90"
 			
-		for label in ("0-{range1}".format(**self.filters),
-			"{range1}-{range2}".format(**self.filters),
-			"{range2}-{range3}".format(**self.filters),
-			"{range3}-{above}".format(range3=self.filters.range3, above=_("Above"))):
+		for label in ("0-{range1}".format(range1=self.filters["range1"]),
+			"{range1}-{range2}".format(range1=self.filters["range1"]+1, range2=self.filters["range2"]),
+			"{range2}-{range3}".format(range2=self.filters["range2"]+1, range3=self.filters["range3"]),
+			"{range3}-{above}".format(range3=self.filters["range3"] + 1, above=_("Above"))):
 				columns.append({
 					"label": label,
 					"fieldtype": "Currency",
