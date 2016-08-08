@@ -53,4 +53,4 @@ def make_payment(razorpay_payment_id, options, reference_doctype, reference_docn
 		"reference_doctype": reference_doctype
 	})
 	
-	return Controller().make_request(data)
+	return Controller().make_integration_request(data)

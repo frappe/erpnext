@@ -196,3 +196,5 @@ bot_parsers = [
 get_site_info = 'erpnext.utilities.get_site_info'
 
 integration_services = ["PayPal", "Razorpay", "Ldap"]
+
+payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_and_account"

@@ -5,12 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.integration_broker.integration_controller import IntegrationController
-from frappe.utils import get_url
 import urllib, json
-from erpnext.integrations.utils.request_handler import get_request, post_request, make_request
-from erpnext.integrations.utils.payment_gateway_handler import (create_payment_gateway_and_account,
-	set_redirect, validate_transaction_currency)
+from frappe.utils import get_url, call_hook_method
+from frappe.integration_broker.integration_controller import IntegrationController
 
 class Controller(IntegrationController):
 	service_name = 'Razorpay'
@@ -28,14 +25,13 @@ class Controller(IntegrationController):
 	]
 	
 	scheduled_jobs = [
-		{"daily": ["erpnext.integrations.events.payment_completion.complete_payment"]}
+		{"daily": ["erpnext.integrations.razorpay.capture_payment"]}
 	]
 	
 	supported_currencies = ["INR"]
 	
 	def enable(self, parameters):
-		create_payment_gateway_and_account("Razorpay")
-		
+		call_hook_method('payment_gateway_enabled', gateway='RazorPay')
 		self.parameters = parameters
 		self.validate_razorpay_credentails()
 
@@ -44,14 +40,15 @@ class Controller(IntegrationController):
 
 		if razorpay_settings.get("api_key"):
 			try:
-				get_request(url="https://api.razorpay.com/v1/payments",
+				self.get_request(url="https://api.razorpay.com/v1/payments",
 					auth=(razorpay_settings.api_key, razorpay_settings.api_secret))
 			except Exception:
 				frappe.throw(_("Seems API Key or API Secret is wrong !!!"))
 	
 	def validate_transaction_currency(self, doc):
 		if getattr(doc, "currency", None):
-			validate_transaction_currency(self.supported_currencies, doc.currency, self.service_name)
+			if doc.currency not in self.supported_currencies:
+				frappe.throw(_("Please select another payment method. {0} does not support transactions in currency '{1}'").format(self.service_name, doc.currency))
 	
 	def get_payment_url(self, **kwargs):
 		return get_url("./razorpay_checkout?{0}".format(urllib.urlencode(kwargs)))
@@ -59,14 +56,13 @@ class Controller(IntegrationController):
 	def get_settings(self):
 		return frappe._dict(self.get_parameters())
 	
-	def make_request(self, data):
-		setattr(self, "reference_docname", data.get("reference_docname"))
-		setattr(self, "reference_doctype", data.get("reference_doctype"))
-		setattr(self, "razorpay_payment_id", data.get("razorpay_payment_id"))
-		
+	def make_integration_request(self, data):
+		self.data = frappe._dict(data)
+
 		try:
-			self.integration_request = make_request(data, "Host", self.service_name)
-			return self.authorise_payment(data)
+			self.integration_request = super(Controller, self).make_integration_request(self.data, "Host", \
+				self.service_name)
+			return self.authorize_payment()
 
 		except Exception:
 			return{
@@ -74,37 +70,32 @@ class Controller(IntegrationController):
 				"status": 401
 			}
 		
-	def authorise_payment(self, data):
-		settings = self.get_settings()
-		if self.integration_request.status != "Authorized":
-			confirm_payment(self, settings.api_key, settings.api_secret, self.flags.is_sandbox)
+	def authorize_payment(self):
+		"""
+		An authorization is performed when user’s payment details are successfully authenticated by the bank.
+		The money is deducted from the customer’s account, but will not be transferred to the merchant’s account
+		until it is explicitly captured by merchant.
+		"""
 		
-		set_redirect(self)
+		settings = self.get_settings()
+		
+		if self.integration_request.status != "Authorized":
+			resp = self.get_request("https://api.razorpay.com/v1/payments/{0}"
+				.format(self.data.razorpay_payment_id), auth=(settings.api_key,
+					settings.api_secret))
+			
+			if resp.get("status") == "authorized":
+				self.integration_request.db_set('status', 'Authorized', update_modified=False)
+				self.flags.status_changed_to = "Authorized"
 				
-		if frappe.db.get_value("Integration Request", self.integration_request.name, "status") == "Authorized":
+		if self.flags.status_changed_to == "Authorized":
+			if self.data.reference_doctype and self.data.reference_docname:
+				redirect_to = frappe.get_doc(self.data.reference_doctype, self.data.reference_docname).run_method("on_payment_authorized", self.flags.status_changed_to)
+			
 			return {
-				"redirect_to": self.flags.redirect_to or "razorpay-payment-success",
+				"redirect_to": redirect_to or "razorpay-payment-success",
 				"status": 200
 			}
-
-
-def confirm_payment(doc, api_key, api_secret, is_sandbox=False):
-	"""
-	An authorization is performed when user’s payment details are successfully authenticated by the bank.
-	The money is deducted from the customer’s account, but will not be transferred to the merchant’s account
-	until it is explicitly captured by merchant.
-	"""
-	
-	if is_sandbox and doc.sanbox_response:
-		resp = doc.sanbox_response
-	else:
-		resp = get_request("https://api.razorpay.com/v1/payments/{0}".format(doc.razorpay_payment_id),
-			auth=(api_key, api_secret))
-
-	if resp.get("status") == "authorized":
-		doc.integration_request.db_set('status', 'Authorized', update_modified=False)
-		doc.flags.status_changed_to = "Authorized"
-
 
 def capture_payment(is_sandbox=False, sanbox_response=None):
 	"""
@@ -114,8 +105,8 @@ def capture_payment(is_sandbox=False, sanbox_response=None):
 
 		Note: Attempting to capture a payment whose status is not authorized will produce an error.
 	"""
-	settings = frappe.get_doc("Integration Service", "Razorpay").get_parameters()
-	
+	controller = frappe.get_doc("Integration Service", "Razorpay")
+	settings = controller.get_parameters()
 	for doc in frappe.get_all("Integration Request", filters={"status": "Authorized",
 		"integration_request_service": "Razorpay"}, fields=["name", "data"]):
 		try:
@@ -123,7 +114,7 @@ def capture_payment(is_sandbox=False, sanbox_response=None):
 				resp = sanbox_response
 			else:
 				data = json.loads(doc.data)
-				resp = post_request("https://api.razorpay.com/v1/payments/{0}/capture".format(data.get("razorpay_payment_id")),
+				resp = controller.post_request("https://api.razorpay.com/v1/payments/{0}/capture".format(data.get("razorpay_payment_id")),
 					auth=(settings["api_key"], settings["api_secret"]), data={"amount": data.get("amount")})
 			
 			if resp.get("status") == "captured":

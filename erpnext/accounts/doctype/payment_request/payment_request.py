@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate
+from frappe.utils import flt, nowdate, get_url
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
@@ -178,7 +178,33 @@ class PaymentRequest(Document):
 
 	def get_payment_success_url(self):
 		return self.payment_success_url
+	
+	def on_payment_authorized(self, status=None):
+		if not status:
+			return
+		
+		shopping_cart_settings = frappe.get_doc("Shopping Cart Settings")
 
+		if status in ["Authorized", "Completed"]:
+			redirect_to = None
+			self.run_method("set_as_paid")
+
+			# if shopping cart enabled and in session
+			if (shopping_cart_settings.enabled and hasattr(frappe.local, "session")
+				and frappe.local.session.user != "Guest"):
+
+				success_url = shopping_cart_settings.payment_success_url
+				if success_url:
+					redirect_to = ({
+						"Orders": "orders",
+						"Invoices": "invoices",
+						"My Account": "me"
+					}).get(success_url, "me")
+				else:
+					redirect_to = get_url("/orders/{0}".format(self.reference_name))
+			
+			return redirect_to
+			
 @frappe.whitelist(allow_guest=True)
 def make_payment_request(**args):
 	"""Make payment request"""
