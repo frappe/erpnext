@@ -301,7 +301,7 @@ class PurchaseInvoice(BuyingController):
 				asset.flags.ignore_validate_update_after_submit = True
 				asset.save()
 
-	def make_gl_entries(self, repost_future_gle=False):
+	def make_gl_entries(self, repost_future_gle=True):
 		self.auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
