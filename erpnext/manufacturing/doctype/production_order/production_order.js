@@ -38,7 +38,7 @@ frappe.ui.form.on("Production Order", {
 			frm.trigger('show_progress');
 		}
 		
-		if(frm.doc.docstatus == 1){
+		if(frm.doc.docstatus == 1 && frm.doc.status != 'Stopped'){
 			frm.add_custom_button(__('Make Timesheet'), function(){
 				frappe.model.open_mapped_doc({
 					method: "erpnext.manufacturing.doctype.production_order.production_order.make_new_timesheet",
@@ -124,20 +124,20 @@ erpnext.production_order = {
 			}
 
 			// opertions
-			if ((doc.operations || []).length) {
+			if (((doc.operations || []).length) && frm.doc.status != 'Stopped') {
 				frm.add_custom_button(__('Timesheet'), function() {
 					frappe.route_options = {"production_order": frm.doc.name};
 					frappe.set_route("List", "Timesheet");
 				}, __("View"));
 			}
 
-			if (flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) {
+			if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
 				var btn = frm.add_custom_button(__('Start'),
 					cur_frm.cscript['Transfer Raw Materials']);
 				btn.addClass('btn-primary');
 			}
 
-			if (flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) {
+			if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) && frm.doc.status != 'Stopped') {
 				var btn = frm.add_custom_button(__('Finish'),
 					cur_frm.cscript['Update Finished Goods']);
 
