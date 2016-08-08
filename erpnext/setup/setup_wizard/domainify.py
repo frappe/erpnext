@@ -18,7 +18,7 @@ def get_domain(domain):
 			'set_value': [
 				['Stock Settings', None, 'show_barcode_field', 1]
 			],
-			'remove_sidebar_items': ['/announcement', '/course', '/examination', '/fees']
+			'remove_sidebar_items': ['/announcement', '/course', '/assessment', '/fees']
 		},
 
 		'Retail': {
@@ -32,7 +32,7 @@ def get_domain(domain):
 			'set_value': [
 				['Stock Settings', None, 'show_barcode_field', 1]
 			],
-			'remove_sidebar_items': ['/announcement', '/course', '/examination', '/fees']
+			'remove_sidebar_items': ['/announcement', '/course', '/assessment', '/fees']
 		},
 
 		'Distribution': {
@@ -45,7 +45,7 @@ def get_domain(domain):
 			'set_value': [
 				['Stock Settings', None, 'show_barcode_field', 1]
 			],
-			'remove_sidebar_items': ['/announcement', '/course', '/examination', '/fees']
+			'remove_sidebar_items': ['/announcement', '/course', '/assessment', '/fees']
 		},
 
 		'Services': {
@@ -58,13 +58,13 @@ def get_domain(domain):
 			'set_value': [
 				['Stock Settings', None, 'show_barcode_field', 0]
 			],
-			'remove_sidebar_items': ['/announcement', '/course', '/examination', '/fees']
+			'remove_sidebar_items': ['/announcement', '/course', '/assessment', '/fees']
 		},
 		'Education': {
 			'desktop_icons': ['Student', 'Program', 'Course', 'Student Group', 'Instructor',
 				'Fees',  'ToDo', 'Schools'],
 			'allow_roles': ['Academics User', 'Accounts User', 'Accounts Manager', 'Website Manager'],
-			'allow_sidebar_items': ['/announcement', '/course', '/examination', '/fees']
+			'allow_sidebar_items': ['/announcement', '/course', '/assessment', '/fees']
 		},
 	}
 	if not domain in data:

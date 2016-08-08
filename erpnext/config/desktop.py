@@ -229,12 +229,12 @@ def get_data():
 			"type": "list"
 		},
 		{
-			"module_name": "Examination",
+			"module_name": "Assessment",
 			"color": "#8a70be",
 			"icon": "icon-file-text-alt",
-			"label": _("Examination"),
-			"link": "List/Examination",
-			"_doctype": "Examination",
+			"label": _("Assessment"),
+			"link": "List/Assessment",
+			"_doctype": "Assessment",
 			"type": "list"
 		},
 		{
@@ -261,7 +261,7 @@ def get_data():
 			"icon": "icon-map-marker",
 			"label": _("Room"),
 			"link": "List/Room",
-			"_doctype": "Examination",
+			"_doctype": "Room",
 			"type": "list"
 		},
 		{
