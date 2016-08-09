@@ -25,6 +25,9 @@ def execute(filters=None):
 	return columns, res
 
 def validate_filters(filters, account_details):
+	if not filters.get('company'):
+		frappe.throw(_('{0} is mandatory').format(_('Company')))
+
 	if filters.get("account") and not account_details.get(filters.account):
 		frappe.throw(_("Account {0} does not exists").format(filters.account))
 
@@ -87,7 +90,7 @@ def get_columns(filters):
 	columns += [
 		_("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/"+_("Voucher Type")+":160",
 		_("Against Account") + "::120", _("Party Type") + "::80", _("Party") + "::150",
-		_("Project") + ":Link/Project:100", _("Cost Center") + ":Link/Cost Center:100", 
+		_("Project") + ":Link/Project:100", _("Cost Center") + ":Link/Cost Center:100",
 		_("Remarks") + "::400"
 	]
 
@@ -111,7 +114,7 @@ def get_gl_entries(filters):
 		if filters.get("group_by_voucher") else "group by name"
 
 	gl_entries = frappe.db.sql("""
-		select 
+		select
 			posting_date, account, party_type, party,
 			sum(debit) as debit, sum(credit) as credit,
 			voucher_type, voucher_no, cost_center, project,

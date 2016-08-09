@@ -311,6 +311,8 @@ function load_erpnext_slides() {
 				slide.fields.push({fieldtype: "Section Break"});
 				slide.fields.push({fieldtype: "Check", fieldname: "add_sample_data",
 					label: __("Add a few sample records"), "default": 1});
+				slide.fields.push({fieldtype: "Check", fieldname: "setup_website",
+					label: __("Setup a simple website for my organization"), "default": 1});
 			},
 			css_class: "two-column"
 		},

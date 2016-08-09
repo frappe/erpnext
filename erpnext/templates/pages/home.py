@@ -15,6 +15,8 @@ def get_context(context):
 		if route:
 			item.route = '/' + route
 
+	context.title = homepage.title or homepage.company
+
 	# show atleast 3 products
 	if len(homepage.products) < 3:
 		for i in xrange(3 - len(homepage.products)):
@@ -24,6 +26,4 @@ def get_context(context):
 				'route': '#'
 			})
 
-	return {
-		'homepage': homepage
-	}
+	context.homepage = homepage
