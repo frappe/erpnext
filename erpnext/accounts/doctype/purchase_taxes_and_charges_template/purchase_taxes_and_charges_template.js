@@ -27,4 +27,4 @@ frappe.ui.form.on("Purchase Taxes and Charges", "category", function(doc, cdt, c
 		d.add_deduct_tax = '';
 	}
 	refresh_field('add_deduct_tax', d.name, 'taxes');
-})
+});
