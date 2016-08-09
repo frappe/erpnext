@@ -9,7 +9,8 @@ from erpnext.controllers.stock_controller import get_warehouse_account, update_g
 def execute():
 	if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 		return
-		
+	
+	frappe.reload_doctype("Purchase Invoice")	
 	wh_account = get_warehouse_account()
 	
 	for pi in frappe.get_all("Purchase Invoice", filters={"docstatus": 1, "update_stock": 1}):
