@@ -267,7 +267,6 @@ erpnext.patches.v6_27.fix_recurring_order_status
 erpnext.patches.v6_20x.update_product_bundle_description
 erpnext.patches.v7_0.update_party_status
 erpnext.patches.v7_0.update_item_projected
-erpnext.patches.v7_0.fix_duplicate_icons
 erpnext.patches.v7_0.remove_features_setup
 erpnext.patches.v7_0.update_home_page
 erpnext.patches.v7_0.create_budget_record
@@ -310,3 +309,4 @@ erpnext.patches.v7_0.update_refdoc_in_landed_cost_voucher
 erpnext.patches.v7_0.set_material_request_type_in_item
 erpnext.patches.v7_0.rename_examination_to_assessment
 erpnext.patches.v7_0.repost_future_gle_for_purchase_invoice
+erpnext.patches.v7_0.fix_duplicate_icons
