@@ -13,3 +13,4 @@ def execute():
 		rename_field("Assessment", "exam_name", "assessment_name")
 		rename_field("Assessment", "exam_code", "assessment_code")
 	
+		frappe.db.sql("delete from `tabPortal Menu Item` where route = '/examination'")
