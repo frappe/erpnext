@@ -27,6 +27,6 @@ def execute():
 		domainify.setup_sidebar_items(domainify.get_domain('Manufacturing'))
 
 def reload_doctypes_for_schools_icons():
-	for name in ('student', 'student_group', 'course_schedule', 'student_attendance',
+	for name in ('student', 'student_group', 'course_schedule', 'student_attendance', 'room', 'program_enrollment',
 		'course', 'program', 'student_applicant', 'examination', 'fees', 'instructor', 'announcement'):
 		frappe.reload_doc('schools', 'doctype', name)
