@@ -1,4 +1,4 @@
-// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+\// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 {% include 'selling/sales_common.js' %}
@@ -53,7 +53,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					cur_frm.add_custom_button(__('Delivery'), this.make_delivery_note, __("Make"));
 					cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 				}
-	
+
 				// sales invoice
 				if(flt(doc.per_billed, 2) < 100) {
 					cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice, __("Make"));

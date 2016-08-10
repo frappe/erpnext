@@ -56,8 +56,8 @@
 
 		<!-- qty -->
 		<div class="col-sm-2 hidden-xs text-right">
-			{%=doc.get_formatted("quantity")|| doc.get_formatted("qty") %}
-            <span class="small">{%=doc.sell_uom|| doc.uom || doc.stock_uom %}</span>
+			{%= doc.get_formatted("qty") %}
+            <span class="small">{%= doc.uom || doc.stock_uom %}</span>
 		</div>
 
 		<!-- rate -->

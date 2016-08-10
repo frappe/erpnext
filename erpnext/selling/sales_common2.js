@@ -127,7 +127,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			item.qty = flt(item.quantity * item.conversion_factor, precision("qty", item));
 			refresh_field("qty", item.name, item.parentfield);
 		}
-		this.calculate_taxes_and_totals();
 	},
 	shipping_address_name: function() {
 		erpnext.utils.get_address_display(this.frm, "shipping_address_name", "shipping_address");
