@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-import frappe
+import frappe, os
 
 def execute():
 	reload_doctypes_for_schools_icons()
@@ -21,5 +21,7 @@ def execute():
 		remove_from_installed_apps("schools")
 
 def reload_doctypes_for_schools_icons():
-	for d in frappe.get_all('DocType', filters={'module': 'Schools'}):
-		frappe.reload_doc('schools', 'doctype', frappe.scrub(d.name))
+	base_path = frappe.get_app_path('erpnext', 'schools', 'doctype')
+	for doctype in os.listdir(base_path):
+		if os.path.exists(os.path.join(base_path, doctype, doctype + '.json')):
+			frappe.reload_doc('schools', 'doctype', doctype)
