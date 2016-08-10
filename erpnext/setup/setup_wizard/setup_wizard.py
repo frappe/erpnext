@@ -41,7 +41,9 @@ def setup_complete(args=None):
 		create_instructor(args)
 		create_room(args)
 
-	website_maker(args)
+	if args.get('setup_website'):
+		website_maker(args)
+
 	create_logo(args)
 
 	frappe.local.message_log = []
