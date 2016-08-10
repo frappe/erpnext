@@ -7,7 +7,7 @@ $(document).ready(function(){
 			"description": "{{ description }}",
 			"image": "{{ brand_image }}",
 			"handler": function (response){
-				razorpay.make_payment_log(response, options, "{{ doctype }}", "{{ name }}");
+				razorpay.make_payment_log(response, options, "{{ reference_doctype }}", "{{ reference_docname }}");
 			},
 			"prefill": {
 				"name": "{{ payer_name }}",

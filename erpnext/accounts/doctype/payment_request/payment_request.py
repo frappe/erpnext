@@ -72,18 +72,21 @@ class PaymentRequest(Document):
 			"amount": self.grand_total,
 			"title": data.company,
 			"description": self.subject,
-			"doctype": "Payment Request",
-			"name": self.name,
+			"reference_doctype": "Payment Request",
+			"reference_docname": self.name,
 			"payer_email": self.email_to or frappe.session.user,
 			"payer_name": data.customer_name,
-			"order_id": self.name
+			"order_id": self.name,
+			"currency": self.currency
 		})
 
 	def set_as_paid(self):
+		print "set_as_paid"
 		if frappe.session.user == "Guest":
 			frappe.set_user("Administrator")
-
+		
 		payment_entry = self.create_payment_entry()
+		print payment_entry
 		self.make_invoice()
 
 		return payment_entry
@@ -315,6 +318,7 @@ def make_payment_entry(docname):
 
 def make_status_as_paid(doc, method):
 	for ref in doc.references:
+		print ref
 		payment_request_name = frappe.db.get_value("Payment Request",
 			{"reference_doctype": ref.reference_doctype, "reference_name": ref.reference_name,
 			"docstatus": 1})
@@ -323,6 +327,7 @@ def make_status_as_paid(doc, method):
 			doc = frappe.get_doc("Payment Request", payment_request_name)
 			if doc.status != "Paid":
 				doc.db_set('status', 'Paid')
+				frappe.db.commit()
 
 def get_dummy_message(use_dummy_message=True):
 	return """

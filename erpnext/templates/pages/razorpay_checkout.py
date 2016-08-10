@@ -11,7 +11,7 @@ from erpnext.integrations.razorpay import Controller
 no_cache = 1
 no_sitemap = 1
 
-expected_keys = ('amount', 'title', 'description', 'doctype', 'name',
+expected_keys = ('amount', 'title', 'description', 'reference_doctype', 'reference_docname',
 	'payer_name', 'payer_email', 'order_id')
 
 def get_context(context):

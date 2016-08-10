@@ -30,8 +30,8 @@ class Controller(IntegrationController):
 	
 	supported_currencies = ["INR"]
 	
-	def enable(self, parameters):
-		call_hook_method('payment_gateway_enabled', gateway='RazorPay')
+	def enable(self, parameters, use_test_account=0):
+		call_hook_method('payment_gateway_enabled', gateway='Razorpay')
 		self.parameters = parameters
 		self.validate_razorpay_credentails()
 
@@ -45,10 +45,9 @@ class Controller(IntegrationController):
 			except Exception:
 				frappe.throw(_("Seems API Key or API Secret is wrong !!!"))
 	
-	def validate_transaction_currency(self, doc):
-		if getattr(doc, "currency", None):
-			if doc.currency not in self.supported_currencies:
-				frappe.throw(_("Please select another payment method. {0} does not support transactions in currency '{1}'").format(self.service_name, doc.currency))
+	def validate_transaction_currency(self, currency):
+		if currency not in self.supported_currencies:
+			frappe.throw(_("Please select another payment method. {0} does not support transactions in currency '{1}'").format(self.service_name, currency))
 	
 	def get_payment_url(self, **kwargs):
 		return get_url("./razorpay_checkout?{0}".format(urllib.urlencode(kwargs)))
