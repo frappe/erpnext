@@ -21,7 +21,5 @@ def execute():
 		remove_from_installed_apps("schools")
 
 def reload_doctypes_for_schools_icons():
-	for name in ('student', 'student_group', 'course_schedule', 'student_attendance', 'room', 
-		'program_enrollment', 'course', 'program', 'student_applicant', 'fees', 
-		'instructor', 'announcement'):
-			frappe.reload_doc('schools', 'doctype', name)
+	for d in frappe.get_all('DocType', filters={'module': 'Schools'}):
+		frappe.reload_doc('schools', 'doctype', d.name)
