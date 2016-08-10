@@ -1,5 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
+{% include "erpnext/public/js/controllers/accounts.js" %}
 
 frappe.ui.form.on('Payment Entry', {
 	onload: function(frm) {
@@ -255,22 +256,6 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			});
 		}
-	},
-
-	mode_of_payment: function(frm) {
-		return  frappe.call({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
-			args: {
-				"mode_of_payment": frm.doc.mode_of_payment,
-				"company": frm.doc.company
-			},
-			callback: function(r, rt) {
-				if(r.message) {
-					var payment_account_field = frm.doc.payment_type == "Receive" ? "paid_to" : "paid_from";
-					frm.set_value(payment_account_field, r.message['account']);
-				}
-			}
-		});
 	},
 
 	paid_from: function(frm) {
