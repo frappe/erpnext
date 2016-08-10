@@ -46,9 +46,10 @@
   line-height: 0;
   color: #d1d8dd;
   font-size: 30px;
-  background-size: cover;
+  background-size: contain;
   border: 1px solid transparent;
-  background-position: top center;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .pos-item-area {
   border: 1px solid #d1d8dd;
