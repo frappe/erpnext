@@ -22,4 +22,4 @@ def execute():
 
 def reload_doctypes_for_schools_icons():
 	for d in frappe.get_all('DocType', filters={'module': 'Schools'}):
-		frappe.reload_doc('schools', 'doctype', d.name)
+		frappe.reload_doc('schools', 'doctype', frappe.scrub(d.name))
