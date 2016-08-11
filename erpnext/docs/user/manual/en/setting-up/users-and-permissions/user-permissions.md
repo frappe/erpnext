@@ -14,7 +14,7 @@ User 'tom.hagen@riosolutions.com' has Sales User role and we want to limit the u
 
   1. We add a User Permissions row for Company.
 	
-	<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permission-settings.png" class="screen" alt="User Permissions For Company">
+	<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-new.gif" class="screen" alt="User Permissions For Company">
 
 	Add User Permissions row for a combination of User 'tom.hagen@riosolutions.com' and Company 'Rio Solutions'.
 
@@ -42,8 +42,8 @@ User 'tom.hagen@riosolutions.com' has Sales User role and we want to limit the u
 
 	Quotation List is limited to results for Company 'Rio Solutions' for User 'tom.hagen@riosolutions.com'.
 
-  1. User Permissions get applied automatically based on Link Fields, just like how it worked for Quotation. But, Lead Form has 4 Link fields: Territory, Company, Lead Owner and Next Contact By. Say, you want Leads to limit access to Users based only on Territory, even though you have defined User Permissions for DocTypes User, Territory and Company. You can do this by setting 'Ignore User Permissions' for Link fields: Company, Lead Owner and Next Contact By.
-
+  1. User Permissions get applied automatically based on Link Fields, just like how it worked for Quotation. But, Lead Form has 4 Link fields: Territory, Company, Lead Owner and Next Contact By. Say, you want Leads to limit access to Users based only on Territory, even though you have defined User Permissions for DocTypes User, Territory and Company. You can do this by setting 'Ignore User Permissions' for Link fields: Company, Lead Owner and Next Contact By.  
+    
 <img src="{{docs_base_url}}/assets/img/users-and-permissions/user-permissions-lead-role-permissions.png" class="screen" alt="Role Permissions on Lead for Sales User Role">
 
 Sales User can Read, Write and Create Leads limited by User Permissions.
