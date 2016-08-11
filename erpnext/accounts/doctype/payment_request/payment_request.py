@@ -81,12 +81,10 @@ class PaymentRequest(Document):
 		})
 
 	def set_as_paid(self):
-		print "set_as_paid"
 		if frappe.session.user == "Guest":
 			frappe.set_user("Administrator")
 		
 		payment_entry = self.create_payment_entry()
-		print payment_entry
 		self.make_invoice()
 
 		return payment_entry
@@ -253,7 +251,6 @@ def make_payment_request(**args):
 
 	if hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart":
 		pr.get_payment_url()
-		# frappe.local.response["type"] = "redirect"
 		frappe.db.commit()
 
 	if not args.cart:
@@ -318,7 +315,6 @@ def make_payment_entry(docname):
 
 def make_status_as_paid(doc, method):
 	for ref in doc.references:
-		print ref
 		payment_request_name = frappe.db.get_value("Payment Request",
 			{"reference_doctype": ref.reference_doctype, "reference_name": ref.reference_name,
 			"docstatus": 1})
