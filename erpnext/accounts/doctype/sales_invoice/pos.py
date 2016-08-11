@@ -181,6 +181,8 @@ def make_invoice(doc_list):
 				si_doc.update(doc)
 				submit_invoice(si_doc, name)
 				name_list.append(name)
+			else:
+				name_list.append(name)
 
 	return name_list
 
