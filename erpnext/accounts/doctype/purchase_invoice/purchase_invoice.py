@@ -497,6 +497,18 @@ class PurchaseInvoice(BuyingController):
 
 				i += 1
 
+		if self.update_stock and valuation_tax:
+			for cost_center, amount in valuation_tax.items():
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.expenses_included_in_valuation,
+						"cost_center": cost_center,
+						"against": self.supplier,
+						"credit": amount,
+						"remarks": self.remarks or "Accounting Entry for Stock"
+					})
+				)
+
 	def make_payment_gl_entries(self, gl_entries):
 		# Make Cash GL Entries
 		if cint(self.is_paid) and self.cash_bank_account and self.paid_amount:
