@@ -78,10 +78,6 @@ class StockReconciliation(StockController):
 
 		default_currency = frappe.db.get_default("currency")
 
-		# validate no of rows
-		if len(self.items) > 100:
-			frappe.throw(_("""Max 100 rows for Stock Reconciliation."""))
-
 		for row_num, row in enumerate(self.items):
 			# find duplicates
 			if [row.item_code, row.warehouse] in item_warehouse_combinations:

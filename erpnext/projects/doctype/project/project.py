@@ -18,8 +18,10 @@ class Project(Document):
 		if not self.get('__unsaved') and not self.get("tasks"):
 			self.load_tasks()
 
-		self.set_onload('activity_summary', frappe.db.sql('''select activity_type, sum(hours) as total_hours
-			from `tabTimesheet Detail` where project=%s group by activity_type order by total_hours desc''', self.name, as_dict=True))
+		self.set_onload('activity_summary', frappe.db.sql('''select activity_type,
+			sum(hours) as total_hours
+			from `tabTimesheet Detail` where project=%s and docstatus < 2 group by activity_type
+			order by total_hours desc''', self.name, as_dict=True))
 
 	def __setup__(self):
 		self.onload()
@@ -187,12 +189,12 @@ def get_list_context(context=None):
 		"row_template": "templates/includes/projects/project_row.html"
 	}
 
-def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):	
+def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name)
-		from `tabUser` 
-		where enabled=1 
+		from `tabUser`
+		where enabled=1
 		and name not in ("Guest", "Administrator")
-		order by 
+		order by
 		name asc""")
 
 @frappe.whitelist()
