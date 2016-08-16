@@ -10,7 +10,6 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
- "editable_grid": 1, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -1386,8 +1385,8 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-08-16 14:08:32.439922", 
- "modified_by": "umair@frappe.io", 
+ "modified": "2016-06-26 09:08:50.476200", 
+ "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
  "owner": "Administrator", 
@@ -1470,7 +1469,6 @@
    "set_user_permissions": 0, 
    "share": 0, 
    "submit": 0, 
-   "user_permission_doctypes": "[\"Company\"]", 
    "write": 0
   }, 
   {

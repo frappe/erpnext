@@ -2110,8 +2110,8 @@
  "istable": 0, 
  "max_attachments": 1, 
  "menu_index": 0, 
- "modified": "2016-08-16 14:05:00.356461", 
- "modified_by": "umair@frappe.io", 
+ "modified": "2016-08-11 08:52:09.666306", 
+ "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 
  "owner": "Administrator", 
@@ -2134,7 +2134,6 @@
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 1, 
-   "user_permission_doctypes": "[\"Company\"]", 
    "write": 1
   }, 
   {
