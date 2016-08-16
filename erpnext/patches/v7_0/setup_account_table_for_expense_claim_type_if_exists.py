@@ -4,7 +4,10 @@ import frappe
 def execute():
 	frappe.reload_doc("hr", "doctype", "expense_claim_type")
 	frappe.reload_doc("hr", "doctype", "expense_claim_account")
-	
+
+	if not frappe.db.has_column('Expense Claim Type', 'default_account'):
+		return
+
 	for expense_claim_type in frappe.get_all("Expense Claim Type", fields=["name", "default_account"]):
 		if expense_claim_type.default_account:
 			doc = frappe.get_doc("Expense Claim Type", expense_claim_type.name)

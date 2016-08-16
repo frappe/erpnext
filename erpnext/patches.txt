@@ -22,6 +22,7 @@ execute:frappe.reload_doc('accounts', 'doctype', 'pos_setting') # 2014-01-29
 execute:frappe.reload_doc('selling', 'doctype', 'customer') # 2014-01-29
 execute:frappe.reload_doc('buying', 'doctype', 'supplier') # 2014-01-29
 execute:frappe.reload_doc('accounts', 'doctype', 'asset_category')
+execute:frappe.reload_doc('accounts', 'doctype', 'pricing_rule')
 execute:frappe.reload_doctype('Item')
 erpnext.patches.v4_0.map_charge_to_taxes_and_charges
 execute:frappe.reload_doc('support', 'doctype', 'newsletter') # 2014-01-31
@@ -103,7 +104,6 @@ erpnext.patches.v5_0.update_frozen_accounts_permission_role
 erpnext.patches.v5_0.update_dn_against_doc_fields
 execute:frappe.db.sql("update `tabMaterial Request` set material_request_type = 'Material Transfer' where material_request_type = 'Transfer'")
 execute:frappe.reload_doc('stock', 'doctype', 'item')
-execute:frappe.db.sql("update `tabItem` i set apply_warehouse_wise_reorder_level=1, re_order_level=0, re_order_qty=0 where exists(select name from `tabItem Reorder` where parent=i.name)")
 erpnext.patches.v5_0.set_default_company_in_bom
 execute:frappe.reload_doc('crm', 'doctype', 'lead')
 execute:frappe.reload_doc('crm', 'doctype', 'opportunity')
@@ -235,6 +235,7 @@ execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Taxes and Charges 
 erpnext.patches.v6_4.set_user_in_contact
 erpnext.patches.v6_4.make_image_thumbnail #2015-10-20
 erpnext.patches.v6_5.show_in_website_for_template_item
+erpnext.patches.v7_0.create_budget_record
 erpnext.patches.v6_4.fix_expense_included_in_valuation
 execute:frappe.delete_doc_if_exists("Report", "Item-wise Last Purchase Rate")
 erpnext.patches.v6_6.fix_website_image
@@ -269,7 +270,6 @@ erpnext.patches.v7_0.update_party_status
 erpnext.patches.v7_0.update_item_projected
 erpnext.patches.v7_0.remove_features_setup
 erpnext.patches.v7_0.update_home_page
-erpnext.patches.v7_0.create_budget_record
 execute:frappe.delete_doc_if_exists("Page", "financial-analytics")
 erpnext.patches.v7_0.update_project_in_gl_entry
 execute:frappe.db.sql('update tabQuotation set status="Cancelled" where docstatus=2')
