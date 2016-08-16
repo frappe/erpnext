@@ -1,19 +1,23 @@
 import frappe
-
-from erpnext.manufacturing.doctype.production_order.production_order import make_timesheet, add_timesheet_detail
+from erpnext.manufacturing.doctype.production_order.production_order \
+	import make_timesheet, add_timesheet_detail
+from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 
 def execute():
 	frappe.reload_doc('projects', 'doctype', 'timesheet')
 
-	for data in frappe.get_all('Time Log', fields=["*"],
-		filters = [["docstatus", "<", "2"]]):
-		time_sheet = make_timesheet(data.production_order)
-		args = get_timelog_data(data)
-		add_timesheet_detail(time_sheet, args)
-		time_sheet.docstatus = data.docstatus
-		time_sheet.note = data.note
-		time_sheet.company = frappe.db.get_single_value('Global Defaults', 'default_company')
-		time_sheet.save(ignore_permissions=True)
+	for data in frappe.get_all('Time Log', fields=["*"], filters = [["docstatus", "<", "2"]]):
+		try:
+			time_sheet = make_timesheet(data.production_order)
+			args = get_timelog_data(data)
+			add_timesheet_detail(time_sheet, args)
+			time_sheet.docstatus = data.docstatus
+			time_sheet.note = data.note
+			time_sheet.company = frappe.db.get_single_value('Global Defaults', 'default_company')
+			time_sheet.save(ignore_permissions=True)
+		except OverlapError:
+			time_sheet.flags.ignore_validate = True
+			time_sheet.save(ignore_permissions=True)
 
 def get_timelog_data(data):
 	return {
