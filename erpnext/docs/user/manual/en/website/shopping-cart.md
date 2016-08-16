@@ -14,13 +14,9 @@ To set up a shopping cart, go to the selling module.
 
 ![Shopping Cart]({{docs_base_url}}/assets/old_images/erpnext/shopping-cart-1.png)
 
-  
-
 #### Step 2: Enter Price List, Tax Master and Shipping Rule.
 
 ![Shopping Cart]({{docs_base_url}}/assets/old_images/erpnext/shopping-cart-2.png)
-
-  
 
 #### Shopping Cart Display
 
@@ -30,8 +26,6 @@ buy. The Item number will be stored on the right hand corner of the page, next
 to the flower sign.
 
 ![Shopping Cart]({{docs_base_url}}/assets/old_images/erpnext/shopping-cart-display-1.png)
-
-  
 
 Click on the flower sign on the right hand side to see the cart details. Click
 on the cart to get the final amount details.
