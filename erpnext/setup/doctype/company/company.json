@@ -1386,7 +1386,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-08-10 17:04:38.452301", 
+ "modified": "2016-08-16 14:08:32.439922", 
  "modified_by": "umair@frappe.io", 
  "module": "Setup", 
  "name": "Company", 
@@ -1454,7 +1454,7 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 

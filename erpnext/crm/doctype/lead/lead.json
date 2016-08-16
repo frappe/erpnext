@@ -912,7 +912,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-08-10 13:47:37.703600", 
+ "modified": "2016-08-16 14:04:49.753397", 
  "modified_by": "umair@frappe.io", 
  "module": "CRM", 
  "name": "Lead", 
@@ -940,7 +940,7 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 

@@ -2110,15 +2110,15 @@
  "istable": 0, 
  "max_attachments": 1, 
  "menu_index": 0, 
- "modified": "2016-08-11 08:52:09.666306", 
- "modified_by": "Administrator", 
+ "modified": "2016-08-16 14:05:00.356461", 
+ "modified_by": "umair@frappe.io", 
  "module": "Selling", 
  "name": "Quotation", 
  "owner": "Administrator", 
  "permissions": [
   {
    "amend": 1, 
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
