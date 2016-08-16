@@ -318,6 +318,8 @@ def create_items(args):
 					"item_name": item,
 					"description": item,
 					"show_in_website": 1,
+					"is_sales_item": is_sales_item,
+					"is_purchase_item": is_purchase_item,
 					"is_stock_item": is_stock_item and 1 or 0,
 					"item_group": item_group,
 					"stock_uom": args.get("item_uom_" + str(i)),
