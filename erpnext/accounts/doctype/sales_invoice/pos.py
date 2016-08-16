@@ -181,6 +181,8 @@ def make_invoice(doc_list):
 				si_doc.update(doc)
 				submit_invoice(si_doc, name)
 				name_list.append(name)
+			else:
+				name_list.append(name)
 
 	return name_list
 
@@ -222,6 +224,7 @@ def submit_invoice(si_doc, name):
 
 def save_invoice(e, si_doc, name):
 	if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
+		si_doc.docstatus = 0
 		si_doc.flags.ignore_mandatory = True
 		si_doc.insert()
 		make_scheduler_log(e, si_doc.name)
