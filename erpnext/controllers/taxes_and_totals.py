@@ -440,6 +440,7 @@ class calculate_taxes_and_totals(object):
 			paid_amount = self.doc.paid_amount \
 				if self.doc.party_account_currency == self.doc.currency else self.doc.base_paid_amount
 
+			self.calculate_write_off_amount()
 			self.calculate_change_amount()
 
 			self.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) +
@@ -467,6 +468,12 @@ class calculate_taxes_and_totals(object):
 
 		self.doc.base_change_amount = flt(self.doc.change_amount * self.doc.conversion_rate, 
 			self.doc.precision("base_change_amount"))
+
+	def calculate_write_off_amount(self):
+		if flt(self.doc.change_amount) > 0:
+			self.doc.write_off_amount = self.doc.grand_total - self.doc.paid_amount + self.doc.change_amount
+			self.doc.base_write_off_amount = flt(self.doc.write_off_amount * self.doc.conversion_rate,
+				self.doc.precision("base_write_off_amount"))
 
 	def calculate_margin(self, item):
 		total_margin = 0.0

@@ -267,6 +267,16 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	amount: function(){
 		this.write_off_outstanding_amount_automatically()
+	},
+
+	change_amount: function(){
+		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
+			this.calculate_write_off_amount()
+		}else {
+			this.frm.set_value("change_amount", 0.0)
+		}
+
+		this.frm.refresh_fields();
 	}
 });
 
@@ -458,7 +468,7 @@ frappe.ui.form.on('Sales Invoice', {
 				]
 			}
 		}
-	},
+	}
 })
 
 frappe.ui.form.on('Sales Invoice Timesheet', {

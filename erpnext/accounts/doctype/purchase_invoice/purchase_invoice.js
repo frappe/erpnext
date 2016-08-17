@@ -232,7 +232,8 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 
 cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	return {
-		query: "erpnext.controllers.queries.item_query"
+		query: "erpnext.controllers.queries.item_query",
+		filters: {'is_purchase_item': 1}
 	}
 }
 

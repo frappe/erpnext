@@ -35,7 +35,6 @@ def get_pos_data():
 		'customers': get_customers(pos_profile, doc),
 		'pricing_rules': get_pricing_rules(doc),
 		'print_template': print_template,
-		'write_off_account': pos_profile.get('write_off_account'),
 		'meta': {
 			'invoice': frappe.get_meta('Sales Invoice'),
 			'items': frappe.get_meta('Sales Invoice Item'),
@@ -45,7 +44,12 @@ def get_pos_data():
 
 def update_pos_profile_data(doc, pos_profile):
 	company_data = frappe.db.get_value('Company', doc.company, '*', as_dict=1)
+	doc.campaign = pos_profile.get('campaign')
 
+	doc.write_off_account = pos_profile.get('write_off_account') or \
+		company_data.write_off_account
+	doc.change_amount_account = pos_profile.get('change_amount_account') or \
+		company_data.default_cash_account
 	doc.taxes_and_charges = pos_profile.get('taxes_and_charges')
 	if doc.taxes_and_charges:
 		update_tax_table(doc)
@@ -54,7 +58,8 @@ def update_pos_profile_data(doc, pos_profile):
 	doc.conversion_rate = 1.0
 	if doc.currency != company_data.default_currency:
 		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency)
-	doc.selling_price_list = pos_profile.get('selling_price_list') or frappe.db.get_value('Selling Settings', None, 'selling_price_list')
+	doc.selling_price_list = pos_profile.get('selling_price_list') or \
+		frappe.db.get_value('Selling Settings', None, 'selling_price_list')
 	doc.naming_series = pos_profile.get('naming_series') or 'SINV-'
 	doc.letter_head = pos_profile.get('letter_head') or company_data.default_letter_head
 	doc.ignore_pricing_rule = pos_profile.get('ignore_pricing_rule') or 0
@@ -157,10 +162,11 @@ def get_customers(pos_profile, doc):
 def get_pricing_rules(doc):
 	pricing_rules = ""
 	if doc.ignore_pricing_rule == 0:
-		pricing_rules = frappe.db.sql(""" Select * from `tabPricing Rule` where docstatus < 2 and disable = 0
-						and selling = 1 and ifnull(company, '') in (%(company)s, '') and
-						ifnull(for_price_list, '') in (%(price_list)s, '')  and %(date)s between
-						ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31') order by priority desc, name desc""",
+		pricing_rules = frappe.db.sql(""" Select * from `tabPricing Rule` where docstatus < 2
+						and ifnull(for_price_list, '') in (%(price_list)s, '') and selling = 1
+						and ifnull(company, '') in (%(company)s, '') and disable = 0 and %(date)s
+						between ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')
+						order by priority desc, name desc""",
 						{'company': doc.company, 'price_list': doc.selling_price_list, 'date': nowdate()}, as_dict=1)
 	return pricing_rules
 
@@ -173,9 +179,9 @@ def make_invoice(doc_list):
 
 	for docs in doc_list:
 		for name, doc in docs.items():
-			if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
-				validate_customer(doc)
-				validate_item(doc)
+			if not frappe.db.exists('Sales Invoice',
+				{'offline_pos_name': name, 'docstatus': ("<", "2")}):
+				validate_records(doc)
 				si_doc = frappe.new_doc('Sales Invoice')
 				si_doc.offline_pos_name = name
 				si_doc.update(doc)
@@ -185,6 +191,10 @@ def make_invoice(doc_list):
 				name_list.append(name)
 
 	return name_list
+
+def validate_records(doc):
+	validate_customer(doc)
+	validate_item(doc)
 
 def validate_customer(doc):
 	if not frappe.db.exists('Customer', doc.get('customer')):
@@ -196,8 +206,6 @@ def validate_customer(doc):
 		customer_doc.save(ignore_permissions = True)
 		frappe.db.commit()
 		doc['customer'] = customer_doc.name
-
-	return doc
 
 def validate_item(doc):
 	for item in doc.get('items'):

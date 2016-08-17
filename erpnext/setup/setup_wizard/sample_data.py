@@ -11,7 +11,7 @@ import random
 def make_sample_data():
 	"""Create a few opportunities, quotes, material requests, issues, todos, projects
 	to help the user get started"""
-	items = frappe.get_all("Item")
+	items = frappe.get_all("Item", {'is_sales_item': 1})
 
 	customers = frappe.get_all("Customer")
 	warehouses = frappe.get_all("Warehouse")
@@ -25,7 +25,7 @@ def make_sample_data():
 	make_projects()
 
 	if items and warehouses:
-		make_material_request(items)
+		make_material_request(frappe.get_all("Item"))
 
 	frappe.db.commit()
 

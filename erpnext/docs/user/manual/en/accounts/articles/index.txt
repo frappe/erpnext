@@ -1,7 +1,5 @@
 tracking-project-profitability-using-cost-center
-c-form
 changing-parent-account
-depreciation-for-fixed-asset-items
 difference-entry-button
 fiscal-year-error
 freeze-accounting-entries
@@ -13,4 +11,4 @@ post-dated-cheque-entry
 update-stock-option-in-sales-invoice
 what-is-the-differences-of-total-and-valuation-in-tax-and-charges
 withdrawing-salary-from-owners-equity-account
-cheque-print
+c-form
