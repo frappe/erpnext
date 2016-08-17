@@ -231,7 +231,8 @@ def create_test_records():
 		"is_active": 1,
 		"is_default": 1,
 		"docstatus": 1,
-		"with_operations": 0}, [{"item_code": "_Test PPT Item Raw B", "doctype":"BOM Item", "qty":1, "rate":100, "amount": 100,"stock_uom": "_Test UOM"},
+		"with_operations": 0}, [{"item_code": "_Test PPT Item Raw B", "doctype":"BOM Item", "qty":1, "rate":100, "amount": 100, 
+				"stock_uom": "_Test UOM"},
 			{"item_code": "_Test PPT Item Raw C", "doctype":"BOM Item", "qty":4, "rate":100, "amount": 400,"stock_uom": "_Test UOM"}
 			])
 	
@@ -240,8 +241,11 @@ def create_test_records():
 		"is_active": 1,
 		"is_default": 1,
 		"docstatus": 1,
-		"with_operations": 0}, [{"item_code": "_Test PPT Item Raw A","item_name": "_Test PPT Item Raw A",  "doctype":"BOM Item", "qty":6, "rate":100, "amount": 600},
-			{"item_code": "_Test PPT Item Sub B","item_name": "_Test PPT Item Sub B",  "bom_no":"BOM-_Test PPT Item Sub B-001", "doctype":"BOM Item", "qty":2, "rate":100, "amount": 200}
+		"with_operations": 0}, [
+			{"item_code": "_Test PPT Item Raw A","item_name": "_Test PPT Item Raw A",  "doctype":"BOM Item", "qty":6,  
+				"rate":100, "amount": 600},
+			{"item_code": "_Test PPT Item Sub B","item_name": "_Test PPT Item Sub B",  "bom_no":"BOM-_Test PPT Item Sub B-001",  
+				"doctype":"BOM Item", "qty":2, "rate":100, "amount": 200}
 			])
 		
 	bom_sCA = make_bom("BOM-_Test PPT Item SC A-001",{"quantity":1,
@@ -249,7 +253,8 @@ def create_test_records():
 		"is_active": 1,
 		"is_default": 1,
 		"docstatus": 1,
-		"with_operations": 0}, [{"item_code": "_Test PPT Item Raw D","item_name": "_Test PPT Item Raw D", "doctype":"BOM Item", "qty":1, "rate":100, "amount": 100}
+		"with_operations": 0}, [{"item_code": "_Test PPT Item Raw D","item_name": "_Test PPT Item Raw D", "doctype":"BOM Item",  
+				"qty":1, "rate":100, "amount": 100}
 			])
 	
 	bom_sCB = make_bom("BOM-_Test PPT Item SC B-001",{"quantity":1,
@@ -257,26 +262,37 @@ def create_test_records():
 		"is_active": 1,
 		"is_default": 1,
 		"docstatus": 1,
-		"with_operations": 0}, [{"item_code": "_Test PPT Item Raw B","item_name": "_Test PPT Item Raw B","doctype":"BOM Item", "qty":1, "rate":100, "amount": 100},
-			{"item_code": "_Test PPT Item Raw C","item_name": "_Test PPT Item Raw C",  "doctype":"BOM Item", "qty":4, "rate":100, "amount": 400}
+		"with_operations": 0}, [
+			{"item_code": "_Test PPT Item Raw B","item_name": "_Test PPT Item Raw B","doctype":"BOM Item", "qty":1,  
+				"rate":100, "amount": 100},
+			{"item_code": "_Test PPT Item Raw C","item_name": "_Test PPT Item Raw C",  "doctype":"BOM Item", "qty":4,  
+				"rate":100, "amount": 400}
 			])
 	bom_subA = make_bom("BOM-_Test PPT Item Sub A-001",{"quantity":1,
 		"item": "_Test PPT Item Sub A",
 		"is_active": 1,
 		"is_default": 1,
 		"docstatus": 1,
-		"with_operations": 0}, [{"item_code": "_Test PPT Item Sub C","item_name": "_Test PPT Item Sub C",  "bom_no":"BOM-_Test PPT Item Sub C-001", "doctype":"BOM Item", "qty":1, "rate":100, "amount": 100},
-			{"item_code": "_Test PPT Item SC B","item_name": "_Test PPT Item SC B", "bom_no":"BOM-_Test PPT Item SC B-001", "doctype":"BOM Item", "qty":2, "rate":100, "amount": 200}
+		"with_operations": 0}, [
+			{"item_code": "_Test PPT Item Sub C","item_name": "_Test PPT Item Sub C",  "bom_no":"BOM-_Test PPT Item Sub C-001",  
+				"doctype":"BOM Item", "qty":1, "rate":100, "amount": 100},
+			{"item_code": "_Test PPT Item SC B","item_name": "_Test PPT Item SC B", "bom_no":"BOM-_Test PPT Item SC B-001",  
+				"doctype":"BOM Item", "qty":2, "rate":100, "amount": 200}
 			])		
 	bom_master = make_bom("BOM-_Test PPT Item Master-001",{"quantity":1,
 		"item": "_Test PPT Item Master",
 		"is_active": 1,
 		"is_default": 1,
 		"docstatus": 1,
-		"with_operations": 0}, [{"item_code": "_Test PPT Item Sub A","item_name": "_Test PPT Item Sub A",  "bom_no":"BOM-_Test PPT Item Sub A-001", "doctype":"BOM Item", "qty":2, "rate":100, "amount": 200},
-			{"item_code": "_Test PPT Item Sub B","item_name": "_Test PPT Item Sub B",  "bom_no":"BOM-_Test PPT Item Sub B-001", "doctype":"BOM Item", "qty":1, "rate":100, "amount": 100},
-			{"item_code": "_Test PPT Item Raw A","item_name": "_Test PPT Item Raw A", "doctype":"BOM Item", "qty":2, "rate":100, "amount": 200},
-			{"item_code": "_Test PPT Item SC A","item_name": "_Test PPT Item SC A",  "bom_no":"BOM-_Test PPT Item SC A-001", "doctype":"BOM Item", "qty":1, "rate":100, "amount": 100}
+		"with_operations": 0}, [
+			{"item_code": "_Test PPT Item Sub A","item_name": "_Test PPT Item Sub A",  "bom_no":"BOM-_Test PPT Item Sub A-001", 
+				"doctype":"BOM Item", "qty":2, "rate":100, "amount": 200},
+			{"item_code": "_Test PPT Item Sub B","item_name": "_Test PPT Item Sub B",  "bom_no":"BOM-_Test PPT Item Sub B-001", 
+				"doctype":"BOM Item", "qty":1, "rate":100, "amount": 100},
+			{"item_code": "_Test PPT Item Raw A","item_name": "_Test PPT Item Raw A", "doctype":"BOM Item", "qty":2, "rate":100,  
+				"amount": 200},
+			{"item_code": "_Test PPT Item SC A","item_name": "_Test PPT Item SC A",  "bom_no":"BOM-_Test PPT Item SC A-001",  
+				"doctype":"BOM Item", "qty":1, "rate":100, "amount": 100}
 			])
 
 
@@ -336,7 +352,8 @@ def run_production_planning_tool(**args):
 		ppt.company = args.company
 	ppt.create_material_requests_for_all_required_qty = 1
 	
-	ppt.append("items",{"item_code": args.item_code, "bom_no": args.bom_no, "planned_qty": args.planned_qty, "planned_start_date": args.planned_start_date, "warehouse": args.warehouse})
+	ppt.append("items",{"item_code": args.item_code, "bom_no": args.bom_no, "planned_qty": args.planned_qty, 
+		"planned_start_date": args.planned_start_date, "warehouse": args.warehouse})
 	
 	return ppt
 
@@ -348,14 +365,16 @@ def create_material_requests(ppt):
 	
 def get_requested_qty(item_code):
 	total_qty = 0
-	for d in frappe.db.sql("""select item.qty as qty from `tabMaterial Request` mat_req, `tabMaterial Request Item` item 
+	for d in frappe.db.sql("""select item.qty as qty 
+		from `tabMaterial Request` mat_req, `tabMaterial Request Item` item 
 		where item.item_code = %(item_code)s and item.parent = mat_req.name""", {"item_code":item_code}, as_dict=1):
 		total_qty += d.qty
 	return total_qty
 
 def get_requested_types(item_code):
 	types = []
-	for d in frappe.db.sql("""select mat_req.material_request_type as type from `tabMaterial Request` mat_req, `tabMaterial Request Item` item 
+	for d in frappe.db.sql("""select mat_req.material_request_type as type 
+		from `tabMaterial Request` mat_req, `tabMaterial Request Item` item 
 		where item.item_code = %(item_code)s and item.parent = mat_req.name""", {"item_code":item_code}, as_dict=1):
 		types.append(d.type)
 	return types
