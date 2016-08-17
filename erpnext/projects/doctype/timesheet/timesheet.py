@@ -159,8 +159,8 @@ class Timesheet(Document):
 
 		existing = self.get_overlap_for(fieldname, args, value)
 		if existing:
-			frappe.throw(_("Row {0}: From Time and To Time overlap with existing from and to time").format(args.idx),
-				OverlapError)
+			frappe.throw(_("Row {0}: From Time and To Time of {1} is overlapping with {2}")
+				.format(args.idx, self.name, existing.name), OverlapError)
 
 	def get_overlap_for(self, fieldname, args, value):
 		cond = "ts.`{0}`".format(fieldname)
