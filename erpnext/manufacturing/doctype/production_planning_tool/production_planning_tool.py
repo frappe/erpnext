@@ -332,7 +332,8 @@ class ProductionPlanningTool(Document):
 			else:
 				# Get all raw materials considering SA items as raw materials,
 				# so no childs of SA items
-				bom_wise_item_details = self.get_subitems(bom_wise_item_details, bom,1, self.use_multi_level_bom,self.only_raw_materials, self.include_subcontracted)
+				bom_wise_item_details = self.get_subitems(bom_wise_item_details, bom,1, \
+					self.use_multi_level_bom,self.only_raw_materials, self.include_subcontracted)
 				
 			for item, item_details in bom_wise_item_details.items():
 				for so_qty in so_wise_qty:
@@ -343,21 +344,26 @@ class ProductionPlanningTool(Document):
 
 	def get_subitems(self,bom_wise_item_details, bom, parent_qty, include_sublevel, only_raw, supply_subs):
 		for d in frappe.db.sql("""select bom_item.item_code, default_material_request_type,
-						ifnull(%(parent_qty)s * sum(bom_item.qty/ifnull(bom.quantity, 1)), 0) as qty, 
-						item.is_sub_contracted_item as is_sub_contracted, item.default_bom as default_bom
-						from `tabBOM Item` bom_item, `tabBOM` bom, tabItem item
-						where bom.name = bom_item.parent and bom.name = %(bom)s and bom_item.docstatus < 2
-						and bom_item.item_code = item.name
-						and item.is_stock_item = 1
-						group by bom_item.item_code""", {"bom": bom, "parent_qty": parent_qty}, as_dict=1):
-							if (d.default_material_request_type == "Purchase" and not (d.is_sub_contracted and only_raw and include_sublevel)) or (d.default_material_request_type == "Manufacture" and not only_raw):
-								if d.item_code in bom_wise_item_details:
-									bom_wise_item_details[d.item_code].qty = bom_wise_item_details[d.item_code].qty + d.qty
-								else:
-									bom_wise_item_details[d.item_code] = d
-							if include_sublevel:
-								if (d.default_material_request_type == "Purchase" and d.is_sub_contracted and supply_subs) or (d.default_material_request_type == "Manufacture"):
-									child_details = self.get_subitems(bom_wise_item_details,d.default_bom,d.qty, include_sublevel, only_raw, supply_subs)
+			ifnull(%(parent_qty)s * sum(bom_item.qty/ifnull(bom.quantity, 1)), 0) as qty, 
+			item.is_sub_contracted_item as is_sub_contracted, item.default_bom as default_bom
+			from `tabBOM Item` bom_item, `tabBOM` bom, tabItem item
+			where bom.name = bom_item.parent and bom.name = %(bom)s and bom_item.docstatus < 2
+			and bom_item.item_code = item.name
+			and item.is_stock_item = 1
+			group by bom_item.item_code""", {"bom": bom, "parent_qty": parent_qty}, as_dict=1):
+			if (d.default_material_request_type == "Purchase" and not (d.is_sub_contracted \
+				and only_raw and include_sublevel)) or (d.default_material_request_type == \
+				"Manufacture" and not only_raw):
+				if d.item_code in bom_wise_item_details:
+					bom_wise_item_details[d.item_code].qty = bom_wise_item_details[d.item_code].qty\
+						+ d.qty
+				else:
+					bom_wise_item_details[d.item_code] = d
+			if include_sublevel:
+				if (d.default_material_request_type == "Purchase" and d.is_sub_contracted \
+					and supply_subs) or (d.default_material_request_type == "Manufacture"):
+					child_details = self.get_subitems(bom_wise_item_details,d.default_bom, \
+						d.qty, include_sublevel, only_raw, supply_subs)
 		return bom_wise_item_details
 
 	def make_items_dict(self, item_list):

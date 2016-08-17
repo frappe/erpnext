@@ -17,58 +17,84 @@ test_dependencies = ["Item","BOM"]
 class TestEvent(unittest.TestCase):
 	
 	def test_materials_requests_all_raw_multi_level(self):
-		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D","_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A","_Test PPT Item SC B","_Test PPT Item Master"]
+		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D",
+			"_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A",
+			"_Test PPT Item SC B","_Test PPT Item Master"]
 		quantities = [14,9,36,1,0,0,0,0,0,0]
-		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase","Purchase","Manufacture"]
+		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase",
+			"Purchase","Manufacture"]
 		
-		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=1, only_raw_materials=1, include_subcontracted=1)
+		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=1, only_raw_materials=1, \
+			include_subcontracted=1)
 	
 	def test_materials_requests_multi_no_subcontracted(self):
-		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D","_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A","_Test PPT Item SC B","_Test PPT Item Master"]
+		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D",
+			"_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A",
+			"_Test PPT Item SC B","_Test PPT Item Master"]
 		quantities = [14,5,20,0,0,0,0,0,0,0]
-		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase","Purchase","Manufacture"]
+		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase",
+			"Purchase","Manufacture"]
 		
 		# This one should fail for now
-		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=1, only_raw_materials=1, include_subcontracted=0)
+		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=1, only_raw_materials=1, \
+			include_subcontracted=0)
 
 		
 
 	def test_materials_requests_manufacture_and_sub_multi_level(self):
-		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D","_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A","_Test PPT Item SC B","_Test PPT Item Master"]
+		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D",
+			"_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A",
+			"_Test PPT Item SC B","_Test PPT Item Master"]
 		quantities = [14,9,36,1,2,5,2,1,4,0]
-		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase","Purchase","Manufacture"]
+		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase",
+			"Purchase","Manufacture"]
 		
-		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=1, only_raw_materials=0, include_subcontracted=1)
+		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=1, only_raw_materials=0, \
+			include_subcontracted=1)
 	
 	def test_materials_requests_manufacture_multi_level(self):
-		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D","_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A","_Test PPT Item SC B","_Test PPT Item Master"]
+		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D",
+			"_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A",
+			"_Test PPT Item SC B","_Test PPT Item Master"]
 		quantities = [14,5,20,0,2,5,2,1,4,0]
-		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase","Purchase","Manufacture"]
+		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase",
+			"Purchase","Manufacture"]
 		
-		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=1, only_raw_materials=0, include_subcontracted=0)
+		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=1, only_raw_materials=0, \
+			include_subcontracted=0)
 	
 	
 	
 	def test_materials_requests_single_level_purch_only(self):
-		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D","_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A","_Test PPT Item SC B","_Test PPT Item Master"]
+		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D",
+			"_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A",
+			"_Test PPT Item SC B","_Test PPT Item Master"]
 		quantities = [2,0,0,0,0,0,0,1,0,0]
-		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase","Purchase","Manufacture"]
+		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase",
+			"Purchase","Manufacture"]
 		
-		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=0, only_raw_materials=1, include_subcontracted=0)
+		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=0, only_raw_materials=1, \
+			include_subcontracted=0)
 	
 	def test_materials_requests_single_level(self):
-		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D","_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A","_Test PPT Item SC B","_Test PPT Item Master"]
+		items = ["_Test PPT Item Raw A","_Test PPT Item Raw B","_Test PPT Item Raw C","_Test PPT Item Raw D",
+			"_Test PPT Item Sub A","_Test PPT Item Sub B","_Test PPT Item Sub C","_Test PPT Item SC A",
+			"_Test PPT Item SC B","_Test PPT Item Master"]
 		quantities = [2,0,0,0,2,1,0,1,0,0]
-		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase","Purchase","Manufacture"]
+		types = ["Purchase","Purchase","Purchase","Purchase","Manufacture","Manufacture","Manufacture","Purchase",
+			"Purchase","Manufacture"]
 		
-		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=0, only_raw_materials=0, include_subcontracted=0)
+		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=0, only_raw_materials=0, \
+			include_subcontracted=0)
 	
 	def runtest_materials_requests(self, items, quantities, types,use_multi_level_bom, only_raw_materials, include_subcontracted):
 		
 		clear_material_requests()
 		create_test_records()
 		
-		ppt = run_production_planning_tool(use_multi_level_bom=use_multi_level_bom, only_raw_materials=only_raw_materials, include_subcontracted=include_subcontracted, item_code = "_Test PPT Item Master",bom_no = "BOM-_Test PPT Item Master-001", planned_qty = 1, planned_start_date = "5/5/2029", warehouse = "_Test Warehouse - _TC", company = "_Test Company")
+		ppt = run_production_planning_tool(use_multi_level_bom=use_multi_level_bom, only_raw_materials=only_raw_materials, 
+			include_subcontracted=include_subcontracted, item_code = "_Test PPT Item Master",bom_no = "BOM-_Test PPT Item Master-001", 
+			planned_qty = 1, planned_start_date = "5/5/2029", warehouse = "_Test Warehouse - _TC", company = "_Test Company")
 		create_material_requests(ppt)
 		
 		for item, qty, type in zip(items, quantities, types):
