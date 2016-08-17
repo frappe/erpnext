@@ -270,13 +270,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	change_amount: function(){
-		if((this.frm.doc.paid_amount - this.frm.doc.grand_total) < this.frm.doc.change_amount){
-			this.frm.set_value("change_amount", 0.0)
-			frappe.msgprint(__("You can not return change amount, limit has been exceeded"))
-		}else{
+		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
 			this.calculate_write_off_amount()
-			this.frm.refresh_fields();
+		}else {
+			this.frm.set_value("change_amount", 0.0)
 		}
+
+		this.frm.refresh_fields();
 	}
 });
 

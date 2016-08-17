@@ -455,7 +455,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.pos_gl_entry(si, pos, 300)
 
-	def test_pos_chnage_amount(self):
+	def test_pos_change_amount(self):
 		set_perpetual_inventory()
 		self.make_pos_profile()
 

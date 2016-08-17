@@ -188,8 +188,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.frm.doc.write_off_account = doc.write_off_account
 		}
 
-		if(!this.frm.doc.change_amount_account){
-			this.frm.doc.change_amount_account = doc.change_amount_account
+		if(!this.frm.doc.account_for_change_amount){
+			this.frm.doc.account_for_change_amount = doc.account_for_change_amount
 		}
 	},
 
@@ -486,11 +486,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.remove_item = []
 		$.each(this.frm.doc["items"] || [], function(i, d) {
-			if (d.item_code == item_code && d.serial_no
-				&& field == 'qty' && cint(value) != value) {
-				d.qty = 0.0;
-				me.refresh();
-				frappe.throw(__("Serial no item cannot be a fraction"))
+			if(d.serial_no){
+				me.validate_serial_no_qty(d, item_code, field, value)
 			}
 
 			if (d.item_code == item_code) {
@@ -904,6 +901,23 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			frappe.throw(__(repl("Error: Serial no is mandatory for item %(item)s", {
 				'item': this.items[0].item_code
 			})))
+		}
+	},
+
+	validate_serial_no_qty: function(args, item_code, field, value){
+		var me = this;
+		if (args.item_code == item_code && args.serial_no
+			&& field == 'qty' && cint(value) != value) {
+			args.qty = 0.0;
+			this.refresh();
+			frappe.throw(__("Serial no item cannot be a fraction"))
+		}
+
+		if(args.serial_no && args.serial_no.split('\n').length != cint(value)){
+			args.qty = 0.0;
+			args.serial_no = ''
+			this.refresh();
+			frappe.throw(__("Total nos of serial no is not equal to quantity."))
 		}
 	},
 
