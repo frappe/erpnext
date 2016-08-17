@@ -87,14 +87,18 @@ class TestEvent(unittest.TestCase):
 		self.runtest_materials_requests(items, quantities, types, use_multi_level_bom=0, only_raw_materials=0, \
 			include_subcontracted=0)
 	
-	def runtest_materials_requests(self, items, quantities, types,use_multi_level_bom, only_raw_materials, include_subcontracted):
+	def runtest_materials_requests(self, items, quantities, types,use_multi_level_bom, only_raw_materials, \
+		include_subcontracted):
 		
 		clear_material_requests()
 		create_test_records()
 		
-		ppt = run_production_planning_tool(use_multi_level_bom=use_multi_level_bom, only_raw_materials=only_raw_materials, 
-			include_subcontracted=include_subcontracted, item_code = "_Test PPT Item Master",bom_no = "BOM-_Test PPT Item Master-001", 
-			planned_qty = 1, planned_start_date = "5/5/2029", warehouse = "_Test Warehouse - _TC", company = "_Test Company")
+		ppt = run_production_planning_tool(use_multi_level_bom=use_multi_level_bom, 
+			only_raw_materials=only_raw_materials, include_subcontracted=include_subcontracted, 
+			item_code = "_Test PPT Item Master", bom_no = "BOM-_Test PPT Item Master-001", 
+			planned_qty = 1, planned_start_date = "5/5/2029", 
+			warehouse = "_Test Warehouse - _TC", company = "_Test Company")
+			
 		create_material_requests(ppt)
 		
 		for item, qty, type in zip(items, quantities, types):
@@ -231,10 +235,10 @@ def create_test_records():
 		"is_active": 1,
 		"is_default": 1,
 		"docstatus": 1,
-		"with_operations": 0}, [{"item_code": "_Test PPT Item Raw B", "doctype":"BOM Item", "qty":1, "rate":100, "amount": 100, 
-				"stock_uom": "_Test UOM"},
-			{"item_code": "_Test PPT Item Raw C", "doctype":"BOM Item", "qty":4, "rate":100, "amount": 400,"stock_uom": "_Test UOM"}
-			])
+		"with_operations": 0}, [{"item_code": "_Test PPT Item Raw B", "doctype":"BOM Item", "qty":1,  
+				"rate":100, "amount": 100, "stock_uom": "_Test UOM"},
+			{"item_code": "_Test PPT Item Raw C", "doctype":"BOM Item", "qty":4, "rate":100,  
+				"amount": 400,"stock_uom": "_Test UOM"}])
 	
 	bom_subC = make_bom("BOM-_Test PPT Item Sub C-001",{"quantity":1,
 		"item": "_Test PPT Item Sub C",
@@ -242,20 +246,20 @@ def create_test_records():
 		"is_default": 1,
 		"docstatus": 1,
 		"with_operations": 0}, [
-			{"item_code": "_Test PPT Item Raw A","item_name": "_Test PPT Item Raw A",  "doctype":"BOM Item", "qty":6,  
-				"rate":100, "amount": 600},
-			{"item_code": "_Test PPT Item Sub B","item_name": "_Test PPT Item Sub B",  "bom_no":"BOM-_Test PPT Item Sub B-001",  
-				"doctype":"BOM Item", "qty":2, "rate":100, "amount": 200}
-			])
+			{"item_code": "_Test PPT Item Raw A","item_name": "_Test PPT Item Raw A",   
+				"doctype":"BOM Item", "qty":6, "rate":100, "amount": 600},
+			{"item_code": "_Test PPT Item Sub B","item_name": "_Test PPT Item Sub B",   
+				"bom_no":"BOM-_Test PPT Item Sub B-001", "doctype":"BOM Item", "qty":2,  
+				"rate":100, "amount": 200}])
 		
 	bom_sCA = make_bom("BOM-_Test PPT Item SC A-001",{"quantity":1,
 		"item": "_Test PPT Item SC A",
 		"is_active": 1,
 		"is_default": 1,
 		"docstatus": 1,
-		"with_operations": 0}, [{"item_code": "_Test PPT Item Raw D","item_name": "_Test PPT Item Raw D", "doctype":"BOM Item",  
-				"qty":1, "rate":100, "amount": 100}
-			])
+		"with_operations": 0}, [
+			{"item_code": "_Test PPT Item Raw D","item_name": "_Test PPT Item Raw D",  
+				"doctype":"BOM Item", "qty":1, "rate":100, "amount": 100}])
 	
 	bom_sCB = make_bom("BOM-_Test PPT Item SC B-001",{"quantity":1,
 		"item": "_Test PPT Item SC B",
@@ -263,35 +267,41 @@ def create_test_records():
 		"is_default": 1,
 		"docstatus": 1,
 		"with_operations": 0}, [
-			{"item_code": "_Test PPT Item Raw B","item_name": "_Test PPT Item Raw B","doctype":"BOM Item", "qty":1,  
-				"rate":100, "amount": 100},
-			{"item_code": "_Test PPT Item Raw C","item_name": "_Test PPT Item Raw C",  "doctype":"BOM Item", "qty":4,  
-				"rate":100, "amount": 400}
-			])
+			{"item_code": "_Test PPT Item Raw B","item_name": "_Test PPT Item Raw B", 
+				"doctype":"BOM Item", "qty":1, "rate":100, "amount": 100},
+			{"item_code": "_Test PPT Item Raw C","item_name": "_Test PPT Item Raw C",   
+				"doctype":"BOM Item", "qty":4, "rate":100, "amount": 400}])
+	
 	bom_subA = make_bom("BOM-_Test PPT Item Sub A-001",{"quantity":1,
 		"item": "_Test PPT Item Sub A",
 		"is_active": 1,
 		"is_default": 1,
 		"docstatus": 1,
 		"with_operations": 0}, [
-			{"item_code": "_Test PPT Item Sub C","item_name": "_Test PPT Item Sub C",  "bom_no":"BOM-_Test PPT Item Sub C-001",  
-				"doctype":"BOM Item", "qty":1, "rate":100, "amount": 100},
-			{"item_code": "_Test PPT Item SC B","item_name": "_Test PPT Item SC B", "bom_no":"BOM-_Test PPT Item SC B-001",  
-				"doctype":"BOM Item", "qty":2, "rate":100, "amount": 200}
-			])		
+			{"item_code": "_Test PPT Item Sub C","item_name": "_Test PPT Item Sub C",   
+				"bom_no":"BOM-_Test PPT Item Sub C-001", "doctype":"BOM Item",  
+				"qty":1, "rate":100, "amount": 100},
+			{"item_code": "_Test PPT Item SC B","item_name": "_Test PPT Item SC B",  
+				"bom_no":"BOM-_Test PPT Item SC B-001", "doctype":"BOM Item", "qty":2,  
+				"rate":100, "amount": 200}])		
+				
 	bom_master = make_bom("BOM-_Test PPT Item Master-001",{"quantity":1,
 		"item": "_Test PPT Item Master",
 		"is_active": 1,
 		"is_default": 1,
 		"docstatus": 1,
 		"with_operations": 0}, [
-			{"item_code": "_Test PPT Item Sub A","item_name": "_Test PPT Item Sub A",  "bom_no":"BOM-_Test PPT Item Sub A-001", 
+			{"item_code": "_Test PPT Item Sub A","item_name": "_Test PPT Item Sub A",   
+				"bom_no":"BOM-_Test PPT Item Sub A-001", 
 				"doctype":"BOM Item", "qty":2, "rate":100, "amount": 200},
-			{"item_code": "_Test PPT Item Sub B","item_name": "_Test PPT Item Sub B",  "bom_no":"BOM-_Test PPT Item Sub B-001", 
+			{"item_code": "_Test PPT Item Sub B","item_name": "_Test PPT Item Sub B",   
+				"bom_no":"BOM-_Test PPT Item Sub B-001", 
 				"doctype":"BOM Item", "qty":1, "rate":100, "amount": 100},
-			{"item_code": "_Test PPT Item Raw A","item_name": "_Test PPT Item Raw A", "doctype":"BOM Item", "qty":2, "rate":100,  
+			{"item_code": "_Test PPT Item Raw A","item_name": "_Test PPT Item Raw A",  
+				"doctype":"BOM Item", "qty":2, "rate":100,  
 				"amount": 200},
-			{"item_code": "_Test PPT Item SC A","item_name": "_Test PPT Item SC A",  "bom_no":"BOM-_Test PPT Item SC A-001",  
+			{"item_code": "_Test PPT Item SC A","item_name": "_Test PPT Item SC A",   
+				"bom_no":"BOM-_Test PPT Item SC A-001",  
 				"doctype":"BOM Item", "qty":1, "rate":100, "amount": 100}
 			])
 
