@@ -183,6 +183,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if(this.frm.doc.customer){
 			this.party_field.$input.val(this.frm.doc.customer);
 		}
+
+		if(!this.frm.doc.write_off_account){
+			this.frm.doc.write_off_account = doc.write_off_account
+		}
+
+		if(!this.frm.doc.account_for_change_amount){
+			this.frm.doc.account_for_change_amount = doc.account_for_change_amount
+		}
 	},
 
 	get_invoice_doc: function(si_docs){
@@ -209,7 +217,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				window.meta = r.message.meta;
 				window.print_template = r.message.print_template;
 				me.default_customer = r.message.default_customer || null;
-				me.write_off_account = r.message.write_off_account;
 				localStorage.setItem('doc', JSON.stringify(r.message.doc));
 				if(callback){
 					callback();
@@ -485,11 +492,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.remove_item = []
 		$.each(this.frm.doc["items"] || [], function(i, d) {
-			if (d.item_code == item_code && d.serial_no
-				&& field == 'qty' && cint(value) != value) {
-				d.qty = 0.0;
-				me.refresh();
-				frappe.throw(__("Serial no item cannot be a fraction"))
+			if(d.serial_no){
+				me.validate_serial_no_qty(d, item_code, field, value)
 			}
 
 			if (d.item_code == item_code) {
@@ -723,49 +727,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}, 1000)
 	},
 
-	write_off_amount: function(){
-		var me = this;
-		var value = 0.0;
-
-		if(this.frm.doc.outstanding_amount > 0){
-			dialog = new frappe.ui.Dialog({
-				title: 'Write Off Amount',
-				fields: [
-					{fieldtype: "Check", fieldname: "write_off_amount", label: __("Write off Outstanding Amount")},
-					{fieldtype: "Link", options:"Account", default:this.write_off_account, fieldname: "write_off_account", 
-					label: __("Write off Account"), get_query: function() {
-						return {
-							filters: {'is_group': 0, 'report_type': 'Profit and Loss'}
-						}
-					}}
-				]
-			});
-
-			dialog.show();
-
-			dialog.fields_dict.write_off_amount.$input.change(function(){
-				write_off_amount = dialog.get_values().write_off_amount;
-				me.frm.doc.write_off_outstanding_amount_automatically = write_off_amount;
-				me.frm.doc.base_write_off_amount = (write_off_amount==1) ? flt(me.frm.doc.grand_total - me.frm.doc.paid_amount, precision("outstanding_amount")) : 0;
-				me.frm.doc.write_off_account = (write_off_amount==1) ? dialog.get_values().write_off_account : '';
-				me.frm.doc.write_off_amount = flt(me.frm.doc.base_write_off_amount * me.frm.doc.conversion_rate, precision("write_off_amount"))
-				me.calculate_outstanding_amount();
-				me.set_primary_action();
-			})
-
-			dialog.fields_dict.write_off_account.$input.change(function(){
-				me.frm.doc.write_off_account = dialog.get_values().write_off_account;
-			})
-
-			dialog.set_primary_action(__("Submit"), function(){
-				dialog.hide()
-				me.submit_invoice()
-			})
-		}else{
-			this.submit_invoice()
-		}
-	},
-
 	submit_invoice: function(){
 		var me = this;
 		frappe.confirm(__("Do you really want to submit the invoice?"), function () {
@@ -951,6 +912,23 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	validate_serial_no_qty: function(args, item_code, field, value){
+		var me = this;
+		if (args.item_code == item_code && args.serial_no
+			&& field == 'qty' && cint(value) != value) {
+			args.qty = 0.0;
+			this.refresh();
+			frappe.throw(__("Serial no item cannot be a fraction"))
+		}
+
+		if(args.serial_no && args.serial_no.split('\n').length != cint(value)){
+			args.qty = 0.0;
+			args.serial_no = ''
+			this.refresh();
+			frappe.throw(__("Total nos of serial no is not equal to quantity."))
+		}
+	},
+
 	mandatory_batch_no: function(){
 		var me = this;
 		if(this.items[0].has_batch_no && !this.item_batch_no[this.items[0].item_code]){
@@ -978,11 +956,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	get_pricing_rule: function(item){
 		var me = this;
 		return $.grep(this.pricing_rules, function(data){
-			if(data.item_code == item.item_code || in_list(['All Item Groups', item.item_group], data.item_group)) {
-				if(in_list(['Customer', 'Customer Group', 'Territory'], data.applicable_for)){
-					return me.validate_condition(data)
-				}else{
-					return true
+			if(item.qty >= data.min_qty && (item.qty <= (data.max_qty ? data.max_qty : item.qty)) ){
+				if(data.item_code == item.item_code || in_list(['All Item Groups', item.item_group], data.item_group)) {
+					if(in_list(['Customer', 'Customer Group', 'Territory', 'Campaign'], data.applicable_for)){
+						return me.validate_condition(data)
+					}else{
+						return true
+					}
 				}
 			}
 		})
@@ -1001,6 +981,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			'Customer': [data.customer, [this.frm.doc.customer]],
 			'Customer Group': [data.customer_group, [this.frm.doc.customer_group, 'All Customer Groups']],
 			'Territory': [data.territory, [this.frm.doc.territory, 'All Territories']],
+			'Campaign': [data.campaign, [this.frm.doc.campaign]],
 		}
 	},
 

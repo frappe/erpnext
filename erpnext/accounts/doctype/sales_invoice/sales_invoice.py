@@ -61,6 +61,7 @@ class SalesInvoice(SellingController):
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		self.add_remarks()
 		self.validate_write_off_account()
+		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
 
@@ -233,11 +234,21 @@ class SalesInvoice(SellingController):
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
 		pos = get_pos_profile(self.company)
 
+		if not self.get('payments'):
+			pos_profile = frappe.get_doc('POS Profile', pos.name) if pos else None
+			update_multi_mode_option(self, pos_profile)
+
+		if not self.account_for_change_amount:
+			self.account_for_change_amount = frappe.db.get_value('Company', self.company, 'default_cash_account')
+
 		if pos:
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
 				self.mode_of_payment = pos.mode_of_payment
 				# self.set_customer_defaults()
+
+			if pos.get('account_for_change_amount'):
+				self.account_for_change_amount = pos.get('account_for_change_amount')
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
 				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account',
@@ -264,10 +275,6 @@ class SalesInvoice(SellingController):
 			# fetch charges
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
-
-			if not self.get('payments'):
-				pos_profile = frappe.get_doc('POS Profile', pos.name)
-				update_multi_mode_option(self, pos_profile)
 
 		return pos
 
@@ -379,6 +386,9 @@ class SalesInvoice(SellingController):
 		if flt(self.write_off_amount) and not self.write_off_account:
 			msgprint(_("Please enter Write Off Account"), raise_exception=1)
 
+	def validate_account_for_change_amount(self):
+		if flt(self.change_amount) and not self.account_for_change_amount:
+			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
 
 	def validate_c_form(self):
 		""" Blank C-form no if C-form applicable marked as 'No'"""
@@ -502,7 +512,7 @@ class SalesInvoice(SellingController):
 		gl_entries = merge_similar_entries(gl_entries)
 
 		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change(gl_entries)
+		self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 
@@ -606,16 +616,15 @@ class SalesInvoice(SellingController):
 						}, payment_mode_account_currency)
 					)
 				
-	def make_gle_for_change(self, gl_entries):
+	def make_gle_for_change_amount(self, gl_entries):
 		if cint(self.is_pos) and self.change_amount:
-			cash_account = self.get_cash_account()
-			if cash_account:
+			if self.account_for_change_amount:
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": self.debit_to,
 						"party_type": "Customer",
 						"party": self.customer,
-						"against": cash_account,
+						"against": self.account_for_change_amount,
 						"debit": flt(self.base_change_amount),
 						"debit_in_account_currency": flt(self.base_change_amount) \
 							if self.party_account_currency==self.company_currency else flt(self.change_amount),
@@ -626,22 +635,13 @@ class SalesInvoice(SellingController):
 				
 				gl_entries.append(
 					self.get_gl_dict({
-						"account": cash_account,
+						"account": self.account_for_change_amount,
 						"against": self.customer,
 						"credit": self.base_change_amount
 					})
 				)
-		
-				
-	def get_cash_account(self):
-		cash_account = [d.account for d in self.payments if d.type=="Cash"]
-		if cash_account:
-			cash_account = cash_account[0]
-		else:
-			cash_account = frappe.db.get_value("Account", 
-				filters={"company": self.company, "account_type": "Cash", "is_group": 0})
-				
-		return cash_account
+			else:
+				frappe.throw(_("Select change amount account"), title="Mandatory Field")
 		
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos

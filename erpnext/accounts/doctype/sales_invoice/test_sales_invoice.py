@@ -455,6 +455,25 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.pos_gl_entry(si, pos, 300)
 
+	def test_pos_change_amount(self):
+		set_perpetual_inventory()
+		self.make_pos_profile()
+
+		self._insert_purchase_receipt()
+		pos = copy.deepcopy(test_records[1])
+		pos["is_pos"] = 1
+		pos["update_stock"] = 1
+		pos["payments"] = [{'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 300},
+							{'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 340}]
+
+		si = frappe.copy_doc(pos)
+		si.change_amount = 5.0
+		si.insert()
+		si.submit()
+
+		self.assertEquals(si.grand_total, 630.0)
+		self.assertEquals(si.write_off_amount, -5)
+
 	def test_make_pos_invoice(self):
 		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
 
