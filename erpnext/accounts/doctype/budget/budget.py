@@ -73,13 +73,14 @@ def validate_expense_against_budget(args):
 						args.posting_date, args.fiscal_year, budget.budget_amount)
 
 					args["month_end_date"] = get_last_day(args.posting_date)
-
+						
 					compare_expense_with_budget(args, budget.cost_center,
 						budget_amount, _("Accumulated Monthly"), monthly_action)
 
-				elif yearly_action in ["Stop", "Warn"]:
-					compare_expense_with_budget(args, budget.cost_center,
-						flt(budget.budget_amount), _("Annual"), yearly_action)
+				if yearly_action in ("Stop", "Warn") and monthly_action != "Stop" \
+					and yearly_action != monthly_action:
+						compare_expense_with_budget(args, budget.cost_center,
+							flt(budget.budget_amount), _("Annual"), yearly_action)
 
 def compare_expense_with_budget(args, cost_center, budget_amount, action_for, action):
 	actual_expense = get_actual_expense(args, cost_center)

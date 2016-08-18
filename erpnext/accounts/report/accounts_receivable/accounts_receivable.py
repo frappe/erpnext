@@ -66,7 +66,8 @@ class ReceivablePayableReport(object):
 		columns.append({
 			"fieldname": "currency",
 			"label": _("Currency"),
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "Currency",
 			"width": 100
 		})
 		if args.get("party_type") == "Customer":
