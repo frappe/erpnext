@@ -13,9 +13,9 @@ from erpnext.controllers.accounts_controller import get_taxes_and_charges
 @frappe.whitelist()
 def get_pos_data():
 	doc = frappe.new_doc('Sales Invoice')
-	doc.update_stock = 1;
 	doc.is_pos = 1;
 	pos_profile = get_pos_profile(doc.company) or {}
+	doc.update_stock = pos_profile.get('update_stock')
 
 	if pos_profile.get('name'):
 		pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
@@ -105,7 +105,7 @@ def update_tax_table(doc):
 
 def get_items(doc, pos_profile):
 	item_list = []
-	for item in frappe.get_all("Item", fields=["*"], filters={'disabled': 0, 'has_variants': 0}):
+	for item in frappe.get_all("Item", fields=["*"], filters={'disabled': 0, 'has_variants': 0, 'is_sales_item': 1}):
 		item_doc = frappe.get_doc('Item', item.name)
 		if item_doc.taxes:
 			item.taxes = json.dumps(dict(([d.tax_type, d.tax_rate] for d in
