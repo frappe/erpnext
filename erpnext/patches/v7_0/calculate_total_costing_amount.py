@@ -13,4 +13,5 @@ def execute():
 			ts.flags.ignore_validate = True
 			ts.flags.ignore_mandatory = True
 			ts.flags.ignore_validate_update_after_submit = True
+			ts.flags.ignore_links = True
 			ts.save()
