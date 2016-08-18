@@ -24,7 +24,7 @@ frappe.ui.form.on("Salary Slip", {
 
 	refresh: function(frm) {
 		frm.trigger("toggle_fields")
-	},
+	},	
 
 	salary_slip_based_on_timesheet: function(frm) {
 		frm.trigger("toggle_fields")
