@@ -12,6 +12,9 @@ frappe.ui.form.on('Delivery Note', 'onload', function(frm) {
 			return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
 		})
 
+	erpnext.queries.setup_queries(frm, "Warehouse", function() {
+		return erpnext.queries.warehouse(frm.doc);
+	});
 })
 
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
