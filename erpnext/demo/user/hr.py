@@ -92,13 +92,20 @@ def update_sanctioned_amount(expense_claim):
 			expense.sanctioned_amount = sanctioned_amount
 
 def get_timesheet_based_salary_slip_employee():
-	return frappe.get_all('Salary Structure', fields = ["distinct employee as name"],
-		filters = {'salary_slip_based_on_timesheet': 1})
+	sal_struct = frappe.db.sql("""
+			select name from `tabSalary Structure`
+			where salary_slip_based_on_timesheet = 1
+			and docstatus != 2""")
+	if sal_struct:
+		employees = frappe.db.sql("""
+				select employee from `tabSalary Structure Employee`
+				where parent IN %(sal_struct)s""", {"sal_struct": sal_struct}, as_dict=True)
+		return employees
 	
 def make_timesheet_records():
 	employees = get_timesheet_based_salary_slip_employee()
-	for employee in employees:
-		ts = make_timesheet(employee.name, simulate = True, billable = 1, activity_type=get_random("Activity Type"))
+	for e in employees:
+		ts = make_timesheet(e.employee, simulate = True, billable = 1, activity_type=get_random("Activity Type"))
 
 		rand = random.random()
 		if rand >= 0.3:

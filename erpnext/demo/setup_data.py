@@ -290,9 +290,13 @@ def setup_item_price():
 def setup_salary_structure():
 	f = frappe.get_doc('Fiscal Year', frappe.defaults.get_global_default('fiscal_year'))
 
+	ss = frappe.new_doc('Salary Structure')
+	ss.name = "Sample Salary Structure - " + str(f.year_start_date)
 	for e in frappe.get_all('Employee', fields=['name', 'date_of_joining']):
-		ss = frappe.new_doc('Salary Structure')
-		ss.employee = e.name
+		ss.append('employees', {
+			'employee': e.name,
+			'base': random.random() * 10000
+		})
 
 		if not e.date_of_joining:
 			continue
@@ -300,16 +304,24 @@ def setup_salary_structure():
 		ss.from_date = e.date_of_joining if (e.date_of_joining
 			and e.date_of_joining > f.year_start_date) else f.year_start_date
 		ss.to_date = f.year_end_date
-		ss.append('earnings', {
-			'salary_component': 'Basic',
-			'amount': random.random() * 10000
-		})
-		ss.append('deductions', {
-			'salary_component': 'Income Tax',
-			'amount': random.random() * 1000
-		})
 
-		ss.insert()
+	ss.append('earnings', {
+		'salary_component': 'Basic',
+		"abbr":'B',
+		'condition': 'base > 5000',
+		'formula': 'base*.2',
+		'amount_based_on_formula': 1,
+		"idx": 1
+	})
+	ss.append('deductions', {
+		'salary_component': 'Income Tax',
+		"abbr":'IT',
+		'condition': 'base > 5000',
+		'amount': random.random() * 1000,
+		"idx": 1
+	})
+
+	ss.insert()
 
 def setup_salary_structure_for_timesheet():
 	for e in frappe.get_all('Salary Structure', fields=['name'], filters={'is_active': 'Yes'}, limit=2):
