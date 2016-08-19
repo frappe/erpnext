@@ -325,7 +325,6 @@ class ProductionPlanningTool(Document):
 					from `tabBOM Explosion Item` fb, `tabBOM` bom, `tabItem` item
 					where bom.name = fb.parent and item.name = fb.item_code
 					and (item.is_sub_contracted_item = 0 or ifnull(item.default_bom, "")="")
-					and item.is_stock_item = 1
 					and fb.docstatus<2 and bom.name=%s
 					group by fb.item_code, fb.stock_uom""", bom, as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
@@ -338,7 +337,6 @@ class ProductionPlanningTool(Document):
 					from `tabBOM Item` bom_item, `tabBOM` bom, tabItem item
 					where bom.name = bom_item.parent and bom.name = %s and bom_item.docstatus < 2
 					and bom_item.item_code = item.name
-					and item.is_stock_item = 1
 					group by bom_item.item_code""", bom, as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
 			for item, item_details in bom_wise_item_details.items():
