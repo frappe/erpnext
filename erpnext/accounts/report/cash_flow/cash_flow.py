@@ -9,7 +9,7 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 
 
 def execute(filters=None):
-	period_list = get_period_list(filters.fiscal_year, filters.periodicity)
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, filters.periodicity)
 
 	operation_accounts = {
 		"section_name": "Operations",
