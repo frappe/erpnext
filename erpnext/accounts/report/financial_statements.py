@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import math
 from frappe import _
-from frappe.utils import (flt, getdate, get_first_day, get_last_day,
+from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
 	add_months, add_days, formatdate, cint)
 
 def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
@@ -24,7 +24,9 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 	# start with first day, so as to avoid year to_dates like 2-April if ever they occur]
 	year_start_date = get_first_day(getdate(from_fy_start_end_date[0]))
 	year_end_date = getdate(to_fy_start_end_date[1])
-	
+
+	validate_fiscal_year(year_start_date, year_end_date)
+
 	months_to_add = {
 		"Yearly": 12,
 		"Half-Yearly": 6,
@@ -35,9 +37,9 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 	period_list = []
 
 	start_date = year_start_date
-	months = flt(get_months(year_start_date, year_end_date))
+	months = get_months(year_start_date, year_end_date)
 
-	for i in xrange(cint(math.ceil(months / flt(months_to_add)))):
+	for i in xrange(months / months_to_add):
 		period = frappe._dict({
 			"from_date": start_date
 		})
@@ -82,7 +84,11 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 		})
 
 	return period_list
-	
+
+def validate_fiscal_year(start_date, end_date):
+	if date_diff(end_date, start_date) <= 0:
+		frappe.throw(_("End Year cannot be before Start Year"))
+
 def get_months(start_date, end_date):
 	diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
 	return diff + 1

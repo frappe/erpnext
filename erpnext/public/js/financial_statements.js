@@ -70,7 +70,7 @@ function get_filters(){
 		},
 		{
 			"fieldname":"from_fiscal_year",
-			"label": __("Fiscal Year"),
+			"label": __("Start Year"),
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
 			"default": frappe.defaults.get_user_default("fiscal_year"),
@@ -78,7 +78,7 @@ function get_filters(){
 		},
 		{
 			"fieldname":"to_fiscal_year",
-			"label": __("Fiscal Year"),
+			"label": __("End Year"),
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
 			"default": frappe.defaults.get_user_default("fiscal_year"),
