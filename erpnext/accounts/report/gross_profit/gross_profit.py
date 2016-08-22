@@ -93,14 +93,14 @@ def get_columns(group_wise_columns, filters):
 
 class GrossProfitGenerator(object):
 	def __init__(self, filters=None):
-			self.data = []
-			self.average_buying_rate = {}
-			self.filters = frappe._dict(filters)
-			self.load_invoice_items()
-			self.load_stock_ledger_entries()
-			self.load_product_bundle()
-			self.load_non_stock_items()
-			self.process()
+		self.data = []
+		self.average_buying_rate = {}
+		self.filters = frappe._dict(filters)
+		self.load_invoice_items()
+		self.load_stock_ledger_entries()
+		self.load_product_bundle()
+		self.load_non_stock_items()
+		self.process()
 
 	def process(self):
 		self.grouped = {}
@@ -234,14 +234,13 @@ class GrossProfitGenerator(object):
 			where a.item_code = %s and a.docstatus=1
 			and modified <= %s 
 			order by a.modified desc limit 1""", (item_code,self.filters.to_date))
-			return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
 		else:
 			last_purchase_rate = frappe.db.sql("""
 			select (a.base_rate / a.conversion_factor)
 			from `tabPurchase Invoice Item` a
 			where a.item_code = %s and a.docstatus=1
 			order by a.modified desc limit 1""", item_code)
-			return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
+		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
 
 	def load_invoice_items(self):
 		conditions = ""
