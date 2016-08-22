@@ -16,6 +16,7 @@ def execute():
 		time_sheet = make_timesheet(data.production_order)
 		args = get_timelog_data(data)
 		add_timesheet_detail(time_sheet, args)
+		time_sheet.docstatus = data.docstatus
 		time_sheet.note = data.note
 		time_sheet.company = company
 		
@@ -24,15 +25,6 @@ def execute():
 		time_sheet.calculate_total_amounts()
 		time_sheet.flags.ignore_validate = True
 		time_sheet.save(ignore_permissions=True)
-		
-		# To ignore validate_mandatory_fields function
-		if data.docstatus == 1:
-			time_sheet.db_set("docstatus", 1)
-			for d in time_sheet.get("time_logs"):
-				d.db_set("docstatus", 1)
-			time_sheet.update_production_order(time_sheet.name)
-			time_sheet.update_task_and_project()
-			
 
 def get_timelog_data(data):
 	return {
