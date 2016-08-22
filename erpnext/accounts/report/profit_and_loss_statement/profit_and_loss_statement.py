@@ -54,7 +54,7 @@ def get_net_profit_loss(income, expense, period_list, company):
 			return net_profit_loss
 
 def get_chart_data(filters, columns, income, expense, net_profit_loss):
-	x_intervals = ['x'] + [d.get("label") for d in columns[2:-1]]
+	x_intervals = ['x'] + [d.get("label") for d in columns[2:]]
 	
 	income_data, expense_data, net_profit = [], [], []
 	

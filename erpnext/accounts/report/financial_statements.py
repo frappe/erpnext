@@ -16,13 +16,13 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 	to_fy_start_end_date = frappe.db.get_value("Fiscal Year", to_fiscal_year, ["year_start_date", "year_end_date"])
 
 	if not from_fy_start_end_date:
-		frappe.throw(_("Fiscal Year {0} not found.").format(from_fiscal_year))
+		frappe.throw(_("Start Year {0} not found.").format(from_fiscal_year))
 	
 	if not to_fy_start_end_date:
-		frappe.throw(_("Fiscal Year {0} not found.").format(to_fiscal_year))
+		frappe.throw(_("End Year {0} not found.").format(to_fiscal_year))
 
 	# start with first day, so as to avoid year to_dates like 2-April if ever they occur]
-	year_start_date = get_first_day(getdate(from_fy_start_end_date[0]))
+	year_start_date = getdate(from_fy_start_end_date[0])
 	year_end_date = getdate(to_fy_start_end_date[1])
 
 	validate_fiscal_year(year_start_date, year_end_date)
