@@ -294,7 +294,7 @@ erpnext.patches.v7_0.rename_prevdoc_fields
 erpnext.patches.v7_0.rename_time_sheet_doctype
 execute:frappe.delete_doc_if_exists("Report", "Customers Not Buying Since Long Time")
 erpnext.patches.v7_0.make_is_group_fieldtype_as_check
-execute:frappe.reload_doc('projects', 'doctype', 'timesheet', force=True)
+execute:frappe.reload_doc('projects', 'doctype', 'timesheet', force=True) #2016-08-23
 execute:frappe.delete_doc_if_exists("Report", "Employee Holiday Attendance")
 execute:frappe.delete_doc_if_exists("DocType", "Payment Tool")
 execute:frappe.delete_doc_if_exists("DocType", "Payment Tool Detail")
