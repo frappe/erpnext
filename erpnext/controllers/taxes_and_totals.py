@@ -471,7 +471,8 @@ class calculate_taxes_and_totals(object):
 
 	def calculate_write_off_amount(self):
 		if flt(self.doc.change_amount) > 0:
-			self.doc.write_off_amount = self.doc.grand_total - self.doc.paid_amount + self.doc.change_amount
+			self.doc.write_off_amount = flt(self.doc.grand_total - self.doc.paid_amount + self.doc.change_amount,
+				self.doc.precision("write_off_amount"))
 			self.doc.base_write_off_amount = flt(self.doc.write_off_amount * self.doc.conversion_rate,
 				self.doc.precision("base_write_off_amount"))
 
