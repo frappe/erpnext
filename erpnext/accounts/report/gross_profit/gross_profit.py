@@ -189,7 +189,7 @@ class GrossProfitGenerator(object):
 		# stock_ledger_entries should already be filtered by item_code and warehouse and
 		# sorted by posting_date desc, posting_time desc
 		if item_code in self.non_stock_items:
-			#Issue 6089-Get last purchasing rate for non-stock items
+			#Issue 6089-Get last purchasing rate for non-stock item
 			item_rate = self.get_last_purchase_rate(item_code)
 			return flt(row.qty) * item_rate
 
