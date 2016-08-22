@@ -177,19 +177,17 @@ erpnext.payments = erpnext.stock.StockController.extend({
 	write_off_amount: function(write_off_amount) {
 		var me = this;
 
-		if(this.frm.doc.paid_amount > 0){
-			this.frm.doc.write_off_amount = write_off_amount;
-			this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
-				precision("base_write_off_amount"));
-			this.calculate_outstanding_amount(false)
-			this.show_amounts()
-		}
+		this.frm.doc.write_off_amount = flt(write_off_amount, precision("write_off_amount"));
+		this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
+			precision("base_write_off_amount"));
+		this.calculate_outstanding_amount(false)
+		this.show_amounts()
 	},
 
 	change_amount: function(change_amount) {
 		var me = this;
 
-		this.frm.doc.change_amount = change_amount;
+		this.frm.doc.change_amount = flt(change_amount, precision("change_amount"));
 		this.calculate_write_off_amount()
 		this.show_amounts()
 	},
@@ -197,7 +195,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 	update_paid_amount: function() {
 		var me = this;
 		if(in_list(['change_amount', 'write_off_amount'], this.idx)){
-			value = flt(me.selected_mode.val(), 2)
+			value = me.selected_mode.val();
 			if(me.idx == 'change_amount'){
 				me.change_amount(value)
 			} else{
@@ -226,9 +224,9 @@ erpnext.payments = erpnext.stock.StockController.extend({
 
 	show_amounts: function(){
 		var me = this;
-		$(this.$body).find(".write_off_amount").val(format_number(this.frm.doc.write_off_amount, 2));
+		$(this.$body).find(".write_off_amount").val(flt(this.frm.doc.write_off_amount, precision("write_off_amount")));
 		$(this.$body).find('.paid_amount').text(format_currency(this.frm.doc.paid_amount, this.frm.doc.currency));
-		$(this.$body).find('.change_amount').val(format_number(this.frm.doc.change_amount, 2))
+		$(this.$body).find('.change_amount').val(flt(this.frm.doc.change_amount, precision("change_amount")))
 		$(this.$body).find('.outstanding_amount').text(format_currency(this.frm.doc.outstanding_amount, this.frm.doc.currency))
 		this.update_invoice();
 	}

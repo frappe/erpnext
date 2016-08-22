@@ -509,7 +509,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.remove_zero_qty_item();
 		}
 
-		this.refresh();
+		this.update_paid_amount_status(false)
 	},
 
 	remove_zero_qty_item: function(){
@@ -591,7 +591,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if (!caught)
 			this.add_new_item_to_grid();
 
-		this.refresh();
+		this.update_paid_amount_status(false)
 	},
 
 	add_new_item_to_grid: function() {
@@ -616,6 +616,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			? this.item_serial_no[this.child.item_code][0] : '');
 	},
 
+	update_paid_amount_status: function(update_paid_amount){
+		if(this.name){
+			update_paid_amount = update_paid_amount ? false : true;
+		}
+
+		this.refresh(update_paid_amount);
+	},
+
 	refresh: function(update_paid_amount) {
 		var me = this;
 		this.refresh_fields(update_paid_amount);
@@ -623,6 +631,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.update_rate();
 		this.set_primary_action();
 	},
+
 	refresh_fields: function(update_paid_amount) {
 		this.apply_pricing_rule();
 		this.discount_amount_applied = false;
@@ -698,7 +707,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if (this.frm.doc.docstatus==0) {
 			this.page.set_primary_action(__("Pay"), function() {
-				me.validate()
+				me.validate();
+				me.update_paid_amount_status(true);
 				me.create_invoice();
 				me.make_payment();
 			}, "octicon octicon-credit-card");
