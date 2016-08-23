@@ -28,14 +28,22 @@ class Timesheet(Document):
 
 	def calculate_total_amounts(self):
 		self.total_hours = 0.0
+		self.total_billing_hours = 0.0
 		self.total_billing_amount = 0.0
 		self.total_costing_amount = 0.0
 
 		for d in self.get("time_logs"):
-			self.total_hours += flt(d.billing_hours)
+			self.update_billing_hours(d)
+
+			self.total_hours += flt(d.hours)
+			self.total_billing_hours += flt(d.billing_hours)
 			if d.billable: 
 				self.total_billing_amount += flt(d.billing_amount)
 				self.total_costing_amount += flt(d.costing_amount)
+
+	def update_billing_hours(self, args):
+		if cint(args.billing_hours) == 0:
+			args.billing_hours = args.hours
 
 	def set_status(self):
 		self.status = {
@@ -246,7 +254,7 @@ def make_sales_invoice(source_name, target=None):
 			"doctype": "Sales Invoice Timesheet",
 			"field_map": {
 				"total_billing_amount": "billing_amount",
-				"total_hours": "billing_hours",
+				"total_billing_hours": "billing_hours",
 				"name": "time_sheet"
 			},
 		}

@@ -16,6 +16,7 @@ class TestTimesheet(unittest.TestCase):
 		timesheet = make_timesheet("_T-Employee-0001", True)
 
 		self.assertEquals(timesheet.total_hours, 2)
+		self.assertEquals(timesheet.total_billing_hours, 2)
 		self.assertEquals(timesheet.time_logs[0].billing_rate, 50)
 		self.assertEquals(timesheet.time_logs[0].billing_amount, 100)
 
@@ -54,7 +55,6 @@ class TestTimesheet(unittest.TestCase):
 		timesheet = frappe.get_doc('Timesheet', timesheet.name)
 		self.assertEquals(sales_invoice.total_billing_amount, 100)
 		self.assertEquals(timesheet.status, 'Billed')
-				
 
 def make_salary_structure(employee):
 	name = frappe.db.get_value('Salary Structure Employee', {'employee': employee}, 'parent')
