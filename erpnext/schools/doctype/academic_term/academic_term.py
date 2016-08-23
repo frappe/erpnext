@@ -7,4 +7,9 @@ import frappe
 from frappe.model.document import Document
 
 class AcademicTerm(Document):
-	pass
+    def autoname(self):
+        #Concatenate the academic year and the term name to form a unique name for combination of academic year/term
+        self.name = self.academic_year + "/" + self.term_name
+        
+    def on_update(self):
+        pass
