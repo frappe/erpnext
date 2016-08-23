@@ -156,18 +156,21 @@ var calculate_billing_costing_amount = function(frm, cdt, cdn){
 
 var calculate_time_and_amount = function(frm) {
 	var tl = frm.doc.time_logs || [];
-	total_hr = 0;
+	total_working_hr = 0;
+	total_billing_hr = 0;
 	total_billing_amount = 0;
 	total_costing_amount = 0;
 	for(var i=0; i<tl.length; i++) {
 		if (tl[i].hours) {
-			total_hr += tl[i].billing_hours;
+			total_working_hr += tl[i].hours;
+			total_billing_hr += tl[i].billing_hours;
 			total_billing_amount += tl[i].billing_amount;
 			total_costing_amount += tl[i].costing_amount;
 		}
 	}
 
-	cur_frm.set_value("total_hours", total_hr);
+	cur_frm.set_value("total_billing_hours", total_billing_hr);
+	cur_frm.set_value("total_hours", total_working_hr);
 	cur_frm.set_value("total_billing_amount", total_billing_amount);
 	cur_frm.set_value("total_costing_amount", total_costing_amount);
 }
