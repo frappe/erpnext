@@ -112,15 +112,15 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		$(this.$body).find('.form-control').click(function(){
 			me.idx = $(this).attr("idx");
 			me.set_outstanding_amount();
-			me.update_paid_amount();
+			me.update_paid_amount(true);
 		})
 		
 		$(this.$body).find('.write_off_amount').change(function(){
-			me.write_off_amount(flt($(this).val()));
+			me.write_off_amount(flt($(this).val()), precision("write_off_amount"));
 		})
 		
 		$(this.$body).find('.change_amount').change(function(){
-			me.change_amount(flt($(this).val()));
+			me.change_amount(flt($(this).val()), precision("change_amount"));
 		})
 	},
 
@@ -139,7 +139,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 			me.payment_val += $(this).text();
 			me.selected_mode.val(format_number(me.payment_val, 2))
 			me.idx = me.selected_mode.attr("idx")
-			me.selected_mode.change()
+			me.update_paid_amount()
 		})
 		
 		$(this.$body).find('.delete-btn').click(function(){
@@ -177,31 +177,29 @@ erpnext.payments = erpnext.stock.StockController.extend({
 	write_off_amount: function(write_off_amount) {
 		var me = this;
 
-		if(this.frm.doc.paid_amount > 0){
-			this.frm.doc.write_off_amount = write_off_amount;
-			this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
-				precision("base_write_off_amount"));
-			this.calculate_outstanding_amount(false)
-			this.show_amounts()
-		}
+		this.frm.doc.write_off_amount = flt(write_off_amount, precision("write_off_amount"));
+		this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
+			precision("base_write_off_amount"));
+		this.calculate_outstanding_amount(false)
+		this.show_amounts()
 	},
 
 	change_amount: function(change_amount) {
 		var me = this;
 
-		this.frm.doc.change_amount = change_amount;
+		this.frm.doc.change_amount = flt(change_amount, precision("change_amount"));
 		this.calculate_write_off_amount()
 		this.show_amounts()
 	},
 
-	update_paid_amount: function() {
+	update_paid_amount: function(update_write_off) {
 		var me = this;
 		if(in_list(['change_amount', 'write_off_amount'], this.idx)){
-			value = flt(me.selected_mode.val(), 2)
+			value = me.selected_mode.val();
 			if(me.idx == 'change_amount'){
 				me.change_amount(value)
 			} else{
-				if(value == 0) { 
+				if(value == 0 && update_write_off) {
 					value = me.frm.doc.outstanding_amount;
 				}
 				me.write_off_amount(value)
@@ -226,9 +224,9 @@ erpnext.payments = erpnext.stock.StockController.extend({
 
 	show_amounts: function(){
 		var me = this;
-		$(this.$body).find(".write_off_amount").val(format_number(this.frm.doc.write_off_amount, 2));
+		$(this.$body).find(".write_off_amount").val(format_number(this.frm.doc.write_off_amount, precision("write_off_amount")));
 		$(this.$body).find('.paid_amount').text(format_currency(this.frm.doc.paid_amount, this.frm.doc.currency));
-		$(this.$body).find('.change_amount').val(format_number(this.frm.doc.change_amount, 2))
+		$(this.$body).find('.change_amount').val(format_number(this.frm.doc.change_amount, precision("change_amount")))
 		$(this.$body).find('.outstanding_amount').text(format_currency(this.frm.doc.outstanding_amount, this.frm.doc.currency))
 		this.update_invoice();
 	}

@@ -381,8 +381,10 @@ class SalesInvoice(SellingController):
 			if d.delivery_note:
 				msgprint(_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note), raise_exception=1)
 
-
 	def validate_write_off_account(self):
+		if flt(self.write_off_amount) and not self.write_off_account:
+			self.write_off_account = frappe.db.get_value('Company', self.company, 'write_off_account')
+
 		if flt(self.write_off_amount) and not self.write_off_account:
 			msgprint(_("Please enter Write Off Account"), raise_exception=1)
 
