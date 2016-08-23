@@ -84,7 +84,7 @@ class LandedCostVoucher(Document):
 		self.update_landed_cost()
 
 	def update_landed_cost(self):
-		for d in self.get("items"):
+		for d in self.get("purchase_receipts"):
 			doc = frappe.get_doc(d.receipt_document_type, d.receipt_document)
 
 			# set landed cost voucher amount in pr item
@@ -103,7 +103,7 @@ class LandedCostVoucher(Document):
 			# update stock & gl entries for cancelled state of PR
 			doc.docstatus = 2
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-			doc.make_gl_entries_on_cancel()
+			doc.make_gl_entries_on_cancel(repost_future_gle=False)
 
 
 			# update stock & gl entries for submit state of PR

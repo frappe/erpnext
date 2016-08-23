@@ -204,10 +204,10 @@ class StockController(AccountsController):
 		from erpnext.stock.stock_ledger import make_sl_entries
 		make_sl_entries(sl_entries, is_amended, allow_negative_stock, via_landed_cost_voucher)
 
-	def make_gl_entries_on_cancel(self):
+	def make_gl_entries_on_cancel(self, repost_future_gle=True):
 		if frappe.db.sql("""select name from `tabGL Entry` where voucher_type=%s
 			and voucher_no=%s""", (self.doctype, self.name)):
-				self.make_gl_entries()
+				self.make_gl_entries(repost_future_gle)
 
 	def get_serialized_items(self):
 		serialized_items = []
@@ -261,7 +261,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 
 	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
 	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
-
+	
 	for voucher_type, voucher_no in future_stock_vouchers:
 		existing_gle = gle.get((voucher_type, voucher_no), [])
 		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
