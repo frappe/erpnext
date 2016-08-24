@@ -104,7 +104,7 @@ def get_label(periodicity, from_date, to_date):
 
 	return label
 	
-def get_data(company, root_type, balance_must_be, period_list, 
+def get_data(company, root_type, balance_must_be, period_list, filters=None,
 		accumulated_values=1, only_current_fiscal_year=True, ignore_closing_entries=False,
 		ignore_accumulated_values_for_fy=False):
 	accounts = get_accounts(company, root_type)
@@ -122,7 +122,7 @@ def get_data(company, root_type, balance_must_be, period_list,
 		set_gl_entries_by_account(company, 
 			period_list[0]["year_start_date"] if only_current_fiscal_year else None,
 			period_list[-1]["to_date"], 
-			root.lft, root.rgt, 
+			root.lft, root.rgt, filters,
 			gl_entries_by_account, ignore_closing_entries=ignore_closing_entries)
 
 	calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy)
@@ -288,16 +288,11 @@ def sort_root_accounts(roots):
 
 	roots.sort(compare_roots)
 
-def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, gl_entries_by_account,
+def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, filters, gl_entries_by_account,
 		ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
-	additional_conditions = []
 
-	if ignore_closing_entries:
-		additional_conditions.append("and ifnull(voucher_type, '')!='Period Closing Voucher'")
-
-	if from_date:
-		additional_conditions.append("and posting_date >= %(from_date)s")
+	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
 	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening from `tabGL Entry`
 		where company=%(company)s
@@ -305,7 +300,7 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, g
 		and posting_date <= %(to_date)s
 		and account in (select name from `tabAccount`
 			where lft >= %(lft)s and rgt <= %(rgt)s)
-		order by account, posting_date""".format(additional_conditions="\n".join(additional_conditions)),
+		order by account, posting_date""".format(additional_conditions=additional_conditions),
 		{
 			"company": company,
 			"from_date": from_date,
@@ -319,6 +314,22 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, g
 		gl_entries_by_account.setdefault(entry.account, []).append(entry)
 
 	return gl_entries_by_account
+
+def get_additional_conditions(from_date, ignore_closing_entries, filters):
+	additional_conditions = []
+
+	if ignore_closing_entries:
+		additional_conditions.append("ifnull(voucher_type, '')!='Period Closing Voucher'")
+
+	if from_date:
+		additional_conditions.append("posting_date >= %(from_date)s")
+
+	if filters:
+		for key in filters:
+			if filters.get(key) and key in ['cost_center', 'project']:
+				additional_conditions.append("%s = '%s'"%(key, filters.get(key)))
+
+	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 
 def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 	columns = [{

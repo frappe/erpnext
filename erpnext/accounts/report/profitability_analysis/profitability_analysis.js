@@ -58,7 +58,45 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"fieldtype": "Check"
 			}
 		],
-		"formatter": erpnext.financial_statements.formatter,
+		"formatter": function(row, cell, value, columnDef, dataContext, default_formatter) {
+			if (columnDef.df.fieldname=="account") {
+				value = dataContext.account_name;
+
+				columnDef.df.link_onclick =
+					"frappe.query_reports['Profitability Analysis'].open_profit_and_loss_statement(" + JSON.stringify(dataContext) + ")";
+				columnDef.df.is_tree = true;
+			}
+
+			value = default_formatter(row, cell, value, columnDef, dataContext);
+
+			if (!dataContext.parent_account && dataContext.based_on != 'project') {
+				var $value = $(value).css("font-weight", "bold");
+				if (dataContext.warn_if_negative && dataContext[columnDef.df.fieldname] < 0) {
+					$value.addClass("text-danger");
+				}
+
+				value = $value.wrap("<p></p>").parent().html();
+			}
+
+			return value;
+		},
+		"open_profit_and_loss_statement": function(data) {
+			if (!data.account) return;
+
+			frappe.route_options = {
+				"company": frappe.query_report.filters_by_name.company.get_value(),
+				"from_fiscal_year": data.fiscal_year,
+				"to_fiscal_year": data.fiscal_year
+			};
+
+			if(data.based_on == 'cost_center'){
+				frappe.route_options["cost_center"] = data.account
+			} else {
+				frappe.route_options["project"] = data.account
+			}
+
+			frappe.set_route("query-report", "Profit and Loss Statement");
+		},
 		"tree": true,
 		"name_field": "account",
 		"parent_field": "parent_account",

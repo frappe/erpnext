@@ -39,7 +39,7 @@ def get_data(accounts, filters, based_on):
 	total_row = calculate_values(accounts, gl_entries_by_account, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
-	data = prepare_data(accounts, filters, total_row, parent_children_map)
+	data = prepare_data(accounts, filters, total_row, parent_children_map, based_on)
 	data = filter_out_zero_value_rows(data, parent_children_map, 
 		show_zero_values=filters.get("show_zero_values"))
 
@@ -88,7 +88,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 			for key in value_fields:
 				accounts_by_name[d.parent_account][key] += d[key]
 
-def prepare_data(accounts, filters, total_row, parent_children_map):
+def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 	data = []
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 
@@ -99,10 +99,9 @@ def prepare_data(accounts, filters, total_row, parent_children_map):
 			"account": d.name,
 			"parent_account": d.parent_account,
 			"indent": d.indent,
-			"from_date": filters.from_date,
-			"to_date": filters.to_date,
+			"fiscal_year": filters.fiscal_year,
 			"currency": company_currency,
-			"based_on": filters.based_on
+			"based_on": based_on
 		}
 
 		for key in value_fields:
