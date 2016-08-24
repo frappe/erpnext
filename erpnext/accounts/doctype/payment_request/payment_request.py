@@ -250,8 +250,9 @@ def make_payment_request(**args):
 			pr.submit()
 
 	if hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart":
-		pr.get_payment_url()
 		frappe.db.commit()
+		frappe.local.response["type"] = "redirect"
+		frappe.local.response["location"] = pr.get_payment_url()
 
 	if not args.cart:
 		return pr
