@@ -51,6 +51,11 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"label": __("To Date"),
 				"fieldtype": "Date",
 				"default": frappe.defaults.get_user_default("year_end_date"),
+			},
+			{
+				"fieldname": "show_zero_values",
+				"label": __("Show zero values"),
+				"fieldtype": "Check"
 			}
 		],
 		"formatter": erpnext.financial_statements.formatter,

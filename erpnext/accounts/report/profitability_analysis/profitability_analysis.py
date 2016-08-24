@@ -5,38 +5,43 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, getdate, formatdate, cstr
-from erpnext.accounts.report.financial_statements import filter_accounts
+from erpnext.accounts.report.financial_statements import filter_accounts, filter_out_zero_value_rows
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 
 value_fields = ("income", "expense", "total")
 
 def execute(filters=None):
+	based_on = filters.based_on.replace(' ', '_').lower()
 	validate_filters(filters)
-	data = get_data(filters)
-	columns = get_columns()
+	accounts = get_accounts_data(based_on, filters.company)
+	data = get_data(accounts, filters, based_on)
+	columns = get_columns(filters)
 	return columns, data
 
-def get_data(filters):
-	accounts = frappe.db.sql("""select name, parent_cost_center as parent_account, cost_center_name as account_name, lft, rgt
-		from `tabCost Center` where company=%s order by lft""", filters.company, as_dict=True)
+def get_accounts_data(based_on, company):
+	if based_on == 'cost_center':
+		return frappe.db.sql("""select name, parent_cost_center as parent_account, cost_center_name as account_name, lft, rgt
+			from `tabCost Center` where company=%s order by lft""", company, as_dict=True)
+	else:
+		return frappe.get_all('Project', fields = ["name"], filters = {'company': company})
 
+def get_data(accounts, filters, based_on):
 	if not accounts:
 		return None
 
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 
-	min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabCost Center`
-		where company=%s""", (filters.company,))[0]
-
 	gl_entries_by_account = {}
 
 	set_gl_entries_by_account(filters.company, filters.from_date,
-		filters.to_date, min_lft, max_rgt, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
+		filters.to_date, based_on, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
 
 	total_row = calculate_values(accounts, gl_entries_by_account, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
 	data = prepare_data(accounts, filters, total_row, parent_children_map)
+	data = filter_out_zero_value_rows(data, parent_children_map, 
+		show_zero_values=filters.get("show_zero_values"))
 
 	return data
 
@@ -90,13 +95,14 @@ def prepare_data(accounts, filters, total_row, parent_children_map):
 	for d in accounts:
 		has_value = False
 		row = {
-			"account_name": d.account_name,
+			"account_name": d.account_name or d.name,
 			"account": d.name,
 			"parent_account": d.parent_account,
 			"indent": d.indent,
 			"from_date": filters.from_date,
 			"to_date": filters.to_date,
-			"currency": company_currency
+			"currency": company_currency,
+			"based_on": filters.based_on
 		}
 
 		for key in value_fields:
@@ -113,13 +119,13 @@ def prepare_data(accounts, filters, total_row, parent_children_map):
 
 	return data
 
-def get_columns():
+def get_columns(filters):
 	return [
 		{
 			"fieldname": "account",
-			"label": _("Cost Center"),
+			"label": _(filters.based_on),
 			"fieldtype": "Link",
-			"options": "Cost Center",
+			"options": filters.based_on,
 			"width": 300
 		},
 		{
@@ -152,7 +158,7 @@ def get_columns():
 		}
 	]
 
-def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, gl_entries_by_account,
+def set_gl_entries_by_account(company, from_date, to_date, based_on, gl_entries_by_account,
 		ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	additional_conditions = []
@@ -163,24 +169,21 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, g
 	if from_date:
 		additional_conditions.append("and posting_date >= %(from_date)s")
 
-	gl_entries = frappe.db.sql("""select posting_date, cost_center, debit, credit, 
+	gl_entries = frappe.db.sql("""select posting_date, {based_on} as based_on, debit, credit, 
 		is_opening, (select root_type from `tabAccount` where name = account) as type
 		from `tabGL Entry` where company=%(company)s
 		{additional_conditions}
 		and posting_date <= %(to_date)s
-		and cost_center in (select name from `tabCost Center`
-			where lft >= %(lft)s and rgt <= %(rgt)s)
-		order by cost_center, posting_date""".format(additional_conditions="\n".join(additional_conditions)),
+		and {based_on} is not null
+		order by {based_on}, posting_date""".format(additional_conditions="\n".join(additional_conditions), based_on= based_on),
 		{
 			"company": company,
 			"from_date": from_date,
-			"to_date": to_date,
-			"lft": root_lft,
-			"rgt": root_rgt
+			"to_date": to_date
 		},
 		as_dict=True)
 
 	for entry in gl_entries:
-		gl_entries_by_account.setdefault(entry.cost_center, []).append(entry)
+		gl_entries_by_account.setdefault(entry.based_on, []).append(entry)
 
 	return gl_entries_by_account
