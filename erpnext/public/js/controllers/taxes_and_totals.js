@@ -532,6 +532,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		// NOTE:
 		// paid_amount and write_off_amount is only for POS Invoice
 		// total_advance is only for non POS Invoice
+		
+		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.is_return){
+			this.calculate_paid_amount()
+		}
+
 		if(this.frm.doc.is_return || this.frm.doc.docstatus > 0) return;
 
 		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
@@ -594,11 +599,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var me = this;
 		var paid_amount = base_paid_amount = 0.0;
 		$.each(this.frm.doc['payments'] || [], function(index, data){
-			if(data.amount > -1){
-				data.base_amount = flt(data.amount * me.frm.doc.conversion_rate);
-				paid_amount += data.amount;
-				base_paid_amount += data.base_amount;
-			}
+			data.base_amount = flt(data.amount * me.frm.doc.conversion_rate);
+			paid_amount += data.amount;
+			base_paid_amount += data.base_amount;
 		})
 
 		this.frm.doc.paid_amount = flt(paid_amount, precision("paid_amount"));
@@ -607,7 +610,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_change_amount: function(){
 		this.frm.doc.change_amount = 0.0;
-		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
+		if(this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return){
 			this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total + 
 				this.frm.doc.write_off_amount, precision("change_amount"));
 		}
