@@ -208,7 +208,7 @@
    "no_copy": 0,
    "oldfieldname": "source",
    "oldfieldtype": "Select",
-   "options": "\nAdvertisement\nBlog Post\nCampaign\nCall\nCustomer\nExhibition\nSupplier\nWebsite\nEmail",
+   "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign", 
    "permlevel": 0,
    "print_hide": 0,
    "print_hide_if_no_value": 0,
