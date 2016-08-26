@@ -122,6 +122,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Grading System"
+				},
+				{
+					"type": "doctype",
 					"name": "Program"
 				},
 				{

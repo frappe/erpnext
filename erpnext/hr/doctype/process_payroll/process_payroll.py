@@ -10,6 +10,7 @@ from frappe.model.document import Document
 
 class ProcessPayroll(Document):
 
+
 	def get_emp_list(self):
 		"""
 			Returns list of active employees based on selected criteria
@@ -18,14 +19,22 @@ class ProcessPayroll(Document):
 		cond = self.get_filter_condition()
 		cond += self.get_joining_releiving_condition()
 
+		sal_struct = frappe.db.sql("""
+				select name from `tabSalary Structure`
+				where docstatus != 2 and
+				ifnull(salary_slip_based_on_timesheet,0) = 0""")
+
+		if sal_struct:
+			cond += "and t2.parent IN %(sal_struct)s "
+
 		emp_list = frappe.db.sql("""
 			select t1.name
-			from `tabEmployee` t1, `tabSalary Structure` t2
-			where t1.docstatus!=2 and t2.docstatus != 2 and 
-			ifnull(t2.salary_slip_based_on_timesheet,0) = 0 and t1.name = t2.employee
-		%s """% cond)
+			from `tabEmployee` t1, `tabSalary Structure Employee` t2
+			where t1.docstatus!=2 and t1.name = t2.employee
+		%s """% cond, {"sal_struct": sal_struct})
 
 		return emp_list
+
 
 	def get_filter_condition(self):
 		self.check_mandatory()
