@@ -11,13 +11,6 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	setup: function(frm) {
-		frm.get_field('references').grid.editable_fields = [
-			{fieldname: 'reference_doctype', columns: 2},
-			{fieldname: 'reference_name', columns: 2},
-			{fieldname: 'outstanding_amount', columns: 3},
-			{fieldname: 'allocated_amount', columns: 3}
-		];
-
 		var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
 
 		frm.set_query("paid_from", function() {

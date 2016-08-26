@@ -2,18 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 erpnext.taxes_and_totals = erpnext.payments.extend({
-	setup: function() {
-		if(this.frm.get_field('taxes')) {
-			this.frm.get_field('taxes').grid.editable_fields = [
-				{fieldname: 'charge_type', columns: 2},
-				{fieldname: 'account_head', columns: 2},
-				{fieldname: 'rate', columns: 2},
-				{fieldname: 'tax_amount', columns: 2},
-				{fieldname: 'total', columns: 2}
-			];
-		}
-
-	},
+	setup: function() {},
 	apply_pricing_rule_on_item: function(item){
 		if(!item.margin_type){
 			item.margin_rate_or_amount = 0.0;

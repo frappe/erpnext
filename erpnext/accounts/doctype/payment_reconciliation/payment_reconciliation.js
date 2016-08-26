@@ -4,15 +4,6 @@
 frappe.provide("erpnext.accounts");
 
 erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.extend({
-	setup: function() {
-		this.frm.get_field('payments').grid.editable_fields = [
-			{fieldname: 'reference_name', columns: 3},
-			{fieldname: 'invoice_number', columns: 3},
-			{fieldname: 'amount', columns: 2},
-			{fieldname: 'allocated_amount', columns: 2}
-		];
-	},
-
 	onload: function() {
 		var me = this
 		this.frm.set_query('party_type', function() {
