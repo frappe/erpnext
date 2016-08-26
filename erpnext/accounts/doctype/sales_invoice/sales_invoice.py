@@ -223,8 +223,15 @@ class SalesInvoice(SellingController):
 		self.set_paid_amount()
 
 	def set_paid_amount(self):
+		paid_amount = 0.0
+		base_paid_amount = 0.0
 		for data in self.payments:
 			data.base_amount = flt(data.amount*self.conversion_rate, self.precision("base_paid_amount"))
+			paid_amount += data.amount
+			base_paid_amount += data.base_amount
+
+		self.paid_amount = paid_amount
+		self.base_paid_amount = base_paid_amount
 
 	def validate_time_sheets_are_submitted(self):
 		for data in self.timesheets:
