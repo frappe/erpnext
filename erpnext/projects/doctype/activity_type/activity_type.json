@@ -121,7 +121,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-07-25 05:24:26.717981", 
+ "modified": "2016-08-22 08:53:43.680463", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Activity Type", 
@@ -171,5 +171,6 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "sort_order": "ASC", 
  "track_seen": 0
 }
