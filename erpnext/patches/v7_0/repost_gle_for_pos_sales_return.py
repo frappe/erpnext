@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint
+from frappe.utils import cint, flt
 
 def execute():
 	frappe.reload_doctype("Sales Invoice")
@@ -12,13 +12,13 @@ def execute():
 		filters={"docstatus": 1, "is_pos": 1, "is_return": 1}):
 		si_doc = frappe.get_doc("Sales Invoice", si.name)
 		if len(si_doc.payments) > 0:
-			delete_gle_for_voucher(si_doc.name)
 			si_doc.set_paid_amount()
 			si_doc.flags.ignore_validate_update_after_submit = True
 			si_doc.save()
-			si_doc.run_method("make_gl_entries")
+			if si_doc.grand_total <= si_doc.paid_amount and si_doc.paid_amount < 0:
+				delete_gle_for_voucher(si_doc.name)
+				si_doc.run_method("make_gl_entries")
 
 def delete_gle_for_voucher(voucher_no):
 	frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %(voucher_no)s""",
 		{'voucher_no': voucher_no})
-	
