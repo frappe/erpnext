@@ -8,7 +8,7 @@ from frappe.utils import flt, getdate, formatdate, cstr
 from erpnext.accounts.report.financial_statements import filter_accounts, filter_out_zero_value_rows
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 
-value_fields = ("income", "expense", "total")
+value_fields = ("income", "expense", "gross_profit_loss")
 
 def execute(filters=None):
 	based_on = filters.based_on.replace(' ', '_').lower()
@@ -49,7 +49,7 @@ def calculate_values(accounts, gl_entries_by_account, filters):
 	init = {
 		"income": 0.0,
 		"expense": 0.0,
-		"total": 0.0
+		"gross_profit_loss": 0.0
 	}
 
 	total_row = {
@@ -58,7 +58,7 @@ def calculate_values(accounts, gl_entries_by_account, filters):
 		"warn_if_negative": True,
 		"income": 0.0,
 		"expense": 0.0,
-		"total": 0.0
+		"gross_profit_loss": 0.0
 	}
 
 	for d in accounts:
@@ -73,12 +73,12 @@ def calculate_values(accounts, gl_entries_by_account, filters):
 				if entry.type == 'Expense':
 					d["expense"] += flt(entry.debit) - flt(entry.credit)
 
-				d["total"] = d.get("income") - d.get("expense")
+				d["gross_profit_loss"] = d.get("income") - d.get("expense")
 
 		total_row["income"] += d["income"]
 		total_row["expense"] += d["expense"]
 
-	total_row["total"] = total_row.get("income") - total_row.get("expense")
+	total_row["gross_profit_loss"] = total_row.get("income") - total_row.get("expense")
 
 	return total_row
 
@@ -142,7 +142,7 @@ def get_columns(filters):
 			"width": 120
 		},
 		{
-			"fieldname": "total",
+			"fieldname": "gross_profit_loss",
 			"label": _("Gross Profit / Loss"),
 			"fieldtype": "Currency",
 			"options": "currency",

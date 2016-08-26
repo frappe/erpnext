@@ -325,8 +325,8 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 		additional_conditions.append("posting_date >= %(from_date)s")
 
 	if filters:
-		for key in filters:
-			if filters.get(key) and key in ['cost_center', 'project']:
+		for key in ['cost_center', 'project']:
+			if filters.get(key):
 				additional_conditions.append("%s = '%s'"%(key, filters.get(key)))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
