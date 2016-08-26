@@ -65,8 +65,8 @@ class SalesInvoice(SellingController):
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
 
-		# if cint(self.is_pos):
-			# self.validate_pos()
+		if cint(self.is_pos):
+			self.validate_pos()
 
 		if cint(self.update_stock):
 			self.validate_dropship_item()
@@ -219,6 +219,20 @@ class SalesInvoice(SellingController):
 				timesheet.set_status()
 				timesheet.save()
 
+	def on_update(self):
+		self.set_paid_amount()
+
+	def set_paid_amount(self):
+		paid_amount = 0.0
+		base_paid_amount = 0.0
+		for data in self.payments:
+			data.base_amount = flt(data.amount*self.conversion_rate, self.precision("base_paid_amount"))
+			paid_amount += data.amount
+			base_paid_amount += data.base_amount
+
+		self.paid_amount = paid_amount
+		self.base_paid_amount = base_paid_amount
+
 	def validate_time_sheets_are_submitted(self):
 		for data in self.timesheets:
 			if data.time_sheet:
@@ -356,11 +370,8 @@ class SalesInvoice(SellingController):
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer,self.project))
 
 	def validate_pos(self):
-		if not self.cash_bank_account and flt(self.paid_amount):
-			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
-
 		if flt(self.paid_amount) + flt(self.write_off_amount) \
-				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
+				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)) and self.is_return:
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
 
@@ -588,35 +599,34 @@ class SalesInvoice(SellingController):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def make_pos_gl_entries(self, gl_entries):
-		if cint(self.is_pos) and self.paid_amount:
+		if cint(self.is_pos):
 			for payment_mode in self.payments:
-				if payment_mode.base_amount > 0:
-					# POS, make payment entries
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": self.debit_to,
-							"party_type": "Customer",
-							"party": self.customer,
-							"against": payment_mode.account,
-							"credit": payment_mode.base_amount,
-							"credit_in_account_currency": payment_mode.base_amount \
-								if self.party_account_currency==self.company_currency \
-								else payment_mode.amount,
-							"against_voucher": self.return_against if cint(self.is_return) else self.name,
-							"against_voucher_type": self.doctype,
-						}, self.party_account_currency)
-					)
-					
-					payment_mode_account_currency = get_account_currency(payment_mode.account)
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": payment_mode.account,
-							"against": self.customer,
-							"debit": payment_mode.base_amount,
-							"debit_in_account_currency": payment_mode.base_amount \
-								if payment_mode_account_currency==self.company_currency else payment_mode.amount
-						}, payment_mode_account_currency)
-					)
+				# POS, make payment entries
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.customer,
+						"against": payment_mode.account,
+						"credit": payment_mode.base_amount,
+						"credit_in_account_currency": payment_mode.base_amount \
+							if self.party_account_currency==self.company_currency \
+							else payment_mode.amount,
+						"against_voucher": self.return_against if cint(self.is_return) else self.name,
+						"against_voucher_type": self.doctype,
+					}, self.party_account_currency)
+				)
+
+				payment_mode_account_currency = get_account_currency(payment_mode.account)
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": payment_mode.account,
+						"against": self.customer,
+						"debit": payment_mode.base_amount,
+						"debit_in_account_currency": payment_mode.base_amount \
+							if payment_mode_account_currency==self.company_currency else payment_mode.amount
+					}, payment_mode_account_currency)
+				)
 				
 	def make_gle_for_change_amount(self, gl_entries):
 		if cint(self.is_pos) and self.change_amount:
