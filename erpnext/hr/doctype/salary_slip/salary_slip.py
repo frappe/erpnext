@@ -271,7 +271,7 @@ class SalarySlip(TransactionBase):
 	def calculate_lwp(self, holidays, working_days):
 		lwp = 0
 		for d in range(working_days):
-			dt = add_days(cstr(self.start_date), d)
+			dt = add_days(cstr(getdate(self.start_date)), d)
 			if dt not in holidays:
 				leave = frappe.db.sql("""
 					select t1.name, t1.half_day
