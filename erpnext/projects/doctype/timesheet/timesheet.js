@@ -4,14 +4,6 @@ cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 
 frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
-		frm.get_field('time_logs').grid.editable_fields = [
-			{fieldname: 'billable', columns: 1},
-			{fieldname: 'project', columns: 3},
-			{fieldname: 'activity_type', columns: 2},
-			{fieldname: 'from_time', columns: 3},
-			{fieldname: 'hours', columns: 1}
-		];
-
 		frm.fields_dict.employee.get_query = function() {
 			return {
 				filters:{
