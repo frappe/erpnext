@@ -420,8 +420,10 @@ class calculate_taxes_and_totals(object):
 		# NOTE:
 		# write_off_amount is only for POS Invoice
 		# total_advance is only for non POS Invoice
-		if self.doc.is_return:
-			return
+		if self.doc.doctype == "Sales Invoice":
+			self.calculate_paid_amount()
+
+		if self.doc.is_return: return
 
 		self.doc.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount"])
 		self._set_in_company_currency(self.doc, ['write_off_amount'])
@@ -435,7 +437,6 @@ class calculate_taxes_and_totals(object):
 					- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
 
 		if self.doc.doctype == "Sales Invoice":
-			self.calculate_paid_amount()
 			self.doc.round_floats_in(self.doc, ["paid_amount"])
 			paid_amount = self.doc.paid_amount \
 				if self.doc.party_account_currency == self.doc.currency else self.doc.base_paid_amount
@@ -452,10 +453,9 @@ class calculate_taxes_and_totals(object):
 	def calculate_paid_amount(self):
 		paid_amount = base_paid_amount = 0.0
 		for payment in self.doc.get('payments'):
-			if flt(payment.amount) > 0:
-				payment.base_amount = flt(payment.amount * self.doc.conversion_rate)
-				paid_amount += payment.amount
-				base_paid_amount += payment.base_amount
+			payment.base_amount = flt(payment.amount * self.doc.conversion_rate)
+			paid_amount += payment.amount
+			base_paid_amount += payment.base_amount
 
 		self.doc.paid_amount = flt(paid_amount, self.doc.precision("paid_amount"))
 		self.doc.base_paid_amount = flt(base_paid_amount, self.doc.precision("base_paid_amount"))
