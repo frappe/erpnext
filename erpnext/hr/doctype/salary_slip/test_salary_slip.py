@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import erpnext
+from frappe.utils.make_random import get_random
 from frappe.utils import today, now_datetime, getdate, cstr, add_years, nowdate
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.leave_application.test_leave_application import make_allocation_record
@@ -202,7 +203,8 @@ def make_salary_structure(sal_struct):
 			"from_date": nowdate(),
 			"employees": get_employee_details(),
 			"earnings": get_earnings_component(),
-			"deductions": get_deductions_component()			
+			"deductions": get_deductions_component(),
+			"payment_account": get_random("Account")		
 		}).insert()
 	return sal_struct
 			
