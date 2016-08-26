@@ -1,0 +1,134 @@
+[
+	{
+		"doctype": "Course",
+		"course_name": "Communication Skiils",
+		"course_code": "BCA2040",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Object Oriented Programing - C++",
+		"course_code": "BCA2030",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Data Structures and Algorithm",
+		"course_code": "BCA2020",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Operating System",
+		"course_code": "BCA2010",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Digital Logic",
+		"course_code": "BCA1040",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Basic Mathematics",
+		"course_code": "BCA1030",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Programing in C",
+		"course_code": "BCA1020",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Fundamentals of IT & Programing",
+		"course_code": "BCA1010",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Microprocessor",
+		"course_code": "MCA4010",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Probability and Statistics",
+		"course_code": "MCA4020",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Programing in Java",
+		"course_code": "MCA4030",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Communication Skills",
+		"course_code": "BBA 101",
+		"department": "Management Studies"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Organizational Behavior",
+		"course_code": "BBA 102",
+		"department": "Management Studies"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Business Environment",
+		"course_code": "BBA 103",
+		"department": "Management Studies"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Legal and Regulatory Framework",
+		"course_code": "BBA 301",
+		"department": "Management Studies"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Human Resource Management",
+		"course_code": "BBA 302",
+		"department": "Management Studies"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Advertising and Sales",
+		"course_code": "BBA 304",
+		"department": "Management Studies"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Entrepreneurship Management",
+		"course_code": "BBA 505",
+		"department": "Management Studies"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Visual Merchandising",
+		"course_code": "BBR 504",
+		"department": "Management Studies"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Warehouse Management",
+		"course_code": "BBR 505",
+		"department": "Management Studies"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Store Operations and Job Knowledge",
+		"course_code": "BBR 501",
+		"department": "Management Studies"
+	},
+	{
+		"doctype": "Course",
+		"course_name": "Management Development and Skills",
+		"course_code": "BBA 602",
+		"department": "Management Studies"
+	}
+]

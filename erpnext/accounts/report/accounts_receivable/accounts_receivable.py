@@ -53,9 +53,9 @@ class ReceivablePayableReport(object):
 			self.filters["range3"] = "90"
 			
 		for label in ("0-{range1}".format(range1=self.filters["range1"]),
-			"{range1}-{range2}".format(range1=self.filters["range1"]+1, range2=self.filters["range2"]),
-			"{range2}-{range3}".format(range2=self.filters["range2"]+1, range3=self.filters["range3"]),
-			"{range3}-{above}".format(range3=self.filters["range3"] + 1, above=_("Above"))):
+			"{range1}-{range2}".format(range1=cint(self.filters["range1"])+ 1, range2=self.filters["range2"]),
+			"{range2}-{range3}".format(range2=cint(self.filters["range2"])+ 1, range3=self.filters["range3"]),
+			"{range3}-{above}".format(range3=cint(self.filters["range3"])+ 1, above=_("Above"))):
 				columns.append({
 					"label": label,
 					"fieldtype": "Currency",
