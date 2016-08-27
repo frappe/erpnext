@@ -7,4 +7,5 @@ import frappe
 from frappe.model.document import Document
 
 class GradeInterval(Document):
-	pass
+    def validate(self):
+        pass
