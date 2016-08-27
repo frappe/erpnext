@@ -18,5 +18,23 @@ frappe.ui.form.on("Program Enrollment", {
 				}
 			});
 		}
+	},
+	
+	onload: function(frm, cdt, cdn){
+		cur_frm.set_query("academic_term", "fees", function(){
+			return{
+				"filters":{
+					"academic_year": (frm.doc.academic_year)
+				}
+			};
+		});
+				
+		cur_frm.fields_dict['fees'].grid.get_field('fee_structure').get_query = function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: {'academic_term': d.academic_term}
+			}
+		};
+		
 	}
 });
