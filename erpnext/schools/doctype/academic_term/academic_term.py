@@ -9,6 +9,9 @@ from frappe.utils import get_datetime, get_datetime_str
 from frappe.model.document import Document
 
 class AcademicTerm(Document):
+    def autoname(self):
+        self.name = self.academic_year + " ({})".format(self.term_name) if self.term_name else ""
+        
     def validate(self):
         #Check if entry with same academic_year and the term_name already exists
         validate_duplication(self)
