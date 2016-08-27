@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
+from frappe.utils import get_datetime, get_datetime_str
 from frappe.model.document import Document
 
 class AcademicTerm(Document):
@@ -18,9 +19,14 @@ class AcademicTerm(Document):
             frappe.throw(_("The Term End Date cannot be earlier than the Term Start Date. Please correct the dates and try again."))
         
         """Check that the start of the term is not before the start of the academic year and end of term is not after 
-            the end of the academic year
+            the end of the academic year"""
+        year = frappe.get_doc("Academic Year",self.academic_year)
+        if self.term_start_date and get_datetime_str(year.year_start_date) and (self.term_start_date < get_datetime_str(year.year_start_date)):
+            frappe.throw(_("The Term Start Date cannot be earlier than the Year Start Date of the Academic Year to which the term is linked (Academic Year {}). Please correct the dates and try again.").format(self.academic_year))
         
-    
+        if self.term_end_date and get_datetime_str(year.year_end_date) and (self.term_end_date > get_datetime_str(year.year_end_date)):
+            frappe.throw(_("The Term End Date cannot be later than the Year End Date of the Academic Year to which the term is linked (Academic Year {}). Please correct the dates and try again.").format(self.academic_year))
+
 
 def validate_duplication(self):
     term = frappe.db.sql("""select name from `tabAcademic Term` where academic_year= %s and term_name= %s 
