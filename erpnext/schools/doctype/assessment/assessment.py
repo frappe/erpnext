@@ -49,8 +49,8 @@ def get_list_context(context=None):
 def get_grade(grading_structure, result):
     grade = frappe.db.sql("""select gi.from_score, gi.to_score, gi.grade_code, gi.grade_description 
         from `tabGrading Structure` as gs, `tabGrade Interval` as gi 
-        where gs.name = gi.parent and gs.name = %(grading_structure)s and gi.from_score < %(result)s 
-        and gi.to_score > %(result)s""".format(), 
+        where gs.name = gi.parent and gs.name = %(grading_structure)s and gi.from_score <= %(result)s 
+        and gi.to_score >= %(result)s""".format(), 
         {
             "grading_structure":grading_structure,
             "result": result
