@@ -24,21 +24,21 @@ class TestCourseSchedule(unittest.TestCase):
 		cs1 = make_course_schedule_test_record(simulate= True)
 		
 		cs2 = make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time, 
-			student_group="TC2-TP-2014-2015 (_Test Academic Term)", room="RM0002", do_not_save= 1)
+			student_group="TC2-TP-2014-2015-2014-2015 (_Test Academic Term)", room="RM0002", do_not_save= 1)
 		self.assertRaises(OverlapError, cs2.save)
 
 	def test_room_conflict(self):
 		cs1 = make_course_schedule_test_record(simulate= True)
 		
 		cs2 = make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time, 
-			student_group="TC2-TP-2014-2015 (_Test Academic Term)", instructor="_T-Instructor-00002", do_not_save= 1)
+			student_group="TC2-TP-2014-2015-2014-2015 (_Test Academic Term)", instructor="_T-Instructor-00002", do_not_save= 1)
 		self.assertRaises(OverlapError, cs2.save)
 		
 	def test_no_conflict(self):
 		cs1 = make_course_schedule_test_record(simulate= True)
 		
 		make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time, 
-			student_group="TC2-TP-2014-2015 (_Test Academic Term)", instructor="_T-Instructor-00002", room="RM0002")
+			student_group="TC2-TP-2014-2015-2014-2015 (_Test Academic Term)", instructor="_T-Instructor-00002", room="RM0002")
 
 def make_course_schedule_test_record(**args):
 	args = frappe._dict(args)
