@@ -66,6 +66,8 @@ class ProcessPayroll(Document):
 			Creates salary slip for selected employees if already not created
 		"""
 
+		self.check_permission('write')
+
 		emp_list = self.get_emp_list()
 		ss_list = []
 		for emp in emp_list:
@@ -111,6 +113,8 @@ class ProcessPayroll(Document):
 		"""
 			Submit all salary slips based on selected criteria
 		"""
+		self.check_permission('write')
+
 		ss_list = self.get_sal_slip_list()
 		not_submitted_ss = []
 		for ss in ss_list:
@@ -168,6 +172,8 @@ class ProcessPayroll(Document):
 
 
 	def make_journal_entry(self, salary_account = None):
+		self.check_permission('write')
+
 		amount = self.get_total_salary()
 		default_bank_account = frappe.db.get_value("Company", self.company,
 			"default_bank_account")

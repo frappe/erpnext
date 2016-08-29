@@ -23,7 +23,8 @@ def get_pos_data():
 		frappe.msgprint('<a href="#List/POS Profile">'
 			+ _("Welcome to POS: Create your POS Profile") + '</a>');
 
-	update_pos_profile_data(doc, pos_profile)
+	company_data = get_company_data(doc.company)
+	update_pos_profile_data(doc, pos_profile, company_data)
 	update_multi_mode_option(doc, pos_profile)
 	default_print_format = pos_profile.get('print_format') or "Point of Sale"
 	print_template = frappe.db.get_value('Print Format', default_print_format, 'html')
@@ -32,7 +33,7 @@ def get_pos_data():
 		'doc': doc,
 		'default_customer': pos_profile.get('customer'),
 		'items': get_items(doc, pos_profile),
-		'customers': get_customers(pos_profile, doc),
+		'customers': get_customers(pos_profile, doc, company_data.default_currency),
 		'pricing_rules': get_pricing_rules(doc),
 		'print_template': print_template,
 		'meta': {
@@ -42,8 +43,10 @@ def get_pos_data():
 		}
 	}
 
-def update_pos_profile_data(doc, pos_profile):
-	company_data = frappe.db.get_value('Company', doc.company, '*', as_dict=1)
+def get_company_data(company):
+	return frappe.get_all('Company', fields = ["*"], filters= {'name': company})[0]
+
+def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.campaign = pos_profile.get('campaign')
 
 	doc.write_off_account = pos_profile.get('write_off_account') or \
@@ -148,14 +151,14 @@ def get_serial_nos(item, pos_profile, company):
 
 	return serial_no_list
 
-def get_customers(pos_profile, doc):
+def get_customers(pos_profile, doc, company_currency):
 	filters = {'disabled': 0}
 	customer_list = []
 	customers = frappe.get_all("Customer", fields=["*"], filters = filters)
 
 	for customer in customers:
 		customer_currency = get_party_account_currency('Customer', customer.name, doc.company) or doc.currency
-		if customer_currency == doc.currency:
+		if customer_currency == doc.currency or customer_currency == company_currency:
 			customer_list.append(customer)
 	return customer_list
 

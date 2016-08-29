@@ -575,7 +575,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		if(this.frm.doc.is_pos && (update_paid_amount===undefined || update_paid_amount)){
 			$.each(this.frm.doc['payments'] || [], function(index, data){
 				if(data.type == "Cash" && payment_status) {
-					data.amount = total_amount_to_pay;
+					data.base_amount = flt(total_amount_to_pay, precision("base_amount"));
+					data.amount = flt(total_amount_to_pay / me.frm.doc.conversion_rate, precision("amount"));
 					payment_status = false;
 				}else if(me.frm.doc.paid_amount){
 					data.amount = 0.0;
@@ -588,7 +589,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var me = this;
 		var paid_amount = base_paid_amount = 0.0;
 		$.each(this.frm.doc['payments'] || [], function(index, data){
-			data.base_amount = flt(data.amount * me.frm.doc.conversion_rate);
+			data.base_amount = flt(data.amount * me.frm.doc.conversion_rate, precision("base_amount"));
 			paid_amount += data.amount;
 			base_paid_amount += data.base_amount;
 		})
