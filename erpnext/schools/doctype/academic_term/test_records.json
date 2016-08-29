@@ -1,17 +1,17 @@
 [
     {
         "doctype": "Academic Term",
-        "academic_year": "_Academic Year",
+        "academic_year": "2014-2015",
         "term_name": "_Test Academic Term"
     },
     {
         "doctype": "Academic Term",
-        "academic_year": "_Academic Year 1",
+        "academic_year": "2014-2015",
         "term_name": "_Test Academic Term 1"
     },
     {
         "doctype": "Academic Term",
-        "academic_year": "_Academic Year 2",
+        "academic_year": "2014-2015",
         "term_name": "_Test Academic Term 2"
     }
 ]    
