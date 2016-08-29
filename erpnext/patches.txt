@@ -316,3 +316,4 @@ erpnext.patches.v7_0.fix_duplicate_icons
 erpnext.patches.v7_0.move_employee_parent_to_child_in_salary_structure
 erpnext.patches.v7_0.repost_gle_for_pos_sales_return
 erpnext.patches.v7_1.update_total_billing_hours
+erpnext.patches.v7_1.update_component_type
