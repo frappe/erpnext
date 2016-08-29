@@ -72,7 +72,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	validate_conversion_rate: function() {
-		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
+		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, (cur_frm) ? precision("conversion_rate") : 9);
 		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate",
 			this.frm.doc.name);
 		var company_currency = this.frm.doc.currency || this.get_company_currency();
