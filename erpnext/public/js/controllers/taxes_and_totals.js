@@ -72,7 +72,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	validate_conversion_rate: function() {
-		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
+		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, (cur_frm) ? precision("conversion_rate") : 9);
 		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate",
 			this.frm.doc.name);
 		var company_currency = this.frm.doc.currency || this.get_company_currency();
@@ -573,7 +573,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
 
 			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) + 
-				flt(this.frm.doc.change_amount), precision("outstanding_amount"));
+				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
 
 		} else if(this.frm.doc.doctype == "Purchase Invoice") {
 			this.frm.doc.outstanding_amount = flt(total_amount_to_pay, precision("outstanding_amount"));

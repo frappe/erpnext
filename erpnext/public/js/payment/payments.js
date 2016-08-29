@@ -84,7 +84,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		this.payment_val = 0.0
 		if(this.frm.doc.outstanding_amount > 0 && flt(this.selected_mode.val()) == 0.0){
 			//When user first time click on row
-			this.payment_val = flt(this.frm.doc.outstanding_amount)
+			this.payment_val = flt(this.frm.doc.outstanding_amount / this.frm.doc.conversion_rate, precision("outstanding_amount"))
 			this.selected_mode.val(format_number(this.payment_val, 2));
 			this.update_payment_amount()
 		}else if(flt(this.selected_mode.val()) > 0){
@@ -200,7 +200,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 				me.change_amount(value)
 			} else{
 				if(value == 0 && update_write_off) {
-					value = me.frm.doc.outstanding_amount;
+					value = flt(me.frm.doc.outstanding_amount / me.frm.doc.conversion_rate, precision(me.idx));
 				}
 				me.write_off_amount(value)
 			}
@@ -227,7 +227,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		$(this.$body).find(".write_off_amount").val(format_number(this.frm.doc.write_off_amount, precision("write_off_amount")));
 		$(this.$body).find('.paid_amount').text(format_currency(this.frm.doc.paid_amount, this.frm.doc.currency));
 		$(this.$body).find('.change_amount').val(format_number(this.frm.doc.change_amount, precision("change_amount")))
-		$(this.$body).find('.outstanding_amount').text(format_currency(this.frm.doc.outstanding_amount, this.frm.doc.currency))
+		$(this.$body).find('.outstanding_amount').text(format_currency(this.frm.doc.outstanding_amount, frappe.get_doc(":Company", this.frm.doc.company).default_currency))
 		this.update_invoice();
 	}
 })
