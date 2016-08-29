@@ -483,4 +483,5 @@ frappe.ui.form.on('Sales Invoice Timesheet', {
 	}
 })
 
+cur_frm.add_fetch("time_sheet", "total_billing_hours", "billing_hours");
 cur_frm.add_fetch("time_sheet", "total_billing_amount", "billing_amount");
