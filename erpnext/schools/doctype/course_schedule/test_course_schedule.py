@@ -44,7 +44,7 @@ def make_course_schedule_test_record(**args):
 	args = frappe._dict(args)
 
 	course_schedule = frappe.new_doc("Course Schedule")
-	course_schedule.student_group = args.student_group or "TC-TP-2014-2015-_Test Academic Term"
+	course_schedule.student_group = args.student_group or "TC-TP-2014-2015-2014-2015 (_Test Academic Term)"
 	course_schedule.course = args.course or "_Test Course"
 	course_schedule.instructor = args.instructor or "_T-Instructor-00001"
 	course_schedule.room = args.room or "RM0001"
