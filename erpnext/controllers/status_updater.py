@@ -142,7 +142,7 @@ class StatusUpdater(Document):
 							if item['reduce_by'] > .01:
 								self.limits_crossed_error(args, item)
 
-						else:
+						elif item[args['target_ref_field']]:
 							self.check_overflow_with_tolerance(item, args)
 
 	def check_overflow_with_tolerance(self, item, args):

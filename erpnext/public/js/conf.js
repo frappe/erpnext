@@ -19,7 +19,7 @@ $(document).bind('toolbar_setup', function() {
 
 
 	// default documentation goes to erpnext
-	$('[data-link-type="documentation"]').attr('data-path', 'user/manual/index');
+	// $('[data-link-type="documentation"]').attr('data-path', '/erpnext/manual/index');
 
 	// additional help links for erpnext
 	var $help_menu = $('.dropdown-help ul .documentation-links');

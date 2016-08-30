@@ -13,6 +13,23 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 }
 
 frappe.ui.form.on('Salary Structure', {
+	onload: function(frm) {
+		frm.set_query("salary_component", "earnings", function() {
+			return {
+				filters: {
+					type: "earning"
+				}
+			}
+		})
+		frm.set_query("salary_component", "deductions", function() {
+			return {
+				filters: {
+					type: "deduction"
+				}
+			}
+		})
+	},
+	
 	refresh: function(frm) {
 		frm.trigger("toggle_fields")
 		frm.fields_dict['earnings'].grid.set_column_disp("default_amount", false);
