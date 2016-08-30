@@ -199,7 +199,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 			if(me.idx == 'change_amount'){
 				me.change_amount(value)
 			} else{
-				if(flt(value) == 0 && update_write_off) {
+				if(flt(value) == 0 && update_write_off && me.frm.doc.outstanding_amount > 0) {
 					value = flt(me.frm.doc.outstanding_amount / me.frm.doc.conversion_rate, precision(me.idx));
 				}
 				me.write_off_amount(value)
