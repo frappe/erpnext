@@ -572,7 +572,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
 
-			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) + 
+			var change_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
+				this.frm.doc.change_amount : this.frm.doc.base_change_amount;
+
+			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
 
 		} else if(this.frm.doc.doctype == "Purchase Invoice") {
@@ -612,12 +615,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	calculate_change_amount: function(){
 		this.frm.doc.change_amount = 0.0;
 		if(this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return){
-			this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total + 
+			this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total +
 				this.frm.doc.write_off_amount, precision("change_amount"));
+			this.frm.doc.base_change_amount = flt(this.frm.doc.base_paid_amount - this.frm.doc.base_grand_total +
+				this.frm.doc.base_write_off_amount, precision("base_change_amount"));
 		}
-
-		this.frm.doc.base_change_amount = flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate,
-			precision("base_change_amount"));
 	},
 
 	calculate_write_off_amount: function(){
