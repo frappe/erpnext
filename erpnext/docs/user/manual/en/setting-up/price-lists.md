@@ -16,6 +16,4 @@ You can create new Price List
 
 * Standard Buying and Selling Price List are created by default.
 
-To disable specific Price List, uncheck Enabled field in it. Disabled Price List will not be available for selection in the Sales and Purchase transactions.
-
 {next}
