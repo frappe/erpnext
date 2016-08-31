@@ -441,12 +441,15 @@ class calculate_taxes_and_totals(object):
 			paid_amount = self.doc.paid_amount \
 				if self.doc.party_account_currency == self.doc.currency else self.doc.base_paid_amount
 
+			change_amount = self.doc.change_amount \
+				if self.doc.party_account_currency == self.doc.currency else self.doc.base_change_amount
+
 			self.calculate_write_off_amount()
 			self.calculate_change_amount()
 
 			self.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) +
-				flt(self.doc.change_amount), self.doc.precision("outstanding_amount"))
-					
+				flt(change_amount), self.doc.precision("outstanding_amount"))
+
 		elif self.doc.doctype == "Purchase Invoice":
 			self.doc.outstanding_amount = flt(total_amount_to_pay, self.doc.precision("outstanding_amount"))
 		
@@ -462,12 +465,13 @@ class calculate_taxes_and_totals(object):
 
 	def calculate_change_amount(self):
 		self.doc.change_amount = 0.0
+		self.doc.base_change_amount = 0.0
 		if self.doc.paid_amount > self.doc.grand_total:
 			self.doc.change_amount = flt(self.doc.paid_amount - self.doc.grand_total + 
 				self.doc.write_off_amount, self.doc.precision("change_amount"))
 
-		self.doc.base_change_amount = flt(self.doc.change_amount * self.doc.conversion_rate, 
-			self.doc.precision("base_change_amount"))
+			self.doc.base_change_amount = flt(self.doc.base_paid_amount - self.doc.base_grand_total +
+				self.doc.base_write_off_amount, self.doc.precision("base_change_amount"))
 
 	def calculate_write_off_amount(self):
 		if flt(self.doc.change_amount) > 0:
