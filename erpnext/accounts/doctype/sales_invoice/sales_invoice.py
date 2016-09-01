@@ -89,6 +89,8 @@ class SalesInvoice(SellingController):
 		set_account_for_mode_of_payment(self)
 
 	def on_submit(self):
+		self.validate_pos_paid_amount()
+
 		if not self.recurring_id:
 			frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			 	self.company, self.base_grand_total, self)
@@ -120,6 +122,10 @@ class SalesInvoice(SellingController):
 			self.update_against_document_in_jv()
 
 		self.update_time_sheet(self.name)
+
+	def validate_pos_paid_amount(self):
+		if len(self.payments) == 0 and self.is_pos:
+			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
 	def before_cancel(self):
 		self.update_time_sheet(None)
@@ -248,7 +254,7 @@ class SalesInvoice(SellingController):
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
 		pos = get_pos_profile(self.company)
 
-		if not self.get('payments'):
+		if not self.get('payments') and not for_validate:
 			pos_profile = frappe.get_doc('POS Profile', pos.name) if pos else None
 			update_multi_mode_option(self, pos_profile)
 
