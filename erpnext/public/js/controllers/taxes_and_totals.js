@@ -72,7 +72,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	validate_conversion_rate: function() {
-		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
+		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, (cur_frm) ? precision("conversion_rate") : 9);
 		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate",
 			this.frm.doc.name);
 		var company_currency = this.frm.doc.currency || this.get_company_currency();
@@ -572,8 +572,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
 
-			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) + 
-				flt(this.frm.doc.change_amount), precision("outstanding_amount"));
+			var change_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
+				this.frm.doc.change_amount : this.frm.doc.base_change_amount;
+
+			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
+				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
 
 		} else if(this.frm.doc.doctype == "Purchase Invoice") {
 			this.frm.doc.outstanding_amount = flt(total_amount_to_pay, precision("outstanding_amount"));
@@ -585,7 +588,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		payment_status = true;
 		if(this.frm.doc.is_pos && (update_paid_amount===undefined || update_paid_amount)){
 			$.each(this.frm.doc['payments'] || [], function(index, data){
-				if(data.type == "Cash" && payment_status) {
+				if(data.type == "Cash" && payment_status && total_amount_to_pay > 0) {
 					data.base_amount = flt(total_amount_to_pay, precision("base_amount"));
 					data.amount = flt(total_amount_to_pay / me.frm.doc.conversion_rate, precision("amount"));
 					payment_status = false;
@@ -612,12 +615,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	calculate_change_amount: function(){
 		this.frm.doc.change_amount = 0.0;
 		if(this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return){
-			this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total + 
+			this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total +
 				this.frm.doc.write_off_amount, precision("change_amount"));
+			this.frm.doc.base_change_amount = flt(this.frm.doc.base_paid_amount - this.frm.doc.base_grand_total +
+				this.frm.doc.base_write_off_amount, precision("base_change_amount"));
 		}
-
-		this.frm.doc.base_change_amount = flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate,
-			precision("base_change_amount"));
 	},
 
 	calculate_write_off_amount: function(){

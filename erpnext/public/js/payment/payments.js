@@ -84,8 +84,8 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		this.payment_val = 0.0
 		if(this.frm.doc.outstanding_amount > 0 && flt(this.selected_mode.val()) == 0.0){
 			//When user first time click on row
-			this.payment_val = flt(this.frm.doc.outstanding_amount)
-			this.selected_mode.val(format_number(this.payment_val, 2));
+			this.payment_val = flt(this.frm.doc.outstanding_amount / this.frm.doc.conversion_rate, precision("outstanding_amount"))
+			this.selected_mode.val(format_currency(this.payment_val, this.frm.doc.currency));
 			this.update_payment_amount()
 		}else if(flt(this.selected_mode.val()) > 0){
 			//If user click on existing row which has value
@@ -137,14 +137,14 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		var me = this;
 		$(this.$body).find('.pos-keyboard-key').click(function(){
 			me.payment_val += $(this).text();
-			me.selected_mode.val(format_number(me.payment_val, 2))
+			me.selected_mode.val(format_currency(me.payment_val, me.frm.doc.currency))
 			me.idx = me.selected_mode.attr("idx")
 			me.update_paid_amount()
 		})
 		
 		$(this.$body).find('.delete-btn').click(function(){
 			me.payment_val =  cstr(flt(me.selected_mode.val())).slice(0, -1);
-			me.selected_mode.val(format_number(me.payment_val, 2));
+			me.selected_mode.val(format_currency(me.payment_val, me.frm.doc.currency));
 			me.idx = me.selected_mode.attr("idx")
 			me.update_paid_amount();
 		})
@@ -155,7 +155,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		var me = this;
 		this.selected_mode.change(function(){
 			me.payment_val =  flt($(this).val()) || 0.0;
-			me.selected_mode.val(format_number(me.payment_val, 2))
+			me.selected_mode.val(format_currency(me.payment_val, me.frm.doc.currency))
 			me.idx = me.selected_mode.attr("idx")
 			me.update_payment_amount()
 		})
@@ -199,8 +199,8 @@ erpnext.payments = erpnext.stock.StockController.extend({
 			if(me.idx == 'change_amount'){
 				me.change_amount(value)
 			} else{
-				if(value == 0 && update_write_off) {
-					value = me.frm.doc.outstanding_amount;
+				if(flt(value) == 0 && update_write_off && me.frm.doc.outstanding_amount > 0) {
+					value = flt(me.frm.doc.outstanding_amount / me.frm.doc.conversion_rate, precision(me.idx));
 				}
 				me.write_off_amount(value)
 			}
@@ -224,10 +224,10 @@ erpnext.payments = erpnext.stock.StockController.extend({
 
 	show_amounts: function(){
 		var me = this;
-		$(this.$body).find(".write_off_amount").val(format_number(this.frm.doc.write_off_amount, precision("write_off_amount")));
+		$(this.$body).find(".write_off_amount").val(format_currency(this.frm.doc.write_off_amount, this.frm.doc.currency));
 		$(this.$body).find('.paid_amount').text(format_currency(this.frm.doc.paid_amount, this.frm.doc.currency));
-		$(this.$body).find('.change_amount').val(format_number(this.frm.doc.change_amount, precision("change_amount")))
-		$(this.$body).find('.outstanding_amount').text(format_currency(this.frm.doc.outstanding_amount, this.frm.doc.currency))
+		$(this.$body).find('.change_amount').val(format_currency(this.frm.doc.change_amount, this.frm.doc.currency))
+		$(this.$body).find('.outstanding_amount').text(format_currency(this.frm.doc.outstanding_amount, frappe.get_doc(":Company", this.frm.doc.company).default_currency))
 		this.update_invoice();
 	}
 })

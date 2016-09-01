@@ -9,7 +9,7 @@ erpnext.patches.v4_0.move_warehouse_user_to_restrictions
 erpnext.patches.v4_0.global_defaults_to_system_settings
 erpnext.patches.v4_0.update_incharge_name_to_sales_person_in_maintenance_schedule
 execute:frappe.reload_doc('stock', 'doctype', 'warehouse')
-execute:frappe.reload_doc('accounts', 'doctype', 'sales_invoice') # 2014-01-29
+execute:frappe.reload_doc('accounts', 'doctype', 'sales_invoice') # 2016-08-31
 execute:frappe.reload_doc('selling', 'doctype', 'sales_order') # 2014-01-29
 execute:frappe.reload_doc('selling', 'doctype', 'quotation') # 2014-01-29
 execute:frappe.reload_doc('stock', 'doctype', 'delivery_note') # 2014-01-29
@@ -276,6 +276,7 @@ execute:frappe.db.sql('update tabQuotation set status="Cancelled" where docstatu
 execute:frappe.rename_doc("DocType", "Payments", "Sales Invoice Payment", force=True)
 erpnext.patches.v7_0.update_mins_to_first_response
 erpnext.patches.v6_20x.repost_valuation_rate_for_negative_inventory
+erpnext.patches.v7_0.migrate_mode_of_payments_v6_to_v7
 erpnext.patches.v7_0.system_settings_setup_complete
 erpnext.patches.v7_0.set_naming_series_for_timesheet #2016-07-27
 execute:frappe.reload_doc('projects', 'doctype', 'project')
@@ -312,3 +313,4 @@ erpnext.patches.v7_0.set_portal_settings
 erpnext.patches.v7_0.repost_future_gle_for_purchase_invoice
 erpnext.patches.v7_0.fix_duplicate_icons
 erpnext.patches.v7_0.repost_gle_for_pos_sales_return
+erpnext.patches.v7_0.update_missing_employee_in_timesheet
