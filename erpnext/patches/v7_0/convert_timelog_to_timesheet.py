@@ -17,6 +17,7 @@ def execute():
 		args = get_timelog_data(data)
 		add_timesheet_detail(time_sheet, args)
 		time_sheet.docstatus = data.docstatus
+		time_sheet.employee = data.employee
 		time_sheet.note = data.note
 		time_sheet.company = company
 		
