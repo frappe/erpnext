@@ -19,13 +19,14 @@ def execute():
 		time_sheet.employee = data.employee
 		time_sheet.note = data.note
 		time_sheet.company = company
-		
+
 		time_sheet.set_status()
+		time_sheet.set_dates()
 		time_sheet.update_cost()
 		time_sheet.calculate_total_amounts()
 		time_sheet.flags.ignore_validate = True
 		time_sheet.save(ignore_permissions=True)
-		
+
 		# To ignore validate_mandatory_fields function
 		if data.docstatus == 1:
 			time_sheet.db_set("docstatus", 1)
@@ -33,7 +34,6 @@ def execute():
 				d.db_set("docstatus", 1)
 			time_sheet.update_production_order(time_sheet.name)
 			time_sheet.update_task_and_project()
-			
 
 def get_timelog_data(data):
 	return {
