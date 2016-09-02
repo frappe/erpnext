@@ -174,7 +174,8 @@ erpnext.production_order = {
 		var company_filter = function(doc) {
 			return {
 				filters: {
-					'company': frm.doc.company
+					'company': frm.doc.company,
+					'is_group': 0
 				}
 			}
 		}

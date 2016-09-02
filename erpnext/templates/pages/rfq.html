@@ -33,16 +33,16 @@
 	<div id="order-container">
 			<div id="rfq-items">
 				<div class="row cart-item-header">
-					<div class="col-sm-6 col-xs-6">
+					<div class="col-sm-5 col-xs-12">
 						Items
 					</div>
-					<div class="col-sm-2 col-xs-2 text-right">
+					<div class="col-sm-2 col-xs-4 text-right">
 						Qty
 					</div>
-					<div class="col-sm-2 col-xs-2 text-right">
+					<div class="col-sm-2 col-xs-4 text-right">
 						Rate
 					</div>
-					<div class="col-sm-2 col-xs-2 text-right">
+					<div class="col-sm-3 col-xs-4 text-right">
 						Amount
 					</div>
 				</div>
@@ -55,8 +55,8 @@
 		</div>
         {% if doc.items %}
 		<div class="row grand-total-row">
-			<div class="col-xs-10 text-right">{{ _("Grand Total") }}</div>
-			<div class="col-xs-2 text-right">
+			<div class="col-xs-9 text-right">{{ _("Grand Total") }}</div>
+			<div class="col-xs-3 text-right">
 			{{doc.currency_symbol}}  <span class="tax-grand-total">0.0</span>
 			</div>
 		</div>
