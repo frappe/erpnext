@@ -39,6 +39,7 @@ def validate_filters(filters):
 		frappe.throw(_("'Based On' and 'Group By' can not be same"))
 
 def get_data(filters, conditions):
+	
 	data = []
 	inc, cond= '',''
 	query_details =  conditions["based_on_select"] + conditions["period_wise_select"]
@@ -49,6 +50,9 @@ def get_data(filters, conditions):
 
 	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
 		cond = 'and '+ conditions["based_on_select"][:-1] +' IS Not NULL'
+	
+	if conditions.get('trans') in ['Sales Order', 'Purchase Order']:
+		cond += "and t1.status != 'Closed'"
 
 	year_start_date, year_end_date = frappe.db.get_value("Fiscal Year",
 		filters.get('fiscal_year'), ["year_start_date", "year_end_date"])
@@ -85,10 +89,10 @@ def get_data(filters, conditions):
 			#to get distinct value of col specified by group_by in filter
 			row = frappe.db.sql("""select DISTINCT(%s) from `tab%s` t1, `tab%s Item` t2 %s
 						where t2.parent = t1.name and t1.company = %s and %s between %s and %s
-						and t1.docstatus = 1 and %s = %s %s
+						and t1.docstatus = 1 and %s = %s %s %s
 					""" %
 					(sel_col,  conditions["trans"],  conditions["trans"], conditions["addl_tables"],
-						"%s", posting_date, "%s", "%s", conditions["group_by"], "%s", conditions.get("addl_tables_relational_cond")),
+						"%s", posting_date, "%s", "%s", conditions["group_by"], "%s", conditions.get("addl_tables_relational_cond"), cond),
 					(filters.get("company"), year_start_date, year_end_date, data1[d][0]), as_list=1)
 
 			for i in range(len(row)):
@@ -97,11 +101,11 @@ def get_data(filters, conditions):
 				#get data for group_by filter
 				row1 = frappe.db.sql(""" select %s , %s from `tab%s` t1, `tab%s Item` t2 %s
 							where t2.parent = t1.name and t1.company = %s and %s between %s and %s
-							and t1.docstatus = 1 and %s = %s and %s = %s %s
+							and t1.docstatus = 1 and %s = %s and %s = %s %s %s
 						""" %
 						(sel_col, conditions["period_wise_select"], conditions["trans"],
 							conditions["trans"], conditions["addl_tables"], "%s", posting_date, "%s","%s", sel_col,
-							"%s", conditions["group_by"], "%s", conditions.get("addl_tables_relational_cond")),
+							"%s", conditions["group_by"], "%s", conditions.get("addl_tables_relational_cond"), cond),
 						(filters.get("company"), year_start_date, year_end_date, row[i][0],
 							data1[d][0]), as_list=1)
 
