@@ -18,7 +18,8 @@ frappe.ui.form.on('Asset', {
 		frm.set_query("warehouse", function() {
 			return {
 				"filters": {
-					"company": frm.doc.company
+					"company": frm.doc.company,
+					"is_group": 0
 				}
 			};
 		});
@@ -232,7 +233,10 @@ erpnext.asset.transfer_asset = function(frm) {
 				"options": "Warehouse",
 				"get_query": function () {
 					return {
-						filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]]
+						filters: [
+							["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+							["Warehouse", "is_group", "=", 0]
+						]
 					}
 				}, 
 				"reqd": 1 
