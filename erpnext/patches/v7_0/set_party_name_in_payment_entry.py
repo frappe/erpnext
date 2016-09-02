@@ -9,6 +9,8 @@ def execute():
 	customers = frappe._dict(frappe.db.sql("select name, customer_name from tabCustomer"))
 	suppliers = frappe._dict(frappe.db.sql("select name, supplier_name from tabSupplier"))
 	
+	frappe.reload_doc('accounts', 'doctype', 'payment_entry')
+	
 	pe_list = frappe.db.sql("""select name, party_type, party from `tabPayment Entry` 
 		where party is not null and party != ''""", as_dict=1)
 	for pe in pe_list:
