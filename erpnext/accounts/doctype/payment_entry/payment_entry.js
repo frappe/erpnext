@@ -219,6 +219,12 @@ frappe.ui.form.on('Payment Entry', {
 
 	party: function(frm) {
 		if(frm.doc.payment_type && frm.doc.party_type && frm.doc.party) {
+			if(!frm.doc.posting_date) {
+				frappe.msgprint(__("Please select Posting Date before selecting Party"))
+				frm.set_value("party", "");
+				return ;
+			}
+			
 			frm.set_party_account_based_on_party = true;
 
 			return frappe.call({
