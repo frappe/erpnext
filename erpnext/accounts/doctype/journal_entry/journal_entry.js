@@ -6,15 +6,6 @@ frappe.provide("erpnext.journal_entry");
 
 
 frappe.ui.form.on("Journal Entry", {
-	setup: function(frm) {
-		frm.get_field('accounts').grid.editable_fields = [
-			{fieldname: 'account', columns: 3},
-			{fieldname: 'party', columns: 3},
-			{fieldname: 'debit_in_account_currency', columns: 2},
-			{fieldname: 'credit_in_account_currency', columns: 2}
-		];
-	},
-
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
 		frm.cscript.voucher_type(frm.doc);

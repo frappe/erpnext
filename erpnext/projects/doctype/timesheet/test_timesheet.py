@@ -16,6 +16,7 @@ class TestTimesheet(unittest.TestCase):
 		timesheet = make_timesheet("_T-Employee-0001", True)
 
 		self.assertEquals(timesheet.total_hours, 2)
+		self.assertEquals(timesheet.total_billing_hours, 2)
 		self.assertEquals(timesheet.time_logs[0].billing_rate, 50)
 		self.assertEquals(timesheet.time_logs[0].billing_amount, 100)
 
@@ -27,7 +28,7 @@ class TestTimesheet(unittest.TestCase):
 
 		self.assertEquals(salary_slip.total_working_hours, 2)
 		self.assertEquals(salary_slip.hour_rate, 50)
-		self.assertEquals(salary_slip.net_pay, 150)
+		self.assertEquals(salary_slip.net_pay, 50)
 		self.assertEquals(salary_slip.timesheets[0].time_sheet, timesheet.name)
 		self.assertEquals(salary_slip.timesheets[0].working_hours, 2)
 		
@@ -56,33 +57,39 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEquals(timesheet.status, 'Billed')
 
 def make_salary_structure(employee):
-	name = frappe.db.get_value('Salary Structure', {'employee': employee, 'salary_slip_based_on_timesheet': 1}, 'name')
+	name = frappe.db.get_value('Salary Structure Employee', {'employee': employee}, 'parent')
 	if name:
 		salary_structure = frappe.get_doc('Salary Structure', name)
 	else:
 		salary_structure = frappe.new_doc("Salary Structure")
+		salary_structure.name = "Timesheet Salary Structure Test"
+		salary_structure.salary_slip_based_on_timesheet = 1
+		salary_structure.from_date = nowdate()
+		salary_structure.salary_component = "Basic"
+		salary_structure.hour_rate = 50.0
+		salary_structure.company= "_Test Company"
 
-	salary_structure.salary_slip_based_on_timesheet = 1
-	salary_structure.employee = employee
-	salary_structure.from_date = nowdate()
-	salary_structure.salary_component = "Basic"
-	salary_structure.hour_rate = 50.0
-	salary_structure.company= "_Test Company"
+		salary_structure.set('employees', [])
+		salary_structure.set('earnings', [])
+		salary_structure.set('deductions', [])
 
-	salary_structure.set('earnings', [])
-	salary_structure.set('deductions', [])
+		es = salary_structure.append('employees', {
+			"employee": employee,
+			"base": 1200 
+		})
+		
+		
+		es = salary_structure.append('earnings', {
+			"salary_component": "_Test Allowance",
+			"amount": 100 
+		})
 
-	es = salary_structure.append('earnings', {
-		"salary_component": "_Test Allowance",
-		"amount": 100 
-	})
+		ds = salary_structure.append('deductions', {
+			"salary_component": "_Test Professional Tax",
+			"amount": 50
+		})
 
-	ds = salary_structure.append('deductions', {
-		"salary_component": "_Test Professional Tax",
-		"amount": 50
-	})
-
-	salary_structure.save(ignore_permissions=True)
+		salary_structure.save(ignore_permissions=True)
 
 	return salary_structure
 

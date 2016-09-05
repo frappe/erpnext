@@ -3,61 +3,71 @@
 
 from __future__ import unicode_literals
 import frappe
+import math
 from frappe import _
-from frappe.utils import (flt, getdate, get_first_day, get_last_day,
-	add_months, add_days, formatdate)
+from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
+	add_months, add_days, formatdate, cint)
 
-def get_period_list(fiscal_year, periodicity):
+def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
-	fy_start_end_date = frappe.db.get_value("Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"])
-	if not fy_start_end_date:
-		frappe.throw(_("Fiscal Year {0} not found.").format(fiscal_year))
+	from_fy_start_end_date = frappe.db.get_value("Fiscal Year", from_fiscal_year, ["year_start_date", "year_end_date"])
+	to_fy_start_end_date = frappe.db.get_value("Fiscal Year", to_fiscal_year, ["year_start_date", "year_end_date"])
+
+	if not from_fy_start_end_date:
+		frappe.throw(_("Start Year {0} not found.").format(from_fiscal_year))
+	
+	if not to_fy_start_end_date:
+		frappe.throw(_("End Year {0} not found.").format(to_fiscal_year))
 
 	# start with first day, so as to avoid year to_dates like 2-April if ever they occur]
-	year_start_date = get_first_day(getdate(fy_start_end_date[0]))
-	year_end_date = getdate(fy_start_end_date[1])
-	
-	if periodicity == "Yearly":
-		period_list = [frappe._dict({"from_date": year_start_date, "to_date": year_end_date, 
-			"key": fiscal_year, "label": fiscal_year})]
-	else:
-		months_to_add = {
-			"Half-Yearly": 6,
-			"Quarterly": 3,
-			"Monthly": 1
-		}[periodicity]
+	year_start_date = getdate(from_fy_start_end_date[0])
+	year_end_date = getdate(to_fy_start_end_date[1])
 
-		period_list = []
+	validate_fiscal_year(year_start_date, year_end_date)
 
-		start_date = year_start_date
-		for i in xrange(12 / months_to_add):
-			period = frappe._dict({
-				"from_date": start_date
-			})
-			to_date = add_months(start_date, months_to_add)
-			start_date = to_date
-			
-			if to_date == get_first_day(to_date):
-				# if to_date is the first day, get the last day of previous month
-				to_date = add_days(to_date, -1)
-			else:
-				# to_date should be the last day of the new to_date's month
-				to_date = get_last_day(to_date)
+	months_to_add = {
+		"Yearly": 12,
+		"Half-Yearly": 6,
+		"Quarterly": 3,
+		"Monthly": 1
+	}[periodicity]
 
-			if to_date <= year_end_date:
-				# the normal case
-				period.to_date = to_date
-			else:
-				# if a fiscal year ends before a 12 month period
-				period.to_date = year_end_date
-			
-			period_list.append(period)
-			
-			if period.to_date == year_end_date:
-				break
-				
+	period_list = []
+
+	start_date = year_start_date
+	months = get_months(year_start_date, year_end_date)
+
+	for i in xrange(months / months_to_add):
+		period = frappe._dict({
+			"from_date": start_date
+		})
+
+		to_date = add_months(start_date, months_to_add)
+		start_date = to_date
+		
+		if to_date == get_first_day(to_date):
+			# if to_date is the first day, get the last day of previous month
+			to_date = add_days(to_date, -1)
+		else:
+			# to_date should be the last day of the new to_date's month
+			to_date = get_last_day(to_date)
+
+		if to_date <= year_end_date:
+			# the normal case
+			period.to_date = to_date
+		else:
+			# if a fiscal year ends before a 12 month period
+			period.to_date = year_end_date
+
+		period.to_date_fiscal_year = get_date_fiscal_year(period.to_date)
+
+		period_list.append(period)
+
+		if period.to_date == year_end_date:
+			break
+
 	# common processing
 	for opts in period_list:
 		key = opts["to_date"].strftime("%b_%Y").lower()
@@ -75,6 +85,14 @@ def get_period_list(fiscal_year, periodicity):
 
 	return period_list
 
+def validate_fiscal_year(start_date, end_date):
+	if date_diff(end_date, start_date) <= 0:
+		frappe.throw(_("End Year cannot be before Start Year"))
+
+def get_months(start_date, end_date):
+	diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
+	return diff + 1
+
 def get_label(periodicity, from_date, to_date):
 	if periodicity=="Yearly":
 		if formatdate(from_date, "YYYY") == formatdate(to_date, "YYYY"):
@@ -86,8 +104,9 @@ def get_label(periodicity, from_date, to_date):
 
 	return label
 	
-def get_data(company, root_type, balance_must_be, period_list, 
-		accumulated_values=1, only_current_fiscal_year=True, ignore_closing_entries=False):
+def get_data(company, root_type, balance_must_be, period_list, filters=None,
+		accumulated_values=1, only_current_fiscal_year=True, ignore_closing_entries=False,
+		ignore_accumulated_values_for_fy=False):
 	accounts = get_accounts(company, root_type)
 	if not accounts:
 		return None
@@ -103,10 +122,10 @@ def get_data(company, root_type, balance_must_be, period_list,
 		set_gl_entries_by_account(company, 
 			period_list[0]["year_start_date"] if only_current_fiscal_year else None,
 			period_list[-1]["to_date"], 
-			root.lft, root.rgt, 
+			root.lft, root.rgt, filters,
 			gl_entries_by_account, ignore_closing_entries=ignore_closing_entries)
 
-	calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values)
+	calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy)
 	accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values)
 	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
 	out = filter_out_zero_value_rows(out, parent_children_map)
@@ -116,18 +135,26 @@ def get_data(company, root_type, balance_must_be, period_list,
 
 	return out
 
-def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values):
+def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy):
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
 			for period in period_list:
 				# check if posting date is within the period
+
+				fiscal_year = get_date_fiscal_year(entry.posting_date)
 				if entry.posting_date <= period.to_date:
-					if accumulated_values or entry.posting_date >= period.from_date:
+					if (accumulated_values or entry.posting_date >= period.from_date) and \
+						(fiscal_year == period.to_date_fiscal_year or not ignore_accumulated_values_for_fy):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
-						
+
 			if entry.posting_date < period_list[0].year_start_date:
 				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
+				
+def get_date_fiscal_year(date):
+	from erpnext.accounts.utils import get_fiscal_year
+	
+	return get_fiscal_year(date)[0]
 
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values):
 	"""accumulate children's values in parent accounts"""
@@ -261,16 +288,11 @@ def sort_root_accounts(roots):
 
 	roots.sort(compare_roots)
 
-def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, gl_entries_by_account,
+def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, filters, gl_entries_by_account,
 		ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
-	additional_conditions = []
 
-	if ignore_closing_entries:
-		additional_conditions.append("and ifnull(voucher_type, '')!='Period Closing Voucher'")
-
-	if from_date:
-		additional_conditions.append("and posting_date >= %(from_date)s")
+	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
 	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening from `tabGL Entry`
 		where company=%(company)s
@@ -278,7 +300,7 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, g
 		and posting_date <= %(to_date)s
 		and account in (select name from `tabAccount`
 			where lft >= %(lft)s and rgt <= %(rgt)s)
-		order by account, posting_date""".format(additional_conditions="\n".join(additional_conditions)),
+		order by account, posting_date""".format(additional_conditions=additional_conditions),
 		{
 			"company": company,
 			"from_date": from_date,
@@ -292,6 +314,22 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, g
 		gl_entries_by_account.setdefault(entry.account, []).append(entry)
 
 	return gl_entries_by_account
+
+def get_additional_conditions(from_date, ignore_closing_entries, filters):
+	additional_conditions = []
+
+	if ignore_closing_entries:
+		additional_conditions.append("ifnull(voucher_type, '')!='Period Closing Voucher'")
+
+	if from_date:
+		additional_conditions.append("posting_date >= %(from_date)s")
+
+	if filters:
+		for key in ['cost_center', 'project']:
+			if filters.get(key):
+				additional_conditions.append("%s = '%s'"%(key, filters.get(key)))
+
+	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 
 def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 	columns = [{

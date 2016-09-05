@@ -178,19 +178,6 @@ def get_retirement_date(date_of_birth=None):
 	return ret
 
 
-@frappe.whitelist()
-def make_salary_structure(source_name, target=None):
-	target = get_mapped_doc("Employee", source_name, {
-		"Employee": {
-			"doctype": "Salary Structure",
-			"field_map": {
-				"name": "employee",
-			}
-		}
-	})
-	target.make_earn_ded_table()
-	return target
-
 def validate_employee_role(doc, method):
 	# called via User hook
 	if "Employee" in [d.role for d in doc.get("user_roles")]:

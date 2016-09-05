@@ -4,14 +4,6 @@ cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 
 frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
-		frm.get_field('time_logs').grid.editable_fields = [
-			{fieldname: 'billable', columns: 1},
-			{fieldname: 'project', columns: 3},
-			{fieldname: 'activity_type', columns: 2},
-			{fieldname: 'from_time', columns: 3},
-			{fieldname: 'hours', columns: 1}
-		];
-
 		frm.fields_dict.employee.get_query = function() {
 			return {
 				filters:{
@@ -49,6 +41,10 @@ frappe.ui.form.on("Timesheet", {
 					"icon-file-alt");
 			}
 		}
+
+		if(frm.doc.sales_invoice) {
+			cur_frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
+		}
 	},
 
 	make_invoice: function(frm) {
@@ -85,6 +81,10 @@ frappe.ui.form.on("Timesheet Detail", {
 
 	hours: function(frm, cdt, cdn) {
 		calculate_end_time(frm, cdt, cdn)
+	},
+
+	billing_hours: function(frm, cdt, cdn) {
+		calculate_billing_costing_amount(frm, cdt, cdn)
 	},
 
 	billing_rate: function(frm, cdt, cdn) {
@@ -127,16 +127,18 @@ calculate_end_time = function(frm, cdt, cdn){
 	frappe.model.set_value(cdt, cdn, "to_time", d.format(moment.defaultDatetimeFormat));
 	frm._setting_hours = false;
 
-	calculate_billing_costing_amount(frm, cdt, cdn)
+	if(frm.doc.__islocal && !child.billing_hours && child.hours){
+		frappe.model.set_value(cdt, cdn, "billing_hours", child.hours);
+	}
 }
 
 var calculate_billing_costing_amount = function(frm, cdt, cdn){
 	child = locals[cdt][cdn]
 	billing_amount = costing_amount = 0.0;
 
-	if(child.hours && child.billable){
-		billing_amount = (child.hours * child.billing_rate);
-		costing_amount = flt(child.costing_rate * child.hours);
+	if(child.billing_hours && child.billable){
+		billing_amount = (child.billing_hours * child.billing_rate);
+		costing_amount = flt(child.costing_rate * child.billing_hours);
 	}
 
 	frappe.model.set_value(cdt, cdn, 'billing_amount', billing_amount);
@@ -146,18 +148,21 @@ var calculate_billing_costing_amount = function(frm, cdt, cdn){
 
 var calculate_time_and_amount = function(frm) {
 	var tl = frm.doc.time_logs || [];
-	total_hr = 0;
+	total_working_hr = 0;
+	total_billing_hr = 0;
 	total_billing_amount = 0;
 	total_costing_amount = 0;
 	for(var i=0; i<tl.length; i++) {
 		if (tl[i].hours) {
-			total_hr += tl[i].hours;
+			total_working_hr += tl[i].hours;
+			total_billing_hr += tl[i].billing_hours;
 			total_billing_amount += tl[i].billing_amount;
 			total_costing_amount += tl[i].costing_amount;
 		}
 	}
 
-	cur_frm.set_value("total_hours", total_hr);
+	cur_frm.set_value("total_billing_hours", total_billing_hr);
+	cur_frm.set_value("total_hours", total_working_hr);
 	cur_frm.set_value("total_billing_amount", total_billing_amount);
 	cur_frm.set_value("total_costing_amount", total_costing_amount);
 }

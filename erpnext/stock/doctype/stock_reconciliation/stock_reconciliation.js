@@ -140,13 +140,6 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 				}
 			}
 		}
-
-		this.frm.get_field('items').grid.editable_fields = [
-			{fieldname: 'item_code', columns: 3},
-			{fieldname: 'warehouse', columns: 3},
-			{fieldname: 'qty', columns: 2},
-			{fieldname: 'valuation_rate', columns: 2}
-		];
 	},
 
 	refresh: function() {

@@ -21,9 +21,8 @@ def enroll_student(source_name):
 			"field_map": {
 				"name": "student_applicant"
 			}
-		}})
+		}}, ignore_permissions=True)
 	student.save()
-
 	program_enrollment = frappe.new_doc("Program Enrollment")
 	program_enrollment.student = student.name
 	program_enrollment.student_name = student.title

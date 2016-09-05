@@ -9,6 +9,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -1172,7 +1173,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-07-07 12:49:01.596547", 
+ "modified": "2016-08-10 15:57:59.944600", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 

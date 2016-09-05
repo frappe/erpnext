@@ -83,6 +83,7 @@ class SalesInvoice(SellingController):
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		self.update_packing_list()
+		self.set_billing_hours_and_amount()
 		self.calculate_billing_amount_from_timesheet()
 
 	def before_save(self):
@@ -350,7 +351,6 @@ class SalesInvoice(SellingController):
 				against_acc.append(d.income_account)
 		self.against_income_account = ','.join(against_acc)
 
-
 	def add_remarks(self):
 		if not self.remarks: self.remarks = 'No Remarks'
 
@@ -446,6 +446,15 @@ class SalesInvoice(SellingController):
 			make_packing_list(self)
 		else:
 			self.set('packed_items', [])
+
+	def set_billing_hours_and_amount(self):
+		for timesheet in self.timesheets:
+			ts_doc = frappe.get_doc('Timesheet', timesheet.time_sheet)
+			if not timesheet.billing_hours and ts_doc.total_billing_hours:
+				timesheet.billing_hours = ts_doc.total_billing_hours
+
+			if not timesheet.billing_amount and ts_doc.total_billing_amount:
+				timesheet.billing_amount = ts_doc.total_billing_amount
 
 	def calculate_billing_amount_from_timesheet(self):
 		total_billing_amount = 0.0

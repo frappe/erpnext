@@ -25,23 +25,84 @@ class SalarySlip(TransactionBase):
 		self.set_month_dates()
 		
 		if not (len(self.get("earnings")) or len(self.get("deductions"))):
+			# get details from salary structure
 			self.get_emp_and_leave_details()
 		else:
 			self.get_leave_details(lwp = self.leave_without_pay)
 
-		if self.salary_slip_based_on_timesheet or not self.net_pay:
-			self.calculate_net_pay()
+		# if self.salary_slip_based_on_timesheet or not self.net_pay:
+		# 	self.calculate_net_pay()
 
 		company_currency = get_company_currency(self.company)
 		self.total_in_words = money_in_words(self.rounded_total, company_currency)
-
-		set_employee_name(self)
+		
+		if frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet"):
+			max_working_hours = frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet")
+			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
+				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
+								format(max_working_hours), alert=True)
 
 	def validate_dates(self):
 		if date_diff(self.end_date, self.start_date) < 0:
 			frappe.throw(_("To date cannot be before From date"))
+			
+	def calculate_component_amounts(self):
+		if not getattr(self, '_salary_structure_doc', None):
+			self._salary_structure_doc = frappe.get_doc('Salary Structure', self.salary_structure)
+
+		data = self.get_data_for_eval()
+		for key in ('earnings', 'deductions'):
+			for d in self._salary_structure_doc.get(key):
+				amount = self.eval_condition_and_formula(d, data)				
+				if amount:
+					self.append(key, {
+						'amount': amount,
+						'default_amount': amount,
+						'depends_on_lwp' : d.depends_on_lwp,
+						'salary_component' : d.salary_component
+					})
+	
+	def eval_condition_and_formula(self, d, data):
+		try:
+			if d.condition:
+				if not eval(d.condition, None, data):
+					return None
+	
+			amount = d.amount
+			if d.amount_based_on_formula:
+				if d.formula:
+					amount = eval(d.formula, None, data)
+	
+				data[d.abbr] = amount
+			return amount
+		except NameError as err:
+		    frappe.throw(_("Name error: {0}".format(err)))
+		except SyntaxError as err:
+		    frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
+		except:
+		    frappe.throw(_("Error in formula or condition"))
+		    raise	
+	
+	def get_data_for_eval(self):
+		'''Returns data for evaluating formula'''
+		data = frappe._dict()
+		
+		for d in self._salary_structure_doc.employees:
+			if d.employee == self.employee:
+				data.base, data.variable = d.base, d.variable
+	
+		data.update(frappe.get_doc("Employee", self.employee).as_dict())
+
+		# set values for components
+		salary_components = frappe.get_all("Salary Component", fields=["salary_component_abbr"])
+		for salary_component in salary_components:
+			data[salary_component.salary_component_abbr] = 0
+			
+		return data
+		
 
 	def get_emp_and_leave_details(self):
+		'''First time, load all the components from salary structure'''
 		if self.employee:
 			self.set("earnings", [])
 			self.set("deductions", [])
@@ -55,10 +116,10 @@ class SalarySlip(TransactionBase):
 			struct = self.check_sal_struct(joining_date, relieving_date)
 
 			if struct:
-				ss_doc = frappe.get_doc('Salary Structure', struct)
-				self.salary_slip_based_on_timesheet = ss_doc.salary_slip_based_on_timesheet or 0
+				self._salary_structure_doc = frappe.get_doc('Salary Structure', struct)
+				self.salary_slip_based_on_timesheet = self._salary_structure_doc.salary_slip_based_on_timesheet or 0
 				self.set_time_sheet()
-				self.pull_sal_struct(ss_doc)
+				self.pull_sal_struct()
 
 	def set_time_sheet(self):
 		if self.salary_slip_based_on_timesheet:
@@ -79,28 +140,44 @@ class SalarySlip(TransactionBase):
 			self.end_date = m['month_end_date']
 
 	def check_sal_struct(self, joining_date, relieving_date):
-		struct = frappe.db.sql("""select name from `tabSalary Structure`
-			where employee=%s and is_active = 'Yes'
-			and (from_date <= %s or from_date <= %s)
-			and (to_date is null or to_date >= %s or to_date >= %s) order by from_date desc limit 1""",
-			(self.employee, self.start_date, joining_date, self.end_date, relieving_date))
+		st_name = frappe.db.sql("""select parent from `tabSalary Structure Employee`
+			where employee=%s order by modified desc limit 1""",self.employee)
+			
+		if st_name:
+			struct = frappe.db.sql("""select name from `tabSalary Structure`
+				where name=%s and is_active = 'Yes'
+				and (from_date <= %s or from_date <= %s)
+				and (to_date is null or to_date >= %s or to_date >= %s) order by from_date desc limit 1""",
+				(st_name, self.start_date, joining_date, self.end_date, relieving_date))
 
-		if not struct:
+			if not struct:
+				self.salary_structure = None
+				frappe.throw(_("No active or default Salary Structure found for employee {0} for the given dates")
+					.format(self.employee), title=_('Salary Structure Missing'))
+
+			return struct and struct[0][0] or ''
+		else:
 			self.salary_structure = None
 			frappe.throw(_("No active or default Salary Structure found for employee {0} for the given dates")
-				.format(self.employee), title=_('Salary Structure Missing'))
+				.format(self.employee), title=_('Salary Structure Missing'))	
 
-		return struct and struct[0][0] or ''
-
-	def pull_sal_struct(self, ss_doc):
+	def pull_sal_struct(self):
 		from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-		make_salary_slip(ss_doc.name, self)
+		make_salary_slip(self._salary_structure_doc.name, self)
 
 		if self.salary_slip_based_on_timesheet:
-			self.salary_structure = ss_doc.name
-			self.hour_rate = ss_doc.hour_rate
+			self.salary_structure = self._salary_structure_doc.name
+			self.hour_rate = self._salary_structure_doc.hour_rate
 			self.total_working_hours = sum([d.working_hours or 0.0 for d in self.timesheets]) or 0.0
-			self.add_earning_for_hourly_wages(ss_doc.salary_component)
+			self.add_earning_for_hourly_wages(self._salary_structure_doc.salary_component)
+			
+			
+			
+	def process_salary_structure(self):
+		'''Calculate salary after salary structure details have been updated'''
+		self.pull_emp_details()
+		self.get_leave_details()
+		self.calculate_net_pay()
 
 	def add_earning_for_hourly_wages(self, salary_component):
 		default_type = False
@@ -120,6 +197,7 @@ class SalarySlip(TransactionBase):
 		if emp:
 			self.bank_name = emp.bank_name
 			self.bank_account_no = emp.bank_ac_no
+
 
 	def get_leave_details(self, joining_date=None, relieving_date=None, lwp=None):
 		if not self.fiscal_year:
@@ -193,7 +271,7 @@ class SalarySlip(TransactionBase):
 	def calculate_lwp(self, holidays, working_days):
 		lwp = 0
 		for d in range(working_days):
-			dt = add_days(cstr(self.start_date), d)
+			dt = add_days(cstr(getdate(self.start_date)), d)
 			if dt not in holidays:
 				leave = frappe.db.sql("""
 					select t1.name, t1.half_day
@@ -222,35 +300,28 @@ class SalarySlip(TransactionBase):
 				if frappe.db.get_value('Timesheet', data.time_sheet, 'status') == 'Payrolled':
 					frappe.throw(_("Salary Slip of employee {0} already created for time sheet {1}").format(self.employee, data.time_sheet))
 
-	def calculate_earning_total(self):
-		self.gross_pay = flt(self.arrear_amount) + flt(self.leave_encashment_amount)
-		for d in self.get("earnings"):
-			if cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet:
-				d.amount = rounded((flt(d.default_amount) * flt(self.payment_days)
-					/ cint(self.total_days_in_month)), self.precision("amount", "earnings"))
-			elif not self.payment_days and not self.salary_slip_based_on_timesheet:
-				d.amount = 0
-			elif not d.amount:
-				d.amount = d.default_amount
-			self.gross_pay += flt(d.amount)
-
-	def calculate_ded_total(self):
-		self.total_deduction = 0
-		for d in self.get('deductions'):
+	def sum_components(self, component_type, total_field):
+		for d in self.get(component_type):
 			if cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet:
 				d.amount = rounded((flt(d.amount) * flt(self.payment_days)
-					/ cint(self.total_days_in_month)), self.precision("amount", "deductions"))
+					/ cint(self.total_days_in_month)), self.precision("amount", component_type))
 			elif not self.payment_days and not self.salary_slip_based_on_timesheet:
 				d.amount = 0
 			elif not d.amount:
 				d.amount = d.default_amount
-			self.total_deduction += flt(d.amount)
+			self.set(total_field, self.get(total_field) + flt(d.amount))
 
 	def calculate_net_pay(self):
+		self.calculate_component_amounts()
+
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
-		self.calculate_earning_total()
-		self.calculate_ded_total()
+		self.gross_pay = flt(self.arrear_amount) + flt(self.leave_encashment_amount)
+		self.total_deduction = 0
+
+		self.sum_components('earnings', 'gross_pay')
+		self.sum_components('deductions', 'total_deduction')
+
 		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
 		self.rounded_total = rounded(self.net_pay,
 			self.precision("net_pay") if disable_rounded_total else 0)

@@ -9,45 +9,79 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 	e_tbl = doc.earnings || [];
 	d_tbl = doc.deductions || [];
 	if (e_tbl.length == 0 && d_tbl.length == 0)
-		return $c_obj(doc,'make_earn_ded_table','', function(r, rt) { refresh_many(['earnings', 'deductions']);});
-}
-
-cur_frm.cscript.refresh = function(doc, dt, dn){
-	if((!doc.__islocal) && (doc.is_active == 'Yes') && cint(doc.salary_slip_based_on_timesheet == 0)){
-		cur_frm.add_custom_button(__('Salary Slip'),
-			cur_frm.cscript['Make Salary Slip'], __("Make"));
-		cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-	}
+		return function(r, rt) { refresh_many(['earnings', 'deductions']);};
 }
 
 frappe.ui.form.on('Salary Structure', {
+	onload: function(frm) {
+		frm.set_query("salary_component", "earnings", function() {
+			return {
+				filters: {
+					type: "earning"
+				}
+			}
+		})
+		frm.set_query("salary_component", "deductions", function() {
+			return {
+				filters: {
+					type: "deduction"
+				}
+			}
+		})
+	},
+	
 	refresh: function(frm) {
 		frm.trigger("toggle_fields")
 		frm.fields_dict['earnings'].grid.set_column_disp("default_amount", false);
 		frm.fields_dict['deductions'].grid.set_column_disp("default_amount", false);
-	},
+		
+		frm.add_custom_button(__("Preview Salary Slip"),
+			function() { frm.trigger('preview_salary_slip'); }, "icon-sitemap", "btn-default");
+		
+	},	
 
 	salary_slip_based_on_timesheet: function(frm) {
 		frm.trigger("toggle_fields")
 	},
-
+	
+	preview_salary_slip: function(frm) {
+		var d = new frappe.ui.Dialog({
+			title: __("Preview Salary Slip"),
+			fields: [
+				{"fieldname":"employee", "fieldtype":"Select", "label":__("Employee"),
+				options: $.map(frm.doc.employees, function(d) { return d.employee }), reqd: 1, label:"Employee"},
+				{fieldname:"fetch", "label":__("Show Salary Slip"), "fieldtype":"Button"}
+			]
+		});
+		d.get_input("fetch").on("click", function() {
+			var values = d.get_values();
+			if(!values) return;
+			frm.doc.salary_slip_based_on_timesheet?print_format="Salary Slip based on Timesheet":print_format="Salary Slip Standard";
+				
+			frappe.call({
+				method: "erpnext.hr.doctype.salary_structure.salary_structure.make_salary_slip",
+				args: {
+					source_name: frm.doc.name,
+					employee: values.employee,
+					as_print: 1,
+					print_format: print_format
+				},
+				callback: function(r) {
+					var new_window = window.open();
+					new_window.document.write(r.message);
+					// frappe.msgprint(r.message);
+				}
+			});
+		});
+		d.show();
+	},
+	
 	toggle_fields: function(frm) {
 		frm.toggle_display(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
 		frm.toggle_reqd(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
 	}
 })
 
-cur_frm.cscript['Make Salary Slip'] = function() {
-	frappe.model.open_mapped_doc({
-		method: "erpnext.hr.doctype.salary_structure.salary_structure.make_salary_slip",
-		frm: cur_frm
-	});
-}
-
-cur_frm.cscript.employee = function(doc, dt, dn){
-	if (doc.employee)
-		return get_server_fields('get_employee_details','','',doc,dt,dn);
-}
 
 cur_frm.cscript.amount = function(doc, cdt, cdn){
 	calculate_totals(doc, cdt, cdn);
@@ -79,10 +113,6 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	if(doc.employee && doc.is_active == "Yes") frappe.model.clear_doc("Employee", doc.employee);
 }
 
-cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
-	return{ query: "erpnext.controllers.queries.employee_query" }
-}
-
 
 frappe.ui.form.on('Salary Detail', {
 	amount: function(frm) {
@@ -97,3 +127,11 @@ frappe.ui.form.on('Salary Detail', {
 		calculate_totals(frm.doc);
 	}
 })
+
+frappe.ui.form.on('Salary Structure Employee', {
+	onload: function(frm) {
+		frm.set_query("employee","employees", function(doc,cdt,cdn) {
+			return{ query: "erpnext.controllers.queries.employee_query" }
+		})
+	}
+});

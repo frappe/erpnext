@@ -2,9 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Customer", {
-	before_load: function(frm) {
-		frappe.setup_language_field(frm);
-	},
 	refresh: function(frm) {
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
 			frm.toggle_display("naming_series", false);

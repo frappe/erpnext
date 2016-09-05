@@ -28,14 +28,22 @@ class Timesheet(Document):
 
 	def calculate_total_amounts(self):
 		self.total_hours = 0.0
+		self.total_billing_hours = 0.0
 		self.total_billing_amount = 0.0
 		self.total_costing_amount = 0.0
 
 		for d in self.get("time_logs"):
+			self.update_billing_hours(d)
+
 			self.total_hours += flt(d.hours)
+			self.total_billing_hours += flt(d.billing_hours)
 			if d.billable: 
 				self.total_billing_amount += flt(d.billing_amount)
 				self.total_costing_amount += flt(d.costing_amount)
+
+	def update_billing_hours(self, args):
+		if cint(args.billing_hours) == 0:
+			args.billing_hours = args.hours
 
 	def set_status(self):
 		self.status = {
@@ -230,7 +238,7 @@ class Timesheet(Document):
 		for data in self.time_logs:
 			if data.activity_type and (not data.billing_amount or not data.costing_amount):
 				rate = get_activity_cost(self.employee, data.activity_type)
-				hours =  data.hours or 0
+				hours =  data.billing_hours or 0
 				if rate:
 					data.billing_rate = flt(rate.get('billing_rate'))
 					data.costing_rate = flt(rate.get('costing_rate'))
@@ -246,6 +254,7 @@ def make_sales_invoice(source_name, target=None):
 			"doctype": "Sales Invoice Timesheet",
 			"field_map": {
 				"total_billing_amount": "billing_amount",
+				"total_billing_hours": "billing_hours",
 				"name": "time_sheet"
 			},
 		}
@@ -304,7 +313,7 @@ def get_events(start, end, filters=None):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, `tabTimesheet Detail`.parent as parent,
 		from_time, hours, activity_type, project, to_time from `tabTimesheet Detail`, 
-		`tabTimesheet` where `tabTimesheet Detail`.parent = `tabTimesheet`.name and 
+		`tabTimesheet` where `tabTimesheet Detail`.parent = `tabTimesheet`.name and `tabTimesheet`.docstatus < 2 and
 		(from_time between %(start)s and %(end)s) {conditions}""".format(conditions=conditions),
 		{
 			"start": start,

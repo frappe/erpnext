@@ -23,13 +23,15 @@ execute:frappe.reload_doc('selling', 'doctype', 'customer') # 2014-01-29
 execute:frappe.reload_doc('buying', 'doctype', 'supplier') # 2014-01-29
 execute:frappe.reload_doc('accounts', 'doctype', 'asset_category')
 execute:frappe.reload_doc('accounts', 'doctype', 'pricing_rule')
+
+erpnext.patches.v5_2.change_item_selects_to_checks
 execute:frappe.reload_doctype('Item')
+
 erpnext.patches.v4_0.map_charge_to_taxes_and_charges
 execute:frappe.reload_doc('support', 'doctype', 'newsletter') # 2014-01-31
 execute:frappe.reload_doc('hr', 'doctype', 'employee') # 2014-02-03
 execute:frappe.db.sql("update tabPage set module='Core' where name='Setup'")
 
-erpnext.patches.v5_2.change_item_selects_to_checks
 erpnext.patches.v4_0.fields_to_be_renamed
 erpnext.patches.v4_0.rename_sitemap_to_route
 erpnext.patches.v7_0.re_route #2016-06-27
@@ -293,7 +295,7 @@ erpnext.patches.v7_0.rename_prevdoc_fields
 erpnext.patches.v7_0.rename_time_sheet_doctype
 execute:frappe.delete_doc_if_exists("Report", "Customers Not Buying Since Long Time")
 erpnext.patches.v7_0.make_is_group_fieldtype_as_check
-execute:frappe.reload_doc('projects', 'doctype', 'timesheet', force=True)
+execute:frappe.reload_doc('projects', 'doctype', 'timesheet', force=True) #2016-08-23
 execute:frappe.delete_doc_if_exists("Report", "Employee Holiday Attendance")
 execute:frappe.delete_doc_if_exists("DocType", "Payment Tool")
 execute:frappe.delete_doc_if_exists("DocType", "Payment Tool Detail")
@@ -312,6 +314,10 @@ erpnext.patches.v7_0.rename_examination_to_assessment
 erpnext.patches.v7_0.set_portal_settings
 erpnext.patches.v7_0.repost_future_gle_for_purchase_invoice
 erpnext.patches.v7_0.fix_duplicate_icons
+erpnext.patches.v7_0.move_employee_parent_to_child_in_salary_structure
+erpnext.patches.v7_0.repost_gle_for_pos_sales_return
+erpnext.patches.v7_1.update_total_billing_hours
+erpnext.patches.v7_1.update_component_type
 erpnext.patches.v7_0.repost_gle_for_pos_sales_return
 erpnext.patches.v7_0.update_missing_employee_in_timesheet
 erpnext.patches.v7_0.update_status_for_timesheet

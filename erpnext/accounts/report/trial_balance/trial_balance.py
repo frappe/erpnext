@@ -65,7 +65,7 @@ def get_data(filters):
 	gl_entries_by_account = {}
 
 	set_gl_entries_by_account(filters.company, filters.from_date,
-		filters.to_date, min_lft, max_rgt, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
+		filters.to_date, min_lft, max_rgt, filters, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
 
 	opening_balances = get_opening_balances(filters)
 

@@ -1,25 +1,28 @@
 from __future__ import unicode_literals
 import frappe
 import random
-from frappe.utils import random_string, add_days
+from frappe.utils import random_string, add_days, cint
 from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
-from frappe.utils.make_random import how_many, get_random
+from frappe.utils.make_random import get_random
 from erpnext.hr.doctype.expense_claim.expense_claim import get_expense_approver, make_bank_entry
 from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on, OverlapError
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_hr_user'))
 	year, month = frappe.flags.current_date.strftime("%Y-%m").split("-")
+	prev_month = str(cint(month)- 1).zfill(2)
+	if month=="01":
+		prev_month = "12"
 	
 	mark_attendance()
 	make_leave_application()
 
 	# process payroll
-	if not frappe.db.get_value("Salary Slip", {"month": month, "fiscal_year": year}):
+	if not frappe.db.get_value("Salary Slip", {"month": prev_month, "fiscal_year": year}):
 		process_payroll = frappe.get_doc("Process Payroll", "Process Payroll")
 		process_payroll.company = frappe.flags.company
-		process_payroll.month = month
+		process_payroll.month = prev_month
 		process_payroll.fiscal_year = year
 		process_payroll.create_sal_slip()
 		process_payroll.submit_salary_slip()
@@ -92,13 +95,20 @@ def update_sanctioned_amount(expense_claim):
 			expense.sanctioned_amount = sanctioned_amount
 
 def get_timesheet_based_salary_slip_employee():
-	return frappe.get_all('Salary Structure', fields = ["distinct employee as name"],
-		filters = {'salary_slip_based_on_timesheet': 1})
+	sal_struct = frappe.db.sql("""
+			select name from `tabSalary Structure`
+			where salary_slip_based_on_timesheet = 1
+			and docstatus != 2""")
+	if sal_struct:
+		employees = frappe.db.sql("""
+				select employee from `tabSalary Structure Employee`
+				where parent IN %(sal_struct)s""", {"sal_struct": sal_struct}, as_dict=True)
+		return employees
 	
 def make_timesheet_records():
 	employees = get_timesheet_based_salary_slip_employee()
-	for employee in employees:
-		ts = make_timesheet(employee.name, simulate = True, billable = 1, activity_type=get_random("Activity Type"))
+	for e in employees:
+		ts = make_timesheet(e.employee, simulate = True, billable = 1, activity_type=get_random("Activity Type"))
 
 		rand = random.random()
 		if rand >= 0.3:
@@ -173,7 +183,7 @@ def mark_attendance():
 			if leave:
 				attendance.status = "Absent"
 			else:
-				attendance.status = "Present"		
+				attendance.status = "Present"
 			attendance.save()
 			attendance.submit()		
-			frappe.db.commit()	
+			frappe.db.commit()

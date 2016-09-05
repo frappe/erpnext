@@ -42,15 +42,52 @@ To create a new Salary Structure go to:
 
 > Human Resources > Setup > Salary Structure > New Salary Structure
 
-#### Figure 1:Salary Structure
+#### Figure 1.1:Salary Structure
 
 <img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/salary-structure.png">
 
 ### In the Salary Structure,
 
-  * Select the Employee
+  * Select the Employees and enter Base (which is base salary or CTC) and Variable (if applicable)
   * Set the starting date from which this is valid (Note: There can only be one Salary Structure that can be “Active” for an Employee during any period)
-  * In the “Earnings” and “Deductions” table all your defined Earning Type and Deductions Type will be auto-populated. Set the values of the Earnings and Deductions and save the Salary Structure.
+
+#### Figure 1.2:Salary Structure for Salary Slip based on Timesheet
+
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/salary-timesheet.png">
+  
+### Salary Slip Based on Timesheet 
+
+Salary Slip based on Timesheet is applicable if you have timesheet based payroll system
+  
+  * Check "Salary Slip Based on Timesheet"
+  * Select the salary component and enter Hour Rate (Note: This salary component gets added to earnings in Salary Slip)
+  
+### Earnings and Deductions in Salary Structure 
+
+In the “Earnings” and “Deductions” tables, you can calculate the values of Salary Components based on,
+
+  * Condition and Formula
+
+#### Figure 1.3:Condition and Formula
+
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/condition-formula.png">
+
+  * Condition and Amount
+  
+#### Figure 1.4:Condition and Amount
+
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/condition-amount.png">  
+
+  * Only Formula  
+  * Only Amount
+  
+Save the Salary Structure.
+
+In conditions and formulas, 
+
+  * Use field "base" for using base salary of the Employee
+  * Use Salary Component abbreviations. For example: BS for Basic Salary
+  * Use field name for employee details. For example: Employment Type for employment_type
 
 ### Leave Without Pay (LWP)
 
@@ -64,6 +101,7 @@ days for the month (based on the Holiday List).
 If you don’t want ERPNext to manage LWP, just don’t click on LWP in any of the
 Earning Types and Deduction Types.
 
+
 * * *
 
 ### Creating Salary Slips
@@ -71,8 +109,9 @@ Earning Types and Deduction Types.
 Once the Salary Structure is created, you can make a salary slip from the same
 form or you can process your payroll for the month using Process Payroll.
 
-To create a salary slip from Salary Structure, click on the button Make Salary
-Slip.
+To create a new Salary Slip go to:
+
+> Human Resources > Setup > Salary Slip > New Salary Slip
 
 #### Figure 2: Salary Slip
 
