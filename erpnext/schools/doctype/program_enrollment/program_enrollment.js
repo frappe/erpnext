@@ -9,7 +9,8 @@ frappe.ui.form.on("Program Enrollment", {
 			frappe.call({
 				method: "erpnext.schools.api.get_fee_schedule",
 				args: {
-					"program": frm.doc.program
+					"program": frm.doc.program,
+					"student_category": frm.doc.student_category
 				},
 				callback: function(r) {
 					if(r.message) {
@@ -18,6 +19,10 @@ frappe.ui.form.on("Program Enrollment", {
 				}
 			});
 		}
+	},
+	
+	student_category: function() {
+		frappe.ui.form.trigger("Program Enrollment", "program");
 	},
 	
 	onload: function(frm, cdt, cdn){
