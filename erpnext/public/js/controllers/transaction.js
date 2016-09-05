@@ -424,7 +424,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
 				&& !this.frm.doc.ignore_pricing_rule) {
-			this.get_exchange_rate(this.frm.doc.currency, company_currency,
+			this.get_exchange_rate(this.frm.doc.posting_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("conversion_rate", exchange_rate);
 				});
@@ -452,10 +452,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	get_exchange_rate: function(from_currency, to_currency, callback) {
+	get_exchange_rate: function(posting_date, from_currency, to_currency, callback) {
 		return frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
+				posting_date: posting_date,
 				from_currency: from_currency,
 				to_currency: to_currency
 			},
