@@ -17,7 +17,8 @@ def get_filters_cond(doctype, filters, conditions):
 				if isinstance(f[1], basestring) and f[1][0] == '!':
 					flt.append([doctype, f[0], '!=', f[1][1:]])
 				else:
-					flt.append([doctype, f[0], '=', f[1]])
+					value = frappe.db.escape(f[1]) if isinstance(f[1], basestring) else f[1]
+					flt.append([doctype, f[0], '=', value])
 
 		query = DatabaseQuery(doctype)
 		query.filters = flt
