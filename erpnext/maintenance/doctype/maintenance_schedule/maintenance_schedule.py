@@ -58,7 +58,7 @@ class MaintenanceSchedule(TransactionBase):
 			if no_email_sp:
 				frappe.msgprint(
 					frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
-						self.owner, "<br>"+no_email_sp.join("<br>")
+						self.owner, "<br>" + "<br>".join(no_email_sp)
 				))
 
 			scheduled_date = frappe.db.sql("""select scheduled_date from
@@ -187,14 +187,17 @@ class MaintenanceSchedule(TransactionBase):
 			if not sr_details:
 				frappe.throw(_("Serial No {0} not found").format(serial_no))
 
-			if sr_details.warranty_expiry_date and sr_details.warranty_expiry_date>=amc_start_date:
-				throw(_("Serial No {0} is under warranty upto {1}").format(serial_no, sr_details.warranty_expiry_date))
+			if sr_details.warranty_expiry_date \
+				and getdate(sr_details.warranty_expiry_date) >= getdate(amc_start_date):
+				throw(_("Serial No {0} is under warranty upto {1}")
+					.format(serial_no, sr_details.warranty_expiry_date))
 
-			if sr_details.amc_expiry_date and sr_details.amc_expiry_date >= amc_start_date:
-				throw(_("Serial No {0} is under maintenance contract upto {1}").format(serial_no, sr_details.amc_start_date))
+			if sr_details.amc_expiry_date and getdate(sr_details.amc_expiry_date) >= getdate(amc_start_date):
+				throw(_("Serial No {0} is under maintenance contract upto {1}")
+					.format(serial_no, sr_details.amc_start_date))
 
 			if not sr_details.warehouse and sr_details.delivery_date and \
-				sr_details.delivery_date >= amc_start_date:
+				getdate(sr_details.delivery_date) >= getdate(amc_start_date):
 					throw(_("Maintenance start date can not be before delivery date for Serial No {0}")
 						.format(serial_no))
 
