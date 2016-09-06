@@ -26,7 +26,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 1, 
-   "options": "PR.", 
+   "options": "PR", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 

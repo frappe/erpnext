@@ -53,7 +53,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 1, 
-   "options": "MS.", 
+   "options": "MS", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
