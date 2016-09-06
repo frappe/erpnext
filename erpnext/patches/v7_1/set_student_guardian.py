@@ -4,7 +4,7 @@ def execute():
 	if frappe.db.exists("DocType", "Guardian"):
 		frappe.reload_doc("schools", "doctype", "student")
 		frappe.reload_doc("schools", "doctype", "student_guardian")
-		guardian = frappe.get_list("Guardian", fields=["name", "student"])
+		guardian = frappe.get_all("Guardian", fields=["name", "student"])
 		for d in guardian:
 			if d.student:
 				student = frappe.get_doc("Student", d.student)
