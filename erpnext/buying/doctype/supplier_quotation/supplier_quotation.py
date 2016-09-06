@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import flt
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.buying_controller import BuyingController
@@ -62,7 +63,7 @@ def make_purchase_order(source_name, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
-		target.conversion_factor = 1
+		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
 	doclist = get_mapped_doc("Supplier Quotation", source_name,		{
 		"Supplier Quotation": {
@@ -76,8 +77,6 @@ def make_purchase_order(source_name, target_doc=None):
 			"field_map": [
 				["name", "supplier_quotation_item"],
 				["parent", "supplier_quotation"],
-				["uom", "stock_uom"],
-				["uom", "uom"],
 				["material_request", "material_request"],
 				["material_request_item", "material_request_item"]
 			],
