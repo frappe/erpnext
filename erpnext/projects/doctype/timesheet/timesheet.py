@@ -308,17 +308,22 @@ def get_events(start, end, filters=None):
 	:param end: End date-time.
 	:param filters: Filters (JSON).
 	"""
+	
 	filters = json.loads(filters)
+	
 
-	conditions = get_conditions(filters)
-	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, `tabTimesheet Detail`.parent as parent,
-		from_time, hours, activity_type, project, to_time from `tabTimesheet Detail`, 
-		`tabTimesheet` where `tabTimesheet Detail`.parent = `tabTimesheet`.name and `tabTimesheet`.docstatus < 2 and
-		(from_time between %(start)s and %(end)s) {conditions}""".format(conditions=conditions),
-		{
-			"start": start,
-			"end": end
-		}, as_dict=True, update={"allDay": 0})
+	if filters.get('employee'):
+		conditions = get_conditions(filters)
+		return frappe.db.sql("""select `tabTimesheet Detail`.name as name, `tabTimesheet Detail`.parent as parent,
+			from_time, hours, activity_type, project, to_time from `tabTimesheet Detail`, 
+			`tabTimesheet` where `tabTimesheet Detail`.parent = `tabTimesheet`.name and `tabTimesheet`.docstatus < 2 and
+			(from_time between %(start)s and %(end)s) {conditions}""".format(conditions=conditions),
+			{
+				"start": start,
+				"end": end
+			}, as_dict=True, update={"allDay": 0})
+	return None
+	
 
 def get_conditions(filters):
 	conditions = []
