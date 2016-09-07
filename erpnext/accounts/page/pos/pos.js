@@ -614,6 +614,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.batch_no = this.item_batch_no[this.child.item_code];
 		this.child.serial_no = (this.item_serial_no[this.child.item_code]
 			? this.item_serial_no[this.child.item_code][0] : '');
+		this.child.item_tax_rate = this.items[0].taxes;
 	},
 
 	update_paid_amount_status: function(update_paid_amount){
