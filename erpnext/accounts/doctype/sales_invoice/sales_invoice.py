@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.sales_invoice.pos import update_multi_mode_option
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.accounts.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal
 
@@ -221,10 +222,18 @@ class SalesInvoice(SellingController):
 		for d in self.timesheets:
 			if d.time_sheet:
 				timesheet = frappe.get_doc("Timesheet", d.time_sheet)
+				self.update_time_sheet_detail(timesheet, d)
 				timesheet.sales_invoice = sales_invoice
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
 				timesheet.save()
+
+	def update_time_sheet_detail(self, timesheet, args):
+		for data in timesheet.time_logs:
+			if (self.project and self.project == data.project) or \
+				(not self.project and (data.billing_amount - data.billed_amount) > 0):
+				data.billed_amount = args.billing_amount
+				if self.project: return
 
 	def on_update(self):
 		self.set_paid_amount()
@@ -463,6 +472,18 @@ class SalesInvoice(SellingController):
 				total_billing_amount += data.billing_amount
 
 		self.total_billing_amount = total_billing_amount
+
+	def add_timesheet_data(self):
+		self.set('timesheets', [])
+		if self.project:
+			for data in get_projectwise_timesheet_data(self.project):
+				self.append('timesheets', {
+						'time_sheet': data.parent,
+						'billing_hours': data.billing_hours,
+						'billing_amount': data.billing_amt
+					})
+
+			self.calculate_billing_amount_from_timesheet()
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`

@@ -31,6 +31,7 @@ class Timesheet(Document):
 		self.total_billing_hours = 0.0
 		self.total_billing_amount = 0.0
 		self.total_costing_amount = 0.0
+		self.total_billed_amount = 0.0
 
 		for d in self.get("time_logs"):
 			self.update_billing_hours(d)
@@ -40,6 +41,7 @@ class Timesheet(Document):
 			if d.billable: 
 				self.total_billing_amount += flt(d.billing_amount)
 				self.total_costing_amount += flt(d.costing_amount)
+				self.total_billed_amount += flt(d.billed_amount)
 
 	def update_billing_hours(self, args):
 		if cint(args.billing_hours) == 0:
@@ -244,6 +246,34 @@ class Timesheet(Document):
 					data.costing_rate = flt(rate.get('costing_rate'))
 					data.billing_amount = data.billing_rate * hours
 					data.costing_amount = data.costing_rate * hours
+
+@frappe.whitelist()	
+def get_projectwise_timesheet_data(project, parent=None):
+	cond = ''
+	if parent:
+		cond = "and parent = %(parent)s"
+
+	return frappe.db.sql("""select parent, billing_hours, (billing_amount - billed_amount) as billing_amt 
+			from `tabTimesheet Detail` where docstatus=1 and project = %(project)s {0}
+			having billing_amt > 0""".format(cond), {'project': project, 'parent': parent}, as_dict=1)
+
+@frappe.whitelist()
+def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
+	if not filters: filters = {}
+
+	condition = ""
+	if filters.get("project"):
+		condition = "and tsd.project = %(project)s"
+
+	return frappe.db.sql("""select distinct tsd.parent from `tabTimesheet Detail` tsd,
+			`tabTimesheet` ts where ts.status in ('Submitted', 'Payslip') and
+			(tsd.billing_amount - tsd.billed_amount) > 0 and
+			tsd.docstatus = 1 and tsd.parent LIKE %(txt)s {condition}
+			order by tsd.parent limit %(start)s, %(page_len)s"""
+			.format(condition=condition), {
+				"txt": "%%%s%%" % frappe.db.escape(txt),
+				"start": start, "page_len": page_len, 'project': filters.get("project")
+			})
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target=None):
