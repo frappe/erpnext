@@ -7,7 +7,7 @@ def execute():
 	if not frappe.db.table_exists("Time Log"):
 		return
 
-	for data in frappe.db.sql("select * from `tabTime Log` where where docstatus < 2", as_dict=1):
+	for data in frappe.db.sql("select * from `tabTime Log` where docstatus < 2", as_dict=1):
 		if data.task:
 			company = frappe.db.get_value("Task", data.task, "company")
 		elif data.production_order:
