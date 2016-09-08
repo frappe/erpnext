@@ -5,6 +5,8 @@ def execute():
 		frappe.reload_doc("schools", "doctype", "student")
 		frappe.reload_doc("schools", "doctype", "student_guardian")
 		frappe.reload_doc("schools", "doctype", "student_sibling")
+		if "student" not in frappe.db.get_table_columns("Guardian"):
+			return
 		guardian = frappe.get_all("Guardian", fields=["name", "student"])
 		for d in guardian:
 			if d.student:
