@@ -31,7 +31,7 @@ frappe.ui.form.on("Timesheet", {
 
 	refresh: function(frm) {
 		if(frm.doc.docstatus==1) {
-			if(!frm.doc.sales_invoice && frm.doc.total_billing_amount > 0){
+			if(frm.doc.per_billed < 100){
 				frm.add_custom_button(__("Make Sales Invoice"), function() { frm.trigger("make_invoice") },
 					"icon-file-alt");
 			}
@@ -42,7 +42,7 @@ frappe.ui.form.on("Timesheet", {
 			}
 		}
 
-		if(frm.doc.sales_invoice) {
+		if(frm.doc.per_billed > 0) {
 			cur_frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
 		}
 	},

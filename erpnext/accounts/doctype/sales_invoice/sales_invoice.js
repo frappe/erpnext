@@ -481,16 +481,22 @@ frappe.ui.form.on('Sales Invoice', {
 })
 
 frappe.ui.form.on('Sales Invoice Timesheet', {
-	time_sheet: function(frm){
-		frm.call({
-			method: "calculate_billing_amount_from_timesheet",
-			doc: frm.doc,
+	time_sheet: function(frm, cdt, cdn){
+		var d = locals[cdt][cdn];
+		frappe.call({
+			method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_data",
+			args: {
+				'name': d.time_sheet,
+				'project': frm.doc.project || null
+			},
 			callback: function(r, rt) {
-				refresh_field('total_billing_amount')
+				if(r.message){
+					data = r.message;
+					frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
+					frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
+					frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
+				}
 			}
 		})
 	}
 })
-
-cur_frm.add_fetch("time_sheet", "total_billing_hours", "billing_hours");
-cur_frm.add_fetch("time_sheet", "total_billing_amount", "billing_amount");

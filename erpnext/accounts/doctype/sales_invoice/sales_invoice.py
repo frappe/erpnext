@@ -222,17 +222,19 @@ class SalesInvoice(SellingController):
 		for d in self.timesheets:
 			if d.time_sheet:
 				timesheet = frappe.get_doc("Timesheet", d.time_sheet)
-				self.update_time_sheet_detail(timesheet, d)
-				timesheet.sales_invoice = sales_invoice
+				self.update_time_sheet_detail(timesheet, d, sales_invoice)
+				timesheet.calculate_total_amounts()
+				timesheet.calculate_percentage_billed()
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
 				timesheet.save()
 
-	def update_time_sheet_detail(self, timesheet, args):
+	def update_time_sheet_detail(self, timesheet, args, sales_invoice):
 		for data in timesheet.time_logs:
-			if (self.project and self.project == data.project) or \
-				(not self.project and (data.billing_amount - data.billed_amount) > 0):
-				data.billed_amount = args.billing_amount
+			if (self.project and args.timesheet_detail == data.name) or \
+				(not self.project and not data.sales_invoice) or \
+				(not sales_invoice and data.sales_invoice == self.name):
+				data.sales_invoice = sales_invoice
 				if self.project: return
 
 	def on_update(self):
@@ -480,7 +482,8 @@ class SalesInvoice(SellingController):
 				self.append('timesheets', {
 						'time_sheet': data.parent,
 						'billing_hours': data.billing_hours,
-						'billing_amount': data.billing_amt
+						'billing_amount': data.billing_amt,
+						'timesheet_detail': data.name
 					})
 
 			self.calculate_billing_amount_from_timesheet()
