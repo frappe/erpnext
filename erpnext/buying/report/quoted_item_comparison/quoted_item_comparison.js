@@ -4,12 +4,43 @@
 frappe.query_reports["Quoted Item Comparison"] = {
 	"filters": [
 	{
+		"fieldname":"supplier_quotation",
+		"label": __("Supplier Quotation"),
+		"fieldtype": "Link",
+		"options": "Supplier Quotation",
+		"default": "",
+		"get_query": function() {
+				return {
+					filters: {"docstatus": ["<",2]}
+				}
+			}
+		
+		
+	},{
 		"fieldname":"item",
 		"label": __("Item"),
 		"fieldtype": "Link",
 		"options": "Item",
-		"default": ""
-		
+		"default": "",
+		"reqd": 1,
+		"get_query": function() {
+				var quote = frappe.query_report_filters_by_name.supplier_quotation.get_value();
+				if (quote != "")
+				{
+					return {
+						query: "erpnext.buying.doctype.quality_inspection.quality_inspection.item_query",
+						filters: {
+							"from": "Supplier Quotation Item",
+							"parent": quote
+						}
+					}
+				}
+				else{
+					return{
+						filters: {"disabled":0}
+					}
+				}
+			}
 	}
 	],
 	onload: function(report) {
