@@ -44,6 +44,7 @@ frappe.ui.form.on("Timesheet", {
 
 		if(frm.doc.per_billed > 0) {
 			cur_frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
+			cur_frm.fields_dict["time_logs"].grid.toggle_enable("billable", false);
 		}
 	},
 
