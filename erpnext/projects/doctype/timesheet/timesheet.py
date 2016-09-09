@@ -255,7 +255,7 @@ class Timesheet(Document):
 					data.billing_amount = data.billing_rate * hours
 					data.costing_amount = data.costing_rate * hours
 
-@frappe.whitelist()	
+@frappe.whitelist()
 def get_projectwise_timesheet_data(project, parent=None):
 	cond = ''
 	if parent:

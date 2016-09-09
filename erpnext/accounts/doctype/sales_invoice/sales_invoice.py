@@ -85,7 +85,7 @@ class SalesInvoice(SellingController):
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
-		self.calculate_billing_amount_from_timesheet()
+		self.update_timesheet_billing_for_project()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -467,13 +467,11 @@ class SalesInvoice(SellingController):
 			if not timesheet.billing_amount and ts_doc.total_billing_amount:
 				timesheet.billing_amount = ts_doc.total_billing_amount
 
-	def calculate_billing_amount_from_timesheet(self):
-		total_billing_amount = 0.0
-		for data in self.timesheets:
-			if data.billing_amount:
-				total_billing_amount += data.billing_amount
-
-		self.total_billing_amount = total_billing_amount
+	def update_timesheet_billing_for_project(self):
+		if not self.timesheets and self.project:
+			self.add_timesheet_data()
+		else:
+			self.calculate_billing_amount_for_timesheet()
 
 	def add_timesheet_data(self):
 		self.set('timesheets', [])
@@ -486,7 +484,15 @@ class SalesInvoice(SellingController):
 						'timesheet_detail': data.name
 					})
 
-			self.calculate_billing_amount_from_timesheet()
+			self.calculate_billing_amount_for_timesheet()
+
+	def calculate_billing_amount_for_timesheet(self):
+		total_billing_amount = 0.0
+		for data in self.timesheets:
+			if data.billing_amount:
+				total_billing_amount += data.billing_amount
+
+		self.total_billing_amount = total_billing_amount
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`

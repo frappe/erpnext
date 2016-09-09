@@ -21,6 +21,14 @@ frappe.ui.form.on("Timesheet", {
 				}
 			}
 		}
+
+		frm.fields_dict['time_logs'].grid.get_field('project').get_query = function() {
+			return{
+				filters: {
+					'status': frm.doc.company
+				}
+			}
+		}
 	},
 
 	onload: function(frm){
