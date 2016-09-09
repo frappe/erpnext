@@ -156,9 +156,12 @@ var calculate_time_and_amount = function(frm) {
 	for(var i=0; i<tl.length; i++) {
 		if (tl[i].hours) {
 			total_working_hr += tl[i].hours;
-			total_billing_hr += tl[i].billing_hours;
 			total_billing_amount += tl[i].billing_amount;
 			total_costing_amount += tl[i].costing_amount;
+
+			if(tl[i].billable){
+				total_billing_hr += tl[i].billing_hours;
+			}
 		}
 	}
 

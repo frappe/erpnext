@@ -246,12 +246,12 @@ class Timesheet(Document):
 
 	def update_cost(self):
 		for data in self.time_logs:
-			if data.activity_type and (not data.billing_amount or not data.costing_amount):
+			if data.activity_type and data.billable:
 				rate = get_activity_cost(self.employee, data.activity_type)
 				hours =  data.billing_hours or 0
 				if rate:
-					data.billing_rate = flt(rate.get('billing_rate'))
-					data.costing_rate = flt(rate.get('costing_rate'))
+					data.billing_rate = flt(rate.get('billing_rate')) if flt(data.billing_rate) == 0 else data.billing_rate
+					data.costing_rate = flt(rate.get('costing_rate')) if flt(data.costing_rate) == 0 else data.costing_rate
 					data.billing_amount = data.billing_rate * hours
 					data.costing_amount = data.costing_rate * hours
 
@@ -262,7 +262,7 @@ def get_projectwise_timesheet_data(project, parent=None):
 		cond = "and parent = %(parent)s"
 
 	return frappe.db.sql("""select name, parent, billing_hours, billing_amount as billing_amt 
-			from `tabTimesheet Detail` where docstatus=1 and project = %(project)s {0}
+			from `tabTimesheet Detail` where docstatus=1 and project = %(project)s {0} and billable = 1
 			and sales_invoice is null""".format(cond), {'project': project, 'parent': parent}, as_dict=1)
 
 @frappe.whitelist()
