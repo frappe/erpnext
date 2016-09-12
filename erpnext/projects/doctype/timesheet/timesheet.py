@@ -20,11 +20,16 @@ class OverProductionLoggedError(frappe.ValidationError): pass
 
 class Timesheet(Document):
 	def validate(self):
+		self.set_employee_name()
 		self.set_status()
 		self.validate_dates()
 		self.validate_time_logs()
 		self.update_cost()
 		self.calculate_total_amounts()
+
+	def set_employee_name(self):
+		if self.employee and not self.employee_name:
+			self.employee_name = frappe.db.get_value('Employee', self.employee, 'employee_name')
 
 	def calculate_total_amounts(self):
 		self.total_hours = 0.0
