@@ -276,12 +276,18 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 def compare_existing_and_expected_gle(existing_gle, expected_gle):
 	matched = True
 	for entry in expected_gle:
+		account_existed = False
 		for e in existing_gle:
-			if entry.account==e.account and entry.against_account==e.against_account \
-				and (not entry.cost_center or not e.cost_center or entry.cost_center==e.cost_center) \
-				and (entry.debit != e.debit or entry.credit != e.credit):
-					matched = False
-					break
+			if entry.account == e.account:
+				account_existed = True
+			if entry.account == e.account and entry.against_account == e.against_account \
+					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center) \
+					and (entry.debit != e.debit or entry.credit != e.credit):
+				matched = False
+				break
+		if not account_existed:
+			matched = False
+			break
 	return matched
 
 def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None):
