@@ -249,7 +249,7 @@ class ProductionPlanningTool(Document):
 				"wip_warehouse"			: "",
 				"fg_warehouse"			: d.warehouse,
 				"status"				: "Draft",
-				"project"			: frappe.db.get_value("Sales Order",d.sales_order,"Project")
+				"project"			: frappe.db.get_value("Sales Order", d.sales_order, "project")
 			}
 
 			""" Club similar BOM and item for processing in case of Sales Orders """
