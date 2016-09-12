@@ -464,8 +464,8 @@ class SalesInvoice(SellingController):
 			if not timesheet.billing_hours and ts_doc.total_billing_hours:
 				timesheet.billing_hours = ts_doc.total_billing_hours
 
-			if not timesheet.billing_amount and ts_doc.total_billing_amount:
-				timesheet.billing_amount = ts_doc.total_billing_amount
+			if not timesheet.billing_amount and ts_doc.total_billable_amount:
+				timesheet.billing_amount = ts_doc.total_billable_amount
 
 	def update_timesheet_billing_for_project(self):
 		if not self.timesheets and self.project:

@@ -20,6 +20,7 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEquals(timesheet.total_billing_hours, 2)
 		self.assertEquals(timesheet.time_logs[0].billing_rate, 50)
 		self.assertEquals(timesheet.time_logs[0].billing_amount, 100)
+		self.assertEquals(timesheet.total_billable_amount, 100)
 
 	def test_salary_slip_from_timesheet(self):
 		salary_structure = make_salary_structure("_T-Employee-0001")

@@ -6,7 +6,7 @@ def execute():
 	frappe.reload_doc('accounts', 'doctype', 'sales_invoice_timesheet')
 
 	frappe.db.sql("""update tabTimesheet set total_billing_hours=total_hours 
-		where total_billing_amount>0 and docstatus = 1""")
+		where total_billable_amount>0 and docstatus = 1""")
 
 	frappe.db.sql("""update `tabTimesheet Detail` set billing_hours=hours where docstatus < 2""")
 

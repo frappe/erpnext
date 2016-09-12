@@ -31,7 +31,7 @@ class Timesheet(Document):
 		self.total_hours = 0.0
 		self.total_billing_hours = 0.0
 		self.total_billed_hours = 0.0
-		self.total_billing_amount = 0.0
+		self.total_billable_amount = 0.0
 		self.total_costing_amount = 0.0
 		self.total_billed_amount = 0.0
 
@@ -41,15 +41,15 @@ class Timesheet(Document):
 			self.total_hours += flt(d.hours)
 			if d.billable:
 				self.total_billing_hours += flt(d.billing_hours)
-				self.total_billing_amount += flt(d.billing_amount)
+				self.total_billable_amount += flt(d.billing_amount)
 				self.total_costing_amount += flt(d.costing_amount)
 				self.total_billed_amount += flt(d.billing_amount) if d.sales_invoice else 0.0
 				self.total_billed_hours += flt(d.billing_hours) if d.sales_invoice else 0.0
 
 	def calculate_percentage_billed(self):
 		self.per_billed = 0
-		if self.total_billed_amount > 0 and self.total_billing_amount > 0:
-			self.per_billed = (self.total_billed_amount * 100) / self.total_billing_amount
+		if self.total_billed_amount > 0 and self.total_billable_amount > 0:
+			self.per_billed = (self.total_billed_amount * 100) / self.total_billable_amount
 
 	def update_billing_hours(self, args):
 		if cint(args.billing_hours) == 0:
@@ -276,7 +276,7 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select distinct tsd.parent from `tabTimesheet Detail` tsd,
 			`tabTimesheet` ts where 
 			ts.status in ('Submitted', 'Payslip') and tsd.parent = ts.name and 
-			tsd.docstatus = 1 and ts.total_billing_amount > 0 
+			tsd.docstatus = 1 and ts.total_billable_amount > 0 
 			and tsd.parent LIKE %(txt)s {condition}
 			order by tsd.parent limit %(start)s, %(page_len)s"""
 			.format(condition=condition), {
@@ -290,7 +290,7 @@ def get_timesheet_data(name, project):
 		data = get_projectwise_timesheet_data(project, name)
 	else:
 		data = frappe.get_all('Timesheet', 
-			fields = ["(total_billing_amount - total_billed_amount) as billing_amt", "total_billing_hours as billing_hours"], filters = {'name': name})
+			fields = ["(total_billable_amount - total_billed_amount) as billing_amt", "total_billing_hours as billing_hours"], filters = {'name': name})
 
 	return {
 		'billing_hours': data[0].billing_hours,
@@ -306,10 +306,10 @@ def make_sales_invoice(source_name, target=None):
 	target.append('timesheets', {
 		'time_sheet': timesheet.name,
 		'billing_hours': flt(timesheet.total_billing_hours) - flt(timesheet.total_billed_hours),
-		'billing_amount': flt(timesheet.total_billing_amount) - flt(timesheet.total_billed_amount)
+		'billing_amount': flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
 	})
 
-	target.run_method("calculate_billing_amount_from_timesheet")
+	target.run_method("calculate_billing_amount_for_timesheet")
 
 	return target
 
