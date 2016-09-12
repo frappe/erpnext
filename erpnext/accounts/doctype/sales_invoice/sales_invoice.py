@@ -461,8 +461,8 @@ class SalesInvoice(SellingController):
 	def set_billing_hours_and_amount(self):
 		for timesheet in self.timesheets:
 			ts_doc = frappe.get_doc('Timesheet', timesheet.time_sheet)
-			if not timesheet.billing_hours and ts_doc.total_billing_hours:
-				timesheet.billing_hours = ts_doc.total_billing_hours
+			if not timesheet.billing_hours and ts_doc.total_billable_hours:
+				timesheet.billing_hours = ts_doc.total_billable_hours
 
 			if not timesheet.billing_amount and ts_doc.total_billable_amount:
 				timesheet.billing_amount = ts_doc.total_billable_amount

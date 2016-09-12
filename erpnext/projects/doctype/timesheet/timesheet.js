@@ -173,7 +173,7 @@ var calculate_time_and_amount = function(frm) {
 		}
 	}
 
-	cur_frm.set_value("total_billing_hours", total_billing_hr);
+	cur_frm.set_value("total_billable_hours", total_billing_hr);
 	cur_frm.set_value("total_hours", total_working_hr);
 	cur_frm.set_value("total_billable_amount", total_billable_amount);
 	cur_frm.set_value("total_costing_amount", total_costing_amount);

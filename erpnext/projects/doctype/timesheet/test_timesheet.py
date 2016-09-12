@@ -17,7 +17,7 @@ class TestTimesheet(unittest.TestCase):
 		timesheet = make_timesheet("_T-Employee-0001", simulate = True, billable=1)
 
 		self.assertEquals(timesheet.total_hours, 2)
-		self.assertEquals(timesheet.total_billing_hours, 2)
+		self.assertEquals(timesheet.total_billable_hours, 2)
 		self.assertEquals(timesheet.time_logs[0].billing_rate, 50)
 		self.assertEquals(timesheet.time_logs[0].billing_amount, 100)
 		self.assertEquals(timesheet.total_billable_amount, 100)

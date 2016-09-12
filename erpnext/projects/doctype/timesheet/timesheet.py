@@ -29,7 +29,7 @@ class Timesheet(Document):
 
 	def calculate_total_amounts(self):
 		self.total_hours = 0.0
-		self.total_billing_hours = 0.0
+		self.total_billable_hours = 0.0
 		self.total_billed_hours = 0.0
 		self.total_billable_amount = 0.0
 		self.total_costing_amount = 0.0
@@ -40,7 +40,7 @@ class Timesheet(Document):
 
 			self.total_hours += flt(d.hours)
 			if d.billable:
-				self.total_billing_hours += flt(d.billing_hours)
+				self.total_billable_hours += flt(d.billing_hours)
 				self.total_billable_amount += flt(d.billing_amount)
 				self.total_costing_amount += flt(d.costing_amount)
 				self.total_billed_amount += flt(d.billing_amount) if d.sales_invoice else 0.0
@@ -290,7 +290,7 @@ def get_timesheet_data(name, project):
 		data = get_projectwise_timesheet_data(project, name)
 	else:
 		data = frappe.get_all('Timesheet', 
-			fields = ["(total_billable_amount - total_billed_amount) as billing_amt", "total_billing_hours as billing_hours"], filters = {'name': name})
+			fields = ["(total_billable_amount - total_billed_amount) as billing_amt", "total_billable_hours as billing_hours"], filters = {'name': name})
 
 	return {
 		'billing_hours': data[0].billing_hours,
@@ -305,7 +305,7 @@ def make_sales_invoice(source_name, target=None):
 
 	target.append('timesheets', {
 		'time_sheet': timesheet.name,
-		'billing_hours': flt(timesheet.total_billing_hours) - flt(timesheet.total_billed_hours),
+		'billing_hours': flt(timesheet.total_billable_hours) - flt(timesheet.total_billed_hours),
 		'billing_amount': flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
 	})
 
