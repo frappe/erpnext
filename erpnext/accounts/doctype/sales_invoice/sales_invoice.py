@@ -357,12 +357,12 @@ class SalesInvoice(SellingController):
 
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""
-		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
+		dic = {'Sales Order':['so_required', 'is_pos'],'Delivery Note':['dn_required', 'update_stock']}
 		for i in dic:
-			if frappe.db.get_value('Selling Settings', None, dic[i]) == 'Yes':
+			if frappe.db.get_value('Selling Settings', None, dic[i][0]) == 'Yes':
 				for d in self.get('items'):
 					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 1 \
-						and not d.get(i.lower().replace(' ','_')):
+						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1]):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
 
