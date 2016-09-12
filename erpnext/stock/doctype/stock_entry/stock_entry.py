@@ -232,6 +232,17 @@ class StockEntry(StockController):
 						frappe.bold(d.transfer_qty)),
 					NegativeStockError, title=_('Insufficient Stock'))
 
+	def set_serial_nos(self, production_order):
+		previous_se = frappe.db.get_value("Stock Entry", {"production_order": production_order,
+				"purpose": "Material Transfer for Manufacture"}, "name")
+
+		for d in self.get('items'):
+			transferred_serial_no = frappe.db.get_value("Stock Entry Detail",{"parent": previous_se,
+				"item_code": d.item_code}, "serial_no")
+			
+			if transferred_serial_no:
+				d.serial_no = transferred_serial_no
+
 	def get_stock_and_rate(self):
 		self.set_transfer_qty()
 		self.set_actual_qty()
@@ -551,6 +562,9 @@ class StockEntry(StockController):
 
 						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
 					self.add_to_stock_entry_detail(item_dict)
+			# fetch the serial_no of the first stock entry for the second stock entry
+			if self.production_order and self.purpose == "Manufacture":
+				self.set_serial_nos(self.production_order)
 
 			# add finished goods item
 			if self.purpose in ("Manufacture", "Repack"):
