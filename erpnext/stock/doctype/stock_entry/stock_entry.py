@@ -71,9 +71,6 @@ class StockEntry(StockController):
 		if self.purpose not in valid_purposes:
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
 
-		if self.purpose in ("Manufacture", "Repack") and not self.difference_account:
-			self.difference_account = frappe.db.get_value("Company", self.company, "default_expense_account")
-
 	def set_transfer_qty(self):
 		for item in self.get("items"):
 			if not flt(item.qty):
@@ -96,9 +93,6 @@ class StockEntry(StockController):
 				"cost_center", "conversion_factor"):
 					if f in ["stock_uom", "conversion_factor"] or not item.get(f):
 						item.set(f, item_details.get(f))
-
-			if self.difference_account and not item.expense_account:
-				item.expense_account = self.difference_account
 
 			if not item.transfer_qty and item.qty:
 				item.transfer_qty = item.qty * item.conversion_factor
