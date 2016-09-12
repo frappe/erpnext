@@ -85,15 +85,15 @@ class StockEntry(StockController):
 		condition = ""
 
 		if for_items:
-			condition += " and item_code in ({})".format(", ".join(["%s"] * len(for_items)))
+			condition += " and item_code in ({})".format(", ".join(["%(item_code)s"] * len(for_items)))
 			values += for_items
 
 		for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 			from `tabStock Ledger Entry` sle
-			where timestamp(sle.posting_date, sle.posting_time) <= timestamp(%s, %s) {condition}
-			and warehouse = "Finished Goods - IAG"
+			where timestamp(sle.posting_date, sle.posting_time) <= timestamp(%(date)s, %(time)s) {condition}
+			and warehouse = %(warehouse)s
 			order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""".format(condition=condition),
-		                       tuple([posting_date, posting_time] + values), as_dict=True):
+		                       {"warehouse":for_warehouses,"date":posting_date,"time":posting_time,"item_code":values}, as_dict=1):
 			previous_stock_vouchers.append([d.voucher_type, d.voucher_no])
 
 		return previous_stock_vouchers
