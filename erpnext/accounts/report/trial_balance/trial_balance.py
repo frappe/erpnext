@@ -87,8 +87,7 @@ def get_opening_balances(filters):
 
 
 def get_rootwise_opening_balances(filters, report_type):
-	additional_conditions = " and posting_date >= %(year_start_date)s" \
-		if report_type == "Profit and Loss" else ""
+	additional_conditions = ""
 
 	if not flt(filters.with_period_closing_entry):
 		additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
