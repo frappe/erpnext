@@ -48,7 +48,7 @@ def execute(filters=None):
 
 def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 	if asset and (liability or equity):
-		total = total_total=0
+		total = total_row_total=0
 		currency = frappe.db.get_value("Company", company, "default_currency")
 		provisional_profit_loss = {
 			"account_name": "'" + _("Provisional Profit / Loss (Credit)") + "'",
@@ -80,8 +80,8 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 			total += flt(provisional_profit_loss[period.key])
 			provisional_profit_loss["total"] = total
 			
-			total_total += flt(total_row[period.key])
-			total_row["total"] = total_total
+			total_row_total += flt(total_row[period.key])
+			total_row["total"] = total_row_total
 
 		if has_value:
 			return provisional_profit_loss, total_row
