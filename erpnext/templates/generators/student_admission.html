@@ -1,0 +1,45 @@
+
+{% extends "templates/web.html" %}
+
+{% block breadcrumbs %}
+	{% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
+{% block header %}
+
+<h1>{{ program }}</h1>
+{% endblock %}
+
+{% block page_content %}
+
+{%- if introduction -%}
+<div>{{ introduction }}</div>
+{% endif %}
+
+{%- if eligibility -%}
+<h3> Eligibility </h3>
+<div>{{ eligibility }}</div>
+{% endif %}
+
+<table class="table table-bordered" style="margin-top: 20px">
+	<tr>
+		<th> Academic Year</th>
+		<th> Admission Start Date</th>
+		<th> Admission End Date</th>
+		<th class="text-right"> Application Fee</th>
+	</tr>
+	<tr>
+		<td>{{ academic_year }} </td>
+		<td>{{ frappe.utils.formatdate(admission_start_date) }}</td>
+		<td>{{ frappe.utils.formatdate(admission_end_date) }}</td>
+		<td class="text-right">{{ application_fee }}</td>
+	</tr>
+</table>
+
+<p>
+	<a class='btn btn-primary'
+	href='/student-applicant?program={{ doc.program }}&academic_year={{ doc.academic_year }}&new=1'>
+	{{ _("Apply Now") }}</a>
+</p>
+
+{% endblock %}
