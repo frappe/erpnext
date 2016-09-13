@@ -8,6 +8,7 @@ from frappe import _
 
 import json
 from datetime import timedelta
+from erpnext.controllers.queries import get_match_cond
 from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, get_datetime_str
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
@@ -305,7 +306,8 @@ def get_events(start, end, filters=None):
 	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, `tabTimesheet Detail`.parent as parent,
 		from_time, hours, activity_type, project, to_time from `tabTimesheet Detail`, 
 		`tabTimesheet` where `tabTimesheet Detail`.parent = `tabTimesheet`.name and 
-		(from_time between %(start)s and %(end)s) {conditions}""".format(conditions=conditions),
+		(from_time between %(start)s and %(end)s) {conditions}
+		{match_cond}""".format(conditions=conditions, match_cond = get_match_cond('Timesheet')),
 		{
 			"start": start,
 			"end": end
