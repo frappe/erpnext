@@ -8,6 +8,7 @@ from frappe import _
 
 import json
 from datetime import timedelta
+from erpnext.controllers.queries import get_match_cond
 from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, get_datetime_str
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
@@ -20,11 +21,16 @@ class OverProductionLoggedError(frappe.ValidationError): pass
 
 class Timesheet(Document):
 	def validate(self):
+		self.set_employee_name()
 		self.set_status()
 		self.validate_dates()
 		self.validate_time_logs()
 		self.update_cost()
 		self.calculate_total_amounts()
+
+	def set_employee_name(self):
+		if self.employee and not self.employee_name:
+			self.employee_name = frappe.db.get_value('Employee', self.employee, 'employee_name')
 
 	def calculate_total_amounts(self):
 		self.total_hours = 0.0
@@ -305,7 +311,8 @@ def get_events(start, end, filters=None):
 	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, `tabTimesheet Detail`.parent as parent,
 		from_time, hours, activity_type, project, to_time from `tabTimesheet Detail`, 
 		`tabTimesheet` where `tabTimesheet Detail`.parent = `tabTimesheet`.name and 
-		(from_time between %(start)s and %(end)s) {conditions}""".format(conditions=conditions),
+		(from_time between %(start)s and %(end)s) {conditions}
+		{match_cond}""".format(conditions=conditions, match_cond = get_match_cond('Timesheet')),
 		{
 			"start": start,
 			"end": end
