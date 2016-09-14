@@ -302,6 +302,9 @@ class PurchaseInvoice(BuyingController):
 				asset.save()
 
 	def make_gl_entries(self, repost_future_gle=True):
+		if not self.grand_total:
+			return
+		
 		self.auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 

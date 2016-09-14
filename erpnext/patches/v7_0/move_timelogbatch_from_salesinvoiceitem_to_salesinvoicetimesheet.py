@@ -9,6 +9,6 @@ def execute():
 		ts = si_doc.append('timesheets',{})
 		ts.time_sheet = time_sheet.name
 		ts.billing_amount = time_sheet.total_billable_amount
-		si_doc.update_time_sheet(time_sheet.sales_invoice)
-		si_doc.flags.ignore_validate_update_after_submit = True
-		si_doc.save()
+		ts.db_update()
+		si_doc.calculate_billing_amount_from_timesheet()
+		si_doc.db_set("total_billing_amount", si_doc.total_billing_amount, update_modified = False)

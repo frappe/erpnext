@@ -29,8 +29,8 @@ def execute():
 		row.db_update()
 		
 		si_doc.set_paid_amount()
-		si_doc.db_set("paid_amount", si_doc.paid_amount)
-		si_doc.db_set("base_paid_amount", si_doc.base_paid_amount)
+		si_doc.db_set("paid_amount", si_doc.paid_amount, update_modified = False)
+		si_doc.db_set("base_paid_amount", si_doc.base_paid_amount, update_modified = False)
 		
 		count +=1
 		

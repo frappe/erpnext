@@ -530,6 +530,8 @@ class SalesInvoice(SellingController):
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
 	def make_gl_entries(self, repost_future_gle=True):
+		if not self.grand_total:
+			return
 		gl_entries = self.get_gl_entries()
 
 		if gl_entries:
