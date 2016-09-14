@@ -78,7 +78,7 @@ frappe.ui.form.on("Project", {
 			section.on('click', '.time-sheet-link', function() {
 				var activity_type = $(this).attr('data-activity_type');
 				frappe.set_route('List', 'Timesheet',
-					{'activity_type': activity_type, 'project': frm.doc.name});
+					{'activity_type': activity_type, 'project': frm.doc.name, 'status': ["!=", "Cancelled"]});
 			});
 		}
 	}
