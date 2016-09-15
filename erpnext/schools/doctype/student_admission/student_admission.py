@@ -16,6 +16,10 @@ class StudentAdmission(WebsiteGenerator):
 
 	def get_context(self, context):
 		context.parents = [{'name': 'admissions', 'title': _('All Student Admissions') }]
+		
+	def validate(self):
+		if not self.title:
+			self.title = self.program + " admissions for " + self.academic_year
 
 def get_list_context(context):
 	context.title = _("Student Admissions")

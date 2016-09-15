@@ -7,7 +7,7 @@
 
 {% block header %}
 
-<h1>{{ program }}</h1>
+<h1>{{ title }}</h1>
 {% endblock %}
 
 {% block page_content %}
@@ -22,6 +22,10 @@
 {% endif %}
 
 <table class="table table-bordered" style="margin-top: 20px; width: 30%">
+	<tr>
+		<th> Program</th>
+		<td>{{ program }} </td>
+	</tr>
 	<tr>
 		<th> Academic Year</th>
 		<td>{{ academic_year }} </td>
