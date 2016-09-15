@@ -10,13 +10,14 @@
  "idx": 0, 
  "is_standard": 1, 
  "login_required": 1, 
- "modified": "2016-09-13 08:31:57.767283", 
+ "modified": "2016-09-15 02:00:28.493759", 
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "student-applicant", 
  "owner": "Administrator", 
  "published": 1, 
  "route": "student-applicant", 
+ "sidebar_items": [], 
  "success_url": "/student-applicant", 
  "title": "Student Applicant", 
  "web_form_fields": [
@@ -133,6 +134,24 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "label": "Pincode", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "guardians", 
+   "fieldtype": "Table", 
+   "hidden": 0, 
+   "label": "Guardians", 
+   "options": "Student Guardian", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "siblings", 
+   "fieldtype": "Table", 
+   "hidden": 0, 
+   "label": "Siblings", 
+   "options": "Student Sibling", 
    "read_only": 0, 
    "reqd": 0
   }

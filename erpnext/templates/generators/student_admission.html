@@ -21,18 +21,22 @@
 <div>{{ eligibility }}</div>
 {% endif %}
 
-<table class="table table-bordered" style="margin-top: 20px">
+<table class="table table-bordered" style="margin-top: 20px; width: 30%">
 	<tr>
 		<th> Academic Year</th>
-		<th> Admission Start Date</th>
-		<th> Admission End Date</th>
-		<th class="text-right"> Application Fee</th>
+		<td>{{ academic_year }} </td>
 	</tr>
 	<tr>
-		<td>{{ academic_year }} </td>
+		<th> Admission Start Date</th>
 		<td>{{ frappe.utils.formatdate(admission_start_date) }}</td>
+	</tr>
+	<tr>
+		<th> Admission End Date</th>
 		<td>{{ frappe.utils.formatdate(admission_end_date) }}</td>
-		<td class="text-right">{{ application_fee }}</td>
+	</tr>
+	<tr>
+		<th> Application Fee</th>
+		<td>{{ frappe.utils.fmt_money(application_fee, 2, currency) }}</td>
 	</tr>
 </table>
 
