@@ -10,7 +10,8 @@ from frappe import _
 class StudentAdmission(WebsiteGenerator):
 	website = frappe._dict(
 		template = "templates/generators/student_admission.html",
-		condition_field = "publish"
+		condition_field = "publish",
+		page_title_field = "route"
 	)
 
 	def get_context(self, context):
