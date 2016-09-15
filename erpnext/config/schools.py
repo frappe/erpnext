@@ -39,6 +39,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Student Admission"
+				},
+				{
+					"type": "doctype",
 					"name": "Program Enrollment"
 				},
 				{
