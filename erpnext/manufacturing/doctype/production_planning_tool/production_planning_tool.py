@@ -307,7 +307,7 @@ class ProductionPlanningTool(Document):
 		self.get_raw_materials(bom_dict)
 		return self.get_csv()
 
-	def get_raw_materials(self, bom_dict,non_stock_item=False):
+	def get_raw_materials(self, bom_dict,non_stock_item=0):
 		""" Get raw materials considering sub-assembly items
 			{
 				"item_code": [qty_required, description, stock_uom, min_order_qty]
@@ -343,7 +343,7 @@ class ProductionPlanningTool(Document):
 						
 		self.make_items_dict(item_list)
 
-	def get_subitems(self,bom_wise_item_details, bom, parent_qty, include_sublevel, only_raw, supply_subs,non_stock_item=False):
+	def get_subitems(self,bom_wise_item_details, bom, parent_qty, include_sublevel, only_raw, supply_subs,non_stock_item=0):
 		for d in frappe.db.sql("""select bom_item.item_code, default_material_request_type,
 			ifnull(%(parent_qty)s * sum(bom_item.qty/ifnull(bom.quantity, 1)), 0) as qty, 
 			item.is_sub_contracted_item as is_sub_contracted, item.default_bom as default_bom
