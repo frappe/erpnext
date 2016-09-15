@@ -1,10 +1,10 @@
-A Item Variant is a different version of a Item, such as differing sizes or differing colours.
-Without Item variants, you would have to treat the small, medium and large versions of a t-shirt as three separate Items; 
-Item variants let you treat the small, medium and large versions of a t-shirt as variations of the same Item.
+A Item Variant is a version of a Item, such as differing sizes or differing colours (like a _blue_ t-shirt in size _small_ rather then just a t-shirt).
+Without Item variants, you would have to treat the _small, medium_ and _large_ versions of a t-shirt as three separate Items; 
+Item variants let you treat the _small, medium_ and _large_ versions of a t-shirt as variations of the one Item 't-shirt'.
 
-To use Item Variants in ERPNext, create an Item and check 'Has Variants'
+To use Item Variants in ERPNext, create an Item and check 'Has Variants'.
 
-* The Item shall then be referred as a 'Template'
+* The Item shall then be referred to as a so called 'Template'. Such a Template is not identical to a regular 'Item' any longer. For example it (the Template) can not be used directly in any Transactions (Sales Order, Delivery Note, Purchase Invoice) itself. Only the Variants of an Item (_blue_ t-shirt in size _small)_ can be practically used in such. Therefore it would be ideal to decide whether an item 'Has Variants' or not directly when creating it. 
 
 <img class="screenshot" alt="Has Variants" src="{{docs_base_url}}/assets/img/stock/item-has-variants.png">
 
