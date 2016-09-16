@@ -19,3 +19,7 @@ def execute():
 			if s and s not in default_lead_sources:
 				frappe.get_doc(dict(doctype='Lead Source', source_name=s)).insert()
 
+		# remove customization for source
+		for p in frappe.get_all('Property Setter', {'doc_type':d, 'field_name':'source', 'property':'options'}):
+			frappe.delete_doc('Property Setter', p.name)
+
