@@ -259,7 +259,6 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	if(!doc.company) return;
 
 	var update_jv_details = function(doc, r) {
-		var jvdetail = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
 		$.each(r, function(i, d) {
 			var row = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
 			row.account = d.account;
@@ -267,8 +266,8 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 		});
 		refresh_field("accounts");
 	}
-
-	if(!(doc.accounts || []).length) {
+	
+	if((!(doc.accounts || []).length) || ((doc.accounts || []).length==1 && !doc.accounts[0].account)) {
 		if(in_list(["Bank Entry", "Cash Entry"], doc.voucher_type)) {
 			return frappe.call({
 				type: "GET",
