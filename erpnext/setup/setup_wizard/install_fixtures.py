@@ -7,6 +7,10 @@ import frappe
 
 from frappe import _
 
+default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
+	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",
+	"Customer's Vendor", "Campaign", "Walk In"]
+
 def install(country=None):
 	records = [
 
@@ -147,6 +151,7 @@ def install(country=None):
 		{'doctype': 'Activity Type', 'activity_type': _('Execution')},
 		{'doctype': 'Activity Type', 'activity_type': _('Communication')},
 
+		# Lead Source
 		{'doctype': "Item Attribute", "attribute_name": _("Size"), "item_attribute_values": [
 			{"attribute_value": _("Extra Small"), "abbr": "XS"},
 			{"attribute_value": _("Small"), "abbr": "S"},
@@ -190,6 +195,8 @@ def install(country=None):
 	from erpnext.setup.setup_wizard.industry_type import get_industry_types
 	records += [{"doctype":"Industry Type", "industry": d} for d in get_industry_types()]
 	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
+
+	records += [{'doctype': 'Lead Source', 'source_name': _(d)} for d in default_lead_sources]
 
 	from frappe.modules import scrub
 	for r in records:
