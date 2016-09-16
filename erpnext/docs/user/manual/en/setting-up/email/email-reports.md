@@ -22,7 +22,7 @@ If your report has filters, you will see a table with the filters
 
 Step 1. Select the Report, the user for which you want to create this report. Permissions will apply for this user
 
-<img class="screenshot" alt="With Filters" src="{{docs_base_url}}/assets/img/setup/email/auto-email-1.png">
+<img class="screenshot" alt="With Filters" src="{{docs_base_url}}/assets/img/setup/email/auto-email-2.png">
 
 Click on the table to edit the table
 
