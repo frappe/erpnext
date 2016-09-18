@@ -67,12 +67,13 @@ def before_tests():
 @frappe.whitelist()
 def get_exchange_rate(posting_date, from_currency, to_currency):
     if not (posting_date and from_currency and to_currency):
+        # cksgb 19/09/2016: Should this be an empty return or should it throw and exception?
         return
     
     if from_currency == to_currency:
         return 1
     
-    #Get all entries in Currency Exchange with from_currency and to_currency
+    # cksgb 19/09/2016: get all entries in Currency Exchange with from_currency and to_currency. Order by date desc. Top one is the required exchange rate
     entries = frappe.get_all("Currency Exchange", fields = ["*"], filters=[["date", "<=", get_datetime_str(posting_date)], ["from_currency", "=", from_currency], ["to_currency", "=", to_currency]], order_by="date desc")
     if entries:
         return flt(entries[0].exchange_rate)
