@@ -4,8 +4,10 @@ from erpnext.manufacturing.doctype.production_order.production_order \
 
 def execute():
 	frappe.reload_doc('projects', 'doctype', 'timesheet')
+	if not frappe.db.table_exists("Time Log"):
+		return
 
-	for data in frappe.get_all('Time Log', fields=["*"], filters = [["docstatus", "<", "2"]]):
+	for data in frappe.db.sql("select * from `tabTime Log` where docstatus < 2", as_dict=1):
 		if data.task:
 			company = frappe.db.get_value("Task", data.task, "company")
 		elif data.production_order:

@@ -12,20 +12,12 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
-	from_fy_start_end_date = frappe.db.get_value("Fiscal Year", from_fiscal_year, ["year_start_date", "year_end_date"])
-	to_fy_start_end_date = frappe.db.get_value("Fiscal Year", to_fiscal_year, ["year_start_date", "year_end_date"])
-
-	if not from_fy_start_end_date:
-		frappe.throw(_("Start Year {0} not found.").format(from_fiscal_year))
-	
-	if not to_fy_start_end_date:
-		frappe.throw(_("End Year {0} not found.").format(to_fiscal_year))
+	fiscal_year = get_fiscal_year_data(from_fiscal_year, to_fiscal_year)
+	validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year)
 
 	# start with first day, so as to avoid year to_dates like 2-April if ever they occur]
-	year_start_date = getdate(from_fy_start_end_date[0])
-	year_end_date = getdate(to_fy_start_end_date[1])
-
-	validate_fiscal_year(year_start_date, year_end_date)
+	year_start_date = getdate(fiscal_year.year_start_date)
+	year_end_date = getdate(fiscal_year.year_end_date)
 
 	months_to_add = {
 		"Yearly": 12,
@@ -46,7 +38,7 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 
 		to_date = add_months(start_date, months_to_add)
 		start_date = to_date
-		
+
 		if to_date == get_first_day(to_date):
 			# if to_date is the first day, get the last day of previous month
 			to_date = add_days(to_date, -1)
@@ -85,8 +77,16 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 
 	return period_list
 
-def validate_fiscal_year(start_date, end_date):
-	if date_diff(end_date, start_date) <= 0:
+def get_fiscal_year_data(from_fiscal_year, to_fiscal_year):
+	fiscal_year = frappe.db.sql("""select min(year_start_date) as year_start_date, 
+		max(year_end_date) as year_end_date from `tabFiscal Year` where 
+		name between %(from_fiscal_year)s and %(to_fiscal_year)s""",
+		{'from_fiscal_year': from_fiscal_year, 'to_fiscal_year': to_fiscal_year}, as_dict=1)
+
+	return fiscal_year[0] if fiscal_year else {}
+
+def validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year):
+	if not fiscal_year.get('year_start_date') and not fiscal_year.get('year_end_date'):
 		frappe.throw(_("End Year cannot be before Start Year"))
 
 def get_months(start_date, end_date):
@@ -142,10 +142,9 @@ def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accum
 			for period in period_list:
 				# check if posting date is within the period
 
-				fiscal_year = get_date_fiscal_year(entry.posting_date)
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and \
-						(fiscal_year == period.to_date_fiscal_year or not ignore_accumulated_values_for_fy):
+						(entry.fiscal_year == period.to_date_fiscal_year or not ignore_accumulated_values_for_fy):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
 
 			if entry.posting_date < period_list[0].year_start_date:
@@ -294,7 +293,7 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, f
 
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
-	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening from `tabGL Entry`
+	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year from `tabGL Entry`
 		where company=%(company)s
 		{additional_conditions}
 		and posting_date <= %(to_date)s
