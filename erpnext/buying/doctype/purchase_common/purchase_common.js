@@ -183,7 +183,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_projected_qty",
+				method: "erpnext.stock.get_item_details.get_bin_details",
 				child: item,
 				args: {
 					item_code: item.item_code,
