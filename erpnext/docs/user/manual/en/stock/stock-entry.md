@@ -38,6 +38,6 @@ If perpetual inventory system is enabled, additional costs will be booked in "Ex
 <img class="screenshot" alt="Additional Costs General Ledger" src="{{docs_base_url}}/assets/img/stock/additional-costs-general-ledger.png">
 
 
-> **Note:** To update Stock from a spreadsheet, see Stock Reconciliation.
+> **Note:** To update Stock from a spreadsheet, see [Stock Reconciliation] ({{doc_base_url}}/user/manual/en/setting-up/stock-reconciliation-for-non-serialized-item.html).
 
 {next}
