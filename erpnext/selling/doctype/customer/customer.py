@@ -40,14 +40,24 @@ class Customer(TransactionBase):
 
 		return self.customer_name
 
+	def after_insert(self):
+		'''If customer created from Lead, update customer id in quotations, opportunities'''
+		self.update_lead_status()
+
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()
 		validate_party_accounts(self)
 		self.status = get_party_status(self)
 
 	def update_lead_status(self):
+		'''If Customer created from Lead, update lead status to "Converted"
+		update Customer link in Quotation, Opportunity'''
 		if self.lead_name:
-			frappe.db.sql("update `tabLead` set status='Converted' where name = %s", self.lead_name)
+		 	frappe.db.set_value('Lead', self.lead_name, 'status', 'Converted', update_modified=False)
+
+			for doctype in ('Opportunity', 'Quotation'):
+				for d in frappe.get_all(doctype, {'lead': self.lead_name}):
+					frappe.db.set_value(doctype, d.name, 'customer', self.name, update_modified=False)
 
 	def update_address(self):
 		frappe.db.sql("""update `tabAddress` set customer_name=%s, modified=NOW()
@@ -81,7 +91,6 @@ class Customer(TransactionBase):
 	def on_update(self):
 		self.validate_name_with_customer_group()
 
-		self.update_lead_status()
 		self.update_address()
 		self.update_contact()
 
