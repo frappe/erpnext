@@ -7,5 +7,9 @@ data = {
 			'label': _('Related'),
 			'items': ['Request for Quotation', 'Supplier Quotation', 'Purchase Order']
 		},
+		{
+			'label': _('Manufacturing'),
+			'items': ['Production Order']
+		},
 	]
 }
