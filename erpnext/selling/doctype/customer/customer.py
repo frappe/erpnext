@@ -46,8 +46,21 @@ class Customer(TransactionBase):
 
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()
+		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
 		self.status = get_party_status(self)
+
+	def on_update(self):
+		self.validate_name_with_customer_group()
+
+		if self.flags.old_lead != self.lead_name:
+			self.update_lead_status()
+
+		self.update_address()
+		self.update_contact()
+
+		if self.flags.is_new_doc:
+			self.create_lead_address_contact()
 
 	def update_lead_status(self):
 		'''If Customer created from Lead, update lead status to "Converted"
@@ -87,15 +100,6 @@ class Customer(TransactionBase):
 			c.autoname()
 			if not frappe.db.exists("Contact", c.name):
 				c.insert()
-
-	def on_update(self):
-		self.validate_name_with_customer_group()
-
-		self.update_address()
-		self.update_contact()
-
-		if self.flags.is_new_doc:
-			self.create_lead_address_contact()
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
