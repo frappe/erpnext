@@ -119,6 +119,13 @@ class AccountsController(TransactionBase):
             validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
 
     def set_price_list_currency(self, buying_or_selling):
+        # manqala 19/09/2016: for PO and SO the translation date for exchange rate conversions is transaction_date. For everything else it is posting_date
+        if self.meta.get_field("posting_date"):
+            translation_date = self.posting_date
+        else:
+            translation_date = self.transaction_date
+        # end manqala
+            
         if self.meta.get_field("currency"):
             # price list part
             fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
@@ -133,7 +140,7 @@ class AccountsController(TransactionBase):
                 elif not self.plc_conversion_rate:
                     # manqala 19/09/16: using the transaction date on the PO or SO as the basis for getting the exchange rate
                     self.plc_conversion_rate = get_exchange_rate(
-                        self.transaction_date, self.price_list_currency, self.company_currency)
+                        translation_date, self.price_list_currency, self.company_currency)
 
             # currency
             if not self.currency:
@@ -142,9 +149,10 @@ class AccountsController(TransactionBase):
             elif self.currency == self.company_currency:
                 self.conversion_rate = 1.0
             elif not self.conversion_rate:
-                # cksgb 19/09/2016: added transaction date to arguments for get_exchange_rate
-                self.conversion_rate = get_exchange_rate(self.transaction_date, self.currency,
+                # manqala 19/09/2016: added transaction date to arguments for get_exchange_rate
+                self.conversion_rate = get_exchange_rate(translation_date, self.currency,
                     self.company_currency)
+                # end manqala
 
     def set_missing_item_details(self):
         """set missing item values"""

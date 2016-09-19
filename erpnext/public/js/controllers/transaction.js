@@ -417,15 +417,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	currency: function() {
-		/* cksgb 19/09/2016: We need to detect if this transaction is a PO/SO. 
-		If so, use transaction_date. 
-		If not, use posting_date as we assume that any other document type is an accounting document. */
-		
-		if (this.frm.doc.doctype == "Purchase Order" || this.frm.doc.doctype == "Sales Order"){
-			lookup_date = this.frm.doc.transaction_date;
-		}else{
-			lookup_date = this.frm.doc.posting_date;
-		}
+		/* manqala 19/09/2016: let the translation date be whichever of the transaction_date or posting_date is available */
+		translation_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
+		/* end manqala */
 		
 		var me = this;
 		this.set_dynamic_labels();
@@ -434,7 +428,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
 				&& !this.frm.doc.ignore_pricing_rule) {
-			this.get_exchange_rate(lookup_date, this.frm.doc.currency, company_currency,
+			this.get_exchange_rate(translation_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("conversion_rate", exchange_rate);
 				});
@@ -462,11 +456,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	get_exchange_rate: function(posting_date, from_currency, to_currency, callback) {
+	get_exchange_rate: function(translation_date, from_currency, to_currency, callback) {
 		return frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
-				posting_date: posting_date,
+				translation_date: translation_date,
 				from_currency: from_currency,
 				to_currency: to_currency
 			},
