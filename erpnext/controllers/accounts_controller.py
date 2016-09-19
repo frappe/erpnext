@@ -142,7 +142,8 @@ class AccountsController(TransactionBase):
             elif self.currency == self.company_currency:
                 self.conversion_rate = 1.0
             elif not self.conversion_rate:
-                self.conversion_rate = get_exchange_rate(self.currency,
+                # cksgb 19/09/2016: added transaction date to arguments for get_exchange_rate
+                self.conversion_rate = get_exchange_rate(self.transaction_date, self.currency,
                     self.company_currency)
 
     def set_missing_item_details(self):
