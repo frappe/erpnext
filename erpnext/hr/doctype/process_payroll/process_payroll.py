@@ -81,6 +81,7 @@ class ProcessPayroll(Document):
 					"employee": emp[0],
 					"month": self.month,
 					"company": self.company,
+					"posting_date": self.posting_date,
 				})
 				ss.insert()
 				ss_list.append(ss.name)
