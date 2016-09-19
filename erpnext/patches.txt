@@ -328,3 +328,4 @@ erpnext.patches.v7_0.update_conversion_factor_in_supplier_quotation_item
 erpnext.patches.v7_1.move_sales_invoice_from_parent_to_child_timesheet
 execute:frappe.db.sql("update `tabTimesheet` ts, `tabEmployee` emp set ts.employee_name = emp.employee_name where emp.name = ts.employee and ts.employee_name is null and ts.employee is not null")
 erpnext.patches.v7_1.update_lead_source
+erpnext.patches.v7_1.fix_link_for_customer_from_lead
