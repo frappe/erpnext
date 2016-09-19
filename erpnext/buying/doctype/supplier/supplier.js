@@ -30,6 +30,7 @@ frappe.ui.form.on("Supplier", {
 		  	unhide_field(['address_html','contact_html']);
 			erpnext.utils.render_address_and_contact(frm);
 
+			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.set_route('query-report', 'General Ledger',
 					{party_type:'Supplier', party:frm.doc.name});
@@ -37,6 +38,9 @@ frappe.ui.form.on("Supplier", {
 			frm.add_custom_button(__('Accounts Payable'), function() {
 				frappe.set_route('query-report', 'Accounts Payable', {supplier:frm.doc.name});
 			});
+
+			// indicators
+			erpnext.utils.set_party_dashboard_indicators(frm);
 		}
 	},
 });
