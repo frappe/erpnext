@@ -31,7 +31,7 @@ class SalarySlip(TransactionBase):
 			self.get_leave_details(lwp = self.leave_without_pay)
 
 		# if self.salary_slip_based_on_timesheet or not self.net_pay:
-		# 	self.calculate_net_pay()
+		self.calculate_net_pay()
 
 		company_currency = get_company_currency(self.company)
 		self.total_in_words = money_in_words(self.rounded_total, company_currency)
@@ -52,15 +52,27 @@ class SalarySlip(TransactionBase):
 
 		data = self.get_data_for_eval()
 		for key in ('earnings', 'deductions'):
-			for d in self._salary_structure_doc.get(key):
-				amount = self.eval_condition_and_formula(d, data)				
-				if amount:
-					self.append(key, {
-						'amount': amount,
-						'default_amount': amount,
-						'depends_on_lwp' : d.depends_on_lwp,
-						'salary_component' : d.salary_component
-					})
+			for struct_row in self._salary_structure_doc.get(key):
+				amount = self.eval_condition_and_formula(struct_row, data)	
+					if amount:
+					self.update_component_row(struct_row, amount, key)
+					
+					
+	def update_component_row(self, struct_row, amount, key):
+		component_row = None
+		for d in self.get(key):
+			if d.salary_component == struct_row.salary_component:
+				component_row = d
+		
+		if not component_row:
+			self.append(key, {
+				'amount': amount,
+				'default_amount': amount,
+				'depends_on_lwp' : struct_row.depends_on_lwp,
+				'salary_component' : struct_row.salary_component
+			})
+		else:
+			component_row.amount = amount
 	
 	def eval_condition_and_formula(self, d, data):
 		try:
@@ -74,6 +86,7 @@ class SalarySlip(TransactionBase):
 					amount = eval(d.formula, None, data)
 	
 				data[d.abbr] = amount
+
 			return amount
 		except NameError as err:
 		    frappe.throw(_("Name error: {0}".format(err)))
@@ -92,6 +105,7 @@ class SalarySlip(TransactionBase):
 				data.base, data.variable = d.base, d.variable
 	
 		data.update(frappe.get_doc("Employee", self.employee).as_dict())
+		data.update(self.as_dict())
 
 		# set values for components
 		salary_components = frappe.get_all("Salary Component", fields=["salary_component_abbr"])
