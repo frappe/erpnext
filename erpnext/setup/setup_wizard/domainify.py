@@ -63,7 +63,8 @@ def get_domain(domain):
 		'Education': {
 			'desktop_icons': ['Student', 'Program', 'Course', 'Student Group', 'Instructor',
 				'Fees',  'ToDo', 'Schools'],
-			'allow_roles': ['Academics User', 'Accounts User', 'Accounts Manager', 'Website Manager'],
+			'allow_roles': ['Academics User', 'Accounts User', 'Accounts Manager', 'Item Manager',
+				'Website Manager', 'HR User', 'HR Manager', 'Purchase User', 'Purchase Manager'],
 			'allow_sidebar_items': ['/announcement', '/course', '/assessment', '/fees']
 		},
 	}
