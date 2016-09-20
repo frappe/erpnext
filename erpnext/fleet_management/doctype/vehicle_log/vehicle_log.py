@@ -11,9 +11,6 @@ from frappe.model.document import Document
 
 class VehicleLog(Document):
 	def validate(self):
-		vehicle_status=frappe.db.get_value("Vehicle", self.license_plate, "docstatus")
-		if vehicle_status == 0:
-			frappe.throw(_("You cannot enter Vehicle Logs against vehcicle's in Draft status"))
 		last_odometer=frappe.db.get_value("Vehicle", self.license_plate, "last_odometer")
 		if flt(self.odometer) < flt(last_odometer):
 			frappe.throw(_("Current Odometer reading entered should be greater than initial Vehicle Odometer {0}").format(last_odometer))

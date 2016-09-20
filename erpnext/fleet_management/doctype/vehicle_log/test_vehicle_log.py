@@ -9,8 +9,19 @@ from frappe.utils import nowdate,flt, cstr,random_string
 # test_records = frappe.get_test_records('Vehicle Log')
 class TestVehicleLog(unittest.TestCase):
 	def test_make_vehicle_log(self):
+		vehicle = frappe.get_doc({
+			"doctype": "Vehicle",
+			"license_plate": random_string(10).upper(),
+			"make": "Maruti",
+			"model": "PCM",
+			"last_odometer":5000,
+			"acquisition_date":frappe.utils.nowdate(),
+			"location": "Mumbai",
+			"chassis_no": "1234ABCD",
+			"vehicle_value":frappe.utils.flt(500000)
+		})
+		vehicle.insert()
 		license_plate = frappe.db.sql("""select license_plate from `tabVehicle` order by modified desc limit 1""")[0][0]
-		print license_plate
 		vehicle_log = frappe.get_doc({
 			"doctype": "Vehicle Log",
 			"license_plate": cstr(license_plate).upper(),

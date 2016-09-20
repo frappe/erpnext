@@ -31,11 +31,3 @@ frappe.ui.form.on("Vehicle Log", {
 	}
 });
 
-
-cur_frm.fields_dict.license_plate.get_query = function(doc) {
-	return {
-		filters: [
-			["Vehicle", "docstatus", "=",1]
-		]
-	}
-}
