@@ -15,9 +15,9 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
 
 
-# form_grid_templates = {
-# 	"items": "templates/form_grid/material_request_grid.html"
-# }
+form_grid_templates = {
+	"items": "templates/form_grid/material_request_grid.html"
+}
 
 class MaterialRequest(BuyingController):
 	def get_feed(self):
