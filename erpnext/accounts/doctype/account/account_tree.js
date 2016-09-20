@@ -48,5 +48,5 @@ frappe.treeview_settings["Account"] = {
 				+ " " + dr_or_cr
 				+ '</span>').insertBefore(node.$ul);
 		}
-	}
+	},
 }
