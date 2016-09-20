@@ -22,4 +22,3 @@ class TestVehicle(unittest.TestCase):
 			"vehicle_value":frappe.utils.flt(500000)
 		})
 		vehicle.insert()
-		return vehicle
