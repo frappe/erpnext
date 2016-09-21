@@ -54,8 +54,8 @@ class SalarySlip(TransactionBase):
 		for key in ('earnings', 'deductions'):
 			for struct_row in self._salary_structure_doc.get(key):
 				amount = self.eval_condition_and_formula(struct_row, data)	
-					if amount:
-						self.update_component_row(struct_row, amount, key)
+				if amount:
+					self.update_component_row(struct_row, amount, key)
 					
 					
 	def update_component_row(self, struct_row, amount, key):
@@ -78,16 +78,14 @@ class SalarySlip(TransactionBase):
 		try:
 			if d.condition:
 				if not eval(d.condition, None, data):
-					return None
-	
+					return None	
 			amount = d.amount
 			if d.amount_based_on_formula:
 				if d.formula:
 					amount = eval(d.formula, None, data)
-	
 				data[d.abbr] = amount
-
 			return amount
+			
 		except NameError as err:
 		    frappe.throw(_("Name error: {0}".format(err)))
 		except SyntaxError as err:
