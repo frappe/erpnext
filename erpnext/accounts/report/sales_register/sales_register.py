@@ -23,6 +23,7 @@ def execute(filters=None):
 	invoice_so_dn_map = get_invoice_so_dn_map(invoice_list)
 	customer_map = get_customer_deatils(invoice_list)
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	mode_of_payments = get_mode_of_payments([inv.name for inv in invoice_list])
 
 	data = []
 	for inv in invoice_list:
@@ -33,7 +34,7 @@ def execute(filters=None):
 		row = [inv.name, inv.posting_date, inv.customer, inv.customer_name,
 		customer_map.get(inv.customer, {}).get("customer_group"), 
 		customer_map.get(inv.customer, {}).get("territory"),
-		inv.debit_to, inv.mode_of_payment, inv.project, inv.remarks, 
+		inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])), inv.project, inv.remarks, 
 		", ".join(sales_order), ", ".join(delivery_note), company_currency]
 
 		# map income values
@@ -68,7 +69,7 @@ def get_columns(invoice_list):
 		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80", 
 		_("Customer Id") + "::120", _("Customer Name") + "::120", 
 		_("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80", 
-		_("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + ":Link/Mode of Payment:80", 
+		_("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120", 
 		_("Project") +":Link/Project:80", _("Remarks") + "::150", 
 		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
 		{
@@ -113,8 +114,11 @@ def get_conditions(filters):
 	if filters.get("from_date"): conditions += " and posting_date >= %(from_date)s"
 	if filters.get("to_date"): conditions += " and posting_date <= %(to_date)s"
 	
-	if filters.get("mode_of_payment"): conditions += " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"
-
+	if filters.get("mode_of_payment"):
+		conditions += """ and exists(select name from `tabSales Invoice Payment`
+			 where parent=`tabSales Invoice`.name 
+			 	and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
+				
 	return conditions
 
 def get_invoices(filters):
@@ -188,3 +192,15 @@ def get_customer_deatils(invoice_list):
 			customer_map.setdefault(cust.name, cust)
 
 	return customer_map
+
+
+def get_mode_of_payments(invoice_list):
+	mode_of_payments = {}
+	inv_mop = frappe.db.sql("""select parent, mode_of_payment
+		from `tabSales Invoice Payment` where parent in (%s) group by parent, mode_of_payment""" %
+		', '.join(['%s']*len(invoice_list)), tuple(invoice_list), as_dict=1)
+
+	for d in inv_mop:
+		mode_of_payments.setdefault(d.parent, []).append(d.mode_of_payment)
+
+	return mode_of_payments
