@@ -55,7 +55,7 @@ class SalarySlip(TransactionBase):
 			for struct_row in self._salary_structure_doc.get(key):
 				amount = self.eval_condition_and_formula(struct_row, data)	
 					if amount:
-					self.update_component_row(struct_row, amount, key)
+						self.update_component_row(struct_row, amount, key)
 					
 					
 	def update_component_row(self, struct_row, amount, key):
