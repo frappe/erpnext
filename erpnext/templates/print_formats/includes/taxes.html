@@ -19,9 +19,9 @@
 		{%- for charge in data -%}
 			{%- if not charge.included_in_print_rate -%}
 			<div class="row">
-				<div class="col-xs-5 text-right">
-					<label>{{ charge.get_formatted("description") }}</label></div>
 				<div class="col-xs-7 text-right">
+					<label>{{ charge.get_formatted("description") }}</label></div>
+				<div class="col-xs-5 text-right">
 					{{ frappe.format_value(frappe.utils.flt(charge.tax_amount),
 						table_meta.get_field("tax_amount"), doc, currency=doc.currency) }}
 				</div>
