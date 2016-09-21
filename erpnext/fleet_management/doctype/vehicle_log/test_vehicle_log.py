@@ -10,6 +10,7 @@ from frappe.utils import nowdate,flt, cstr,random_string
 class TestVehicleLog(unittest.TestCase):
 	def test_make_vehicle_log(self):
 		license_plate=random_string(10).upper()
+		employee_id=frappe.db.sql("""select name from `tabEmployee` order by modified desc limit 1""")[0][0]
 		vehicle = frappe.get_doc({
 			"doctype": "Vehicle",
 			"license_plate": cstr(license_plate),
@@ -21,22 +22,18 @@ class TestVehicleLog(unittest.TestCase):
 			"chassis_no": "1234ABCD",
 			"vehicle_value":frappe.utils.flt(500000)
 		})
-		vehicle.insert()
+		try:
+			vehicle.insert()
+		except frappe.DuplicateEntryError:
+			pass
 		vehicle_log = frappe.get_doc({
 			"doctype": "Vehicle Log",
 			"license_plate": cstr(license_plate),
-			"employee":"EMP/0002",
+			"employee":employee_id,
 			"date":frappe.utils.nowdate(),
 			"odometer":5010,
 			"fuel_qty":frappe.utils.flt(50),
-			"price": frappe.utils.flt(500),
-			"service_detail":[{
-				"service_item":"Oil Change",
-				"type":"Change",
-				"frequency":"Monthly",
-				"expense_amount":frappe.utils.flt(50)
-			}
-			]
+			"price": frappe.utils.flt(500)
 		})
 		vehicle_log.insert()
 		vehicle_log.submit()
