@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import flt
 from frappe.model.mapper import get_mapped_doc
 
@@ -53,6 +54,18 @@ class SupplierQuotation(BuyingController):
 	def validate_common(self):
 		pc = frappe.get_doc('Purchase Common')
 		pc.validate_for_items(self)
+
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Supplier Quotation'),
+	})
+
+	return list_context
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
