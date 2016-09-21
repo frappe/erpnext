@@ -9,7 +9,7 @@ def execute():
 	frappe.local.lang = frappe.db.get_default("lang") or 'en'
 
 	for s in default_lead_sources:
-		frappe.get_doc(dict(doctype='Lead Source', source_name=_(s))).insert()
+		insert_lead_source(_(s))
 
 	# get lead sources in existing forms (customized)
 	# and create a document if not created
@@ -17,9 +17,12 @@ def execute():
 		sources = frappe.db.sql_list('select distinct source from `tab{0}`'.format(d))
 		for s in sources:
 			if s and s not in default_lead_sources:
-				frappe.get_doc(dict(doctype='Lead Source', source_name=s)).insert()
+				insert_lead_source(s)
 
 		# remove customization for source
 		for p in frappe.get_all('Property Setter', {'doc_type':d, 'field_name':'source', 'property':'options'}):
 			frappe.delete_doc('Property Setter', p.name)
 
+def insert_lead_source(s):
+	if not frappe.db.exists('Lead Source', s):
+		frappe.get_doc(dict(doctype='Lead Source', source_name=s)).insert()
