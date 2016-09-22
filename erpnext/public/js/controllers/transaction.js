@@ -678,6 +678,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					me._set_values_for_item_list(r.message);
 					if(item) me.set_gross_profit(item);
 					if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
+					if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on")
 				}
 			}
 		});
