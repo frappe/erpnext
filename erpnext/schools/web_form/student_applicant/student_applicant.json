@@ -1,0 +1,159 @@
+{
+ "allow_comments": 0, 
+ "allow_delete": 0, 
+ "allow_edit": 1, 
+ "allow_multiple": 1, 
+ "creation": "2016-09-12 02:26:42.447103", 
+ "doc_type": "Student Applicant", 
+ "docstatus": 0, 
+ "doctype": "Web Form", 
+ "idx": 0, 
+ "is_standard": 1, 
+ "login_required": 1, 
+ "modified": "2016-09-15 02:00:28.493759", 
+ "modified_by": "Administrator", 
+ "module": "Schools", 
+ "name": "student-applicant", 
+ "owner": "Administrator", 
+ "published": 1, 
+ "route": "student-applicant", 
+ "sidebar_items": [], 
+ "success_url": "/student-applicant", 
+ "title": "Student Applicant", 
+ "web_form_fields": [
+  {
+   "fieldname": "first_name", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "First Name", 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "middle_name", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "Middle Name", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "last_name", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "Last Name", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "Image", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "program", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "label": "Program", 
+   "options": "Program", 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "academic_year", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "label": "Academic Year", 
+   "options": "Academic Year", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "date_of_birth", 
+   "fieldtype": "Date", 
+   "hidden": 0, 
+   "label": "Date of Birth", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "blood_group", 
+   "fieldtype": "Select", 
+   "hidden": 0, 
+   "label": "Blood Group", 
+   "options": "\nA+\nA-\nB+\nB-\nO+\nO-\nAB+\nAB-", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "student_email_id", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "Student Email ID", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "student_mobile_number", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "Student Mobile Number", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "nationality", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "label": "Nationality", 
+   "options": "Country", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "address_line_1", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "Address Line 1", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "address_line_2", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "Address Line 2", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "pincode", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "Pincode", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "guardians", 
+   "fieldtype": "Table", 
+   "hidden": 0, 
+   "label": "Guardians", 
+   "options": "Student Guardian", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "siblings", 
+   "fieldtype": "Table", 
+   "hidden": 0, 
+   "label": "Siblings", 
+   "options": "Student Sibling", 
+   "read_only": 0, 
+   "reqd": 0
+  }
+ ]
+}

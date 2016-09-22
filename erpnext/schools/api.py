@@ -21,9 +21,8 @@ def enroll_student(source_name):
 			"field_map": {
 				"name": "student_applicant"
 			}
-		}})
+		}}, ignore_permissions=True)
 	student.save()
-
 	program_enrollment = frappe.new_doc("Program Enrollment")
 	program_enrollment.student = student.name
 	program_enrollment.student_name = student.title
@@ -104,13 +103,14 @@ def get_fee_components(fee_structure):
 		return fs
 
 @frappe.whitelist()
-def get_fee_schedule(program):
+def get_fee_schedule(program, student_category=None):
 	"""Returns Fee Schedule.
 
 	:param program: Program.
+	:param student_category: Student Category
 	"""
 	fs = frappe.get_list("Program Fee", fields=["academic_term", "fee_structure", "due_date", "amount"] ,
-		filters={"parent": program}, order_by= "idx")
+		filters={"parent": program, "student_category": student_category }, order_by= "idx")
 	return fs
 
 @frappe.whitelist()

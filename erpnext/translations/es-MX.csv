@@ -1,0 +1,25 @@
+DocType: Delivery Note,% Installed,% Instalado
+DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
+DocType: Address Template,"<h4>Default Template</h4>
+<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
+<pre><code>{{ address_line1 }}&lt;br&gt;
+{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
+{{ city }}&lt;br&gt;
+{% if state %}{{ state }}&lt;br&gt;{% endif -%}
+{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
+{{ country }}&lt;br&gt;
+{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
+{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
+{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
+</code></pre>","<h4> Por defecto la plantilla <!-- h4--> 
+ <p> <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </a> y todos los campos de la Dirección ( incluyendo campos personalizados en su caso) estará disponible <!-- p--> 
+ </p><pre> <code> {{address_line1}} &amp; lt; br &amp; gt; 
+ {% if address_line2%} {{address_line2}} &amp; lt; br &amp; gt; { endif% -%} 
+ {{ciudad}} &amp; lt; br &amp; gt; 
+ {% if%} Estado {{Estado}} &amp; lt; br &amp; gt; {% endif -%} {% if 
+ código PIN%} PIN: {{código PIN}} &amp; lt; br &amp; gt; {% endif -%} 
+ {{país}} &amp; lt; br &amp; gt; 
+ {% if teléfono%} Teléfono: {{teléfono}} &amp; lt; br &amp; gt; { % endif -%} 
+ {% if fax%} Fax: {{fax}} &amp; lt; br &amp; gt; {% endif -%} 
+ {% if email_ID%} Email: {{email_ID}} &amp; lt; br &amp; gt ; {% endif -%} 
+ <!-- code--> <!-- pre--></code></pre></h4>"

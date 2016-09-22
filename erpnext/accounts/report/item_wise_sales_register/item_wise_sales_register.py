@@ -32,6 +32,8 @@ def execute(filters=None):
 		elif d.so_detail:
 			delivery_note = ", ".join(frappe.db.sql_list("""select distinct parent
 			from `tabDelivery Note Item` where docstatus=1 and so_detail=%s""", d.so_detail))
+		if not delivery_note and d.update_stock:
+			delivery_note = d.parent
 
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.customer, d.customer_name,
 			d.customer_group, d.debit_to, ", ".join(mode_of_payments.get(d.parent, [])), 
@@ -91,7 +93,7 @@ def get_items(filters):
 			si_item.item_code, si_item.item_name, si_item.item_group, si_item.sales_order,
 			si_item.delivery_note, si_item.income_account, si_item.cost_center, si_item.qty,
 			si_item.base_net_rate, si_item.base_net_amount, si.customer_name,
-			si.customer_group, si_item.so_detail
+			si.customer_group, si_item.so_detail, si.update_stock
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 %s
 		order by si.posting_date desc, si_item.item_code desc""" % conditions, filters, as_dict=1)

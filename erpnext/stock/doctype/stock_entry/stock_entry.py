@@ -156,7 +156,7 @@ class StockEntry(StockController):
 						if not d.s_warehouse:
 							frappe.throw(_("Source warehouse is mandatory for row {0}").format(d.idx))
 
-			if cstr(d.s_warehouse) == cstr(d.t_warehouse):
+			if cstr(d.s_warehouse) == cstr(d.t_warehouse) and not self.purpose == "Material Transfer for Manufacture":
 				frappe.throw(_("Source and target warehouse cannot be same for row {0}").format(d.idx))
 
 	def validate_production_order(self):
@@ -225,6 +225,17 @@ class StockEntry(StockController):
 					+ '<br><br>' + _("Available qty is {0}, you need {1}").format(frappe.bold(d.actual_qty),
 						frappe.bold(d.transfer_qty)),
 					NegativeStockError, title=_('Insufficient Stock'))
+
+	def set_serial_nos(self, production_order):
+		previous_se = frappe.db.get_value("Stock Entry", {"production_order": production_order,
+				"purpose": "Material Transfer for Manufacture"}, "name")
+
+		for d in self.get('items'):
+			transferred_serial_no = frappe.db.get_value("Stock Entry Detail",{"parent": previous_se,
+				"item_code": d.item_code}, "serial_no")
+			
+			if transferred_serial_no:
+				d.serial_no = transferred_serial_no
 
 	def get_stock_and_rate(self):
 		self.set_transfer_qty()
@@ -545,6 +556,9 @@ class StockEntry(StockController):
 
 						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
 					self.add_to_stock_entry_detail(item_dict)
+			# fetch the serial_no of the first stock entry for the second stock entry
+			if self.production_order and self.purpose == "Manufacture":
+				self.set_serial_nos(self.production_order)
 
 			# add finished goods item
 			if self.purpose in ("Manufacture", "Repack"):

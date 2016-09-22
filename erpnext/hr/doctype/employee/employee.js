@@ -40,13 +40,6 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 				"Ms": "Female"
 			}[this.frm.doc.salutation]);
 		}
-	},
-
-	make_salary_structure: function(btn) {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.hr.doctype.employee.employee.make_salary_structure",
-			frm: cur_frm
-		});
 	}
 });
 cur_frm.cscript = new erpnext.hr.EmployeeController({frm: cur_frm});

@@ -9,7 +9,8 @@ frappe.ui.form.on("Program Enrollment", {
 			frappe.call({
 				method: "erpnext.schools.api.get_fee_schedule",
 				args: {
-					"program": frm.doc.program
+					"program": frm.doc.program,
+					"student_category": frm.doc.student_category
 				},
 				callback: function(r) {
 					if(r.message) {
@@ -18,5 +19,27 @@ frappe.ui.form.on("Program Enrollment", {
 				}
 			});
 		}
+	},
+	
+	student_category: function() {
+		frappe.ui.form.trigger("Program Enrollment", "program");
+	},
+	
+	onload: function(frm, cdt, cdn){
+		cur_frm.set_query("academic_term", "fees", function(){
+			return{
+				"filters":{
+					"academic_year": (frm.doc.academic_year)
+				}
+			};
+		});
+				
+		cur_frm.fields_dict['fees'].grid.get_field('fee_structure').get_query = function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: {'academic_term': d.academic_term}
+			}
+		};
+		
 	}
 });

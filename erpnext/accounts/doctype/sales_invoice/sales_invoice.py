@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.sales_invoice.pos import update_multi_mode_option
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.accounts.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal
 
@@ -83,7 +84,8 @@ class SalesInvoice(SellingController):
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		self.update_packing_list()
-		self.calculate_billing_amount_from_timesheet()
+		self.set_billing_hours_and_amount()
+		self.update_timesheet_billing_for_project()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -220,10 +222,20 @@ class SalesInvoice(SellingController):
 		for d in self.timesheets:
 			if d.time_sheet:
 				timesheet = frappe.get_doc("Timesheet", d.time_sheet)
-				timesheet.sales_invoice = sales_invoice
+				self.update_time_sheet_detail(timesheet, d, sales_invoice)
+				timesheet.calculate_total_amounts()
+				timesheet.calculate_percentage_billed()
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
 				timesheet.save()
+
+	def update_time_sheet_detail(self, timesheet, args, sales_invoice):
+		for data in timesheet.time_logs:
+			if (self.project and args.timesheet_detail == data.name) or \
+				(not self.project and not data.sales_invoice) or \
+				(not sales_invoice and data.sales_invoice == self.name):
+				data.sales_invoice = sales_invoice
+				if self.project: return
 
 	def on_update(self):
 		self.set_paid_amount()
@@ -350,19 +362,18 @@ class SalesInvoice(SellingController):
 				against_acc.append(d.income_account)
 		self.against_income_account = ','.join(against_acc)
 
-
 	def add_remarks(self):
 		if not self.remarks: self.remarks = 'No Remarks'
 
 
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""
-		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
+		dic = {'Sales Order':['so_required', 'is_pos'],'Delivery Note':['dn_required', 'update_stock']}
 		for i in dic:
-			if frappe.db.get_value('Selling Settings', None, dic[i]) == 'Yes':
+			if frappe.db.get_value('Selling Settings', None, dic[i][0]) == 'Yes':
 				for d in self.get('items'):
 					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 1 \
-						and not d.get(i.lower().replace(' ','_')):
+						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1]):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
 
@@ -390,7 +401,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).validate_warehouse()
 
 		for d in self.get('items'):
-			if not d.warehouse:
+			if not d.warehouse and frappe.db.get_value("Item", d.item_code, "is_stock_item"):
 				frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
 
 	def validate_delivery_note(self):
@@ -447,7 +458,35 @@ class SalesInvoice(SellingController):
 		else:
 			self.set('packed_items', [])
 
-	def calculate_billing_amount_from_timesheet(self):
+	def set_billing_hours_and_amount(self):
+		for timesheet in self.timesheets:
+			ts_doc = frappe.get_doc('Timesheet', timesheet.time_sheet)
+			if not timesheet.billing_hours and ts_doc.total_billable_hours:
+				timesheet.billing_hours = ts_doc.total_billable_hours
+
+			if not timesheet.billing_amount and ts_doc.total_billable_amount:
+				timesheet.billing_amount = ts_doc.total_billable_amount
+
+	def update_timesheet_billing_for_project(self):
+		if not self.timesheets and self.project:
+			self.add_timesheet_data()
+		else:
+			self.calculate_billing_amount_for_timesheet()
+
+	def add_timesheet_data(self):
+		self.set('timesheets', [])
+		if self.project:
+			for data in get_projectwise_timesheet_data(self.project):
+				self.append('timesheets', {
+						'time_sheet': data.parent,
+						'billing_hours': data.billing_hours,
+						'billing_amount': data.billing_amt,
+						'timesheet_detail': data.name
+					})
+
+			self.calculate_billing_amount_for_timesheet()
+
+	def calculate_billing_amount_for_timesheet(self):
 		total_billing_amount = 0.0
 		for data in self.timesheets:
 			if data.billing_amount:

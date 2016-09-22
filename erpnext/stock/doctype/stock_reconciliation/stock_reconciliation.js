@@ -78,10 +78,27 @@ frappe.ui.form.on("Stock Reconciliation", {
 				}
 			});
 		}
-	}
+	},
+	set_item_code: function(doc, cdt, cdn) {
+		var d = frappe.model.get_doc(cdt, cdn);
+		if (d.barcode) {
+			frappe.call({
+				method: "erpnext.stock.get_item_details.get_item_code",
+				args: {"barcode": d.barcode },
+				callback: function(r) {
+					if (!r.exe){
+						frappe.model.set_value(cdt, cdn, "item_code", r.message);
+					}
+				}
+			});
+		}
+	}	
 });
 
 frappe.ui.form.on("Stock Reconciliation Item", {
+	barcode: function(frm, cdt, cdn) {
+		frm.events.set_item_code(frm, cdt, cdn);
+	},
 	warehouse: function(frm, cdt, cdn) {
 		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
 	},
@@ -140,13 +157,6 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 				}
 			}
 		}
-
-		this.frm.get_field('items').grid.editable_fields = [
-			{fieldname: 'item_code', columns: 3},
-			{fieldname: 'warehouse', columns: 3},
-			{fieldname: 'qty', columns: 2},
-			{fieldname: 'valuation_rate', columns: 2}
-		];
 	},
 
 	refresh: function() {

@@ -364,10 +364,11 @@ def get_events(start, end):
 
 	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "company"],
 		as_dict=True)
-	if not employee:
-		return events
-
-	employee, company = employee.name, employee.company
+	if employee:
+		employee, company = employee.name, employee.company
+	else:
+		employee=''
+		company=frappe.db.get_value("Global Defaults", None, "default_company")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("Leave Application")

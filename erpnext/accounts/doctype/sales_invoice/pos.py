@@ -19,9 +19,6 @@ def get_pos_data():
 
 	if pos_profile.get('name'):
 		pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
-	else:
-		frappe.msgprint('<a href="#List/POS Profile">'
-			+ _("Welcome to POS: Create your POS Profile") + '</a>');
 
 	company_data = get_company_data(doc.company)
 	update_pos_profile_data(doc, pos_profile, company_data)
