@@ -30,8 +30,14 @@ def get_make_model(license_plate):
 
 @frappe.whitelist()
 def make_expense_claim(docname):
+	def check_exp_claim_exists():
+		exp_claim = frappe.db.sql("""select name from `tabExpense Claim` where vehicle_log=%s""",vehicle_log.name)
+		return exp_claim[0][0] if exp_claim else ""
 	def calc_service_exp():
 		total_exp_amt=0
+		exp_claim = check_exp_claim_exists()
+		if exp_claim:
+			frappe.throw(_("Expense Claim {0} already exists for the Vehicle Log").format(exp_claim))
 		for serdetail in vehicle_log.service_detail:
 			total_exp_amt = total_exp_amt + serdetail.expense_amount
 		return total_exp_amt
@@ -39,6 +45,7 @@ def make_expense_claim(docname):
 	vehicle_log = frappe.get_doc("Vehicle Log", docname)
 	exp_claim = frappe.new_doc("Expense Claim")
 	exp_claim.employee=vehicle_log.employee
+	exp_claim.vehicle_log=vehicle_log.name
 	exp_claim.remark=_("Expense Claim for Vehicle Log {0}").format(vehicle_log.name)
 	fuel_price=vehicle_log.price
 	total_claim_amt=calc_service_exp() + fuel_price
