@@ -124,7 +124,7 @@ def get_conditions(filters):
 def get_invoices(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select name, posting_date, debit_to, project, customer, customer_name, remarks, 
-		base_net_total, base_grand_total, base_rounded_total, outstanding_amount, mode_of_payment
+		base_net_total, base_grand_total, base_rounded_total, outstanding_amount
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date desc, name desc""" %
 		conditions, filters, as_dict=1)
@@ -196,11 +196,12 @@ def get_customer_deatils(invoice_list):
 
 def get_mode_of_payments(invoice_list):
 	mode_of_payments = {}
-	inv_mop = frappe.db.sql("""select parent, mode_of_payment
-		from `tabSales Invoice Payment` where parent in (%s) group by parent, mode_of_payment""" %
-		', '.join(['%s']*len(invoice_list)), tuple(invoice_list), as_dict=1)
+	if invoice_list:
+		inv_mop = frappe.db.sql("""select parent, mode_of_payment
+			from `tabSales Invoice Payment` where parent in (%s) group by parent, mode_of_payment""" %
+			', '.join(['%s']*len(invoice_list)), tuple(invoice_list), as_dict=1)
 
-	for d in inv_mop:
-		mode_of_payments.setdefault(d.parent, []).append(d.mode_of_payment)
+		for d in inv_mop:
+			mode_of_payments.setdefault(d.parent, []).append(d.mode_of_payment)
 
 	return mode_of_payments
