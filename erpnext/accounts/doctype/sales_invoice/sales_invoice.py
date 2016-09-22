@@ -401,7 +401,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).validate_warehouse()
 
 		for d in self.get('items'):
-			if not d.warehouse:
+			if not d.warehouse and frappe.db.get_value("Item", d.item_code, "is_stock_item"):
 				frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
 
 	def validate_delivery_note(self):
