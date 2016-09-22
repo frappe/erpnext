@@ -173,6 +173,7 @@ execute:frappe.db.set_value("Backup Manager", None, "send_backups_to_dropbox", 1
 execute:frappe.db.sql_list("delete from `tabDocPerm` where parent='Issue' and modified_by='Administrator' and role='Guest'")
 erpnext.patches.v5_0.update_item_and_description_again
 erpnext.patches.v6_0.multi_currency
+erpnext.patches.v7_0.create_budget_record
 erpnext.patches.v5_0.repost_gle_for_jv_with_multiple_party
 erpnext.patches.v5_0.portal_fixes
 erpnext.patches.v5_0.reset_values_in_tools # 02-05-2016
@@ -235,7 +236,6 @@ execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Taxes and Charges 
 erpnext.patches.v6_4.set_user_in_contact
 erpnext.patches.v6_4.make_image_thumbnail #2015-10-20
 erpnext.patches.v6_5.show_in_website_for_template_item
-erpnext.patches.v7_0.create_budget_record
 erpnext.patches.v6_4.fix_expense_included_in_valuation
 execute:frappe.delete_doc_if_exists("Report", "Item-wise Last Purchase Rate")
 erpnext.patches.v6_6.fix_website_image
