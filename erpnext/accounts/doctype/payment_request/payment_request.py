@@ -65,7 +65,7 @@ class PaymentRequest(Document):
 		data = frappe.db.get_value(self.reference_doctype, self.reference_name,
 			["company", "customer_name"], as_dict=1)
 		
-		controller = get_integration_controller(self.payment_gateway, setup=False)
+		controller = get_integration_controller(self.payment_gateway)
 		controller.validate_transaction_currency(self.currency)
 		
 		return controller.get_payment_url(**{
