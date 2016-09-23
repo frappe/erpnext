@@ -553,6 +553,9 @@ def get_events(start, end, filters=None):
 def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=None):
 	def set_missing_values(source, target):
 		target.supplier = for_supplier
+		target.apply_discount_on = ""
+		target.additional_discount_percentage = 0.0
+		target.discount_amount = 0.0
 
 		default_price_list = frappe.get_value("Supplier", for_supplier, "default_price_list")
 		if default_price_list:

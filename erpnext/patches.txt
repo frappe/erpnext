@@ -266,7 +266,7 @@ erpnext.patches.v6_20x.remove_fiscal_year_from_holiday_list
 erpnext.patches.v6_24.map_customer_address_to_shipping_address_on_po
 erpnext.patches.v6_27.fix_recurring_order_status
 erpnext.patches.v6_20x.update_product_bundle_description
-erpnext.patches.v7_0.update_party_status
+erpnext.patches.v7_0.update_party_status #2016-09-22
 erpnext.patches.v7_0.update_item_projected
 erpnext.patches.v7_0.remove_features_setup
 erpnext.patches.v7_0.update_home_page
