@@ -13,6 +13,7 @@ def execute():
 	for c in frappe.get_all('Contact', fields=['user'], filters={'ifnull(user, "")': ('!=', '')}):
 		user = frappe.get_doc('User', c.user)
 		user.set_default_roles()
+		user.flags.ignore_validate = True
 		user.save()
 
 
