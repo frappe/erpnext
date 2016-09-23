@@ -15,3 +15,6 @@ class StudentApplicant(Document):
 		student = frappe.get_list("Student",  filters= {"student_applicant": self.name})
 		if student:
 			frappe.throw(_("Cannot change status as student {0} is linked with student application {1}").format(student[0].name, self.name))
+
+	def on_payment_authorized(self, *args, **kwargs):
+		self.db_set('paid', 1)
