@@ -328,3 +328,4 @@ erpnext.patches.v7_1.fix_link_for_customer_from_lead
 erpnext.patches.v7_0.update_mode_of_payment_type
 execute:frappe.reload_doctype("Salary Slip")
 execute:frappe.db.sql("update `tabSalary Slip` set posting_date=creation")
+erpnext.patches.v7_1.update_portal_roles

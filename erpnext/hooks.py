@@ -101,17 +101,25 @@ website_route_rules = [
 
 portal_menu_items = [
 	{"title": _("Projects"), "route": "/project", "reference_doctype": "Project"},
-	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation"},
-	{"title": _("Supplier Quotation"), "route": "/quotations", "reference_doctype": "Supplier Quotation"},
-	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order"},
-	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice"},
-	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note"},
-	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "show_always": True},
+	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation", "role": "Supplier"},
+	{"title": _("Supplier Quotation"), "route": "/quotations", "reference_doctype": "Supplier Quotation", "role": "Supplier"},
+	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order", "role":"Customer"},
+	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice", "role":"Customer"},
+	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note", "role":"Customer"},
+	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
 	{"title": _("Announcements"), "route": "/announcement", "reference_doctype": "Announcement"},
-	{"title": _("Courses"), "route": "/course", "reference_doctype": "Course"},
-	{"title": _("Assessment Schedule"), "route": "/assessment", "reference_doctype": "Assessment"},
-	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees"}
+	{"title": _("Courses"), "route": "/course", "reference_doctype": "Course", "role":"Student"},
+	{"title": _("Assessment Schedule"), "route": "/assessment", "reference_doctype": "Assessment", "role":"Student"},
+	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"}
+]
+
+default_roles = [
+	{'role': 'Customer', 'doctype':'Contact', 'email_field': 'email_id',
+		'filters': {'ifnull(customer, "")': ('!=', '')}},
+	{'role': 'Supplier', 'doctype':'Contact', 'email_field': 'email_id',
+		'filters': {'ifnull(supplier, "")': ('!=', '')}},
+	{'role': 'Student', 'doctype':'Student', 'email_field': 'student_email_id'}
 ]
 
 has_website_permission = {
