@@ -4,6 +4,8 @@
 from __future__ import unicode_literals
 import frappe, copy
 
+import os
+import json
 from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
@@ -15,57 +17,107 @@ from frappe.core.doctype.communication.comment import add_info_comment
 from erpnext.setup.setup_wizard.domainify import setup_domain
 
 def setup_complete(args=None):
-    if frappe.db.sql("select name from tabCompany"):
-        frappe.throw(_("Setup Already Complete!!"))
+	if frappe.db.sql("select name from tabCompany"):
+		frappe.throw(_("Setup Already Complete!!"))
 
-    install_fixtures.install(args.get("country"))
+	install_fixtures.install(args.get("country"))
 
-    create_price_lists(args)
-    create_fiscal_year_and_company(args)
-    create_users(args)
-    set_defaults(args)
-    create_territories()
-    create_feed_and_todo()
-    create_email_digest()
-    create_letter_head(args)
-    create_taxes(args)
-    create_items(args)
-    create_customers(args)
-    create_suppliers(args)
+	create_price_lists(args)
+	create_fiscal_year_and_company(args)
+	create_sales_tax(args)
+	create_users(args)
+	set_defaults(args)
+	create_territories()
+	create_feed_and_todo()
+	create_email_digest()
+	create_letter_head(args)
+	create_taxes(args)
+	create_items(args)
+	create_customers(args)
+	create_suppliers(args)
 
-    if args.domain.lower() == 'education':
-        create_academic_year()
-        create_academic_term()
-        create_program(args)
-        create_course(args)
-        create_instructor(args)
-        create_room(args)
+	if args.domain.lower() == 'education':
+		create_academic_year()
+		create_academic_term()
+		create_program(args)
+		create_course(args)
+		create_instructor(args)
+		create_room(args)
 
-    if args.get('setup_website'):
-        website_maker(args)
+	if args.get('setup_website'):
+		website_maker(args)
 
-    create_logo(args)
+	create_logo(args)
 
-    frappe.local.message_log = []
-    setup_domain(args.get('domain'))
+	frappe.local.message_log = []
+	setup_domain(args.get('domain'))
 
-    frappe.db.commit()
-    login_as_first_user(args)
+	frappe.db.commit()
+	login_as_first_user(args)
 
-    frappe.db.commit()
-    frappe.clear_cache()
+	frappe.db.commit()
+	frappe.clear_cache()
 
-    if args.get("add_sample_data"):
-        try:
-            make_sample_data()
-            frappe.clear_cache()
-        except:
-            # clear message
-            if frappe.message_log:
-                frappe.message_log.pop()
+	if args.get("add_sample_data"):
+		try:
+			make_sample_data()
+			frappe.clear_cache()
+		except:
+			# clear message
+			if frappe.message_log:
+				frappe.message_log.pop()
 
-            pass
+			pass
 
+def create_sales_tax(args):
+	country_wise_tax = get_country_wise_tax(args.get("country"))
+	if len(country_wise_tax)>0:
+		for sales_tax, tax_data in country_wise_tax.items():
+			account = create_account(tax_data, args)
+			if account:
+				create_sales_template(sales_tax, account, args)
+
+def create_account(tax_data, args):
+	try:
+		account = frappe.get_doc({
+			"doctype": "Account",
+			"is_group": 0,
+			"root_type": "Liability",
+			"company": args.get("company_name"),
+			"parent_account": "Duties and Taxes - %s"%(args.get('company_abbr')),
+			"account_name": tax_data.get('account_name'),
+			"account_type": "Tax",
+			"tax_rate": tax_data.get('tax_rate'),
+			"currency": args.get('currency')
+		}).insert(ignore_permissions=True)
+
+		return account.name
+	except:
+		return None
+
+def create_sales_template(sales_tax, account, args):
+	sales_tax_template = frappe.get_doc({
+		"doctype": "Sales Taxes and Charges Template",
+		"title": sales_tax,
+		"company": args.get("company_name"),
+		"taxes": [{
+			"doctype": "Sales Taxes and Charges",
+			"charge_type": "On Net Total",
+			"account_head": account,
+			"description": sales_tax.split("-")[0]
+		}]
+	}).insert(ignore_permissions=True)
+
+	sales_tax_template.set_missing_values()
+	sales_tax_template.save()
+
+def get_country_wise_tax(country):
+	data = {}
+	with open (os.path.join(os.path.dirname(__file__), "data", "country_wise_tax.json")) as countrywise_tax:
+		data = json.load(countrywise_tax).get(country)
+
+	return data
+ 
 def create_fiscal_year_and_company(args):
     if (args.get('fy_start_date')):
         curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
