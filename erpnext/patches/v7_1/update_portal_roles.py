@@ -14,6 +14,7 @@ def execute():
 		user = frappe.get_doc('User', c.user)
 		user.set_default_roles()
 		user.flags.ignore_validate = True
+		user.flags.ignore_mandatory = True
 		user.save()
 
 
