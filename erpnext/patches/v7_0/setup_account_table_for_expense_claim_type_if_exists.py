@@ -16,4 +16,5 @@ def execute():
 				"company": frappe.db.get_value("Account", expense_claim_type.default_account, "company"),
 				"default_account": expense_claim_type.default_account,
 			})
+			doc.flags.ignore_mandatory = True
 			doc.save(ignore_permissions=True)

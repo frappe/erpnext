@@ -667,7 +667,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	show_items_in_item_cart: function() {
 		var me = this;
 		var $items = this.wrapper.find(".items").empty();
-		me.frm.doc.net_total = 0.0
 		$.each(this.frm.doc.items|| [], function(i, d) {
 			$(frappe.render_template("pos_bill_item", {
 				item_code: d.item_code,

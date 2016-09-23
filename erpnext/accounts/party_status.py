@@ -55,7 +55,6 @@ def notify_status(doc, method=None):
 		if party.status == 'Open':
 			# may be open elsewhere, check
 			# default status
-			party.status = status
 			update_status(party)
 
 	party.update_modified()

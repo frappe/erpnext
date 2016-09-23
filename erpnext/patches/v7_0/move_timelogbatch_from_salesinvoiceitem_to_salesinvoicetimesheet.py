@@ -5,6 +5,8 @@ def execute():
 	frappe.reload_doc('accounts', 'doctype', 'sales_invoice_payment')
 	for time_sheet in frappe.db.sql(""" select sales_invoice, name, total_billable_amount from `tabTimesheet`
 		where sales_invoice is not null and docstatus < 2""", as_dict=True):
+		if not frappe.db.exists('Sales Invoice', time_sheet.sales_invoice):
+			continue
 		si_doc = frappe.get_doc('Sales Invoice', time_sheet.sales_invoice)
 		ts = si_doc.append('timesheets',{})
 		ts.time_sheet = time_sheet.name

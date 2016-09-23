@@ -7,6 +7,8 @@ def execute():
 	frappe.reload_doctype('Stock Settings')
 	stock_settings = frappe.get_doc('Stock Settings', 'Stock Settings')
 	stock_settings.show_barcode_field = cint(frappe.db.get_value("Features Setup", None, "fs_item_barcode"))
+	if not frappe.db.exists("UOM", stock_settings.stock_uom):
+		stock_settings.stock_uom = None
 	stock_settings.save()
 
 	create_compact_item_print_custom_field()
