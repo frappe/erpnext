@@ -7,6 +7,7 @@ from frappe.utils import cint, flt
 
 def execute():
 	frappe.reload_doctype("Sales Invoice")
+	frappe.reload_doctype("Sales Invoice Item")
 	
 	for si in frappe.get_all("Sales Invoice", fields = ["name"], 
 		filters={"docstatus": 1, "is_pos": 1, "is_return": 1}):
