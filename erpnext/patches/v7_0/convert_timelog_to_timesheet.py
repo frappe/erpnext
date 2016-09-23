@@ -27,6 +27,7 @@ def execute():
 		time_sheet.update_cost()
 		time_sheet.calculate_total_amounts()
 		time_sheet.flags.ignore_validate = True
+		time_sheet.flags.ignore_links = True
 		time_sheet.save(ignore_permissions=True)
 
 		# To ignore validate_mandatory_fields function
