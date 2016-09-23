@@ -14,7 +14,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			},
 			{
 				"fieldname": "based_on",
-				"label": __("Baed On"),
+				"label": __("Based On"),
 				"fieldtype": "Select",
 				"options": "Cost Center\nProject",
 				"default": "Cost Center",
