@@ -30,7 +30,7 @@ class TestTimesheet(unittest.TestCase):
 
 		self.assertEquals(salary_slip.total_working_hours, 2)
 		self.assertEquals(salary_slip.hour_rate, 50)
-		self.assertEquals(salary_slip.net_pay, 50)
+		self.assertEquals(salary_slip.net_pay, 150)
 		self.assertEquals(salary_slip.timesheets[0].time_sheet, timesheet.name)
 		self.assertEquals(salary_slip.timesheets[0].working_hours, 2)
 		

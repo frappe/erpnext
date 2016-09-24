@@ -98,6 +98,7 @@ def make_salary_slip_from_salary_structure(employee):
 	sal_slip.employee_name = frappe.get_value("Employee", {"name":employee}, "employee_name")
 	sal_slip.month = "11"
 	sal_slip.fiscal_year = "_Test Fiscal Year 2016"
+	sal_slip.posting_date = nowdate()
 	sal_slip.insert()
 	sal_slip.submit()
 	return sal_slip	

@@ -345,6 +345,7 @@ def set_missing_values(time_sheet, target):
 	target.salary_slip_based_on_timesheet = 1
 	target.start_date = doc.start_date
 	target.end_date = doc.end_date
+	target.posting_date = doc.modified
 
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None):

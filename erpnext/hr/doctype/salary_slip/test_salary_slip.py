@@ -41,12 +41,12 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEquals(ss.total_days_in_month, 31)
 		self.assertEquals(ss.payment_days, 31)
-		self.assertEquals(ss.earnings[0].amount, 0)
-		self.assertEquals(ss.earnings[1].amount, 0)
-		self.assertEquals(ss.deductions[0].amount, 0)
-		self.assertEquals(ss.deductions[1].amount, 0)
-		self.assertEquals(ss.gross_pay, 0)
-		self.assertEquals(ss.net_pay, 0)
+		self.assertEquals(ss.earnings[0].amount, 5000)
+		self.assertEquals(ss.earnings[1].amount, 3000)
+		self.assertEquals(ss.deductions[0].amount, 5000)
+		self.assertEquals(ss.deductions[1].amount, 2500)
+		self.assertEquals(ss.gross_pay, 10500)
+		self.assertEquals(ss.net_pay, 3000)
 
 	def test_salary_slip_with_holidays_excluded(self):
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
@@ -58,13 +58,13 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEquals(ss.total_days_in_month, 27)
 		self.assertEquals(ss.payment_days, 27)
-		self.assertEquals(ss.earnings[0].amount, 0)
+		self.assertEquals(ss.earnings[0].amount, 5000)
 		self.assertEquals(ss.earnings[0].default_amount, 5000)
-		self.assertEquals(ss.earnings[1].amount, 0)
-		self.assertEquals(ss.deductions[0].amount, 0)
-		self.assertEquals(ss.deductions[1].amount, 0)
-		self.assertEquals(ss.gross_pay, 0)
-		self.assertEquals(ss.net_pay, 0)
+		self.assertEquals(ss.earnings[1].amount, 3000)
+		self.assertEquals(ss.deductions[0].amount, 5000)
+		self.assertEquals(ss.deductions[1].amount, 2500)
+		self.assertEquals(ss.gross_pay, 10500)
+		self.assertEquals(ss.net_pay, 3000)
 		
 	def test_payment_days(self):
 		# Holidays not included in working days
@@ -179,6 +179,7 @@ class TestSalarySlip(unittest.TestCase):
 			salary_slip.employee_name = frappe.get_value("Employee", {"name":frappe.db.get_value("Employee", {"user_id": user})}, "employee_name")
 			salary_slip.month = "12"
 			salary_slip.fiscal_year = "_Test Fiscal Year 2016"
+			salary_slip.posting_date = nowdate()
 			salary_slip.insert()
 			# salary_slip.submit()
 			salary_slip = salary_slip.name
