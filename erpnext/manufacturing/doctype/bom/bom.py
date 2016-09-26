@@ -74,14 +74,13 @@ class BOM(Document):
 		return item
 
 	def validate_rm_item(self, item):
-		if item[0]['name'] == self.item:
+		if (item[0]['name'] in [it.item_code for it in self.items]) and item[0]['name'] == self.item:
 			frappe.throw(_("Raw material cannot be same as main Item"))
 
 	def set_bom_material_details(self):
 		for item in self.get("items"):
 			ret = self.get_bom_material_detail({"item_code": item.item_code, "item_name": item.item_name, "bom_no": item.bom_no,
 				"qty": item.qty})
-
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
@@ -103,12 +102,12 @@ class BOM(Document):
 
 		rate = self.get_rm_rate(args)
 		ret_item = {
-			 'item_name'	: item and args['item_name'] or '',
-			 'description'  : item and args['description'] or '',
-			 'image'		: item and args['image'] or '',
-			 'stock_uom'	: item and args['stock_uom'] or '',
-			 'bom_no'		: args['bom_no'],
-			 'rate'			: rate
+			'item_name'	: item and args['item_name'] or '',
+			'description'  : item and args['description'] or '',
+			'image'		: item and args['image'] or '',
+			'stock_uom'	: item and args['stock_uom'] or '',
+			'bom_no'	: args['bom_no'],
+			'rate'		: rate
 		}
 		return ret_item
 
