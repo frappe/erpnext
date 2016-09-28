@@ -59,7 +59,6 @@ def execute(filters=None):
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 	
 	for cash_flow_account in cash_flow_accounts:
-
 		section_data = []
 		data.append({
 			"account_name": cash_flow_account['section_header'], 
@@ -82,7 +81,8 @@ def execute(filters=None):
 			account_data = get_account_type_based_data(filters.company, 
 				account['account_type'], period_list, filters.accumulated_values)
 			account_data.update({
-				"account_name": account['label'], 
+				"account_name": account['label'],
+				"account": account['label'], 
 				"indent": 1,
 				"parent_account": cash_flow_account['section_header'],
 				"currency": company_currency
@@ -129,7 +129,7 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 def add_total_row_account(out, data, label, period_list, currency):
 	total_row = {
 		"account_name": "'" + _("{0}").format(label) + "'",
-		"account": None,
+		"account": "'" + _("{0}").format(label) + "'",
 		"currency": currency
 	}
 	for row in data:
