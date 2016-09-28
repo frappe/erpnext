@@ -324,7 +324,8 @@ class SalarySlip(TransactionBase):
 			self.set(total_field, self.get(total_field) + flt(d.amount))
 
 	def calculate_net_pay(self):
-		self.calculate_component_amounts()
+		if self.salary_structure:
+			self.calculate_component_amounts()
 
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
