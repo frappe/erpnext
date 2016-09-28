@@ -171,7 +171,7 @@ class Account(Document):
 				
 			old_warehouse = cstr(frappe.db.get_value("Account", self.name, "warehouse"))
 			if old_warehouse != cstr(self.warehouse):
-				if old_warehouse:
+				if old_warehouse and frappe.db.exists("Warehouse", old_warehouse):
 					self.validate_warehouse(old_warehouse)
 				if self.warehouse:
 					self.validate_warehouse(self.warehouse)
