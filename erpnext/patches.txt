@@ -282,7 +282,7 @@ execute:frappe.reload_doc('projects', 'doctype', 'project_user')
 erpnext.patches.v7_0.convert_timelogbatch_to_timesheet
 erpnext.patches.v7_0.convert_timelog_to_timesheet
 erpnext.patches.v7_0.move_timelogbatch_from_salesinvoiceitem_to_salesinvoicetimesheet
-erpnext.patches.v7_0.remove_doctypes_and_reports
+erpnext.patches.v7_0.remove_doctypes_and_reports #2016-10-29
 erpnext.patches.v7_0.update_maintenance_module_in_doctype
 erpnext.patches.v7_0.update_prevdoc_values_for_supplier_quotation_item
 erpnext.patches.v7_0.rename_advance_table_fields
