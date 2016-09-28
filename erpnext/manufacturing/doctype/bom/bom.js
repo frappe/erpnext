@@ -143,8 +143,6 @@ erpnext.bom.calculate_sm_cost = function(doc) {
 	for(var i=0;i<sm.length;i++) {
 		amt =	flt(sm[i].rate) * flt(sm[i].qty);
 		set_multiple('BOM Scrap Item',sm[i].name, {'amount': amt}, 'scrap_items');
-		set_multiple('BOM Scrap Item',sm[i].name,
-			{'qty_consumed_per_unit': flt(sm[i].qty)/flt(doc.quantity)}, 'scrap_items');
 	}
 }
 

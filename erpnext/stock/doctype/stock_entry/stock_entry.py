@@ -148,7 +148,7 @@ class StockEntry(StockController):
 						if not d.t_warehouse:
 							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
-						elif self.pro_doc and cstr(d.t_warehouse) != self.pro_doc.fg_warehouse:
+						elif self.pro_doc and (cstr(d.t_warehouse) != self.pro_doc.fg_warehouse and cstr(d.t_warehouse) != self.pro_doc.scrap_warehouse):
 							frappe.throw(_("Target warehouse in row {0} must be same as Production Order").format(d.idx))
 
 					else:
@@ -348,14 +348,14 @@ class StockEntry(StockController):
 
 	def validate_bom(self):
 		for d in self.get('items'):
-			if d.bom_no:
+			if d.bom_no and (d.t_warehouse != self.pro_doc.scrap_warehouse):
 				validate_bom_no(d.item_code, d.bom_no)
 
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
 		items_with_target_warehouse = []
 		for d in self.get('items'):
-			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty):
+			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty) and (d.t_warehouse != self.pro_doc.scrap_warehouse):
 				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
 					format(d.idx, d.transfer_qty, self.fg_completed_qty))
 
@@ -557,7 +557,15 @@ class StockEntry(StockController):
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
 
 						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
+					
 					self.add_to_stock_entry_detail(item_dict)
+
+					scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
+					for item in scrap_item_dict.values():
+						if self.pro_doc and self.pro_doc.scrap_warehouse:
+							item["to_warehouse"] = self.pro_doc.scrap_warehouse
+					self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
+					
 			# fetch the serial_no of the first stock entry for the second stock entry
 			if self.production_order and self.purpose == "Manufacture":
 				self.set_serial_nos(self.production_order)
@@ -607,7 +615,18 @@ class StockEntry(StockController):
 		for item in item_dict.values():
 			item.from_warehouse = self.from_warehouse or item.default_warehouse
 		return item_dict
+	
+	def get_bom_scrap_material(self, qty):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_scrap_items_as_dict
+		
+		# item dict = { item_code: {qty, description, stock_uom} }
+		item_dict = get_bom_scrap_items_as_dict(self.bom_no, self.company, qty=qty,
+			fetch_exploded = self.use_multi_level_bom)
 
+		for item in item_dict.values():
+			item.from_warehouse = ""
+		return item_dict
+	
 	def get_transfered_raw_materials(self):
 		transferred_materials = frappe.db.sql("""
 			select

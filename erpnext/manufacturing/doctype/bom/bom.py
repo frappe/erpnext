@@ -425,6 +425,48 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
 
 	return item_dict
 
+def get_bom_scrap_items_as_dict(bom, company, qty=1, fetch_exploded=1):
+	item_dict = {}
+
+	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
+	query = """select
+				bom_scrap_item.item_code,
+				item.item_name,
+				sum(bom_scrap_item.qty/ifnull(bom.quantity, 1)) * %(qty)s as qty,
+				item.description,
+				item.image,
+				item.stock_uom,
+				item.default_warehouse,
+				item.expense_account as expense_account,
+				item.buying_cost_center as cost_center
+			from
+				`tabBOM Scrap Item` bom_scrap_item, `tabBOM` bom, `tabItem` item
+			where
+				bom_scrap_item.parent = bom.name
+				and bom_scrap_item.docstatus < 2
+				and bom_scrap_item.parent = %(bom)s
+				and item.name = bom_scrap_item.item_code
+				and is_stock_item = 1
+				group by item_code, stock_uom"""
+
+	items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
+
+	# make unique
+	for item in items:
+		if item_dict.has_key(item.item_code):
+			item_dict[item.item_code]["qty"] += flt(item.qty)
+		else:
+			item_dict[item.item_code] = item
+
+	for item, item_details in item_dict.items():
+		for d in [["Account", "expense_account", "default_expense_account"],
+			["Cost Center", "cost_center", "cost_center"], ["Warehouse", "default_warehouse", ""]]:
+				company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
+				if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
+					item_dict[item][d[1]] = frappe.db.get_value("Company", company, d[2]) if d[2] else None
+
+	return item_dict
+
 @frappe.whitelist()
 def get_bom_items(bom, company, qty=1, fetch_exploded=1):
 	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded).values()
