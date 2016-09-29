@@ -420,6 +420,7 @@ $.extend(erpnext.journal_entry, {
 			frappe.call({
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_exchange_rate",
 				args: {
+					posting_date: frm.doc.posting_date,
 					account: row.account,
 					account_currency: row.account_currency,
 					company: frm.doc.company,
