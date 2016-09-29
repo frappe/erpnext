@@ -504,6 +504,18 @@ frappe.ui.form.on('Payment Entry', {
 		});
 	},
 
+	allocate_payment_amount: function(frm) {
+		if(frm.doc.payment_type == 'Internal Transfer'){
+			return
+		}
+
+		if(frm.doc.references.length == 0){
+			frm.events.get_outstanding_documents(frm);
+		}
+
+		frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount);
+	},
+
 	allocate_party_amount_against_ref_docs: function(frm, paid_amount) {
 		var total_positive_outstanding_including_order = 0;
 		var total_negative_outstanding = 0;
@@ -545,22 +557,24 @@ frappe.ui.form.on('Payment Entry', {
 		}
 
 		$.each(frm.doc.references || [], function(i, row) {
-			row.allocated_amount = 0
+			row.allocated_amount = 0 //If allocate payment amount checkbox is unchecked, set zero to allocate amount
+			if(frm.doc.allocate_payment_amount){
+				if(row.outstanding_amount > 0 && allocated_positive_outstanding > 0) {
+					if(row.outstanding_amount >= allocated_positive_outstanding)
+							row.allocated_amount = allocated_positive_outstanding;
+					else row.allocated_amount = row.outstanding_amount;
 
-			if(row.outstanding_amount > 0 && allocated_positive_outstanding > 0) {
-				if(row.outstanding_amount >= allocated_positive_outstanding)
-						row.allocated_amount = allocated_positive_outstanding;
-				else row.allocated_amount = row.outstanding_amount;
+					allocated_positive_outstanding -= flt(row.allocated_amount);
+				} else if (row.outstanding_amount < 0 && allocated_negative_outstanding) {
+					if(Math.abs(row.outstanding_amount) >= allocated_negative_outstanding)
+						row.allocated_amount = -1*allocated_negative_outstanding;
+					else row.allocated_amount = row.outstanding_amount;
 
-				allocated_positive_outstanding -= flt(row.allocated_amount);
-			} else if (row.outstanding_amount < 0 && allocated_negative_outstanding) {
-				if(Math.abs(row.outstanding_amount) >= allocated_negative_outstanding)
-					row.allocated_amount = -1*allocated_negative_outstanding;
-				else row.allocated_amount = row.outstanding_amount;
-
-				allocated_negative_outstanding -= Math.abs(flt(row.allocated_amount));
+					allocated_negative_outstanding -= Math.abs(flt(row.allocated_amount));
+				}
 			}
 		})
+
 		frm.refresh_fields()
 		frm.events.set_total_allocated_amount(frm);
 	},
