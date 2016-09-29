@@ -45,6 +45,12 @@ frappe.ui.form.on("Production Order", {
 					frm: cur_frm
 				})
 			})
+			frm.add_custom_button(__('Generate Bar Code'), function(){
+				frappe.model.open_mapped_doc({
+					method: "erpnext.manufacturing.doctype.production_order.production_order.generate_bar_code",
+					frm: cur_frm
+				})
+			})
 		}
 	},
 	show_progress: function(frm) {
