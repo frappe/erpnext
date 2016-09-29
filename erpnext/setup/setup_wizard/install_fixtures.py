@@ -13,10 +13,6 @@ default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 
 def install(country=None):
 	records = [
-		dict(doctype='Role', role_name='Supplier', desk_access=0),
-		dict(doctype='Role', role_name='Customer', desk_access=0),
-		dict(doctype='Role', role_name='Student', desk_access=0),
-
 		# address template
 		{'doctype':"Address Template", "country": country},
 
