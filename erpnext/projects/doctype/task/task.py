@@ -29,6 +29,7 @@ class Task(Document):
 	def validate(self):
 		self.validate_dates()
 		self.validate_status()
+		self.update_depends_on()
 
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -45,6 +46,12 @@ class Task(Document):
 
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
+
+	def update_depends_on(self):
+		depends_on_tasks = ""
+		for d in self.depends_on:
+			depends_on_tasks += d.task + ","
+		self.depends_on_tasks = depends_on_tasks
 
 	def on_update(self):
 		self.check_recursion()
@@ -155,6 +162,4 @@ def set_tasks_as_overdue():
 		where exp_end_date is not null
 		and exp_end_date < CURDATE()
 		and `status` not in ('Closed', 'Cancelled')""")
-		
-
 		
