@@ -37,7 +37,7 @@ $.extend(cur_frm.cscript, new erpnext.support.WarrantyClaim({frm: cur_frm}));
 
 cur_frm.cscript.onload = function(doc,cdt,cdn){
 	if(!doc.status)
-		set_multiple(dt,dn,{status:'Open'});
+		set_multiple(cdt,cdn,{status:'Open'});
 }
 
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
