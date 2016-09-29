@@ -218,14 +218,16 @@ class ReceivablePayableReport(object):
 			conditions, values = self.prepare_conditions(party_type)
 
 			if self.filters.get(scrub(party_type)):
-				select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
+				select_fields = "sum(debit_in_account_currency) as debit, sum(credit_in_account_currency) as credit"
 			else:
-				select_fields = "debit, credit"
+				select_fields = "sum(debit) as debit, sum(credit) as credit"
 
-			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party,
-				voucher_type, voucher_no, against_voucher_type, against_voucher, account_currency, remarks, {0}
+			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party, 
+				voucher_type, voucher_no, against_voucher_type, against_voucher, 
+				account_currency, remarks, {0}
 				from `tabGL Entry`
 				where docstatus < 2 and party_type=%s and (party is not null and party != '') {1}
+				group by voucher_type, voucher_no, against_voucher_type, against_voucher
 				order by posting_date, party"""
 				.format(select_fields, conditions), values, as_dict=True)
 
