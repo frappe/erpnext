@@ -6,7 +6,7 @@ import frappe
 
 from frappe.utils import flt, cint
 
-from frappe import _
+from frappe import _, msgprint
 import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
@@ -127,7 +127,9 @@ class PurchaseReceipt(BuyingController):
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
+                msgprint(_("Inside Purchase Receipt"))
 		self.update_stock_ledger()
+                msgprint(_("Back"))
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")

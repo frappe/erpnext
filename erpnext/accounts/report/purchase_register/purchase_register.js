@@ -29,6 +29,13 @@ frappe.query_reports["Purchase Register"] = {
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company")
 		},
+                {
+			"fieldname":"inter_transfer",
+			"label": __("Include Inter Transfer"),
+			"fieldtype": "Data",
+                        "default": "Y"
+			
+		},
 		{
 			"fieldname":"mode_of_payment",
 			"label": __("Mode of Payment"),

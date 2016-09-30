@@ -266,6 +266,7 @@ class SellingController(StockController):
 					or (cint(self.is_return) and self.docstatus==2)):
 						sl_entries.append(self.get_sl_entries(d, {
 							"actual_qty": -1*flt(d.qty),
+                                                        "item_tax": flt(d.item_tax_amount),
 							"incoming_rate": return_rate
 						}))
 
@@ -283,6 +284,7 @@ class SellingController(StockController):
 								"posting_date": self.posting_date,
 								"posting_time": self.posting_time,
 								"qty": -1*flt(d.qty),
+                                                                "item_tax":d.item_tax_amount
 								"serial_no": d.serial_no
 							})
 							target_warehouse_sle.update({

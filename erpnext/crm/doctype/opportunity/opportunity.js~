@@ -101,6 +101,15 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		cur_frm.add_custom_button(__('Quotation'),
 			cur_frm.cscript.create_quotation);
 	}
+
+        cur_frm.add_custom_button(__("Make Communication"), function() {
+			frappe.route_options = {
+				reference_doctype: "Opportunity",
+                        	reference_name: cur_frm.doc.name
+			}
+			frappe.set_route("List", "Communication");
+		});
+
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {

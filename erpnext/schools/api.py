@@ -103,6 +103,13 @@ def get_fee_components(fee_structure):
 		return fs
 
 @frappe.whitelist()
+def get_program_fees(fee_structure):
+
+	if fee_structure:	
+		fs = frappe.get_list("Program Fee", fields=["amount"] , filters={"fee_structure": fee_structure}, order_by= "idx")
+		return fs
+
+@frappe.whitelist()
 def get_fee_schedule(program):
 	"""Returns Fee Schedule.
 

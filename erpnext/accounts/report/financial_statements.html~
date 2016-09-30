@@ -19,7 +19,7 @@
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h4 class="text-center">{%= filters.company %}</h3>
 <h4 class="text-center">{%= filters.fiscal_year %}</h3>
-
+<h4 class="text-center">{%= filters.exchange_rate %}</h3>
 {% if (filters.from_date) { %}
 	<h4 class="text-center">{%= dateutil.str_to_user(filters.from_date) %} - {%= dateutil.str_to_user(filters.to_date) %}</h3>
 {% } %}
