@@ -30,7 +30,12 @@ def execute():
 		time_sheet.flags.ignore_validate = True
 		time_sheet.flags.ignore_links = True
 		time_sheet.save(ignore_permissions=True)
-
+		frappe.db.sql("""update tabCommunication 
+				set reference_doctype = "Timesheet",
+				reference_name = %(timesheet)s
+				where reference_doctype = "Time Log"
+				and reference_name = %(timelog)s""",{'timesheet':time_sheet.name,'timelog':data.name},auto_commit=1)
+		
 		# To ignore validate_mandatory_fields function
 		if data.docstatus == 1:
 			time_sheet.db_set("docstatus", 1)
