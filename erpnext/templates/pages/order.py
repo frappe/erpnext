@@ -16,8 +16,8 @@ def get_context(context):
 	context.parents = frappe.form_dict.parents
 	context.payment_ref = frappe.db.get_value("Payment Request", 
 		{"reference_name": frappe.form_dict.name}, "name")
-	
+
 	context.enabled_checkout = frappe.get_doc("Shopping Cart Settings").enable_checkout
-			
+
 	if not context.doc.has_website_permission("read"):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)

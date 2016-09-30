@@ -51,6 +51,9 @@ class Budget(Document):
 
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)
+	if not args.cost_center:
+		return
+		
 	if frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
 		cc_lft, cc_rgt = frappe.db.get_value("Cost Center", args.cost_center, ["lft", "rgt"])
 

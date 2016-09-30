@@ -22,7 +22,7 @@ def make_timesheet_for_projects(current_date	):
 		ts = make_timesheet(employee, simulate = True, billable = 1,
 			activity_type=get_random("Activity Type"), project=data.project, task =data.name)
 
-		if flt(ts.total_billing_amount) > 0.0:
+		if flt(ts.total_billable_amount) > 0.0:
 			make_sales_invoice_for_timesheet(ts.name)
 			frappe.db.commit()
 

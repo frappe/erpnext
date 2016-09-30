@@ -71,7 +71,7 @@ class Warehouse(NestedSet):
 						"freeze_account": "No"
 					})
 					ac_doc.flags.ignore_permissions = True
-
+					ac_doc.flags.ignore_mandatory = True
 					try:
 						ac_doc.insert()
 						msgprint(_("Account head {0} created").format(ac_doc.name))
@@ -278,7 +278,7 @@ def add_node():
 		parent = None
 
 	doc.update({
-		name_field: frappe.form_dict['name_field'],
+		name_field: frappe.form_dict['warehouse_name'],
 		parent_field: parent,
 		"is_group": frappe.form_dict['is_group'],
 		"company": company

@@ -13,7 +13,7 @@ def execute():
 		header = frappe.db.get_value('Web Page', website_settings.home_page, 'header')
 		if header and header.startswith("<div class='hero text-center'>"):
 			homepage = frappe.get_doc('Homepage', 'Homepage')
-			homepage.company = erpnext.get_default_company()
+			homepage.company = erpnext.get_default_company() or frappe.get_all("Company")[0].name
 			if '<h1>' in header:
 				homepage.tag_line = header.split('<h1>')[1].split('</h1>')[0] or 'Default Website'
 			else:

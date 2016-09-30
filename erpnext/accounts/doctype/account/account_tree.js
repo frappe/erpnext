@@ -48,5 +48,24 @@ frappe.treeview_settings["Account"] = {
 				+ " " + dr_or_cr
 				+ '</span>').insertBefore(node.$ul);
 		}
-	}
+	},
+	toolbar: [
+		{
+			condition: function(node) {
+				return !node.root && frappe.boot.user.can_read.indexOf("GL Entry") !== -1
+			},
+			label: __("View Ledger"),
+			click: function(node, btn) {
+				frappe.route_options = {
+					"account": node.label,
+					"from_date": sys_defaults.year_start_date,
+					"to_date": sys_defaults.year_end_date,
+					"company": frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
+				};
+				frappe.set_route("query-report", "General Ledger");
+			},
+			btnClass: "hidden-xs"
+		}
+	],
+	extend_toolbar: true
 }

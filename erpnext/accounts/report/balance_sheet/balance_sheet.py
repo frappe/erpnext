@@ -70,7 +70,7 @@ def check_opening_balance(asset, liability, equity):
 	if liability:
 		opening_balance -= flt(liability[0].get("opening_balance", 0))
 	if equity:
-		opening_balance -= flt(asset[0].get("opening_balance", 0))
+		opening_balance -= flt(equity[0].get("opening_balance", 0))
 
 	if opening_balance:
 		return _("Previous Financial Year is not closed")

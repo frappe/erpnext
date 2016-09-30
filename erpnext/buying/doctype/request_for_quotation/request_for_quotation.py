@@ -210,7 +210,7 @@ def create_supplier_quotation(doc):
 		frappe.msgprint(_("Supplier Quotation {0} created").format(sq_doc.name))
 		return sq_doc.name
 	except Exception:
-		return
+		return None
 
 def add_items(sq_doc, supplier, items):
 	for data in items:

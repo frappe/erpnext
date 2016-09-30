@@ -43,9 +43,8 @@ frappe.ui.form.on("Project", {
 
 			if(frappe.model.can_read("Task")) {
 				frm.add_custom_button(__("Gantt Chart"), function() {
-					frappe.route_options = {"project": frm.doc.name,
-						"start": frm.doc.expected_start_date, "end": frm.doc.expected_end_date};
-					frappe.set_route("Gantt", "Task");
+					frappe.route_options = {"project": frm.doc.name};
+					frappe.set_route("List", "Task", "Gantt");
 				});
 			}
 
@@ -78,7 +77,7 @@ frappe.ui.form.on("Project", {
 			section.on('click', '.time-sheet-link', function() {
 				var activity_type = $(this).attr('data-activity_type');
 				frappe.set_route('List', 'Timesheet',
-					{'activity_type': activity_type, 'project': frm.doc.name});
+					{'activity_type': activity_type, 'project': frm.doc.name, 'status': ["!=", "Cancelled"]});
 			});
 		}
 	}

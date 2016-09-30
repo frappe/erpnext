@@ -45,7 +45,7 @@ calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Ho
 
 fixtures = ["Web Form"]
 
-website_generators = ["Item Group", "Item", "Sales Partner", "Job Opening"]
+website_generators = ["Item Group", "Item", "Sales Partner", "Job Opening", "Student Admission"]
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
@@ -65,6 +65,13 @@ website_route_rules = [
 		"defaults": {
 			"doctype": "Sales Invoice",
 			"parents": [{"title": _("Invoices"), "name": "invoices"}]
+		}
+	},
+	{"from_route": "/quotations", "to_route": "Supplier Quotation"},
+	{"from_route": "/quotations/<path:name>", "to_route": "order",
+		"defaults": {
+			"doctype": "Supplier Quotation",
+			"parents": [{"title": _("Supplier Quotation"), "name": "quotations"}]
 		}
 	},
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
@@ -89,25 +96,36 @@ website_route_rules = [
 		}
 	},
 	{"from_route": "/jobs", "to_route": "Job Opening"},
+	{"from_route": "/admissions", "to_route": "Student Admission"},
 ]
 
 portal_menu_items = [
 	{"title": _("Projects"), "route": "/project", "reference_doctype": "Project"},
-	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation"},
-	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order"},
-	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice"},
-	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note"},
-	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "show_always": True},
+	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation", "role": "Supplier"},
+	{"title": _("Supplier Quotation"), "route": "/quotations", "reference_doctype": "Supplier Quotation", "role": "Supplier"},
+	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order", "role":"Customer"},
+	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice", "role":"Customer"},
+	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note", "role":"Customer"},
+	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
 	{"title": _("Announcements"), "route": "/announcement", "reference_doctype": "Announcement"},
-	{"title": _("Courses"), "route": "/course", "reference_doctype": "Course"},
-	{"title": _("Assessment Schedule"), "route": "/assessment", "reference_doctype": "Assessment"},
-	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees"}
+	{"title": _("Courses"), "route": "/course", "reference_doctype": "Course", "role":"Student"},
+	{"title": _("Assessment Schedule"), "route": "/assessment", "reference_doctype": "Assessment", "role":"Student"},
+	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"}
+]
+
+default_roles = [
+	{'role': 'Customer', 'doctype':'Contact', 'email_field': 'email_id',
+		'filters': {'ifnull(customer, "")': ('!=', '')}},
+	{'role': 'Supplier', 'doctype':'Contact', 'email_field': 'email_id',
+		'filters': {'ifnull(supplier, "")': ('!=', '')}},
+	{'role': 'Student', 'doctype':'Student', 'email_field': 'student_email_id'}
 ]
 
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
+	"Supplier Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
 	"Address": "erpnext.utilities.doctype.address.address.has_website_permission",

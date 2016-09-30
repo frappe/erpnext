@@ -18,7 +18,6 @@ def delete_company_transactions(company_name):
 			frappe.PermissionError)
 
 	delete_bins(company_name)
-	delete_time_sheets(company_name)
 	delete_lead_addresses(company_name)
 
 	for doctype in frappe.db.sql_list("""select parent from
@@ -69,14 +68,6 @@ def delete_for_doctype(doctype, company_name):
 def delete_bins(company_name):
 	frappe.db.sql("""delete from tabBin where warehouse in
 			(select name from tabWarehouse where company=%s)""", company_name)
-
-def delete_time_sheets(company_name):
-	# Delete Time Logs as it is linked to Production Order / Project / Task, which are linked to company
-	frappe.db.sql("""
-		delete from `tabTimesheet`
-		where
-			company=%(company)s
-	""", {"company": company_name})
 
 def delete_lead_addresses(company_name):
 	"""Delete addresses to which leads are linked"""
