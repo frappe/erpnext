@@ -6,3 +6,20 @@ frappe.ui.form.on('Bar Code Generate', {
 
 	}
 });
+
+erpnextBarCodeGenerateControler = frappe.ui.form.Controller.extend({
+	onload:function (doc,doctype,docname) {
+		local = locals[doctype][docname]
+		console.log(local)
+        this.frm.set_query("operation", function() {
+			frappe.model.validate_missing(doc, "production_order");
+	        return {
+	            filters: {
+	                // "reference": doc.style,
+	            }
+	        };
+	    });
+	}
+});
+
+cur_frm.cscript = new erpnextBarCodeGenerateControler({frm:cur_frm})

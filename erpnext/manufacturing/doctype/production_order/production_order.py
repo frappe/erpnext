@@ -574,4 +574,10 @@ def make_new_timesheet(source_name, target_doc=None):
 
 @frappe.whitelist()
 def generate_bar_code(source_name, target_doc=None):
-	pass
+	po = frappe.get_doc('Production Order', source_name)
+	po = po.make_bar_code(open_new=True)
+
+	if not po or not po.get('time_logs'):
+		frappe.throw(_("Already completed"))
+
+	return po
