@@ -18,7 +18,30 @@ erpnextBarCodeGenerateControler = frappe.ui.form.Controller.extend({
 				searchfield:'operation'
 			}
 	    });
+		this.frm.add_fetch('operation', 'completed_qty', 'bar_code_quantity');
+	},
+	operation: function(doc){
+		set_available_quantity(doc);
+		set_total_bar_code(doc);
+	},
+	bar_code_quantity: function (doc) {
+		set_available_quantity(doc);
+		set_total_bar_code(doc);
+	},
+	per_bar_code_quantity: function (doc) {
+		set_total_bar_code(doc);
 	}
+
 });
+
+function set_available_quantity(doc) {
+	doc.available_quantity = doc.total_oder_quantity - doc.bar_code_quantity;
+	refresh_field('available_quantity')
+}
+
+function set_total_bar_code(doc){
+	doc.total_bar_code = parseInt(doc.available_quantity / doc.per_bar_code_quantity);
+	refresh_field('total_bar_code')
+}
 
 cur_frm.cscript = new erpnextBarCodeGenerateControler({frm:cur_frm})
