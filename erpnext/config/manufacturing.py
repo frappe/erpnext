@@ -65,6 +65,17 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Bar Code"),
+			"icon": "icon-wrench",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Bar Code Generate",
+					"description": _("Bar Code Generate"),
+				},
+			]
+		},
+		{
 			"label": _("Tools"),
 			"icon": "icon-wrench",
 			"items": [

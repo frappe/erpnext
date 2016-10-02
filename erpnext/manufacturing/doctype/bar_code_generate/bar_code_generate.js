@@ -34,6 +34,8 @@ erpnextBarCodeGenerateControler = frappe.ui.form.Controller.extend({
 
 });
 
+cur_frm.cscript = new erpnextBarCodeGenerateControler({frm:cur_frm})
+
 function set_available_quantity(doc) {
 	doc.available_quantity = doc.total_oder_quantity - doc.bar_code_quantity;
 	refresh_field('available_quantity')
@@ -44,4 +46,3 @@ function set_total_bar_code(doc){
 	refresh_field('total_bar_code')
 }
 
-cur_frm.cscript = new erpnextBarCodeGenerateControler({frm:cur_frm})
