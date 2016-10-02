@@ -73,6 +73,11 @@ def get_data():
 					"name": "Bar Code Generate",
 					"description": _("Bar Code Generate"),
 				},
+				{
+					"type": "doctype",
+					"name": "Bar Code",
+					"description": _("Bar Code Store"),
+				},
 			]
 		},
 		{
