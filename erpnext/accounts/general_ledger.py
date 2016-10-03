@@ -168,8 +168,8 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 
 	if not gl_entries:
 		gl_entries = frappe.db.sql("""
-			select account, posting_date, party_type, party, cost_center, fiscal_year,
-			voucher_type, voucher_no, against_voucher_type, against_voucher, cost_center
+			select account, posting_date, party_type, party, cost_center, fiscal_year,voucher_type,
+			voucher_no, against_voucher_type, against_voucher, cost_center, company
 			from `tabGL Entry`
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no), as_dict=True)
 

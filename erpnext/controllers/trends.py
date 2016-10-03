@@ -49,10 +49,10 @@ def get_data(filters, conditions):
 		posting_date = 't1.posting_date'
 
 	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
-		cond = 'and '+ conditions["based_on_select"][:-1] +' IS Not NULL'
+		cond = ' and '+ conditions["based_on_select"][:-1] +' IS Not NULL'
 	
 	if conditions.get('trans') in ['Sales Order', 'Purchase Order']:
-		cond += "and t1.status != 'Closed'"
+		cond += " and t1.status != 'Closed'"
 
 	year_start_date, year_end_date = frappe.db.get_value("Fiscal Year",
 		filters.get('fiscal_year'), ["year_start_date", "year_end_date"])
