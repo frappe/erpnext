@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Bar Code Generate', {
 	refresh: function(frm) {
-
+		frm.disable_save();
 	}
 });
 
