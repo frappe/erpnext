@@ -18,6 +18,7 @@ rfq = Class.extend({
 		this.change_rate();
 		this.terms();
 		this.submit_rfq();
+		this.navigate_quotations();
 	},
 
 	onfocus_select_all: function(){
@@ -88,6 +89,13 @@ rfq = Class.extend({
 					}
 				}
 			})
+		})
+	},
+
+	navigate_quotations: function() {
+		$('.quotations').click(function(){
+			name = $(this).attr('idx')
+			window.location.href = "/quotations/" + encodeURIComponent(name);
 		})
 	}
 })
