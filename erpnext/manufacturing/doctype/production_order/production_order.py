@@ -115,7 +115,7 @@ class ProductionOrder(Document):
 		'''Update status of production order if unknown'''
 		if not status:
 			status = self.get_status(status)
-			
+
 		if status != self.status:
 			self.db_set("status", status)
 
@@ -240,7 +240,7 @@ class ProductionOrder(Document):
 			holidays[holiday_list] = holiday_list_days
 
 		return holidays[holiday_list]
-		
+
 	def make_time_logs(self, open_new=False):
 		"""Capacity Planning. Plan time logs based on earliest availablity of workstation after
 			Planned Start Date. Time logs will be created and remain in Draft mode and must be submitted
@@ -261,7 +261,7 @@ class ProductionOrder(Document):
 			if d.workstation and d.status != 'Completed':
 				last_workstation_idx[d.workstation] = i # set last row index of workstation
 				self.set_start_end_time_for_workstation(d, workstation_list, last_workstation_idx.get(d.workstation))
-				
+
 				args = self.get_operations_data(d)
 				add_timesheet_detail(timesheet, args)
 				original_start_time = d.planned_start_time
@@ -366,7 +366,8 @@ class ProductionOrder(Document):
 		if frappe.db.get_value("Item", self.production_item, "has_variants"):
 			frappe.throw(_("Production Order cannot be raised against a Item Template"), ItemHasVariantError)
 
-		validate_end_of_life(self.production_item)
+		if self.production_item:
+			validate_end_of_life(self.production_item)
 
 	def validate_qty(self):
 		if not self.qty > 0:
@@ -520,7 +521,7 @@ def make_timesheet(production_order):
 	timesheet.production_order = production_order
 	return timesheet
 
-@frappe.whitelist()	
+@frappe.whitelist()
 def add_timesheet_detail(timesheet, args):
 	if isinstance(timesheet, unicode):
 		timesheet = frappe.get_doc('Timesheet', timesheet)
