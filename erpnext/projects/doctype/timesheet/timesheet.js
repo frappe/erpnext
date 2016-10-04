@@ -87,15 +87,21 @@ frappe.ui.form.on("Timesheet", {
 		});
 	},
 	machine_no: function (frm) {
-		machine = frappe.get_doc("Machine", {'name': frm.doc.machine_no})
-		console.log(machine)
+		frappe.call({
+			method:'frappe.client.get',
+			args:{
+				doctype:"Machine",
+				name: frm.doc.machine_no
+			},
+			callback:function (data) {
+				if(data.message){
+					cur_frm.set_value('machine_name',data.message.machine_name);
+					cur_frm.set_value('gg',data.message.gg);
+				}
+			}
+		});
 	}
 })
-
-// set_machine_info = function (doc) {
-// 	cur_frm.set_value('machine_name',doc.machine_name);
-// 	cur_frm.set_value('gg',doc.gg);
-// }
 
 var set_values_on_barcode_change = function (doc) {
 	var parentDoc = cur_frm.doc;
