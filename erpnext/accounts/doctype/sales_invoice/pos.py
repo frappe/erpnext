@@ -15,6 +15,7 @@ def get_pos_data():
 	doc = frappe.new_doc('Sales Invoice')
 	doc.is_pos = 1;
 	pos_profile = get_pos_profile(doc.company) or {}
+	if not doc.company: doc.company = pos_profile.get('company')
 	doc.update_stock = pos_profile.get('update_stock')
 
 	if pos_profile.get('name'):

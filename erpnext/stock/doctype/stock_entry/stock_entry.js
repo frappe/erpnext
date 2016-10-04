@@ -348,6 +348,7 @@ cur_frm.fields_dict['production_order'].get_query = function(doc) {
 }
 
 cur_frm.cscript.purpose = function(doc, cdt, cdn) {
+	cur_frm.fields_dict.items.grid.refresh();
 	cur_frm.cscript.toggle_related_fields(doc);
 }
 
