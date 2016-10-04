@@ -55,12 +55,22 @@ frappe.ui.form.on("Timesheet", {
 			cur_frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
 			cur_frm.fields_dict["time_logs"].grid.toggle_enable("billable", false);
 		}
+		var me = this;
 		setTimeout(function () {
-			// console.log(cur_frm.fields_dict["bar_code_no"].$input)
-			cur_frm.fields_dict["bar_code_no"].$input.keydown(function (frm) {
-
+			cur_frm.fields_dict["bar_code_no"].$input.keyup(function (frm) {
+				frappe.call({
+					method:"erpnext.projects.doctype.timesheet.timesheet.get_barcode",
+					args:{
+						fields: $(this).val()
+					},
+					callback: function (data) {
+						if (data.message){
+							set_values_on_barcode_change(data.message);
+						}
+					}
+				})
 			})
-		});
+		},100);
 	},
 
 	make_invoice: function(frm) {
@@ -77,6 +87,11 @@ frappe.ui.form.on("Timesheet", {
 		});
 	},
 })
+var set_values_on_barcode_change = function (doc) {
+		cur_frm.set_value('machine_no',doc.machine_id);
+		cur_frm.set_value('production_order',doc.production_order);
+		console.log(doc)
+	};
 
 frappe.ui.form.on("Timesheet Detail", {
 	time_logs_remove: function(frm) {
