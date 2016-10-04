@@ -106,9 +106,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.get_data_from_server(function(){
 				me.load_data(false);
 				me.make_customer();
-				me.make_item_list();
+				me.make_item_list(true);
 				me.set_missing_values();
 			})
+		});
+
+		this.page.add_menu_item(__("Sync Offline Invoices"), function(){
+			me.sync_sales_invoice()
 		});
 
 		this.page.add_menu_item(__("POS Profile"), function() {
@@ -275,7 +279,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	make: function() {
 		this.make_search();
 		this.make_customer();
-		this.make_item_list();
+		this.make_item_list(true);
 		this.make_discount_field()
 	},
 
@@ -296,7 +300,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.search.$input.on("keyup", function() {
 			setTimeout(function() {
 				me.items = me.get_items();
-				me.make_item_list();
+				me.make_item_list(false);
 			}, 1000);
 		});
 
@@ -369,7 +373,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	make_item_list: function() {
+	make_item_list: function(index_search) {
 		var me = this;
 		if(!this.price_list) {
 			msgprint(__("Price List not found or disabled"));
@@ -383,7 +387,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if (this.items) {
 			$.each(this.items, function(index, obj) {
-				if(index < 16){
+				if(!index_search || index < 16){
 					$(frappe.render_template("pos_item", {
 						item_code: obj.name,
 						item_price: format_currency(obj.price_list_rate, obj.currency),
