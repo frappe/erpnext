@@ -29,6 +29,7 @@ frappe.ui.form.on("Timesheet", {
 				}
 			}
 		}
+
 	},
 
 	onload: function(frm){
@@ -54,6 +55,12 @@ frappe.ui.form.on("Timesheet", {
 			cur_frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
 			cur_frm.fields_dict["time_logs"].grid.toggle_enable("billable", false);
 		}
+		setTimeout(function () {
+			// console.log(cur_frm.fields_dict["bar_code_no"].$input)
+			cur_frm.fields_dict["bar_code_no"].$input.keydown(function (frm) {
+
+			})
+		});
 	},
 
 	make_invoice: function(frm) {

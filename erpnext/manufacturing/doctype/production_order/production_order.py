@@ -58,7 +58,7 @@ class ProductionOrder(Document):
     def validate_sales_order(self):
         if self.sales_order:
             so = frappe.db.sql("""select name, delivery_date, project from `tabSales Order`
-				where name=%s and docstatus = 1""", self.sales_order, as_dict=1)
+                where name=%s and docstatus = 1""", self.sales_order, as_dict=1)
 
             if len(so):
                 if not self.expected_delivery_date:
@@ -91,18 +91,18 @@ class ProductionOrder(Document):
     def validate_production_order_against_so(self):
         # already ordered qty
         ordered_qty_against_so = frappe.db.sql("""select sum(qty) from `tabProduction Order`
-			where production_item = %s and sales_order = %s and docstatus < 2 and name != %s""",
+            where production_item = %s and sales_order = %s and docstatus < 2 and name != %s""",
                                                (self.production_item, self.sales_order, self.name))[0][0]
 
         total_qty = flt(ordered_qty_against_so) + flt(self.qty)
 
         # get qty from Sales Order Item table
         so_item_qty = frappe.db.sql("""select sum(qty) from `tabSales Order Item`
-			where parent = %s and item_code = %s""",
+            where parent = %s and item_code = %s""",
                                     (self.sales_order, self.production_item))[0][0]
         # get qty from Packing Item table
         dnpi_qty = frappe.db.sql("""select sum(qty) from `tabPacked Item`
-			where parent = %s and parenttype = 'Sales Order' and item_code = %s""",
+            where parent = %s and parenttype = 'Sales Order' and item_code = %s""",
                                  (self.sales_order, self.production_item))[0][0]
         # total qty in SO
         so_qty = flt(so_item_qty) + flt(dnpi_qty)
@@ -143,8 +143,8 @@ class ProductionOrder(Document):
         elif self.docstatus == 1:
             if status != 'Stopped':
                 stock_entries = frappe._dict(frappe.db.sql("""select purpose, sum(fg_completed_qty)
-					from `tabStock Entry` where production_order=%s and docstatus=1
-					group by purpose""", self.name))
+                    from `tabStock Entry` where production_order=%s and docstatus=1
+                    group by purpose""", self.name))
 
                 status = "Not Started"
                 if stock_entries:
@@ -159,13 +159,13 @@ class ProductionOrder(Document):
 
     def update_production_order_qty(self):
         """Update **Manufactured Qty** and **Material Transferred for Qty** in Production Order
-			based on Stock Entry"""
+            based on Stock Entry"""
 
         for purpose, fieldname in (("Manufacture", "produced_qty"),
                                    ("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
             qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
-				from `tabStock Entry` where production_order=%s and docstatus=1
-				and purpose=%s""", (self.name, purpose))[0][0])
+                from `tabStock Entry` where production_order=%s and docstatus=1
+                and purpose=%s""", (self.name, purpose))[0][0])
 
             if qty > self.qty:
                 frappe.throw(
@@ -203,7 +203,7 @@ class ProductionOrder(Document):
 
         # Check whether any stock entry exists against this Production Order
         stock_entry = frappe.db.sql("""select name from `tabStock Entry`
-			where production_order = %s and docstatus = 1""", self.name)
+            where production_order = %s and docstatus = 1""", self.name)
         if stock_entry:
             frappe.throw(_("Cannot cancel because submitted Stock Entry {0} exists").format(stock_entry[0][0]))
 
@@ -226,8 +226,8 @@ class ProductionOrder(Document):
             return
         self.set('operations', [])
         operations = frappe.db.sql("""select operation, description, workstation, idx,
-			hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
-			where parent = %s order by idx""", self.bom_no, as_dict=1)
+            hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
+            where parent = %s order by idx""", self.bom_no, as_dict=1)
         self.set('operations', operations)
         self.calculate_time()
 
@@ -256,8 +256,8 @@ class ProductionOrder(Document):
 
     def make_time_logs(self, open_new=False):
         """Capacity Planning. Plan time logs based on earliest availablity of workstation after
-			Planned Start Date. Time logs will be created and remain in Draft mode and must be submitted
-			before manufacturing entry can be made."""
+            Planned Start Date. Time logs will be created and remain in Draft mode and must be submitted
+            before manufacturing entry can be made."""
 
         if not self.operations:
             return
@@ -326,7 +326,7 @@ class ProductionOrder(Document):
 
     def set_start_end_time_for_workstation(self, data, workstation_list, index):
         """Set start and end time for given operation. If first operation, set start as
-		`planned_start_date`, else add time diff to end time of earlier operation."""
+        `planned_start_date`, else add time diff to end time of earlier operation."""
 
         if data.workstation not in workstation_list:
             data.planned_start_time = self.planned_start_date
@@ -364,8 +364,8 @@ class ProductionOrder(Document):
     def set_actual_dates(self):
         if self.get("operations"):
             actual_date = frappe.db.sql("""select min(actual_start_time) as start_date,
-				max(actual_end_time) as end_date from `tabProduction Order Operation`
-				where parent = %s and docstatus=1""", self.name, as_dict=1)[0]
+                max(actual_end_time) as end_date from `tabProduction Order Operation`
+                where parent = %s and docstatus=1""", self.name, as_dict=1)[0]
             self.actual_start_date = actual_date.start_date
             self.actual_end_date = actual_date.end_date
         else:
@@ -393,9 +393,9 @@ class ProductionOrder(Document):
 
     def update_required_items(self):
         '''
-		update bin reserved_qty_for_production
-		called from Stock Entry for production, after submit, cancel
-		'''
+        update bin reserved_qty_for_production
+        called from Stock Entry for production, after submit, cancel
+        '''
         if self.docstatus == 1 and self.source_warehouse:
             if self.material_transferred_for_manufacturing == self.produced_qty:
                 # clear required items table and save document
@@ -444,17 +444,17 @@ class ProductionOrder(Document):
 
     def update_transaferred_qty_for_required_items(self):
         '''update transferred qty from submitted stock entries for that item against
-			the production order'''
+            the production order'''
 
         for d in self.required_items:
             transferred_qty = frappe.db.sql('''select count(qty)
-				from `tabStock Entry` entry, `tabStock Entry Detail` detail
-				where
-					entry.production_order = %s
-					entry.purpose = "Material Transfer for Manufacture"
-					and entry.docstatus = 1
-					and detail.parent = entry.name
-					and detail.item_code = %s''', (self.name, d.item_code))[0][0]
+                from `tabStock Entry` entry, `tabStock Entry Detail` detail
+                where
+                    entry.production_order = %s
+                    entry.purpose = "Material Transfer for Manufacture"
+                    and entry.docstatus = 1
+                    and detail.parent = entry.name
+                    and detail.item_code = %s''', (self.name, d.item_code))[0][0]
 
             d.db_set('transferred_qty', transferred_qty, update_modified=False)
 
@@ -462,8 +462,8 @@ class ProductionOrder(Document):
 @frappe.whitelist()
 def get_item_details(item):
     res = frappe.db.sql("""select stock_uom, description
-		from `tabItem` where disabled=0 and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)
-		and name=%s""", (nowdate(), item), as_dict=1)
+        from `tabItem` where disabled=0 and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)
+        and name=%s""", (nowdate(), item), as_dict=1)
     if not res:
         return {}
 
@@ -511,21 +511,21 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 def get_events(start, end, filters=None):
     """Returns events for Gantt / Calendar view rendering.
 
-	:param start: Start date-time.
-	:param end: End date-time.
-	:param filters: Filters (JSON).
-	"""
+    :param start: Start date-time.
+    :param end: End date-time.
+    :param filters: Filters (JSON).
+    """
     from frappe.desk.calendar import get_event_conditions
     conditions = get_event_conditions("Production Order", filters)
 
     data = frappe.db.sql("""select name, production_item, planned_start_date,
-		planned_end_date, status
-		from `tabProduction Order`
-		where ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
-				and (planned_start_date between %(start)s and %(end)s) \
-			or ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
-				and planned_end_date between %(start)s and %(end)s)) {conditions}
-		""".format(conditions=conditions), {
+        planned_end_date, status
+        from `tabProduction Order`
+        where ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
+                and (planned_start_date between %(start)s and %(end)s) \
+            or ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
+                and planned_end_date between %(start)s and %(end)s)) {conditions}
+        """.format(conditions=conditions), {
         "start": start,
         "end": end
     }, as_dict=True, update={"allDay": 0})
