@@ -106,9 +106,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.get_data_from_server(function(){
 				me.load_data(false);
 				me.make_customer();
-				me.make_item_list(false);
+				me.make_item_list(true);
 				me.set_missing_values();
 			})
+		});
+
+		this.page.add_menu_item(__("Sync Offline Invoices"), function(){
+			me.sync_sales_invoice()
 		});
 
 		this.page.add_menu_item(__("POS Profile"), function() {
