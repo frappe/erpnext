@@ -86,12 +86,41 @@ frappe.ui.form.on("Timesheet", {
 			frm: frm
 		});
 	},
+	machine_no: function (frm) {
+		machine = frappe.get_doc("Machine", {'name': frm.doc.machine_no})
+		console.log(machine)
+	}
 })
+
+// set_machine_info = function (doc) {
+// 	cur_frm.set_value('machine_name',doc.machine_name);
+// 	cur_frm.set_value('gg',doc.gg);
+// }
+
 var set_values_on_barcode_change = function (doc) {
-		cur_frm.set_value('machine_no',doc.machine_id);
-		cur_frm.set_value('production_order',doc.production_order);
-		console.log(doc)
-	};
+	var parentDoc = cur_frm.doc;
+	cur_frm.set_value('machine_no',doc.machine_id);
+	cur_frm.script_manager.trigger('refresh',parentDoc.doctype,parentDoc.name);
+	cur_frm.set_value('production_order',doc.production_order);
+	parentDoc.time_logs = [];
+	var r = frappe.model.add_child(parentDoc,"Timesheet Detail","time_logs");
+	r.operation_id = doc.operation;
+	r.completed_qty = doc.qty;
+	frappe.call({
+		method:'frappe.client.get',
+		args:{
+			doctype:"Production Order Operation",
+			name:r.operation_id
+		},
+		callback:function (data) {
+			if (data.message) {
+				frappe.model.set_value(r.doctype, r.name, "operation", data.message.operation);
+			}
+		}
+	});
+	cur_frm.refresh_field('time_logs');
+	// console.log(r);
+};
 
 frappe.ui.form.on("Timesheet Detail", {
 	time_logs_remove: function(frm) {

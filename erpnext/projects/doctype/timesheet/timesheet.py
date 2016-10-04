@@ -415,3 +415,8 @@ def get_barcode(fields, doctype = None, filters=None):
     return frappe.get_doc('Bar Code', {'name': fields})
 
 
+# @frappe.whitelist()
+# def get_machine_info(fields, doctype=None, filters=None):
+#     if not frappe.db.exists('Machine', {'name': fields}):
+#         return
+#     return frappe.get_doc('Machine', {'name': fields})
