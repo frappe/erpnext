@@ -11,15 +11,18 @@ class StudentAdmission(WebsiteGenerator):
 	website = frappe._dict(
 		template = "templates/generators/student_admission.html",
 		condition_field = "publish",
-		page_title_field = "route"
+		page_title_field = "title"
 	)
+
+	def autoname(self):
+		self.name = self.get_title()
+		self.title = self.name
 
 	def get_context(self, context):
 		context.parents = [{'name': 'admissions', 'title': _('All Student Admissions') }]
-		
-	def validate(self):
-		if not self.title:
-			self.title = self.program + " admissions for " + self.academic_year
+
+	def get_title(self):
+		return _("Admissions for {0}") + self.academic_year
 
 def get_list_context(context):
 	context.title = _("Student Admissions")

@@ -19,8 +19,9 @@
 {%- if application_form_route -%}
 <p>
 	<a class='btn btn-primary'
-	href='/{{ doc.application_form_route }}?academic_year={{ doc.academic_year }}&new=1
-		{%- if doc.program -%}&program={{ doc.program }}{%- endif -%}'>
+	href='/{{ doc.application_form_route }}?new=1&student_admission={{ doc.name }}
+		{%- if doc.program -%}&program={{ doc.program }}{%- endif -%}
+		{%- if doc.academic_year -%}&academic_year={{ doc.academic_year }}{%- endif -%}'>
 	{{ _("Apply Now") }}</a>
 </p>
 {% endif %}
