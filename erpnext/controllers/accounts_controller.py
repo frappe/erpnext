@@ -144,7 +144,7 @@ class AccountsController(TransactionBase):
 				self.conversion_rate = get_exchange_rate(self.currency,
 					self.company_currency)
 
-	def set_missing_item_details(self):
+	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
 
@@ -196,7 +196,7 @@ class AccountsController(TransactionBase):
 								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
 
 			if self.doctype == "Purchase Invoice":
-				self.set_expense_account()
+				self.set_expense_account(for_validate)
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):

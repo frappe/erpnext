@@ -15,13 +15,11 @@ frappe.pages['pos'].refresh = function(wrapper) {
 	window.onbeforeunload = function () {
 		return wrapper.pos.beforeunload()
 	}
-	wrapper.pos.on_refresh_page()
 }
 
 
 erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	init: function(wrapper){
-		this.load = true;
 		this.page = wrapper.page;
 		this.wrapper = $(wrapper).find('.page-content');
 		this.set_indicator();
@@ -29,17 +27,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.make_menu_list();
 		this.set_interval_for_si_sync();
 		this.si_docs = this.get_doc_from_localstorage();
-	},
-
-	on_refresh_page: function() {
-		var me = this;
-		if(this.load){
-			this.load = false;
-		}else if(this.connection_status){
-			this.onload();
-		}else{
-			this.create_new();
-		}
 	},
 
 	beforeunload: function(e){
@@ -359,11 +346,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	get_customers: function(key){
 		var me = this;
 		key = key.toLowerCase().trim()
+		var re = new RegExp('%', 'g');
+		var reg = new RegExp(key.replace(re, '\\w*\\s*[a-zA-Z0-9]*'))
+
 		if(key){
 			return $.grep(this.customers, function(data) {
-				if(data.name.toLowerCase().match(key)
-					|| data.customer_name.toLowerCase().match(key)
-					|| (data.customer_group && data.customer_group.toLowerCase().match(key))){
+				if(reg.test(data.name.toLowerCase())
+					|| reg.test(data.customer_name.toLowerCase())
+					|| (data.customer_group && reg.test(data.customer_group.toLowerCase()))){
 					return data
 				}
 			})
@@ -431,7 +421,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			})
 		}
 
-		key = this.search.$input.val().toLowerCase();
+		key =  this.search.$input.val().toLowerCase();
+		var re = new RegExp('%', 'g');
+		var reg = new RegExp(key.replace(re, '\\w*\\s*[a-zA-Z0-9]*'))
 		search_status = true
 
 		if(key){
@@ -447,8 +439,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					} else if(item.barcode == me.search.$input.val()) {
 						search_status = false;
 						return item.barcode == me.search.$input.val();
-					} else if((item.item_code.toLowerCase().match(key)) ||
-						(item.item_name.toLowerCase().match(key)) || (item.item_group.toLowerCase().match(key))) {
+					} else if(reg.test(item.item_code.toLowerCase()) || reg.test(item.description.toLowerCase()) ||
+					reg.test(item.item_name.toLowerCase()) || reg.test(item.item_group.toLowerCase()) ){
 						return true
 					}
 				}
