@@ -15,13 +15,11 @@ frappe.pages['pos'].refresh = function(wrapper) {
 	window.onbeforeunload = function () {
 		return wrapper.pos.beforeunload()
 	}
-	wrapper.pos.on_refresh_page()
 }
 
 
 erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	init: function(wrapper){
-		this.load = true;
 		this.page = wrapper.page;
 		this.wrapper = $(wrapper).find('.page-content');
 		this.set_indicator();
@@ -29,17 +27,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.make_menu_list();
 		this.set_interval_for_si_sync();
 		this.si_docs = this.get_doc_from_localstorage();
-	},
-
-	on_refresh_page: function() {
-		var me = this;
-		if(this.load){
-			this.load = false;
-		}else if(this.connection_status){
-			this.onload();
-		}else{
-			this.create_new();
-		}
 	},
 
 	beforeunload: function(e){
