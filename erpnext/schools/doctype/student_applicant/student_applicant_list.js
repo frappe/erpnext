@@ -3,7 +3,7 @@ frappe.listview_settings['Student Applicant'] = {
 	has_indicator_for_draft: 1,
 	get_indicator: function(doc) {
 		if (doc.paid) {
-			return [__("Paid"), "green", "paid,=,1"];
+			return [__("Paid"), "green", "paid,=,Yes"];
 		}
 		else if (doc.application_status=="Applied") {
 			return [__("Applied"), "orange", "application_status,=,Applied"];

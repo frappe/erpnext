@@ -15,14 +15,15 @@ class StudentAdmission(WebsiteGenerator):
 	)
 
 	def autoname(self):
-		self.name = self.get_title()
-		self.title = self.name
+		if not self.title:
+			self.title = self.get_title()
+		self.name = self.title
 
 	def get_context(self, context):
 		context.parents = [{'name': 'admissions', 'title': _('All Student Admissions') }]
 
 	def get_title(self):
-		return _("Admissions for {0}") + self.academic_year
+		return _("Admissions for {0}").format(self.academic_term)
 
 def get_list_context(context):
 	context.title = _("Student Admissions")
