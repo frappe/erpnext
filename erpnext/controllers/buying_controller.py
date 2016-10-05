@@ -62,7 +62,7 @@ class BuyingController(StockController):
 		if getattr(self, "supplier", None):
 			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions))
 
-		self.set_missing_item_details()
+		self.set_missing_item_details(for_validate)
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:

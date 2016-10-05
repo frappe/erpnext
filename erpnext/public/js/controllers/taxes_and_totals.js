@@ -14,11 +14,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			item.total_margin = item.price_list_rate + item.margin_rate_or_amount;
 		}
 
-		item.rate = flt(item.total_margin , 2);
+		item.rate = flt(item.total_margin , precision("rate", item));
 
 		if(item.discount_percentage){
 			discount_value = flt(item.total_margin) * flt(item.discount_percentage) / 100;
-			item.rate = flt((item.total_margin) - (discount_value), precision('rate'));
+			item.rate = flt((item.total_margin) - (discount_value), precision('rate', item));
 		}
 	},
 

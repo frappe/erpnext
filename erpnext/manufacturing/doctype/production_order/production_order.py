@@ -55,7 +55,8 @@ class ProductionOrder(Document):
 				if not self.expected_delivery_date:
 					self.expected_delivery_date = so[0].delivery_date
 
-				self.project = so[0].project
+				if so[0].project:
+					self.project = so[0].project
 
 				self.validate_production_order_against_so()
 			else:
