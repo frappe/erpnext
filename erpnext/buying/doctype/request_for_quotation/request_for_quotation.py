@@ -192,8 +192,6 @@ def create_supplier_quotation(doc):
 	if isinstance(doc, basestring):
 		doc = json.loads(doc)
 
-	validate_duplicate_supplier_quotation(doc)
-
 	try:
 		sq_doc = frappe.get_doc({
 			"doctype": "Supplier Quotation",
@@ -245,13 +243,3 @@ def get_rfq_doc(doctype, name, supplier_idx):
 		args = doc.get('suppliers')[cint(supplier_idx) - 1]
 		doc.update_supplier_part_no(args)
 		return doc
-
-@frappe.whitelist()
-def validate_duplicate_supplier_quotation(args):
-	data = frappe.db.sql("""select sq.name as name from `tabSupplier Quotation` sq, 
-		`tabSupplier Quotation Item` sqi where sqi.parent = sq.name and sq.supplier = %(supplier)s 
-		and sqi.request_for_quotation = %(rfq)s and sq.docstatus < 2""",
-		{'supplier': args.get('supplier'), 'rfq': args.get('name')}, as_dict=True)
-
-	if data and data[0] and data[0].name:
-		frappe.throw(_("Already supplier quotation has created"))
