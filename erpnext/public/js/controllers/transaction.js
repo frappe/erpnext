@@ -989,7 +989,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	make_payment_entry: function() {
 		return frappe.call({
-			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
+			method: cur_frm.cscript.get_method_for_payment(),
 			args: {
 				"dt": cur_frm.doc.doctype,
 				"dn": cur_frm.doc.name
@@ -1000,5 +1000,18 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				// cur_frm.refresh_fields()
 			}
 		});
+	},
+
+	get_method_for_payment: function(){
+		method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry"
+		if(cur_frm.doc.__onload && cur_frm.doc.__onload.journal_entry){
+			if(in_list(['Sales Invoice', 'Purchase Invoice'],  cur_frm.doc.doctype)){
+				method = "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice"
+			}else {
+				method= "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order"
+			}
+		}
+
+		return method
 	}
 });

@@ -36,6 +36,9 @@ class PurchaseInvoice(BuyingController):
 			'overflow_type': 'billing'
 		}]
 
+	def onload(self):
+		self.get("__onload").journal_entry = frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+
 	def validate(self):
 		if not self.is_opening:
 			self.is_opening = 'No'
