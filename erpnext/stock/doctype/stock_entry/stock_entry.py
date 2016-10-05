@@ -238,6 +238,7 @@ class StockEntry(StockController):
 				d.serial_no = transferred_serial_no
 
 	def get_stock_and_rate(self):
+		self.set_production_order_details()
 		self.set_transfer_qty()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
@@ -252,6 +253,7 @@ class StockEntry(StockController):
 	def set_basic_rate(self, force=False, update_finished_item_rate=True):
 		"""get stock and incoming rate on posting date"""
 		raw_material_cost = 0.0
+		scrap_material_cost = 0.0
 		fg_basic_rate = 0.0
 
 		for d in self.get('items'):
@@ -282,17 +284,22 @@ class StockEntry(StockController):
 					basic_rate = flt(get_incoming_rate(args), self.precision("basic_rate", d))
 					if basic_rate > 0:
 						d.basic_rate = basic_rate
+					d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
+
+				if getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
+
+					scrap_material_cost += flt(d.basic_amount)
 
 		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
 		if (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
-			self.set_basic_rate_for_finished_goods(raw_material_cost)
+			self.set_basic_rate_for_finished_goods(raw_material_cost, scrap_material_cost)
 
-	def set_basic_rate_for_finished_goods(self, raw_material_cost):
+	def set_basic_rate_for_finished_goods(self, raw_material_cost, scrap_material_cost):
 		if self.purpose in ["Manufacture", "Repack"]:
 			for d in self.get("items"):
 				if (d.bom_no or d.t_warehouse) and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse):
-					d.basic_rate = flt(raw_material_cost / flt(d.transfer_qty), d.precision("basic_rate"))
-					d.basic_amount = flt(raw_material_cost, d.precision("basic_amount"))
+					d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
+					d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
 
 	def distribute_additional_costs(self):
 		if self.purpose == "Material Issue":
@@ -355,14 +362,14 @@ class StockEntry(StockController):
 
 	def validate_bom(self):
 		for d in self.get('items'):
-			if d.bom_no and (d.t_warehouse != self.pro_doc.scrap_warehouse):
+			if d.bom_no and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
 				validate_bom_no(d.item_code, d.bom_no)
 
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
 		items_with_target_warehouse = []
 		for d in self.get('items'):
-			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty) and (d.t_warehouse != self.pro_doc.scrap_warehouse):
+			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty) and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
 				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
 					format(d.idx, d.transfer_qty, self.fg_completed_qty))
 
@@ -526,19 +533,7 @@ class StockEntry(StockController):
 		if not self.posting_date or not self.posting_time:
 			frappe.throw(_("Posting date and posting time is mandatory"))
 
-		if not getattr(self, "pro_doc", None):
-			self.pro_doc = None
-
-		if self.production_order:
-			# common validations
-			if not self.pro_doc:
-				self.pro_doc = frappe.get_doc('Production Order', self.production_order)
-
-			if self.pro_doc:
-				self.bom_no = self.pro_doc.bom_no
-			else:
-				# invalid production order
-				self.production_order = None
+		self.set_production_order_details()
 
 		if self.bom_no:
 			if self.purpose in ["Material Issue", "Material Transfer", "Manufacture", "Repack",
@@ -583,6 +578,21 @@ class StockEntry(StockController):
 
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
+
+	def set_production_order_details(self):
+		if not getattr(self, "pro_doc", None):
+			self.pro_doc = None
+
+		if self.production_order:
+			# common validations
+			if not self.pro_doc:
+				self.pro_doc = frappe.get_doc('Production Order', self.production_order)
+
+			if self.pro_doc:
+				self.bom_no = self.pro_doc.bom_no
+			else:
+				# invalid production order
+				self.production_order = None
 
 	def load_items_from_bom(self):
 		if self.production_order:

@@ -86,7 +86,7 @@ var get_bom_material_detail= function(doc, cdt, cdn) {
 				refresh_field("scrap_items");
 				doc = locals[doc.doctype][doc.name];
 				erpnext.bom.calculate_rm_cost(doc);
-				erpnext.bom.calculate_sm_cost(doc);
+				erpnext.bom.calculate_scrap_materials_cost(doc);
 				erpnext.bom.calculate_total(doc);
 			},
 			freeze: true
@@ -137,7 +137,7 @@ erpnext.bom.calculate_rm_cost = function(doc) {
 }
 
 //sm : scrap material
-erpnext.bom.calculate_sm_cost = function(doc) {
+erpnext.bom.calculate_scrap_materials_cost = function(doc) {
 	var sm = doc.scrap_items || [];
 	total_sm_cost = 0;
 	for(var i=0;i<sm.length;i++) {
@@ -188,7 +188,7 @@ cur_frm.fields_dict['items'].grid.get_field('bom_no').get_query = function(doc, 
 cur_frm.cscript.validate = function(doc, dt, dn) {
 	erpnext.bom.calculate_op_cost(doc);
 	erpnext.bom.calculate_rm_cost(doc);
-	erpnext.bom.calculate_sm_cost(doc);
+	erpnext.bom.calculate_scrap_materials_cost(doc);
 	erpnext.bom.calculate_total(doc);
 }
 
