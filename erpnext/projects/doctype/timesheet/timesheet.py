@@ -145,7 +145,7 @@ class Timesheet(Document):
 
 	def validate_dates(self):
 		for data in self.time_logs:
-			if time_diff_in_hours(data.to_time, data.from_time) < 0:
+			if data.from_time and data.to_time and time_diff_in_hours(data.to_time, data.from_time) < 0:
 				frappe.throw(_("To date cannot be before from date"))
 
 	def validate_time_logs(self):
