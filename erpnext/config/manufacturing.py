@@ -81,6 +81,24 @@ def get_data():
 			]
 		},
 		{
+			"label": _("TimeSheet"),
+			"icon": "icon-wrench",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Timesheet",
+					"description": _("Timesheet Details"),
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Daily Production",
+					"description": _("Daily Production Report"),
+					"doctype": "Timesheet"
+				},
+			]
+		},
+		{
 			"label": _("Tools"),
 			"icon": "icon-wrench",
 			"items": [
