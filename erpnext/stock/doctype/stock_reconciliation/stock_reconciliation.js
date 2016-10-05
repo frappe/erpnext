@@ -75,8 +75,8 @@ frappe.ui.form.on("Stock Reconciliation", {
 					frappe.model.set_value(cdt, cdn, "valuation_rate", r.message.rate);
 					frappe.model.set_value(cdt, cdn, "current_qty", r.message.qty);
 					frappe.model.set_value(cdt, cdn, "current_valuation_rate", r.message.rate);
-					frappe.model.set_value(cdt, cdn, "current_amount", r.message.rate*r.message.qty);
-					frappe.model.set_value(cdt, cdn, "amount", r.message.rate*r.message.qty);
+					frappe.model.set_value(cdt, cdn, "current_amount", r.message.rate * r.message.qty);
+					frappe.model.set_value(cdt, cdn, "amount", r.message.rate * r.message.qty);
 					
 				}
 			});
@@ -99,11 +99,11 @@ frappe.ui.form.on("Stock Reconciliation", {
 	set_amount_quantity: function(doc, cdt, cdn) {
 		var d = frappe.model.get_doc(cdt, cdn);
 		if (d.qty & d.valuation_rate) {
-				frappe.model.set_value(cdt, cdn, "amount", d.qty*d.valuation_rate);
-				frappe.model.set_value(cdt, cdn, "quantity_difference", d.qty-d.current_qty);
-				frappe.model.set_value(cdt, cdn, "amount_difference", d.amount-d.current_amount);
-			}
-		}	
+			frappe.model.set_value(cdt, cdn, "amount", flt(d.qty) * flt(d.valuation_rate));
+			frappe.model.set_value(cdt, cdn, "quantity_difference", flt(d.qty) - flt(d.current_qty));
+			frappe.model.set_value(cdt, cdn, "amount_difference", flt(d.amount) - flt(d.current_amount));
+		}
+	}
 });
 
 frappe.ui.form.on("Stock Reconciliation Item", {
