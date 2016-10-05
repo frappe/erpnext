@@ -30,4 +30,3 @@ class StudentApplicant(Document):
 
 	def on_payment_authorized(self, *args, **kwargs):
 		self.db_set('paid', 1)
-		self.submit()
