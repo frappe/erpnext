@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import ast
+from frappe import _
 
 
 class BarCodeGenerate(Document):
@@ -19,6 +20,7 @@ class BarCodeGenerate(Document):
             bar_code.date = self.date
             bar_code.machine_id = self.machine_id
             bar_code.save()
+            frappe.msgprint(_("Barcode Created with these id {0}".format(bar_code.name)))
         return bar_code
 
 
