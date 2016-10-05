@@ -39,7 +39,7 @@ def get_columns(filters):
 		_("Customer") + ":Link/Customer:140", _("Territory") + ":Link/Territory:100", _("Posting Date") + ":Date:100",
 		_("Item Code") + ":Link/Item:120", _("Item Group") + ":Link/Item Group:120",
 		_("Brand") + ":Link/Brand:120", _("Qty") + ":Float:100", _("Amount") + ":Currency:120",
-		_("Sales Person") + ":Link/Sales Person:140", _("Contribution %") + ":Float:110",
+		_("Sales Person") + ":Link/Sales Person:140", _("Contribution %") + "::110",
 		_("Contribution Amount") + ":Currency:140"]
 
 def get_entries(filters):
