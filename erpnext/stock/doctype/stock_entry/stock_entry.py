@@ -276,6 +276,13 @@ class StockEntry(StockController):
 				if not d.t_warehouse:
 					raw_material_cost += flt(d.basic_amount)
 
+			# get scrap items basic rate
+			if d.bom_no:
+				if not flt(d.basic_rate) and getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
+					basic_rate = flt(get_incoming_rate(args), self.precision("basic_rate", d))
+					if basic_rate > 0:
+						d.basic_rate = basic_rate
+
 		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
 		if (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
 			self.set_basic_rate_for_finished_goods(raw_material_cost)
@@ -283,7 +290,7 @@ class StockEntry(StockController):
 	def set_basic_rate_for_finished_goods(self, raw_material_cost):
 		if self.purpose in ["Manufacture", "Repack"]:
 			for d in self.get("items"):
-				if d.bom_no or d.t_warehouse:
+				if (d.bom_no or d.t_warehouse) and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse):
 					d.basic_rate = flt(raw_material_cost / flt(d.transfer_qty), d.precision("basic_rate"))
 					d.basic_amount = flt(raw_material_cost, d.precision("basic_amount"))
 
@@ -302,7 +309,7 @@ class StockEntry(StockController):
 
 	def update_valuation_rate(self):
 		for d in self.get("items"):
-			d.amount = flt(d.basic_amount + flt(d.additional_cost), d.precision("amount"))
+			d.amount = flt(flt(d.basic_amount) + flt(d.additional_cost), d.precision("amount"))
 			d.valuation_rate = flt(
 				flt(d.basic_rate)
 				+ (flt(d.additional_cost) / flt(d.transfer_qty)),
@@ -617,11 +624,11 @@ class StockEntry(StockController):
 		return item_dict
 	
 	def get_bom_scrap_material(self, qty):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_scrap_items_as_dict
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		
 		# item dict = { item_code: {qty, description, stock_uom} }
-		item_dict = get_bom_scrap_items_as_dict(self.bom_no, self.company, qty=qty,
-			fetch_exploded = self.use_multi_level_bom)
+		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
+			fetch_exploded = 0, fetch_scrap_items = 1)
 
 		for item in item_dict.values():
 			item.from_warehouse = ""

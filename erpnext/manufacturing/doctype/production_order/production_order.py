@@ -222,6 +222,8 @@ class ProductionOrder(Document):
 		self.set('operations', operations)
 		self.calculate_time()
 
+		return check_if_scrap_warehouse_mandatory(self.bom_no)
+
 	def calculate_time(self):
 		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
 
@@ -457,11 +459,25 @@ def get_item_details(item):
 		return {}
 
 	res = res[0]
+
 	res["bom_no"] = frappe.db.get_value("BOM", filters={"item": item, "is_default": 1})
 	if not res["bom_no"]:
 		variant_of= frappe.db.get_value("Item", item, "variant_of")
 		if variant_of:
 			res["bom_no"] = frappe.db.get_value("BOM", filters={"item": variant_of, "is_default": 1})
+
+	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
+
+	return res
+
+@frappe.whitelist()
+def check_if_scrap_warehouse_mandatory(bom_no):
+	res = {"set_scrap_wh_mandatory": False }
+	bom = frappe.get_doc("BOM", bom_no)
+
+	if len(bom.scrap_items) > 0:
+		res["set_scrap_wh_mandatory"] = True
+
 	return res
 
 @frappe.whitelist()
