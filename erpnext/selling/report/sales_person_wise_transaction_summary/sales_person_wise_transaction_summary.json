@@ -1,5 +1,5 @@
 {
- "add_total_row": 0, 
+ "add_total_row": 1, 
  "apply_user_permissions": 1, 
  "creation": "2013-05-03 11:31:05", 
  "disabled": 0, 
@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2016-01-28 04:22:49.476068", 
+ "modified": "2016-10-05 12:26:15.736596", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Person-wise Transaction Summary", 
