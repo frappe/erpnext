@@ -407,7 +407,7 @@ DocType: Employee,Single,Unique
 DocType: Account,Cost of Goods Sold,Coût des marchandises vendues
 DocType: Purchase Invoice,Yearly,Annuel
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +229,Please enter Cost Center,S'il vous plaît entrer Centre de coûts
-DocType: Journal Entry Account,Sales Order,Bon de commande
+DocType: Journal Entry Account,Sales Order,commande client
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +67,Avg. Selling Rate,Moy. Taux de vente
 DocType: Examination,Examiner Name,Nom de l&#39;examinateur
 apps/erpnext/erpnext/utilities/transaction_base.py +149,Quantity cannot be a fraction in row {0},La quantité ne peut pas être une fraction à la ligne {0}
@@ -991,7 +991,7 @@ apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +18,Standard B
 DocType: GL Entry,Against,Contre
 DocType: Item,Default Selling Cost Center,Coût des marchandises vendues
 DocType: Sales Partner,Implementation Partner,Partenaire de mise en œuvre
-apps/erpnext/erpnext/controllers/selling_controller.py +231,Sales Order {0} is {1},Bon de commande {0} est {1}
+apps/erpnext/erpnext/controllers/selling_controller.py +231,Sales Order {0} is {1},commande client {0} est {1}
 DocType: Opportunity,Contact Info,Information de contact
 apps/erpnext/erpnext/config/stock.py +299,Making Stock Entries,Faire des entrées stock
 DocType: Packing Slip,Net Weight UOM,Unité de mesure Poids Net
@@ -1137,7 +1137,7 @@ DocType: Item,Lead Time in days,Délai en jours
 ,Accounts Payable Summary,Le résumé des comptes à payer
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +196,Not authorized to edit frozen Account {0},N'êtes pas autorisé à modifier le compte gelé {0}
 DocType: Journal Entry,Get Outstanding Invoices,Obtenez les factures impayées
-apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +62,Sales Order {0} is not valid,Bon de commande {0} invalide
+apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +62,Sales Order {0} is not valid,commande client {0} invalide
 apps/erpnext/erpnext/setup/doctype/company/company.py +182,"Sorry, companies cannot be merged","Désolé , les entreprises ne peuvent pas être fusionnés"
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +139,"The total Issue / Transfer quantity {0} in Material Request {1}  \
 							cannot be greater than requested quantity {2} for Item {3}",La quantité Problème / transfert total {0} dans Material Request {1} \ ne peut pas être supérieure à la quantité demandée {2} pour le poste {3}
@@ -1590,7 +1590,7 @@ DocType: Authorization Control,Authorization Control,Contrôle d&#39;autorisatio
 apps/erpnext/erpnext/controllers/buying_controller.py +300,Row #{0}: Rejected Warehouse is mandatory against rejected Item {1},Row # {0}: Entrepôt Rejeté est obligatoire contre Item rejeté {1}
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +678,Payment,Paiement
 DocType: Production Order Operation,Actual Time and Cost,Temps réel et coût
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +54,Material Request of maximum {0} can be made for Item {1} against Sales Order {2},Demande de Matériel d'un maximum de {0} peut être faite pour l'article {1} par rapport au bon de commande {2}
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +54,Material Request of maximum {0} can be made for Item {1} against Sales Order {2},Demande de Matériel d'un maximum de {0} peut être faite pour l'article {1} par rapport au commande client {2}
 DocType: Employee,Salutation,Titre
 DocType: Pricing Rule,Brand,Marque
 DocType: Course,Course Abbreviation,Abréviation de cours
@@ -1863,7 +1863,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +52,"e.g. ""Build tools for build
 DocType: Quality Inspection,In Process,En cours
 DocType: Authorization Rule,Itemwise Discount,Remise (par Article)
 apps/erpnext/erpnext/config/accounts.py +63,Tree of financial accounts.,Arbre des comptes financiers.
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} against Sales Order {1},{0} contre le bon de commande de vente {1}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +334,{0} against Sales Order {1},{0} contre le commande client de vente {1}
 DocType: Account,Fixed Asset,Actifs immobilisés
 apps/erpnext/erpnext/config/stock.py +304,Serialized Inventory,Inventaire sérialisé
 DocType: Activity Type,Default Billing Rate,Prix facturation par défaut
@@ -2153,7 +2153,7 @@ DocType: Homepage,Homepage,Page d&#39;accueil
 DocType: Purchase Receipt Item,Recd Quantity,Quantité reçue
 apps/erpnext/erpnext/schools/doctype/program_enrollment/program_enrollment.py +54,Fee Records Created - {0},Records Fee Créé - {0}
 DocType: Asset Category Account,Asset Category Account,Catégorie d&#39;actif compte
-apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +103,Cannot produce more Item {0} than Sales Order quantity {1},Ne peut pas produire plus d'article {0} que de la qté du bon de commande {1}
+apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +103,Cannot produce more Item {0} than Sales Order quantity {1},Ne peut pas produire plus d'article {0} que de la qté du commande client {1}
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +504,Stock Entry {0} is not submitted,Entrée stock {0} est pas soumis
 DocType: Payment Reconciliation,Bank / Cash Account,Banque et liquidités
 DocType: Tax Rule,Billing City,Ville de facturation
@@ -2499,7 +2499,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 DocType: Program Enrollment Tool,Get Students,Obtenez étudiants
 DocType: Serial No,Under Warranty,Sous garantie
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +447,[Error],[Erreur]
-DocType: Sales Order,In Words will be visible once you save the Sales Order.,En Toutes Lettres. Sera visible une fois que vous enregistrerez le bon de commande.
+DocType: Sales Order,In Words will be visible once you save the Sales Order.,En Toutes Lettres. Sera visible une fois que vous enregistrerez le commande client.
 ,Employee Birthday,Anniversaire de l'employé
 apps/erpnext/erpnext/controllers/status_updater.py +175,Limit Crossed,Limite Crossed
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +55,Venture Capital,Capital Risque
@@ -2734,7 +2734,7 @@ apps/erpnext/erpnext/setup/doctype/item_group/item_group.py +59,"An item exists 
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1171,Please select customer,S&#39;il vous plaît sélectionner client
 DocType: C-Form,I,je
 DocType: Company,Asset Depreciation Cost Center,Asset Centre Amortissements
-DocType: Sales Order Item,Sales Order Date,Date du bon de Commande
+DocType: Sales Order Item,Sales Order Date,Date du commande client
 DocType: Sales Invoice Item,Delivered Qty,Qté livrée
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +86,Warehouse {0}: Company is mandatory,Entrepôt {0}: Société est obligatoire
 ,Payment Period Based On Invoice Date,Période de paiement basé sur Date de la facture
@@ -3421,7 +3421,7 @@ DocType: Task,Total Expense Claim (via Expense Claim),Frais totaux (via Note de 
 apps/erpnext/erpnext/accounts/report/sales_register/sales_register.py +69,Customer Id,Client Id
 apps/erpnext/erpnext/hr/doctype/employee_attendance_tool/employee_attendance_tool.js +176,Mark Absent,Marquer absent
 DocType: Journal Entry Account,Exchange Rate,Taux de change
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +461,Sales Order {0} is not submitted,Bon de commande {0} n'a pas été transmis
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +461,Sales Order {0} is not submitted,commande client {0} n'a pas été transmis
 DocType: Homepage,Tag Line,Tag ligne
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +804,Add items from,Ajouter des articles de
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +97,Warehouse {0}: Parent account {1} does not bolong to the company {2},Entrepôt {0}: le Compte Parent {1} n'appartient pas à la société {2}
