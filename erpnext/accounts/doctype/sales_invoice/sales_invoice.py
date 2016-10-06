@@ -49,9 +49,6 @@ class SalesInvoice(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
-	def onload(self):
-		self.get("__onload").journal_entry = frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
-
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.validate_posting_time()

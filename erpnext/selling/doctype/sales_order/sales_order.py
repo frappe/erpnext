@@ -24,9 +24,6 @@ class SalesOrder(SellingController):
 	def __init__(self, arg1, arg2=None):
 		super(SalesOrder, self).__init__(arg1, arg2)
 
-	def onload(self):
-		self.get("__onload").journal_entry = frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
-
 	def validate(self):
 		super(SalesOrder, self).validate()
 

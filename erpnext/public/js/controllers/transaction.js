@@ -1004,7 +1004,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	get_method_for_payment: function(){
 		method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry"
-		if(cur_frm.doc.__onload && cur_frm.doc.__onload.journal_entry){
+		if(cur_frm.doc.__onload && cur_frm.doc.__onload.make_payment_via_journal_entry){
 			if(in_list(['Sales Invoice', 'Purchase Invoice'],  cur_frm.doc.doctype)){
 				method = "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice"
 			}else {

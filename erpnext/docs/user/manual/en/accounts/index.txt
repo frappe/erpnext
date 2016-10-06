@@ -3,6 +3,7 @@ opening-accounts
 sales-invoice
 point-of-sale-pos-invoice
 purchase-invoice
+payments
 journal-entry
 payment-entry
 multi-currency-accounting

@@ -33,9 +33,6 @@ class PurchaseOrder(BuyingController):
 			'overflow_type': 'order'
 		}]
 
-	def onload(self):
-		self.get("__onload").journal_entry = frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
-
 	def validate(self):
 		super(PurchaseOrder, self).validate()
 
