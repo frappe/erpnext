@@ -23,6 +23,7 @@ class SellingController(StockController):
 			self.grand_total)
 
 	def onload(self):
+		super(SellingController, self).onload()
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get("items"):
 				item.update(get_bin_details(item.item_code,
