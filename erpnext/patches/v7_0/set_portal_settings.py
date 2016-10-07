@@ -10,6 +10,8 @@ def execute():
 	for dt in ("assessment", "announcement", "course", "fees"):
 		frappe.reload_doc("schools", "doctype", dt)
 		
+	frappe.reload_doc('website', 'doctype', 'portal_menu_item')
+		
 	frappe.get_doc('Portal Settings').sync_menu()
 	
 	if 'schools' in frappe.get_installed_apps():
