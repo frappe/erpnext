@@ -332,3 +332,5 @@ execute:frappe.reload_doctype("Salary Slip")
 execute:frappe.db.sql("update `tabSalary Slip` set posting_date=creation")
 erpnext.patches.v7_1.update_portal_roles
 erpnext.patches.v7_1.set_total_amount_currency_in_je
+finally:erpnext.patches.v7_0.update_timesheet_communications
+erpnext.patches.v7_0.update_status_of_zero_amount_sales_order

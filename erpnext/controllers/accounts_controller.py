@@ -26,6 +26,9 @@ class AccountsController(TransactionBase):
 
 		return self.__company_currency
 
+	def onload(self):
+		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)

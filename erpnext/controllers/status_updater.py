@@ -301,12 +301,7 @@ class StatusUpdater(Document):
 			ref_doc = frappe.get_doc(ref_dt, ref_dn)
 
 			ref_doc.db_set("per_billed", per_billed)
-
-			if frappe.get_meta(ref_dt).get_field("billing_status"):
-				if per_billed < 0.001: billing_status = "Not Billed"
-				elif per_billed >= 99.99: billing_status = "Fully Billed"
-				else: billing_status = "Partly Billed"
-				ref_doc.db_set('billing_status', billing_status)
+			ref_doc.set_status(update=True)
 
 def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 	"""
