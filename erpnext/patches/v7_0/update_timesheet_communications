@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	if frappe.db.table_exists("Time Log") and "employee" in frappe.db.get_table_columns("Time Log"):
+	if frappe.db.table_exists("Time Log"):
 		timesheet = frappe.db.sql("""SELECT ts.name AS name, tl.name AS timelogname,
 				tl.modified AS modified, tl.modified_by AS modified_by, tl.creation AS creation, tl.owner AS owner
 			FROM 
