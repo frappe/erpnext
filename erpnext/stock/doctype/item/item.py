@@ -567,7 +567,7 @@ class Item(WebsiteGenerator):
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
-		for warehouse in frappe.db.sql("select name from `tabWarehouse`"):
+		for warehouse in frappe.db.sql("select name from `tabWarehouse` where is_group = 0"):
 			repost_stock(new_name, warehouse[0])
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
