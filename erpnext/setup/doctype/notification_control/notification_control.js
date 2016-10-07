@@ -9,7 +9,7 @@ frappe.ui.form.on("Notification Control", {
 		frm.set_value("custom_message", frm.doc[frm.events.get_fieldname(frm)]);
 	},
 	set_message: function(frm) {
-		if(frm.doc.select_transaction) {
+		if(frm.doc.select_transaction && frm.doc.select_transaction !== " ") {
 			frm.set_value(frm.events.get_fieldname(frm), frm.doc.custom_message);
 		}
 		frm.save();
