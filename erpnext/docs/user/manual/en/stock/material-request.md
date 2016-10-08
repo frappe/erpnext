@@ -1,7 +1,7 @@
 A Material Request is a simple document identifying a requirement of a set of
 Items (products or services) for a particular reason.
 
-![Workflow]({{docs_base_url}}/assets/old_images/erpnext/material-request-workflow.jpg)
+![Workflow]({{docs_base_url}}/assets/img/buying/material-request-flowchart.png)
 
 To generate a Material Request manually go to:
 
@@ -24,6 +24,8 @@ A Material Request can be of type:
 * Material Transfer - If the requested material is to be shifted from one warehouse to another.
 * Material Issue - If the requested material is to be Issued.
 * Manufacture - If the requested material is to be Produced.
+
+You can also raise a [RFQ]({{docs_base_url}}/user/manual/en/buying/request-for-quotation.html) against a material request by using the 'Make' button.
 
 > Info: Material Request is not mandatory. It is ideal if you have centralized
 buying so that you can collect this information from various departments.
