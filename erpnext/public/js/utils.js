@@ -165,7 +165,7 @@ erpnext.utils.map_current_doc = function(opts) {
 				},
 			]
 		});
-		d.set_primary_action(__('Get Items'), function() {
+		d.set_primary_action(__(opts.primary_button_label || 'Get Items'), function() {
 			var values = d.get_values();
 			if(!values)
 				return;
