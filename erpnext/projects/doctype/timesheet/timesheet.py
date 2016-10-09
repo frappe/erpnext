@@ -28,7 +28,7 @@ class Timesheet(Document):
         self.set_employee_name()
         self.set_status()
         self.validate_dates()
-        self.validate_time_logs()
+        # self.validate_time_logs()
         self.update_cost()
         self.calculate_total_amounts()
         self.calculate_percentage_billed()

@@ -176,7 +176,7 @@ class ProductionOrder(Document):
 
     def before_submit(self):
         self.set_required_items()
-        self.make_time_logs()
+        # self.make_time_logs()
 
     def on_submit(self):
         if not self.wip_warehouse:
