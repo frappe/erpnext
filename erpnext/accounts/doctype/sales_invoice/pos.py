@@ -236,10 +236,4 @@ def save_invoice(e, si_doc, name):
 		si_doc.docstatus = 0
 		si_doc.flags.ignore_mandatory = True
 		si_doc.insert()
-		make_scheduler_log(e, si_doc.name)
-
-def make_scheduler_log(e, sales_invoice):
-	scheduler_log = frappe.new_doc('Scheduler Log')
-	scheduler_log.method = "erpnext.accounts.doctype.sales_invoice.pos.make_invoice"
-	scheduler_log.error = e
-	scheduler_log.save(ignore_permissions=True)
+		frappe.log_error(frappe.get_traceback())
