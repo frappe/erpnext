@@ -25,7 +25,7 @@ A Material Request can be of type:
 * Material Issue - If the requested material is to be Issued.
 * Manufacture - If the requested material is to be Produced.
 
-You can also raise a [RFQ]({{docs_base_url}}/user/manual/en/buying/request-for-quotation.html) against a material request by using the 'Make' button.
+The User can also raise a [Request For Quotation]({{docs_base_url}}/user/manual/en/buying/request-for-quotation.html) against a Material Request. To create a Request For Quotation the user can click on 'Make'.
 
 > Info: Material Request is not mandatory. It is ideal if you have centralized
 buying so that you can collect this information from various departments.
