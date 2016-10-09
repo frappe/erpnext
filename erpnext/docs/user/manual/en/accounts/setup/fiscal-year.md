@@ -20,8 +20,8 @@ desired profit margins.
 
 To set the Fiscal Year as default, click on the 'Default' button.
 
-In case you have more than one company sharing the same Fiscal Year, you can
-it into the Grid as shown below.
+In case you have multiple companies sharing the same Fiscal Year, you can add
+it into the grid as shown below.
 
 <img class="screenshot" alt="Fiscal Year" src="{{docs_base_url}}/assets/img/accounts/fiscal-year.png">
 
