@@ -1,0 +1,17 @@
+{
+ "creation": "2016-10-10 11:42:43.577923", 
+ "custom_format": 0, 
+ "disabled": 0, 
+ "doc_type": "Production Order", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "idx": 0, 
+ "modified": "2016-10-10 11:42:48.728023", 
+ "modified_by": "Administrator", 
+ "name": "Barcode", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Server", 
+ "standard": "Yes"
+}

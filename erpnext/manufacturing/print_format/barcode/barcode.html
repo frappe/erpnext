@@ -1,0 +1,25 @@
+{{ letter_head or "" }}
+
+<div class="col-xs-12">
+
+    <div class="title" align="left">
+        <h4>{{ doc.doctype }}</h4>
+        <h6><b>{{doc.name}}</b></h6>
+        <hr style="width: 100%; color: black; height: 1px; background-color:rgba(160, 152, 136, 0.54);" align="center">
+    </div>
+    {% if doc.__onload %}
+        {% for row in doc.__onload.has_barcode %}
+            <div class="col-xs-6">
+                <svg class="barcode"
+                  jsbarcode-value="{{ row.name }}"
+                  jsbarcode-textmargin="0">
+                </svg>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+</div>
+
+<script>
+    JsBarcode(".barcode").init();
+</script>
