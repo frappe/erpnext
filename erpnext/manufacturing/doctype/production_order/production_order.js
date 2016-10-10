@@ -44,13 +44,26 @@ frappe.ui.form.on("Production Order", {
 					method: "erpnext.manufacturing.doctype.production_order.production_order.make_new_timesheet",
 					frm: cur_frm
 				})
-			})
-			frm.add_custom_button(__('Generate Bar Code'), function(){
-				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.production_order.production_order.generate_bar_code",
-					frm: cur_frm
+			});
+			if (typeof frm.doc.__onload !== "undefined" && frm.doc.__onload.has_barcode) {
+				frm.add_custom_button(__('Barcode'), function(){
+					frappe.route_options={
+						'production_order': frm.doc.name
+					};
+					frappe.set_route("List", "Bar Code");
+				}, __("View"))
+			}else {
+				frm.add_custom_button(__('Generate Bar Code'), function(){
+					frappe.confirm(__("Are you sure to generate barcode? "), function () {
+						frappe.model.open_mapped_doc({
+							method: "erpnext.manufacturing.doctype.production_order.production_order.create_barcode",
+							frm: cur_frm
+						})
+					})
+
 				})
-			})
+			}
+
 		}
 	},
 	show_progress: function(frm) {

@@ -15,7 +15,7 @@ class BarCodeGenerate(Document):
         for x in range(total):
             bar_code = frappe.new_doc('Bar Code')
             bar_code.production_order = self.production_order
-            bar_code.operation = self.operation
+            bar_code.operation_id = self.operation
             bar_code.qty = self.per_bar_code_quantity
             bar_code.date = self.date
             bar_code.machine_id = self.machine_id

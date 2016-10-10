@@ -40,6 +40,11 @@ form_grid_templates = {
 
 
 class ProductionOrder(Document):
+    def onload(self):
+        if frappe.db.exists('Bar Code', {'production_order': self.name}):
+            self.get('__onload').has_barcode = frappe.db.get_values("Bar Code", {'production_order': self.name},
+                                                                    as_dict=True)
+
     def validate(self):
         self.validate_production_item()
         if self.bom_no:
@@ -578,4 +583,19 @@ def generate_bar_code(source_name):
     bar_code = frappe.new_doc("Bar Code Generate")
     bar_code.production_order = source_name
     bar_code.total_oder_quantity = po.qty
+    return bar_code
+
+
+@frappe.whitelist()
+def create_barcode(source_name):
+    po = frappe.get_doc('Production Order', source_name)
+    for op in po.operations:
+        bar_code = frappe.new_doc('Bar Code')
+        bar_code.production_order = po.name
+        bar_code.operation_id = op.name
+        bar_code.operation = op.operation
+        bar_code.qty = 1
+        bar_code.date = po.planned_start_date
+        bar_code.save()
+        frappe.msgprint(_("Barcode Created with these id {0}".format(bar_code.name)))
     return bar_code
