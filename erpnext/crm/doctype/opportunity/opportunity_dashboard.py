@@ -1,11 +1,14 @@
 from frappe import _
 
 data = {
-	'fieldname': 'prevdoc_docname',
+	'fieldname': 'opportunity',
+	'non_standard_fieldnames': {
+		'Quotation': 'prevdoc_docname'
+	},
 	'transactions': [
 		{
 			'label': _('Related'),
-			'items': ['Quotation']
+			'items': ['Quotation', 'Supplier Quotation']
 		},
 	]
 }

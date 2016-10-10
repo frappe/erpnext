@@ -108,6 +108,17 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+	set_party_dashboard_indicators: function(frm) {
+		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
+			var info = frm.doc.__onload.dashboard_info;
+			frm.dashboard.add_indicator(__('Annual Billing: {0}',
+				[format_currency(info.billing_this_year, frm.doc.default_currency)]), 'blue');
+			frm.dashboard.add_indicator(__('Total Unpaid: {0}',
+				[format_currency(info.total_unpaid, frm.doc.default_currency)]),
+				info.total_unpaid ? 'orange' : 'green');
+		}
+	},
+
 	copy_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname) {
 		var d = locals[dt][dn];
 		if(d[fieldname]){
