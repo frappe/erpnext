@@ -111,6 +111,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Salary Structure Employee Assign",
+					"description": _("Assign Employees in Salary Structure.")
+				},
+				{
+					"type": "doctype",
 					"name": "Salary Component",
 					"label": _("Salary Components"),
 					"description": _("Earnings, Deductions and other Salary components")
