@@ -108,6 +108,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Salary Structure",
 					"description": _("Salary template master.")
+				},{
+					"type": "doctype",
+					"name": "Salary Structure Employee Assign",
+					"description": _("Assign Employees in Salary Structure.")
 				},
 				{
 					"type": "doctype",
