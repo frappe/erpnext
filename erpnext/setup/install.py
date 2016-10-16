@@ -26,7 +26,8 @@ def check_setup_wizard_not_completed():
 		return False
 
 def set_single_defaults():
-	for dt in frappe.db.sql_list("""select name from `tabDocType` where issingle=1"""):
+	for dt in ('Accounts Settings', 'Print Settings', 'HR Settings', 'Buying Settings',
+		'Selling Settings', 'Stock Settings'):
 		default_values = frappe.db.sql("""select fieldname, `default` from `tabDocField`
 			where parent=%s""", dt)
 		if default_values:
@@ -36,6 +37,8 @@ def set_single_defaults():
 					b.set(fieldname, value)
 				b.save()
 			except frappe.MandatoryError:
+				pass
+			except frappe.ValidationError:
 				pass
 
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
