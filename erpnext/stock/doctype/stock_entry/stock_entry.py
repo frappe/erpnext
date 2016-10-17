@@ -36,7 +36,6 @@ class StockEntry(StockController):
 			self.pro_doc = frappe.get_doc('Production Order', self.production_order)
 
 		self.validate_posting_time()
-		self.validate_posting_date()
 		self.validate_purpose()
 		self.validate_item()
 		self.set_transfer_qty()
@@ -65,38 +64,6 @@ class StockEntry(StockController):
 		self.update_stock_ledger()
 		self.update_production_order()
 		self.make_gl_entries_on_cancel()
-
-	def validate_posting_date(self):
-		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
-		items, warehouses = self.get_items_and_warehouses()
-		previous_stock_vouchers = self.get_previous_stock_vouchers(self.posting_date, self.posting_time, warehouses,
-		                                                           items)
-
-		if allow_negative_stock and previous_stock_vouchers:
-			for voucher_type, voucher_no in previous_stock_vouchers:
-				frappe.msgprint(
-					_("The posting date is after {0}: {1}, this will cause missing data in the General Ledger").format(
-						voucher_type, voucher_no))
-
-	def get_previous_stock_vouchers(self, posting_date, posting_time, for_warehouses=None, for_items=None):
-		previous_stock_vouchers = []
-
-		values = []
-		condition = ""
-
-		if for_items:
-			condition += " and item_code in ({})".format(", ".join(["%(item_code)s"] * len(for_items)))
-			values += for_items
-
-		for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
-			from `tabStock Ledger Entry` sle
-			where timestamp(sle.posting_date, sle.posting_time) <= timestamp(%(date)s, %(time)s) {condition}
-			and warehouse = %(warehouse)s
-			order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""".format(condition=condition),
-		                       {"warehouse":for_warehouses,"date":posting_date,"time":posting_time,"item_code":values}, as_dict=1):
-			previous_stock_vouchers.append([d.voucher_type, d.voucher_no])
-
-		return previous_stock_vouchers
 
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer", "Material Transfer for Manufacture",
