@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 import datetime
+from frappe.utils.make_random import get_random
 from frappe.utils import now_datetime, nowdate
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
@@ -78,7 +79,8 @@ def make_salary_structure(employee):
 		salary_structure.from_date = nowdate()
 		salary_structure.salary_component = "Basic"
 		salary_structure.hour_rate = 50.0
-		salary_structure.company= "_Test Company"
+		salary_structure.company = "_Test Company"
+		salary_structure.payment_account = get_random("Account")
 
 		salary_structure.set('employees', [])
 		salary_structure.set('earnings', [])
