@@ -11,6 +11,13 @@ frappe.ui.form.on("Leave Allocation", {
 			return {
 				query: "erpnext.controllers.queries.employee_query"
 			}
+		});
+		frm.set_query("leave_type", function() {
+			return {
+				filters: {
+					is_lwp: 0
+				}
+			}
 		})
 	},
 

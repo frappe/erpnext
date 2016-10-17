@@ -23,6 +23,7 @@ class LeaveAllocation(Document):
 		self.validate_back_dated_allocation()
 		self.set_total_leaves_allocated()
 		self.validate_total_leaves_allocated()
+		self.validate_lwp()
 		set_employee_name(self)
 
 	def on_update_after_submit(self):
@@ -37,6 +38,10 @@ class LeaveAllocation(Document):
 	def validate_period(self):
 		if date_diff(self.to_date, self.from_date) <= 0:
 			frappe.throw(_("To date cannot be before from date"))
+			
+	def validate_lwp(self):
+		if frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
+			frappe.throw(_("Leave Type {0} cannot be allocated since it is leave without pay").format(self.leave_type))
 
 	def validate_new_leaves_allocated_value(self):
 		"""validate that leave allocation is in multiples of 0.5"""
