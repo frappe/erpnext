@@ -3,6 +3,7 @@
 
 cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('time_sheet', 'total_hours', 'working_hours');
+cur_frm.add_fetch('salary_component', 'type', 'type');
 
 frappe.ui.form.on("Salary Slip", {
 	setup: function(frm) {
@@ -41,7 +42,7 @@ frappe.ui.form.on("Salary Slip", {
 		salary_detail_fields = ['formula', 'abbr']
 		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
 		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
-	},	
+	},
 
 	salary_slip_based_on_timesheet: function(frm) {
 		frm.trigger("toggle_fields")
