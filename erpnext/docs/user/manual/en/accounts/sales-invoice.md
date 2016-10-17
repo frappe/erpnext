@@ -2,9 +2,9 @@ A Sales Invoice is a bill that you send to your customers, against which the cus
 
 You can create a Sales Invoice directly from
 
-> Accounting > Documents > Sales Invoice > New Sales Invoice
+> Accounts > Billing > Sales Invoice > New Sales Invoice
 
-or Click on Make Invoice at the right hand corner of the Delivery Note.
+or you can Make a new Sales Invoice after you submit the Delivery Note.
 
 <img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/accounts/sales-invoice.png">
 
@@ -53,6 +53,16 @@ bill this Invoice and the period for which the contract is valid.
 
 ERPNext will automatically create new Invoices and mail it to the email ids
 you set.
+
+#### POS Invoices
+
+Consider a scenario where retail transaction is carried out. For e.g: A retail shop.
+If you check the **Is POS** checkbox, then all your **POS Profile** data is fetched
+into the Sales Invoice and you can easily make payments.
+Also, if you check the **Update Stock** the stock will also update automatically,
+without the need of a Delivery Note.
+
+<img class="screenshot" alt="POS Invoice" src="{{docs_base_url}}/assets/img/accounts/pos-sales-invoice.png">
 
 * * *
 
