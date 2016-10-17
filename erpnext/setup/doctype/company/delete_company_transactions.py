@@ -14,7 +14,7 @@ def delete_company_transactions(company_name):
 	doc = frappe.get_doc("Company", company_name)
 
 	if frappe.session.user != doc.owner:
-		frappe.throw(_("Transactions can only be deleted by the creator of the Company"), 
+		frappe.throw(_("Transactions can only be deleted by the creator of the Company"),
 			frappe.PermissionError)
 
 	delete_bins(company_name)
@@ -64,6 +64,16 @@ def delete_for_doctype(doctype, company_name):
 					frappe.db.sql("""update tabSeries set current = %s
 						where name=%s""", (last, prefix))
 
+		# delete communication
+		try:
+			frappe.db.sql("""
+				select name, reference_doctype from `tabCommunication`
+				where reference_doctype = "{0}" and
+				exists(select name from `tab{1}` where company = %s and
+				`tabCommunication`.reference_name = name)
+			""".format(doctype, doctype), company_name)
+		except Exception, e:
+			print e
 
 def delete_bins(company_name):
 	frappe.db.sql("""delete from tabBin where warehouse in
