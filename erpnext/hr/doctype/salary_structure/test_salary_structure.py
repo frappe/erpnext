@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 import erpnext
+from frappe.utils.make_random import get_random
 from frappe.utils import nowdate, add_days, add_years
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 # test_records = frappe.get_test_records('Salary Structure')
@@ -85,11 +86,11 @@ class TestSalaryStructure(unittest.TestCase):
 		if not sal_slip:
 			sal_slip = make_salary_slip_from_salary_structure(employee=frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}))
 			self.assertEquals(sal_slip.get("salary_structure"), 'Salary Structure Sample')
-			self.assertEquals(sal_slip.get("earnings")[0].amount, 0)
-			self.assertEquals(sal_slip.get("deductions")[0].amount, 0)
-			self.assertEquals(sal_slip.get("deductions")[1].amount, 0)
-			self.assertEquals(sal_slip.get("total_deduction"), 0)
-			self.assertEquals(sal_slip.get("net_pay"), 0)
+			self.assertEquals(sal_slip.get("earnings")[0].amount, 5000)
+			self.assertEquals(sal_slip.get("deductions")[0].amount, 5000)
+			self.assertEquals(sal_slip.get("deductions")[1].amount, 2500)
+			self.assertEquals(sal_slip.get("total_deduction"), 7500)
+			self.assertEquals(sal_slip.get("net_pay"), 7500)
 			
 		
 def make_salary_slip_from_salary_structure(employee):
@@ -112,7 +113,8 @@ def make_salary_structure(sal_struct):
 			"from_date": nowdate(),
 			"employees": get_employee_details(),
 			"earnings": get_earnings_component(),
-			"deductions": get_deductions_component()			
+			"deductions": get_deductions_component(),
+			"payment_account": frappe.get_all("Account")[0].name
 		}).insert()
 	return sal_struct
 			
@@ -124,7 +126,7 @@ def get_employee_details():
 			"idx": 1
 			},
 			{"employee": frappe.get_value("Employee", {"employee_name":"test_employee_2@salary.com"}, "name"),
-			 "base": 2100,
+			 "base": 15000,
 			 "variable": 100,
 			 "idx": 2
 			}
@@ -149,7 +151,7 @@ def get_earnings_component():
 				{
 					"salary_component": 'HRA',
 					"abbr":'H',
-					"amount": 3000,
+					"amount": 10000,
 					"idx": 3
 				},
 				{
@@ -173,6 +175,7 @@ def get_deductions_component():
 				{
 					"salary_component": 'TDS',
 					"abbr":'T',
+					"condition": 'employment_type!="Intern"',
 					"formula": 'base*.5',
 					"idx": 2
 				},

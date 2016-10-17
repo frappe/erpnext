@@ -20,6 +20,7 @@ class SalarySlip(TransactionBase):
 		self.name = make_autoname('Sal Slip/' +self.employee + '/.#####')
 
 	def validate(self):
+		self.status = self.get_status()
 		self.validate_dates()
 		self.check_existing()
 		self.set_month_dates()
@@ -340,11 +341,16 @@ class SalarySlip(TransactionBase):
 			self.precision("net_pay") if disable_rounded_total else 0)
 
 	def on_submit(self):
-		self.update_status(self.name)
-		if(frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")):
-			self.email_salary_slip()
+		if self.net_pay < 0:
+			frappe.throw(_("Net Pay cannot be less than 0"))
+		else:
+			self.set_status()
+			self.update_status(self.name)
+			if(frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")):
+				self.email_salary_slip()
 
 	def on_cancel(self):
+		self.set_status()
 		self.update_status()
 
 	def email_salary_slip(self):
@@ -365,3 +371,29 @@ class SalarySlip(TransactionBase):
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
 				timesheet.save()
+				
+	def set_status(self, status=None):
+		'''Get and update status'''
+		if not status:
+			status = self.get_status()
+		self.db_set("status", status)
+
+	def get_status(self):
+		if self.docstatus == 0:
+			status = "Draft"
+		elif self.docstatus == 1:
+			status = "Submitted"
+			if self.journal_entry:
+				status = "Paid"
+		elif self.docstatus == 2:
+			status = "Cancelled"
+		return status	
+
+def unlink_ref_doc_from_salary_slip(ref_no):
+	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
+	where journal_entry=%s and docstatus < 2""", (ref_no))
+	if linked_ss:
+		for ss in linked_ss:
+			ss_doc = frappe.get_doc("Salary Slip", ss)
+			frappe.db.set_value("Salary Slip", ss_doc.name, "status", "Submitted")
+			frappe.db.set_value("Salary Slip", ss_doc.name, "journal_entry", "")
