@@ -54,11 +54,10 @@ class SalarySlip(TransactionBase):
 		data = self.get_data_for_eval()
 		for key in ('earnings', 'deductions'):
 			for struct_row in self._salary_structure_doc.get(key):
-				amount = self.eval_condition_and_formula(struct_row, data)	
+				amount = self.eval_condition_and_formula(struct_row, data)
 				if amount:
 					self.update_component_row(struct_row, amount, key)
-					
-					
+
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None
 		for d in self.get(key):
@@ -88,12 +87,12 @@ class SalarySlip(TransactionBase):
 			return amount
 			
 		except NameError as err:
-		    frappe.throw(_("Name error: {0}".format(err)))
+			frappe.throw(_("Name error: {0}".format(err)))
 		except SyntaxError as err:
-		    frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
+			frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
 		except:
-		    frappe.throw(_("Error in formula or condition"))
-		    raise	
+			frappe.throw(_("Error in formula or condition"))
+			raise	
 	
 	def get_data_for_eval(self):
 		'''Returns data for evaluating formula'''
@@ -172,7 +171,7 @@ class SalarySlip(TransactionBase):
 		else:
 			self.salary_structure = None
 			frappe.throw(_("No active or default Salary Structure found for employee {0} for the given dates")
-				.format(self.employee), title=_('Salary Structure Missing'))	
+				.format(self.employee), title=_('Salary Structure Missing'))
 
 	def pull_sal_struct(self):
 		from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
@@ -183,9 +182,7 @@ class SalarySlip(TransactionBase):
 			self.hour_rate = self._salary_structure_doc.hour_rate
 			self.total_working_hours = sum([d.working_hours or 0.0 for d in self.timesheets]) or 0.0
 			self.add_earning_for_hourly_wages(self._salary_structure_doc.salary_component)
-			
-			
-			
+
 	def process_salary_structure(self):
 		'''Calculate salary after salary structure details have been updated'''
 		self.pull_emp_details()
@@ -210,7 +207,6 @@ class SalarySlip(TransactionBase):
 		if emp:
 			self.bank_name = emp.bank_name
 			self.bank_account_no = emp.bank_ac_no
-
 
 	def get_leave_details(self, joining_date=None, relieving_date=None, lwp=None):
 		if not self.fiscal_year:
@@ -339,6 +335,23 @@ class SalarySlip(TransactionBase):
 		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
 		self.rounded_total = rounded(self.net_pay,
 			self.precision("net_pay") if disable_rounded_total else 0)
+	
+	def on_update(self):
+		# to set salary component type
+		self.set_salary_component_type_earning()
+		self.set_salary_component_type_deduction()
+		
+	def set_salary_component_type_earning(self):
+		for component in self.earnings:
+			self.set_salary_component_type(component, _('Earning'))
+	
+	def set_salary_component_type_deduction(self):
+		for component in self.deductions:
+			self.set_salary_component_type(component, _('Deduction'))
+	
+	def set_salary_component_type(self, component, component_type):
+		if not component.type:
+			component.db_set('type', component_type, update_modified=False)
 
 	def on_submit(self):
 		if self.net_pay < 0:
