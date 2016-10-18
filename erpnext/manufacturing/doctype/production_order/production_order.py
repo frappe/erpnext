@@ -58,7 +58,8 @@ class ProductionOrder(Document):
 				if so[0].project:
 					self.project = so[0].project
 
-				self.validate_production_order_against_so()
+				if not self.material_request:
+					self.validate_production_order_against_so()
 			else:
 				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
 

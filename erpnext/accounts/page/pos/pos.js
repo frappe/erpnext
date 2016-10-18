@@ -93,7 +93,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.get_data_from_server(function(){
 				me.load_data(false);
 				me.make_customer();
-				me.make_item_list(true);
+				me.make_item_list();
 				me.set_missing_values();
 			})
 		});
@@ -269,7 +269,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	make: function() {
 		this.make_search();
 		this.make_customer();
-		this.make_item_list(true);
+		this.make_item_list();
 		this.make_discount_field()
 	},
 
@@ -290,7 +290,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.search.$input.on("keyup", function() {
 			setTimeout(function() {
 				me.items = me.get_items();
-				me.make_item_list(false);
+				me.make_item_list();
 			}, 1000);
 		});
 
@@ -375,7 +375,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	make_item_list: function(index_search) {
+	make_item_list: function() {
 		var me = this;
 		if(!this.price_list) {
 			msgprint(__("Price List not found or disabled"));
@@ -389,7 +389,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if (this.items) {
 			$.each(this.items, function(index, obj) {
-				if(!index_search || index < 16){
+				if(index < 30){
 					$(frappe.render_template("pos_item", {
 						item_code: obj.name,
 						item_price: format_currency(obj.price_list_rate, obj.currency),
@@ -435,7 +435,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		key =  this.search.$input.val().toLowerCase();
 		var re = new RegExp('%', 'g');
-		var reg = new RegExp(key.replace(re, '\\w*\\s*[a-zA-Z0-9]*'))
+		var reg = new RegExp(key.replace(re, '[\\w*\\s*[a-zA-Z0-9]*]*'))
 		search_status = true
 
 		if(key){
