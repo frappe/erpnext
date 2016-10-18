@@ -329,7 +329,7 @@ erpnext.patches.v7_1.fix_link_for_customer_from_lead
 execute:frappe.db.sql("delete from `tabTimesheet Detail` where NOT EXISTS (select name from `tabTimesheet` where name = `tabTimesheet Detail`.parent)")
 erpnext.patches.v7_0.update_mode_of_payment_type
 
-execute:frappe.reload_doctype('Employee')
+execute:frappe.reload_doctype('Employee') #2016-10-18
 execute:frappe.db.sql("update `tabEmployee` set prefered_contact_email = IFNULL(prefered_contact_email,'') ")
 execute:frappe.reload_doctype("Salary Slip")
 execute:frappe.db.sql("update `tabSalary Slip` set posting_date=creation")
