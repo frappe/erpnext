@@ -5,6 +5,7 @@ import frappe
 from frappe.utils import flt, add_days
 import frappe.permissions
 import unittest
+from erpnext.stock.doctype.item.test_item import get_total_projected_qty
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 
@@ -426,6 +427,13 @@ class TestSalesOrder(unittest.TestCase):
 			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
 
 		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item)
+
+	def test_total_projected_qty_against_sales_order(self):
+		so = make_sales_order(item = '_Test Item')
+		total_projected_qty = get_total_projected_qty('_Test Item')
+
+		item_doc = frappe.get_doc('Item', '_Test Item')
+		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
