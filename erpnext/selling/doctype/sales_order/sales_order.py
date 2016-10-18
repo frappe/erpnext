@@ -444,7 +444,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
 		
 		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
-		target.cost_center = frappe.db.get_value("Project", obj.project, "cost_center") \
+		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
 			or item.selling_cost_center \
 			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
