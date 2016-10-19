@@ -64,7 +64,7 @@ def get_cost_center_target_details(filters):
 	return frappe.db.sql("""
 			select b.cost_center, b.monthly_distribution, ba.account, ba.budget_amount
 			from `tabBudget` b, `tabBudget Account` ba
-			where b.name=ba.parent and b.fiscal_year=%s and b.company=%s
+			where b.name=ba.parent and b.docstatus = 1 and b.fiscal_year=%s and b.company=%s 
 		""", (filters.fiscal_year, filters.company), as_dict=True)
 
 #Get target distribution details of accounts of cost center
@@ -84,8 +84,9 @@ def get_actual_details(cost_center, fiscal_year):
 	ac_details = frappe.db.sql("""select gl.account, gl.debit, gl.credit,
 		MONTHNAME(gl.posting_date) as month_name, b.cost_center
 		from `tabGL Entry` gl, `tabBudget Account` ba, `tabBudget` b
-		where 
+		where
 			b.name = ba.parent
+			and b.docstatus = 1
 			and ba.account=gl.account 
 			and gl.fiscal_year=%s 
 			and b.cost_center=%s
