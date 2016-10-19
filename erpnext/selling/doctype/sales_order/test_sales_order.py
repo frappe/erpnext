@@ -125,8 +125,16 @@ class TestSalesOrder(unittest.TestCase):
 		dn = create_dn_against_so(so.name, 15)
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
 
+		total_projected_qty = get_total_projected_qty('_Test Item')
+		item_doc_before_cancel = frappe.get_doc('Item', '_Test Item')
+		self.assertEqual(total_projected_qty,  item_doc_before_cancel.total_projected_qty)
+
 		dn.cancel()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
+
+		total_projected_qty = get_total_projected_qty('_Test Item')
+		item_doc_after_cancel = frappe.get_doc('Item', '_Test Item')
+		self.assertEqual(total_projected_qty,  item_doc_after_cancel.total_projected_qty)
 		
 	def test_reserved_qty_for_over_delivery_via_sales_invoice(self):
 		# set over-delivery tolerance
@@ -142,6 +150,10 @@ class TestSalesOrder(unittest.TestCase):
 		si.get("items")[0].qty = 12
 		si.insert()
 		si.submit()
+
+		total_projected_qty = get_total_projected_qty('_Test Item')
+		item_doc = frappe.get_doc('Item', '_Test Item')
+		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 		
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
 		
@@ -151,6 +163,9 @@ class TestSalesOrder(unittest.TestCase):
 
 		si.cancel()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
+		total_projected_qty = get_total_projected_qty('_Test Item')
+		item_doc = frappe.get_doc('Item', '_Test Item')
+		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 		
 		so.load_from_db()
 		self.assertEqual(so.get("items")[0].delivered_qty, 0)
@@ -178,6 +193,10 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), existing_reserved_qty_item2)
+
+		total_projected_qty = get_total_projected_qty('_Test Item')
+		item_doc = frappe.get_doc('Item', '_Test Item')
+		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 
 		# unclose so
 		so.load_from_db()
@@ -211,6 +230,10 @@ class TestSalesOrder(unittest.TestCase):
 			existing_reserved_qty_item2 + 20)
 
 		dn = create_dn_against_so(so.name, 15)
+
+		total_projected_qty = get_total_projected_qty('_Test Item')
+		item_doc = frappe.get_doc('Item', '_Test Item')
+		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
