@@ -454,21 +454,20 @@ class ProductionPlanningTool(Document):
 				material_request.update({"material_request_type": item_wrapper.default_material_request_type})
 
 				for sales_order, requested_qty in items_to_be_requested[item].items():
-					if sales_order != 'No Sales Order':
-						material_request.append("items", {
-							"doctype": "Material Request Item",
-							"__islocal": 1,
-							"item_code": item,
-							"item_name": item_wrapper.item_name,
-							"description": item_wrapper.description,
-							"uom": item_wrapper.stock_uom,
-							"item_group": item_wrapper.item_group,
-							"brand": item_wrapper.brand,
-							"qty": requested_qty,
-							"schedule_date": add_days(nowdate(), cint(item_wrapper.lead_time_days)),
-							"warehouse": self.purchase_request_for_warehouse,
-							"sales_order": sales_order if sales_order!="No Sales Order" else None
-						})
+					material_request.append("items", {
+						"doctype": "Material Request Item",
+						"__islocal": 1,
+						"item_code": item,
+						"item_name": item_wrapper.item_name,
+						"description": item_wrapper.description,
+						"uom": item_wrapper.stock_uom,
+						"item_group": item_wrapper.item_group,
+						"brand": item_wrapper.brand,
+						"qty": requested_qty,
+						"schedule_date": add_days(nowdate(), cint(item_wrapper.lead_time_days)),
+						"warehouse": self.purchase_request_for_warehouse,
+						"sales_order": sales_order if sales_order!="No Sales Order" else None
+					})
 
 				material_request.flags.ignore_permissions = 1
 				material_request.submit()
