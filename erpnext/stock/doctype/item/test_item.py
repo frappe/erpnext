@@ -177,4 +177,10 @@ def make_item_variant():
 		variant.item_name = "_Test Variant Item-S"
 		variant.save()
 
+def get_total_projected_qty(item):
+	total_qty = frappe.db.sql(""" select sum(projected_qty) as projected_qty from tabBin
+		where item_code = %(item)s""", {'item': item}, as_dict=1)
+
+	return total_qty[0].projected_qty if total_qty else 0.0
+
 test_records = frappe.get_test_records('Item')

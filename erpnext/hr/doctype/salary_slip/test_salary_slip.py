@@ -14,7 +14,7 @@ class TestSalarySlip(unittest.TestCase):
 		for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
-		make_allocation_record(leave_type="_Test Leave Type LWP")
+		# make_allocation_record(leave_type="_Test Leave Type")
 
 		frappe.db.set_value("Company", "_Test Company", "default_holiday_list", "_Test Holiday List")
 

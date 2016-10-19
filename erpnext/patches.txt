@@ -320,3 +320,4 @@ execute:frappe.db.sql("delete from `tabTimesheet Detail` where NOT EXISTS (selec
 erpnext.patches.v7_0.update_mode_of_payment_type
 finally:erpnext.patches.v7_0.update_timesheet_communications
 erpnext.patches.v7_0.update_status_of_zero_amount_sales_order
+erpnext.patches.v7_0.repost_bin_qty_and_item_projected_qty
