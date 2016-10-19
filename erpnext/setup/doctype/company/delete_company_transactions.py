@@ -37,6 +37,9 @@ def delete_for_doctype(doctype, company_name):
 
 	if not meta.issingle:
 		if not meta.istable:
+			# delete communication
+			delete_communications(meta, doctype, company_name)
+
 			# delete children
 			for df in meta.get_table_fields():
 				frappe.db.sql("""delete from `tab{0}` where parent in
@@ -64,17 +67,6 @@ def delete_for_doctype(doctype, company_name):
 					frappe.db.sql("""update tabSeries set current = %s
 						where name=%s""", (last, prefix))
 
-		# delete communication
-		try:
-			frappe.db.sql("""
-				select name, reference_doctype from `tabCommunication`
-				where reference_doctype = "{0}" and
-				exists(select name from `tab{1}` where company = %s and
-				`tabCommunication`.reference_name = name)
-			""".format(doctype, doctype), company_name)
-		except Exception, e:
-			print e
-
 def delete_bins(company_name):
 	frappe.db.sql("""delete from tabBin where warehouse in
 			(select name from tabWarehouse where company=%s)""", company_name)
@@ -86,3 +78,11 @@ def delete_lead_addresses(company_name):
 			where lead=%s and (customer='' or customer is null) and (supplier='' or supplier is null)""", lead.name)
 
 		frappe.db.sql("""update `tabAddress` set lead=null, lead_name=null where lead=%s""", lead.name)
+
+def delete_communications(meta, doctype, company_name):
+	linkfields = [df.fieldname for df in meta.get_link_fields()]
+
+	if 'company' in linkfields:
+		frappe.db.sql("""DELETE FROM `tabCommunication` WHERE reference_doctype = "{0}" AND
+			EXISTS (SELECT name FROM `tab{1}` WHERE company = %s AND `tabCommunication`.reference_name = name)
+			""".format(doctype, doctype), company_name)
