@@ -32,6 +32,7 @@ class SellingController(StockController):
 	def validate(self):
 		super(SellingController, self).validate()
 		self.validate_max_discount()
+		self.validate_selling_price()
 		check_active_sales_items(self)
 
 	def set_missing_values(self, for_validate=False):
@@ -161,6 +162,17 @@ class SellingController(StockController):
 			if discount and flt(d.discount_percentage) > discount:
 				frappe.throw(_("Maxiumm discount for Item {0} is {1}%").format(d.item_code, discount))
 
+	def validate_selling_price(self):
+		selling_settings = frappe.get_single("Selling Settings")
+		if not selling_settings.validate_selling_price_purchase_rate:
+			return
+
+		for it in self.get("items"):
+			item = frappe.get_doc("Item", it.name)
+
+			if flt(it.base_rate) < flt(item.last_purchase_rate):
+				frappe.throw(_("Selling price for item {0} is lower than its Purchase rate. Selling price should be atleast {1}").format(it.item_name, item.last_purchase_rate))
+
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
@@ -230,7 +242,7 @@ class SellingController(StockController):
 				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
 				if status == "Closed":
 					frappe.throw(_("Sales Order {0} is {1}").format(d.get(ref_fieldname), status))
-					
+
 	def update_reserved_qty(self):
 		so_map = {}
 		for d in self.get("items"):
@@ -310,7 +322,7 @@ def check_active_sales_items(obj):
 			item = frappe.db.sql("""select docstatus,
 				income_account from tabItem where name = %s""",
 				d.item_code, as_dict=True)[0]
-                
+
 			if getattr(d, "income_account", None) and not item.income_account:
 				frappe.db.set_value("Item", d.item_code, "income_account",
 					d.income_account)
