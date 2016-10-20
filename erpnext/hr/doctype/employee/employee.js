@@ -40,6 +40,24 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 				"Ms": "Female"
 			}[this.frm.doc.salutation]);
 		}
+	},
+	
+});
+frappe.ui.form.on('Employee',{
+	prefered_contact_email:function(frm){
+		frm.events.update_contact(frm)
+	},
+	personal_email:function(frm){
+		frm.events.update_contact(frm)
+	},
+	company_email:function(frm){
+		frm.events.update_contact(frm)
+	},
+	user_id:function(frm){
+		frm.events.update_contact(frm)
+	},
+	update_contact:function(frm){
+		frm.set_value("prefered_email",frm.fields_dict[frappe.model.scrub(frm.doc.prefered_contact_email)].value)
 	}
 });
 cur_frm.cscript = new erpnext.hr.EmployeeController({frm: cur_frm});

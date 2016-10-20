@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, nowdate
 
-from frappe import _
+from frappe import throw, _
 import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
@@ -58,6 +58,10 @@ class PurchaseReceipt(BuyingController):
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_closed_status(pc_obj)
+		
+		if self.posting_date > nowdate():
+			throw(_("Posting Date cannot be future date"))
+		
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({

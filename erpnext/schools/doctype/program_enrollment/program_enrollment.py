@@ -11,6 +11,8 @@ from frappe.utils import comma_and
 class ProgramEnrollment(Document):
 	def validate(self):
 		self.validate_duplication()
+		if not self.student_name:
+			self.student_name = frappe.db.get_value("Student", self.student, "title")
 	
 	def on_submit(self):
 		self.update_student_joining_date()

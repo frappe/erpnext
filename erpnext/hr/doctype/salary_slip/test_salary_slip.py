@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import erpnext
+from frappe.utils.make_random import get_random
 from frappe.utils import today, now_datetime, getdate, cstr, add_years, nowdate
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.leave_application.test_leave_application import make_allocation_record
@@ -16,8 +17,6 @@ class TestSalarySlip(unittest.TestCase):
 		for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
-		make_allocation_record(leave_type="_Test Leave Type LWP")
-		
 		self.make_holiday_list()
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
 
@@ -203,7 +202,8 @@ def make_salary_structure(sal_struct):
 			"from_date": nowdate(),
 			"employees": get_employee_details(),
 			"earnings": get_earnings_component(),
-			"deductions": get_deductions_component()			
+			"deductions": get_deductions_component(),
+			"payment_account": get_random("Account")		
 		}).insert()
 	return sal_struct
 			

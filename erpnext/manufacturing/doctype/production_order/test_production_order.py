@@ -10,7 +10,9 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.manufacturing.doctype.production_order.production_order \
 	import make_stock_entry, ItemHasVariantError
 from erpnext.stock.doctype.stock_entry import test_stock_entry
+from erpnext.stock.doctype.item.test_item import get_total_projected_qty
 from erpnext.stock.utils import get_bin
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 class TestProductionOrder(unittest.TestCase):
 	def setUp(self):
@@ -171,6 +173,28 @@ class TestProductionOrder(unittest.TestCase):
 			cint(bin1_on_cancel.reserved_qty_for_production))
 		self.assertEqual(self.bin1_at_start.projected_qty,
 			cint(bin1_on_cancel.projected_qty))
+
+	def test_projected_qty_for_production_and_sales_order(self):
+		before_production_order = get_bin(self.item, self.warehouse)
+		before_production_order.update_reserved_qty_for_production()
+
+		self.pro_order = make_prod_order_test_record(item="_Test FG Item", qty=2,
+			source_warehouse=self.warehouse)
+
+		after_production_order = get_bin(self.item, self.warehouse)
+
+		sales_order = make_sales_order(item = self.item, qty = 2)
+		after_sales_order = get_bin(self.item, self.warehouse)
+
+		self.assertEqual(cint(before_production_order.reserved_qty_for_production) + 2,
+			cint(after_sales_order.reserved_qty_for_production))
+		self.assertEqual(cint(before_production_order.projected_qty),
+			cint(after_sales_order.projected_qty) + 2)
+
+		total_projected_qty = get_total_projected_qty(self.item)
+
+		item_doc = frappe.get_doc('Item', self.item)
+		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 
 	def test_reserved_qty_for_production_on_stock_entry(self):
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
