@@ -33,7 +33,14 @@ frappe.ui.form.on('Salary Structure Employee Assign', {
 						erpnext.salary_structure_employee_assign.load_employees(frm);
 					}
 				});
-		})
+		});
+
+        if (frappe.route_options) {
+            $.each(frappe.route_options,function (key, val) {
+                frm.set_value(key, val)
+            });
+            frappe.route_options = null
+        }
 	},
 	company:function (frm) {
 		erpnext.salary_structure_employee_assign.load_employees(frm)
