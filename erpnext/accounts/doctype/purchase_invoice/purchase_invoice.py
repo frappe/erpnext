@@ -578,7 +578,8 @@ class PurchaseInvoice(BuyingController):
 
 		if not self.is_return:
 			from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-			unlink_ref_doc_from_payment_entries(self.doctype, self.name)
+			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+				unlink_ref_doc_from_payment_entries(self.doctype, self.name)
 
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
