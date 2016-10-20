@@ -319,7 +319,9 @@ class StockEntry(StockController):
 		self.value_difference = self.total_incoming_value - self.total_outgoing_value
 
 	def set_total_amount(self):
-		self.total_amount = sum([flt(item.amount) for item in self.get("items")])
+		self.total_amount = None
+		if self.purpose not in ['Manufacture', 'Repack']:
+			self.total_amount = sum([flt(item.amount) for item in self.get("items")])
 
 	def validate_purchase_order(self):
 		"""Throw exception if more raw material is transferred against Purchase Order than in
