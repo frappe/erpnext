@@ -4,8 +4,9 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest, copy
-from frappe.utils import nowdate, add_days, flt
+from frappe.utils import nowdate, add_days, flt, nowdate
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
@@ -18,6 +19,12 @@ class TestSalesInvoice(unittest.TestCase):
 		w.insert()
 		w.submit()
 		return w
+
+	def setUp(self):
+		unlink_payment_on_cancel_of_invoice()
+
+	def tearDown(self):
+		unlink_payment_on_cancel_of_invoice(0)
 
 	def test_timestamp_change(self):
 		w = frappe.copy_doc(test_records[0])
@@ -77,6 +84,28 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEquals(si.base_grand_total, 1627.05)
 		self.assertEquals(si.grand_total, 1627.05)
+
+	def test_payment_entry_unlink_against_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		si = frappe.copy_doc(test_records[0])
+		si.is_pos = 0
+		si.insert()
+		si.submit()
+
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = si.currency
+		pe.paid_to_account_currency = si.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = si.grand_total
+		pe.insert()
+		pe.submit()
+
+		unlink_payment_on_cancel_of_invoice(0)
+		si = frappe.get_doc('Sales Invoice', si.name)
+		self.assertRaises(frappe.LinkExistsError, si.cancel)
 
 	def test_sales_invoice_calculation_export_currency(self):
 		si = frappe.copy_doc(test_records[2])
