@@ -53,7 +53,7 @@ class Customer(TransactionBase):
 
 	def get_customer_name(self):
 		if frappe.db.get_value("Customer", self.customer_name):
-			count = frappe.db.sql("""select ifnull(max(SUBSTRING_INDEX(name, ' ', -1)), 0) from tabCustomer
+			count = frappe.db.sql("""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabCustomer
 				 where name like %s""", "%{0} - %".format(self.customer_name), as_list=1)[0][0]
 			count = cint(count) + 1
 			return "{0} - {1}".format(self.customer_name, cstr(count))
