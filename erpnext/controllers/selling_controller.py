@@ -164,14 +164,15 @@ class SellingController(StockController):
 
 	def validate_selling_price(self):
 		selling_settings = frappe.get_single("Selling Settings")
-		if not selling_settings.validate_selling_price_purchase_rate:
+		if not selling_settings.validate_selling_price:
 			return
 
 		for it in self.get("items"):
 			item = frappe.get_doc("Item", it.name)
 
-			if flt(it.base_rate) < flt(item.last_purchase_rate):
-				frappe.throw(_("Selling price for item {0} is lower than its Purchase rate. Selling price should be atleast {1}").format(it.item_name, item.last_purchase_rate))
+			if flt(it.base_rate) < flt(item.last_purchase_rate) or flt(it.base_rate) < flt(item.valuation_rate):
+				frappe.throw(_("""Selling price for item {0} is lower than its Purchase rate or Valuation rate.
+				Selling price should be atleast {1}""").format(it.item_name, item.last_purchase_rate))
 
 	def get_item_list(self):
 		il = []
