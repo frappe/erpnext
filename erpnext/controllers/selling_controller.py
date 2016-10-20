@@ -164,15 +164,14 @@ class SellingController(StockController):
 				frappe.throw(_("Maxiumm discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def validate_selling_price(self):
-		selling_settings = frappe.get_single("Selling Settings")
-		if not selling_settings.validate_selling_price:
+		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
 			return
 
 		for it in self.get("items"):
-			last_purchase_rate = frappe.db.get_value("Item", it.name, "last_purchase_rate")
+			last_purchase_rate, is_stock_item = frappe.db.get_value("Item", it.name, ["last_purchase_rate", "is_stock_item"])
 
 			if flt(it.base_rate) < flt(last_purchase_rate):
-				throw(it.name, last_purchase_rate)
+				throw(it.name, last_purchase_rate, "last purchase rate")
 
 			last_valuation_rate = frappe.db.sql("""
 				SELECT valuation_rate FROM `tabStock Ledger Entry` WHERE item_code = %s
@@ -180,14 +179,12 @@ class SellingController(StockController):
 				ORDER BY posting_date DESC, posting_time DESC, name DESC LIMIT 1
 				""", (it.item_code, it.warehouse))
 
-			is_stock_item = frappe.db.get_value("Item", it.name, "is_stock_item")
-
 			if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate):
-				throw(it.name, last_valuation_rate)
+				throw_message(it.name, last_valuation_rate, "valuation rate")
 
-		def throw(item_name, rate):
-			frappe.throw(_("""Selling price for item {0} is lower than its Purchase rate or Valuation rate.
-			Selling price should be atleast {1}""").format(item_name, rate))
+		def throw_message(item_name, rate, ref_rate_field):
+			frappe.throw(_("""Selling price for item {0} is lower than its {1}. Selling price should be atleast {2}""")
+				.format(item_name, ref_rate_field, rate))
 
 	def get_item_list(self):
 		il = []
