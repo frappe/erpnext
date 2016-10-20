@@ -340,3 +340,4 @@ erpnext.patches.v7_0.update_status_of_zero_amount_sales_order
 erpnext.patches.v7_1.add_field_for_task_dependent
 erpnext.patches.v7_0.repost_bin_qty_and_item_projected_qty
 erpnext.patches.v7_1.set_prefered_contact_email
+execute:frappe.db.sql("update `tabSingles` set value = 1 where field = 'unlink_payment_on_cancellation_of_invoice' and doctype = 'Accounts Settings'")
