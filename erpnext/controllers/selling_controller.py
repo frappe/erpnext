@@ -8,6 +8,7 @@ from erpnext.setup.utils import get_company_currency
 from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.stock_ledger import get_valuation_rate
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -168,11 +169,25 @@ class SellingController(StockController):
 			return
 
 		for it in self.get("items"):
-			item = frappe.get_doc("Item", it.name)
+			last_purchase_rate = frappe.db.get_value("Item", it.name, "last_purchase_rate")
 
-			if flt(it.base_rate) < flt(item.last_purchase_rate) or flt(it.base_rate) < flt(item.valuation_rate):
-				frappe.throw(_("""Selling price for item {0} is lower than its Purchase rate or Valuation rate.
-				Selling price should be atleast {1}""").format(it.item_name, item.last_purchase_rate))
+			if flt(it.base_rate) < flt(last_purchase_rate):
+				throw(it.name, last_purchase_rate)
+
+			last_valuation_rate = frappe.db.sql("""
+				SELECT valuation_rate FROM `tabStock Ledger Entry` WHERE item_code = %s
+				AND warehouse = %s AND valuation_rate > 0
+				ORDER BY posting_date DESC, posting_time DESC, name DESC LIMIT 1
+				""", (it.item_code, it.warehouse))
+
+			is_stock_item = frappe.db.get_value("Item", it.name, "is_stock_item")
+
+			if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate):
+				throw(it.name, last_valuation_rate)
+
+		def throw(item_name, rate):
+			frappe.throw(_("""Selling price for item {0} is lower than its Purchase rate or Valuation rate.
+			Selling price should be atleast {1}""").format(item_name, rate))
 
 	def get_item_list(self):
 		il = []
