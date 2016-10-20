@@ -143,6 +143,8 @@ class TestSalarySlip(unittest.TestCase):
 				"department": frappe.get_all("Department", fields="name")[0].name,
 				"gender": "Female",
 				"company_email": user,
+				"prefered_contact_email": "Company Email",
+				"prefered_email": user,
 				"status": "Active",
 				"employment_type": "Intern"
 			}).insert()
