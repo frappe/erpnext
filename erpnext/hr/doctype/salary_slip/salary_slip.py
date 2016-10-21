@@ -280,24 +280,26 @@ class SalarySlip(TransactionBase):
 		holidays = [cstr(i) for i in holidays]
 
 		return holidays
-
+	
 	def calculate_lwp(self, holidays, working_days):
 		lwp = 0
+		holidays = "','".join(holidays)
 		for d in range(working_days):
 			dt = add_days(cstr(getdate(self.start_date)), d)
-			if dt not in holidays:
-				leave = frappe.db.sql("""
-					select t1.name, t1.half_day
-					from `tabLeave Application` t1, `tabLeave Type` t2
-					where t2.name = t1.leave_type
-					and t2.is_lwp = 1
-					and t1.docstatus = 1
-					and t1.employee = %s
-					and %s between from_date and to_date
-				""", (self.employee, dt))
-				if leave:
-					lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
-		return lwp
+			leave = frappe.db.sql("""
+				select t1.name, t1.half_day
+				from `tabLeave Application` t1, `tabLeave Type` t2
+				where t2.name = t1.leave_type
+				and t2.is_lwp = 1
+				and t1.docstatus = 1
+				and t1.employee = %(employee)s
+				and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
+				WHEN t2.include_holiday THEN %(dt)s between from_date and to_date
+				END
+				""".format(holidays), {"employee": self.employee, "dt": dt})
+			if leave:
+				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
+		return lwp	
 
 	def check_existing(self):
 		if not self.salary_slip_based_on_timesheet:
