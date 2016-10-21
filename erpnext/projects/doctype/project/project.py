@@ -104,17 +104,17 @@ class Project(Document):
 
 	def update_percent_complete(self):
 		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
-		if (self.pct_comp_method == "Task Completion" and total > 0) or (not self.pct_comp_method and total > 0):
+		if (self.percent_complete_method == "Task Completion" and total > 0) or (not self.percent_complete_method and total > 0):
 			completed = frappe.db.sql("""select count(name) from tabTask where
 				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
 			self.percent_complete = flt(flt(completed) / total * 100, 2)
 
-		if (self.pct_comp_method == "Task Progress" and total > 0):
+		if (self.percent_complete_method == "Task Progress" and total > 0):
 			progress = frappe.db.sql("""select sum(progress) from tabTask where
 				project=%s""", self.name)[0][0]
 			self.percent_complete = flt(flt(progress) / total, 2)
 
-		if (self.pct_comp_method == "Task Weight" and total > 0):
+		if (self.percent_complete_method == "Task Weight" and total > 0):
 			weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where
 				project=%s""", self.name)[0][0]
 			if weight_sum == 1:
