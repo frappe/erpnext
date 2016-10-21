@@ -550,28 +550,20 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	change_form_labels: function(company_currency) {
 		var me = this;
-		var field_label_map = {};
 
-		var setup_field_label_map = function(fields_list, currency) {
-			$.each(fields_list, function(i, fname) {
-				var docfield = frappe.meta.docfield_map[me.frm.doc.doctype][fname];
-				if(docfield) {
-					var label = __(docfield.label || "").replace(/\([^\)]*\)/g, "");
-					field_label_map[fname] = label.trim() + " (" + currency + ")";
-				}
-			});
-		};
-		setup_field_label_map(["base_total", "base_net_total", "base_total_taxes_and_charges",
+		this.frm.set_currency_labels(["base_total", "base_net_total", "base_total_taxes_and_charges",
 			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "total_amount_to_pay",
-			"base_paid_amount", "base_write_off_amount", "base_change_amount"
+			"base_paid_amount", "base_write_off_amount", "base_change_amount", "base_operating_cost", 
+			"base_raw_material_cost", "base_total_cost", "base_scrap_material_cost"
 		], company_currency);
 
-		setup_field_label_map(["total", "net_total", "total_taxes_and_charges", "discount_amount",
+		this.frm.set_currency_labels(["total", "net_total", "total_taxes_and_charges", "discount_amount",
 			"grand_total", "taxes_and_charges_added", "taxes_and_charges_deducted",
-			"rounded_total", "in_words", "paid_amount", "write_off_amount"], this.frm.doc.currency);
+			"rounded_total", "in_words", "paid_amount", "write_off_amount", "operating_cost", "scrap_material_cost",
+			"raw_material_cost", "total_cost"], this.frm.doc.currency);
 
-		setup_field_label_map(["outstanding_amount", "total_advance"], this.frm.doc.party_account_currency);
+		this.frm.set_currency_labels(["outstanding_amount", "total_advance"], this.frm.doc.party_account_currency);
 
 		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
 			+ " = [?] " + company_currency)
@@ -585,16 +577,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.toggle_display(["conversion_rate", "base_total", "base_net_total", "base_total_taxes_and_charges",
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted",
 			"base_grand_total", "base_rounded_total", "base_in_words", "base_discount_amount",
-			"base_paid_amount", "base_write_off_amount"],
+			"base_paid_amount", "base_write_off_amount", "base_operating_cost", 
+			"base_raw_material_cost", "base_total_cost", "base_scrap_material_cost"],
 			this.frm.doc.currency != company_currency);
 
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],
 			this.frm.doc.price_list_currency != company_currency);
-
-		// set labels
-		$.each(field_label_map, function(fname, label) {
-			me.frm.fields_dict[fname].set_label(label);
-		});
 
 		var show =cint(cur_frm.doc.discount_amount) ||
 				((cur_frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
@@ -609,34 +597,43 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	change_grid_labels: function(company_currency) {
 		var me = this;
-		var field_label_map = {};
 
-		var setup_field_label_map = function(fields_list, currency, parentfield) {
-			var grid_doctype = me.frm.fields_dict[parentfield].grid.doctype;
-			$.each(fields_list, function(i, fname) {
-				var docfield = frappe.meta.docfield_map[grid_doctype][fname];
-				if(docfield) {
-					var label = __(docfield.label || "").replace(/\([^\)]*\)/g, "");
-					field_label_map[grid_doctype + "-" + fname] =
-						label.trim() + " (" + __(currency) + ")";
-				}
+		this.frm.set_currency_labels(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount", "base_net_amount"],
+			company_currency, "items");
+
+		this.frm.set_currency_labels(["rate", "net_rate", "price_list_rate", "amount", "net_amount"],
+			this.frm.doc.currency, "items");
+
+		if(this.frm.fields_dict["operations"]) {
+			this.frm.set_currency_labels(["operating_cost", "hour_rate"], this.frm.doc.currency, "operations");
+			this.frm.set_currency_labels(["base_operating_cost", "base_hour_rate"], company_currency, "operations");
+
+			var item_grid = this.frm.fields_dict["operations"].grid;
+			$.each(["base_operating_cost", "base_hour_rate"], function(i, fname) {
+				if(frappe.meta.get_docfield(item_grid.doctype, fname))
+					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 			});
 		}
 
-		setup_field_label_map(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount", "base_net_amount"],
-			company_currency, "items");
+		if(this.frm.fields_dict["scrap_items"]) {
+			this.frm.set_currency_labels(["rate", "amount"], this.frm.doc.currency, "scrap_items");
+			this.frm.set_currency_labels(["base_rate", "base_amount"], company_currency, "scrap_items");
 
-		setup_field_label_map(["rate", "net_rate", "price_list_rate", "amount", "net_amount"],
-			this.frm.doc.currency, "items");
+			var item_grid = this.frm.fields_dict["scrap_items"].grid;
+			$.each(["base_rate", "base_amount"], function(i, fname) {
+				if(frappe.meta.get_docfield(item_grid.doctype, fname))
+					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
+			});
+		}
 
 		if(this.frm.fields_dict["taxes"]) {
-			setup_field_label_map(["tax_amount", "total", "tax_amount_after_discount"], this.frm.doc.currency, "taxes");
+			this.frm.set_currency_labels(["tax_amount", "total", "tax_amount_after_discount"], this.frm.doc.currency, "taxes");
 
-			setup_field_label_map(["base_tax_amount", "base_total", "base_tax_amount_after_discount"], company_currency, "taxes");
+			this.frm.set_currency_labels(["base_tax_amount", "base_total", "base_tax_amount_after_discount"], company_currency, "taxes");
 		}
 
 		if(this.frm.fields_dict["advances"]) {
-			setup_field_label_map(["advance_amount", "allocated_amount"],
+			this.frm.set_currency_labels(["advance_amount", "allocated_amount"],
 				this.frm.doc.party_account_currency, "advances");
 		}
 
@@ -662,11 +659,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		// set labels
 		var $wrapper = $(this.frm.wrapper);
-		$.each(field_label_map, function(fname, label) {
-			fname = fname.split("-");
-			var df = frappe.meta.get_docfield(fname[0], fname[1], me.frm.doc.name);
-			if(df) df.label = label;
-		});
 	},
 
 	recalculate: function() {
