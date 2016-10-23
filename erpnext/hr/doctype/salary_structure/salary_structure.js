@@ -38,8 +38,48 @@ frappe.ui.form.on('Salary Structure', {
 		
 		frm.add_custom_button(__("Preview Salary Slip"),
 			function() { frm.trigger('preview_salary_slip'); }, "icon-sitemap", "btn-default");
+
+		frm.add_custom_button(__("Add Employees"),function () {
+			frm.trigger('add_employees')
+		})
 		
-	},	
+	},
+
+	add_employees:function (frm) {
+		var emp = new frappe.ui.Dialog({
+			title: __("Add Employees"),
+			fields: [
+				{fieldname:'company', fieldtype:'Link', options: 'Company', label: __('Company')},
+				{fieldname:'branch', fieldtype:'Link', options: 'Branch', label: __('Branch')},
+				{fieldname:'department', fieldtype:'Link', options: 'Department', label: __('Department')},
+				{fieldname:'designation', fieldtype:'Link', options: 'Designation', label: __('Designation')},
+				{fieldname:'check_sec', fieldtype:'Section Break', label: __('Check')},
+				{fieldname:'check_all', fieldtype:'Check', label: __('Check All')},
+				{fieldname:'check_col_br', fieldtype:'Column Break'},
+				{fieldname:'uncheck_all', fieldtype:'Check', label: __('Uncheck All')},
+				{fieldname:'employees_sec', fieldtype:'Section Break', label: __('Employees')},
+				{fieldname:'employees_html', fieldtype:'HTML', label: __('Employees')}
+			]
+		});
+		frm.$empDialog = emp;
+		frm.trigger('getEmployees');
+		frm.$empDialog.show();
+	},
+
+	getEmployees:function (frm) {
+		var filters = frm.$empDialog.get_values();
+		delete filters.check_all;
+		delete filters.uncheck_all;
+		frappe.call({
+			method:'erpnext.hr.doctype.salary_structure.salary_structure.get_employees',
+			args:{
+				filters: filters
+			},
+			callback:function (r) {
+				console.log(r)
+			}
+		})
+	},
 
 	salary_slip_based_on_timesheet: function(frm) {
 		frm.trigger("toggle_fields")
