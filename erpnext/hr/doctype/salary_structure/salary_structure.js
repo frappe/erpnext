@@ -53,7 +53,11 @@ frappe.ui.form.on('Salary Structure', {
 				{fieldname:'branch', fieldtype:'Link', options: 'Branch', label: __('Branch')},
 				{fieldname:'department', fieldtype:'Link', options: 'Department', label: __('Department')},
 				{fieldname:'designation', fieldtype:'Link', options: 'Designation', label: __('Designation')},
-				{fieldname:'check_sec', fieldtype:'Section Break', label: __('Check')},
+				{fieldname:'base_variable', fieldtype:'Section Break'},
+				{fieldname:'base', fieldtype:'Currency', label: __('Base')},
+				{fieldname:'base_col_br', fieldtype:'Column Break'},
+				{fieldname:'variable', fieldtype:'Currency', label: __('Variable')},
+				{fieldname:'check_sec', fieldtype:'Section Break'},
 				{fieldname:'check_all', fieldtype:'Button', label: __('Check All')},
 				{fieldname:'check_col_br', fieldtype:'Column Break'},
 				{fieldname:'uncheck_all', fieldtype:'Button', label: __('Uncheck All')},
@@ -109,12 +113,15 @@ frappe.ui.form.on('Salary Structure', {
 	
 	
 	setEmployeesInChildTable:function (frm) {
-		var employees = $.map(frm.doc.employees, function(d) { return d.employee })
+		var employees = $.map(frm.doc.employees, function(d) { return d.employee });
+		console.log(employees);
 		frm.$empDialog.fields_dict.employees_html.$wrapper.find('input').each(function () {
-			if ($(this).prop('checked') && !($(this).val() in employees)) {
+			if ($(this).prop('checked') && employees.indexOf($(this).val()) === -1) {
 				var r = frappe.model.add_child(frm.doc, frm.fields_dict.employees.df.options, frm.fields_dict.employees.df.fieldname);
 				r.employee = $(this).val();
 				r.employee_name = $(this).attr('data-employee-name');
+				r.base = frm.$empDialog.get_value('base');
+				r.variable = frm.$empDialog.get_value('variable');
 			}
 		});
 		frm.refresh_field('employees');
@@ -128,7 +135,7 @@ frappe.ui.form.on('Salary Structure', {
 			var $input = $('<input type="checkbox">').appendTo($wrapper);
 			$wrapper.append('<label>'+frm.$empDialog.__data[i].name+'</label>');
 			$input.val(frm.$empDialog.__data[i].name);
-			$input.data('employee-name',frm.$empDialog.__data[i].employee_name);
+			$input.attr('data-employee-name',frm.$empDialog.__data[i].employee_name);
 			$wrapper.appendTo(frm.$empDialog.fields_dict.employees_html.$wrapper)
 		}
 	},
