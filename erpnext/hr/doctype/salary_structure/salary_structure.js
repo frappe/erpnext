@@ -133,9 +133,10 @@ frappe.ui.form.on('Salary Structure', {
 		for (var i=0; i <frm.$empDialog.__data.length; i++) {
 			var $wrapper = $('<div class="col-xs-6">');
 			var $input = $('<input type="checkbox">').appendTo($wrapper);
-			$wrapper.append('<label>'+frm.$empDialog.__data[i].name+'</label>');
+			$wrapper.append('<label title="'+frm.$empDialog.__data[i].name+'">'+frm.$empDialog.__data[i].employee_name+'</label>');
 			$input.val(frm.$empDialog.__data[i].name);
 			$input.attr('data-employee-name',frm.$empDialog.__data[i].employee_name);
+			$input.attr('title',frm.$empDialog.__data[i].name);
 			$wrapper.appendTo(frm.$empDialog.fields_dict.employees_html.$wrapper)
 		}
 	},
