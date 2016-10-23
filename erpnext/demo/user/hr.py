@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 import random
 from frappe.utils import random_string, add_days, cint
 from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
@@ -24,18 +24,14 @@ def work():
 		process_payroll.company = frappe.flags.company
 		process_payroll.month = prev_month
 		process_payroll.fiscal_year = year
-		process_payroll.create_sal_slip()
+		process_payroll.from_date = frappe.flags.current_date
+		process_payroll.to_date = add_days(frappe.flags.current_date, random.randint(0, 30))
+		process_payroll.reference_number = "DemoRef23"
+		process_payroll.reference_date = frappe.flags.current_date
+		process_payroll.payment_account = frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 		process_payroll.submit_salary_slip()
-		r = process_payroll.make_journal_entry(frappe.get_value('Account',
-			{'account_name': 'Salary'}))
-
-		journal_entry = frappe.get_doc(r)
-		journal_entry.cheque_no = random_string(10)
-		journal_entry.cheque_date = frappe.flags.current_date
-		journal_entry.posting_date = frappe.flags.current_date
-		journal_entry.insert()
-		journal_entry.submit()
-	
+		process_payroll.make_journal_entry()
+		
 	if frappe.db.get_global('demo_hr_user'):
 		make_timesheet_records()
 	

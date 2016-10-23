@@ -38,18 +38,6 @@ frappe.ui.form.on('Salary Structure', {
 		
 		frm.add_custom_button(__("Preview Salary Slip"),
 			function() { frm.trigger('preview_salary_slip'); }, "icon-sitemap", "btn-default");
-
-		frm.add_custom_button(__("Sync Employee"),function () {
-			if (frm.doc.__islocal) {
-				msgprint(__("Please save the document before Sync Employee"));
-				return
-			}
-			frappe.route_options = {
-				salary_structure: frm.doc.name,
-				company: frm.doc.company
-			};
-			frappe.set_route("Form", "Salary Structure Employee Assign")
-		})
 		
 	},	
 

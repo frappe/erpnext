@@ -7,4 +7,8 @@
 
 * Credit Controller: Role that is allowed to submit transactions that exceed credit limits set.
 
+* Make Payment via Journal Entry: If checked, on invoice if uer has clicked on payment system open the journal entry else payment entry
+
+* Unlink Payment on Cancellation of Invoice: If checked system inlink the payment against the invoice else shows the link error.
+
 {next}
