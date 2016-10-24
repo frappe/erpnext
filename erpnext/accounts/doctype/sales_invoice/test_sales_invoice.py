@@ -591,61 +591,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		if not frappe.db.exists("POS Profile", "_Test POS Profile"):
 			pos_profile.insert()
-
-	def test_si_gl_entry_with_perpetual_inventory_and_update_stock_with_warehouse_but_no_account(self):
-		set_perpetual_inventory()
-		frappe.delete_doc("Account", "_Test Warehouse No Account - _TC")
-
-		# insert purchase receipt
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
-			as pr_test_records
-		pr = frappe.copy_doc(pr_test_records[0])
-		pr.naming_series = "_T-Purchase Receipt-"
-		pr.get("items")[0].warehouse = "_Test Warehouse No Account - _TC"
-		pr.insert()
-		pr.submit()
-
-		si_doc = copy.deepcopy(test_records[1])
-		si_doc["update_stock"] = 1
-		# si_doc["posting_time"] = "12:05"
-		si_doc.get("items")[0]["warehouse"] = "_Test Warehouse No Account - _TC"
-
-		si = frappe.copy_doc(si_doc)
-		si.insert()
-		si.submit()
-
-		# check stock ledger entries
-		sle = frappe.db.sql("""select * from `tabStock Ledger Entry`
-			where voucher_type = 'Sales Invoice' and voucher_no = %s""",
-			si.name, as_dict=1)[0]
-		self.assertTrue(sle)
-		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty],
-			["_Test Item", "_Test Warehouse No Account - _TC", -1.0])
-
-		# check gl entries
-		gl_entries = frappe.db.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc, debit asc""", si.name, as_dict=1)
-		self.assertTrue(gl_entries)
-
-		expected_gl_entries = dict((d[0], d) for d in [
-			[si.debit_to, 630.0, 0.0],
-			[si_doc.get("items")[0]["income_account"], 0.0, 500.0],
-			[si_doc.get("taxes")[0]["account_head"], 0.0, 80.0],
-			[si_doc.get("taxes")[1]["account_head"], 0.0, 50.0],
-		])
-		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_gl_entries[gle.account][0], gle.account)
-			self.assertEquals(expected_gl_entries[gle.account][1], gle.debit)
-			self.assertEquals(expected_gl_entries[gle.account][2], gle.credit)
-
-		si.cancel()
-		gle = frappe.db.sql("""select * from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
-
-		self.assertFalse(gle)
-		set_perpetual_inventory(0)
-
+			
 	def test_sales_invoice_gl_entry_with_perpetual_inventory_no_item_code(self):
 		set_perpetual_inventory()
 
