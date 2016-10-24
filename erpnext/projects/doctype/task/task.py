@@ -28,6 +28,7 @@ class Task(Document):
 
 	def validate(self):
 		self.validate_dates()
+		self.validate_progress()
 		self.validate_status()
 		self.update_depends_on()
 
@@ -46,6 +47,10 @@ class Task(Document):
 
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
+			
+	def validate_progress(self):
+		if self.progress > 100:
+			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
 	def update_depends_on(self):
 		depends_on_tasks = ""
