@@ -56,13 +56,10 @@ frappe.ui.form.on('Salary Structure', {
 				{fieldname:'base_variable', fieldtype:'Section Break'},
 				{fieldname:'base', fieldtype:'Currency', label: __('Base')},
 				{fieldname:'base_col_br', fieldtype:'Column Break'},
-				{fieldname:'variable', fieldtype:'Currency', label: __('Variable')},
-				{fieldname:'check_sec', fieldtype:'Section Break'},
-				{fieldname:'set_employee', fieldtype:'Button', label: __('Add')}
+				{fieldname:'variable', fieldtype:'Currency', label: __('Variable')}
 			]
 		});
-
-		frm.$emp_dialog.get_input('set_employee').removeClass('btn-xs').addClass('btn-primary pull-right').on('click', function () {
+		frm.$emp_dialog.set_primary_action(__("Add"), function() {
 			frm.trigger('get_employees');
 		});
 		frm.$emp_dialog.show();
