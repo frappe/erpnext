@@ -1041,11 +1041,8 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 4, 
-<<<<<<< 6ef2c9faa43ba40bef00abc29cd9a5de980b2037
  "modified": "2016-10-21 04:20:14.974653", 
-=======
  "modified": "2016-10-23 01:02:40.632849", 
->>>>>>> [fix] 6363
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
