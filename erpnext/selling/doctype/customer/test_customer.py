@@ -112,6 +112,17 @@ class TestCustomer(unittest.TestCase):
 		self.assertEquals("_Test Customer 1 - 1", duplicate_customer.name)
 		self.assertEquals(test_customer_1.customer_name, duplicate_customer.customer_name)
 
+	def get_customer_outstanding_amount(self):
+		outstanding_amt = get_customer_outstanding('_Test Customer', '_Test Company')
+
+		# If outstanding is negative make a transaction to get positive outstanding amount
+		if outstanding_amt > 0.0:
+			return outstanding_amt
+
+		item_qty = int((abs(outstanding_amt) + 200)/100)
+		make_sales_order({'qty':item_qty})
+		return get_customer_outstanding('_Test Customer', '_Test Company')
+
 	def test_customer_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -119,12 +130,15 @@ class TestCustomer(unittest.TestCase):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
-		outstanding_amt = get_customer_outstanding('_Test Customer', '_Test Company')
+		outstanding_amt = self.get_customer_outstanding_amount()
 		credit_limit = get_credit_limit('_Test Customer', '_Test Company')
 
+		if outstanding_amt <= 0.0:
+			item_qty = int((abs(outstanding_amt) + 200)/100)
+			make_sales_order({'qty':item_qty})
 
 		if credit_limit == 0.0:
-			frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', 50.0)
+			frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', outstanding_amt - 50.0)
 
 		# Sales Order
 		so = make_sales_order(do_not_submit=True)
@@ -151,7 +165,7 @@ class TestCustomer(unittest.TestCase):
 		from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
-		outstanding_amt = get_customer_outstanding('_Test Customer', '_Test Company')
+		outstanding_amt = self.get_customer_outstanding_amount()
 		credit_limit = get_credit_limit('_Test Customer', '_Test Company')
 
 		customer = frappe.get_doc("Customer", '_Test Customer')
