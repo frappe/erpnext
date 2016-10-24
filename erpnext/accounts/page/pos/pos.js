@@ -1061,7 +1061,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	validate_warehouse: function(){
 		if(!this.items[0].default_warehouse){
-			frappe.throw(__("Deafault warehouse is required for selected item"))
+			frappe.throw(__("Default warehouse is required for selected item"))
 		}
 	}
 })
