@@ -38,7 +38,7 @@ def delete_for_doctype(doctype, company_name):
 	if not meta.issingle:
 		if not meta.istable:
 			# delete communication
-			delete_communications(meta, doctype, company_name)
+			delete_communications(doctype, company_name, company_fieldname)
 
 			# delete children
 			for df in meta.get_table_fields():
@@ -79,10 +79,8 @@ def delete_lead_addresses(company_name):
 
 		frappe.db.sql("""update `tabAddress` set lead=null, lead_name=null where lead=%s""", lead.name)
 
-def delete_communications(meta, doctype, company_name):
-	linkfields = [df.fieldname for df in meta.get_link_fields()]
-
-	if 'company' in linkfields:
-		frappe.db.sql("""DELETE FROM `tabCommunication` WHERE reference_doctype = "{0}" AND
-			EXISTS (SELECT name FROM `tab{1}` WHERE company = %s AND `tabCommunication`.reference_name = name)
-			""".format(doctype, doctype), company_name)
+def delete_communications(doctype, company_name, company_fieldname):
+		frappe.db.sql("""
+			DELETE FROM `tabCommunication` WHERE reference_doctype = %s AND
+			EXISTS (SELECT name FROM `tab{0}` WHERE {1} = %s AND `tabCommunication`.reference_name = name)
+			""".format(doctype, company_fieldname), (doctype, company_name))
