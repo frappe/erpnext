@@ -154,21 +154,18 @@ class SalarySlip(TransactionBase):
 
 	def check_sal_struct(self, joining_date, relieving_date):
 		st_name = frappe.db.sql("""select parent from `tabSalary Structure Employee`
-			where employee=%s order by modified desc limit 1""",self.employee)
+			where employee=%s
+			and parent in (select name from `tabSalary Structure`
+				where is_active = 'Yes'
+				and (from_date <= %s or from_date <= %s)
+				and (to_date is null or to_date >= %s or to_date >= %s))
+			""",(self.employee, self.start_date, joining_date, self.end_date, relieving_date))
 			
 		if st_name:
-			struct = frappe.db.sql("""select name from `tabSalary Structure`
-				where name=%s and is_active = 'Yes'
-				and (from_date <= %s or from_date <= %s)
-				and (to_date is null or to_date >= %s or to_date >= %s) order by from_date desc limit 1""",
-				(st_name, self.start_date, joining_date, self.end_date, relieving_date))
-
-			if not struct:
-				self.salary_structure = None
-				frappe.throw(_("No active or default Salary Structure found for employee {0} for the given dates")
-					.format(self.employee), title=_('Salary Structure Missing'))
-
-			return struct and struct[0][0] or ''
+			if len(st_name) > 1:
+				frappe.msgprint(_("Multiple active Salary Structures found for employee {0} for the given dates")
+					.format(self.employee), title=_('Warning'))
+			return st_name and st_name[0][0] or ''
 		else:
 			self.salary_structure = None
 			frappe.throw(_("No active or default Salary Structure found for employee {0} for the given dates")
