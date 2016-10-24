@@ -39,9 +39,6 @@ def get_domain(domain):
 			'desktop_icons': ['Item', 'Customer', 'Supplier', 'Lead', 'Sales Order',
 				 'Sales Invoice', 'CRM', 'Selling', 'Buying', 'Stock', 'Accounts', 'HR', 'ToDo'],
 			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User'],
-			'properties': [
-				{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
-			],
 			'set_value': [
 				['Stock Settings', None, 'show_barcode_field', 1]
 			],
