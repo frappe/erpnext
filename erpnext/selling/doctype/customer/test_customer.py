@@ -9,6 +9,7 @@ import unittest
 from frappe.test_runner import make_test_records
 from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.utils import flt
+from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 
 test_ignore = ["Price List"]
 
@@ -124,7 +125,6 @@ class TestCustomer(unittest.TestCase):
 		return get_customer_outstanding('_Test Customer', '_Test Company')
 
 	def test_customer_credit_limit(self):
-		from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -162,7 +162,6 @@ class TestCustomer(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, make_sales_order)
 
 	def test_customer_credit_limit_on_change(self):
-		from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		outstanding_amt = self.get_customer_outstanding_amount()
