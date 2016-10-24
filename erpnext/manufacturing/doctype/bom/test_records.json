@@ -28,9 +28,20 @@
   "quantity": 1.0
  },
  {
+  "scrap_items":[
+  {
+   "amount": 2000.0,
+   "doctype": "BOM Item",
+   "item_code": "_Test Item Home Desktop 100",
+   "parentfield": "items",
+   "qty": 1.0,
+   "rate": 2000.0,
+   "stock_uom": "_Test UOM"
+  }
+  ],
   "items": [
    {
-    "amount": 5000.0,
+    "amount": 10000.0,
     "doctype": "BOM Item",
     "item_code": "_Test Item",
     "parentfield": "items",
@@ -81,7 +92,7 @@
     "doctype": "BOM Item",
     "item_code": "_Test Item Home Desktop Manufactured",
     "parentfield": "items",
-    "qty": 2.0,
+    "qty": 3.0,
     "rate": 1000.0,
     "stock_uom": "_Test UOM"
    }
