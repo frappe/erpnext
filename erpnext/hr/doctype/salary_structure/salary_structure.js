@@ -46,7 +46,7 @@ frappe.ui.form.on('Salary Structure', {
 	},
 
 	add_employees:function (frm) {
-		var emp = new frappe.ui.Dialog({
+		frm.$emp_dialog = new frappe.ui.Dialog({
 			title: __("Add Employees"),
 			fields: [
 				{fieldname:'company', fieldtype:'Link', options: 'Company', label: __('Company')},
@@ -58,93 +58,44 @@ frappe.ui.form.on('Salary Structure', {
 				{fieldname:'base_col_br', fieldtype:'Column Break'},
 				{fieldname:'variable', fieldtype:'Currency', label: __('Variable')},
 				{fieldname:'check_sec', fieldtype:'Section Break'},
-				{fieldname:'check_all', fieldtype:'Button', label: __('Check All')},
-				{fieldname:'check_col_br', fieldtype:'Column Break'},
-				{fieldname:'uncheck_all', fieldtype:'Button', label: __('Uncheck All')},
-				{fieldname:'check_col_br2', fieldtype:'Column Break'},
-				{fieldname:'set_employee', fieldtype:'Button', label: __('Set')},
-				{fieldname:'employees_sec', fieldtype:'Section Break', label: __('Employees')},
-				{fieldname:'employees_html', fieldtype:'HTML', label: __('Employees')}
+				{fieldname:'set_employee', fieldtype:'Button', label: __('Add')}
 			]
 		});
-		frm.$empDialog = emp;
-		frm.trigger('getEmployees');
-		frm.$empDialog.get_input('company').on('change', function () {
-			frm.trigger('getEmployees');
+
+		frm.$emp_dialog.get_input('set_employee').removeClass('btn-xs').addClass('btn-primary pull-right').on('click', function () {
+			frm.trigger('get_employees');
 		});
-		frm.$empDialog.get_input('department').on('change', function () {
-			frm.trigger('getEmployees');
-		});
-		frm.$empDialog.get_input('branch').on('change', function () {
-			frm.trigger('getEmployees');
-		});
-		frm.$empDialog.get_input('designation').on('change', function () {
-			frm.trigger('getEmployees');
-		});
-		frm.$empDialog.get_input('check_all').on('click', function () {
-			frm.$empDialog.__check_all = true;
-			frm.trigger('employeeCheckToggle');
-		});
-		frm.$empDialog.get_input('uncheck_all').on('click', function () {
-			frm.$empDialog.__check_all = false;
-			frm.trigger('employeeCheckToggle');
-		});
-		frm.$empDialog.get_input('set_employee').addClass('btn-primary').on('click', function () {
-			frm.trigger('setEmployeesInChildTable');
-		});
-		frm.$empDialog.show();
+		frm.$emp_dialog.show();
 	},
 
-	getEmployees:function (frm) {
-		var filters = frm.$empDialog.get_values();
-		delete filters.check_all;
-		delete filters.uncheck_all;
+	get_employees:function (frm) {
+		var filters = frm.$emp_dialog.get_values();
+		if ('variable' in filters) {
+			delete filters.variable
+		}
+		if ('base' in filters) {
+			delete filters.base
+		}
 		frappe.call({
 			method:'erpnext.hr.doctype.salary_structure.salary_structure.get_employees',
 			args:{
 				filters: filters
 			},
 			callback:function (r) {
-				frm.$empDialog.__data = r.message;
-				frm.trigger('setEmployee')
+				var employees = $.map(frm.doc.employees, function(d) { return d.employee });
+				for (var i=0; i< r.message.length; i++) {
+					if (employees.indexOf(r.message[i].name) === -1) {
+						var row = frappe.model.add_child(frm.doc, frm.fields_dict.employees.df.options, frm.fields_dict.employees.df.fieldname);
+						row.employee = r.message[i].name;
+						row.employee_name = r.message[i].employee_name;
+						row.base = frm.$emp_dialog.get_value('base');
+						row.variable = frm.$emp_dialog.get_value('variable');
+					}
+				}
+				frm.refresh_field('employees');
+				frm.$emp_dialog.hide()
 			}
 		})
-	},
-	
-	
-	setEmployeesInChildTable:function (frm) {
-		var employees = $.map(frm.doc.employees, function(d) { return d.employee });
-		console.log(employees);
-		frm.$empDialog.fields_dict.employees_html.$wrapper.find('input').each(function () {
-			if ($(this).prop('checked') && employees.indexOf($(this).val()) === -1) {
-				var r = frappe.model.add_child(frm.doc, frm.fields_dict.employees.df.options, frm.fields_dict.employees.df.fieldname);
-				r.employee = $(this).val();
-				r.employee_name = $(this).attr('data-employee-name');
-				r.base = frm.$empDialog.get_value('base');
-				r.variable = frm.$empDialog.get_value('variable');
-			}
-		});
-		frm.refresh_field('employees');
-		frm.$empDialog.hide()
-	},
-
-	setEmployee:function (frm) {
-		frm.$empDialog.fields_dict.employees_html.$wrapper.html(null);
-		for (var i=0; i <frm.$empDialog.__data.length; i++) {
-			var $wrapper = $('<div class="col-xs-6">');
-			var $input = $('<input type="checkbox">').appendTo($wrapper);
-			$wrapper.append('<label title="'+frm.$empDialog.__data[i].name+'">'+frm.$empDialog.__data[i].employee_name+'</label>');
-			$input.val(frm.$empDialog.__data[i].name);
-			$input.attr('data-employee-name',frm.$empDialog.__data[i].employee_name);
-			$input.attr('title',frm.$empDialog.__data[i].name);
-			$wrapper.appendTo(frm.$empDialog.fields_dict.employees_html.$wrapper)
-		}
-	},
-	
-	employeeCheckToggle:function (frm) {
-		frm.$empDialog.fields_dict.employees_html.$wrapper.find('input').each(function () {
-			$(this).prop('checked', frm.$empDialog.__check_all)
-		});
 	},
 
 	salary_slip_based_on_timesheet: function(frm) {
