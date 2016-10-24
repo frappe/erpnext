@@ -69,6 +69,7 @@ class Customer(TransactionBase):
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
 		self.status = get_party_status(self)
+		self.validate_credit_limit_on_change()
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -124,6 +125,15 @@ class Customer(TransactionBase):
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
 			frappe.throw(_("A Customer Group exists with same name please change the Customer name or rename the Customer Group"), frappe.NameError)
+
+	def validate_credit_limit_on_change(self):
+		if self.get("__islocal") or self.credit_limit == frappe.db.get_value("Customer", self.name, "credit_limit"):
+			return
+
+		for company in frappe.get_all("Company"):
+			outstanding_amt = get_customer_outstanding(self.name, company.name)
+			if flt(self.credit_limit) < outstanding_amt:
+				frappe.throw(_("""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}""").format(outstanding_amt))
 
 	def delete_customer_address(self):
 		addresses = frappe.db.sql("""select name, lead from `tabAddress`
