@@ -63,4 +63,4 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 
 @frappe.whitelist()
 def get_employees(**args):
-	return frappe.get_all('Employee',filters=args['filters'], fields=['name', 'employee_name'])
+	return frappe.get_list('Employee',filters=args['filters'], fields=['name', 'employee_name'])
