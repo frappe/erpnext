@@ -21,7 +21,7 @@ frappe.ui.form.on('Salary Structure', {
 					type: "earning"
 				}
 			}
-		})
+		});
 		frm.set_query("salary_component", "deductions", function() {
 			return {
 				filters: {
@@ -32,14 +32,68 @@ frappe.ui.form.on('Salary Structure', {
 	},
 	
 	refresh: function(frm) {
-		frm.trigger("toggle_fields")
+		frm.trigger("toggle_fields");
 		frm.fields_dict['earnings'].grid.set_column_disp("default_amount", false);
 		frm.fields_dict['deductions'].grid.set_column_disp("default_amount", false);
 		
 		frm.add_custom_button(__("Preview Salary Slip"),
 			function() { frm.trigger('preview_salary_slip'); }, "icon-sitemap", "btn-default");
+
+		frm.add_custom_button(__("Add Employees"),function () {
+			frm.trigger('add_employees')
+		})
 		
-	},	
+	},
+
+	add_employees:function (frm) {
+		frm.$emp_dialog = new frappe.ui.Dialog({
+			title: __("Add Employees"),
+			fields: [
+				{fieldname:'company', fieldtype:'Link', options: 'Company', label: __('Company')},
+				{fieldname:'branch', fieldtype:'Link', options: 'Branch', label: __('Branch')},
+				{fieldname:'department', fieldtype:'Link', options: 'Department', label: __('Department')},
+				{fieldname:'designation', fieldtype:'Link', options: 'Designation', label: __('Designation')},
+				{fieldname:'base_variable', fieldtype:'Section Break'},
+				{fieldname:'base', fieldtype:'Currency', label: __('Base')},
+				{fieldname:'base_col_br', fieldtype:'Column Break'},
+				{fieldname:'variable', fieldtype:'Currency', label: __('Variable')}
+			]
+		});
+		frm.$emp_dialog.set_primary_action(__("Add"), function() {
+			frm.trigger('get_employees');
+		});
+		frm.$emp_dialog.show();
+	},
+
+	get_employees:function (frm) {
+		var filters = frm.$emp_dialog.get_values();
+		if ('variable' in filters) {
+			delete filters.variable
+		}
+		if ('base' in filters) {
+			delete filters.base
+		}
+		frappe.call({
+			method:'erpnext.hr.doctype.salary_structure.salary_structure.get_employees',
+			args:{
+				filters: filters
+			},
+			callback:function (r) {
+				var employees = $.map(frm.doc.employees, function(d) { return d.employee });
+				for (var i=0; i< r.message.length; i++) {
+					if (employees.indexOf(r.message[i].name) === -1) {
+						var row = frappe.model.add_child(frm.doc, frm.fields_dict.employees.df.options, frm.fields_dict.employees.df.fieldname);
+						row.employee = r.message[i].name;
+						row.employee_name = r.message[i].employee_name;
+						row.base = frm.$emp_dialog.get_value('base');
+						row.variable = frm.$emp_dialog.get_value('variable');
+					}
+				}
+				frm.refresh_field('employees');
+				frm.$emp_dialog.hide()
+			}
+		})
+	},
 
 	salary_slip_based_on_timesheet: function(frm) {
 		frm.trigger("toggle_fields")
@@ -81,12 +135,12 @@ frappe.ui.form.on('Salary Structure', {
 		frm.toggle_display(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
 		frm.toggle_reqd(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
 	}
-})
+});
 
 
 cur_frm.cscript.amount = function(doc, cdt, cdn){
 	calculate_totals(doc, cdt, cdn);
-}
+};
 
 var calculate_totals = function(doc) {
 	var tbl1 = doc.earnings || [];
