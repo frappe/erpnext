@@ -69,6 +69,10 @@ class StockController(AccountsController):
 						warehouse_with_no_account.append(sle.warehouse)
 
 		if warehouse_with_no_account:
+			for wh in warehouse_with_no_account:
+				if frappe.db.get_value("Warehouse", wh, "company"):
+					frappe.throw(_("Warehouse {0} is not linked to any account, please create/link the corresponding (Asset) account for the warehouse.").format(wh))
+					
 			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
 
