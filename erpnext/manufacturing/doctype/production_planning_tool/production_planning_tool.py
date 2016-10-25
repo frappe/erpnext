@@ -344,10 +344,11 @@ class ProductionPlanningTool(Document):
 		self.make_items_dict(item_list)
 
 	def get_subitems(self,bom_wise_item_details, bom, parent_qty, include_sublevel, only_raw, supply_subs,non_stock_item=0):
-		for d in frappe.db.sql("""select bom_item.item_code, default_material_request_type,
+		for d in frappe.db.sql("""SELECT bom_item.item_code, default_material_request_type,
 			ifnull(%(parent_qty)s * sum(bom_item.qty/ifnull(bom.quantity, 1)), 0) as qty, 
-			item.is_sub_contracted_item as is_sub_contracted, item.default_bom as default_bom
-			from `tabBOM Item` bom_item, `tabBOM` bom, tabItem item
+			item.is_sub_contracted_item as is_sub_contracted, item.default_bom as default_bom,
+			bom_item.description as description,  bom_item.stock_uom as stock_uom,  item.min_order_qty 
+			as min_order_qty FROM `tabBOM Item` bom_item, `tabBOM` bom, tabItem item
 			where bom.name = bom_item.parent and bom.name = %(bom)s and bom_item.docstatus < 2
 			and bom_item.item_code = item.name
 			""" + ("and item.is_stock_item = 1","")[non_stock_item] + """
