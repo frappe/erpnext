@@ -118,7 +118,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 1, 
    "collapsible": 0, 
    "columns": 0, 
@@ -1465,7 +1465,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-09-22 05:46:00.860706", 
+ "modified": "2016-10-25 16:12:29.785395", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order Item", 
