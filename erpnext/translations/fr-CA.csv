@@ -22,3 +22,4 @@ DocType: Address Template,"<h4>Default Template</h4>
  {% if télécopieur%} Fax: {{fax}} &amp; lt; br &amp; gt; {% endif -%} 
  {% si email_id%} Email: {{email_id}} &amp; lt; br &amp; gt ; {% endif -%} 
  <!-- code--> <!-- pre--></code></pre></h4>"
+DocType: Journal Entry,Difference (Dr - Cr),Différence (Dt - Ct )
