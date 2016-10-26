@@ -165,6 +165,13 @@ def get_pricing_rule_for_item(args):
 			})
 		else:
 			item_details.discount_percentage = pricing_rule.discount_percentage
+	elif args.get('pricing_rule'):
+		if frappe.db.get_value('Pricing Rule', args.get('pricing_rule'), 'price_or_discount') == 'Discount Percentage':
+			item_details.discount_percentage = 0.0
+
+		item_details.margin_rate_or_amount = 0.0
+		item_details.margin_type = None
+
 	return item_details
 
 def get_pricing_rules(args):
