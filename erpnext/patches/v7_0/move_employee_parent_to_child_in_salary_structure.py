@@ -11,4 +11,5 @@ def execute():
 		if not ss_doc.company:
 			ss_doc.company = frappe.db.get_value('Employee', salary_employee.employee, 'company')
 		ss_doc.flags.ignore_validate = True
+		ss_doc.flags.ignore_mandatory = True
 		ss_doc.save()
