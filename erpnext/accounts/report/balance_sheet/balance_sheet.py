@@ -86,6 +86,7 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 		if has_value:
 			return provisional_profit_loss, total_row
 		return None,total_row
+	return None, None
 
 def check_opening_balance(asset, liability, equity):
 	# Check if previous year balance sheet closed
