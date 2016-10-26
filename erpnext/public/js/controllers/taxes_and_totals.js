@@ -4,10 +4,6 @@
 erpnext.taxes_and_totals = erpnext.payments.extend({
 	setup: function() {},
 	apply_pricing_rule_on_item: function(item){
-		if(!item.margin_type){
-			item.margin_rate_or_amount = 0.0;
-		}
-
 		if(item.margin_type == "Percentage"){
 			item.total_margin = item.price_list_rate + item.price_list_rate * ( item.margin_rate_or_amount / 100);
 		}else{
