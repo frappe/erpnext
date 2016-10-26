@@ -38,7 +38,8 @@ def execute(filters=None):
 		
 	if provisional_profit_loss:
 		data.append(provisional_profit_loss)
-	data.append(total_credit)		
+	if total_credit:
+		data.append(total_credit)		
 
 	columns = get_columns(filters.periodicity, period_list, company=filters.company)
 	
@@ -86,6 +87,7 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 		if has_value:
 			return provisional_profit_loss, total_row
 		return None,total_row
+	return None, None	
 
 def check_opening_balance(asset, liability, equity):
 	# Check if previous year balance sheet closed
