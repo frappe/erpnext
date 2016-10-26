@@ -56,7 +56,6 @@ class ReceivablePayableReport(object):
 			"{range1}-{range2}".format(range1=cint(self.filters["range1"])+ 1, range2=self.filters["range2"]),
 			"{range2}-{range3}".format(range2=cint(self.filters["range2"])+ 1, range3=self.filters["range3"]),
 			"{range3}-{above}".format(range3=cint(self.filters["range3"])+ 1, above=_("Above"))):
-				frappe.errprint(label)
 				columns.append({
 					"label": label,
 					"fieldtype": "Currency",

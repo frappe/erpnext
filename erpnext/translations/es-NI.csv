@@ -1,0 +1,6 @@
+DocType: Tax Rule,Tax Rule,Regla Fiscal
+DocType: POS Profile,Account for Change Amount,Cuenta para el Cambio de Monto
+apps/erpnext/erpnext/controllers/accounts_controller.py +558,'Update Stock' cannot be checked for fixed asset sale,"""Actualización de Existencia' no se puede ser escogida para venta de activo fijo"
+DocType: Customer,Tax ID,RUC
+apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +85,Tax Rule Conflicts with {0},Regla Fiscal en conflicto con {0}
+DocType: Item Tax,Tax Rate,Tasa de Impuesto

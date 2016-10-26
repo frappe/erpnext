@@ -30,7 +30,7 @@ To setup an Email Alert:
 
 
 ### Setting a Subject
-You can retrieve the data for a particular field by using `doc.[field_name]`. To use it in your subject / message, you have to surround it with `{{ }}`. These are called [Jinja](http://jinja.pocoo.org/) tags. So, for example to get the name of a document, you use `{{ doc.name }}`. The below example sends an email on saving a Task with the Subject, "TASK##### has been created"
+You can retrieve the data for a particular field by using `doc.[field_name]`. To use it in your subject / message, you have to surround it with `{% raw %}{{ }}{% endraw %}`. These are called [Jinja](http://jinja.pocoo.org/) tags. So, for example to get the name of a document, you use `{% raw %}{{ doc.name }}{% endraw %}`. The below example sends an email on saving a Task with the Subject, "TASK##### has been created"
 
 <img class="screenshot" alt="Setting Subject" src="{{docs_base_url}}/assets/img/setup/email/email-alert-subject.png">
 
@@ -44,7 +44,7 @@ The above example will send an Email Alert when a Task is saved with the status 
 
 ### Setting a Message
 
-You can use both Jinja Tags (`{{ doc.[field_name] }}`) and HTML tags in the message textbox.
+You can use both Jinja Tags (`{% raw %}{{ doc.[field_name] }}{% endraw %}`) and HTML tags in the message textbox.
 
 	{% raw %}<h3>Order Overdue</h3>
 

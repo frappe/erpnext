@@ -193,7 +193,7 @@ class LeaveApplication(Document):
 
 	def validate_max_days(self):
 		max_days = frappe.db.get_value("Leave Type", self.leave_type, "max_days_allowed")
-		if max_days and self.total_leave_days > max_days:
+		if max_days and self.total_leave_days > cint(max_days):
 			frappe.throw(_("Leave of type {0} cannot be longer than {1}").format(self.leave_type, max_days))
 
 	def validate_leave_approver(self):
@@ -279,7 +279,7 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day=None):
-	if half_day:
+	if half_day==1:
 		return 0.5
 	number_of_days = date_diff(to_date, from_date) + 1
 	if not frappe.db.get_value("Leave Type", leave_type, "include_holiday"):
@@ -371,10 +371,11 @@ def get_events(start, end):
 
 	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "company"],
 		as_dict=True)
-	if not employee:
-		return events
-
-	employee, company = employee.name, employee.company
+	if employee:
+		employee, company = employee.name, employee.company
+	else:
+		employee=''
+		company=frappe.db.get_value("Global Defaults", None, "default_company")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("Leave Application")

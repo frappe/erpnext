@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
+from frappe.utils import flt
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.buying_controller import BuyingController
@@ -53,6 +55,18 @@ class SupplierQuotation(BuyingController):
 		pc = frappe.get_doc('Purchase Common')
 		pc.validate_for_items(self)
 
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Supplier Quotation'),
+	})
+
+	return list_context
+
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
 	def set_missing_values(source, target):
@@ -62,7 +76,7 @@ def make_purchase_order(source_name, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
-		target.conversion_factor = 1
+		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
 	doclist = get_mapped_doc("Supplier Quotation", source_name,		{
 		"Supplier Quotation": {
@@ -76,8 +90,6 @@ def make_purchase_order(source_name, target_doc=None):
 			"field_map": [
 				["name", "supplier_quotation_item"],
 				["parent", "supplier_quotation"],
-				["uom", "stock_uom"],
-				["uom", "uom"],
 				["material_request", "material_request"],
 				["material_request_item", "material_request_item"]
 			],

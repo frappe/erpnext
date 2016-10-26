@@ -18,6 +18,7 @@ rfq = Class.extend({
 		this.change_rate();
 		this.terms();
 		this.submit_rfq();
+		this.navigate_quotations();
 	},
 
 	onfocus_select_all: function(){
@@ -81,10 +82,20 @@ rfq = Class.extend({
 				},
 				btn: this,
 				callback: function(r){
-					$('.btn-sm').hide()
 					frappe.unfreeze();
+					if(r.message){
+						$('.btn-sm').hide()
+						window.location.href = "/quotations/" + encodeURIComponent(r.message);
+					}
 				}
 			})
+		})
+	},
+
+	navigate_quotations: function() {
+		$('.quotations').click(function(){
+			name = $(this).attr('idx')
+			window.location.href = "/quotations/" + encodeURIComponent(name);
 		})
 	}
 })

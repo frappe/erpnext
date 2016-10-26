@@ -25,7 +25,10 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 
 	if not filters: filters = []
 
-	filters.append((doctype, "docstatus", "=", 1))
+	if doctype == 'Supplier Quotation':
+		filters.append((doctype, "docstatus", "<", 2))
+	else:
+		filters.append((doctype, "docstatus", "=", 1))
 
 	if user != "Guest" and is_website_user():
 		parties_doctype = 'Request for Quotation Supplier' if doctype == 'Request for Quotation' else doctype
@@ -112,7 +115,8 @@ def has_website_permission(doc, ptype, user, verbose=False):
 		return frappe.get_all(doctype, filters=[(doctype, "customer", "in", customers),
 			(doctype, "name", "=", doc.name)]) and True or False
 	elif suppliers:
-		return frappe.get_all(doctype, filters=[(doctype, "suppliers", "in", suppliers),
+		fieldname = 'suppliers' if doctype == 'Request for Quotation' else 'supplier'
+		return frappe.get_all(doctype, filters=[(doctype, fieldname, "in", suppliers),
 			(doctype, "name", "=", doc.name)]) and True or False
 	else:
 		return False

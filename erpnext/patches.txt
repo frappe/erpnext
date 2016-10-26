@@ -291,7 +291,8 @@ erpnext.patches.v7_0.rename_prevdoc_fields
 erpnext.patches.v7_0.rename_time_sheet_doctype
 execute:frappe.delete_doc_if_exists("Report", "Customers Not Buying Since Long Time")
 erpnext.patches.v7_0.make_is_group_fieldtype_as_check
-execute:frappe.reload_doc('projects', 'doctype', 'timesheet', force=True)
+execute:frappe.reload_doc('projects', 'doctype', 'timesheet') #2016-09-12
+erpnext.patches.v7_1.rename_field_timesheet
 execute:frappe.delete_doc_if_exists("Report", "Employee Holiday Attendance")
 execute:frappe.delete_doc_if_exists("DocType", "Payment Tool")
 execute:frappe.delete_doc_if_exists("DocType", "Payment Tool Detail")
@@ -311,13 +312,33 @@ erpnext.patches.v7_0.set_portal_settings
 erpnext.patches.v7_0.update_change_amount_account
 erpnext.patches.v7_0.repost_future_gle_for_purchase_invoice
 erpnext.patches.v7_0.fix_duplicate_icons
+erpnext.patches.v7_0.move_employee_parent_to_child_in_salary_structure
+erpnext.patches.v7_0.repost_gle_for_pos_sales_return
+erpnext.patches.v7_1.update_total_billing_hours
+erpnext.patches.v7_1.update_component_type
 erpnext.patches.v7_0.repost_gle_for_pos_sales_return
 erpnext.patches.v7_0.update_missing_employee_in_timesheet
 erpnext.patches.v7_0.update_status_for_timesheet
 erpnext.patches.v7_0.set_party_name_in_payment_entry
+erpnext.patches.v7_1.set_student_guardian
+erpnext.patches.v7_0.update_conversion_factor_in_supplier_quotation_item
+erpnext.patches.v7_1.move_sales_invoice_from_parent_to_child_timesheet
 execute:frappe.db.sql("update `tabTimesheet` ts, `tabEmployee` emp set ts.employee_name = emp.employee_name where emp.name = ts.employee and ts.employee_name is null and ts.employee is not null")
+erpnext.patches.v7_1.update_lead_source
+erpnext.patches.v7_1.fix_link_for_customer_from_lead
 execute:frappe.db.sql("delete from `tabTimesheet Detail` where NOT EXISTS (select name from `tabTimesheet` where name = `tabTimesheet Detail`.parent)")
 erpnext.patches.v7_0.update_mode_of_payment_type
+
+execute:frappe.reload_doctype('Employee') #2016-10-18
+execute:frappe.db.sql("update `tabEmployee` set prefered_contact_email = IFNULL(prefered_contact_email,'') ")
+execute:frappe.reload_doctype("Salary Slip")
+execute:frappe.db.sql("update `tabSalary Slip` set posting_date=creation")
+erpnext.patches.v7_1.update_portal_roles
+erpnext.patches.v7_1.set_total_amount_currency_in_je
 finally:erpnext.patches.v7_0.update_timesheet_communications
 erpnext.patches.v7_0.update_status_of_zero_amount_sales_order
+erpnext.patches.v7_1.add_field_for_task_dependent
 erpnext.patches.v7_0.repost_bin_qty_and_item_projected_qty
+erpnext.patches.v7_1.set_prefered_contact_email
+execute:frappe.db.sql("update `tabSingles` set value = 1 where field = 'unlink_payment_on_cancellation_of_invoice' and doctype = 'Accounts Settings'")
+execute:frappe.db.sql("update `tabStock Entry` set total_amount = null where purpose in('Repack', 'Manufacture')")

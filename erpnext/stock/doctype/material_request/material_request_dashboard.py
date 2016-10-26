@@ -1,5 +1,6 @@
 from frappe import _
 
+
 def get_data():
 	return {
 		'fieldname': 'material_request',
@@ -8,5 +9,9 @@ def get_data():
 				'label': _('Related'),
 				'items': ['Request for Quotation', 'Supplier Quotation', 'Purchase Order']
 			},
+			{
+				'label': _('Manufacturing'),
+				'items': ['Production Order']
+			}
 		]
 	}

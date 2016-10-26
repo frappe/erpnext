@@ -12,12 +12,6 @@ frappe.provide("erpnext.selling");
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	setup: function() {
 		this._super();
-		this.frm.get_field('items').grid.editable_fields = [
-			{fieldname: 'item_code', columns: 4},
-			{fieldname: 'qty', columns: 2},
-			{fieldname: 'rate', columns: 2},
-			{fieldname: 'amount', columns: 2}
-		];
 	},
 
 	onload: function() {

@@ -6,10 +6,11 @@ import frappe
 from frappe import _
 from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_net_profit_loss
+from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
-	period_list = get_period_list(filters.fiscal_year, filters.periodicity)
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, filters.periodicity)
 
 	operation_accounts = {
 		"section_name": "Operations",
@@ -49,9 +50,9 @@ def execute(filters=None):
 
 	# compute net profit / loss
 	income = get_data(filters.company, "Income", "Credit", period_list, 
-		accumulated_values=filters.accumulated_values, ignore_closing_entries=True)
+		accumulated_values=filters.accumulated_values, ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
 	expense = get_data(filters.company, "Expense", "Debit", period_list, 
-		accumulated_values=filters.accumulated_values, ignore_closing_entries=True)
+		accumulated_values=filters.accumulated_values, ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
 		
 	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
 
@@ -98,33 +99,39 @@ def execute(filters=None):
 
 	return columns, data
 
-
 def get_account_type_based_data(company, account_type, period_list, accumulated_values):
 	data = {}
 	total = 0
 	for period in period_list:
+		start_date = get_start_date(period, accumulated_values)
 		gl_sum = frappe.db.sql_list("""
 			select sum(credit) - sum(debit)
 			from `tabGL Entry`
 			where company=%s and posting_date >= %s and posting_date <= %s 
 				and voucher_type != 'Period Closing Voucher'
 				and account in ( SELECT name FROM tabAccount WHERE account_type = %s)
-		""", (company, period["year_start_date"] if accumulated_values else period['from_date'], 
+		""", (company, start_date if accumulated_values else period['from_date'],
 			period['to_date'], account_type))
-		
+
 		if gl_sum and gl_sum[0]:
 			amount = gl_sum[0]
 			if account_type == "Depreciation":
 				amount *= -1
 		else:
 			amount = 0
-			
+
 		total += amount
 		data.setdefault(period["key"], amount)
-		
+
 	data["total"] = total
 	return data
 
+def get_start_date(period, accumulated_values):
+	start_date = period["year_start_date"]
+	if accumulated_values:
+		start_date = get_fiscal_year(period.to_date)[1]
+
+	return start_date
 
 def add_total_row_account(out, data, label, period_list, currency):
 	total_row = {

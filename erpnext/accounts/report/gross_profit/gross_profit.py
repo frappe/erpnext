@@ -6,6 +6,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import flt
 
+
 def execute(filters=None):
 	if not filters: filters = frappe._dict()
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
@@ -16,7 +17,7 @@ def execute(filters=None):
 	source = gross_profit_data.grouped_data if filters.get("group_by") != "Invoice" else gross_profit_data.data
 
 	group_wise_columns = frappe._dict({
-		"invoice": ["parent", "customer", "posting_date","item_code", "item_name","item_group", "brand", "description", \
+		"invoice": ["parent", "customer", "customer_group", "posting_date","item_code", "item_name","item_group", "brand", "description", \
 			"warehouse", "qty", "base_rate", "buying_rate", "base_amount",
 			"buying_amount", "gross_profit", "gross_profit_percent", "project"],
 		"item_code": ["item_code", "item_name", "brand", "description", "qty", "base_rate",
@@ -188,8 +189,8 @@ class GrossProfitGenerator(object):
 		# stock_ledger_entries should already be filtered by item_code and warehouse and
 		# sorted by posting_date desc, posting_time desc
 		if item_code in self.non_stock_items:
-			# average purchasing rate for non-stock items
-			item_rate = self.get_average_buying_rate(item_code)
+			#Issue 6089-Get last purchasing rate for non-stock item
+			item_rate = self.get_last_purchase_rate(item_code)
 			return flt(row.qty) * item_rate
 
 		else:
@@ -224,6 +225,22 @@ class GrossProfitGenerator(object):
 					where item_code = %s and qty_after_transaction > 0""", item_code)[0][0])
 
 		return self.average_buying_rate[item_code]
+
+	def get_last_purchase_rate(self, item_code):
+		if self.filters.to_date:
+			last_purchase_rate = frappe.db.sql("""
+			select (a.base_rate / a.conversion_factor)
+			from `tabPurchase Invoice Item` a
+			where a.item_code = %s and a.docstatus=1
+			and modified <= %s 
+			order by a.modified desc limit 1""", (item_code,self.filters.to_date))
+		else:
+			last_purchase_rate = frappe.db.sql("""
+			select (a.base_rate / a.conversion_factor)
+			from `tabPurchase Invoice Item` a
+			where a.item_code = %s and a.docstatus=1
+			order by a.modified desc limit 1""", item_code)
+		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
 
 	def load_invoice_items(self):
 		conditions = ""

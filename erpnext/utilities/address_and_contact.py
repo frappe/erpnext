@@ -29,7 +29,6 @@ def has_permission(doc, ptype, user):
 	for df in (links.get("permitted_links") + links.get("not_permitted_links")):
 		doctype = df.options
 		name = doc.get(df.fieldname)
-
 		names.append(name)
 
 		if name and frappe.has_permission(doctype, ptype, doc=name):
@@ -37,9 +36,7 @@ def has_permission(doc, ptype, user):
 
 	if not any(names):
 		return True
-
-	else:
-		return False
+	return False
 
 def get_permission_query_conditions_for_contact(user):
 	return get_permission_query_conditions("Contact")

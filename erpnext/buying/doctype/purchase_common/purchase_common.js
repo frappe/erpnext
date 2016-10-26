@@ -12,14 +12,6 @@ cur_frm.email_field = "contact_email";
 erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	setup: function() {
 		this._super();
-		if(!in_list(["Material Request", "Request for Quotation"], this.frm.doc.doctype)){
-			this.frm.get_field('items').grid.editable_fields = [
-				{fieldname: 'item_code', columns: 3},
-				{fieldname: 'qty', columns: 2},
-				{fieldname: 'rate', columns: 3},
-				{fieldname: 'amount', columns: 2}
-			];
-		}
 	},
 
 	onload: function() {
@@ -146,20 +138,15 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	qty: function(doc, cdt, cdn) {
+		var item = frappe.get_doc(cdt, cdn);
 		if ((doc.doctype == "Purchase Receipt") || (doc.doctype == "Purchase Invoice" && doc.update_stock)) {
-			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
 			if(!(item.received_qty || item.rejected_qty) && item.qty) {
 				item.received_qty = item.qty;
 			}
 
-			if(item.qty > item.received_qty) {
-				msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "qty", item.name)),
-							__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]))
-				item.qty = item.rejected_qty = 0.0;
-			} else {
-				item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
-			}
+			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
+			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
 		}
 
 		this._super(doc, cdt, cdn);
@@ -168,26 +155,18 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	received_qty: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		frappe.model.round_floats_in(item, ["qty", "received_qty"]);
-
-		item.qty = (item.qty < item.received_qty) ? item.qty : item.received_qty;
-		this.qty(doc, cdt, cdn);
+		this.calculate_accepted_qty(doc, cdt, cdn)
 	},
 
 	rejected_qty: function(doc, cdt, cdn) {
+		this.calculate_accepted_qty(doc, cdt, cdn)
+	},
+
+	calculate_accepted_qty: function(doc, cdt, cdn){
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
 
-		if(item.rejected_qty > item.received_qty) {
-			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "rejected_qty", item.name)),
-						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]));
-			item.qty = item.rejected_qty = 0.0;
-		} else {
-
-			item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
-		}
-
+		item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
 		this.qty(doc, cdt, cdn);
 	},
 
@@ -204,7 +183,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_projected_qty",
+				method: "erpnext.stock.get_item_details.get_bin_details",
 				child: item,
 				args: {
 					item_code: item.item_code,

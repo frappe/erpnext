@@ -4,16 +4,6 @@
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
-
-		if(in_list(["Sales Invoice", "Purchase Invoice"], this.frm.doc.doctype)) {
-			this.frm.get_field('advances').grid.editable_fields = [
-				{fieldname: 'reference_name', columns: 3},
-				{fieldname: 'remarks', columns: 3},
-				{fieldname: 'advance_amount', columns: 2},
-				{fieldname: 'allocated_amount', columns: 2}
-			];
-		}
-
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);

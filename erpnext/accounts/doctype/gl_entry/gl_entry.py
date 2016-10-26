@@ -44,9 +44,12 @@ class GLEntry(Document):
 				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
 
 		account_type = frappe.db.get_value("Account", self.account, "account_type")
-		if account_type in ["Receivable", "Payable"] and not (self.party_type and self.party):
-			frappe.throw(_("Party Type and Party is required for Receivable / Payable account {0}").format(self.account))
-
+		if not (self.party_type and self.party):
+			if account_type == "Receivable":
+				frappe.throw(_("Customer is required against Receivable account {0}").format(self.account))
+			elif account_type == "Payable":
+				frappe.throw(_("Supplier is required against Payable account {0}").format(self.account))
+				
 		# Zero value transaction is not allowed
 		if not (flt(self.debit) or flt(self.credit)):
 			frappe.throw(_("Either debit or credit amount is required for {0}").format(self.account))
@@ -54,7 +57,7 @@ class GLEntry(Document):
 	def pl_must_have_cost_center(self):
 		if frappe.db.get_value("Account", self.account, "report_type") == "Profit and Loss":
 			if not self.cost_center and self.voucher_type != 'Period Closing Voucher':
-				frappe.throw(_("Cost Center is required for 'Profit and Loss' account {0}")
+				frappe.throw(_("Cost Center is required for 'Profit and Loss' account {0}. Please set up a default Cost Center for the Company.")
 					.format(self.account))
 		else:
 			if self.cost_center:

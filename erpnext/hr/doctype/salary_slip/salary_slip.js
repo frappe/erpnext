@@ -13,6 +13,20 @@ frappe.ui.form.on("Salary Slip", {
 				}
 			}
 		}
+		frm.set_query("salary_component", "earnings", function() {
+			return {
+				filters: {
+					type: "earning"
+				}
+			}
+		})
+		frm.set_query("salary_component", "deductions", function() {
+			return {
+				filters: {
+					type: "deduction"
+				}
+			}
+		})
 	},
 
 	company: function(frm) {
@@ -24,7 +38,10 @@ frappe.ui.form.on("Salary Slip", {
 
 	refresh: function(frm) {
 		frm.trigger("toggle_fields")
-	},
+		salary_detail_fields = ['formula', 'abbr']
+		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
+		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
+	},	
 
 	salary_slip_based_on_timesheet: function(frm) {
 		frm.trigger("toggle_fields")

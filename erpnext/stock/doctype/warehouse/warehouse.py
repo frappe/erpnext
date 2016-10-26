@@ -150,7 +150,10 @@ class Warehouse(NestedSet):
 		return new_warehouse
 
 	def rename_account_for(self, olddn, newdn, merge):
-		old_account = self.get_account(olddn)
+		if self.is_group:
+			old_account = self.get_account()
+		else:
+			old_account = self.get_account(olddn)
 
 		if old_account:
 			new_account = None
@@ -278,7 +281,7 @@ def add_node():
 		parent = None
 
 	doc.update({
-		name_field: frappe.form_dict['name_field'],
+		name_field: frappe.form_dict['warehouse_name'],
 		parent_field: parent,
 		"is_group": frappe.form_dict['is_group'],
 		"company": company

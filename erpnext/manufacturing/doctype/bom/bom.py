@@ -74,14 +74,13 @@ class BOM(Document):
 		return item
 
 	def validate_rm_item(self, item):
-		if item[0]['name'] == self.item:
+		if (item[0]['name'] in [it.item_code for it in self.items]) and item[0]['name'] == self.item:
 			frappe.throw(_("Raw material cannot be same as main Item"))
 
 	def set_bom_material_details(self):
 		for item in self.get("items"):
 			ret = self.get_bom_material_detail({"item_code": item.item_code, "item_name": item.item_name, "bom_no": item.bom_no,
 				"qty": item.qty})
-
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
@@ -103,12 +102,12 @@ class BOM(Document):
 
 		rate = self.get_rm_rate(args)
 		ret_item = {
-			 'item_name'	: item and args['item_name'] or '',
-			 'description'  : item and args['description'] or '',
-			 'image'		: item and args['image'] or '',
-			 'stock_uom'	: item and args['stock_uom'] or '',
-			 'bom_no'		: args['bom_no'],
-			 'rate'			: rate
+			'item_name'	: item and args['item_name'] or '',
+			'description'  : item and args['description'] or '',
+			'image'		: item and args['image'] or '',
+			'stock_uom'	: item and args['stock_uom'] or '',
+			'bom_no'	: args['bom_no'],
+			'rate'		: rate
 		}
 		return ret_item
 
@@ -377,7 +376,7 @@ class BOM(Document):
 				if not d.description:
 					d.description = frappe.db.get_value('Operation', d.operation, 'description')
 
-def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
+def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_items=0):
 	item_dict = {}
 
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
@@ -406,11 +405,13 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
 		query = query.format(table="BOM Explosion Item",
 			conditions="""and item.is_sub_contracted_item = 0""")
 		items = frappe.db.sql(query, { "qty": qty,	"bom": bom }, as_dict=True)
+	elif fetch_scrap_items:
+		query = query.format(table="BOM Scrap Item", conditions="")
+		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", conditions="")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 
-	# make unique
 	for item in items:
 		if item_dict.has_key(item.item_code):
 			item_dict[item.item_code]["qty"] += flt(item.qty)

@@ -245,8 +245,8 @@ class StatusUpdater(Document):
 			frappe.db.sql("""update `tab%(target_parent_dt)s`
 				set %(target_parent_field)s = round(
 					ifnull((select
-						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, %(target_field)s, %(target_ref_field)s)), 0)
-						/ sum(%(target_ref_field)s) * 100
+						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
+						/ sum(abs(%(target_ref_field)s)) * 100
 					from `tab%(target_dt)s` where parent="%(name)s"), 0), 2)
 					%(update_modified)s
 				where name='%(name)s'""" % args)

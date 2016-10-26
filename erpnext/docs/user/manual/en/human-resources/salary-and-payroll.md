@@ -42,15 +42,58 @@ To create a new Salary Structure go to:
 
 > Human Resources > Setup > Salary Structure > New Salary Structure
 
-#### Figure 1:Salary Structure
+#### Figure 1.1:Salary Structure
 
 <img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/salary-structure.png">
 
 ### In the Salary Structure,
 
-  * Select the Employee
+  * Select the Employees and enter Base (which is base salary or CTC) and Variable (if applicable)
   * Set the starting date from which this is valid (Note: There can only be one Salary Structure that can be “Active” for an Employee during any period)
-  * In the “Earnings” and “Deductions” table all your defined Earning Type and Deductions Type will be auto-populated. Set the values of the Earnings and Deductions and save the Salary Structure.
+
+#### Figure 1.2:Salary Structure for Salary Slip based on Timesheet
+
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/salary-timesheet.png">
+  
+### Salary Slip Based on Timesheet 
+
+Salary Slip based on Timesheet is applicable if you have timesheet based payroll system
+  
+  * Check "Salary Slip Based on Timesheet"
+  * Select the salary component and enter Hour Rate (Note: This salary component gets added to earnings in Salary Slip)
+  
+### Earnings and Deductions in Salary Structure 
+
+In the “Earnings” and “Deductions” tables, you can calculate the values of Salary Components based on,
+
+  * Condition and Formula
+
+#### Figure 1.3:Condition and Formula
+
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/condition-formula.png">
+
+  * Condition and Amount
+  
+#### Figure 1.4:Condition and Amount
+
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/condition-amount.png">  
+
+  * Only Formula  
+  * Only Amount
+  
+#### Figure 1.5:Account Details
+
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/salary-structure-account.png">  
+
+  * Select Mode of Payment and Payment Account for the Salary Slips which will be generated using this Salary Structure
+  
+Save the Salary Structure.
+
+In conditions and formulas, 
+
+  * Use field "base" for using base salary of the Employee
+  * Use Salary Component abbreviations. For example: BS for Basic Salary
+  * Use field name for employee details. For example: Employment Type for employment_type
 
 ### Leave Without Pay (LWP)
 
@@ -64,6 +107,7 @@ days for the month (based on the Holiday List).
 If you don’t want ERPNext to manage LWP, just don’t click on LWP in any of the
 Earning Types and Deduction Types.
 
+
 * * *
 
 ### Creating Salary Slips
@@ -71,8 +115,9 @@ Earning Types and Deduction Types.
 Once the Salary Structure is created, you can make a salary slip from the same
 form or you can process your payroll for the month using Process Payroll.
 
-To create a salary slip from Salary Structure, click on the button Make Salary
-Slip.
+To create a new Salary Slip go to:
+
+> Human Resources > Setup > Salary Slip > New Salary Slip
 
 #### Figure 2: Salary Slip
 
@@ -89,8 +134,10 @@ You can also create salary slip for multiple employees using Process Payroll:
 In Process Payroll,
 
   1. Select the Company for which you want to create the Salary Slips.
-  2. Select the Month and the Year for which you want to create the Salary Slips.
-  3. Click on “Create Salary Slips”. This will create Salary Slip records for each active Employee for the month selected. If the Salary Slips are created, the system will not create any more Salary Slips. All updates will be shown in the “Activity Log” section.
+  2. Check "Salary Slip based on Timesheet" if you want to process timesheet based Salary Slips.
+  3. Select the From Date and To Date or Fiscal year and month for which you want to create the Salary Slips.
+  3. Select the Payment Account.
+  3. Click on “Create Salary Slips”. This will create Salary Slip records for each active Employee for the time period selected. If the Salary Slips are created, the system will not create any more Salary Slips. All updates will be shown in the “Activity Log” section.
   4. Once all Salary Slips are created, you can check if they are created correctly or edit it if you want to deduct Leave Without Pay (LWP).
   5. After checking, you can “Submit” them all together by clicking on “Submit Salary Slips”. 1. If you want them to be automatically emailed to the Employee, make sure to check the “Send Email” box.
 
@@ -105,12 +152,19 @@ there is only one payment entry in the company’s books of accounts and anyone
 with access to the company’s accounts will not have access to the individual
 salaries.
 
-The salary payment entry is a Journal Entry entry that debits the total
-salary of all Employees to the Salary Account and credits the company’s bank
-Account.
+The salary payment entry is a Journal Entry that debits the total of the
+earning type salary component and credits the total of deduction type salary 
+component of all Employees to the default account set at Salary Component level 
+for each component.
 
 To generate your salary payment voucher from Process Payroll, click on
-“Make Bank Voucher” and a new Journal Entry with the total salaries will be
+“Make Bank Entry”. It will ask to enter the Bank Transaction Reference Number and date.
+Click on "Make" and a new Journal Entry with the total salary components will be
 created.
+
+#### Figure 3.1: Make Bank Entry
+
+<img class="screenshot" alt="Process Payroll" src="{{docs_base_url}}/assets/img/human-resources/bank-entry.png">
+
 
 {next}

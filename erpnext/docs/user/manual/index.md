@@ -5,6 +5,6 @@ WORK IN PROGRESS
 
 Select your language
 
-1. [English](en)
-1. [Deutsch](de)
-1. [Español](es)
+1. [English]({{docs_base_url}}/user/manual/en)
+1. [Deutsch]({{docs_base_url}}/user/manual/de)
+1. [Español]({{docs_base_url}}/user/manual/es)
