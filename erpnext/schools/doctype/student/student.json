@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_import": 1, 
- "allow_rename": 0, 
+ "allow_rename": 1, 
  "autoname": "naming_series:", 
  "beta": 0, 
  "creation": "2015-09-07 13:00:55.938280", 
@@ -10,6 +10,7 @@
  "doctype": "DocType", 
  "document_type": "Document", 
  "editable_grid": 0, 
+ "engine": "InnoDB", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -762,7 +763,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-10-07 15:36:39.936505", 
+ "modified": "2016-10-26 12:24:10.533118", 
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "Student", 
