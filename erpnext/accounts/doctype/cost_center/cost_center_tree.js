@@ -23,4 +23,5 @@ frappe.treeview_settings["Cost Center"] = {
 		{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 			description:__('Further cost centers can be made under Groups but entries can be made against non-Groups')}
 	],
+	ignore_fields:["parent_cost_center"]
 }

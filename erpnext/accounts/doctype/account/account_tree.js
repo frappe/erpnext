@@ -1,3 +1,5 @@
+frappe.provide("frappe.treeview_settings")
+
 frappe.treeview_settings["Account"] = {
 	breadcrumbs: "Accounts",
 	title: __("Chart Of Accounts"),
@@ -33,10 +35,19 @@ frappe.treeview_settings["Account"] = {
 		{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate'),
 			depends_on: 'eval:doc.is_group==1&&doc.account_type=="Tax"'},
 		{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse",
-			depends_on: 'eval:(!doc.is_group&&doc.account_type=="Warehouse")'},
+			depends_on: 'eval:(!doc.is_group&&doc.account_type=="Stock")',
+			get_query: function() {
+				return {
+					filters:{
+						"company": frappe.treeview_settings.filters["company"]
+					}
+				}
+			}
+		},
 		{fieldtype:'Link', fieldname:'account_currency', label:__('Currency'), options:"Currency",
 			description: __("Optional. Sets company's default currency, if not specified.")}
 	],
+	ignore_fields:["parent_account"],
 	onrender: function(node) {
 		var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
 		if (node.data && node.data.balance!==undefined) {
