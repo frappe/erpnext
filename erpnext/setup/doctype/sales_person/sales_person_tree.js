@@ -1,3 +1,4 @@
+
 frappe.treeview_settings["Sales Person"] = {
 	fields: [
 		{fieldtype:'Data', fieldname: 'sales_person_name',
