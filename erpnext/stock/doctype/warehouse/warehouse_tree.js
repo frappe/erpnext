@@ -16,6 +16,7 @@ frappe.treeview_settings['Warehouse'] = {
 		{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 			description: __("Child nodes can be only created under 'Group' type nodes")}
 	],
+	ignore_fields:["parent_warehouse"],
 	onrender: function(node) {
 		if (node.data && node.data.balance!==undefined) {
 			$('<span class="balance-area pull-right text-muted small">'
