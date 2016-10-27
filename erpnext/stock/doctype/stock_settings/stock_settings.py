@@ -10,7 +10,7 @@ from frappe.model.document import Document
 
 class StockSettings(Document):
 	def validate(self):
-		for key in ["item_naming_by", "item_group", "stock_uom", "allow_negative_stock"]:
+		for key in ["item_naming_by", "item_group", "stock_uom", "allow_negative_stock", "default_warehouse"]:
 			frappe.db.set_default(key, self.get(key, ""))
 
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
