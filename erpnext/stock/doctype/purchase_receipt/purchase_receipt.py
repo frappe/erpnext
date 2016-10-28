@@ -8,7 +8,7 @@ from frappe.utils import flt, cint, nowdate
 
 from frappe import throw, _
 import frappe.defaults
-
+from frappe.utils import getdate
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
@@ -59,7 +59,7 @@ class PurchaseReceipt(BuyingController):
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_closed_status(pc_obj)
 		
-		if self.posting_date > nowdate():
+		if self.posting_date > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
 		
 
