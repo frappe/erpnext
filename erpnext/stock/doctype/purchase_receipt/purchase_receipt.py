@@ -59,7 +59,7 @@ class PurchaseReceipt(BuyingController):
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_closed_status(pc_obj)
 		
-		if self.posting_date > getdate(nowdate()):
+		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
 		
 
