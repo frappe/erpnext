@@ -247,7 +247,7 @@ def get_fy_details(fy_start_date, fy_end_date):
 	
 def create_sales_tax(args):
 	country_wise_tax = get_country_wise_tax(args.get("country"))
-	if len(country_wise_tax)>0:
+	if country_wise_tax and len(country_wise_tax) > 0:
 		for sales_tax, tax_data in country_wise_tax.items():
 			make_tax_account_and_template(args.get("company_name").strip(), 
 				tax_data.get('account_name'), tax_data.get('tax_rate'), sales_tax)
