@@ -8,6 +8,7 @@ import erpnext
 from frappe.utils.make_random import get_random
 from frappe.utils import nowdate, add_days, add_years
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
+from erpnext.hr.doctype.salary_slip.test_salary_slip import make_salary_component
 # test_records = frappe.get_test_records('Salary Structure')
 
 class TestSalaryStructure(unittest.TestCase):
@@ -23,7 +24,7 @@ class TestSalaryStructure(unittest.TestCase):
 			
 		self.make_holiday_list()
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Structure Test Holiday List")
-		self.make_salary_component(["Basic Salary", "Allowance", "HRA", "Professional Tax", "TDS"])
+		make_salary_component(["Basic Salary", "Allowance", "HRA", "Professional Tax", "TDS"])
 		employee1 = self.make_employee("test_employee@salary.com")
 		employee2 = self.make_employee("test_employee_2@salary.com")
 		
@@ -69,17 +70,6 @@ class TestSalaryStructure(unittest.TestCase):
 			return emp.name
 		else:
 			return frappe.get_value("Employee", {"employee_name":user}, "name")
-	
-	def make_salary_component(self, salary_components):
-		for salary_component in salary_components:
-			if not frappe.db.exists('Salary Component', salary_component):
-				sal_comp = frappe.get_doc({
-					"doctype": "Salary Component",
-					"salary_component": salary_component
-				})
-				sal_comp.insert()
-				
-
 		
 	def test_amount_totals(self):
 		sal_slip = frappe.get_value("Salary Slip", {"employee_name":"test_employee@salary.com"})
@@ -114,7 +104,7 @@ def make_salary_structure(sal_struct):
 			"employees": get_employee_details(),
 			"earnings": get_earnings_component(),
 			"deductions": get_deductions_component(),
-			"payment_account": frappe.get_all("Account")[0].name
+			"payment_account": frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 		}).insert()
 	return sal_struct
 			

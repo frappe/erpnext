@@ -8,11 +8,11 @@ import erpnext
 from frappe.utils.make_random import get_random
 from frappe.utils import today, now_datetime, getdate, cstr, add_years, nowdate
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.hr.doctype.leave_application.test_leave_application import make_allocation_record
+from erpnext.hr.doctype.process_payroll.test_process_payroll import get_salary_component_account
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
-		self.make_salary_component(["Basic Salary", "Allowance", "HRA", "Professional Tax", "TDS"])
+		make_salary_component(["Basic Salary", "Allowance", "HRA", "Professional Tax", "TDS"])
 		
 		for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
@@ -160,16 +160,7 @@ class TestSalarySlip(unittest.TestCase):
 			}).insert()	
 			holiday_list.get_weekly_off_dates()
 			holiday_list.save()
-			
-	def make_salary_component(self, salary_components):
-		for salary_component in salary_components:
-			if not frappe.db.exists('Salary Component', salary_component):
-				sal_comp = frappe.get_doc({
-					"doctype": "Salary Component",
-					"salary_component": salary_component
-				})
-				sal_comp.insert()		
-		
+				
 	def make_employee_salary_slip(self, user):
 		employee = frappe.db.get_value("Employee", {"user_id": user})
 		salary_structure = make_salary_structure("Salary Structure Test for Salary Slip")
@@ -194,6 +185,15 @@ class TestSalarySlip(unittest.TestCase):
 		activity_type.wage_rate = 25
 		activity_type.save()
 
+def make_salary_component(salary_components):
+	for salary_component in salary_components:
+		if not frappe.db.exists('Salary Component', salary_component):
+			sal_comp = frappe.get_doc({
+				"doctype": "Salary Component",
+				"salary_component": salary_component
+			})
+			sal_comp.insert()
+		get_salary_component_account(salary_component)
 
 def make_salary_structure(sal_struct):
 	if not frappe.db.exists('Salary Structure', sal_struct):
@@ -205,7 +205,7 @@ def make_salary_structure(sal_struct):
 			"employees": get_employee_details(),
 			"earnings": get_earnings_component(),
 			"deductions": get_deductions_component(),
-			"payment_account": get_random("Account")		
+			"payment_account": frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 		}).insert()
 	return sal_struct
 			
