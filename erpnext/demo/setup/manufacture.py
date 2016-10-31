@@ -63,7 +63,10 @@ def setup_item():
 	for i in items:
 		item = frappe.new_doc('Item')
 		item.update(i)
-		item.default_warehouse = frappe.get_all('Warehouse', filters={'warehouse_name': item.default_warehouse}, limit=1)[0].name
+		if item.default_warehouse:
+			warehouse = frappe.get_all('Warehouse', filters={'warehouse_name': item.default_warehouse}, limit=1)
+			if warehouse:
+				item.default_warehouse = warehouse[0].name
 		item.insert()
 
 def setup_product_bundle():
