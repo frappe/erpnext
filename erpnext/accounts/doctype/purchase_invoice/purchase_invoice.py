@@ -305,25 +305,8 @@ class PurchaseInvoice(BuyingController):
 		if not self.grand_total:
 			return
 		
-		self.auto_accounting_for_stock = \
-			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
-
-		self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
-		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-		self.negative_expense_to_be_booked = 0.0
-		gl_entries = []
-
-
-		self.make_supplier_gl_entry(gl_entries)
-		self.make_item_gl_entries(gl_entries)
-		self.make_tax_gl_entries(gl_entries)
-
-		gl_entries = merge_similar_entries(gl_entries)
-
-		self.make_payment_gl_entries(gl_entries)
-
-		self.make_write_off_gl_entry(gl_entries)
-
+		gl_entries = self.get_gl_entries()
+		
 		if gl_entries:
 			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 
@@ -342,6 +325,26 @@ class PurchaseInvoice(BuyingController):
 		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
+	def get_gl_entries(self, warehouse_account=None):
+		self.auto_accounting_for_stock = \
+			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
+
+		self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
+		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		self.negative_expense_to_be_booked = 0.0
+		gl_entries = []
+
+
+		self.make_supplier_gl_entry(gl_entries)
+		self.make_item_gl_entries(gl_entries)
+		self.make_tax_gl_entries(gl_entries)
+
+		gl_entries = merge_similar_entries(gl_entries)
+
+		self.make_payment_gl_entries(gl_entries)
+		self.make_write_off_gl_entry(gl_entries)
+		
+		return gl_entries
 
 	def make_supplier_gl_entry(self, gl_entries):
 		if self.grand_total:
