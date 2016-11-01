@@ -392,7 +392,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if(index < 30){
 					$(frappe.render_template("pos_item", {
 						item_code: obj.name,
-						item_price: format_currency(obj.price_list_rate, obj.currency),
+						item_price: format_currency(obj.price_list_rate, me.frm.doc.currency),
 						item_name: obj.name===obj.item_name ? "" : obj.item_name,
 						item_image: obj.image ? "url('" + obj.image + "')" : null,
 						color: frappe.get_palette(obj.item_name),

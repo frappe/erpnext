@@ -763,7 +763,8 @@ def get_party_account_and_balance(company, party_type, party):
 	return {
 		"account": account,
 		"balance": account_balance,
-		"party_balance": party_balance
+		"party_balance": party_balance,
+		"account_currency": frappe.db.get_value("Account", account, "account_currency")
 	}
 
 @frappe.whitelist()
