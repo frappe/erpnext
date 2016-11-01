@@ -31,7 +31,7 @@ class StockEntry(StockController):
 			item.update(get_bin_details(item.item_code, item.s_warehouse))
 
 	def validate(self):
-		self.pro_doc = None
+		self.pro_doc = frappe._dict()
 		if self.production_order:
 			self.pro_doc = frappe.get_doc('Production Order', self.production_order)
 
@@ -582,7 +582,7 @@ class StockEntry(StockController):
 
 	def set_production_order_details(self):
 		if not getattr(self, "pro_doc", None):
-			self.pro_doc = None
+			self.pro_doc = frappe._dict()
 
 		if self.production_order:
 			# common validations
