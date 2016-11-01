@@ -11,6 +11,10 @@ def execute():
 
 	for pi in frappe.db.sql("""select name from `tabPurchase Invoice` 
 		where update_stock=1 and docstatus=1  order by posting_date asc""", as_dict=1):
+		
+			frappe.db.sql("""delete from `tabGL Entry` 
+				where voucher_type = 'Purchase Invoice' and voucher_no = %s""", pi.name)
+				
 			pi_doc = frappe.get_doc("Purchase Invoice", pi.name)
-			pi_doc.make_gl_entries()
+			pi_doc.make_gl_entries(repost_future_gle=False)
 			frappe.db.commit()

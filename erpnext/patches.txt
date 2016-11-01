@@ -321,4 +321,4 @@ erpnext.patches.v7_0.update_mode_of_payment_type
 finally:erpnext.patches.v7_0.update_timesheet_communications
 erpnext.patches.v7_0.update_status_of_zero_amount_sales_order
 erpnext.patches.v7_0.repost_bin_qty_and_item_projected_qty
-erpnext.patches.v7_0.repost_gle_for_pi_with_update_stock
+erpnext.patches.v7_0.repost_gle_for_pi_with_update_stock #2016-11-01
