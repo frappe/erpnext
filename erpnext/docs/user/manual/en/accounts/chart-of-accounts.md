@@ -19,10 +19,19 @@ figure this out) it's a good opportunity to start learning about this. It will
 be worth the effort. You can also take the help of your accountant to setup
 your Chart of Accounts.
 
-Financial statement of your company is easily viewable in ERPNext. An Example
-of a financial statement is given below:
+Financial statements for your company are easily viewable in ERPNext. You can view financial statements
+such as  Balance Sheet, Profit and Loss statement and Cash flow statement.
 
-<img class="screenshot" alt="Financial Analytics Balance Sheet" src="{{docs_base_url}}/assets/img/accounts/financial-analytics-bl.png">
+An Example of various financial statement are given below:
+
+#### Cash Flow Report
+<img class="screenshot" alt="Cash Flow Report" src="{{docs_base_url}}/assets/img/accounts/cash_flow_report.png">
+
+#### Profit and Loss Report
+<img class="screenshot" alt="Profit and Loss Report" src="{{docs_base_url}}/assets/img/accounts/profit_n_loss_report.png">
+
+#### Balance Sheet Report
+<img class="screenshot" alt="Balance Sheet Report" src="{{docs_base_url}}/assets/img/accounts/balance_sheet_report.png">
 
 To edit your Chart of Accounts in ERPNext go to:
 
