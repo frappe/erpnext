@@ -369,11 +369,11 @@ def get_events(start, end, filters=None):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, 
 			`tabTimesheet Detail`.docstatus as status, `tabTimesheet Detail`.parent as parent,
-			from_time as start_date, hours, activity_type, project, to_time as end_date
+			from_time, hours, activity_type, project, to_time
 		from `tabTimesheet Detail`, `tabTimesheet` 
 		where `tabTimesheet Detail`.parent = `tabTimesheet`.name 
 			and `tabTimesheet`.docstatus < 2 
-			and (from_time between %(start)s and %(end)s) {conditions} {match_cond}
+			and (from_time <= %(end)s and to_time >= %(start)s) {conditions} {match_cond}
 		""".format(conditions=conditions, match_cond = get_match_cond('Timesheet')), 
 		{
 			"start": start,

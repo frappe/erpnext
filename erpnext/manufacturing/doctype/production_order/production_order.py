@@ -523,9 +523,9 @@ def get_events(start, end, filters=None):
 		planned_end_date, status
 		from `tabProduction Order`
 		where ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
-				and (planned_start_date between %(start)s and %(end)s) \
-			or ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
-				and planned_end_date between %(start)s and %(end)s)) {conditions}
+				and (planned_start_date <= %(end)s) \
+			and ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
+				and planned_end_date >= %(start)s)) {conditions}
 		""".format(conditions=conditions), {
 			"start": start,
 			"end": end
