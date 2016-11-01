@@ -131,7 +131,8 @@ class RequestforQuotation(BuyingController):
 
 	def send_email(self, data, sender, subject, message, attachments):
 		make(subject = subject, content=message,recipients=data.email_id, 
-			sender=sender,attachments = attachments, send_email=True)["name"]
+			sender=sender,attachments = attachments, send_email=True,
+		     	doctype=self.doctype, name=self.name)["name"]
 
 		frappe.msgprint(_("Email sent to supplier {0}").format(data.supplier))
 
