@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import msgprint, _
+from frappe import _
 from frappe.utils import get_datetime
 from frappe.model.document import Document
 
@@ -27,7 +27,7 @@ class AcademicTerm(Document):
         if self.term_start_date and get_datetime(year.year_start_date) and (self.term_start_date < get_datetime(year.year_start_date)):
             frappe.throw(_("The Term Start Date cannot be earlier than the Year Start Date of the Academic Year to which the term is linked (Academic Year {}). Please correct the dates and try again.").format(self.academic_year))
 
-        if self.term_end_date and get_datetime_(year.year_end_date) and (self.term_end_date > get_datetime(year.year_end_date)):
+        if self.term_end_date and get_datetime(year.year_end_date) and (self.term_end_date > get_datetime(year.year_end_date)):
             frappe.throw(_("The Term End Date cannot be later than the Year End Date of the Academic Year to which the term is linked (Academic Year {}). Please correct the dates and try again.").format(self.academic_year))
 
 
