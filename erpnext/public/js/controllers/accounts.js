@@ -81,6 +81,14 @@ frappe.ui.form.on('Payment Entry', {
 	}
 })
 
+frappe.ui.form.on('Salary Structure', {
+	mode_of_payment: function(frm) {
+		get_payment_mode_account(frm, frm.doc.mode_of_payment, function(account){
+			frm.set_value("payment_account", account);
+		})
+	}
+})
+
 get_payment_mode_account = function(frm, mode_of_payment, callback){
 	return  frappe.call({
 		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",

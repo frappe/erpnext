@@ -8,6 +8,18 @@ from frappe import _
 from frappe.model.document import Document
 
 class StudentApplicant(Document):
+	def autoname(self):
+		from frappe.model.naming import set_name_by_naming_series
+		if self.student_admission:
+			naming_series = frappe.db.get_value('Student Admission', self.student_admission,
+				'naming_series_for_student_applicant')
+			print naming_series
+
+			if naming_series:
+				self.naming_series = naming_series
+
+		set_name_by_naming_series(self)
+
 	def validate(self):
 		self.title = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
 

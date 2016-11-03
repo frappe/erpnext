@@ -39,9 +39,6 @@ def get_domain(domain):
 			'desktop_icons': ['Item', 'Customer', 'Supplier', 'Lead', 'Sales Order',
 				 'Sales Invoice', 'CRM', 'Selling', 'Buying', 'Stock', 'Accounts', 'HR', 'ToDo'],
 			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User'],
-			'properties': [
-				{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
-			],
 			'set_value': [
 				['Stock Settings', None, 'show_barcode_field', 1]
 			],
@@ -100,6 +97,7 @@ def setup_roles(data):
 	'''Add, remove roles from `data.allow_roles` or `data.remove_roles`'''
 	def remove_role(role):
 		frappe.db.sql('delete from tabUserRole where role=%s', role)
+		frappe.set_value('Role', role, 'disabled', 1)
 
 	if data.remove_roles:
 		for role in data.remove_roles:

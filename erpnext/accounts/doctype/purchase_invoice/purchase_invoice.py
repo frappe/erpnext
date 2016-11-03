@@ -58,7 +58,7 @@ class PurchaseInvoice(BuyingController):
 		self.check_for_closed_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
-		self.set_expense_account()
+		self.set_expense_account(for_validate=True)
 		self.set_against_expense_account()
 		self.validate_write_off_account()
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
@@ -71,7 +71,7 @@ class PurchaseInvoice(BuyingController):
 			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
 
 		if flt(self.paid_amount) + flt(self.write_off_amount) \
-				- flt(self.base_grand_total) > 1/(10**(self.precision("base_grand_total") + 1)):
+				- flt(self.grand_total) > 1/(10**(self.precision("base_grand_total") + 1)):
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
 	def create_remarks(self):
@@ -155,7 +155,7 @@ class PurchaseInvoice(BuyingController):
 
 		super(PurchaseInvoice, self).validate_warehouse()
 
-	def set_expense_account(self):
+	def set_expense_account(self, for_validate=False):
 		auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
 		if auto_accounting_for_stock:
@@ -181,7 +181,7 @@ class PurchaseInvoice(BuyingController):
 				else:
 					item.expense_account = stock_not_billed_account
 
-			elif not item.expense_account:
+			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
 
 	def set_against_expense_account(self):
@@ -305,25 +305,8 @@ class PurchaseInvoice(BuyingController):
 		if not self.grand_total:
 			return
 		
-		self.auto_accounting_for_stock = \
-			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
-
-		self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
-		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-		self.negative_expense_to_be_booked = 0.0
-		gl_entries = []
-
-
-		self.make_supplier_gl_entry(gl_entries)
-		self.make_item_gl_entries(gl_entries)
-		self.make_tax_gl_entries(gl_entries)
-
-		gl_entries = merge_similar_entries(gl_entries)
-
-		self.make_payment_gl_entries(gl_entries)
-
-		self.make_write_off_gl_entry(gl_entries)
-
+		gl_entries = self.get_gl_entries()
+		
 		if gl_entries:
 			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 
@@ -342,6 +325,26 @@ class PurchaseInvoice(BuyingController):
 		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
+	def get_gl_entries(self, warehouse_account=None):
+		self.auto_accounting_for_stock = \
+			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
+
+		self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
+		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		self.negative_expense_to_be_booked = 0.0
+		gl_entries = []
+
+
+		self.make_supplier_gl_entry(gl_entries)
+		self.make_item_gl_entries(gl_entries)
+		self.make_tax_gl_entries(gl_entries)
+
+		gl_entries = merge_similar_entries(gl_entries)
+
+		self.make_payment_gl_entries(gl_entries)
+		self.make_write_off_gl_entry(gl_entries)
+		
+		return gl_entries
 
 	def make_supplier_gl_entry(self, gl_entries):
 		if self.grand_total:
@@ -372,7 +375,7 @@ class PurchaseInvoice(BuyingController):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
 
-				if self.update_stock and self.auto_accounting_for_stock:
+				if self.update_stock and self.auto_accounting_for_stock and item.item_code in stock_items:
 					val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
 
 					# warehouse account
@@ -578,7 +581,8 @@ class PurchaseInvoice(BuyingController):
 
 		if not self.is_return:
 			from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-			unlink_ref_doc_from_payment_entries(self.doctype, self.name)
+			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+				unlink_ref_doc_from_payment_entries(self.doctype, self.name)
 
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")

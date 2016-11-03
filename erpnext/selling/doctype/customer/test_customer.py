@@ -8,6 +8,8 @@ import unittest
 
 from frappe.test_runner import make_test_records
 from erpnext.exceptions import PartyFrozen, PartyDisabled
+from frappe.utils import flt
+from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 
 test_ignore = ["Price List"]
 
@@ -111,6 +113,64 @@ class TestCustomer(unittest.TestCase):
 		self.assertEquals("_Test Customer 1 - 1", duplicate_customer.name)
 		self.assertEquals(test_customer_1.customer_name, duplicate_customer.customer_name)
 
+	def get_customer_outstanding_amount(self):
+		outstanding_amt = get_customer_outstanding('_Test Customer', '_Test Company')
+
+		# If outstanding is negative make a transaction to get positive outstanding amount
+		if outstanding_amt > 0.0:
+			return outstanding_amt
+
+		item_qty = int((abs(outstanding_amt) + 200)/100)
+		make_sales_order({'qty':item_qty})
+		return get_customer_outstanding('_Test Customer', '_Test Company')
+
+	def test_customer_credit_limit(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+
+		outstanding_amt = self.get_customer_outstanding_amount()
+		credit_limit = get_credit_limit('_Test Customer', '_Test Company')
+
+		if outstanding_amt <= 0.0:
+			item_qty = int((abs(outstanding_amt) + 200)/100)
+			make_sales_order({'qty':item_qty})
+
+		if credit_limit == 0.0:
+			frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', outstanding_amt - 50.0)
+
+		# Sales Order
+		so = make_sales_order(do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, so.submit)
+
+		# Delivery Note
+		dn = create_delivery_note(do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, dn.submit)
+
+		# Sales Invoice
+		si = create_sales_invoice(do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, si.submit)
+
+		if credit_limit > outstanding_amt:
+			frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', credit_limit)
+
+		# Makes Sales invoice from Sales Order
+		so.save(ignore_permissions=True)
+		si = make_sales_invoice(so.name)
+		si.save(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, make_sales_order)
+
+	def test_customer_credit_limit_on_change(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		outstanding_amt = self.get_customer_outstanding_amount()
+		credit_limit = get_credit_limit('_Test Customer', '_Test Company')
+
+		customer = frappe.get_doc("Customer", '_Test Customer')
+		customer.credit_limit = flt(outstanding_amt - 100)
+		self.assertRaises(frappe.ValidationError, customer.save)
+
 def get_customer_dict(customer_name):
 	return {
 		 "customer_group": "_Test Customer Group",
@@ -119,4 +179,3 @@ def get_customer_dict(customer_name):
 		 "doctype": "Customer",
 		 "territory": "_Test Territory"
 	}
-

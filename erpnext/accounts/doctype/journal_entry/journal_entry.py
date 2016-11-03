@@ -62,11 +62,13 @@ class JournalEntry(AccountsController):
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+		from erpnext.hr.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
 		unlink_ref_doc_from_payment_entries(self.doctype, self.name)
-
+		unlink_ref_doc_from_salary_slip(self.name)		
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.update_expense_claim()
+		
 
 	def validate_party(self):
 		for d in self.get("accounts"):
@@ -381,6 +383,7 @@ class JournalEntry(AccountsController):
 
 	def set_total_amount(self, amt, currency):
 		self.total_amount = amt
+		self.total_amount_currency = currency
 		from frappe.utils import money_in_words
 		self.total_amount_in_words = money_in_words(amt, currency)
 
@@ -760,7 +763,8 @@ def get_party_account_and_balance(company, party_type, party):
 	return {
 		"account": account,
 		"balance": account_balance,
-		"party_balance": party_balance
+		"party_balance": party_balance,
+		"account_currency": frappe.db.get_value("Account", account, "account_currency")
 	}
 
 @frappe.whitelist()

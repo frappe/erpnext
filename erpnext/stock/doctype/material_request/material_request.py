@@ -75,7 +75,7 @@ class MaterialRequest(BuyingController):
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 
-		self.set_title()
+		# self.set_title()
 
 
 		# self.validate_qty_against_so()

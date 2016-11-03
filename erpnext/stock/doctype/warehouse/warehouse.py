@@ -150,7 +150,10 @@ class Warehouse(NestedSet):
 		return new_warehouse
 
 	def rename_account_for(self, olddn, newdn, merge):
-		old_account = self.get_account(olddn)
+		if self.is_group:
+			old_account = self.get_account()
+		else:
+			old_account = self.get_account(olddn)
 
 		if old_account:
 			new_account = None

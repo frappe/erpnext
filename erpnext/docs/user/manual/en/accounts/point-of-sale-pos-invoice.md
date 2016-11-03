@@ -69,6 +69,25 @@ ready to make the Payment. Payment process is divided into 3 steps -
 Submit the document to finalise the record. After the document is submitted,
 you can either print or email it directly to the customer.
 
+### Write off Amount
+
+Outstanding amount can be write off from the POS, user has to enter the amount under write off field on the payment screen.
+
+<img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/write-off.png">
+
+System books the write off amount into the ledger which has selected on the POS Profile.
+
+### Change Amount
+
+POS calculate the extra amount paid by the customer, which user can return from the cash account. User has to set the account for the change amount on the POS profile.
+
+<img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/change-amount.png">
+
+### Offline Records
+All the records from the POS stores into the browser's local storegae and sync submitted records after every minute of the interval if system is connected to internet. User can view the offline records by clicking on Menu > View Offline Records
+
+<img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/offline-records.png">
+
 #### Accounting entries (GL Entry) for a Point of Sale:
 
 Debits:
@@ -82,6 +101,7 @@ Credits:
   * Taxes (liabilities to be paid to the government)
   * Customer (payment)
   * Write Off (optional)
+  * Account for Change Amount (optional)
 
 To see entries after “Submit”, click on “View Ledger”.
 

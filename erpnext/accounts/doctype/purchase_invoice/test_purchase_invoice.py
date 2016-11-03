@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.model
-from frappe.utils import cint, flt, today
+from frappe.utils import cint, flt, today, nowdate
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
 	test_records as pr_test_records
@@ -17,6 +17,12 @@ test_dependencies = ["Item", "Cost Center"]
 test_ignore = ["Serial No"]
 
 class TestPurchaseInvoice(unittest.TestCase):
+	def setUp(self):
+		unlink_payment_on_cancel_of_invoice()
+
+	def tearDown(self):
+		unlink_payment_on_cancel_of_invoice(0)
+
 	def test_gl_entries_without_auto_accounting_for_stock(self):
 		set_perpetual_inventory(0)
 		self.assertTrue(not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")))
@@ -54,6 +60,27 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.check_gle_for_pi(pi.name)
 
 		set_perpetual_inventory(0)
+
+	def test_payment_entry_unlink_against_purchase_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		unlink_payment_on_cancel_of_invoice(0)
+
+		pi_doc = make_purchase_invoice()
+
+		pe = get_payment_entry("Purchase Invoice", pi_doc.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = pi_doc.currency
+		pe.paid_to_account_currency = pi_doc.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = pi_doc.grand_total
+		pe.save(ignore_permissions=True)
+		pe.submit()
+
+		pi_doc = frappe.get_doc('Purchase Invoice', pi_doc.name)
+
+		self.assertRaises(frappe.LinkExistsError, pi_doc.cancel)
 
 	def test_gl_entries_with_auto_accounting_for_stock_against_pr(self):
 		set_perpetual_inventory(1)
@@ -410,6 +437,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEquals(frappe.db.get_value("Serial No", pi.get("items")[0].rejected_serial_no,
 			"warehouse"), pi.get("items")[0].rejected_warehouse)
+
+def unlink_payment_on_cancel_of_invoice(enable=1):
+	accounts_settings = frappe.get_doc("Accounts Settings")
+	accounts_settings.unlink_payment_on_cancellation_of_invoice = enable
+	accounts_settings.save()
 
 def make_purchase_invoice(**args):
 	pi = frappe.new_doc("Purchase Invoice")

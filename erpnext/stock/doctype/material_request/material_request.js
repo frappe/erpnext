@@ -7,7 +7,13 @@ frappe.ui.form.on('Material Request', {
 	onload: function(frm) {
 		// formatter for material request item
 		frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange" })
+			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange" }),
+
+		frm.fields_dict["items"].grid.get_field("warehouse").get_query = function(doc, cdt, cdn){
+			return{
+				filters: {'company': doc.company}
+			}
+		}
 	}
 });
 

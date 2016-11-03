@@ -18,6 +18,11 @@ choose to start its fiscal year on October 1. That way, they know what their
 income will be for that year, and can adjust their expenses to maintain their
 desired profit margins.
 
+To set the Fiscal Year as default, click on the 'Default' button.
+
+In case you have multiple companies sharing the same Fiscal Year, you can add
+it into the grid as shown below.
+
 <img class="screenshot" alt="Fiscal Year" src="{{docs_base_url}}/assets/img/accounts/fiscal-year.png">
 
 {next}

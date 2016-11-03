@@ -81,6 +81,12 @@ In the “Earnings” and “Deductions” tables, you can calculate the values 
   * Only Formula  
   * Only Amount
   
+#### Figure 1.5:Account Details
+
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/salary-structure-account.png">  
+
+  * Select Mode of Payment and Payment Account for the Salary Slips which will be generated using this Salary Structure
+  
 Save the Salary Structure.
 
 In conditions and formulas, 
@@ -128,8 +134,10 @@ You can also create salary slip for multiple employees using Process Payroll:
 In Process Payroll,
 
   1. Select the Company for which you want to create the Salary Slips.
-  2. Select the Month and the Year for which you want to create the Salary Slips.
-  3. Click on “Create Salary Slips”. This will create Salary Slip records for each active Employee for the month selected. If the Salary Slips are created, the system will not create any more Salary Slips. All updates will be shown in the “Activity Log” section.
+  2. Check "Salary Slip based on Timesheet" if you want to process timesheet based Salary Slips.
+  3. Select the From Date and To Date or Fiscal year and month for which you want to create the Salary Slips.
+  3. Select the Payment Account.
+  3. Click on “Create Salary Slips”. This will create Salary Slip records for each active Employee for the time period selected. If the Salary Slips are created, the system will not create any more Salary Slips. All updates will be shown in the “Activity Log” section.
   4. Once all Salary Slips are created, you can check if they are created correctly or edit it if you want to deduct Leave Without Pay (LWP).
   5. After checking, you can “Submit” them all together by clicking on “Submit Salary Slips”. 1. If you want them to be automatically emailed to the Employee, make sure to check the “Send Email” box.
 
@@ -144,12 +152,19 @@ there is only one payment entry in the company’s books of accounts and anyone
 with access to the company’s accounts will not have access to the individual
 salaries.
 
-The salary payment entry is a Journal Entry entry that debits the total
-salary of all Employees to the Salary Account and credits the company’s bank
-Account.
+The salary payment entry is a Journal Entry that debits the total of the
+earning type salary component and credits the total of deduction type salary 
+component of all Employees to the default account set at Salary Component level 
+for each component.
 
 To generate your salary payment voucher from Process Payroll, click on
-“Make Bank Voucher” and a new Journal Entry with the total salaries will be
+“Make Bank Entry”. It will ask to enter the Bank Transaction Reference Number and date.
+Click on "Make" and a new Journal Entry with the total salary components will be
 created.
+
+#### Figure 3.1: Make Bank Entry
+
+<img class="screenshot" alt="Process Payroll" src="{{docs_base_url}}/assets/img/human-resources/bank-entry.png">
+
 
 {next}

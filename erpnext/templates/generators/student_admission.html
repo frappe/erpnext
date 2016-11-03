@@ -16,38 +16,10 @@
 <div>{{ introduction }}</div>
 {% endif %}
 
-{%- if eligibility -%}
-<h3> Eligibility </h3>
-<div>{{ eligibility }}</div>
-{% endif %}
-
-<table class="table table-bordered" style="margin-top: 20px; width: 30%">
-	<tr>
-		<th> Program</th>
-		<td>{{ program }} </td>
-	</tr>
-	<tr>
-		<th> Academic Year</th>
-		<td>{{ academic_year }} </td>
-	</tr>
-	<tr>
-		<th> Admission Start Date</th>
-		<td>{{ frappe.utils.formatdate(admission_start_date) }}</td>
-	</tr>
-	<tr>
-		<th> Admission End Date</th>
-		<td>{{ frappe.utils.formatdate(admission_end_date) }}</td>
-	</tr>
-	<tr>
-		<th> Application Fee</th>
-		<td>{{ frappe.utils.fmt_money(application_fee, 2, currency) }}</td>
-	</tr>
-</table>
-
 {%- if application_form_route -%}
 <p>
 	<a class='btn btn-primary'
-	href='/{{ doc.application_form_route }}?program={{ doc.program }}&academic_year={{ doc.academic_year }}&new=1'>
+	href='/{{ doc.application_form_route }}'>
 	{{ _("Apply Now") }}</a>
 </p>
 {% endif %}

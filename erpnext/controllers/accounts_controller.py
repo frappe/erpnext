@@ -26,6 +26,9 @@ class AccountsController(TransactionBase):
 
 		return self.__company_currency
 
+	def onload(self):
+		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
@@ -144,7 +147,7 @@ class AccountsController(TransactionBase):
 				self.conversion_rate = get_exchange_rate(self.currency,
 					self.company_currency)
 
-	def set_missing_item_details(self):
+	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
 
@@ -196,7 +199,7 @@ class AccountsController(TransactionBase):
 								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
 
 			if self.doctype == "Purchase Invoice":
-				self.set_expense_account()
+				self.set_expense_account(for_validate)
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):

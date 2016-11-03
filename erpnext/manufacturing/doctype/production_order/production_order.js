@@ -225,6 +225,10 @@ $.extend(cur_frm.cscript, {
 				$.each(["description", "stock_uom", "bom_no"], function(i, field) {
 					cur_frm.set_value(field, r.message[field]);
 				});
+
+				if(r.message["set_scrap_wh_mandatory"]){
+					cur_frm.toggle_reqd("scrap_warehouse", true);
+				}
 			}
 		});
 	},
@@ -260,7 +264,12 @@ $.extend(cur_frm.cscript, {
 	bom_no: function() {
 		return this.frm.call({
 			doc: this.frm.doc,
-			method: "set_production_order_operations"
+			method: "set_production_order_operations",
+			callback: function(r) {
+				if(r.message["set_scrap_wh_mandatory"]){
+					cur_frm.toggle_reqd("scrap_warehouse", true);
+				}
+			}
 		});
 	},
 

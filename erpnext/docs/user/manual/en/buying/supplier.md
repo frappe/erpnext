@@ -2,7 +2,7 @@ Suppliers are companies or individuals who provide you with products or services
 
 You can create a new Supplier from:
 
-`Buying > Documents > Supplier > New Supplier`
+`Explore > Supplier > New Supplier`
 
 <img class="screenshot" alt="Supplier Master" src="{{docs_base_url}}/assets/img/buying/supplier-master.png">
 

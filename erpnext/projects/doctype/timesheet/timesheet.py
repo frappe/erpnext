@@ -163,7 +163,7 @@ class Timesheet(Document):
 
 	def validate_dates(self):
 		for data in self.time_logs:
-			if time_diff_in_hours(data.to_time, data.from_time) < 0:
+			if data.from_time and data.to_time and time_diff_in_hours(data.to_time, data.from_time) < 0:
 				frappe.throw(_("To date cannot be before from date"))
 
 	def validate_time_logs(self):
@@ -369,7 +369,7 @@ def get_events(start, end, filters=None):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, 
 			`tabTimesheet Detail`.docstatus as status, `tabTimesheet Detail`.parent as parent,
-			from_time, hours, activity_type, project, to_time 
+			from_time as start_date, hours, activity_type, project, to_time as end_date
 		from `tabTimesheet Detail`, `tabTimesheet` 
 		where `tabTimesheet Detail`.parent = `tabTimesheet`.name 
 			and `tabTimesheet`.docstatus < 2 

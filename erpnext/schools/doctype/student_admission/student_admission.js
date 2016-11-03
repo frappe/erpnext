@@ -8,7 +8,7 @@ frappe.ui.form.on('Student Admission', {
 			frm.refresh_field("route");
 		}
 	},
-	
+
 	academic_year: function(frm) {
 		frm.trigger("program");
 	}

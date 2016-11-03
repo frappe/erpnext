@@ -328,6 +328,19 @@ erpnext.patches.v7_1.update_lead_source
 erpnext.patches.v7_1.fix_link_for_customer_from_lead
 execute:frappe.db.sql("delete from `tabTimesheet Detail` where NOT EXISTS (select name from `tabTimesheet` where name = `tabTimesheet Detail`.parent)")
 erpnext.patches.v7_0.update_mode_of_payment_type
+
+execute:frappe.reload_doctype('Employee') #2016-10-18
+execute:frappe.db.sql("update `tabEmployee` set prefered_contact_email = IFNULL(prefered_contact_email,'') ")
 execute:frappe.reload_doctype("Salary Slip")
 execute:frappe.db.sql("update `tabSalary Slip` set posting_date=creation")
 erpnext.patches.v7_1.update_portal_roles
+erpnext.patches.v7_1.set_total_amount_currency_in_je
+finally:erpnext.patches.v7_0.update_timesheet_communications
+erpnext.patches.v7_0.update_status_of_zero_amount_sales_order
+erpnext.patches.v7_1.add_field_for_task_dependent
+erpnext.patches.v7_0.repost_bin_qty_and_item_projected_qty
+erpnext.patches.v7_1.set_prefered_contact_email
+execute:frappe.db.sql("update `tabSingles` set value = 1 where field = 'unlink_payment_on_cancellation_of_invoice' and doctype = 'Accounts Settings'")
+execute:frappe.db.sql("update `tabStock Entry` set total_amount = null where purpose in('Repack', 'Manufacture')")
+erpnext.patches.v7_1.save_stock_settings
+erpnext.patches.v7_0.repost_gle_for_pi_with_update_stock #2016-11-01

@@ -44,7 +44,9 @@ If field type is set as Select (drop down field), then all he possible result fo
 
 <img alt="Select Document Type" class="screenshot" src="{{docs_base_url}}/assets/img/customize/custom-field-5.png">
 
-For other field types like Data, Date, Currency, Option field will be left blank.
+For Data field, Option can be set to "Email" or "Phone" and the field will be validated accordingly.
+
+For other field types like Date, Currency, Option field will be left blank.
 
 ####Set More Properties
 

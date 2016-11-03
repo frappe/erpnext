@@ -43,7 +43,8 @@
 
 <!-- issue list -->
 {% if issue_list %}
-<h4 style="{{ section_head }}">{{ _("Open Issues ") }}<span class="badge">({{ issue_count }})</span></h4>
+<h4 style="{{ section_head }}">{{ _("Open Issues ") }}
+	<span class="badge">({{ issue_count }})</span></h4>
 <div>
 {% for t in issue_list %}
     <div style="{{ line_item }}">
@@ -66,7 +67,8 @@
 
 <!-- project list -->
 {% if project_list %}
-<h4 style="{{ section_head }}">{{ _("Open Projects ") }}<span class="badge">({{ project_count }})</span></h4>
+<h4 style="{{ section_head }}">{{ _("Open Projects ") }}
+	<span class="badge">({{ project_count }})</span></h4>
 <div>
 {% for t in project_list %}
     <div style="{{ line_item }}">
@@ -92,7 +94,8 @@
 
 <!-- events -->
 {% if events %}
-<h4 style="{{ section_head }}">{{ _("Upcoming Calendar Events ") }}<span class="badge">({{ event_count }})</span></h4>
+<h4 style="{{ section_head }}">{{ _("Upcoming Calendar Events ") }}
+	<span class="badge">({{ event_count }})</span></h4>
 <div>
 {% for e in events %}
     {% if loop.index==1 or events[loop.index-1].date != e.date %}
@@ -124,7 +127,8 @@
 
 <!-- todo list -->
 {% if todo_list %}
-<h4 style="{{ section_head }}">{{ _("Open To Do ") }}<span class="badge">({{ todo_count }})</span></h4>
+<h4 style="{{ section_head }}">{{ _("Open To Do ") }}
+	<span class="badge">({{ todo_count }})</span></h4>
 <div>
 {% for t in todo_list %}
     <div style="{{ line_item }}">

@@ -155,6 +155,30 @@ class PurchaseOrder(BuyingController):
 		if date_diff and date_diff[0][0]:
 			msgprint(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
 				raise_exception=True)
+				
+	def before_print(self):
+		if self.get("group_same_items"):
+			
+			group_item_qty = {}
+			group_item_amount = {}
+
+			for item in self.items:
+				group_item_qty[item.item_code] = group_item_qty.get(item.item_code, 0) + item.qty
+				group_item_amount[item.item_code] = group_item_amount.get(item.item_code, 0) + item.amount
+				
+			duplicate_list = []
+			
+			for item in self.items:
+				if item.item_code in group_item_qty:
+					item.qty = group_item_qty[item.item_code]
+					item.amount = group_item_amount[item.item_code]
+					del group_item_qty[item.item_code]
+				else:
+					duplicate_list.append(item)
+					
+			for item in duplicate_list:
+				self.remove(item)
+				
 
 	def update_status(self, status):
 		self.check_modified_date()
@@ -302,6 +326,11 @@ def make_purchase_invoice(source_name, target_doc=None):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
+		
+		item = frappe.db.get_value("Item", target.item_code, ["item_group", "buying_cost_center"], as_dict=1)
+		target.cost_center = frappe.db.get_value("Project", obj.project, "cost_center") \
+			or item.buying_cost_center \
+			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {

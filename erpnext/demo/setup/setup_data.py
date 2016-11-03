@@ -41,9 +41,9 @@ def complete_setup(domain='Manufacturing'):
 		setup_complete({
 			"first_name": "Test",
 			"last_name": "User",
-			"email": "test_demo@erpnext.com",
+			"email": "demo@erpnext.com",
 			"company_tagline": 'Awesome Products and Services',
-			"password": "test",
+			"password": "demo",
 			"fy_start_date": "2015-01-01",
 			"fy_end_date": "2015-12-31",
 			"bank_account": "National Bank",
@@ -130,7 +130,7 @@ def setup_salary_structure():
 		ss.from_date = e.date_of_joining if (e.date_of_joining
 			and e.date_of_joining > f.year_start_date) else f.year_start_date
 		ss.to_date = f.year_end_date
-
+		ss.payment_account = frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 	ss.append('earnings', {
 		'salary_component': 'Basic',
 		"abbr":'B',

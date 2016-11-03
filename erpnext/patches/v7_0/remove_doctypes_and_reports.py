@@ -13,7 +13,8 @@ def execute():
 			'doctype': 'Custom Field',
 			'label': data.label,
 			'dt': 'Timesheet Detail',
-			'fieldname': data.fieldname
+			'fieldname': data.fieldname,
+			'fieldtype': data.fieldtype or "Data"
 		}).insert(ignore_permissions=True)
 
 	frappe.db.sql("""delete from `tabCustom Field` where dt = 'Time Log'""")

@@ -10,7 +10,9 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.manufacturing.doctype.production_order.production_order \
 	import make_stock_entry, ItemHasVariantError
 from erpnext.stock.doctype.stock_entry import test_stock_entry
+from erpnext.stock.doctype.item.test_item import get_total_projected_qty
 from erpnext.stock.utils import get_bin
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 class TestProductionOrder(unittest.TestCase):
 	def setUp(self):
@@ -172,6 +174,28 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertEqual(self.bin1_at_start.projected_qty,
 			cint(bin1_on_cancel.projected_qty))
 
+	def test_projected_qty_for_production_and_sales_order(self):
+		before_production_order = get_bin(self.item, self.warehouse)
+		before_production_order.update_reserved_qty_for_production()
+
+		self.pro_order = make_prod_order_test_record(item="_Test FG Item", qty=2,
+			source_warehouse=self.warehouse)
+
+		after_production_order = get_bin(self.item, self.warehouse)
+
+		sales_order = make_sales_order(item = self.item, qty = 2)
+		after_sales_order = get_bin(self.item, self.warehouse)
+
+		self.assertEqual(cint(before_production_order.reserved_qty_for_production) + 2,
+			cint(after_sales_order.reserved_qty_for_production))
+		self.assertEqual(cint(before_production_order.projected_qty),
+			cint(after_sales_order.projected_qty) + 2)
+
+		total_projected_qty = get_total_projected_qty(self.item)
+
+		item_doc = frappe.get_doc('Item', self.item)
+		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
+
 	def test_reserved_qty_for_production_on_stock_entry(self):
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target= self.warehouse, qty=100, basic_rate=100)
@@ -209,6 +233,45 @@ class TestProductionOrder(unittest.TestCase):
 		self.pro_order.reload()
 		self.assertEqual(len(self.pro_order.required_items), 0)
 
+	def test_scrap_material_qty(self):
+		prod_order = make_prod_order_test_record(planned_start_date=now(), qty=2)
+
+		# add raw materials to stores
+		test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="Stores - _TC", qty=10, basic_rate=5000.0)
+		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="Stores - _TC", qty=10, basic_rate=1000.0)
+
+		s = frappe.get_doc(make_stock_entry(prod_order.name, "Material Transfer for Manufacture", 2))
+		for d in s.get("items"):
+			d.s_warehouse = "Stores - _TC"
+		s.insert()
+		s.submit()
+
+		s = frappe.get_doc(make_stock_entry(prod_order.name, "Manufacture", 2))
+		s.insert()
+		s.submit()
+
+		prod_order_details = frappe.db.get_value("Production Order", prod_order.name,
+			["scrap_warehouse", "qty", "produced_qty", "bom_no"], as_dict=1)
+
+		scrap_item_details = get_scrap_item_details(prod_order_details.bom_no)
+
+		self.assertEqual(prod_order_details.produced_qty, 2)
+
+		for item in s.items:
+			if item.bom_no and item.item_code in scrap_item_details:
+				self.assertEqual(prod_order_details.scrap_warehouse, item.t_warehouse)
+				self.assertEqual(flt(prod_order_details.qty)*flt(scrap_item_details[item.item_code]), item.qty)
+
+def get_scrap_item_details(bom_no):
+	scrap_items = {}
+	for item in frappe.db.sql("""select item_code, qty from `tabBOM Scrap Item`
+		where parent = %s""", bom_no, as_dict=1):
+		scrap_items[item.item_code] = item.qty
+
+	return scrap_items
+
 def make_prod_order_test_record(**args):
 	args = frappe._dict(args)
 
@@ -219,6 +282,7 @@ def make_prod_order_test_record(**args):
 	pro_order.qty = args.qty or 10
 	pro_order.wip_warehouse = args.wip_warehouse or "_Test Warehouse - _TC"
 	pro_order.fg_warehouse = args.fg_warehouse or "_Test Warehouse 1 - _TC"
+	pro_order.scrap_warehouse = args.fg_warehouse or "_Test Scrap Warehouse - _TC"
 	pro_order.company = args.company or "_Test Company"
 	pro_order.stock_uom = args.stock_uom or "_Test UOM"
 	pro_order.set_production_order_operations()
