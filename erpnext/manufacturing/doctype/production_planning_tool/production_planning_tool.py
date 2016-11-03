@@ -175,7 +175,7 @@ class ProductionPlanningTool(Document):
 				and bom.is_active = 1) %s""" % \
 			(", ".join(["%s"] * len(mr_list)), item_condition), tuple(mr_list), as_dict=1)
 
-		self.add_items(items) 
+		self.add_items(items)
 
 
 	def add_items(self, items):
@@ -314,7 +314,7 @@ class ProductionPlanningTool(Document):
 			}
 		"""
 		item_list = []
-		
+
 		for bom, so_wise_qty in bom_dict.items():
 			bom_wise_item_details = {}
 			if self.use_multi_level_bom and self.only_raw_materials and self.include_subcontracted:
@@ -335,19 +335,19 @@ class ProductionPlanningTool(Document):
 				# so no childs of SA items
 				bom_wise_item_details = self.get_subitems(bom_wise_item_details, bom,1, \
 					self.use_multi_level_bom,self.only_raw_materials, self.include_subcontracted,non_stock_item)
-				
+
 			for item, item_details in bom_wise_item_details.items():
 				for so_qty in so_wise_qty:
 					item_list.append([item, flt(item_details.qty) * so_qty[1], item_details.description,
 						item_details.stock_uom, item_details.min_order_qty, so_qty[0]])
-						
+
 		self.make_items_dict(item_list)
 
 	def get_subitems(self,bom_wise_item_details, bom, parent_qty, include_sublevel, only_raw, supply_subs,non_stock_item=0):
 		for d in frappe.db.sql("""SELECT bom_item.item_code, default_material_request_type,
-			ifnull(%(parent_qty)s * sum(bom_item.qty/ifnull(bom.quantity, 1)), 0) as qty, 
+			ifnull(%(parent_qty)s * sum(bom_item.qty/ifnull(bom.quantity, 1)), 0) as qty,
 			item.is_sub_contracted_item as is_sub_contracted, item.default_bom as default_bom,
-			bom_item.description as description,  bom_item.stock_uom as stock_uom,  item.min_order_qty 
+			bom_item.description as description,  bom_item.stock_uom as stock_uom,  item.min_order_qty
 			as min_order_qty FROM `tabBOM Item` bom_item, `tabBOM` bom, tabItem item
 			where bom.name = bom_item.parent and bom.name = %(bom)s and bom_item.docstatus < 2
 			and bom_item.item_code = item.name
@@ -364,7 +364,7 @@ class ProductionPlanningTool(Document):
 			if include_sublevel:
 				if (d.default_material_request_type == "Purchase" and d.is_sub_contracted \
 					and supply_subs) or (d.default_material_request_type == "Manufacture"):
-					child_details = self.get_subitems(bom_wise_item_details,d.default_bom, \
+					self.get_subitems(bom_wise_item_details,d.default_bom, \
 						d.qty, include_sublevel, only_raw, supply_subs)
 		return bom_wise_item_details
 
@@ -409,12 +409,12 @@ class ProductionPlanningTool(Document):
 		items_to_be_requested = frappe._dict()
 
 		if not self.create_material_requests_for_all_required_qty:
-			item_projected_qty = self.get_projected_qty()			
+			item_projected_qty = self.get_projected_qty()
 
 		for item, so_item_qty in self.item_dict.items():
 			total_qty = sum([flt(d[0]) for d in so_item_qty])
 			requested_qty = 0
-			
+
 			if self.create_material_requests_for_all_required_qty:
 				requested_qty = total_qty
 			elif total_qty > item_projected_qty.get(item, 0):
