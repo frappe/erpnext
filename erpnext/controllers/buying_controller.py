@@ -37,7 +37,7 @@ class BuyingController(StockController):
 			self.validate_purchase_receipt_if_update_stock()
 
 		if self.doctype=="Purchase Receipt" or (self.doctype=="Purchase Invoice" and self.update_stock):
-			# self.validate_purchase_return()
+			self.validate_purchase_return()
 			self.validate_rejected_warehouse()
 			self.validate_accepted_rejected_qty()
 
@@ -62,7 +62,7 @@ class BuyingController(StockController):
 		if getattr(self, "supplier", None):
 			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions))
 
-		self.set_missing_item_details(for_validate)
+		self.set_missing_item_details()
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:
@@ -317,25 +317,23 @@ class BuyingController(StockController):
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		self.update_ordered_qty()
-                msgprint(_("Inside 1"))
+
 		sl_entries = []
 		stock_items = self.get_stock_items()
 
 		for d in self.get('items'):
 			if d.item_code in stock_items and d.warehouse:
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
-                                msgprint(_(pr_qty))
-                                msgprint(_(d.item_tax_amount))
+
 				if pr_qty:
 					sle = self.get_sl_entries(d, {
 						"actual_qty": flt(pr_qty),
-                                                "item_tax": flt(d.item_tax_amount),
 						"serial_no": cstr(d.serial_no).strip()
 					})
 					if self.is_return:
 						original_incoming_rate = frappe.db.get_value("Stock Ledger Entry",
 							{"voucher_type": "Purchase Receipt", "voucher_no": self.return_against,
-							"item_code": d.item_code, "item_tax": d.item_tax_amount}, "incoming_rate")
+							"item_code": d.item_code}, "incoming_rate")
 
 						sle.update({
 							"outgoing_rate": original_incoming_rate
@@ -348,7 +346,7 @@ class BuyingController(StockController):
 						})
 					sl_entries.append(sle)
 
-				if flt(d.rejected_qty) != 0:
+				if flt(d.rejected_qty) > 0:
 					sl_entries.append(self.get_sl_entries(d, {
 						"warehouse": d.rejected_warehouse,
 						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
@@ -357,7 +355,6 @@ class BuyingController(StockController):
 					}))
 
 		self.make_sl_entries_for_supplier_warehouse(sl_entries)
-                msgprint(_("Inside 2"))
 		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher)
 
@@ -390,6 +387,5 @@ class BuyingController(StockController):
 					"item_code": d.rm_item_code,
 					"warehouse": self.supplier_warehouse,
 					"actual_qty": -1*flt(d.consumed_qty),
-                                        "item_tax": d.item_tax_amount
 				}))
 
