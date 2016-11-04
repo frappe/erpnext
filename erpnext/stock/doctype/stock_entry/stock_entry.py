@@ -297,7 +297,7 @@ class StockEntry(StockController):
 	def set_basic_rate_for_finished_goods(self, raw_material_cost, scrap_material_cost):
 		if self.purpose in ["Manufacture", "Repack"]:
 			for d in self.get("items"):
-				if (d.bom_no or d.t_warehouse) and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse):
+				if d.transfer_qty and (d.bom_no or d.t_warehouse) and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse):
 					d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
 					d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
 
@@ -316,11 +316,10 @@ class StockEntry(StockController):
 
 	def update_valuation_rate(self):
 		for d in self.get("items"):
-			d.amount = flt(flt(d.basic_amount) + flt(d.additional_cost), d.precision("amount"))
-			d.valuation_rate = flt(
-				flt(d.basic_rate)
-				+ (flt(d.additional_cost) / flt(d.transfer_qty)),
-				d.precision("valuation_rate"))
+			if d.transfer_qty:
+				d.amount = flt(flt(d.basic_amount) + flt(d.additional_cost), d.precision("amount"))
+				d.valuation_rate = flt(flt(d.basic_rate) + (flt(d.additional_cost) / flt(d.transfer_qty)),
+					d.precision("valuation_rate"))
 
 	def set_total_incoming_outgoing_value(self):
 		self.total_incoming_value = self.total_outgoing_value = 0.0
@@ -681,7 +680,7 @@ class StockEntry(StockController):
 		for item in transferred_materials:
 			qty= item.qty
 
-			if manufacturing_qty > (produced_qty + flt(self.fg_completed_qty)):
+			if trans_qty and manufacturing_qty > (produced_qty + flt(self.fg_completed_qty)):
 				qty = (qty/trans_qty) * flt(self.fg_completed_qty)
 
 			elif backflushed_materials.get(item.item_code):
@@ -819,7 +818,7 @@ def get_additional_costs(production_order=None, bom_no=None, fg_qty=None):
 			"amount": operating_cost_per_unit * flt(fg_qty)
 		})
 
-	if production_order and production_order.additional_operating_cost:
+	if production_order and production_order.additional_operating_cost and production_order.qty:
 		additional_operating_cost_per_unit = \
 			flt(production_order.additional_operating_cost) / flt(production_order.qty)
 
@@ -839,13 +838,14 @@ def get_operating_cost_per_unit(production_order=None, bom_no=None):
 		for d in production_order.get("operations"):
 			if flt(d.completed_qty):
 				operating_cost_per_unit += flt(d.actual_operating_cost) / flt(d.completed_qty)
-			else:
+			elif production_order.qty:
 				operating_cost_per_unit += flt(d.planned_operating_cost) / flt(production_order.qty)
 
 	# Get operating cost from BOM if not found in production_order.
 	if not operating_cost_per_unit and bom_no:
 		bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
-		operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
+		if bom.quantity:
+			operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
 
 	return operating_cost_per_unit
 
