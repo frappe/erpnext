@@ -168,7 +168,7 @@ class SalarySlip(TransactionBase):
 			return st_name and st_name[0][0] or ''
 		else:
 			self.salary_structure = None
-			frappe.throw(_("No active or default Salary Structure found for employee {0} for the given dates")
+			frappe.msgprint(_("No active or default Salary Structure found for employee {0} for the given dates")
 				.format(self.employee), title=_('Salary Structure Missing'))	
 
 	def pull_sal_struct(self):

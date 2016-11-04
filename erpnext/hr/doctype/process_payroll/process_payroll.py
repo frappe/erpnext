@@ -22,9 +22,9 @@ class ProcessPayroll(Document):
 
 		sal_struct = frappe.db.sql("""
 				select name from `tabSalary Structure`
-				where docstatus != 2 and payment_account = '%(payment_account)s' and 
-				ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s"""% 
-				{"payment_account": self.payment_account, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
+				where docstatus != 2 and company = %(company)s and
+				ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s""",
+				{"company": self.company, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
 		
 		if sal_struct:
 			cond += "and t2.parent IN %(sal_struct)s "
@@ -82,6 +82,7 @@ class ProcessPayroll(Document):
 							"start_date": self.from_date,
 							"end_date": self.to_date,
 							"employee": emp[0],
+							"employee_name": frappe.get_value("Employee", {"name":emp[0]}, "employee_name"),
 							"company": self.company,
 							"posting_date": self.posting_date
 						})
@@ -92,6 +93,7 @@ class ProcessPayroll(Document):
 							"fiscal_year": self.fiscal_year,
 							"month": self.month,
 							"employee": emp[0],
+							"employee_name": frappe.get_value("Employee", {"name":emp[0]}, "employee_name"),
 							"company": self.company,
 							"posting_date": self.posting_date
 						})	
@@ -222,8 +224,8 @@ class ProcessPayroll(Document):
 	
 	def make_journal_entry(self, reference_number = None, reference_date = None):
 		self.check_permission('write')
-		earnings = self.get_salary_component_total(component_type = "earnings")
-		deductions = self.get_salary_component_total(component_type = "deductions")
+		earnings = self.get_salary_component_total(component_type = "earnings") or {}
+		deductions = self.get_salary_component_total(component_type = "deductions") or {}
 		jv_name = ""
 
 		if earnings or deductions:
