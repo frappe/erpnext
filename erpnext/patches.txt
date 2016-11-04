@@ -298,6 +298,7 @@ execute:frappe.delete_doc_if_exists("DocType", "Payment Tool")
 execute:frappe.delete_doc_if_exists("DocType", "Payment Tool Detail")
 erpnext.patches.v7_0.setup_account_table_for_expense_claim_type_if_exists
 erpnext.patches.v7_0.migrate_schools_to_erpnext
+erpnext.patches.v7_1.update_lead_source
 erpnext.patches.v6_20x.remove_customer_supplier_roles
 erpnext.patches.v7_0.remove_administrator_role_in_doctypes
 erpnext.patches.v7_0.rename_fee_amount_to_fee_component
@@ -324,7 +325,6 @@ erpnext.patches.v7_1.set_student_guardian
 erpnext.patches.v7_0.update_conversion_factor_in_supplier_quotation_item
 erpnext.patches.v7_1.move_sales_invoice_from_parent_to_child_timesheet
 execute:frappe.db.sql("update `tabTimesheet` ts, `tabEmployee` emp set ts.employee_name = emp.employee_name where emp.name = ts.employee and ts.employee_name is null and ts.employee is not null")
-erpnext.patches.v7_1.update_lead_source
 erpnext.patches.v7_1.fix_link_for_customer_from_lead
 execute:frappe.db.sql("delete from `tabTimesheet Detail` where NOT EXISTS (select name from `tabTimesheet` where name = `tabTimesheet Detail`.parent)")
 erpnext.patches.v7_0.update_mode_of_payment_type
