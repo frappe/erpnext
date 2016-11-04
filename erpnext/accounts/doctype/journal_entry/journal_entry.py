@@ -39,6 +39,7 @@ class JournalEntry(AccountsController):
 		self.set_account_and_party_balance()
 		if not self.title:
 			self.title = self.get_title()
+		self.clear_zero_debit_credit_row()
 
 	def on_submit(self):
 		self.check_credit_limit()
@@ -526,6 +527,10 @@ class JournalEntry(AccountsController):
 
 			d.account_balance = account_balance[d.account]
 			d.party_balance = party_balance[(d.party_type, d.party)]
+
+	def clear_zero_debit_credit_row(self):
+		self.accounts = [account for account in self.accounts if not (account.debit_in_account_currency==0.0 and account.credit_in_account_currency==0.0)]
+		frappe.db.sql("""delete from `tabJournal Entry Account` where parent = %s and debit = 0.0 and credit = 0.0""", self.name)
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None):
