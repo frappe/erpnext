@@ -6,16 +6,48 @@
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
 
-frappe.ui.form.on('Delivery Note', 'onload', function(frm) {
-	frm.set_indicator_formatter('item_code',
-		function(doc) {
-			return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
+frappe.ui.form.on("Delivery Note", {
+	setup: function(frm) {
+		var qa_no = frappe.meta.get_docfield("Delivery Note Item", "qa_no");
+		qa_no.get_route_options_for_new_doc = function(field) {
+			if(frm.is_new()) return;
+			var doc = field.doc;
+			return {
+				"inspection_type": "Outgoing",
+				"delivery_note_no": frm.doc.name,
+				"item_code": doc.item_code,
+				"description": doc.description,
+				"item_serial_no": doc.serial_no ? doc.serial_no.split("\n")[0] : null,
+				"batch_no": doc.batch_no
+			}
+		}
+
+		frm.set_indicator_formatter('item_code',
+			function(doc) {
+				return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
+			})
+
+		frm.set_query("warehouse", "items", function() {
+			return {
+				filters: [
+					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+					["Warehouse", "is_group", "=", 0]
+				]
+			}
 		})
 
-	erpnext.queries.setup_queries(frm, "Warehouse", function() {
-		return erpnext.queries.warehouse(frm.doc);
-	});
-})
+		frm.set_query("qa_no", "items", function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: {
+					docstatus: 1,
+					inspection_type: "Outgoing",
+					item_code: d.item_code
+				}
+			}
+		})
+	}
+});
 
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {

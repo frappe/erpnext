@@ -7,7 +7,6 @@ frappe.provide("erpnext.stock");
 
 frappe.ui.form.on("Purchase Receipt", {
 	onload: function(frm) {
-		// default values for quotation no
 		var qa_no = frappe.meta.get_docfield("Purchase Receipt Item", "qa_no");
 		qa_no.get_route_options_for_new_doc = function(field) {
 			if(frm.is_new()) return;
@@ -39,6 +38,17 @@ frappe.ui.form.on("Purchase Receipt", {
 					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
 					["Warehouse", "is_group", "=", 0]
 				]
+			}
+		})
+
+		frm.set_query("qa_no", "items", function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: {
+					docstatus: 1,
+					inspection_type: "Incoming",
+					item_code: d.item_code
+				}
 			}
 		})
 	}
