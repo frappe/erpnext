@@ -16,9 +16,9 @@ and Deductions.
 Salary structures are used to help organizations:
   1. Maintain pay levels that are competitive with the external labor market,
   2. Maintain internal pay relationships among jobs,
-  3. Recognize and reward differences in level of responsibility, skill, and performance, and manage pay expenditures.
+  3. Recognize and reward differences in level the of responsibility, skill, and performance, and manage pay expenditures.
 
-The usual components of the salary structure (in india) include:
+The usual components of the salary structure (in India) include:
 
 __Basic Salary:__ It is the taxable base income and generally not more than 40% of CTC.
 
@@ -32,7 +32,7 @@ __Gratuity:__ It is basically a lump sum amount paid by the employer when the em
 
 __PF:__ Fund collected during emergency or old age. 12% of the basic salary is automatically deducted and goes to the employee provident fund.
 
-__Medical Allowance:__ The employer pays the employee for the medical expenditures incurred. It is tax free up to Rs.15,000.
+__Medical Allowance:__ The employer pays the employee for the medical expenditures incurred. It is tax-free up to Rs.15,000.
 
 __Bonus:__ Taxable part of the CTC, usually a once a year lump sum amount, given to the employee based on the individual’s as well as the organizational performance for the year.
 
