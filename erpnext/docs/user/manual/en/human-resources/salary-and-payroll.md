@@ -16,7 +16,7 @@ and Deductions.
 Salary structures are used to help organizations:
   1. Maintain pay levels that are competitive with the external labor market,
   2. Maintain internal pay relationships among jobs,
-  3. Recognize and reward differences in level the of responsibility, skill, and performance, and manage pay expenditures.
+  3. Recognize and reward differences in the level of responsibility, skill, and performance, and manage pay expenditures.
 
 The usual components of the salary structure (in India) include:
 
