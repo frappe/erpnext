@@ -68,4 +68,44 @@ of each year reducing its value by a certain percentage.
 > Note: There may be regulations in your country that define by how much
 amount you can depreciate a class of Assets.
 
+#### Credit Note
+
+"Credit Note" is made for a Customer against a Sales Invoice when the 
+company needs to adjust a payment for returned goods. When a Credit Note
+is made, the seller can either make a payment to the customer or adjust 
+the amount in another invoice.
+
+  * Debit: Sales Return Account
+  * Credit: Customer Account
+  
+#### Debit Note
+
+"Debit Note" is made for a Supplier against a Purchase Invoice or accepted 
+as a credit note from supplier when a company returns goods. When a Debit
+Note is made, the company can either receive a payment from the supplier or 
+adjust the amount in another invoice.
+
+  * Debit: Supplier Account
+  * Credit: Purchase Return Account 
+
+#### Excise Entry
+
+When a Company buys good from a Supplier, company pays excise duty
+on these goods to Supplier. And when a company sells these goods to Customers, 
+it receives excise duty. Company will deduct payable excise duty and deposit balance 
+in Govt. account.
+
+  * When a Company buys goods with Excise duty: 
+    * Debit: Purchase Account
+    * Debit: Excise Duty Account
+	* Credit: Supplier Account
+	
+  * When a Company sells goods with Excise duty: 
+    * Debit: Customer Account
+    * Credit: Sales Account
+	* Credit: Excise Duty Account
+
+> Note: Applicable in India, might not be applicable for your Country. 
+Please check your country regulations.
+
 {next}
