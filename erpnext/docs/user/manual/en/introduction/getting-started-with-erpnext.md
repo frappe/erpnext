@@ -30,6 +30,6 @@ Image](https://erpnext.com/download)
 
 ### 4\. Install ERPNext on your Unix/Linux/Mac machine
 
-If you are familiar to installing applications on *nix platforms, read the instructions on how to install using [Frappe Bench](https://github.com/frappe/bench).
+If you are familiar with installing applications on *nix platforms, read the instructions on how to install using [Frappe Bench](https://github.com/frappe/bench).
 
 {next}
