@@ -30,6 +30,7 @@ def get_notification_config():
 				"outstanding_amount": (">", 0), 
 				"docstatus": ("<", 2)
 			},
+			"Payment Entry": {"docstatus": 0},
 			"Leave Application": {"status": "Open"},
 			"Expense Claim": {"approval_status": "Draft"},
 			"Job Applicant": {"status": "Open"},
