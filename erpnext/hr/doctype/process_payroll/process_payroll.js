@@ -2,43 +2,43 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Process Payroll", {
-	refresh: function(frm) {
-		frm.disable_save();
-		frm.trigger("toggle_fields");
-		frm.trigger("set_month_dates");
-	},
-	
-	month: function(frm) {
-		frm.trigger("set_month_dates");
-	},
-	
-	fiscal_year: function(frm) {
-		frm.trigger("set_month_dates");
-	},
-	
-	salary_slip_based_on_timesheet: function(frm) {
-		frm.trigger("toggle_fields")
+	onload: function(frm) {
+		frm.doc.posting_date = frm.doc.start_date = frm.doc.end_date = frappe.datetime.nowdate()
 	},
 
-	toggle_fields: function(frm) {
-		frm.toggle_display(['from_date','to_date'],
-			cint(frm.doc.salary_slip_based_on_timesheet)==1);
-		frm.toggle_display(['fiscal_year', 'month'],
-			cint(frm.doc.salary_slip_based_on_timesheet)==0);
+	refresh: function(frm) {
+		frm.disable_save();
 	},
 	
-	set_month_dates: function(frm) {
+	payroll_frequency: function(frm) {
+		frm.trigger("set_start_end_dates");
+	},
+	
+	start_date: function(frm) {
+		frm.trigger("set_start_end_dates");
+	},
+	
+	end_date: function(frm) {
+		frm.trigger("set_start_end_dates");
+	},
+
+	payment_account: function(frm) {
+		frm.toggle_display(['make_bank_entry'], (frm.doc.payment_account!="" && frm.doc.payment_account!="undefined"));
+	},
+	
+	set_start_end_dates: function(frm) {
 		if (!frm.doc.salary_slip_based_on_timesheet){
 			frappe.call({
-				method:'erpnext.hr.doctype.process_payroll.process_payroll.get_month_details',
+				method:'erpnext.hr.doctype.process_payroll.process_payroll.get_start_end_dates',
 				args:{
-					year: frm.doc.fiscal_year, 
-					month: frm.doc.month
+					payroll_frequency: frm.doc.payroll_frequency,
+					start_date: frm.doc.start_date,
+					end_date: frm.doc.end_date
 				},
 				callback: function(r){
 					if (r.message){
-						frm.set_value('from_date', r.message.month_start_date);
-						frm.set_value('to_date', r.message.month_end_date);			
+						frm.set_value('start_date', r.message.start_date);
+						frm.set_value('end_date', r.message.end_date);			
 					}
 				}
 			})
@@ -55,17 +55,6 @@ frappe.ui.form.on("Process Payroll", {
 		}
 	}
 })
-
-cur_frm.cscript.onload = function(doc,cdt,cdn){
-		if(!doc.month) {
-			var today=new Date();
-			month = (today.getMonth()+01).toString();
-			if(month.length>1) doc.month = month;
-			else doc.month = '0'+month;
-		}
-		if(!doc.fiscal_year) doc.fiscal_year = sys_defaults['fiscal_year'];
-		refresh_many(['month', 'fiscal_year']);
-}
 
 cur_frm.cscript.display_activity_log = function(msg) {
 	if(!cur_frm.ss_html)
@@ -92,7 +81,7 @@ cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
 cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 	cur_frm.cscript.display_activity_log("");
 
-	frappe.confirm(__("Do you really want to Submit all Salary Slip from {0} to {1}", [doc.from_date, doc.to_date]), function() {
+	frappe.confirm(__("Do you really want to Submit all Salary Slip from {0} to {1}", [doc.start_date, doc.end_date]), function() {
 		// clear all in locals
 		if(locals["Salary Slip"]) {
 			$.each(locals["Salary Slip"], function(name, d) {
@@ -110,7 +99,7 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.make_bank_entry = function(doc,cdt,cdn){
-    if(doc.company && doc.from_date && doc.to_date){
+    if(doc.company && doc.start_date && doc.end_date){
 		return cur_frm.cscript.reference_entry(doc,cdt,cdn);
     } else {
   	  msgprint(__("Company, From Date and To Date is mandatory"));

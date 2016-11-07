@@ -3,10 +3,12 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt, nowdate
+from frappe.utils import cint, flt, nowdate, add_days, getdate
 from frappe import _
 import collections
 from collections import defaultdict
+from calendar import monthrange
+from erpnext.accounts.utils import get_fiscal_year
 
 from frappe.model.document import Document
 
@@ -19,7 +21,12 @@ class ProcessPayroll(Document):
 		"""
 		cond = self.get_filter_condition()
 		cond += self.get_joining_releiving_condition()
-
+		
+		
+		struct_cond = ''
+		if self.payroll_frequency:
+			struct_cond = """and payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}	
+			
 		sal_struct = frappe.db.sql("""
 				select name from `tabSalary Structure`
 				where docstatus != 2 and is_active = 'Yes' and company = %(company)s and
@@ -28,13 +35,11 @@ class ProcessPayroll(Document):
 		
 		if sal_struct:
 			cond += "and t2.parent IN %(sal_struct)s "
-
 			emp_list = frappe.db.sql("""
 				select t1.name
 				from `tabEmployee` t1, `tabSalary Structure Employee` t2
 				where t1.docstatus!=2 and t1.name = t2.employee
 			%s """% cond, {"sal_struct": sal_struct})
-
 			return emp_list
 
 
@@ -51,16 +56,16 @@ class ProcessPayroll(Document):
 
 	def get_joining_releiving_condition(self):
 		cond = """
-			and ifnull(t1.date_of_joining, '0000-00-00') <= '%(to_date)s'
-			and ifnull(t1.relieving_date, '2199-12-31') >= '%(from_date)s'
-		""" % {"from_date": self.from_date, "to_date": self.to_date}
+			and ifnull(t1.date_of_joining, '0000-00-00') <= '%(end_date)s'
+			and ifnull(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
+		""" % {"start_date": self.start_date, "end_date": self.end_date}
 		return cond
 
 
 	def check_mandatory(self):
-		for f in ['company', 'from_date', 'to_date']:
-			if not self.get(f):
-				frappe.throw(_("Please set {0}").format(f))
+		for fieldname in ['company', 'payroll_frequency', 'start_date', 'end_date']:
+			if not self.get(fieldname):
+				frappe.throw(_("Please set {0}").format(self.meta.get_label(fieldname)))
 
 	def create_sal_slip(self):
 		"""
@@ -74,28 +79,28 @@ class ProcessPayroll(Document):
 			for emp in emp_list:
 				if not frappe.db.sql("""select name from `tabSalary Slip`
 						where docstatus!= 2 and employee = %s and start_date >= %s and end_date <= %s and company = %s
-						""", (emp[0], self.from_date, self.to_date, self.company)):
-					if self.salary_slip_based_on_timesheet:
+						""", (emp[0], self.start_date, self.end_date, self.company)):
+					if self.payroll_frequency == "Monthly" or self.payroll_frequency == '':
 						ss = frappe.get_doc({
 							"doctype": "Salary Slip",
 							"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
-							"start_date": self.from_date,
-							"end_date": self.to_date,
 							"employee": emp[0],
 							"employee_name": frappe.get_value("Employee", {"name":emp[0]}, "employee_name"),
 							"company": self.company,
-							"posting_date": self.posting_date
+							"posting_date": self.posting_date,
+							"payroll_frequency": self.payroll_frequency
 						})
 					else:
 						ss = frappe.get_doc({
 							"doctype": "Salary Slip",
 							"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
-							"fiscal_year": self.fiscal_year,
-							"month": self.month,
+							"start_date": self.start_date,
+							"end_date": self.end_date,
 							"employee": emp[0],
 							"employee_name": frappe.get_value("Employee", {"name":emp[0]}, "employee_name"),
 							"company": self.company,
-							"posting_date": self.posting_date
+							"posting_date": self.posting_date,
+							"payroll_frequency": self.payroll_frequency
 						})	
 					ss.insert()
 					ss_list.append(ss.name)
@@ -120,7 +125,7 @@ class ProcessPayroll(Document):
 			select t1.name, t1.salary_structure from `tabSalary Slip` t1
 			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s 
 			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s %s
-		""" % ('%s', '%s', '%s','%s', cond), (ss_status, self.from_date, self.to_date, self.salary_slip_based_on_timesheet), as_dict=as_dict)
+		""" % ('%s', '%s', '%s','%s', cond), (ss_status, self.start_date, self.end_date, self.salary_slip_based_on_timesheet), as_dict=as_dict)
 		return ss_list
 
 
@@ -183,7 +188,7 @@ class ProcessPayroll(Document):
 		tot = frappe.db.sql("""
 			select sum(rounded_total) from `tabSalary Slip` t1
 			where t1.docstatus = 1 and start_date >= %s and end_date <= %s %s
-		""" % ('%s', '%s', cond), (self.from_date, self.to_date))
+		""" % ('%s', '%s', cond), (self.start_date, self.end_date))
 
 		return flt(tot[0][0])
 		
@@ -231,8 +236,8 @@ class ProcessPayroll(Document):
 		if earnings or deductions:
 			journal_entry = frappe.new_doc('Journal Entry')
 			journal_entry.voucher_type = 'Bank Entry'
-			journal_entry.user_remark = _('Payment of salary from {0} to {1}').format(self.from_date,
-				self.to_date)
+			journal_entry.user_remark = _('Payment of salary from {0} to {1}').format(self.start_date,
+				self.end_date)
 			journal_entry.company = self.company
 			journal_entry.posting_date = nowdate()
 		
@@ -257,6 +262,7 @@ class ProcessPayroll(Document):
 			journal_entry.set("accounts", account_amt_list)
 			journal_entry.cheque_no = reference_number
 			journal_entry.cheque_date = reference_date
+			journal_entry.multi_currency = 1
 			journal_entry.save()
 			try:
 				journal_entry.submit()
@@ -279,7 +285,7 @@ class ProcessPayroll(Document):
 		for ss in ss_list:
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
 			frappe.db.set_value("Salary Slip", ss_obj.name, "status", "Paid")
-			frappe.db.set_value("Salary Slip", ss_obj.name, "journal_entry", jv_name)
+			frappe.db.set_value("Salary Slip", ss_obj.name, "journal_entry", jv_name)		
 
 
 @frappe.whitelist()
@@ -293,12 +299,45 @@ def get_month_details(year, month):
 			diff_mnt = 12-int(ysd.month)+cint(month)
 		msd = ysd + relativedelta(months=diff_mnt) # month start date
 		month_days = cint(calendar.monthrange(cint(msd.year) ,cint(month))[1]) # days in month
+		mid_start = datetime.date(msd.year, cint(month), 16) # month mid start date
+		mid_end = datetime.date(msd.year, cint(month), 15) # month mid end date
 		med = datetime.date(msd.year, cint(month), month_days) # month end date
 		return frappe._dict({
 			'year': msd.year,
 			'month_start_date': msd,
 			'month_end_date': med,
+			'month_mid_start_date': mid_start,
+			'month_mid_end_date': mid_end,
 			'month_days': month_days
 		})
 	else:
 		frappe.throw(_("Fiscal Year {0} not found").format(year))
+
+@frappe.whitelist()
+def get_start_end_dates(payroll_frequency, start_date, end_date):
+	if payroll_frequency == "Monthly" or payroll_frequency == "Bimonthly":
+		fiscal_year = get_fiscal_year(start_date)[0] or get_fiscal_year(end_date)[0]
+		month = "%02d" % getdate(start_date).month or "%02d" % getdate(end_date).month
+		m = get_month_details(fiscal_year, month)
+		if payroll_frequency == "Bimonthly":
+			if getdate(start_date).day <= 15:
+				start_date = m['month_start_date']
+				end_date = m['month_mid_end_date']
+			else:
+				start_date = m['month_mid_start_date']
+				end_date = m['month_end_date']
+		else:
+			start_date = m['month_start_date']
+			end_date = m['month_end_date']
+		
+	if payroll_frequency == "Weekly":
+		end_date = add_days(start_date, 6)
+			
+	if payroll_frequency == "Fortnightly":
+		end_date = add_days(start_date, 13)
+		
+	if payroll_frequency == "Daily":
+		end_date = start_date
+	return frappe._dict({
+		'start_date': start_date, 'end_date': end_date
+	})

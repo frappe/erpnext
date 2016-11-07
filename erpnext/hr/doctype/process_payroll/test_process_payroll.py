@@ -18,15 +18,14 @@ class TestProcessPayroll(unittest.TestCase):
 				get_salary_component_account(data.name)
 				
 		payment_account = frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
-		if not frappe.db.get_value("Salary Slip", {"fiscal_year": fiscal_year, "month": month}):
+		if not frappe.db.get_value("Salary Slip", {"start_date": "2016-11-01", "end_date": "2016-11-30"}):
 			process_payroll = frappe.get_doc("Process Payroll", "Process Payroll")
 			process_payroll.company = erpnext.get_default_company()
-			process_payroll.month = month
-			process_payroll.fiscal_year = fiscal_year
-			process_payroll.from_date = "2016-11-01"
-			process_payroll.to_date = "2016-11-30"
+			process_payroll.start_date = "2016-11-01"
+			process_payroll.end_date = "2016-11-30"
 			process_payroll.payment_account = payment_account
 			process_payroll.posting_date = nowdate()
+			process_payroll.payroll_frequency = "Monthly"
 			process_payroll.create_sal_slip()
 			process_payroll.submit_salary_slip()
 			if process_payroll.get_sal_slip_list(ss_status = 1):
