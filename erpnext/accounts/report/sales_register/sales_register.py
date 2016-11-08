@@ -21,7 +21,7 @@ def execute(filters=None):
 		invoice_income_map, income_accounts)
 
 	invoice_so_dn_map = get_invoice_so_dn_map(invoice_list)
-	customer_map = get_customer_deatils(invoice_list)
+	customer_map = get_customer_details(invoice_list)
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 	mode_of_payments = get_mode_of_payments([inv.name for inv in invoice_list])
 
@@ -184,7 +184,7 @@ def get_invoice_so_dn_map(invoice_list):
 
 	return invoice_so_dn_map
 
-def get_customer_deatils(invoice_list):
+def get_customer_details(invoice_list):
 	customer_map = {}
 	customers = list(set([inv.customer for inv in invoice_list]))
 	for cust in frappe.db.sql("""select name, territory, customer_group from `tabCustomer`
