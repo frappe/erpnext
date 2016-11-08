@@ -384,7 +384,7 @@ DocType: Purchase Invoice Item,Quantity and Rate,數量和速率
 DocType: Delivery Note,% Installed,％已安裝
 apps/erpnext/erpnext/public/js/setup_wizard.js +378,Classrooms/ Laboratories etc where lectures can be scheduled.,教室/實驗室等在那裡的演講可以預定。
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +46,Please enter company name first,請先輸入公司名稱
-DocType: BOM,Item Desription,項目Desription
+DocType: BOM,Item Description,項目Description
 DocType: Purchase Invoice,Supplier Name,供應商名稱
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +25,Read the ERPNext Manual,閱讀ERPNext手冊
 DocType: Account,Is Group,是集團
