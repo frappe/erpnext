@@ -86,6 +86,7 @@ class SalesInvoice(SellingController):
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
+		self.set_status()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -158,6 +159,7 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		self.make_gl_entries_on_cancel()
+		frappe.db.set(self, 'status', 'Cancelled')
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
