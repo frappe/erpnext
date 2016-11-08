@@ -322,18 +322,7 @@ def make_sales_invoice(source_name, target=None):
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc=None):
 	target = frappe.new_doc("Salary Slip")
-	set_missing_values(source_name, target)
-	
-	target.append("timesheets", get_mapped_doc("Timesheet", source_name, {
-		"Timesheet": {
-			"doctype": "Salary Slip Timesheet",
-			"field_map": {
-				"total_hours": "working_hours",
-				"name": "time_sheet"
-			},
-		}
-	}))
-	
+	set_missing_values(source_name, target)	
 	target.run_method("get_emp_and_leave_details")
 
 	return target

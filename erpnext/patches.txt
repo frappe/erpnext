@@ -340,7 +340,9 @@ erpnext.patches.v7_0.update_status_of_zero_amount_sales_order
 erpnext.patches.v7_1.add_field_for_task_dependent
 erpnext.patches.v7_0.repost_bin_qty_and_item_projected_qty
 erpnext.patches.v7_1.set_prefered_contact_email
-execute:frappe.db.sql("update `tabSingles` set value = 1 where field = 'unlink_payment_on_cancellation_of_invoice' and doctype = 'Accounts Settings'")
+execute:frappe.reload_doc('accounts', 'doctype', 'accounts_settings')
+execute:frappe.db.set_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 0)
 execute:frappe.db.sql("update `tabStock Entry` set total_amount = null where purpose in('Repack', 'Manufacture')")
 erpnext.patches.v7_1.save_stock_settings
 erpnext.patches.v7_0.repost_gle_for_pi_with_update_stock #2016-11-01
+erpnext.patches.v7_1.add_account_user_role_for_timesheet

@@ -483,20 +483,22 @@ frappe.ui.form.on('Sales Invoice', {
 frappe.ui.form.on('Sales Invoice Timesheet', {
 	time_sheet: function(frm, cdt, cdn){
 		var d = locals[cdt][cdn];
-		frappe.call({
-			method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_data",
-			args: {
-				'name': d.time_sheet,
-				'project': frm.doc.project || null
-			},
-			callback: function(r, rt) {
-				if(r.message){
-					data = r.message;
-					frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
-					frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
-					frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
+		if(d.time_sheet) {
+			frappe.call({
+				method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_data",
+				args: {
+					'name': d.time_sheet,
+					'project': frm.doc.project || null
+				},
+				callback: function(r, rt) {
+					if(r.message){
+						data = r.message;
+						frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
+						frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
+						frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
+					}
 				}
-			}
-		})
+			})
+		}
 	}
 })

@@ -988,6 +988,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				item.margin_rate_or_amount = pricing_rule[0].margin_rate_or_amount;
 				item.discount_percentage = pricing_rule[0].discount_percentage || 0.0;
 				me.apply_pricing_rule_on_item(item)
+			} else if(item.discount_percentage > 0 || item.margin_rate_or_amount > 0) {
+				item.margin_rate_or_amount = 0.0;
+				item.discount_percentage = 0.0;
+				me.apply_pricing_rule_on_item(item)
 			}
 		})
 	},
