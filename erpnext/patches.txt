@@ -322,3 +322,4 @@ finally:erpnext.patches.v7_0.update_timesheet_communications
 erpnext.patches.v7_0.update_status_of_zero_amount_sales_order
 erpnext.patches.v7_0.repost_bin_qty_and_item_projected_qty
 erpnext.patches.v7_0.repost_gle_for_pi_with_update_stock #2016-11-01
+erpnext.patches.v7_0.set_base_amount_in_invoice_payment_table
