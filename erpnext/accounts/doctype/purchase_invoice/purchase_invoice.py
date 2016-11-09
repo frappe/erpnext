@@ -65,6 +65,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_fixed_asset()
 		self.validate_fixed_asset_account()
 		self.create_remarks()
+		self.set_status()
 
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
@@ -596,6 +597,7 @@ class PurchaseInvoice(BuyingController):
 		self.make_gl_entries_on_cancel()
 		self.update_project()
 		self.update_fixed_asset()
+		frappe.db.set(self, 'status', 'Cancelled')
 
 	def update_project(self):
 		project_list = []
