@@ -721,3 +721,12 @@ def get_advance_payment_entries(party_type, party, party_account,
 			""".format(party_account_field), (party_account, party_type, party, payment_type), as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
+
+def update_invoice_status():
+	# Daily update the status of the invoices
+
+	frappe.db.sql(""" update `tabSales Invoice` set status = 'Overdue' 
+		where due_date < CURDATE() and docstatus = 1 and outstanding_amount > 0""")
+
+	frappe.db.sql(""" update `tabPurchase Invoice` set status = 'Overdue' 
+		where due_date < CURDATE() and docstatus = 1 and outstanding_amount > 0""")
