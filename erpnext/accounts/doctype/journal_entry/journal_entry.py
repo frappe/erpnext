@@ -42,9 +42,8 @@ class JournalEntry(AccountsController):
 			self.title = self.get_title()
 			
 	def clear_zero_debit_credit_row(self):
-		self.accounts = [account for account in self.accounts if not (account.debit_in_account_currency==0.0 and account.credit_in_account_currency==0.0)]
-		frappe.db.sql("""delete from `tabJournal Entry Account` where parent = %s and debit = 0.0 and credit = 0.0""", self.name)
-
+		self.accounts = [account for account in self.accounts 
+			if not (account.debit_in_account_currency==0.0 and account.credit_in_account_currency==0.0)]
 
 	def on_submit(self):
 		self.check_credit_limit()
