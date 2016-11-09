@@ -12,9 +12,11 @@ def execute():
 		update 
 			`tabPurchase Invoice` 
 		set 
-			status = (Case When outstanding_amount = 0 and docstatus = 1 then 'Paid'
+			status = (Case When outstanding_amount = 0 and docstatus = 1 and is_return = 0 then 'Paid'
 			when due_date < CURDATE() and outstanding_amount > 0 and docstatus =1 then 'Overdue'
 			when due_date >= CURDATE() and outstanding_amount > 0 and docstatus =1 then 'Unpaid'
+			when outstanding_amount < 0 and docstatus =1 then 'Debit Note Issued'
+			when is_return = 1 and docstatus =1 then 'Return'
 			when docstatus = 2 then 'Cancelled'
 			else 'Draft'
 		End)""")
@@ -22,9 +24,11 @@ def execute():
 	frappe.db.sql(""" 
 		update 
 			`tabSales Invoice` 
-		set status = (Case When outstanding_amount = 0 and docstatus = 1 then 'Paid'
+		set status = (Case When outstanding_amount = 0 and docstatus = 1 and is_return = 0 then 'Paid'
 			when due_date < CURDATE() and outstanding_amount > 0 and docstatus =1 then 'Overdue'
 			when due_date >= CURDATE() and outstanding_amount > 0 and docstatus =1 then 'Unpaid'
+			when outstanding_amount < 0 and docstatus =1 then 'Credit Note Issued'
+			when is_return = 1 and docstatus =1 then 'Return'
 			when docstatus = 2 then 'Cancelled'
 			else 'Draft'
 		End)""")
