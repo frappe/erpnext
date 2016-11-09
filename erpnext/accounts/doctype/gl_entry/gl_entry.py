@@ -195,6 +195,7 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
 		ref_doc.db_set('outstanding_amount', bal)
+		ref_doc.set_status(update=True)
 
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.db.get_value("Account", account, "freeze_account")
