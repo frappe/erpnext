@@ -7,8 +7,9 @@ frappe.provide("erpnext.stock");
 
 frappe.ui.form.on("Purchase Receipt", {
 	onload: function(frm) {
-		var qa_no = frappe.meta.get_docfield("Purchase Receipt Item", "qa_no");
-		qa_no.get_route_options_for_new_doc = function(field) {
+		console.log('onload1');
+		var quality_inspection = frappe.meta.get_docfield("Purchase Receipt Item", "quality_inspection");
+		quality_inspection.get_route_options_for_new_doc = function(field) {
 			if(frm.is_new()) return;
 			var doc = field.doc;
 			return {
@@ -20,7 +21,7 @@ frappe.ui.form.on("Purchase Receipt", {
 				"batch_no": doc.batch_no
 			}
 		}
-
+		console.log(quality_inspection);
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
 			frm.set_query(field, "items", function() {
 				return {
@@ -39,22 +40,18 @@ frappe.ui.form.on("Purchase Receipt", {
 					["Warehouse", "is_group", "=", 0]
 				]
 			}
-		})
-
-		frm.set_query("qa_no", "items", function(doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
-			return {
-				filters: {
-					docstatus: 1,
-					inspection_type: "Incoming",
-					item_code: d.item_code
-				}
-			}
-		})
+		});
+		
 	}
 });
 
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
+	onload: function() {
+		this._super();
+		console.log(' before onload2');
+		//this.setup_inspection_required_filter('Incoming');
+		this.setup_quality_inspection("Purchase Receipt Item","Incoming")
+	},
 	refresh: function() {
 		this._super();
 		if(this.frm.doc.docstatus===1) {
@@ -200,7 +197,7 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 	}
 }
 
-cur_frm.fields_dict.items.grid.get_field("qa_no").get_query = function(doc) {
+cur_frm.fields_dict.items.grid.get_field("quality_inspection").get_query = function(doc) {
 	return {
 		filters: {
 			'docstatus': 1

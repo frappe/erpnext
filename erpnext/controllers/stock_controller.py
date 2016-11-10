@@ -254,6 +254,18 @@ class StockController(AccountsController):
 			"name": self.name,
 		}, update_modified)
 
+	def validate_inspection(self, inspection_type):
+		'''Checks if quality inspection is set for Items that require inspection.
+		On submit, throw an exception'''
+		for d in self.get('items'):
+			if (frappe.db.get_value("Item", d.item_code, inspection_type) 
+				and not d.quality_inspection):
+				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
+				if self.docstatus==1:
+					raise frappe.ValidationError
+
+
+
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):
 	def _delete_gl_entries(voucher_type, voucher_no):

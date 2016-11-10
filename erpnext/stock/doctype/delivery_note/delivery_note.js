@@ -8,8 +8,8 @@ frappe.provide("erpnext.stock.delivery_note");
 
 frappe.ui.form.on("Delivery Note", {
 	setup: function(frm) {
-		var qa_no = frappe.meta.get_docfield("Delivery Note Item", "qa_no");
-		qa_no.get_route_options_for_new_doc = function(field) {
+		var quality_inspection = frappe.meta.get_docfield("Delivery Note Item", "quality_inspection");
+		quality_inspection.get_route_options_for_new_doc = function(field) {
 			if(frm.is_new()) return;
 			var doc = field.doc;
 			return {
@@ -36,7 +36,7 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		})
 
-		frm.set_query("qa_no", "items", function(doc, cdt, cdn) {
+		frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {
 				filters: {

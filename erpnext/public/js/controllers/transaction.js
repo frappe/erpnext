@@ -1004,5 +1004,32 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		return method
+	},
+
+	setup_quality_inspection: function(doctype_name, inspection_type) {
+		var quality_inspection = frappe.meta.get_docfield(doctype_name, "quality_inspection");
+		quality_inspection.get_route_options_for_new_doc = function(field) {
+			if(frm.is_new()) return;
+			var doc = field.doc;
+			return {
+				"inspection_type": inspection_type,
+				"purchase_receipt_no": frm.doc.name,
+				"item_code": doc.item_code,
+				"description": doc.description,
+				"item_serial_no": doc.serial_no ? doc.serial_no.split("\n")[0] : null,
+				"batch_no": doc.batch_no
+			}
+		}
+		this.frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: {
+					docstatus: 1,
+					inspection_type: inspection_type,
+					item_code: d.item_code
+				}
+			}
+		});
+
 	}
 });

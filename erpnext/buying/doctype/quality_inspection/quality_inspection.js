@@ -33,7 +33,7 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 				"parent": doc.purchase_receipt_no
 			}
 		}
-	} else if (doc.delivery_note_no) {
+	} else if(doc.delivery_note_no) {
 		return {
 			query: "erpnext.buying.doctype.quality_inspection.quality_inspection.item_query",
 			filters: {
