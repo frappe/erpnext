@@ -119,7 +119,7 @@ DocType: Employee,Single,solo
 DocType: Account,Cost of Goods Sold,Costo de las Ventas
 DocType: Journal Entry Account,Sales Order,Ordenes de Venta
 DocType: Purchase Invoice Item,Quantity and Rate,Cantidad y Cambio
-DocType: BOM,Item Desription,Descripción del Artículo
+DocType: BOM,Item Description,Descripción del Artículo
 DocType: Purchase Invoice,Supplier Name,Nombre del Proveedor
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +57,'To Case No.' cannot be less than 'From Case No.','Hasta Caso No.' no puede ser inferior a 'Desde el Caso No.'
 DocType: Production Order,Not Started,Sin comenzar

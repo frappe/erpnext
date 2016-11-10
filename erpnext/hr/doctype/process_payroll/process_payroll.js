@@ -82,7 +82,7 @@ cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
 cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 	cur_frm.cscript.display_activity_log("");
 
-	frappe.confirm(__("Do you really want to Submit all Salary Slip for Account {0} from {1} to {2}", [doc.payment_account, doc.from_date, doc.to_date]), function() {
+	frappe.confirm(__("Do you really want to Submit all Salary Slip from {0} to {1}", [doc.from_date, doc.to_date]), function() {
 		// clear all in locals
 		if(locals["Salary Slip"]) {
 			$.each(locals["Salary Slip"], function(name, d) {

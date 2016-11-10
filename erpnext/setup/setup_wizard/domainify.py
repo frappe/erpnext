@@ -105,7 +105,7 @@ def setup_roles(data):
 
 	if data.allow_roles:
 		# remove all roles other than allowed roles
-		data.allow_roles += ['Administrator', 'Guest', 'System Manager']
+		data.allow_roles += ['Administrator', 'Guest', 'System Manager', 'All']
 		for role in frappe.get_all('Role'):
 			if not (role.name in data.allow_roles):
 				remove_role(role.name)

@@ -7,7 +7,9 @@
 			<div class="col-sm-3 small" style="margin-top: 8px;">
 				{% if show_item %}
 					<a data-type="item"
-						data-name="{{ d.item_code }}">{{ d.item_code }}</a>
+						data-name="{{ d.item_code }}">{{ d.item_code }}
+						{% if d.item_name != d.item_code %}({{ d.item_name }}){% endif %}
+					</a>
 				{% endif %}
 			</div>
 			<div class="col-sm-4 small">

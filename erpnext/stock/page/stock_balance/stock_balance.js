@@ -28,6 +28,17 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 		}
 	});
 
+	page.item_group_field = page.add_field({
+		fieldname: 'item_group',
+		label: __('Item Group'),
+		fieldtype:'Link',
+		options:'Item Group',
+		change: function() {
+			page.item_dashboard.start = 0;
+			page.item_dashboard.refresh();
+		}
+	});
+
 	page.sort_selector = new frappe.ui.SortSelector({
 		parent: page.wrapper.find('.page-form'),
 		args: {
@@ -58,6 +69,7 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 		page.item_dashboard.before_refresh = function() {
 			this.item_code = page.item_field.get_value();
 			this.warehouse = page.warehouse_field.get_value();
+			this.item_group = page.item_group_field.get_value();
 		}
 
 		page.item_dashboard.refresh();
