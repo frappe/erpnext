@@ -6,7 +6,8 @@ def execute():
 	si_list = frappe.db.sql("""
 		select distinct parent
 		from `tabSales Invoice Payment`
-		where docstatus!=2 and amount != 0 and base_amount = 0
+		where docstatus!=2 and parenttype = 'Sales Invoice'
+		and amount != 0 and base_amount = 0
 	""")
 
 	count = 0
