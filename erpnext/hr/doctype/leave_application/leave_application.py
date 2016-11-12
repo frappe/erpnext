@@ -99,7 +99,7 @@ class LeaveApplication(Document):
 			frappe.throw(_("Leave cannot be applied/cancelled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}")
 				.format(formatdate(future_allocation[0].from_date), future_allocation[0].name))
 
-<<<<<<< HEAD
+
 	def validate_salary_processed_days(self):
 		if not frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
 			return
@@ -116,8 +116,8 @@ class LeaveApplication(Document):
 				formatdate(last_processed_pay_slip[0][1])))
 
 
-=======
->>>>>>> Vhrs Update 12/11/16
+
+
 	def show_block_day_warning(self):
 		block_dates = get_applicable_block_dates(self.from_date, self.to_date,
 			self.employee, self.company, all_lists=True)
