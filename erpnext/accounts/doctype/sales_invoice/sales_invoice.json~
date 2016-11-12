@@ -250,9 +250,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-<<<<<<< HEAD
-=======
-   "fieldname": "project", 
+ "fieldname": "project", 
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -308,7 +306,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
->>>>>>> Vhrs Update 12/11/16
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -395,11 +392,8 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-<<<<<<< HEAD
    "fieldname": "company", 
-=======
    "fieldname": "mode_of_payment", 
->>>>>>> Vhrs Update 12/11/16
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -429,12 +423,8 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-<<<<<<< HEAD
-   "fieldname": "project", 
-=======
-   "fieldname": "company", 
->>>>>>> Vhrs Update 12/11/16
-   "fieldtype": "Link", 
+  "fieldname": "project", 
+  "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
@@ -1211,8 +1201,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-<<<<<<< HEAD
-=======
    "fieldname": "section_break", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -3277,7 +3265,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-<<<<<<< HEAD
    "depends_on": "", 
    "fieldname": "campaign", 
    "fieldtype": "Link", 
@@ -3309,8 +3296,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-=======
->>>>>>> Vhrs Update 12/11/16
    "fieldname": "col_break23", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -3338,15 +3323,12 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-<<<<<<< HEAD
    "default": "Draft", 
    "fieldname": "status", 
    "fieldtype": "Select", 
-=======
    "depends_on": "eval:doc.source == 'Campaign'", 
    "fieldname": "campaign", 
    "fieldtype": "Link", 
->>>>>>> Vhrs Update 12/11/16
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
