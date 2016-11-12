@@ -597,8 +597,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-<<<<<<< HEAD
-=======
    "fieldname": "territory", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -626,7 +624,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
->>>>>>> Vhrs Update 12/11/16
    "fieldname": "contact_person", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -848,7 +845,6 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-<<<<<<< HEAD
    "collapsible": 0, 
    "columns": 0, 
    "fieldname": "territory", 
@@ -878,8 +874,6 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-=======
->>>>>>> Vhrs Update 12/11/16
    "collapsible": 1, 
    "columns": 0, 
    "depends_on": "customer", 
