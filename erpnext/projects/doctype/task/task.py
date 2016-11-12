@@ -69,13 +69,13 @@ class Task(Document):
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
-<<<<<<< HEAD
+
 		self.update_depends_on()
-=======
+
 		self.sync_candidates()
 		self.pending_count()
 		self.update_dow()
->>>>>>> Vhrs Update 12/11/16
+
 
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -145,14 +145,14 @@ class Task(Document):
 		if self.progress > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
-<<<<<<< HEAD
+
 	def update_depends_on(self):
 		depends_on_tasks = ""
 		for d in self.depends_on:
 			if d.task:
 				depends_on_tasks += d.task + ","
 		self.depends_on_tasks = depends_on_tasks
-=======
+
 	def pending_count(self):
 		count = 0
 		for candidate in self.get_candidates() :
@@ -173,7 +173,7 @@ class Task(Document):
 	def update_dow(self):
 		if self.status == 'Working':
 			self.date_of_working =today()
->>>>>>> Vhrs Update 12/11/16
+
 
 	def on_update(self):
 		self.check_recursion()
@@ -285,13 +285,13 @@ def set_tasks_as_overdue():
 	frappe.db.sql("""update tabTask set `status`='Overdue'
 		where exp_end_date is not null
 		and exp_end_date < CURDATE()
-<<<<<<< HEAD
+
 		and `status` not in ('Closed', 'Cancelled')""")
 		
-=======
+
 		and `status` not in ('Closed', 'Cancelled', 'Hold','Pending Review','DnD')""")
 
 def set_dow():
 	frappe.db.sql("""update tabTask set `date_of_working`=%s
 		where `status`='Working'""",today())
->>>>>>> Vhrs Update 12/11/16
+
