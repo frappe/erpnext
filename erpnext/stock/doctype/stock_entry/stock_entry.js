@@ -502,7 +502,7 @@ frappe.ui.form.on('Stock Entry', {
 				'qty'		: d.qty
 			};
 			frappe.call({
-				method: "erpnext.stock.doctype.stock_entry.stock_entry.get_serial_no",
+				method: "erpnext.stock.get_item_details.get_serial_no",
 				args: {"args": args},
 				callback: function(r) {
 					if (!r.exe){
