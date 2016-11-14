@@ -4,7 +4,6 @@ def get_data():
 	return {
 		'fieldname': 'purchase_invoice',
 		'non_standard_fieldnames': {
-			'Delivery Note': 'against_sales_invoice',
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
 			'Payment Request': 'reference_name',
@@ -12,8 +11,8 @@ def get_data():
 			'Purchase Invoice': 'return_against'
 		},
 		'internal_links': {
-			'Purchase Order': ['items', 'sales_order'],
-			'Purchase Receipt': ['items', 'delivery_note'],
+			'Purchase Order': ['items', 'purchase_order'],
+			'Purchase Receipt': ['items', 'purchase_receipt'],
 		},
 		'transactions': [
 			{

@@ -14,6 +14,4 @@ def execute():
 			employee.prefered_contact_email = "User ID"
 			employee.prefered_email = employee.user_id
 		
-		employee.flags.ignore_mandatory = True
-		employee.flags.ignore_validate = True
-		employee.save()
+		employee.db_update()
