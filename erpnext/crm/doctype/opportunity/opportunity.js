@@ -60,9 +60,10 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			this.frm.doc.enquiry_from = "Lead";
 
 		if(!this.frm.doc.status)
-			set_multiple(cdt, cdn, { status:'Draft' });
+			set_multiple(this.frm.doc.doctype, this.frm.doc.name, { status:'Open' });
 		if(!this.frm.doc.company && frappe.defaults.get_user_default("Company"))
-			set_multiple(cdt, cdn, { company:frappe.defaults.get_user_default("Company") });
+			set_multiple(this.frm.doc.doctype, this.frm.doc.name, 
+				{ company:frappe.defaults.get_user_default("Company") });
 
 		this.setup_queries();
 	},
