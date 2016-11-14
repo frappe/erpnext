@@ -65,7 +65,7 @@ $.extend(shopping_cart, {
 		var cart_count = getCookie("cart_count");
 
 		if(cart_count) {
-			$(".shopping-cart").toggleClass('hidden', true);
+			$(".shopping-cart").toggleClass('hidden', false);
 		}
 
 		var $cart = $('.cart-icon');

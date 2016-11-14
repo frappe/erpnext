@@ -13,6 +13,7 @@
         </div>
     </div>
 {% endmacro %}
+
 {% macro item_name_and_description_cart(d) %}
     <div class="row item_name_dropdown">
         <div class="col-xs-4 col-sm-4 order-image-col">
@@ -21,15 +22,15 @@
             </div>
         </div>
         <div class="col-xs-8 col-sm-8">
-           {{ d.item_code|truncate(25) }}			
+           {{ d.item_code|truncate(25) }}
 			<div class="input-group number-spinner">
                 <span class="input-group-btn">
                     <button class="btn btn-default cart-btn" data-dir="dwn">
                         –</button>
                 </span>
-            <input class="form-control text-right cart-qty"
-            value = "{{ d.get_formatted('qty') }}"
-            data-item-code="{{ d.item_code }}">
+	            <input class="form-control text-right cart-qty"
+		            value = "{{ d.get_formatted('qty') }}"
+		            data-item-code="{{ d.item_code }}">
                 <span class="input-group-btn">
                     <button class="btn btn-default cart-btn" data-dir="up">
                         +</button>
