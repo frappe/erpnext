@@ -7,21 +7,6 @@ frappe.provide("erpnext.stock");
 
 frappe.ui.form.on("Purchase Receipt", {
 	onload: function(frm) {
-		console.log('onload1');
-		var quality_inspection = frappe.meta.get_docfield("Purchase Receipt Item", "quality_inspection");
-		quality_inspection.get_route_options_for_new_doc = function(field) {
-			if(frm.is_new()) return;
-			var doc = field.doc;
-			return {
-				"inspection_type": "Incoming",
-				"purchase_receipt_no": frm.doc.name,
-				"item_code": doc.item_code,
-				"description": doc.description,
-				"item_serial_no": doc.serial_no ? doc.serial_no.split("\n")[0] : null,
-				"batch_no": doc.batch_no
-			}
-		}
-		console.log(quality_inspection);
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
 			frm.set_query(field, "items", function() {
 				return {
@@ -48,9 +33,8 @@ frappe.ui.form.on("Purchase Receipt", {
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
 	onload: function() {
 		this._super();
-		console.log(' before onload2');
-		//this.setup_inspection_required_filter('Incoming');
-		this.setup_quality_inspection("Purchase Receipt Item","Incoming")
+		console.log('----> TESTING');
+		this.setup_quality_inspection("Incoming")
 	},
 	refresh: function() {
 		this._super();

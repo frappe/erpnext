@@ -83,7 +83,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 	onload: function() {
 		var me = this;
-		//this.frm.show_print_first = true;
 		if(this.frm.doc.__islocal) {
 			var today = get_today(),
 				currency = frappe.defaults.get_user_default("currency");
@@ -136,7 +135,34 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			});
 		}
+	},
 
+	setup_quality_inspection: function(inspection_type) {
+		var me = this;
+		var quality_inspection = frappe.meta.get_docfield(this.frm.doc.items[0].doctype, "quality_inspection");
+		quality_inspection.get_route_options_for_new_doc = function(field) {
+			if(me.frm.is_new()) return;
+			var doc = field.doc;
+			return {
+				"inspection_type": inspection_type,
+				"purchase_receipt_no": me.frm.doc.name,
+				"item_code": me.doc.item_code,
+				"description": me.doc.description,
+				"item_serial_no": me.doc.serial_no ? me.doc.serial_no.split("\n")[0] : null,
+				"batch_no": me.doc.batch_no
+			}
+		}
+		console.log(quality_inspection);
+		this.frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: {
+					docstatus: 1,
+					inspection_type: inspection_type,
+					item_code: d.item_code
+				}
+			}
+		});
 	},
 
 	onload_post_render: function() {
@@ -1005,31 +1031,5 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		return method
 	},
-
-	setup_quality_inspection: function(doctype_name, inspection_type) {
-		var quality_inspection = frappe.meta.get_docfield(doctype_name, "quality_inspection");
-		quality_inspection.get_route_options_for_new_doc = function(field) {
-			if(frm.is_new()) return;
-			var doc = field.doc;
-			return {
-				"inspection_type": inspection_type,
-				"purchase_receipt_no": frm.doc.name,
-				"item_code": doc.item_code,
-				"description": doc.description,
-				"item_serial_no": doc.serial_no ? doc.serial_no.split("\n")[0] : null,
-				"batch_no": doc.batch_no
-			}
-		}
-		this.frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
-			return {
-				filters: {
-					docstatus: 1,
-					inspection_type: inspection_type,
-					item_code: d.item_code
-				}
-			}
-		});
-
-	}
+	
 });
