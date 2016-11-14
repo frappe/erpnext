@@ -39,6 +39,9 @@ class Opportunity(TransactionBase):
 
 		if not self.title:
 			self.title = self.customer_name
+			
+		if not self.with_items:
+			self.items = []
 
 
 	def make_new_lead_if_required(self):

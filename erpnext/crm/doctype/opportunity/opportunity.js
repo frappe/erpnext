@@ -23,20 +23,19 @@ frappe.ui.form.on("Opportunity", {
 	refresh: function(frm) {
 		var doc = frm.doc;
 		frm.events.enquiry_from(frm);
-
 		if(doc.status!=="Lost") {
 			if(doc.with_items){
 				frm.add_custom_button(__('Supplier Quotation'),
 					function() {
 						frm.trigger("make_supplier_quotation")
 					}, __("Make"));
-
-				frm.add_custom_button(__('Quotation'),
-					cur_frm.cscript.create_quotation, __("Make"));
-
-				frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
 
+			frm.add_custom_button(__('Quotation'),
+				cur_frm.cscript.create_quotation, __("Make"));
+
+			frm.page.set_inner_btn_group_as_primary(__("Make"));
+		
 			if(doc.status!=="Quotation") {
 				frm.add_custom_button(__('Lost'),
 					cur_frm.cscript['Declare Opportunity Lost']);
