@@ -30,6 +30,9 @@ class TestDailyWorkSummary(unittest.TestCase):
 			self.assertFalse(d.user_id in [d.recipient for d in emails
 				if settings.subject in d.message])
 
+	def test_summary(self):
+		pass
+
 	def setup_and_prepare_test(self, hour):
 		frappe.db.sql('delete from `tabEmail Queue`')
 

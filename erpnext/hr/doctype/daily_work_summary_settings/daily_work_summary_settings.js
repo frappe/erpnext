@@ -2,6 +2,9 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Daily Work Summary Settings', {
-	onload: function(frm) {
+	refresh: function(frm) {
+		frm.add_custom_button(__('Daily Work Summary'), function() {
+			frappe.set_route('List', 'Daily Work Summary');
+		});
 	}
 });
