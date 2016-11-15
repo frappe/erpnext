@@ -8,7 +8,8 @@ frappe.provide("erpnext.accounts");
 erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	onload: function() {
 		this._super();
-
+		console.log('----> TESTING');
+		this.setup_quality_inspection("Incoming");
 		if(!this.frm.doc.__islocal) {
 			// show credit_to in print format
 			if(!this.frm.doc.supplier && this.frm.doc.credit_to) {

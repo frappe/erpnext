@@ -33,8 +33,7 @@ frappe.ui.form.on("Purchase Receipt", {
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
 	onload: function() {
 		this._super();
-		console.log('----> TESTING');
-		this.setup_quality_inspection("Incoming")
+		this.setup_quality_inspection("Incoming");
 	},
 	refresh: function() {
 		this._super();
