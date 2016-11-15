@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, cint
 from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 
 def execute(filters=None):
@@ -92,12 +92,13 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 def check_opening_balance(asset, liability, equity):
 	# Check if previous year balance sheet closed
 	opening_balance = 0
+	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 	if asset:
-		opening_balance = flt(asset[0].get("opening_balance", 0))
+		opening_balance = flt(asset[0].get("opening_balance", 0), float_precision)
 	if liability:
-		opening_balance -= flt(liability[0].get("opening_balance", 0))
+		opening_balance -= flt(liability[0].get("opening_balance", 0), float_precision)
 	if equity:
-		opening_balance -= flt(equity[0].get("opening_balance", 0))
+		opening_balance -= flt(equity[0].get("opening_balance", 0), float_precision)
 
 	if opening_balance:
 		return _("Previous Financial Year is not closed"),opening_balance
