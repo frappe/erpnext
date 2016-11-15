@@ -80,14 +80,14 @@ erpnext.MarkedEmployee = Class.extend({
 
 		var row;
 		$.each(employee, function(i, m) {
-			var attendance_icon = "icon-check";
+			var attendance_icon = "fa fa-check";
 			var color_class = "";
 			if(m.status == "Absent") {
-				attendance_icon = "icon-check-empty"
+				attendance_icon = "fa fa-check-empty"
 				color_class = "text-muted";
 			}
 			else if(m.status == "Half Day") {
-				attendance_icon = "icon-check-minus"
+				attendance_icon = "fa fa-check-minus"
 			}
 
 			if (i===0 || i % 4===0) {

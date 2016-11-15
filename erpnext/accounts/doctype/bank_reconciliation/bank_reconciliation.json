@@ -234,7 +234,7 @@
  ], 
  "hide_heading": 1, 
  "hide_toolbar": 1, 
- "icon": "icon-check", 
+ "icon": "fa fa-check", 
  "idx": 1, 
  "image_view": 0, 
  "in_create": 0, 

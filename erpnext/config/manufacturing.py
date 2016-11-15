@@ -5,7 +5,7 @@ def get_data():
 	return [
 		{
 			"label": _("Production"),
-			"icon": "icon-star",
+			"icon": "fa fa-star",
 			"items": [
 				{
 					"type": "doctype",
@@ -41,7 +41,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "BOM",
-					"icon": "icon-sitemap",
+					"icon": "fa fa-sitemap",
 					"label": _("BOM Browser"),
 					"description": _("Tree of Bill of Materials"),
 					"link": "Tree/BOM",
@@ -66,7 +66,7 @@ def get_data():
 		},
 		{
 			"label": _("Tools"),
-			"icon": "icon-wrench",
+			"icon": "fa fa-wrench",
 			"items": [
 				{
 					"type": "doctype",
@@ -87,7 +87,7 @@ def get_data():
 		},
 		{
 			"label": _("Reports"),
-			"icon": "icon-list",
+			"icon": "fa fa-list",
 			"items": [
 				{
 					"type": "report",
@@ -123,7 +123,7 @@ def get_data():
 		},
 		{
 			"label": _("Help"),
-			"icon": "icon-facetime-video",
+			"icon": "fa fa-facetime-video",
 			"items": [
 				{
 					"type": "help",

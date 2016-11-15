@@ -4,7 +4,7 @@
 frappe.ui.form.on("Pricing Rule", "refresh", function(frm) {
 	var help_content = ['<table class="table table-bordered" style="background-color: #f9f9f9;">',
 		'<tr><td>',
-			'<h4><i class="icon-hand-right"></i> ',
+			'<h4><i class="fa fa-hand-right"></i> ',
 				__('Notes'),
 			':</h4>',
 			'<ul>',
@@ -23,7 +23,7 @@ frappe.ui.form.on("Pricing Rule", "refresh", function(frm) {
 			'</ul>',
 		'</td></tr>',
 		'<tr><td>',
-			'<h4><i class="icon-question-sign"></i> ',
+			'<h4><i class="fa fa-question-sign"></i> ',
 				__('How Pricing Rule is applied?'),
 			'</h4>',
 			'<ol>',

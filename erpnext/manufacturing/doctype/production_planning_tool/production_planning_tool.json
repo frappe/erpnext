@@ -807,7 +807,7 @@
  ], 
  "hide_heading": 0, 
  "hide_toolbar": 1, 
- "icon": "icon-calendar", 
+ "icon": "fa fa-calendar", 
  "idx": 1, 
  "image_view": 0, 
  "in_create": 1, 

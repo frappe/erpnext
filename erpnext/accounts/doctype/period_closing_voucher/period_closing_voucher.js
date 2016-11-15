@@ -30,7 +30,7 @@ frappe.ui.form.on('Period Closing Voucher', {
 					group_by_voucher: 0
 				};
 				frappe.set_route("query-report", "General Ledger");
-			}, "icon-table");
+			}, "fa fa-table");
 		}
 	}
 	
