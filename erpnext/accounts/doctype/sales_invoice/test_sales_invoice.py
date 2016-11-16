@@ -980,6 +980,39 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.submit()
 
 		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
+	
+	def test_outstanding_amount_after_advance_jv_cancelation(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
+			import test_records as jv_test_records
+
+		jv = frappe.copy_doc(jv_test_records[0])
+		jv.insert()
+		jv.submit()
+
+		si = frappe.copy_doc(test_records[0])
+		si.append("advances", {
+			"doctype": "Sales Invoice Advance",
+			"reference_type": "Journal Entry",
+			"reference_name": jv.name,
+			"reference_row": jv.get("accounts")[0].name,
+			"advance_amount": 400,
+			"allocated_amount": 300,
+			"remarks": jv.remark
+		})
+		si.insert()
+		si.submit()
+		si.load_from_db()
+
+		#check outstanding after advance allocation
+		self.assertEqual(flt(si.outstanding_amount), flt(si.grand_total - si.total_advance, si.precision("outstanding_amount")))
+		
+		#added to avoid Document has been modified exception
+		jv = frappe.get_doc("Journal Entry", jv.name)
+		jv.cancel()
+		
+		si.load_from_db()
+		#check outstanding after advance cancellation
+		self.assertEqual(flt(si.outstanding_amount), flt(si.grand_total + si.total_advance, si.precision("outstanding_amount")))
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
