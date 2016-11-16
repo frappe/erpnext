@@ -28,7 +28,15 @@ frappe.ui.form.on('Salary Structure', {
 					type: "deduction"
 				}
 			}
-		})
+		});
+		frm.set_query("employee", "employees", function(doc) {
+			return {
+				query: "erpnext.controllers.queries.employee_query",
+				filters: {
+					company: doc.company
+				}
+			}
+		});
 	},
 	
 	refresh: function(frm) {
@@ -182,11 +190,3 @@ frappe.ui.form.on('Salary Detail', {
 		calculate_totals(frm.doc);
 	}
 })
-
-frappe.ui.form.on('Salary Structure Employee', {
-	onload: function(frm) {
-		frm.set_query("employee","employees", function(doc,cdt,cdn) {
-			return{ query: "erpnext.controllers.queries.employee_query" }
-		})
-	}
-});
