@@ -63,6 +63,11 @@ class AccountsController(TransactionBase):
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
 
+	def before_print(self):
+		if self.doctype in ['Purchase Order', 'Sales Order']:
+			if self.get("group_same_items"):
+				self.group_similar_items()
+
 	def validate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
 			is_paid = self.get("is_pos") or self.get("is_paid")
@@ -560,6 +565,28 @@ class AccountsController(TransactionBase):
 							elif asset.status in ("Scrapped", "Cancelled", "Sold"):
 								frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
 									.format(d.idx, d.asset, asset.status))
+
+	def group_similar_items(self):
+		group_item_qty = {}
+		group_item_amount = {}
+
+		for item in self.items:
+			group_item_qty[item.item_code] = group_item_qty.get(item.item_code, 0) + item.qty
+			group_item_amount[item.item_code] = group_item_amount.get(item.item_code, 0) + item.amount
+
+		duplicate_list = []
+
+		for item in self.items:
+			if item.item_code in group_item_qty:
+				item.qty = group_item_qty[item.item_code]
+				item.amount = group_item_amount[item.item_code]
+				del group_item_qty[item.item_code]
+			else:
+				duplicate_list.append(item)
+
+		for item in duplicate_list:
+			self.remove(item)
+
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
