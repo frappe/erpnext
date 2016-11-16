@@ -146,14 +146,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return {
 				"inspection_type": inspection_type,
 				"reference_type": me.frm.doc.doctype,
-				"purchase_receipt": me.frm.doc.name,
+				"reference_name": me.frm.doc.name,
 				"item_code": doc.item_code,
 				"description": doc.description,
 				"item_serial_no": doc.serial_no ? doc.serial_no.split("\n")[0] : null,
 				"batch_no": doc.batch_no
 			}
 		}
-		console.log(quality_inspection_field);
 		this.frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {

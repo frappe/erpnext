@@ -8,19 +8,6 @@ frappe.provide("erpnext.stock.delivery_note");
 
 frappe.ui.form.on("Delivery Note", {
 	setup: function(frm) {
-		var quality_inspection = frappe.meta.get_docfield("Delivery Note Item", "quality_inspection");
-		quality_inspection.get_route_options_for_new_doc = function(field) {
-			if(frm.is_new()) return;
-			var doc = field.doc;
-			return {
-				"inspection_type": "Outgoing",
-				"delivery_note_no": frm.doc.name,
-				"item_code": doc.item_code,
-				"description": doc.description,
-				"item_serial_no": doc.serial_no ? doc.serial_no.split("\n")[0] : null,
-				"batch_no": doc.batch_no
-			}
-		}
 
 		frm.set_indicator_formatter('item_code',
 			function(doc) {
@@ -36,20 +23,15 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		})
 
-		frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
-			return {
-				filters: {
-					docstatus: 1,
-					inspection_type: "Outgoing",
-					item_code: d.item_code
-				}
-			}
-		})
 	}
 });
 
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
+	onload: function() {
+		this._super();
+		this.setup_quality_inspection("Outgoing");
+	},
+
 	refresh: function(doc, dt, dn) {
 		this._super();
 		if (!doc.is_return && doc.status!="Closed") {
