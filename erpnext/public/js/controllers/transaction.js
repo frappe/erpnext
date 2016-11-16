@@ -79,7 +79,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			frm.cscript.calculate_taxes_and_totals();
 		});
-
 	},
 	onload: function() {
 		var me = this;
@@ -135,24 +134,32 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			});
 		}
+		
+		this.setup_quality_inspection();
 	},
 
-	setup_quality_inspection: function(inspection_type) {
+	setup_quality_inspection: function() {
+		if(!in_list(["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype)) {
+			return;
+		}
 		var me = this;
+		var inspection_type = in_list(["Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype) 
+			? "Incoming" : "Outgoing";
+			
 		var quality_inspection_field = this.frm.get_docfield("items", "quality_inspection");
-		quality_inspection_field.get_route_options_for_new_doc = function(field) {
+		quality_inspection_field.get_route_options_for_new_doc = function(row) {
 			if(me.frm.is_new()) return;
-			var doc = field.doc;
 			return {
 				"inspection_type": inspection_type,
 				"reference_type": me.frm.doc.doctype,
 				"reference_name": me.frm.doc.name,
-				"item_code": doc.item_code,
-				"description": doc.description,
-				"item_serial_no": doc.serial_no ? doc.serial_no.split("\n")[0] : null,
-				"batch_no": doc.batch_no
+				"item_code": row.doc.item_code,
+				"description": row.doc.description,
+				"item_serial_no": row.doc.serial_no ? row.doc.serial_no.split("\n")[0] : null,
+				"batch_no": row.doc.batch_no
 			}
 		}
+		
 		this.frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {

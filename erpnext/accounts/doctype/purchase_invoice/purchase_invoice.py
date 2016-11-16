@@ -67,10 +67,6 @@ class PurchaseInvoice(BuyingController):
 		self.create_remarks()
 		self.set_status()
 
-		#validate the quality inspection
-		if self.update_stock==1:
-			self.validate_inspection("inspection_required")
-
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
 			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))

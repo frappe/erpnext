@@ -8,7 +8,6 @@ frappe.provide("erpnext.stock.delivery_note");
 
 frappe.ui.form.on("Delivery Note", {
 	setup: function(frm) {
-
 		frm.set_indicator_formatter('item_code',
 			function(doc) {
 				return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
@@ -27,11 +26,6 @@ frappe.ui.form.on("Delivery Note", {
 });
 
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
-	onload: function() {
-		this._super();
-		this.setup_quality_inspection("Outgoing");
-	},
-
 	refresh: function(doc, dt, dn) {
 		this._super();
 		if (!doc.is_return && doc.status!="Closed") {

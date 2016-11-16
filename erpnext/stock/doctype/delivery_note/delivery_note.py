@@ -103,7 +103,6 @@ class DeliveryNote(SellingController):
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_with_previous_doc()
-		self.validate_inspection("inspection_required_before_delivery")
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)

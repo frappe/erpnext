@@ -31,10 +31,6 @@ frappe.ui.form.on("Purchase Receipt", {
 });
 
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
-	onload: function() {
-		this._super();
-		this.setup_quality_inspection("Incoming");
-	},
 	refresh: function() {
 		this._super();
 		if(this.frm.doc.docstatus===1) {
@@ -177,14 +173,6 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 		filters: [
 			['Print Heading', 'docstatus', '!=', '2']
 		]
-	}
-}
-
-cur_frm.fields_dict.items.grid.get_field("quality_inspection").get_query = function(doc) {
-	return {
-		filters: {
-			'docstatus': 1
-		}
 	}
 }
 

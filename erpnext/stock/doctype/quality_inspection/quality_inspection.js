@@ -5,20 +5,12 @@ cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
 
 // item code based on GRN/DN
 cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
-	if (doc.purchase_receipt) {
+	if (doc.reference_type && doc.reference_name) {
 		return {
 			query: "erpnext.stock.doctype.quality_inspection.quality_inspection.item_query",
 			filters: {
-				"from": "Purchase Receipt Item",
-				"parent": doc.purchase_receipt
-			}
-		}
-	} else if(doc.delivery_note) {
-		return {
-			query: "erpnext.stock.doctype.quality_inspection.quality_inspection.item_query",
-			filters: {
-				"from": "Delivery Note Item",
-				"parent": doc.delivery_note
+				"from": doc.reference_type,
+				"parent": doc.reference_name
 			}
 		}
 	}

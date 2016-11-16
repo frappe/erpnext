@@ -32,11 +32,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		if(doc.update_stock==1 && doc.docstatus==1) {
 			this.show_stock_ledger();
 		}
-
-		if (doc.update_stock==1){
-			this.setup_quality_inspection("Incoming");
-		}
-
+		
 		if(!doc.is_return && doc.docstatus==1) {
 			if(doc.outstanding_amount != 0) {
 				this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
