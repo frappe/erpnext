@@ -2,6 +2,7 @@ import frappe
 
 def execute():
 	frappe.reload_doctype('Role')
+	frappe.reload_doctype('User')
 	for role_name in ('Customer', 'Supplier', 'Student'):
 		if frappe.db.exists('Role', role_name):
 			frappe.db.set_value('Role', role_name, 'desk_access', 0)
