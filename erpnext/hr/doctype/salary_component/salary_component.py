@@ -10,7 +10,6 @@ from frappe import _
 class SalaryComponent(Document):
 	def validate(self):
 		self.validate_abbr()
-		
 
 	def validate_abbr(self):
 		if not self.salary_component_abbr:
@@ -20,9 +19,6 @@ class SalaryComponent(Document):
 
 		if self.get('__islocal') and len(self.salary_component_abbr) > 5:
 			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
-
-		if not self.salary_component_abbr.strip():
-			frappe.throw(_("Abbreviation is mandatory"))
 
 		if frappe.db.sql("select salary_component_abbr from `tabSalary Component` where name!=%s and salary_component_abbr=%s", (self.name, self.salary_component_abbr)):
 			frappe.throw(_("Abbreviation already used for another salary component"))
