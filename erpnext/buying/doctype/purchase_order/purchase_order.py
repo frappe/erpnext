@@ -231,6 +231,7 @@ class PurchaseOrder(BuyingController):
 			"target_parent_dt": "Sales Order",
 			"target_dt": "Sales Order Item",
 			'target_field': 'ordered_qty',
+			"join_field": "sales_order_item",
 			"target_parent_field": ''
 		})
 
