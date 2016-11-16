@@ -31,7 +31,7 @@ def get_pos_data():
 		'doc': doc,
 		'default_customer': pos_profile.get('customer'),
 		'items': get_items(doc, pos_profile),
-		'customers': get_customers(pos_profile, doc, company_data.default_currency),
+		'customers': get_customers_list(pos_profile),
 		'pricing_rules': get_pricing_rules(doc),
 		'print_template': print_template,
 		'meta': {
@@ -106,7 +106,7 @@ def update_tax_table(doc):
 
 def get_items(doc, pos_profile):
 	item_list = []
-	for item in frappe.get_all("Item", fields=["*"], filters={'disabled': 0, 'has_variants': 0, 'is_sales_item': 1}):
+	for item in get_items_list(pos_profile):
 		item_doc = frappe.get_doc('Item', item.name)
 		if item_doc.taxes:
 			item.taxes = json.dumps(dict(([d.tax_type, d.tax_rate] for d in
@@ -129,6 +129,26 @@ def get_items(doc, pos_profile):
 
 	return item_list
 
+def get_items_list(pos_profile):
+	cond = "1=1"
+	item_groups = []
+	if pos_profile.get('item_groups'):
+		cond = "item_group in (%s)"%(', '.join(['%s']*len(pos_profile.get('item_groups'))))
+		item_groups = [d.item_group for d in pos_profile.get('item_groups')]
+
+	return frappe.db.sql(""" select * from tabItem where disabled = 0 and has_variants = 0 
+		and is_sales_item = 1 and {cond}""".format(cond=cond), tuple(item_groups), as_dict=1) or []
+
+def get_customers_list(pos_profile):
+	cond = "1=1"
+	customer_groups = []
+	if pos_profile.get('customer_groups'):
+		cond = "customer_group in (%s)"%(', '.join(['%s']*len(pos_profile.get('customer_groups'))))
+		customer_groups = [d.customer_group for d in pos_profile.get('customer_groups')]
+
+	return frappe.db.sql(""" select * from tabCustomer where disabled = 0 
+		and {cond}""".format(cond=cond), tuple(customer_groups), as_dict=1) or {}
+
 def get_item_warehouse_for_company(company, warehouse):
 	if frappe.db.get_value('Warehouse', warehouse, 'company') != company:
 		warehouse = None
@@ -148,17 +168,6 @@ def get_serial_nos(item, pos_profile, company):
 		serial_no_list[serial_no.name] = serial_no.warehouse
 
 	return serial_no_list
-
-def get_customers(pos_profile, doc, company_currency):
-	filters = {'disabled': 0}
-	customer_list = []
-	customers = frappe.get_all("Customer", fields=["*"], filters = filters)
-
-	for customer in customers:
-		customer_currency = get_party_account_currency('Customer', customer.name, doc.company) or doc.currency
-		if customer_currency == doc.currency or customer_currency == company_currency:
-			customer_list.append(customer)
-	return customer_list
 
 def get_pricing_rules(doc):
 	pricing_rules = ""

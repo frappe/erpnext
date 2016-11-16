@@ -387,7 +387,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var $wrap = me.wrapper.find(".item-list");
 		me.wrapper.find(".item-list").empty();
 
-		if (this.items) {
+		if (this.items.length > 0) {
 			$.each(this.items, function(index, obj) {
 				if(index < 30){
 					$(frappe.render_template("pos_item", {
@@ -400,6 +400,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					})).tooltip().appendTo($wrap);
 				}
 			});
+		} else {
+			$("<h4>Searching record not found.</h4>").appendTo($wrap)
 		}
 
 		if(this.items.length == 1
