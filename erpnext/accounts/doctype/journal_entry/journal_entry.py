@@ -69,7 +69,7 @@ class JournalEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.unlink_advance_entry_reference()
-	
+
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
 			if d.is_advance and d.reference_type in ("Sales Invoice", "Purchase Invoice"):
