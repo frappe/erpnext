@@ -54,7 +54,7 @@ class AccountsController(TransactionBase):
 		self.validate_currency()
 
 		if self.meta.get_field("is_recurring"):
-			if self.amended_from and self.recurring_id:
+			if self.amended_from and self.recurring_id == self.amended_from:
 				self.recurring_id = None
 			if not self.get("__islocal"):
 				validate_recurring_document(self)
