@@ -271,19 +271,19 @@ class StatusUpdater(Document):
 					%(update_modified)s
 				where name='%(name)s'""" % args)
 
-		# update field
-		if args.get('status_field'):
-			frappe.db.sql("""update `tab%(target_parent_dt)s`
-				set %(status_field)s = if(%(target_parent_field)s<0.001,
-					'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
-					'Fully %(keyword)s', 'Partly %(keyword)s'))
-				where name='%(name)s'""" % args)
+			# update field
+			if args.get('status_field'):
+				frappe.db.sql("""update `tab%(target_parent_dt)s`
+					set %(status_field)s = if(%(target_parent_field)s<0.001,
+						'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
+						'Fully %(keyword)s', 'Partly %(keyword)s'))
+					where name='%(name)s'""" % args)
 
-		if update_modified:
-			target = frappe.get_doc(args["target_parent_dt"], args["name"])
-			target.set_status(update=True)
-			target.notify_update()
-			notify_status(target)
+			if update_modified:
+				target = frappe.get_doc(args["target_parent_dt"], args["name"])
+				target.set_status(update=True)
+				target.notify_update()
+				notify_status(target)
 
 	def _update_modified(self, args, update_modified):
 		args['update_modified'] = ''
