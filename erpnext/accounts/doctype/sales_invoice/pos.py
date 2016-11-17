@@ -133,6 +133,8 @@ def get_items_list(pos_profile):
 	cond = "1=1"
 	item_groups = []
 	if pos_profile.get('item_groups'):
+		# Get items based on the item groups defined in the POS profile
+
 		cond = "item_group in (%s)"%(', '.join(['%s']*len(pos_profile.get('item_groups'))))
 		item_groups = [d.item_group for d in pos_profile.get('item_groups')]
 
@@ -143,6 +145,8 @@ def get_customers_list(pos_profile):
 	cond = "1=1"
 	customer_groups = []
 	if pos_profile.get('customer_groups'):
+		# Get customers based on the customer groups defined in the POS profile
+
 		cond = "customer_group in (%s)"%(', '.join(['%s']*len(pos_profile.get('customer_groups'))))
 		customer_groups = [d.customer_group for d in pos_profile.get('customer_groups')]
 
