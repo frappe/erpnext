@@ -126,11 +126,11 @@ class TransactionBase(StatusUpdater):
 		
 		return ret
 	
-	def delink_advance_entries(self, jv):
+	def delink_advance_entries(self, linked_doc_name):
 		total_allocated_amount = 0
 		for adv in self.advances:
 			consider_for_total_advance = True
-			if adv.reference_name == jv:
+			if adv.reference_name == linked_doc_name:
 				frappe.db.sql("""delete from `tab{0} Advance`
 					where name = %s""".format(self.doctype), adv.name)
 				consider_for_total_advance = False

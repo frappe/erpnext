@@ -60,7 +60,14 @@ class PaymentEntry(AccountsController):
 		self.setup_party_account_field()
 		self.make_gl_entries(cancel=1)
 		self.update_advance_paid()
-							
+		self.delink_advance_entry_references()
+	
+	def delink_advance_entry_references(self):
+		for reference in self.references:
+			if reference.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+				doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
+				doc.delink_advance_entries(self.name)
+
 	def set_missing_values(self):
 		if self.payment_type == "Internal Transfer":
 			for field in ("party", "party_balance", "total_allocated_amount", 
