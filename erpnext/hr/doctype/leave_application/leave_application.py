@@ -408,13 +408,13 @@ def add_leaves(events, start, end, match_conditions=None):
 	query = """select name, from_date, to_date, employee_name, half_day,
 		status, employee, docstatus
 		from `tabLeave Application` where
-		(from_date between %s and %s or to_date between %s and %s)
+		from_date <= %(end)s and to_date >= %(start)s <= to_date
 		and docstatus < 2
 		and status!="Rejected" """
 	if match_conditions:
 		query += " and " + match_conditions
 
-	for d in frappe.db.sql(query, (start, end, start, end), as_dict=True):
+	for d in frappe.db.sql(query, {"start":start, "end": end}, as_dict=True):
 		e = {
 			"name": d.name,
 			"doctype": "Leave Application",
