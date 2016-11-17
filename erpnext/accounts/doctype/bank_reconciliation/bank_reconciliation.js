@@ -46,6 +46,12 @@ frappe.ui.form.on("Bank Reconciliation", {
 			callback: function(r, rt) {
 				frm.refresh_field("payment_entries");
 				frm.refresh_fields();
+
+				$(frm.fields_dict.payment_entries.wrapper).find("[data-fieldname=amount]").each(function(i,v){
+					if (i !=0){
+						$(v).addClass("text-right")
+					}
+				})
 			}
 		});
 	}
