@@ -1,36 +1,35 @@
+// Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
+// For license information, please see license.txt
 frappe.provide("schools")
 
-frappe.ui.form.on("Course Schedule" ,{
-	onload: function(frm) {
-		if (frm.doc.from_datetime && frm.doc.to_datetime) {
-			var from_datetime = moment(frm.doc.from_datetime);
-			var to_datetime = moment(frm.doc.to_datetime);
-			frm.doc.schedule_date = from_datetime.format(moment.defaultFormat);
-			frm.doc.from_time = from_datetime.format("HH:mm:ss");
-			frm.doc.to_time = to_datetime.format("HH:mm:ss");
-		}
+frappe.ui.form.on('Student Batch Attendance Tool', {
+	refresh: function(frm) {
+		frm.disable_save();
+		hide_field('attendance');
 	},
 	
-	refresh :function(frm) {
-		if(!frm.doc.__islocal && frm.doc.student_group) {
+	student_batch :function(frm) {
+		if(frm.doc.student_batch && frm.doc.date) {
 			frappe.call({
 				method: "erpnext.schools.api.check_attendance_records_exist",
 				args: {
-					"course_schedule": frm.doc.name
+					"student_batch": frm.doc.student_batch,
+					"date": frm.doc.date
 				},
 				callback: function(r) {
 					if(r.message) {
+						frappe.msgprint("Attendance already marked.");
 						hide_field('attendance');
-						frm.events.view_attendance(frm)
 					}
 					else {
 						frappe.call({
-							method: "erpnext.schools.api.get_student_group_students",
+							method: "erpnext.schools.api.get_student_batch_students",
 							args: {
-								"student_group": frm.doc.student_group
+								"student_batch": frm.doc.student_batch
 							},
 							callback: function(r) {
 								if (r.message) {
+									unhide_field('attendance');
 									frm.events.get_students(frm, r.message)
 								}
 							}
@@ -39,19 +38,10 @@ frappe.ui.form.on("Course Schedule" ,{
 				}
 			});
 		}
-		else {
-			hide_field('attendance');
-		}
 	},
 	
-	view_attendance: function(frm) {
-		hide_field('attendance');
-		frm.add_custom_button(__("View attendance"), function() {
-			frappe.route_options = {
-				course_schedule: frm.doc.name
-			}
-			frappe.set_route("List", "Student Attendance");
-		});
+	date: function(frm) {
+		frm.trigger("student_batch");
 	},
 	
 	get_students: function(frm, students) {
@@ -117,10 +107,11 @@ schools.StudentsEditor = Class.extend({
 					args: {
 						"students_present": students_present,
 						"students_absent": students_absent,
-						"course_schedule": frm.doc.name
+						"student_batch": frm.doc.student_batch,
+						"date": frm.doc.date
 					},
 					callback: function(r) {
-						frm.events.view_attendance(frm)
+						hide_field('attendance');
 					}
 				});
 		});
@@ -134,4 +125,4 @@ schools.StudentsEditor = Class.extend({
 			</div></div>', {student: m.student_name})).appendTo(me.wrapper);
 		});
 	}
-})
+});
