@@ -431,9 +431,25 @@ frappe.ui.form.on('Stock Entry Detail', {
 	uom: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(d.uom && d.item_code){
-			var arg = {'item_code':d.item_code, 'uom':d.uom, 'qty':d.qty}
-			return get_server_fields('get_uom_details', JSON.stringify(arg),
-				'items', doc, cdt, cdn, 1);
+			arg = {
+					'item_code':d.item_code,
+					'uom':d.uom,
+					'qty':d.qty
+			};
+			return frappe.call({
+				doc: cur_frm.doc,
+				method: "get_uom_details",
+				args: arg,
+				callback: function(r) {
+					if(r.message) {
+						var d = locals[cdt][cdn];
+						$.each(r.message, function(k, v) {
+							d[k] = v;
+						});
+						refresh_field("items");
+					}
+				}
+			});
 		}
 	},
 	item_code: function(doc, cdt, cdn) {
