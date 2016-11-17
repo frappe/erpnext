@@ -420,7 +420,7 @@ DocType: Employee,Single,Unique
 DocType: Account,Cost of Goods Sold,Coût des marchandises vendues
 DocType: Purchase Invoice,Yearly,Annuel
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +226,Please enter Cost Center,S'il vous plaît entrer Centre de coûts
-DocType: Journal Entry Account,Sales Order,Bon de commande
+DocType: Journal Entry Account,Sales Order,Commande client
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +68,Avg. Selling Rate,Moy. Taux de vente
 DocType: Assessment,Examiner Name,Nom de l&#39;examinateur
 apps/erpnext/erpnext/utilities/transaction_base.py +149,Quantity cannot be a fraction in row {0},La quantité ne peut pas être une fraction à la ligne {0}
@@ -722,7 +722,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -733,19 +733,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Modèle de la taxe standard qui peut être appliqué à toutes les opérations de vente. Ce modèle peut contenir la liste des chefs d'impôt ainsi que d'autres chefs dépenses / revenus comme le ""port"", ""assurance"", ""Manipulation"", etc. 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Modèle de la taxe standard qui peut être appliqué à toutes les opérations de vente. Ce modèle peut contenir la liste des chefs d'impôt ainsi que d'autres chefs dépenses / revenus comme le ""port"", ""assurance"", ""Manipulation"", etc.
 
- #### Remarque 
+ #### Remarque
 
  Le taux d'imposition vous définir ici sera le taux d'imposition standard pour tous les articles ** **. Se il ya ** ** Articles qui ont des taux différents, ils doivent être ajoutés dans le ** Impôt de l'article ** ** table dans le Point ** maître.
 
- #### Description des colonnes 
+ #### Description des colonnes
 
- 1. Type de calcul: 
+ 1. Type de calcul:
  - Cela peut être le ** Net Total ** (ce est la somme de montant de base).
  - ** Sur Rang Précédent Total / Montant ** (pour les taxes ou frais cumulatifs). Si vous sélectionnez cette option, la taxe sera appliquée en pourcentage de la rangée précédente (dans la table d'impôt) montant ou totale.
  - ** ** Réelles (comme mentionné).
- 2. Compte chef: Le grand livre de compte en vertu de laquelle cette taxe sera réservé 
+ 2. Compte chef: Le grand livre de compte en vertu de laquelle cette taxe sera réservé
  3. Centre de Coût: Si la taxe / redevance est un revenu (comme le transport) ou dépenses qu'elle doit être réservé contre un centre de coûts.
  4. Description: Description de la taxe (qui sera imprimée sur les factures / guillemets).
  5. Taux: Le taux d'imposition.
@@ -941,7 +941,7 @@ apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +30,"Row {0}: Invoice {1}
 						Please enter a valid Invoice","Row {0}: Invoice {1} est invalide, il pourrait être annulé / n&#39;existe pas. \ S&#39;il vous plaît entrer une facture valide"
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +105,Row {0}: Payment against Sales/Purchase Order should always be marked as advance,Row {0}: Paiement contre Ventes / bon de commande doit toujours être marqué comme avance
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +16,Chemical,chimique
-apps/erpnext/erpnext/schools/doctype/grading_structure/grading_structure.py +24,"The intervals for Grade Code {0} overlaps with the grade intervals for other grades. 
+apps/erpnext/erpnext/schools/doctype/grading_structure/grading_structure.py +24,"The intervals for Grade Code {0} overlaps with the grade intervals for other grades.
                     Please check intervals {0} and {1} and try again",Les intervalles de code grade {0} chevauchements avec les intervalles de qualité pour les autres grades. S&#39;il vous plaît vérifier les intervalles {0} et {1} et essayez à nouveau
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +694,All items have already been transferred for this Production Order.,Tous les éléments ont déjà été transférés pour cet ordre de production.
 DocType: Process Payroll,Select Payroll Year and Month,Sélectionnez paie Année et mois
@@ -2171,7 +2171,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -2183,19 +2183,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Modèle de la taxe standard qui peut être appliqué à toutes les opérations d'achat. Ce modèle peut contenir la liste des chefs d'impôt ainsi que d'autres chefs de dépenses comme ""Expédition"", ""assurance"", ""Manipulation"", etc. 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Modèle de la taxe standard qui peut être appliqué à toutes les opérations d'achat. Ce modèle peut contenir la liste des chefs d'impôt ainsi que d'autres chefs de dépenses comme ""Expédition"", ""assurance"", ""Manipulation"", etc.
 
- #### Remarque 
+ #### Remarque
 
  Le taux d'imposition que vous définissez ici sera le taux d'imposition standard pour tous les articles ** **. Se il ya ** ** Articles qui ont des taux différents, ils doivent être ajoutés dans le ** Impôt de l'article ** ** table dans le Point ** maître.
 
- #### Description des colonnes 
+ #### Description des colonnes
 
- 1. Type de calcul: 
+ 1. Type de calcul:
  - Cela peut être le ** Net Total ** (ce est la somme de montant de base).
  - ** Sur Rang Précédent Total / Montant ** (pour les taxes ou frais cumulatifs). Si vous sélectionnez cette option, la taxe sera appliquée en pourcentage de la rangée précédente (dans la table d'impôt) montant ou totale.
  - ** ** Réelles (comme mentionné).
- 2. Compte chef: Le grand livre de compte en vertu de laquelle cette taxe sera réservé 
+ 2. Compte chef: Le grand livre de compte en vertu de laquelle cette taxe sera réservé
  3. Centre de Coût: Si la taxe / redevance est un revenu (comme le transport) ou dépenses qu'elle doit être réservé contre un centre de coûts.
  4. Description: Description de la taxe (qui sera imprimée sur les factures / guillemets).
  5. Taux: Le taux d'imposition.
@@ -2389,7 +2389,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Conditions d'utilisation standard qui peuvent être ajoutés aux ventes et achats.
 
- Exemples: 
+ Exemples:
 
  1. Validité de l'offre.
  1. Conditions de paiement (à l'avance, à crédit, une partie avance etc).
@@ -2398,7 +2398,7 @@ Examples:
  1. Garantie cas échéant.
  1. Politique de retour.
  1. Conditions d'expédition, le cas échéant.
- 1. Façons de différends adressage, indemnisation, la responsabilité, etc. 
+ 1. Façons de différends adressage, indemnisation, la responsabilité, etc.
  1. Adresse et contact de votre société."
 DocType: Attendance,Leave Type,Type de Congé
 apps/erpnext/erpnext/controllers/stock_controller.py +173,Expense / Difference account ({0}) must be a 'Profit or Loss' account,Dépenses / compte de la différence ({0}) doit être un compte «de résultat»
@@ -3384,7 +3384,7 @@ DocType: Accounts Settings,"If enabled, the system will post accounting entries 
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +15,Brokerage,courtage
 DocType: Address,Postal Code,Code Postal
 DocType: Production Order Operation,"in Minutes
-Updated via 'Time Log'","Mise à jour en quelques minutes 
+Updated via 'Time Log'","Mise à jour en quelques minutes
  via 'Log Time'"
 DocType: Customer,From Lead,Du prospect
 apps/erpnext/erpnext/config/manufacturing.py +13,Orders released for production.,Commandes validé pour la production.
@@ -3564,7 +3564,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +133,Please find attached
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +34,Bank Statement balance as per General Ledger,Solde du relevé bancaire que par General Ledger
 DocType: Job Applicant,Applicant Name,Nom du demandeur
 DocType: Authorization Rule,Customer / Item Name,Client / Nom d&#39;article
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -3711,17 +3711,17 @@ DocType: Address Template,"<h4>Default Template</h4>
 {% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
 {% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
 {% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<H4> Modèle par défaut </ h4> 
- <p> <a Utilise href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </a> et tous les champs d'adresse ( y compris les champs personnalisés le cas échéant) sera disponible </ p> 
- <pre> <code> {{address_line1}} & lt; br & gt; 
- {% si address_line2%} {{address_line2}} & lt; br & gt; { % endif -%} 
- {{ville}} & lt; br & gt; 
- {% si l'état%} {{}} Etat & lt; br & gt; {% endif -%} {% if 
- code PIN%} PIN: {{code PIN}} & lt; br & gt; {% endif -%} 
- {{pays}} & lt; br & gt; 
- {% si le téléphone%} Téléphone: {{téléphone}} & lt; br & gt; { % endif -%} 
- {% if télécopieur%} Fax: {{fax}} & lt; br & gt; {% endif -%} 
- {% si email_id%} Email: {{email_id}} & lt; br & gt ; {% endif -%} 
+</code></pre>","<H4> Modèle par défaut </ h4>
+ <p> <a Utilise href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </a> et tous les champs d'adresse ( y compris les champs personnalisés le cas échéant) sera disponible </ p>
+ <pre> <code> {{address_line1}} & lt; br & gt;
+ {% si address_line2%} {{address_line2}} & lt; br & gt; { % endif -%}
+ {{ville}} & lt; br & gt;
+ {% si l'état%} {{}} Etat & lt; br & gt; {% endif -%} {% if
+ code PIN%} PIN: {{code PIN}} & lt; br & gt; {% endif -%}
+ {{pays}} & lt; br & gt;
+ {% si le téléphone%} Téléphone: {{téléphone}} & lt; br & gt; { % endif -%}
+ {% if télécopieur%} Fax: {{fax}} & lt; br & gt; {% endif -%}
+ {% si email_id%} Email: {{email_id}} & lt; br & gt ; {% endif -%}
  </ code> </ pre>"
 DocType: Salary Detail,Default Amount,Montant par défaut
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +93,Warehouse not found in the system,Entrepôt pas trouvé dans le système
@@ -3914,7 +3914,7 @@ DocType: Purchase Invoice Item,Rejected Serial No,N° de série rejetés
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +80,Year start date or end date is overlapping with {0}. To avoid please set company,Année de début ou de fin chevauche avec {0}. Pour éviter s'il vous plaît définir la société
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +157,Start date should be less than end date for Item {0},La date de début doit être inférieure à la date de fin de l'article {0}
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Exemple:. ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Exemple:. ABCD #####
  Si la série est réglé et n ° de série ne est pas mentionné dans les transactions, le numéro de série, puis automatique sera créé sur la base de cette série. Si vous voulez toujours de mentionner explicitement numéros de série pour ce produit. laissez ce champ vide."
 DocType: Upload Attendance,Upload Attendance,Chargez fréquentation
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +113,BOM and Manufacturing Quantity are required,BOM et fabrication Quantité sont nécessaires
