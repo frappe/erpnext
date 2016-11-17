@@ -4,7 +4,7 @@
     <div class="row item_name_and_description">
         <div class="col-xs-4 col-sm-2 order-image-col">
             <div class="order-image">
-                {{ product_image_square(d.image) }}
+                {{ product_image_square(d.thumbnail or d.image) }}
             </div>
         </div>
         <div class="col-xs-8 col-sm-10">
@@ -18,7 +18,7 @@
     <div class="row item_name_dropdown">
         <div class="col-xs-4 col-sm-4 order-image-col">
             <div class="order-image">
-             {{ product_image_square(d.image) }}
+             {{ product_image_square(d.thumbnail or d.image) }}
             </div>
         </div>
         <div class="col-xs-8 col-sm-8">

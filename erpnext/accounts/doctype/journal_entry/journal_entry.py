@@ -69,11 +69,20 @@ class JournalEntry(AccountsController):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 		from erpnext.hr.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
 		unlink_ref_doc_from_payment_entries(self.doctype, self.name)
-		unlink_ref_doc_from_salary_slip(self.name)		
+		unlink_ref_doc_from_salary_slip(self.name)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.update_expense_claim()
-		
+		self.unlink_advance_entry_reference()
+
+	def unlink_advance_entry_reference(self):
+		for d in self.get("accounts"):
+			if d.is_advance and d.reference_type in ("Sales Invoice", "Purchase Invoice"):
+				doc = frappe.get_doc(d.reference_type, d.reference_name)
+				doc.delink_advance_entries(self.name)
+				d.reference_type = ''
+				d.reference_name = ''
+				d.db_update()
 
 	def validate_party(self):
 		for d in self.get("accounts"):
