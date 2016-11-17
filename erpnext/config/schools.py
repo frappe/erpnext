@@ -48,6 +48,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Program Enrollment Tool"
+				},
+				{
+					"type": "doctype",
+					"name": "Batch Creation Tool"
 				}
 			]
 		},
@@ -65,6 +69,19 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Scheduling Tool"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Batch Attendance Tool"
+				}
+			]
+		},
+		{
+			"label": _("Assessment"),
+			"items": [
+				{
+					"type": "doctype",
 					"name": "Assessment"
 				},
 				{
@@ -73,11 +90,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Student Batch Attendance Tool"
-				},
-				{
-					"type": "doctype",
-					"name": "Scheduling Tool"
+					"name": "Grading Structure"
 				}
 			]
 		},
@@ -131,6 +144,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Program"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Batch Name"
 				},
 				{
 					"type": "doctype",
