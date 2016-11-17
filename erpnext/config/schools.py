@@ -73,6 +73,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Student Batch Attendance Tool"
+				},
+				{
+					"type": "doctype",
 					"name": "Scheduling Tool"
 				}
 			]

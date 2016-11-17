@@ -22,7 +22,9 @@ class SchedulingTool(Document):
 		self.validate_mandatory()
 		self.validate_date()
 		self.instructor_name= frappe.db.get_value("Instructor", self.instructor, "instructor_name")
-		self.course= frappe.db.get_value("Student Group", self.student_group, "course")
+		
+		if self.student_group:
+			self.course= frappe.db.get_value("Student Group", self.student_group, "course")
 		
 		if self.rechedule:
 			rescheduled, reschedule_errors = self.delete_course_schedule(rescheduled, reschedule_errors)
@@ -54,7 +56,11 @@ class SchedulingTool(Document):
 			
 	def validate_mandatory(self):
 		"""Validates all mandatory fields"""
-		fields = ['student_group', 'room', 'instructor', 'from_time', 'to_time', 'course_start_date', 'course_end_date', 'day']
+		
+		if not (self.student_batch or self.student_group):
+			frappe.throw(_("""Student Batch or Student Group is mandatory"""))
+		
+		fields = ['course', 'room', 'instructor', 'from_time', 'to_time', 'course_start_date', 'course_end_date', 'day']
 		for d in  fields:
 			if not self.get(d):
 				frappe.throw(_("{0} is mandatory").format(self.meta.get_label(d)))	
@@ -68,6 +74,8 @@ class SchedulingTool(Document):
 		"""Delete all course schedule within the Date range and specified filters"""
 		schedules = frappe.get_list("Course Schedule", fields=["name", "schedule_date"], filters = 
 			[["student_group", "=", self.student_group],
+			["student_batch", "=", self.student_batch],
+			["course", "=", self.course],
 			["schedule_date", ">=", self.course_start_date], 
 			["schedule_date", "<=", self.course_end_date]])
 		for d in schedules:
@@ -85,6 +93,7 @@ class SchedulingTool(Document):
 		
 		course_schedule = frappe.new_doc("Course Schedule")
 		course_schedule.student_group = self.student_group
+		course_schedule.student_batch = self.student_batch
 		course_schedule.course = self.course
 		course_schedule.instructor = self.instructor
 		course_schedule.instructor_name = self.instructor_name
