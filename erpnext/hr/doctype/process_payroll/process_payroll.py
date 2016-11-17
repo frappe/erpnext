@@ -22,7 +22,7 @@ class ProcessPayroll(Document):
 
 		sal_struct = frappe.db.sql("""
 				select name from `tabSalary Structure`
-				where docstatus != 2 and company = %(company)s and
+				where docstatus != 2 and is_active = 'Yes' and company = %(company)s and
 				ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s""",
 				{"company": self.company, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
 		
@@ -51,8 +51,8 @@ class ProcessPayroll(Document):
 
 	def get_joining_releiving_condition(self):
 		cond = """
-			and ifnull(t1.date_of_joining, '0000-00-00') <= '%(from_date)s'
-			and ifnull(t1.relieving_date, '2199-12-31') >= '%(to_date)s'
+			and ifnull(t1.date_of_joining, '0000-00-00') <= '%(to_date)s'
+			and ifnull(t1.relieving_date, '2199-12-31') >= '%(from_date)s'
 		""" % {"from_date": self.from_date, "to_date": self.to_date}
 		return cond
 
