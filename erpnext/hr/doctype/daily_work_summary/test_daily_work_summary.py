@@ -3,6 +3,7 @@
 # See license.txt
 from __future__ import unicode_literals
 
+import os
 import frappe
 import unittest
 import frappe.utils
@@ -11,7 +12,7 @@ import frappe.utils
 
 class TestDailyWorkSummary(unittest.TestCase):
 	def test_email_trigger(self):
-		settings, employees, emails = self.setup_and_prepare_test(frappe.utils.nowtime().split(':')[0])
+		settings, employees, emails = self.setup_and_prepare_test()
 
 		for d in employees:
 			# check that email is sent to this employee
@@ -30,11 +31,32 @@ class TestDailyWorkSummary(unittest.TestCase):
 			self.assertFalse(d.user_id in [d.recipient for d in emails
 				if settings.subject in d.message])
 
-	def test_summary(self):
-		pass
+	def test_incoming(self):
+		settings, employees, emails = self.setup_and_prepare_test()
 
-	def setup_and_prepare_test(self, hour):
+		# get test mail with message-id as in-reply-to
+		with open(os.path.join(os.path.dirname(__file__), "test_data", "test-reply.raw"), "r") as f:
+			test_mails = [f.read().replace('{{ sender }}', employees[-1].user_id)\
+				.replace('{{ message_id }}', emails[-1].message_id)]
+
+		# pull the mail
+		email_account = frappe.get_doc("Email Account", "_Test Email Account 1")
+		email_account.db_set('enable_incoming', 1)
+		email_account.receive(test_mails=test_mails)
+
+		daily_work_summary = frappe.get_doc('Daily Work Summary',
+			frappe.get_all('Daily Work Summary')[0].name)
+
+		summary = daily_work_summary.get_summary_message()
+
+		self.assertTrue('I built Daily Work Summary!' in summary)
+
+	def setup_and_prepare_test(self, hour=None):
+		if not hour:
+			hour = frappe.utils.nowtime().split(':')[0]
+		frappe.db.sql('delete from `tabDaily Work Summary`')
 		frappe.db.sql('delete from `tabEmail Queue`')
+		frappe.db.sql('delete from `tabCommunication`')
 
 		# setup email to trigger at this our
 		settings = frappe.get_doc('Daily Work Summary Settings')
@@ -53,6 +75,6 @@ class TestDailyWorkSummary(unittest.TestCase):
 		employees = frappe.get_all('Employee', fields = ['user_id'],
 			filters=dict(company='_Test Company', status='Active'))
 
-		emails = frappe.get_all('Email Queue', fields=['recipient', 'message'])
+		emails = frappe.get_all('Email Queue', fields=['recipient', 'message', 'message_id'])
 
 		return settings, employees, emails
