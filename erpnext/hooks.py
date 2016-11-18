@@ -183,7 +183,8 @@ doc_events = {
 
 scheduler_events = {
 	"hourly": [
-		"erpnext.controllers.recurring_document.create_recurring_documents"
+		"erpnext.controllers.recurring_document.create_recurring_documents",
+		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails'
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
@@ -193,7 +194,8 @@ scheduler_events = {
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
-		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries"
+		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries",
+		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary'
 	]
 }
 
