@@ -119,6 +119,30 @@ class TestAsset(unittest.TestCase):
 			for d in asset.get("schedules")]
 
 		self.assertEqual(schedules, expected_schedules)
+		
+	def test_schedule_for_manual_method(self):
+		asset = frappe.get_doc("Asset", "Macbook Pro 1")
+		asset.depreciation_method = "Manual"
+		asset.schedules = []
+		for schedule_date, amount in [["2020-12-31", 40000], ["2021-06-30", 30000], ["2021-10-31", 20000]]:
+			asset.append("schedules", {
+				"schedule_date": schedule_date,
+				"depreciation_amount": amount
+			})
+		asset.save()
+
+		self.assertEqual(asset.status, "Draft")
+
+		expected_schedules = [
+			["2020-12-31", 40000, 40000],
+			["2021-06-30", 30000, 70000],
+			["2021-10-31", 20000, 90000]
+		]
+
+		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
 
 	def test_depreciation(self):
 		asset = frappe.get_doc("Asset", "Macbook Pro 1")
