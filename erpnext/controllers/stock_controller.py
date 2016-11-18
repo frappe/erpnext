@@ -262,6 +262,7 @@ class StockController(AccountsController):
 		'''Checks if quality inspection is set for Items that require inspection.
 		On submit, throw an exception'''
 		
+		inspection_required_fieldname = None
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 			inspection_required_fieldname = "inspection_required_before_purchase"
 		elif self.doctype in ["Delivery Note", "Sales Invoice"]:
