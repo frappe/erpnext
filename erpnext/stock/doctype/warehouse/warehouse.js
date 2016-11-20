@@ -12,7 +12,7 @@ frappe.ui.form.on("Warehouse", {
 
 		if (cint(frm.doc.is_group) == 1) {
 			frm.add_custom_button(__('Group to Non-Group'),
-				function() { convert_to_group_or_ledger(frm); }, 'icon-retweet', 'btn-default')
+				function() { convert_to_group_or_ledger(frm); }, 'fa fa-retweet', 'btn-default')
 		} else if (cint(frm.doc.is_group) == 0) {
 			if(frm.doc.__onload && frm.doc.__onload.account) {
 				frm.add_custom_button(__("General Ledger"), function() {
@@ -25,7 +25,7 @@ frappe.ui.form.on("Warehouse", {
 			}
 
 			frm.add_custom_button(__('Non-Group to Group'),
-				function() { convert_to_group_or_ledger(frm); }, 'icon-retweet', 'btn-default')
+				function() { convert_to_group_or_ledger(frm); }, 'fa fa-retweet', 'btn-default')
 		}
 		
 		cur_frm.toggle_enable(['is_group', 'company'], false);

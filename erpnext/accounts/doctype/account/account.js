@@ -51,7 +51,7 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 
 	if (doc.is_group == 1) {
 		cur_frm.add_custom_button(__('Group to Non-Group'),
-			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet', 'btn-default');
+			function() { cur_frm.cscript.convert_to_ledger(); }, 'fa fa-retweet', 'btn-default');
 	} else if (cint(doc.is_group) == 0) {
 		cur_frm.add_custom_button(__('Ledger'), function() {
 			frappe.route_options = {
@@ -64,7 +64,7 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 		});
 
 		cur_frm.add_custom_button(__('Non-Group to Group'),
-			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet', 'btn-default')
+			function() { cur_frm.cscript.convert_to_group(); }, 'fa fa-retweet', 'btn-default')
 	}
 }
 
