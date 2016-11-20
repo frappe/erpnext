@@ -466,6 +466,9 @@ def get_item_details(item):
 		if variant_of:
 			res["bom_no"] = frappe.db.get_value("BOM", filters={"item": variant_of, "is_default": 1})
 
+	if not res["bom_no"]:
+		frappe.throw(_("Default BOM for {0} not found").format(item))
+
 	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
 
 	return res
