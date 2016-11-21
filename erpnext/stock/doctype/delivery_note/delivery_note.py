@@ -103,7 +103,6 @@ class DeliveryNote(SellingController):
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_with_previous_doc()
-		self.validate_inspection()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
@@ -111,13 +110,6 @@ class DeliveryNote(SellingController):
 		self.update_current_stock()
 
 		if not self.installation_status: self.installation_status = 'Not Installed'
-
-	def validate_inspection(self):
-		for d in self.get('items'):		 #Enter inspection date for all items that require inspection
-			if frappe.db.get_value("Item", d.item_code, "inspection_required_before_delivery") and not d.qa_no:
-				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
-				if self.docstatus==1:
-					raise frappe.ValidationError
 
 	def validate_with_previous_doc(self):
 		for fn in (("Sales Order", "against_sales_order", "so_detail"),

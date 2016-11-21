@@ -24,19 +24,20 @@ class QualityInspection(Document):
 			child.status = 'Accepted'
 
 	def on_submit(self):
-		if self.purchase_receipt_no:
-			frappe.db.sql("""update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2
-				set t1.qa_no = %s, t2.modified = %s
-				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name""",
-				(self.name, self.modified, self.purchase_receipt_no,
-					self.item_code))
-
+		if self.reference_type and self.reference_name:
+			frappe.db.sql("""update `tab{doctype} Item` t1, `tab{doctype}` t2
+				set t1.quality_inspection = %s, t2.modified = %s
+				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name"""
+				.format(doctype=self.reference_type),
+				(self.name, self.modified, self.reference_name, self.item_code))
+				
 	def on_cancel(self):
-		if self.purchase_receipt_no:
-			frappe.db.sql("""update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2
-				set t1.qa_no = '', t2.modified = %s
-				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name""",
-				(self.modified, self.purchase_receipt_no, self.item_code))
+		if self.reference_type and self.reference_name:
+			frappe.db.sql("""update `tab{doctype} Item` t1, `tab{doctype}` t2
+				set t1.quality_inspection = null, t2.modified = %s
+				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name"""
+				.format(doctype=self.reference_type),
+				(self.modified, self.reference_name, self.item_code))
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("from"):
