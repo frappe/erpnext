@@ -114,7 +114,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-11-07 05:30:20.409675", 
+ "modified": "2016-11-21 14:54:35.998761", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Monthly Distribution", 
@@ -164,7 +164,7 @@
    "write": 0
   }
  ], 
- "quick_entry": 1, 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_field": "modified", 
