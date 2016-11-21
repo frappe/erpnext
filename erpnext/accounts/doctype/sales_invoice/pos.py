@@ -122,7 +122,8 @@ def get_items_list(pos_profile):
 	return frappe.db.sql(""" 
 		select
 			name, item_code, item_name, description, item_group, expense_account, has_batch_no,
-			has_serial_no, expense_account, selling_cost_center, stock_uom, image, default_warehouse
+			has_serial_no, expense_account, selling_cost_center, stock_uom, image, 
+			default_warehouse, is_stock_item
 		from
 			tabItem
 		where
