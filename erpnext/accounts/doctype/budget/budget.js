@@ -10,6 +10,14 @@ frappe.ui.form.on('Budget', {
 				}
 			}
 		})
+
+		frm.set_query("project", function() {
+			return {
+				filters: {
+					company: frm.doc.company
+				}
+			}
+		})
 		
 		frm.set_query("account", "accounts", function() {
 			return {
