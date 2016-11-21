@@ -15,7 +15,7 @@ ERPNext is Open Source under the GNU General Public Licence v3 and has been
 listed as one of the Best Open Source Softwares in the world by many online
 blogs."""
 
-docs_version = "6.x.x"
+docs_version = "7.x.x"
 splash_light_background = True
 
 def get_context(context):
