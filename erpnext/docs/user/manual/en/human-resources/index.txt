@@ -12,4 +12,5 @@ human-resources-reports
 setup
 holiday-list
 human-resource-setup
+daily-work-summary
 articles
