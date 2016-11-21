@@ -592,10 +592,10 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-11-18 17:48:40.610284", 
+ "modified": "2016-11-21 16:58:29.295922", 
  "modified_by": "Administrator", 
  "module": "Schools", 
- "name": "Scheduling Tool", 
+ "name": "Course Scheduling Tool", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [

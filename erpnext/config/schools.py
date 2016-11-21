@@ -51,7 +51,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Batch Creation Tool"
+					"name": "Student Batch Creation Tool"
 				}
 			]
 		},
@@ -69,7 +69,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Scheduling Tool"
+					"name": "Course Scheduling Tool"
 				},
 				{
 					"type": "doctype",
@@ -147,7 +147,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Student Batch Name"
+					"name": "Instructor"
+				},
+				{
+					"type": "doctype",
+					"name": "Room"
 				},
 				{
 					"type": "doctype",
@@ -155,15 +159,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Grading Structure"
-				},
-				{
-					"type": "doctype",
-					"name": "Instructor"
-				},
-				{
-					"type": "doctype",
-					"name": "Room"
+					"name": "Student Batch Name"
 				},
 				{
 					"type": "doctype",

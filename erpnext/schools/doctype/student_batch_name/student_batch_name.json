@@ -51,10 +51,10 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-11-17 18:46:01.359799", 
+ "modified": "2016-11-21 16:31:50.775958", 
  "modified_by": "Administrator", 
  "module": "Schools", 
- "name": "Batch Name", 
+ "name": "Student Batch Name", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [

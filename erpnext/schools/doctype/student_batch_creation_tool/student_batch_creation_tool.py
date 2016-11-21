@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class BatchCreationTool(Document):
+class StudentBatchCreationTool(Document):
 	def make_batch(self):
 		if self.academic_year and self.program and self.student_batch_name:
 			students = frappe.get_list("Program Enrollment", fields=["student", "student_name"],
@@ -24,3 +24,4 @@ class BatchCreationTool(Document):
 				frappe.msgprint("Student Batch created.")
 			else:
 				frappe.msgprint("No students found.")
+

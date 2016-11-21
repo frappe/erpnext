@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015, Frappe Technologies and contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -10,7 +10,7 @@ from frappe.model.document import Document
 from frappe.utils import add_days, getdate
 from erpnext.schools.utils import OverlapError
 
-class SchedulingTool(Document):
+class CourseSchedulingTool(Document):
 	def schedule_course(self):
 		"""Creates course schedules as per specified parametes"""
 		
@@ -102,3 +102,4 @@ class SchedulingTool(Document):
 		course_schedule.from_time= self.from_time
 		course_schedule.to_time= self.to_time
 		return course_schedule
+	

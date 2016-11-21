@@ -138,10 +138,10 @@
  "issingle": 1, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-11-18 17:33:03.157470", 
+ "modified": "2016-11-21 16:47:56.823988", 
  "modified_by": "Administrator", 
  "module": "Schools", 
- "name": "Batch Creation Tool", 
+ "name": "Student Batch Creation Tool", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [
