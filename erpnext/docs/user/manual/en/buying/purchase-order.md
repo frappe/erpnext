@@ -7,7 +7,7 @@ Supplier Quotation.
 
 #### Purchase Order Flow Chart
 
-![Purchase Order]({{docs_base_url}}/assets/old_images/erpnext/purchase-order-f.jpg)
+![Purchase Order]({{docs_base_url}}/assets/img/buying/buying_flow.png)
 
 In ERPNext, you can also make a Purchase Order directly by going to:
 
@@ -39,6 +39,12 @@ which you collect from your Customer. In many regions, what you pay to your
 government is only the difference between what you collect from your Customer
 and what you pay to your Supplier. This is called Value Added Tax (VAT).
 
+#### Add Taxes in Purchase Order
+<img class="screenshot" alt="Purchase Order" src="{{docs_base_url}}/assets/img/buying/add_taxes_to_doc.png">
+
+#### Show Tax break-up
+<img class="screenshot" alt="Purchase Order" src="{{docs_base_url}}/assets/img/buying/show_tax_breakup.png">
+
 For example you buy Items worth X and sell them for 1.3X. So your Customer
 pays 1.3 times the tax you pay your Supplier. Since you have already paid tax
 to your Supplier for X, what you owe your government is only the tax on 0.3X.
@@ -49,7 +55,7 @@ Ideally you must create two Accounts for each type of VAT you pay and collect,
 effect. Please contact your accountant if you need more help or post a query
 on our forums!
 
-  
+
 
 #### Purchase UOM and Stock UOM Conversion
 
@@ -82,5 +88,5 @@ __Step 5:__  Notice that the stock quantity will be updated accordingly.
 
 __Step 6:__ Save and Submit the Form.
 
-  
+
 {next}
