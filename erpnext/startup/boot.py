@@ -23,7 +23,7 @@ def boot_session(bootinfo):
 			"Notification Control")
 
 		# if no company, show a dialog box to create a new company
-		bootinfo.customer_count = frappe.db.sql("""select count(name) from tabCustomer""")[0][0]
+		bootinfo.customer_count = frappe.db.sql("""select count(*) from tabCustomer""")[0][0]
 
 		if not bootinfo.customer_count:
 			bootinfo.setup_complete = frappe.db.sql("""select name from

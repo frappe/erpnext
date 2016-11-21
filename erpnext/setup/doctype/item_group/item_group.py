@@ -127,7 +127,7 @@ def get_item_for_list_in_html(context):
 
 def get_group_item_count(item_group):
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(item_group)])
-	return frappe.db.sql("""select count(name) from `tabItem`
+	return frappe.db.sql("""select count(*) from `tabItem`
 		where docstatus = 0 and show_in_website = 1
 		and (item_group in (%s)
 			or name in (select parent from `tabWebsite Item Group`

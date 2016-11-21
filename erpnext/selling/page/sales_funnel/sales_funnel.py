@@ -8,7 +8,7 @@ from frappe import _
 
 @frappe.whitelist()
 def get_funnel_data(from_date, to_date):
-	active_leads = frappe.db.sql("""select count(name) from `tabLead`
+	active_leads = frappe.db.sql("""select count(*) from `tabLead`
 		where (date(`modified`) between %s and %s)
 		and status != "Do Not Contact" """, (from_date, to_date))[0][0]
 
@@ -16,15 +16,15 @@ def get_funnel_data(from_date, to_date):
 		where (date(`modified`) between %s and %s)
 		and status != "Passive" """, (from_date, to_date))[0][0]
 
-	opportunities = frappe.db.sql("""select count(name) from `tabOpportunity`
+	opportunities = frappe.db.sql("""select count(*) from `tabOpportunity`
 		where (date(`creation`) between %s and %s)
 		and status != "Lost" """, (from_date, to_date))[0][0]
 
-	quotations = frappe.db.sql("""select count(name) from `tabQuotation`
+	quotations = frappe.db.sql("""select count(*) from `tabQuotation`
 		where docstatus = 1 and (date(`creation`) between %s and %s)
 		and status != "Lost" """, (from_date, to_date))[0][0]
 
-	sales_orders = frappe.db.sql("""select count(name) from `tabSales Order`
+	sales_orders = frappe.db.sql("""select count(*) from `tabSales Order`
 		where docstatus = 1 and (date(`creation`) between %s and %s)""", (from_date, to_date))[0][0]
 
 	return [
