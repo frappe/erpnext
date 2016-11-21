@@ -2,15 +2,9 @@
 
 A barcode is a value decoded into vertical spaced lines. Barcode scanners are the input medium, like Keyboard. When it scans a barcode, the data appears in the computer screens at the point of a cursor.
 
-To enable barcode feature in ERPNext go to:
+### Item Master
 
-`Setup > Customize > Features Setup`
-
-Check "Item Barcode".
-
-<img alt="Material Transfer" class="screenshot" src="{{docs_base_url}}/assets/img/articles/barcode-feature-setup.png">
-
-Now a new field "Barcode" will be appear in Item master. Enter barcode while creating a new item.
+To set the barcode of a particular item, you will have to open the Item record. You can also enter barcode while creating a new item.
 
 <img alt="Material Transfer" class="screenshot" src="{{docs_base_url}}/assets/img/articles/barcode-item-master.png">
 

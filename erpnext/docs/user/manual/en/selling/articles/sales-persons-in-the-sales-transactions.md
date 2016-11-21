@@ -32,14 +32,4 @@ ERPNext only provide total amount of sale made by a Sales Person. If you offer c
 
 `Accounts > Standard Reports > Sales Partners Commission`
 
-####Disable Sales Person Feature
-
-If you don't track Sales Person wise performance, and doesn't wish to use this feature, you can disable it from:
-
-`Setup > Customize > Features Setup`
-
-<img class="screenshot" alt="Disable Sales Person" src="{{docs_base_url}}/assets/img/articles/sales-person-transaction-4.png">
-
-On disabling this feature, fields and tables related to Sales Person will become hidden from masters and transcations.
-
 <!-- markdown -->
