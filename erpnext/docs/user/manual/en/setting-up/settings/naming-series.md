@@ -47,7 +47,7 @@ See how to set the naming series
 {next}
 
 ### 4. Custom Field in Naming Series
- Some companies prefers to make use of "short-codes" for suppliers, i.e. WN for company "Web Notes" that later can be used in naming series for quick identication.
+ Some companies prefers to make use of "short-codes" for suppliers, i.e. WN for company "Web Notes" that later can be used in naming series for quick identification.
  
 #### Example:
 
