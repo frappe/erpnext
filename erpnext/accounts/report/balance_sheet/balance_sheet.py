@@ -14,10 +14,10 @@ def execute(filters=None):
 	liability = get_data(filters.company, "Liability", "Credit", period_list, only_current_fiscal_year=False)
 	equity = get_data(filters.company, "Equity", "Credit", period_list, only_current_fiscal_year=False)
 
-	provisional_profit_loss,total_credit  = get_provisional_profit_loss(asset, liability, equity,
+	provisional_profit_loss, total_credit = get_provisional_profit_loss(asset, liability, equity,
 		period_list, filters.company)
 
-	message,opening_balance = check_opening_balance(asset, liability, equity)
+	message, opening_balance = check_opening_balance(asset, liability, equity)
 
 	data = []
 	data.extend(asset or [])
@@ -32,7 +32,9 @@ def execute(filters=None):
 		}
 		for period in period_list:
 			unclosed[period.key] = opening_balance
-			provisional_profit_loss[period.key] = provisional_profit_loss[period.key] - opening_balance
+			if provisional_profit_loss:
+				provisional_profit_loss[period.key] = provisional_profit_loss[period.key] - opening_balance
+				
 		unclosed["total"]=opening_balance
 		data.append(unclosed)
 		
@@ -48,15 +50,11 @@ def execute(filters=None):
 	return columns, data, message, chart
 
 def get_provisional_profit_loss(asset, liability, equity, period_list, company):
+	provisional_profit_loss = {}
+	total_row = {}
 	if asset and (liability or equity):
 		total = total_row_total=0
 		currency = frappe.db.get_value("Company", company, "default_currency")
-		provisional_profit_loss = {
-			"account_name": "'" + _("Provisional Profit / Loss (Credit)") + "'",
-			"account": None,
-			"warn_if_negative": True,
-			"currency": currency
-		}
 		total_row = {
 			"account_name": "'" + _("Total (Credit)") + "'",
 			"account": None,
@@ -85,9 +83,14 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 			total_row["total"] = total_row_total
 
 		if has_value:
-			return provisional_profit_loss, total_row
-		return None,total_row
-	return None, None	
+			provisional_profit_loss.update({
+				"account_name": "'" + _("Provisional Profit / Loss (Credit)") + "'",
+				"account": None,
+				"warn_if_negative": True,
+				"currency": currency
+			})
+			
+	return provisional_profit_loss, total_row
 
 def check_opening_balance(asset, liability, equity):
 	# Check if previous year balance sheet closed
