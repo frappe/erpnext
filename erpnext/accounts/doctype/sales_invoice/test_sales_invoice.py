@@ -7,6 +7,7 @@ import unittest, copy
 from frappe.utils import nowdate, add_days, flt, nowdate
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
@@ -467,7 +468,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_pos_gl_entry_with_perpetual_inventory(self):
 		set_perpetual_inventory()
-		self.make_pos_profile()
+		make_pos_profile()
 
 		self._insert_purchase_receipt()
 		pos = copy.deepcopy(test_records[1])
@@ -486,7 +487,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_pos_change_amount(self):
 		set_perpetual_inventory()
-		self.make_pos_profile()
+		make_pos_profile()
 
 		self._insert_purchase_receipt()
 		pos = copy.deepcopy(test_records[1])
@@ -508,7 +509,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		set_perpetual_inventory()
 
-		self.make_pos_profile()
+		make_pos_profile()
 		self._insert_purchase_receipt()
 
 		pos = copy.deepcopy(test_records[1])
@@ -572,26 +573,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 		frappe.db.sql("delete from `tabPOS Profile`")
 
-	def make_pos_profile(self):
-		pos_profile = frappe.get_doc({
-			"company": "_Test Company",
-			"cost_center": "_Test Cost Center - _TC",
-			"currency": "INR",
-			"doctype": "POS Profile",
-			"expense_account": "_Test Account Cost for Goods Sold - _TC",
-			"income_account": "Sales - _TC",
-			"name": "_Test POS Profile",
-			"naming_series": "_T-POS Profile-",
-			"selling_price_list": "_Test Price List",
-			"territory": "_Test Territory",
-			"warehouse": "_Test Warehouse - _TC",
-			"write_off_account": "_Test Write Off - _TC",
-			"write_off_cost_center": "_Test Write Off Cost Center - _TC"
-		})
-
-		if not frappe.db.exists("POS Profile", "_Test POS Profile"):
-			pos_profile.insert()
-			
 	def test_sales_invoice_gl_entry_with_perpetual_inventory_no_item_code(self):
 		set_perpetual_inventory()
 
