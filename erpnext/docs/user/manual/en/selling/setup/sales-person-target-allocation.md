@@ -80,7 +80,7 @@ You can link Monthly Distribution while allocating targets in Sales Person as we
 
 ###See Also
 
-1. [Managing Sales Person](https://erpnext.com/selling/selling-setup/sales-person)
-2. [Using Sales Person in transactions](https://erpnext.com/kb/selling/managing-sales-persons-in-sales-transactions)
+1. [Sales Person Target Allocation]({{docs_base_url}}/user/manual/en/selling/setup/sales-person-target-allocation)
+2. [Using Sales Person in transactions]({{docs_base_url}}/user/manual/en/selling/articles/sales-persons-in-the-sales-transactions)
 
 {next}
