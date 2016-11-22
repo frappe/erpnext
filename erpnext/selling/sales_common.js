@@ -66,7 +66,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
-		if(this.frm.fields_dict["packed_items"].grid.get_field('batch_no')) {
+		if(this.frm.fields_dict["packed_items"] &&
+			this.frm.fields_dict["packed_items"].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", "packed_items", function(doc, cdt, cdn) {
 				return me.set_query_for_batch(doc, cdt, cdn)
 			});
