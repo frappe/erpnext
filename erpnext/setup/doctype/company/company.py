@@ -30,6 +30,7 @@ class Company(Document):
 		self.validate_abbr()
 		self.validate_default_accounts()
 		self.validate_currency()
+		self.validate_stock_structure()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -241,6 +242,23 @@ class Company(Document):
 		frappe.db.sql("""update `tabSingles` set value=""
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
+
+	def validate_stock_structure(self):
+		company_list = []
+		for entry in self.stock_structure:
+			# Check Parent cannot hold its own shares
+			if entry.company == self.name:
+				frappe.throw(_("{0} cannot hold its own shares, check row {1} in Stock Structure".format(self.name, entry.idx)))
+
+			# Check percentage holdings cannot be negative or 0
+			if entry.percent_holding <= 0.0:
+				frappe.throw(_("Wrong holding in {0}, check row {1} in Stock Structure".format(self.name, entry.idx)))
+
+			company_list.append(entry.company)
+
+		# Error when Same Company is entered multiple times in stock structure
+		if len(company_list)!= len(set(company_list)):
+			frappe.throw(_("Same Company is entered more than once"))
 
 @frappe.whitelist()
 def replace_abbr(company, old, new):
