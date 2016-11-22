@@ -20,6 +20,8 @@ class Budget(Document):
 			self.name = make_autoname(self.project + "/" + self.fiscal_year + "/.###")
 	
 	def validate(self):
+		if not self.cost_center and not self.project:
+			frappe.throw(_("Budget should be allocated against either Cost Center or Project."))
 		if self.cost_center:
 			self.validate_duplicate("cost_center")
 		if self.project:

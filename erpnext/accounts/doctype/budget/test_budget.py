@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from erpnext.accounts.doctype.budget.budget import get_actual_expense, BudgetError
+from erpnext.accounts.doctype.budget.budget import get_actual_expense_for_CC, BudgetError
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 class TestBudget(unittest.TestCase):		
@@ -89,7 +89,7 @@ class TestBudget(unittest.TestCase):
 		budget.cancel()
 
 def set_total_expense_zero(posting_date, cost_center=None):
-	existing_expense = get_actual_expense({
+	existing_expense = get_actual_expense_for_CC({
 		"account": "_Test Account Cost for Goods Sold - _TC",
 		"cost_center": cost_center or "_Test Cost Center - _TC",
 		"monthly_end_date": posting_date,
