@@ -14,7 +14,8 @@ class NamingSeriesNotSetError(frappe.ValidationError): pass
 class NamingSeries(Document):
 	def get_transactions(self, arg=None):
 		doctypes = list(set(frappe.db.sql_list("""select parent
-				from `tabDocField` where fieldname='naming_series'""")
+				from `tabDocField` df where fieldname='naming_series' and 
+				exists(select * from `tabDocPerm` dp, `tabRole` role where dp.role = role.name and dp.parent = df.parent and not role.disabled)""")
 			+ frappe.db.sql_list("""select dt from `tabCustom Field`
 				where fieldname='naming_series'""")))
 
