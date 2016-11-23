@@ -401,16 +401,22 @@ def update_reference_in_payment_entry(d, payment_entry):
 	payment_entry.set_amounts()
 	payment_entry.save(ignore_permissions=True)
 	
-def unlink_ref_doc_from_payment_entries(ref_type, ref_no):
-	remove_ref_doc_link_from_jv(ref_type, ref_no)
-	remove_ref_doc_link_from_pe(ref_type, ref_no)
+def unlink_ref_doc_from_payment_entries(ref_doc):
+	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name)
+	remove_ref_doc_link_from_pe(ref_doc.doctype, ref_doc.name)
 	
 	frappe.db.sql("""update `tabGL Entry`
 		set against_voucher_type=null, against_voucher=null,
 		modified=%s, modified_by=%s
 		where against_voucher_type=%s and against_voucher=%s
 		and voucher_no != ifnull(against_voucher, '')""",
-		(now(), frappe.session.user, ref_type, ref_no))
+		(now(), frappe.session.user, ref_doc.doctype, ref_doc.name))
+	
+	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice"):
+		ref_doc.set("advances", [])
+	
+		frappe.db.sql("""delete from `tab{0} Advance` where parent = %s"""
+			.format(ref_doc.doctype), ref_doc.name)
 
 def remove_ref_doc_link_from_jv(ref_type, ref_no):
 	linked_jv = frappe.db.sql_list("""select parent from `tabJournal Entry Account`
