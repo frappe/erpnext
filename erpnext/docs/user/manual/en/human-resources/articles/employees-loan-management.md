@@ -10,7 +10,7 @@ Create following Groups and Ledgers in Chart of Accounts if not there.
       
 #### 1.1  Employee Loan Account
 
-Create Group as 'Employees Loans' under Current Assets and create employee loan A/C (Ledger) under it. [Check this link for new account creation](https://erpnext.com/kb/setup/managing-tree-structure-masters)
+Create Group as 'Employees Loans' under Current Assets and create employee loan A/C (Ledger) under it. [Check this link for new account creation]({{docs_base_url}}/user/manual/en/setting-up/articles/managing-tree-structure-masters)
 
 ![CoA]({{docs_base_url}}/assets/img/articles/Selection_433.png)
 
