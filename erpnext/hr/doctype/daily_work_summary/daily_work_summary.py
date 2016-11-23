@@ -39,11 +39,14 @@ class DailyWorkSummary(Document):
 
 		replies = frappe.get_all('Communication', fields=['content', 'text_content', 'sender'],
 			filters=dict(reference_doctype=self.doctype, reference_name=self.name,
-				communication_type='Communication', sent_or_received='Received'))
+				communication_type='Communication', sent_or_received='Received'),
+				order_by='creation asc')
 
 		did_not_reply = self.email_sent_to.split()
 
 		for d in replies:
+			d.sender_name = frappe.db.get_value("Employee", {"user_id": d.sender},
+				"employee_name") or d.sender
 			if d.sender in did_not_reply:
 				did_not_reply.remove(d.sender)
 			if d.text_content:
@@ -62,17 +65,17 @@ class DailyWorkSummary(Document):
 
 	def get_summary_template(self):
 		return '''
-<h4>{{ title }}</h4>
+<h3>{{ title }}</h3>
 
 {% for reply in replies %}
-<h5>{{ frappe.db.get_value("Employee", {"user_id": reply.sender}, "employee_name") or reply.sender }}<h5>
+<h4>{{ reply.sender_name }}</h4>
 <p style="padding-bottom: 20px">
 	{{ reply.content }}
 </p>
+<hr>
 {% endfor %}
 
 {% if did_not_reply %}
-<hr>
 <p>{{ did_not_reply_title }}: {{ did_not_reply }}</p>
 {% endif %}
 
