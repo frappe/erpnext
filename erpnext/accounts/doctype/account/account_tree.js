@@ -27,7 +27,8 @@ frappe.treeview_settings["Account"] = {
 		{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 			description: __('Further accounts can be made under Groups, but entries can be made against non-Groups')},
 		{fieldtype:'Select', fieldname:'root_type', label:__('Root Type'),
-			options: ['Asset', 'Liability', 'Equity', 'Income', 'Expense'].join('\n')},
+			options: ['Asset', 'Liability', 'Equity', 'Income', 'Expense'].join('\n'),
+			depends_on: 'eval:doc.is_group'},
 		{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
 			options: ['', 'Bank', 'Cash', 'Stock', 'Tax', 'Chargeable', 'Fixed Asset'].join('\n'),
 			description: __("Optional. This setting will be used to filter in various transactions.")
