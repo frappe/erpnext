@@ -66,9 +66,12 @@ def identify_is_group(child):
 
 def get_chart(chart_name):
 	chart = {}
-	if chart_name == "Standard":
+	if chart_name == "Standard Template":
 		from erpnext.accounts.doctype.account.chart_of_accounts.verified import standard_chart_of_accounts
 		return standard_chart_of_accounts.get()
+		
+	
+		
 	else:
 		folders = ("verified",)
 		if frappe.local.flags.allow_unverified_charts:
