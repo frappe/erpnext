@@ -444,7 +444,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			})
 		}
 
-		key =  this.search.$input.val().toLowerCase();
+		key =  this.search.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g,'\\$&');
 		var re = new RegExp('%', 'g');
 		var reg = new RegExp(key.replace(re, '[\\w*\\s*[a-zA-Z0-9]*]*'))
 		search_status = true
