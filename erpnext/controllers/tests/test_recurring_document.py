@@ -110,7 +110,7 @@ def _test_recurring_document(obj, base_doc, date_field, first_and_last_day):
 	no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_doc.recurring_type]
 
 	def _test(i):
-		obj.assertEquals(i+1, frappe.db.sql("""select count(name) from `tab%s`
+		obj.assertEquals(i+1, frappe.db.sql("""select count(*) from `tab%s`
 			where recurring_id=%s and (docstatus=1 or docstatus=0)""" % (base_doc.doctype, '%s'),
 			(base_doc.recurring_id))[0][0])
 

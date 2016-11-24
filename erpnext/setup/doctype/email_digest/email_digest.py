@@ -177,7 +177,7 @@ class EmailDigest(Document):
 		if not user_id:
 			user_id = frappe.session.user
 
-		return frappe.db.sql("""select count(name) from `tabToDo` 
+		return frappe.db.sql("""select count(*) from `tabToDo` 
 			where status='Open' and (owner=%s or assigned_by=%s)""",
 			(user_id, user_id))[0][0]
 
@@ -202,7 +202,7 @@ class EmailDigest(Document):
 	
 	def get_issue_count(self):
 		"""Get count of Issue"""
-		return frappe.db.sql("""select count(name) from `tabIssue`
+		return frappe.db.sql("""select count(*) from `tabIssue`
 			where status in ('Open','Replied') """)[0][0]
 
 	def get_project_list(self, user_id=None):
@@ -221,7 +221,7 @@ class EmailDigest(Document):
 
 	def get_project_count(self):
 		"""Get count of Project"""
-		return frappe.db.sql("""select count(name) from `tabProject`
+		return frappe.db.sql("""select count(*) from `tabProject`
 			where status='Open' and project_type='External'""")[0][0]
 
 	def set_accounting_cards(self, context):

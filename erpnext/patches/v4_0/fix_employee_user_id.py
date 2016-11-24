@@ -18,6 +18,6 @@ def execute():
 			frappe.db.sql("""update `tabEmployee` set user_id=null
 				where user_id=%s and name!=%s""", (user_id, employee))
 		else:
-			count = frappe.db.sql("""select count(name) from `tabEmployee` where user_id=%s""", user_id)[0][0]
+			count = frappe.db.sql("""select count(*) from `tabEmployee` where user_id=%s""", user_id)[0][0]
 			frappe.db.sql("""update `tabEmployee` set user_id=null
 				where user_id=%s limit %s""", (user_id, count - 1))
