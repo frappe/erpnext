@@ -217,7 +217,7 @@ class ProductionOrder(Document):
 			return
 		self.set('operations', [])
 		operations = frappe.db.sql("""select operation, description, workstation, idx,
-			hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
+			base_hour_rate as hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
 			where parent = %s order by idx""", self.bom_no, as_dict=1)
 		self.set('operations', operations)
 		self.calculate_time()
