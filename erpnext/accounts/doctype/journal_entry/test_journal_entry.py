@@ -186,10 +186,12 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertEqual(len(je.get("accounts")), 2)		
 		
 
-def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False):
+def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False, project=None):
 	if not cost_center:
 		cost_center = "_Test Cost Center - _TC"
-	
+	if not project:
+		project = "_Test Project"
+
 	jv = frappe.new_doc("Journal Entry")
 	jv.posting_date = posting_date or "2013-02-14"
 	jv.company = "_Test Company"
@@ -199,12 +201,14 @@ def make_journal_entry(account1, account2, amount, cost_center=None, posting_dat
 		{
 			"account": account1,
 			"cost_center": cost_center,
+			"project": project,
 			"debit_in_account_currency": amount if amount > 0 else 0,
 			"credit_in_account_currency": abs(amount) if amount < 0 else 0,
 			"exchange_rate": exchange_rate
 		}, {
 			"account": account2,
 			"cost_center": cost_center,
+			"project": project,
 			"credit_in_account_currency": amount if amount > 0 else 0,
 			"debit_in_account_currency": abs(amount) if amount < 0 else 0,
 			"exchange_rate": exchange_rate
