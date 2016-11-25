@@ -1,4 +1,4 @@
-<h1>Wesite Home Page</h1>
+<h1>Website Home Page</h1>
 
 It is very much possible in ERPNext to setup certain standard page as default website Home Page. Following are steps to setup default website home page.
 
