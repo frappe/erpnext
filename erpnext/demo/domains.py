@@ -12,5 +12,8 @@ data = {
 	},
 	'Services': {
 		'company_name': 'Acme Consulting'
+	},
+	'Education': {
+		'company_name': 'Whitmore College'
 	}
 }

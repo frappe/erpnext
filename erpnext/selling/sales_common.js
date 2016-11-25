@@ -12,12 +12,6 @@ frappe.provide("erpnext.selling");
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	setup: function() {
 		this._super();
-		this.frm.get_field('items').grid.editable_fields = [
-			{fieldname: 'item_code', columns: 4},
-			{fieldname: 'qty', columns: 2},
-			{fieldname: 'rate', columns: 2},
-			{fieldname: 'amount', columns: 2}
-		];
 	},
 
 	onload: function() {
@@ -66,29 +60,45 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if(this.frm.fields_dict["items"].grid.get_field('item_code')) {
 			this.frm.set_query("item_code", "items", function() {
 				return {
-					query: "erpnext.controllers.queries.item_query"
+					query: "erpnext.controllers.queries.item_query",
+					filters: {'is_sales_item': 1}
 				}
+			});
+		}
+
+		if(this.frm.fields_dict["packed_items"] &&
+			this.frm.fields_dict["packed_items"].grid.get_field('batch_no')) {
+			this.frm.set_query("batch_no", "packed_items", function(doc, cdt, cdn) {
+				return me.set_query_for_batch(doc, cdt, cdn)
 			});
 		}
 
 		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
-				var item = frappe.get_doc(cdt, cdn);
-				if(!item.item_code) {
-					frappe.throw(__("Please enter Item Code to get batch no"));
-				} else {
-					filters = {
-						'item_code': item.item_code,
-						'posting_date': me.frm.doc.posting_date || nowdate(),
-					}
-					if(item.warehouse) filters["warehouse"] = item.warehouse
-
-					return {
-						query : "erpnext.controllers.queries.get_batch_no",
-						filters: filters
-					}
-				}
+				return me.set_query_for_batch(doc, cdt, cdn)
 			});
+		}
+	},
+
+	set_query_for_batch: function(doc, cdt, cdn) {
+		// Show item's batches in the dropdown of batch no
+
+		var me = this;
+		var item = frappe.get_doc(cdt, cdn);
+
+		if(!item.item_code) {
+			frappe.throw(__("Please enter Item Code to get batch no"));
+		} else {
+			filters = {
+				'item_code': item.item_code,
+				'posting_date': me.frm.doc.posting_date || frappe.datetime.nowdate(),
+			}
+			if(item.warehouse) filters["warehouse"] = item.warehouse
+
+			return {
+				query : "erpnext.controllers.queries.get_batch_no",
+				filters: filters
+			}
 		}
 	},
 

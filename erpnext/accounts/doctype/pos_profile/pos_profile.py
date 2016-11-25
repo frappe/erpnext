@@ -13,6 +13,7 @@ class POSProfile(Document):
 	def validate(self):
 		self.check_for_duplicate()
 		self.validate_all_link_fields()
+		self.validate_duplicate_groups()
 
 	def check_for_duplicate(self):
 		res = frappe.db.sql("""select name, user from `tabPOS Profile`
@@ -36,6 +37,16 @@ class POSProfile(Document):
 				if link_dn and not frappe.db.exists({"doctype": link_dt,
 						"company": self.company, "name": link_dn}):
 					frappe.throw(_("{0} does not belong to Company {1}").format(link_dn, self.company))
+
+	def validate_duplicate_groups(self):
+		item_groups = [d.item_group for d in self.item_groups]
+		customer_groups = [d.customer_group for d in self.customer_groups]
+
+		if len(item_groups) != len(set(item_groups)):
+			frappe.throw(_("Duplicate item group found in the item group table"), title = "Duplicate Item Group")
+
+		if len(customer_groups) != len(set(customer_groups)):
+			frappe.throw(_("Duplicate customer group found in the cutomer group table"), title = "Duplicate Customer Group")
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)

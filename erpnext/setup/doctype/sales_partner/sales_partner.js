@@ -12,9 +12,3 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 		erpnext.utils.render_address_and_contact(cur_frm);
 	}
 }
-
-cur_frm.fields_dict['targets'].grid.get_field("item_group").get_query = function(doc, dt, dn) {
-  return{
-  	filters:{ 'is_group': 0 }
-  }
-}

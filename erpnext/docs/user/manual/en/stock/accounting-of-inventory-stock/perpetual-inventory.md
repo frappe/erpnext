@@ -1,42 +1,38 @@
-In perpetual inventory, system creates accounting entries for each stock
-transactions, so that stock and account balance will always remain same. The
-account balance will be posted against their respective account heads for each
-Warehouse. On saving of a Warehouse, the system will automatically create an
-account head with the same name as warehouse. As account balance is maintained
-for each Warehouse, you should create Warehouses, based on the type of items
-(Current / Fixed Assets) it stores.
+As per the perpetual inventory system, accounts posting is done for every stock transaction.
 
-At the time of items received in a particular warehouse, the balance of asset
-account (linked to that warehouse) will be increased. Similarly when you
-deliver some items from that warehouse, an expense will be booked and the
-asset account will be reduced, based on the valuation amount of those items.
+On creating new Warehouse, the system will automatically create an Account in the Chart of Accout, with the same name as Warehouse Name.
 
-## **Activation**
+On receipt of items in a particular warehouse, the balance in the Warehouse Account will increase. Similarly when items are delivered from the Warehouse, an expense will be booked, and balance in the Warehouse Account will reduce.
 
-  1. Setup the following default accounts for each Company 
+##Activation
+
+  1. Setup the following default accounts for each Company. These accounts are created automatically in the new ERPNext accounts.
 
     * Stock Received But Not Billed
     * Stock Adjustment Account
     * Expenses Included In Valuation
     * Cost Center
-  2. In perpetual inventory, the system will maintain separate account balance for each warehouse under separate account head. To create that account head, enter "Create Account Under" in Warehouse master.
+	
+  2. Ensure each Warehouse is an Account in the Chart of Accounts master. As per the default configuration, Accounts for Warehouse are created under `Assets > Current Asset > Stock Assets > (Warehouse)`
 
   3. Activate Perpetual Inventory
 
-> Setup > Accounts Settings > Make Accounting Entry For Every Stock Movement
+	 > Explore > Accounts > Accounts Settings > "Make Accounting Entry For Every Stock Movement"
+
+<img class="screenshot" alt="Perpetual Inventory" src="{{docs_base_url}}/assets/img/accounts/perpetual-1.png">
 
 * * *
 
-## **Example**
+##Example
 
 Consider following Chart of Accounts and Warehouse setup for your company:
 
-#### Chart of Accounts
+####Chart of Accounts
 
   * Assets (Dr) 
     * Current Assets
     * Accounts Receivable 
-      * Jane Doe
+      * Debtor
     * Stock Assets 
       * Stores
       * Finished Goods
@@ -44,11 +40,11 @@ Consider following Chart of Accounts and Warehouse setup for your company:
     * Tax Assets 
       * VAT
     * Fixed Assets
-    * Fixed Asset Warehouse
+      * Fixed Asset Warehouse
   * Liabilities (Cr) 
     * Current Liabilities
     * Accounts Payable 
-      * East Wind Inc.
+      * Creditors
     * Stock Liabilities 
       * Stock Received But Not Billed
     * Tax Liabilities 
@@ -65,18 +61,15 @@ Consider following Chart of Accounts and Warehouse setup for your company:
       * Shipping Charges
       * Customs Duty
 
-#### Warehouse - Account Configuration
+####Warehouse - Account Configuration
 
   * Stores
   * Work In Progress
   * Finished Goods
-  * Fixed Asset Warehouse
 
-### **Purchase Receipt**
+###Purchase Receipt
 
-Suppose you have purchased _10 nos_ of item "RM0001" at _$200_ and _5 nos_ of
-item "Desktop" at **$100** from supplier "East Wind Inc". Following are the
-details of Purchase Receipt:
+Suppose you have purchased _10 nos_ of item "RM0001" at _$200_ and _5 nos_ of item "Base Plate" at **$100** from supplier "East Wind Inc". Following are the details of Purchase Receipt:
 
 **Supplier:** East Wind Inc.
 
@@ -100,15 +93,7 @@ details of Purchase Receipt:
             <td>10</td>
             <td>200</td>
             <td>2000</td>
-            <td>2200</td>
-        </tr>
-        <tr>
-            <td>Desktop</td>
-            <td>Fixed Asset Warehouse</td>
-            <td>5</td>
-            <td>100</td>
-            <td>500</td>
-            <td>550</td>
+            <td>2250</td>
         </tr>
     </tbody>
 </table>
@@ -129,8 +114,8 @@ details of Purchase Receipt:
             <td>Total and Valuation</td>
         </tr>
         <tr>
-            <td>VAT</td>
-            <td>120</td>
+            <td>VAT (10%)</td>
+            <td>200</td>
             <td>Total</td>
         </tr>
         <tr>
@@ -140,25 +125,22 @@ details of Purchase Receipt:
         </tr>
     </tbody>
 </table>
-<p><strong>Stock Ledger</strong>
-</p>
 
-<img alt="Stock" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-2.png">
+**Stock Ledger**
+
+<img class="screenshot" alt="Perpetual Inventory" src="{{docs_base_url}}/assets/img/accounts/perpetual-2.png">
 
 **General Ledger**
 
-<img alt="Leger" class="screenshot" src="{{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-3.png">
+<img class="screenshot" alt="Perpetual Inventory" src="{{docs_base_url}}/assets/img/accounts/perpetual-3.png">
 
-As stock balance increases through Purchase Receipt, "Store" and "Fixed Asset
-Warehouse" accounts are debited and a temporary account "Stock Receipt But Not
-Billed" account is credited, to maintain double entry accounting system. At the same time, negative expense is booked in account "Expense included in Valuation" for the amount added for valuation purpose, to avoid double expense booking.
+As stock balance increases through Purchase Receipt, "Store" accounts are debited and a temporary account "Stock Receipt But Not Billed" account is credited, to maintain double entry accounting system. At the same time, negative expense is booked in account "Expense included in Valuation" for the amount added for valuation purpose, to avoid double expense booking.
 
 * * *
 
-### **Purchase Invoice**
+###Purchase Invoice
 
-On receiving Bill from supplier, for the above Purchase Receipt, you will make
-Purchase Invoice for the same. The general ledger entries are as follows:
+On receiving Bill from supplier, for the above Purchase Receipt, you will make Purchase Invoice for the same. The general ledger entries are as follows:
 
 **General Ledger**
 
@@ -169,7 +151,7 @@ effect of Purchase Receipt.
 
 * * *
 
-### **Delivery Note**
+###Delivery Note
 
 Lets say, you have an order from "Jane Doe" to deliver 5 nos of item "RM0001"
 at $300. Following are the details of Delivery Note:
@@ -246,7 +228,7 @@ valuation method (FIFO / Moving Average) or actual cost of serialized items.
 
 * * *
 
-### **Sales Invoice with Update Stock**
+###Sales Invoice with Update Stock
 
 Lets say, you did not make Delivery Note against the above order and instead
 you have made Sales Invoice directly, with "Update Stock" options. The details
@@ -265,7 +247,7 @@ Goods Sold" accounts are also affected based on the valuation amount.
 
 * * *
 
-### **Stock Entry (Material Receipt)**
+###Stock Entry (Material Receipt)
 
 **Items:**
 
@@ -300,7 +282,7 @@ Goods Sold" accounts are also affected based on the valuation amount.
 
 * * *
 
-### **Stock Entry (Material Issue)**
+###Stock Entry (Material Issue)
 
 **Items:**
 
@@ -335,7 +317,7 @@ Goods Sold" accounts are also affected based on the valuation amount.
 
 * * *
 
-### **Stock Entry (Material Transfer)**
+###Stock Entry (Material Transfer)
 
 **Items:**
 

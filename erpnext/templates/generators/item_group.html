@@ -31,10 +31,10 @@
 		</div>
 		<div class="text-center item-group-nav-buttons">
 			{% if frappe.form_dict.start|int > 0 %}
-			<a class="btn btn-default" href="{{ pathname }}?start={{ frappe.form_dict.start|int - 24 }}">Prev</a>
+			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">Prev</a>
 			{% endif %}
-			{% if items|length == 24 %}
-			<a class="btn btn-default" href="{{ pathname }}?start={{ frappe.form_dict.start|int + 24 }}">Next</a>
+			{% if items|length == page_length %}
+			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">Next</a>
 			{% endif %}
 		</div>
 		{% else %}

@@ -2,7 +2,7 @@
 <div class="page-break">
     {%- if not doc.get("print_heading") and not doc.get("select_print_heading")
         and doc.set("select_print_heading", _("Payment Receipt Note")) -%}{%- endif -%}
-    {{ add_header(0, 1, doc, letter_head, no_letterhead) }}
+    {{ add_header(0, 1, doc, letter_head, no_letterhead, print_settings) }}
 
     {%- for label, value in (
         (_("Received On"), frappe.utils.formatdate(doc.voucher_date)),

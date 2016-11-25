@@ -373,6 +373,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Profitability Analysis",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
 					"name": "Payment Period Based On Invoice Date",
 					"is_query_report": True,
 					"doctype": "Journal Entry"

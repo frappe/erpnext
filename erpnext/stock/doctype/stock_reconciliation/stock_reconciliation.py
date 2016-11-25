@@ -27,6 +27,7 @@ class StockReconciliation(StockController):
 		self.remove_items_with_no_change()
 		self.validate_data()
 		self.validate_expense_account()
+		self.set_total_qty_and_amount()
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -77,10 +78,6 @@ class StockReconciliation(StockController):
 		item_warehouse_combinations = []
 
 		default_currency = frappe.db.get_default("currency")
-
-		# validate no of rows
-		if len(self.items) > 100:
-			frappe.throw(_("""Max 100 rows for Stock Reconciliation."""))
 
 		for row_num, row in enumerate(self.items):
 			# find duplicates
@@ -240,6 +237,13 @@ class StockReconciliation(StockController):
 		elif not frappe.db.sql("""select name from `tabStock Ledger Entry` limit 1"""):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(_("Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry"), OpeningEntryAccountError)
+				
+	def set_total_qty_and_amount(self):
+		for d in self.get("items"):
+			d.amount = flt(d.qty) * flt(d.valuation_rate)
+			d.current_amount = flt(d.current_qty) * flt(d.current_valuation_rate)
+			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
+			d.amount_difference = flt(d.amount) - flt(d.current_amount)
 
 	def get_items_for(self, warehouse):
 		self.items = []

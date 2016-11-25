@@ -78,9 +78,12 @@ def execute():
 	
 	for doctype, cols in dt_cols_de.items():		
 		source_cols = "`" + "`, `".join(standard_cols_de + cols) + "`"
-		
-		frappe.db.sql("""INSERT INTO `tabSalary Component` ({0}) SELECT {1} FROM `tab{2}`"""
-			.format(target_cols, source_cols, doctype))
+		try:
+			frappe.db.sql("""INSERT INTO `tabSalary Component` ({0}) SELECT {1} FROM `tab{2}`"""
+				.format(target_cols, source_cols, doctype))
+		except Exception, e:
+			if e.args[0]==1062:
+				pass
 			
 	update_customizations()
 			

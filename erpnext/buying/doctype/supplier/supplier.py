@@ -18,6 +18,26 @@ class Supplier(TransactionBase):
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self, "supplier")
+		self.load_dashboard_info()
+
+	def load_dashboard_info(self):
+		billing_this_year = frappe.db.sql("""
+			select sum(credit_in_account_currency) - sum(debit_in_account_currency)
+			from `tabGL Entry`
+			where voucher_type='Purchase Invoice' and party_type = 'Supplier'
+				and party=%s and fiscal_year = %s""",
+			(self.name, frappe.db.get_default("fiscal_year")))
+
+		total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
+			from `tabPurchase Invoice`
+			where supplier=%s and docstatus = 1""", self.name)
+
+
+		info = {}
+		info["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
+		info["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
+
+		self.set_onload('dashboard_info', info)
 
 	def autoname(self):
 		supp_master_name = frappe.defaults.get_global_default('supp_master_name')

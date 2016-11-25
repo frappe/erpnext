@@ -5,13 +5,6 @@ frappe.ui.form.on("Bank Reconciliation", {
 	setup: function(frm) {
 		frm.get_docfield("payment_entries").allow_bulk_edit = 1;
 		frm.add_fetch("bank_account", "account_currency", "account_currency");
-
-		frm.get_field('payment_entries').grid.editable_fields = [
-			{fieldname: 'against_account', columns: 3},
-			{fieldname: 'amount', columns: 2},
-			{fieldname: 'cheque_number', columns: 3},
-			{fieldname: 'clearance_date', columns: 2}
-		];
 	},
 
 	onload: function(frm) {
@@ -53,6 +46,12 @@ frappe.ui.form.on("Bank Reconciliation", {
 			callback: function(r, rt) {
 				frm.refresh_field("payment_entries");
 				frm.refresh_fields();
+
+				$(frm.fields_dict.payment_entries.wrapper).find("[data-fieldname=amount]").each(function(i,v){
+					if (i !=0){
+						$(v).addClass("text-right")
+					}
+				})
 			}
 		});
 	}

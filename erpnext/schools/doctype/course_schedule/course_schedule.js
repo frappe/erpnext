@@ -12,7 +12,7 @@ frappe.ui.form.on("Course Schedule" ,{
 	},
 	
 	refresh :function(frm) {
-		if(!frm.doc.__islocal) {
+		if(!frm.doc.__islocal && frm.doc.student_group) {
 			frappe.call({
 				method: "erpnext.schools.api.check_attendance_records_exist",
 				args: {

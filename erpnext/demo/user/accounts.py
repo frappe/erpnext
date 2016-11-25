@@ -67,7 +67,7 @@ def work():
 def make_payment_entries(ref_doctype, report):
 	outstanding_invoices = list(set([r[3] for r in query_report.run(report,
 	{"report_date": frappe.flags.current_date })["result"] if r[2]==ref_doctype]))
-
+	
 	# make Payment Entry
 	for inv in outstanding_invoices[:random.randint(1, 2)]:
 		pe = get_payment_entry(ref_doctype, inv)

@@ -1,5 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
+{% include "erpnext/public/js/controllers/accounts.js" %}
 
 frappe.ui.form.on('Payment Entry', {
 	onload: function(frm) {
@@ -10,13 +11,6 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	setup: function(frm) {
-		frm.get_field('references').grid.editable_fields = [
-			{fieldname: 'reference_doctype', columns: 2},
-			{fieldname: 'reference_name', columns: 2},
-			{fieldname: 'outstanding_amount', columns: 3},
-			{fieldname: 'allocated_amount', columns: 3}
-		];
-
 		var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
 
 		frm.set_query("paid_from", function() {
@@ -126,50 +120,21 @@ frappe.ui.form.on('Payment Entry', {
 	set_dynamic_labels: function(frm) {
 		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
-		var field_label_map = {};
-		var grid_field_label_map = {};
-
-		var setup_field_label_map = function(fields_list, currency, parentfield) {
-			var doctype = parentfield ? frm.fields_dict[parentfield].grid.doctype : frm.doc.doctype;
-			$.each(fields_list, function(i, fname) {
-				var docfield = frappe.meta.docfield_map[doctype][fname];
-				if(docfield) {
-					var label = __(docfield.label || "").replace(/\([^\)]*\)/g, "");
-					if(parentfield) {
-						grid_field_label_map[doctype + "-" + fname] =
-							label.trim() + " (" + __(currency) + ")";
-					} else {
-						field_label_map[fname] = label.trim() + " (" + currency + ")";
-					}
-				}
-			});
-		}
-
-		setup_field_label_map(["base_paid_amount", "base_received_amount", "base_total_allocated_amount",
+		frm.set_currency_labels(["base_paid_amount", "base_received_amount", "base_total_allocated_amount",
 			"difference_amount"], company_currency);
 
-		setup_field_label_map(["paid_amount"], frm.doc.paid_from_account_currency);
-		setup_field_label_map(["received_amount"], frm.doc.paid_to_account_currency);
+		frm.set_currency_labels(["paid_amount"], frm.doc.paid_from_account_currency);
+		frm.set_currency_labels(["received_amount"], frm.doc.paid_to_account_currency);
 
 		var party_account_currency = frm.doc.payment_type=="Receive" ?
 			frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency;
 
-		setup_field_label_map(["total_allocated_amount", "unallocated_amount"], party_account_currency);
+		frm.set_currency_labels(["total_allocated_amount", "unallocated_amount"], party_account_currency);
 
-		$.each(field_label_map, function(fname, label) {
-			me.frm.fields_dict[fname].set_label(label);
-		});
-
-		setup_field_label_map(["total_amount", "outstanding_amount", "allocated_amount"],
+		frm.set_currency_labels(["total_amount", "outstanding_amount", "allocated_amount"],
 			party_account_currency, "references");
 
-		setup_field_label_map(["amount"], company_currency, "deductions");
-
-		$.each(grid_field_label_map, function(fname, label) {
-			fname = fname.split("-");
-			var df = frappe.meta.get_docfield(fname[0], fname[1], me.frm.doc.name);
-			if(df) df.label = label;
-		});
+		frm.set_currency_labels(["amount"], company_currency, "deductions");
 
 		cur_frm.set_df_property("source_exchange_rate", "description",
 			("1 " + frm.doc.paid_from_account_currency + " = [?] " + company_currency));
@@ -225,6 +190,12 @@ frappe.ui.form.on('Payment Entry', {
 
 	party: function(frm) {
 		if(frm.doc.payment_type && frm.doc.party_type && frm.doc.party) {
+			if(!frm.doc.posting_date) {
+				frappe.msgprint(__("Please select Posting Date before selecting Party"))
+				frm.set_value("party", "");
+				return ;
+			}
+			
 			frm.set_party_account_based_on_party = true;
 
 			return frappe.call({
@@ -255,22 +226,6 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			});
 		}
-	},
-
-	mode_of_payment: function(frm) {
-		return  frappe.call({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
-			args: {
-				"mode_of_payment": frm.doc.mode_of_payment,
-				"company": frm.doc.company
-			},
-			callback: function(r, rt) {
-				if(r.message) {
-					var payment_account_field = frm.doc.payment_type == "Receive" ? "paid_to" : "paid_from";
-					frm.set_value(payment_account_field, r.message['account']);
-				}
-			}
-		});
 	},
 
 	paid_from: function(frm) {
@@ -422,7 +377,10 @@ frappe.ui.form.on('Payment Entry', {
 
 		if(!frm.doc.paid_amount && frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
 			frm.set_value("paid_amount", frm.doc.received_amount);
-			frm.set_value("source_exchange_rate", frm.doc.target_exchange_rate);
+
+			if(frm.doc.target_exchange_rate) {
+				frm.set_value("source_exchange_rate", frm.doc.target_exchange_rate);
+			}
 			frm.set_value("base_paid_amount", frm.doc.base_received_amount);
 		}
 
@@ -442,7 +400,10 @@ frappe.ui.form.on('Payment Entry', {
 				(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency)) {
 			
 			frm.set_value("received_amount", frm.doc.paid_amount);
-			frm.set_value("target_exchange_rate", frm.doc.source_exchange_rate);
+
+			if(frm.doc.source_exchange_rate) {
+				frm.set_value("target_exchange_rate", frm.doc.source_exchange_rate);
+			}
 			frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 		}
 		
@@ -520,6 +481,18 @@ frappe.ui.form.on('Payment Entry', {
 		});
 	},
 
+	allocate_payment_amount: function(frm) {
+		if(frm.doc.payment_type == 'Internal Transfer'){
+			return
+		}
+
+		if(frm.doc.references.length == 0){
+			frm.events.get_outstanding_documents(frm);
+		}
+
+		frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount);
+	},
+
 	allocate_party_amount_against_ref_docs: function(frm, paid_amount) {
 		var total_positive_outstanding_including_order = 0;
 		var total_negative_outstanding = 0;
@@ -561,22 +534,24 @@ frappe.ui.form.on('Payment Entry', {
 		}
 
 		$.each(frm.doc.references || [], function(i, row) {
-			row.allocated_amount = 0
+			row.allocated_amount = 0 //If allocate payment amount checkbox is unchecked, set zero to allocate amount
+			if(frm.doc.allocate_payment_amount){
+				if(row.outstanding_amount > 0 && allocated_positive_outstanding > 0) {
+					if(row.outstanding_amount >= allocated_positive_outstanding)
+							row.allocated_amount = allocated_positive_outstanding;
+					else row.allocated_amount = row.outstanding_amount;
 
-			if(row.outstanding_amount > 0 && allocated_positive_outstanding > 0) {
-				if(row.outstanding_amount >= allocated_positive_outstanding)
-						row.allocated_amount = allocated_positive_outstanding;
-				else row.allocated_amount = row.outstanding_amount;
+					allocated_positive_outstanding -= flt(row.allocated_amount);
+				} else if (row.outstanding_amount < 0 && allocated_negative_outstanding) {
+					if(Math.abs(row.outstanding_amount) >= allocated_negative_outstanding)
+						row.allocated_amount = -1*allocated_negative_outstanding;
+					else row.allocated_amount = row.outstanding_amount;
 
-				allocated_positive_outstanding -= flt(row.allocated_amount);
-			} else if (row.outstanding_amount < 0 && allocated_negative_outstanding) {
-				if(Math.abs(row.outstanding_amount) >= allocated_negative_outstanding)
-					row.allocated_amount = -1*allocated_negative_outstanding;
-				else row.allocated_amount = row.outstanding_amount;
-
-				allocated_negative_outstanding -= Math.abs(flt(row.allocated_amount));
+					allocated_negative_outstanding -= Math.abs(flt(row.allocated_amount));
+				}
 			}
 		})
+
 		frm.refresh_fields()
 		frm.events.set_total_allocated_amount(frm);
 	},

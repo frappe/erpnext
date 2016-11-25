@@ -155,7 +155,7 @@ class PurchaseOrder(BuyingController):
 		if date_diff and date_diff[0][0]:
 			msgprint(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
 				raise_exception=True)
-
+				
 	def update_status(self, status):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
@@ -207,6 +207,7 @@ class PurchaseOrder(BuyingController):
 			"target_parent_dt": "Sales Order",
 			"target_dt": "Sales Order Item",
 			'target_field': 'ordered_qty',
+			"join_field": "sales_order_item",
 			"target_parent_field": ''
 		})
 
@@ -302,6 +303,11 @@ def make_purchase_invoice(source_name, target_doc=None):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
+		
+		item = frappe.db.get_value("Item", target.item_code, ["item_group", "buying_cost_center"], as_dict=1)
+		target.cost_center = frappe.db.get_value("Project", obj.project, "cost_center") \
+			or item.buying_cost_center \
+			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
@@ -350,4 +356,3 @@ def update_status(status, name):
 	po = frappe.get_doc("Purchase Order", name)
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
-

@@ -2,34 +2,20 @@
 // License: GNU General Public License v3. See license.txt
 
 erpnext.taxes_and_totals = erpnext.payments.extend({
-	setup: function() {
-		if(this.frm.get_field('taxes')) {
-			this.frm.get_field('taxes').grid.editable_fields = [
-				{fieldname: 'charge_type', columns: 2},
-				{fieldname: 'account_head', columns: 2},
-				{fieldname: 'rate', columns: 2},
-				{fieldname: 'tax_amount', columns: 2},
-				{fieldname: 'total', columns: 2}
-			];
-		}
-
-	},
+	setup: function() {},
 	apply_pricing_rule_on_item: function(item){
-		if(!item.margin_type){
-			item.margin_rate_or_amount = 0.0;
-		}
-
 		if(item.margin_type == "Percentage"){
-			item.total_margin = item.price_list_rate + item.price_list_rate * ( item.margin_rate_or_amount / 100);
+			item.total_margin = flt(item.price_list_rate) 
+				+ flt(item.price_list_rate) * ( flt(item.margin_rate_or_amount) / 100);
 		}else{
-			item.total_margin = item.price_list_rate + item.margin_rate_or_amount;
+			item.total_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
 		}
 
-		item.rate = flt(item.total_margin , 2);
+		item.rate = flt(item.total_margin , precision("rate", item));
 
 		if(item.discount_percentage){
 			discount_value = flt(item.total_margin) * flt(item.discount_percentage) / 100;
-			item.rate = flt((item.total_margin) - (discount_value), precision('rate'));
+			item.rate = flt((item.total_margin) - (discount_value), precision('rate', item));
 		}
 	},
 
@@ -72,7 +58,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	validate_conversion_rate: function() {
-		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
+		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, (cur_frm) ? precision("conversion_rate") : 9);
 		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate",
 			this.frm.doc.name);
 		var company_currency = this.frm.doc.currency || this.get_company_currency();
@@ -532,6 +518,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		// NOTE:
 		// paid_amount and write_off_amount is only for POS Invoice
 		// total_advance is only for non POS Invoice
+		
+		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.is_return){
+			this.calculate_paid_amount()
+		}
+
 		if(this.frm.doc.is_return || this.frm.doc.docstatus > 0) return;
 
 		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
@@ -567,8 +558,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
 
-			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) + 
-				flt(this.frm.doc.change_amount), precision("outstanding_amount"));
+			var change_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
+				this.frm.doc.change_amount : this.frm.doc.base_change_amount;
+
+			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
+				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
 
 		} else if(this.frm.doc.doctype == "Purchase Invoice") {
 			this.frm.doc.outstanding_amount = flt(total_amount_to_pay, precision("outstanding_amount"));
@@ -580,8 +574,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		payment_status = true;
 		if(this.frm.doc.is_pos && (update_paid_amount===undefined || update_paid_amount)){
 			$.each(this.frm.doc['payments'] || [], function(index, data){
-				if(data.type == "Cash" && payment_status) {
-					data.amount = total_amount_to_pay;
+				if(data.type == "Cash" && payment_status && total_amount_to_pay > 0) {
+					data.base_amount = flt(total_amount_to_pay, precision("base_amount"));
+					data.amount = flt(total_amount_to_pay / me.frm.doc.conversion_rate, precision("amount"));
 					payment_status = false;
 				}else if(me.frm.doc.paid_amount){
 					data.amount = 0.0;
@@ -594,11 +589,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var me = this;
 		var paid_amount = base_paid_amount = 0.0;
 		$.each(this.frm.doc['payments'] || [], function(index, data){
-			if(data.amount > -1){
-				data.base_amount = flt(data.amount * me.frm.doc.conversion_rate);
-				paid_amount += data.amount;
-				base_paid_amount += data.base_amount;
-			}
+			data.base_amount = flt(data.amount * me.frm.doc.conversion_rate, precision("base_amount"));
+			paid_amount += data.amount;
+			base_paid_amount += data.base_amount;
 		})
 
 		this.frm.doc.paid_amount = flt(paid_amount, precision("paid_amount"));
@@ -607,12 +600,25 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_change_amount: function(){
 		this.frm.doc.change_amount = 0.0;
-		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
-			this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total + 
+		if(this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return){
+			this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total +
 				this.frm.doc.write_off_amount, precision("change_amount"));
+			this.frm.doc.base_change_amount = flt(this.frm.doc.base_paid_amount - this.frm.doc.base_grand_total +
+				this.frm.doc.base_write_off_amount, precision("base_change_amount"));
 		}
-
-		this.frm.doc.base_change_amount = flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate,
-			precision("base_change_amount"));
 	},
+
+	calculate_write_off_amount: function(){
+		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
+			this.frm.doc.write_off_amount = flt(this.frm.doc.grand_total - this.frm.doc.paid_amount + this.frm.doc.change_amount,
+					precision("write_off_amount"))
+		
+			this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
+				precision("base_write_off_amount"));
+		}else{
+			this.frm.doc.paid_amount = 0.0
+		}
+		
+		this.calculate_outstanding_amount(false)
+	}
 })

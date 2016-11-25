@@ -75,7 +75,7 @@ def get_item_details(args):
 
 	if args.get("doctype") in ("Sales Invoice", "Delivery Note"):
 		if item_doc.has_serial_no == 1 and not args.serial_no:
-			out.serial_no = get_serial_nos_by_fifo(args, item_doc)
+			out.serial_no = get_serial_nos_by_fifo(args)
 
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
@@ -328,17 +328,18 @@ def get_pos_profile_item_details(company, args, pos_profile=None):
 
 @frappe.whitelist()
 def get_pos_profile(company):
+	condition = "and company = '%s'"%(company) if company else ''
 	pos_profile = frappe.db.sql("""select * from `tabPOS Profile` where user = %s
-		and company = %s""", (frappe.session['user'], company), as_dict=1)
+		{cond}""".format(cond=condition), (frappe.session['user']), as_dict=1)
 
-	if not pos_profile:
+	if not pos_profile and company:
 		pos_profile = frappe.db.sql("""select * from `tabPOS Profile`
 			where ifnull(user,'') = '' and company = %s""", company, as_dict=1)
 
 	return pos_profile and pos_profile[0] or None
 
 
-def get_serial_nos_by_fifo(args, item_doc):
+def get_serial_nos_by_fifo(args):
 	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
 		return "\n".join(frappe.db.sql_list("""select name from `tabSerial No`
 			where item_code=%(item_code)s and warehouse=%(warehouse)s

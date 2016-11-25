@@ -18,3 +18,13 @@ frappe.ui.form.on("Purchase Taxes and Charges", "add_deduct_tax", function(doc, 
 	}
 	refresh_field('add_deduct_tax', d.name, 'taxes');
 });
+
+frappe.ui.form.on("Purchase Taxes and Charges", "category", function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+
+	if (d.category != 'Total' && d.add_deduct_tax == 'Deduct') {
+		msgprint(__("Cannot deduct when category is for 'Valuation' or 'Vaulation and Total'"));
+		d.add_deduct_tax = '';
+	}
+	refresh_field('add_deduct_tax', d.name, 'taxes');
+});

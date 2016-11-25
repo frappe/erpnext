@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from erpnext.schools.api import enroll_student
 
 class ProgramEnrollmentTool(Document):
 	def get_students(self):
@@ -29,11 +30,16 @@ class ProgramEnrollmentTool(Document):
 			
 	def enroll_students(self):
 		for stud in self.students:
-			prog_enrollment = frappe.new_doc("Program Enrollment")
-			prog_enrollment.student = stud.student
-			prog_enrollment.student_name = stud.student_name
-			prog_enrollment.program = self.new_program
-			prog_enrollment.academic_year = self.new_academic_year
-			prog_enrollment.save()
+			if stud.student:
+				prog_enrollment = frappe.new_doc("Program Enrollment")
+				prog_enrollment.student = stud.student
+				prog_enrollment.student_name = stud.student_name
+				prog_enrollment.program = self.new_program
+				prog_enrollment.academic_year = self.new_academic_year
+				prog_enrollment.save()
+			elif stud.student_applicant:
+				prog_enrollment = enroll_student(stud.student_applicant)
+				prog_enrollment.academic_year = self.academic_year
+				prog_enrollment.save()
 		frappe.msgprint("Students have been enrolled.")
 			

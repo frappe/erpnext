@@ -4,8 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cstr, validate_email_add, cint, comma_and, has_gravatar
-from frappe import session
+from frappe.utils import cstr, validate_email_add, cint, comma_and, has_gravatar, nowdate
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
@@ -34,18 +33,20 @@ class Lead(SellingController):
 		self.set_status()
 		self.check_email_id_is_unique()
 
-		if self.source == 'Campaign' and not self.campaign_name and session['user'] != 'Guest':
-			frappe.throw(_("Campaign Name is required"))
-
 		if self.email_id:
 			if not self.flags.ignore_email_validation:
 				validate_email_add(self.email_id, True)
 
 			if self.email_id == self.lead_owner:
-				# Lead Owner cannot be same as the Lead
-				self.lead_owner = None
+				frappe.throw(_("Lead Owner cannot be same as the Lead"))
+
+			if self.email_id == self.contact_by:
+				frappe.throw(_("Next Contact By cannot be same as the Lead Email id"))
 
 			self.image = has_gravatar(self.email_id)
+
+		if self.contact_date and self.contact_date < nowdate():
+			frappe.throw(_("Next Contact Date cannot be in the past"))
 
 	def on_update(self):
 		self.add_calendar_event()

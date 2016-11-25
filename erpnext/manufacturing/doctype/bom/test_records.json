@@ -22,15 +22,27 @@
   ],
   "docstatus": 1,
   "doctype": "BOM",
+  "currency": "USD",
   "is_active": 1,
   "is_default": 1,
   "item": "_Test Item Home Desktop Manufactured",
   "quantity": 1.0
  },
  {
+  "scrap_items":[
+  {
+   "amount": 2000.0,
+   "doctype": "BOM Item",
+   "item_code": "_Test Item Home Desktop 100",
+   "parentfield": "items",
+   "qty": 1.0,
+   "rate": 2000.0,
+   "stock_uom": "_Test UOM"
+  }
+  ],
   "items": [
    {
-    "amount": 5000.0,
+    "amount": 10000.0,
     "doctype": "BOM Item",
     "item_code": "_Test Item",
     "parentfield": "items",
@@ -52,6 +64,7 @@
   "doctype": "BOM",
   "is_active": 1,
   "is_default": 1,
+  "currency": "USD",
   "item": "_Test FG Item",
   "quantity": 1.0
  },
@@ -81,7 +94,7 @@
     "doctype": "BOM Item",
     "item_code": "_Test Item Home Desktop Manufactured",
     "parentfield": "items",
-    "qty": 2.0,
+    "qty": 3.0,
     "rate": 1000.0,
     "stock_uom": "_Test UOM"
    }
@@ -90,6 +103,7 @@
   "doctype": "BOM",
   "is_active": 1,
   "is_default": 1,
+  "currency": "USD",
   "item": "_Test FG Item 2",
   "quantity": 1.0,
   "with_operations": 1
@@ -119,6 +133,7 @@
   "doctype": "BOM",
   "is_active": 1,
   "is_default": 1,
+  "currency": "USD",
   "item": "_Test Variant Item",
   "quantity": 1.0,
   "with_operations": 1

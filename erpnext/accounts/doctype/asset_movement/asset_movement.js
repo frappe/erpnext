@@ -7,7 +7,10 @@ frappe.ui.form.on('Asset Movement', {
 		
 		frm.set_query("target_warehouse", function() {
 			return {
-				filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]]
+				filters: [
+					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+					["Warehouse", "is_group", "=", 0]
+				]
 			}
 		})
 

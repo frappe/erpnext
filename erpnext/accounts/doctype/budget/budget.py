@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, add_months, get_last_day
+from frappe.utils import flt, getdate, add_months, get_last_day, fmt_money
 from frappe.model.naming import make_autoname
 from frappe.model.document import Document
 
@@ -51,6 +51,9 @@ class Budget(Document):
 
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)
+	if not args.cost_center:
+		return
+		
 	if frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
 		cc_lft, cc_rgt = frappe.db.get_value("Cost Center", args.cost_center, ["lft", "rgt"])
 
@@ -73,25 +76,30 @@ def validate_expense_against_budget(args):
 						args.posting_date, args.fiscal_year, budget.budget_amount)
 
 					args["month_end_date"] = get_last_day(args.posting_date)
-
+						
 					compare_expense_with_budget(args, budget.cost_center,
 						budget_amount, _("Accumulated Monthly"), monthly_action)
 
-				elif yearly_action in ["Stop", "Warn"]:
-					compare_expense_with_budget(args, budget.cost_center,
-						flt(budget.budget_amount), _("Annual"), yearly_action)
+				if yearly_action in ("Stop", "Warn") and monthly_action != "Stop" \
+					and yearly_action != monthly_action:
+						compare_expense_with_budget(args, budget.cost_center,
+							flt(budget.budget_amount), _("Annual"), yearly_action)
 
 def compare_expense_with_budget(args, cost_center, budget_amount, action_for, action):
 	actual_expense = get_actual_expense(args, cost_center)
 	if actual_expense > budget_amount:
 		diff = actual_expense - budget_amount
+		currency = frappe.db.get_value('Company', frappe.db.get_value('Cost Center',
+			cost_center, 'company'), 'default_currency')
 
-		msg = _("{0} Budget for Account {1} against Cost Center {2} is {3}. It will exceed by {4}").format(_(action_for), args.account, cost_center, budget_amount, diff)
+		msg = _("{0} Budget for Account {1} against Cost Center {2} is {3}. It will exceed by {4}").format(_(action_for),
+			frappe.bold(args.account), frappe.bold(cost_center),
+			frappe.bold(fmt_money(budget_amount, currency=currency)), frappe.bold(fmt_money(diff, currency=currency)))
 
 		if action=="Stop":
 			frappe.throw(msg, BudgetError)
 		else:
-			frappe.msgprint(msg)
+			frappe.msgprint(msg, indicator='orange')
 
 def get_accumulated_monthly_budget(monthly_distribution, posting_date, fiscal_year, annual_budget):
 	distribution = {}

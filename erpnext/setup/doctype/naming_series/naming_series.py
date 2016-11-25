@@ -14,7 +14,8 @@ class NamingSeriesNotSetError(frappe.ValidationError): pass
 class NamingSeries(Document):
 	def get_transactions(self, arg=None):
 		doctypes = list(set(frappe.db.sql_list("""select parent
-				from `tabDocField` where fieldname='naming_series'""")
+				from `tabDocField` df where fieldname='naming_series' and 
+				exists(select * from `tabDocPerm` dp, `tabRole` role where dp.role = role.name and dp.parent = df.parent and not role.disabled)""")
 			+ frappe.db.sql_list("""select dt from `tabCustom Field`
 				where fieldname='naming_series'""")))
 
@@ -24,7 +25,8 @@ class NamingSeries(Document):
 			try:
 				options = self.get_options(d)
 			except frappe.DoesNotExistError:
-				frappe.pass_does_not_exist_error()
+				frappe.msgprint('Unable to find DocType {0}'.format(d))
+				#frappe.pass_does_not_exist_error()
 				continue
 
 			if options:

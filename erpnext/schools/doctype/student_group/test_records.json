@@ -3,12 +3,12 @@
 		"program": "_Test Program",
 		"course": "_Test Course",
 		"academic_year": "2014-2015",
-		"academic_term": "_Test Academic Term"
+		"academic_term": "2014-2015 (_Test Academic Term)"
 	},
 	{
 		"program": "_Test Program",
 		"course": "_Test Course 2",
 		"academic_year": "2014-2015",
-		"academic_term": "_Test Academic Term"
+		"academic_term": "2014-2015 (_Test Academic Term)"
 	}
 ]

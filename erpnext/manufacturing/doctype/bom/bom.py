@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr, flt
 from frappe import _
+from erpnext.setup.utils import get_exchange_rate
 from frappe.model.document import Document
 
 from operator import itemgetter
@@ -35,6 +36,8 @@ class BOM(Document):
 	def validate(self):
 		self.clear_operations()
 		self.validate_main_item()
+		self.validate_currency()
+		self.set_conversion_rate()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "stock_uom", "qty", "BOM Item")
@@ -74,17 +77,18 @@ class BOM(Document):
 		return item
 
 	def validate_rm_item(self, item):
-		if item[0]['name'] == self.item:
+		if (item[0]['name'] in [it.item_code for it in self.items]) and item[0]['name'] == self.item:
 			frappe.throw(_("Raw material cannot be same as main Item"))
 
 	def set_bom_material_details(self):
 		for item in self.get("items"):
 			ret = self.get_bom_material_detail({"item_code": item.item_code, "item_name": item.item_name, "bom_no": item.bom_no,
 				"qty": item.qty})
-
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
+					
+			self.validate_bom_currecny(item)
 
 	def get_bom_material_detail(self, args=None):
 		""" Get raw material details like uom, desc and rate"""
@@ -108,14 +112,22 @@ class BOM(Document):
 			 'image'		: item and args['image'] or '',
 			 'stock_uom'	: item and args['stock_uom'] or '',
 			 'bom_no'		: args['bom_no'],
-			 'rate'			: rate
+			 'rate'			: rate,
+			 'base_rate'	: rate if self.company_currency() == self.currency else rate * self.conversion_rate
 		}
 		return ret_item
+
+	def validate_bom_currecny(self, item):
+		if item.get('bom_no') and frappe.db.get_value('BOM', item.get('bom_no'), 'currency') != self.currency:
+			frappe.throw(_("Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2}").format(item.idx, item.bom_no, self.currency))
 
 	def get_rm_rate(self, arg):
 		"""	Get raw material rate as per selected method, if bom exists takes bom cost """
 		rate = 0
-		if arg['bom_no']:
+
+		if arg.get('scrap_items'):
+			rate = self.get_valuation_rate(arg)
+		elif arg['bom_no']:
 			rate = self.get_bom_unitcost(arg['bom_no'])
 		elif arg:
 			if self.rm_cost_as_per == 'Valuation Rate':
@@ -210,6 +222,14 @@ class BOM(Document):
 
 		if not self.quantity:
 			frappe.throw(_("Quantity should be greater than 0"))
+			
+	def validate_currency(self):
+		if self.rm_cost_as_per == 'Price List' and \
+			frappe.db.get_value('Price List', self.buying_price_list, 'currency') != self.currency:
+			frappe.throw(_("Currency of the price list {0} is not similar with the selected currency {1}").format(self.buying_price_list, self.currency))
+
+	def set_conversion_rate(self):
+		self.conversion_rate = get_exchange_rate(self.currency, self.company_currency())
 
 	def validate_materials(self):
 		""" Validate raw material entries """
@@ -271,11 +291,14 @@ class BOM(Document):
 		"""Calculate bom totals"""
 		self.calculate_op_cost()
 		self.calculate_rm_cost()
-		self.total_cost = self.operating_cost + self.raw_material_cost
+		self.calculate_sm_cost()
+		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
+		self.base_total_cost = self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
 
 	def calculate_op_cost(self):
 		"""Update workstation rate and calculates totals"""
 		self.operating_cost = 0
+		self.base_operating_cost = 0
 		for d in self.get('operations'):
 			if d.workstation:
 				if not d.hour_rate:
@@ -283,20 +306,45 @@ class BOM(Document):
 
 			if d.hour_rate and d.time_in_mins:
 				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
+				d.base_hour_rate = flt(d.hour_rate) * flt(self.conversion_rate)
+				d.base_operating_cost = flt(d.base_hour_rate) * flt(d.time_in_mins) / 60.0
 
 			self.operating_cost += flt(d.operating_cost)
+			self.base_operating_cost += flt(d.base_operating_cost)
 
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
 		total_rm_cost = 0
+		base_total_rm_cost = 0
+
 		for d in self.get('items'):
 			if d.bom_no:
 				d.rate = self.get_bom_unitcost(d.bom_no)
+				
+			d.base_rate = d.rate * self.conversion_rate
 			d.amount = flt(d.rate, self.precision("rate", d)) * flt(d.qty, self.precision("qty", d))
+			d.base_amount = d.amount * self.conversion_rate
 			d.qty_consumed_per_unit = flt(d.qty, self.precision("qty", d)) / flt(self.quantity, self.precision("quantity"))
 			total_rm_cost += d.amount
+			base_total_rm_cost += d.base_amount
 
 		self.raw_material_cost = total_rm_cost
+		self.base_raw_material_cost = base_total_rm_cost
+
+	def calculate_sm_cost(self):
+		"""Fetch RM rate as per today's valuation rate and calculate totals"""
+		total_sm_cost = 0
+		base_total_sm_cost = 0
+
+		for d in self.get('scrap_items'):
+			d.base_rate = d.rate * self.conversion_rate
+			d.amount = flt(d.rate, self.precision("rate", d)) * flt(d.qty, self.precision("qty", d))
+			d.base_amount = d.amount * self.conversion_rate
+			total_sm_cost += d.amount
+			base_total_sm_cost += d.base_amount
+
+		self.scrap_material_cost = total_sm_cost
+		self.base_scrap_material_cost = base_total_sm_cost
 
 	def update_exploded_items(self):
 		""" Update Flat BOM, following will be correct data"""
@@ -317,8 +365,11 @@ class BOM(Document):
 					'image'			: d.image,
 					'stock_uom'		: d.stock_uom,
 					'qty'			: flt(d.qty),
-					'rate'			: flt(d.rate),
+					'rate'			: d.base_rate,
 				}))
+				
+	def company_currency(self):
+		return frappe.db.get_value('Company', self.company, 'default_currency')
 
 	def add_to_cur_exploded_items(self, args):
 		if self.cur_exploded_items.get(args.item_code):
@@ -377,7 +428,7 @@ class BOM(Document):
 				if not d.description:
 					d.description = frappe.db.get_value('Operation', d.operation, 'description')
 
-def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
+def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_items=0):
 	item_dict = {}
 
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
@@ -406,11 +457,13 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
 		query = query.format(table="BOM Explosion Item",
 			conditions="""and item.is_sub_contracted_item = 0""")
 		items = frappe.db.sql(query, { "qty": qty,	"bom": bom }, as_dict=True)
+	elif fetch_scrap_items:
+		query = query.format(table="BOM Scrap Item", conditions="")
+		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", conditions="")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 
-	# make unique
 	for item in items:
 		if item_dict.has_key(item.item_code):
 			item_dict[item.item_code]["qty"] += flt(item.qty)

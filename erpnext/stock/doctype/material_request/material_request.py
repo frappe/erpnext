@@ -15,9 +15,9 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
 
 
-# form_grid_templates = {
-# 	"items": "templates/form_grid/material_request_grid.html"
-# }
+form_grid_templates = {
+	"items": "templates/form_grid/material_request_grid.html"
+}
 
 class MaterialRequest(BuyingController):
 	def get_feed(self):
@@ -75,7 +75,7 @@ class MaterialRequest(BuyingController):
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 
-		self.set_title()
+		# self.set_title()
 
 
 		# self.validate_qty_against_so()
@@ -372,6 +372,7 @@ def raise_production_orders(material_request):
 	mr= frappe.get_doc("Material Request", material_request)
 	errors =[]
 	production_orders = []
+	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 	for d in mr.items:
 		if (d.qty - d.ordered_qty) >0:
 			if frappe.db.get_value("BOM", {"item": d.item_code, "is_default": 1}):
@@ -379,6 +380,7 @@ def raise_production_orders(material_request):
 				prod_order.production_item = d.item_code
 				prod_order.qty = d.qty - d.ordered_qty
 				prod_order.fg_warehouse = d.warehouse
+				prod_order.wip_warehouse = default_wip_warehouse
 				prod_order.description = d.description
 				prod_order.stock_uom = d.uom
 				prod_order.expected_delivery_date = d.schedule_date

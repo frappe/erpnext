@@ -21,3 +21,13 @@ frappe.ui.form.on("Student Group Creation Tool", "get_courses", function(frm) {
 		}
 	})
 });
+
+frappe.ui.form.on("Student Group Creation Tool", "onload", function(frm){
+	cur_frm.set_query("academic_term",function(){
+		return{
+			"filters":{
+				"academic_year": (frm.doc.academic_year)
+			}
+		};
+	});
+});

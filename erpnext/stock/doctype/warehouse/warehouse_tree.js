@@ -11,11 +11,12 @@ frappe.treeview_settings['Warehouse'] = {
 		default: frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
 	}],
 	fields:[
-		{fieldtype:'Data', fieldname: 'name_field',
+		{fieldtype:'Data', fieldname: 'warehouse_name',
 			label:__('New Warehouse Name'), reqd:true},
 		{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 			description: __("Child nodes can be only created under 'Group' type nodes")}
 	],
+	ignore_fields:["parent_warehouse"],
 	onrender: function(node) {
 		if (node.data && node.data.balance!==undefined) {
 			$('<span class="balance-area pull-right text-muted small">'

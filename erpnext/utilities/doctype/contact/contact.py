@@ -103,4 +103,5 @@ def update_contact(doc, method):
 		for key in ("first_name", "last_name", "phone"):
 			if doc.get(key):
 				contact.set(key, doc.get(key))
+		contact.flags.ignore_mandatory = True
 		contact.save(ignore_permissions=True)

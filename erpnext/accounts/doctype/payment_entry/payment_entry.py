@@ -60,7 +60,14 @@ class PaymentEntry(AccountsController):
 		self.setup_party_account_field()
 		self.make_gl_entries(cancel=1)
 		self.update_advance_paid()
-							
+		self.delink_advance_entry_references()
+	
+	def delink_advance_entry_references(self):
+		for reference in self.references:
+			if reference.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+				doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
+				doc.delink_advance_entries(self.name)
+
 	def set_missing_values(self):
 		if self.payment_type == "Internal Transfer":
 			for field in ("party", "party_balance", "total_allocated_amount", 
@@ -73,6 +80,9 @@ class PaymentEntry(AccountsController):
 				
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
+				
+			self.party_name = frappe.db.get_value(self.party_type, self.party, 
+				self.party_type.lower() + "_name")
 		
 		if self.party:
 			if not self.party_balance:
@@ -666,6 +676,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.paid_to_account_currency = party_account_currency if payment_type=="Pay" else bank.account_currency
 	pe.paid_amount = paid_amount
 	pe.received_amount = received_amount
+	pe.allocate_payment_amount = 1
 	
 	pe.append("references", {
 		"reference_doctype": dt,

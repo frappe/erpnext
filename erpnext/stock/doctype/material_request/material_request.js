@@ -4,18 +4,16 @@
 {% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
 
 frappe.ui.form.on('Material Request', {
-	setup: function(frm) {
-		frm.get_field('items').grid.editable_fields = [
-			{fieldname: 'item_code', columns: 3},
-			{fieldname: 'qty', columns: 2},
-			{fieldname: 'warehouse', columns: 3},
-			{fieldname: 'schedule_date', columns: 2},
-		];
-	},
 	onload: function(frm) {
 		// formatter for material request item
 		frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange" })
+			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange" }),
+
+		frm.fields_dict["items"].grid.get_field("warehouse").get_query = function(doc, cdt, cdn){
+			return{
+				filters: {'company': doc.company}
+			}
+		}
 	}
 });
 

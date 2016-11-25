@@ -17,7 +17,8 @@ def get_filters_cond(doctype, filters, conditions):
 				if isinstance(f[1], basestring) and f[1][0] == '!':
 					flt.append([doctype, f[0], '!=', f[1][1:]])
 				else:
-					flt.append([doctype, f[0], '=', f[1]])
+					value = frappe.db.escape(f[1]) if isinstance(f[1], basestring) else f[1]
+					flt.append([doctype, f[0], '=', value])
 
 		query = DatabaseQuery(doctype)
 		query.filters = flt
@@ -31,12 +32,13 @@ def get_filters_cond(doctype, filters, conditions):
 
  # searches for active employees
 def employee_query(doctype, txt, searchfield, start, page_len, filters):
+	conditions = []
 	return frappe.db.sql("""select name, employee_name from `tabEmployee`
 		where status = 'Active'
 			and docstatus < 2
 			and ({key} like %(txt)s
 				or employee_name like %(txt)s)
-			{mcond}
+			{fcond} {mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, employee_name), locate(%(_txt)s, employee_name), 99999),
@@ -44,6 +46,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 			name, employee_name
 		limit %(start)s, %(page_len)s""".format(**{
 			'key': searchfield,
+			'fcond': get_filters_cond(doctype, filters, conditions),
 			'mcond': get_match_cond(doctype)
 		}), {
 			'txt': "%%%s%%" % txt,

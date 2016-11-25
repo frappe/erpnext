@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.sales_invoice.pos import update_multi_mode_option
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.accounts.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal
 
@@ -61,11 +62,12 @@ class SalesInvoice(SellingController):
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		self.add_remarks()
 		self.validate_write_off_account()
+		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
 
-		# if cint(self.is_pos):
-			# self.validate_pos()
+		if cint(self.is_pos):
+			self.validate_pos()
 
 		if cint(self.update_stock):
 			self.validate_dropship_item()
@@ -82,12 +84,16 @@ class SalesInvoice(SellingController):
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		self.update_packing_list()
-		self.calculate_billing_amount_from_timesheet()
+		self.set_billing_hours_and_amount()
+		self.update_timesheet_billing_for_project()
+		self.set_status()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 
 	def on_submit(self):
+		self.validate_pos_paid_amount()
+
 		if not self.recurring_id:
 			frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			 	self.company, self.base_grand_total, self)
@@ -120,6 +126,10 @@ class SalesInvoice(SellingController):
 
 		self.update_time_sheet(self.name)
 
+	def validate_pos_paid_amount(self):
+		if len(self.payments) == 0 and self.is_pos:
+			frappe.throw(_("At least one mode of payment is required for POS invoice."))
+
 	def before_cancel(self):
 		self.update_time_sheet(None)
 
@@ -127,7 +137,8 @@ class SalesInvoice(SellingController):
 		self.check_close_sales_order("sales_order")
 
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-		unlink_ref_doc_from_payment_entries(self.doctype, self.name)
+		if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+			unlink_ref_doc_from_payment_entries(self)
 
 		if self.is_return:
 			# NOTE status updating bypassed for is_return
@@ -148,6 +159,7 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		self.make_gl_entries_on_cancel()
+		frappe.db.set(self, 'status', 'Cancelled')
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -213,10 +225,34 @@ class SalesInvoice(SellingController):
 		for d in self.timesheets:
 			if d.time_sheet:
 				timesheet = frappe.get_doc("Timesheet", d.time_sheet)
-				timesheet.sales_invoice = sales_invoice
+				self.update_time_sheet_detail(timesheet, d, sales_invoice)
+				timesheet.calculate_total_amounts()
+				timesheet.calculate_percentage_billed()
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
 				timesheet.save()
+
+	def update_time_sheet_detail(self, timesheet, args, sales_invoice):
+		for data in timesheet.time_logs:
+			if (self.project and args.timesheet_detail == data.name) or \
+				(not self.project and not data.sales_invoice) or \
+				(not sales_invoice and data.sales_invoice == self.name):
+				data.sales_invoice = sales_invoice
+				if self.project: return
+
+	def on_update(self):
+		self.set_paid_amount()
+
+	def set_paid_amount(self):
+		paid_amount = 0.0
+		base_paid_amount = 0.0
+		for data in self.payments:
+			data.base_amount = flt(data.amount*self.conversion_rate, self.precision("base_paid_amount"))
+			paid_amount += data.amount
+			base_paid_amount += data.base_amount
+
+		self.paid_amount = paid_amount
+		self.base_paid_amount = base_paid_amount
 
 	def validate_time_sheets_are_submitted(self):
 		for data in self.timesheets:
@@ -233,11 +269,21 @@ class SalesInvoice(SellingController):
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
 		pos = get_pos_profile(self.company)
 
+		if not self.get('payments') and not for_validate:
+			pos_profile = frappe.get_doc('POS Profile', pos.name) if pos else None
+			update_multi_mode_option(self, pos_profile)
+
+		if not self.account_for_change_amount:
+			self.account_for_change_amount = frappe.db.get_value('Company', self.company, 'default_cash_account')
+
 		if pos:
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
 				self.mode_of_payment = pos.mode_of_payment
 				# self.set_customer_defaults()
+
+			if pos.get('account_for_change_amount'):
+				self.account_for_change_amount = pos.get('account_for_change_amount')
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
 				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account',
@@ -264,10 +310,6 @@ class SalesInvoice(SellingController):
 			# fetch charges
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
-
-			if not self.get('payments'):
-				pos_profile = frappe.get_doc('POS Profile', pos.name)
-				update_multi_mode_option(self, pos_profile)
 
 		return pos
 
@@ -323,19 +365,18 @@ class SalesInvoice(SellingController):
 				against_acc.append(d.income_account)
 		self.against_income_account = ','.join(against_acc)
 
-
 	def add_remarks(self):
 		if not self.remarks: self.remarks = 'No Remarks'
 
 
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""
-		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
+		dic = {'Sales Order':['so_required', 'is_pos'],'Delivery Note':['dn_required', 'update_stock']}
 		for i in dic:
-			if frappe.db.get_value('Selling Settings', None, dic[i]) == 'Yes':
+			if frappe.db.get_value('Selling Settings', None, dic[i][0]) == 'Yes':
 				for d in self.get('items'):
 					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 1 \
-						and not d.get(i.lower().replace(' ','_')):
+						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1]):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
 
@@ -349,11 +390,8 @@ class SalesInvoice(SellingController):
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer,self.project))
 
 	def validate_pos(self):
-		if not self.cash_bank_account and flt(self.paid_amount):
-			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
-
 		if flt(self.paid_amount) + flt(self.write_off_amount) \
-				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
+				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)) and self.is_return:
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
 
@@ -366,7 +404,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).validate_warehouse()
 
 		for d in self.get('items'):
-			if not d.warehouse:
+			if not d.warehouse and frappe.db.get_value("Item", d.item_code, "is_stock_item"):
 				frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
 
 	def validate_delivery_note(self):
@@ -374,11 +412,16 @@ class SalesInvoice(SellingController):
 			if d.delivery_note:
 				msgprint(_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note), raise_exception=1)
 
-
 	def validate_write_off_account(self):
+		if flt(self.write_off_amount) and not self.write_off_account:
+			self.write_off_account = frappe.db.get_value('Company', self.company, 'write_off_account')
+
 		if flt(self.write_off_amount) and not self.write_off_account:
 			msgprint(_("Please enter Write Off Account"), raise_exception=1)
 
+	def validate_account_for_change_amount(self):
+		if flt(self.change_amount) and not self.account_for_change_amount:
+			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
 
 	def validate_c_form(self):
 		""" Blank C-form no if C-form applicable marked as 'No'"""
@@ -418,7 +461,35 @@ class SalesInvoice(SellingController):
 		else:
 			self.set('packed_items', [])
 
-	def calculate_billing_amount_from_timesheet(self):
+	def set_billing_hours_and_amount(self):
+		for timesheet in self.timesheets:
+			ts_doc = frappe.get_doc('Timesheet', timesheet.time_sheet)
+			if not timesheet.billing_hours and ts_doc.total_billable_hours:
+				timesheet.billing_hours = ts_doc.total_billable_hours
+
+			if not timesheet.billing_amount and ts_doc.total_billable_amount:
+				timesheet.billing_amount = ts_doc.total_billable_amount
+
+	def update_timesheet_billing_for_project(self):
+		if not self.timesheets and self.project:
+			self.add_timesheet_data()
+		else:
+			self.calculate_billing_amount_for_timesheet()
+
+	def add_timesheet_data(self):
+		self.set('timesheets', [])
+		if self.project:
+			for data in get_projectwise_timesheet_data(self.project):
+				self.append('timesheets', {
+						'time_sheet': data.parent,
+						'billing_hours': data.billing_hours,
+						'billing_amount': data.billing_amt,
+						'timesheet_detail': data.name
+					})
+
+			self.calculate_billing_amount_for_timesheet()
+
+	def calculate_billing_amount_for_timesheet(self):
 		total_billing_amount = 0.0
 		for data in self.timesheets:
 			if data.billing_amount:
@@ -462,6 +533,8 @@ class SalesInvoice(SellingController):
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
 	def make_gl_entries(self, repost_future_gle=True):
+		if not self.grand_total:
+			return
 		gl_entries = self.get_gl_entries()
 
 		if gl_entries:
@@ -502,7 +575,7 @@ class SalesInvoice(SellingController):
 		gl_entries = merge_similar_entries(gl_entries)
 
 		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change(gl_entries)
+		self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 
@@ -576,46 +649,44 @@ class SalesInvoice(SellingController):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def make_pos_gl_entries(self, gl_entries):
-		if cint(self.is_pos) and self.paid_amount:
+		if cint(self.is_pos):
 			for payment_mode in self.payments:
-				if payment_mode.base_amount > 0:
-					# POS, make payment entries
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": self.debit_to,
-							"party_type": "Customer",
-							"party": self.customer,
-							"against": payment_mode.account,
-							"credit": payment_mode.base_amount,
-							"credit_in_account_currency": payment_mode.base_amount \
-								if self.party_account_currency==self.company_currency \
-								else payment_mode.amount,
-							"against_voucher": self.return_against if cint(self.is_return) else self.name,
-							"against_voucher_type": self.doctype,
-						}, self.party_account_currency)
-					)
-					
-					payment_mode_account_currency = get_account_currency(payment_mode.account)
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": payment_mode.account,
-							"against": self.customer,
-							"debit": payment_mode.base_amount,
-							"debit_in_account_currency": payment_mode.base_amount \
-								if payment_mode_account_currency==self.company_currency else payment_mode.amount
-						}, payment_mode_account_currency)
-					)
-				
-	def make_gle_for_change(self, gl_entries):
-		if cint(self.is_pos) and self.change_amount:
-			cash_account = self.get_cash_account()
-			if cash_account:
+				# POS, make payment entries
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": self.debit_to,
 						"party_type": "Customer",
 						"party": self.customer,
-						"against": cash_account,
+						"against": payment_mode.account,
+						"credit": payment_mode.base_amount,
+						"credit_in_account_currency": payment_mode.base_amount \
+							if self.party_account_currency==self.company_currency \
+							else payment_mode.amount,
+						"against_voucher": self.return_against if cint(self.is_return) else self.name,
+						"against_voucher_type": self.doctype,
+					}, self.party_account_currency)
+				)
+
+				payment_mode_account_currency = get_account_currency(payment_mode.account)
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": payment_mode.account,
+						"against": self.customer,
+						"debit": payment_mode.base_amount,
+						"debit_in_account_currency": payment_mode.base_amount \
+							if payment_mode_account_currency==self.company_currency else payment_mode.amount
+					}, payment_mode_account_currency)
+				)
+				
+	def make_gle_for_change_amount(self, gl_entries):
+		if cint(self.is_pos) and self.change_amount:
+			if self.account_for_change_amount:
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.customer,
+						"against": self.account_for_change_amount,
 						"debit": flt(self.base_change_amount),
 						"debit_in_account_currency": flt(self.base_change_amount) \
 							if self.party_account_currency==self.company_currency else flt(self.change_amount),
@@ -626,22 +697,13 @@ class SalesInvoice(SellingController):
 				
 				gl_entries.append(
 					self.get_gl_dict({
-						"account": cash_account,
+						"account": self.account_for_change_amount,
 						"against": self.customer,
 						"credit": self.base_change_amount
 					})
 				)
-		
-				
-	def get_cash_account(self):
-		cash_account = [d.account for d in self.payments if d.type=="Cash"]
-		if cash_account:
-			cash_account = cash_account[0]
-		else:
-			cash_account = frappe.db.get_value("Account", 
-				filters={"company": self.company, "account_type": "Cash", "is_group": 0})
-				
-		return cash_account
+			else:
+				frappe.throw(_("Select change amount account"), title="Mandatory Field")
 		
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos

@@ -26,7 +26,8 @@
 		"public/js/payment/pos_payment.html",
 		"public/js/payment/payment_details.html",
 		"public/js/templates/item_selector.html",
-		"public/js/utils/item_selector.js"
+		"public/js/utils/item_selector.js",
+		"public/js/help_links.js"
 	],
 	"js/item-dashboard.min.js": [
 		"stock/dashboard/item_dashboard.html",

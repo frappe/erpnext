@@ -10,7 +10,7 @@ frappe.ready(function() {
 		$('.navbar li[data-label="User"] a')
 			.html('<i class="icon-fixed-width icon-user"></i> ' + full_name);
 	}
-	
+
 	// update login
 	shopping_cart.show_shoppingcart_dropdown();
 	shopping_cart.set_cart_count();
@@ -32,7 +32,7 @@ $.extend(shopping_cart, {
 			}
 		});
 	},
-	
+
 	update_cart: function(opts) {
 		if(!full_name || full_name==="Guest") {
 			if(localStorage) {
@@ -50,10 +50,10 @@ $.extend(shopping_cart, {
 				},
 				btn: opts.btn,
 				callback: function(r) {
-					shopping_cart.set_cart_count();	
+					shopping_cart.set_cart_count();
 					if (r.message.shopping_cart_menu) {
 						$('.shopping-cart-menu').html(r.message.shopping_cart_menu);
-					}					
+					}
 					if(opts.callback)
 						opts.callback(r);
 				}
@@ -63,11 +63,11 @@ $.extend(shopping_cart, {
 
 	set_cart_count: function() {
 		var cart_count = getCookie("cart_count");
-		
+
 		if(cart_count) {
-			$(".shopping-cart").toggle(true);	
-		}		
-		
+			$(".shopping-cart").toggleClass('hidden', false);
+		}
+
 		var $cart = $('.cart-icon');
 		var $badge = $cart.find("#cart-count");
 
@@ -88,7 +88,7 @@ $.extend(shopping_cart, {
 			$badge.remove();
 		}
 	},
-	
+
 	shopping_cart_update: function(item_code, newVal, cart_dropdown) {
 		frappe.freeze();
 		shopping_cart.update_cart({
@@ -103,20 +103,20 @@ $.extend(shopping_cart, {
 					$(".cart-tax-items").html(r.message.taxes);
 					if (cart_dropdown != true) {
 						$(".cart-icon").hide();
-					}					
+					}
 				}
 			},
 		});
 	},
-	
-	
+
+
 	bind_dropdown_cart_buttons: function() {
 		$(".cart-icon").on('click', '.number-spinner button', function () {
 			var btn = $(this),
 				input = btn.closest('.number-spinner').find('input'),
 				oldValue = input.val().trim(),
 				newVal = 0;
-			
+
 				if (btn.attr('data-dir') == 'up') {
 					newVal = parseInt(oldValue) + 1;
 				} else {
@@ -125,11 +125,11 @@ $.extend(shopping_cart, {
 					}
 			}
 			input.val(newVal);
-			var item_code = input.attr("data-item-code"); 
+			var item_code = input.attr("data-item-code");
 			shopping_cart.shopping_cart_update(item_code, newVal, true);
 			return false;
 		});
-		
+
 	},
-	
+
 });

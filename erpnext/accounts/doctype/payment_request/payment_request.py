@@ -6,10 +6,11 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, get_url, nowdate
+from frappe.utils import flt, nowdate, get_url
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
+from frappe.integration_broker.doctype.integration_service.integration_service import get_integration_controller
 
 class PaymentRequest(Document):
 	def validate(self):
@@ -25,7 +26,7 @@ class PaymentRequest(Document):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		if self.payment_account and ref_doc.currency != frappe.db.get_value("Account", self.payment_account, "account_currency"):
 			frappe.throw(_("Transaction currency must be same as Payment Gateway currency"))
-
+		
 	def on_submit(self):
 		send_mail = True
 		self.make_communication_entry()
@@ -35,16 +36,12 @@ class PaymentRequest(Document):
 			send_mail = False
 
 		if send_mail and not self.flags.mute_email:
-			self.send_payment_request()
+			self.set_payment_request_url()
 			self.send_email()
 
 	def on_cancel(self):
+		self.check_if_payment_entry_exists()
 		self.set_as_cancelled()
-
-	def get_payment_url(self):
-		""" This is blanck method to trigger hooks call from individual payment gateway app
-		which will return respective payment gateway"""
-		pass
 
 	def make_invoice(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
@@ -54,20 +51,39 @@ class PaymentRequest(Document):
 			si = si.insert(ignore_permissions=True)
 			si.submit()
 
-	def send_payment_request(self):
+	def set_payment_request_url(self):
 		if self.payment_account:
-			self.payment_url = get_url("/api/method/erpnext.accounts.doctype.payment_request.payment_request.generate_payment_request?name={0}".format(self.name))
+			self.payment_url = self.get_payment_url()
 		
 		if self.payment_url:
 			self.db_set('payment_url', self.payment_url)
 			
 		if self.payment_url or not self.payment_gateway_account:
 			self.db_set('status', 'Initiated')
+	
+	def get_payment_url(self):
+		data = frappe.db.get_value(self.reference_doctype, self.reference_name,
+			["company", "customer_name"], as_dict=1)
+		
+		controller = get_integration_controller(self.payment_gateway)
+		controller.validate_transaction_currency(self.currency)
+		
+		return controller.get_payment_url(**{
+			"amount": self.grand_total,
+			"title": data.company,
+			"description": self.subject,
+			"reference_doctype": "Payment Request",
+			"reference_docname": self.name,
+			"payer_email": self.email_to or frappe.session.user,
+			"payer_name": data.customer_name,
+			"order_id": self.name,
+			"currency": self.currency
+		})
 
 	def set_as_paid(self):
 		if frappe.session.user == "Guest":
 			frappe.set_user("Administrator")
-
+		
 		payment_entry = self.create_payment_entry()
 		self.make_invoice()
 
@@ -141,6 +157,13 @@ class PaymentRequest(Document):
 
 	def set_as_cancelled(self):
 		self.db_set("status", "Cancelled")
+	
+	def check_if_payment_entry_exists(self):
+		if self.status == "Paid":
+			payment_entry = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
+				where reference_name=%s""", self.reference_name)
+			if payment_entry:
+				frappe.throw(_("Payment Entry already exists"), title=_('Error'))
 
 	def make_communication_entry(self):
 		"""Make communication entry"""
@@ -156,7 +179,33 @@ class PaymentRequest(Document):
 
 	def get_payment_success_url(self):
 		return self.payment_success_url
+	
+	def on_payment_authorized(self, status=None):
+		if not status:
+			return
+		
+		shopping_cart_settings = frappe.get_doc("Shopping Cart Settings")
 
+		if status in ["Authorized", "Completed"]:
+			redirect_to = None
+			self.run_method("set_as_paid")
+
+			# if shopping cart enabled and in session
+			if (shopping_cart_settings.enabled and hasattr(frappe.local, "session")
+				and frappe.local.session.user != "Guest"):
+
+				success_url = shopping_cart_settings.payment_success_url
+				if success_url:
+					redirect_to = ({
+						"Orders": "orders",
+						"Invoices": "invoices",
+						"My Account": "me"
+					}).get(success_url, "me")
+				else:
+					redirect_to = get_url("/orders/{0}".format(self.reference_name))
+			
+			return redirect_to
+			
 @frappe.whitelist(allow_guest=True)
 def make_payment_request(**args):
 	"""Make payment request"""
@@ -201,8 +250,9 @@ def make_payment_request(**args):
 			pr.submit()
 
 	if hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart":
-		generate_payment_request(pr.name)
 		frappe.db.commit()
+		frappe.local.response["type"] = "redirect"
+		frappe.local.response["location"] = pr.get_payment_url()
 
 	if not args.cart:
 		return pr
@@ -256,10 +306,6 @@ def get_print_format_list(ref_doctype):
 	}
 
 @frappe.whitelist(allow_guest=True)
-def generate_payment_request(name):
-	frappe.get_doc("Payment Request", name).run_method("get_payment_url")
-
-@frappe.whitelist(allow_guest=True)
 def resend_payment_email(docname):
 	return frappe.get_doc("Payment Request", docname).send_email()
 
@@ -278,6 +324,7 @@ def make_status_as_paid(doc, method):
 			doc = frappe.get_doc("Payment Request", payment_request_name)
 			if doc.status != "Paid":
 				doc.db_set('status', 'Paid')
+				frappe.db.commit()
 
 def get_dummy_message(use_dummy_message=True):
 	return """

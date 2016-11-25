@@ -65,7 +65,7 @@ def get_data(filters):
 	gl_entries_by_account = {}
 
 	set_gl_entries_by_account(filters.company, filters.from_date,
-		filters.to_date, min_lft, max_rgt, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
+		filters.to_date, min_lft, max_rgt, filters, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
 
 	opening_balances = get_opening_balances(filters)
 
@@ -87,8 +87,10 @@ def get_opening_balances(filters):
 
 
 def get_rootwise_opening_balances(filters, report_type):
-	additional_conditions = " and posting_date >= %(year_start_date)s" \
-		if report_type == "Profit and Loss" else ""
+	additional_conditions = ""
+	if not filters.show_unclosed_fy_pl_balances:
+		additional_conditions = " and posting_date >= %(year_start_date)s" \
+			if report_type == "Profit and Loss" else ""
 
 	if not flt(filters.with_period_closing_entry):
 		additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"

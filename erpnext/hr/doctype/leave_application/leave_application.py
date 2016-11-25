@@ -97,12 +97,19 @@ class LeaveApplication(Document):
 				.format(formatdate(future_allocation[0].from_date), future_allocation[0].name))
 
 	def validate_salary_processed_days(self):
-		last_processed_pay_slip = frappe.db.sql("""select start_date, end_date from `tabSalary Slip`
-						where docstatus != 2 and employee = %s and ((%s between start_date and end_date) or (%s between start_date and end_date)) order by modified desc limit 1""",(self.employee, self.to_date, self.from_date))
+		if not frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
+			return
+			
+		last_processed_pay_slip = frappe.db.sql("""
+			select start_date, end_date from `tabSalary Slip`
+			where docstatus != 2 and employee = %s 
+			and ((%s between start_date and end_date) or (%s between start_date and end_date)) 
+			order by modified desc limit 1
+		""",(self.employee, self.to_date, self.from_date))
 
 		if last_processed_pay_slip:
-			frappe.throw(_("Salary already processed for period between {0} and {1}, Leave application period cannot be between this date range.").
-					format(formatdate(last_processed_pay_slip[0][0]), formatdate(last_processed_pay_slip[0][1])))
+			frappe.throw(_("Salary already processed for period between {0} and {1}, Leave application period cannot be between this date range.").format(formatdate(last_processed_pay_slip[0][0]), 
+				formatdate(last_processed_pay_slip[0][1])))
 
 
 	def show_block_day_warning(self):
@@ -186,7 +193,7 @@ class LeaveApplication(Document):
 
 	def validate_max_days(self):
 		max_days = frappe.db.get_value("Leave Type", self.leave_type, "max_days_allowed")
-		if max_days and self.total_leave_days > max_days:
+		if max_days and self.total_leave_days > cint(max_days):
 			frappe.throw(_("Leave of type {0} cannot be longer than {1}").format(self.leave_type, max_days))
 
 	def validate_leave_approver(self):
@@ -272,7 +279,7 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day=None):
-	if half_day:
+	if half_day==1:
 		return 0.5
 	number_of_days = date_diff(to_date, from_date) + 1
 	if not frappe.db.get_value("Leave Type", leave_type, "include_holiday"):
@@ -364,10 +371,11 @@ def get_events(start, end):
 
 	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "company"],
 		as_dict=True)
-	if not employee:
-		return events
-
-	employee, company = employee.name, employee.company
+	if employee:
+		employee, company = employee.name, employee.company
+	else:
+		employee=''
+		company=frappe.db.get_value("Global Defaults", None, "default_company")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("Leave Application")
@@ -400,13 +408,13 @@ def add_leaves(events, start, end, match_conditions=None):
 	query = """select name, from_date, to_date, employee_name, half_day,
 		status, employee, docstatus
 		from `tabLeave Application` where
-		(from_date between %s and %s or to_date between %s and %s)
+		from_date <= %(end)s and to_date >= %(start)s <= to_date
 		and docstatus < 2
 		and status!="Rejected" """
 	if match_conditions:
 		query += " and " + match_conditions
 
-	for d in frappe.db.sql(query, (start, end, start, end), as_dict=True):
+	for d in frappe.db.sql(query, {"start":start, "end": end}, as_dict=True):
 		e = {
 			"name": d.name,
 			"doctype": "Leave Application",

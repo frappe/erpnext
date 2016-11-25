@@ -14,18 +14,18 @@ class Bin(Document):
 			self.stock_uom = frappe.db.get_value('Item', self.item_code, 'stock_uom')
 
 		self.validate_mandatory()
-
-		self.projected_qty = flt(self.actual_qty) + flt(self.ordered_qty) + \
-			flt(self.indented_qty) + flt(self.planned_qty) - flt(self.reserved_qty)
-		
+		self.set_projected_qty()
 		self.block_transactions_against_group_warehouse()
+
+	def on_update(self):
+		update_item_projected_qty(self.item_code)
 
 	def validate_mandatory(self):
 		qf = ['actual_qty', 'reserved_qty', 'ordered_qty', 'indented_qty']
 		for f in qf:
 			if (not getattr(self, f, None)) or (not self.get(f)):
 				self.set(f, 0.0)
-	
+
 	def block_transactions_against_group_warehouse(self):
 		from erpnext.stock.utils import is_group_warehouse
 		is_group_warehouse(self.warehouse)
@@ -72,9 +72,7 @@ class Bin(Document):
 		self.indented_qty = flt(self.indented_qty) + flt(args.get("indented_qty"))
 		self.planned_qty = flt(self.planned_qty) + flt(args.get("planned_qty"))
 
-		self.set_projected_qty()
 		self.save()
-		update_item_projected_qty(self.item_code)
 
 	def set_projected_qty(self):
 		self.projected_qty = (flt(self.actual_qty) + flt(self.ordered_qty)

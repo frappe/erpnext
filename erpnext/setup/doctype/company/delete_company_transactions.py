@@ -14,11 +14,10 @@ def delete_company_transactions(company_name):
 	doc = frappe.get_doc("Company", company_name)
 
 	if frappe.session.user != doc.owner:
-		frappe.throw(_("Transactions can only be deleted by the creator of the Company"), 
+		frappe.throw(_("Transactions can only be deleted by the creator of the Company"),
 			frappe.PermissionError)
 
 	delete_bins(company_name)
-	delete_time_sheets(company_name)
 	delete_lead_addresses(company_name)
 
 	for doctype in frappe.db.sql_list("""select parent from
@@ -38,6 +37,9 @@ def delete_for_doctype(doctype, company_name):
 
 	if not meta.issingle:
 		if not meta.istable:
+			# delete communication
+			delete_communications(doctype, company_name, company_fieldname)
+
 			# delete children
 			for df in meta.get_table_fields():
 				frappe.db.sql("""delete from `tab{0}` where parent in
@@ -65,18 +67,9 @@ def delete_for_doctype(doctype, company_name):
 					frappe.db.sql("""update tabSeries set current = %s
 						where name=%s""", (last, prefix))
 
-
 def delete_bins(company_name):
 	frappe.db.sql("""delete from tabBin where warehouse in
 			(select name from tabWarehouse where company=%s)""", company_name)
-
-def delete_time_sheets(company_name):
-	# Delete Time Logs as it is linked to Production Order / Project / Task, which are linked to company
-	frappe.db.sql("""
-		delete from `tabTimesheet`
-		where
-			company=%(company)s
-	""", {"company": company_name})
 
 def delete_lead_addresses(company_name):
 	"""Delete addresses to which leads are linked"""
@@ -85,3 +78,9 @@ def delete_lead_addresses(company_name):
 			where lead=%s and (customer='' or customer is null) and (supplier='' or supplier is null)""", lead.name)
 
 		frappe.db.sql("""update `tabAddress` set lead=null, lead_name=null where lead=%s""", lead.name)
+
+def delete_communications(doctype, company_name, company_fieldname):
+		frappe.db.sql("""
+			DELETE FROM `tabCommunication` WHERE reference_doctype = %s AND
+			EXISTS (SELECT name FROM `tab{0}` WHERE {1} = %s AND `tabCommunication`.reference_name = name)
+			""".format(doctype, company_fieldname), (doctype, company_name))

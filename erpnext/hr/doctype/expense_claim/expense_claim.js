@@ -129,9 +129,6 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 	doc.total_sanctioned_amount = 0;
 	$.each((doc.expenses || []), function(i, d) {
 		doc.total_claimed_amount += d.claim_amount;
-		if(d.sanctioned_amount==null) {
-			d.sanctioned_amount = d.claim_amount;
-		}
 		doc.total_sanctioned_amount += d.sanctioned_amount;
 	});
 
@@ -141,17 +138,6 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
-	cur_frm.cscript.calculate_total(doc,cdt,cdn);
-}
-
-cur_frm.cscript.claim_amount = function(doc,cdt,cdn){
-	cur_frm.cscript.calculate_total(doc,cdt,cdn);
-
-	var child = locals[cdt][cdn];
-	refresh_field("sanctioned_amount", child.name, child.parentfield);
-}
-
-cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 }
 
@@ -171,6 +157,25 @@ erpnext.expense_claim = {
 		}
 	}
 }
+
+frappe.ui.form.on("Expense Claim Detail", {
+	claim_amount: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		var doc = frm.doc;
+
+		if(!child.sanctioned_amount){
+			frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount)
+		}
+
+		cur_frm.cscript.calculate_total(doc,cdt,cdn);
+	},
+
+	sanctioned_amount: function(frm, cdt, cdn) {
+		var doc = frm.doc;
+		cur_frm.cscript.calculate_total(doc,cdt,cdn);
+	}
+})
+
 
 frappe.ui.form.on("Expense Claim", "employee_name", function(frm) {
 	erpnext.expense_claim.set_title(frm);

@@ -44,7 +44,7 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 		var std_columns = [
 			{id: "_check", name: __("Plot"), field: "_check", width: 30,
 				formatter: this.check_formatter},
-			{id: "status", name: __("Status"), field: "status", width: 100},
+			{id: "name", name: __("Status"), field: "name", width: 100},
 		];
 		this.make_date_range_columns();
 		this.columns = std_columns.concat(this.columns);
@@ -54,14 +54,14 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 		// add Opening, Closing, Totals rows
 		// if filtered by account and / or voucher
 		var me = this;
-		var total_tickets = {status:"All Tickets", "id": "all-tickets",
+		var total_tickets = {name:"All Tickets", "id": "all-tickets",
 			checked:true};
-		var days_to_close = {status:"Days to Close", "id":"days-to-close",
+		var days_to_close = {name:"Days to Close", "id":"days-to-close",
 			checked:false};
 		var total_closed = {};
-		var hours_to_close = {status:"Hours to Close", "id":"hours-to-close",
+		var hours_to_close = {name:"Hours to Close", "id":"hours-to-close",
 			checked:false};
-		var hours_to_respond = {status:"Hours to Respond", "id":"hours-to-respond",
+		var hours_to_respond = {name:"Hours to Respond", "id":"hours-to-respond",
 			checked:false};
 		var total_responded = {};
 

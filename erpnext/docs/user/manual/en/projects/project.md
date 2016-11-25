@@ -2,6 +2,20 @@ Project management in ERPNext is Task driven. You can create Project and assign 
 
 <img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/project.png">
 
+You can also track % Completion of a Project using different methods.
+
+  1. Task Completion
+  2. Task Progress
+  3. Task Weight
+
+<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/project-percent-complete.png">
+
+Some examples of how the % Completion is calculated based on Tasks.
+
+<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/percent-complete-calc.png">
+
+<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/percent-complete-formula.png">
+
 ### Managing tasks
 Project can be divided into multiple Tasks.
 Task can be created via Project document itself or can be created via  [Task]({{docs_base_url}}/user/manual/en/projects/tasks.html)
@@ -17,6 +31,12 @@ Task can be created via Project document itself or can be created via  [Task]({{
 * You can also view the Tasks from the Project document itself
 
 <img class="screenshot" alt="Project - Task Grid" src="{{docs_base_url}}/assets/img/project/project_task_grid.png">
+
+* To add Weights to Tasks you can follow the below steps
+
+<img class="screenshot" alt="Project - Task Grid" src="{{docs_base_url}}/assets/img/project/tasks.png">
+<img class="screenshot" alt="Project - Task Grid" src="{{docs_base_url}}/assets/img/project/task-weights.png">
+
 
 ### Managing time
 

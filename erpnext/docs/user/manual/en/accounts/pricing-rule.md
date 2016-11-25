@@ -79,4 +79,31 @@ Check to Disable Pricing Rule.
 
 <img alt="Disable" class="screenshot" src="{{docs_base_url}}/assets/img/articles/pricing-rule-disable.png">
 
+### Add Margin
+
+Using pricing rule user can add margin on the sales transactions
+
+For example :  User want to add 10% margin on the supplier price list at the time of sales
+
+####1. Make Price List
+
+Create price list for supllier and create item price against the price list.
+
+<img alt="Disable" class="screenshot" src="{{docs_base_url}}/assets/img/articles/price-list.png">
+
+
+####2. Make Pricing Rule 
+
+Create pricing rule for the item against which supplier rate has created
+
+<img alt="Disable" class="screenshot" src="{{docs_base_url}}/assets/img/articles/pricing-rule-margin.png">
+
+####2. Make Invoice
+
+System apply the margin rate on the item price on selection of an item.
+
+<img alt="Disable" class="screenshot" src="{{docs_base_url}}/assets/img/articles/pricing-rule-invoice.png">
+
+For more details about pricing rule [Click Here]({{docs_base_url}}/user/manual/en/selling/articles/adding-margin.html)
+
 <!-- markdown -->

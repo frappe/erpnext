@@ -28,7 +28,9 @@ class Task(Document):
 
 	def validate(self):
 		self.validate_dates()
+		self.validate_progress()
 		self.validate_status()
+		self.update_depends_on()
 
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -45,6 +47,16 @@ class Task(Document):
 
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
+			
+	def validate_progress(self):
+		if self.progress > 100:
+			frappe.throw(_("Progress % for a task cannot be more than 100."))
+
+	def update_depends_on(self):
+		depends_on_tasks = ""
+		for d in self.depends_on:
+			depends_on_tasks += d.task + ","
+		self.depends_on_tasks = depends_on_tasks
 
 	def on_update(self):
 		self.check_recursion()
@@ -121,9 +133,9 @@ def get_events(start, end, filters=None):
 	data = frappe.db.sql("""select name, exp_start_date, exp_end_date,
 		subject, status, project from `tabTask`
 		where ((ifnull(exp_start_date, '0000-00-00')!= '0000-00-00') \
-				and (exp_start_date between %(start)s and %(end)s) \
-			or ((ifnull(exp_start_date, '0000-00-00')!= '0000-00-00') \
-				and exp_end_date between %(start)s and %(end)s))
+				and (exp_start_date <= %(end)s) \
+			or ((ifnull(exp_end_date, '0000-00-00')!= '0000-00-00') \
+				and exp_end_date >= %(start)s))
 		{conditions}""".format(conditions=conditions), {
 			"start": start,
 			"end": end
@@ -155,6 +167,4 @@ def set_tasks_as_overdue():
 		where exp_end_date is not null
 		and exp_end_date < CURDATE()
 		and `status` not in ('Closed', 'Cancelled')""")
-		
-
 		

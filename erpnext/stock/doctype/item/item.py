@@ -141,7 +141,7 @@ class Item(WebsiteGenerator):
 
 	def make_route(self):
 		if not self.route:
-			return frappe.db.get_value('Item Group', self.item_group, 'route') + '/' + self.scrub(self.item_name)
+			return cstr(frappe.db.get_value('Item Group', self.item_group, 'route')) + '/' + self.scrub(self.item_name)
 
 	def get_parents(self, context):
 		item_group, route = frappe.db.get_value('Item Group', self.item_group, ['name', 'route'])
@@ -455,16 +455,18 @@ class Item(WebsiteGenerator):
 
 	def cant_change(self):
 		if not self.get("__islocal"):
-			vals = frappe.db.get_value("Item", self.name, ["has_serial_no", "is_stock_item",
-				"valuation_method", "has_batch_no", "is_fixed_asset"], as_dict=True)
+			to_check = ("has_serial_no", "is_stock_item",
+				"valuation_method", "has_batch_no", "is_fixed_asset")
 
-			if vals and ((self.is_stock_item != vals.is_stock_item) or
-				vals.has_serial_no != self.has_serial_no or
-				vals.has_batch_no != self.has_batch_no or
-				cstr(vals.valuation_method) != cstr(self.valuation_method)):
-					if self.check_if_linked_document_exists():
-						frappe.throw(_("As there are existing transactions for this item, \
-							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'"))
+			vals = frappe.db.get_value("Item", self.name, to_check, as_dict=True)
+
+			if vals:
+				for key in to_check:
+					if self.get(key) != vals.get(key):
+						if not self.check_if_linked_document_exists():
+							break # no linked document, allowed
+						else:
+							frappe.throw(_("As there are existing transactions for this item, you can not change the value of {0}").format(frappe.bold(self.meta.get_label(key))))
 
 			if vals and not self.is_fixed_asset and self.is_fixed_asset != vals.is_fixed_asset:
 				asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
@@ -565,7 +567,7 @@ class Item(WebsiteGenerator):
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
-		for warehouse in frappe.db.sql("select name from `tabWarehouse`"):
+		for warehouse in frappe.db.sql("select warehouse from `tabBin` where item_code=%s", new_name):
 			repost_stock(new_name, warehouse[0])
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)

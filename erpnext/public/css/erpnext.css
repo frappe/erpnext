@@ -46,9 +46,10 @@
   line-height: 0;
   color: #d1d8dd;
   font-size: 30px;
-  background-size: cover;
+  background-size: contain;
   border: 1px solid transparent;
-  background-position: top center;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .pos-item-area {
   border: 1px solid #d1d8dd;
@@ -137,12 +138,14 @@
   font-size: 15px;
 }
 .pos-payment-row .col-xs-6 {
-  padding: 10px;
+  padding: 15px;
 }
 .pos-payment-row {
   border-bottom: 1px solid #d1d8dd;
   margin: 2px 0px 5px 0px;
   height: 60px;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 .pos-payment-row:hover,
 .pos-keyboard-key:hover {
@@ -201,4 +204,9 @@ body[data-route="pos"] .modal-dialog {
 }
 .pos-invoice-list {
   padding: 15px 10px;
+}
+.write_off_amount,
+.change_amount {
+  margin: 15px;
+  width: 130px;
 }

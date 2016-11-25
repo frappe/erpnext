@@ -20,7 +20,13 @@ frappe.ui.form.on("Item Group", {
 		frm.trigger("set_root_readonly");
 		frm.add_custom_button(__("Item Group Tree"), function() {
 			frappe.set_route("Tree", "Item Group");
-		}, "icon-sitemap");
+		});
+
+		if(!frm.is_new()) {
+			frm.add_custom_button(__("Items"), function() {
+				frappe.set_route("List", "Item", {"item_group": frm.doc.name});
+			});
+		}
 	},
 
 	set_root_readonly: function(frm) {

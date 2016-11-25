@@ -26,8 +26,8 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 					}
 					frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
 						var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
-						query_report.filters_by_name.from_date.set_input(fy.year_start_date);
-						query_report.filters_by_name.to_date.set_input(fy.year_end_date);
+						frappe.query_report_filters_by_name.from_date.set_input(fy.year_start_date);
+						frappe.query_report_filters_by_name.to_date.set_input(fy.year_end_date);
 						query_report.trigger_refresh();
 					});
 				}
@@ -55,6 +55,11 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"label": __("Show zero values"),
 				"fieldtype": "Check"
 			},
+			{
+				"fieldname": "show_unclosed_fy_pl_balances",
+				"label": __("Show unclosed fiscal year's P&L balances"),
+				"fieldtype": "Check"
+			}
 		],
 		"formatter": erpnext.financial_statements.formatter,
 		"tree": true,

@@ -39,11 +39,19 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Student Admission"
+				},
+				{
+					"type": "doctype",
 					"name": "Program Enrollment"
 				},
 				{
 					"type": "doctype",
 					"name": "Program Enrollment Tool"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Batch Creation Tool"
 				}
 			]
 		},
@@ -61,6 +69,19 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Course Scheduling Tool"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Batch Attendance Tool"
+				}
+			]
+		},
+		{
+			"label": _("Assessment"),
+			"items": [
+				{
+					"type": "doctype",
 					"name": "Assessment"
 				},
 				{
@@ -69,7 +90,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Scheduling Tool"
+					"name": "Grading Structure"
 				}
 			]
 		},
@@ -131,6 +152,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Room"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Category"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Batch Name"
 				},
 				{
 					"type": "doctype",

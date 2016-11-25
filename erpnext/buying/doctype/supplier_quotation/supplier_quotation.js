@@ -41,10 +41,6 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.SupplierQuotationController({frm: cur_frm}));
 
-cur_frm.cscript.uom = function(doc, cdt, cdn) {
-	// no need to trigger updation of stock uom, as this field doesn't exist in supplier quotation
-}
-
 cur_frm.fields_dict['items'].grid.get_field('project').get_query =
 	function(doc, cdt, cdn) {
 		return{

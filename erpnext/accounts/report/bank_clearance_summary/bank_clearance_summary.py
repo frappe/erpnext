@@ -16,7 +16,7 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		_("Payment Document") + ":Link/DocType:130",
+		_("Payment Document") + "::130",
 		_("Payment Entry") + ":Dynamic Link/"+_("Payment Document")+":110",
 		_("Posting Date") + ":Date:100",
 		_("Cheque/Reference No") + "::120",

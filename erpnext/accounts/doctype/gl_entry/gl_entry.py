@@ -44,18 +44,24 @@ class GLEntry(Document):
 				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
 
 		account_type = frappe.db.get_value("Account", self.account, "account_type")
-		if account_type in ["Receivable", "Payable"] and not (self.party_type and self.party):
-			frappe.throw(_("Party Type and Party is required for Receivable / Payable account {0}").format(self.account))
-
+		if not (self.party_type and self.party):
+			if account_type == "Receivable":
+				frappe.throw(_("{0} {1}: Customer is required against Receivable account {2}")
+					.format(self.voucher_type, self.voucher_no, self.account))
+			elif account_type == "Payable":
+				frappe.throw(_("{0} {1}: Supplier is required against Payable account {2}")
+					.format(self.voucher_type, self.voucher_no, self.account))
+				
 		# Zero value transaction is not allowed
 		if not (flt(self.debit) or flt(self.credit)):
-			frappe.throw(_("Either debit or credit amount is required for {0}").format(self.account))
+			frappe.throw(_("{0} {1}: Either debit or credit amount is required for {2}")
+				.format(self.voucher_type, self.voucher_no, self.account))
 
 	def pl_must_have_cost_center(self):
 		if frappe.db.get_value("Account", self.account, "report_type") == "Profit and Loss":
 			if not self.cost_center and self.voucher_type != 'Period Closing Voucher':
-				frappe.throw(_("Cost Center is required for 'Profit and Loss' account {0}")
-					.format(self.account))
+				frappe.throw(_("{0} {1}: Cost Center is required for 'Profit and Loss' account {2}. Please set up a default Cost Center for the Company.")
+					.format(self.voucher_type, self.voucher_no, self.account))
 		else:
 			if self.cost_center:
 				self.cost_center = None
@@ -65,7 +71,8 @@ class GLEntry(Document):
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \
 				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss":
-			frappe.throw(_("'Profit and Loss' type account {0} not allowed in Opening Entry").format(self.account))
+			frappe.throw(_("{0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry")
+				.format(self.voucher_type, self.voucher_no, self.account))
 
 	def validate_account_details(self, adv_adj):
 		"""Account must be ledger, active and not freezed"""
@@ -74,13 +81,16 @@ class GLEntry(Document):
 			from tabAccount where name=%s""", self.account, as_dict=1)[0]
 
 		if ret.is_group==1:
-			frappe.throw(_("Account {0} cannot be a Group").format(self.account))
+			frappe.throw(_("{0} {1}: Account {2} cannot be a Group")
+				.format(self.voucher_type, self.voucher_no, self.account))
 
 		if ret.docstatus==2:
-			frappe.throw(_("Account {0} is inactive").format(self.account))
+			frappe.throw(_("{0} {1}: Account {2} is inactive")
+				.format(self.voucher_type, self.voucher_no, self.account))
 
 		if ret.company != self.company:
-			frappe.throw(_("Account {0} does not belong to Company {1}").format(self.account, self.company))
+			frappe.throw(_("{0} {1}: Account {2} does not belong to Company {3}")
+				.format(self.voucher_type, self.voucher_no, self.account, self.company))
 
 	def validate_cost_center(self):
 		if not hasattr(self, "cost_center_company"):
@@ -94,7 +104,8 @@ class GLEntry(Document):
 			return self.cost_center_company[self.cost_center]
 
 		if self.cost_center and _get_cost_center_company() != self.company:
-			frappe.throw(_("Cost Center {0} does not belong to Company {1}").format(self.cost_center, self.company))
+			frappe.throw(_("{0} {1}: Cost Center {2} does not belong to Company {3}")
+				.format(self.voucher_type, self.voucher_no, self.cost_center, self.company))
 
 	def validate_party(self):
 		validate_party_frozen_disabled(self.party_type, self.party)
@@ -107,8 +118,9 @@ class GLEntry(Document):
 			self.account_currency = company_currency
 
 		if account_currency != self.account_currency:
-			frappe.throw(_("Accounting Entry for {0} can only be made in currency: {1}")
-				.format(self.account, (account_currency or company_currency)), InvalidAccountCurrency)
+			frappe.throw(_("{0} {1}: Accounting Entry for {2} can only be made in currency: {3}")
+				.format(self.voucher_type, self.voucher_no, self.account, 
+				(account_currency or company_currency)), InvalidAccountCurrency)
 
 		if self.party_type and self.party:
 			validate_party_gle_currency(self.party_type, self.party, self.company, self.account_currency)
@@ -183,6 +195,7 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
 		ref_doc.db_set('outstanding_amount', bal)
+		ref_doc.set_status(update=True)
 
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.db.get_value("Account", account, "freeze_account")

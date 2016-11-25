@@ -131,7 +131,8 @@ class RequestforQuotation(BuyingController):
 
 	def send_email(self, data, sender, subject, message, attachments):
 		make(subject = subject, content=message,recipients=data.email_id, 
-			sender=sender,attachments = attachments, send_email=True)["name"]
+			sender=sender,attachments = attachments, send_email=True,
+		     	doctype=self.doctype, name=self.name)["name"]
 
 		frappe.msgprint(_("Email sent to supplier {0}").format(data.supplier))
 
@@ -192,8 +193,6 @@ def create_supplier_quotation(doc):
 	if isinstance(doc, basestring):
 		doc = json.loads(doc)
 
-	validate_duplicate_supplier_quotation(doc)
-
 	try:
 		sq_doc = frappe.get_doc({
 			"doctype": "Supplier Quotation",
@@ -210,7 +209,7 @@ def create_supplier_quotation(doc):
 		frappe.msgprint(_("Supplier Quotation {0} created").format(sq_doc.name))
 		return sq_doc.name
 	except Exception:
-		return
+		return None
 
 def add_items(sq_doc, supplier, items):
 	for data in items:
@@ -245,13 +244,3 @@ def get_rfq_doc(doctype, name, supplier_idx):
 		args = doc.get('suppliers')[cint(supplier_idx) - 1]
 		doc.update_supplier_part_no(args)
 		return doc
-
-@frappe.whitelist()
-def validate_duplicate_supplier_quotation(args):
-	data = frappe.db.sql("""select sq.name as name from `tabSupplier Quotation` sq, 
-		`tabSupplier Quotation Item` sqi where sqi.parent = sq.name and sq.supplier = %(supplier)s 
-		and sqi.request_for_quotation = %(rfq)s and sq.docstatus < 2""",
-		{'supplier': args.get('supplier'), 'rfq': args.get('name')}, as_dict=True)
-
-	if data and data[0] and data[0].name:
-		frappe.throw(_("Already supplier quotation has created"))

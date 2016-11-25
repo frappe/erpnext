@@ -18,8 +18,10 @@ class Project(Document):
 		if not self.get('__unsaved') and not self.get("tasks"):
 			self.load_tasks()
 
-		self.set_onload('activity_summary', frappe.db.sql('''select activity_type, sum(hours) as total_hours
-			from `tabTimesheet Detail` where project=%s group by activity_type order by total_hours desc''', self.name, as_dict=True))
+		self.set_onload('activity_summary', frappe.db.sql('''select activity_type,
+			sum(hours) as total_hours
+			from `tabTimesheet Detail` where project=%s and docstatus < 2 group by activity_type
+			order by total_hours desc''', self.name, as_dict=True))
 
 	def __setup__(self):
 		self.onload()
@@ -34,7 +36,8 @@ class Project(Document):
 				"start_date": task.exp_start_date,
 				"end_date": task.exp_end_date,
 				"description": task.description,
-				"task_id": task.name
+				"task_id": task.name,
+				"task_weight": task.task_weight
 			})
 
 	def get_tasks(self):
@@ -42,6 +45,7 @@ class Project(Document):
 
 	def validate(self):
 		self.validate_dates()
+		self.validate_weights()
 		self.sync_tasks()
 		self.tasks = []
 		self.send_welcome_email()
@@ -50,6 +54,14 @@ class Project(Document):
 		if self.expected_start_date and self.expected_end_date:
 			if getdate(self.expected_end_date) < getdate(self.expected_start_date):
 				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
+				
+	def validate_weights(self):
+		sum = 0
+		for task in self.tasks:
+			if task.task_weight > 0:
+				sum = sum + task.task_weight
+		if sum > 0 and sum != 1:
+			frappe.throw(_("Total of all task weights should be 1. Please adjust weights of all Project tasks accordingly"))
 
 	def sync_tasks(self):
 		"""sync tasks and remove table"""
@@ -62,13 +74,13 @@ class Project(Document):
 			else:
 				task = frappe.new_doc("Task")
 				task.project = self.name
-
 			task.update({
 				"subject": t.title,
 				"status": t.status,
 				"exp_start_date": t.start_date,
 				"exp_end_date": t.end_date,
 				"description": t.description,
+				"task_weight": t.task_weight
 			})
 
 			task.flags.ignore_links = True
@@ -91,12 +103,27 @@ class Project(Document):
 		self.save(ignore_permissions = True)
 
 	def update_percent_complete(self):
-		total = frappe.db.sql("""select count(*) from tabTask where project=%s""", self.name)[0][0]
-		if total:
-			completed = frappe.db.sql("""select count(*) from tabTask where
+		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
+		if (self.percent_complete_method == "Task Completion" and total > 0) or (not self.percent_complete_method and total > 0):
+			completed = frappe.db.sql("""select count(name) from tabTask where
 				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
-
 			self.percent_complete = flt(flt(completed) / total * 100, 2)
+
+		if (self.percent_complete_method == "Task Progress" and total > 0):
+			progress = frappe.db.sql("""select sum(progress) from tabTask where
+				project=%s""", self.name)[0][0]
+			self.percent_complete = flt(flt(progress) / total, 2)
+
+		if (self.percent_complete_method == "Task Weight" and total > 0):
+			weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where
+				project=%s""", self.name)[0][0]
+			if weight_sum == 1:
+				weighted_progress = frappe.db.sql("""select progress,task_weight from tabTask where
+					project=%s""", self.name,as_dict=1)
+				pct_complete=0
+				for row in weighted_progress:
+					pct_complete += row["progress"] * row["task_weight"]
+				self.percent_complete = flt(flt(pct_complete), 2)
 
 	def update_costing(self):
 		from_time_sheet = frappe.db.sql("""select
@@ -187,12 +214,12 @@ def get_list_context(context=None):
 		"row_template": "templates/includes/projects/project_row.html"
 	}
 
-def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):	
+def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name)
-		from `tabUser` 
-		where enabled=1 
+		from `tabUser`
+		where enabled=1
 		and name not in ("Guest", "Administrator")
-		order by 
+		order by
 		name asc""")
 
 @frappe.whitelist()

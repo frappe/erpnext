@@ -11,6 +11,10 @@ from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, 
 from erpnext.controllers.accounts_controller import AccountsController
 
 class StockController(AccountsController):
+	def validate(self):
+		super(StockController, self).validate()
+		self.validate_inspection()
+	
 	def make_gl_entries(self, repost_future_gle=True):
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
@@ -69,6 +73,10 @@ class StockController(AccountsController):
 						warehouse_with_no_account.append(sle.warehouse)
 
 		if warehouse_with_no_account:
+			for wh in warehouse_with_no_account:
+				if frappe.db.get_value("Warehouse", wh, "company"):
+					frappe.throw(_("Warehouse {0} is not linked to any account, please create/link the corresponding (Asset) account for the warehouse.").format(wh))
+					
 			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
 
@@ -204,10 +212,10 @@ class StockController(AccountsController):
 		from erpnext.stock.stock_ledger import make_sl_entries
 		make_sl_entries(sl_entries, is_amended, allow_negative_stock, via_landed_cost_voucher)
 
-	def make_gl_entries_on_cancel(self):
+	def make_gl_entries_on_cancel(self, repost_future_gle=True):
 		if frappe.db.sql("""select name from `tabGL Entry` where voucher_type=%s
 			and voucher_no=%s""", (self.doctype, self.name)):
-				self.make_gl_entries()
+				self.make_gl_entries(repost_future_gle)
 
 	def get_serialized_items(self):
 		serialized_items = []
@@ -250,6 +258,28 @@ class StockController(AccountsController):
 			"name": self.name,
 		}, update_modified)
 
+	def validate_inspection(self):
+		'''Checks if quality inspection is set for Items that require inspection.
+		On submit, throw an exception'''
+		
+		inspection_required_fieldname = None
+		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
+			inspection_required_fieldname = "inspection_required_before_purchase"
+		elif self.doctype in ["Delivery Note", "Sales Invoice"]:
+			inspection_required_fieldname = "inspection_required_before_delivery"
+		
+		if not inspection_required_fieldname or \
+			(self.doctype in ["Sales Invoice", "Purchase Invoice"] and not self.update_stock):
+				return
+		
+		for d in self.get('items'):
+			if (frappe.db.get_value("Item", d.item_code, inspection_required_fieldname) 
+				and not d.quality_inspection):
+				
+				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
+				if self.docstatus==1:
+					raise frappe.ValidationError
+
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
@@ -261,7 +291,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 
 	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
 	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
-
+	
 	for voucher_type, voucher_no in future_stock_vouchers:
 		existing_gle = gle.get((voucher_type, voucher_no), [])
 		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
@@ -276,12 +306,18 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 def compare_existing_and_expected_gle(existing_gle, expected_gle):
 	matched = True
 	for entry in expected_gle:
+		account_existed = False
 		for e in existing_gle:
-			if entry.account==e.account and entry.against_account==e.against_account \
-				and (not entry.cost_center or not e.cost_center or entry.cost_center==e.cost_center) \
-				and (entry.debit != e.debit or entry.credit != e.credit):
-					matched = False
-					break
+			if entry.account == e.account:
+				account_existed = True
+			if entry.account == e.account and entry.against_account == e.against_account \
+					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center) \
+					and (entry.debit != e.debit or entry.credit != e.credit):
+				matched = False
+				break
+		if not account_existed:
+			matched = False
+			break
 	return matched
 
 def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None):

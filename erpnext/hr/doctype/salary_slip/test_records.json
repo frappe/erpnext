@@ -36,6 +36,7 @@
   ], 
   "employee": "_T-Employee-0001", 
   "employee_name": "_Test Employee", 
+  "posting_date": "2013-02-01",
   "fiscal_year": "_Test Fiscal Year 2013", 
   "month": "01", 
   "payment_days": 31, 

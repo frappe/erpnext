@@ -108,6 +108,17 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+	set_party_dashboard_indicators: function(frm) {
+		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
+			var info = frm.doc.__onload.dashboard_info;
+			frm.dashboard.add_indicator(__('Annual Billing: {0}',
+				[format_currency(info.billing_this_year, frm.doc.default_currency)]), 'blue');
+			frm.dashboard.add_indicator(__('Total Unpaid: {0}',
+				[format_currency(info.total_unpaid, frm.doc.default_currency)]),
+				info.total_unpaid ? 'orange' : 'green');
+		}
+	},
+
 	copy_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname) {
 		var d = locals[dt][dn];
 		if(d[fieldname]){
@@ -181,7 +192,7 @@ erpnext.utils.map_current_doc = function(opts) {
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
 	if(doc && doc.item_name && doc.item_name !== value) {
-		return value + ': ' + doc.item_name;
+		return value? value + ': ' + doc.item_name: doc.item_name;
 	} else {
 		return value;
 	}
@@ -189,7 +200,7 @@ frappe.form.link_formatters['Item'] = function(value, doc) {
 
 frappe.form.link_formatters['Employee'] = function(value, doc) {
 	if(doc && doc.employee_name && doc.employee_name !== value) {
-		return value + ': ' + doc.employee_name;
+		return value? value + ': ' + doc.employee_name: doc.employee_name;
 	} else {
 		return value;
 	}

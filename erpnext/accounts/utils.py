@@ -127,6 +127,83 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		# if bal is None, return 0
 		return flt(bal)
 
+def get_count_on(account, fieldname, date):
+
+	cond = []
+	if date:
+		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
+	else:
+		# get balance of all entries that exist
+		date = nowdate()
+
+	try:
+		year_start_date = get_fiscal_year(date, verbose=0)[1]
+	except FiscalYearError:
+		if getdate(date) > getdate(nowdate()):
+			# if fiscal year not found and the date is greater than today
+			# get fiscal year for today's date and its corresponding year start date
+			year_start_date = get_fiscal_year(nowdate(), verbose=1)[1]
+		else:
+			# this indicates that it is a date older than any existing fiscal year.
+			# hence, assuming balance as 0.0
+			return 0.0
+
+	if account:
+		acc = frappe.get_doc("Account", account)
+
+		if not frappe.flags.ignore_account_permission:
+			acc.check_permission("read")
+
+		# for pl accounts, get balance within a fiscal year
+		if acc.report_type == 'Profit and Loss':
+			cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
+				% year_start_date)
+
+		# different filter for group and ledger - improved performance
+		if acc.is_group:
+			cond.append("""exists (
+				select name from `tabAccount` ac where ac.name = gle.account
+				and ac.lft >= %s and ac.rgt <= %s
+			)""" % (acc.lft, acc.rgt))
+
+			# If group and currency same as company,
+			# always return balance based on debit and credit in company currency
+			if acc.account_currency == frappe.db.get_value("Company", acc.company, "default_currency"):
+				in_account_currency = False
+		else:
+			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+
+		entries = frappe.db.sql("""
+			SELECT name, posting_date, account, party_type, party,debit,credit,
+				voucher_type, voucher_no, against_voucher_type, against_voucher
+			FROM `tabGL Entry` gle
+			WHERE {0}""".format(" and ".join(cond)), as_dict=True)
+		
+		count = 0
+		for gle in entries:
+			if fieldname not in ('invoiced_amount','payables'):
+				count += 1
+			else:
+				dr_or_cr = "debit" if fieldname == "invoiced_amount" else "credit"
+				cr_or_dr = "credit" if fieldname == "invoiced_amount" else "debit"
+				select_fields = "ifnull(sum(credit-debit),0)" if fieldname == "invoiced_amount" else "ifnull(sum(debit-credit),0)"
+
+				if ((not gle.against_voucher) or (gle.against_voucher_type in ["Sales Order", "Purchase Order"]) or
+				(gle.against_voucher==gle.voucher_no and gle.get(dr_or_cr) > 0)):
+					payment_amount = frappe.db.sql("""
+						SELECT {0}
+						FROM `tabGL Entry` gle
+						WHERE docstatus < 2 and posting_date <= %(date)s and against_voucher = %(voucher_no)s
+						and party = %(party)s and name != %(name)s""".format(select_fields),
+						{"date": date, "voucher_no": gle.voucher_no, "party": gle.party, "name": gle.name})[0][0]
+					
+					outstanding_amount = flt(gle.get(dr_or_cr)) - flt(gle.get(cr_or_dr)) - payment_amount
+					currency_precision = get_currency_precision() or 2
+					if abs(flt(outstanding_amount)) > 0.1/10**currency_precision:
+						count += 1
+					
+		return count
+
 @frappe.whitelist()
 def add_ac(args=None):
 	if not args:
@@ -324,16 +401,22 @@ def update_reference_in_payment_entry(d, payment_entry):
 	payment_entry.set_amounts()
 	payment_entry.save(ignore_permissions=True)
 	
-def unlink_ref_doc_from_payment_entries(ref_type, ref_no):
-	remove_ref_doc_link_from_jv(ref_type, ref_no)
-	remove_ref_doc_link_from_pe(ref_type, ref_no)
+def unlink_ref_doc_from_payment_entries(ref_doc):
+	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name)
+	remove_ref_doc_link_from_pe(ref_doc.doctype, ref_doc.name)
 	
 	frappe.db.sql("""update `tabGL Entry`
 		set against_voucher_type=null, against_voucher=null,
 		modified=%s, modified_by=%s
 		where against_voucher_type=%s and against_voucher=%s
 		and voucher_no != ifnull(against_voucher, '')""",
-		(now(), frappe.session.user, ref_type, ref_no))
+		(now(), frappe.session.user, ref_doc.doctype, ref_doc.name))
+	
+	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice"):
+		ref_doc.set("advances", [])
+	
+		frappe.db.sql("""delete from `tab{0} Advance` where parent = %s"""
+			.format(ref_doc.doctype), ref_doc.name)
 
 def remove_ref_doc_link_from_jv(ref_type, ref_no):
 	linked_jv = frappe.db.sql_list("""select parent from `tabJournal Entry Account`
@@ -570,3 +653,58 @@ def get_children():
 				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value")))
 
 	return acc
+
+def create_payment_gateway_and_account(gateway):
+	create_payment_gateway(gateway)
+	create_payment_gateway_account(gateway)
+
+def create_payment_gateway(gateway):
+	# NOTE: we don't translate Payment Gateway name because it is an internal doctype
+	if not frappe.db.exists("Payment Gateway", gateway):
+		payment_gateway = frappe.get_doc({
+			"doctype": "Payment Gateway",
+			"gateway": gateway
+		})
+		payment_gateway.insert(ignore_permissions=True)
+
+def create_payment_gateway_account(gateway):
+	from erpnext.setup.setup_wizard.setup_wizard import create_bank_account
+
+	company = frappe.db.get_value("Global Defaults", None, "default_company")
+	if not company:
+		return
+
+	# NOTE: we translate Payment Gateway account name because that is going to be used by the end user
+	bank_account = frappe.db.get_value("Account", {"account_name": _(gateway), "company": company},
+		["name", 'account_currency'], as_dict=1)
+
+	if not bank_account:
+		# check for untranslated one
+		bank_account = frappe.db.get_value("Account", {"account_name": gateway, "company": company},
+			["name", 'account_currency'], as_dict=1)
+
+	if not bank_account:
+		# try creating one
+		bank_account = create_bank_account({"company_name": company, "bank_account": _(gateway)})
+
+	if not bank_account:
+		frappe.msgprint(_("Payment Gateway Account not created, please create one manually."))
+		return
+
+	# if payment gateway account exists, return
+	if frappe.db.exists("Payment Gateway Account",
+		{"payment_gateway": gateway, "currency": bank_account.account_currency}):
+		return
+
+	try:
+		frappe.get_doc({
+			"doctype": "Payment Gateway Account",
+			"is_default": 1,
+			"payment_gateway": gateway,
+			"payment_account": bank_account.name,
+			"currency": bank_account.account_currency
+		}).insert(ignore_permissions=True)
+
+	except frappe.DuplicateEntryError:
+		# already exists, due to a reinstall?
+		pass

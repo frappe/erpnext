@@ -442,6 +442,11 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
+		
+		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
+		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
+			or item.selling_cost_center \
+			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -553,6 +558,9 @@ def get_events(start, end, filters=None):
 def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=None):
 	def set_missing_values(source, target):
 		target.supplier = for_supplier
+		target.apply_discount_on = ""
+		target.additional_discount_percentage = 0.0
+		target.discount_amount = 0.0
 
 		default_price_list = frappe.get_value("Supplier", for_supplier, "default_price_list")
 		if default_price_list:

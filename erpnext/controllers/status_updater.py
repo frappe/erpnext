@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, comma_or
+from frappe.utils import flt, comma_or, nowdate, getdate
 from frappe import _
 from frappe.model.document import Document
 from erpnext.accounts.party_status import notify_status
@@ -40,6 +40,26 @@ status_map = {
 		["Completed", "eval:self.order_type == 'Maintenance' and self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
+	],
+	"Sales Invoice": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus==1"],
+		["Return", "eval:self.is_return==1 and self.docstatus==1"],
+		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1"],
+		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1 and self.is_return==0"],
+		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
+		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
+		["Cancelled", "eval:self.docstatus==2"],
+	],
+	"Purchase Invoice": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus==1"],
+		["Return", "eval:self.is_return==1 and self.docstatus==1"],
+		["Debit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1"],
+		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1 and self.is_return==0"],
+		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
+		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
+		["Cancelled", "eval:self.docstatus==2"],
 	],
 	"Purchase Order": [
 		["Draft", None],
@@ -142,7 +162,7 @@ class StatusUpdater(Document):
 							if item['reduce_by'] > .01:
 								self.limits_crossed_error(args, item)
 
-						else:
+						elif item[args['target_ref_field']]:
 							self.check_overflow_with_tolerance(item, args)
 
 	def check_overflow_with_tolerance(self, item, args):
@@ -245,25 +265,25 @@ class StatusUpdater(Document):
 			frappe.db.sql("""update `tab%(target_parent_dt)s`
 				set %(target_parent_field)s = round(
 					ifnull((select
-						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, %(target_field)s, %(target_ref_field)s)), 0)
-						/ sum(%(target_ref_field)s) * 100
+						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
+						/ sum(abs(%(target_ref_field)s)) * 100
 					from `tab%(target_dt)s` where parent="%(name)s"), 0), 2)
 					%(update_modified)s
 				where name='%(name)s'""" % args)
 
-		# update field
-		if args.get('status_field'):
-			frappe.db.sql("""update `tab%(target_parent_dt)s`
-				set %(status_field)s = if(%(target_parent_field)s<0.001,
-					'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
-					'Fully %(keyword)s', 'Partly %(keyword)s'))
-				where name='%(name)s'""" % args)
+			# update field
+			if args.get('status_field'):
+				frappe.db.sql("""update `tab%(target_parent_dt)s`
+					set %(status_field)s = if(%(target_parent_field)s<0.001,
+						'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
+						'Fully %(keyword)s', 'Partly %(keyword)s'))
+					where name='%(name)s'""" % args)
 
-		if update_modified:
-			target = frappe.get_doc(args["target_parent_dt"], args["name"])
-			target.set_status(update=True)
-			target.notify_update()
-			notify_status(target)
+			if update_modified:
+				target = frappe.get_doc(args["target_parent_dt"], args["name"])
+				target.set_status(update=True)
+				target.notify_update()
+				notify_status(target)
 
 	def _update_modified(self, args, update_modified):
 		args['update_modified'] = ''
@@ -301,12 +321,7 @@ class StatusUpdater(Document):
 			ref_doc = frappe.get_doc(ref_dt, ref_dn)
 
 			ref_doc.db_set("per_billed", per_billed)
-
-			if frappe.get_meta(ref_dt).get_field("billing_status"):
-				if per_billed < 0.001: billing_status = "Not Billed"
-				elif per_billed >= 99.99: billing_status = "Fully Billed"
-				else: billing_status = "Partly Billed"
-				ref_doc.db_set('billing_status', billing_status)
+			ref_doc.set_status(update=True)
 
 def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 	"""

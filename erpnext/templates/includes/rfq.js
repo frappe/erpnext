@@ -18,6 +18,7 @@ rfq = Class.extend({
 		this.change_rate();
 		this.terms();
 		this.submit_rfq();
+		this.navigate_quotations();
 	},
 
 	onfocus_select_all: function(){
@@ -30,9 +31,10 @@ rfq = Class.extend({
 		var me = this;
 		$('.rfq-items').on("change", ".rfq-qty", function(){
 			me.idx = parseFloat($(this).attr('data-idx'));
-			me.qty = parseFloat($(this).val());
+			me.qty = parseFloat($(this).val()) || 0;
 			me.rate = parseFloat($(repl('.rfq-rate[data-idx=%(idx)s]',{'idx': me.idx})).val());
 			me.update_qty_rate();
+			$(this).val(format_number(me.qty, 2));
 		})
 	},
 
@@ -40,9 +42,10 @@ rfq = Class.extend({
 		var me = this;
 		$(".rfq-items").on("change", ".rfq-rate", function(){
 			me.idx = parseFloat($(this).attr('data-idx'));
-			me.rate = parseFloat($(this).val());
+			me.rate = parseFloat($(this).val()) || 0;
 			me.qty = parseFloat($(repl('.rfq-qty[data-idx=%(idx)s]',{'idx': me.idx})).val());
 			me.update_qty_rate();
+			$(this).val(format_number(me.rate, 2));
 		})
 	},
 
@@ -79,10 +82,20 @@ rfq = Class.extend({
 				},
 				btn: this,
 				callback: function(r){
-					$('.btn-sm').hide()
 					frappe.unfreeze();
+					if(r.message){
+						$('.btn-sm').hide()
+						window.location.href = "/quotations/" + encodeURIComponent(r.message);
+					}
 				}
 			})
+		})
+	},
+
+	navigate_quotations: function() {
+		$('.quotations').click(function(){
+			name = $(this).attr('idx')
+			window.location.href = "/quotations/" + encodeURIComponent(name);
 		})
 	}
 })

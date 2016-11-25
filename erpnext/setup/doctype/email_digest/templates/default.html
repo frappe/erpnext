@@ -1,10 +1,20 @@
 {% macro show_card(card) %}
 <div style="width: 50%; float:left; min-height: 80px; padding-top: 20px;">
-    <h6 style="color: {{ text_muted }}; font-size: 12px; margin-bottom: 0px; margin-top: 0px;">{{ card.label }}</h6>
+    <h6 style="color: {{ text_muted }}; font-size: 12px; margin-bottom: 0px; margin-top: 0px;">{{ card.label }}
+    {% if card.count %}
+    <span class="badge">({{ card.count }})</span>
+    {% endif %}</h6>
     <h4 style="margin-top: 7px; font-size: 16px; margin-botom: 5px;">{{ card.value }}</h4>
     {% if card.diff %}
     <p style="color: {{ text_muted }}; font-size: 12px; margin-top: 0px;">{{ card.diff }}%</p>
     {% endif %}
+    {% if card.billed %}
+    <p style="color: {{ text_muted }}; font-size: 12px; margin-top: 0px;">{{ card.billed }}%</p>
+    {% endif %}
+    {% if card.delivered %}
+    <p style="color: {{ text_muted }}; font-size: 12px; margin-top: 0px;">{{ card.delivered }}%</p>
+    {% endif %}
+
 </div>
 {% endmacro %}
 
@@ -31,13 +41,61 @@
 <div style="clear: both"></div>
 {% endif %}
 
+<!-- issue list -->
+{% if issue_list %}
+<h4 style="{{ section_head }}">{{ _("Open Issues ") }}
+	<span class="badge">({{ issue_count }})</span></h4>
+<div>
+{% for t in issue_list %}
+    <div style="{{ line_item }}">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <a style="{{ link_css }}" href="{{ t.link }}">{{ _(t.subject) }}</a>
+                </td>
+                <td style="width: 25%; text-align: right">
+                    <span style="{{ label_css }}">
+                        {{ _(t.status) }}
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+
+<!-- project list -->
+{% if project_list %}
+<h4 style="{{ section_head }}">{{ _("Open Projects ") }}
+	<span class="badge">({{ project_count }})</span></h4>
+<div>
+{% for t in project_list %}
+    <div style="{{ line_item }}">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <a style="{{ link_css }}" href="{{ t.link }}">{{ _(t.project_name) }}</a>
+                </td>
+                <td style="width: 25%; text-align: right">
+                    <span style="{{ label_css }}">
+                        {{ _(t.status) }}
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endfor %}
+</div>
+{% endif %}
 
 {% if events or todo_list or notifications %}
 <h1 style="{{ h1 }}">{{ _("Pending Activities") }}</h1>
 
 <!-- events -->
 {% if events %}
-<h4 style="{{ section_head }}">{{ _("Upcoming Events") }}</h4>
+<h4 style="{{ section_head }}">{{ _("Upcoming Calendar Events ") }}
+	<span class="badge">({{ event_count }})</span></h4>
 <div>
 {% for e in events %}
     {% if loop.index==1 or events[loop.index-1].date != e.date %}
@@ -69,7 +127,8 @@
 
 <!-- todo list -->
 {% if todo_list %}
-<h4 style="{{ section_head }}">{{ _("To Do List") }}</h4>
+<h4 style="{{ section_head }}">{{ _("Open To Do ") }}
+	<span class="badge">({{ todo_count }})</span></h4>
 <div>
 {% for t in todo_list %}
     <div style="{{ line_item }}">

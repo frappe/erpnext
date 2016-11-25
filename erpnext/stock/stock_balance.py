@@ -230,7 +230,7 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 				pass
 
 def repost_all_stock_vouchers():
-	warehouses_with_account = frappe.db.sql_list("""select master_name from tabAccount
+	warehouses_with_account = frappe.db.sql_list("""select warehouse from tabAccount
 		where ifnull(account_type, '') = 'Stock' and (warehouse is not null and warehouse != '')
 		and is_group=0""")
 
@@ -244,7 +244,7 @@ def repost_all_stock_vouchers():
 	i = 0
 	for voucher_type, voucher_no in vouchers:
 		i+=1
-		print i, "/", len(vouchers)
+		print i, "/", len(vouchers), voucher_type, voucher_no
 		try:
 			for dt in ["Stock Ledger Entry", "GL Entry"]:
 				frappe.db.sql("""delete from `tab%s` where voucher_type=%s and voucher_no=%s"""%

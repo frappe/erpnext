@@ -14,6 +14,6 @@ Select Document Type for which you want to set user permission. After permission
 
 #### Step 3: Apply User Permission
 
-For Role to be resricted (Sales User in this case), check "If Owner".
+For Role to be restricted (Sales User in this case), check "If Owner".
 
 <img alt="S" class="screenshot" src="{{docs_base_url}}/assets/img/articles/owner-restriction-2.png">

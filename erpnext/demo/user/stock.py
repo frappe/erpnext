@@ -85,9 +85,10 @@ def make_stock_reconciliation():
 
 def submit_draft_stock_entries():
 	from erpnext.stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, \
-		DuplicateEntryForProductionOrderError, OperationsNotCompleteError
+		DuplicateEntryForProductionOrderError, OperationsNotCompleteError	
 
 	# try posting older drafts (if exists)
+	frappe.db.commit()
 	for st in frappe.db.get_values("Stock Entry", {"docstatus":0}, "name"):
 		try:
 			ste = frappe.get_doc("Stock Entry", st[0])
@@ -102,23 +103,21 @@ def submit_draft_stock_entries():
 def make_sales_return_records():
 	for data in frappe.get_all('Delivery Note', fields=["name"], filters={"docstatus": 1}):
 		if random.random() < 0.2:
-			print "dn"
 			try:
 				dn = make_sales_return(data.name)
 				dn.insert()
 				dn.submit()
 				frappe.db.commit()
-			except Exception, e:
+			except Exception:
 				frappe.db.rollback()
 
 def make_purchase_return_records():
 	for data in frappe.get_all('Purchase Receipt', fields=["name"], filters={"docstatus": 1}):
 		if random.random() < 0.2:
-			print "purchase"
 			try:
 				pr = make_purchase_return(data.name)
 				pr.insert()
 				pr.submit()
 				frappe.db.commit()
-			except Exception, e:
+			except Exception:
 				frappe.db.rollback()

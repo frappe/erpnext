@@ -23,6 +23,7 @@ class LeaveAllocation(Document):
 		self.validate_back_dated_allocation()
 		self.set_total_leaves_allocated()
 		self.validate_total_leaves_allocated()
+		self.validate_lwp()
 		set_employee_name(self)
 
 	def on_update_after_submit(self):
@@ -37,6 +38,10 @@ class LeaveAllocation(Document):
 	def validate_period(self):
 		if date_diff(self.to_date, self.from_date) <= 0:
 			frappe.throw(_("To date cannot be before from date"))
+			
+	def validate_lwp(self):
+		if frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
+			frappe.throw(_("Leave Type {0} cannot be allocated since it is leave without pay").format(self.leave_type))
 
 	def validate_new_leaves_allocated_value(self):
 		"""validate that leave allocation is in multiples of 0.5"""
@@ -87,7 +92,10 @@ class LeaveAllocation(Document):
 			self.from_date, self.to_date)
 		
 		if flt(leaves_taken) > flt(self.total_leaves_allocated):
-			frappe.throw(_("Total allocated leaves {0} cannot be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken), LessAllocationError)
+			if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
+				frappe.msgprint(_("Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken), LessAllocationError)
+			else:
+				frappe.throw(_("Total allocated leaves {0} cannot be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken), LessAllocationError)
 
 @frappe.whitelist()
 def get_carry_forwarded_leaves(employee, leave_type, date, carry_forward=None):

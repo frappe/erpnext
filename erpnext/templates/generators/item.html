@@ -3,7 +3,7 @@
 {% block title %} {{ title }} {% endblock %}
 
 {% block breadcrumbs %}
-    {% include "templates/includes/breadcrumbs.html" %}
+	{% include "templates/includes/breadcrumbs.html" %}
 {% endblock %}
 
 {% block page_content %}
@@ -25,17 +25,17 @@
 					{{ _("Item Code") }}: <span itemprop="productID">{{ variant and variant.name or name }}</span></p>
 				<br>
 				<div class="item-attribute-selectors">
-                    {% if has_variants %}
-                    {% for d in attributes %}
+					{% if has_variants %}
+					{% for d in attributes %}
 					{% if attribute_values[d.attribute] -%}
-                    <div class="item-view-attribute {% if (attribute_values[d.attribute] | len)==1 -%} hidden {%- endif %}"
-                            style="margin-bottom: 10px;">
-                        <h6 class="text-muted">{{ _(d.attribute) }}</h6>
-                        <select class="form-control"
-                            style="max-width: 140px"
-                            data-attribute="{{ d.attribute }}">
+					<div class="item-view-attribute {% if (attribute_values[d.attribute] | len)==1 -%} hidden {%- endif %}"
+							style="margin-bottom: 10px;">
+						<h6 class="text-muted">{{ _(d.attribute) }}</h6>
+						<select class="form-control"
+							style="max-width: 140px"
+							data-attribute="{{ d.attribute }}">
 						{% for value in attribute_values[d.attribute] %}
-                        <option value="{{ value }}"
+						<option value="{{ value }}"
 						{% if selected_attributes and selected_attributes[d.attribute]==value -%}
 							selected
 						{%- elif disabled_attributes and value in disabled_attributes.get(d.attribute, []) -%}
@@ -43,12 +43,12 @@
 						{%- endif %}>
 							{{ _(value) }}
 						</option>
-                        {% endfor %}
-                        </select>
-                    </div>
+						{% endfor %}
+						</select>
+					</div>
 					{%- endif %}
-                    {% endfor %}
-                    {% endif %}
+					{% endfor %}
+					{% endif %}
 				</div>
 				<br>
 				<div style="min-height: 100px; margin: 10px 0;">
@@ -56,18 +56,17 @@
 						<h4 class="item-price" itemprop="price"></h4>
 						<div class="item-stock" itemprop="availability"></div>
 					</div>
-                    <div class="item-cart hide">
-    					<div id="item-add-to-cart">
-    						<button class="btn btn-primary btn-sm">
-    							{{ _("Add to Cart") }}</button>
-    					</div>
-    					<div id="item-update-cart"
-                            style="display: none;
-    						padding-left: 0px; padding-right: 0px;
-                            padding-top: 10px;">
-    						<a href="/cart">{{ _("Goto Cart") }}</a>
-    					</div>
-                    </div>
+					<div class="item-cart hide">
+						<div id="item-add-to-cart">
+							<button class="btn btn-primary btn-sm">
+								{{ _("Add to Cart") }}</button>
+						</div>
+						<div id="item-update-cart" style="display: none;">
+							<a href="/cart" class='btn btn-sm btn-default'>
+								<i class='octicon octicon-check'></i>
+								{{ _("View in Cart") }}</a>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -88,7 +87,7 @@
 				<table class="table borderless" style="width: 100%">
 				{% for d in website_specifications -%}
 					<tr>
-						<td class="product-label text-muted" style="width: 30%;">{{ d.label }}</td>
+						<td class="uppercase text-muted" style="width: 30%;">{{ d.label }}</td>
 						<td>{{ d.description }}</td>
 					</tr>
 				{%- endfor %}
@@ -101,10 +100,10 @@
 <script>
 	{% include "templates/includes/product_page.js" %}
 
-    {% if variant_info %}
-    window.variant_info = {{ variant_info }};
-    {% else %}
-    window.variant_info = null;
-    {% endif %}
+	{% if variant_info %}
+	window.variant_info = {{ variant_info }};
+	{% else %}
+	window.variant_info = null;
+	{% endif %}
 </script>
 {% endblock %}

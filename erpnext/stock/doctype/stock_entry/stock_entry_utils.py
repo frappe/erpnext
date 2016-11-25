@@ -57,8 +57,6 @@ def make_stock_entry(**args):
 	s.purchase_receipt_no = args.purchase_receipt_no
 	s.delivery_note_no = args.delivery_note_no
 	s.sales_invoice_no = args.sales_invoice_no
-	if args.difference_account:
-		s.difference_account = args.difference_account
 	if not args.cost_center:
 		args.cost_center = frappe.get_value('Company', s.company, 'cost_center')
 

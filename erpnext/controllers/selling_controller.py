@@ -8,6 +8,7 @@ from erpnext.setup.utils import get_company_currency
 from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.stock_ledger import get_valuation_rate
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -23,6 +24,7 @@ class SellingController(StockController):
 			self.grand_total)
 
 	def onload(self):
+		super(SellingController, self).onload()
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get("items"):
 				item.update(get_bin_details(item.item_code,
@@ -31,6 +33,7 @@ class SellingController(StockController):
 	def validate(self):
 		super(SellingController, self).validate()
 		self.validate_max_discount()
+		self.validate_selling_price()
 		check_active_sales_items(self)
 
 	def set_missing_values(self, for_validate=False):
@@ -160,6 +163,30 @@ class SellingController(StockController):
 			if discount and flt(d.discount_percentage) > discount:
 				frappe.throw(_("Maxiumm discount for Item {0} is {1}%").format(d.item_code, discount))
 
+	def validate_selling_price(self):
+		def throw_message(item_name, rate, ref_rate_field):
+			frappe.throw(_("""Selling price for item {0} is lower than its {1}. Selling price should be atleast {2}""")
+				.format(item_name, ref_rate_field, rate))
+
+		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
+			return
+
+		for it in self.get("items"):
+			last_purchase_rate, is_stock_item = frappe.db.get_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
+
+			if flt(it.base_rate) < flt(last_purchase_rate):
+				throw_message(it.item_name, last_purchase_rate, "last purchase rate")
+
+			last_valuation_rate = frappe.db.sql("""
+				SELECT valuation_rate FROM `tabStock Ledger Entry` WHERE item_code = %s
+				AND warehouse = %s AND valuation_rate > 0
+				ORDER BY posting_date DESC, posting_time DESC, name DESC LIMIT 1
+				""", (it.item_code, it.warehouse))
+
+			if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate):
+				throw_message(it.name, last_valuation_rate, "valuation rate")
+
+
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
@@ -229,7 +256,7 @@ class SellingController(StockController):
 				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
 				if status == "Closed":
 					frappe.throw(_("Sales Order {0} is {1}").format(d.get(ref_fieldname), status))
-					
+
 	def update_reserved_qty(self):
 		so_map = {}
 		for d in self.get("items"):
@@ -309,7 +336,7 @@ def check_active_sales_items(obj):
 			item = frappe.db.sql("""select docstatus,
 				income_account from tabItem where name = %s""",
 				d.item_code, as_dict=True)[0]
-                
+
 			if getattr(d, "income_account", None) and not item.income_account:
 				frappe.db.set_value("Item", d.item_code, "income_account",
 					d.income_account)

@@ -9,7 +9,6 @@ from frappe.model.naming import make_autoname
 from frappe import throw, _
 import frappe.permissions
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
 from erpnext.utilities.transaction_base import delete_events
 
 
@@ -164,7 +163,6 @@ def get_timeline_data(doctype, name):
 
 @frappe.whitelist()
 def get_retirement_date(date_of_birth=None):
-	import datetime
 	ret = {}
 	if date_of_birth:
 		try:
@@ -177,19 +175,6 @@ def get_retirement_date(date_of_birth=None):
 
 	return ret
 
-
-@frappe.whitelist()
-def make_salary_structure(source_name, target=None):
-	target = get_mapped_doc("Employee", source_name, {
-		"Employee": {
-			"doctype": "Salary Structure",
-			"field_map": {
-				"name": "employee",
-			}
-		}
-	})
-	target.make_earn_ded_table()
-	return target
 
 def validate_employee_role(doc, method):
 	# called via User hook
@@ -232,7 +217,11 @@ def get_employees_who_are_born_today():
 		and status = 'Active'""", {"date": today()}, as_dict=True)
 
 def get_holiday_list_for_employee(employee, raise_exception=True):
-	holiday_list, company = frappe.db.get_value("Employee", employee, ["holiday_list", "company"])
+	if employee:
+		holiday_list, company = frappe.db.get_value("Employee", employee, ["holiday_list", "company"])
+	else:
+		holiday_list=''
+		company=frappe.db.get_value("Global Defaults", None, "default_company")
 
 	if not holiday_list:
 		holiday_list = frappe.db.get_value("Company", company, "default_holiday_list")
@@ -241,4 +230,17 @@ def get_holiday_list_for_employee(employee, raise_exception=True):
 		frappe.throw(_('Please set a default Holiday List for Employee {0} or Company {1}').format(employee, company))
 
 	return holiday_list
+
+def is_holiday(employee, date=None):
+	'''Returns True if given Employee has an holiday on the given date
+
+	:param employee: Employee `name`
+	:param date: Date to check. Will check for today if None'''
+
+	holiday_list = get_holiday_list_for_employee(employee)
+	if not date:
+		date = today()
+
+	if holiday_list:
+		return frappe.get_all('Holiday List', dict(name=holiday_list, holiday_date=date)) and True or False
 

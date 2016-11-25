@@ -97,8 +97,9 @@ def set_total_expense_zero(posting_date, cost_center=None):
 		"fiscal_year": "_Test Fiscal Year 2013"
 	}, cost_center or "_Test Cost Center - _TC")
 	
-	make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-		"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True)
+	if existing_expense:
+		make_journal_entry("_Test Account Cost for Goods Sold - _TC",
+			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True)
 		
 def make_budget(cost_center=None):
 	budget = frappe.new_doc("Budget")

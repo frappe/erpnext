@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+{% include "erpnext/public/js/controllers/accounts.js" %}
+
 frappe.ui.form.on("POS Profile", "onload", function(frm) {
 	frm.set_query("selling_price_list", function() {
 		return { filters: { selling: 1 } };
@@ -23,6 +25,30 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 		}
 	});
 });
+
+frappe.ui.form.on("POS Profile", {
+	setup: function(frm) {
+		frm.trigger("get_query_for_groups")
+	},
+
+	get_query_for_groups: function(frm) {
+		frm.fields_dict['item_groups'].grid.get_field('item_group').get_query = function(frm, cdt, cdn) {
+			return{
+				filters: {
+					'is_group': 0
+				}
+			}
+		}
+
+		frm.fields_dict['customer_groups'].grid.get_field('customer_group').get_query = function(frm, cdt, cdn) {
+			return{
+				filters: {
+					'is_group': 0
+				}
+			}
+		}
+	}
+})
 
 // Income Account
 // --------------------------------

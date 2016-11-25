@@ -19,7 +19,7 @@ class WarrantyClaim(TransactionBase):
 		if session['user'] != 'Guest' and not self.customer:
 			frappe.throw(_("Customer is required"))
 
-		if self.status=="Closed" and \
+		if self.status=="Closed" and not self.resolution_date and \
 			frappe.db.get_value("Warranty Claim", self.name, "status")!="Closed":
 			self.resolution_date = now_datetime()
 

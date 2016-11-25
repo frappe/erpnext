@@ -26,9 +26,8 @@
 					{% endfor %}
 				</div>
 			</div>
-			<!-- TODO: remove hardcoding of /products -->
 			<div class="text-center padding">
-				<a href="/products" class="btn btn-primary all-products">
+				<a href="{{ homepage.products_url or "/products" }}" class="btn btn-primary all-products">
 					{{ _("View All Products") }}</a></div>
 		</div>
 		{% endif %}

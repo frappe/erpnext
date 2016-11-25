@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.website.utils import delete_page_cache
 
 class Homepage(Document):
 	def validate(self):
@@ -12,6 +13,7 @@ class Homepage(Document):
 			self.setup_items()
 		if not self.description:
 			self.description = frappe._("This is an example website auto-generated from ERPNext")
+		delete_page_cache('home')
 
 	def setup_items(self):
 		for d in frappe.get_all('Item', fields=['name', 'item_name', 'description', 'image'],

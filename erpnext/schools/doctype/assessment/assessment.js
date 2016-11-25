@@ -29,3 +29,23 @@ frappe.ui.form.on("Assessment" ,{
 		}
 	}
 });
+
+frappe.ui.form.on("Assessment Result" ,{
+	result : function(frm, cdt, cdn) {
+		if(frm.doc.grading_structure){
+			var assessment_result = locals[cdt][cdn];
+			frappe.call({
+				method:"erpnext.schools.doctype.assessment.assessment.get_grade",
+				args:{
+					grading_structure: frm.doc.grading_structure,
+					result: assessment_result.result
+				},
+				callback: function(r){
+					if(r.message){
+						frappe.model.set_value(cdt, cdn, 'grade', r.message);
+					}
+				}
+			});
+		}
+	}
+});

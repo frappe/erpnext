@@ -37,7 +37,7 @@ class BuyingController(StockController):
 			self.validate_purchase_receipt_if_update_stock()
 
 		if self.doctype=="Purchase Receipt" or (self.doctype=="Purchase Invoice" and self.update_stock):
-			self.validate_purchase_return()
+			# self.validate_purchase_return()
 			self.validate_rejected_warehouse()
 			self.validate_accepted_rejected_qty()
 
@@ -62,7 +62,7 @@ class BuyingController(StockController):
 		if getattr(self, "supplier", None):
 			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions))
 
-		self.set_missing_item_details()
+		self.set_missing_item_details(for_validate)
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:
@@ -346,7 +346,7 @@ class BuyingController(StockController):
 						})
 					sl_entries.append(sle)
 
-				if flt(d.rejected_qty) > 0:
+				if flt(d.rejected_qty) != 0:
 					sl_entries.append(self.get_sl_entries(d, {
 						"warehouse": d.rejected_warehouse,
 						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),

@@ -18,7 +18,7 @@
 ---
 
 <h3>
-	<a class="no-decoration" href="https://conf.erpnext.com/2014/videos">Conference Vidoes</a>
+	<a class="no-decoration" href="https://conf.erpnext.com/2014/videos">Conference Videos</a>
 </h3>
 
 <div class="row">

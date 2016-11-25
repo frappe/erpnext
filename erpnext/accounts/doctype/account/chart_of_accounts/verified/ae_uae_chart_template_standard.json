@@ -294,7 +294,7 @@
             "Current Liabilities": {
                 "Accounts Payable": {
                     "Payables": {
-                        "Advance Paybale to Suppliers": {
+                        "Advance Payable to Suppliers": {
                             "account_type": "Payable"
                         },
                         "Consigned Payable": {
