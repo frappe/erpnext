@@ -1,3 +1,4 @@
+<img class="screenshot" alt="Production Order" src="{{docs_base_url}}/assets/img/manufacturing/manufacturing-flow.png">
 Production Order (also called as Work Order) is a document that is given to
 the manufacturing shop floor by the Production Planner as a signal to produce
 a certain quantity of a certain Item. Production Order also helps to generate
@@ -45,7 +46,7 @@ by:
 * Once you have submitted your Production Order, you need to Transfer the Raw Materials to initiate the Manufacturing Process.
 * This will create a Stock Entry with all the Items required to complete this Production Order to be added to the WIP Warehouse. (this will add sub-Items with BOM as one Item or explode their children based on your setting above).
 
-* Click on 'Transfer Materials for Manufacturing'.
+* Click on 'Start'.
 
 <img class="screenshot" alt="Transfer Materials" src="{{docs_base_url}}/assets/img/manufacturing/PO-material-transfer.png">
 
@@ -63,18 +64,18 @@ by:
 
 ### Making Time Logs
 
-* Progress in the Production Order can be tracked using [Time Log]({{docs_base_url}}/user/manual/en/projects/time-log.html)
-* Time Logs are created against Production Order Operations.
-* Drafts of Time Logs are also created based on the scheduled operations when an Production Order is Submitted.
-* To create more Time Logs against an operation select 'Make TIme Log' in the respective operation.
+* Progress in the Production Order can be tracked using [Timesheet]({{docs_base_url}}/user/manual/en/projects/timesheet/timesheet-against-production-order.html)
+* Timesheet's time slots are created against Production Order Operations.
+* Drafts of Timesheet is created based on the scheduled operations when an Production Order is Submitted.
+* To create more Timesheet against an operation click 'Make Timesheet' button.
 
-<img class="screenshot" alt="Make TL against PO" src="{{docs_base_url}}/assets/img/manufacturing/PO-operations-make-tl.png">
+<img class="screenshot" alt="Make timesheet against PO" src="{{docs_base_url}}/assets/img/manufacturing/PO-operations-make-ts.png">
 
 ###Updating Finished Goods
 
 * Once you are done with the Production Order you need to update the Finished Goods.
 * This will create a Stock Entry that will deduct all the sub-Items from the WIP Warehouse and add them to the Finished Goods Warehouse.
-* Click on 'Update Finished Goods'.
+* Click on 'Finish'.
 
 <img class="screenshot" alt="Update Finished Goods" src="{{docs_base_url}}/assets/img/manufacturing/PO-FG-update.png">
 
