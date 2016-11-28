@@ -40,7 +40,7 @@ To add taxes to your Quotation, you can select a **Sales Taxes and Charges Templ
 
 For e.g
 
-<img class="screenshot" alt="Taxes and Charges" src="{{docs_base_url}}/assets/img/selling/taxes-and-charges.png">
+<img class="screenshot" alt="Taxes and Charges" src="{{docs_base_url}}/assets/img/selling/taxes-and-charges.gif">
 
 To understand taxes in detail visit [Taxes]({{docs_base_url}}/user/manual/en/setting-up/setting-up-taxes.html).
 
