@@ -9,6 +9,14 @@ frappe.ui.form.on("Course Schedule" ,{
 			frm.doc.from_time = from_datetime.format("HH:mm:ss");
 			frm.doc.to_time = to_datetime.format("HH:mm:ss");
 		}
+		
+		cur_frm.set_query("student_batch", function(){
+			return{
+				"filters": {
+					"active": 1
+				}
+			};
+		});
 	},
 	
 	refresh :function(frm) {

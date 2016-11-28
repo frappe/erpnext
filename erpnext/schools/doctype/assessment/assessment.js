@@ -7,6 +7,16 @@ cur_frm.add_fetch("supervisor", "instructor_name", "supervisor_name");
 cur_frm.add_fetch("student", "title", "student_name");
 
 frappe.ui.form.on("Assessment" ,{
+	onload: function(frm){
+		cur_frm.set_query("student_batch", function(){
+			return{
+				"filters": {
+					"active": 1
+				}
+			};
+		});
+	},
+	
 	student_group : function(frm) {
 		frm.set_value("results" ,"");
 		if (frm.doc.student_group) {

@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from erpnext.schools.doctype.student_batch.student_batch import validate_active_student_batch
 
 class CourseSchedule(Document):
 	def validate(self):
@@ -16,6 +17,9 @@ class CourseSchedule(Document):
 		self.set_student_batch()
 		self.validate_date()
 		self.validate_overlap()
+		
+		if self.student_batch:
+			validate_active_student_batch(self.student_batch)
 	
 	def set_title(self):
 		"""Set document Title"""

@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from erpnext.schools.utils import validate_duplicate_student
+from erpnext.schools.doctype.student_batch.student_batch import validate_active_student_batch
 
 class StudentGroup(Document):
 	def autoname(self):
@@ -30,6 +31,9 @@ class StudentGroup(Document):
 		self.validate_strength()
 		self.validate_student_name()
 		validate_duplicate_student(self.students)
+		
+		if self.student_batch:
+			validate_active_student_batch(self.student_batch)
 
 	def validate_strength(self):
 		if self.max_strength and len(self.students) > self.max_strength:

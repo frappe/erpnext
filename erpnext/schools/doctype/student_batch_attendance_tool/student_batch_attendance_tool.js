@@ -8,6 +8,16 @@ frappe.ui.form.on('Student Batch Attendance Tool', {
 		hide_field('attendance');
 	},
 	
+	onload: function(frm){
+		cur_frm.set_query("student_batch", function(){
+			return{
+				"filters": {
+					"active": 1
+				}
+			};
+		});
+	},
+	
 	student_batch :function(frm) {
 		if(frm.doc.student_batch && frm.doc.date) {
 			frappe.call({

@@ -7,12 +7,25 @@ cur_frm.add_fetch("student_group", "course", "course");
 cur_frm.add_fetch("student_group", "academic_year", "academic_year");
 cur_frm.add_fetch("student_group", "academic_term", "academic_term");
 
-frappe.ui.form.on("Course Scheduling Tool", "refresh", function(frm) {
-	frm.disable_save();
-	frm.page.set_primary_action(__("Schedule Course"), function() {
-		frappe.call({
-			method: "schedule_course",
-			doc:frm.doc
-		})
-	});
+frappe.ui.form.on("Course Scheduling Tool", {
+	
+	refresh: function(frm) {
+		frm.disable_save();
+		frm.page.set_primary_action(__("Schedule Course"), function() {
+			frappe.call({
+				method: "schedule_course",
+				doc:frm.doc
+			})
+		});
+	},
+	
+	onload: function(frm){
+		cur_frm.set_query("student_batch", function(){
+			return{
+				"filters": {
+					"active": 1
+				}
+			};
+		});
+	}
 });
