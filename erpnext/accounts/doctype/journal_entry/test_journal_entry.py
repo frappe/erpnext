@@ -189,8 +189,6 @@ class TestJournalEntry(unittest.TestCase):
 def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False, project=None):
 	if not cost_center:
 		cost_center = "_Test Cost Center - _TC"
-	if not project:
-		project = "_Test Project"
 
 	jv = frappe.new_doc("Journal Entry")
 	jv.posting_date = posting_date or "2013-02-14"

@@ -14,12 +14,11 @@ class DuplicateBudgetError(frappe.ValidationError): pass
 
 class Budget(Document):
 	def autoname(self):
-		budget_against = self.get(frappe.scrub(self.budget_against))
-		self.name = make_autoname(budget_against + "/" + self.fiscal_year + "/.###")
-	
+		self.name = make_autoname(self.get(frappe.scrub(self.budget_against)) + "/" + self.fiscal_year + "/.###")
+
 	def validate(self):
-		if not self.cost_center and not self.project:
-			frappe.throw(_("Budget should be allocated against either Cost Center or Project."))
+		if not self.get(frappe.scrub(self.budget_against)):
+			frappe.throw(_("{0} is mandatory").format(self.budget_against))
 		self.validate_duplicate()
 		self.validate_accounts()
 
@@ -58,7 +57,6 @@ def validate_expense_against_budget(args):
 	args = frappe._dict(args)
 	if not args.cost_center and not args.project:
 		return
-
 	for budget_against in [args.project, args.cost_center]:
 		if budget_against:
 			if frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
