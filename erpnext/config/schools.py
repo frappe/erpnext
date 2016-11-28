@@ -56,20 +56,15 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Schedule"),
+			"label": _("Attendance"),
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Course Schedule",
-					"route": "Calendar/Course Schedule"
-				},
 				{
 					"type": "doctype",
 					"name": "Student Attendance"
 				},
 				{
 					"type": "doctype",
-					"name": "Course Scheduling Tool"
+					"name": "Student Leave Application"
 				},
 				{
 					"type": "doctype",
@@ -80,6 +75,20 @@ def get_data():
 					"is_query_report": True,
 					"name": "Student Monthly Attendance Sheet",
 					"doctype": "Attendance"
+				}
+			]
+		},
+		{
+			"label": _("Schedule"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Course Schedule",
+					"route": "Calendar/Course Schedule"
+				},
+				{
+					"type": "doctype",
+					"name": "Course Scheduling Tool"
 				}
 			]
 		},
