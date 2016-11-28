@@ -324,11 +324,16 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 		additional_conditions.append("posting_date >= %(from_date)s")
 
 	if filters:
-		for key in ['cost_center', 'project']:
-			if filters.get(key):
-				additional_conditions.append("%s = '%s'"%(key, filters.get(key)))
+		if filters.get("project"):
+			additional_conditions.append("project = '%s'"%(frappe.db.escape(filters.get("project"))))
+		if filters.get("cost_center"):
+			additional_conditions.append(get_cost_center_cond(filters.get("cost_center")))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
+
+def get_cost_center_cond(cost_center):
+	lft, rgt = frappe.db.get_value("Cost Center", cost_center, ["lft", "rgt"])
+	return (""" cost_center in (select name from `tabCost Center` where lft >=%s and rgt <=%s)"""%(lft, rgt))
 
 def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 	columns = [{
