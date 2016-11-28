@@ -14,20 +14,26 @@ class DuplicateBudgetError(frappe.ValidationError): pass
 
 class Budget(Document):
 	def autoname(self):
-		self.name = make_autoname(self.cost_center + "/" + self.fiscal_year + "/.###")
-
+		if self.cost_center:
+			self.name = make_autoname(self.cost_center + "/" + self.fiscal_year + "/.###")
+		elif self.project:
+			self.name = make_autoname(self.project + "/" + self.fiscal_year + "/.###")
+	
 	def validate(self):
-		self.validate_duplicate()
+		if self.cost_center:
+			self.validate_duplicate(cost_center)
+		elif self.project:
+			self.validate_duplicate(project)
 		self.validate_accounts()
 
-	def validate_duplicate(self):
-		existing_budget = frappe.db.get_value("Budget", {"cost_center": self.cost_center,
+	def validate_duplicate(self, budget_against):
+		existing_budget = frappe.db.get_value("Budget", {budget_against: self.budget_against,
 			"fiscal_year": self.fiscal_year, "company": self.company,
 			"name": ["!=", self.name], "docstatus": ["!=", 2]})
 		if existing_budget:
 			frappe.throw(_("Another Budget record {0} already exists against {1} for fiscal year {2}")
-				.format(existing_budget, self.cost_center, self.fiscal_year), DuplicateBudgetError)
-
+				.format(existing_budget, self.budget_against, self.fiscal_year), DuplicateBudgetError)
+	
 	def validate_accounts(self):
 		account_list = []
 		for d in self.get('accounts'):
@@ -51,6 +57,8 @@ class Budget(Document):
 
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)
+	print "============>>>>>>>> TESTING"
+	print args
 	if not args.cost_center:
 		return
 		
@@ -84,6 +92,7 @@ def validate_expense_against_budget(args):
 					and yearly_action != monthly_action:
 						compare_expense_with_budget(args, budget.cost_center,
 							flt(budget.budget_amount), _("Annual"), yearly_action)
+
 
 def compare_expense_with_budget(args, cost_center, budget_amount, action_for, action):
 	actual_expense = get_actual_expense(args, cost_center)
