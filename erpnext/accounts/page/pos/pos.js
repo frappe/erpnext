@@ -246,6 +246,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 
 		this.items = this.item_data;
+		this.actual_qty_dict = {};
+
 		if(load_doc) {
 			this.frm.doc =  JSON.parse(localStorage.getItem('doc'));
 		}
@@ -444,7 +446,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			})
 		}
 
-		key =  this.search.$input.val().toLowerCase();
+		key =  this.search.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g,'\\$&');
 		var re = new RegExp('%', 'g');
 		var reg = new RegExp(key.replace(re, '[\\w*\\s*[a-zA-Z0-9]*]*'))
 		search_status = true
@@ -680,7 +682,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				item_code: d.item_code,
 				item_name: (d.item_name===d.item_code || !d.item_name) ? "" : ("<br>" + d.item_name),
 				qty: d.qty,
-				actual_qty: me.actual_qty,
+				actual_qty: me.actual_qty_dict[d.item_code] || 0,
 				projected_qty: d.projected_qty,
 				rate: format_number(d.rate, me.frm.doc.currency),
 				amount: format_currency(d.amount, me.frm.doc.currency)
@@ -1083,9 +1085,11 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	get_actual_qty: function(item) {
 		this.actual_qty = 0.0;
+
 		var warehouse = this.pos_profile_data['warehouse'] || item.default_warehouse;
 		if(warehouse && this.bin_data[item.item_code]) {
 			this.actual_qty = this.bin_data[item.item_code][warehouse] || 0;
+			this.actual_qty_dict[item.item_code] = this.actual_qty
 		}
 
 		return this.actual_qty
