@@ -74,6 +74,12 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Student Batch Attendance Tool"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Student Monthly Attendance Sheet",
+					"doctype": "Attendance"
 				}
 			]
 		},

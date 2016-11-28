@@ -1,0 +1,17 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2013-05-13 14:04:03", 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 1, 
+ "is_standard": "Yes", 
+ "modified": "2014-06-03 07:18:17.181332", 
+ "modified_by": "Administrator", 
+ "module": "Schools", 
+ "name": "Student Monthly Attendance Sheet", 
+ "owner": "Administrator", 
+ "ref_doctype": "Attendance", 
+ "report_name": "Student Monthly Attendance Sheet", 
+ "report_type": "Script Report"
+}
