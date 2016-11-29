@@ -3,6 +3,10 @@ or services you are planning to offer, along with the prices and other terms
 of engagement. This is called a “Proposal” or an “Estimate” or a “Pro Forma
 Invoice”or a **Quotation**.
 
+A typical Selling flow looks like:
+
+<img class="screenshot" alt="Make Quotation from Opportunity" src="{{docs_base_url}}/assets/img/selling/selling-flow.png">
+
 To create a new Quotation navigate to:
 
 > Selling > Quotation > New Quotation
