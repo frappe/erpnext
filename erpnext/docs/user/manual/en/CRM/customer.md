@@ -9,7 +9,7 @@ You can either directly create your Customers via
 
 > Selling > Customer
 
-<img class="screenshot" alt="Customer" src="{{docs_base_url}}/assets/img/crm/create-customer.gif">
+<img class="screenshot" alt="Create Customer" src="{{docs_base_url}}/assets/img/crm/create-customer.gif">
 
 or upload it via the Data Import Tool.
 
