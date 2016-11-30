@@ -9,9 +9,13 @@ You can either directly create your Customers via
 
 > Selling > Customer
 
+<img class="screenshot" alt="Customer" src="{{docs_base_url}}/assets/img/crm/create-customer.gif">
+
 or upload it via the Data Import Tool.
 
-<img class="screenshot" alt="Customer" src="{{docs_base_url}}/assets/img/crm/customer.png">
+A Customer can avail the features (operations) in the selling process. The general flow can be summarazed as:
+
+<img class="screenshot" alt="Customer" src="{{docs_base_url}}/assets/img/crm/customer-to selling-flowchart.jpeg">
 
 > Note: Customers are separate from Contacts and Addresses. A Customer can
 have multiple Contacts and Addresses.
@@ -53,7 +57,7 @@ You can set how much credit you want to allow for a Customer by adding the
 master. Classifying Customers
 
 ERPNext allows you to group your Customers using [Customer Group]({{docs_base_url}}/user/manual/en/CRM/setup/customer-group.html) 
-and also divide them into [Territories]({{docs_base_url}}/user/manual/en/CRM/setup/territory.html)
+and also divide them into [Territories]({{docs_base_url}}/user/manual/en/setting-up/territory.html)
 Grouping will help you get better analysis of your data and
 identify which Customers are profitable and which are not. Territories will
 help you set sales targets for the respective territories.
