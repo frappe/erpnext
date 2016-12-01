@@ -56,6 +56,41 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Attendance"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Student Attendance"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Leave Application"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Batch Attendance Tool"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Absent Student Report",
+					"doctype": "Attendance"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Student Batch Wise Attendance",
+					"doctype": "Attendance"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Student Monthly Attendance Sheet",
+					"doctype": "Attendance"
+				}
+			]
+		},
+		{
 			"label": _("Schedule"),
 			"items": [
 				{
@@ -65,15 +100,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Student Attendance"
-				},
-				{
-					"type": "doctype",
 					"name": "Course Scheduling Tool"
-				},
-				{
-					"type": "doctype",
-					"name": "Student Batch Attendance Tool"
 				}
 			]
 		},
