@@ -5,12 +5,12 @@
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-06-03 07:18:17.229116", 
+ "modified": "2016-12-01 09:18:17.229116", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project wise Stock Tracking", 
  "owner": "Administrator", 
  "ref_doctype": "Project", 
  "report_name": "Project wise Stock Tracking ", 
- "report_type": "Report Builder"
+ "report_type": "Script Report"
 }
