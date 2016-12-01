@@ -307,7 +307,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 
 	item_fields_stock = ['serial_no', 'batch_no', 'actual_qty', 'expense_account', 'warehouse', 'expense_account', 'warehouse']
 	cur_frm.fields_dict['items'].grid.set_column_disp(item_fields_stock,
-		(cint(doc.update_stock)==1 ? true : false));
+		(cint(doc.update_stock)==1 || cint(doc.is_return)==1 ? true : false));
 
 	// India related fields
 	if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
