@@ -84,6 +84,7 @@ class SalarySlip(TransactionBase):
 			if d.amount_based_on_formula:
 				if d.formula:
 					amount = eval(d.formula, None, data)
+			if amount:		
 				data[d.abbr] = amount
 			return amount
 			
