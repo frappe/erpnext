@@ -6,16 +6,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from erpnext.schools.doctype.student_batch.student_batch import validate_active_student_batch
 
 class StudentAttendance(Document):
 	def validate(self):
 		self.validate_date()
 		self.validate_mandatory()
 		self.validate_duplication()
-		
-		if self.student_batch:
-			validate_active_student_batch(self.student_batch)
 		
 	def validate_date(self):
 		if self.course_schedule:

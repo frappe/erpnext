@@ -6,15 +6,11 @@ from __future__ import unicode_literals
 from frappe.model.document import Document
 import frappe
 from frappe import _
-from erpnext.schools.doctype.student_batch.student_batch import validate_active_student_batch
 
 class Assessment(Document):
 	def validate(self):
 		self.validate_overlap()
 
-		if self.student_batch:
-			validate_active_student_batch(self.student_batch)
-	
 	def validate_overlap(self):
 		"""Validates overlap for Student Group/Student Batch, Instructor, Room"""
 		
