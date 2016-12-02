@@ -25,7 +25,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.set_indicator();
 		this.onload();
 		this.make_menu_list();
-		this.set_interval_for_si_sync();
 		this.si_docs = this.get_doc_from_localstorage();
 	},
 
@@ -73,8 +72,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.get_data_from_server(function(){
 			me.create_new();
 		});
-
-		this.check_internet_connection();
 	},
 
 	make_menu_list: function(){
@@ -204,18 +201,31 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			freeze: true,
 			freeze_message: __("Master data syncing, it might take some time"),
 			callback: function(r){
-				window.items = r.message.items;
-				window.customers = r.message.customers;
-				window.pricing_rules = r.message.pricing_rules;
-				window.meta = r.message.meta;
-				window.print_template = r.message.print_template;
-				me.default_customer = r.message.default_customer || null;
+				me.init_master_data(r)
 				localStorage.setItem('doc', JSON.stringify(r.message.doc));
+				me.set_interval_for_si_sync();
+				me.check_internet_connection();
 				if(callback){
 					callback();
 				}
 			}
 		})
+	},
+
+	init_master_data: function(r){
+		var me = this;
+		this.meta = r.message.meta;
+		this.item_data = r.message.items;
+		this.customers = r.message.customers;
+		this.serial_no_data = r.message.serial_no_data;
+		this.batch_no_data = r.message.batch_no_data;
+		this.tax_data = r.message.tax_data;
+		this.price_list_data = r.message.price_list_data;
+		this.bin_data = r.message.bin_data;
+		this.pricing_rules = r.message.pricing_rules;
+		this.print_template = r.message.print_template;
+		this.pos_profile_data = r.message.pos_profile;
+		this.default_customer = r.message.default_customer || null;
 	},
 
 	save_previous_entry : function(){
@@ -233,20 +243,21 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	},
 
 	load_data: function(load_doc){
-		this.items = window.items;
-		this.customers = window.customers;
-		this.pricing_rules = window.pricing_rules;
+		var me = this;
+
+		this.items = this.item_data;
+		this.actual_qty_dict = {};
 
 		if(load_doc) {
 			this.frm.doc =  JSON.parse(localStorage.getItem('doc'));
 		}
 
-		$.each(window.meta, function(i, data){
+		$.each(this.meta, function(i, data){
 			frappe.meta.sync(data)
 		})
 
 		this.print_template = frappe.render_template("print_template",
-			{content: window.print_template, title:"POS",
+			{content: this.print_template, title:"POS",
 			base_url: frappe.urllib.get_base_url(), print_css: frappe.boot.print_css})
 	},
 
@@ -387,12 +398,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var $wrap = me.wrapper.find(".item-list");
 		me.wrapper.find(".item-list").empty();
 
-		if (this.items) {
+		if (this.items.length > 0) {
 			$.each(this.items, function(index, obj) {
 				if(index < 30){
 					$(frappe.render_template("pos_item", {
 						item_code: obj.name,
-						item_price: format_currency(obj.price_list_rate, me.frm.doc.currency),
+						item_price: format_currency(me.price_list_data[obj.name], me.frm.doc.currency),
 						item_name: obj.name===obj.item_name ? "" : obj.item_name,
 						item_image: obj.image ? "url('" + obj.image + "')" : null,
 						color: frappe.get_palette(obj.item_name),
@@ -400,6 +411,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					})).tooltip().appendTo($wrap);
 				}
 			});
+		} else {
+			$("<h4>Searching record not found.</h4>").appendTo($wrap)
 		}
 
 		if(this.items.length == 1
@@ -426,27 +439,28 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.item_batch_no = {};
 
 		if(item_code){
-			return $.grep(window.items, function(item){
+			return $.grep(this.item_data, function(item){
 				if(item.item_code == item_code ){
 					return true
 				}
 			})
 		}
 
-		key =  this.search.$input.val().toLowerCase();
+		key =  this.search.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g,'\\$&');
 		var re = new RegExp('%', 'g');
 		var reg = new RegExp(key.replace(re, '[\\w*\\s*[a-zA-Z0-9]*]*'))
 		search_status = true
 
 		if(key){
-			return $.grep(window.items, function(item){
+			return $.grep(this.item_data, function(item){
 				if(search_status){
-					if(in_list(item.batch_nos, me.search.$input.val())){
+					if(in_list(me.batch_no_data[item.item_code], me.search.$input.val())){
 						search_status = false;
 						return me.item_batch_no[item.item_code] = me.search.$input.val()
-					} else if(in_list(Object.keys(item.serial_nos), me.search.$input.val())) {
+					} else if( me.serial_no_data[item.item_code]
+						&& in_list(Object.keys(me.serial_no_data[item.item_code]), me.search.$input.val())) {
 						search_status = false;
-						me.item_serial_no[item.item_code] = [me.search.$input.val(), item.serial_nos[me.search.$input.val()]]
+						me.item_serial_no[item.item_code] = [me.search.$input.val(), me.serial_no_data[item.item_code][me.search.$input.val()]]
 						return true
 					} else if(item.barcode == me.search.$input.val()) {
 						search_status = false;
@@ -458,7 +472,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 			})
 		}else{
-			return window.items;
+			return this.item_data;
 		}
 	},
 
@@ -611,18 +625,18 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.description = this.items[0].description;
 		this.child.qty = 1;
 		this.child.item_group = this.items[0].item_group;
-		this.child.cost_center = this.items[0].cost_center;
-		this.child.income_account = this.items[0].income_account;
+		this.child.cost_center = this.pos_profile_data['cost_center'] || this.items[0].cost_center;
+		this.child.income_account = this.pos_profile_data['income_account'] || this.items[0].income_account;
 		this.child.warehouse = (this.item_serial_no[this.child.item_code]
-			? this.item_serial_no[this.child.item_code][1] : this.items[0].default_warehouse);
-		this.child.price_list_rate = flt(this.items[0].price_list_rate, 9) / flt(this.frm.doc.conversion_rate, 9);
-		this.child.rate = flt(this.items[0].price_list_rate, 9) / flt(this.frm.doc.conversion_rate, 9);
-		this.child.actual_qty = this.items[0].actual_qty;
+			? this.item_serial_no[this.child.item_code][1] : (this.pos_profile_data['warehouse'] || this.items[0].default_warehouse) );
+		this.child.price_list_rate = flt(this.price_list_data[this.child.item_code], 9) / flt(this.frm.doc.conversion_rate, 9);
+		this.child.rate = flt(this.price_list_data[this.child.item_code], 9) / flt(this.frm.doc.conversion_rate, 9);
+		this.child.actual_qty = me.get_actual_qty(this.items[0]);
 		this.child.amount = flt(this.child.qty) * flt(this.child.rate);
 		this.child.batch_no = this.item_batch_no[this.child.item_code];
 		this.child.serial_no = (this.item_serial_no[this.child.item_code]
 			? this.item_serial_no[this.child.item_code][0] : '');
-		this.child.item_tax_rate = this.items[0].taxes;
+		this.child.item_tax_rate = JSON.stringify(this.tax_data[this.child.item_code]);
 	},
 
 	update_paid_amount_status: function(update_paid_amount){
@@ -668,7 +682,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				item_code: d.item_code,
 				item_name: (d.item_name===d.item_code || !d.item_name) ? "" : ("<br>" + d.item_name),
 				qty: d.qty,
-				actual_qty: d.actual_qty,
+				actual_qty: me.actual_qty_dict[d.item_code] || 0,
 				projected_qty: d.projected_qty,
 				rate: format_number(d.rate, me.frm.doc.currency),
 				amount: format_currency(d.amount, me.frm.doc.currency)
@@ -1064,8 +1078,20 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	},
 
 	validate_warehouse: function(){
-		if(!this.items[0].default_warehouse){
+		if(this.items[0].is_stock_item && !this.items[0].default_warehouse && !this.pos_profile_data['warehouse']){
 			frappe.throw(__("Default warehouse is required for selected item"))
 		}
+	},
+
+	get_actual_qty: function(item) {
+		this.actual_qty = 0.0;
+
+		var warehouse = this.pos_profile_data['warehouse'] || item.default_warehouse;
+		if(warehouse && this.bin_data[item.item_code]) {
+			this.actual_qty = this.bin_data[item.item_code][warehouse] || 0;
+			this.actual_qty_dict[item.item_code] = this.actual_qty
+		}
+
+		return this.actual_qty
 	}
 })

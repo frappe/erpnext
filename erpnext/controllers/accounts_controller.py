@@ -565,6 +565,21 @@ class AccountsController(TransactionBase):
 							elif asset.status in ("Scrapped", "Cancelled", "Sold"):
 								frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
 									.format(d.idx, d.asset, asset.status))
+									
+	def delink_advance_entries(self, linked_doc_name):
+		total_allocated_amount = 0
+		for adv in self.advances:
+			consider_for_total_advance = True
+			if adv.reference_name == linked_doc_name:
+				frappe.db.sql("""delete from `tab{0} Advance`
+					where name = %s""".format(self.doctype), adv.name)
+				consider_for_total_advance = False
+
+			if consider_for_total_advance:
+				total_allocated_amount += flt(adv.allocated_amount, adv.precision("allocated_amount"))
+
+		frappe.db.set_value(self.doctype, self.name, "total_advance", 
+			total_allocated_amount, update_modified=False)
 
 	def group_similar_items(self):
 		group_item_qty = {}

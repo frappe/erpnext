@@ -11,6 +11,10 @@ from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, 
 from erpnext.controllers.accounts_controller import AccountsController
 
 class StockController(AccountsController):
+	def validate(self):
+		super(StockController, self).validate()
+		self.validate_inspection()
+	
 	def make_gl_entries(self, repost_future_gle=True):
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
@@ -253,6 +257,28 @@ class StockController(AccountsController):
 			"target_field": "billed_amt",
 			"name": self.name,
 		}, update_modified)
+
+	def validate_inspection(self):
+		'''Checks if quality inspection is set for Items that require inspection.
+		On submit, throw an exception'''
+		
+		inspection_required_fieldname = None
+		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
+			inspection_required_fieldname = "inspection_required_before_purchase"
+		elif self.doctype in ["Delivery Note", "Sales Invoice"]:
+			inspection_required_fieldname = "inspection_required_before_delivery"
+		
+		if not inspection_required_fieldname or \
+			(self.doctype in ["Sales Invoice", "Purchase Invoice"] and not self.update_stock):
+				return
+		
+		for d in self.get('items'):
+			if (frappe.db.get_value("Item", d.item_code, inspection_required_fieldname) 
+				and not d.quality_inspection):
+				
+				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
+				if self.docstatus==1:
+					raise frappe.ValidationError
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):

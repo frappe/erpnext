@@ -217,7 +217,7 @@ class ProductionOrder(Document):
 			return
 		self.set('operations', [])
 		operations = frappe.db.sql("""select operation, description, workstation, idx,
-			hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
+			base_hour_rate as hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
 			where parent = %s order by idx""", self.bom_no, as_dict=1)
 		self.set('operations', operations)
 		self.calculate_time()
@@ -465,6 +465,9 @@ def get_item_details(item):
 		variant_of= frappe.db.get_value("Item", item, "variant_of")
 		if variant_of:
 			res["bom_no"] = frappe.db.get_value("BOM", filters={"item": variant_of, "is_default": 1})
+
+	if not res["bom_no"]:
+		frappe.throw(_("Default BOM for {0} not found").format(item))
 
 	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
 

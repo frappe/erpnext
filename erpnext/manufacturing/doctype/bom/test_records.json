@@ -22,6 +22,7 @@
   ],
   "docstatus": 1,
   "doctype": "BOM",
+  "currency": "USD",
   "is_active": 1,
   "is_default": 1,
   "item": "_Test Item Home Desktop Manufactured",
@@ -63,6 +64,7 @@
   "doctype": "BOM",
   "is_active": 1,
   "is_default": 1,
+  "currency": "USD",
   "item": "_Test FG Item",
   "quantity": 1.0
  },
@@ -101,6 +103,7 @@
   "doctype": "BOM",
   "is_active": 1,
   "is_default": 1,
+  "currency": "USD",
   "item": "_Test FG Item 2",
   "quantity": 1.0,
   "with_operations": 1
@@ -130,6 +133,7 @@
   "doctype": "BOM",
   "is_active": 1,
   "is_default": 1,
+  "currency": "USD",
   "item": "_Test Variant Item",
   "quantity": 1.0,
   "with_operations": 1

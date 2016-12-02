@@ -185,6 +185,10 @@ def get_data():
 					"name": "Designation",
 					"description": _("Employee designation (e.g. CEO, Director etc.).")
 				},
+				{
+					"type": "doctype",
+					"name": "Daily Work Summary Settings"
+				},
 			]
 		},
 		{

@@ -50,6 +50,16 @@ Warehouse here.
 This “reserved” quantity will help you project what is the quantity you need
 to purchase based on all your commitments.
 
+### Taxes
+
+To add taxes to your Quotation, you can select a **Sales Taxes and Charges Template** or add the taxes on your own.
+
+For e.g
+
+<img class="screenshot" alt="Taxes and Charges" src="{{docs_base_url}}/assets/img/selling/taxes-and-charges.gif">
+
+To understand taxes in detail visit [Taxes]({{docs_base_url}}/user/manual/en/setting-up/setting-up-taxes.html).
+
 ### Sales Team
 
 **Sales Partner:** If this Sale was booked via a Sales Partner, you can update the Sales Partner’s details with commission and other info that you can aggregate.

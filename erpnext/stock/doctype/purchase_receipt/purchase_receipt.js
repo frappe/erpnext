@@ -7,20 +7,6 @@ frappe.provide("erpnext.stock");
 
 frappe.ui.form.on("Purchase Receipt", {
 	onload: function(frm) {
-		var qa_no = frappe.meta.get_docfield("Purchase Receipt Item", "qa_no");
-		qa_no.get_route_options_for_new_doc = function(field) {
-			if(frm.is_new()) return;
-			var doc = field.doc;
-			return {
-				"inspection_type": "Incoming",
-				"purchase_receipt_no": frm.doc.name,
-				"item_code": doc.item_code,
-				"description": doc.description,
-				"item_serial_no": doc.serial_no ? doc.serial_no.split("\n")[0] : null,
-				"batch_no": doc.batch_no
-			}
-		}
-
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
 			frm.set_query(field, "items", function() {
 				return {
@@ -39,18 +25,8 @@ frappe.ui.form.on("Purchase Receipt", {
 					["Warehouse", "is_group", "=", 0]
 				]
 			}
-		})
-
-		frm.set_query("qa_no", "items", function(doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
-			return {
-				filters: {
-					docstatus: 1,
-					inspection_type: "Incoming",
-					item_code: d.item_code
-				}
-			}
-		})
+		});
+		
 	}
 });
 
@@ -197,14 +173,6 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 		filters: [
 			['Print Heading', 'docstatus', '!=', '2']
 		]
-	}
-}
-
-cur_frm.fields_dict.items.grid.get_field("qa_no").get_query = function(doc) {
-	return {
-		filters: {
-			'docstatus': 1
-		}
 	}
 }
 

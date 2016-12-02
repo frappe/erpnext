@@ -10,7 +10,7 @@ from frappe import _
 class Assessment(Document):
 	def validate(self):
 		self.validate_overlap()
-	
+
 	def validate_overlap(self):
 		"""Validates overlap for Student Group/Student Batch, Instructor, Room"""
 		

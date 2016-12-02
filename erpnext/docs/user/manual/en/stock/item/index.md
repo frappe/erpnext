@@ -10,7 +10,7 @@ ERPNext is optimized for itemized management of your sales and purchase. If you 
   * **Default Unit of Measure:** This is the default measuring unit that you will use for your product. It could be in nos, kgs, meters, etc. You can store all the UOM’s that your product will require under Set Up> Master Data > UOM. These can be preselected while filling New Item by using % sign to get a pop up of the UOM list.
   * **Brand:** If you have more than one brand save them under Set Up> Master Data> Brand and pre-select them while filling a New Item.
   * **Variant:** A Item Variant is a different version of a Item.To learn more about managing varaints see [Item Variants]({{docs_base_url}}/user/manual/en/stock/item/item-variants.html)
-  
+
 ### Upload an Image
 
 To upload an image for your icon that will appear in all transactions, save
@@ -24,8 +24,8 @@ different Items. This can be selected based on Item types. It could be Fixed
 Asset Item, Stock Item or even Manufacturing Item.
 
   * **Stock Item:** If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item.
-  * **Default Warehouse:** This is the Warehouse that is automatically selected in your transactions. 
-  * **Allowance Percentage:** This is the percent by which you will be allowed to over-bill or over-deliver this Item. If not set, it will select from the Global Defaults. 
+  * **Default Warehouse:** This is the Warehouse that is automatically selected in your transactions.
+  * **Allowance Percentage:** This is the percent by which you will be allowed to over-bill or over-deliver this Item. If not set, it will select from the Global Defaults.
   * **Valuation Method:** There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit “ Item Valuation, FIFO and Moving Average”.
 
 ### Serialized and Batched Inventory
@@ -34,11 +34,11 @@ These numbers help to track individual units or batches of Items which you sell.
 
 > Important: Once you mark an item as serialized or batched or neither, you cannot change it after you have made any stock entry.
 
-  * [Discussion on Serialized Inventory]({{docs_base_url}}/user/manual/en/setting-up/stock-reconciliation-for-non-serialized-item.html)  
+  * [Discussion on Serialized Inventory]({{docs_base_url}}/user/manual/en/setting-up/stock-reconciliation-for-non-serialized-item.html)
 
 ### Re Ordering
 
-  * **Re-order level** suggests the amount of stock balance in the Warehouse. 
+  * **Re-order level** suggests the amount of stock balance in the Warehouse.
   * **Re-order Qty** suggests the amount of stock to be ordered to maintain minimum stock levels.
   * **Minimum Order Qty** is the minimum quantity for which a Material Request / Purchase Order must be made.
 
@@ -86,7 +86,7 @@ Length, Finish etc.
 
 ![Manufacturing]({{docs_base_url}}/assets/old_images/erpnext/item-manufacturing-website.png)
 
-Visit [Manufacturing]({{docs_base_url}}/user/manual/en/manufacturing.html) and [Website ]({{docs_base_url}}/user/manual/en/website.html)to understand these topics in detail.
+Visit [Manufacturing]({{docs_base_url}}/user/manual/en/manufacturing) and [Website ]({{docs_base_url}}/user/manual/en/website)to understand these topics in detail.
 
 ### Learn more about Item
 

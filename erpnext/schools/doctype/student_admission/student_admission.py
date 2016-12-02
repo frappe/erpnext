@@ -23,7 +23,7 @@ class StudentAdmission(WebsiteGenerator):
 		context.parents = [{'name': 'admissions', 'title': _('All Student Admissions') }]
 
 	def get_title(self):
-		return _("Admissions for {0}").format(self.academic_term)
+		return _("Admissions for {0}").format(self.academic_year)
 
 def get_list_context(context):
 	context.title = _("Student Admissions")

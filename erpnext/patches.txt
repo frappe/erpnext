@@ -350,3 +350,6 @@ erpnext.patches.v7_0.set_base_amount_in_invoice_payment_table
 erpnext.patches.v7_1.update_invoice_status
 erpnext.patches.v7_0.po_status_issue_for_pr_return
 erpnext.patches.v7_1.update_missing_salary_component_type
+erpnext.patches.v7_1.rename_quality_inspection_field
+erpnext.patches.v7_0.update_autoname_field
+erpnext.patches.v7_1.update_bom_base_currency
