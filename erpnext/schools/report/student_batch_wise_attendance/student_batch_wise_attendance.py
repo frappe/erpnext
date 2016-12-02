@@ -48,7 +48,7 @@ def get_columns(filters):
 
 def get_active_student_batch():
 	active_student_batch = frappe.db.sql("""select name from `tabStudent Batch` 
-		where active = 1 order by name""", as_dict=1)
+		where enabled = 1 order by name""", as_dict=1)
 	return active_student_batch
 
 def get_student_batch_strength(student_batch):

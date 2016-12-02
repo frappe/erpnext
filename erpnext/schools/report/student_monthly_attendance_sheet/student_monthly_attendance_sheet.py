@@ -31,7 +31,7 @@ def execute(filters=None):
 				total_p += 1
 			elif status == "Absent":
 				total_a += 1
-		
+
 		row += [total_p, total_a]
 		data.append(row)
 

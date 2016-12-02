@@ -54,13 +54,13 @@ def mark_attendance(students_present, students_absent, course_schedule=None, stu
 	"""
 	present = json.loads(students_present)
 	absent = json.loads(students_absent)
-
 	for d in present:
 		make_attendance_records(d["student"], d["student_name"], "Present", course_schedule, student_batch, date)
 
 	for d in absent:
 		make_attendance_records(d["student"], d["student_name"], "Absent", course_schedule, student_batch, date)
 
+	frappe.db.commit()
 	frappe.msgprint(_("Attendance has been marked successfully."))
 
 def make_attendance_records(student, student_name, status, course_schedule=None, student_batch=None, date=None):
@@ -79,7 +79,6 @@ def make_attendance_records(student, student_name, status, course_schedule=None,
 	student_attendance.date = date
 	student_attendance.status = status
 	student_attendance.submit()
-	frappe.db.commit()
 
 @frappe.whitelist()
 def get_student_batch_students(student_batch):
@@ -87,7 +86,7 @@ def get_student_batch_students(student_batch):
 
 	:param student_batch: Student Batch.
 	"""
-	students = frappe.get_list("Student Batch Student", fields=["student", "student_name"] , filters={"parent": student_batch}, order_by= "idx")
+	students = frappe.get_list("Student Batch Student", fields=["student", "student_name", "idx"] , filters={"parent": student_batch}, order_by= "idx")
 	return students
 
 @frappe.whitelist()

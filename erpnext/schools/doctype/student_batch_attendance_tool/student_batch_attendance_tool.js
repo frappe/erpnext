@@ -88,16 +88,23 @@ schools.StudentsEditor = Class.extend({
                 });
             });
 
+        var get_student = function(idx) {
+            return students.filter(function(s) {
+                return s.idx === idx;
+            })[0]
+        }
+
         student_toolbar.find(".btn-mark-att")
             .html(__('Mark Attendence'))
             .on("click", function() {
                 var students_present = [];
                 var students_absent = [];
                 $(me.wrapper).find('input[type="checkbox"]').each(function(i, check) {
+                    var idx = $(check).data().idx;
                     if ($(check).is(":checked")) {
-                        students_present.push(students[i]);
+                        students_present.push(get_student(idx));
                     } else {
-                        students_absent.push(students[i]);
+                        students_absent.push(get_student(idx));
                     }
                 });
                 frappe.call({
@@ -118,9 +125,12 @@ schools.StudentsEditor = Class.extend({
         $.each(students, function(i, m) {
             $(repl('<div class="col-sm-6">\
 				<div class="checkbox">\
-				<label><input type="checkbox" class="students-check" student="%(student)s">\
-				%(student)s</label>\
-			</div></div>', { student: m.student_name })).appendTo(me.wrapper);
+				<label><input data-idx="%(idx)s" type="checkbox" class="students-check" data-student="%(name)s">\
+				%(idx)s - %(name)s</label>\
+			</div></div>', {
+                name: m.student_name,
+                idx: m.idx
+            })).appendTo(me.wrapper);
         });
     }
 });
