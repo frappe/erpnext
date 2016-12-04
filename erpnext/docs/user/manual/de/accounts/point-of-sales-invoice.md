@@ -16,7 +16,7 @@ In ERPNext können über den POS alle Verkaufs- und Einkaufstransaktionen, wie A
 
 #### Auf die POS-Ansicht umschalten
 
-Öffnen Sie eine beliebige Verkaufs- oder Einkaufstransaktion. Klicken Sie auf das Computersymbol <i class="icon-desktop"></i>.
+Öffnen Sie eine beliebige Verkaufs- oder Einkaufstransaktion. Klicken Sie auf das Computersymbol <i class="fa fa-desktop"></i>.
 
 #### Die verschiedenen Abschnitte des POS
 

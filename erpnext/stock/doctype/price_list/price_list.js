@@ -8,6 +8,6 @@ $.extend(cur_frm.cscript, {
 				"price_list": cur_frm.doc.name
 			};
 			frappe.set_route("Report", "Item Price");
-		}, "icon-money");
+		}, "fa fa-money");
 	}
 });
