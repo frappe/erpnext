@@ -73,17 +73,20 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Absent Student Report"
+					"name": "Absent Student Report",
+					"doctype": "Student Attendance"
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Student Batch-Wise Attendance"
+					"name": "Student Batch-Wise Attendance",
+					"doctype": "Student Attendance"
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Student Monthly Attendance Sheet"
+					"name": "Student Monthly Attendance Sheet",
+					"doctype": "Student Attendance"
 				}
 			]
 		},
