@@ -533,7 +533,6 @@ def get_serial_no(args):
 	if args.get('warehouse') and args.get('qty') and args.get('item_code'):
 		
 		if frappe.get_value('Item', {'item_code': args.item_code}, "has_serial_no") == 1:
-			print "I am in too"
 			args = json.dumps({"item_code": args.get('item_code'),"warehouse": args.get('warehouse'),"qty": args.get('qty')})
 			args = process_args(args)
 			serial_no = get_serial_nos_by_fifo(args)
