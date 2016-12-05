@@ -8,7 +8,7 @@ frappe.ready(function() {
 	// update user
 	if(full_name) {
 		$('.navbar li[data-label="User"] a')
-			.html('<i class="icon-fixed-width icon-user"></i> ' + full_name);
+			.html('<i class="fa fa-fixed-width fa fa-user"></i> ' + full_name);
 	}
 
 	// update login

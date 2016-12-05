@@ -733,7 +733,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.update_paid_amount_status(true);
 				me.create_invoice();
 				me.make_payment();
-			}, "octicon octicon-credit-card");
+			}, "octicon octfa fa-credit-card");
 		}else if(this.frm.doc.docstatus == 1) {
 			this.page.set_primary_action(__("Print"), function() {
 				html = frappe.render(me.print_template, me.frm.doc)
@@ -746,7 +746,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.page.set_secondary_action(__("New"), function() {
 			me.save_previous_entry();
 			me.create_new();
-		}, "octicon octicon-plus").addClass("btn-primary");
+		}, "octicon octfa fa-plus").addClass("btn-primary");
 	},
 
 	print_dialog: function(){

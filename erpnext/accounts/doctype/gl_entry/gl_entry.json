@@ -596,7 +596,7 @@
  ], 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
- "icon": "icon-list", 
+ "icon": "fa fa-list", 
  "idx": 1, 
  "in_create": 1, 
  "in_dialog": 0, 

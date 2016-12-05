@@ -60,7 +60,7 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				}, "icon-download", "btn-default"
+				}, "fa fa-download", "btn-default"
 			);
 		}
 	},
