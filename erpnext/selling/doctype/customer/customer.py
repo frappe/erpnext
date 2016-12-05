@@ -24,13 +24,18 @@ class Customer(TransactionBase):
 
 	def load_dashboard_info(self):
 		billing_this_year = frappe.db.sql("""
-			select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-			from `tabGL Entry`
-			where voucher_type='Sales Invoice' and party_type = 'Customer'
-				and party=%s and fiscal_year = %s""",
+			select
+				sum(`tabGL Entry`.debit_in_account_currency / `tabSales Invoice`.conversion_rate) -
+				sum(`tabGL Entry`.credit_in_account_currency / `tabSales Invoice`.conversion_rate)
+			from
+				`tabGL Entry`, `tabSales Invoice`
+			where
+				`tabGL Entry`.voucher_type='Sales Invoice' and `tabGL Entry`.party_type = 'Customer'
+				and `tabGL Entry`.party=%s and `tabGL Entry`.fiscal_year = %s
+				and `tabGL Entry`.against_voucher = `tabSales Invoice`.name""",
 			(self.name, frappe.db.get_default("fiscal_year")))
 
-		total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
+		total_unpaid = frappe.db.sql("""select sum((outstanding_amount / conversion_rate))
 			from `tabSales Invoice`
 			where customer=%s and docstatus = 1""", self.name)
 
@@ -39,7 +44,6 @@ class Customer(TransactionBase):
 		info["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
 
 		self.set_onload('dashboard_info', info)
-
 
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')
