@@ -736,7 +736,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"qty": d.qty,
 					"parenttype": d.parenttype,
 					"parent": d.parent,
-					"pricing_rule": d.pricing_rule
+					"pricing_rule": d.pricing_rule,
+					"warehouse": d.warehouse,
+					"serial_no": d.serial_no
 				});
 
 				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list

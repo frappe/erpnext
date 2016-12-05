@@ -15,7 +15,7 @@ $.extend(cur_frm.cscript, {
 
 		if (!doc.__islocal && (doc.name != sys_defaults.fiscal_year)) {
 			this.frm.add_custom_button(__("Default"),
-				this.frm.cscript.set_as_default, "icon-star");
+				this.frm.cscript.set_as_default, "fa fa-star");
 			this.frm.set_intro(__("To set this Fiscal Year as Default, click on 'Set as Default'"));
 		} else {
 			this.frm.set_intro("");

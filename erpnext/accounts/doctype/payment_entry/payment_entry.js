@@ -156,7 +156,7 @@ frappe.ui.form.on('Payment Entry', {
 					group_by_voucher: 0
 				};
 				frappe.set_route("query-report", "General Ledger");
-			}, "icon-table");
+			}, "fa fa-table");
 		}
 	},
 

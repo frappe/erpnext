@@ -22,7 +22,7 @@ frappe.ready(function() {
 				}
 				else if(r.message.stock==1) {
 					$(".item-stock").html("<div style='color: green'>\
-						<i class='icon-check'></i> Available (in stock)</div>");
+						<i class='fa fa-check'></i> Available (in stock)</div>");
 				}
 
 				if(r.message.qty) {
