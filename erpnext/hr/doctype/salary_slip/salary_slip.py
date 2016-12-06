@@ -10,7 +10,6 @@ from frappe.model.naming import make_autoname
 from frappe import msgprint, _
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.setup.utils import get_company_currency
-from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
@@ -84,6 +83,7 @@ class SalarySlip(TransactionBase):
 			if d.amount_based_on_formula:
 				if d.formula:
 					amount = eval(d.formula, None, data)
+			if amount:
 				data[d.abbr] = amount
 			return amount
 			
@@ -230,10 +230,15 @@ class SalarySlip(TransactionBase):
 			if working_days < 0:
 				frappe.throw(_("There are more holidays than working days this month."))
 
+		actual_lwp = self.calculate_lwp(holidays, working_days)
 		if not lwp:
-			lwp = self.calculate_lwp(holidays, working_days)
+			lwp = actual_lwp
+		elif lwp != actual_lwp:
+			frappe.msgprint(_("Leave Without Pay does not match with approved Leave Application records"))
+			
 		self.total_days_in_month = working_days
 		self.leave_without_pay = lwp
+		
 		payment_days = flt(self.get_payment_days(joining_date, relieving_date)) - flt(lwp)
 		self.payment_days = payment_days > 0 and payment_days or 0
 
@@ -315,7 +320,7 @@ class SalarySlip(TransactionBase):
 	def sum_components(self, component_type, total_field):
 		for d in self.get(component_type):
 			if cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet:
-				d.amount = rounded((flt(d.amount) * flt(self.payment_days)
+				d.amount = rounded((flt(d.default_amount) * flt(self.payment_days)
 					/ cint(self.total_days_in_month)), self.precision("amount", component_type))
 			elif not self.payment_days and not self.salary_slip_based_on_timesheet:
 				d.amount = 0

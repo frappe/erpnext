@@ -55,8 +55,8 @@ class TestSalarySlip(unittest.TestCase):
 		ss = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@salary.com"))
 
-		self.assertEquals(ss.total_days_in_month, 27)
-		self.assertEquals(ss.payment_days, 27)
+		self.assertEquals(ss.total_days_in_month, 28)
+		self.assertEquals(ss.payment_days, 28)
 		self.assertEquals(ss.earnings[0].amount, 5000)
 		self.assertEquals(ss.earnings[0].default_amount, 5000)
 		self.assertEquals(ss.earnings[1].amount, 3000)
@@ -76,23 +76,23 @@ class TestSalarySlip(unittest.TestCase):
 		ss = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@salary.com"))
 
-		self.assertEquals(ss.total_days_in_month, 27)
-		self.assertEquals(ss.payment_days, 27)
+		self.assertEquals(ss.total_days_in_month, 28)
+		self.assertEquals(ss.payment_days, 28)
 
 		# set relieving date in the same month
 		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", "12-12-2016")
 		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "status", "Left")
 		
-		self.assertEquals(ss.total_days_in_month, 27)
-		self.assertEquals(ss.payment_days, 27)
+		self.assertEquals(ss.total_days_in_month, 28)
+		self.assertEquals(ss.payment_days, 28)
 		ss.save()
 		
 		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
 		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "status", "Active")
 		# Holidays included in working days
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 1)	
-		self.assertEquals(ss.total_days_in_month, 27)
-		self.assertEquals(ss.payment_days, 27)
+		self.assertEquals(ss.total_days_in_month, 28)
+		self.assertEquals(ss.payment_days, 28)
 		ss.save()
 				#
 		# frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "date_of_joining", "2001-01-11")
