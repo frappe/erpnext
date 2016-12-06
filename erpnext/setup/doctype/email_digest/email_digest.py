@@ -233,7 +233,7 @@ class EmailDigest(Document):
 			 "new_quotations","pending_quotations","sales_order","purchase_order","pending_sales_orders","pending_purchase_orders",
 			"invoiced_amount", "payables", "bank_balance", "credit_balance"):
 			if self.get(key):
-				cache_key = "email_digest:card:{0}:{1}".format(self.company, key)
+				cache_key = "email_digest:card:{0}:{1}:{2}".format(self.company, self.frequency, key)
 				card = cache.get(cache_key)
 
 				if card:
