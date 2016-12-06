@@ -16,6 +16,9 @@ test_ignore = ["Price List"]
 test_records = frappe.get_test_records('Customer')
 
 class TestCustomer(unittest.TestCase):
+	def tearDown(self):
+		frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', 0.0)
+
 	def test_party_details(self):
 		from erpnext.accounts.party import get_party_details
 
