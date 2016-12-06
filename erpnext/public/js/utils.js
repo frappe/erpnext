@@ -112,9 +112,9 @@ $.extend(erpnext.utils, {
 		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
 			var info = frm.doc.__onload.dashboard_info;
 			frm.dashboard.add_indicator(__('Annual Billing: {0}',
-				[format_currency(info.billing_this_year, frm.doc.default_currency)]), 'blue');
+				[format_currency(info.billing_this_year, info.currency)]), 'blue');
 			frm.dashboard.add_indicator(__('Total Unpaid: {0}',
-				[format_currency(info.total_unpaid, frm.doc.default_currency)]),
+				[format_currency(info.total_unpaid, info.currency)]),
 				info.total_unpaid ? 'orange' : 'green');
 		}
 	},
