@@ -231,10 +231,15 @@ class SalarySlip(TransactionBase):
 			if working_days < 0:
 				frappe.throw(_("There are more holidays than working days this month."))
 
+		actual_lwp = self.calculate_lwp(holidays, working_days)
 		if not lwp:
-			lwp = self.calculate_lwp(holidays, working_days)
+			lwp = actual_lwp
+		elif lwp != actual_lwp:
+			frappe.msgprint(_("Leave Without Pay does not match with approved Leave Application records"))
+			
 		self.total_days_in_month = working_days
 		self.leave_without_pay = lwp
+		
 		payment_days = flt(self.get_payment_days(joining_date, relieving_date)) - flt(lwp)
 		self.payment_days = payment_days > 0 and payment_days or 0
 

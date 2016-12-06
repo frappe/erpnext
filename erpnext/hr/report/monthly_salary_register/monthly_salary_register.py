@@ -48,7 +48,7 @@ def get_columns(salary_slips):
 		from `tabSalary Detail` sd, `tabSalary Component` sc
 		where sc.name=sd.salary_component and sd.amount != 0 and sd.parent in (%s)""" %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1):
-		salary_components[component.type].append(component.salary_component)
+		salary_components[_(component.type)].append(component.salary_component)
 
 	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
 		[ _("Arrear Amount") + ":Currency:120", _("Leave Encashment Amount") + ":Currency:150",
