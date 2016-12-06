@@ -43,6 +43,16 @@ frappe.ui.form.on("Process Payroll", {
 				}
 			})
 		}
+	},
+	account: function(frm) {
+		var account_types = ["Bank", "Cash"];
+		return {
+			filters: {
+				"account_type": ["in", account_types],
+				"is_group": 0,
+				"company": frm.doc.company
+			}
+		}
 	}
 })
 

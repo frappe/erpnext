@@ -12,6 +12,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.utilities.address_and_contact import load_address_and_contact
 from erpnext.accounts.party import validate_party_accounts, get_timeline_data # keep this
 from erpnext.accounts.party_status import get_party_status
+from erpnext import get_default_currency
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -24,7 +25,7 @@ class Customer(TransactionBase):
 
 	def load_dashboard_info(self):
 		billing_this_year = frappe.db.sql("""
-			select sum(debit_in_account_currency) - sum(credit_in_account_currency)
+			select sum(debit_in_account_currency) - sum(credit_in_account_currency), account_currency
 			from `tabGL Entry`
 			where voucher_type='Sales Invoice' and party_type = 'Customer'
 				and party=%s and fiscal_year = %s""",
@@ -36,6 +37,7 @@ class Customer(TransactionBase):
 
 		info = {}
 		info["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
+		info["currency"] = billing_this_year[0][1] if billing_this_year else get_default_currency()
 		info["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
 
 		self.set_onload('dashboard_info', info)

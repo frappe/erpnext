@@ -38,6 +38,7 @@ class LeaveApplication(Document):
 		self.validate_block_days()
 		self.validate_salary_processed_days()
 		self.validate_leave_approver()
+		self.validate_attendance()
 
 	def on_update(self):
 		if (not self.previous_doc and self.leave_approver) or (self.previous_doc and \
@@ -102,7 +103,7 @@ class LeaveApplication(Document):
 			
 		last_processed_pay_slip = frappe.db.sql("""
 			select start_date, end_date from `tabSalary Slip`
-			where docstatus != 2 and employee = %s 
+			where docstatus = 1 and employee = %s
 			and ((%s between start_date and end_date) or (%s between start_date and end_date)) 
 			order by modified desc limit 1
 		""",(self.employee, self.to_date, self.from_date))
@@ -212,6 +213,13 @@ class LeaveApplication(Document):
 		elif self.docstatus==1 and len(leave_approvers) and self.leave_approver != frappe.session.user:
 			frappe.throw(_("Only the selected Leave Approver can submit this Leave Application"),
 				LeaveApproverIdentityError)
+	
+	def validate_attendance(self):
+		attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s and (att_date between %s and %s)
+					and docstatus = 1""",
+			(self.employee, self.from_date, self.to_date))
+		if attendance:
+			frappe.throw(_("Attendance for employee {0} is already marked for this day").format(self.employee))		
 
 	def notify_employee(self, status):
 		employee = frappe.get_doc("Employee", self.employee)

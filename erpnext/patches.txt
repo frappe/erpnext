@@ -353,3 +353,4 @@ erpnext.patches.v7_1.update_missing_salary_component_type
 erpnext.patches.v7_1.rename_quality_inspection_field
 erpnext.patches.v7_0.update_autoname_field
 erpnext.patches.v7_1.update_bom_base_currency
+erpnext.patches.v7_0.update_status_of_po_so

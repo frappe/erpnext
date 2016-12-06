@@ -114,22 +114,15 @@ var calculate_all = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.amount = function(doc,dt,dn){
-	calculate_earning_total(doc, dt, dn);
-	calculate_net_pay(doc, dt, dn);
+	var child = locals[dt][dn];
+	if(!doc.salary_structure){
+		frappe.model.set_value(dt,dn, "default_amount", child.amount)
+	}
+	calculate_all(doc, dt, dn);
 }
 
 cur_frm.cscript.depends_on_lwp = function(doc,dt,dn){
 	calculate_earning_total(doc, dt, dn, true);
-	calculate_net_pay(doc, dt, dn);
-}
-// Trigger on earning modified amount and depends on lwp
-// ------------------------------------------------------------------------
-cur_frm.cscript.amount = function(doc,dt,dn){
-	calculate_ded_total(doc, dt, dn);
-	calculate_net_pay(doc, dt, dn);
-}
-
-cur_frm.cscript.depends_on_lwp = function(doc, dt, dn) {
 	calculate_ded_total(doc, dt, dn, true);
 	calculate_net_pay(doc, dt, dn);
 };

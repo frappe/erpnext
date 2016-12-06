@@ -28,6 +28,7 @@ class Timesheet(Document):
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
+		self.set_dates()
 
 	def set_employee_name(self):
 		if self.employee and not self.employee_name:
@@ -85,9 +86,6 @@ class Timesheet(Document):
 			if start_date and end_date:
 				self.start_date = getdate(start_date)
 				self.end_date = getdate(end_date)
-
-	def before_submit(self):
-		self.set_dates()
 
 	def before_cancel(self):
 		self.set_status()
