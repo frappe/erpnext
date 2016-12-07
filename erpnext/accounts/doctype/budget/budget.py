@@ -14,7 +14,8 @@ class DuplicateBudgetError(frappe.ValidationError): pass
 
 class Budget(Document):
 	def autoname(self):
-		self.name = make_autoname(self.get(frappe.scrub(self.budget_against)) + "/" + self.fiscal_year + "/.###")
+		self.name = make_autoname(self.get(frappe.scrub(self.budget_against)) 
+			+ "/" + self.fiscal_year + "/.###")
 
 	def validate(self):
 		if not self.get(frappe.scrub(self.budget_against)):
@@ -58,48 +59,56 @@ def validate_expense_against_budget(args):
 	if not args.cost_center and not args.project:
 		return
 	for budget_against in [args.project, args.cost_center]:
-		if budget_against:
-			if frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
-				if args.project:
-					budget_against_field = "b.project"
-					condition = "and exists(select name from `tabProject` where name=b.project)"
-					args.update({"budget_against_field":"Project"})
-					args.update({"budget_against":budget_against})
-				
-				elif args.cost_center:
-					cc_lft, cc_rgt = frappe.db.get_value("Cost Center", args.cost_center, ["lft", "rgt"])
-					budget_against_field = "b.cost_center"
-					condition = """and exists(select name from `tabCost Center` 
-						where lft<=%s and rgt>=%s and name=b.cost_center)""" % (cc_lft, cc_rgt)
-					args.update({"budget_against_field":"Cost Center"})
-					args.update({"budget_against":budget_against})
-				budget_records = frappe.db.sql("""
-						select
-							{budget_against_field}, ba.budget_amount, b.monthly_distribution,
-							b.action_if_annual_budget_exceeded, b.action_if_accumulated_monthly_budget_exceeded
-						from 
-							`tabBudget` b, `tabBudget Account` ba
-						where
-							b.name=ba.parent and b.fiscal_year=%s and ba.account=%s and b.docstatus=1
-							{condition}
-					""".format(condition=condition, budget_against_field=budget_against_field),(args.fiscal_year, args.account),
-					 as_dict=True)
-				validate_budget_records(args, budget_records)
+		if budget_against \
+				and frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
+
+			if args.project:
+				condition = "and exists(select name from `tabProject` where name=b.project)"
+				args.budget_against_field = "Project"
+			
+			elif args.cost_center:
+				cc_lft, cc_rgt = frappe.db.get_value("Cost Center", args.cost_center, ["lft", "rgt"])
+				condition = """and exists(select name from `tabCost Center` 
+					where lft<=%s and rgt>=%s and name=b.cost_center)""" % (cc_lft, cc_rgt)
+				args.budget_against_field = "Cost Center"
+			
+			args.budget_against = budget_against
+
+			budget_records = frappe.db.sql("""
+				select
+					b.{budget_against_field}, ba.budget_amount, b.monthly_distribution,
+					b.action_if_annual_budget_exceeded, 
+					b.action_if_accumulated_monthly_budget_exceeded
+				from 
+					`tabBudget` b, `tabBudget Account` ba
+				where
+					b.name=ba.parent and b.fiscal_year=%s 
+					and ba.account=%s and b.docstatus=1
+					{condition}
+			""".format(condition=condition, 
+				budget_against_field=frappe.scrub(args.get("budget_against_field"))),
+				(args.fiscal_year, args.account), as_dict=True)
+
+			validate_budget_records(args, budget_records)
 
 def validate_budget_records(args, budget_records):
 	for budget in budget_records:
 		if budget.budget_amount:
 			yearly_action = budget.action_if_annual_budget_exceeded
 			monthly_action = budget.action_if_accumulated_monthly_budget_exceeded
+
 			if monthly_action in ["Stop", "Warn"]:
 				budget_amount = get_accumulated_monthly_budget(budget.monthly_distribution,
 					args.posting_date, args.fiscal_year, budget.budget_amount)
 				args["month_end_date"] = get_last_day(args.posting_date)
-				compare_expense_with_budget(args, budget_amount, _("Accumulated Monthly"), monthly_action)
+
+				compare_expense_with_budget(args, budget_amount, 
+					_("Accumulated Monthly"), monthly_action)
 
 			if yearly_action in ("Stop", "Warn") and monthly_action != "Stop" \
 				and yearly_action != monthly_action:
-				compare_expense_with_budget(args, flt(budget.budget_amount), _("Annual"), yearly_action)
+				compare_expense_with_budget(args, flt(budget.budget_amount), 
+						_("Annual"), yearly_action)
 
 
 def compare_expense_with_budget(args, budget_amount, action_for, action):
@@ -108,9 +117,11 @@ def compare_expense_with_budget(args, budget_amount, action_for, action):
 		diff = actual_expense - budget_amount
 		currency = frappe.db.get_value('Company', args.company, 'default_currency')
 
-		msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It will exceed by {5}").format(_(action_for),
-			frappe.bold(args.account), args.budget_against_field, frappe.bold(args.budget_against),
-			frappe.bold(fmt_money(budget_amount, currency=currency)), frappe.bold(fmt_money(diff, currency=currency)))
+		msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It will exceed by {5}").format(
+				_(action_for), frappe.bold(args.account), args.budget_against_field, 
+				frappe.bold(args.budget_against), 
+				frappe.bold(fmt_money(budget_amount, currency=currency)), 
+				frappe.bold(fmt_money(diff, currency=currency)))
 
 		if action=="Stop":
 			frappe.throw(msg, BudgetError)
@@ -119,24 +130,27 @@ def compare_expense_with_budget(args, budget_amount, action_for, action):
 
 
 def get_actual_expense(args):
-	condition1 = " and gle.posting_date <= %(month_end_date)s" if args.get("month_end_date") else ""
+	condition1 = " and gle.posting_date <= %(month_end_date)s" \
+		if args.get("month_end_date") else ""
 	if args.budget_against_field == "Cost Center":
-		lft_rgt = frappe.db.get_value(args.budget_against_field, args.budget_against, ["lft", "rgt"], as_dict=1)
+		lft_rgt = frappe.db.get_value(args.budget_against_field, 
+			args.budget_against, ["lft", "rgt"], as_dict=1)
 		args.update(lft_rgt)
 		condition2 = """and exists(select name from `tabCost Center` 
-						where lft>=%(lft)s and rgt<=%(rgt)s and name=gle.cost_center)"""
+			where lft>=%(lft)s and rgt<=%(rgt)s and name=gle.cost_center)"""
 	
 	elif args.budget_against_field == "Project":
 		condition2 = "and exists(select name from `tabProject` where name=gle.project)"
+
 	return flt(frappe.db.sql("""
 		select sum(gle.debit) - sum(gle.credit)
 		from `tabGL Entry` gle
 		where gle.account=%(account)s
-			{condition2}
+			{condition1}
 			and gle.fiscal_year=%(fiscal_year)s
 			and gle.company=%(company)s
 			and gle.docstatus=1
-			{condition1}
+			{condition2}
 	""".format(condition1=condition1, condition2=condition2), (args))[0][0])
 
 
