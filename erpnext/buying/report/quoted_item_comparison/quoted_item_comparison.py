@@ -39,7 +39,10 @@ def get_quote_list(item, qty_list):
 		#Add a row for each supplier
 		for root in set(suppliers):
 			supplier_currency = frappe.db.get_value("Supplier",root,"default_currency")
-			exg = get_exchange_rate(supplier_currency,company_currency)
+			if supplier_currency:
+				exg = get_exchange_rate(supplier_currency,company_currency)
+			else:
+				exg = 1
 
 			row = frappe._dict({
 				"supplier_name": root
