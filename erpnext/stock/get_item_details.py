@@ -43,7 +43,7 @@ def get_item_details(args):
 	get_party_item_code(args, item_doc, out)
 
 	if out.get("warehouse"):
-		out.update(get_bin_details_and_serial_nos(args.item_code, out.warehouse, args.qty, args.serial_no))	
+		out.update(get_bin_details(args.item_code, out.warehouse))	
 
 	if frappe.db.exists("Product Bundle", args.item_code):
 		valuation_rate = 0.0
