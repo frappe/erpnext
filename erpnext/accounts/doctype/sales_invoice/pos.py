@@ -296,4 +296,3 @@ def save_invoice(e, si_doc, name):
 		si_doc.docstatus = 0
 		si_doc.flags.ignore_mandatory = True
 		si_doc.insert()
-		frappe.log_error(frappe.get_traceback())
