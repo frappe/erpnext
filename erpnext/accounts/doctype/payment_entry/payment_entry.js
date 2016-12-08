@@ -327,6 +327,7 @@ frappe.ui.form.on('Payment Entry', {
 		frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
+				posting_date: frm.doc.posting_date,
 				from_currency: from_currency,
 				to_currency: to_currency
 			},
@@ -425,6 +426,7 @@ frappe.ui.form.on('Payment Entry', {
 			method: 'erpnext.accounts.doctype.payment_entry.payment_entry.get_outstanding_reference_documents',
 			args: {
 				args: {
+					"posting_date": frm.doc.posting_date,
 					"company": frm.doc.company,
 					"party_type": frm.doc.party_type,
 					"payment_type": frm.doc.payment_type,

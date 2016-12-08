@@ -152,11 +152,11 @@ class PaymentEntry(AccountsController):
 			elif self.payment_type in ("Pay", "Internal Transfer"):
 				self.source_exchange_rate = get_average_exchange_rate(self.paid_from)
 			else:
-				self.source_exchange_rate = get_exchange_rate(self.paid_from_account_currency, 
+				self.source_exchange_rate = get_exchange_rate(self.posting_date, self.paid_from_account_currency, 
 					self.company_currency)
 		
 		if self.paid_to and not self.target_exchange_rate:
-			self.target_exchange_rate = get_exchange_rate(self.paid_to_account_currency, 
+			self.target_exchange_rate = get_exchange_rate(self.posting_date, self.paid_to_account_currency, 
 				self.company_currency)
 				
 	def validate_mandatory(self):
@@ -482,12 +482,12 @@ def get_outstanding_reference_documents(args):
 				d["exchange_rate"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "conversion_rate")
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
-	orders_to_be_billed =  get_orders_to_be_billed(args.get("party_type"), args.get("party"), 
+	orders_to_be_billed =  get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"), args.get("party"), 
 		party_account_currency, company_currency)
 	
 	return negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 	
-def get_orders_to_be_billed(party_type, party, party_account_currency, company_currency):
+def get_orders_to_be_billed(posting_date, party_type, party, party_account_currency, company_currency):
 	voucher_type = 'Sales Order' if party_type == "Customer" else 'Purchase Order'
 
 	ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
@@ -517,7 +517,8 @@ def get_orders_to_be_billed(party_type, party, party_account_currency, company_c
 	order_list = []
 	for d in orders:
 		d["voucher_type"] = voucher_type
-		d["exchange_rate"] = get_exchange_rate(party_account_currency, company_currency)
+        # This assumes that the exchange rate required is the one in the SO
+		d["exchange_rate"] = get_exchange_rate(posting_date,party_account_currency, company_currency)
 		order_list.append(d)
 
 	return order_list
@@ -592,14 +593,16 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = 1
 		else:
 			total_amount = ref_doc.grand_total
+            # Get the exchange rate from the original ref doc or get it based on the posting date of the ref doc
 			exchange_rate = ref_doc.get("conversion_rate") or \
-				get_exchange_rate(party_account_currency, ref_doc.company_currency)
+				get_exchange_rate(ref_doc.posting_date, party_account_currency, ref_doc.company_currency)
 		
 		outstanding_amount = ref_doc.get("outstanding_amount") \
 			if reference_doctype in ("Sales Invoice", "Purchase Invoice") \
 			else flt(total_amount) - flt(ref_doc.advance_paid)			
 	else:
-		exchange_rate = get_exchange_rate(party_account_currency, ref_doc.company_currency)
+        # Get the exchange rate based on the posting date of the ref doc
+		exchange_rate = get_exchange_rate(ref_doc.posting_date, party_account_currency, ref_doc.company_currency)
 		
 	return frappe._dict({
 		"due_date": ref_doc.get("due_date"),

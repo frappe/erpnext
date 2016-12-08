@@ -205,7 +205,7 @@ def make_quotation(source_name, target_doc=None):
 		if company_currency == quotation.currency:
 			exchange_rate = 1
 		else:
-			exchange_rate = get_exchange_rate(quotation.currency, company_currency)
+			exchange_rate = get_exchange_rate(quotation.transaction_date, quotation.currency, company_currency)
 
 		quotation.conversion_rate = exchange_rate
 

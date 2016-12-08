@@ -127,6 +127,11 @@ class AccountsController(TransactionBase):
 			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
 
 	def set_price_list_currency(self, buying_or_selling):
+		if self.meta.get_field("posting_date"):
+			translation_date = self.posting_date
+		else:
+			translation_date = self.transaction_date
+		 
 		if self.meta.get_field("currency"):
 			# price list part
 			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
@@ -139,7 +144,7 @@ class AccountsController(TransactionBase):
 					self.plc_conversion_rate = 1.0
 
 				elif not self.plc_conversion_rate:
-					self.plc_conversion_rate = get_exchange_rate(
+					self.plc_conversion_rate = get_exchange_rate(translation_date, 
 						self.price_list_currency, self.company_currency)
 
 			# currency
@@ -149,7 +154,7 @@ class AccountsController(TransactionBase):
 			elif self.currency == self.company_currency:
 				self.conversion_rate = 1.0
 			elif not self.conversion_rate:
-				self.conversion_rate = get_exchange_rate(self.currency,
+				self.conversion_rate = get_exchange_rate(translation_date, self.currency,
 					self.company_currency)
 
 	def set_missing_item_details(self, for_validate=False):
@@ -602,128 +607,127 @@ class AccountsController(TransactionBase):
 		for item in duplicate_list:
 			self.remove(item)
 
-
 @frappe.whitelist()
 def get_tax_rate(account_head):
-	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
+    return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 @frappe.whitelist()
 def get_default_taxes_and_charges(master_doctype):
-	default_tax = frappe.db.get_value(master_doctype, {"is_default": 1})
-	return get_taxes_and_charges(master_doctype, default_tax)
+    default_tax = frappe.db.get_value(master_doctype, {"is_default": 1})
+    return get_taxes_and_charges(master_doctype, default_tax)
 
 @frappe.whitelist()
 def get_taxes_and_charges(master_doctype, master_name):
-	if not master_name:
-		return
-	from frappe.model import default_fields
-	tax_master = frappe.get_doc(master_doctype, master_name)
+    if not master_name:
+        return
+    from frappe.model import default_fields
+    tax_master = frappe.get_doc(master_doctype, master_name)
 
-	taxes_and_charges = []
-	for i, tax in enumerate(tax_master.get("taxes")):
-		tax = tax.as_dict()
+    taxes_and_charges = []
+    for i, tax in enumerate(tax_master.get("taxes")):
+        tax = tax.as_dict()
 
-		for fieldname in default_fields:
-			if fieldname in tax:
-				del tax[fieldname]
+        for fieldname in default_fields:
+            if fieldname in tax:
+                del tax[fieldname]
 
-		taxes_and_charges.append(tax)
+        taxes_and_charges.append(tax)
 
-	return taxes_and_charges
+    return taxes_and_charges
 
 def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
-	"""common validation for currency and price list currency"""
+    """common validation for currency and price list currency"""
 
-	company_currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
+    company_currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
 
-	if not conversion_rate:
-		throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(
-			conversion_rate_label, currency, company_currency))
+    if not conversion_rate:
+        throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(
+            conversion_rate_label, currency, company_currency))
 
 def validate_taxes_and_charges(tax):
-	if tax.charge_type in ['Actual', 'On Net Total'] and tax.row_id:
-		frappe.throw(_("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"))
-	elif tax.charge_type in ['On Previous Row Amount', 'On Previous Row Total']:
-		if cint(tax.idx) == 1:
-			frappe.throw(_("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"))
-		elif not tax.row_id:
-			frappe.throw(_("Please specify a valid Row ID for row {0} in table {1}".format(tax.idx, _(tax.doctype))))
-		elif tax.row_id and cint(tax.row_id) >= cint(tax.idx):
-			frappe.throw(_("Cannot refer row number greater than or equal to current row number for this Charge type"))
+    if tax.charge_type in ['Actual', 'On Net Total'] and tax.row_id:
+        frappe.throw(_("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"))
+    elif tax.charge_type in ['On Previous Row Amount', 'On Previous Row Total']:
+        if cint(tax.idx) == 1:
+            frappe.throw(_("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"))
+        elif not tax.row_id:
+            frappe.throw(_("Please specify a valid Row ID for row {0} in table {1}".format(tax.idx, _(tax.doctype))))
+        elif tax.row_id and cint(tax.row_id) >= cint(tax.idx):
+            frappe.throw(_("Cannot refer row number greater than or equal to current row number for this Charge type"))
 
-	if tax.charge_type == "Actual":
-		tax.rate = None
+    if tax.charge_type == "Actual":
+        tax.rate = None
 
 def validate_inclusive_tax(tax, doc):
-	def _on_previous_row_error(row_range):
-		throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx,
-			row_range))
+    def _on_previous_row_error(row_range):
+        throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx,
+            row_range))
 
-	if cint(getattr(tax, "included_in_print_rate", None)):
-		if tax.charge_type == "Actual":
-			# inclusive tax cannot be of type Actual
-			throw(_("Charge of type 'Actual' in row {0} cannot be included in Item Rate").format(tax.idx))
-		elif tax.charge_type == "On Previous Row Amount" and \
-				not cint(doc.get("taxes")[cint(tax.row_id) - 1].included_in_print_rate):
-			# referred row should also be inclusive
-			_on_previous_row_error(tax.row_id)
-		elif tax.charge_type == "On Previous Row Total" and \
-				not all([cint(t.included_in_print_rate) for t in doc.get("taxes")[:cint(tax.row_id) - 1]]):
-			# all rows about the reffered tax should be inclusive
-			_on_previous_row_error("1 - %d" % (tax.row_id,))
-		elif tax.get("category") == "Valuation":
-			frappe.throw(_("Valuation type charges can not marked as Inclusive"))
+    if cint(getattr(tax, "included_in_print_rate", None)):
+        if tax.charge_type == "Actual":
+            # inclusive tax cannot be of type Actual
+            throw(_("Charge of type 'Actual' in row {0} cannot be included in Item Rate").format(tax.idx))
+        elif tax.charge_type == "On Previous Row Amount" and \
+                not cint(doc.get("taxes")[cint(tax.row_id) - 1].included_in_print_rate):
+            # referred row should also be inclusive
+            _on_previous_row_error(tax.row_id)
+        elif tax.charge_type == "On Previous Row Total" and \
+                not all([cint(t.included_in_print_rate) for t in doc.get("taxes")[:cint(tax.row_id) - 1]]):
+            # all rows about the reffered tax should be inclusive
+            _on_previous_row_error("1 - %d" % (tax.row_id,))
+        elif tax.get("category") == "Valuation":
+            frappe.throw(_("Valuation type charges can not marked as Inclusive"))
 
 def set_balance_in_account_currency(gl_dict, account_currency=None, conversion_rate=None, company_currency=None):
-	if (not conversion_rate) and (account_currency!=company_currency):
-			frappe.throw(_("Account: {0} with currency: {1} can not be selected")
-				.format(gl_dict.account, account_currency))
+    if (not conversion_rate) and (account_currency!=company_currency):
+            frappe.throw(_("Account: {0} with currency: {1} can not be selected")
+                .format(gl_dict.account, account_currency))
 
-	gl_dict["account_currency"] = company_currency if account_currency==company_currency \
-		else account_currency
+    gl_dict["account_currency"] = company_currency if account_currency==company_currency \
+        else account_currency
 
-	# set debit/credit in account currency if not provided
-	if flt(gl_dict.debit) and not flt(gl_dict.debit_in_account_currency):
-		gl_dict.debit_in_account_currency = gl_dict.debit if account_currency==company_currency \
-			else flt(gl_dict.debit / conversion_rate, 2)
+    # set debit/credit in account currency if not provided
+    if flt(gl_dict.debit) and not flt(gl_dict.debit_in_account_currency):
+        gl_dict.debit_in_account_currency = gl_dict.debit if account_currency==company_currency \
+            else flt(gl_dict.debit / conversion_rate, 2)
 
-	if flt(gl_dict.credit) and not flt(gl_dict.credit_in_account_currency):
-		gl_dict.credit_in_account_currency = gl_dict.credit if account_currency==company_currency \
-			else flt(gl_dict.credit / conversion_rate, 2)
+    if flt(gl_dict.credit) and not flt(gl_dict.credit_in_account_currency):
+        gl_dict.credit_in_account_currency = gl_dict.credit if account_currency==company_currency \
+            else flt(gl_dict.credit / conversion_rate, 2)
 
 
 def get_advance_journal_entries(party_type, party, party_account, amount_field,
-		order_doctype, order_list, include_unallocated=True):
+        order_doctype, order_list, include_unallocated=True):
 
-	dr_or_cr = "credit_in_account_currency" if party_type=="Customer" else "debit_in_account_currency"
+    dr_or_cr = "credit_in_account_currency" if party_type=="Customer" else "debit_in_account_currency"
 
-	conditions = []
-	if include_unallocated:
-		conditions.append("ifnull(t2.reference_name, '')=''")
+    conditions = []
+    if include_unallocated:
+        conditions.append("ifnull(t2.reference_name, '')=''")
 
-	if order_list:
-		order_condition = ', '.join(['%s'] * len(order_list))
-		conditions.append(" (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))"\
-			.format(order_doctype, order_condition))
+    if order_list:
+        order_condition = ', '.join(['%s'] * len(order_list))
+        conditions.append(" (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))"\
+            .format(order_doctype, order_condition))
 
-	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
-	
-	journal_entries = frappe.db.sql("""
-		select
-			"Journal Entry" as reference_type, t1.name as reference_name,
-			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
-			t2.reference_name as against_order
-		from
-			`tabJournal Entry` t1, `tabJournal Entry Account` t2
-		where
-			t1.name = t2.parent and t2.account = %s
-			and t2.party_type = %s and t2.party = %s
-			and t2.is_advance = 'Yes' and t1.docstatus = 1
-			and {1} > 0 {2}
-		order by t1.posting_date""".format(amount_field, dr_or_cr, reference_condition),
-		[party_account, party_type, party] + order_list, as_dict=1)
+    reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
+    
+    journal_entries = frappe.db.sql("""
+        select
+            "Journal Entry" as reference_type, t1.name as reference_name,
+            t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
+            t2.reference_name as against_order
+        from
+            `tabJournal Entry` t1, `tabJournal Entry Account` t2
+        where
+            t1.name = t2.parent and t2.account = %s
+            and t2.party_type = %s and t2.party = %s
+            and t2.is_advance = 'Yes' and t1.docstatus = 1
+            and {1} > 0 {2}
+        order by t1.posting_date""".format(amount_field, dr_or_cr, reference_condition),
+        [party_account, party_type, party] + order_list, as_dict=1)
 
-	return list(journal_entries)
+    return list(journal_entries)
 
 def get_advance_payment_entries(party_type, party, party_account,
 		order_doctype, order_list=None, include_unallocated=True, against_all_orders=False):
