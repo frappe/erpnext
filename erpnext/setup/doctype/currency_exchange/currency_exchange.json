@@ -79,12 +79,8 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
-<<<<<<< HEAD
    "in_list_view": 1, 
    "in_standard_filter": 1, 
-=======
-   "in_list_view": 0, 
->>>>>>> 4a0c8400762adb857c8e929d3af56ba83d8c3f76
    "label": "To Currency", 
    "length": 0, 
    "no_copy": 0, 
@@ -142,11 +138,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
-<<<<<<< HEAD
- "modified": "2016-11-07 05:28:09.772560", 
-=======
- "modified": "2016-09-05 22:47:38.746711", 
->>>>>>> 4a0c8400762adb857c8e929d3af56ba83d8c3f76
+ "modified": "2016-11-08 05:28:09.772560", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Currency Exchange", 

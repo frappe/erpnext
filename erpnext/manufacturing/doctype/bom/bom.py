@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, cstr, flt
+from frappe.utils import cint, cstr, flt, nowdate
 from frappe import _
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.document import Document
@@ -229,7 +229,7 @@ class BOM(Document):
 			frappe.throw(_("Currency of the price list {0} is not similar with the selected currency {1}").format(self.buying_price_list, self.currency))
 
 	def set_conversion_rate(self):
-		self.conversion_rate = get_exchange_rate(self.currency, self.company_currency())
+		self.conversion_rate = get_exchange_rate(nowdate(), self.currency, self.company_currency())
 
 	def validate_materials(self):
 		""" Validate raw material entries """

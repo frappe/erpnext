@@ -65,22 +65,22 @@ def before_tests():
 	frappe.db.commit()
 
 @frappe.whitelist()
-def get_exchange_rate(translation_date, from_currency, to_currency):
-	if not (translation_date and from_currency and to_currency):
+def get_exchange_rate(transaction_date, from_currency, to_currency):
+	if not (transaction_date and from_currency and to_currency):
 		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
 		return
 	
 	if from_currency == to_currency:
 		return 1
 	
-	# cksgb 19/09/2016: get all entries in Currency Exchange with from_currency and to_currency. Order by date desc. Top one is the required exchange rate
+	# cksgb 19/09/2016: get last entry in Currency Exchange with from_currency and to_currency.
 	entries = frappe.get_all("Currency Exchange", fields = ["exchange_rate"], 
 		filters=[
-			["date", "<=", get_datetime_str(translation_date)], 
+			["date", "<=", get_datetime_str(transaction_date)], 
 			["from_currency", "=", from_currency], 
 			["to_currency", "=", to_currency]
 		], order_by="date desc", limit=1)
-		
+	
 	if entries:
 		return flt(entries[0].exchange_rate)
 
@@ -102,5 +102,5 @@ def get_exchange_rate(translation_date, from_currency, to_currency):
 
 		return flt(value)
 	except:
-		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}").format(from_currency, to_currency, translation_date))
+		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}").format(from_currency, to_currency, transaction_date))
 		return 0.0
