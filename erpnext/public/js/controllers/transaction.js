@@ -413,6 +413,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	transaction_date: function() {
 		if (this.frm.doc.transaction_date) {
 			this.frm.transaction_date = this.frm.doc.transaction_date;
+			frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
 		}
 	},
 
@@ -434,9 +435,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					callback: function(r, rt) {
 						if(r.message) {
 							me.frm.set_value("due_date", r.message);
+							frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
 						}
 					}
 				})
+			} else {
+				frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
 			}
 		}
 	},
