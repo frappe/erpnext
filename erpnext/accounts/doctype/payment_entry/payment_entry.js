@@ -327,7 +327,7 @@ frappe.ui.form.on('Payment Entry', {
 		frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
-				posting_date: frm.doc.posting_date,
+				transaction_date: frm.doc.posting_date,
 				from_currency: from_currency,
 				to_currency: to_currency
 			},
@@ -335,6 +335,10 @@ frappe.ui.form.on('Payment Entry', {
 				frm.set_value(exchange_rate_field, r.message);
 			}
 		})
+	},
+	
+	posting_date: function(frm) {
+		frm.events.paid_from_account_currency(frm);
 	},
 
 	source_exchange_rate: function(frm) {
