@@ -18,9 +18,9 @@ def update_po_per_received_per_billed():
 			`tabPurchase Order`.per_received = round((select sum(if(qty > ifnull(received_qty, 0),
 					ifnull(received_qty, 0), qty)) / sum(qty) *100 from `tabPurchase Order Item`
 					where parent = `tabPurchase Order`.name), 2),
-			`tabPurchase Order`.per_billed = round((select sum( if(amount > ifnull(billed_amt, 0),
+			`tabPurchase Order`.per_billed = ifnull(round((select sum( if(amount > ifnull(billed_amt, 0),
 					ifnull(billed_amt, 0), amount)) / sum(amount) *100 from `tabPurchase Order Item`
-					where parent = `tabPurchase Order`.name), 2)""")
+					where parent = `tabPurchase Order`.name), 2), 0)""")
 
 def update_so_per_delivered_per_billed():
 	frappe.db.sql(""" 
@@ -30,9 +30,9 @@ def update_so_per_delivered_per_billed():
 			`tabSales Order`.per_delivered = round((select sum( if(qty > ifnull(delivered_qty, 0),
 					ifnull(delivered_qty, 0), qty)) / sum(qty) *100 from `tabSales Order Item` 
 					where parent = `tabSales Order`.name), 2), 
-			`tabSales Order`.per_billed = round((select sum( if(amount > ifnull(billed_amt, 0),
+			`tabSales Order`.per_billed = ifnull(round((select sum( if(amount > ifnull(billed_amt, 0),
 					ifnull(billed_amt, 0), amount)) / sum(amount) *100 from `tabSales Order Item`
-					where parent = `tabSales Order`.name), 2)""")
+					where parent = `tabSales Order`.name), 2), 0)""")
 
 def update_status():
 	frappe.db.sql("""
