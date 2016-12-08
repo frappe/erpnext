@@ -1,7 +1,7 @@
 import frappe
 
 def execute():
-	frappe.reload_doc("account", "doctype", "budget")
+	frappe.reload_doc("accounts", "doctype", "budget")
 	frappe.db.sql("""
 		update
 			`tabBudget`
