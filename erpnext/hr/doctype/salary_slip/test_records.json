@@ -40,6 +40,6 @@
   "fiscal_year": "_Test Fiscal Year 2013", 
   "month": "01", 
   "payment_days": 31, 
-  "total_days_in_month": 31
+  "total_working_days": 31
  }
 ]
