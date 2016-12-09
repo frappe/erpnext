@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+
+docs_version = "7.x.x"
+
 source_link = "https://github.com/frappe/erpnext"
 docs_base_url = "https://frappe.github.io/erpnext"
 headline = "ERPNext Documentation"
@@ -15,8 +19,8 @@ ERPNext is Open Source under the GNU General Public Licence v3 and has been
 listed as one of the Best Open Source Softwares in the world by many online
 blogs."""
 
-docs_version = "7.x.x"
 splash_light_background = True
+google_analytics_id = 'UA-8911157-22'
 
 def get_context(context):
 	context.brand_html = ('<img class="brand-logo" src="'+context.docs_base_url
