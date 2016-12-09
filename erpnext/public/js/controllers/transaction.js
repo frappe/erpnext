@@ -413,6 +413,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	transaction_date: function() {
 		if (this.frm.doc.transaction_date) {
 			this.frm.transaction_date = this.frm.doc.transaction_date;
+			frappe.ui.form.trigger(this.frm.doc.doctype, "currency");
 		}
 	},
 
@@ -434,9 +435,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					callback: function(r, rt) {
 						if(r.message) {
 							me.frm.set_value("due_date", r.message);
+							frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
 						}
 					}
 				})
+			} else {
+				frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
 			}
 		}
 	},
@@ -450,6 +454,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	currency: function() {
+		/* manqala 19/09/2016: let the translation date be whichever of the transaction_date or posting_date is available */
+		var transaction_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
+		/* end manqala */
+		
 		var me = this;
 		this.set_dynamic_labels();
 
@@ -457,7 +465,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
 				&& !this.frm.doc.ignore_pricing_rule) {
-			this.get_exchange_rate(this.frm.doc.currency, company_currency,
+			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("conversion_rate", exchange_rate);
 				});
@@ -485,10 +493,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	get_exchange_rate: function(from_currency, to_currency, callback) {
+	get_exchange_rate: function(transaction_date, from_currency, to_currency, callback) {
 		return frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
+				transaction_date: transaction_date,
 				from_currency: from_currency,
 				to_currency: to_currency
 			},
@@ -505,7 +514,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var company_currency = this.get_company_currency();
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.price_list_currency !== company_currency  && !this.frm.doc.ignore_pricing_rule) {
-			this.get_exchange_rate(this.frm.doc.price_list_currency, company_currency,
+			this.get_exchange_rate(this.frm.doc.posting_date, this.frm.doc.price_list_currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("plc_conversion_rate", exchange_rate);
 				});

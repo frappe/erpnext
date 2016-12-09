@@ -8,6 +8,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.utils import comma_and
 from frappe.model.document import Document
+from frappe.utils import get_datetime, get_datetime_str, now_datetime
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
 
@@ -38,11 +39,18 @@ class ShoppingCartSettings(Document):
 		expected_to_exist = [currency + "-" + company_currency
 			for currency in price_list_currency_map.values()
 			if currency != company_currency]
+		
+		# manqala 20/09/2016: set up selection parameters for query from tabCurrency Exchange	
+		from_currency = [currency for currency in price_list_currency_map.values() if currency != company_currency]
+		to_currency = company_currency
+		# manqala end
 
 		if expected_to_exist:
-			exists = frappe.db.sql_list("""select name from `tabCurrency Exchange`
-				where name in (%s)""" % (", ".join(["%s"]*len(expected_to_exist)),),
-				tuple(expected_to_exist))
+			# manqala 20/09/2016: modify query so that it uses date in the selection from Currency Exchange.
+			# exchange rates defined with date less than the date on which this document is being saved will be selected
+			exists = frappe.db.sql_list("""select CONCAT(from_currency,'-',to_currency) from `tabCurrency Exchange`
+				where from_currency in (%s) and to_currency = "%s" and date <= curdate()""" % (", ".join(["%s"]*len(from_currency)), to_currency), tuple(from_currency))
+			# manqala end
 
 			missing = list(set(expected_to_exist).difference(exists))
 

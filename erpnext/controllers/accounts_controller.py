@@ -127,6 +127,11 @@ class AccountsController(TransactionBase):
 			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
 
 	def set_price_list_currency(self, buying_or_selling):
+		if self.meta.get_field("posting_date"):
+			transaction_date = self.posting_date
+		else:
+			transaction_date = self.transaction_date
+		 
 		if self.meta.get_field("currency"):
 			# price list part
 			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
@@ -139,8 +144,8 @@ class AccountsController(TransactionBase):
 					self.plc_conversion_rate = 1.0
 
 				elif not self.plc_conversion_rate:
-					self.plc_conversion_rate = get_exchange_rate(
-						self.price_list_currency, self.company_currency)
+					self.plc_conversion_rate = get_exchange_rate(self.price_list_currency, 
+						self.company_currency, transaction_date)
 
 			# currency
 			if not self.currency:
@@ -150,7 +155,7 @@ class AccountsController(TransactionBase):
 				self.conversion_rate = 1.0
 			elif not self.conversion_rate:
 				self.conversion_rate = get_exchange_rate(self.currency,
-					self.company_currency)
+					self.company_currency, transaction_date)
 
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
@@ -601,7 +606,6 @@ class AccountsController(TransactionBase):
 
 		for item in duplicate_list:
 			self.remove(item)
-
 
 @frappe.whitelist()
 def get_tax_rate(account_head):

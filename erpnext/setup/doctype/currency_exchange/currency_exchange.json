@@ -17,6 +17,33 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fieldname": "date", 
+   "fieldtype": "Date", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 0, 
+   "in_list_view": 1, 
+   "label": "Date", 
+   "length": 0, 
+   "no_copy": 0, 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 0, 
+   "print_hide_if_no_value": 0, 
+   "read_only": 0, 
+   "report_hide": 0, 
+   "reqd": 1, 
+   "search_index": 0, 
+   "set_only_once": 0, 
+   "unique": 0, 
+   "width": "5"
+  }, 
+  {
+   "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
+   "columns": 0, 
    "fieldname": "from_currency", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -38,7 +65,8 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 0
+   "unique": 0, 
+   "width": "3"
   }, 
   {
    "allow_on_submit": 0, 
@@ -66,7 +94,8 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 0
+   "unique": 0, 
+   "width": "3"
   }, 
   {
    "allow_on_submit": 0, 
@@ -94,7 +123,8 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 0
+   "unique": 0, 
+   "width": "3"
   }
  ], 
  "hide_heading": 0, 
@@ -108,7 +138,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-11-07 05:28:09.772560", 
+ "modified": "2016-11-08 05:28:09.772560", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Currency Exchange", 
@@ -202,5 +232,8 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "sort_field": "name", 
+ "sort_order": "DESC", 
+ "title_field": "", 
  "track_seen": 0
 }
