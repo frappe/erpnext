@@ -42,9 +42,6 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 		if to_date == get_first_day(to_date):
 			# if to_date is the first day, get the last day of previous month
 			to_date = add_days(to_date, -1)
-		else:
-			# to_date should be the last day of the new to_date's month
-			to_date = get_last_day(to_date)
 
 		if to_date <= year_end_date:
 			# the normal case

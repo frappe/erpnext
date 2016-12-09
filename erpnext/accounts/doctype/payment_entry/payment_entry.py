@@ -639,7 +639,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	if party_amount:
 		grand_total = outstanding_amount = party_amount
 	elif dt in ("Sales Invoice", "Purchase Invoice"):
-		grand_total = doc.grand_total
+		grand_total = doc.base_grand_total if party_account_currency == doc.company_currency else doc.grand_total
 		outstanding_amount = doc.outstanding_amount
 	else:
 		total_field = "base_grand_total" if party_account_currency == doc.company_currency else "grand_total"
