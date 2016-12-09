@@ -33,12 +33,11 @@ class QualityInspection(Document):
 				
 	def on_cancel(self):
 		if self.reference_type and self.reference_name:
-			frappe.db.sql("""update `tab{doctype} Item` t1, `tab{doctype}` t2
-				set t1.quality_inspection = null, t2.modified = %s
-				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name"""
-				.format(doctype=self.reference_type),
-				(self.modified, self.reference_name, self.item_code))
-
+			frappe.db.sql("""update `tab{doctype} Item` 
+				set quality_inspection = null, modified=%s 
+				where quality_inspection = %s"""
+				.format(doctype=self.reference_type), (self.modified, self.name))
+				
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("from"):
 		from frappe.desk.reportview import get_match_cond
