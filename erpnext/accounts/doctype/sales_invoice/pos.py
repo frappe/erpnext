@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe import _
 from frappe.utils import nowdate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.get_item_details import get_pos_profile
@@ -63,8 +62,10 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 
 	doc.currency = pos_profile.get('currency') or company_data.default_currency
 	doc.conversion_rate = 1.0
+	
 	if doc.currency != company_data.default_currency:
-		doc.conversion_rate = get_exchange_rate(doc.posting_date, doc.currency, company_data.default_currency)
+		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency, doc.posting_date)
+		
 	doc.selling_price_list = pos_profile.get('selling_price_list') or \
 		frappe.db.get_value('Selling Settings', None, 'selling_price_list')
 	doc.naming_series = pos_profile.get('naming_series') or 'SINV-'

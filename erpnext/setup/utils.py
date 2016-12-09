@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
 from frappe.utils import flt
-from frappe.utils import get_datetime, get_datetime_str
+from frappe.utils import get_datetime_str, nowdate
 	
 def get_company_currency(company):
 	currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
@@ -65,8 +65,10 @@ def before_tests():
 	frappe.db.commit()
 
 @frappe.whitelist()
-def get_exchange_rate(transaction_date, from_currency, to_currency):
-	if not (transaction_date and from_currency and to_currency):
+def get_exchange_rate(from_currency, to_currency, transaction_date=None):
+	if not transaction_date:
+		transaction_date = nowdate()
+	if not (from_currency and to_currency):
 		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
 		return
 	

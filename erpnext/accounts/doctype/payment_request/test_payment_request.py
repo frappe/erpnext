@@ -9,8 +9,6 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.setup.utils import get_exchange_rate
-from frappe.utils import nowdate
-# test_records = frappe.get_test_records('Payment Request')
 
 test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
 
@@ -53,7 +51,7 @@ class TestPaymentRequest(unittest.TestCase):
 		self.assertEquals(pr.reference_name, so_inr.name)
 		self.assertEquals(pr.currency, "INR")
 
-		conversion_rate = get_exchange_rate(nowdate(), "USD", "INR")
+		conversion_rate = get_exchange_rate("USD", "INR")
 
 		si_usd = create_sales_invoice(currency="USD", conversion_rate=conversion_rate)
 		pr = make_payment_request(dt="Sales Invoice", dn=si_usd.name, recipient_id="saurabh@erpnext.com")

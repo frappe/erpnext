@@ -152,12 +152,12 @@ class PaymentEntry(AccountsController):
 			elif self.payment_type in ("Pay", "Internal Transfer"):
 				self.source_exchange_rate = get_average_exchange_rate(self.paid_from)
 			else:
-				self.source_exchange_rate = get_exchange_rate(self.posting_date, self.paid_from_account_currency, 
-					self.company_currency)
+				self.source_exchange_rate = get_exchange_rate(self.paid_from_account_currency, 
+					self.company_currency, self.posting_date)
 		
 		if self.paid_to and not self.target_exchange_rate:
-			self.target_exchange_rate = get_exchange_rate(self.posting_date, self.paid_to_account_currency, 
-				self.company_currency)
+			self.target_exchange_rate = get_exchange_rate(self.paid_to_account_currency, 
+				self.company_currency, self.posting_date)
 				
 	def validate_mandatory(self):
 		for field in ("paid_amount", "received_amount", "source_exchange_rate", "target_exchange_rate"):
@@ -517,8 +517,9 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 	order_list = []
 	for d in orders:
 		d["voucher_type"] = voucher_type
-        # This assumes that the exchange rate required is the one in the SO
-		d["exchange_rate"] = get_exchange_rate(posting_date,party_account_currency, company_currency)
+		# This assumes that the exchange rate required is the one in the SO
+		d["exchange_rate"] = get_exchange_rate(party_account_currency, 
+			company_currency, posting_date)
 		order_list.append(d)
 
 	return order_list
@@ -593,16 +594,19 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = 1
 		else:
 			total_amount = ref_doc.grand_total
-            # Get the exchange rate from the original ref doc or get it based on the posting date of the ref doc
+			
+			# Get the exchange rate from the original ref doc 
+			# or get it based on the posting date of the ref doc
 			exchange_rate = ref_doc.get("conversion_rate") or \
-				get_exchange_rate(ref_doc.posting_date, party_account_currency, ref_doc.company_currency)
+				get_exchange_rate(party_account_currency, ref_doc.company_currency, ref_doc.posting_date)
 		
 		outstanding_amount = ref_doc.get("outstanding_amount") \
 			if reference_doctype in ("Sales Invoice", "Purchase Invoice") \
 			else flt(total_amount) - flt(ref_doc.advance_paid)			
 	else:
-        # Get the exchange rate based on the posting date of the ref doc
-		exchange_rate = get_exchange_rate(ref_doc.posting_date, party_account_currency, ref_doc.company_currency)
+		# Get the exchange rate based on the posting date of the ref doc
+		exchange_rate = get_exchange_rate(party_account_currency, 
+			ref_doc.company_currency, ref_doc.posting_date)
 		
 	return frappe._dict({
 		"due_date": ref_doc.get("due_date"),

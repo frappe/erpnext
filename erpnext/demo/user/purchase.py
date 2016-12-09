@@ -12,7 +12,6 @@ from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.material_request.material_request import make_request_for_quotation
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import \
 			 make_supplier_quotation as make_quotation_from_rfq
-from frappe.utils.nowdate
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_purchase_user'))
@@ -57,7 +56,7 @@ def work():
 	if company_currency == party_account_currency:
 		exchange_rate = 1
 	else:
-		exchange_rate = get_exchange_rate(nowdate(), party_account_currency, company_currency)
+		exchange_rate = get_exchange_rate(party_account_currency, company_currency)
 
 	# make supplier quotations
 	if random.random() < 0.2:

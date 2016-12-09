@@ -9,7 +9,6 @@ from frappe.utils.make_random import add_random_children, get_random
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.party import get_party_account_currency
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request, make_payment_entry
-from frappe.utils import nowdate
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_sales_user_2'))
@@ -89,7 +88,7 @@ def make_quotation():
 		if company_currency == party_account_currency:
 			exchange_rate = 1
 		else:
-			exchange_rate = get_exchange_rate(nowdate(), party_account_currency, company_currency)
+			exchange_rate = get_exchange_rate(party_account_currency, company_currency)
 
 		qtn = frappe.get_doc({
 			"creation": frappe.flags.current_date,

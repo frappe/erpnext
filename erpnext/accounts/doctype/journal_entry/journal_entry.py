@@ -327,7 +327,7 @@ class JournalEntry(AccountsController):
 				d.exchange_rate = 1
 			elif not d.exchange_rate or d.exchange_rate == 1 or \
 				(d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name and d.posting_date):
-                    # Modified to include the posting date for which to retreive the exchange rate
+					# Modified to include the posting date for which to retreive the exchange rate
 					d.exchange_rate = get_exchange_rate(self.posting_date, d.account, d.account_currency, self.company,
 						d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
 
@@ -649,7 +649,8 @@ def get_payment_entry(ref_doc, args):
 	cost_center = frappe.db.get_value("Company", ref_doc.company, "cost_center")
 	exchange_rate = 1
 	if args.get("party_account"):
-        # Modified to include the posting date for which the exchange rate is required. Assumed to be the posting date in the reference document
+		# Modified to include the posting date for which the exchange rate is required. 
+		# Assumed to be the posting date in the reference document
 		exchange_rate = get_exchange_rate(ref_doc.posting_date, args.get("party_account"), args.get("party_account_currency"),
 			ref_doc.company, ref_doc.doctype, ref_doc.name)
 
@@ -683,8 +684,8 @@ def get_payment_entry(ref_doc, args):
 	bank_account = get_default_bank_cash_account(ref_doc.company, "Bank", account=args.get("bank_account"))
 	if bank_account:
 		bank_row.update(bank_account)
-        # Modified to include the posting date for which the exchange rate is required. Assumed to be the posting date of the 
-        # reference date
+		# Modified to include the posting date for which the exchange rate is required. 
+		# Assumed to be the posting date of the reference date
 		bank_row.exchange_rate = get_exchange_rate(ref_doc.posting_date, bank_account["account"],
 			bank_account["account_currency"], ref_doc.company)
 
@@ -809,8 +810,9 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 		"party_type": party_type,
 		"account_type": account_details.account_type,
 		"account_currency": account_details.account_currency or company_currency,
-        # The date used to retreive the exchange rate here is the date passed in as an argument to this function. 
-        # It is assumed to be the date on which the balance is sought
+		
+		# The date used to retreive the exchange rate here is the date passed in 
+		# as an argument to this function. It is assumed to be the date on which the balance is sought
 		"exchange_rate": get_exchange_rate(date, account, account_details.account_currency,
 			company, debit=debit, credit=credit, exchange_rate=exchange_rate)
 	}
@@ -849,10 +851,10 @@ def get_exchange_rate(posting_date, account, account_currency=None, company=None
 				(account_details.root_type == "Liability" and debit)):
 			exchange_rate = get_average_exchange_rate(account)
 
+		# The date used to retreive the exchange rate here is the date passed 
+		# in as an argument to this function.
 		if not exchange_rate and account_currency and posting_date:
-            # The date used to retreive the exchange rate here is the date passed in as an argument to this function. 
-			exchange_rate = get_exchange_rate(posting_date, account_currency, company_currency)
-
+			exchange_rate = get_exchange_rate(account_currency, company_currency, posting_date)
 	else:
 		exchange_rate = 1
 

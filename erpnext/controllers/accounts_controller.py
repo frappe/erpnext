@@ -144,8 +144,8 @@ class AccountsController(TransactionBase):
 					self.plc_conversion_rate = 1.0
 
 				elif not self.plc_conversion_rate:
-					self.plc_conversion_rate = get_exchange_rate(transaction_date, 
-						self.price_list_currency, self.company_currency)
+					self.plc_conversion_rate = get_exchange_rate(self.price_list_currency, 
+						self.company_currency, transaction_date)
 
 			# currency
 			if not self.currency:
@@ -154,8 +154,8 @@ class AccountsController(TransactionBase):
 			elif self.currency == self.company_currency:
 				self.conversion_rate = 1.0
 			elif not self.conversion_rate:
-				self.conversion_rate = get_exchange_rate(transaction_date, self.currency,
-					self.company_currency)
+				self.conversion_rate = get_exchange_rate(self.currency,
+					self.company_currency, transaction_date)
 
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
