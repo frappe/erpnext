@@ -34,7 +34,7 @@ frappe.treeview_settings["Account"] = {
 			description: __("Optional. This setting will be used to filter in various transactions.")
 		},
 		{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate'),
-			depends_on: 'eval:doc.is_group==1&&doc.account_type=="Tax"'},
+			depends_on: 'eval:doc.is_group==0&&doc.account_type=="Tax"'},
 		{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse",
 			depends_on: 'eval:(!doc.is_group&&doc.account_type=="Stock")',
 			get_query: function() {
