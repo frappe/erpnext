@@ -2,44 +2,43 @@
 // For license information, please see license.txt
 frappe.provide("schools")
 
-frappe.ui.form.on('Student Batch Attendance Tool', {
+frappe.ui.form.on('Student Attendance Tool', {
     refresh: function(frm) {
         frm.disable_save();
-        hide_field('attendance');
+    },
+
+    based_on: function(frm) {
+        if (frm.doc.based_on == "Student Batch") {
+            frm.set_value("course_schedule", "");
+        } else {
+            frm.set_value("student_batch", "");
+        }
     },
 
     student_batch: function(frm) {
-        if (frm.doc.student_batch && frm.doc.date) {
+        if ((frm.doc.student_batch && frm.doc.date) || frm.doc.course_schedule) {
+            var method = "erpnext.schools.doctype.student_attendance_tool.student_attendance_tool.get_student_attendance_records";
+
             frappe.call({
-                method: "erpnext.schools.api.check_attendance_records_exist",
+                method: method,
                 args: {
-                    "student_batch": frm.doc.student_batch,
-                    "date": frm.doc.date
+                    based_on: frm.doc.based_on,
+                    student_batch: frm.doc.student_batch,
+                    date: frm.doc.date,
+                    course_schedule: frm.doc.course_schedule
                 },
                 callback: function(r) {
-                    if (r.message) {
-                        frappe.msgprint("Attendance already marked.");
-                        hide_field('attendance');
-                    } else {
-                        frappe.call({
-                            method: "erpnext.schools.api.get_student_batch_students",
-                            args: {
-                                "student_batch": frm.doc.student_batch
-                            },
-                            callback: function(r) {
-                                if (r.message) {
-                                    unhide_field('attendance');
-                                    frm.events.get_students(frm, r.message)
-                                }
-                            }
-                        });
-                    }
+                    frm.events.get_students(frm, r.message);
                 }
-            });
+            })
         }
     },
 
     date: function(frm) {
+        frm.trigger("student_batch");
+    },
+
+    course_schedule: function(frm) {
         frm.trigger("student_batch");
     },
 
@@ -72,7 +71,7 @@ schools.StudentsEditor = Class.extend({
             .html(__('Check all'))
             .on("click", function() {
                 $(me.wrapper).find('input[type="checkbox"]').each(function(i, check) {
-                    if (!$(check).is(":checked")) {
+                    if (!$(check).prop("disabled")) {
                         check.checked = true;
                     }
                 });
@@ -82,55 +81,70 @@ schools.StudentsEditor = Class.extend({
             .html(__('Uncheck all'))
             .on("click", function() {
                 $(me.wrapper).find('input[type="checkbox"]').each(function(i, check) {
-                    if ($(check).is(":checked")) {
+                    if (!$(check).prop("disabled")) {
                         check.checked = false;
                     }
                 });
             });
 
-        var get_student = function(idx) {
+        var get_present_student = function(student) {
             return students.filter(function(s) {
                 return s.idx === idx;
-            })[0]
+            })
+        }
+        var get_absent_student = function(idx) {
+            return students.filter(function(s) {
+                return s.idx === idx;
+            })
         }
 
         student_toolbar.find(".btn-mark-att")
             .html(__('Mark Attendence'))
             .on("click", function() {
-                var students_present = [];
-                var students_absent = [];
-                $(me.wrapper).find('input[type="checkbox"]').each(function(i, check) {
-                    var idx = $(check).data().idx;
-                    if ($(check).is(":checked")) {
-                        students_present.push(get_student(idx));
-                    } else {
-                        students_absent.push(get_student(idx));
-                    }
+                var studs = [];
+                $(me.wrapper.find('input[type="checkbox"]')).each(function(i, check) {
+                    var $check = $(check);
+                    studs.push({
+                        student: $check.data().student,
+                        student_name: $check.data().studentName,
+                        idx: $check.data().idx,
+                        disabled: $check.prop("disabled"),
+                        checked: $check.is(":checked")
+                    });
                 });
+
+                var students_present = studs.filter(function(stud) {
+                    return !stud.disabled && stud.checked;
+                });
+
+                var students_absent = studs.filter(function(stud) {
+                    return !stud.disabled && !stud.checked;
+                });
+
                 frappe.call({
                     method: "erpnext.schools.api.mark_attendance",
                     args: {
                         "students_present": students_present,
                         "students_absent": students_absent,
                         "student_batch": frm.doc.student_batch,
+                        "course_schedule": frm.doc.course_schedule,
                         "date": frm.doc.date
                     },
                     callback: function(r) {
-                        hide_field('attendance');
+                        frm.trigger("student_batch");
                     }
                 });
             });
 
-
-        $.each(students, function(i, m) {
-            $(repl('<div class="col-sm-6">\
-				<div class="checkbox">\
-				<label><input data-idx="%(idx)s" type="checkbox" class="students-check" data-student="%(name)s">\
-				%(idx)s - %(name)s</label>\
-			</div></div>', {
-                name: m.student_name,
-                idx: m.idx
-            })).appendTo(me.wrapper);
+        var htmls = students.map(function(student) {
+            return frappe.render_template("student_button", {
+                student: student.student,
+                student_name: student.student_name,
+                idx: student.idx,
+                status: student.status
+            })
         });
+
+        $(htmls.join("")).appendTo(me.wrapper);
     }
 });

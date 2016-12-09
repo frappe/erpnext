@@ -52,8 +52,10 @@ def mark_attendance(students_present, students_absent, course_schedule=None, stu
 	:param student_batch: Student Batch.
 	:param date: Date.
 	"""
+	 
 	present = json.loads(students_present)
 	absent = json.loads(students_absent)
+	
 	for d in present:
 		make_attendance_records(d["student"], d["student_name"], "Present", course_schedule, student_batch, date)
 
