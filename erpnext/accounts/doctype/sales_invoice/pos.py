@@ -115,9 +115,9 @@ def get_items_list(pos_profile):
 	item_groups = []
 	if pos_profile.get('item_groups'):
 		# Get items based on the item groups defined in the POS profile
-
-		cond = "item_group in (%s)"%(', '.join(['%s']*len(pos_profile.get('item_groups'))))
-		item_groups = [d.item_group for d in pos_profile.get('item_groups')]
+		for d in pos_profile.get('item_groups'):
+			item_groups.extend(get_child_nodes('Item Group', d.item_group))
+		cond = "item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
 
 	return frappe.db.sql(""" 
 		select
@@ -135,13 +135,18 @@ def get_customers_list(pos_profile):
 	customer_groups = []
 	if pos_profile.get('customer_groups'):
 		# Get customers based on the customer groups defined in the POS profile
-
-		cond = "customer_group in (%s)"%(', '.join(['%s']*len(pos_profile.get('customer_groups'))))
-		customer_groups = [d.customer_group for d in pos_profile.get('customer_groups')]
+		for d in pos_profile.get('customer_groups'):
+			customer_groups.extend(get_child_nodes('Customer Group', d.customer_group))
+		cond = "customer_group in (%s)"%(', '.join(['%s']*len(customer_groups)))
 
 	return frappe.db.sql(""" select name, customer_name, customer_group,
 		territory from tabCustomer where disabled = 0
 		and {cond}""".format(cond=cond), tuple(customer_groups), as_dict=1) or {}
+
+def get_child_nodes(group_type, root):
+	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
+	return frappe.db.sql_list(""" Select name from `tab{tab}` where
+			lft >= {lft} and rgt <= {rgt}""".format(tab=group_type, lft=lft, rgt=rgt))
 
 def get_serial_no_data(pos_profile, company):
 	# get itemwise serial no data
@@ -240,8 +245,7 @@ def make_invoice(doc_list):
 
 	for docs in doc_list:
 		for name, doc in docs.items():
-			if not frappe.db.exists('Sales Invoice',
-				{'offline_pos_name': name, 'docstatus': ("<", "2")}):
+			if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
 				validate_records(doc)
 				si_doc = frappe.new_doc('Sales Invoice')
 				si_doc.offline_pos_name = name
@@ -286,6 +290,7 @@ def submit_invoice(si_doc, name):
 	try:
 		si_doc.insert()
 		si_doc.submit()
+		frappe.db.commit()
 	except Exception, e:
 		if frappe.message_log: frappe.message_log.pop()
 		frappe.db.rollback()
