@@ -902,13 +902,17 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	get_terms: function() {
 		var me = this;
 		if(this.frm.doc.tc_name) {
-			return this.frm.call({
-				method: "frappe.client.get_value",
+			return frappe.call({
+				method: 'erpnext.setup.doctype.terms_and_conditions.terms_and_conditions.get_terms_and_conditions',
 				args: {
-					doctype: "Terms and Conditions",
-					fieldname: "terms",
-					filters: { name: this.frm.doc.tc_name },
+					template_name: this.frm.doc.tc_name,
+					doc: this.frm.doc
 				},
+				callback: function(r) {
+					if(!r.exc) {
+						me.frm.set_value("terms", r.message);
+					}
+				}
 			});
 		}
 	},
