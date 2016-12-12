@@ -351,3 +351,4 @@ erpnext.patches.v7_0.po_status_issue_for_pr_return
 erpnext.patches.v7_1.update_missing_salary_component_type
 erpnext.patches.v7_0.update_autoname_field
 erpnext.patches.v7_0.update_status_of_po_so
+erpnext.patches.v7_1.repost_stock_for_deleted_bins_for_merging_items

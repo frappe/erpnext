@@ -532,8 +532,6 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("To merge, following properties must be same for both items")
 					+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
 
-			frappe.db.sql("delete from `tabBin` where item_code=%s", old_name)
-
 	def after_rename(self, old_name, new_name, merge):
 		if self.route:
 			invalidate_cache_for_item(self)
@@ -567,8 +565,14 @@ class Item(WebsiteGenerator):
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
-		for warehouse in frappe.db.sql("select warehouse from `tabBin` where item_code=%s", new_name):
-			repost_stock(new_name, warehouse[0])
+		repost_stock_for_warehouses = frappe.db.sql_list("""select distinct warehouse 
+			from tabBin where item_code=%s""", new_name)
+		
+		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
+		frappe.db.sql("delete from `tabBin` where item_code=%s", new_name)
+		
+		for warehouse in repost_stock_for_warehouses:
+			repost_stock(new_name, warehouse)
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
