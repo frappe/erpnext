@@ -31,9 +31,9 @@ class StudentAttendance(Document):
 				(self.student, self.course_schedule, self.name))
 		else:
 			attendance_records= frappe.db.sql("""select name from `tabStudent Attendance` where \
-				student= %s and date= %s and name != %s and docstatus=1 and \
+				student= %s and student_batch= %s and date= %s and name != %s and docstatus=1 and \
 				(course_schedule is Null or course_schedule='')""",
-				(self.student, self.date, self.name))
+				(self.student, self.student_batch, self.date, self.name))
 			
 		if attendance_records:
 			frappe.throw(_("Attendance Record {0} exists against Student {1}")
