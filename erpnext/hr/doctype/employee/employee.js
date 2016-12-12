@@ -58,6 +58,15 @@ frappe.ui.form.on('Employee',{
 	},
 	update_contact:function(frm){
 		frm.set_value("prefered_email",frm.fields_dict[frappe.model.scrub(frm.doc.prefered_contact_email)].value)
-	}
+	},
+	status: function(frm) {
+		return frm.call({
+			method: "deactivate_sales_person",
+			args: {
+				employee: frm.doc.employee,
+				status: frm.doc.status
+			}
+		});
+	},
 });
 cur_frm.cscript = new erpnext.hr.EmployeeController({frm: cur_frm});

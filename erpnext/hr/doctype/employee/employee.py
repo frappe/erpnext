@@ -244,3 +244,9 @@ def is_holiday(employee, date=None):
 	if holiday_list:
 		return frappe.get_all('Holiday List', dict(name=holiday_list, holiday_date=date)) and True or False
 
+@frappe.whitelist()
+def deactivate_sales_person(status = None, employee = None):
+	if status == "Left":
+		sales_person = frappe.db.get_value("Sales Person", {"Employee": employee})
+		if sales_person:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
