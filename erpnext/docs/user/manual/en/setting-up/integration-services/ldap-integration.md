@@ -4,16 +4,16 @@ Lightweight Directory Access Protocol is a centralised access controll system us
 
 By settings up LDAP service, you able to login to ERPNext account by using LDAP credentials.
 
-####Step 1: Create Razorpay service
+####Step 1: Create LDAP service
 
 `Explore > Setup > Integration Service`
 
 Make a new Integration Service and select `LDAP` as a service from dropdown then save the document.
 After saving a document, click on `LDAP Settings` button, to setup service.
 
-####Step 2: Setup  ldap service
+####Step 2: Setup LDAP service
 
-To enable ldap service, you need to configure parameters like LDAP Server Url, Organizational Unit, Base Distinguished Name (DN) and Password for Base DN
+To enable ldap service, you need to configure parameters like LDAP Server Url, Organizational Unit, UID, Base Distinguished Name (DN) and Password for Base DN
 
 <img class="screenshot" alt="LDAP Settings" src="{{docs_base_url}}/assets/img/setup/integration-service/ldap_settings.png">
 
