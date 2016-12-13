@@ -356,3 +356,4 @@ erpnext.patches.v7_1.update_bom_base_currency
 erpnext.patches.v7_0.update_status_of_po_so
 erpnext.patches.v7_1.set_budget_against_as_cost_center
 erpnext.patches.v7_1.set_currency_exchange_date
+erpnext.patches.v7_1.set_sales_person_status
