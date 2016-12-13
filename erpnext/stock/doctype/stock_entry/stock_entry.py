@@ -36,6 +36,7 @@ class StockEntry(StockController):
 			self.pro_doc = frappe.get_doc('Production Order', self.production_order)
 
 		self.validate_posting_time()
+		self.validate_posting_date_for_negative_stock()
 		self.validate_purpose()
 		self.validate_item()
 		self.set_transfer_qty()
@@ -64,6 +65,19 @@ class StockEntry(StockController):
 		self.update_stock_ledger()
 		self.update_production_order()
 		self.make_gl_entries_on_cancel()
+
+	def validate_posting_date_for_negative_stock(self):
+		if frappe.defaults.get_global_default('allow_negative_stock') and frappe.defaults.get_global_default('auto_accounting_for_stock'):
+			items = self.get_items_and_warehouses()
+			for item in self.get("items"):
+				value = frappe.db.sql("""select voucher_type, voucher_no, posting_date, posting_time from `tabStock Ledger Entry` 
+					where voucher_type in ("Sales Invoice","Delivery Note") and item_code = %(item_code)s and 
+					timestamp(posting_date, posting_time) <= timestamp(%(date)s, %(time)s) 
+					and warehouse = %(warehouse)s and qty_after_transaction < 0""",
+				    {"date":self.posting_date, "time":self.posting_time,"item_code":item.item_code,"warehouse":item.t_warehouse},as_dict=1)
+				if value:
+					frappe.throw(_('The Posting date in this Stock Entry is after the date ({0} {1}) on {2}: <a href="#Form/{2}/{3}">{3}</a> and will cause missing data in the General Ledger').format(
+						formatdate(self.posting_date), format_time(self.posting_time), value[0].voucher_type, value[0].voucher_no))
 
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer", "Material Transfer for Manufacture",
