@@ -6,12 +6,15 @@ import frappe
 import unittest
 import erpnext
 from frappe.utils.make_random import get_random
-from frappe.utils import nowdate, add_days, add_years
+from frappe.utils import nowdate, add_days, add_years, getdate
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.hr.doctype.salary_slip.test_salary_slip import make_earning_salary_component, make_deduction_salary_component
+from erpnext.hr.doctype.salary_slip.test_salary_slip \
+	import make_earning_salary_component, make_deduction_salary_component
+
+test_dependencies = ["Fiscal Year"]
 
 class TestSalaryStructure(unittest.TestCase):
-	def test_setup(self):
+	def setUp(self):
 		self.make_holiday_list()
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Structure Test Holiday List")
 		make_earning_salary_component(["Basic Salary", "Allowance", "HRA"])
