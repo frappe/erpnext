@@ -143,9 +143,7 @@ class Warehouse(NestedSet):
 			if self.company != frappe.db.get_value("Warehouse", new_warehouse, "company"):
 				frappe.throw(_("Both Warehouse must belong to same Company"))
 
-			frappe.db.sql("delete from `tabBin` where warehouse=%s", olddn)
-
-		self.rename_account_for(olddn, newdn, merge)
+		self.rename_account_for(olddn, new_warehouse, merge)
 
 		return new_warehouse
 
@@ -195,11 +193,14 @@ class Warehouse(NestedSet):
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
-		for item in frappe.db.sql("""select distinct item_code from (
-			select name as item_code from `tabItem` where is_stock_item=1
-			union
-			select distinct item_code from tabBin) a"""):
-				repost_stock(item[0], newdn)
+		repost_stock_for_items = frappe.db.sql_list("""select distinct item_code 
+			from tabBin where warehouse=%s""", newdn)
+		
+		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
+		frappe.db.sql("delete from `tabBin` where warehouse=%s", newdn)
+
+		for item_code in repost_stock_for_items:
+			repost_stock(item_code, newdn)
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0

@@ -223,7 +223,6 @@ class SalarySlip(TransactionBase):
 				["date_of_joining", "relieving_date"])
 
 		holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
-
 		working_days = date_diff(self.end_date, self.start_date) + 1
 		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
 			working_days -= len(holidays)

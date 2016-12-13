@@ -6,25 +6,19 @@ import frappe
 import unittest
 import erpnext
 from frappe.utils.make_random import get_random
-from frappe.utils import nowdate, add_days, add_years
+from frappe.utils import nowdate, add_days, add_years, getdate
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.hr.doctype.salary_slip.test_salary_slip import make_salary_component
+from erpnext.hr.doctype.salary_slip.test_salary_slip import  make_earning_salary_component, make_deduction_salary_component
 # test_records = frappe.get_test_records('Salary Structure')
 
+test_dependencies = ["Fiscal Year"]
+
 class TestSalaryStructure(unittest.TestCase):
-	def test_setup(self):
-		if not frappe.db.exists("Fiscal Year", "_Test Fiscal Year 2016"):
-			fy = frappe.get_doc({
-				"doctype": "Fiscal Year",
-				"year": "_Test Fiscal Year 2016",
-				"year_end_date": "2016-12-31",
-				"year_start_date": "2016-01-01"
-			})
-			fy.insert()
-			
+	def setUp(self):
 		self.make_holiday_list()
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Structure Test Holiday List")
-		make_salary_component(["Basic Salary", "Allowance", "HRA", "Professional Tax", "TDS"])
+		make_earning_salary_component(["Basic Salary", "Allowance", "HRA"])
+		make_deduction_salary_component(["Professional Tax", "TDS"])
 		employee1 = self.make_employee("test_employee@salary.com")
 		employee2 = self.make_employee("test_employee_2@salary.com")
 		
@@ -87,8 +81,8 @@ def make_salary_slip_from_salary_structure(employee):
 	sal_struct = make_salary_structure('Salary Structure Sample')
 	sal_slip = make_salary_slip(sal_struct, employee = employee)
 	sal_slip.employee_name = frappe.get_value("Employee", {"name":employee}, "employee_name")
-	sal_slip.month = "11"
 	sal_slip.fiscal_year = "_Test Fiscal Year 2016"
+	sal_slip.month = getdate(nowdate()).month
 	sal_slip.posting_date = nowdate()
 	sal_slip.insert()
 	sal_slip.submit()

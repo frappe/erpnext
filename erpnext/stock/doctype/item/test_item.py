@@ -9,6 +9,9 @@ from frappe.test_runner import make_test_records
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError)
 
+from frappe.model.rename_doc import rename_doc
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
 
@@ -164,11 +167,31 @@ class TestItem(unittest.TestCase):
 		variant.item_name = "_Test Numeric Variant Large 1.1m"
 		self.assertRaises(InvalidItemAttributeValueError, variant.save)
 
-		variant = create_variant("_Test Numeric Template Item", {"Test Size": "Large", "Test Item Length": 1.5})
+		variant = create_variant("_Test Numeric Template Item", 
+			{"Test Size": "Large", "Test Item Length": 1.5})
 		self.assertEquals(variant.item_code, None)
 		variant.item_code = "_Test Numeric Variant-L-1.5"
 		variant.item_name = "_Test Numeric Variant Large 1.5m"
 		variant.save()
+		
+	def test_item_merging(self):		
+		create_item("Test Item for Merging 1")
+		create_item("Test Item for Merging 2")
+		
+		make_stock_entry(item_code="Test Item for Merging 1", target="_Test Warehouse - _TC", 
+			qty=1, rate=100)
+		make_stock_entry(item_code="Test Item for Merging 2", target="_Test Warehouse 1 - _TC", 
+			qty=1, rate=100)
+		
+		rename_doc("Item", "Test Item for Merging 1", "Test Item for Merging 2", merge=True)
+		
+		self.assertFalse(frappe.db.exists("Item", "Test Item for Merging 1"))
+		
+		self.assertTrue(frappe.db.get_value("Bin", 
+			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse - _TC"}))
+			
+		self.assertTrue(frappe.db.get_value("Bin", 
+			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse 1 - _TC"}))		
 
 def make_item_variant():
 	if not frappe.db.exists("Item", "_Test Variant Item-S"):
@@ -184,3 +207,14 @@ def get_total_projected_qty(item):
 	return total_qty[0].projected_qty if total_qty else 0.0
 
 test_records = frappe.get_test_records('Item')
+
+def create_item(item_code, is_stock_item=None):
+	if not frappe.db.exists("Item", item_code):
+		item = frappe.new_doc("Item")
+		item.item_code = item_code
+		item.item_name = item_code
+		item.description = item_code
+		item.item_group = "All Item Groups"
+		item.is_stock_item = is_stock_item or 1		
+		item.save()
+		
