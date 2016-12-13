@@ -174,7 +174,7 @@ class TestItem(unittest.TestCase):
 		variant.item_name = "_Test Numeric Variant Large 1.5m"
 		variant.save()
 		
-	def test_item_merging(self):
+	def test_item_merging(self):		
 		create_item("Test Item for Merging 1")
 		create_item("Test Item for Merging 2")
 		
@@ -191,8 +191,7 @@ class TestItem(unittest.TestCase):
 			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse - _TC"}))
 			
 		self.assertTrue(frappe.db.get_value("Bin", 
-			{"item_code": "Test Item for Merging - 2", "warehouse": "_Test Warehouse 1 - _TC"}))
-		
+			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse 1 - _TC"}))		
 
 def make_item_variant():
 	if not frappe.db.exists("Item", "_Test Variant Item-S"):
