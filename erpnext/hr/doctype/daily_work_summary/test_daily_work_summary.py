@@ -56,7 +56,6 @@ class TestDailyWorkSummary(unittest.TestCase):
 			hour = frappe.utils.nowtime().split(':')[0]
 		frappe.db.sql('delete from `tabDaily Work Summary`')
 		frappe.db.sql('delete from `tabEmail Queue`')
-		frappe.db.sql('delete from `tabEmail Queue Recipient`')
 		frappe.db.sql('delete from `tabCommunication`')
 
 		# setup email to trigger at this our
@@ -76,6 +75,6 @@ class TestDailyWorkSummary(unittest.TestCase):
 		employees = frappe.get_all('Employee', fields = ['user_id'],
 			filters=dict(company='_Test Company', status='Active'))
 
-		emails = frappe.db.sql("""select r.recipient, q.message, q.message_id from `tabEmail Queue` as q, `tabEmail Queue Recipient` as r where q.name = r.parent""", as_dict=1)
+		emails = frappe.get_all('Email Queue', fields=['recipient', 'message', 'message_id'])
 
 		return settings, employees, emails
