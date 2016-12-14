@@ -284,19 +284,21 @@ class ProcessPayroll(Document):
 			frappe.db.set_value("Salary Slip", ss_obj.name, "journal_entry", jv_name)
 
 	def set_start_end_dates(self):
-		self.update(get_start_end_dates(self.payroll_frequency, self.posting_date))
+		self.update(get_start_end_dates(self.payroll_frequency, self.start_date or self.posting_date))
 
 
 @frappe.whitelist()
-def get_start_end_dates(payroll_frequency, posting_date):
+def get_start_end_dates(payroll_frequency, start_date=None):
+	'''Returns dict of start and end dates for given payroll frequency based on start_date'''
 	if not payroll_frequency:
 		frappe.throw(_("Please set Payroll Frequency first"))
+
 	if payroll_frequency == "Monthly" or payroll_frequency == "Bimonthly":
-		fiscal_year = get_fiscal_year(posting_date)[0]
-		month = "%02d" % getdate(posting_date).month
+		fiscal_year = get_fiscal_year(start_date)[0]
+		month = "%02d" % getdate(start_date).month
 		m = get_month_details(fiscal_year, month)
 		if payroll_frequency == "Bimonthly":
-			if getdate(posting_date).day <= 15:
+			if getdate(start_date).day <= 15:
 				start_date = m['month_start_date']
 				end_date = m['month_mid_end_date']
 			else:

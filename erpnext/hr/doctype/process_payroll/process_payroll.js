@@ -35,7 +35,7 @@ frappe.ui.form.on("Process Payroll", {
 				method:'erpnext.hr.doctype.process_payroll.process_payroll.get_start_end_dates',
 				args:{
 					payroll_frequency: frm.doc.payroll_frequency,
-					posting_date: frm.doc.posting_date
+					start_date: frm.doc.start_date || frm.doc.posting_date
 				},
 				callback: function(r){
 					if (r.message){
