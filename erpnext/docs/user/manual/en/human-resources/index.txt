@@ -7,6 +7,7 @@ appraisal
 job-applicant
 job-opening
 offer-letter
+training
 tools
 human-resources-reports
 setup

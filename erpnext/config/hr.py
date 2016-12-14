@@ -150,12 +150,23 @@ def get_data():
 		},
 
 		{
-			"label": _("Tools"),
-			"icon": "fa fa-wrench",
+			"label": _("Training"),
 			"items": [
-
+				{
+					"type": "doctype",
+					"name": "Training Event"
+				},
+				{
+					"type": "doctype",
+					"name": "Training Result"
+				},
+				{
+					"type": "doctype",
+					"name": "Training Feedback"
+				},
 			]
 		},
+
 		{
 			"label": _("Setup"),
 			"icon": "fa fa-cog",
