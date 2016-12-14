@@ -10,6 +10,7 @@ from frappe.utils import cstr
 from frappe.model.document import Document
 from jinja2 import TemplateSyntaxError
 from frappe.utils.user import is_website_user
+from frappe.model.naming import make_autoname
 
 class Address(Document):
 	def __setup__(self):
@@ -21,7 +22,10 @@ class Address(Document):
 				or self.supplier or self.sales_partner or self.lead
 
 		if self.address_title:
-			self.name = cstr(self.address_title).strip() + "-" + cstr(self.address_type).strip()
+			self.name = (cstr(self.address_title).strip() + "-" + cstr(self.address_type).strip())
+			if frappe.db.exists("Address", self.name):
+				self.name = make_autoname(cstr(self.address_title).strip() + "-" + 
+					cstr(self.address_type).strip() + "-.#")
 		else:
 			throw(_("Address Title is mandatory."))
 
