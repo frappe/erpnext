@@ -13,7 +13,7 @@ class TrainingEvent(Document):
 			self.invite_employee()
 	
 	def on_update_after_submit(self):
-		if self.event_status == "Scheduled":
+		if self.event_status == "Scheduled" and self.send_email:
 			self.invite_employee()
 	
 	def invite_employee(self):
@@ -21,7 +21,7 @@ class TrainingEvent(Document):
 			.format(self.type, self.event_name, self.start_time, self.end_time, self.location))
 	
 		for emp in self.employees:
-			if emp.status== "Scheduled":
+			if emp.status== "Open":
 				frappe.sendmail(frappe.db.get_value("Employee", emp.employee, "company_email"), \
 					subject=subject, content= self.introduction)
 				emp.status= "Invited"

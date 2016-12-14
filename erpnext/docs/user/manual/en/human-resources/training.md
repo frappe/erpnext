@@ -7,8 +7,8 @@ Schedule seminars, workshops, conferences etc using Training Event. You can also
 ### Inviting Employees for Event
 
 You can invite your employees to attend the event. You can do so by selecting the employees to be invited in the employee table.
-By default the status of the employee will be 'Scheduled'.
-The system shall notify the employee with status 'Scheduled' by sending a email to the office email address of the employee as mentioned in the employee master. 
+By default the status of the employee will be 'Open'.
+The system shall notify the employee with status 'Open' by sending a email to the office email address of the employee as mentioned in the employee master if you have selected 'Send Email' checkbox. 
 The status is changed to 'Invited' when an invitation email is sent to the employee by the system.
 When an Employee confirms his/her presence for the event you can change the status to 'Confirmed'.
 
