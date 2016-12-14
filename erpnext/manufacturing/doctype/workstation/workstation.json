@@ -412,7 +412,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -429,7 +429,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-12-13 04:52:59.657226", 
+ "modified": "2016-12-13 05:04:54.668633", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Workstation", 
