@@ -5,6 +5,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, flt, nowdate, add_days, getdate
 from frappe import _
+import collections
+from collections import defaultdict
+from calendar import monthrange
 from erpnext.accounts.utils import get_fiscal_year
 
 from frappe.model.document import Document
@@ -27,9 +30,8 @@ class ProcessPayroll(Document):
 		sal_struct = frappe.db.sql("""
 				select name from `tabSalary Structure`
 				where docstatus != 2 and is_active = 'Yes' and company = %(company)s and
-				from_date <= %(start_date)s and (to_date is null or to_date >= %(end_date)s) and
-				ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s {struct_cond}""".format(struct_cond=struct_cond),
-				{"company": self.company, "start_date": self.start_date, "end_date": self.end_date, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
+				ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s""",
+				{"company": self.company, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
 		
 		if sal_struct:
 			cond += "and t2.parent IN %(sal_struct)s "
@@ -312,9 +314,7 @@ def get_month_details(year, month):
 		frappe.throw(_("Fiscal Year {0} not found").format(year))
 
 @frappe.whitelist()
-def get_start_end_dates(payroll_frequency = None, start_date = None, end_date = None):
-	if payroll_frequency and not start_date:
-		start_date = nowdate()
+def get_start_end_dates(payroll_frequency, start_date, end_date):
 	if payroll_frequency == "Monthly" or payroll_frequency == "Bimonthly":
 		fiscal_year = get_fiscal_year(start_date)[0] or get_fiscal_year(end_date)[0]
 		month = "%02d" % getdate(start_date).month or "%02d" % getdate(end_date).month
