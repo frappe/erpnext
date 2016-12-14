@@ -5,15 +5,11 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, flt, nowdate, add_days, getdate
 from frappe import _
-import collections
-from collections import defaultdict
-from calendar import monthrange
 from erpnext.accounts.utils import get_fiscal_year
 
 from frappe.model.document import Document
 
 class ProcessPayroll(Document):
-
 	def get_emp_list(self):
 		"""
 			Returns list of active employees based on selected criteria
@@ -21,24 +17,33 @@ class ProcessPayroll(Document):
 		"""
 		cond = self.get_filter_condition()
 		cond += self.get_joining_releiving_condition()
-		
-		
-		struct_cond = ''
+
+
+		condition = ''
 		if self.payroll_frequency:
-			struct_cond = """and payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}	
-			
+			condition = """and payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}
+
 		sal_struct = frappe.db.sql("""
-				select name from `tabSalary Structure`
-				where docstatus != 2 and is_active = 'Yes' and company = %(company)s and
-				ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s""",
+				select
+					name from `tabSalary Structure`
+				where
+					docstatus != 2 and
+					is_active = 'Yes'
+					and company = %(company)s and
+					ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
+					{condition}""".format(condition=condition),
 				{"company": self.company, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
-		
+
 		if sal_struct:
 			cond += "and t2.parent IN %(sal_struct)s "
 			emp_list = frappe.db.sql("""
-				select t1.name
-				from `tabEmployee` t1, `tabSalary Structure Employee` t2
-				where t1.docstatus!=2 and t1.name = t2.employee
+				select
+					t1.name
+				from
+					`tabEmployee` t1, `tabSalary Structure Employee` t2
+				where
+					t1.docstatus!=2
+					and t1.name = t2.employee
 			%s """% cond, {"sal_struct": sal_struct})
 			return emp_list
 
@@ -67,7 +72,7 @@ class ProcessPayroll(Document):
 			if not self.get(fieldname):
 				frappe.throw(_("Please set {0}").format(self.meta.get_label(fieldname)))
 
-	def create_sal_slip(self):
+	def create_salary_slips(self):
 		"""
 			Creates salary slip for selected employees if already not created
 		"""
@@ -77,31 +82,26 @@ class ProcessPayroll(Document):
 		ss_list = []
 		if emp_list:
 			for emp in emp_list:
-				if not frappe.db.sql("""select name from `tabSalary Slip`
-						where docstatus!= 2 and employee = %s and start_date >= %s and end_date <= %s and company = %s
+				if not frappe.db.sql("""select
+						name from `tabSalary Slip`
+					where
+						docstatus!= 2 and
+						employee = %s and
+						start_date >= %s and
+						end_date <= %s and
+						company = %s
 						""", (emp[0], self.start_date, self.end_date, self.company)):
-					if self.payroll_frequency == "Monthly" or self.payroll_frequency == '':
-						ss = frappe.get_doc({
-							"doctype": "Salary Slip",
-							"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
-							"employee": emp[0],
-							"employee_name": frappe.get_value("Employee", {"name":emp[0]}, "employee_name"),
-							"company": self.company,
-							"posting_date": self.posting_date,
-							"payroll_frequency": self.payroll_frequency
-						})
-					else:
-						ss = frappe.get_doc({
-							"doctype": "Salary Slip",
-							"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
-							"start_date": self.start_date,
-							"end_date": self.end_date,
-							"employee": emp[0],
-							"employee_name": frappe.get_value("Employee", {"name":emp[0]}, "employee_name"),
-							"company": self.company,
-							"posting_date": self.posting_date,
-							"payroll_frequency": self.payroll_frequency
-						})	
+					ss = frappe.get_doc({
+						"doctype": "Salary Slip",
+						"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
+						"payroll_frequency": self.payroll_frequency,
+						"start_date": self.start_date,
+						"end_date": self.end_date,
+						"employee": emp[0],
+						"employee_name": frappe.get_value("Employee", {"name":emp[0]}, "employee_name"),
+						"company": self.company,
+						"posting_date": self.posting_date
+					})
 					ss.insert()
 					ss_list.append(ss.name)
 		return self.create_log(ss_list)
@@ -120,16 +120,16 @@ class ProcessPayroll(Document):
 			Returns list of salary slips based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-			
+
 		ss_list = frappe.db.sql("""
 			select t1.name, t1.salary_structure from `tabSalary Slip` t1
-			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s 
+			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s
 			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s %s
 		""" % ('%s', '%s', '%s','%s', cond), (ss_status, self.start_date, self.end_date, self.salary_slip_based_on_timesheet), as_dict=as_dict)
 		return ss_list
 
 
-	def submit_salary_slip(self):
+	def submit_salary_slips(self):
 		"""
 			Submit all salary slips based on selected criteria
 		"""
@@ -144,11 +144,10 @@ class ProcessPayroll(Document):
 			else:
 				try:
 					ss_obj.submit()
-				except Exception,e:
+				except frappe.ValidationError:
 					not_submitted_ss.append(ss[0])
 
 		return self.create_submit_log(ss_list, not_submitted_ss)
-
 
 	def create_submit_log(self, all_ss, not_submitted_ss):
 		log = ''
@@ -167,12 +166,9 @@ class ProcessPayroll(Document):
 			log += """
 				<b>Not Submitted Salary Slips: </b>\
 				<br><br> %s <br><br> \
-				Reason: <br>\
-				May be net pay is less than 0 <br>
-				May be company email id specified in employee master is not valid. <br> \
-				Please mention correct email id in employee master or if you don't want to \
-				send mail, uncheck 'Send Email' checkbox. <br>\
-				Then try to submit Salary Slip again.
+				Possible reasons: <br>\
+				1. Net pay is less than 0 <br>
+				2. Company email id specified in employee master is not valid. <br> \
 			"""% ('<br>'.join(not_submitted_ss))
 		return log
 
@@ -191,42 +187,42 @@ class ProcessPayroll(Document):
 		""" % ('%s', '%s', cond), (self.start_date, self.end_date))
 
 		return flt(tot[0][0])
-		
+
 	def get_salary_component_account(self, salary_component):
 		account = frappe.db.get_value("Salary Component Account",
 			{"parent": salary_component, "company": self.company}, "default_account")
-	
+
 		if not account:
 			frappe.throw(_("Please set default account in Salary Component {0}")
 				.format(salary_component))
-	
-		return account	
-		
+
+		return account
+
 	def get_salary_components(self, component_type):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
 		if salary_slips:
 			salary_components = frappe.db.sql("""select salary_component, amount, parentfield
 				from `tabSalary Detail` where parentfield = '%s' and parent in (%s)""" %
-				(component_type, ', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=True)				
+				(component_type, ', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=True)
 			return salary_components
-		
+
 	def get_salary_component_total(self, component_type = None):
 		salary_components = self.get_salary_components(component_type)
 		if salary_components:
 			component_dict = {}
-			for item in salary_components:			
+			for item in salary_components:
 				component_dict[item['salary_component']] = component_dict.get(item['salary_component'], 0) + item['amount']
 			account_details = self.get_account(component_dict = component_dict)
 			return account_details
-			
+
 	def get_account(self, component_dict = None):
 		account_dict = {}
 		for s, a in component_dict.items():
 			account = self.get_salary_component_account(s)
-			account_dict[account] = account_dict.get(account, 0) + a		
+			account_dict[account] = account_dict.get(account, 0) + a
 		return account_dict
-		
-	
+
+
 	def make_journal_entry(self, reference_number = None, reference_date = None):
 		self.check_permission('write')
 		earnings = self.get_salary_component_total(component_type = "earnings") or {}
@@ -240,7 +236,7 @@ class ProcessPayroll(Document):
 				self.end_date)
 			journal_entry.company = self.company
 			journal_entry.posting_date = nowdate()
-		
+
 			account_amt_list = []
 			adjustment_amt = 0
 			for acc, amt in earnings.items():
@@ -258,7 +254,7 @@ class ProcessPayroll(Document):
 			account_amt_list.append({
 					"account": self.payment_account,
 					"credit_in_account_currency": adjustment_amt
-				})		
+				})
 			journal_entry.set("accounts", account_amt_list)
 			journal_entry.cheque_no = reference_number
 			journal_entry.cheque_date = reference_date
@@ -271,24 +267,58 @@ class ProcessPayroll(Document):
 			except Exception, e:
 				frappe.msgprint(e)
 		return self.create_jv_log(jv_name)
-	
+
 
 	def create_jv_log(self, jv_name):
 		log = "<p>" + _("No submitted Salary Slip found") + "</p>"
 		if jv_name:
 			log = "<b>" + _("Journal Entry Submitted") + "</b>\
 				%s" % '<br>''<a href="#Form/Journal Entry/{0}">{0}</a>'.format(jv_name)
-		return log	
-	
+		return log
+
 	def update_salary_slip_status(self, jv_name = None):
 		ss_list = self.get_sal_slip_list(ss_status=1)
 		for ss in ss_list:
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
 			frappe.db.set_value("Salary Slip", ss_obj.name, "status", "Paid")
-			frappe.db.set_value("Salary Slip", ss_obj.name, "journal_entry", jv_name)		
+			frappe.db.set_value("Salary Slip", ss_obj.name, "journal_entry", jv_name)
+
+	def set_start_end_dates(self):
+		self.update(get_start_end_dates(self.payroll_frequency, self.posting_date))
 
 
 @frappe.whitelist()
+def get_start_end_dates(payroll_frequency, posting_date):
+	if not payroll_frequency:
+		frappe.throw(_("Please set Payroll Frequency first"))
+	if payroll_frequency == "Monthly" or payroll_frequency == "Bimonthly":
+		fiscal_year = get_fiscal_year(posting_date)[0]
+		month = "%02d" % getdate(posting_date).month
+		m = get_month_details(fiscal_year, month)
+		if payroll_frequency == "Bimonthly":
+			if getdate(posting_date).day <= 15:
+				start_date = m['month_start_date']
+				end_date = m['month_mid_end_date']
+			else:
+				start_date = m['month_mid_start_date']
+				end_date = m['month_end_date']
+		else:
+			start_date = m['month_start_date']
+			end_date = m['month_end_date']
+
+	if payroll_frequency == "Weekly":
+		end_date = add_days(start_date, 6)
+
+	if payroll_frequency == "Fortnightly":
+		end_date = add_days(start_date, 13)
+
+	if payroll_frequency == "Daily":
+		end_date = start_date
+
+	return frappe._dict({
+		'start_date': start_date, 'end_date': end_date
+	})
+
 def get_month_details(year, month):
 	ysd = frappe.db.get_value("Fiscal Year", year, "year_start_date")
 	if ysd:
@@ -312,32 +342,3 @@ def get_month_details(year, month):
 		})
 	else:
 		frappe.throw(_("Fiscal Year {0} not found").format(year))
-
-@frappe.whitelist()
-def get_start_end_dates(payroll_frequency, start_date, end_date):
-	if payroll_frequency == "Monthly" or payroll_frequency == "Bimonthly":
-		fiscal_year = get_fiscal_year(start_date)[0] or get_fiscal_year(end_date)[0]
-		month = "%02d" % getdate(start_date).month or "%02d" % getdate(end_date).month
-		m = get_month_details(fiscal_year, month)
-		if payroll_frequency == "Bimonthly":
-			if getdate(start_date).day <= 15:
-				start_date = m['month_start_date']
-				end_date = m['month_mid_end_date']
-			else:
-				start_date = m['month_mid_start_date']
-				end_date = m['month_end_date']
-		else:
-			start_date = m['month_start_date']
-			end_date = m['month_end_date']
-		
-	if payroll_frequency == "Weekly":
-		end_date = add_days(start_date, 6)
-			
-	if payroll_frequency == "Fortnightly":
-		end_date = add_days(start_date, 13)
-		
-	if payroll_frequency == "Daily":
-		end_date = start_date
-	return frappe._dict({
-		'start_date': start_date, 'end_date': end_date
-	})
