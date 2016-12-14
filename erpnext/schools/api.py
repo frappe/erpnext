@@ -163,3 +163,41 @@ def get_course_schedule_events(start, end, filters=None):
 			}, as_dict=True, update={"allDay": 0})
 
 	return data
+
+@frappe.whitelist()
+def get_evaluation_criterias(course):
+	"""Returns Evaluation Criterias and their Weightage from Course Master.
+
+	:param Course: Course
+	"""
+	return frappe.get_list("Course Evaluation Criteria", \
+		fields=["evaluation_criteria", "weightage"], filters={"parent": course}, order_by= "idx")
+	
+@frappe.whitelist()
+def get_assessment_details(assessment):
+	"""Returns Evaluation Criteria  and Maximum Score from Assessment Master.
+
+	:param Assessment: Assessment
+	"""
+	return frappe.get_list("Assessment Evaluation Criteria", \
+		fields=["evaluation_criteria", "maximum_score"], filters={"parent": assessment}, order_by= "idx")
+
+
+@frappe.whitelist()
+def get_grade(grading_scale, percentage):
+	"""Returns Grade based on the Grading Scale and Score.
+
+	:param Grading Scale: Grading Scale
+	:param Percentage: Score Percentage Percentage
+	"""
+	grading_scale_intervals = {}
+	for d in frappe.get_all("Grading Scale Interval", fields=["grade_code", "min_score"], filters={"parent": grading_scale}):
+		grading_scale_intervals.update({d.min_score:d.grade_code})
+	intervals = sorted(grading_scale_intervals.keys(), key=float, reverse=True)
+	for interval in intervals:
+		if flt(percentage) >= interval:
+			grade = grading_scale_intervals.get(interval)
+			break
+		else:
+			grade = "Unsuccessful"
+	return grade

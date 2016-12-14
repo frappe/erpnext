@@ -4,48 +4,32 @@
 cur_frm.add_fetch("student_group", "course", "course");
 cur_frm.add_fetch("examiner", "instructor_name", "examiner_name");
 cur_frm.add_fetch("supervisor", "instructor_name", "supervisor_name");
-cur_frm.add_fetch("student", "title", "student_name");
 
 frappe.ui.form.on("Assessment", {
-    student_group: function(frm) {
-        frm.set_value("results", "");
-        if (frm.doc.student_group) {
+    course: function(frm) {
+        if (frm.doc.course && frm.doc.maximum_assessment_score) {
             frappe.call({
-                method: "erpnext.schools.api.get_student_group_students",
+                method: "erpnext.schools.api.get_evaluation_criterias",
                 args: {
-                    "student_group": frm.doc.student_group
+                    course: frm.doc.course
                 },
                 callback: function(r) {
                     if (r.message) {
+                        frm.doc.evaluation_criterias = [];
                         $.each(r.message, function(i, d) {
-                            var row = frappe.model.add_child(cur_frm.doc, "Assessment Result", "results");
-                            row.student = d.student;
-                            row.student_name = d.student_name;
+                            var row = frappe.model.add_child(frm.doc, "Assessment Evaluation Criteria", "evaluation_criterias");
+                            row.evaluation_criteria = d.evaluation_criteria;
+                            row.maximum_score = d.weightage / 100 * frm.doc.maximum_assessment_score;
                         });
                     }
-                    refresh_field("results");
-                }
-            });
-        }
-    }
-});
+                    refresh_field("evaluation_criterias");
 
-frappe.ui.form.on("Assessment Result", {
-    result: function(frm, cdt, cdn) {
-        if (frm.doc.grading_structure) {
-            var assessment_result = locals[cdt][cdn];
-            frappe.call({
-                method: "erpnext.schools.doctype.assessment.assessment.get_grade",
-                args: {
-                    grading_structure: frm.doc.grading_structure,
-                    result: assessment_result.result
-                },
-                callback: function(r) {
-                    if (r.message) {
-                        frappe.model.set_value(cdt, cdn, 'grade', r.message);
-                    }
                 }
             });
         }
+    },
+
+    maximum_assessment_score: function(frm) {
+        frm.trigger("course");
     }
 });

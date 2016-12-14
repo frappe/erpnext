@@ -8,7 +8,16 @@ from frappe.model.document import Document
 from frappe import _
 
 class Course(Document):
-	pass
+	def validate(self):
+		self.validate_evaluation_criterias()
+	
+	def validate_evaluation_criterias(self):
+		if self.evaluation_criterias:
+			total_weightage = 0
+			for criteria in self.evaluation_criterias:
+				total_weightage += criteria.weightage
+			if total_weightage != 100:
+				frappe.throw(_("Total Weightage of all Evaluation Criterias must be 100%"))
 
 def get_sg_list(doctype, txt, filters, limit_start, limit_page_length=20):
 	user = frappe.session.user

@@ -120,7 +120,15 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Grading Structure"
+					"name": "Assessment Result"
+				},
+				{
+					"type": "doctype",
+					"name": "Grading Scale"
+				},
+				{
+					"type": "doctype",
+					"name": "Evaluation Criteria"
 				}
 			]
 		},

@@ -34,7 +34,7 @@ class Assessment(Document):
 			validate_overlap_for(self, "Assessment", "student_group")
 		
 		validate_overlap_for(self, "Assessment", "room")
-		validate_overlap_for(self, "Assessment", "supervisor", self.instructor)
+		validate_overlap_for(self, "Assessment", "supervisor", self.supervisor)
 
 
 def get_assessment_list(doctype, txt, filters, limit_start, limit_page_length=20):
@@ -54,20 +54,3 @@ def get_list_context(context=None):
 		"get_list": get_assessment_list,
 		"row_template": "templates/includes/assessment/assessment_row.html"
 	}
-
-@frappe.whitelist()
-def get_grade(grading_structure, result):
-	grade = frappe.db.sql("""select gi.from_score, gi.to_score, gi.grade_code, gi.grade_description 
-		from `tabGrading Structure` as gs, `tabGrade Interval` as gi 
-		where gs.name = gi.parent and gs.name = %(grading_structure)s and gi.from_score <= %(result)s 
-		and gi.to_score >= %(result)s""".format(), 
-		{
-			"grading_structure":grading_structure,
-			"result": result
-		},
-		as_dict=True)
-   	 
-	return grade[0].grade_code if grade else ""
-
-def validate_grade(score, grade):
-	pass
