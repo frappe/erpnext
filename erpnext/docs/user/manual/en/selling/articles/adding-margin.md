@@ -1,7 +1,7 @@
 #Adding Margin
 
 User Can apply the margin on Quotation Item and Sales Order Item using following two options.
-1)Price Rule: With the help of this method user can apply the margin on Quotation and Sales Order based on condition. you can find the section margin on pricing rule where a user has to select the type of margin whether it is Percentage or Amount and rate or amount. The system will apply the margin on quotation item and sales order item if pricing rule is enabled.
+1)Price Rule: With the help of this method user can apply the margin on Quotation and Sales Order based on condition. You can find the section margin on pricing rule where a user has to select the type of margin whether it is Percentage or Amount and Rate or Amount. The system will apply the margin on quotation item and sales order item if pricing rule is enabled.
 
 To setup Pricing Rule, go to:
 
