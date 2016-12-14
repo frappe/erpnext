@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Process Payroll", {
 	onload: function(frm) {
-		frm.doc.posting_date = frappe.datetime.nowdate()
+		frm.doc.posting_date = frm.doc.start_date = frm.doc.end_date = frappe.datetime.nowdate()
 	},
 
 	refresh: function(frm) {
