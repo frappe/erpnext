@@ -105,7 +105,7 @@ def get_charts_for_country(country):
 			path = os.path.join(os.path.dirname(__file__), folder)
 
 			for fname in os.listdir(path):
-				if fname.startswith(country_code) and fname.endswith(".json"):
+				if (fname.startswith(country_code) or fname.startswith(country)) and fname.endswith(".json"):
 					with open(os.path.join(path, fname), "r") as f:
 						_get_chart_name(f.read())
 
