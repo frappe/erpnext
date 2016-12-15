@@ -43,31 +43,34 @@ class StockController(AccountsController):
 		gl_list = []
 		warehouse_with_no_account = []
 		
-		for detail in voucher_details:
-			sle_list = sle_map.get(detail.name)
+		for item_row in voucher_details:
+			sle_list = sle_map.get(item_row.name)
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
 						# from warehouse account
-
-						self.check_expense_account(detail)
+						
+						self.check_expense_account(item_row)
+						
+						if not sle.stock_value_difference:
+							self.validate_negative_stock(sle)
 
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["name"],
-							"against": detail.expense_account,
-							"cost_center": detail.cost_center,
+							"against": item_row.expense_account,
+							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2),
 						}, warehouse_account[sle.warehouse]["account_currency"]))
 
 						# to target warehouse / expense account
 						gl_list.append(self.get_gl_dict({
-							"account": detail.expense_account,
+							"account": item_row.expense_account,
 							"against": warehouse_account[sle.warehouse]["name"],
-							"cost_center": detail.cost_center,
+							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
-							"project": detail.get("project") or self.get("project")
+							"project": item_row.get("project") or self.get("project")
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
@@ -81,6 +84,11 @@ class StockController(AccountsController):
 				"\n".join(warehouse_with_no_account))
 
 		return process_gl_map(gl_list)
+		
+	def validate_negative_stock(self, sle):
+		if sle.qty_after_transaction < 0 and sle.actual_qty < 0:
+			frappe.throw(_("For the Item {item}, valuation rate not found for warehouse {warehouse}. To be able to do accounting entries (for booking expenses), we need valuation rate for item {item}. Please create an incoming stock transaction, on or before {posting_date} {posting_time}, and then try submiting {current_document}").format(item=sle.item_code, warehouse=sle.warehouse, 
+				posting_date=sle.posting_date, posting_time=sle.posting_time, current_document=self.name))
 
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
 		if self.doctype == "Stock Reconciliation":
@@ -130,7 +138,7 @@ class StockController(AccountsController):
 	def get_stock_ledger_details(self):
 		stock_ledger = {}
 		for sle in frappe.db.sql("""select warehouse, stock_value_difference,
-			voucher_detail_no, item_code, posting_date, actual_qty
+			voucher_detail_no, item_code, posting_date, posting_time, actual_qty, qty_after_transaction
 			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
 			(self.doctype, self.name), as_dict=True):
 				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
