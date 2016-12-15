@@ -14,15 +14,17 @@ def validate_status(status, options):
 
 status_map = {
 	"Lead": [
-		["Converted", "has_customer"],
+		["Lost Quotation", "has_lost_quotation"],
 		["Opportunity", "has_opportunity"],
+		["Quotation", "has_quotation"],
+		["Converted", "has_customer"],
 	],
 	"Opportunity": [
 		["Quotation", "has_quotation"],
 		["Converted", "has_ordered_quotation"],
 		["Lost", "eval:self.status=='Lost'"],
+		["Lost", "has_lost_quotation"],
 		["Closed", "eval:self.status=='Closed'"]
-
 	],
 	"Quotation": [
 		["Draft", None],
