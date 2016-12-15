@@ -10,6 +10,7 @@ from email_reply_parser import EmailReplyParser
 from erpnext.hr.doctype.employee.employee import is_holiday
 from frappe.utils import formatdate
 from markdown2 import markdown
+from frappe.core.doctype.communication.email import make
 
 class DailyWorkSummary(Document):
 	def send_mails(self, settings, emails):
@@ -18,9 +19,8 @@ class DailyWorkSummary(Document):
 			dict(enable_incoming=1, default_incoming=1), 'email_id')
 
 		self.db_set('email_sent_to', '\n'.join(emails))
-		frappe.sendmail(recipients = emails, message = settings.message,
-			subject = settings.subject, reference_doctype=self.doctype,
-			reference_name=self.name, reply_to = incoming_email_account)
+		make(doctype=self.doctype, name=self.name, subject=settings.subject,
+			content=settings.message, recipients = ", ".join(emails), send_email=True)
 
 	def send_summary(self):
 		'''Send summary of all replies. Called at midnight'''
