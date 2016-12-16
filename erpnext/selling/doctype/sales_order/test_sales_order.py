@@ -363,8 +363,6 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
-		if frappe.db.get_value("Item", "_Test Regular Item", "is_stock_item")==1:
-			make_stock_entry(item="_Test Regular Item", target="_Test Warehouse - _TC", qty=10, rate=100)
 		
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "delivered_by_supplier": 1,
         'default_supplier': '_Test Supplier',
@@ -392,6 +390,9 @@ class TestSalesOrder(unittest.TestCase):
 				"conversion_factor": 1.0
 			}
 		]
+
+		if frappe.db.get_value("Item", "_Test Regular Item", "is_stock_item")==1:
+			make_stock_entry(item="_Test Regular Item", target="_Test Warehouse - _TC", qty=10, rate=100)
 
 		#setuo existing qty from bin
 		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
