@@ -3,21 +3,24 @@
 
 frappe.ui.form.on("Process Payroll", {
 	onload: function(frm) {
-		frm.doc.posting_date = frm.doc.start_date = frm.doc.end_date = frappe.datetime.nowdate()
+		frm.doc.posting_date = frappe.datetime.nowdate();
+		frm.doc.start_date = '';
+		frm.doc.end_date = '';
+		frm.doc.payroll_frequency = '';
 	},
 
 	refresh: function(frm) {
 		frm.disable_save();
 	},
-	
+
 	payroll_frequency: function(frm) {
 		frm.trigger("set_start_end_dates");
 	},
-	
+
 	start_date: function(frm) {
 		frm.trigger("set_start_end_dates");
 	},
-	
+
 	end_date: function(frm) {
 		frm.trigger("set_start_end_dates");
 	},
@@ -25,20 +28,19 @@ frappe.ui.form.on("Process Payroll", {
 	payment_account: function(frm) {
 		frm.toggle_display(['make_bank_entry'], (frm.doc.payment_account!="" && frm.doc.payment_account!="undefined"));
 	},
-	
+
 	set_start_end_dates: function(frm) {
 		if (!frm.doc.salary_slip_based_on_timesheet){
 			frappe.call({
 				method:'erpnext.hr.doctype.process_payroll.process_payroll.get_start_end_dates',
 				args:{
 					payroll_frequency: frm.doc.payroll_frequency,
-					start_date: frm.doc.start_date,
-					end_date: frm.doc.end_date
+					start_date: frm.doc.start_date || frm.doc.posting_date
 				},
 				callback: function(r){
 					if (r.message){
 						frm.set_value('start_date', r.message.start_date);
-						frm.set_value('end_date', r.message.end_date);			
+						frm.set_value('end_date', r.message.end_date);
 					}
 				}
 			})
@@ -75,7 +77,7 @@ cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
 		if (r.message)
 			cur_frm.cscript.display_activity_log(r.message);
 	}
-	return $c('runserverobj', args={'method':'create_sal_slip','docs':doc},callback);
+	return $c('runserverobj', args={'method':'create_salary_slips','docs':doc},callback);
 }
 
 cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
@@ -94,7 +96,7 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 				cur_frm.cscript.display_activity_log(r.message);
 		}
 
-		return $c('runserverobj', args={'method':'submit_salary_slip','docs':doc},callback);
+		return $c('runserverobj', args={'method':'submit_salary_slips','docs':doc},callback);
 	});
 }
 
@@ -111,15 +113,15 @@ cur_frm.cscript.reference_entry = function(doc,cdt,cdn){
 		title: __("Bank Transaction Reference"),
 		fields: [
 			{
-				"label": __("Reference Number"), 
+				"label": __("Reference Number"),
 				"fieldname": "reference_number",
-				"fieldtype": "Data", 
+				"fieldtype": "Data",
 				"reqd": 1
 			},
 			{
-				"label": __("Reference Date"), 
+				"label": __("Reference Date"),
 				"fieldname": "reference_date",
-				"fieldtype": "Date", 
+				"fieldtype": "Date",
 				"reqd": 1,
 				"default": get_today()
 			}

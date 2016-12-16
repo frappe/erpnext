@@ -28,7 +28,8 @@
 					},
 					"Petty Cash": {
 						"account_type": "Cash"
-					}
+					},
+					"account_type": "Cash"
 				},
 				"Loans and Advances-Assets": {
 					"Prepayments": {}
@@ -49,29 +50,73 @@
 			"Non-current assets": {
 				"Fixed Assets": {
 					"Accumulated Depreciation": {
-						"AccDep-Equipment-AV": {},
-						"AccDep-Equipment-Bar": {},
-						"AccDep-Equipment-ICT": {},
-						"AccDep-Equipment-Electrical": {},
-						"AccDep-Furniture and Fixtures": {},
-						"AccDep-Equipment-Kitchen": {},
-						"AccDep-Equipment-Lighting": {},
-						"AccDep-Equipment-Office": {},
-						"AccDep-Motor Vehicle": {},
-						"AccDep-Plant and Machinery": {},
-						"AccDep-Renovation": {}
+						"AccDep-Equipment-AV": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-Bar": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-ICT": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-Electrical": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Furniture and Fixtures": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-Kitchen": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-Lighting": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-Office": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Motor Vehicle": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Plant and Machinery": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Renovation": {
+							"account_type": "Accumulated Depreciation"
+						}
 					},
-					"Equipment-AV": {},
-					"Equipment-Bar": {},
-					"Equipment-ICT": {},
-					"Equipment-Electrical": {},
-					"Furniture and Fixtures": {},
-					"Equipment-Kitchen": {},
-					"Equipment-Lighting": {},
-					"Equipment-Office": {},
-					"Motor Vehicle": {},
-					"Plant and Machinery": {},
-					"Renovation": {}
+					"Equipment-AV": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-Bar": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-ICT": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-Electrical": {
+						"account_type": "Fixed Asset"
+					},
+					"Furniture and Fixtures": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-Kitchen": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-Lighting": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-Office": {
+						"account_type": "Fixed Asset"
+					},
+					"Motor Vehicle": {
+						"account_type": "Fixed Asset"
+					},
+					"Plant and Machinery": {
+						"account_type": "Fixed Asset"
+					},
+					"Renovation": {
+						"account_type": "Fixed Asset"
+					}
 				},
 				"Non-Fixed Assets": {
 					"Goodwill": {},
@@ -292,22 +337,46 @@
 			"Expenses-Other": {
 				"Bad Debts Written Off": {},
 				"Depreciation": {
-					"Dep-AV Equipment": {},
-					"Dep-Bar Equipment": {},
-					"Dep-ICT Equipment": {},
-					"Dep-Electrical Equipment": {},
-					"Dep-Fixtures & Furniture": {},
-					"Dep-Kitchen Equipment": {},
-					"Dep-Lighting Equipment": {},
-					"Dep-Motor Vehicle": {},
-					"Dep-Office Equipment": {},
-					"Dep-Plant & Machinery": {},
-					"Dep-Renovation": {}
+					"Dep-AV Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Bar Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-ICT Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Electrical Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Fixtures & Furniture": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Kitchen Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Lighting Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Motor Vehicle": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Office Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Plant & Machinery": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Renovation": {
+						 "account_type": "Depreciation"
+					}
 				},
 				"Donations": {},
-				"Round Off": {},
+				"Round Off": {
+					"account_type": "Round Off"
+				},
 				"Tax Expenses": {
-					"Tax Expenses": {}
+					"is_group": 1
 				}
 			},
 			"Expenses-Staff": {

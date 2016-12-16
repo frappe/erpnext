@@ -91,6 +91,14 @@ class Opportunity(TransactionBase):
 		return frappe.db.sql("""select q.name from `tabQuotation` q, `tabQuotation Item` qi
 			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s and q.status = 'Ordered'""", self.name)
 
+	def has_lost_quotation(self):
+		return frappe.db.sql("""
+			select q.name 
+			from `tabQuotation` q, `tabQuotation Item` qi
+			where q.name = qi.parent and q.docstatus=1 
+				and qi.prevdoc_docname =%s and q.status = 'Lost'
+			""", self.name)
+
 	def validate_cust_name(self):
 		if self.customer:
 			self.customer_name = frappe.db.get_value("Customer", self.customer, "customer_name")

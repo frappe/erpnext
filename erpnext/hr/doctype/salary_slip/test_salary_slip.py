@@ -16,7 +16,7 @@ class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
 		make_earning_salary_component(["Basic Salary", "Allowance", "HRA"])
 		make_deduction_salary_component(["Professional Tax", "TDS"])
-		
+
 		for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
@@ -65,7 +65,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEquals(ss.deductions[1].amount, 2500)
 		self.assertEquals(ss.gross_pay, 10500)
 		self.assertEquals(ss.net_pay, 3000)
-		
+
 	def test_payment_days(self):
 		no_of_days = self.get_no_of_days()
 		# Holidays not included in working days
@@ -73,7 +73,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		# set joinng date in the same month
 		self.make_employee("test_employee@salary.com")
-		if getdate(nowdate()).day > 15:
+		if getdate(nowdate()).day >= 15:
 			date_of_joining = getdate(add_days(nowdate(),-10))
 			relieving_date = getdate(add_days(nowdate(),-10))
 		elif getdate(nowdate()).day < 15 and getdate(nowdate()).day > 5:
@@ -86,10 +86,13 @@ class TestSalarySlip(unittest.TestCase):
 			date_of_joining = getdate(nowdate())
 			relieving_date = getdate(nowdate())
 
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "date_of_joining", date_of_joining)
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "status", "Active")
-		
+		frappe.db.set_value("Employee", frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "date_of_joining", date_of_joining)
+		frappe.db.set_value("Employee", frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
+		frappe.db.set_value("Employee", frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "status", "Active")
+
 		ss = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@salary.com", "Monthly"))
 
@@ -101,7 +104,7 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", relieving_date)
 		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "status", "Left")
 		ss.save()
-		
+
 		self.assertEquals(ss.total_working_days, no_of_days[0])
 		self.assertEquals(ss.payment_days, getdate(relieving_date).day)
 
@@ -190,7 +193,7 @@ class TestSalarySlip(unittest.TestCase):
 				"from_date": fiscal_year[1],
 				"to_date": fiscal_year[2],
 				"weekly_off": "Sunday"
-			}).insert()	
+			}).insert()
 			holiday_list.get_weekly_off_dates()
 			holiday_list.save()
 
@@ -198,12 +201,11 @@ class TestSalarySlip(unittest.TestCase):
 		employee = frappe.db.get_value("Employee", {"user_id": user})
 		salary_structure = make_salary_structure(payroll_frequency + " Salary Structure Test for Salary Slip", payroll_frequency, employee)
 		salary_slip = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": user})})
-		
+
 		if not salary_slip:
 			salary_slip = make_salary_slip(salary_structure, employee = employee)
 			salary_slip.employee_name = frappe.get_value("Employee", {"name":frappe.db.get_value("Employee", {"user_id": user})}, "employee_name")
 			salary_slip.payroll_frequency = payroll_frequency
-			salary_slip.start_date = nowdate()
 			salary_slip.posting_date = nowdate()
 			salary_slip.insert()
 			# salary_slip.submit()
@@ -220,9 +222,10 @@ class TestSalarySlip(unittest.TestCase):
 
 	def get_no_of_days(self):
 		no_of_days_in_month = calendar.monthrange(getdate(nowdate()).year,
-		                                  getdate(nowdate()).month)
+			getdate(nowdate()).month)
 		no_of_holidays_in_month = len([1 for i in calendar.monthcalendar(getdate(nowdate()).year,
-		                                  getdate(nowdate()).month) if i[6] != 0])
+			getdate(nowdate()).month) if i[6] != 0])
+
 		return [no_of_days_in_month[1], no_of_holidays_in_month]
 
 
@@ -280,7 +283,7 @@ def get_employee_details(employee):
 			}
 		]
 
-def get_earnings_component():	
+def get_earnings_component():
 	return [
 				{
 					"salary_component": 'Basic Salary',
@@ -310,8 +313,8 @@ def get_earnings_component():
 					"idx": 4
 				},
 			]
-			
-def get_deductions_component():	
+
+def get_deductions_component():
 	return [
 				{
 					"salary_component": 'Professional Tax',
