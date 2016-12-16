@@ -62,12 +62,10 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +52,Show Variants,Покажи �
 DocType: Academic Term,Academic Term,Академик Term
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.py +14,Material,Материал
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +624,Quantity,Количество
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +49,Customer &gt; Customer Group &gt; Territory,Клиент&gt; Customer Група&gt; Територия
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +529,Accounts table cannot be blank.,Сметки маса не може да бъде празно.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +151,Loans (Liabilities),Заеми (пасиви)
 DocType: Employee Education,Year of Passing,Година на Passing
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +69,"Reference: %s, Item Code: %s and Customer: %s","Справка:% S, Код:% S и гостите:% S"
-apps/erpnext/erpnext/controllers/stock_controller.py +90,"For the Item {item}, valuation rate not found for warehouse {warehouse}. To be able to do accounting entries (for booking expenses), we need valuation rate for item {item}. Please create an incoming stock transaction, on or before {posting_date} {posting_time}, and then try submiting {current_document}","За елемента {т}, скорост оценка не намери за склад {склад}. За да бъде в състояние да направи счетоводните записи (за разходи за резервации), имаме нужда от скорост оценка за т {т}. Моля да създадете входящо фондова сделка, на или преди {posting_date} {posting_time}, и след това опитайте да изпращате {current_document}"
 apps/erpnext/erpnext/public/js/pos/pos_bill_item.html +12,In Stock,В Наличност
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +46,Open Issues,открити въпроси
 DocType: Designation,Designation,Предназначение
@@ -88,7 +86,6 @@ DocType: Timesheet,Total Costing Amount,Общо Остойностяване с
 DocType: Delivery Note,Vehicle No,Превозно средство не
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +139,Please select Price List,Моля изберете Ценоразпис
 DocType: Production Order Operation,Work In Progress,Незавършено производство
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +23,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Моля, настройка на служителите за именуване на системата в Human Resource&gt; Настройки HR"
 apps/erpnext/erpnext/schools/report/absent_student_report/absent_student_report.py +13,Please select date,"Моля, изберете дата"
 DocType: Employee,Holiday List,Holiday Списък
 apps/erpnext/erpnext/public/js/setup_wizard.js +205,Accountant,Счетоводител
@@ -302,6 +299,7 @@ DocType: Course Scheduling Tool,Course Start Date,Курс Начална дат
 ,Student Batch-Wise Attendance,Student партиди Присъствие
 DocType: Item,Publish in Hub,Публикувай в Hub
 DocType: Student Admission,Student Admission,прием на студенти
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +49,Customer &gt; Customer Group &gt; Territory,Клиент&gt; Customer Група&gt; Територия
 ,Terretory,Terretory
 apps/erpnext/erpnext/stock/doctype/item/item.py +695,Item {0} is cancelled,Точка {0} е отменен
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +831,Material Request,Материал Искане
@@ -620,7 +618,6 @@ DocType: Activity Type,Default Costing Rate,Default Остойностяване
 DocType: Maintenance Schedule,Maintenance Schedule,График за поддръжка
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +34,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","Тогава към цените правилник се филтрират базирани на гостите, група клиенти, територия, доставчик, доставчик Type, Кампания, продажба Partner т.н."
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +23,Net Change in Inventory,Нетна промяна в Инвентаризация
-apps/erpnext/erpnext/utilities/doctype/address/address.py +168,No default Address Template found. Please create a new one from Setup &gt; Printing and Branding &gt; Address Template.,"Не подразбиране Адрес Template намерен. Моля, създайте нов от Setup&gt; Печат и Branding&gt; Адрес за шаблони."
 DocType: Employee,Passport Number,Номер на паспорт
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +83,Manager,Мениджър
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +138,New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0},Нов кредитен лимит е по-малко от сегашната изключително количество за клиента. Кредитен лимит трябва да бъде поне {0}
@@ -767,6 +764,7 @@ DocType: Employee,Bank A/C No.,Bank A / C No.
 DocType: Budget,Project,Проект
 DocType: Quality Inspection Reading,Reading 7,Четене 7
 DocType: Address,Personal,Персонален
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +9,Partially Ordered,Частична поръчано
 DocType: Expense Claim Detail,Expense Claim Type,Expense претенция Type
 DocType: Shopping Cart Settings,Default settings for Shopping Cart,Настройките по подразбиране за количката
 apps/erpnext/erpnext/accounts/doctype/asset/depreciation.py +128,Asset scrapped via Journal Entry {0},Asset бракуват чрез вестник Влизане {0}
@@ -969,7 +967,7 @@ DocType: Workstation,Electricity Cost,Ток Cost
 DocType: HR Settings,Don't send Employee Birthday Reminders,Не изпращайте Employee напомняне за рождени дни
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +113,Stock Entries,Сток влизания
 DocType: Item,Inspection Criteria,Критериите за инспекция
-apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Прехвърлят
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Прехвърлят
 apps/erpnext/erpnext/public/js/setup_wizard.js +163,Upload your letter head and logo. (you can edit them later).,Качете вашето писмо главата и лого. (Можете да ги редактирате по-късно).
 DocType: Timesheet Detail,Bill,законопроект
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Следваща Амортизация Дата се вписва като минало дата
@@ -1017,6 +1015,7 @@ apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +23,G
 DocType: Item,Manufacturer,Производител
 DocType: Landed Cost Item,Purchase Receipt Item,Покупка Квитанция Точка
 DocType: Purchase Receipt,PREC-RET-,PREC-RET-
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier &gt; Supplier Type,Доставчик&gt; Доставчик Type
 DocType: POS Profile,Sales Invoice Payment,Фактурата за продажба на плащане
 DocType: Production Plan Item,Reserved Warehouse in Sales Order / Finished Goods Warehouse,Включено Warehouse в продажбите Поръчка / готова продукция Warehouse
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +70,Selling Amount,Продажба Сума
@@ -1062,6 +1061,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +261,List a few of your suppliers
 apps/erpnext/erpnext/templates/pages/home.html +31,View All Products,Преглед на всички продукти
 DocType: Company,Default Currency,Default валути
 DocType: Contact,Enter designation of this Contact,Въведете наименование за този контакт
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +46,Item Code &gt; Item Group &gt; Brand,Код&gt; Точка Група&gt; Brand
 DocType: Expense Claim,From Employee,От Employee
 apps/erpnext/erpnext/controllers/accounts_controller.py +413,Warning: System will not check overbilling since amount for Item {0} in {1} is zero,"Внимание: Системата няма да се покажат некоректно, тъй като сума за позиция {0} в {1} е нула"
 DocType: Journal Entry,Make Difference Entry,Направи Разлика Влизане
@@ -1280,6 +1280,7 @@ DocType: Request for Quotation Supplier,Request for Quotation Supplier,Запи�
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +113,Hardware,Железария
 DocType: Sales Order,Recurring Upto,повтарящо Upto
 DocType: Attendance,HR Manager,HR мениджъра
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +87,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Моля настройка номериране серия за организиране и обслужване чрез Setup&gt; номерационен Series
 apps/erpnext/erpnext/accounts/party.py +171,Please select a Company,Моля изберете Company
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +51,Privilege Leave,Privilege отпуск
 DocType: Purchase Invoice,Supplier Invoice Date,Доставчик Дата Invoice
@@ -1409,6 +1410,7 @@ DocType: Company,Services,Услуги
 DocType: HR Settings,Email Salary Slip to Employee,Email Заплата поднасяне на служителите
 DocType: Cost Center,Parent Cost Center,Родител Cost Center
 DocType: Sales Invoice,Source,Източник
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +23,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Моля, настройка на служителите за именуване на системата в Human Resource&gt; Настройки HR"
 apps/erpnext/erpnext/templates/pages/projects.html +31,Show closed,Покажи затворен
 DocType: Leave Type,Is Leave Without Pay,Дали си тръгне без Pay
 apps/erpnext/erpnext/stock/doctype/item/item.py +236,Asset Category is mandatory for Fixed Asset item,Asset Категория е задължително за Фиксирана позиция в актива
@@ -1591,6 +1593,7 @@ apps/erpnext/erpnext/accounts/doctype/asset/asset.py +67,Next Depreciation Date 
 apps/erpnext/erpnext/config/support.py +32,Single unit of an Item.,Единична единица на дадена позиция.
 DocType: Fee Category,Fee Category,Такса Категория
 ,Student Fee Collection,Student за събиране на такси
+apps/erpnext/erpnext/controllers/stock_controller.py +90,"For the Item {0}, valuation rate not found for warehouse {1}. To be able to do accounting entries (for booking expenses), we need valuation rate for item {2}. Please create an incoming stock transaction, on or before {3} {4}, and then try submiting {5}","За позицията от {0}, скорост оценка не намери за склад {1}. За да бъде в състояние да направи счетоводните записи (за разходи за резервации), имаме нужда от скорост оценка за т {2}. Моля да създадете входящо фондова сделка, на или преди {3} {4}, и след това опитайте да изпращате {5}"
 apps/erpnext/erpnext/schools/doctype/course_schedule/course_schedule.py +26,Student Batch or Student Group is mandatory,Student Batch или Student Group е задължително
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Направи счетоводен запис за всеки склад Movement
 DocType: Leave Allocation,Total Leaves Allocated,Общо Leaves Отпуснати
@@ -1598,6 +1601,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +155,
 apps/erpnext/erpnext/public/js/setup_wizard.js +78,Please enter valid Financial Year Start and End Dates,"Моля, въведете валиден Финансова година Начални и крайни дати"
 DocType: Employee,Date Of Retirement,Дата на пенсиониране
 DocType: Upload Attendance,Get Template,Вземи Template
+apps/erpnext/erpnext/utilities/doctype/address/address.py +168,No default Address Template found. Please create a new one from Setup &gt; Printing and Branding &gt; Address Template.,"Не подразбиране Адрес Template намерен. Моля, създайте нов от Setup&gt; Печат и Branding&gt; Адрес за шаблони."
 DocType: Address,Postal,Пощенски
 DocType: Vehicle,Doors,Врати
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +202,ERPNext Setup Complete!,ERPNext Setup Complete!
@@ -1931,7 +1935,7 @@ apps/erpnext/erpnext/public/js/utils.js +194,Get From,Вземи От
 DocType: C-Form,Quarter,Тримесечие
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +104,Miscellaneous Expenses,Други разходи
 DocType: Global Defaults,Default Company,Default Company
-apps/erpnext/erpnext/controllers/stock_controller.py +183,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,"Expense или Разлика сметка е задължително за т {0}, както цялостната стойност фондова тя влияе"
+apps/erpnext/erpnext/controllers/stock_controller.py +184,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,"Expense или Разлика сметка е задължително за т {0}, както цялостната стойност фондова тя влияе"
 apps/erpnext/erpnext/controllers/accounts_controller.py +429,"Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings","Не може да се overbill за позиция {0} на ред {1} повече от {2}. За да се даде възможност некоректно, моля, задайте на склад Settings"
 DocType: Payment Request,PR,PR
 DocType: Cheque Print Template,Bank Name,Име на банката
@@ -2327,7 +2331,6 @@ DocType: Product Bundle,Parent Item,Родител Точка
 DocType: Account,Account Type,Тип Сметка
 DocType: Delivery Note,DN-RET-,DN-RET-
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +123,Leave Type {0} cannot be carry-forwarded,Оставете Type {0} не може да се извърши-препрати
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier &gt; Supplier Type,Доставчик&gt; Доставчик Type
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +216,Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',"График за поддръжка не се генерира за всички предмети. Моля, кликнете върху &quot;Генериране Schedule&quot;"
 ,To Produce,Да Произвежда
 apps/erpnext/erpnext/config/hr.py +93,Payroll,ведомост
@@ -2447,7 +2450,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Стандартни условия, които могат да бъдат добавени към Продажби и покупки. Примери: 1. Валидност на офертата. 1. Условия на плащане (авансово, на кредит, част аванс и т.н.). 1. Какво е допълнително (или платими от клиента). Предупреждение / използване 1. безопасност. 1. Гаранция ако има такива. 1. Връща политика. 1. Условия за корабоплаването, ако е приложимо. 1. начини за разрешаване на спорове, обезщетение, отговорност и др 1. Адрес и контакти на вашата компания."
 DocType: Attendance,Leave Type,Оставете Type
-apps/erpnext/erpnext/controllers/stock_controller.py +189,Expense / Difference account ({0}) must be a 'Profit or Loss' account,Expense / Разлика сметка ({0}) трябва да бъде партида на &quot;печалбата или загубата&quot;
+apps/erpnext/erpnext/controllers/stock_controller.py +190,Expense / Difference account ({0}) must be a 'Profit or Loss' account,Expense / Разлика сметка ({0}) трябва да бъде партида на &quot;печалбата или загубата&quot;
 DocType: Account,Accounts User,Роля Потребител на 'Сметки'
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +89,Name error: {0},Наименование грешка: {0}
 apps/erpnext/erpnext/stock/doctype/item/item_list.js +8,Shortage,недостиг
@@ -2482,7 +2485,7 @@ DocType: Salary Slip,Gross Pay + Arrear Amount +Encashment Amount - Total Deduct
 DocType: Item,Total Projected Qty,Общото прогнозно Количество
 DocType: Monthly Distribution,Distribution Name,Разпределение Име
 DocType: Course,Course Code,Код на курса
-apps/erpnext/erpnext/controllers/stock_controller.py +287,Quality Inspection required for Item {0},"Инспекция на качеството, необходимо за т {0}"
+apps/erpnext/erpnext/controllers/stock_controller.py +288,Quality Inspection required for Item {0},"Инспекция на качеството, необходимо за т {0}"
 DocType: Quotation,Rate at which customer's currency is converted to company's base currency,"Скоростта, с която на клиента валута се превръща в основна валута на компанията"
 DocType: Purchase Invoice Item,Net Rate (Company Currency),Net Rate (Company валути)
 DocType: Salary Detail,Condition and Formula Help,Състояние и Формула Помощ
@@ -2894,7 +2897,6 @@ DocType: Grading Structure,Grade Intervals,Интервалите клас
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Select the nature of your business.,Изберете естеството на вашия бизнес.
 apps/erpnext/erpnext/config/manufacturing.py +57,Where manufacturing operations are carried.,Когато се извършват производствени операции.
 DocType: Asset Movement,Source Warehouse,Източник Warehouse
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +189,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Моля, задайте за именуване Series за {0} чрез Setup&gt; Settings&gt; Наименуване Series"
 DocType: Installation Note,Installation Date,Дата на инсталация
 apps/erpnext/erpnext/controllers/accounts_controller.py +547,Row #{0}: Asset {1} does not belong to company {2},Row {0}: Asset {1} не принадлежи на компания {2}
 DocType: Employee,Confirmation Date,Потвърждение Дата
@@ -3307,7 +3309,7 @@ DocType: Sales Invoice,Product Bundle Help,Каталог Bundle Помощ
 DocType: Production Order Item,Production Order Item,Производство Поръчка Точка
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +16,No record found,Не са намерени записи
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +137,Cost of Scrapped Asset,Разходите за Брак на активи
-apps/erpnext/erpnext/controllers/stock_controller.py +192,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Разходен Център е задължително за {2}
+apps/erpnext/erpnext/controllers/stock_controller.py +193,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Разходен Център е задължително за {2}
 DocType: Vehicle,Policy No,политика Не
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +613,Get Items from Product Bundle,Получават от продукта Bundle
 DocType: Asset,Straight Line,Права
@@ -3382,7 +3384,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 DocType: Production Order Item,Transferred Qty,Прехвърлени Количество
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Навигация
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +147,Planning,Планиране
-apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Издаден
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +16,Issued,Издаден
 DocType: Project,Total Billing Amount (via Time Logs),Общо Billing сума (чрез Time Logs)
 apps/erpnext/erpnext/public/js/setup_wizard.js +301,We sell this Item,Ние продаваме този артикул
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +68,Supplier Id,Id доставчик
@@ -3416,6 +3418,7 @@ DocType: Purchase Invoice,Taxes and Charges Added,Данъци и такси Д�
 ,Sales Funnel,Продажбите на фунията
 apps/erpnext/erpnext/setup/doctype/company/company.py +45,Abbreviation is mandatory,Съкращението е задължително
 DocType: Project,Task Progress,Задача Прогрес
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +189,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Моля, задайте за именуване Series за {0} чрез Setup&gt; Settings&gt; Наименуване Series"
 ,Qty to Transfer,Количество да Трансфер
 apps/erpnext/erpnext/config/selling.py +13,Quotes to Leads or Customers.,Цитати на потенциални клиенти или клиенти.
 DocType: Stock Settings,Role Allowed to edit frozen stock,Роля за редактиране замразена
@@ -3983,7 +3986,6 @@ apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Генериран�
 apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Следваща Контакт не може да бъде същата като на Водещия Email ID
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Изкупуването трябва да се провери, ако има такива се избира като {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Отстъпка трябва да е по-малко от 100
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +87,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Моля настройка номериране серия за организиране и обслужване чрез Setup&gt; номерационен Series
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Последно процент покупка не е намерен
 DocType: Purchase Invoice,Write Off Amount (Company Currency),Напиши Off Сума (Company валути)
 DocType: Sales Invoice Timesheet,Billing Hours,Платежни часа
@@ -4147,7 +4149,6 @@ DocType: Journal Entry,Debit Note,Дебитно известие
 DocType: Stock Entry,As per Stock UOM,По фондова мерна единица
 apps/erpnext/erpnext/stock/doctype/batch/batch_list.js +7,Not Expired,Не е изтекъл
 DocType: Student Log,Achievement,постижение
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +46,Item Code &gt; Item Group &gt; Brand,Код&gt; Точка Група&gt; Brand
 DocType: Journal Entry,Total Debit,Общо Debit
 DocType: Manufacturing Settings,Default Finished Goods Warehouse,По подразбиране Завършил Стоки Warehouse
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +75,Sales Person,Продажбите Person

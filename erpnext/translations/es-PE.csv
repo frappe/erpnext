@@ -517,7 +517,7 @@ apps/erpnext/erpnext/hooks.py +80,Shipments,Los envíos
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +154,Row # ,Fila #
 DocType: Purchase Invoice,In Words (Company Currency),En palabras (Moneda Local)
 DocType: Asset,Supplier,Proveedores
-apps/erpnext/erpnext/controllers/stock_controller.py +183,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,"Cuenta de Gastos o Diferencia es obligatorio para el elemento {0} , ya que impacta el valor del stock"
+apps/erpnext/erpnext/controllers/stock_controller.py +184,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,"Cuenta de Gastos o Diferencia es obligatorio para el elemento {0} , ya que impacta el valor del stock"
 apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +27,-Above,-Mayor
 DocType: Leave Application,Total Leave Days,Total Vacaciones
 DocType: Leave Control Panel,Leave blank if considered for all departments,Dejar en blanco si se considera para todos los departamentos
@@ -666,7 +666,7 @@ DocType: BOM Item,Scrap %,Chatarra %
 ,Requested,Requerido
 DocType: Account,Stock Received But Not Billed,Inventario Recibido pero no facturados
 DocType: Monthly Distribution,Distribution Name,Nombre del Distribución
-apps/erpnext/erpnext/controllers/stock_controller.py +287,Quality Inspection required for Item {0},Inspección de la calidad requerida para el articulo {0}
+apps/erpnext/erpnext/controllers/stock_controller.py +288,Quality Inspection required for Item {0},Inspección de la calidad requerida para el articulo {0}
 DocType: Quotation,Rate at which customer's currency is converted to company's base currency,Tasa a la cual la Moneda del Cliente se convierte a la moneda base de la compañía
 DocType: Purchase Invoice Item,Net Rate (Company Currency),Tasa neta (Moneda Local)
 apps/erpnext/erpnext/config/selling.py +105,Manage Territory Tree.,Vista en árbol para la administración de los territorios
@@ -883,7 +883,7 @@ apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +87,Provisio
 DocType: Serial No,Creation Time,Momento de la creación
 DocType: Sales Invoice,Product Bundle Help,Ayuda del conjunto/paquete de productos
 ,Monthly Attendance Sheet,Hoja de Asistencia Mensual
-apps/erpnext/erpnext/controllers/stock_controller.py +192,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: 'Centro de Costos' es obligatorio para el producto {2}
+apps/erpnext/erpnext/controllers/stock_controller.py +193,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: 'Centro de Costos' es obligatorio para el producto {2}
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +21,Attendance From Date and Attendance To Date is mandatory,Asistencia Desde Fecha y Hasta Fecha de Asistencia es obligatoria
 apps/erpnext/erpnext/controllers/buying_controller.py +148,Please enter 'Is Subcontracted' as Yes or No,"Por favor, introduzca si 'Es Subcontratado' o no"
 DocType: Hub Settings,Seller Country,País del Vendedor

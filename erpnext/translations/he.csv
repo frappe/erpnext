@@ -883,7 +883,7 @@ DocType: Workstation,Electricity Cost,עלות חשמל
 DocType: HR Settings,Don't send Employee Birthday Reminders,אל תשלחו לעובדי יום הולדת תזכורות
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +113,Stock Entries,ערכי מניות
 DocType: Item,Inspection Criteria,קריטריונים לבדיקה
-apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,הועבר
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,הועבר
 apps/erpnext/erpnext/public/js/setup_wizard.js +163,Upload your letter head and logo. (you can edit them later).,העלה ראש המכתב ואת הלוגו שלך. (אתה יכול לערוך אותם מאוחר יותר).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +167,White,לבן
 DocType: SMS Center,All Lead (Open),כל הלידים (פתוח)
@@ -1770,7 +1770,7 @@ apps/erpnext/erpnext/public/js/utils.js +194,Get From,קבל מ
 DocType: C-Form,Quarter,רבעון
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +104,Miscellaneous Expenses,הוצאות שונות
 DocType: Global Defaults,Default Company,חברת ברירת מחדל
-apps/erpnext/erpnext/controllers/stock_controller.py +183,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,הוצאה או חשבון הבדל היא חובה עבור פריט {0} כערך המניה בסך הכל זה משפיע
+apps/erpnext/erpnext/controllers/stock_controller.py +184,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,הוצאה או חשבון הבדל היא חובה עבור פריט {0} כערך המניה בסך הכל זה משפיע
 apps/erpnext/erpnext/controllers/accounts_controller.py +429,"Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings","לא יכול overbill לפריט {0} בשורת {1} יותר מ {2}. כדי לאפשר overbilling, נא לקבוע בהגדרות בורסה"
 DocType: Cheque Print Template,Bank Name,שם בנק
 apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +27,-Above,-מעל
@@ -2241,7 +2241,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","תנאים והגבלות רגילים שניתן להוסיף למכירות ורכישות. דוגמאות: 1. זכאותה של ההצעה. 1. תנאי תשלום (מראש, באשראי, מראש חלק וכו '). 1. מהו נוסף (או שישולם על ידי הלקוח). אזהרה / שימוש 1. בטיחות. 1. אחריות אם בכלל. 1. החזרות מדיניות. 1. תנאי משלוח, אם קיימים. 1. דרכים להתמודדות עם סכסוכים, שיפוי, אחריות, וכו 'כתובת 1. ולתקשר של החברה שלך."
 DocType: Attendance,Leave Type,סוג החופשה
-apps/erpnext/erpnext/controllers/stock_controller.py +189,Expense / Difference account ({0}) must be a 'Profit or Loss' account,"חשבון הוצאות / הבדל ({0}) חייב להיות חשבון ""רווח והפסד"""
+apps/erpnext/erpnext/controllers/stock_controller.py +190,Expense / Difference account ({0}) must be a 'Profit or Loss' account,"חשבון הוצאות / הבדל ({0}) חייב להיות חשבון ""רווח והפסד"""
 DocType: Account,Accounts User,חשבונות משתמשים
 apps/erpnext/erpnext/stock/doctype/item/item_list.js +8,Shortage,מחסור
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +188,{0} {1} does not associated with {2} {3},{0} {1} אינו קשור {2} {3}
@@ -2275,7 +2275,7 @@ DocType: Salary Slip,Gross Pay + Arrear Amount +Encashment Amount - Total Deduct
 DocType: Item,Total Projected Qty,כללית המתוכננת כמות
 DocType: Monthly Distribution,Distribution Name,שם הפצה
 DocType: Course,Course Code,קוד קורס
-apps/erpnext/erpnext/controllers/stock_controller.py +287,Quality Inspection required for Item {0},בדיקת איכות הנדרשת לפריט {0}
+apps/erpnext/erpnext/controllers/stock_controller.py +288,Quality Inspection required for Item {0},בדיקת איכות הנדרשת לפריט {0}
 DocType: Quotation,Rate at which customer's currency is converted to company's base currency,קצב שבו לקוחות של מטבע מומר למטבע הבסיס של החברה
 DocType: Purchase Invoice Item,Net Rate (Company Currency),שיעור נטו (חברת מטבע)
 apps/erpnext/erpnext/config/selling.py +105,Manage Territory Tree.,ניהול עץ טריטוריה.
@@ -3023,7 +3023,7 @@ DocType: Sales Invoice,Product Bundle Help,מוצר Bundle עזרה
 DocType: Production Order Item,Production Order Item,פריט ייצור להזמין
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +16,No record found,לא נמצא רשומה
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +137,Cost of Scrapped Asset,עלות לגרוטאות נכסים
-apps/erpnext/erpnext/controllers/stock_controller.py +192,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: מרכז העלות הוא חובה עבור פריט {2}
+apps/erpnext/erpnext/controllers/stock_controller.py +193,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: מרכז העלות הוא חובה עבור פריט {2}
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +613,Get Items from Product Bundle,קבל פריטים מחבילת מוצרים
 DocType: Asset,Straight Line,קו ישר
 DocType: Project User,Project User,משתמש פרויקט
@@ -3092,7 +3092,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 DocType: Production Order Item,Transferred Qty,כמות שהועברה
 apps/erpnext/erpnext/config/learn.py +11,Navigating,ניווט
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +147,Planning,תכנון
-apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,הפיק
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +16,Issued,הפיק
 DocType: Project,Total Billing Amount (via Time Logs),סכום חיוב כולל (דרך זמן יומנים)
 apps/erpnext/erpnext/public/js/setup_wizard.js +301,We sell this Item,אנחנו מוכרים פריט זה
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +68,Supplier Id,ספק זיהוי

@@ -15,7 +15,7 @@ DocType: Pricing Rule,Selling,Selling
 apps/erpnext/erpnext/accounts/page/pos/pos.js +73, to ,Ultima Actualización : Fecha inválida
 DocType: Sales Order,%  Delivered,% Leveres
 DocType: Lead,Lead Owner,Bly Owner
-apps/erpnext/erpnext/controllers/stock_controller.py +192,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Udgiftområde er obligatorisk for varen {2}
+apps/erpnext/erpnext/controllers/stock_controller.py +193,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Udgiftområde er obligatorisk for varen {2}
 apps/erpnext/erpnext/config/selling.py +159,Tax template for selling transactions.,Skat skabelon til at sælge transaktioner.
 apps/erpnext/erpnext/controllers/accounts_controller.py +286, or ,o
 DocType: Sales Order,% of materials billed against this Sales Order,% Af materialer faktureret mod denne Sales Order

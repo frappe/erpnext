@@ -62,12 +62,10 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +52,Show Variants,ತೋ�
 DocType: Academic Term,Academic Term,ಶೈಕ್ಷಣಿಕ ಟರ್ಮ್
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.py +14,Material,ವಸ್ತು
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +624,Quantity,ಪ್ರಮಾಣ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +49,Customer &gt; Customer Group &gt; Territory,ಗ್ರಾಹಕ&gt; ಗ್ರಾಹಕನಿಗೆ ಗ್ರೂಪ್&gt; ಟೆರಿಟರಿ
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +529,Accounts table cannot be blank.,ಟೇಬಲ್ ಖಾತೆಗಳು ಖಾಲಿ ಇರುವಂತಿಲ್ಲ.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +151,Loans (Liabilities),ಸಾಲ ( ಹೊಣೆಗಾರಿಕೆಗಳು )
 DocType: Employee Education,Year of Passing,ಸಾಗುವುದು ವರ್ಷ
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +69,"Reference: %s, Item Code: %s and Customer: %s","ರೆಫರೆನ್ಸ್:% ರು, ಐಟಂ ಕೋಡ್:% s ಮತ್ತು ಗ್ರಾಹಕ% s"
-apps/erpnext/erpnext/controllers/stock_controller.py +90,"For the Item {item}, valuation rate not found for warehouse {warehouse}. To be able to do accounting entries (for booking expenses), we need valuation rate for item {item}. Please create an incoming stock transaction, on or before {posting_date} {posting_time}, and then try submiting {current_document}","ಐಟಂ {ಐಟಂ} ಫಾರ್, ಮೌಲ್ಯಮಾಪನ ದರ ಗೋದಾಮಿನ {ಗೋದಾಮಿನ} ಕಂಡುಬಂದಿಲ್ಲ. ಲೆಕ್ಕಪತ್ರ ನಮೂದುಗಳನ್ನು (ಬುಕಿಂಗ್ ವೆಚ್ಚಗಳಿಗಾಗಿ) ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತದೆ, ನಾವು ಐಟಂ {ಐಟಂ} ಮೌಲ್ಯಮಾಪನ ದರ ಅಗತ್ಯವಿದೆ. ದಯವಿಟ್ಟು ಒಳಬರುವ ಶೇರು ವಹಿವಾಟು, ಅಥವಾ {posting_time} {posting_date} ಮೊದಲು ರಚಿಸಲು ಹಾಗೂ {current_document} submiting ಪ್ರಯತ್ನಿಸಿ"
 apps/erpnext/erpnext/public/js/pos/pos_bill_item.html +12,In Stock,ಸಂಗ್ರಹಣೆಯಲ್ಲಿ
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +46,Open Issues,ಓಪನ್ ತೊಂದರೆಗಳು
 DocType: Designation,Designation,ಹುದ್ದೆ
@@ -88,7 +86,6 @@ DocType: Timesheet,Total Costing Amount,ಒಟ್ಟು ಕಾಸ್ಟಿಂಗ
 DocType: Delivery Note,Vehicle No,ವಾಹನ ನಂ
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +139,Please select Price List,ಬೆಲೆ ಪಟ್ಟಿ ಆಯ್ಕೆ ಮಾಡಿ
 DocType: Production Order Operation,Work In Progress,ಪ್ರಗತಿಯಲ್ಲಿದೆ ಕೆಲಸ
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +23,Please setup Employee Naming System in Human Resource &gt; HR Settings,ದಯವಿಟ್ಟು ಸೆಟಪ್ ನೌಕರರ ಮಾನವ ಸಂಪನ್ಮೂಲ ವ್ಯವಸ್ಥೆ ಹೆಸರಿಸುವ&gt; ಮಾನವ ಸಂಪನ್ಮೂಲ ಸೆಟ್ಟಿಂಗ್ಗಳು
 apps/erpnext/erpnext/schools/report/absent_student_report/absent_student_report.py +13,Please select date,ದಿನಾಂಕ ಆಯ್ಕೆ
 DocType: Employee,Holiday List,ಹಾಲಿಡೇ ಪಟ್ಟಿ
 apps/erpnext/erpnext/public/js/setup_wizard.js +205,Accountant,ಅಕೌಂಟೆಂಟ್
@@ -303,6 +300,7 @@ DocType: Course Scheduling Tool,Course Start Date,ಕೋರ್ಸ್ ಪ�
 ,Student Batch-Wise Attendance,ವಿದ್ಯಾರ್ಥಿ ಬ್ಯಾಚ್ ವೈಸ್ ಅಟೆಂಡೆನ್ಸ್
 DocType: Item,Publish in Hub,ಹಬ್ ಪ್ರಕಟಿಸಿ
 DocType: Student Admission,Student Admission,ವಿದ್ಯಾರ್ಥಿ ಪ್ರವೇಶ
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +49,Customer &gt; Customer Group &gt; Territory,ಗ್ರಾಹಕ&gt; ಗ್ರಾಹಕನಿಗೆ ಗ್ರೂಪ್&gt; ಟೆರಿಟರಿ
 ,Terretory,Terretory
 apps/erpnext/erpnext/stock/doctype/item/item.py +695,Item {0} is cancelled,ಐಟಂ {0} ರದ್ದು
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +831,Material Request,ಮೆಟೀರಿಯಲ್ ವಿನಂತಿ
@@ -622,7 +620,6 @@ DocType: Activity Type,Default Costing Rate,ಡೀಫಾಲ್ಟ್ ಕಾ�
 DocType: Maintenance Schedule,Maintenance Schedule,ನಿರ್ವಹಣೆ ವೇಳಾಪಟ್ಟಿ
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +34,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","ನಂತರ ಬೆಲೆ ನಿಯಮಗಳಲ್ಲಿ ಗ್ರಾಹಕ ಆಧಾರಿತ ಸೋಸುತ್ತವೆ, ಗ್ರಾಹಕ ಗುಂಪಿನ, ಪ್ರದೇಶ, ಸರಬರಾಜುದಾರ, ಸರಬರಾಜುದಾರ ಪ್ರಕಾರ, ಪ್ರಚಾರ, ಮಾರಾಟದ ಸಂಗಾತಿ ಇತ್ಯಾದಿ"
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +23,Net Change in Inventory,ಇನ್ವೆಂಟರಿ ನಿವ್ವಳ ವ್ಯತ್ಯಾಸದ
-apps/erpnext/erpnext/utilities/doctype/address/address.py +168,No default Address Template found. Please create a new one from Setup &gt; Printing and Branding &gt; Address Template.,ಡೀಫಾಲ್ಟ್ ವಿಳಾಸ ಟೆಂಪ್ಲೇಟು ಕಂಡುಬಂದಿಲ್ಲ. ದಯವಿಟ್ಟು ಸೆಟಪ್&gt; ಮುದ್ರಣ ಮತ್ತು ಬ್ರ್ಯಾಂಡಿಂಗ್&gt; ವಿಳಾಸ ಟೆಂಪ್ಲೇಟು ಹೊಸದನ್ನು ರಚಿಸಲು.
 DocType: Employee,Passport Number,ಪಾಸ್ಪೋರ್ಟ್ ಸಂಖ್ಯೆ
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +83,Manager,ವ್ಯವಸ್ಥಾಪಕ
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +138,New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0},ಹೊಸ ಕ್ರೆಡಿಟ್ ಮಿತಿಯನ್ನು ಗ್ರಾಹಕ ಪ್ರಸ್ತುತ ಬಾಕಿ ಮೊತ್ತದ ಕಡಿಮೆ. ಕ್ರೆಡಿಟ್ ಮಿತಿಯನ್ನು ಕನಿಷ್ಠ ಎಂದು ಹೊಂದಿದೆ {0}
@@ -788,6 +785,7 @@ DocType: Employee,Bank A/C No.,ಬ್ಯಾಂಕ್ ಎ / ಸಿ ಸಂಖ್�
 DocType: Budget,Project,ಯೋಜನೆ
 DocType: Quality Inspection Reading,Reading 7,7 ಓದುವಿಕೆ
 DocType: Address,Personal,ದೊಣ್ಣೆ
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +9,Partially Ordered,ಭಾಗಶಃ ಆದೇಶ
 DocType: Expense Claim Detail,Expense Claim Type,ಖರ್ಚು ClaimType
 DocType: Shopping Cart Settings,Default settings for Shopping Cart,ಶಾಪಿಂಗ್ ಕಾರ್ಟ್ ಡೀಫಾಲ್ಟ್ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು
 apps/erpnext/erpnext/accounts/doctype/asset/depreciation.py +128,Asset scrapped via Journal Entry {0},ಆಸ್ತಿ ಜರ್ನಲ್ ಎಂಟ್ರಿ ಮೂಲಕ ಕೈಬಿಟ್ಟಿತು {0}
@@ -990,7 +988,7 @@ DocType: Workstation,Electricity Cost,ವಿದ್ಯುತ್ ಬೆಲೆ
 DocType: HR Settings,Don't send Employee Birthday Reminders,ನೌಕರರ ಜನ್ಮದಿನ ಜ್ಞಾಪನೆಗಳನ್ನು ಕಳುಹಿಸಬೇಡಿ
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +113,Stock Entries,ಸ್ಟಾಕ್ ನಮೂದುಗಳು
 DocType: Item,Inspection Criteria,ಇನ್ಸ್ಪೆಕ್ಷನ್ ಮಾನದಂಡ
-apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,ವರ್ಗಾವಣೆಯ
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,ವರ್ಗಾವಣೆಯ
 apps/erpnext/erpnext/public/js/setup_wizard.js +163,Upload your letter head and logo. (you can edit them later).,ನಿಮ್ಮ ಪತ್ರ ತಲೆ ಮತ್ತು ಲೋಗೋ ಅಪ್ಲೋಡ್. (ನೀವು ಅವುಗಳನ್ನು ನಂತರ ಸಂಪಾದಿಸಬಹುದು).
 DocType: Timesheet Detail,Bill,ಬಿಲ್
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,ಮುಂದಿನ ಸವಕಳಿ ದಿನಾಂಕ ಕಳೆದ ದಿನಾಂಕ ದಾಖಲಿಸಿದರೆ
@@ -1038,6 +1036,7 @@ apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +23,G
 DocType: Item,Manufacturer,ತಯಾರಕ
 DocType: Landed Cost Item,Purchase Receipt Item,ಖರೀದಿ ರಸೀತಿ ಐಟಂ
 DocType: Purchase Receipt,PREC-RET-,PREC-RET-
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier &gt; Supplier Type,ಸರಬರಾಜುದಾರ&gt; ಸರಬರಾಜುದಾರ ಕೌಟುಂಬಿಕತೆ
 DocType: POS Profile,Sales Invoice Payment,ಮಾರಾಟದ ಸರಕುಪಟ್ಟಿ ಪಾವತಿ
 DocType: Production Plan Item,Reserved Warehouse in Sales Order / Finished Goods Warehouse,ಮಾರಾಟದ ಆರ್ಡರ್ / ಗೂಡ್ಸ್ ಮುಕ್ತಾಯಗೊಂಡ ವೇರ್ಹೌಸ್ ರಿಸರ್ವ್ಡ್ ಗೋದಾಮಿನ
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +70,Selling Amount,ಮಾರಾಟ ಪ್ರಮಾಣ
@@ -1083,6 +1082,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +261,List a few of your suppliers
 apps/erpnext/erpnext/templates/pages/home.html +31,View All Products,ಎಲ್ಲಾ ಉತ್ಪನ್ನಗಳು ವೀಕ್ಷಿಸಿ
 DocType: Company,Default Currency,ಡೀಫಾಲ್ಟ್ ಕರೆನ್ಸಿ
 DocType: Contact,Enter designation of this Contact,ಈ ಸಂಪರ್ಕಿಸಿ ಅಂಕಿತವನ್ನು ಯನ್ನು
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +46,Item Code &gt; Item Group &gt; Brand,ಐಟಂ ಕೋಡ್&gt; ಐಟಂ ಗ್ರೂಪ್&gt; ಬ್ರ್ಯಾಂಡ್
 DocType: Expense Claim,From Employee,ಉದ್ಯೋಗಗಳು ಗೆ
 apps/erpnext/erpnext/controllers/accounts_controller.py +413,Warning: System will not check overbilling since amount for Item {0} in {1} is zero,ಎಚ್ಚರಿಕೆ: ಸಿಸ್ಟಮ್ {0} {1} ಶೂನ್ಯ ರಲ್ಲಿ ಐಟಂ ಪ್ರಮಾಣದ overbilling ರಿಂದ ಪರೀಕ್ಷಿಸುವುದಿಲ್ಲ
 DocType: Journal Entry,Make Difference Entry,ವ್ಯತ್ಯಾಸ ಎಂಟ್ರಿ ಮಾಡಿ
@@ -1301,6 +1301,7 @@ DocType: Request for Quotation Supplier,Request for Quotation Supplier,ಉದ್
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +113,Hardware,ಹಾರ್ಡ್ವೇರ್
 DocType: Sales Order,Recurring Upto,ಮರುಕಳಿಸುವ ವರೆಗೆ
 DocType: Attendance,HR Manager,ಮಾನವ ಸಂಪನ್ಮೂಲ ಮ್ಯಾನೇಜರ್
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +87,Please setup numbering series for Attendance via Setup &gt; Numbering Series,ಸೆಟಪ್ ಸೆಟಪ್ ಮೂಲಕ ಅಟೆಂಡೆನ್ಸ್ ಸಂಖ್ಯಾ ದಯವಿಟ್ಟು ಸರಣಿ&gt; ನಂಬರಿಂಗ್ ಸರಣಿ
 apps/erpnext/erpnext/accounts/party.py +171,Please select a Company,ಒಂದು ಕಂಪನಿ ಆಯ್ಕೆಮಾಡಿ
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +51,Privilege Leave,ಸವಲತ್ತು ಲೀವ್
 DocType: Purchase Invoice,Supplier Invoice Date,ಸರಬರಾಜುದಾರ ಸರಕುಪಟ್ಟಿ ದಿನಾಂಕ
@@ -1431,6 +1432,7 @@ DocType: Company,Services,ಸೇವೆಗಳು
 DocType: HR Settings,Email Salary Slip to Employee,ನೌಕರರ ಇಮೇಲ್ ಸಂಬಳ ಸ್ಲಿಪ್
 DocType: Cost Center,Parent Cost Center,ಪೋಷಕ ವೆಚ್ಚ ಸೆಂಟರ್
 DocType: Sales Invoice,Source,ಮೂಲ
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +23,Please setup Employee Naming System in Human Resource &gt; HR Settings,ದಯವಿಟ್ಟು ಸೆಟಪ್ ನೌಕರರ ಮಾನವ ಸಂಪನ್ಮೂಲ ವ್ಯವಸ್ಥೆ ಹೆಸರಿಸುವ&gt; ಮಾನವ ಸಂಪನ್ಮೂಲ ಸೆಟ್ಟಿಂಗ್ಗಳು
 apps/erpnext/erpnext/templates/pages/projects.html +31,Show closed,ಮುಚ್ಚಲಾಗಿದೆ ಶೋ
 DocType: Leave Type,Is Leave Without Pay,ಸಂಬಳ ಇಲ್ಲದೆ ಬಿಟ್ಟು ಇದೆ
 apps/erpnext/erpnext/stock/doctype/item/item.py +236,Asset Category is mandatory for Fixed Asset item,ಆಸ್ತಿ ವರ್ಗ ಸ್ಥಿರ ಆಸ್ತಿ ಐಟಂ ಕಡ್ಡಾಯವಾಗಿದೆ
@@ -1613,6 +1615,7 @@ apps/erpnext/erpnext/accounts/doctype/asset/asset.py +67,Next Depreciation Date 
 apps/erpnext/erpnext/config/support.py +32,Single unit of an Item.,ಐಟಂ ಏಕ ಘಟಕ .
 DocType: Fee Category,Fee Category,ಶುಲ್ಕ ವರ್ಗ
 ,Student Fee Collection,ವಿದ್ಯಾರ್ಥಿ ಶುಲ್ಕ ಸಂಗ್ರಹ
+apps/erpnext/erpnext/controllers/stock_controller.py +90,"For the Item {0}, valuation rate not found for warehouse {1}. To be able to do accounting entries (for booking expenses), we need valuation rate for item {2}. Please create an incoming stock transaction, on or before {3} {4}, and then try submiting {5}","ಐಟಂ {0} ಫಾರ್, ಮೌಲ್ಯಮಾಪನ ದರ ಗೋದಾಮಿನ ಕಂಡುಬಂದಿಲ್ಲ {1}. ಲೆಕ್ಕಪತ್ರ ನಮೂದುಗಳನ್ನು (ಬುಕಿಂಗ್ ವೆಚ್ಚಗಳಿಗಾಗಿ) ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತದೆ, ನಾವು ಐಟಂ ಮೌಲ್ಯಮಾಪನ ದರ ಅಗತ್ಯವಿದೆ {2}. ದಯವಿಟ್ಟು, ಒಂದು ಒಳಬರುವ ಶೇರು ವಹಿವಾಟು ರಚಿಸಲು ಅಥವಾ ಮೊದಲು {3} {4}, ಮತ್ತು ನಂತರ submiting ಪ್ರಯತ್ನಿಸಿ {5}"
 apps/erpnext/erpnext/schools/doctype/course_schedule/course_schedule.py +26,Student Batch or Student Group is mandatory,ವಿದ್ಯಾರ್ಥಿ ಬ್ಯಾಚ್ ಅಥವಾ ವಿದ್ಯಾರ್ಥಿ ಗುಂಪು ಕಡ್ಡಾಯ
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,ಪ್ರತಿ ಸ್ಟಾಕ್ ಚಳುವಳಿ ಲೆಕ್ಕಪರಿಶೋಧಕ ಎಂಟ್ರಿ ಮಾಡಿ
 DocType: Leave Allocation,Total Leaves Allocated,ನಿಗದಿ ಒಟ್ಟು ಎಲೆಗಳು
@@ -1620,6 +1623,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +155,
 apps/erpnext/erpnext/public/js/setup_wizard.js +78,Please enter valid Financial Year Start and End Dates,ಮಾನ್ಯ ಹಣಕಾಸು ವರ್ಷದ ಆರಂಭ ಮತ್ತು ಅಂತಿಮ ದಿನಾಂಕ ನಮೂದಿಸಿ
 DocType: Employee,Date Of Retirement,ನಿವೃತ್ತಿ ದಿನಾಂಕ
 DocType: Upload Attendance,Get Template,ಟೆಂಪ್ಲೆಟ್ ಪಡೆಯಿರಿ
+apps/erpnext/erpnext/utilities/doctype/address/address.py +168,No default Address Template found. Please create a new one from Setup &gt; Printing and Branding &gt; Address Template.,ಡೀಫಾಲ್ಟ್ ವಿಳಾಸ ಟೆಂಪ್ಲೇಟು ಕಂಡುಬಂದಿಲ್ಲ. ದಯವಿಟ್ಟು ಸೆಟಪ್&gt; ಮುದ್ರಣ ಮತ್ತು ಬ್ರ್ಯಾಂಡಿಂಗ್&gt; ವಿಳಾಸ ಟೆಂಪ್ಲೇಟು ಹೊಸದನ್ನು ರಚಿಸಲು.
 DocType: Address,Postal,ಅಂಚೆಯ
 DocType: Vehicle,Doors,ಡೋರ್ಸ್
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +202,ERPNext Setup Complete!,ERPNext ಸೆಟಪ್ ಪೂರ್ಣಗೊಳಿಸಿ!
@@ -1954,7 +1958,7 @@ apps/erpnext/erpnext/public/js/utils.js +194,Get From,ಗೆ ಪಡೆಯಿರ�
 DocType: C-Form,Quarter,ಕಾಲು ಭಾಗ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +104,Miscellaneous Expenses,ವಿವಿಧ ಖರ್ಚುಗಳು
 DocType: Global Defaults,Default Company,ಡೀಫಾಲ್ಟ್ ಕಂಪನಿ
-apps/erpnext/erpnext/controllers/stock_controller.py +183,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,ಖರ್ಚು ಅಥವಾ ವ್ಯತ್ಯಾಸ ಖಾತೆ ಕಡ್ಡಾಯ ಐಟಂ {0} ಪರಿಣಾಮ ಬೀರುತ್ತದೆ ಒಟ್ಟಾರೆ ಸ್ಟಾಕ್ ಮೌಲ್ಯ
+apps/erpnext/erpnext/controllers/stock_controller.py +184,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,ಖರ್ಚು ಅಥವಾ ವ್ಯತ್ಯಾಸ ಖಾತೆ ಕಡ್ಡಾಯ ಐಟಂ {0} ಪರಿಣಾಮ ಬೀರುತ್ತದೆ ಒಟ್ಟಾರೆ ಸ್ಟಾಕ್ ಮೌಲ್ಯ
 apps/erpnext/erpnext/controllers/accounts_controller.py +429,"Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings","ಸತತವಾಗಿ ಐಟಂ {0} ಫಾರ್ overbill ಸಾಧ್ಯವಿಲ್ಲ {1} ಹೆಚ್ಚು {2}. Overbilling, ಸ್ಟಾಕ್ ಸೆಟ್ಟಿಂಗ್ಗಳು ದಯವಿಟ್ಟು ಅವಕಾಶ"
 DocType: Payment Request,PR,ಉದ್ಯೋಗ ತರಬೇತಿ
 DocType: Cheque Print Template,Bank Name,ಬ್ಯಾಂಕ್ ಹೆಸರು
@@ -2370,7 +2374,6 @@ DocType: Product Bundle,Parent Item,ಪೋಷಕ ಐಟಂ
 DocType: Account,Account Type,ಖಾತೆ ಪ್ರಕಾರ
 DocType: Delivery Note,DN-RET-,ಡಿ-RET-
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +123,Leave Type {0} cannot be carry-forwarded,{0} ಸಾಗಿಸುವ-ಫಾರ್ವರ್ಡ್ ಸಾಧ್ಯವಿಲ್ಲ ಕೌಟುಂಬಿಕತೆ ಬಿಡಿ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier &gt; Supplier Type,ಸರಬರಾಜುದಾರ&gt; ಸರಬರಾಜುದಾರ ಕೌಟುಂಬಿಕತೆ
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +216,Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',ನಿರ್ವಹಣೆ ವೇಳಾಪಟ್ಟಿ ಎಲ್ಲಾ ಐಟಂಗಳನ್ನು ಉತ್ಪತ್ತಿಯಾಗುವುದಿಲ್ಲ. ವೇಳಾಪಟ್ಟಿ ' ' ರಚಿಸಿ 'ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ
 ,To Produce,ಉತ್ಪಾದಿಸಲು
 apps/erpnext/erpnext/config/hr.py +93,Payroll,ವೇತನದಾರರ
@@ -2502,7 +2505,7 @@ Examples:
  1. ಇತ್ಯಾದಿ ವಿಳಾಸ ವಿವಾದಗಳು, ನಷ್ಟ, ಹೊಣೆಗಾರಿಕೆ, 
  1 ಮಾರ್ಗಗಳು. ವಿಳಾಸ ಮತ್ತು ನಿಮ್ಮ ಕಂಪನಿ ಸಂಪರ್ಕಿಸಿ."
 DocType: Attendance,Leave Type,ಪ್ರಕಾರ ಬಿಡಿ
-apps/erpnext/erpnext/controllers/stock_controller.py +189,Expense / Difference account ({0}) must be a 'Profit or Loss' account,ಖರ್ಚು / ವ್ಯತ್ಯಾಸ ಖಾತೆ ({0}) ಒಂದು 'ಲಾಭ ಅಥವಾ ನಷ್ಟ' ಖಾತೆ ಇರಬೇಕು
+apps/erpnext/erpnext/controllers/stock_controller.py +190,Expense / Difference account ({0}) must be a 'Profit or Loss' account,ಖರ್ಚು / ವ್ಯತ್ಯಾಸ ಖಾತೆ ({0}) ಒಂದು 'ಲಾಭ ಅಥವಾ ನಷ್ಟ' ಖಾತೆ ಇರಬೇಕು
 DocType: Account,Accounts User,ಬಳಕೆದಾರ ಖಾತೆಗಳು
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +89,Name error: {0},ಹೆಸರು ದೋಷ: {0}
 apps/erpnext/erpnext/stock/doctype/item/item_list.js +8,Shortage,ಕೊರತೆ
@@ -2537,7 +2540,7 @@ DocType: Salary Slip,Gross Pay + Arrear Amount +Encashment Amount - Total Deduct
 DocType: Item,Total Projected Qty,ಒಟ್ಟು ಯೋಜಿತ ಪ್ರಮಾಣ
 DocType: Monthly Distribution,Distribution Name,ವಿತರಣೆ ಹೆಸರು
 DocType: Course,Course Code,ಕೋರ್ಸ್ ಕೋಡ್
-apps/erpnext/erpnext/controllers/stock_controller.py +287,Quality Inspection required for Item {0},ಐಟಂ ಬೇಕಾದ ಗುಣಮಟ್ಟ ತಪಾಸಣೆ {0}
+apps/erpnext/erpnext/controllers/stock_controller.py +288,Quality Inspection required for Item {0},ಐಟಂ ಬೇಕಾದ ಗುಣಮಟ್ಟ ತಪಾಸಣೆ {0}
 DocType: Quotation,Rate at which customer's currency is converted to company's base currency,ಗ್ರಾಹಕ ಕರೆನ್ಸಿ ದರ ಕಂಪನಿಯ ಬೇಸ್ ಕರೆನ್ಸಿ ಪರಿವರ್ತನೆ
 DocType: Purchase Invoice Item,Net Rate (Company Currency),ನೆಟ್ ದರ (ಕಂಪನಿ ಕರೆನ್ಸಿ)
 DocType: Salary Detail,Condition and Formula Help,ಪರಿಸ್ಥಿತಿ ಮತ್ತು ಫಾರ್ಮುಲಾ ಸಹಾಯ
@@ -2949,7 +2952,6 @@ DocType: Grading Structure,Grade Intervals,ಗ್ರೇಡ್ ಮಧ್ಯಂ
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Select the nature of your business.,ನಿಮ್ಮ ವ್ಯಾಪಾರ ಸ್ವರೂಪ ಆಯ್ಕೆಮಾಡಿ.
 apps/erpnext/erpnext/config/manufacturing.py +57,Where manufacturing operations are carried.,ಉತ್ಪಾದನಾ ಕಾರ್ಯಗಳ ಅಲ್ಲಿ ನಿರ್ವಹಿಸುತ್ತಾರೆ.
 DocType: Asset Movement,Source Warehouse,ಮೂಲ ವೇರ್ಹೌಸ್
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +189,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,{0} ಸೆಟಪ್&gt; ಸೆಟ್ಟಿಂಗ್ಗಳು ಮೂಲಕ&gt; ಹೆಸರಿಸುವ ಸರಣಿಯ ಸರಣಿ ಹೆಸರಿಸುವ ಸೆಟ್ ಮಾಡಿ
 DocType: Installation Note,Installation Date,ಅನುಸ್ಥಾಪನ ದಿನಾಂಕ
 apps/erpnext/erpnext/controllers/accounts_controller.py +547,Row #{0}: Asset {1} does not belong to company {2},ರೋ # {0}: ಆಸ್ತಿ {1} ಕಂಪನಿಗೆ ಇಲ್ಲ ಸೇರುವುದಿಲ್ಲ {2}
 DocType: Employee,Confirmation Date,ದೃಢೀಕರಣ ದಿನಾಂಕ
@@ -3363,7 +3365,7 @@ DocType: Sales Invoice,Product Bundle Help,ಉತ್ಪನ್ನ ಕಟ್ಟು
 DocType: Production Order Item,Production Order Item,ಪ್ರೊಡಕ್ಷನ್ ಆರ್ಡರ್ ಐಟಂ
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +16,No record found,ಯಾವುದೇ ದಾಖಲೆ
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +137,Cost of Scrapped Asset,ಕೈಬಿಟ್ಟಿತು ಆಸ್ತಿ ವೆಚ್ಚ
-apps/erpnext/erpnext/controllers/stock_controller.py +192,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: ವೆಚ್ಚ ಸೆಂಟರ್ ಐಟಂ ಕಡ್ಡಾಯ {2}
+apps/erpnext/erpnext/controllers/stock_controller.py +193,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: ವೆಚ್ಚ ಸೆಂಟರ್ ಐಟಂ ಕಡ್ಡಾಯ {2}
 DocType: Vehicle,Policy No,ನೀತಿ ಇಲ್ಲ
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +613,Get Items from Product Bundle,ಉತ್ಪನ್ನ ಬಂಡಲ್ ವಸ್ತುಗಳನ್ನು ಪಡೆಯಲು
 DocType: Asset,Straight Line,ಸರಳ ರೇಖೆ
@@ -3438,7 +3440,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 DocType: Production Order Item,Transferred Qty,ಪ್ರಮಾಣ ವರ್ಗಾಯಿಸಲಾಯಿತು
 apps/erpnext/erpnext/config/learn.py +11,Navigating,ನ್ಯಾವಿಗೇಟ್
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +147,Planning,ಯೋಜನೆ
-apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,ಬಿಡುಗಡೆ
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +16,Issued,ಬಿಡುಗಡೆ
 DocType: Project,Total Billing Amount (via Time Logs),ಒಟ್ಟು ಬಿಲ್ಲಿಂಗ್ ಪ್ರಮಾಣ (ಸಮಯ ದಾಖಲೆಗಳು ಮೂಲಕ)
 apps/erpnext/erpnext/public/js/setup_wizard.js +301,We sell this Item,ನಾವು ಈ ಐಟಂ ಮಾರಾಟ
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +68,Supplier Id,ಪೂರೈಕೆದಾರ ಐಡಿ
@@ -3472,6 +3474,7 @@ DocType: Purchase Invoice,Taxes and Charges Added,ಸೇರಿಸಲಾಗಿ
 ,Sales Funnel,ಮಾರಾಟ ಕೊಳವೆಯನ್ನು
 apps/erpnext/erpnext/setup/doctype/company/company.py +45,Abbreviation is mandatory,ಸಂಕ್ಷೇಪಣ ಕಡ್ಡಾಯ
 DocType: Project,Task Progress,ಟಾಸ್ಕ್ ಪ್ರೋಗ್ರೆಸ್
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +189,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,{0} ಸೆಟಪ್&gt; ಸೆಟ್ಟಿಂಗ್ಗಳು ಮೂಲಕ&gt; ಹೆಸರಿಸುವ ಸರಣಿಯ ಸರಣಿ ಹೆಸರಿಸುವ ಸೆಟ್ ಮಾಡಿ
 ,Qty to Transfer,ವರ್ಗಾವಣೆ ಪ್ರಮಾಣ
 apps/erpnext/erpnext/config/selling.py +13,Quotes to Leads or Customers.,ಪಾತ್ರಗಳ ಅಥವಾ ಗ್ರಾಹಕರಿಗೆ ಹಿಟ್ಟಿಗೆ .
 DocType: Stock Settings,Role Allowed to edit frozen stock,ಪಾತ್ರ ಹೆಪ್ಪುಗಟ್ಟಿದ ಸ್ಟಾಕ್ ಸಂಪಾದಿಸಲು ಅನುಮತಿಸಲಾಗಿದೆ
@@ -4051,7 +4054,6 @@ apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,ಸಂಬಳ ಚೂ
 apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,ಮುಂದಿನ ಮೂಲಕ ಸಂಪರ್ಕಿಸಿ ಲೀಡ್ ಇಮೇಲ್ ಐಡಿ ಅದೇ ಸಾಧ್ಯವಿಲ್ಲ
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","ಅನ್ವಯಿಸುವ ಹಾಗೆ ಆರಿಸಿದರೆ ಖರೀದಿ, ಪರೀಕ್ಷಿಸಬೇಕು {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,ರಿಯಾಯಿತಿ ಕಡಿಮೆ 100 ಇರಬೇಕು
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +87,Please setup numbering series for Attendance via Setup &gt; Numbering Series,ಸೆಟಪ್ ಸೆಟಪ್ ಮೂಲಕ ಅಟೆಂಡೆನ್ಸ್ ಸಂಖ್ಯಾ ದಯವಿಟ್ಟು ಸರಣಿ&gt; ನಂಬರಿಂಗ್ ಸರಣಿ
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,ಕೊನೆಯ ಖರೀದಿ ಕಂಡುಬಂದಿಲ್ಲ
 DocType: Purchase Invoice,Write Off Amount (Company Currency),ಪ್ರಮಾಣದ ಆಫ್ ಬರೆಯಿರಿ (ಕಂಪನಿ ಕರೆನ್ಸಿ)
 DocType: Sales Invoice Timesheet,Billing Hours,ಬಿಲ್ಲಿಂಗ್ ಅವರ್ಸ್
@@ -4216,7 +4218,6 @@ DocType: Journal Entry,Debit Note,ಡೆಬಿಟ್ ಚೀಟಿಯನ್ನ
 DocType: Stock Entry,As per Stock UOM,ಸ್ಟಾಕ್ UOM ಪ್ರಕಾರ
 apps/erpnext/erpnext/stock/doctype/batch/batch_list.js +7,Not Expired,ಅವಧಿ
 DocType: Student Log,Achievement,ಸಾಧನೆ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +46,Item Code &gt; Item Group &gt; Brand,ಐಟಂ ಕೋಡ್&gt; ಐಟಂ ಗ್ರೂಪ್&gt; ಬ್ರ್ಯಾಂಡ್
 DocType: Journal Entry,Total Debit,ಒಟ್ಟು ಡೆಬಿಟ್
 DocType: Manufacturing Settings,Default Finished Goods Warehouse,ಡೀಫಾಲ್ಟ್ ತಯಾರಾದ ಸರಕುಗಳು ವೇರ್ಹೌಸ್
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +75,Sales Person,ಮಾರಾಟಗಾರ

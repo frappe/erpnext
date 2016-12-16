@@ -62,12 +62,10 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +52,Show Variants,Show ကို
 DocType: Academic Term,Academic Term,ပညာရေးဆိုင်ရာ Term
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.py +14,Material,ပစ္စည်း
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +624,Quantity,အရေအတွက်
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +49,Customer &gt; Customer Group &gt; Territory,ဖောက်သည်&gt; ဖောက်သည်အုပ်စု&gt; နယ်မြေတွေကို
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +529,Accounts table cannot be blank.,စားပွဲအလွတ်မဖွစျနိုငျအကောင့်။
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +151,Loans (Liabilities),ချေးငွေများ (စိစစ်)
 DocType: Employee Education,Year of Passing,Pass ၏တစ်နှစ်တာ
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +69,"Reference: %s, Item Code: %s and Customer: %s","ကိုးကားစရာ:% s ကို, Item Code ကို:% s နှင့်ဖောက်သည်:% s ကို"
-apps/erpnext/erpnext/controllers/stock_controller.py +90,"For the Item {item}, valuation rate not found for warehouse {warehouse}. To be able to do accounting entries (for booking expenses), we need valuation rate for item {item}. Please create an incoming stock transaction, on or before {posting_date} {posting_time}, and then try submiting {current_document}","ထိုအရာဝတ္ထု {ကို item}, ဂိုဒေါင် {ဂိုဒေါင်} ဘို့မတွေ့ရှိအဘိုးပြတ်မှုနှုန်းအဘို့။ (ဘွတ်ကင်ကုန်ကျစရိတ်များအတွက်) စာရင်းကိုင် entries တွေကိုလုပ်ဖို့နိုင်မည်ဖို့, ကျနော်တို့ကို item {ကို item} အဘို့နှင့်အဘိုးပြတ်မှုနှုန်းလိုအပ်ပါတယ်။ {posting_date} {posting_time} ပေါ်တွင်သို့မဟုတ်မတိုင်မီတစ်ဦးဝင်လာသောစတော့ရှယ်ယာအရောင်းအဝယ်ဖန်တီး, ပြီးတော့ {current_document} submiting ကြိုးစားပါ"
 apps/erpnext/erpnext/public/js/pos/pos_bill_item.html +12,In Stock,ကုန်ပစ္စည်းလက်ဝယ်ရှိ
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +46,Open Issues,ပွင့်လင်းကိစ္စများ
 DocType: Designation,Designation,သတ်မှတ်ပေးထားခြင်း
@@ -88,7 +86,6 @@ DocType: Timesheet,Total Costing Amount,စုစုပေါင်းကုန�
 DocType: Delivery Note,Vehicle No,မော်တော်ယာဉ်မရှိပါ
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +139,Please select Price List,စျေးနှုန်း List ကို select လုပ်ပါ ကျေးဇူးပြု.
 DocType: Production Order Operation,Work In Progress,တိုးတက်မှုများတွင်အလုပ်
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +23,Please setup Employee Naming System in Human Resource &gt; HR Settings,လူ့စွမ်းအားအရင်းအမြစ်အတွက် System ကိုအမည်ဖြင့်သမုတ် ကျေးဇူးပြု. setup ကိုထမ်း&gt; HR က Settings
 apps/erpnext/erpnext/schools/report/absent_student_report/absent_student_report.py +13,Please select date,ရက်စွဲကို select လုပ်ပါကျေးဇူးပြုပြီး
 DocType: Employee,Holiday List,အားလပ်ရက်များစာရင်း
 apps/erpnext/erpnext/public/js/setup_wizard.js +205,Accountant,စာရင်းကိုင်
@@ -302,6 +299,7 @@ DocType: Course Scheduling Tool,Course Start Date,သင်တန်းကို
 ,Student Batch-Wise Attendance,ကျောင်းသားအသုတ်လိုက်-ပညာရှိတက်ရောက်
 DocType: Item,Publish in Hub,Hub အတွက်ထုတ်ဝေ
 DocType: Student Admission,Student Admission,ကျောင်းသားသမဂ္ဂင်ခွင့်
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +49,Customer &gt; Customer Group &gt; Territory,ဖောက်သည်&gt; ဖောက်သည်အုပ်စု&gt; နယ်မြေတွေကို
 ,Terretory,Terretory
 apps/erpnext/erpnext/stock/doctype/item/item.py +695,Item {0} is cancelled,item {0} ဖျက်သိမ်းလိုက်
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +831,Material Request,material တောင်းဆိုခြင်း
@@ -620,7 +618,6 @@ DocType: Activity Type,Default Costing Rate,Default အနေနဲ့ကုန�
 DocType: Maintenance Schedule,Maintenance Schedule,ပြုပြင်ထိန်းသိမ်းမှုဇယား
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +34,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","ထိုအခါ Pricing နည်းဥပဒေများဖောက်သည်, ဖောက်သည်အုပ်စု, နယ်မြေတွေကို, ပေးသွင်း, ပေးသွင်းရေးထည့်ပြီးကင်ပိန်းစသည်တို့ကိုအရောင်း Partner အပေါ်အခြေခံပြီးထုတ် filtered နေကြတယ်"
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +23,Net Change in Inventory,Inventory ထဲမှာပိုက်ကွန်ကိုပြောင်းရန်
-apps/erpnext/erpnext/utilities/doctype/address/address.py +168,No default Address Template found. Please create a new one from Setup &gt; Printing and Branding &gt; Address Template.,မျှမတွေ့ default အနေနဲ့လိပ်စာ Template ။ Setup ကို&gt; ပုံနှိပ်နှင့်တံဆိပ်တပ်&gt; လိပ်စာ Template ကနေအသစ်တစ်ခုကိုတဦးတည်းဖန်တီးပေးပါ။
 DocType: Employee,Passport Number,နိုင်ငံကူးလက်မှတ်နံပါတ်
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +83,Manager,Manager က
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +138,New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0},နယူးအကြွေးကန့်သတ်ဖောက်သည်များအတွက်လက်ရှိထူးချွန်ငွေပမာဏထက်လျော့နည်းသည်။ အကြွေးကန့်သတ် atleast {0} ဖြစ်ဖို့ရှိပါတယ်
@@ -767,6 +764,7 @@ DocType: Employee,Bank A/C No.,ဘဏ်မှ A / C အမှတ်
 DocType: Budget,Project,စီမံကိန်း
 DocType: Quality Inspection Reading,Reading 7,7 Reading
 DocType: Address,Personal,ပုဂ္ဂိုလ်ရေး
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +9,Partially Ordered,တစ်စိတ်တစ်ပိုင်းမိန့်ထုတ်
 DocType: Expense Claim Detail,Expense Claim Type,စရိတ်တောင်းဆိုမှုများ Type
 DocType: Shopping Cart Settings,Default settings for Shopping Cart,စျေးဝယ်ခြင်းတွန်းလှည်းသည် default setting များ
 apps/erpnext/erpnext/accounts/doctype/asset/depreciation.py +128,Asset scrapped via Journal Entry {0},ဂျာနယ် Entry &#39;{0} ကနေတဆင့်ဖျက်သိမ်းပိုင်ဆိုင်မှု
@@ -969,7 +967,7 @@ DocType: Workstation,Electricity Cost,လျှပ်စစ်မီးကုန
 DocType: HR Settings,Don't send Employee Birthday Reminders,န်ထမ်းမွေးနေသတိပေးချက်များမပို့ပါနဲ့
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +113,Stock Entries,စတော့အိတ် Entries
 DocType: Item,Inspection Criteria,စစ်ဆေးရေးလိုအပ်ချက်
-apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Transferable
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Transferable
 apps/erpnext/erpnext/public/js/setup_wizard.js +163,Upload your letter head and logo. (you can edit them later).,သင့်ရဲ့စာကိုဦးခေါင်းနှင့်လိုဂို upload ။ (သင်နောက်ပိုင်းမှာသူတို့ကိုတည်းဖြတ်နိုင်သည်) ။
 DocType: Timesheet Detail,Bill,ဘီလ်
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Next ကိုတန်ဖိုးနေ့စွဲအတိတ်နေ့စွဲအဖြစ်ထဲသို့ဝင်သည်
@@ -1017,6 +1015,7 @@ apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +23,G
 DocType: Item,Manufacturer,လုပ်ငန်းရှင်
 DocType: Landed Cost Item,Purchase Receipt Item,ဝယ်ယူခြင်းပြေစာ Item
 DocType: Purchase Receipt,PREC-RET-,PREC-RET-
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier &gt; Supplier Type,ပေးသွင်း&gt; ပေးသွင်းအမျိုးအစား
 DocType: POS Profile,Sales Invoice Payment,အရောင်းပြေစာငွေပေးချေမှုရမည့်
 DocType: Production Plan Item,Reserved Warehouse in Sales Order / Finished Goods Warehouse,အရောင်းအမိန့် / Finished ကုန်စည်ဂိုဒေါင်ထဲမှာ Reserved ဂိုဒေါင်
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +70,Selling Amount,ငွေပမာဏရောင်းချနေ
@@ -1062,6 +1061,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +261,List a few of your suppliers
 apps/erpnext/erpnext/templates/pages/home.html +31,View All Products,အားလုံးကုန်ပစ္စည်းများ View
 DocType: Company,Default Currency,default ငွေကြေးစနစ်
 DocType: Contact,Enter designation of this Contact,ဒီဆက်သွယ်ရန်၏သတ်မှတ်ရေး Enter
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +46,Item Code &gt; Item Group &gt; Brand,item Code ကို&gt; item Group မှ&gt; အမှတ်တံဆိပ်
 DocType: Expense Claim,From Employee,န်ထမ်းအနေဖြင့်
 apps/erpnext/erpnext/controllers/accounts_controller.py +413,Warning: System will not check overbilling since amount for Item {0} in {1} is zero,သတိပေးချက်: စနစ် Item {0} သည်ငွေပမာဏကတည်းက overbilling စစ်ဆေးမည်မဟုတ် {1} သုညဖြစ်ပါသည်အတွက်
 DocType: Journal Entry,Make Difference Entry,Difference Entry &#39;ပါစေ
@@ -1280,6 +1280,7 @@ DocType: Request for Quotation Supplier,Request for Quotation Supplier,စျေ
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +113,Hardware,hardware
 DocType: Sales Order,Recurring Upto,နူန်းကျော်ကျော်ထပ်တလဲလဲ
 DocType: Attendance,HR Manager,HR Manager
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +87,Please setup numbering series for Attendance via Setup &gt; Numbering Series,ကျေးဇူးပြု. Setup ကို&gt; နံပါတ်စီးရီးကနေတစ်ဆင့်တက်ရောက်ဘို့ setup ကိုစာရငျးစီးရီး
 apps/erpnext/erpnext/accounts/party.py +171,Please select a Company,တစ်ကုမ္ပဏီလီမိတက်ကို select ကျေးဇူးပြု.
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +51,Privilege Leave,အခွင့်ထူးထွက်ခွာ
 DocType: Purchase Invoice,Supplier Invoice Date,ပေးသွင်းပြေစာနေ့စွဲ
@@ -1409,6 +1410,7 @@ DocType: Company,Services,န်ဆောင်မှုများ
 DocType: HR Settings,Email Salary Slip to Employee,ထမ်းအီးမေးလ်လစာစလစ်ဖြတ်ပိုင်းပုံစံ
 DocType: Cost Center,Parent Cost Center,မိဘကုန်ကျစရိတ် Center က
 DocType: Sales Invoice,Source,အရင်းအမြစ်
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +23,Please setup Employee Naming System in Human Resource &gt; HR Settings,လူ့စွမ်းအားအရင်းအမြစ်အတွက် System ကိုအမည်ဖြင့်သမုတ် ကျေးဇူးပြု. setup ကိုထမ်း&gt; HR က Settings
 apps/erpnext/erpnext/templates/pages/projects.html +31,Show closed,show ကိုပိတ်ထား
 DocType: Leave Type,Is Leave Without Pay,Pay ကိုမရှိရင် Leave ဖြစ်ပါတယ်
 apps/erpnext/erpnext/stock/doctype/item/item.py +236,Asset Category is mandatory for Fixed Asset item,ပိုင်ဆိုင်မှုအမျိုးအစား Fixed Asset ကို item များအတွက်မဖြစ်မနေဖြစ်ပါသည်
@@ -1591,6 +1593,7 @@ apps/erpnext/erpnext/accounts/doctype/asset/asset.py +67,Next Depreciation Date 
 apps/erpnext/erpnext/config/support.py +32,Single unit of an Item.,တစ်ဦး Item ၏လူပျိုယူနစ်။
 DocType: Fee Category,Fee Category,အခကြေးငွေ Category:
 ,Student Fee Collection,ကျောင်းသားသမဂ္ဂကြေးငွေကောက်ခံ
+apps/erpnext/erpnext/controllers/stock_controller.py +90,"For the Item {0}, valuation rate not found for warehouse {1}. To be able to do accounting entries (for booking expenses), we need valuation rate for item {2}. Please create an incoming stock transaction, on or before {3} {4}, and then try submiting {5}","ထိုအရာဝတ္ထု {0}, ဂိုဒေါင် {1} ဘို့မတွေ့ရှိအဘိုးပြတ်မှုနှုန်းအဘို့။ (ဘွတ်ကင်ကုန်ကျစရိတ်များအတွက်) စာရင်းကိုင် entries တွေကိုလုပ်ဖို့နိုင်မည်ဖို့, ကျနော်တို့ကို item {2} အဘို့နှင့်အဘိုးပြတ်မှုနှုန်းလိုအပ်ပါတယ်။ {3} {4} ပေါ်တွင်သို့မဟုတ်မတိုင်မီတစ်ဦးဝင်လာသောစတော့ရှယ်ယာအရောင်းအဝယ်ဖန်တီး ကျေးဇူးပြု. , ပြီးတော့ {5} submiting ကြိုးစားကြည့်ပါ"
 apps/erpnext/erpnext/schools/doctype/course_schedule/course_schedule.py +26,Student Batch or Student Group is mandatory,ကျောင်းသားအသုတ်လိုက်သို့မဟုတ်ကျောင်းသားအုပ်စုမဖြစ်မနေဖြစ်ပါသည်
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,ကျွန်တော်စတော့အိတ်လပ်ြရြားမြသည်စာရင်းကိုင် Entry &#39;ပါစေ
 DocType: Leave Allocation,Total Leaves Allocated,ခွဲဝေစုစုပေါင်းရွက်
@@ -1598,6 +1601,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +155,
 apps/erpnext/erpnext/public/js/setup_wizard.js +78,Please enter valid Financial Year Start and End Dates,မမှန်ကန်ဘဏ္ဍာရေးတစ်နှစ်တာ Start ကိုနဲ့ End သက်ကရာဇျမဝင်ရ ကျေးဇူးပြု.
 DocType: Employee,Date Of Retirement,အငြိမ်းစားအမျိုးမျိုးနေ့စွဲ
 DocType: Upload Attendance,Get Template,Template: Get
+apps/erpnext/erpnext/utilities/doctype/address/address.py +168,No default Address Template found. Please create a new one from Setup &gt; Printing and Branding &gt; Address Template.,မျှမတွေ့ default အနေနဲ့လိပ်စာ Template ။ Setup ကို&gt; ပုံနှိပ်နှင့်တံဆိပ်တပ်&gt; လိပ်စာ Template ကနေအသစ်တစ်ခုကိုတဦးတည်းဖန်တီးပေးပါ။
 DocType: Address,Postal,စာတိုက်
 DocType: Vehicle,Doors,တံခါးပေါက်
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +202,ERPNext Setup Complete!,အပြီးအစီး ERPNext Setup ကို!
@@ -1931,7 +1935,7 @@ apps/erpnext/erpnext/public/js/utils.js +194,Get From,မှစ. Get
 DocType: C-Form,Quarter,လေးပုံတစ်ပုံ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +104,Miscellaneous Expenses,အထွေထွေအသုံးစရိတ်များ
 DocType: Global Defaults,Default Company,default ကုမ္ပဏီ
-apps/erpnext/erpnext/controllers/stock_controller.py +183,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,စရိတ်သို့မဟုတ် Difference အကောင့်ကိုကသက်ရောက်မှုအဖြစ် Item {0} ခြုံငုံစတော့ရှယ်ယာတန်ဖိုးသည်တွေအတွက်မဖြစ်မနေဖြစ်ပါသည်
+apps/erpnext/erpnext/controllers/stock_controller.py +184,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,စရိတ်သို့မဟုတ် Difference အကောင့်ကိုကသက်ရောက်မှုအဖြစ် Item {0} ခြုံငုံစတော့ရှယ်ယာတန်ဖိုးသည်တွေအတွက်မဖြစ်မနေဖြစ်ပါသည်
 apps/erpnext/erpnext/controllers/accounts_controller.py +429,"Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings","{2} ထက် {0} အတန်းအတွက် {1} ပိုပစ္စည်းများအတွက် overbill နိုင်ဘူး။ overbilling ခွင့်ပြုပါရန်, စတော့အိတ် Settings ကိုကိုထားကိုကျေးဇူးတင်ပါ"
 DocType: Payment Request,PR,PR စနစ်
 DocType: Cheque Print Template,Bank Name,ဘဏ်မှအမည်
@@ -2327,7 +2331,6 @@ DocType: Product Bundle,Parent Item,မိဘ Item
 DocType: Account,Account Type,Account Type
 DocType: Delivery Note,DN-RET-,DN-RET-
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +123,Leave Type {0} cannot be carry-forwarded,{0} သယ်-forward နိုင်သည်မရနိုင်ပါ Type နေရာမှာ Leave
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier &gt; Supplier Type,ပေးသွင်း&gt; ပေးသွင်းအမျိုးအစား
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +216,Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',ပြုပြင်ထိန်းသိမ်းမှုဇယားအပေါငျးတို့သပစ္စည်းများသည် generated မဟုတ်ပါ။ &#39;&#39; Generate ဇယား &#39;&#39; ကို click ပါ ကျေးဇူးပြု.
 ,To Produce,ထုတ်လုပ်
 apps/erpnext/erpnext/config/hr.py +93,Payroll,အခစာရင်း
@@ -2447,7 +2450,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","အရောင်းနှင့်ဝယ်ယူထည့်သွင်းနိုင်ပါသည်က Standard စည်းကမ်းသတ်မှတ်ချက်များ။ ဥပမာ: ကမ်းလှမ်းမှုကို၏ 1. သက်တမ်းရှိ။ 1. ငွေပေးချေမှုရမည့်ဝေါဟာရများ (Advance မှာတော့ Credit တွင်တစ်စိတ်တစ်ပိုင်းကြိုတင်မဲစသည်တို့) ။ 1. အပို (သို့မဟုတ်ဖောက်သည်များကပေးဆောင်) သည်အဘယ်သို့။ 1. ဘေးကင်းရေး / အသုံးပြုမှုသတိပေးချက်ကို။ 1. အာမခံရှိလျှင်။ 1. မူဝါဒပြန်ပို့ပေးသည်။ သက်ဆိုင်လျှင်, တင်ပို့၏ 1. သက်မှတ်ချက်များ။ စသည်တို့အငြင်းပွားမှုများဖြေရှင်း၏ 1. နည်းလမ်းများ, လျော်ကြေး, တာဝန်ယူမှု, 1. လိပ်စာနှင့်သင့် Company ၏ဆက်သွယ်ရန်။"
 DocType: Attendance,Leave Type,Type Leave
-apps/erpnext/erpnext/controllers/stock_controller.py +189,Expense / Difference account ({0}) must be a 'Profit or Loss' account,စရိတ် / Difference အကောင့်ကို ({0}) တစ်ဦး &#39;&#39; အကျိုးအမြတ်သို့မဟုတ်ပျောက်ဆုံးခြင်း &#39;&#39; အကောင့်ကိုရှိရမည်
+apps/erpnext/erpnext/controllers/stock_controller.py +190,Expense / Difference account ({0}) must be a 'Profit or Loss' account,စရိတ် / Difference အကောင့်ကို ({0}) တစ်ဦး &#39;&#39; အကျိုးအမြတ်သို့မဟုတ်ပျောက်ဆုံးခြင်း &#39;&#39; အကောင့်ကိုရှိရမည်
 DocType: Account,Accounts User,အသုံးပြုသူအကောင့်
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +89,Name error: {0},အမှားအမည်: {0}
 apps/erpnext/erpnext/stock/doctype/item/item_list.js +8,Shortage,ပြတ်လပ်မှု
@@ -2482,7 +2485,7 @@ DocType: Salary Slip,Gross Pay + Arrear Amount +Encashment Amount - Total Deduct
 DocType: Item,Total Projected Qty,စုစုပေါင်းစီမံကိန်းအရည်အတွက်
 DocType: Monthly Distribution,Distribution Name,ဖြန့်ဖြူးအမည်
 DocType: Course,Course Code,သင်တန်း Code ကို
-apps/erpnext/erpnext/controllers/stock_controller.py +287,Quality Inspection required for Item {0},Item {0} သည်လိုအပ်သောအရည်အသွေးပြည့်စစ်ဆေးရေး
+apps/erpnext/erpnext/controllers/stock_controller.py +288,Quality Inspection required for Item {0},Item {0} သည်လိုအပ်သောအရည်အသွေးပြည့်စစ်ဆေးရေး
 DocType: Quotation,Rate at which customer's currency is converted to company's base currency,ဖောက်သည်ရဲ့ငွေကြေးကုမ္ပဏီ၏အခြေစိုက်စခန်းငွေကြေးအဖြစ်ပြောင်းလဲသောအချိန်တွင် rate
 DocType: Purchase Invoice Item,Net Rate (Company Currency),Net က Rate (ကုမ္ပဏီငွေကြေးစနစ်)
 DocType: Salary Detail,Condition and Formula Help,အခြေအနေနှင့်ဖော်မြူလာအကူအညီ
@@ -2894,7 +2897,6 @@ DocType: Grading Structure,Grade Intervals,grade Interval
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Select the nature of your business.,သင့်ရဲ့စီးပွားရေးလုပ်ငန်း၏သဘောသဘာဝကို Select လုပ်ပါ။
 apps/erpnext/erpnext/config/manufacturing.py +57,Where manufacturing operations are carried.,အဘယ်မှာရှိကုန်ထုတ်လုပ်မှုလုပ်ငန်းများကိုသယ်ဆောင်ကြသည်။
 DocType: Asset Movement,Source Warehouse,source ဂိုဒေါင်
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +189,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Setup ကို Settings&gt;&gt; အမည်ဖြင့်သမုတ်စီးရီးကနေတဆင့် {0} များအတွက်စီးရီးအမည်ဖြင့်သမုတ်သတ်မှတ်ထားပေးပါ
 DocType: Installation Note,Installation Date,Installation လုပ်တဲ့နေ့စွဲ
 apps/erpnext/erpnext/controllers/accounts_controller.py +547,Row #{0}: Asset {1} does not belong to company {2},အတန်း # {0}: ပိုင်ဆိုင်မှု {1} ကုမ္ပဏီမှ {2} ပိုင်ပါဘူး
 DocType: Employee,Confirmation Date,အတည်ပြုချက်နေ့စွဲ
@@ -3307,7 +3309,7 @@ DocType: Sales Invoice,Product Bundle Help,ထုတ်ကုန်ပစ္စ�
 DocType: Production Order Item,Production Order Item,ထုတ်လုပ်မှုအမိန့် Item
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +16,No record found,စံချိန်မျှမတွေ့ပါ
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +137,Cost of Scrapped Asset,ဖျက်သိမ်းပိုင်ဆိုင်မှု၏ကုန်ကျစရိတ်
-apps/erpnext/erpnext/controllers/stock_controller.py +192,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: ကုန်ကျစရိတ် Center က Item {2} သည်မသင်မနေရ
+apps/erpnext/erpnext/controllers/stock_controller.py +193,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: ကုန်ကျစရိတ် Center က Item {2} သည်မသင်မနေရ
 DocType: Vehicle,Policy No,ပေါ်လစီအဘယ်သူမျှမ
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +613,Get Items from Product Bundle,ထုတ်ကုန်ပစ္စည်း Bundle ကိုထံမှပစ္စည်းများ Get
 DocType: Asset,Straight Line,မျဥ်းဖြောင့်
@@ -3382,7 +3384,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 DocType: Production Order Item,Transferred Qty,လွှဲပြောင်း Qty
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigator
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +147,Planning,စီမံကိန်း
-apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,ထုတ်ပြန်သည်
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +16,Issued,ထုတ်ပြန်သည်
 DocType: Project,Total Billing Amount (via Time Logs),(အချိန် Logs ကနေတဆင့်) စုစုပေါင်း Billing ငွေပမာဏ
 apps/erpnext/erpnext/public/js/setup_wizard.js +301,We sell this Item,ကျွန်ုပ်တို့သည်ဤ Item ရောင်းချ
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +68,Supplier Id,ပေးသွင်း Id
@@ -3416,6 +3418,7 @@ DocType: Purchase Invoice,Taxes and Charges Added,အခွန်နှင့်
 ,Sales Funnel,အရောင်းကတော့
 apps/erpnext/erpnext/setup/doctype/company/company.py +45,Abbreviation is mandatory,အတိုကောက်မဖြစ်မနေဖြစ်ပါသည်
 DocType: Project,Task Progress,task ကိုတိုးတက်ရေးပါတီ
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +189,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Setup ကို Settings&gt;&gt; အမည်ဖြင့်သမုတ်စီးရီးကနေတဆင့် {0} များအတွက်စီးရီးအမည်ဖြင့်သမုတ်သတ်မှတ်ထားပေးပါ
 ,Qty to Transfer,သို့လွှဲပြောင်းရန် Qty
 apps/erpnext/erpnext/config/selling.py +13,Quotes to Leads or Customers.,ခဲသို့မဟုတ် Customer များ quotes ။
 DocType: Stock Settings,Role Allowed to edit frozen stock,အေးခဲစတော့ရှယ်ယာတည်းဖြတ်ရန် Allowed အခန်းကဏ္ဍ
@@ -3983,7 +3986,6 @@ apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,လစာစလစ�
 apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Next ကိုဆကျသှယျရနျအားဖြင့်ခဲအီးမေးလ် id သည်အဖြစ်အတူတူပင်မဖွစျနိုငျ
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","application များအတွက် {0} အဖြစ်ရွေးချယ်မယ်ဆိုရင်ဝယ်, checked ရမည်"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,လျော့စျေးက 100 ထက်လျော့နည်းဖြစ်ရမည်
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +87,Please setup numbering series for Attendance via Setup &gt; Numbering Series,ကျေးဇူးပြု. Setup ကို&gt; နံပါတ်စီးရီးကနေတစ်ဆင့်တက်ရောက်ဘို့ setup ကိုစာရငျးစီးရီး
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,ပြီးခဲ့သည့်ဝယ်ယူနှုန်းကိုမတွေ့ရှိ
 DocType: Purchase Invoice,Write Off Amount (Company Currency),ဟာ Off ရေးဖို့ပမာဏ (Company မှငွေကြေးစနစ်)
 DocType: Sales Invoice Timesheet,Billing Hours,ငွေတောင်းခံနာရီ
@@ -4147,7 +4149,6 @@ DocType: Journal Entry,Debit Note,debit မှတ်ချက်
 DocType: Stock Entry,As per Stock UOM,စတော့အိတ် UOM နှုန်းအဖြစ်
 apps/erpnext/erpnext/stock/doctype/batch/batch_list.js +7,Not Expired,Expired မဟုတ်
 DocType: Student Log,Achievement,အောင်မြင်ချက်
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +46,Item Code &gt; Item Group &gt; Brand,item Code ကို&gt; item Group မှ&gt; အမှတ်တံဆိပ်
 DocType: Journal Entry,Total Debit,စုစုပေါင်း Debit
 DocType: Manufacturing Settings,Default Finished Goods Warehouse,Default အနေနဲ့ကုန်စည်ဂိုဒေါင် Finished
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +75,Sales Person,အရောင်းပုဂ္ဂိုလ်

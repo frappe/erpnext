@@ -62,12 +62,10 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +52,Show Variants,バリエー�
 DocType: Academic Term,Academic Term,学術用語
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.py +14,Material,材料
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +624,Quantity,数量
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +49,Customer &gt; Customer Group &gt; Territory,顧客&gt;顧客グループ&gt;テリトリー
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +529,Accounts table cannot be blank.,アカウントの表は、空白にすることはできません。
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +151,Loans (Liabilities),ローン（負債）
 DocType: Employee Education,Year of Passing,経過年
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +69,"Reference: %s, Item Code: %s and Customer: %s",参考：％sは、商品コード：％sと顧客：％sの
-apps/erpnext/erpnext/controllers/stock_controller.py +90,"For the Item {item}, valuation rate not found for warehouse {warehouse}. To be able to do accounting entries (for booking expenses), we need valuation rate for item {item}. Please create an incoming stock transaction, on or before {posting_date} {posting_time}, and then try submiting {current_document}",項目{アイテム}について、評価レートは倉庫{倉庫}が見つかりません。 （予約の費用のための）アカウンティングエントリを行うことができるために、我々は、アイテム{アイテム}に対する評価レートを必要としています。 {posting_date} {posting_time}日以前に、着信在庫トランザクションを作成し、{current_documentを} submitingしてみてください
 apps/erpnext/erpnext/public/js/pos/pos_bill_item.html +12,In Stock,在庫中
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +46,Open Issues,未解決の問題
 DocType: Designation,Designation,肩書
@@ -88,7 +86,6 @@ DocType: Timesheet,Total Costing Amount,総原価計算量
 DocType: Delivery Note,Vehicle No,車両番号
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +139,Please select Price List,価格表を選択してください
 DocType: Production Order Operation,Work In Progress,進行中の作業
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +23,Please setup Employee Naming System in Human Resource &gt; HR Settings,人事でのシステムの命名してくださいセットアップ社員&gt; HRの設定
 apps/erpnext/erpnext/schools/report/absent_student_report/absent_student_report.py +13,Please select date,日付を選択してください
 DocType: Employee,Holiday List,休日のリスト
 apps/erpnext/erpnext/public/js/setup_wizard.js +205,Accountant,会計士
@@ -303,6 +300,7 @@ DocType: Course Scheduling Tool,Course Start Date,コース開始日
 ,Student Batch-Wise Attendance,学生バッチ式出席
 DocType: Item,Publish in Hub,ハブに公開
 DocType: Student Admission,Student Admission,学生の入学
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +49,Customer &gt; Customer Group &gt; Territory,顧客&gt;顧客グループ&gt;テリトリー
 ,Terretory,地域
 apps/erpnext/erpnext/stock/doctype/item/item.py +695,Item {0} is cancelled,アイテム{0}をキャンセルしました
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +831,Material Request,資材要求
@@ -623,7 +621,6 @@ DocType: Activity Type,Default Costing Rate,デフォルト原価
 DocType: Maintenance Schedule,Maintenance Schedule,メンテナンス予定
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +34,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.",価格設定ルールは、顧客、顧客グループ、地域、サプライヤー、サプライヤータイプ、キャンペーン、販売パートナーなどに基づいて抽出されます
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +23,Net Change in Inventory,在庫の純変更
-apps/erpnext/erpnext/utilities/doctype/address/address.py +168,No default Address Template found. Please create a new one from Setup &gt; Printing and Branding &gt; Address Template.,デフォルトのアドレステンプレートが見つかりませんでした。 [設定]&gt; [印刷とブランディング&gt;アドレステンプレートから新しいものを作成してください。
 DocType: Employee,Passport Number,パスポート番号
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +83,Manager,マネージャー
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +138,New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0},新たな与信限度は、顧客の現在の残高よりも少ないです。与信限度は、少なくとも{0}である必要があります
@@ -796,6 +793,7 @@ DocType: Employee,Bank A/C No.,銀行口座番号
 DocType: Budget,Project,プロジェクト
 DocType: Quality Inspection Reading,Reading 7,報告要素7
 DocType: Address,Personal,個人情報
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +9,Partially Ordered,部分的に順序
 DocType: Expense Claim Detail,Expense Claim Type,経費請求タイプ
 DocType: Shopping Cart Settings,Default settings for Shopping Cart,ショッピングカートのデフォルト設定
 apps/erpnext/erpnext/accounts/doctype/asset/depreciation.py +128,Asset scrapped via Journal Entry {0},仕訳を経由して廃車・アセット{0}
@@ -998,7 +996,7 @@ DocType: Workstation,Electricity Cost,電気代
 DocType: HR Settings,Don't send Employee Birthday Reminders,従業員の誕生日リマインダを送信しないでください
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +113,Stock Entries,在庫エントリ
 DocType: Item,Inspection Criteria,検査基準
-apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,移転済
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,移転済
 apps/erpnext/erpnext/public/js/setup_wizard.js +163,Upload your letter head and logo. (you can edit them later).,レターヘッドとロゴをアップロードします（後で編集可能です）
 DocType: Timesheet Detail,Bill,ビル
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,次の減価償却日は過去の日付として入力され、
@@ -1048,6 +1046,7 @@ apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +23,G
 DocType: Item,Manufacturer,製造元
 DocType: Landed Cost Item,Purchase Receipt Item,領収書アイテム
 DocType: Purchase Receipt,PREC-RET-,PREC-RET-
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier &gt; Supplier Type,サプライヤー&gt;サプライヤータイプ
 DocType: POS Profile,Sales Invoice Payment,売上請求書の支払い
 DocType: Production Plan Item,Reserved Warehouse in Sales Order / Finished Goods Warehouse,受注の予約倉庫／完成品倉庫
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +70,Selling Amount,販売額
@@ -1093,6 +1092,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +261,List a few of your suppliers
 apps/erpnext/erpnext/templates/pages/home.html +31,View All Products,すべての製品を見ます
 DocType: Company,Default Currency,デフォルトの通貨
 DocType: Contact,Enter designation of this Contact,この連絡先の肩書を入力してください
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +46,Item Code &gt; Item Group &gt; Brand,商品コード&gt;項目グループ&gt;ブランド
 DocType: Expense Claim,From Employee,社員から
 apps/erpnext/erpnext/controllers/accounts_controller.py +413,Warning: System will not check overbilling since amount for Item {0} in {1} is zero,警告：{1}のアイテム{0} がゼロのため、システムは超過請求をチェックしません
 DocType: Journal Entry,Make Difference Entry,差違エントリを作成
@@ -1311,6 +1311,7 @@ DocType: Request for Quotation Supplier,Request for Quotation Supplier,見積サ
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +113,Hardware,ハードウェア
 DocType: Sales Order,Recurring Upto,定期的な点で最大
 DocType: Attendance,HR Manager,人事マネージャー
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +87,Please setup numbering series for Attendance via Setup &gt; Numbering Series,してください[設定]&gt; [ナンバリングシリーズを経由して出席するための設定採番シリーズ
 apps/erpnext/erpnext/accounts/party.py +171,Please select a Company,会社を選択してください
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +51,Privilege Leave,特別休暇
 DocType: Purchase Invoice,Supplier Invoice Date,サプライヤー請求日
@@ -1441,6 +1442,7 @@ DocType: Company,Services,サービス
 DocType: HR Settings,Email Salary Slip to Employee,従業員への電子メールの給与スリップ
 DocType: Cost Center,Parent Cost Center,親コストセンター
 DocType: Sales Invoice,Source,ソース
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +23,Please setup Employee Naming System in Human Resource &gt; HR Settings,人事でのシステムの命名してくださいセットアップ社員&gt; HRの設定
 apps/erpnext/erpnext/templates/pages/projects.html +31,Show closed,クローズ済を表示
 DocType: Leave Type,Is Leave Without Pay,無給休暇
 apps/erpnext/erpnext/stock/doctype/item/item.py +236,Asset Category is mandatory for Fixed Asset item,資産カテゴリーは、固定資産の項目は必須です
@@ -1626,6 +1628,7 @@ apps/erpnext/erpnext/accounts/doctype/asset/asset.py +67,Next Depreciation Date 
 apps/erpnext/erpnext/config/support.py +32,Single unit of an Item.,アイテムの１単位
 DocType: Fee Category,Fee Category,料金カテゴリー
 ,Student Fee Collection,学生費徴収
+apps/erpnext/erpnext/controllers/stock_controller.py +90,"For the Item {0}, valuation rate not found for warehouse {1}. To be able to do accounting entries (for booking expenses), we need valuation rate for item {2}. Please create an incoming stock transaction, on or before {3} {4}, and then try submiting {5}",項目{0}のため、評価レートは倉庫が見つかりません{1}。 （予約の費用のための）アカウンティングエントリを行うことができるようにするために、我々は項目{2}に対する評価レートを必要としています。 {3} {4}日以前に、着信在庫トランザクションを作成してください、そして、次に、{5} submitingしてみてください
 apps/erpnext/erpnext/schools/doctype/course_schedule/course_schedule.py +26,Student Batch or Student Group is mandatory,学生バッチまたは学生グループが必須です
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,各在庫の動きを会計処理のエントリとして作成
 DocType: Leave Allocation,Total Leaves Allocated,休暇割当合計
@@ -1633,6 +1636,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +155,
 apps/erpnext/erpnext/public/js/setup_wizard.js +78,Please enter valid Financial Year Start and End Dates,有効な会計年度開始日と終了日を入力してください
 DocType: Employee,Date Of Retirement,退職日
 DocType: Upload Attendance,Get Template,テンプレートを取得
+apps/erpnext/erpnext/utilities/doctype/address/address.py +168,No default Address Template found. Please create a new one from Setup &gt; Printing and Branding &gt; Address Template.,デフォルトのアドレステンプレートが見つかりませんでした。 [設定]&gt; [印刷とブランディング&gt;アドレステンプレートから新しいものを作成してください。
 DocType: Address,Postal,郵便
 DocType: Vehicle,Doors,ドア
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +202,ERPNext Setup Complete!,ERPNextのセットアップが完了！
@@ -1968,7 +1972,7 @@ apps/erpnext/erpnext/public/js/utils.js +194,Get From,取得元
 DocType: C-Form,Quarter,四半期
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +104,Miscellaneous Expenses,雑費
 DocType: Global Defaults,Default Company,デフォルトの会社
-apps/erpnext/erpnext/controllers/stock_controller.py +183,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,在庫に影響するアイテム{0}には、費用または差損益が必須です
+apps/erpnext/erpnext/controllers/stock_controller.py +184,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,在庫に影響するアイテム{0}には、費用または差損益が必須です
 apps/erpnext/erpnext/controllers/accounts_controller.py +429,"Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings",行{1}のアイテム{0}は{2}以上超過請求することはできません。超過請求を許可するには「在庫設定」で設定してください
 DocType: Payment Request,PR,PR
 DocType: Cheque Print Template,Bank Name,銀行名
@@ -2392,7 +2396,6 @@ DocType: Product Bundle,Parent Item,親アイテム
 DocType: Account,Account Type,アカウントタイプ
 DocType: Delivery Note,DN-RET-,DN-RET-
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +123,Leave Type {0} cannot be carry-forwarded,{0}キャリー転送できないタイプを残します
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier &gt; Supplier Type,サプライヤー&gt;サプライヤータイプ
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +216,Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',メンテナンススケジュールが全てのアイテムに生成されていません。「スケジュールを生成」をクリックしてください
 ,To Produce,製造
 apps/erpnext/erpnext/config/hr.py +93,Payroll,給与
@@ -2523,7 +2526,7 @@ Examples:
  1.紛争に対処する方法、賠償、責任など
  1.住所とあなたの会社の連絡先"
 DocType: Attendance,Leave Type,休暇タイプ
-apps/erpnext/erpnext/controllers/stock_controller.py +189,Expense / Difference account ({0}) must be a 'Profit or Loss' account,費用／差損益（{0}）は「損益」アカウントである必要があります
+apps/erpnext/erpnext/controllers/stock_controller.py +190,Expense / Difference account ({0}) must be a 'Profit or Loss' account,費用／差損益（{0}）は「損益」アカウントである必要があります
 DocType: Account,Accounts User,会計ユーザー
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +89,Name error: {0},名前のエラー：{0}
 apps/erpnext/erpnext/stock/doctype/item/item_list.js +8,Shortage,不足
@@ -2558,7 +2561,7 @@ DocType: Salary Slip,Gross Pay + Arrear Amount +Encashment Amount - Total Deduct
 DocType: Item,Total Projected Qty,全投影数量
 DocType: Monthly Distribution,Distribution Name,配布名
 DocType: Course,Course Code,コースコード
-apps/erpnext/erpnext/controllers/stock_controller.py +287,Quality Inspection required for Item {0},アイテム{0}に必要な品質検査
+apps/erpnext/erpnext/controllers/stock_controller.py +288,Quality Inspection required for Item {0},アイテム{0}に必要な品質検査
 DocType: Quotation,Rate at which customer's currency is converted to company's base currency,顧客の通貨が会社の基本通貨に換算されるレート
 DocType: Purchase Invoice Item,Net Rate (Company Currency),正味単価（会社通貨）
 DocType: Salary Detail,Condition and Formula Help,条件と式のヘルプ
@@ -2970,7 +2973,6 @@ DocType: Grading Structure,Grade Intervals,グレード間隔
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Select the nature of your business.,あなたのビジネスの性質を選択します。
 apps/erpnext/erpnext/config/manufacturing.py +57,Where manufacturing operations are carried.,製造作業が行なわれる場所
 DocType: Asset Movement,Source Warehouse,出庫元
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +189,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,[設定]&gt; [設定]&gt; [ネーミングシリーズを経由して{0}のためのシリーズのネーミング設定してください
 DocType: Installation Note,Installation Date,設置日
 apps/erpnext/erpnext/controllers/accounts_controller.py +547,Row #{0}: Asset {1} does not belong to company {2},行＃{0}：アセット{1}の会社に属していない{2}
 DocType: Employee,Confirmation Date,確定日
@@ -3383,7 +3385,7 @@ DocType: Sales Invoice,Product Bundle Help,製品付属品ヘルプ
 DocType: Production Order Item,Production Order Item,製造指図の品目
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +16,No record found,レコードが見つかりません
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +137,Cost of Scrapped Asset,スクラップ資産の取得原価
-apps/erpnext/erpnext/controllers/stock_controller.py +192,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}：項目{2}には「コストセンター」が必須です
+apps/erpnext/erpnext/controllers/stock_controller.py +193,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}：項目{2}には「コストセンター」が必須です
 DocType: Vehicle,Policy No,ポリシーはありません
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +613,Get Items from Product Bundle,付属品からアイテムを取得
 DocType: Asset,Straight Line,直線
@@ -3458,7 +3460,7 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 DocType: Production Order Item,Transferred Qty,移転数量
 apps/erpnext/erpnext/config/learn.py +11,Navigating,ナビゲート
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +147,Planning,計画
-apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,課題
+apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +16,Issued,課題
 DocType: Project,Total Billing Amount (via Time Logs),総請求金額（時間ログ経由）
 apps/erpnext/erpnext/public/js/setup_wizard.js +301,We sell this Item,このアイテムを売る
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +68,Supplier Id,サプライヤーID
@@ -3492,6 +3494,7 @@ DocType: Purchase Invoice,Taxes and Charges Added,租税公課が追加されま
 ,Sales Funnel,セールスファネル
 apps/erpnext/erpnext/setup/doctype/company/company.py +45,Abbreviation is mandatory,略称は必須です
 DocType: Project,Task Progress,タスクの進捗状況
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +189,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,[設定]&gt; [設定]&gt; [ネーミングシリーズを経由して{0}のためのシリーズのネーミング設定してください
 ,Qty to Transfer,転送する数量
 apps/erpnext/erpnext/config/selling.py +13,Quotes to Leads or Customers.,リードや顧客への見積。
 DocType: Stock Settings,Role Allowed to edit frozen stock,凍結在庫の編集が許可された役割
@@ -4071,7 +4074,6 @@ apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,給与明細を生�
 apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,次の接触によっては、リードメールIDを同じにすることはできません
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}",適用のためには次のように選択されている場合の購入は、チェックする必要があります{0}
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,割引は100未満でなければなりません
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +87,Please setup numbering series for Attendance via Setup &gt; Numbering Series,してください[設定]&gt; [ナンバリングシリーズを経由して出席するための設定採番シリーズ
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,最後の購入率が見つかりません
 DocType: Purchase Invoice,Write Off Amount (Company Currency),償却額（会社通貨）
 DocType: Sales Invoice Timesheet,Billing Hours,課金時間
@@ -4237,7 +4239,6 @@ DocType: Journal Entry,Debit Note,借方票
 DocType: Stock Entry,As per Stock UOM,在庫の数量単位ごと
 apps/erpnext/erpnext/stock/doctype/batch/batch_list.js +7,Not Expired,有効期限が切れていません
 DocType: Student Log,Achievement,成果
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +46,Item Code &gt; Item Group &gt; Brand,商品コード&gt;項目グループ&gt;ブランド
 DocType: Journal Entry,Total Debit,借方合計
 DocType: Manufacturing Settings,Default Finished Goods Warehouse,デフォルト完成品倉庫
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +75,Sales Person,営業担当
