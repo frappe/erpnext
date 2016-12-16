@@ -87,8 +87,9 @@ class StockController(AccountsController):
 		
 	def validate_negative_stock(self, sle):
 		if sle.qty_after_transaction < 0 and sle.actual_qty < 0:
-			frappe.throw(_("For the Item {item}, valuation rate not found for warehouse {warehouse}. To be able to do accounting entries (for booking expenses), we need valuation rate for item {item}. Please create an incoming stock transaction, on or before {posting_date} {posting_time}, and then try submiting {current_document}").format(item=sle.item_code, warehouse=sle.warehouse, 
-				posting_date=sle.posting_date, posting_time=sle.posting_time, current_document=self.name))
+			frappe.throw(_("For the Item {0}, valuation rate not found for warehouse {1}. To be able to do accounting entries (for booking expenses), we need valuation rate for item {2}. Please create an incoming stock transaction, on or before {3} {4}, and then try submiting {5}")
+			.format(sle.item_code, sle.warehouse, 
+				sle.item_code, sle.posting_date, sle.posting_time, self.name))
 
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
 		if self.doctype == "Stock Reconciliation":
