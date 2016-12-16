@@ -72,7 +72,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		# set joinng date in the same month
 		self.make_employee("test_employee@salary.com")
-		if getdate(nowdate()).day > 15:
+		if getdate(nowdate()).day >= 15:
 			date_of_joining = getdate(add_days(nowdate(),-10))
 			relieving_date = getdate(add_days(nowdate(),-10))
 		elif getdate(nowdate()).day < 15 and getdate(nowdate()).day > 5:
