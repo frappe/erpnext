@@ -20,7 +20,7 @@ class JobApplicant(Document):
 			self.get("__onload").offer_letter = offer_letter[0].name
 
 	def autoname(self):
-		keys = filter(None, (self.applicant_name, self.email_id))
+		keys = filter(None, (self.applicant_name, self.email_id, self.job_title))
 		if not keys:
 			frappe.throw(_("Name or Email is mandatory"), frappe.NameError)
 		self.name = " - ".join(keys)
