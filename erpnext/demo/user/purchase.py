@@ -75,7 +75,7 @@ def work():
 				frappe.db.commit()
 
 	# make purchase orders
-	if random.random() < 0.3:
+	if random.random() < 0.5:
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 		report = "Requested Items To Be Ordered"
 		for row in query_report.run(report)["result"][:how_many("Purchase Order")]:
@@ -103,7 +103,7 @@ def make_material_request(item_code, qty):
 		mr.material_request_type = "Purchase"
 
 	mr.transaction_date = frappe.flags.current_date
-	
+
 	mr.append("items", {
 		"doctype": "Material Request Item",
 		"schedule_date": frappe.utils.add_days(mr.transaction_date, 7),
@@ -130,7 +130,7 @@ def make_subcontract():
 		po.supplier = get_random("Supplier")
 
 		item_code = get_random("Item", {"is_sub_contracted_item": 1})
-		
+
 		po.append("items", {
 			"item_code": item_code,
 			"schedule_date": frappe.utils.add_days(frappe.flags.current_date, 7),

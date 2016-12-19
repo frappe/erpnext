@@ -3052,7 +3052,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 0, 
+   "collapsible": 1, 
    "collapsible_depends_on": "sales_team", 
    "columns": 0, 
    "fieldname": "section_break1", 
@@ -3120,7 +3120,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-11-07 05:52:12.783914", 
+ "modified": "2016-12-16 03:56:08.745185", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 
