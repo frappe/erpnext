@@ -158,6 +158,19 @@ erpnext.expense_claim = {
 	}
 }
 
+frappe.ui.form.on("Expense Claim", {
+	refresh: function(frm) {
+		frm.add_custom_button(__('Accounting Ledger'), function() {
+			frappe.route_options = {
+				voucher_no: frm.doc.name,
+				company: frm.doc.company,
+				group_by_voucher: false
+			};
+			frappe.set_route("query-report", "General Ledger");
+		}, __("View"));
+	}
+})
+
 frappe.ui.form.on("Expense Claim Detail", {
 	claim_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
@@ -176,6 +189,51 @@ frappe.ui.form.on("Expense Claim Detail", {
 	}
 })
 
+frappe.ui.form.on("Expense Claim",{
+	setup: function(frm) {
+		frm.trigger("set_query_for_cost_center")
+		frm.trigger("set_query_for_employee_account")
+		frm.add_fetch("company", "cost_center", "cost_center");
+	},
+
+	set_query_for_cost_center: function(frm) {
+		frm.fields_dict["cost_center"].get_query = function() {
+			return {
+				filters: {
+					"company": frm.doc.company
+				}
+			}
+		}
+	},
+
+	set_query_for_employee_account: function(frm) {
+		frm.fields_dict["employee_account"].get_query = function() {
+			return {
+				filters: {
+					"root_type": "Liability",
+					"account_type": "Employee",
+					"is_group": 0
+				}
+			}
+		}
+	},
+	
+	employee: function(frm) {
+		return frappe.call({
+			method: "erpnext.accounts.party.get_party_account",
+			args: {
+				company: frm.doc.company,
+				party_type: "Employee",
+				party: frm.doc.employee
+			},
+			callback: function(r) {
+				if(!r.exc && r.message) {
+					frm.set_value("employee_account", r.message);
+				}
+			}
+		});
+	}
+});
 
 frappe.ui.form.on("Expense Claim", "employee_name", function(frm) {
 	erpnext.expense_claim.set_title(frm);

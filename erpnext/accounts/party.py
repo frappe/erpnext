@@ -171,13 +171,13 @@ def get_party_account(party_type, party, company):
 		account = frappe.db.get_value("Party Account",
 			{"parenttype": party_type, "parent": party, "company": company}, "account")
 
-		if not account:
+		if not account and party_type != 'Employee':
 			party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
 			group = frappe.db.get_value(party_type, party, scrub(party_group_doctype))
 			account = frappe.db.get_value("Party Account",
 				{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
 
-		if not account:
+		if not account and party_type != 'Employee':
 			default_account_name = "default_receivable_account" \
 				if party_type=="Customer" else "default_payable_account"
 			account = frappe.db.get_value("Company", company, default_account_name)
@@ -249,7 +249,7 @@ def validate_party_accounts(doc):
 		if existing_gle_currency and party_account_currency != existing_gle_currency:
 			frappe.throw(_("Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.").format(existing_gle_currency, account.company))
 
-		if doc.default_currency and party_account_currency and company_default_currency:
+		if doc.get("default_currency") and party_account_currency and company_default_currency:
 			if doc.default_currency != party_account_currency and doc.default_currency != company_default_currency:
 				frappe.throw(_("Billing currency must be equal to either default comapany's currency or party account currency"))
 

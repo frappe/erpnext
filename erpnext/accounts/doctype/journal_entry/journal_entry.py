@@ -87,7 +87,7 @@ class JournalEntry(AccountsController):
 	def validate_party(self):
 		for d in self.get("accounts"):
 			account_type = frappe.db.get_value("Account", d.account, "account_type")
-			if account_type in ["Receivable", "Payable"]:
+			if account_type in ["Receivable", "Payable", "Employee"]:
 				if not (d.party_type and d.party):
 					frappe.throw(_("Row {0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
 			elif d.party_type and d.party:
@@ -377,8 +377,8 @@ class JournalEntry(AccountsController):
 		for d in self.get('accounts'):
 			if d.party_type and d.party:
 				if not pay_to_recd_from:
-					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
-						"customer_name" if d.party_type=="Customer" else "supplier_name")
+					party_name = d.party_type.lower() + "_name"
+					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party, party_name)
 
 				party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				party_account_currency = d.account_currency

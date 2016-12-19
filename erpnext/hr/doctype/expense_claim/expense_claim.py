@@ -7,10 +7,13 @@ from frappe import _
 from frappe.utils import get_fullname, flt
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
+from erpnext.accounts.party import get_party_account
+from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.controllers.accounts_controller import AccountsController
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 
-class ExpenseClaim(Document):
+class ExpenseClaim(AccountsController):
 	def get_feed(self):
 		return _("{0}: From {0} for {1}").format(self.approval_status,
 			self.employee_name, self.total_claimed_amount)
@@ -21,22 +24,78 @@ class ExpenseClaim(Document):
 		self.calculate_total_amount()
 		set_employee_name(self)
 		self.set_expense_account()
+		self.set_employee_account()
+		self.set_cost_center()
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
+
+	def set_employee_account(self):
+		if not self.employee_account:
+			self.employee_account = get_party_account("Employee", self.employee, self.company)
+
+	def set_cost_center(self):
+		if not self.cost_center:
+			self.cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
 
 	def on_submit(self):
 		if self.approval_status=="Draft":
 			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
 		self.update_task_and_project()
+		self.make_gl_entries()
 
 	def on_cancel(self):
 		self.update_task_and_project()
+		self.make_gl_entries(cancel=True)
 
 	def update_task_and_project(self):
 		if self.task:
 			self.update_task()
 		elif self.project:
 			frappe.get_doc("Project", self.project).update_project()
+
+	def make_gl_entries(self, cancel = False):
+		if flt(self.total_sanctioned_amount) > 0:
+			gl_entries = self.get_gl_entries()
+			make_gl_entries(gl_entries, cancel)
+
+	def get_gl_entries(self):
+		gl_entry = []
+		self.validate_account_details()
+
+		# expense entries
+		for data in self.expenses:
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": data.default_account,
+					"debit": data.sanctioned_amount,
+					"debit_in_account_currency": data.sanctioned_amount,
+					"against": self.employee,
+					"cost_center": self.cost_center
+				})
+			)
+
+		# employee entry
+		gl_entry.append(
+			self.get_gl_dict({
+				"account": self.employee_account,
+				"credit": self.total_sanctioned_amount,
+				"credit_in_account_currency": self.total_sanctioned_amount,
+				"against": ",".join([d.default_account for d in self.expenses]),
+				"party_type": "Employee",
+				"party": self.employee,
+				"against_voucher_type": self.doctype,
+				"against_voucher": self.name
+			})
+		)
+
+		return gl_entry
+
+	def validate_account_details(self):
+		if not self.cost_center:
+			frappe.throw(_("Cost center is required to book an expense claim"))
+
+		if not self.employee_account:
+			frappe.throw(_("Please set default employee account in the employee {0}").format(self.employee))
 
 	def calculate_total_amount(self):
 		self.total_claimed_amount = 0
@@ -86,17 +145,18 @@ def make_bank_entry(docname):
 	je.company = expense_claim.company
 	je.remark = 'Payment against Expense Claim: ' + docname;
 
-	for expense in expense_claim.expenses:
-		je.append("accounts", {
-			"account": expense.default_account,
-			"debit_in_account_currency": expense.sanctioned_amount,
-			"reference_type": "Expense Claim",
-			"reference_name": expense_claim.name
-		})
+	je.append("accounts", {
+		"account": expense_claim.employee_account,
+		"debit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_amount_reimbursed),
+		"reference_type": "Expense Claim",
+		"party_type": "Employee",
+		"party": expense_claim.employee,
+		"reference_name": expense_claim.name
+	})
 
 	je.append("accounts", {
 		"account": default_bank_cash_account.account,
-		"credit_in_account_currency": expense_claim.total_sanctioned_amount,
+		"credit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_amount_reimbursed),
 		"reference_type": "Expense Claim",
 		"reference_name": expense_claim.name,
 		"balance": default_bank_cash_account.balance,

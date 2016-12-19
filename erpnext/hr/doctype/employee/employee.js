@@ -51,20 +51,25 @@ frappe.ui.form.on('Employee',{
 	prefered_contact_email:function(frm){		
 		frm.events.update_contact(frm)		
 	},
-	personal_email:function(frm){
+
+	personal_email:function(frm) {
 		frm.events.update_contact(frm)
 	},
-	company_email:function(frm){
+
+	company_email:function(frm) {
 		frm.events.update_contact(frm)
 	},
-	user_id:function(frm){
+
+	user_id:function(frm) {
 		frm.events.update_contact(frm)
 	},
+
 	update_contact:function(frm){
 		var prefered_email_fieldname = frappe.model.scrub(frm.doc.prefered_contact_email) || 'user_id';
 		frm.set_value("prefered_email",
 			frm.fields_dict[prefered_email_fieldname].value)
 	},
+
 	status: function(frm) {
 		return frm.call({
 			method: "deactivate_sales_person",
