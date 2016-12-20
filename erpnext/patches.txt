@@ -358,3 +358,4 @@ erpnext.patches.v7_1.set_budget_against_as_cost_center
 erpnext.patches.v7_1.set_currency_exchange_date
 erpnext.patches.v7_1.set_sales_person_status
 erpnext.patches.v7_1.repost_stock_for_deleted_bins_for_merging_items
+execute:frappe.delete_doc('Desktop Icon', {'module_name': 'Profit and Loss Statment'})
