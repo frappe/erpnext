@@ -507,7 +507,10 @@ class JournalEntry(AccountsController):
 				amt = frappe.db.sql("""select sum(debit) as amt from `tabJournal Entry Account`
 					where reference_type = "Expense Claim" and
 					reference_name = %s and docstatus = 1""", d.reference_name ,as_dict=1)[0].amt
+				doc = frappe.get_doc("Expense Claim", d.reference_name)
+				doc.set_status()
 				frappe.db.set_value("Expense Claim", d.reference_name , "total_amount_reimbursed", amt)
+				frappe.db.set_value("Expense Claim", d.reference_name , "status", doc.status)
 
 	def validate_expense_claim(self):
 		for d in self.accounts:

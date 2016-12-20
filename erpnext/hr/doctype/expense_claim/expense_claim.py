@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import get_fullname, flt
+from frappe.utils import get_fullname, flt, cstr
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
 from erpnext.accounts.party import get_party_account
@@ -26,8 +26,21 @@ class ExpenseClaim(AccountsController):
 		self.set_expense_account()
 		self.set_employee_account()
 		self.set_cost_center()
+		self.set_status()
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
+
+	def set_status(self):
+		self.status = {
+			"0": "Draft",
+			"1": "Submitted",
+			"2": "Cancelled"
+		}[cstr(self.docstatus or 0)]
+
+		if self.total_sanctioned_amount == self.total_amount_reimbursed and self.docstatus == 1:
+			self.status = "Paid"
+		elif self.docstatus == 1:
+			self.status = "Unpaid"
 
 	def set_employee_account(self):
 		if not self.employee_account:
@@ -139,6 +152,8 @@ def make_bank_entry(docname):
 
 	expense_claim = frappe.get_doc("Expense Claim", docname)
 	default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Bank")
+	if not default_bank_cash_account:
+		default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Cash")
 
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = 'Bank Entry'
