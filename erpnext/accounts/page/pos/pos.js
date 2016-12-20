@@ -297,6 +297,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.print_template = r.message.print_template;
 		this.pos_profile_data = r.message.pos_profile;
 		this.default_customer = r.message.default_customer || null;
+		this.print_settings = locals[":Print Settings"]["Print Settings"];
+		this.letter_head = frappe.boot.letter_heads[this.pos_profile_data[letter_head]] || {};
 	},
 
 	save_previous_entry : function(){
@@ -327,9 +329,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			frappe.meta.sync(data)
 		})
 
-		this.print_template_data = frappe.render_template("print_template",
-			{content: this.print_template, title:"POS",
-			base_url: frappe.urllib.get_base_url(), print_css: frappe.boot.print_css})
+		this.print_template_data = frappe.render_template("print_template", {content: this.print_template,
+			title:"POS", base_url: frappe.urllib.get_base_url(), print_css: frappe.boot.print_css,
+			print_settings: this.print_settings, header: this.letter_head.header, footer: this.letter_head.footer})
 	},
 
 	setup: function(){
