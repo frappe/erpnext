@@ -8,14 +8,18 @@ from frappe import _
 def execute(filters=None):
 	columns, data = [], []
 	columns = get_columns()
-	data = get_unclaimed_expese_claims()
+	data = get_unclaimed_expese_claims(filters)
 	return columns, data
 
 def get_columns():
 	return [_("Employee") + ":Link/Employee:120", _("Employee Name") + "::120",_("Expense Claim") + ":Link/Expense Claim:120",
 		_("Sanctioned Amount") + ":Currency:120", _("Paid Amount") + ":Currency:120", _("Outstanding Amount") + ":Currency:150"]
 
-def get_unclaimed_expese_claims():
+def get_unclaimed_expese_claims(filters):
+	cond = "1=1"
+	if filters.get("employee"):
+		cond = "ec.employee = %(employee)s"
+
 	return frappe.db.sql(""" 
 		select
 			ec.employee, ec.employee_name, ec.name, ec.total_sanctioned_amount, ec.total_amount_reimbursed,
@@ -24,7 +28,7 @@ def get_unclaimed_expese_claims():
 			`tabExpense Claim` ec, `tabGL Entry` gle
 		where
 			gle.against_voucher_type = "Expense Claim" and gle.against_voucher = ec.name
-			and gle.party is not null and ec.docstatus = 1 group by ec.name
+			and gle.party is not null and ec.docstatus = 1 and {cond} group by ec.name
 		having
 			outstanding_amt > 0
-	""", as_list =1, debug=1)
+	""".format(cond=cond), filters, as_list=1)

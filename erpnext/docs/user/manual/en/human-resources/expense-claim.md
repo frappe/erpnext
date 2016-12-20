@@ -10,7 +10,7 @@ Set the Employee ID, date and the list of expenses that are to be claimed and
 “Submit” the record.
 
 ### Set Account for Employee
-Set employee's expense account on the employee form, system books an expense amount of an employee under this account
+Set employee's expense account on the employee form, system books an expense amount of an employee under this account.
 <img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/employee_account.png">
 
 ### Approving Expenses

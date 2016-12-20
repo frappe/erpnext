@@ -3,6 +3,10 @@
 
 frappe.query_reports["Unclaimed Expense Claims"] = {
 	"filters": [
-
+		{
+			"fieldname":"employee",
+			"label": __("Employee"),
+			"fieldtype": "Link"
+		}
 	]
 }

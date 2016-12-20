@@ -538,10 +538,11 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-12-19 16:14:03.645704", 
+ "modified": "2016-12-20 21:40:50.254992", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 
+ "name_case": "Title Case", 
  "owner": "Administrator", 
  "permissions": [
   {
