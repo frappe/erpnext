@@ -6,7 +6,7 @@ import frappe
 
 from frappe.utils import getdate, validate_email_add, today, add_years
 from frappe.model.naming import make_autoname
-from frappe import throw, _
+from frappe import throw, _, scrub
 import frappe.permissions
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
@@ -39,6 +39,7 @@ class Employee(Document):
 		self.validate_status()
 		self.validate_employee_leave_approver()
 		self.validate_reports_to()
+		self.validate_prefered_email()
 
 		if self.user_id:
 			self.validate_for_enabled_user_id()
@@ -153,6 +154,11 @@ class Employee(Document):
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
 
+	def validate_prefered_email(self):
+		if not self.get(scrub(self.prefered_contact_email)):
+			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
+
+
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(att_date), count(*)
@@ -250,3 +256,34 @@ def deactivate_sales_person(status = None, employee = None):
 		sales_person = frappe.db.get_value("Sales Person", {"Employee": employee})
 		if sales_person:
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+
+@frappe.whitelist()
+def create_user(employee, user = None):
+	emp = frappe.get_doc("Employee", employee)
+
+	employee_name = emp.employee_name.split(" ")
+	middle_name = last_name = ""
+
+	if len(employee_name) >= 3:
+		last_name = " ".join(employee_name[2:])
+		middle_name = employee_name[1]
+	elif len(employee_name) == 2:
+		last_name = employee_name[1]
+
+	first_name = employee_name[0]
+	
+	user = frappe.new_doc("User")
+	user.update({
+		"name": emp.employee_name,
+		"email": emp.prefered_email,
+		"enabled": 1,
+		"first_name": first_name,
+		"middle_name": middle_name,
+		"last_name": last_name,
+		"gender": emp.gender,
+		"birth_date": emp.date_of_birth,
+		"phone": emp.cell_number,
+		"bio": emp.bio
+	})
+	user.insert()
+	return user.name
