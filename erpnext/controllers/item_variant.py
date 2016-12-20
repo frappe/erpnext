@@ -41,30 +41,37 @@ def validate_item_variant_attributes(item, args=None):
 
 		if attribute.lower() in numeric_values:
 			numeric_attribute = numeric_values[attribute.lower()]
+			validate_is_incremental(numeric_attribute, attribute, value, item.name)
 
-			from_range = numeric_attribute.from_range
-			to_range = numeric_attribute.to_range
-			increment = numeric_attribute.increment
+		else:
+			attributes_list = attribute_values.get(attribute.lower(), [])
+			validate_item_attribute_value(attributes_list, attribute, value, item.name)
 
-			if increment == 0:
-				# defensive validation to prevent ZeroDivisionError
-				frappe.throw(_("Increment for Attribute {0} cannot be 0").format(attribute))
+def validate_is_incremental(numeric_attribute, attribute, value, item):
+	from_range = numeric_attribute.from_range
+	to_range = numeric_attribute.to_range
+	increment = numeric_attribute.increment
 
-			is_in_range = from_range <= flt(value) <= to_range
-			precision = max(len(cstr(v).split(".")[-1].rstrip("0")) for v in (value, increment))
-			#avoid precision error by rounding the remainder
-			remainder = flt((flt(value) - from_range) % increment, precision)
+	if increment == 0:
+		# defensive validation to prevent ZeroDivisionError
+		frappe.throw(_("Increment for Attribute {0} cannot be 0").format(attribute))
 
-			is_incremental = remainder==0 or remainder==increment
+	is_in_range = from_range <= flt(value) <= to_range
+	precision = max(len(cstr(v).split(".")[-1].rstrip("0")) for v in (value, increment))
+	#avoid precision error by rounding the remainder
+	remainder = flt((flt(value) - from_range) % increment, precision)
 
-			if not (is_in_range and is_incremental):
-				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3} for Item {4}")\
-					.format(attribute, from_range, to_range, increment, item.name),
-					InvalidItemAttributeValueError, title=_('Invalid Attribute'))
+	is_incremental = remainder==0 or remainder==increment
 
-		elif value not in attribute_values.get(attribute.lower(), []):
-			frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values for Item {2}").format(
-				value, attribute, item.name), InvalidItemAttributeValueError, title=_('Invalid Attribute'))
+	if not (is_in_range and is_incremental):
+		frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3} for Item {4}")\
+			.format(attribute, from_range, to_range, increment, item),
+			InvalidItemAttributeValueError, title=_('Invalid Attribute'))
+
+def validate_item_attribute_value(attributes_list, attribute, attribute_value, item):
+	if attribute_value not in attributes_list:
+		frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values for Item {2}").format(
+			attribute_value, attribute, item), InvalidItemAttributeValueError, title=_('Invalid Attribute'))
 
 def get_attribute_values():
 	if not frappe.flags.attribute_values:
