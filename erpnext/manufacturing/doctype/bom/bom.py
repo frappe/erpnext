@@ -87,7 +87,7 @@ class BOM(Document):
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
-					
+
 			self.validate_bom_currecny(item)
 
 	def get_bom_material_detail(self, args=None):
@@ -222,7 +222,7 @@ class BOM(Document):
 
 		if not self.quantity:
 			frappe.throw(_("Quantity should be greater than 0"))
-			
+
 	def validate_currency(self):
 		if self.rm_cost_as_per == 'Price List' and \
 			frappe.db.get_value('Price List', self.buying_price_list, 'currency') != self.currency:
@@ -320,7 +320,7 @@ class BOM(Document):
 		for d in self.get('items'):
 			if d.bom_no:
 				d.rate = self.get_bom_unitcost(d.bom_no)
-				
+
 			d.base_rate = d.rate * self.conversion_rate
 			d.amount = flt(d.rate, self.precision("rate", d)) * flt(d.qty, self.precision("qty", d))
 			d.base_amount = d.amount * self.conversion_rate
@@ -367,7 +367,7 @@ class BOM(Document):
 					'qty'			: flt(d.qty),
 					'rate'			: d.base_rate,
 				}))
-				
+
 	def company_currency(self):
 		return frappe.db.get_value('Company', self.company, 'default_currency')
 
@@ -498,12 +498,12 @@ def validate_bom_no(item, bom_no):
 		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 
 @frappe.whitelist()
-def get_children(parent=None):
-	if parent:
+def get_children():
+	if frappe.form_dict.parent:
 		return frappe.db.sql("""select item_code,
 			bom_no as value, qty,
 			if(ifnull(bom_no, "")!="", 1, 0) as expandable
 			from `tabBOM Item`
 			where parent=%s
 			order by idx
-			""", parent, as_dict=True)
+			""", frappe.form_dict.parent, as_dict=True)
