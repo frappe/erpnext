@@ -51,26 +51,40 @@ def get_attendance_list(conditions, filters):
 		status from `tabStudent Attendance` where docstatus = 1 %s order by student, date""" %
 		conditions, filters, as_dict=1)
 
+	students_with_leave_application = get_students_with_leave_application(filters)
+
 	att_map = {}
 	for d in attendance_list:
 		att_map.setdefault(d.student, frappe._dict()).setdefault(d.day_of_month, "")
-		att_map[d.student][d.day_of_month] = d.status
+		for stud in students_with_leave_application:
+			if stud.student== d.student and stud.day_of_month== d.day_of_month:
+				att_map[d.student][d.day_of_month] = "Present"
+				break
+			else:		
+				att_map[d.student][d.day_of_month] = d.status
 
 	return att_map
+
+def get_students_with_leave_application(filters):
+	students_with_leave_application = frappe.db.sql("""select student, day(date) as day_of_month
+		from `tabStudent Leave Application` where mark_as_present and docstatus = 1 
+		and month(date) = %(month)s and year(date) = %(year)s
+		order by student, date""", filters, as_dict=1)
+	return students_with_leave_application 
 
 def get_conditions(filters):
 	if not (filters.get("month") and filters.get("year")):
 		msgprint(_("Please select month and year"), raise_exception=1)
-
+	
 	filters["month"] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
 		"Dec"].index(filters.month) + 1
 
 	filters["total_days_in_month"] = monthrange(cint(filters.year), filters.month)[1]
-
+	
 	conditions = " and month(date) = %(month)s and year(date) = %(year)s"
 
 	if filters.get("student_batch"): conditions += " and student_batch = %(student_batch)s"
-
+	
 	return conditions, filters
 
 @frappe.whitelist()
