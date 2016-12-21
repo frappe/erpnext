@@ -264,6 +264,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Batch Item Expiry Status",
+					"doctype": "Stock Ledger Entry"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Item Prices",
 					"doctype": "Price List"
 				},
