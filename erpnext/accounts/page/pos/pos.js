@@ -298,7 +298,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.pos_profile_data = r.message.pos_profile;
 		this.default_customer = r.message.default_customer || null;
 		this.print_settings = locals[":Print Settings"]["Print Settings"];
-		this.letter_head = frappe.boot.letter_heads[this.pos_profile_data[letter_head]] || {};
+		this.letter_head = (this.pos_profile_data.length > 0) ? frappe.boot.letter_heads[this.pos_profile_data[letter_head]] : {};
 	},
 
 	save_previous_entry : function(){
