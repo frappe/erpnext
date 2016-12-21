@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest, copy
-from frappe.utils import nowdate, add_days, flt, nowdate
+from frappe.utils import nowdate, add_days, flt
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
@@ -162,11 +162,50 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.base_grand_total, 1628)
 		self.assertEquals(si.grand_total, 32.56)
 
+	def test_sales_invoice_with_discount_and_inclusive_tax(self):
+		si = create_sales_invoice(qty=100, rate=50, do_not_save=True)
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 14,
+			'included_in_print_rate': 1
+		})
+		si.insert()
+
+		# with inclusive tax
+		self.assertEquals(si.net_total, 4385.96)
+		self.assertEquals(si.grand_total, 5000)
+
+		si.reload()
+
+		# additional discount
+		si.discount_amount = 100
+		si.apply_discount_on = 'Net Total'
+
+		si.save()
+
+		# with inclusive tax and additional discount
+		self.assertEquals(si.net_total, 4285.96)
+		self.assertEquals(si.grand_total, 4885.99)
+
+		si.reload()
+
+		# additional discount on grand total
+		si.discount_amount = 100
+		si.apply_discount_on = 'Grand Total'
+
+		si.save()
+
+		# with inclusive tax and additional discount
+		self.assertEquals(si.net_total, 4298.24)
+		self.assertEquals(si.grand_total, 4900.00)
+
 	def test_sales_invoice_discount_amount(self):
 		si = frappe.copy_doc(test_records[3])
 		si.discount_amount = 104.95
 		si.append("taxes", {
-			"doctype": "Sales Taxes and Charges",
 			"charge_type": "On Previous Row Amount",
 			"account_head": "_Test Account Service Tax - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -961,7 +1000,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.submit()
 
 		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
-	
+
 	def test_outstanding_amount_after_advance_jv_cancelation(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
 			import test_records as jv_test_records
@@ -986,15 +1025,15 @@ class TestSalesInvoice(unittest.TestCase):
 
 		#check outstanding after advance allocation
 		self.assertEqual(flt(si.outstanding_amount), flt(si.grand_total - si.total_advance, si.precision("outstanding_amount")))
-		
+
 		#added to avoid Document has been modified exception
 		jv = frappe.get_doc("Journal Entry", jv.name)
 		jv.cancel()
-		
+
 		si.load_from_db()
 		#check outstanding after advance cancellation
 		self.assertEqual(flt(si.outstanding_amount), flt(si.grand_total + si.total_advance, si.precision("outstanding_amount")))
-	
+
 	def test_outstanding_amount_after_advance_payment_entry_cancelation(self):
 		pe = frappe.get_doc({
 			"doctype": "Payment Entry",
@@ -1015,7 +1054,7 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 		pe.insert()
 		pe.submit()
-		
+
 		si = frappe.copy_doc(test_records[0])
 		si.is_pos = 0
 		si.append("advances", {
@@ -1028,16 +1067,16 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 		si.insert()
 		si.submit()
-		
+
 		si.load_from_db()
 
 		#check outstanding after advance allocation
 		self.assertEqual(flt(si.outstanding_amount), flt(si.grand_total - si.total_advance, si.precision("outstanding_amount")))
-		
+
 		#added to avoid Document has been modified exception
 		pe = frappe.get_doc("Payment Entry", pe.name)
 		pe.cancel()
-		
+
 		si.load_from_db()
 		#check outstanding after advance cancellation
 		self.assertEqual(flt(si.outstanding_amount), flt(si.grand_total + si.total_advance, si.precision("outstanding_amount")))
