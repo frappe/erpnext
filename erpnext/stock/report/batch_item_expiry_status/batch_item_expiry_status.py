@@ -33,7 +33,7 @@ def get_columns(filters):
 
 	columns = [_("Item") + ":Link/Item:100"] + [_("Item Name") + "::150"] + [_("Description") + "::150"] + \
 	[_("Warehouse") + ":Link/Warehouse:100"] + [_("Batch") + ":Link/Batch:100"] + [_("Expires On") + ":Date:90"] + \
-	[_("Expiry Status") + ":Data:120"]
+	[_("Expiry (In Days)") + ":Int:120"]
 
 	return columns
 
@@ -80,9 +80,9 @@ def get_item_warehouse_batch_map(filters, float_precision):
 		expires_in_days = (exp_date - frappe.utils.datetime.date.today()).days
 
 		if expires_in_days > 0:
-			qty_dict.expiry_status = "Expires in {} day(s)".format(expires_in_days)
+			qty_dict.expiry_status = expires_in_days
 		else:
-			qty_dict.expiry_status = 'Expired'
+			qty_dict.expiry_status = 0
 
 	return iwb_map
 
