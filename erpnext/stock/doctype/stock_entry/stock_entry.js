@@ -431,22 +431,16 @@ frappe.ui.form.on('Stock Entry Detail', {
 	uom: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(d.uom && d.item_code){
-			arg = {
-					'item_code':d.item_code,
-					'uom':d.uom,
-					'qty':d.qty
-			};
 			return frappe.call({
-				doc: cur_frm.doc,
-				method: "get_uom_details",
-				args: arg,
+				method: "erpnext.stock.doctype.stock_entry.stock_entry.get_uom_details",
+				args: {
+					item_code: d.item_code,
+					uom: d.uom,
+					qty: d.qty
+				},
 				callback: function(r) {
 					if(r.message) {
-						var d = locals[cdt][cdn];
-						$.each(r.message, function(k, v) {
-							d[k] = v;
-						});
-						refresh_field("items");
+						frappe.model.set_value(cdt, cdn, r.message);
 					}
 				}
 			});
