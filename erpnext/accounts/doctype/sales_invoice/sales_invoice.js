@@ -270,6 +270,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				});
 			}
 		}
+		else this.frm.trigger("refresh")
 	},
 
 	amount: function(){
