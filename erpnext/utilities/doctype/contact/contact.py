@@ -15,7 +15,7 @@ class Contact(StatusUpdater):
 			[cstr(self.get(f)).strip() for f in ["first_name", "last_name"]]))
 
 		# concat party name if reqd
-		for fieldname in ("customer", "supplier", "sales_partner"):
+		for fieldname in ("customer", "supplier", "sales_partner", "organisation"):
 			if self.get(fieldname):
 				self.name = self.name + "-" + cstr(self.get(fieldname)).strip()
 				break
