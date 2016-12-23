@@ -1,5 +1,5 @@
-import frappe
 from __future__ import unicode_literals
+import frappe
 
 def match_email_to_contact(doc,method=None):
 	if doc.communication_type == "Communication":
