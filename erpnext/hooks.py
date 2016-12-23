@@ -165,6 +165,9 @@ doc_events = {
 	"Address": {
 		"validate": "erpnext.shopping_cart.cart.set_customer_in_address"
 	},
+	"Communication":{
+ 		"after_insert":"erpnext.utilities.doctype.contact.match_email_to_contact"
+ 	},
 
 	# bubble transaction notification on master
 	('Opportunity', 'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
