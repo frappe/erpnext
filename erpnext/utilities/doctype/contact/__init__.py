@@ -1,6 +1,7 @@
+import frappe
 from __future__ import unicode_literals
 
-def match_email_to_contact(doc):
+def match_email_to_contact(doc,method=None):
 	if doc.communication_type == "Communication":
 		origin_contact = frappe.db.sql(
 			"select name, email_id, supplier, supplier_name, customer, customer_name, user, organisation from `tabContact` where email_id <>''",
