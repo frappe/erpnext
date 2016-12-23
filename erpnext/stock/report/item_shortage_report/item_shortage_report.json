@@ -13,7 +13,8 @@
  "module": "Stock", 
  "name": "Item Shortage Report", 
  "owner": "Administrator", 
+ "query": "SELECT  bin.warehouse as \"Warehouse:Link/Warehouse:150\",\n\tbin.item_code as \"Item Code:Link/Item:100\",\n\tbin.actual_qty as \"Actual Quantity:Float:120\",\n\tbin.ordered_qty as \"Ordered Quantity:Float:120\",\n\tbin.planned_qty as \"Planned Quantity:Float:120\",\n\tbin.reserved_qty as \"Reserved Quantity:Float:120\",\n\tbin.projected_qty as \"Project Quantity:Float:120\",\n\titem.item_name as \"Item Name:Data:150\",\n\titem.description as \"Description::200\"\nFROM tabBin as bin\nINNER JOIN tabItem as item\nON bin.item_code=item.name\nWHERE bin.projected_qty<0\nORDER BY bin.projected_qty;", 
  "ref_doctype": "Bin", 
  "report_name": "Item Shortage Report", 
- "report_type": "Report Builder"
+ "report_type": "Query Report"
 }

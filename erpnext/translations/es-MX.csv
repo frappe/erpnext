@@ -1,5 +1,51 @@
 DocType: Delivery Note,% Installed,% Instalado
+DocType: Sales Order,SO-,OV-
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +437,Show Salary Slip,Mostrar recibo de nómina
+DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
+
+#### Note
+
+The tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.
+
+#### Description of Columns
+
+1. Calculation Type: 
+    - This can be on **Net Total** (that is the sum of basic amount).
+    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
+    - **Actual** (as mentioned).
+2. Account Head: The Account ledger under which this tax will be booked
+3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.
+4. Description: Description of the tax (that will be printed in invoices / quotes).
+5. Rate: Tax rate.
+6. Amount: Tax amount.
+7. Total: Cumulative total to this point.
+8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
+9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
+10. Add or Deduct: Whether you want to add or deduct the tax.","Plantilla de impuestos que puede aplicarse a todas las operaciones de compra. Esta plantilla puede contener un listado de cuentas de impuestos así como también de otras cuentas de gastos como ""Envío"", ""Seguros"", ""Manejo"", etc. 
+
+ #### Nota 
+
+La tasa impositiva que se defina aquí será la tasa de gravamen predeterminada para todos los **Productos**. Si existen **Productos** con diferentes tasas, estas deben ser añadidas a la tabla de **Impuestos del Producto ** dentro del maestro del **Producto**.
+
+ #### Descripción de las Columnas 
+
+ 1. Tipo de Cálculo: 
+ - Este puede ser **Sobre el total neto** (que es la suma de la cantidad básica).
+ - **Sobre la línea anterior total / importe** (para impuestos o cargos acumulados). Si selecciona esta opción, el impuesto se aplica como un porcentaje de la cantidad o total de la fila anterior (de la tabla de impuestos).
+ - **Actual** (como se haya capturado).
+ 2. Encabezado de cuenta: La cuenta mayor sobre la que se registrara este gravamen. 
+ 3. Centro de Costo: Si el impuesto / cargo es un ingreso (como en un envío) o un gasto, debe ser registrado contra un centro de costos.
+ 4. Descripción: Descripción del impuesto (que se imprimirán en facturas / cotizaciones).
+ 5. Rate: Tasa de impuesto.
+ 6. Monto: Monto de impuesto.
+ 7. Total: Total acumulado hasta este punto.
+ 8. Línea de referencia: Si se basa en ""Línea anterior al total"" se puede seleccionar el número de la fila que será tomado como base para este cálculo (por defecto es la fila anterior).
+ 9. Considerar impuesto o cargo para: En esta sección se puede especificar si el impuesto / cargo es sólo para la valoración (no una parte del total) o sólo para el total (no agrega valor al elemento) o para ambos.
+ 10. Añadir o deducir: Si usted quiere añadir o deducir el impuesto."
+DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Especificar el tipo de cambio para convertir de una moneda a otra
+apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +150,Source and target warehouse must be different,El almacén de origen debe ser diferente al de destino
 DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
+DocType: Item,Standard Selling Rate,Tarifa de venta estándar
 DocType: Address Template,"<h4>Default Template</h4>
 <p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
 <pre><code>{{ address_line1 }}&lt;br&gt;

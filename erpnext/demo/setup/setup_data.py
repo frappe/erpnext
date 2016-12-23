@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import random, json
 import frappe, erpnext
-from frappe.utils import flt, now_datetime, cstr
+from frappe.utils import flt, now_datetime, cstr, random_string
 from frappe.utils.make_random import add_random_children, get_random
 from erpnext.demo.domains import data
 from frappe import _
@@ -14,8 +14,15 @@ def setup(domain):
 	setup_holiday_list()
 	setup_user()
 	setup_employee()
-	setup_salary_structure()
-	setup_salary_structure_for_timesheet()
+
+	employees = frappe.get_all('Employee',  fields=['name', 'date_of_joining'])
+
+	# monthly salary
+	setup_salary_structure(employees[:5], 0)
+
+	# based on timesheet
+	setup_salary_structure(employees[5:], 1)
+
 	setup_leave_allocation()
 	setup_user_roles()
 	setup_customer()
@@ -29,7 +36,7 @@ def setup(domain):
 	setup_account_to_expense_type()
 	setup_budget()
 	setup_pos_profile()
-	
+
 	frappe.db.commit()
 	frappe.clear_cache()
 
@@ -111,30 +118,44 @@ def setup_employee():
 	frappe.db.set_value("HR Settings", None, "emp_created_by", "Naming Series")
 	frappe.db.commit()
 
+	for d in frappe.get_all('Salary Component'):
+		salary_component = frappe.get_doc('Salary Component', d.name)
+		salary_component.append('accounts', dict(
+			company=erpnext.get_default_company(),
+			default_account=frappe.get_value('Account', dict(account_name=('like', 'Salary%')))
+		))
+		salary_component.save()
+
 	import_json('Employee')
 
-def setup_salary_structure():
+def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 	f = frappe.get_doc('Fiscal Year', frappe.defaults.get_global_default('fiscal_year'))
 
 	ss = frappe.new_doc('Salary Structure')
-	ss.name = "Sample Salary Structure - " + str(f.year_start_date)
-	for e in frappe.get_all('Employee', fields=['name', 'date_of_joining']):
+	ss.name = "Sample Salary Structure - " + random_string(5)
+	for e in employees:
 		ss.append('employees', {
 			'employee': e.name,
 			'base': random.random() * 10000
 		})
 
-		if not e.date_of_joining:
-			continue
+	ss.from_date = e.date_of_joining if (e.date_of_joining
+		and e.date_of_joining > f.year_start_date) else f.year_start_date
+	ss.to_date = f.year_end_date
+	ss.salary_slip_based_on_timesheet = salary_slip_based_on_timesheet
 
-		ss.from_date = e.date_of_joining if (e.date_of_joining
-			and e.date_of_joining > f.year_start_date) else f.year_start_date
-		ss.to_date = f.year_end_date
-		ss.payment_account = frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
+	if salary_slip_based_on_timesheet:
+		ss.salary_component = 'Basic'
+		ss.hour_rate = flt(random.random() * 10, 2)
+	else:
+		ss.payroll_frequency = 'Monthly'
+
+	ss.payment_account = frappe.get_value('Account',
+		{'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
+
 	ss.append('earnings', {
 		'salary_component': 'Basic',
 		"abbr":'B',
-		'condition': 'base > 5000',
 		'formula': 'base*.2',
 		'amount_based_on_formula': 1,
 		"idx": 1
@@ -142,20 +163,14 @@ def setup_salary_structure():
 	ss.append('deductions', {
 		'salary_component': 'Income Tax',
 		"abbr":'IT',
-		'condition': 'base > 5000',
+		'condition': 'base > 1000',
 		'amount': random.random() * 1000,
 		"idx": 1
 	})
 
 	ss.insert()
 
-def setup_salary_structure_for_timesheet():
-	for e in frappe.get_all('Salary Structure', fields=['name'], filters={'is_active': 'Yes'}, limit=2):
-		ss_doc = frappe.get_doc("Salary Structure", e.name)
-		ss_doc.salary_slip_based_on_timesheet = 1
-		ss_doc.salary_component = 'Basic'
-		ss_doc.hour_rate = flt(random.random() * 10, 2)
-		ss_doc.save(ignore_permissions=True)
+	return ss
 
 def setup_user_roles():
 	user = frappe.get_doc('User', 'demo@erpnext.com')
@@ -208,11 +223,11 @@ def setup_user_roles():
 		user = frappe.get_doc('User', 'aromn@example.com')
 		user.add_roles('Academics User')
 		frappe.db.set_global('demo_schools_user', user.name)
-		
+
 	#Add Expense Approver
 	user = frappe.get_doc('User', 'WanMai@example.com')
 	user.add_roles('Expense Approver')
-	
+
 def setup_leave_allocation():
 	year = now_datetime().year
 	for employee in frappe.get_all('Employee', fields=['name']):
@@ -345,7 +360,7 @@ def setup_pos_profile():
 	})
 
 	pos.insert()
-	
+
 def import_json(doctype, submit=False, values=None):
 	frappe.flags.in_import = True
 	data = json.loads(open(frappe.get_app_path('erpnext', 'demo', 'data',

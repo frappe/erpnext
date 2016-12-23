@@ -363,7 +363,7 @@ def get_events(start, end, filters=None):
 		from `tabTimesheet Detail`, `tabTimesheet` 
 		where `tabTimesheet Detail`.parent = `tabTimesheet`.name 
 			and `tabTimesheet`.docstatus < 2 
-			and (from_time between %(start)s and %(end)s) {conditions} {match_cond}
+			and (from_time <= %(end)s and to_time >= %(start)s) {conditions} {match_cond}
 		""".format(conditions=conditions, match_cond = get_match_cond('Timesheet')), 
 		{
 			"start": start,

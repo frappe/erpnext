@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate, format_time
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
-from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor, process_args, get_serial_nos_by_fifo
+from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 import json
 
@@ -868,16 +868,3 @@ def get_warehouse_details(args):
 		}
 
 	return ret
-
-@frappe.whitelist()
-def get_serial_no(args):
-	if isinstance(args, basestring):
-		args = json.loads(args)
-	args = frappe._dict(args)
-
-	if args.get('warehouse'):
-		if frappe.get_value('Item', {'item_code': args.item_code}, "has_serial_no") == 1:
-			args = json.dumps({"item_code": args.get('item_code'),"warehouse": args.get('warehouse'),"qty": args.get('qty')})
-			args = process_args(args)
-			serial_no = get_serial_nos_by_fifo(args)
-			return serial_no

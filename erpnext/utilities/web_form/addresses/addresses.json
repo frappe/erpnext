@@ -1,8 +1,12 @@
 {
+ "accept_payment": 0, 
  "allow_comments": 0, 
  "allow_delete": 0, 
  "allow_edit": 1, 
+ "allow_incomplete": 0, 
  "allow_multiple": 1, 
+ "allow_print": 0, 
+ "amount": 0.0, 
  "creation": "2016-06-24 15:50:33.196990", 
  "doc_type": "Address", 
  "docstatus": 0, 
@@ -10,13 +14,16 @@
  "idx": 0, 
  "is_standard": 1, 
  "login_required": 1, 
- "modified": "2016-06-24 16:11:28.802353", 
+ "max_attachment_size": 0, 
+ "modified": "2016-12-07 04:17:02.020768", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "addresses", 
  "owner": "Administrator", 
  "published": 1, 
  "route": "address", 
+ "show_sidebar": 0, 
+ "sidebar_items": [], 
  "success_url": "/addresses", 
  "title": "Address", 
  "web_form_fields": [
@@ -26,6 +33,8 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "label": "Address Title", 
+   "max_length": 0, 
+   "max_value": 0, 
    "read_only": 0, 
    "reqd": 0
   }, 
@@ -34,6 +43,8 @@
    "fieldtype": "Select", 
    "hidden": 0, 
    "label": "Address Type", 
+   "max_length": 0, 
+   "max_value": 0, 
    "options": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nOther", 
    "read_only": 0, 
    "reqd": 1
@@ -43,6 +54,8 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "label": "Address Line 1", 
+   "max_length": 0, 
+   "max_value": 0, 
    "read_only": 0, 
    "reqd": 1
   }, 
@@ -51,6 +64,8 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "label": "Address Line 2", 
+   "max_length": 0, 
+   "max_value": 0, 
    "read_only": 0, 
    "reqd": 0
   }, 
@@ -59,6 +74,8 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "label": "City/Town", 
+   "max_length": 0, 
+   "max_value": 0, 
    "read_only": 0, 
    "reqd": 1
   }, 
@@ -67,6 +84,8 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "label": "State", 
+   "max_length": 0, 
+   "max_value": 0, 
    "read_only": 0, 
    "reqd": 0
   }, 
@@ -75,6 +94,8 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "label": "Postal Code", 
+   "max_length": 0, 
+   "max_value": 0, 
    "read_only": 0, 
    "reqd": 0
   }, 
@@ -83,6 +104,8 @@
    "fieldtype": "Link", 
    "hidden": 0, 
    "label": "Country", 
+   "max_length": 0, 
+   "max_value": 0, 
    "options": "Country", 
    "read_only": 0, 
    "reqd": 1
@@ -90,6 +113,8 @@
   {
    "fieldtype": "Column Break", 
    "hidden": 0, 
+   "max_length": 0, 
+   "max_value": 0, 
    "read_only": 0, 
    "reqd": 0
   }, 
@@ -98,6 +123,8 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "label": "Email Id", 
+   "max_length": 0, 
+   "max_value": 0, 
    "read_only": 0, 
    "reqd": 0
   }, 
@@ -106,6 +133,8 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "label": "Phone", 
+   "max_length": 0, 
+   "max_value": 0, 
    "read_only": 0, 
    "reqd": 1
   }, 
@@ -116,6 +145,8 @@
    "fieldtype": "Check", 
    "hidden": 0, 
    "label": "Preferred Billing Address", 
+   "max_length": 0, 
+   "max_value": 0, 
    "read_only": 0, 
    "reqd": 0
   }, 
@@ -126,6 +157,8 @@
    "fieldtype": "Check", 
    "hidden": 0, 
    "label": "Preferred Shipping Address", 
+   "max_length": 0, 
+   "max_value": 0, 
    "read_only": 0, 
    "reqd": 0
   }

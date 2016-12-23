@@ -97,6 +97,7 @@ def setup_roles(data):
 	'''Add, remove roles from `data.allow_roles` or `data.remove_roles`'''
 	def remove_role(role):
 		frappe.db.sql('delete from tabUserRole where role=%s', role)
+		frappe.set_value('Role', role, 'disabled', 1)
 
 	if data.remove_roles:
 		for role in data.remove_roles:
@@ -104,7 +105,7 @@ def setup_roles(data):
 
 	if data.allow_roles:
 		# remove all roles other than allowed roles
-		data.allow_roles += ['Administrator', 'Guest', 'System Manager']
+		data.allow_roles += ['Administrator', 'Guest', 'System Manager', 'All']
 		for role in frappe.get_all('Role'):
 			if not (role.name in data.allow_roles):
 				remove_role(role.name)

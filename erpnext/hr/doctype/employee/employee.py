@@ -9,7 +9,6 @@ from frappe.model.naming import make_autoname
 from frappe import throw, _
 import frappe.permissions
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
 from erpnext.utilities.transaction_base import delete_events
 
 
@@ -164,7 +163,6 @@ def get_timeline_data(doctype, name):
 
 @frappe.whitelist()
 def get_retirement_date(date_of_birth=None):
-	import datetime
 	ret = {}
 	if date_of_birth:
 		try:
@@ -233,3 +231,22 @@ def get_holiday_list_for_employee(employee, raise_exception=True):
 
 	return holiday_list
 
+def is_holiday(employee, date=None):
+	'''Returns True if given Employee has an holiday on the given date
+
+	:param employee: Employee `name`
+	:param date: Date to check. Will check for today if None'''
+
+	holiday_list = get_holiday_list_for_employee(employee)
+	if not date:
+		date = today()
+
+	if holiday_list:
+		return frappe.get_all('Holiday List', dict(name=holiday_list, holiday_date=date)) and True or False
+
+@frappe.whitelist()
+def deactivate_sales_person(status = None, employee = None):
+	if status == "Left":
+		sales_person = frappe.db.get_value("Sales Person", {"Employee": employee})
+		if sales_person:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)

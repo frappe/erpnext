@@ -343,12 +343,19 @@ erpnext.patches.v7_1.set_prefered_contact_email
 execute:frappe.reload_doc('accounts', 'doctype', 'accounts_settings')
 execute:frappe.db.set_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 0)
 execute:frappe.db.sql("update `tabStock Entry` set total_amount = null where purpose in('Repack', 'Manufacture')")
+erpnext.patches.v7_1.save_stock_settings
 erpnext.patches.v7_0.repost_gle_for_pi_with_update_stock #2016-11-01
 erpnext.patches.v7_1.add_account_user_role_for_timesheet
 erpnext.patches.v7_0.set_base_amount_in_invoice_payment_table
 erpnext.patches.v7_1.update_invoice_status
 erpnext.patches.v7_0.po_status_issue_for_pr_return
 erpnext.patches.v7_1.update_missing_salary_component_type
+erpnext.patches.v7_1.rename_quality_inspection_field
 erpnext.patches.v7_0.update_autoname_field
+erpnext.patches.v7_1.update_bom_base_currency
 erpnext.patches.v7_0.update_status_of_po_so
+erpnext.patches.v7_1.set_budget_against_as_cost_center
+erpnext.patches.v7_1.set_currency_exchange_date
+erpnext.patches.v7_1.set_sales_person_status
 erpnext.patches.v7_1.repost_stock_for_deleted_bins_for_merging_items
+execute:frappe.delete_doc('Desktop Icon', {'module_name': 'Profit and Loss Statment'})

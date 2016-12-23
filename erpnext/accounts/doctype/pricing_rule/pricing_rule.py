@@ -11,6 +11,7 @@ from frappe import throw, _
 from frappe.utils import flt, cint
 from frappe.model.document import Document
 
+
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
 
 class PricingRule(Document):
@@ -113,8 +114,19 @@ def apply_pricing_rule(args):
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
 		out.append(get_pricing_rule_for_item(args_copy))
-
+		out.append(get_serial_no_for_item(args_copy))
 	return out
+	
+def get_serial_no_for_item(args):
+	from erpnext.stock.get_item_details import get_serial_no
+	item_details = frappe._dict({
+		"doctype": args.doctype,
+		"name": args.name,
+		"serial_no": args.serial_no
+	})
+	if args.get("parenttype") in ("Sales Invoice", "Delivery Note"):
+		item_details.serial_no = get_serial_no(args)
+	return item_details
 
 def get_pricing_rule_for_item(args):
 	if args.get("parenttype") == "Material Request": return {}
@@ -286,7 +298,7 @@ def filter_pricing_rules(args, pricing_rules):
 			pricing_rules = filter(lambda x: x.for_price_list==args.price_list, pricing_rules) \
 				or pricing_rules
 
-	if len(pricing_rules) > 1:
+	if len(pricing_rules) > 1 and not args.for_shopping_cart:
 		frappe.throw(_("Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}")
 			.format("\n".join([d.name for d in pricing_rules])), MultiplePricingRuleConflict)
 	elif pricing_rules:

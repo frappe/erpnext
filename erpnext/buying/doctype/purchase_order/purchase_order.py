@@ -156,30 +156,6 @@ class PurchaseOrder(BuyingController):
 			msgprint(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
 				raise_exception=True)
 				
-	def before_print(self):
-		if self.get("group_same_items"):
-			
-			group_item_qty = {}
-			group_item_amount = {}
-
-			for item in self.items:
-				group_item_qty[item.item_code] = group_item_qty.get(item.item_code, 0) + item.qty
-				group_item_amount[item.item_code] = group_item_amount.get(item.item_code, 0) + item.amount
-				
-			duplicate_list = []
-			
-			for item in self.items:
-				if item.item_code in group_item_qty:
-					item.qty = group_item_qty[item.item_code]
-					item.amount = group_item_amount[item.item_code]
-					del group_item_qty[item.item_code]
-				else:
-					duplicate_list.append(item)
-					
-			for item in duplicate_list:
-				self.remove(item)
-				
-
 	def update_status(self, status):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
@@ -380,4 +356,3 @@ def update_status(status, name):
 	po = frappe.get_doc("Purchase Order", name)
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
-

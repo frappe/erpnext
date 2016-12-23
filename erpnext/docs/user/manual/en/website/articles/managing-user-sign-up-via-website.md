@@ -2,7 +2,7 @@
 
 Users can sign up for ERPNext account via the ERPNext Website.
 
-<img src="{{docs_base_path}}/assets/img/articles/Screen Shot 2014-12-10 at 4.45.27 pm.jpg">
+<img src="{{docs_base_url}}/assets/img/website/website-login.png">
 
 As seen above the login / sign-up button appears on the homepage of the website generated using ERPNext.
 
@@ -16,7 +16,7 @@ To do so, Go to
 
 3. Check the disable SignUp check-box and save the doc.
 
-Now only the login button shall appear and there shall be no option to sign-up via the website. You can always revert back by following the same steps.
+Now only the login button will appear and there shall be no option to sign-up via the website. You can always revert back by following the same steps.
 
 
 <!-- markdown -->

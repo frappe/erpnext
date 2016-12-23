@@ -6,16 +6,24 @@
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
 
-frappe.ui.form.on('Delivery Note', 'onload', function(frm) {
-	frm.set_indicator_formatter('item_code',
-		function(doc) {
-			return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
+frappe.ui.form.on("Delivery Note", {
+	setup: function(frm) {
+		frm.set_indicator_formatter('item_code',
+			function(doc) {
+				return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
+			})
+
+		frm.set_query("warehouse", "items", function() {
+			return {
+				filters: [
+					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+					["Warehouse", "is_group", "=", 0]
+				]
+			}
 		})
 
-	erpnext.queries.setup_queries(frm, "Warehouse", function() {
-		return erpnext.queries.warehouse(frm.doc);
-	});
-})
+	}
+});
 
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {

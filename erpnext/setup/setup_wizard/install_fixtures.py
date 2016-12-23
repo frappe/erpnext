@@ -31,8 +31,8 @@ def install(country=None):
 			'is_group': 0, 'parent_item_group': _('All Item Groups') },
 
 		# salary component
-		{'doctype': 'Salary Component', 'salary_component': _('Income Tax'), 'description': _('Income Tax')},
-		{'doctype': 'Salary Component', 'salary_component': _('Basic'), 'description': _('Basic')},
+		{'doctype': 'Salary Component', 'salary_component': _('Income Tax'), 'description': _('Income Tax'), 'type': 'Deduction'},
+		{'doctype': 'Salary Component', 'salary_component': _('Basic'), 'description': _('Basic'), 'type': 'Earning'},
 
 		# expense claim type
 		{'doctype': 'Expense Claim Type', 'name': _('Calls'), 'expense_type': _('Calls')},
@@ -186,9 +186,6 @@ def install(country=None):
 
 		{'doctype': "Print Heading", 'print_heading': _("Credit Note")},
 		{'doctype': "Print Heading", 'print_heading': _("Debit Note")},
-
-		{"doctype": "Salary Component", "salary_component": _("Basic")},
-		{"doctype": "Salary Component", "salary_component": _("Income Tax")},
 	]
 
 	from erpnext.setup.setup_wizard.industry_type import get_industry_types
