@@ -136,7 +136,7 @@ calculate_end_time = function(frm, cdt, cdn){
 	frappe.model.set_value(cdt, cdn, "to_time", d.format(moment.defaultDatetimeFormat));
 	frm._setting_hours = false;
 
-	if(frm.doc.__islocal && !child.billing_hours && child.hours){
+	if((frm.doc.__islocal || frm.doc.__onload.maintain_bill_work_hours_same) && child.hours){
 		frappe.model.set_value(cdt, cdn, "billing_hours", child.hours);
 	}
 }
