@@ -476,25 +476,33 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	update_qty: function() {
+	bind_qty_event: function() {
 		var me = this;
 
 		$(this.wrapper).find(".pos-item-qty").on("change", function(){
 			var item_code = $(this).parents(".pos-bill-item").attr("data-item-code");
-			me.update_qty_rate_against_item_code(item_code, "qty", $(this).val());
+			var qty = $(this).val();
+			me.update_qty(item_code, qty)
 		})
 
 		$(this.wrapper).find("[data-action='increase-qty']").on("click", function(){
 			var item_code = $(this).parents(".pos-bill-item").attr("data-item-code");
 			var qty = flt($(this).parents(".pos-bill-item").find('.pos-item-qty').val()) + 1;
-			me.update_qty_rate_against_item_code(item_code, "qty", qty);
+			me.update_qty(item_code, qty)
 		})
 
 		$(this.wrapper).find("[data-action='decrease-qty']").on("click", function(){
 			var item_code = $(this).parents(".pos-bill-item").attr("data-item-code");
 			var qty = flt($(this).parents(".pos-bill-item").find('.pos-item-qty').val()) - 1;
-			me.update_qty_rate_against_item_code(item_code, "qty", qty);
+			me.update_qty(item_code, qty)
 		})
+	},
+	
+	update_qty: function(item_code, qty) {
+		var me = this;
+		this.items = this.get_items(item_code);
+		this.validate_serial_no()
+		this.update_qty_rate_against_item_code(item_code, "qty", qty);
 	},
 
 	update_rate: function() {
@@ -650,7 +658,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	refresh: function(update_paid_amount) {
 		var me = this;
 		this.refresh_fields(update_paid_amount);
-		this.update_qty();
+		this.bind_qty_event();
 		this.update_rate();
 		this.set_primary_action();
 	},
@@ -946,6 +954,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			serial_no = me.item_serial_no[key][0];
 		}
 
+		if(this.items[0].has_serial_no && serial_no == ""){
+			this.refresh();
+			frappe.throw(__(repl("Error: Serial no is mandatory for item %(item)s", {
+				'item': this.items[0].item_code
+			})))
+		}
+
 		if(item_code && serial_no){
 			$.each(this.frm.doc.items, function(index, data){
 				if(data.item_code == item_code){
@@ -956,12 +971,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					}
 				}
 			})
-		}
-
-		if(this.items[0].has_serial_no && serial_no == ""){
-			frappe.throw(__(repl("Error: Serial no is mandatory for item %(item)s", {
-				'item': this.items[0].item_code
-			})))
 		}
 	},
 
@@ -974,11 +983,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			frappe.throw(__("Serial no item cannot be a fraction"))
 		}
 
-		if(args.serial_no && args.serial_no.split('\n').length != cint(value)){
+		if(args.item_code == item_code && args.serial_no && args.serial_no.split('\n').length != cint(value)){
 			args.qty = 0.0;
 			args.serial_no = ''
 			this.refresh();
-			frappe.throw(__("Total nos of serial no is not equal to quantity."))
+			frappe.throw(__(repl("Total nos of serial no is not equal to quantity for item %(item)s.", {
+				'item': item_code
+			})))
 		}
 	},
 
