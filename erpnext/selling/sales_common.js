@@ -212,7 +212,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					item_code: item.item_code,
 					warehouse: item.warehouse,
 					qty: item.qty,
-					serial_no:item.serial_no
+					serial_no: item.serial_no || ""
 				},
 				callback:function(r){
 					if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
