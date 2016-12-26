@@ -9,6 +9,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_account
+from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 
 class JournalEntry(AccountsController):
 	def __init__(self, arg1, arg2=None):
@@ -87,7 +88,7 @@ class JournalEntry(AccountsController):
 	def validate_party(self):
 		for d in self.get("accounts"):
 			account_type = frappe.db.get_value("Account", d.account, "account_type")
-			if account_type in ["Receivable", "Payable", "Employee"]:
+			if account_type in ["Receivable", "Payable"]:
 				if not (d.party_type and d.party):
 					frappe.throw(_("Row {0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
 			elif d.party_type and d.party:
@@ -504,13 +505,8 @@ class JournalEntry(AccountsController):
 	def update_expense_claim(self):
 		for d in self.accounts:
 			if d.reference_type=="Expense Claim":
-				amt = frappe.db.sql("""select sum(debit) as amt from `tabJournal Entry Account`
-					where reference_type = "Expense Claim" and
-					reference_name = %s and docstatus = 1""", d.reference_name ,as_dict=1)[0].amt
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
-				doc.set_status()
-				frappe.db.set_value("Expense Claim", d.reference_name , "total_amount_reimbursed", amt)
-				frappe.db.set_value("Expense Claim", d.reference_name , "status", doc.status)
+				update_reimbursed_amount(doc)
 
 	def validate_expense_claim(self):
 		for d in self.accounts:

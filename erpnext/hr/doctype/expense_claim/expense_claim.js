@@ -194,8 +194,9 @@ frappe.ui.form.on("Expense Claim Detail", {
 frappe.ui.form.on("Expense Claim",{
 	setup: function(frm) {
 		frm.trigger("set_query_for_cost_center")
-		frm.trigger("set_query_for_employee_account")
+		frm.trigger("set_query_for_payable_account")
 		frm.add_fetch("company", "cost_center", "cost_center");
+		frm.add_fetch("company", "default_expense_payable", "payable_account");
 	},
 
 	set_query_for_cost_center: function(frm) {
@@ -208,32 +209,20 @@ frappe.ui.form.on("Expense Claim",{
 		}
 	},
 
-	set_query_for_employee_account: function(frm) {
-		frm.fields_dict["employee_account"].get_query = function() {
+	set_query_for_payable_account: function(frm) {
+		frm.fields_dict["payable_account"].get_query = function() {
 			return {
 				filters: {
-					"root_type": "Liability",
-					"account_type": "Employee",
+					"root_type": "Balance Sheet",
+					"account_type": "Payable",
 					"is_group": 0
 				}
 			}
 		}
 	},
-	
-	employee: function(frm) {
-		return frappe.call({
-			method: "erpnext.accounts.party.get_party_account",
-			args: {
-				company: frm.doc.company,
-				party_type: "Employee",
-				party: frm.doc.employee
-			},
-			callback: function(r) {
-				if(!r.exc && r.message) {
-					frm.set_value("employee_account", r.message);
-				}
-			}
-		});
+
+	is_paid: function(frm) {
+		frm.toggle_reqd("mode_of_payment", frm.doc.is_paid)
 	}
 });
 

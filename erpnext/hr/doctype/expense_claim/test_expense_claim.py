@@ -22,12 +22,12 @@ class TestExpenseClaim(unittest.TestCase):
 		}).save()
 
 		task_name = frappe.db.get_value("Task", {"project": "_Test Project 1"})
-		employee_account = get_employee_account(employee = "_T-Employee-0001", company = "Wind Power LLC")
+		payable_account = get_payable_account(employee = "_T-Employee-0001", company = "Wind Power LLC")
 
 		expense_claim = frappe.get_doc({
 			 "doctype": "Expense Claim",
 			 "employee": "_T-Employee-0001",
-			 "employee_account": employee_account,
+			 "payable_account": payable_account,
 			 "approval_status": "Approved",
 			 "project": "_Test Project 1",
 			 "task": task_name,
@@ -60,11 +60,11 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
 		
 	def test_expense_claim_status(self):
-		employee_account = get_employee_account(employee = "_T-Employee-0001", company = "Wind Power LLC")
+		payable_account = get_payable_account(employee = "_T-Employee-0001", company = "Wind Power LLC")
 		expense_claim = frappe.get_doc({
 			 "doctype": "Expense Claim",
 			 "employee": "_T-Employee-0001",
-			 "employee_account": employee_account,
+			 "payable_account": payable_account,
 			 "approval_status": "Approved",
 			 "expenses":
 			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "claim_amount": 300, "sanctioned_amount": 200 }]
@@ -86,11 +86,11 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertEqual(expense_claim.status, "Unpaid")
 
 	def test_expense_claim_gl_entry(self):
-		employee_account = get_employee_account(employee = "_T-Employee-0001", company = "Wind Power LLC")
+		payable_account = get_payable_account(employee = "_T-Employee-0001", company = "Wind Power LLC")
 		expense_claim = frappe.get_doc({
 			 "doctype": "Expense Claim",
 			 "employee": "_T-Employee-0001",
-			 "employee_account": employee_account,
+			 "payable_account": payable_account,
 			 "approval_status": "Approved",
 			 "expenses":
 			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "claim_amount": 300, "sanctioned_amount": 200 }]
@@ -104,7 +104,7 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = dict((d[0], d) for d in [
-			[employee_account, 0.0, 200.0],
+			[payable_account, 0.0, 200.0],
 			["Travel Expenses - WP", 200.0, 0.0]
 		])
 
@@ -113,7 +113,7 @@ class TestExpenseClaim(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][1], gle.debit)
 			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
-def get_employee_account(employee, company):
+def get_payable_account(employee, company):
 	args = {'root_type': "Liability", 'company': company, 'account_type': 'Employee', 'is_group': 0}
 	account = frappe.db.get_value('Account', args, "name")
 	if not account:

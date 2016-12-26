@@ -24,7 +24,7 @@ class ExpenseClaim(AccountsController):
 		self.calculate_total_amount()
 		set_employee_name(self)
 		self.set_expense_account()
-		self.set_employee_account()
+		self.set_payable_account()
 		self.set_cost_center()
 		self.set_status()
 		if self.task and not self.project:
@@ -42,9 +42,9 @@ class ExpenseClaim(AccountsController):
 		elif self.docstatus == 1:
 			self.status = "Unpaid"
 
-	def set_employee_account(self):
-		if not self.employee_account:
-			self.employee_account = get_party_account("Employee", self.employee, self.company)
+	def set_payable_account(self):
+		if not self.payable_account:
+			self.payable_account = get_party_account("Employee", self.employee, self.company)
 
 	def set_cost_center(self):
 		if not self.cost_center:
@@ -53,12 +53,18 @@ class ExpenseClaim(AccountsController):
 	def on_submit(self):
 		if self.approval_status=="Draft":
 			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
+
 		self.update_task_and_project()
 		self.make_gl_entries()
 
+		if self.is_paid:
+			update_reimbursed_amount(self)
+
 	def on_cancel(self):
 		self.update_task_and_project()
-		self.make_gl_entries(cancel=True)
+		self.set_status()
+		if self.payable_account:
+			self.make_gl_entries(cancel=True)
 
 	def update_task_and_project(self):
 		if self.task:
@@ -87,19 +93,32 @@ class ExpenseClaim(AccountsController):
 				})
 			)
 
-		# employee entry
-		gl_entry.append(
-			self.get_gl_dict({
-				"account": self.employee_account,
-				"credit": self.total_sanctioned_amount,
-				"credit_in_account_currency": self.total_sanctioned_amount,
-				"against": ",".join([d.default_account for d in self.expenses]),
-				"party_type": "Employee",
-				"party": self.employee,
-				"against_voucher_type": self.doctype,
-				"against_voucher": self.name
-			})
-		)
+		if self.is_paid:
+			# payment entry
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": get_bank_cash_account(self.mode_of_payment, self.company),
+					"credit": self.total_sanctioned_amount,
+					"credit_in_account_currency": self.total_sanctioned_amount,
+					"against": ",".join([d.default_account for d in self.expenses]),
+					"against_voucher_type": self.doctype,
+					"against_voucher": self.name
+				})
+			)
+		else:
+			# payable entry
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": self.payable_account,
+					"credit": self.total_sanctioned_amount,
+					"credit_in_account_currency": self.total_sanctioned_amount,
+					"against": ",".join([d.default_account for d in self.expenses]),
+					"party_type": "Employee",
+					"party": self.employee,
+					"against_voucher_type": self.doctype,
+					"against_voucher": self.name
+				})
+			)
 
 		return gl_entry
 
@@ -107,8 +126,12 @@ class ExpenseClaim(AccountsController):
 		if not self.cost_center:
 			frappe.throw(_("Cost center is required to book an expense claim"))
 
-		if not self.employee_account:
+		if not self.payable_account:
 			frappe.throw(_("Please set default employee account in the employee {0}").format(self.employee))
+
+		if self.is_paid:
+			if not self.mode_of_payment:
+				frappe.throw(_("Mode of payment is required to make a payment").format(self.employee))
 
 	def calculate_total_amount(self):
 		self.total_claimed_amount = 0
@@ -136,7 +159,15 @@ class ExpenseClaim(AccountsController):
 		for expense in self.expenses:
 			if not expense.default_account:
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
-		
+				
+def update_reimbursed_amount(doc):
+	amt = frappe.db.sql("""select sum(debit) as amt from `tabJournal Entry Account`
+		where reference_type = "Expense Claim" and
+		reference_name = %s and docstatus = 1""", doc.name ,as_dict=1)[0].amt
+	doc.set_status()
+	frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)
+	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
+
 @frappe.whitelist()
 def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
@@ -161,7 +192,7 @@ def make_bank_entry(docname):
 	je.remark = 'Payment against Expense Claim: ' + docname;
 
 	je.append("accounts", {
-		"account": expense_claim.employee_account,
+		"account": expense_claim.payable_account,
 		"debit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_amount_reimbursed),
 		"reference_type": "Expense Claim",
 		"party_type": "Employee",
