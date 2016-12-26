@@ -136,6 +136,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 		
 		lcv = frappe.new_doc("Landed Cost Voucher")
 		lcv.company = "_Test Company"
+		lcv.distribute_charges_based_on = 'Amount'
 		lcv.set("purchase_receipts", [{
 			"receipt_document_type": receipt_document_type,
 			"receipt_document": receipt_document,
