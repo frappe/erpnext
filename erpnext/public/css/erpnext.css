@@ -61,6 +61,8 @@
 }
 .item-list-area {
   padding: 15px 0px;
+  overflow-y: scroll;
+  height: calc(100vh - 162px);
 }
 .pos-toolbar,
 .pos-bill-toolbar {
