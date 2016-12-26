@@ -7,10 +7,10 @@ def get_data():
 		'fieldname': 'student',
 		'transactions': [
 			{
-				'items': ['Student Log', 'Student Group', 'Student Attendance']
+				'items': ['Student Log', 'Student Batch', 'Student Group', 'Program Enrollment']
 			},
 			{
-				'items': ['Program Enrollment', 'Fees', 'Assessment']
+				'items': ['Fees', 'Assessment', 'Student Attendance', 'Student Leave Application']
 			}
 		]
 	}
