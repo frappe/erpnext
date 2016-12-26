@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
@@ -46,7 +47,7 @@ def get_contact_number(contact_name, value, key):
 	return number and (number[0][0] or number[0][1]) or ''
 
 @frappe.whitelist()
-def send_sms(receiver_list, msg, sender_name = ''):
+def send_sms(receiver_list, msg, sender_name = '', success_msg = True):
 
 	import json
 	if isinstance(receiver_list, basestring):
@@ -58,8 +59,9 @@ def send_sms(receiver_list, msg, sender_name = ''):
 
 	arg = {
 		'receiver_list' : receiver_list,
-		'message'		: msg,
-		'sender_name'	: sender_name or get_sender_name()
+		'message'		: unicode(msg).encode('utf-8'),
+		'sender_name'	: sender_name or get_sender_name(),
+		'success_msg'	: success_msg
 	}
 
 	if frappe.db.get_value('SMS Settings', None, 'sms_gateway_url'):
@@ -77,13 +79,14 @@ def send_via_gateway(arg):
 	for d in arg.get('receiver_list'):
 		args[ss.receiver_parameter] = d
 		status = send_request(ss.sms_gateway_url, args)
-		if status > 200 and status < 300:
+		if 200 <= status < 300:
 			success_list.append(d)
 
 	if len(success_list) > 0:
 		args.update(arg)
 		create_sms_log(args, success_list)
-		frappe.msgprint(_("SMS sent to following numbers: {0}").format("\n" + "\n".join(success_list)))
+		if arg.get('success_msg'):
+			frappe.msgprint(_("SMS sent to following numbers: {0}").format("\n" + "\n".join(success_list)))
 
 
 def send_request(gateway_url, params):
@@ -99,7 +102,7 @@ def create_sms_log(args, sent_to):
 	sl = frappe.new_doc('SMS Log')
 	sl.sender_name = args['sender_name']
 	sl.sent_on = nowdate()
-	sl.message = args['message']
+	sl.message = args['message'].decode('utf-8')
 	sl.no_of_requested_sms = len(args['receiver_list'])
 	sl.requested_numbers = "\n".join(args['receiver_list'])
 	sl.no_of_sent_sms = len(sent_to)
