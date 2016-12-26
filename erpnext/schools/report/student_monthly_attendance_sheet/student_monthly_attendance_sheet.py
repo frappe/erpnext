@@ -15,8 +15,9 @@ def execute(filters=None):
 	to_date = get_last_day(filters["month"] + '-' + filters["year"])
 	total_days_in_month = date_diff(to_date, from_date) +1
 	columns = get_columns(total_days_in_month)
-	att_map = get_attendance_list(from_date, to_date, filters.get("student_batch"))
 	students = get_student_batch_students(filters.get("student_batch"))
+	students_list = get_students_list(students)
+	att_map = get_attendance_list(from_date, to_date, filters.get("student_batch"), students_list)
 	data = []
 	for stud in students:
 		row = [stud.student, stud.student_name]
@@ -44,32 +45,55 @@ def get_columns(days_in_month):
 	columns += [_("Total Present") + ":Int:95", _("Total Absent") + ":Int:90"]
 	return columns
 
-def get_attendance_list(from_date, to_date, student_batch):
+def get_students_list(students):
+	student_list = []
+	for stud in students:
+		student_list.append(stud.student)
+	return student_list
+
+def get_attendance_list(from_date, to_date, student_batch, students_list):
 	attendance_list = frappe.db.sql("""select student, date, status 
 		from `tabStudent Attendance` where docstatus = 1 and student_batch = %s 
 		and date between %s and %s
 		order by student, date""",
 		(student_batch, from_date, to_date), as_dict=1)
 	att_map = {}
+	students_with_leave_application = get_students_with_leave_application(from_date, to_date, students_list)
 	for d in attendance_list:
 		att_map.setdefault(d.student, frappe._dict()).setdefault(d.date, "")
-		students_with_leave_application = get_students_with_leave_application(d.date)
-		if students_with_leave_application:
-			for stud in students_with_leave_application:
-				if stud.student== d.student:
-					att_map[d.student][d.date] = "Present"
-					break
-				else:		
-					att_map[d.student][d.date] = d.status
+		if students_with_leave_application and d.student in students_with_leave_application.get(d.date):
+			att_map[d.student][d.date] = "Present"
 		else:
 			att_map[d.student][d.date] = d.status
 	return att_map
 
-def get_students_with_leave_application(date):
-	students_with_leave_application = frappe.db.sql("""select student from 
-		`tabStudent Leave Application` where mark_as_present and docstatus = 1 and 
-		%s between from_date and to_date""", date, as_dict=1)	
-	return students_with_leave_application
+def get_students_with_leave_application(from_date, to_date, students_list):
+	leave_applications = frappe.db.sql("""
+		select student, from_date, to_date 
+		from `tabStudent Leave Application` 
+		where 
+			mark_as_present and docstatus = 1
+			and student in %(students)s
+			and (
+				from_date between %(from_date)s and %(to_date)s
+				or to_date between %(from_date)s and %(to_date)s
+				or (%(from_date)s between from_date and to_date and %(to_date)s between from_date and to_date)
+			)
+		""", {
+			"students": students_list,
+			"from_date": from_date,
+			"to_date": to_date
+		}, as_dict=True)
+	students_with_leaves= {}
+	for application in leave_applications:
+		for date in daterange(application.from_date, application.to_date):
+			students_with_leaves.setdefault(date, []).append(application.student)
+
+	return students_with_leaves
+
+def daterange(d1, d2):
+	import datetime
+	return (d1 + datetime.timedelta(days=i) for i in range((d2 - d1).days + 1))
 
 @frappe.whitelist()
 def get_attendance_years():
