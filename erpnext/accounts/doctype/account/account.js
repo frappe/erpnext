@@ -43,6 +43,10 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 		cur_frm.toggle_display(['tax_rate'], doc.account_type == 'Tax');
 		cur_frm.toggle_display('warehouse', doc.account_type=='Stock');
 	}
+
+	if(in_list(['Receivable', 'Payable'], doc.account_type)) {
+		cur_frm.set_value("party_type", doc.account_type == "Receivable" ? "Customer":"Supplier")
+	}
 }
 
 cur_frm.cscript.add_toolbar_buttons = function(doc) {

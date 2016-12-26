@@ -44,7 +44,7 @@ class ExpenseClaim(AccountsController):
 
 	def set_payable_account(self):
 		if not self.payable_account:
-			self.payable_account = get_party_account("Employee", self.employee, self.company)
+			self.payable_account = frappe.db.sql("Company", self.company, "default_expense_payable")
 
 	def set_cost_center(self):
 		if not self.cost_center:

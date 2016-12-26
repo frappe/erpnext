@@ -113,22 +113,20 @@ class TestExpenseClaim(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][1], gle.debit)
 			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
-def get_payable_account(employee, company):
-	args = {'root_type': "Liability", 'company': company, 'account_type': 'Employee', 'is_group': 0}
+def get_payable_account(company):
+	args = {'root_type': "Liability", 'company': company, 'party_type': 'Employee', 'is_group': 0}
 	account = frappe.db.get_value('Account', args, "name")
 	if not account:
 		account_doc = frappe.new_doc("Account")
-		account_doc.account_name = employee
+		account_doc.account_name = "Expense Payable"
 		account_doc.parent_account = "Current Liabilities - " + frappe.db.get_value('Company', company, 'abbr')
 		account_doc.update(args)
 		account_doc.save()
 		account = account_doc.name
 
-	if not frappe.db.get_value('Party Account', {'parent': employee, 'company': company}):
-		emp = frappe.get_doc("Employee", employee)
-		emp.append("accounts", {
-			"company": company,
-			"account": account
-		})
+	if not frappe.db.get_value('Company', company, 'default_expense_payable'):
+		doc = frappe.get_doc("Company", company)
+		doc.default_expense_payable = account
+		doc.save(ignore_permissions=True)
 
 	return account

@@ -10,7 +10,8 @@ def get():
 	        _("Current Assets"): {
 	            _("Accounts Receivable"): {
 	                _("Debtors"): {
-	                    "account_type": "Receivable"
+	                    "account_type": "Receivable",
+						"party_type": "Customer"
 	                }
 	            },
 	            _("Bank Accounts"): {
@@ -136,7 +137,8 @@ def get():
 	        _("Current Liabilities"): {
 			    _("Accounts Payable"): {
 			        _("Creditors"): {
-			            "account_type": "Payable"
+			            "account_type": "Payable",
+						"party_type": "Supplier"
 			        }
 			    },
 			    _("Stock Liabilities"): {
@@ -147,6 +149,11 @@ def get():
 				_("Duties and Taxes"): {
 					"account_type": "Tax",
 					"is_group": 1
+				},
+				_("Employee Group"): {
+				    _("Expense Payable"): {
+				        "party_type": "Employee",
+				    },
 				},
 				_("Loans (Liabilities)"): {
 					_("Secured Loans"): {},

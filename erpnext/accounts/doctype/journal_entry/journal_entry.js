@@ -86,9 +86,9 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			};
 		});
 
-		me.frm.set_query("party_type", "accounts", function(doc, cdt, cdn) {
-			return {
-				filters: {"name": ["in", ["Customer", "Supplier", "Employee"]]}
+		me.frm.set_query("party_type", "accounts", function() {
+			return{
+				query: "frappe.core.doctype.party_type.party_type.get_party_type"
 			}
 		});
 
