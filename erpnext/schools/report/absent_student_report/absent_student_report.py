@@ -55,6 +55,6 @@ def get_absent_students(date):
 def get_leave_applications(date):
 	leave_applicants = []
 	for student in frappe.db.sql("""select student from `tabStudent Leave Application` 
-		where docstatus = 1 and date = %s""", date):
+	where docstatus = 1 and from_date <= %s and to_date >= %s""", (date, date)):
 		leave_applicants.append(student[0])
 	return leave_applicants
