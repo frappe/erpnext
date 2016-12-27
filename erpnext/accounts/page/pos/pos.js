@@ -410,33 +410,37 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.frm.doc.customer = this.default_customer;
 		}
 
-		this.party_field.$input.autocomplete({
-			autoFocus: true,
-			source: function (request, response) {
-				me.customer_data = me.get_customers(request.term)
-				response($.map(me.customer_data, function(data){
+		this.party_field.awesomeplete = new Awesomplete(this.party_field.$input.get(0), {
+				minChars: 0,
+				maxItems: 99,
+				autoFirst: true,
+				list: [],
+			});
+
+		this.party_field.$input
+			.on('input', function(e) {
+				var customer_data = me.get_customers(e.target.value) || [];
+				me.party_field.awesomeplete.list = customer_data.map(function(data){
 					return {label: data.name, value: data.name,
 						customer_group: data.customer_group, territory: data.territory}
-				}))
-			},
-			change: function(event, ui){
-				if(ui.item){
-					me.frm.doc.customer = ui.item.label;
-					me.frm.doc.customer_name = ui.item.customer_name;
-					me.frm.doc.customer_group = ui.item.customer_group;
-					me.frm.doc.territory = ui.item.territory;
-				}else{
+				});
+			})
+			.on('awesomplete-select', function(e) {
+				var item = me.party_field.awesomeplete.get_item(e.originalEvent.text.value);
+				console.log(item);
+				if(item) {
+					me.frm.doc.customer = item.label;
+					me.frm.doc.customer_name = item.customer_name;
+					me.frm.doc.customer_group = item.customer_group;
+					me.frm.doc.territory = item.territory;
+				} else {
 					me.frm.doc.customer = me.party_field.$input.val();
 				}
 				me.refresh();
-			}
-		}).on("focus", function(){
-			setTimeout(function() {
-				if(!me.party_field.$input.val()) {
-					me.party_field.$input.autocomplete( "search", " " );
-				}
-			}, 500);
-		});
+			})
+			.on('focus', function(e) {
+				$(e.target).val('').trigger('input');
+			});
 	},
 
 	get_customers: function(key){
@@ -570,7 +574,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.update_qty(item_code, qty)
 		})
 	},
-	
+
 	update_qty: function(item_code, qty) {
 		var me = this;
 		this.items = this.get_items(item_code);
@@ -1012,13 +1016,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			frappe.throw(__("Select items to save the invoice"))
 		}
 	},
-	
+
 	validate_mode_of_payments: function(){
 		if (this.frm.doc.payments.length === 0){
 			frappe.throw(__("Payment Mode is not configured. Please check, whether account has been set on Mode of Payments or on POS Profile."))
 		}
 	},
-	
+
 	validate_serial_no: function(){
 		var me = this;
 		var item_code = serial_no = '';
