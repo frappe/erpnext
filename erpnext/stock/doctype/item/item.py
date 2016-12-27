@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 import erpnext
 import json
-import urllib
 import itertools
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate, strip
@@ -238,19 +237,12 @@ class Item(WebsiteGenerator):
 	def get_context(self, context):
 		context.show_search=True
 		context.search_link = '/product_search'
-		if self.variant_of:
-			# redirect to template page!
-			template_item = frappe.get_doc("Item", self.variant_of)
-			frappe.flags.redirect_location = template_item.route + "?variant=" + urllib.quote(self.name)
-			raise frappe.Redirect
 
 		context.parent_groups = get_parent_item_groups(self.item_group) + \
 			[{"name": self.name}]
 
 		self.set_variant_context(context)
-
 		self.set_attribute_context(context)
-
 		self.set_disabled_attributes(context)
 
 		context.parents = self.get_parents(context)
@@ -264,7 +256,8 @@ class Item(WebsiteGenerator):
 			# load variants
 			# also used in set_attribute_context
 			context.variants = frappe.get_all("Item",
-				filters={"variant_of": self.name, "show_in_website": 1}, order_by="name asc")
+				filters={"variant_of": self.name, "show_variant_in_website": 1},
+				order_by="name asc")
 
 			variant = frappe.form_dict.variant
 			if not variant and context.variants:
@@ -565,12 +558,12 @@ class Item(WebsiteGenerator):
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
-		repost_stock_for_warehouses = frappe.db.sql_list("""select distinct warehouse 
+		repost_stock_for_warehouses = frappe.db.sql_list("""select distinct warehouse
 			from tabBin where item_code=%s""", new_name)
-		
+
 		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
 		frappe.db.sql("delete from `tabBin` where item_code=%s", new_name)
-		
+
 		for warehouse in repost_stock_for_warehouses:
 			repost_stock(new_name, warehouse)
 
@@ -597,6 +590,11 @@ class Item(WebsiteGenerator):
 	def update_template_item(self):
 		"""Set Show in Website for Template Item if True for its Variant"""
 		if self.variant_of and self.show_in_website:
+			self.show_variant_in_website = 1
+			self.show_in_website = 0
+
+		if self.show_variant_in_website:
+			# show template
 			template_item = frappe.get_doc("Item", self.variant_of)
 
 			if not template_item.show_in_website:
