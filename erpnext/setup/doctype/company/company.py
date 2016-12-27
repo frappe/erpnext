@@ -78,6 +78,8 @@ class Company(Document):
 
 		if not frappe.local.flags.ignore_chart_of_accounts:
 			self.set_default_accounts()
+			if self.default_cash_account:
+				self.mode_of_payment()
 
 		if self.default_currency:
 			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
@@ -161,6 +163,16 @@ class Company(Document):
 
 		if account:
 			self.db_set(fieldname, account)
+
+	def mode_of_payment(self):
+		cash = frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name')
+		if cash:
+			mode_of_payment = frappe.get_doc('Mode of Payment', cash)
+			mode_of_payment.append('accounts', {
+				'company': self.name,
+				'default_account': self.default_cash_account
+			})
+			mode_of_payment.save(ignore_permissions=True)
 
 	def create_default_cost_center(self):
 		cc_list = [

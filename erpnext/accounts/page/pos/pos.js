@@ -593,7 +593,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.remove_item = []
 		$.each(this.frm.doc["items"] || [], function(i, d) {
-			if(d.serial_no){
+			if(d.serial_no && field == 'qty'){
 				me.validate_serial_no_qty(d, item_code, field, value)
 			}
 
