@@ -41,6 +41,7 @@ def get_pos_data():
 		'pos_profile': pos_profile,
 		'meta': {
 			'invoice': frappe.get_meta('Sales Invoice'),
+			'customer': frappe.get_meta('Customer'),
 			'items': frappe.get_meta('Sales Invoice Item'),
 			'taxes': frappe.get_meta('Sales Taxes and Charges')
 		}

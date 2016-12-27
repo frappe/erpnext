@@ -325,6 +325,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		$.each(this.meta, function(i, data){
 			frappe.meta.sync(data)
+			locals["DocType"][data.name] = data;
 		})
 
 		this.print_template_data = frappe.render_template("print_template",
@@ -412,21 +413,26 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			autoFocus: true,
 			source: function (request, response) {
 				me.customer_data = me.get_customers(request.term)
+				me.add_customer();
+
 				response($.map(me.customer_data, function(data){
-					return {label: data.name, value: data.name,
-						customer_group: data.customer_group, territory: data.territory}
+					return {label: data.name, customer_name: data.name, customer_group: data.customer_group,
+						territory: data.territory, onclick: data.onclick}
 				}))
 			},
-			change: function(event, ui){
-				if(ui.item){
-					me.frm.doc.customer = ui.item.label;
-					me.frm.doc.customer_name = ui.item.customer_name;
-					me.frm.doc.customer_group = ui.item.customer_group;
-					me.frm.doc.territory = ui.item.territory;
-				}else{
-					me.frm.doc.customer = me.party_field.$input.val();
+			select: function(event, ui){
+				if(ui.item.onclick) {
+					ui.item.value = ""
+					ui.item.onclick(me);
+				}else if(ui.item) {
+					me.update_customer_data(ui.item)
 				}
 				me.refresh();
+			},
+			change: function(event, ui) {
+				if(!ui.item) {
+					me.frm.doc.customer = $(this).val();
+				}
 			}
 		}).on("focus", function(){
 			setTimeout(function() {
@@ -434,7 +440,43 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					me.party_field.$input.autocomplete( "search", " " );
 				}
 			}, 500);
-		});
+		}).autocomplete(this.party_field).data('ui-autocomplete')._renderItem = function(ul, d){
+			var html = "<span>" + __(d.label) + "</span>";
+			return $('<li></li>')
+				.data('item.autocomplete', d)
+				.html('<a><p>' + html + '</p></a>')
+				.appendTo(ul);
+		}
+	},
+
+	add_customer: function() {
+		var me = this;
+		if(this.connection_status) {
+			this.customer_data.push({
+				name: "<span class='text-primary link-option'>"
+					+ "<i class='fa fa-plus' style='margin-right: 5px;'></i> "
+					+ __("Create a new Customer")
+					+ "</span>",
+				onclick: me.new_customer
+			});
+		}
+	},
+
+	new_customer: function(obj) {
+		var me = obj;
+		frappe.ui.form.quick_entry('Customer', function(doc){
+			me.customers.push(doc)
+			me.party_field.$input.val(doc.name);
+			me.update_customer_data(doc)
+		})
+	},
+
+	update_customer_data: function(doc) {
+		var me = this;
+		this.frm.doc.customer = doc.label || doc.name;
+		this.frm.doc.customer_name = doc.customer_name;
+		this.frm.doc.customer_group = doc.customer_group;
+		this.frm.doc.territory = doc.territory;
 	},
 
 	get_customers: function(key){
