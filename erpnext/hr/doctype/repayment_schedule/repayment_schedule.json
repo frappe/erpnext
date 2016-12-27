@@ -162,10 +162,10 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-12-20 17:18:14.129574", 
+ "modified": "2017-01-09 12:00:10.818772", 
  "modified_by": "Administrator", 
  "module": "HR", 
- "name": "Amortization Schedule", 
+ "name": "Repayment Schedule", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [], 
@@ -174,5 +174,6 @@
  "read_only_onload": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "track_changes": 1, 
  "track_seen": 0
 }

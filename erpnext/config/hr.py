@@ -266,7 +266,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Loan Management"),
+			"label": _("Employee Loan Management"),
 			"icon": "icon-list",
 			"items": [
 				{

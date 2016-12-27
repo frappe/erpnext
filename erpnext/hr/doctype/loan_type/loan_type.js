@@ -2,13 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Loan Type', {
-	onload: function(frm) {
-		frm.set_query("deduction_type", function() {
-			return {
-				filters: {
-					type: "deduction"
-				}
-			}
-		})
+	refresh: function(frm) {
 	}
 });
