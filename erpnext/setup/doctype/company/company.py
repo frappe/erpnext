@@ -166,7 +166,7 @@ class Company(Document):
 
 	def mode_of_payment(self):
 		cash = frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name')
-		if cash:
+		if cash and not frappe.db.get_value('Mode of Payment Account', {'company': self.name}):
 			mode_of_payment = frappe.get_doc('Mode of Payment', cash)
 			mode_of_payment.append('accounts', {
 				'company': self.name,

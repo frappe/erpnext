@@ -40,9 +40,10 @@ class TestCompany(unittest.TestCase):
 			acc = frappe.get_doc("Account", account)
 			for prop, val in acc_property.items():
 				self.assertEqual(acc.get(prop), val)
-				
+
+		self.delete_mode_of_payment("COA from Existing Company")
 		frappe.delete_doc("Company", "COA from Existing Company")
-				
+
 	def test_coa_based_on_country_template(self):
 		countries = ["India", "Brazil", "United Arab Emirates", "Canada", "Germany", "France",
 			"Guatemala", "Indonesia", "Mexico", "Nicaragua", "Netherlands", "Singapore"]
@@ -78,4 +79,9 @@ class TestCompany(unittest.TestCase):
 
 						self.assertTrue(frappe.get_all("Account", filters))
 				finally:
+					self.delete_mode_of_payment(template)
 					frappe.delete_doc("Company", template)
+
+	def delete_mode_of_payment(self, company):
+		frappe.db.sql(""" delete from `tabMode of Payment Account`
+			where company =%s """, (company))
