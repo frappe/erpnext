@@ -237,7 +237,7 @@ class StockReconciliation(StockController):
 		elif not frappe.db.sql("""select name from `tabStock Ledger Entry` limit 1"""):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(_("Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry"), OpeningEntryAccountError)
-				
+
 	def set_total_qty_and_amount(self):
 		for d in self.get("items"):
 			d.amount = flt(d.qty) * flt(d.valuation_rate)
@@ -267,7 +267,8 @@ def get_items(warehouse, posting_date, posting_time):
 	items = frappe.get_list("Bin", fields=["item_code"], filters={"warehouse": warehouse}, as_list=1)
 
 	items += frappe.get_list("Item", fields=["name"], filters= {"is_stock_item": 1, "has_serial_no": 0,
-		"has_batch_no": 0, "has_variants": 0, "disabled": 0, "default_warehouse": warehouse}, as_list=1)
+		"has_batch_no": 0, "has_variants": 0, "disabled": 0, "default_warehouse": warehouse},
+			as_list=1)
 
 	res = []
 	for item in set(items):
@@ -280,6 +281,7 @@ def get_items(warehouse, posting_date, posting_time):
 				"item_code": item[0],
 				"warehouse": warehouse,
 				"qty": stock_bal[0],
+				"item_name": frappe.db.get_value('Item', item[0], 'item_name'),
 				"valuation_rate": stock_bal[1],
 				"current_qty": stock_bal[0],
 				"current_valuation_rate": stock_bal[1]
