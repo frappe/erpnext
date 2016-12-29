@@ -5,12 +5,11 @@ frappe.provide("erpnext.company");
 
 frappe.ui.form.on("Company", {
 	setup: function(frm) {
-		frm.fields_dict['default_expense_payable'].get_query = function() {
+		frm.fields_dict['default_payable_account'].get_query = function() {
 			return{
 				filters: {
-					"report_type": "Balance Sheet",
-					"party_type": "Employee",
-					"is_group": 0
+					"root_type": "Liability",
+					"account_type": "Payable"
 				}
 			}
 		}

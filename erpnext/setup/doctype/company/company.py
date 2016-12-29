@@ -153,9 +153,8 @@ class Company(Document):
 			self.db_set("default_income_account", frappe.db.get_value("Account",
 				{"account_name": _("Sales"), "company": self.name}))
 
-		if not self.default_expense_payable:
-			self.db_set("default_expense_payable", frappe.db.get_value("Account",
-				{'party_type': _('Employee'), "company": self.name}))
+		if not self.default_payable_account:
+			self.db_set("default_payable_account", self.default_payable_account)
 
 	def _set_default_account(self, fieldname, account_type):
 		if self.get(fieldname):

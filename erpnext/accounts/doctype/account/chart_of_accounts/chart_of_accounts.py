@@ -16,7 +16,7 @@ def create_charts(company, chart_template=None, existing_company=None):
 				if root_account:
 					root_type = child.get("root_type")
 
-				if account_name not in ["account_type", "root_type", "is_group", "tax_rate", "party_type"]:
+				if account_name not in ["account_type", "root_type", "is_group", "tax_rate"]:
 
 					account_name_in_db = unidecode(account_name.strip().lower())
 					if account_name_in_db in accounts:
@@ -37,8 +37,7 @@ def create_charts(company, chart_template=None, existing_company=None):
 						"report_type": report_type,
 						"account_type": child.get("account_type"),
 						"account_currency": frappe.db.get_value("Company", company, "default_currency"),
-						"tax_rate": child.get("tax_rate"),
-						"party_type": child.get("party_type")
+						"tax_rate": child.get("tax_rate")
 					})
 
 					if root_account or frappe.local.flags.allow_unverified_charts:
@@ -57,7 +56,7 @@ def create_charts(company, chart_template=None, existing_company=None):
 def identify_is_group(child):
 	if child.get("is_group"):
 		is_group = child.get("is_group")
-	elif len(set(child.keys()) - set(["account_type", "root_type", "is_group", "tax_rate", "party_type"])):
+	elif len(set(child.keys()) - set(["account_type", "root_type", "is_group", "tax_rate"])):
 		is_group = 1
 	else:
 		is_group = 0

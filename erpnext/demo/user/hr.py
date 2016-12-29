@@ -51,7 +51,7 @@ def work():
 		expense_claim.extend('expenses', get_expenses())
 		expense_claim.employee = get_random("Employee")
 		expense_claim.company = frappe.flags.company
-		expense_claim.payable_account = get_payable_account(expense_claim.employee, expense_claim.company)
+		expense_claim.payable_account = get_payable_account(expense_claim.company)
 		expense_claim.posting_date = frappe.flags.current_date
 		expense_claim.exp_approver = filter((lambda x: x[0] != 'Administrator'), get_expense_approver(None, '', None, 0, 20, None))[0][0]
 		expense_claim.insert()

@@ -22,7 +22,7 @@ class TestExpenseClaim(unittest.TestCase):
 		}).save()
 
 		task_name = frappe.db.get_value("Task", {"project": "_Test Project 1"})
-		payable_account = get_payable_account(employee = "_T-Employee-0001", company = "Wind Power LLC")
+		payable_account = get_payable_account("Wind Power LLC")
 
 		expense_claim = frappe.get_doc({
 			 "doctype": "Expense Claim",
@@ -60,7 +60,7 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
 		
 	def test_expense_claim_status(self):
-		payable_account = get_payable_account(employee = "_T-Employee-0001", company = "Wind Power LLC")
+		payable_account = get_payable_account("Wind Power LLC")
 		expense_claim = frappe.get_doc({
 			 "doctype": "Expense Claim",
 			 "employee": "_T-Employee-0001",
@@ -86,7 +86,7 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertEqual(expense_claim.status, "Unpaid")
 
 	def test_expense_claim_gl_entry(self):
-		payable_account = get_payable_account(employee = "_T-Employee-0001", company = "Wind Power LLC")
+		payable_account = get_payable_account("Wind Power LLC")
 		expense_claim = frappe.get_doc({
 			 "doctype": "Expense Claim",
 			 "employee": "_T-Employee-0001",
@@ -114,19 +114,4 @@ class TestExpenseClaim(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
 def get_payable_account(company):
-	args = {'root_type': "Liability", 'company': company, 'party_type': 'Employee', 'is_group': 0}
-	account = frappe.db.get_value('Account', args, "name")
-	if not account:
-		account_doc = frappe.new_doc("Account")
-		account_doc.account_name = "Expense Payable"
-		account_doc.parent_account = "Current Liabilities - " + frappe.db.get_value('Company', company, 'abbr')
-		account_doc.update(args)
-		account_doc.save()
-		account = account_doc.name
-
-	if not frappe.db.get_value('Company', company, 'default_expense_payable'):
-		doc = frappe.get_doc("Company", company)
-		doc.default_expense_payable = account
-		doc.save(ignore_permissions=True)
-
-	return account
+	return frappe.db.get_value('Company', company, 'default_payable_account')

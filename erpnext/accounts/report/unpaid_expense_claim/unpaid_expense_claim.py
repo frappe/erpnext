@@ -28,7 +28,7 @@ def get_unclaimed_expese_claims(filters):
 			`tabExpense Claim` ec, `tabGL Entry` gle
 		where
 			gle.against_voucher_type = "Expense Claim" and gle.against_voucher = ec.name
-			and gle.party is not null and ec.docstatus = 1 and {cond} group by ec.name
+			and gle.party is not null and ec.docstatus = 1 and ec.is_paid = 0 and {cond} group by ec.name
 		having
 			outstanding_amt > 0
 	""".format(cond=cond), filters, as_list=1)

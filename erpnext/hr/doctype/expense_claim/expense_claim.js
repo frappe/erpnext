@@ -196,7 +196,11 @@ frappe.ui.form.on("Expense Claim",{
 		frm.trigger("set_query_for_cost_center")
 		frm.trigger("set_query_for_payable_account")
 		frm.add_fetch("company", "cost_center", "cost_center");
-		frm.add_fetch("company", "default_expense_payable", "payable_account");
+		frm.add_fetch("company", "default_payable_account", "payable_account");
+	},
+
+	refresh: function(frm) {
+		frm.trigger("toggle_fields")
 	},
 
 	set_query_for_cost_center: function(frm) {
@@ -213,15 +217,18 @@ frappe.ui.form.on("Expense Claim",{
 		frm.fields_dict["payable_account"].get_query = function() {
 			return {
 				filters: {
-					"report_type": "Balance Sheet",
-					"party_type": "Employee",
-					"is_group": 0
+					"root_type": "Liability",
+					"account_type": "Payable"
 				}
 			}
 		}
 	},
 
 	is_paid: function(frm) {
+		frm.trigger("toggle_fields")
+	},
+
+	toggle_fields: function(frm) {
 		frm.toggle_reqd("mode_of_payment", frm.doc.is_paid)
 	}
 });

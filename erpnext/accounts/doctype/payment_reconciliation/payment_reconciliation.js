@@ -8,7 +8,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 		var me = this
 		this.frm.set_query("party_type", function() {
 			return{
-				query: "frappe.core.doctype.party_type.party_type.get_party_type"
+				query: "erpnext.setup.doctype.party_type.party_type.get_party_type"
 			}
 		});
 

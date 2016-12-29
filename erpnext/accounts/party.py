@@ -171,13 +171,13 @@ def get_party_account(party_type, party, company):
 		account = frappe.db.get_value("Party Account",
 			{"parenttype": party_type, "parent": party, "company": company}, "account")
 
-		if not account and party_type != 'Employee':
+		if not account and party_type in ['Customer', 'Supplier']:
 			party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
 			group = frappe.db.get_value(party_type, party, scrub(party_group_doctype))
 			account = frappe.db.get_value("Party Account",
 				{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
 
-		if not account and party_type != 'Employee':
+		if not account and party_type in ['Customer', 'Supplier']:
 			default_account_name = "default_receivable_account" \
 				if party_type=="Customer" else "default_payable_account"
 			account = frappe.db.get_value("Company", company, default_account_name)
