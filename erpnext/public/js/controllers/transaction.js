@@ -349,7 +349,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						me.frm.set_value("letter_head", company_doc.default_letter_head);
 					}
 				}
-				if (company_doc.default_terms && me.frm.doc.doctype != "Purchase Invoice") {
+				if (company_doc.default_terms && me.frm.doc.doctype != "Purchase Invoice" && frappe.meta.has_field(me.frm.doc.doctype, "tc_name")) {
 					me.frm.set_value("tc_name", company_doc.default_terms);
 				}
 
