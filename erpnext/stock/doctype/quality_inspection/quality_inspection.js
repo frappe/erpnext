@@ -9,7 +9,7 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 		return {
 			query: "erpnext.stock.doctype.quality_inspection.quality_inspection.item_query",
 			filters: {
-				"from": doc.reference_type,
+				"from": doc.reference_type + " Item",
 				"parent": doc.reference_name
 			}
 		}
