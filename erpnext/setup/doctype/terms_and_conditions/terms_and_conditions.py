@@ -9,7 +9,8 @@ from frappe.utils.jinja import validate_template
 
 class TermsandConditions(Document):
 	def validate(self):
-		validate_template(self.terms)
+		if self.terms:
+			validate_template(self.terms)
 
 @frappe.whitelist()
 def get_terms_and_conditions(template_name, doc):
