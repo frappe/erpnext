@@ -302,11 +302,11 @@ class PurchaseInvoice(BuyingController):
 				asset.flags.ignore_validate_update_after_submit = True
 				asset.save()
 
-	def make_gl_entries(self, repost_future_gle=True):
+	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
 			return
-		
-		gl_entries = self.get_gl_entries()
+		if not gl_entries:
+			gl_entries = self.get_gl_entries()
 		
 		if gl_entries:
 			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"

@@ -113,7 +113,7 @@ class AccountsController(TransactionBase):
 				date_field = "transaction_date"
 
 			if date_field and self.get(date_field):
-				validate_fiscal_year(self.get(date_field), self.fiscal_year,
+				validate_fiscal_year(self.get(date_field), self.fiscal_year, self.company, 
 					self.meta.get_label(date_field), self)
 
 	def validate_due_date(self):
