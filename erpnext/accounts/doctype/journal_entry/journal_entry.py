@@ -326,7 +326,7 @@ class JournalEntry(AccountsController):
 			if d.account_currency == self.company_currency:
 				d.exchange_rate = 1
 			elif not d.exchange_rate or d.exchange_rate == 1 or \
-				(d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name and d.posting_date):
+				(d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name and self.posting_date):
 					# Modified to include the posting date for which to retreive the exchange rate
 					d.exchange_rate = get_exchange_rate(self.posting_date, d.account, d.account_currency, self.company,
 						d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
