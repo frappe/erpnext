@@ -77,7 +77,7 @@ def send_via_gateway(arg):
 	for d in arg.get('receiver_list'):
 		args[ss.receiver_parameter] = d
 		status = send_request(ss.sms_gateway_url, args)
-		if status > 200 and status < 300:
+		if status >= 200 and status < 300:
 			success_list.append(d)
 
 	if len(success_list) > 0:
