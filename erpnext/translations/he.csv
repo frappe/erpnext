@@ -330,7 +330,7 @@ DocType: Student Applicant,Admitted,רישיון
 DocType: Workstation,Rent Cost,עלות השכרה
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,הסכום לאחר פחת
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,אנא בחר חודש והשנה
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","id הדוא""ל של הזן מופרד על ידי פסיקים, חשבונית תישלח באופן אוטומטי על תאריך מסוים"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","id הדוא""ל של הזן מופרד על ידי פסיקים, חשבונית תישלח באופן אוטומטי על תאריך מסוים"
 DocType: Employee,Company Email,"חברת דוא""ל"
 DocType: GL Entry,Debit Amount in Account Currency,סכום חיוב במטבע חשבון
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,עסקות בנק / מזומנים נגד מפלגה או עבור העברה פנימית
@@ -621,7 +621,7 @@ DocType: Purchase Receipt Item Supplied,Current Stock,מלאי נוכחי
 apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1} does not linked to Item {2},# שורה {0}: Asset {1} אינו קשור פריט {2}
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,חשבון {0} הוזן מספר פעמים
 DocType: Account,Expenses Included In Valuation,הוצאות שנכללו בהערכת שווי
-DocType: Employee,Provide email id registered in company,"לספק id הדוא""ל רשום בחברה"
+DocType: Employee,Provide Email Address registered in company,"לספק id הדוא""ל רשום בחברה"
 DocType: Hub Settings,Seller City,מוכר עיר
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,בחר סטודנטי קבוצה
 DocType: Email Digest,Next email will be sent on:,"הדוא""ל הבא יישלח על:"
@@ -1011,7 +1011,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,כחול
 DocType: Purchase Invoice,Is Return,האם חזרה
 DocType: Price List Country,Price List Country,מחיר מחירון מדינה
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,אנא הגדר מזהה דוא&quot;ל
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,אנא הגדר מזהה דוא&quot;ל
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} nos סדרתי תקף עבור פריט {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,קוד פריט לא ניתן לשנות למס 'סידורי
@@ -2005,7 +2005,7 @@ DocType: Fiscal Year,Year End Date,תאריך סיום שנה
 DocType: Task Depends On,Task Depends On,המשימה תלויה ב
 DocType: Supplier Quotation,Opportunity,הזדמנות
 ,Completed Production Orders,הזמנות ייצור שהושלמו
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,שורת {0}: לקבלת ספק {0} id הדוא&quot;ל נדרש כדי לשלוח דואר אלקטרוני
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,שורת {0}: לקבלת ספק {0} id הדוא&quot;ל נדרש כדי לשלוח דואר אלקטרוני
 DocType: Operation,Default Workstation,Workstation ברירת המחדל
 DocType: Notification Control,Expense Claim Approved Message,הודעת תביעת הוצאות שאושרה
 DocType: Payment Entry,Deductions or Loss,ניכויים או הפסד
@@ -3327,7 +3327,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,הגדר Exchange רווח / ה�
 ,Cash Flow,תזרים מזומנים
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,תקופת יישום לא יכולה להיות על פני שתי רשומות alocation
 DocType: Item Group,Default Expense Account,חשבון הוצאות ברירת המחדל
-DocType: Student,Student Email ID,מזהה אימייל סטודנטים
+DocType: Student,Student Email Address,מזהה אימייל סטודנטים
 DocType: Employee,Notice (days),הודעה (ימים)
 DocType: Tax Rule,Sales Tax Template,תבנית מס מכירות
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,בחר פריטים כדי לשמור את החשבונית
@@ -3463,7 +3463,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,ב�
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,צפייה בלידים
 DocType: Program Enrollment Tool,New Program,תוכנית חדשה
 DocType: Item Attribute Value,Attribute Value,תכונה ערך
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","id דוא""ל חייב להיות ייחודי, כבר קיים עבור {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","id דוא""ל חייב להיות ייחודי, כבר קיים עבור {0}"
 ,Itemwise Recommended Reorder Level,Itemwise מומלץ להזמנה חוזרת רמה
 DocType: Salary Detail,Salary Detail,פרטי שכר
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,אנא בחר {0} ראשון
@@ -3907,7 +3907,7 @@ DocType: Purchase Order,Advance Paid,מראש בתשלום
 DocType: Item,Item Tax,מס פריט
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,חומר לספקים
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,בלו חשבונית
-DocType: Expense Claim,Employees Email Id,"דוא""ל עובדי זיהוי"
+DocType: Expense Claim,Employees Email Address,"דוא""ל עובדי זיהוי"
 DocType: Employee Attendance Tool,Marked Attendance,נוכחות בולטת
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,התחייבויות שוטפות
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,שלח SMS המוני לאנשי הקשר שלך

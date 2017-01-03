@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,Huurkosten
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Bedrag na afschrijvingen
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Aankomende Gebeurtenissen
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Selecteer maand en jaar
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Vul e-mail ID in, gescheiden door komma's. De factuur zal automatisch worden gemaild op specifieke datum"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Vul e-mail ID in, gescheiden door komma's. De factuur zal automatisch worden gemaild op specifieke datum"
 DocType: Employee,Company Email,Bedrijf e-mail
 DocType: GL Entry,Debit Amount in Account Currency,Debet Bedrag in account Valuta
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Bank / Cash-transacties tegen de partij of voor interne overplaatsing
@@ -684,7 +684,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Voorbeschouwing loonstrook
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Account {0} is meerdere keren ingevoerd
 DocType: Account,Expenses Included In Valuation,Kosten inbegrepen in waardering
-DocType: Employee,Provide email id registered in company,Zorg voor een bedrijfs e-mail ID
+DocType: Employee,Provide Email Address registered in company,Zorg voor een bedrijfs e-mail ID
 DocType: Hub Settings,Seller City,Verkoper Stad
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,Selecteer een Student Group
 ,Absent Student Report,Absent Student Report
@@ -1127,7 +1127,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Blauw
 DocType: Purchase Invoice,Is Return,Is Return
 DocType: Price List Country,Price List Country,Prijslijst Land
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Stel Email ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Stel Email Address
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} geldig serienummers voor Artikel {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Artikelcode kan niet worden gewijzigd voor Serienummer
@@ -2218,7 +2218,7 @@ DocType: Fiscal Year,Year End Date,Jaar Einddatum
 DocType: Task Depends On,Task Depends On,Taak Hangt On
 DocType: Supplier Quotation,Opportunity,Opportunity
 ,Completed Production Orders,Voltooide productieorders
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Rij {0}: Voor leverancier {0} e-id is vereist om e-mail te sturen
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Rij {0}: Voor leverancier {0} e-id is vereist om e-mail te sturen
 DocType: Operation,Default Workstation,Standaard Werkstation
 DocType: Notification Control,Expense Claim Approved Message,Kostendeclaratie Goedgekeurd Bericht
 DocType: Payment Entry,Deductions or Loss,Aftrek of verlies
@@ -3697,7 +3697,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Stel Exchange winst / verlies
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Aanvraagperiode kan niet over twee alocation platen
 DocType: Item Group,Default Expense Account,Standaard Kostenrekening
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Student Batch of Course Schedule is verplicht
-DocType: Student,Student Email ID,Student Email ID
+DocType: Student,Student Email Address,Student Email Address
 DocType: Employee,Notice (days),Kennisgeving ( dagen )
 DocType: Tax Rule,Sales Tax Template,Sales Tax Template
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Selecteer items om de factuur te slaan
@@ -3848,7 +3848,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Gro
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Bekijk Leads
 DocType: Program Enrollment Tool,New Program,nieuw programma
 DocType: Item Attribute Value,Attribute Value,Eigenschap Waarde
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","E-mail ID moet uniek zijn, bestaat al voor {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","E-mail ID moet uniek zijn, bestaat al voor {0}"
 ,Itemwise Recommended Reorder Level,Artikelgebaseerde Aanbevolen Bestelniveau
 DocType: Salary Detail,Salary Detail,salaris Detail
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,Selecteer eerst {0}
@@ -4050,7 +4050,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Project activiteit / taak.
 DocType: Vehicle Log,Refuelling Details,Tanken Details
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Genereer Salarisstroken
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Volgende Contact Door het kan niet hetzelfde zijn als de Lead e-mail-ID
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Volgende Contact Door het kan niet hetzelfde zijn als de Lead e-mail-ID
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Aankopen moeten worden gecontroleerd, indien ""VAN TOEPASSING VOOR"" is geselecteerd als {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Korting moet minder dan 100 zijn
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Laatste aankoop tarief niet gevonden
@@ -4345,7 +4345,7 @@ DocType: Purchase Order,Advance Paid,Voorschot Betaald
 DocType: Item,Item Tax,Artikel Belasting
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Materiaal aan Leverancier
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Accijnzen Factuur
-DocType: Expense Claim,Employees Email Id,Medewerkers E-mail ID
+DocType: Expense Claim,Employees Email Address,Medewerkers E-mail ID
 DocType: Employee Attendance Tool,Marked Attendance,Gemarkeerde Attendance
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Kortlopende Schulden
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Stuur massa SMS naar uw contacten

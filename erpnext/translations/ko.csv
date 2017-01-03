@@ -366,7 +366,7 @@ DocType: Workstation,Rent Cost,임대 비용
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,금액 감가 상각 후
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,다가오는 일정 이벤트
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,월 및 연도를 선택하세요
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","쉼표로 구분 된 전자 메일 ID를 입력, 송장은 특정 날짜에 자동으로 발송됩니다"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","쉼표로 구분 된 전자 메일 ID를 입력, 송장은 특정 날짜에 자동으로 발송됩니다"
 DocType: Employee,Company Email,회사 이메일
 DocType: GL Entry,Debit Amount in Account Currency,계정 통화에서 직불 금액
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,자에 대하여 또는 내부 전송을위한 은행 / 현금 거래
@@ -685,7 +685,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,미리보기 연봉 슬립
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,계정 {0} 여러 번 입력 된
 DocType: Account,Expenses Included In Valuation,비용은 평가에 포함
-DocType: Employee,Provide email id registered in company,이메일 ID는 회사에 등록 제공
+DocType: Employee,Provide Email Address registered in company,이메일 ID는 회사에 등록 제공
 DocType: Hub Settings,Seller City,판매자 도시
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,학생 그룹을 선택하세요
 ,Absent Student Report,결석 한 학생 보고서
@@ -1128,7 +1128,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,푸른
 DocType: Purchase Invoice,Is Return,돌아가요
 DocType: Price List Country,Price List Country,가격 목록 나라
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,이메일 ID를 설정하십시오
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,이메일 ID를 설정하십시오
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},항목에 대한 {0} 유효한 일련 NOS {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,상품 코드 일련 번호 변경할 수 없습니다
@@ -2219,7 +2219,7 @@ DocType: Fiscal Year,Year End Date,연도 종료 날짜
 DocType: Task Depends On,Task Depends On,작업에 따라 다릅니다
 DocType: Supplier Quotation,Opportunity,기회
 ,Completed Production Orders,완료 생산 주문
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,행 {0} : 공급 업체 {0} 이메일 ID는 이메일을 보낼 필요
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,행 {0} : 공급 업체 {0} 이메일 ID는 이메일을 보낼 필요
 DocType: Operation,Default Workstation,기본 워크 스테이션
 DocType: Notification Control,Expense Claim Approved Message,경비 청구서 승인 메시지
 DocType: Payment Entry,Deductions or Loss,공제 또는 손실
@@ -3697,7 +3697,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,교환 게인을 설정 / 손실
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,신청 기간은 2 alocation 기록을 통해 할 수 없습니다
 DocType: Item Group,Default Expense Account,기본 비용 계정
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,학생 배치 또는 코스 예약은 필수입니다
-DocType: Student,Student Email ID,학생 이메일 ID
+DocType: Student,Student Email Address,학생 이메일 ID
 DocType: Employee,Notice (days),공지 사항 (일)
 DocType: Tax Rule,Sales Tax Template,판매 세 템플릿
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,송장을 저장하는 항목을 선택
@@ -3848,7 +3848,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,원
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,보기 오퍼
 DocType: Program Enrollment Tool,New Program,새 프로그램
 DocType: Item Attribute Value,Attribute Value,속성 값
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","이메일 ID가 고유해야합니다, 이미 존재 {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","이메일 ID가 고유해야합니다, 이미 존재 {0}"
 ,Itemwise Recommended Reorder Level,Itemwise는 재주문 수준에게 추천
 DocType: Salary Detail,Salary Detail,급여 세부 정보
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,먼저 {0}를 선택하세요
@@ -4050,7 +4050,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,프로젝트 활동 / 작업.
 DocType: Vehicle Log,Refuelling Details,급유 세부 사항
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,급여 전표 생성
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,다음으로 연락으로는 리드 이메일 ID와 동일 할 수 없습니다
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,다음으로 연락으로는 리드 이메일 ID와 동일 할 수 없습니다
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}",해당 법령에가로 선택된 경우 구매 확인해야합니다 {0}
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,할인 100 미만이어야합니다
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,마지막 구매 비율을 찾을 수 없습니다
@@ -4346,7 +4346,7 @@ DocType: Purchase Order,Advance Paid,사전 유료
 DocType: Item,Item Tax,상품의 세금
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,공급 업체에 소재
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,소비세 송장
-DocType: Expense Claim,Employees Email Id,직원 이드 이메일
+DocType: Expense Claim,Employees Email Address,직원 이드 이메일
 DocType: Employee Attendance Tool,Marked Attendance,표시된 출석
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,유동 부채
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,상대에게 대량 SMS를 보내기

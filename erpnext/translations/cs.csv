@@ -366,7 +366,7 @@ DocType: Workstation,Rent Cost,Rent Cost
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Částka po odpisech
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Nadcházející Události v kalendáři
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Vyberte měsíc a rok
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Zadejte e-mail id odděleny čárkami, bude faktura bude zaslán automaticky na určité datum"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Zadejte e-mail id odděleny čárkami, bude faktura bude zaslán automaticky na určité datum"
 DocType: Employee,Company Email,Společnost E-mail
 DocType: GL Entry,Debit Amount in Account Currency,Debetní Částka v měně účtu
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Banka / Hotovostní operace proti osobě nebo pro interní převod
@@ -685,7 +685,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Preview výplatní pásce
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Účet {0} byl zadán vícekrát
 DocType: Account,Expenses Included In Valuation,Náklady ceně oceňování
-DocType: Employee,Provide email id registered in company,Poskytnout e-mail id zapsané ve firmě
+DocType: Employee,Provide Email Address registered in company,Poskytnout e-mail id zapsané ve firmě
 DocType: Hub Settings,Seller City,Prodejce City
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,"Prosím, vyberte si studentská skupina"
 ,Absent Student Report,Absent Student Report
@@ -1128,7 +1128,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Modrý
 DocType: Purchase Invoice,Is Return,Je Return
 DocType: Price List Country,Price List Country,Ceník Země
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Prosím nastavte e-mail ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Prosím nastavte e-mail ID
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} platí pořadová čísla pro položky {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Kód položky nemůže být změněn pro Serial No.
@@ -2219,7 +2219,7 @@ DocType: Fiscal Year,Year End Date,Datum Konce Roku
 DocType: Task Depends On,Task Depends On,Úkol je závislá na
 DocType: Supplier Quotation,Opportunity,Příležitost
 ,Completed Production Orders,Dokončené Výrobní zakázky
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Řádek {0}: Pro dodavatele je zapotřebí {0} e-mail id poslat e-mail
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Řádek {0}: Pro dodavatele je zapotřebí {0} e-mail id poslat e-mail
 DocType: Operation,Default Workstation,Výchozí Workstation
 DocType: Notification Control,Expense Claim Approved Message,Zpráva o schválení úhrady výdajů
 DocType: Payment Entry,Deductions or Loss,Odpočty nebo ztráta
@@ -3698,7 +3698,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Set Exchange zisk / ztráta
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Období pro podávání žádostí nemůže být na dvou alokace záznamy
 DocType: Item Group,Default Expense Account,Výchozí výdajového účtu
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Student Batch nebo rozvrh je povinné
-DocType: Student,Student Email ID,Student ID e-mailu
+DocType: Student,Student Email Address,Student ID e-mailu
 DocType: Employee,Notice (days),Oznámení (dny)
 DocType: Tax Rule,Sales Tax Template,Daň z prodeje Template
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,"Vyberte položky, které chcete uložit fakturu"
@@ -3849,7 +3849,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Hla
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Zobrazit Vodítka
 DocType: Program Enrollment Tool,New Program,nový program
 DocType: Item Attribute Value,Attribute Value,Hodnota atributu
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","E-mail id musí být jedinečný, již existuje {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","E-mail id musí být jedinečný, již existuje {0}"
 ,Itemwise Recommended Reorder Level,Itemwise Doporučené Změna pořadí Level
 DocType: Salary Detail,Salary Detail,plat Detail
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,"Prosím, nejprve vyberte {0}"
@@ -4051,7 +4051,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Projektová činnost / úkol.
 DocType: Vehicle Log,Refuelling Details,Tankovací Podrobnosti
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Generování výplatních páskách
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Následující Kontakt Tím nemůže být stejná jako Lead ID e-mailu
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Následující Kontakt Tím nemůže být stejná jako Lead ID e-mailu
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Nákup musí být zkontrolováno, v případě potřeby pro vybrán jako {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Sleva musí být menší než 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Poslední cena při platbě nebyl nalezen
@@ -4347,7 +4347,7 @@ DocType: Purchase Order,Advance Paid,Vyplacené zálohy
 DocType: Item,Item Tax,Daň Položky
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Materiál Dodavateli
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Spotřební Faktura
-DocType: Expense Claim,Employees Email Id,Zaměstnanci Email Id
+DocType: Expense Claim,Employees Email Address,Zaměstnanci Email Address
 DocType: Employee Attendance Tool,Marked Attendance,Výrazná Návštěvnost
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Krátkodobé závazky
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Posílat hromadné SMS vašim kontaktům

@@ -180,7 +180,7 @@ class ProcessPayroll(Document):
 			log += """
 				Possible reasons: <br>\
 				1. Net pay is less than 0 <br>
-				2. Company email id specified in employee master is not valid. <br>
+				2. Company Email Address specified in employee master is not valid. <br>
 				"""
 		return log
 

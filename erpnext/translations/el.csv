@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,Κόστος ενοικίασης
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Ποσό μετά την απόσβεση
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Επερχόμενες Ημερολόγιο Εκδηλώσεων
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Παρακαλώ επιλέξτε μήνα και έτος
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Πληκτρολογήστε το αναγνωριστικό email, διαχωρισμένο με κόμματα, το τιμολόγιο θα αποσταλεί αυτόματα την συγκεκριμένη ημερομηνία"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Πληκτρολογήστε το αναγνωριστικό email, διαχωρισμένο με κόμματα, το τιμολόγιο θα αποσταλεί αυτόματα την συγκεκριμένη ημερομηνία"
 DocType: Employee,Company Email,Email εταιρείας
 DocType: GL Entry,Debit Amount in Account Currency,Χρεωστικό ποσό στο λογαριασμό Νόμισμα
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Τράπεζα / Ταμειακές συναλλαγές κατά μέρος ή για εσωτερική μεταφορά
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Preview Μισθός Slip
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Ο λογαριασμός {0} έχει τεθεί πολλές φορές
 DocType: Account,Expenses Included In Valuation,Δαπάνες που περιλαμβάνονται στην αποτίμηση
-DocType: Employee,Provide email id registered in company,Παρέχετε ένα email ID εγγεγραμμένο στην εταιρεία
+DocType: Employee,Provide Email Address registered in company,Παρέχετε ένα Email Address εγγεγραμμένο στην εταιρεία
 DocType: Hub Settings,Seller City,Πόλη πωλητή
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,Επιλέξτε μια Ομάδα Φοιτητών
 ,Absent Student Report,Απών Έκθεση Φοιτητών
@@ -1126,7 +1126,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Μπλε
 DocType: Purchase Invoice,Is Return,Είναι η επιστροφή
 DocType: Price List Country,Price List Country,Τιμοκατάλογος Χώρα
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Παρακαλούμε να ορίσετε ID Email
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Παρακαλούμε να ορίσετε ID Email
 DocType: Item,UOMs,Μ.Μ.
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} Έγκυροι σειριακοί αριθμοί για το είδος {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Ο κωδικός είδους δεν μπορεί να αλλάξει για τον σειριακό αριθμό
@@ -2215,7 +2215,7 @@ DocType: Fiscal Year,Year End Date,Ημερομηνία λήξης έτους
 DocType: Task Depends On,Task Depends On,Εργασία Εξαρτάται από
 DocType: Supplier Quotation,Opportunity,Ευκαιρία
 ,Completed Production Orders,Ολοκλήρωση εντολών παραγωγής
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Σειρά {0}: Για τον προμηθευτή {0} ταυτότητα ηλεκτρονικού ταχυδρομείου είναι απαραίτητη για την αποστολή e-mail
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Σειρά {0}: Για τον προμηθευτή {0} ταυτότητα ηλεκτρονικού ταχυδρομείου είναι απαραίτητη για την αποστολή e-mail
 DocType: Operation,Default Workstation,Προεπιλογμένος σταθμός εργασίας
 DocType: Notification Control,Expense Claim Approved Message,Μήνυμα έγκρισης αξίωσης δαπανών
 DocType: Payment Entry,Deductions or Loss,Μειώσεις ή Ζημία
@@ -3693,7 +3693,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Ορίστε Χρηματιστ�
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Περίοδος υποβολής των αιτήσεων δεν μπορεί να είναι σε δύο εγγραφές alocation
 DocType: Item Group,Default Expense Account,Προεπιλεγμένος λογαριασμός δαπανών
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Μαζική φοιτητής ή Πρόγραμμα μαθημάτων είναι υποχρεωτική
-DocType: Student,Student Email ID,Φοιτητής Email ID
+DocType: Student,Student Email Address,Φοιτητής Email Address
 DocType: Employee,Notice (days),Ειδοποίηση (ημέρες)
 DocType: Tax Rule,Sales Tax Template,Φόρος επί των πωλήσεων Πρότυπο
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Επιλέξτε αντικείμενα για να σώσει το τιμολόγιο
@@ -3844,7 +3844,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Γ�
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Δείτε τις απαγωγές
 DocType: Program Enrollment Tool,New Program,νέο Πρόγραμμα
 DocType: Item Attribute Value,Attribute Value,Χαρακτηριστικό αξία
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","Email ID, όπου ένας υποψήφιος θα αποστείλει email π.Χ. 'jobs@example.Com'"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Email Address, όπου ένας υποψήφιος θα αποστείλει email π.Χ. 'jobs@example.Com'"
 ,Itemwise Recommended Reorder Level,Προτεινόμενο επίπεδο επαναπαραγγελίας ανά είδος
 DocType: Salary Detail,Salary Detail,μισθός Λεπτομέρειες
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,Παρακαλώ επιλέξτε {0} πρώτα
@@ -4046,7 +4046,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Δραστηριότητες / εργασίες έργου
 DocType: Vehicle Log,Refuelling Details,Λεπτομέρειες ανεφοδιασμού
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Δημιουργία βεβαιώσεων αποδοχών
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Επόμενο Επικοινωνία Με το να μην μπορεί να είναι ίδιο με το Lead id Email
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Επόμενο Επικοινωνία Με το να μην μπορεί να είναι ίδιο με το Lead id Email
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}",Η επιλογή αγορά πρέπει να οριστεί αν είναι επιλεγμένο το πεδίο 'εφαρμοστέο σε' ως {0}
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Η έκπτωση πρέπει να είναι μικρότερη από 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Τελευταία ποσοστό αγορά δεν βρέθηκε
@@ -4341,7 +4341,7 @@ DocType: Purchase Order,Advance Paid,Προκαταβολή που καταβλ�
 DocType: Item,Item Tax,Φόρος είδους
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Υλικό Προμηθευτή
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Των ειδικών φόρων κατανάλωσης Τιμολόγιο
-DocType: Expense Claim,Employees Email Id,Email ID υπαλλήλων
+DocType: Expense Claim,Employees Email Address,Email Address υπαλλήλων
 DocType: Employee Attendance Tool,Marked Attendance,Αισθητή Συμμετοχή
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Βραχυπρόθεσμες υποχρεώσεις
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Αποστολή μαζικών SMS στις επαφές σας

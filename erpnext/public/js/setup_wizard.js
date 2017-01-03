@@ -192,7 +192,7 @@ function load_erpnext_slides() {
 						{fieldtype:"Data", fieldname:"user_fullname_"+ i,
 							label:__("Full Name")},
 						{fieldtype:"Data", fieldname:"user_email_" + i,
-							label:__("Email ID"), placeholder:__("user@example.com"),
+							label:__("Email Address"), placeholder:__("user@example.com"),
 							options: "Email"},
 						{fieldtype:"Column Break"},
 						{fieldtype: "Check", fieldname: "user_sales_" + i,

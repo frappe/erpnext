@@ -51,7 +51,7 @@ monthly, quarterly, half-yearly or annual basis, you can check the “Recurring
 Invoice” box. Here you can fill in the details of how frequently you want to
 bill this Invoice and the period for which the contract is valid.
 
-ERPNext will automatically create new Invoices and mail it to the email ids
+ERPNext will automatically create new Invoices and mail it to the Email Addresses
 you set.
 
 #### POS Invoices

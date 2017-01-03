@@ -366,7 +366,7 @@ DocType: Workstation,Rent Cost,地代・賃料
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,減価償却後の金額
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,今後のカレンダーイベント
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,月と年を選択してください
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date",カンマで区切られたメールアドレスを入力すると、請求が特定の日に自動的に送信されます
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date",カンマで区切られたメールアドレスを入力すると、請求が特定の日に自動的に送信されます
 DocType: Employee,Company Email,会社の電子メール
 DocType: GL Entry,Debit Amount in Account Currency,アカウント通貨での借方金額
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,当事者に対してまたは内部転送のための銀行/現金取引
@@ -686,7 +686,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,プレビュー給与スリップ
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,アカウント{0}を複数回入力されました
 DocType: Account,Expenses Included In Valuation,評価中経費
-DocType: Employee,Provide email id registered in company,会社に登録されたメールアドレスを提供
+DocType: Employee,Provide Email Address registered in company,会社に登録されたメールアドレスを提供
 DocType: Hub Settings,Seller City,販売者の市区町村
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,学生グループを選択してください
 ,Absent Student Report,不在学生レポート
@@ -1138,7 +1138,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,青
 DocType: Purchase Invoice,Is Return,返品
 DocType: Price List Country,Price List Country,価格表内の国
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,メールアドレスを設定してください
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,メールアドレスを設定してください
 DocType: Item,UOMs,数量単位
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},アイテム {1} の有効なシリアル番号 {0}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,アイテムコードはシリアル番号に付け替えることができません
@@ -2234,7 +2234,7 @@ DocType: Fiscal Year,Year End Date,年終日
 DocType: Task Depends On,Task Depends On,依存するタスク
 DocType: Supplier Quotation,Opportunity,機会
 ,Completed Production Orders,完成した製造指示
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,行{0}：サプライヤーのために{0}電子メールIDは、電子メールを送信するために必要とされます
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,行{0}：サプライヤーのために{0}電子メールIDは、電子メールを送信するために必要とされます
 DocType: Operation,Default Workstation,デフォルト作業所
 DocType: Notification Control,Expense Claim Approved Message,経費請求を承認メッセージ
 DocType: Payment Entry,Deductions or Loss,控除または損失
@@ -3718,7 +3718,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,取引利益/損失を設定し�
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,申請期間は2つの割当レコードを横断することはできません
 DocType: Item Group,Default Expense Account,デフォルト経費
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,学生バッチまたはコーススケジュールは必須です
-DocType: Student,Student Email ID,学生メールID
+DocType: Student,Student Email Address,学生メールID
 DocType: Employee,Notice (days),お知らせ（日）
 DocType: Tax Rule,Sales Tax Template,販売税テンプレート
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,請求書を保存する項目を選択します
@@ -3869,7 +3869,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,総
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,リードを表示
 DocType: Program Enrollment Tool,New Program,新しいプログラム
 DocType: Item Attribute Value,Attribute Value,属性値
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}",メールアドレスは重複できません。すでに{0}に存在しています
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}",メールアドレスは重複できません。すでに{0}に存在しています
 ,Itemwise Recommended Reorder Level,アイテムごとに推奨される再注文レベル
 DocType: Salary Detail,Salary Detail,給与詳細
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,{0}を選択してください
@@ -4071,7 +4071,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,プロジェクト活動／タスク
 DocType: Vehicle Log,Refuelling Details,給油の詳細
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,給与明細を生成
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,次の接触によっては、リードメールIDを同じにすることはできません
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,次の接触によっては、リードメールIDを同じにすることはできません
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}",適用のためには次のように選択されている場合の購入は、チェックする必要があります{0}
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,割引は100未満でなければなりません
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,最後の購入率が見つかりません
@@ -4368,7 +4368,7 @@ DocType: Purchase Order,Advance Paid,立替金
 DocType: Item,Item Tax,アイテムごとの税
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,サプライヤー用資材
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,消費税の請求書
-DocType: Expense Claim,Employees Email Id,従業員メールアドレス
+DocType: Expense Claim,Employees Email Address,従業員メールアドレス
 DocType: Employee Attendance Tool,Marked Attendance,マークされた出席
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,流動負債
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,連絡先にまとめてSMSを送信

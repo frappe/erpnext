@@ -16,7 +16,7 @@ system shall create a New Job Applicant against each email received on the mailb
 
 > Setup > Email Account > New 
 
-* Enter the email id and the password, and select 'Enable Incoming'
+* Enter the Email Address and the password, and select 'Enable Incoming'
 
 * In 'Append To' select 'Job Applicant'
 

@@ -92,7 +92,7 @@
    "fieldname": "student_email_id", 
    "fieldtype": "Data", 
    "hidden": 0, 
-   "label": "Student Email ID", 
+   "label": "Student Email Address", 
    "read_only": 0, 
    "reqd": 0
   }, 
