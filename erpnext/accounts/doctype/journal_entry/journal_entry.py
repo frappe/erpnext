@@ -326,10 +326,12 @@ class JournalEntry(AccountsController):
 			if d.account_currency == self.company_currency:
 				d.exchange_rate = 1
 			elif not d.exchange_rate or d.exchange_rate == 1 or \
-				(d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name and d.posting_date):
+				(d.reference_type in ("Sales Invoice", "Purchase Invoice") 
+				and d.reference_name and self.posting_date):
+				
 					# Modified to include the posting date for which to retreive the exchange rate
-					d.exchange_rate = get_exchange_rate(self.posting_date, d.account, d.account_currency, self.company,
-						d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
+					d.exchange_rate = get_exchange_rate(self.posting_date, d.account, d.account_currency, 
+						self.company, d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
 
 			if not d.exchange_rate:
 				frappe.throw(_("Row {0}: Exchange Rate is mandatory").format(d.idx))
@@ -651,7 +653,8 @@ def get_payment_entry(ref_doc, args):
 	if args.get("party_account"):
 		# Modified to include the posting date for which the exchange rate is required. 
 		# Assumed to be the posting date in the reference document
-		exchange_rate = get_exchange_rate(ref_doc.posting_date, args.get("party_account"), args.get("party_account_currency"),
+		exchange_rate = get_exchange_rate(ref_doc.get("posting_date") or ref_doc.get("transaction_date"), 
+			args.get("party_account"), args.get("party_account_currency"),
 			ref_doc.company, ref_doc.doctype, ref_doc.name)
 
 	je = frappe.new_doc("Journal Entry")
@@ -686,7 +689,8 @@ def get_payment_entry(ref_doc, args):
 		bank_row.update(bank_account)
 		# Modified to include the posting date for which the exchange rate is required. 
 		# Assumed to be the posting date of the reference date
-		bank_row.exchange_rate = get_exchange_rate(ref_doc.posting_date, bank_account["account"],
+		bank_row.exchange_rate = get_exchange_rate(ref_doc.get("posting_date") 
+			or ref_doc.get("transaction_date"), bank_account["account"], 
 			bank_account["account_currency"], ref_doc.company)
 
 	bank_row.cost_center = cost_center

@@ -217,7 +217,7 @@ class LeaveApplication(Document):
 
 	def validate_attendance(self):
 		attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s and (att_date between %s and %s)
-					and docstatus = 1""",
+					and status = "Present" and docstatus = 1""",
 			(self.employee, self.from_date, self.to_date))
 		if attendance:
 			frappe.throw(_("Attendance for employee {0} is already marked for this day").format(self.employee),

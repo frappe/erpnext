@@ -109,12 +109,16 @@ def apply_pricing_rule(args):
 
 	item_list = args.get("items")
 	args.pop("items")
+	
+	set_serial_nos_based_on_fifo = frappe.db.get_single_value("Stock Settings", 
+		"automatically_set_serial_nos_based_on_fifo")
 
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
 		out.append(get_pricing_rule_for_item(args_copy))
-		out.append(get_serial_no_for_item(args_copy))
+		if set_serial_nos_based_on_fifo:
+			out.append(get_serial_no_for_item(args_copy))
 	return out
 	
 def get_serial_no_for_item(args):
