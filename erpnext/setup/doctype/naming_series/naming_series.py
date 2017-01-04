@@ -134,7 +134,7 @@ class NamingSeries(Document):
 		"""get series current"""
 		if self.prefix:
 			self.current_value = frappe.db.get_value("Series",
-				self.prefix.split('.')[0], "current")
+				self.prefix.split('.')[0], "current", order_by = "name")
 
 	def insert_series(self, series):
 		"""insert series if missing"""
