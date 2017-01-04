@@ -17,7 +17,13 @@
         </div>
     </div>
     <div class="col-xs-3 text-right">
-        <div class="text-muted" style="margin-top: 5px;"><input type="text" value="{%= rate %}" class="form-control input-sm pos-item-rate text-right"></div>
+        <div class="text-muted" style="margin-top: 5px;">
+			{% if(enabled) { %}
+				<input type="text" value="{%= rate %}" class="form-control input-sm pos-item-rate text-right">
+			{% } else { %}
+				<h6>{%= format_currency(rate) %}</h6>
+			{% } %}
+		</div>
 		<p><h6>{%= amount %}</h6></p>
     </div>
 </div>
