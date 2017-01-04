@@ -42,7 +42,7 @@ def get_columns(filters):
 		_("Student") + ":Link/Student:90", 
 		_("Student Name") + "::150", 
 		_("Student Batch") + "::180",
-		_("Student Email ID") + "::180",
+		_("Student Email Address") + "::180",
 		_("Student Mobile No.") + "::150",
 	]
 	return columns

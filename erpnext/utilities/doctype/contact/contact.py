@@ -66,7 +66,7 @@ def invite_user(contact):
 	contact = frappe.get_doc("Contact", contact)
 
 	if not contact.email_id:
-		frappe.throw(_("Please set Email ID"))
+		frappe.throw(_("Please set Email Address"))
 
 	if contact.has_permission("write"):
 		user = frappe.get_doc({

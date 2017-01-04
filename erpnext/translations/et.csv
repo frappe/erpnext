@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,Üürile Cost
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Summa pärast amortisatsiooni
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Sündmuste kalender
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Palun valige kuu ja aasta
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Sisesta e-posti id komadega eraldatult, arve saadetakse automaatselt teatud kuupäeva"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Sisesta e-posti id komadega eraldatult, arve saadetakse automaatselt teatud kuupäeva"
 DocType: Employee,Company Email,Ettevõte Email
 DocType: GL Entry,Debit Amount in Account Currency,Deebetkaart Summa konto Valuuta
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Bank / Raha vastu tehing poole või sisene ülekanne
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Eelvaade palgatõend
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Konto {0} on sisestatud mitu korda
 DocType: Account,Expenses Included In Valuation,Kulud sisalduvad Hindamine
-DocType: Employee,Provide email id registered in company,Pakkuda email id registreeritud ettevõte
+DocType: Employee,Provide Email Address registered in company,Pakkuda Email Address registreeritud ettevõte
 DocType: Hub Settings,Seller City,Müüja City
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,Palun valige Student Group
 ,Absent Student Report,Puudub Student Report
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Blue
 DocType: Purchase Invoice,Is Return,Kas Tagasi
 DocType: Price List Country,Price List Country,Hinnakiri Riik
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Palun määra Email ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Palun määra Email Address
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} kehtiv serial-numbrid Punkt {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Kood ei saa muuta Serial No.
@@ -2196,7 +2196,7 @@ DocType: Fiscal Year,Year End Date,Aasta lõpp kuupäev
 DocType: Task Depends On,Task Depends On,Task sõltub
 DocType: Supplier Quotation,Opportunity,Võimalus
 ,Completed Production Orders,Valmistoodanguladu Tellimused
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Rida {0}: tarnija {0} e-posti id on vaja saata e-posti
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Rida {0}: tarnija {0} e-posti id on vaja saata e-posti
 DocType: Operation,Default Workstation,Vaikimisi Workstation
 DocType: Notification Control,Expense Claim Approved Message,Kuluhüvitussüsteeme Kinnitatud Message
 DocType: Payment Entry,Deductions or Loss,Mahaarvamisi või kaotus
@@ -3641,7 +3641,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Määra Exchange kasum / kahjum
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Taotlemise tähtaeg ei või olla üle kahe alocation arvestust
 DocType: Item Group,Default Expense Account,Vaikimisi ärikohtumisteks
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Student Partii või Kursuse ajakava on kohustuslik
-DocType: Student,Student Email ID,Student E-ID
+DocType: Student,Student Email Address,Student E-ID
 DocType: Employee,Notice (days),Teade (päeva)
 DocType: Tax Rule,Sales Tax Template,Sales Tax Mall
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,"Valige objekt, et salvestada arve"
@@ -3792,7 +3792,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Gen
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Vaata Leads
 DocType: Program Enrollment Tool,New Program,New Program
 DocType: Item Attribute Value,Attribute Value,Omadus Value
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","Email id peab olema unikaalne, juba olemas {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Email Address peab olema unikaalne, juba olemas {0}"
 ,Itemwise Recommended Reorder Level,Itemwise Soovitatav Reorder Level
 DocType: Salary Detail,Salary Detail,palk Detail
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,Palun valige {0} Esimene
@@ -3983,7 +3983,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Projekti tegevus / ülesanne.
 DocType: Vehicle Log,Refuelling Details,tankimine detailid
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Loo palgalehed
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Järgmine kontakteeruda ei saa olla sama Lead E id
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Järgmine kontakteeruda ei saa olla sama Lead E id
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Ostmine tuleb kontrollida, kui need on kohaldatavad valitakse {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Soodustus peab olema väiksem kui 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Viimati ostu määr ei leitud
@@ -4278,7 +4278,7 @@ DocType: Purchase Order,Advance Paid,Advance Paide
 DocType: Item,Item Tax,Punkt Maksu-
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Materjal Tarnija
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Aktsiisi Arve
-DocType: Expense Claim,Employees Email Id,Töötajad Post Id
+DocType: Expense Claim,Employees Email Address,Töötajad Post Id
 DocType: Employee Attendance Tool,Marked Attendance,Märkimisväärne osavõtt
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Lühiajalised kohustused
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Saada mass SMS oma kontaktid

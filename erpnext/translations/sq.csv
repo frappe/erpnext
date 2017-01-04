@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,Qira Kosto
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Shuma Pas Zhvlerësimi
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Ardhshme Ngjarje Kalendari
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,"Ju lutem, përzgjidhni muaji dhe viti"
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Shkruani id email ndara me presje, fatura do të postohet automatikisht në datën e caktuar"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Shkruani id email ndara me presje, fatura do të postohet automatikisht në datën e caktuar"
 DocType: Employee,Company Email,Kompania Email
 DocType: GL Entry,Debit Amount in Account Currency,Shuma Debi në llogarinë në valutë
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Bank / Cash transaksionet kundër partisë apo për transferimin e brendshëm
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Preview Paga Shqip
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Llogaria {0} ka hyrë disa herë
 DocType: Account,Expenses Included In Valuation,Shpenzimet e përfshira në Vlerësimit
-DocType: Employee,Provide email id registered in company,Sigurojë id mail regjistruar në kompaninë
+DocType: Employee,Provide Email Address registered in company,Sigurojë id mail regjistruar në kompaninë
 DocType: Hub Settings,Seller City,Shitës qytetit
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,"Ju lutem, përzgjidhni një Grup Student"
 ,Absent Student Report,Mungon Raporti Student
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Blu
 DocType: Purchase Invoice,Is Return,Është Kthimi
 DocType: Price List Country,Price List Country,Lista e Çmimeve Vendi
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Ju lutem plotësoni Email ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Ju lutem plotësoni Email Address
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} nos vlefshme serik për Item {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Kodi artikull nuk mund të ndryshohet për të Serial Nr
@@ -2196,7 +2196,7 @@ DocType: Fiscal Year,Year End Date,Viti End Date
 DocType: Task Depends On,Task Depends On,Detyra varet
 DocType: Supplier Quotation,Opportunity,Mundësi
 ,Completed Production Orders,Urdhërat përfunduar prodhimit
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Row {0} Për të furnizuesit {0} email id është e nevojshme për të dërguar një email
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Row {0} Për të furnizuesit {0} Email Address është e nevojshme për të dërguar një email
 DocType: Operation,Default Workstation,Gabim Workstation
 DocType: Notification Control,Expense Claim Approved Message,Shpenzim Kërkesa Miratuar mesazh
 DocType: Payment Entry,Deductions or Loss,Zbritjet apo Humbje
@@ -3641,7 +3641,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Set Exchange Gain / Humbje
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Periudha e aplikimit nuk mund të jetë në dy regjistrave alokimin
 DocType: Item Group,Default Expense Account,Llogaria e albumit shpenzimeve
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Batch Student ose Course Orari është i detyrueshëm
-DocType: Student,Student Email ID,Student Email ID
+DocType: Student,Student Email Address,Student Email Address
 DocType: Employee,Notice (days),Njoftim (ditë)
 DocType: Tax Rule,Sales Tax Template,Template Sales Tax
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Zgjidhni artikuj për të shpëtuar faturën
@@ -3792,7 +3792,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Pë
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Shiko kryeson
 DocType: Program Enrollment Tool,New Program,Program i ri
 DocType: Item Attribute Value,Attribute Value,Atribut Vlera
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","Email ID duhet të jetë unike, tashmë ekziston për {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Email Address duhet të jetë unike, tashmë ekziston për {0}"
 ,Itemwise Recommended Reorder Level,Itemwise Recommended reorder Niveli
 DocType: Salary Detail,Salary Detail,Paga Detail
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,"Ju lutem, përzgjidhni {0} parë"
@@ -3983,7 +3983,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Aktiviteti i projekt / detyra.
 DocType: Vehicle Log,Refuelling Details,Details Rimbushja
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Generate paga rrëshqet
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Next Contact By nuk mund të jetë i njëjtë si Lead Email id
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Next Contact By nuk mund të jetë i njëjtë si Lead Email Address
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Blerja duhet të kontrollohet, nëse është e aplikueshme për të është zgjedhur si {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Discount duhet të jetë më pak se 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Shkalla e fundit e blerjes nuk u gjet
@@ -4278,7 +4278,7 @@ DocType: Purchase Order,Advance Paid,Advance Paid
 DocType: Item,Item Tax,Tatimi i artikullit
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Materiale për Furnizuesin
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Akciza Faturë
-DocType: Expense Claim,Employees Email Id,Punonjësit Email Id
+DocType: Expense Claim,Employees Email Address,Punonjësit Email Address
 DocType: Employee Attendance Tool,Marked Attendance,Pjesëmarrja e shënuar
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Detyrimet e tanishme
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Dërgo SMS në masë për kontaktet tuaja

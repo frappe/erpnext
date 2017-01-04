@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,vuokrakustannukset
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Määrä jälkeen Poistot
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Tulevia kalenteritapahtumia
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Ole hyvä ja valitse kuukausi ja vuosi
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","syötä sähköpostiosoitteet pilkulla erotettuina, lasku lähetetään automaattisesti määritettynä päivänä"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","syötä sähköpostiosoitteet pilkulla erotettuina, lasku lähetetään automaattisesti määritettynä päivänä"
 DocType: Employee,Company Email,yrityksen sähköposti
 DocType: GL Entry,Debit Amount in Account Currency,Debit Määrä tilini Valuutta
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Pankki / Cash liiketoimien vastaan osapuolelle tai sisäinen siirto
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Preview Palkka Slip
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Tili {0} on syötetty useita kertoja
 DocType: Account,Expenses Included In Valuation,"kulut, jotka sisältyy arvoon"
-DocType: Employee,Provide email id registered in company,Tarkista sähköpostitunnuksen rekisteröinti yritykselle
+DocType: Employee,Provide Email Address registered in company,Tarkista sähköpostitunnuksen rekisteröinti yritykselle
 DocType: Hub Settings,Seller City,Myyjä kaupunki
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,Valitse Student Group
 ,Absent Student Report,Absent Student Report
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,sininen
 DocType: Purchase Invoice,Is Return,on palautus
 DocType: Price List Country,Price List Country,Hinnasto Maa
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Aseta sähköpostiosoite
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Aseta sähköpostiosoite
 DocType: Item,UOMs,Mittayksiköt
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} oikea sarjanumero (nos) tuotteelle {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,sarjanumeron tuotekoodia ei voi vaihtaa
@@ -2196,7 +2196,7 @@ DocType: Fiscal Year,Year End Date,Vuoden viimeinen päivä
 DocType: Task Depends On,Task Depends On,Tehtävä riippuu
 DocType: Supplier Quotation,Opportunity,Myyntimahdollisuus
 ,Completed Production Orders,valmiit tuotannon tilaukset
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Rivi {0}: Sähköpostin lähettäminen toimittajalle {0} vaatii sähköpostiosoitteen
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Rivi {0}: Sähköpostin lähettäminen toimittajalle {0} vaatii sähköpostiosoitteen
 DocType: Operation,Default Workstation,oletus työpiste
 DocType: Notification Control,Expense Claim Approved Message,viesti kulukorvauksen hyväksymisestä
 DocType: Payment Entry,Deductions or Loss,Vähennykset tai Loss
@@ -3641,7 +3641,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Aseta Exchange voitto / tappio
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Hakuaika ei voi yli kaksi alocation kirjaa
 DocType: Item Group,Default Expense Account,oletus kulutili
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Opiskelija Erä tai Course aikataulu on pakollinen
-DocType: Student,Student Email ID,Opiskelijan Sähköposti ID
+DocType: Student,Student Email Address,Opiskelijan Sähköposti ID
 DocType: Employee,Notice (days),Ilmoitus (päivää)
 DocType: Tax Rule,Sales Tax Template,Sales Tax Malline
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Valitse kohteita tallentaa laskun
@@ -3794,7 +3794,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Pä
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Näytä vihjeet
 DocType: Program Enrollment Tool,New Program,uusi ohjelma
 DocType: Item Attribute Value,Attribute Value,"tuntomerkki, arvo"
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","sähköpostitunnus tulee olla uniikki, tunnus on jo olemassa {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","sähköpostitunnus tulee olla uniikki, tunnus on jo olemassa {0}"
 ,Itemwise Recommended Reorder Level,Tuotekohtainen suositeltu täydennystilaustaso
 DocType: Salary Detail,Salary Detail,Palkka Detail
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,Ole hyvä ja valitse {0} Ensimmäinen
@@ -3985,7 +3985,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Tehtävä
 DocType: Vehicle Log,Refuelling Details,Tankkaaminen tiedot
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Tuota palkkalaskelmat
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Seuraava Ota By voi olla sama kuin Lead sähköposti id
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Seuraava Ota By voi olla sama kuin Lead sähköposti id
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}",osto tulee täpätä mikälisovellus on valittu {0}:na
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,alennus on oltava alle 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Viimeisin osto korko ei löytynyt
@@ -4280,7 +4280,7 @@ DocType: Purchase Order,Advance Paid,ennakkoon maksettu
 DocType: Item,Item Tax,Tuotteen vero
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Materiaalin Toimittaja
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Valmistevero Lasku
-DocType: Expense Claim,Employees Email Id,työntekijän sähköpostiosoite
+DocType: Expense Claim,Employees Email Address,työntekijän sähköpostiosoite
 DocType: Employee Attendance Tool,Marked Attendance,Merkitty Läsnäolo
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,lyhytaikaiset vastattavat
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Lähetä massatekstiviesti yhteystiedoillesi
