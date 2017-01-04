@@ -5,8 +5,15 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
+from erpnext.schools.api import get_grade
 
 # test_records = frappe.get_test_records('Assessment Result')
 
 class TestAssessmentResult(unittest.TestCase):
-	pass
+	def test_grade(self):
+		grade = get_grade("_Test Grading Scale", 80)
+		self.assertEquals("A", grade)
+
+		grade = get_grade("_Test Grading Scale", 70)
+		self.assertEquals("B", grade)
+		

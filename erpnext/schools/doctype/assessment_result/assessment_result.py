@@ -22,4 +22,3 @@ class AssessmentResult(Document):
 				d.grade = get_grade(self.grading_scale, (flt(d.score)/d.maximum_score)*100)
 				self.total_score += d.score
 		self.grade = get_grade(self.grading_scale, (self.total_score/self.maximum_score)*100)
-	
