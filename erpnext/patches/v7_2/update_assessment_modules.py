@@ -7,7 +7,7 @@ def execute():
 	frappe.rename_doc("DocType", "Grade Interval", "Grading Scale Interval", force=True)
 
 	frappe.reload_doc("schools", "doctype", "grading_scale_interval")
-	rename_field("Grading Scale Interval", "to_score", "min_score")
+	rename_field("Grading Scale Interval", "to_score", "threshold")
 
 	#Rename Assessment Results
 	frappe.reload_doc("schools", "doctype", "assessment")

@@ -191,8 +191,8 @@ def get_grade(grading_scale, percentage):
 	:param Percentage: Score Percentage Percentage
 	"""
 	grading_scale_intervals = {}
-	for d in frappe.get_all("Grading Scale Interval", fields=["grade_code", "min_score"], filters={"parent": grading_scale}):
-		grading_scale_intervals.update({d.min_score:d.grade_code})
+	for d in frappe.get_all("Grading Scale Interval", fields=["grade_code", "threshold"], filters={"parent": grading_scale}):
+		grading_scale_intervals.update({d.threshold:d.grade_code})
 	intervals = sorted(grading_scale_intervals.keys(), key=float, reverse=True)
 	for interval in intervals:
 		if flt(percentage) >= interval:
