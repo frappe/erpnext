@@ -956,16 +956,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_create_so_with_margin(self):
 		si = create_sales_invoice(item_code="_Test Item", qty=1, do_not_submit=True)
-		price_list_rate = si.items[0].price_list_rate
+		price_list_rate = 100
+		si.items[0].price_list_rate = price_list_rate
 		si.items[0].margin_type = 'Percentage'
 		si.items[0].margin_rate_or_amount = 25
 		si.insert()
-
-		self.assertNotEquals(si.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
-		si.items[0].margin_rate_or_amount = 25
-		si.submit()
-
-		self.assertNotEquals(si.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
+		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 
 	def test_party_status(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
