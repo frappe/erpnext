@@ -625,7 +625,7 @@
    "label": "Amended From", 
    "length": 0, 
    "no_copy": 1, 
-   "options": "Assessment", 
+   "options": "Assessment Plan", 
    "permlevel": 0, 
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 
@@ -649,10 +649,10 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-12-15 14:35:50.780052", 
+ "modified": "2017-01-04 16:21:40.752137", 
  "modified_by": "Administrator", 
  "module": "Schools", 
- "name": "Assessment", 
+ "name": "Assessment Plan", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [
@@ -683,5 +683,6 @@
  "read_only_onload": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "track_changes": 0, 
  "track_seen": 0
 }

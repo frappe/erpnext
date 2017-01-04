@@ -174,13 +174,13 @@ def get_evaluation_criterias(course):
 		fields=["evaluation_criteria", "weightage"], filters={"parent": course}, order_by= "idx")
 	
 @frappe.whitelist()
-def get_assessment_details(assessment):
-	"""Returns Evaluation Criteria  and Maximum Score from Assessment Master.
+def get_assessment_details(assessment_plan):
+	"""Returns Evaluation Criteria  and Maximum Score from Assessment Plan Master.
 
-	:param Assessment: Assessment
+	:param Assessment Plan: Assessment Plan
 	"""
 	return frappe.get_list("Assessment Evaluation Criteria", \
-		fields=["evaluation_criteria", "maximum_score"], filters={"parent": assessment}, order_by= "idx")
+		fields=["evaluation_criteria", "maximum_score"], filters={"parent": assessment_plan}, order_by= "idx")
 
 
 @frappe.whitelist()

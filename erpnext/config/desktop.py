@@ -229,12 +229,12 @@ def get_data():
 			"type": "list"
 		},
 		{
-			"module_name": "Assessment",
+			"module_name": "Assessment Plan",
 			"color": "#8a70be",
 			"icon": "fa fa-file-text-alt",
-			"label": _("Assessment"),
-			"link": "List/Assessment",
-			"_doctype": "Assessment",
+			"label": _("Assessment Plan"),
+			"link": "List/Assessment Plan",
+			"_doctype": "Assessment Plan",
 			"type": "list"
 		},
 		{

@@ -5,7 +5,7 @@ cur_frm.add_fetch("student_group", "course", "course");
 cur_frm.add_fetch("examiner", "instructor_name", "examiner_name");
 cur_frm.add_fetch("supervisor", "instructor_name", "supervisor_name");
 
-frappe.ui.form.on("Assessment", {
+frappe.ui.form.on("Assessment Plan", {
     course: function(frm) {
         if (frm.doc.course && frm.doc.maximum_assessment_score) {
             frappe.call({

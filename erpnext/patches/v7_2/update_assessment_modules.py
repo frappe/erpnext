@@ -9,18 +9,20 @@ def execute():
 	frappe.reload_doc("schools", "doctype", "grading_scale_interval")
 	rename_field("Grading Scale Interval", "to_score", "threshold")
 
+	frappe.rename_doc("DocType", "Assessment", "Assessment Plan", force=True)
+
 	#Rename Assessment Results
-	frappe.reload_doc("schools", "doctype", "assessment")
-	rename_field("Assessment", "grading_structure", "grading_scale")
+	frappe.reload_doc("schools", "doctype", "assessment_plan")
+	rename_field("Assessment Plan", "grading_structure", "grading_scale")
 
 	frappe.reload_doc("schools", "doctype", "assessment_result")
-	for assessment in frappe.get_all("Assessment", fields=["name", "grading_scale"]):
+	for assessment in frappe.get_all("Assessment Plan", fields=["name", "grading_scale"]):
 		for stud_result in frappe.db.sql("select * from `tabAssessment Result` where parent= %s", assessment.name, as_dict=True):
 			if stud_result.result:
 				assessment_result = frappe.new_doc("Assessment Result")
 				assessment_result.student = stud_result.student
 				assessment_result.student_name = stud_result.student_name
-				assessment_result.assessment = assessment.name
+				assessment_result.assessment_plan = assessment.name
 				assessment_result.grading_scale = assessment.grading_scale
 				assessment_result.total_score = stud_result.result
 				assessment_result.flags.ignore_validate = True

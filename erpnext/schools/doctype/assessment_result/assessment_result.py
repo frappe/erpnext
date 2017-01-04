@@ -10,7 +10,7 @@ from erpnext.schools.api import get_grade
 
 class AssessmentResult(Document):
 	def validate(self):
-		self.maximum_score = frappe.db.get_value("Assessment", self.assessment, "maximum_assessment_score")
+		self.maximum_score = frappe.db.get_value("Assessment Plan", self.assessment_plan, "maximum_assessment_score")
 		self.validate_grade()
 	
 	def validate_grade(self):

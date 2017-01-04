@@ -2,15 +2,15 @@
 // For license information, please see license.txt
 
 cur_frm.add_fetch("student", "title", "student_name");
-cur_frm.add_fetch("assessment", "grading_scale", "grading_scale");
-cur_frm.add_fetch("assessment", "maximum_assessment_score", "maximum_score");
+cur_frm.add_fetch("assessment_plan", "grading_scale", "grading_scale");
+cur_frm.add_fetch("assessment_plan", "maximum_assessment_score", "maximum_score");
 
 frappe.ui.form.on("Assessment Result", {
-    assessment: function(frm) {
+    assessment_plan: function(frm) {
         frappe.call({
             method: "erpnext.schools.api.get_assessment_details",
             args: {
-                assessment: frm.doc.assessment
+                assessment_plan: frm.doc.assessment_plan
             },
             callback: function(r) {
                 if (r.message) {

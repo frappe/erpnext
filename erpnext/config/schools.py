@@ -112,7 +112,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Assessment"
+					"name": "Assessment Plan"
 				},
 				{
 					"type": "doctype",
