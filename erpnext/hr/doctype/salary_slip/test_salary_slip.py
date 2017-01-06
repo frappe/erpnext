@@ -76,7 +76,7 @@ class TestSalarySlip(unittest.TestCase):
 		if getdate(nowdate()).day >= 15:
 			date_of_joining = getdate(add_days(nowdate(),-10))
 			relieving_date = getdate(add_days(nowdate(),-10))
-		elif getdate(nowdate()).day < 15 and getdate(nowdate()).day > 5:
+		elif getdate(nowdate()).day < 15 and getdate(nowdate()).day >= 5:
 			date_of_joining = getdate(add_days(nowdate(),-3))
 			relieving_date = getdate(add_days(nowdate(),-3))
 		elif getdate(nowdate()).day < 5 and not getdate(nowdate()).day == 1:

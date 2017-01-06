@@ -74,7 +74,7 @@ class Warehouse(NestedSet):
 					ac_doc.flags.ignore_mandatory = True
 					try:
 						ac_doc.insert()
-						msgprint(_("Account head {0} created").format(ac_doc.name))
+						msgprint(_("Account head {0} created").format(ac_doc.name), indicator='green', alert=True)
 
 					except frappe.DuplicateEntryError, e:
 						if not (e.args and e.args[0]=='Account'):
@@ -193,9 +193,9 @@ class Warehouse(NestedSet):
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
-		repost_stock_for_items = frappe.db.sql_list("""select distinct item_code 
+		repost_stock_for_items = frappe.db.sql_list("""select distinct item_code
 			from tabBin where warehouse=%s""", newdn)
-		
+
 		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
 		frappe.db.sql("delete from `tabBin` where warehouse=%s", newdn)
 
