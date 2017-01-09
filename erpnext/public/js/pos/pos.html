@@ -1,14 +1,15 @@
 <div class="pos">
     <div class="row">
-    	<div class="col-sm-5 pos-bill-wrapper">
+    	<div class="col-sm-6 pos-bill-wrapper">
             <div class="pos-bill-toolbar row">
                 <div class="party-area col-xs-12"></div>
             </div>
     		<div class="pos-bill">
     			<div class="item-cart">
                     <div class="row pos-bill-row pos-bill-header">
-                        <div class="col-xs-5"><h6>{%= __("Item") %}</h6></div>
-                        <div class="col-xs-4"><h6 class="text-right">{%= __("Quantity") %}</h6></div>
+                        <div class="col-xs-4"><h6>{%= __("Item") %}</h6></div>
+                        <div class="col-xs-3"><h6 class="text-right">{%= __("Quantity") %}</h6></div>
+						<div class="col-xs-2"><h6 class="text-right">{%= __("Discount") %}</h6></div>
                         <div class="col-xs-3"><h6 class="text-right">{%= __("Rate") %}</h6></div>
                     </div>
                     <div class="items"></div>
@@ -49,17 +50,21 @@
     			</div>
     		</div>
     	</div>
-    	<div class="col-sm-7 pos-items-section">
+    	<div class="col-sm-6 pos-items-section">
 			<div class="row pos-item-area">
 
 			</div>
 			<span id="customer-results" style="color:#68a;"></span>
             <div class="row pos-item-toolbar">
-            	<div class="search-area col-xs-12"></div>
+				<div class="search-item-group col-xs-5"></div>
+				<div class="search-item col-xs-7"></div>
             </div>
-    		<div class="item-list-area">
+    		<div class="item-list-area" style="auto">
 				<div class="app-listing item-list"></ul>
     		</div>
     	</div>
+		<div class="text-right list-paging-area" style="padding-right:0px">
+			<button class="btn btn-default btn-more btn-sm">More</button>
+		</div>
     </div>
 </div>

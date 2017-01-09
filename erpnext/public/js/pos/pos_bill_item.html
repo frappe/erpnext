@@ -1,6 +1,6 @@
 <div class="row pos-bill-row pos-bill-item" data-item-code="{%= item_code %}">
-    <div class="col-xs-5"><h6>{%= item_code || "" %}{%= item_name || "" %}</h6></div>
-    <div class="col-xs-4">
+    <div class="col-xs-4"><h6>{%= item_code || "" %}{%= item_name || "" %}</h6></div>
+    <div class="col-xs-3">
         <div class="row pos-qty-row">
             <div class="col-xs-2 text-center pos-qty-btn" data-action="decrease-qty"><i class="fa fa-minus text-muted" style="font-size:12px"></i></div>
             <div class="col-xs-8">
@@ -9,11 +9,16 @@
                 </div>
                 {% if(actual_qty != null) { %}
                 <div style="margin-top: 5px;" class="text-muted small text-right">
-                    <span title="{%= __("In Stock") %}">{%= actual_qty || 0 %}<span>
+                    {%= __("In Stock: ") %} <span>{%= actual_qty || 0 %}</span>
                 </div>
                 {% } %}
             </div>
             <div class="col-xs-2 text-center pos-qty-btn" data-action="increase-qty"><i class="fa fa-plus text-muted" style="font-size:12px"></i></div>
+        </div>
+    </div>
+    <div class="col-xs-2 text-right">
+		<div class="row input-sm">
+            <input type="tel" value="0" class="form-control text-right">
         </div>
     </div>
     <div class="col-xs-3 text-right">

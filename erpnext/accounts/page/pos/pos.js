@@ -20,6 +20,7 @@ frappe.pages['pos'].refresh = function(wrapper) {
 
 erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	init: function(wrapper){
+		this.page_len = 18;
 		this.page = wrapper.page;
 		this.wrapper = $(wrapper).find('.page-content');
 		this.set_indicator();
@@ -287,6 +288,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.meta = r.message.meta;
 		this.item_data = r.message.items;
+		this.item_groups = r.message.item_groups;
 		this.customers = r.message.customers;
 		this.serial_no_data = r.message.serial_no_data;
 		this.batch_no_data = r.message.batch_no_data;
@@ -360,24 +362,38 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	make_search: function() {
 		var me = this;
-		this.search = frappe.ui.form.make_control({
+		this.serach_item = frappe.ui.form.make_control({
 			df: {
 				"fieldtype": "Data",
 				"label": "Item",
 				"fieldname": "pos_item",
 				"placeholder": __("Search Item")
 			},
-			parent: this.wrapper.find(".search-area"),
+			parent: this.wrapper.find(".search-item"),
 			only_input: true,
 		});
 
-		this.search.make_input();
-		this.search.$input.on("keyup", function() {
+		this.serach_item.make_input();
+		this.serach_item.$input.on("keyup", function() {
 			setTimeout(function() {
 				me.items = me.get_items();
 				me.make_item_list();
 			}, 1000);
 		});
+		
+		this.search_item_group = frappe.ui.form.make_control({
+			df: {
+				"fieldtype": "Select",
+				"options": me.item_groups,
+				"label": __("Item Group"),
+				"fieldname": "item_group",
+				"placeholder": __("Item Group")
+			},
+			parent: this.wrapper.find(".search-item-group"),
+			only_input: true,
+		});
+		
+		this.search_item_group.make_input();
 
 		this.party_field = frappe.ui.form.make_control({
 			df: {
@@ -397,7 +413,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	set_focus: function(){
 		if(this.default_customer){
-			this.search.$input.focus();
+			this.serach_item.$input.focus();
 		}else{
 			this.party_field.$input.focus();
 		}
@@ -536,7 +552,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if (this.items.length > 0) {
 			$.each(this.items, function(index, obj) {
-				if(index < 30){
+				if(index < me.page_len){
 					$(frappe.render_template("pos_item", {
 						item_code: obj.name,
 						item_price: format_currency(me.price_list_data[obj.name], me.frm.doc.currency),
@@ -552,8 +568,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}
 
 		if(this.items.length == 1
-			&& this.search.$input.val()) {
-			this.search.$input.val("");
+			&& this.serach_item.$input.val()) {
+			this.serach_item.$input.val("");
 			this.add_to_cart();
 		}
 
@@ -582,7 +598,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			})
 		}
 
-		key =  this.search.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g,'\\$&');
+		key =  this.serach_item.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g,'\\$&');
 		var re = new RegExp('%', 'g');
 		var reg = new RegExp(key.replace(re, '[\\w*\\s*[a-zA-Z0-9]*]*'))
 		search_status = true
@@ -590,17 +606,17 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if(key){
 			return $.grep(this.item_data, function(item){
 				if(search_status){
-					if(in_list(me.batch_no_data[item.item_code], me.search.$input.val())){
+					if(in_list(me.batch_no_data[item.item_code], me.serach_item.$input.val())){
 						search_status = false;
-						return me.item_batch_no[item.item_code] = me.search.$input.val()
+						return me.item_batch_no[item.item_code] = me.serach_item.$input.val()
 					} else if( me.serial_no_data[item.item_code]
-						&& in_list(Object.keys(me.serial_no_data[item.item_code]), me.search.$input.val())) {
+						&& in_list(Object.keys(me.serial_no_data[item.item_code]), me.serach_item.$input.val())) {
 						search_status = false;
-						me.item_serial_no[item.item_code] = [me.search.$input.val(), me.serial_no_data[item.item_code][me.search.$input.val()]]
+						me.item_serial_no[item.item_code] = [me.serach_item.$input.val(), me.serial_no_data[item.item_code][me.serach_item.$input.val()]]
 						return true
-					} else if(item.barcode == me.search.$input.val()) {
+					} else if(item.barcode == me.serach_item.$input.val()) {
 						search_status = false;
-						return item.barcode == me.search.$input.val();
+						return item.barcode == me.serach_item.$input.val();
 					} else if(reg.test(item.item_code.toLowerCase()) || reg.test(item.description.toLowerCase()) ||
 					reg.test(item.item_name.toLowerCase()) || reg.test(item.item_group.toLowerCase()) ){
 						return true

@@ -30,6 +30,7 @@ def get_pos_data():
 		'doc': doc,
 		'default_customer': pos_profile.get('customer'),
 		'items': get_items_list(pos_profile),
+		'item_groups': get_item_group(pos_profile),
 		'customers': get_customers_list(pos_profile),
 		'serial_no_data': get_serial_no_data(pos_profile, doc.company),
 		'batch_no_data': get_batch_no_data(),
@@ -139,6 +140,16 @@ def get_items_list(pos_profile):
 		where
 			disabled = 0 and has_variants = 0 and is_sales_item = 1 and {cond}
 		""".format(cond=cond), tuple(item_groups), as_dict=1)
+
+def get_item_group(pos_profile):
+	item_groups = ["All Products"]
+	if pos_profile.get('item_groups'):
+		for d in pos_profile.get('item_groups'):
+			item_groups.extend(get_child_nodes('Item Group', d.item_group))
+	else:
+		item_groups.extend(frappe.db.sql_list("""Select name from `tabItem Group` order by name"""))
+
+	return item_groups
 
 def get_customers_list(pos_profile):
 	cond = "1=1"
