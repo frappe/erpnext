@@ -327,6 +327,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		$.each(this.meta, function(i, data){
 			frappe.meta.sync(data)
+			locals["DocType"][data.name] = data;
 		})
 
 		this.print_template_data = frappe.render_template("print_template", {content: this.print_template,
@@ -410,37 +411,95 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.frm.doc.customer = this.default_customer;
 		}
 
-		this.party_field.awesomeplete = new Awesomplete(this.party_field.$input.get(0), {
+		this.party_field.awesomeplete =
+			new Awesomplete(this.party_field.$input.get(0), {
 				minChars: 0,
 				maxItems: 99,
 				autoFirst: true,
 				list: [],
+				filter: function(item, input) {
+					var value = item.value.toLowerCase();
+					if(value.indexOf('is_action') !== -1 ||
+						value.indexOf(input) !== -1) {
+						return true;
+					}
+				},
+				item: function(item, input) {
+					var d = item;
+					var html = "<span>" + __(d.label || d.value) + "</span>";
+					return $('<li></li>')
+						.data('item.autocomplete', d)
+						.html('<a><p>' + html + '</p></a>')
+						.get(0);
+				}
 			});
+		var items = this.customers.map(function(c) {
+			return {
+				label: c.name,
+				value: c.name,
+				customer_group: c.customer_group,
+				territory: c.territory
+			}
+		});
+		items.push({
+			label: "<span class='text-primary link-option'>"
+				+ "<i class='fa fa-plus' style='margin-right: 5px;'></i> "
+				+ __("Create a new Customer")
+				+ "</span>",
+			value: 'is_action',
+			action: me.new_customer
+		});
+		this.party_field.awesomeplete.list = items;
 
 		this.party_field.$input
 			.on('input', function(e) {
-				var customer_data = me.get_customers(e.target.value) || [];
-				me.party_field.awesomeplete.list = customer_data.map(function(data){
-					return {label: data.name, value: data.name,
-						customer_group: data.customer_group, territory: data.territory}
-				});
+				me.party_field.awesomeplete.list = items;
 			})
 			.on('awesomplete-select', function(e) {
-				var item = me.party_field.awesomeplete.get_item(e.originalEvent.text.value);
-				console.log(item);
-				if(item) {
-					me.frm.doc.customer = item.label;
-					me.frm.doc.customer_name = item.customer_name;
-					me.frm.doc.customer_group = item.customer_group;
-					me.frm.doc.territory = item.territory;
-				} else {
-					me.frm.doc.customer = me.party_field.$input.val();
+				var item = me.party_field.awesomeplete
+					.get_item(e.originalEvent.text.value);
+				if(!item) return;
+				if(item.action) {
+					item.action.apply(me);
+					return;
 				}
+				me.update_customer_data(item);
 				me.refresh();
+			})
+			.on('change', function(e) {
+				if(!e.originalEvent.text) {
+					me.frm.doc.customer = $(this).val();
+				}
 			})
 			.on('focus', function(e) {
 				$(e.target).val('').trigger('input');
+			})
+			.on("awesomplete-selectcomplete", function(e) {
+				var item = me.party_field.awesomeplete
+					.get_item(e.originalEvent.text.value);
+				// clear text input if item is action
+				if(item.action) {
+					$(this).val("");
+				}
 			});
+	},
+
+	new_customer: function () {
+		var me = this;
+		if(!this.connection_status) return;
+		frappe.ui.form.quick_entry('Customer', function (doc) {
+			me.customers.push(doc);
+			me.party_field.$input.val(doc.name);
+			me.update_customer_data(doc);
+		})
+	},
+
+	update_customer_data: function(doc) {
+		var me = this;
+		this.frm.doc.customer = doc.label || doc.name;
+		this.frm.doc.customer_name = doc.customer_name;
+		this.frm.doc.customer_group = doc.customer_group;
+		this.frm.doc.territory = doc.territory;
 	},
 
 	get_customers: function(key){
@@ -599,7 +658,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.remove_item = []
 		$.each(this.frm.doc["items"] || [], function(i, d) {
-			if(d.serial_no){
+			if(d.serial_no && field == 'qty'){
 				me.validate_serial_no_qty(d, item_code, field, value)
 			}
 
@@ -770,6 +829,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				actual_qty: me.actual_qty_dict[d.item_code] || 0,
 				projected_qty: d.projected_qty,
 				rate: format_number(d.rate, me.frm.doc.currency),
+				enabled: me.pos_profile_data["allow_user_to_edit_rate"] ? true: false,
 				amount: format_currency(d.amount, me.frm.doc.currency)
 			})).appendTo($items);
 		});
