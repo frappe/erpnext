@@ -55,7 +55,8 @@ class Task(Document):
 	def update_depends_on(self):
 		depends_on_tasks = ""
 		for d in self.depends_on:
-			depends_on_tasks += d.task + ","
+			if d.task:
+				depends_on_tasks += d.task + ","
 		self.depends_on_tasks = depends_on_tasks
 
 	def on_update(self):
