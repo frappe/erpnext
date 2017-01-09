@@ -153,22 +153,37 @@ erpnext.utils.map_current_doc = function(opts) {
 			frappe.get_meta(items_doctype).fields.forEach(function(d) { 
 				if(d.options===opts.source_doctype) link_fieldname = d.fieldname; });
 
-			// search in existing items if the source_name is already set
+			// search in existing items if the source_name is already set and full qty fetched
 			var already_set = false;
-
+			var item_qty_map = {};
+			
 			$.each(cur_frm.doc.items, function(i, d) {
 				if(d[link_fieldname]==opts.source_name) {
 					already_set = true;
-					return false;
+					if (item_qty_map[d.item_code])
+						item_qty_map[d.item_code] += flt(d.qty);
+					else
+						item_qty_map[d.item_code] = flt(d.qty);
 				}
 			});
-
+			
 			if(already_set) {
-				frappe.msgprint(__("You have already selected items from {0} {1}", 
-					[opts.source_doctype, opts.source_name]));
-				return;
-			}
+				frappe.model.with_doc(opts.source_doctype, opts.source_name, function(r) {
+					var source_doc = frappe.model.get_doc(opts.source_doctype, opts.source_name);
+					$.each(source_doc.items || [], function(i, row) {
+						if(row.qty > flt(item_qty_map[row.item_code])) {
+							already_set = false;
+							return false;
+						}
+					})
+				})
 
+				if(already_set) {
+					frappe.msgprint(__("You have already selected items from {0} {1}", 
+						[opts.source_doctype, opts.source_name]));
+					return;
+				}
+			}
 		}
 
 

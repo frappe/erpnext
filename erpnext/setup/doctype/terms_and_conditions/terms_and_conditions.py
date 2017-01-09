@@ -18,4 +18,6 @@ def get_terms_and_conditions(template_name, doc):
 		doc = json.loads(doc)
 
 	terms_and_conditions = frappe.get_doc("Terms and Conditions", template_name)
-	return frappe.render_template(terms_and_conditions.terms, doc)
+	
+	if terms_and_conditions.terms:
+		return frappe.render_template(terms_and_conditions.terms, doc)
