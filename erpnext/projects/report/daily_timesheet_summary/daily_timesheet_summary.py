@@ -9,7 +9,9 @@ from frappe.desk.reportview import build_match_conditions
 def execute(filters=None):
 	if not filters:
 		filters = {}
-	elif filters.get("from_date") or filters.get("to_date"):
+	elif filters.get("date") :
+		filters["from_date"] = filters["date"][0]
+		filters["to_date"] = filters["date"][1]
 		filters["from_time"] = "00:00:00"
 		filters["to_time"] = "24:00:00"
 
