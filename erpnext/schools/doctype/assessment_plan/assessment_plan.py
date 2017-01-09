@@ -9,7 +9,11 @@ from frappe import _
 
 class AssessmentPlan(Document):
 	def validate(self):
+		if not (self.student_batch or self.student_group):
+			frappe.throw(_("Please select Student Group or Student Batch"))
+		self.validate_student_batch()
 		self.validate_overlap()
+
 
 	def validate_overlap(self):
 		"""Validates overlap for Student Group/Student Batch, Instructor, Room"""
@@ -35,3 +39,7 @@ class AssessmentPlan(Document):
 		
 		validate_overlap_for(self, "Assessment Plan", "room")
 		validate_overlap_for(self, "Assessment Plan", "supervisor", self.supervisor)
+
+	def validate_student_batch(self):
+		if self.student_group:
+			self.student_batch = frappe.db.get_value("Student Group", self.student_group, "student_batch")

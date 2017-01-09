@@ -4,7 +4,16 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 class GradingScale(Document):
-	pass
+	def validate(self):
+		thresholds = []
+		for d in self.intervals:
+			if d.threshold in thresholds:
+				frappe.throw(_("Treshold {0}% appears more than once.".format(d.threshold)))
+			else:
+				thresholds.append(d.threshold)
+		if 0 not in thresholds:
+			frappe.throw(_("Please define grade for treshold 0%"))

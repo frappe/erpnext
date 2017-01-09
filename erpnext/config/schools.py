@@ -129,6 +129,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Evaluation Criteria"
+				},
+				{
+					"type": "doctype",
+					"name": "Assessment Result Tool"
 				}
 			]
 		},
