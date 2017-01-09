@@ -32,12 +32,12 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	},
 
-	refresh: function() {
+	refresh: function(frm) {
 		var help_content = [
 			'<br><br>',
 			'<table class="table table-bordered" style="background-color: #f9f9f9;">',
 				'<tr><td>',
-					'<h4><i class="icon-hand-right"></i> ',
+					'<h4><i class="fa fa-hand-right"></i> ',
 						__('Notes'),
 					':</h4>',
 					'<ul>',
@@ -70,12 +70,15 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		} else {
 			return this.frm.call({
 				doc: me.frm.doc,
-				method: "get_items_from_purchase_receipts"
+				method: "get_items_from_purchase_receipts",
+				callback: function(r, rt) {
+					me.set_applicable_charges_for_item();
+				}
 			});
 		}
 	},
 
-	amount: function() {
+	amount: function(frm) {
 		this.set_total_taxes_and_charges();
 		this.set_applicable_charges_for_item();
 	},
@@ -90,17 +93,23 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	set_applicable_charges_for_item: function() {
 		var me = this;
+
 		if(this.frm.doc.taxes.length) {
+			
 			var total_item_cost = 0.0;
+			var based_on = this.frm.doc.distribute_charges_based_on.toLowerCase();
 			$.each(this.frm.doc.items || [], function(i, d) {
-				total_item_cost += flt(d.amount)
+				total_item_cost += flt(d[based_on])
 			});
 
 			$.each(this.frm.doc.items || [], function(i, item) {
-				item.applicable_charges = flt(item.amount) *  flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)
+				item.applicable_charges = flt(item[based_on]) * flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)			
 			});
 			refresh_field("items");
 		}
+	},
+	distribute_charges_based_on: function (frm) {
+		this.set_applicable_charges_for_item();
 	}
 
 });

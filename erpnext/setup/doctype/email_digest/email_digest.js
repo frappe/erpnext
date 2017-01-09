@@ -21,7 +21,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 				d.show();
 			}
 		});
-	}, "icon-eye-open", "btn-default");
+	}, "fa fa-eye-open", "btn-default");
 
 	if(user==="Administrator") {
 		cur_frm.add_custom_button(__('Send Now'), function() {
@@ -39,7 +39,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			} else {
 				msgprint(save_msg);
 			}
-		}, "icon-envelope", "btn-default");
+		}, "fa fa-envelope", "btn-default");
 	}
 }
 

@@ -138,7 +138,7 @@ class SalesInvoice(SellingController):
 
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 		if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
-			unlink_ref_doc_from_payment_entries(self.doctype, self.name)
+			unlink_ref_doc_from_payment_entries(self)
 
 		if self.is_return:
 			# NOTE status updating bypassed for is_return
@@ -403,9 +403,9 @@ class SalesInvoice(SellingController):
 	def validate_warehouse(self):
 		super(SalesInvoice, self).validate_warehouse()
 
-		for d in self.get('items'):
+		for d in self.get_item_list():
 			if not d.warehouse and frappe.db.get_value("Item", d.item_code, "is_stock_item"):
-				frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
+				frappe.throw(_("Warehouse required for stock Item {0}").format(d.item_code))
 
 	def validate_delivery_note(self):
 		for d in self.get("items"):

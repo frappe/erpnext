@@ -20,13 +20,23 @@ def execute(filters=None):
 	
 def get_data(filters, show_party_name):
 	party_name_field = "customer_name" if filters.get("party_type")=="Customer" else "supplier_name"
-	parties = frappe.get_all(filters.get("party_type"), fields = ["name", party_name_field], order_by="name")
+	party_filters = {"name": filters.get("party")} if filters.get("party") else {}
+	parties = frappe.get_all(filters.get("party_type"), fields = ["name", party_name_field], 
+		filters = party_filters, order_by="name")
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 	opening_balances = get_opening_balances(filters)
 	balances_within_period = get_balances_within_period(filters)
 	
 	data = []
-	total_debit, total_credit = 0, 0
+	# total_debit, total_credit = 0, 0
+	total_row = frappe._dict({
+		"opening_debit": 0,
+		"opening_credit": 0,
+		"debit": 0,
+		"credit": 0,
+		"closing_debit": 0,
+		"closing_credit": 0
+	})
 	for party in parties:
 		row = { "party": party.name }
 		if show_party_name:
@@ -45,17 +55,17 @@ def get_data(filters, show_party_name):
 			"debit": debit,
 			"credit": credit
 		})
-		
-		# totals
-		total_debit += debit
-		total_credit += credit
-		
+				
 		# closing
 		closing_debit, closing_credit = toggle_debit_credit(opening_debit + debit, opening_credit + credit)
 		row.update({
 			"closing_debit": closing_debit,
 			"closing_credit": closing_credit
 		})
+		
+		# totals
+		for col in total_row:
+			total_row[col] += row.get(col)
 		
 		row.update({
 			"currency": company_currency
@@ -69,13 +79,12 @@ def get_data(filters, show_party_name):
 			data.append(row)
 		
 	# Add total row
-	if total_debit or total_credit:
-		data.append({
-			"party": "'" + _("Totals") + "'",
-			"debit": total_debit,
-			"credit": total_credit,
-			"currency": company_currency
-		})
+	
+	total_row.update({
+		"party": "'" + _("Totals") + "'",
+		"currency": company_currency
+	})
+	data.append(total_row)
 	
 	return data
 	

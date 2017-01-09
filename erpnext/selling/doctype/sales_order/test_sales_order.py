@@ -8,7 +8,7 @@ import unittest
 from erpnext.stock.doctype.item.test_item import get_total_projected_qty
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
-
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from frappe.tests.test_permissions import set_user_permission_doctypes
 
 class TestSalesOrder(unittest.TestCase):
@@ -86,6 +86,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(so.get("items")[0].delivered_qty, 9)
 
 	def test_reserved_qty_for_partial_delivery(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
 		existing_reserved_qty = get_reserved_qty()
 
 		so = make_sales_order()
@@ -113,6 +114,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
 
 	def test_reserved_qty_for_over_delivery(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
 		# set over-delivery tolerance
 		frappe.db.set_value('Item', "_Test Item", 'tolerance', 50)
 
@@ -137,6 +139,8 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(total_projected_qty,  item_doc_after_cancel.total_projected_qty)
 		
 	def test_reserved_qty_for_over_delivery_via_sales_invoice(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
+		
 		# set over-delivery tolerance
 		frappe.db.set_value('Item', "_Test Item", 'tolerance', 50)
 
@@ -172,6 +176,10 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.per_delivered, 0)
 
 	def test_reserved_qty_for_partial_delivery_with_packing_list(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
+		make_stock_entry(item="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, rate=100)
+		
+		
 		existing_reserved_qty_item1 = get_reserved_qty("_Test Item")
 		existing_reserved_qty_item2 = get_reserved_qty("_Test Item Home Desktop 100")
 
@@ -217,6 +225,9 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), existing_reserved_qty_item2)
 
 	def test_reserved_qty_for_over_delivery_with_packing_list(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
+		make_stock_entry(item="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, rate=100)
+		
 		# set over-delivery tolerance
 		frappe.db.set_value('Item', "_Test Product Bundle Item", 'tolerance', 50)
 
@@ -351,6 +362,8 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
+		
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "delivered_by_supplier": 1,
         'default_supplier': '_Test Supplier',
 		    "expense_account": "_Test Account Cost for Goods Sold - _TC",
@@ -377,6 +390,9 @@ class TestSalesOrder(unittest.TestCase):
 				"conversion_factor": 1.0
 			}
 		]
+
+		if frappe.db.get_value("Item", "_Test Regular Item", "is_stock_item")==1:
+			make_stock_entry(item="_Test Regular Item", target="_Test Warehouse - _TC", qty=10, rate=100)
 
 		#setuo existing qty from bin
 		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},

@@ -217,7 +217,7 @@ class ProductionOrder(Document):
 			return
 		self.set('operations', [])
 		operations = frappe.db.sql("""select operation, description, workstation, idx,
-			hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
+			base_hour_rate as hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
 			where parent = %s order by idx""", self.bom_no, as_dict=1)
 		self.set('operations', operations)
 		self.calculate_time()
@@ -466,6 +466,9 @@ def get_item_details(item):
 		if variant_of:
 			res["bom_no"] = frappe.db.get_value("BOM", filters={"item": variant_of, "is_default": 1})
 
+	if not res["bom_no"]:
+		frappe.throw(_("Default BOM for {0} not found").format(item))
+
 	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
 
 	return res
@@ -523,9 +526,9 @@ def get_events(start, end, filters=None):
 		planned_end_date, status
 		from `tabProduction Order`
 		where ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
-				and (planned_start_date between %(start)s and %(end)s) \
-			or ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
-				and planned_end_date between %(start)s and %(end)s)) {conditions}
+				and (planned_start_date <= %(end)s) \
+			and ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
+				and planned_end_date >= %(start)s)) {conditions}
 		""".format(conditions=conditions), {
 			"start": start,
 			"end": end

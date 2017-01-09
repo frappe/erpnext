@@ -30,7 +30,7 @@ def make(domain='Manufacturing'):
 		manufacture.setup_data()
 	elif domain== 'Education':
 		education.setup_data()
-	
+
 	site = frappe.local.site
 	frappe.destroy()
 	frappe.init(site)
@@ -52,7 +52,7 @@ def simulate(domain='Manufacturing'):
 	demo_last_date = frappe.db.get_global('demo_last_date')
 	if demo_last_date:
 		current_date = frappe.utils.add_days(frappe.utils.getdate(demo_last_date), 1)
-		
+
 	# run till today
 	if not runs_for:
 		runs_for = frappe.utils.date_diff(frappe.utils.nowdate(), current_date)
@@ -60,7 +60,8 @@ def simulate(domain='Manufacturing'):
 
 	fixed_asset.work()
 	for i in xrange(runs_for):
-		sys.stdout.write("\rSimulating {0}".format(current_date.strftime("%Y-%m-%d")))
+		sys.stdout.write("\rSimulating {0}: Day {1}".format(
+			current_date.strftime("%Y-%m-%d"), i))
 		sys.stdout.flush()
 		frappe.flags.current_date = current_date
 		if current_date.weekday() in (5, 6):
@@ -73,16 +74,16 @@ def simulate(domain='Manufacturing'):
 			accounts.work()
 			projects.run_projects(current_date)
 			#run_messages()
-			
+
 			if domain=='Manufacturing':
 				sales.work()
 				manufacturing.work()
 			elif domain=='Education':
 				schools.work()
-		
+
 		except:
 			frappe.db.set_global('demo_last_date', current_date)
-			raise	
+			raise
 		finally:
 			current_date = frappe.utils.add_days(current_date, 1)
 			frappe.db.commit()

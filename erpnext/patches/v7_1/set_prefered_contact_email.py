@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doctype('User')
 	for d in frappe.get_all("Employee"):
 		employee = frappe.get_doc("Employee", d.name)
 		if employee.company_email:
@@ -13,7 +14,4 @@ def execute():
 		elif employee.user_id:
 			employee.prefered_contact_email = "User ID"
 			employee.prefered_email = employee.user_id
-		
-		employee.flags.ignore_mandatory = True
-		employee.flags.ignore_validate = True
-		employee.save()
+		employee.db_update()

@@ -4,7 +4,7 @@
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h4 class="text-center">{%= filters.customer || filters.supplier %} </h4>
 <h5 class="text-center">
-	{%= filters.ageing_based_on %}
+	{%= __(filters.ageing_based_on) %}
 	{%= __("Until") %}
 	{%= dateutil.str_to_user(filters.report_date) %}
 </h5>
@@ -12,7 +12,7 @@
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			{% if(__(report.report_name) == "Accounts Receivable" || __(report.report_name) == "Accounts Payable") { %}
+			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
 				<th style="width: 15%">{%= __("Date") %}</th>
 				<th style="width: 15%">{%= __("Ref") %}</th>
 				<th style="width: 40%">{%= __("Party") %}</th>
@@ -30,7 +30,7 @@
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
-			{% if(__(report.report_name) == "Accounts Receivable" || __(report.report_name) == "Accounts Payable") { %}
+			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
 				{% if(data[i][__("Customer")] || data[i][__("Supplier")]) { %}
 					<td>{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
 					<td>{%= data[i][__("Voucher Type")] %}
@@ -38,21 +38,21 @@
 					<td>{%= data[i][__("Customer Name")] || data[i][__("Customer")] || data[i][__("Supplier Name")] || data[i][__("Supplier")] %}
 						<br>{%= __("Remarks") %}: {%= data[i][__("Remarks")] %}</td>
 					<td style="text-align: right">
-						{%= format_currency(data[i][__("Invoiced Amount")], data[i]["currency"]) %}</td>
+						{%= format_currency(data[i]["Invoiced Amount"], data[i]["currency"]) %}</td>
 					<td style="text-align: right">
-						{%= format_currency(data[i][__("Paid Amount")], data[i]["currency"]) %}</td>
+						{%= format_currency(data[i]["Paid Amount"], data[i]["currency"]) %}</td>
 					<td style="text-align: right">
-						{%= format_currency(data[i][__("Outstanding Amount")], data[i]["currency"]) %}</td>
+						{%= format_currency(data[i]["Outstanding Amount"], data[i]["currency"]) %}</td>
 				{% } else { %}
 					<td></td>
 					<td></td>
 					<td><b>{%= __("Total") %}</b></td>
 					<td style="text-align: right">
-						{%= format_currency(data[i][__("Invoiced Amount")]) %}</td>
+						{%= format_currency(data[i]["Invoiced Amount"]) %}</td>
 					<td style="text-align: right">
-						{%= format_currency(data[i][__("Paid Amount")]) %}</td>
+						{%= format_currency(data[i]["Paid Amount"]) %}</td>
 					<td style="text-align: right">
-						{%= format_currency(data[i][__("Outstanding Amount")]) %}</td>
+						{%= format_currency(data[i]["Outstanding Amount"]) %}</td>
 				{% } %}
 			{% } else { %}
 				{% if(data[i][__("Customer")] || data[i][__("Supplier")]|| "&nbsp;") { %}
@@ -71,4 +71,4 @@
 		{% } %}
 	</tbody>
 </table>
-<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+<p class="text-right text-muted">{{ __("Printed On") }}{%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>

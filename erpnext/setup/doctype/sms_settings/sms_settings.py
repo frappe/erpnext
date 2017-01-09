@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
@@ -46,7 +47,7 @@ def get_contact_number(contact_name, value, key):
 	return number and (number[0][0] or number[0][1]) or ''
 
 @frappe.whitelist()
-def send_sms(receiver_list, msg, sender_name = ''):
+def send_sms(receiver_list, msg, sender_name = '', success_msg = True):
 
 	import json
 	if isinstance(receiver_list, basestring):
@@ -58,8 +59,9 @@ def send_sms(receiver_list, msg, sender_name = ''):
 
 	arg = {
 		'receiver_list' : receiver_list,
-		'message'		: msg,
-		'sender_name'	: sender_name or get_sender_name()
+		'message'		: unicode(msg).encode('utf-8'),
+		'sender_name'	: sender_name or get_sender_name(),
+		'success_msg'	: success_msg
 	}
 
 	if frappe.db.get_value('SMS Settings', None, 'sms_gateway_url'):
@@ -69,7 +71,7 @@ def send_sms(receiver_list, msg, sender_name = ''):
 
 def send_via_gateway(arg):
 	ss = frappe.get_doc('SMS Settings', 'SMS Settings')
-	args = {ss.message_parameter : arg.get('message')}
+	args = {ss.message_parameter: arg.get('message')}
 	for d in ss.get("parameters"):
 		args[d.parameter] = d.value
 
@@ -77,35 +79,22 @@ def send_via_gateway(arg):
 	for d in arg.get('receiver_list'):
 		args[ss.receiver_parameter] = d
 		status = send_request(ss.sms_gateway_url, args)
-		if status == 200:
+
+		if 200 <= status < 300:
 			success_list.append(d)
 
 	if len(success_list) > 0:
 		args.update(arg)
 		create_sms_log(args, success_list)
-		frappe.msgprint(_("SMS sent to following numbers: {0}").format("\n" + "\n".join(success_list)))
+		if arg.get('success_msg'):
+			frappe.msgprint(_("SMS sent to following numbers: {0}").format("\n" + "\n".join(success_list)))
 
-# Send Request
-# =========================================================
-def send_request(gateway_url, args):
-	import httplib, urllib
-	server, api_url = scrub_gateway_url(gateway_url)
-	conn = httplib.HTTPConnection(server)  # open connection
-	headers = {}
-	headers['Accept'] = "text/plain, text/html, */*"
-	conn.request('GET', api_url + urllib.urlencode(args), headers = headers)    # send request
-	resp = conn.getresponse()     # get response
-	return resp.status
 
-# Split gateway url to server and api url
-# =========================================================
-def scrub_gateway_url(url):
-	url = url.replace('http://', '').strip().split('/')
-	server = url.pop(0)
-	api_url = '/' + '/'.join(url)
-	if not api_url.endswith('?'):
-		api_url += '?'
-	return server, api_url
+def send_request(gateway_url, params):
+	import requests
+	response = requests.get(gateway_url, params = params, headers={'Accept': "text/plain, text/html, */*"})
+	response.raise_for_status()
+	return response.status_code
 
 
 # Create SMS Log
@@ -114,7 +103,7 @@ def create_sms_log(args, sent_to):
 	sl = frappe.new_doc('SMS Log')
 	sl.sender_name = args['sender_name']
 	sl.sent_on = nowdate()
-	sl.message = args['message']
+	sl.message = args['message'].decode('utf-8')
 	sl.no_of_requested_sms = len(args['receiver_list'])
 	sl.requested_numbers = "\n".join(args['receiver_list'])
 	sl.no_of_sent_sms = len(sent_to)

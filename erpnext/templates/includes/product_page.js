@@ -12,17 +12,17 @@ frappe.ready(function() {
 			item_code: get_item_code()
 		},
 		callback: function(r) {
-			$(".item-cart").toggleClass("hide", !!!r.message.price);
+			$(".item-cart").toggleClass("hide", (!!!r.message.price || !!!r.message.stock));
 			if(r.message && r.message.price) {
 				$(".item-price")
 					.html(r.message.price.formatted_price + " per " + r.message.uom);
 
 				if(r.message.stock==0) {
-					$(".item-stock").html("<div class='help'>Not in stock</div>");
+					$(".item-stock").html("<div style='color: red'>Not in stock</div>");
 				}
 				else if(r.message.stock==1) {
 					$(".item-stock").html("<div style='color: green'>\
-						<i class='icon-check'></i> Available (in stock)</div>");
+						<i class='fa fa-check'></i> Available (in stock)</div>");
 				}
 
 				if(r.message.qty) {

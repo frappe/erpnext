@@ -112,9 +112,9 @@ $.extend(erpnext.utils, {
 		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
 			var info = frm.doc.__onload.dashboard_info;
 			frm.dashboard.add_indicator(__('Annual Billing: {0}',
-				[format_currency(info.billing_this_year, frm.doc.default_currency)]), 'blue');
+				[format_currency(info.billing_this_year, info.currency)]), 'blue');
 			frm.dashboard.add_indicator(__('Total Unpaid: {0}',
-				[format_currency(info.total_unpaid, frm.doc.default_currency)]),
+				[format_currency(info.total_unpaid, info.currency)]),
 				info.total_unpaid ? 'orange' : 'green');
 		}
 	},
@@ -143,7 +143,34 @@ erpnext.utils.map_current_doc = function(opts) {
 			if(!cur_frm.doc.items[0].item_code) {
 				cur_frm.doc.items = cur_frm.doc.items.splice(1);
 			}
+
+			// find the doctype of the items table
+			var items_doctype = frappe.meta.get_docfield(cur_frm.doctype, 'items').options;
+			
+			// find the link fieldname from items table for the given
+			// source_doctype
+			var link_fieldname = null;
+			frappe.get_meta(items_doctype).fields.forEach(function(d) { 
+				if(d.options===opts.source_doctype) link_fieldname = d.fieldname; });
+
+			// search in existing items if the source_name is already set
+			var already_set = false;
+
+			$.each(cur_frm.doc.items, function(i, d) {
+				if(d[link_fieldname]==opts.source_name) {
+					already_set = true;
+					return false;
+				}
+			});
+
+			if(already_set) {
+				frappe.msgprint(__("You have already selected items from {0} {1}", 
+					[opts.source_doctype, opts.source_name]));
+				return;
+			}
+
 		}
+
 
 		return frappe.call({
 			// Sometimes we hit the limit for URL length of a GET request

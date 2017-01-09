@@ -15,6 +15,8 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 
 frappe.ui.form.on('Salary Structure', {
 	onload: function(frm) {
+		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet),
+		
 		frm.set_query("salary_component", "earnings", function() {
 			return {
 				filters: {
@@ -28,7 +30,15 @@ frappe.ui.form.on('Salary Structure', {
 					type: "deduction"
 				}
 			}
-		})
+		});
+		frm.set_query("employee", "employees", function(doc) {
+			return {
+				query: "erpnext.controllers.queries.employee_query",
+				filters: {
+					company: doc.company
+				}
+			}
+		});
 	},
 	
 	refresh: function(frm) {
@@ -37,7 +47,7 @@ frappe.ui.form.on('Salary Structure', {
 		frm.fields_dict['deductions'].grid.set_column_disp("default_amount", false);
 		
 		frm.add_custom_button(__("Preview Salary Slip"),
-			function() { frm.trigger('preview_salary_slip'); }, "icon-sitemap", "btn-default");
+			function() { frm.trigger('preview_salary_slip'); }, "fa fa-sitemap", "btn-default");
 
 		frm.add_custom_button(__("Add Employees"),function () {
 			frm.trigger('add_employees')
@@ -134,6 +144,7 @@ frappe.ui.form.on('Salary Structure', {
 	toggle_fields: function(frm) {
 		frm.toggle_display(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
 		frm.toggle_reqd(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
+		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
 	}
 });
 
@@ -182,11 +193,3 @@ frappe.ui.form.on('Salary Detail', {
 		calculate_totals(frm.doc);
 	}
 })
-
-frappe.ui.form.on('Salary Structure Employee', {
-	onload: function(frm) {
-		frm.set_query("employee","employees", function(doc,cdt,cdn) {
-			return{ query: "erpnext.controllers.queries.employee_query" }
-		})
-	}
-});

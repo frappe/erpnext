@@ -163,6 +163,32 @@ class SellingController(StockController):
 			if discount and flt(d.discount_percentage) > discount:
 				frappe.throw(_("Maxiumm discount for Item {0} is {1}%").format(d.item_code, discount))
 
+
+	def validate_selling_price(self):
+		def throw_message(item_name, rate, ref_rate_field):
+			frappe.throw(_("""Selling price for item {0} is lower than its {1}. Selling price should be atleast {2}""")
+				.format(item_name, ref_rate_field, rate))
+
+		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
+			return
+
+		for it in self.get("items"):
+			last_purchase_rate, is_stock_item = frappe.db.get_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
+
+			if flt(it.base_rate) < flt(last_purchase_rate):
+				throw_message(it.item_name, last_purchase_rate, "last purchase rate")
+
+			last_valuation_rate = frappe.db.sql("""
+				SELECT valuation_rate FROM `tabStock Ledger Entry` WHERE item_code = %s
+				AND warehouse = %s AND valuation_rate > 0
+				ORDER BY posting_date DESC, posting_time DESC, name DESC LIMIT 1
+				""", (it.item_code, it.warehouse))
+
+			if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate):
+				throw_message(it.name, last_valuation_rate, "valuation rate")
+
+
+
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):

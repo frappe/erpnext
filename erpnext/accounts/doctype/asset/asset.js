@@ -28,6 +28,7 @@ frappe.ui.form.on('Asset', {
 	refresh: function(frm) {
 		frappe.ui.form.trigger("Asset", "is_existing_asset");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
+		frm.events.make_schedules_editable(frm);
 				
 		if (frm.doc.docstatus==1) {
 			if (frm.doc.status=='Submitted' && !frm.doc.is_existing_asset && !frm.doc.purchase_invoice) {
@@ -141,6 +142,22 @@ frappe.ui.form.on('Asset', {
 		frm.toggle_enable("supplier", frm.doc.is_existing_asset);
 		frm.toggle_reqd("next_depreciation_date", !frm.doc.is_existing_asset);
 	},
+	
+	opening_accumulated_depreciation: function(frm) {
+		erpnext.asset.set_accululated_depreciation(frm);
+	},
+	
+	depreciation_method: function(frm) {
+		frm.events.make_schedules_editable(frm);
+	},
+	
+	make_schedules_editable: function(frm) {
+		var is_editable = frm.doc.depreciation_method==="Manual" ? true : false;
+		frm.toggle_enable("schedules", is_editable);
+		frm.fields_dict["schedules"].grid.toggle_enable("schedule_date", is_editable);
+		frm.fields_dict["schedules"].grid.toggle_enable("depreciation_amount", is_editable);
+	}
+	
 });
 
 frappe.ui.form.on('Depreciation Schedule', {
@@ -159,8 +176,24 @@ frappe.ui.form.on('Depreciation Schedule', {
 				}
 			})
 		}
+	},
+	
+	depreciation_amount: function(frm, cdt, cdn) {
+		erpnext.asset.set_accululated_depreciation(frm);
 	}
+
 })
+
+erpnext.asset.set_accululated_depreciation = function(frm) {
+	if(frm.doc.depreciation_method != "Manual") return;
+	
+	accumulated_depreciation = flt(frm.doc.opening_accumulated_depreciation);
+	$.each(frm.doc.schedules || [], function(i, row) {
+		accumulated_depreciation  += flt(row.depreciation_amount);
+		frappe.model.set_value(row.doctype, row.name, 
+			"accumulated_depreciation_amount", accumulated_depreciation);
+	})
+}
 
 erpnext.asset.make_purchase_invoice = function(frm) {
 	frappe.call({

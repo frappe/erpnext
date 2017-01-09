@@ -20,6 +20,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		erpnext.queries.setup_queries(this.frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(me.frm.doc);
 		});
+
+		if(this.frm.doc.__islocal && this.frm.doc.is_pos) {
+			//Load pos profile data on the invoice if the default value of Is POS is 1
+
+			me.frm.script_manager.trigger("is_pos");
+			me.frm.refresh_fields();
+		}
 	},
 
 	refresh: function(doc, dt, dn) {
@@ -263,6 +270,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				});
 			}
 		}
+		else this.frm.trigger("refresh")
 	},
 
 	amount: function(){
@@ -300,7 +308,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 
 	item_fields_stock = ['serial_no', 'batch_no', 'actual_qty', 'expense_account', 'warehouse', 'expense_account', 'warehouse']
 	cur_frm.fields_dict['items'].grid.set_column_disp(item_fields_stock,
-		(cint(doc.update_stock)==1 ? true : false));
+		(cint(doc.update_stock)==1 || cint(doc.is_return)==1 ? true : false));
 
 	// India related fields
 	if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
@@ -496,9 +504,23 @@ frappe.ui.form.on('Sales Invoice Timesheet', {
 						frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
 						frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
 						frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
+						calculate_total_billing_amount(frm)
 					}
 				}
 			})
 		}
 	}
 })
+
+var calculate_total_billing_amount =  function(frm) {
+	var doc = frm.doc;
+
+	doc.total_billing_amount = 0.0
+	if(doc.timesheets) {
+		$.each(doc.timesheets, function(index, data){
+			doc.total_billing_amount += data.billing_amount
+		})
+	}
+
+	refresh_field('total_billing_amount')
+}

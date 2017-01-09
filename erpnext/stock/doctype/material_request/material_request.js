@@ -43,7 +43,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 
 		if(doc.docstatus==0) {
 			cur_frm.add_custom_button(__("Get Items from BOM"),
-				cur_frm.cscript.get_items_from_bom, "icon-sitemap", "btn-default");
+				cur_frm.cscript.get_items_from_bom, "fa fa-sitemap", "btn-default");
 		}
 
 		if(doc.docstatus == 1 && doc.status != 'Stopped') {

@@ -71,7 +71,7 @@ Im Folgenden erhalten Sie eine Auflistung der Eigenschaften, die Sie für ein be
     </tr>
     <tr>
       <td>Feldtyp</td>
-      <td>Klicken Sie <a href="https://erpnext.com/kb/customize/field-types">hier</a> um mehr über Feldtypen zu erfahren.</td>
+      <td>Klicken Sie <a href="{{docs_base_url}}/user/manual/en/customize-erpnext/articles/field-types">hier</a> um mehr über Feldtypen zu erfahren.</td>
     </tr>
     <tr>
       <td>Optionen</td>

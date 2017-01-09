@@ -1,0 +1,19 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2016-11-22 15:57:22.602167", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2017-01-02 09:42:13.090278", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "temp", 
+ "owner": "Administrator", 
+ "query": "select sc.reference_name as opportunity, op.customer as customer, opi.item_code as item_code, opi.item_group as item_group, opi.qty as qty, sc.name as sales_cycle, sc.stage_date as stage_date, sc.value as value, sc.closing_date as closing_date, sc.stage as stage, sc.opportunity_purpose as opportunity_purpose, sc.buying_status as buying_status, sc.support_needed as support_needed, co.subject as subject, co.communication_date as communication_date, co.reference_name as reference_name, co.status as status\n\nfrom `tabOpportunity` op, `tabOpportunity Item` opi, `tabSales Cycle` sc, `tabCommunication` co\nwhere op.name = opi.parent and op.name = sc.reference_name and op.name = co.reference_name\nand sc.stage_date in (select co1.communication_date from `tabCommunication` co1, `tabSales Cycle` sc1 where co1.reference_name = sc1.reference_name and sc1.reference_name = sc.reference_name)", 
+ "ref_doctype": "Sales Order", 
+ "report_name": "temp", 
+ "report_type": "Query Report"
+}

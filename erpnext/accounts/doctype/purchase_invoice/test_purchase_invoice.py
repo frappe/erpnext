@@ -437,6 +437,85 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEquals(frappe.db.get_value("Serial No", pi.get("items")[0].rejected_serial_no,
 			"warehouse"), pi.get("items")[0].rejected_warehouse)
+	
+	def test_outstanding_amount_after_advance_jv_cancelation(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
+			import test_records as jv_test_records
+
+		jv = frappe.copy_doc(jv_test_records[1])
+		jv.insert()
+		jv.submit()
+
+		pi = frappe.copy_doc(test_records[0])
+		pi.append("advances", {
+			"reference_type": "Journal Entry",
+			"reference_name": jv.name,
+			"reference_row": jv.get("accounts")[0].name,
+			"advance_amount": 400,
+			"allocated_amount": 300,
+			"remarks": jv.remark
+		})
+		pi.insert()
+		pi.submit()
+		pi.load_from_db()
+		
+		#check outstanding after advance allocation
+		self.assertEqual(flt(pi.outstanding_amount), flt(pi.grand_total - pi.total_advance))
+		
+		#added to avoid Document has been modified exception
+		jv = frappe.get_doc("Journal Entry", jv.name)
+		jv.cancel()
+		
+		pi.load_from_db()
+		#check outstanding after advance cancellation
+		self.assertEqual(flt(pi.outstanding_amount), flt(pi.grand_total + pi.total_advance))
+
+	def test_outstanding_amount_after_advance_payment_entry_cancelation(self):
+		pe = frappe.get_doc({
+			"doctype": "Payment Entry",
+			"payment_type": "Pay",
+			"party_type": "Supplier",
+			"party": "_Test Supplier",
+			"company": "_Test Company",
+			"paid_from_account_currency": "INR",
+			"paid_to_account_currency": "INR",
+			"source_exchange_rate": 1,
+			"target_exchange_rate": 1,
+			"reference_no": "1",
+			"reference_date": nowdate(),
+			"received_amount": 300,
+			"paid_amount": 300,
+			"paid_from": "_Test Cash - _TC",
+			"paid_to": "_Test Payable - _TC"
+		})
+		pe.insert()
+		pe.submit()
+		
+		pi = frappe.copy_doc(test_records[0])
+		pi.is_pos = 0
+		pi.append("advances", {
+			"doctype": "Purchase Invoice Advance",
+			"reference_type": "Payment Entry",
+			"reference_name": pe.name,
+			"advance_amount": 300,
+			"allocated_amount": 300,
+			"remarks": pe.remarks
+		})
+		pi.insert()
+		pi.submit()
+		
+		pi.load_from_db()
+
+		#check outstanding after advance allocation
+		self.assertEqual(flt(pi.outstanding_amount), flt(pi.grand_total - pi.total_advance))
+		
+		#added to avoid Document has been modified exception
+		pe = frappe.get_doc("Payment Entry", pe.name)
+		pe.cancel()
+		
+		pi.load_from_db()
+		#check outstanding after advance cancellation
+		self.assertEqual(flt(pi.outstanding_amount), flt(pi.grand_total + pi.total_advance))
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")

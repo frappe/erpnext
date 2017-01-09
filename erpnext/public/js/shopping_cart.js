@@ -8,7 +8,7 @@ frappe.ready(function() {
 	// update user
 	if(full_name) {
 		$('.navbar li[data-label="User"] a')
-			.html('<i class="icon-fixed-width icon-user"></i> ' + full_name);
+			.html('<i class="fa fa-fixed-width fa fa-user"></i> ' + full_name);
 	}
 
 	// update login
@@ -65,7 +65,7 @@ $.extend(shopping_cart, {
 		var cart_count = getCookie("cart_count");
 
 		if(cart_count) {
-			$(".shopping-cart").toggleClass('hidden', true);
+			$(".shopping-cart").toggleClass('hidden', false);
 		}
 
 		var $cart = $('.cart-icon');

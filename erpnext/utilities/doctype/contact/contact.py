@@ -66,7 +66,7 @@ def invite_user(contact):
 	contact = frappe.get_doc("Contact", contact)
 
 	if not contact.email_id:
-		frappe.throw(_("Please set Email ID"))
+		frappe.throw(_("Please set Email Address"))
 
 	if contact.has_permission("write"):
 		user = frappe.get_doc({
@@ -103,4 +103,5 @@ def update_contact(doc, method):
 		for key in ("first_name", "last_name", "phone"):
 			if doc.get(key):
 				contact.set(key, doc.get(key))
+		contact.flags.ignore_mandatory = True
 		contact.save(ignore_permissions=True)

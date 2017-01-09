@@ -16,7 +16,7 @@ Customers have to log-in to the Company Website, and sign-up as a customer.
 
 ![Sign Up]({{docs_base_url}}/assets/old_images/erpnext/customer-portal-sign-up-3.png)
 
-After the sign up process, a mail will be sent to the customers email id with
+After the sign up process, a mail will be sent to the customers Email Address with
 the password details.
 
 {next}

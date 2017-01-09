@@ -34,7 +34,7 @@ function load_erpnext_slides() {
 		org: {
 			domains: ["all"],
 			title: __("The Organization"),
-			icon: "icon-building",
+			icon: "fa fa-building",
 			fields: [
 				{fieldname:'company_name',
 					label: frappe.wiz.domain==='Education' ?
@@ -158,7 +158,7 @@ function load_erpnext_slides() {
 
 		branding: {
 			domains: ["all"],
-			icon: "icon-bookmark",
+			icon: "fa fa-bookmark",
 			title: __("The Brand"),
 			help: __('Upload your letter head and logo. (you can edit them later).'),
 			fields: [
@@ -180,7 +180,7 @@ function load_erpnext_slides() {
 
 		users: {
 			domains: ["all"],
-			icon: "icon-money",
+			icon: "fa fa-money",
 			title: __("Add Users"),
 			help: __("Add users to your organization, other than yourself"),
 			fields: [],
@@ -192,7 +192,7 @@ function load_erpnext_slides() {
 						{fieldtype:"Data", fieldname:"user_fullname_"+ i,
 							label:__("Full Name")},
 						{fieldtype:"Data", fieldname:"user_email_" + i,
-							label:__("Email ID"), placeholder:__("user@example.com"),
+							label:__("Email Address"), placeholder:__("user@example.com"),
 							options: "Email"},
 						{fieldtype:"Column Break"},
 						{fieldtype: "Check", fieldname: "user_sales_" + i,
@@ -212,7 +212,7 @@ function load_erpnext_slides() {
 
 		taxes: {
 			domains: ['manufacturing', 'services', 'retail', 'distribution'],
-			icon: "icon-money",
+			icon: "fa fa-money",
 			title: __("Add Taxes"),
 			help: __("List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
 			"fields": [],
@@ -233,7 +233,7 @@ function load_erpnext_slides() {
 
 		customers: {
 			domains: ['manufacturing', 'services', 'retail', 'distribution'],
-			icon: "icon-group",
+			icon: "fa fa-group",
 			title: __("Your Customers"),
 			help: __("List a few of your customers. They could be organizations or individuals."),
 			fields: [],
@@ -256,7 +256,7 @@ function load_erpnext_slides() {
 
 		suppliers: {
 			domains: ['manufacturing', 'services', 'retail', 'distribution'],
-			icon: "icon-group",
+			icon: "fa fa-group",
 			title: __("Your Suppliers"),
 			help: __("List a few of your suppliers. They could be organizations or individuals."),
 			fields: [],
@@ -279,7 +279,7 @@ function load_erpnext_slides() {
 
 		items: {
 			domains: ['manufacturing', 'services', 'retail', 'distribution'],
-			icon: "icon-barcode",
+			icon: "fa fa-barcode",
 			title: __("Your Products or Services"),
 			help: __("List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
 			fields: [],

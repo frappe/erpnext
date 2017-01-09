@@ -88,6 +88,9 @@ class ReceivablePayableReport(object):
 
 		future_vouchers = self.get_entries_after(self.filters.report_date, args.get("party_type"))
 
+		if not self.filters.get("company"):
+			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
+
 		company_currency = frappe.db.get_value("Company", self.filters.get("company"), "default_currency")
 
 		data = []

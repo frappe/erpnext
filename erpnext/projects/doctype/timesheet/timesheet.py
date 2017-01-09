@@ -20,6 +20,9 @@ class OverlapError(frappe.ValidationError): pass
 class OverProductionLoggedError(frappe.ValidationError): pass
 
 class Timesheet(Document):
+	def onload(self):
+		self.get("__onload").maintain_bill_work_hours_same = frappe.db.get_single_value('HR Settings', 'maintain_bill_work_hours_same')
+
 	def validate(self):
 		self.set_employee_name()
 		self.set_status()
@@ -28,6 +31,7 @@ class Timesheet(Document):
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
+		self.set_dates()
 
 	def set_employee_name(self):
 		if self.employee and not self.employee_name:
@@ -78,16 +82,13 @@ class Timesheet(Document):
 			self.status = "Completed"
 
 	def set_dates(self):
-		if self.docstatus < 2:
-			start_date = min([d.from_time for d in self.time_logs])
-			end_date = max([d.to_time for d in self.time_logs])
+		if self.docstatus < 2 and self.time_logs:
+			start_date = min([getdate(d.from_time) for d in self.time_logs])
+			end_date = max([getdate(d.to_time) for d in self.time_logs])
 
 			if start_date and end_date:
 				self.start_date = getdate(start_date)
 				self.end_date = getdate(end_date)
-
-	def before_submit(self):
-		self.set_dates()
 
 	def before_cancel(self):
 		self.set_status()
@@ -358,11 +359,12 @@ def get_events(start, end, filters=None):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, 
 			`tabTimesheet Detail`.docstatus as status, `tabTimesheet Detail`.parent as parent,
-			from_time as start_date, hours, activity_type, project, to_time as end_date
+			from_time as start_date, hours, activity_type, project, to_time as end_date, 
+			CONCAT(`tabTimesheet Detail`.parent, ' (', ROUND(hours,2),' hrs)') as title 
 		from `tabTimesheet Detail`, `tabTimesheet` 
 		where `tabTimesheet Detail`.parent = `tabTimesheet`.name 
 			and `tabTimesheet`.docstatus < 2 
-			and (from_time between %(start)s and %(end)s) {conditions} {match_cond}
+			and (from_time <= %(end)s and to_time >= %(start)s) {conditions} {match_cond}
 		""".format(conditions=conditions, match_cond = get_match_cond('Timesheet')), 
 		{
 			"start": start,

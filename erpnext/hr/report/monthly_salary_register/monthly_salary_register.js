@@ -4,19 +4,18 @@
 frappe.query_reports["Monthly Salary Register"] = {
 	"filters": [
 		{
-			"fieldname":"month",
-			"label": __("Month"),
-			"fieldtype": "Select",
-			"options": "\nJan\nFeb\nMar\nApr\nMay\nJun\nJul\nAug\nSep\nOct\nNov\nDec",
-			"default": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", 
-				"Dec"][frappe.datetime.str_to_obj(frappe.datetime.get_today()).getMonth()],
+			"fieldname":"from_date",
+			"label": __("From"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+			"reqd": 1
 		},
 		{
-			"fieldname":"fiscal_year",
-			"label": __("Fiscal Year"),
-			"fieldtype": "Link",
-			"options": "Fiscal Year",
-			"default": sys_defaults.fiscal_year,
+			"fieldname":"to_date",
+			"label": __("To"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today(),
+			"reqd": 1
 		},
 		{
 			"fieldname":"employee",

@@ -181,7 +181,6 @@
 }
 .cart-dropdown-container .cart-items-dropdown {
   max-height: 350px;
-  overflow: auto;
 }
 .cart-dropdown-container .cart-items-dropdown .cart-dropdown {
   display: block;

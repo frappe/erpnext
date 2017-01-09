@@ -31,6 +31,11 @@ To make a new BOM:
 
 <img class="screenshot" alt="Update Cost" src="{{docs_base_url}}/assets/img/manufacturing/bom-update-cost.png">
 
+* User can select the currency in the BOM 
+* System calculates the costing based on the price list currency
+
+<img class="screenshot" alt="Update Cost" src="{{docs_base_url}}/assets/img/manufacturing/price-list-based-currency-bom.png">
+
 ### Materials Required(exploded) 
 
 This table lists down all the Material required for the Item to be Manufactured.

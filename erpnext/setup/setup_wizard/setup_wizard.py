@@ -68,7 +68,7 @@ def setup_complete(args=None):
 				frappe.message_log.pop()
 
 			pass
- 
+
 def create_fiscal_year_and_company(args):
 	if (args.get('fy_start_date')):
 		curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
@@ -88,6 +88,7 @@ def create_fiscal_year_and_company(args):
 			'abbr':args.get('company_abbr'),
 			'default_currency':args.get('currency'),
 			'country': args.get('country'),
+			'create_chart_of_accounts_based_on': 'Standard Template',
 			'chart_of_accounts': args.get(('chart_of_accounts')),
 			'domain': args.get('domain')
 		}).insert()
@@ -244,12 +245,12 @@ def get_fy_details(fy_start_date, fy_end_date):
 	else:
 		fy = cstr(start_year) + '-' + cstr(start_year + 1)
 	return fy
-	
+
 def create_sales_tax(args):
 	country_wise_tax = get_country_wise_tax(args.get("country"))
 	if country_wise_tax and len(country_wise_tax) > 0:
 		for sales_tax, tax_data in country_wise_tax.items():
-			make_tax_account_and_template(args.get("company_name").strip(), 
+			make_tax_account_and_template(args.get("company_name").strip(),
 				tax_data.get('account_name'), tax_data.get('tax_rate'), sales_tax)
 
 def get_country_wise_tax(country):
@@ -267,7 +268,7 @@ def create_taxes(args):
 			account_name = args.get("tax_" + str(i))
 
 			make_tax_account_and_template(args.get("company_name").strip(), account_name, tax_rate)
-			
+
 def make_tax_account_and_template(company, account_name, tax_rate, template_name=None):
 	try:
 		account = make_tax_account(company, account_name, tax_rate)
@@ -280,14 +281,14 @@ def make_tax_account_and_template(company, account_name, tax_rate, template_name
 			raise
 	except RootNotEditable, e:
 		pass
-				
+
 def get_tax_account_group(company):
-	tax_group = frappe.db.get_value("Account", 
+	tax_group = frappe.db.get_value("Account",
 		{"account_name": "Duties and Taxes", "is_group": 1, "company": company})
 	if not tax_group:
-		tax_group = frappe.db.get_value("Account", {"is_group": 1, "root_type": "Liability", 
+		tax_group = frappe.db.get_value("Account", {"is_group": 1, "root_type": "Liability",
 				"account_type": "Tax", "company": company})
-				
+
 	return tax_group
 
 def make_tax_account(company, account_name, tax_rate):
@@ -308,7 +309,7 @@ def make_tax_account(company, account_name, tax_rate):
 def make_sales_and_purchase_tax_templates(account, template_name=None):
 	if not template_name:
 		template_name = account.name
-		
+
 	sales_tax_template = {
 		"doctype": "Sales Taxes and Charges Template",
 		"title": template_name,
@@ -548,35 +549,50 @@ def create_academic_term():
 			academic_term = frappe.new_doc("Academic Term")
 			academic_term.academic_year = y
 			academic_term.term_name = t
-			academic_term.save()
+			try:
+				academic_term.save()
+			except frappe.DuplicateEntryError:
+				pass
 
 def create_academic_year():
 	ac = ["2013-14", "2014-15", "2015-16", "2016-17", "2017-18"]
 	for d in ac:
 		academic_year = frappe.new_doc("Academic Year")
 		academic_year.academic_year_name = d
-		academic_year.save()
+		try:
+			academic_year.save()
+		except frappe.DuplicateEntryError:
+			pass
 
 def create_program(args):
 	for i in xrange(1,6):
 		if args.get("program_" + str(i)):
 			program = frappe.new_doc("Program")
 			program.program_name = args.get("program_" + str(i))
-			program.save()
+			try:
+				program.save()
+			except frappe.DuplicateEntryError:
+				pass
 
 def create_course(args):
 	for i in xrange(1,6):
 		if args.get("course_" + str(i)):
 			course = frappe.new_doc("Course")
 			course.course_name = args.get("course_" + str(i))
-			course.save()
+			try:
+				course.save()
+			except frappe.DuplicateEntryError:
+				pass
 
 def create_instructor(args):
 	for i in xrange(1,6):
 		if args.get("instructor_" + str(i)):
 			instructor = frappe.new_doc("Instructor")
 			instructor.instructor_name = args.get("instructor_" + str(i))
-			instructor.save()
+			try:
+				instructor.save()
+			except frappe.DuplicateEntryError:
+				pass
 
 def create_room(args):
 	for i in xrange(1,6):
@@ -584,6 +600,9 @@ def create_room(args):
 			room = frappe.new_doc("Room")
 			room.room_name = args.get("room_" + str(i))
 			room.seating_capacity = args.get("room_capacity_" + str(i))
-			room.save()
+			try:
+				room.save()
+			except frappe.DuplicateEntryError:
+				pass
 
 

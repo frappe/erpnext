@@ -10,6 +10,14 @@ frappe.ui.form.on('Budget', {
 				}
 			}
 		})
+
+		frm.set_query("project", function() {
+			return {
+				filters: {
+					company: frm.doc.company
+				}
+			}
+		})
 		
 		frm.set_query("account", "accounts", function() {
 			return {
@@ -28,5 +36,18 @@ frappe.ui.form.on('Budget', {
 				}
 			}
 		})
+	},
+
+	refresh: function(frm) {
+		frm.trigger("toggle_reqd_fields")
+	},
+
+	budget_against: function(frm) {
+		frm.trigger("toggle_reqd_fields")
+	},
+
+	toggle_reqd_fields: function(frm) {
+		frm.toggle_reqd("cost_center", frm.doc.budget_against=="Cost Center");
+		frm.toggle_reqd("project", frm.doc.budget_against=="Project");
 	}
 });

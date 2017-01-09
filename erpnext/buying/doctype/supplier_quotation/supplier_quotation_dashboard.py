@@ -11,11 +11,12 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Related'),
-				'items': ['Purchase Order']
+				'items': ['Purchase Order', 'Quotation']
 			},
 			{
 				'label': _('Reference'),
 				'items': ['Material Request', 'Request for Quotation', 'Project']
 			},
 		]
+
 	}

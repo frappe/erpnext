@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe import _
 from frappe.utils import nowdate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.get_item_details import get_pos_profile
@@ -30,10 +29,16 @@ def get_pos_data():
 	return {
 		'doc': doc,
 		'default_customer': pos_profile.get('customer'),
-		'items': get_items(doc, pos_profile),
-		'customers': get_customers(pos_profile, doc, company_data.default_currency),
-		'pricing_rules': get_pricing_rules(doc),
+		'items': get_items_list(pos_profile),
+		'customers': get_customers_list(pos_profile),
+		'serial_no_data': get_serial_no_data(pos_profile, doc.company),
+		'batch_no_data': get_batch_no_data(),
+		'tax_data': get_item_tax_data(),
+		'price_list_data': get_price_list_data(doc.selling_price_list),
+		'bin_data': get_bin_data(pos_profile),
+		'pricing_rules': get_pricing_rule_data(doc),
 		'print_template': print_template,
+		'pos_profile': pos_profile,
 		'meta': {
 			'invoice': frappe.get_meta('Sales Invoice'),
 			'items': frappe.get_meta('Sales Invoice Item'),
@@ -57,8 +62,10 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 
 	doc.currency = pos_profile.get('currency') or company_data.default_currency
 	doc.conversion_rate = 1.0
+	
 	if doc.currency != company_data.default_currency:
-		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency)
+		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency, doc.posting_date)
+		
 	doc.selling_price_list = pos_profile.get('selling_price_list') or \
 		frappe.db.get_value('Selling Settings', None, 'selling_price_list')
 	doc.naming_series = pos_profile.get('naming_series') or 'SINV-'
@@ -104,63 +111,122 @@ def update_tax_table(doc):
 	for tax in taxes:
 		doc.append('taxes', tax)
 
-def get_items(doc, pos_profile):
-	item_list = []
-	for item in frappe.get_all("Item", fields=["*"], filters={'disabled': 0, 'has_variants': 0, 'is_sales_item': 1}):
-		item_doc = frappe.get_doc('Item', item.name)
-		if item_doc.taxes:
-			item.taxes = json.dumps(dict(([d.tax_type, d.tax_rate] for d in
-						item_doc.get("taxes"))))
+def get_items_list(pos_profile):
+	cond = "1=1"
+	item_groups = []
+	if pos_profile.get('item_groups'):
+		# Get items based on the item groups defined in the POS profile
+		for d in pos_profile.get('item_groups'):
+			item_groups.extend(get_child_nodes('Item Group', d.item_group))
+		cond = "item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
 
-		item.price_list_rate = frappe.db.get_value('Item Price', {'item_code': item.name,
-									'price_list': doc.selling_price_list}, 'price_list_rate') or 0
-		item.default_warehouse = pos_profile.get('warehouse') or \
-			get_item_warehouse_for_company(doc.company, item.default_warehouse) or None
-		item.expense_account = pos_profile.get('expense_account') or item.expense_account
-		item.income_account = pos_profile.get('income_account') or item_doc.income_account
-		item.cost_center = pos_profile.get('cost_center') or item_doc.selling_cost_center
-		item.actual_qty = frappe.db.get_value('Bin', {'item_code': item.name,
-								'warehouse': item.default_warehouse}, 'actual_qty') or 0
-		item.serial_nos = get_serial_nos(item, pos_profile, doc.company)
-		item.batch_nos = frappe.db.sql_list("""select name from `tabBatch` where ifnull(expiry_date, '4000-10-10') > curdate()
-			and item = %(item_code)s""", {'item_code': item.item_code})
+	return frappe.db.sql(""" 
+		select
+			name, item_code, item_name, description, item_group, expense_account, has_batch_no,
+			has_serial_no, expense_account, selling_cost_center, stock_uom, image, 
+			default_warehouse, is_stock_item, barcode
+		from
+			tabItem
+		where
+			disabled = 0 and has_variants = 0 and is_sales_item = 1 and {cond}
+		""".format(cond=cond), tuple(item_groups), as_dict=1)
 
-		item_list.append(item)
+def get_customers_list(pos_profile):
+	cond = "1=1"
+	customer_groups = []
+	if pos_profile.get('customer_groups'):
+		# Get customers based on the customer groups defined in the POS profile
+		for d in pos_profile.get('customer_groups'):
+			customer_groups.extend(get_child_nodes('Customer Group', d.customer_group))
+		cond = "customer_group in (%s)"%(', '.join(['%s']*len(customer_groups)))
 
-	return item_list
+	return frappe.db.sql(""" select name, customer_name, customer_group,
+		territory from tabCustomer where disabled = 0
+		and {cond}""".format(cond=cond), tuple(customer_groups), as_dict=1) or {}
 
-def get_item_warehouse_for_company(company, warehouse):
-	if frappe.db.get_value('Warehouse', warehouse, 'company') != company:
-		warehouse = None
-	return warehouse
+def get_child_nodes(group_type, root):
+	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
+	return frappe.db.sql_list(""" Select name from `tab{tab}` where
+			lft >= {lft} and rgt <= {rgt}""".format(tab=group_type, lft=lft, rgt=rgt))
 
-def get_serial_nos(item, pos_profile, company):
+def get_serial_no_data(pos_profile, company):
+	# get itemwise serial no data
+	# example {'Nokia Lumia 1020': {'SN0001': 'Pune'}}
+	# where Nokia Lumia 1020 is item code, SN0001 is serial no and Pune is warehouse
+
 	cond = "1=1"
 	if pos_profile.get('update_stock') and pos_profile.get('warehouse'):
 		cond = "warehouse = '{0}'".format(pos_profile.get('warehouse'))
 
-	serial_nos = frappe.db.sql("""select name, warehouse from `tabSerial No` where {0}
-				and item_code = %(item_code)s and company = %(company)s
-				""".format(cond), {'item_code': item.item_code, 'company': company}, as_dict=1)
+	serial_nos = frappe.db.sql("""select name, warehouse, item_code from `tabSerial No` where {0}
+				and company = %(company)s """.format(cond), {'company': company}, as_dict=1)
 
-	serial_no_list = {}
-	for serial_no in serial_nos:
-		serial_no_list[serial_no.name] = serial_no.warehouse
+	itemwise_serial_no = {}
+	for sn in serial_nos:
+		if sn.item_code not in itemwise_serial_no:
+			itemwise_serial_no.setdefault(sn.item_code, {})
+		itemwise_serial_no[sn.item_code][sn.name] = sn.warehouse
 
-	return serial_no_list
+	return itemwise_serial_no
 
-def get_customers(pos_profile, doc, company_currency):
-	filters = {'disabled': 0}
-	customer_list = []
-	customers = frappe.get_all("Customer", fields=["*"], filters = filters)
+def get_batch_no_data():
+	# get itemwise batch no data
+	# exmaple: {'LED-GRE': [Batch001, Batch002]}
+	# where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
 
-	for customer in customers:
-		customer_currency = get_party_account_currency('Customer', customer.name, doc.company) or doc.currency
-		if customer_currency == doc.currency or customer_currency == company_currency:
-			customer_list.append(customer)
-	return customer_list
+	itemwise_batch = {}
+	batches = frappe.db.sql("""select name, item from `tabBatch`
+		where ifnull(expiry_date, '4000-10-10') >= curdate()""", as_dict=1)
 
-def get_pricing_rules(doc):
+	for batch in batches:
+		if batch.item not in itemwise_batch:
+			itemwise_batch.setdefault(batch.item, [])
+		itemwise_batch[batch.item].append(batch.name)
+
+	return itemwise_batch
+
+def get_item_tax_data():
+	# get default tax of an item
+	# example: {'Consulting Services': {'Excise 12 - TS': '12.000'}}
+
+	itemwise_tax = {}
+	taxes = frappe.db.sql(""" select parent, tax_type, tax_rate from `tabItem Tax`""", as_dict=1)
+
+	for tax in taxes:
+		if tax.parent not in itemwise_tax:
+			itemwise_tax.setdefault(tax.parent, {})
+		itemwise_tax[tax.parent][tax.tax_type] = tax.tax_rate
+
+	return itemwise_tax
+
+def get_price_list_data(selling_price_list):
+	itemwise_price_list = {}
+	price_lists = frappe.db.sql("""Select ifnull(price_list_rate, 0) as price_list_rate,
+		item_code from `tabItem Price` ip where price_list = %(price_list)s""",
+		{'price_list': selling_price_list}, as_dict=1)
+
+	for item in price_lists:
+		itemwise_price_list[item.item_code] = item.price_list_rate
+
+	return itemwise_price_list
+
+def get_bin_data(pos_profile):
+	itemwise_bin_data = {}
+	cond = "1=1"
+	if pos_profile.get('warehouse'):
+		cond = "warehouse = '{0}'".format(pos_profile.get('warehouse'))
+
+	bin_data = frappe.db.sql(""" select item_code, warehouse, actual_qty from `tabBin`
+		where actual_qty > 0 and {cond}""".format(cond=cond), as_dict=1)
+
+	for bins in bin_data:
+		if bins.item_code not in itemwise_bin_data:
+			itemwise_bin_data.setdefault(bins.item_code, {})
+		itemwise_bin_data[bins.item_code][bins.warehouse] = bins.actual_qty
+
+	return itemwise_bin_data
+
+def get_pricing_rule_data(doc):
 	pricing_rules = ""
 	if doc.ignore_pricing_rule == 0:
 		pricing_rules = frappe.db.sql(""" Select * from `tabPricing Rule` where docstatus < 2
@@ -180,8 +246,7 @@ def make_invoice(doc_list):
 
 	for docs in doc_list:
 		for name, doc in docs.items():
-			if not frappe.db.exists('Sales Invoice',
-				{'offline_pos_name': name, 'docstatus': ("<", "2")}):
+			if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
 				validate_records(doc)
 				si_doc = frappe.new_doc('Sales Invoice')
 				si_doc.offline_pos_name = name
@@ -226,6 +291,7 @@ def submit_invoice(si_doc, name):
 	try:
 		si_doc.insert()
 		si_doc.submit()
+		frappe.db.commit()
 	except Exception, e:
 		if frappe.message_log: frappe.message_log.pop()
 		frappe.db.rollback()
@@ -236,4 +302,3 @@ def save_invoice(e, si_doc, name):
 		si_doc.docstatus = 0
 		si_doc.flags.ignore_mandatory = True
 		si_doc.insert()
-		frappe.log_error(frappe.get_traceback())
