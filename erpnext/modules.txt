@@ -1,7 +1,6 @@
 Accounts
 CRM
 Buying
-Fleet Management
 Projects
 Selling
 Setup

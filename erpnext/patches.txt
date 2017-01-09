@@ -362,3 +362,4 @@ execute:frappe.delete_doc('Desktop Icon', {'module_name': 'Profit and Loss Statm
 erpnext.patches.v7_2.update_website_for_variant
 erpnext.patches.v7_2.update_doctype_status
 erpnext.patches.v7_2.update_salary_slips
+erpnext.patches.v7_2.delete_fleet_management_module_def
