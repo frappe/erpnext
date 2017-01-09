@@ -199,13 +199,22 @@ class Timesheet(Document):
 				(%(to_time)s > tsd.from_time and %(to_time)s < tsd.to_time) or
 				(%(from_time)s <= tsd.from_time and %(to_time)s >= tsd.to_time))
 			and tsd.name!=%(name)s
+			and ts.name!=%(parent)s
 			and ts.docstatus < 2""".format(cond),
 			{
 				"val": value,
 				"from_time": args.from_time,
 				"to_time": args.to_time,
-				"name": args.name or "No Name"
+				"name": args.name or "No Name",
+				"parent": args.parent or "No Name"
 			}, as_dict=True)
+		# check internal overlap
+		for time_log in self.time_logs:
+			if (fieldname != 'workstation' or args.get(fieldname) == time_log.get(fieldname)) and \
+				args.idx != time_log.idx and ((args.from_time > time_log.from_time and args.from_time < time_log.to_time) or 
+				(args.to_time > time_log.from_time and args.to_time < time_log.to_time) or 
+				(args.from_time <= time_log.from_time and args.to_time >= time_log.to_time)):
+				return self
 
 		return existing[0] if existing else None
 
@@ -359,7 +368,8 @@ def get_events(start, end, filters=None):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, 
 			`tabTimesheet Detail`.docstatus as status, `tabTimesheet Detail`.parent as parent,
-			from_time as start_date, hours, activity_type, project, to_time as end_date
+			from_time as start_date, hours, activity_type, project, to_time as end_date, 
+			CONCAT(`tabTimesheet Detail`.parent, ' (', ROUND(hours,2),' hrs)') as title 
 		from `tabTimesheet Detail`, `tabTimesheet` 
 		where `tabTimesheet Detail`.parent = `tabTimesheet`.name 
 			and `tabTimesheet`.docstatus < 2 
