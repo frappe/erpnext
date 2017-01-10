@@ -7,6 +7,7 @@ frappe.ui.form.on("Process Payroll", {
 		frm.doc.start_date = '';
 		frm.doc.end_date = '';
 		frm.doc.payroll_frequency = '';
+		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
 	},
 
 	refresh: function(frm) {
@@ -23,6 +24,10 @@ frappe.ui.form.on("Process Payroll", {
 
 	end_date: function(frm) {
 		frm.trigger("set_start_end_dates");
+	},
+
+	salary_slip_based_on_timesheet: function(frm) {
+		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
 	},
 
 	payment_account: function(frm) {

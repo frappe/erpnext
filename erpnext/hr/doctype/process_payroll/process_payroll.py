@@ -68,7 +68,7 @@ class ProcessPayroll(Document):
 
 
 	def check_mandatory(self):
-		for fieldname in ['company', 'payroll_frequency', 'start_date', 'end_date']:
+		for fieldname in ['company', 'start_date', 'end_date']:
 			if not self.get(fieldname):
 				frappe.throw(_("Please set {0}").format(self.meta.get_label(fieldname)))
 
