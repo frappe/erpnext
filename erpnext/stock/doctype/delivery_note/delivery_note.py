@@ -95,7 +95,6 @@ class DeliveryNote(SellingController):
 
 	def validate(self):
 		super(DeliveryNote, self).validate()
-		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()
 		self.check_close_sales_order("against_sales_order")

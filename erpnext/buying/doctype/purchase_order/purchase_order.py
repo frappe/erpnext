@@ -36,7 +36,6 @@ class PurchaseOrder(BuyingController):
 	def validate(self):
 		super(PurchaseOrder, self).validate()
 
-		self.set_status()
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 		self.check_for_closed_status(pc_obj)
@@ -198,9 +197,6 @@ class PurchaseOrder(BuyingController):
 		self.update_ordered_qty()
 
 		pc_obj.update_last_purchase_rate(self, is_submit = 0)
-
-	def on_update(self):
-		pass
 
 	def update_status_updater(self):
 		self.status_updater[0].update({
