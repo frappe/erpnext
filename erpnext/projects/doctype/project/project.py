@@ -30,7 +30,7 @@ class Project(Document):
 		"""Load `tasks` from the database"""
 		self.tasks = []
 		for task in self.get_tasks():
-			self.append("tasks", {
+			task_map = {
 				"title": task.subject,
 				"status": task.status,
 				"start_date": task.exp_start_date,
@@ -38,7 +38,11 @@ class Project(Document):
 				"description": task.description,
 				"task_id": task.name,
 				"task_weight": task.task_weight
-			})
+			}
+
+			self.map_custom_fields(task, task_map)
+
+			self.append("tasks", task_map)
 
 	def get_tasks(self):
 		return frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc")
@@ -66,7 +70,6 @@ class Project(Document):
 	def sync_tasks(self):
 		"""sync tasks and remove table"""
 		if self.flags.dont_sync_tasks: return
-
 		task_names = []
 		for t in self.tasks:
 			if t.task_id:
@@ -83,6 +86,8 @@ class Project(Document):
 				"task_weight": t.task_weight
 			})
 
+			self.map_custom_fields(t, task)
+
 			task.flags.ignore_links = True
 			task.flags.from_project = True
 			task.flags.ignore_feed = True
@@ -95,6 +100,14 @@ class Project(Document):
 
 		self.update_percent_complete()
 		self.update_costing()
+
+	def map_custom_fields(self, source, target):
+		project_task_custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task"}, "fieldname")
+
+		for field in project_task_custom_fields:
+			target.update({
+				field.fieldname: source.get(field.fieldname)
+			})
 
 	def update_project(self):
 		self.update_percent_complete()
