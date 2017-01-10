@@ -4,7 +4,8 @@ frappe.query_reports["BOM Stock Report"] = {
             "fieldname":"bom",
             "label": __("BOM"),
             "fieldtype": "Link",
-            "options": "BOM"
+            "options": "BOM",
+            "reqd": 1
         },
     ]
 }
