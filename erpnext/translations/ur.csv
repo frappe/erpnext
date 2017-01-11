@@ -358,7 +358,7 @@ DocType: Workstation,Rent Cost,کرایہ لاگت
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,رقم ہراس کے بعد
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,انے والے واقعات کے کیلنڈر
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,مہینے اور سال براہ مہربانی منتخب کریں
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date",کوما سے علیحدہ کریں ای میل کی شناخت، انوائس خاص تاریخ پر خود کار طریقے سے بھیج دیا جائے گا
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date",کوما سے علیحدہ کریں ای میل کی شناخت، انوائس خاص تاریخ پر خود کار طریقے سے بھیج دیا جائے گا
 DocType: Employee,Company Email,کمپنی ای میل
 DocType: GL Entry,Debit Amount in Account Currency,اکاؤنٹ کی کرنسی میں ڈیبٹ رقم
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,بینک / کیش پارٹی کے خلاف یا اندرونی منتقلی کے لئے لین دین
@@ -674,7 +674,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,پیش نظارہ تنخواہ کی پرچی
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,اکاؤنٹ {0} کئی بار داخل کیا گیا ہے
 DocType: Account,Expenses Included In Valuation,اخراجات تشخیص میں شامل
-DocType: Employee,Provide email id registered in company,کمپنی میں رجسٹرڈ ای میل ID فراہم
+DocType: Employee,Provide Email Address registered in company,کمپنی میں رجسٹرڈ ای میل ID فراہم
 DocType: Hub Settings,Seller City,فروش شہر
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,ایک طالب علم گروپ براہ مہربانی منتخب کریں
 ,Absent Student Report,غائب Student کی رپورٹ
@@ -1086,7 +1086,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,بلیو
 DocType: Purchase Invoice,Is Return,واپسی ہے
 DocType: Price List Country,Price List Country,قیمت کی فہرست ملک
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,ای میل ID مقرر کریں
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,ای میل ID مقرر کریں
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} شے کے لئے درست سیریل نمبر {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,آئٹم کوڈ سیریل نمبر کے لئے تبدیل کر دیا گیا نہیں کیا جا سکتا
@@ -3555,7 +3555,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,ایکسچینج حاصل مقر
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,درخواست کی مدت دو alocation ریکارڈ پار نہیں ہو سکتا
 DocType: Item Group,Default Expense Account,پہلے سے طے شدہ ایکسپینس اکاؤنٹ
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Student کی بیچ یا کورس شیڈول لازمی ہے
-DocType: Student,Student Email ID,Student کی ای میل آئی ڈی
+DocType: Student,Student Email Address,Student کی ای میل آئی ڈی
 DocType: Employee,Notice (days),نوٹس (دن)
 DocType: Tax Rule,Sales Tax Template,سیلز ٹیکس سانچہ
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,انوائس کو بچانے کے لئے اشیاء کو منتخب کریں
@@ -3703,7 +3703,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,ج�
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,لنک لیڈز
 DocType: Program Enrollment Tool,New Program,نیا پروگرام
 DocType: Item Attribute Value,Attribute Value,ویلیو وصف
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}",ای میل کی شناخت پہلے ہی موجود ہے، منفرد ہونا چاہئے {0}
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}",ای میل کی شناخت پہلے ہی موجود ہے، منفرد ہونا چاہئے {0}
 ,Itemwise Recommended Reorder Level,Itemwise ترتیب لیول سفارش
 DocType: Salary Detail,Salary Detail,تنخواہ تفصیل
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,پہلے {0} براہ مہربانی منتخب کریں
@@ -3888,7 +3888,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,پروجیکٹ سرگرمی / کام.
 DocType: Vehicle Log,Refuelling Details,Refuelling تفصیلات
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,تنخواہ تخم پیدا
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,اگلا رابطے کی طرف سے لیڈ ای میل آئی ڈی کے طور پر ہی نہیں ہو سکتا
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,اگلا رابطے کی طرف سے لیڈ ای میل آئی ڈی کے طور پر ہی نہیں ہو سکتا
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}",قابل اطلاق کے لئے کے طور پر منتخب کیا جاتا ہے تو خریدنے، جانچ پڑتال ہونا ضروری {0}
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,ڈسکاؤنٹ کم 100 ہونا ضروری ہے
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,آخری خریداری کی شرح نہ پایا
@@ -4174,7 +4174,7 @@ DocType: Purchase Order,Advance Paid,ایڈوانس ادا
 DocType: Item,Item Tax,آئٹم ٹیکس
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,سپلائر مواد
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,ایکسائز انوائس
-DocType: Expense Claim,Employees Email Id,ملازمین ای میل کی شناخت
+DocType: Expense Claim,Employees Email Address,ملازمین ای میل کی شناخت
 DocType: Employee Attendance Tool,Marked Attendance,نشان حاضری
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,موجودہ قرضوں
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,بڑے پیمانے پر ایس ایم ایس اپنے رابطوں کو بھیجیں

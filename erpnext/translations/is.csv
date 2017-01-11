@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,Rent Kostnaður
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Upphæð Eftir Afskriftir
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Næstu Dagbókaratriði
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Vinsamlegast veldu mánuði og ár
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Sláðu email persónuskilríki aðskilin með kommum, reikningur verður sent sjálfkrafa tilteknum degi"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Sláðu email persónuskilríki aðskilin með kommum, reikningur verður sent sjálfkrafa tilteknum degi"
 DocType: Employee,Company Email,fyrirtæki Email
 DocType: GL Entry,Debit Amount in Account Currency,Debit Upphæð í Account Gjaldmiðill
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Bank / reiðufé gagnvart aðila eða fyrir innra flytja
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Preview Laun Slip
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Reikningur {0} hefur verið slegið mörgum sinnum
 DocType: Account,Expenses Included In Valuation,Kostnaður í Verðmat
-DocType: Employee,Provide email id registered in company,Gefðu email persónuskilríki skráð í félaginu
+DocType: Employee,Provide Email Address registered in company,Gefðu email persónuskilríki skráð í félaginu
 DocType: Hub Settings,Seller City,Seljandi City
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,Vinsamlegast veldu Student Group
 ,Absent Student Report,Absent Student Report
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Blue
 DocType: Purchase Invoice,Is Return,er aftur
 DocType: Price List Country,Price List Country,Verðskrá Country
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Vinsamlegast settu Email ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Vinsamlegast settu Email Address
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} gild raðnúmer nos fyrir lið {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Item Code er ekki hægt að breyta fyrir Raðnúmer
@@ -2196,7 +2196,7 @@ DocType: Fiscal Year,Year End Date,Ár Lokadagur
 DocType: Task Depends On,Task Depends On,Verkefni veltur á
 DocType: Supplier Quotation,Opportunity,tækifæri
 ,Completed Production Orders,Lokið Framleiðsla Pantanir
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Row {0}: Fyrir birgja {0} email persónuskilríki er nauðsynlegt að senda tölvupóst
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Row {0}: Fyrir birgja {0} email persónuskilríki er nauðsynlegt að senda tölvupóst
 DocType: Operation,Default Workstation,Sjálfgefið Workstation
 DocType: Notification Control,Expense Claim Approved Message,Kostnað Krafa Samþykkt skilaboð
 DocType: Payment Entry,Deductions or Loss,Frádráttur eða tap
@@ -3641,7 +3641,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Setja gengishagnaður / tap
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Umsókn tímabil getur ekki verið á tveimur alocation færslur
 DocType: Item Group,Default Expense Account,Sjálfgefið kostnað reiknings
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Námsmaður Hópur eða Course Dagskrá er nauðsynlegur
-DocType: Student,Student Email ID,Student Email ID
+DocType: Student,Student Email Address,Student Email Address
 DocType: Employee,Notice (days),Tilkynning (dagar)
 DocType: Tax Rule,Sales Tax Template,Söluskattur Snið
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Veldu atriði til að bjarga reikning
@@ -3792,7 +3792,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Gen
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Skoða Vísbendingar
 DocType: Program Enrollment Tool,New Program,ný Program
 DocType: Item Attribute Value,Attribute Value,eigindi gildi
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","Email id verður að vera einstakt, þegar til fyrir {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Email Address verður að vera einstakt, þegar til fyrir {0}"
 ,Itemwise Recommended Reorder Level,Itemwise Mælt Uppröðun Level
 DocType: Salary Detail,Salary Detail,laun Detail
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,Vinsamlegast veldu {0} fyrst
@@ -3983,7 +3983,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Project virkni / verkefni.
 DocType: Vehicle Log,Refuelling Details,Eldsneytisstöðvar Upplýsingar
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Búa Laun laumar
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Næsta Samband með getur ekki verið sama og Lead email id
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Næsta Samband með getur ekki verið sama og Lead Email Address
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Kaup verður að vera merkt, ef við á er valið sem {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Afsláttur verður að vera minna en 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Síðustu kaup hlutfall fannst ekki
@@ -4278,7 +4278,7 @@ DocType: Purchase Order,Advance Paid,Advance Greiddur
 DocType: Item,Item Tax,Liður Tax
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Efni til Birgir
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,vörugjöld Invoice
-DocType: Expense Claim,Employees Email Id,Starfsmenn Netfang Id
+DocType: Expense Claim,Employees Email Address,Starfsmenn Netfang Id
 DocType: Employee Attendance Tool,Marked Attendance,Marked Aðsókn
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,núverandi Skuldir
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Senda massa SMS til þinn snerting

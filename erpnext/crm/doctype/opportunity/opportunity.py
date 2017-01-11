@@ -31,7 +31,6 @@ class Opportunity(TransactionBase):
 		if not self.enquiry_from:
 			frappe.throw(_("Opportunity From field is mandatory"))
 
-		self.set_status()
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_lead_cust()
@@ -131,6 +130,7 @@ class Opportunity(TransactionBase):
 			frappe.throw(_("Customer {0} does not exist").format(name), frappe.DoesNotExistError)
 
 	def on_update(self):
+		super(Opportunity, self).on_update()
 		self.add_calendar_event()
 
 	def add_calendar_event(self, opts=None, force=False):

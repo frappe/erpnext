@@ -15,7 +15,6 @@ form_grid_templates = {
 class Quotation(SellingController):
 	def validate(self):
 		super(Quotation, self).validate()
-		self.set_status()
 		self.update_opportunity()
 		self.validate_order_type()
 		self.validate_uom_is_integer("stock_uom", "qty")

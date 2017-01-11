@@ -86,7 +86,6 @@ class SalesInvoice(SellingController):
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
-		self.set_status()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -241,6 +240,7 @@ class SalesInvoice(SellingController):
 				if self.project: return
 
 	def on_update(self):
+		super(SalesInvoice, self).on_update()
 		self.set_paid_amount()
 
 	def set_paid_amount(self):

@@ -6,10 +6,13 @@ def get_data():
 		{
 			"label": _("Student"),
 			"items": [
-
 				{
 					"type": "doctype",
 					"name": "Student"
+				},
+				{
+					"type": "doctype",
+					"name": "Guardian"
 				},
 				{
 					"type": "doctype",

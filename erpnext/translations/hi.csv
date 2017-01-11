@@ -366,7 +366,7 @@ DocType: Workstation,Rent Cost,बाइक किराए मूल्य
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,राशि मूल्यह्रास के बाद
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,आगामी कैलेंडर घटनाओं
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,माह और वर्ष का चयन करें
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","अल्पविराम के द्वारा अलग ईमेल आईडी दर्ज करें, चालान विशेष तिथि पर स्वचालित रूप से भेज दिया जाएगा"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","अल्पविराम के द्वारा अलग ईमेल आईडी दर्ज करें, चालान विशेष तिथि पर स्वचालित रूप से भेज दिया जाएगा"
 DocType: Employee,Company Email,कंपनी ईमेल
 DocType: GL Entry,Debit Amount in Account Currency,खाते की मुद्रा में डेबिट राशि
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,बैंक / नकद पार्टी के खिलाफ या आंतरिक स्थानांतरण के लिए लेनदेन
@@ -685,7 +685,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,पूर्वावलोकन वेतन पर्ची
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,खाता {0} कई बार दर्ज किया गया है
 DocType: Account,Expenses Included In Valuation,व्यय मूल्यांकन में शामिल
-DocType: Employee,Provide email id registered in company,कंपनी में पंजीकृत ईमेल आईडी प्रदान
+DocType: Employee,Provide Email Address registered in company,कंपनी में पंजीकृत ईमेल आईडी प्रदान
 DocType: Hub Settings,Seller City,विक्रेता सिटी
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,एक छात्र समूह का चयन करें
 ,Absent Student Report,अनुपस्थित छात्र की रिपोर्ट
@@ -1128,7 +1128,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,नीला
 DocType: Purchase Invoice,Is Return,वापसी है
 DocType: Price List Country,Price List Country,मूल्य सूची देश
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,ईमेल आईडी सेट करें
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,ईमेल आईडी सेट करें
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},आइटम के लिए {0} वैध धारावाहिक नग {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,मद कोड सीरियल नंबर के लिए बदला नहीं जा सकता
@@ -2219,7 +2219,7 @@ DocType: Fiscal Year,Year End Date,वर्षांत तिथि
 DocType: Task Depends On,Task Depends On,काम पर निर्भर करता है
 DocType: Supplier Quotation,Opportunity,अवसर
 ,Completed Production Orders,पूरे किए उत्पादन के आदेश
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,पंक्ति {0}: आपूर्तिकर्ता के लिए {0} ईमेल आईडी ईमेल भेजने के लिए आवश्यक है
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,पंक्ति {0}: आपूर्तिकर्ता के लिए {0} ईमेल आईडी ईमेल भेजने के लिए आवश्यक है
 DocType: Operation,Default Workstation,मूलभूत वर्कस्टेशन
 DocType: Notification Control,Expense Claim Approved Message,व्यय दावा संदेश स्वीकृत
 DocType: Payment Entry,Deductions or Loss,कटौती या घटाने
@@ -3698,7 +3698,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,सेट मुद्रा ल
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,आवेदन की अवधि दो alocation अभिलेखों के पार नहीं किया जा सकता
 DocType: Item Group,Default Expense Account,डिफ़ॉल्ट व्यय खाते
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,छात्र बैच या पाठ्यक्रम अनुसूची अनिवार्य है
-DocType: Student,Student Email ID,छात्र ईमेल आईडी
+DocType: Student,Student Email Address,छात्र ईमेल आईडी
 DocType: Employee,Notice (days),सूचना (दिन)
 DocType: Tax Rule,Sales Tax Template,सेल्स टैक्स खाका
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,चालान बचाने के लिए आइटम का चयन करें
@@ -3849,7 +3849,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,स
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,देखें बिक्रीसूत्र
 DocType: Program Enrollment Tool,New Program,नए कार्यक्रम
 DocType: Item Attribute Value,Attribute Value,मान बताइए
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","ईमेल आईडी अद्वितीय होना चाहिए , पहले से ही मौजूद है {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","ईमेल आईडी अद्वितीय होना चाहिए , पहले से ही मौजूद है {0}"
 ,Itemwise Recommended Reorder Level,Itemwise पुनःक्रमित स्तर की सिफारिश की
 DocType: Salary Detail,Salary Detail,वेतन विस्तार
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,पहला {0} का चयन करें
@@ -4051,7 +4051,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,परियोजना / कार्य कार्य.
 DocType: Vehicle Log,Refuelling Details,ईंधन भराई विवरण
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,वेतन स्लिप्स उत्पन्न
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,अगले संपर्क के द्वारा सीसा ईमेल आईडी के रूप में ही नहीं किया जा सकता
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,अगले संपर्क के द्वारा सीसा ईमेल आईडी के रूप में ही नहीं किया जा सकता
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","लागू करने के लिए के रूप में चुना जाता है तो खरीदना, जाँच की जानी चाहिए {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,सबसे कम से कम 100 होना चाहिए
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,अंतिम खरीद दर नहीं मिला
@@ -4347,7 +4347,7 @@ DocType: Purchase Order,Advance Paid,अग्रिम भुगतान
 DocType: Item,Item Tax,आइटम टैक्स
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,प्रदायक के लिए सामग्री
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,आबकारी चालान
-DocType: Expense Claim,Employees Email Id,ईमेल आईडी कर्मचारी
+DocType: Expense Claim,Employees Email Address,ईमेल आईडी कर्मचारी
 DocType: Employee Attendance Tool,Marked Attendance,उल्लेखनीय उपस्थिति
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,वर्तमान देयताएं
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,अपने संपर्कों के लिए बड़े पैमाने पर एसएमएस भेजें

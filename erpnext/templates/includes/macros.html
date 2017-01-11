@@ -13,7 +13,9 @@
 {% macro product_image(website_image, css_class="") %}
     <div class="product-image {% if not website_image -%} missing-image {%- endif %} {{ css_class }}">
     	{% if website_image -%}
-    		<img itemprop="image" src="{{ frappe.utils.quoted(website_image) | abs_url }}" class="img-responsive">
+			<a href="{{ frappe.utils.quoted(website_image) }}">
+				<img itemprop="image" src="{{ frappe.utils.quoted(website_image) | abs_url }}" class="img-responsive">
+			</a>
     	{%- endif %}
     </div>
 {% endmacro %}

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt, nowdate, add_days, getdate
+from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money
 from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -103,17 +103,23 @@ class ProcessPayroll(Document):
 						"posting_date": self.posting_date
 					})
 					ss.insert()
-					ss_list.append(ss.name)
+					ss_dict = {}
+					ss_dict["Employee Name"] = ss.employee_name
+					ss_dict["Total Pay"] = fmt_money(ss.rounded_total,currency = frappe.defaults.get_global_default("currency"))
+					ss_dict["Salary Slip"] = self.format_as_links(ss.name)[0]
+					ss_list.append(ss_dict)
 		return self.create_log(ss_list)
 
 
 	def create_log(self, ss_list):
-		log = "<p>" + _("No employee for the above selected criteria OR salary slip already created") + "</p>"
-		if ss_list:
-			log = "<b>" + _("Salary Slip Created") + "</b>\
-			<br><br>%s" % '<br>'.join(self.format_as_links(ss_list))
-		return log
-
+		if not ss_list:
+			log = "<p>" + _("No employee for the above selected criteria OR salary slip already created") + "</p>"
+		else:
+			log = frappe.render_template("templates/includes/salary_slip_log.html",
+						dict(ss_list=ss_list,
+							keys=sorted(ss_list[0].keys()),
+							title=_('Created Salary Slips')))
+			return log
 
 	def get_sal_slip_list(self, ss_status, as_dict=False):
 		"""
@@ -136,44 +142,50 @@ class ProcessPayroll(Document):
 		self.check_permission('write')
 
 		ss_list = self.get_sal_slip_list(ss_status=0)
+		submitted_ss = []
 		not_submitted_ss = []
 		for ss in ss_list:
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
+			ss_dict = {}
+			ss_dict["Employee Name"] = ss_obj.employee_name
+			ss_dict["Total Pay"] = fmt_money(ss_obj.rounded_total,currency = frappe.defaults.get_global_default("currency"))
+			ss_dict["Salary Slip"] = self.format_as_links(ss_obj.name)[0]
 			if ss_obj.net_pay<0:
-				not_submitted_ss.append(ss[0])
+				not_submitted_ss.append(ss_dict)
 			else:
 				try:
 					ss_obj.submit()
+					submitted_ss.append(ss_dict)
 				except frappe.ValidationError:
-					not_submitted_ss.append(ss[0])
+					not_submitted_ss.append(ss_dict)
 
-		return self.create_submit_log(ss_list, not_submitted_ss)
+		return self.create_submit_log(submitted_ss, not_submitted_ss)
 
-	def create_submit_log(self, all_ss, not_submitted_ss):
+	def create_submit_log(self, submitted_ss, not_submitted_ss):
 		log = ''
-		if not all_ss:
+		if not submitted_ss and not not_submitted_ss:
 			log = "No salary slip found to submit for the above selected criteria"
-		else:
-			all_ss = [d[0] for d in all_ss]
 
-		submitted_ss = self.format_as_links(list(set(all_ss) - set(not_submitted_ss)))
 		if submitted_ss:
-			log = """
-				<b>Salary Slips Submitted:</b> <br><br>%s
-				""" % ('<br>'.join(submitted_ss))
+			log = frappe.render_template("templates/includes/salary_slip_log.html",
+					dict(ss_list=submitted_ss,
+						keys=sorted(submitted_ss[0].keys()),
+						title=_('Submitted Salary Slips')))
 
 		if not_submitted_ss:
+			log += frappe.render_template(self.get_log_template(),
+					dict(ss_list=not_submitted_ss,
+						keys=sorted(not_submitted_ss[0].keys()),
+						title=_('Not Submitted Salary Slips')))
 			log += """
-				<b>Not Submitted Salary Slips: </b>\
-				<br><br> %s <br><br> \
 				Possible reasons: <br>\
 				1. Net pay is less than 0 <br>
-				2. Company email id specified in employee master is not valid. <br> \
-			"""% ('<br>'.join(not_submitted_ss))
+				2. Company Email Address specified in employee master is not valid. <br>
+				"""
 		return log
 
-	def format_as_links(self, ss_list):
-		return ['<a href="#Form/Salary Slip/{0}">{0}</a>'.format(s) for s in ss_list]
+	def format_as_links(self, salary_slip):
+		return ['<a href="#Form/Salary Slip/{0}">{0}</a>'.format(salary_slip)]
 
 
 	def get_total_salary(self):

@@ -13,7 +13,7 @@ Set **_Delivered by Supplier (Drop Ship)_** and **_Default Supplier_** in Item M
 <img class="screenshot" alt="Setup Item Master" src="{{docs_base_url}}/assets/img/selling/setup-drop-ship-on-item-master.png">
 
 #### Setup on Sales Order
-If Drop Shipping has set on Item master, it will automatically set **Supplier delivers to Customer** and **Supplier** on Salse Order Item.
+If Drop Shipping has set on Item master, it will automatically set **Supplier delivers to Customer** and **Supplier** on Sales Order Item.
 
 You can setup Drop Shipping, on Sales Order Item. Under **Drop Ship** section, set **Supplier delivers to Customer** and select **Supplier** agaist which Purchase Order will get created.
 

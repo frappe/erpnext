@@ -366,7 +366,7 @@ DocType: Workstation,Rent Cost,ต้นทุนการ ให้เช่า
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,จำนวนเงินหลังจากที่ค่าเสื่อมราคา
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,ที่จะเกิดขึ้นปฏิทินเหตุการณ์
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,กรุณาเลือกเดือนและปี
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date",ใส่หมายเลขอีเมลคั่นด้วยเครื่องหมายจุลภาคใบแจ้งหนี้จะถูกส่งโดยอัตโนมัติในวันที่เจาะจง
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date",ใส่หมายเลขอีเมลคั่นด้วยเครื่องหมายจุลภาคใบแจ้งหนี้จะถูกส่งโดยอัตโนมัติในวันที่เจาะจง
 DocType: Employee,Company Email,อีเมล์ บริษัท
 DocType: GL Entry,Debit Amount in Account Currency,จำนวนเงินเดบิตในสกุลเงินในบัญชี
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,การทำธุรกรรมธนาคาร / เงินสดกับบุคคลหรือสำหรับการถ่ายโอนภายใน
@@ -685,7 +685,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,ดูตัวอย่างสลิปเงินเดือน
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,บัญชี {0} ได้รับการป้อนหลายครั้ง
 DocType: Account,Expenses Included In Valuation,ค่าใช้จ่ายรวมอยู่ในการประเมินมูลค่า
-DocType: Employee,Provide email id registered in company,ให้ ID อีเมลที่ลงทะเบียนใน บริษัท
+DocType: Employee,Provide Email Address registered in company,ให้ ID อีเมลที่ลงทะเบียนใน บริษัท
 DocType: Hub Settings,Seller City,ผู้ขายเมือง
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,โปรดเลือกกลุ่มนักศึกษา
 ,Absent Student Report,รายงานนักศึกษาขาด
@@ -1128,7 +1128,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,สีฟ้า
 DocType: Purchase Invoice,Is Return,คือการกลับมา
 DocType: Price List Country,Price List Country,ราคาประเทศ
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,กรุณาตั้งค่าอีเมล์ ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,กรุณาตั้งค่าอีเมล์ ID
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} กัดกร่อน แบบอนุกรม ที่ถูกต้องสำหรับ รายการ {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,รหัสสินค้า ไม่สามารถ เปลี่ยนเป็น เลข อนุกรม
@@ -2219,7 +2219,7 @@ DocType: Fiscal Year,Year End Date,วันสิ้นปี
 DocType: Task Depends On,Task Depends On,ขึ้นอยู่กับงาน
 DocType: Supplier Quotation,Opportunity,โอกาส
 ,Completed Production Orders,เสร็จสิ้นการ สั่งซื้อ การผลิต
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,แถว {0}: สำหรับผู้จัดจำหน่าย {0} รหัสอีเมลจะต้องส่งอีเมล
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,แถว {0}: สำหรับผู้จัดจำหน่าย {0} รหัสอีเมลจะต้องส่งอีเมล
 DocType: Operation,Default Workstation,เวิร์คสเตชั่เริ่มต้น
 DocType: Notification Control,Expense Claim Approved Message,เรียกร้องค่าใช้จ่ายที่ได้รับอนุมัติข้อความ
 DocType: Payment Entry,Deductions or Loss,การหักเงินหรือการสูญเสีย
@@ -3697,7 +3697,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,ตั้งแลกเปล�
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,รับสมัครไม่สามารถบันทึกในสอง alocation
 DocType: Item Group,Default Expense Account,บัญชีค่าใช้จ่ายเริ่มต้น
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,ชุดนักเรียนหรือตารางเรียนมีผลบังคับใช้
-DocType: Student,Student Email ID,อีเมล์ ID นักศึกษา
+DocType: Student,Student Email Address,อีเมล์ ID นักศึกษา
 DocType: Employee,Notice (days),แจ้งให้ทราบล่วงหน้า (วัน)
 DocType: Tax Rule,Sales Tax Template,แม่แบบภาษีการขาย
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,เลือกรายการที่จะบันทึกในใบแจ้งหนี้
@@ -3848,7 +3848,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,บ
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,ดูนำ
 DocType: Program Enrollment Tool,New Program,โปรแกรมใหม่
 DocType: Item Attribute Value,Attribute Value,ค่าแอตทริบิวต์
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}",id อีเมล ต้องไม่ซ้ำกัน อยู่ แล้วสำหรับ {0}
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}",id อีเมล ต้องไม่ซ้ำกัน อยู่ แล้วสำหรับ {0}
 ,Itemwise Recommended Reorder Level,แนะนำ Itemwise Reorder ระดับ
 DocType: Salary Detail,Salary Detail,รายละเอียดเงินเดือน
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,กรุณาเลือก {0} ครั้งแรก
@@ -4050,7 +4050,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,กิจกรรมของโครงการ / งาน
 DocType: Vehicle Log,Refuelling Details,รายละเอียดเชื้อเพลิง
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,สร้าง Slips เงินเดือน
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,ถัดไปติดต่อโดยไม่สามารถเช่นเดียวกับ ID ตะกั่วอีเมล์
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,ถัดไปติดต่อโดยไม่สามารถเช่นเดียวกับ ID ตะกั่วอีเมล์
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}",ต้องเลือก การซื้อ ถ้าเลือก ใช้ได้กับ เป็น {0}
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,ส่วนลด จะต้อง น้อยกว่า 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,ไม่พบอัตราการซื้อล่าสุด
@@ -4346,7 +4346,7 @@ DocType: Purchase Order,Advance Paid,จ่ายล่วงหน้า
 DocType: Item,Item Tax,ภาษีสินค้า
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,วัสดุในการจัดจำหน่าย
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,สรรพสามิตใบแจ้งหนี้
-DocType: Expense Claim,Employees Email Id,Email รหัสพนักงาน
+DocType: Expense Claim,Employees Email Address,Email รหัสพนักงาน
 DocType: Employee Attendance Tool,Marked Attendance,ผู้เข้าร่วมการทำเครื่องหมาย
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,หนี้สินหมุนเวียน
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,ส่ง SMS มวลการติดต่อของคุณ

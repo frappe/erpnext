@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,اجاره هزینه
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,مقدار پس از استهلاک
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,تقویم رویدادهای آینده
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,لطفا ماه و سال را انتخاب کنید
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date",را وارد کنید ایمیل ID با کاما جدا شده، فاکتور به صورت خودکار در تاریخ خاص فرستاده
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date",را وارد کنید ایمیل ID با کاما جدا شده، فاکتور به صورت خودکار در تاریخ خاص فرستاده
 DocType: Employee,Company Email,شرکت پست الکترونیک
 DocType: GL Entry,Debit Amount in Account Currency,مقدار بدهی در حساب ارز
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,معاملات بانک / پول نقد در برابر حزب و یا برای انتقال داخلی
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,پیش نمایش لغزش حقوق
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,حساب {0} وارد شده است چندین بار
 DocType: Account,Expenses Included In Valuation,هزینه های موجود در ارزش گذاری
-DocType: Employee,Provide email id registered in company,ارائه ایمیل شناسه ثبت شده در شرکت
+DocType: Employee,Provide Email Address registered in company,ارائه ایمیل شناسه ثبت شده در شرکت
 DocType: Hub Settings,Seller City,فروشنده شهر
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,لطفا یک گروه دانشجویی را انتخاب کنید
 ,Absent Student Report,وجود ندارد گزارش دانشجو
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,ابی
 DocType: Purchase Invoice,Is Return,آیا بازگشت
 DocType: Price List Country,Price List Country,لیست قیمت کشور
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,لطفا ایمیل ID تنظیم
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,لطفا ایمیل ID تنظیم
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} NOS سریال معتبر برای مورد {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,کد مورد می تواند برای شماره سریال نمی تواند تغییر
@@ -2196,7 +2196,7 @@ DocType: Fiscal Year,Year End Date,سال پایان تاریخ
 DocType: Task Depends On,Task Depends On,کار بستگی به
 DocType: Supplier Quotation,Opportunity,فرصت
 ,Completed Production Orders,سفارشات تولید تکمیل
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,ردیف {0}: عرضه کننده {0} شناسه ایمیل مورد نیاز برای ارسال ایمیل
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,ردیف {0}: عرضه کننده {0} شناسه ایمیل مورد نیاز برای ارسال ایمیل
 DocType: Operation,Default Workstation,به طور پیش فرض ایستگاه کاری
 DocType: Notification Control,Expense Claim Approved Message,پیام ادعای هزینه تایید
 DocType: Payment Entry,Deductions or Loss,کسر یا از دست دادن
@@ -3641,7 +3641,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,تنظیم اوراق بهادا
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,دوره نرم افزار نمی تواند در سراسر دو رکورد alocation شود
 DocType: Item Group,Default Expense Account,حساب پیش فرض هزینه
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,دسته ای دانش آموز و یا برنامه های آموزشی الزامی است
-DocType: Student,Student Email ID,دانشجو ID ایمیل
+DocType: Student,Student Email Address,دانشجو ID ایمیل
 DocType: Employee,Notice (days),مقررات (روز)
 DocType: Tax Rule,Sales Tax Template,قالب مالیات بر فروش
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,انتخاب آیتم ها برای صرفه جویی در فاکتور
@@ -3792,7 +3792,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,ل�
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,مشخصات آگهی
 DocType: Program Enrollment Tool,New Program,برنامه جدید
 DocType: Item Attribute Value,Attribute Value,موجودیت مقدار
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}",شناسه ایمیل باید منحصر به فرد، در حال حاضر وجود دارد برای {0}
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}",شناسه ایمیل باید منحصر به فرد، در حال حاضر وجود دارد برای {0}
 ,Itemwise Recommended Reorder Level,Itemwise توصیه ترتیب مجدد سطح
 DocType: Salary Detail,Salary Detail,جزئیات حقوق و دستمزد
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,لطفا انتخاب کنید {0} برای اولین بار
@@ -3983,7 +3983,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,فعالیت پروژه / وظیفه.
 DocType: Vehicle Log,Refuelling Details,اطلاعات سوختگیری
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,تولید حقوق و دستمزد ورقه
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,بعد تماس با نمی تواند مانند شناسه ایمیل سرب
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,بعد تماس با نمی تواند مانند شناسه ایمیل سرب
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}",خرید باید بررسی شود، اگر قابل استفاده برای عنوان انتخاب شده {0}
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,تخفیف باید کمتر از 100 باشد
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,آخرین نرخ خرید یافت نشد
@@ -4278,7 +4278,7 @@ DocType: Purchase Order,Advance Paid,پیش پرداخت
 DocType: Item,Item Tax,مالیات مورد
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,مواد به کننده
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,فاکتور مالیات کالاهای داخلی
-DocType: Expense Claim,Employees Email Id,کارکنان پست الکترونیکی شناسه
+DocType: Expense Claim,Employees Email Address,کارکنان پست الکترونیکی شناسه
 DocType: Employee Attendance Tool,Marked Attendance,حضور و غیاب مشخص شده
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,بدهی های جاری
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,ارسال اس ام اس انبوه به مخاطبین خود

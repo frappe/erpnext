@@ -41,7 +41,6 @@ class SalesOrder(SellingController):
 		make_packing_list(self)
 
 		self.validate_with_previous_doc()
-		self.set_status()
 
 		if not self.billing_status: self.billing_status = 'Not Billed'
 		if not self.delivery_status: self.delivery_status = 'Not Delivered'
@@ -245,9 +244,6 @@ class SalesOrder(SellingController):
 			update_bin_qty(item_code, warehouse, {
 				"reserved_qty": get_reserved_qty(item_code, warehouse)
 			})
-
-	def on_update(self):
-		pass
 
 	def before_update_after_submit(self):
 		self.validate_drop_ship()

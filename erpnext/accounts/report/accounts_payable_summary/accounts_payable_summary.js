@@ -53,5 +53,12 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"default": "90",
 			"reqd": 1
 		}
-	]
+	],
+
+	onload: function(report) {
+		report.page.add_inner_button(__("Accounts Payable"), function() {
+			var filters = report.get_values();
+			frappe.set_route('query-report', 'Accounts Payable', {company: filters.company});
+		});
+	}
 }

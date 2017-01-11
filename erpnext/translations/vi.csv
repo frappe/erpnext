@@ -366,7 +366,7 @@ DocType: Workstation,Rent Cost,Chi phí thuê
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Số tiền Sau khi khấu hao
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Sắp tới Lịch sự kiện
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Vui lòng chọn tháng và năm
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Nhập id email cách nhau bằng dấu phẩy, hóa đơn sẽ được gửi tự động vào ngày cụ thể"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Nhập id email cách nhau bằng dấu phẩy, hóa đơn sẽ được gửi tự động vào ngày cụ thể"
 DocType: Employee,Company Email,Email công ty
 DocType: GL Entry,Debit Amount in Account Currency,Nợ Số tiền trong tài khoản ngoại tệ
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Ngân hàng / Tiền giao dịch với bên hoặc chuyển giao nội bộ
@@ -685,7 +685,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Xem trước trượt Mức lương
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Tài khoản {0} đã được nhập nhiều lần
 DocType: Account,Expenses Included In Valuation,Chi phí bao gồm trong định giá
-DocType: Employee,Provide email id registered in company,Cung cấp email id đăng ký tại công ty
+DocType: Employee,Provide Email Address registered in company,Cung cấp Email Address đăng ký tại công ty
 DocType: Hub Settings,Seller City,Người bán Thành phố
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,Vui lòng chọn một nhóm học sinh
 ,Absent Student Report,Báo cáo Sinh viên vắng mặt
@@ -1109,7 +1109,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Màu xanh
 DocType: Purchase Invoice,Is Return,Là Return
 DocType: Price List Country,Price List Country,Giá Danh sách Country
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Hãy đặt Email ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Hãy đặt Email Address
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} Các số seri hợp lệ cho mục {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Mã hàng không có thể được thay đổi cho Số sản
@@ -2200,7 +2200,7 @@ DocType: Fiscal Year,Year End Date,Ngày kết thúc năm
 DocType: Task Depends On,Task Depends On,Nhiệm vụ Phụ thuộc On
 DocType: Supplier Quotation,Opportunity,Cơ hội
 ,Completed Production Orders,Đơn đặt hàng sản xuất hoàn thành
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Row {0}: Đối với nhà cung cấp {0} email id là bắt buộc để gửi email
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Row {0}: Đối với nhà cung cấp {0} Email Address là bắt buộc để gửi email
 DocType: Operation,Default Workstation,Mặc định Workstation
 DocType: Notification Control,Expense Claim Approved Message,Thông báo yêu cầu bồi thường chi phí được chấp thuận
 DocType: Payment Entry,Deductions or Loss,Các khoản giảm trừ khả năng mất vốn
@@ -3659,7 +3659,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Đặt khoán Lãi / lỗ
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Kỳ ứng dụng không thể được qua hai hồ sơ alocation
 DocType: Item Group,Default Expense Account,Tài khoản mặc định chi phí
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Hàng loạt sinh viên hoặc Lịch học là bắt buộc
-DocType: Student,Student Email ID,Email ID Sinh viên
+DocType: Student,Student Email Address,Email Address Sinh viên
 DocType: Employee,Notice (days),Thông báo (ngày)
 DocType: Tax Rule,Sales Tax Template,Template Thuế bán hàng
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Chọn mục để lưu các hoá đơn
@@ -3810,7 +3810,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,S�
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Xem chào
 DocType: Program Enrollment Tool,New Program,Chương trình mới
 DocType: Item Attribute Value,Attribute Value,Attribute Value
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","Id email phải là duy nhất, đã tồn tại cho {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Id email phải là duy nhất, đã tồn tại cho {0}"
 ,Itemwise Recommended Reorder Level,Itemwise Đê Sắp xếp lại Cấp
 DocType: Salary Detail,Salary Detail,Chi tiết lương
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,Vui lòng chọn {0} đầu tiên
@@ -4012,7 +4012,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Hoạt động dự án / nhiệm vụ.
 DocType: Vehicle Log,Refuelling Details,Chi tiết Nạp nhiên liệu
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Tạo ra lương Trượt
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Tiếp theo Liên Bằng không được giống như Email id chì
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Tiếp theo Liên Bằng không được giống như Email Address chì
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Buying must be checked, if Applicable For is selected as {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Giảm giá phải được ít hơn 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,không tìm thấy tỷ lệ mua sắm cuối
@@ -4308,7 +4308,7 @@ DocType: Purchase Order,Advance Paid,Trước Paid
 DocType: Item,Item Tax,Mục thuế
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Chất liệu để Nhà cung cấp
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Tiêu thụ đặc biệt Invoice
-DocType: Expense Claim,Employees Email Id,Nhân viên Email Id
+DocType: Expense Claim,Employees Email Address,Nhân viên Email Address
 DocType: Employee Attendance Tool,Marked Attendance,Attendance đánh dấu
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Nợ ngắn hạn
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Gửi tin nhắn SMS hàng loạt địa chỉ liên lạc của bạn

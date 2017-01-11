@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,Вартість оренди
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Залишкова вартість
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Майбутні Календар подій
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,"Будь-ласка, виберіть місяць та рік"
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Введіть електронний ідентифікатор, розділені комами, рахунок-фактура буде автоматично відправлений на певну дату"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Введіть електронний ідентифікатор, розділені комами, рахунок-фактура буде автоматично відправлений на певну дату"
 DocType: Employee,Company Email,Компанія E-mail
 DocType: GL Entry,Debit Amount in Account Currency,Дебет Сума в валюті рахунку
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Банк / Касові операції проти партії або для внутрішньої передачі
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Попередній перегляд Зарплатного розрахунку
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Рахунок {0} був введений кілька разів
 DocType: Account,Expenses Included In Valuation,"Витрати, що включаються в оцінку"
-DocType: Employee,Provide email id registered in company,Забезпечити електронний ідентифікатор зареєстрованого в компанії
+DocType: Employee,Provide Email Address registered in company,Забезпечити електронний ідентифікатор зареєстрованого в компанії
 DocType: Hub Settings,Seller City,Продавець Місто
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,"Будь ласка, виберіть групу Student"
 ,Absent Student Report,Відсутня Student Report
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Синій
 DocType: Purchase Invoice,Is Return,Повернення
 DocType: Price List Country,Price List Country,Ціни Країна
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,"Будь ласка, встановіть Email ID"
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,"Будь ласка, встановіть Email Address"
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} дійсні серійні номери для позиції {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Код товару не може бути змінена для серійним номером
@@ -2194,7 +2194,7 @@ DocType: Fiscal Year,Year End Date,Дата закінчення року
 DocType: Task Depends On,Task Depends On,Завдання залежить від
 DocType: Supplier Quotation,Opportunity,Нагода
 ,Completed Production Orders,Виконані Виробничі замовлення
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Рядок {0}: Для постачальника {0} електронний ідентифікатор потрібно для відправки електронної пошти
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Рядок {0}: Для постачальника {0} електронний ідентифікатор потрібно для відправки електронної пошти
 DocType: Operation,Default Workstation,За замовчуванням робоча станція
 DocType: Notification Control,Expense Claim Approved Message,Повідомлення при погодженні авансового звіту
 DocType: Payment Entry,Deductions or Loss,Відрахування або збиток
@@ -3639,7 +3639,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Встановити Курсо�
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Термін подачі заяв не може бути з двох alocation записів
 DocType: Item Group,Default Expense Account,Витратний рахунок за замовчуванням
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Student Пакетний або Розклад курсу є обов&#39;язковим
-DocType: Student,Student Email ID,Student Email ID
+DocType: Student,Student Email Address,Student Email Address
 DocType: Employee,Notice (days),Примітка (днів)
 DocType: Tax Rule,Sales Tax Template,Шаблон податків на продаж
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Виберіть елементи для збереження рахунку-фактури
@@ -3790,7 +3790,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Г�
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Подивитися Lead-и
 DocType: Program Enrollment Tool,New Program,Нова програма
 DocType: Item Attribute Value,Attribute Value,Значення атрибута
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","Посвідчення особи електронної пошти повинен бути унікальним, вже існує для {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Посвідчення особи електронної пошти повинен бути унікальним, вже існує для {0}"
 ,Itemwise Recommended Reorder Level,Itemwise Recommended Reorder Level
 DocType: Salary Detail,Salary Detail,Заробітна плата: Подробиці
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,"Будь ласка, виберіть {0} в першу чергу"
@@ -3981,7 +3981,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Проектна діяльність / завдання.
 DocType: Vehicle Log,Refuelling Details,заправні Детальніше
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Згенерувати Зарплатні розрахунки
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,"Наступна Контактні До не може бути такою ж, як провідного ідентифікатор електронної пошти"
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,"Наступна Контактні До не може бути такою ж, як провідного ідентифікатор електронної пошти"
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","""Купівля"" повинно бути позначено, якщо ""Застосовне для"" обране як {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,"Знижка повинна бути менше, ніж 100"
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Останню ціну закупівлі не знайдено
@@ -4276,7 +4276,7 @@ DocType: Purchase Order,Advance Paid,Попередньо оплачено
 DocType: Item,Item Tax,Податки
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Матеріал Постачальнику
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Акцизний Рахунок
-DocType: Expense Claim,Employees Email Id,Співробітники Email ID
+DocType: Expense Claim,Employees Email Address,Співробітники Email Address
 DocType: Employee Attendance Tool,Marked Attendance,Помітне Відвідуваність
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Поточні зобов&#39;язання
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Відправити SMS масового вашим контактам

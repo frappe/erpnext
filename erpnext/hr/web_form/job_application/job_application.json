@@ -55,7 +55,7 @@
    "fieldname": "email_id", 
    "fieldtype": "Data", 
    "hidden": 0, 
-   "label": "Email Id", 
+   "label": "Email Address", 
    "max_length": 0, 
    "max_value": 0, 
    "options": "Email", 

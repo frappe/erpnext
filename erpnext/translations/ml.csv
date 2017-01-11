@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,രെംട് ചെലവ്
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,മൂല്യത്തകർച്ച ശേഷം തുക
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,വരാനിരിക്കുന്ന കലണ്ടർ ഇവന്റുകൾ
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,മാസം വർഷം തിരഞ്ഞെടുക്കുക
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","കോമകളാൽ വേർതിരിച്ച ഇമെയിൽ ഐഡി നൽകുക, ഇൻവോയ്സ് പ്രത്യേക തീയതി സ്വയം മെയിൽ ചെയ്യപ്പെടും"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","കോമകളാൽ വേർതിരിച്ച ഇമെയിൽ ഐഡി നൽകുക, ഇൻവോയ്സ് പ്രത്യേക തീയതി സ്വയം മെയിൽ ചെയ്യപ്പെടും"
 DocType: Employee,Company Email,കമ്പനി ഇമെയിൽ
 DocType: GL Entry,Debit Amount in Account Currency,അക്കൗണ്ട് കറൻസി ഡെബിറ്റ് തുക
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,പാർട്ടി വിരുദ്ധ അല്ലെങ്കിൽ ആന്തരിക കൈമാറ്റം ബാങ്ക് / ക്യാഷ് ഇടപാടുകൾ
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,പ്രിവ്യൂ ശമ്പളം ജി
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,അക്കൗണ്ട് {0} ഒന്നിലധികം തവണ നൽകിയിട്ടുണ്ടെന്നും
 DocType: Account,Expenses Included In Valuation,മൂലധനം ഉൾപ്പെടുത്തിയിട്ടുണ്ട് ചിലവുകൾ
-DocType: Employee,Provide email id registered in company,കമ്പനിയുടെ രജിസ്റ്റർ ഇമെയിൽ ഐഡി നൽകുക
+DocType: Employee,Provide Email Address registered in company,കമ്പനിയുടെ രജിസ്റ്റർ ഇമെയിൽ ഐഡി നൽകുക
 DocType: Hub Settings,Seller City,വില്പനക്കാരന്റെ സിറ്റി
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,ഒരു വിദ്യാർത്ഥി ഗ്രൂപ്പ് തിരഞ്ഞെടുക്കുക
 ,Absent Student Report,നിലവില്ല വിദ്യാർത്ഥി റിപ്പോർട്ട്
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,ബ്ലൂ
 DocType: Purchase Invoice,Is Return,മടക്കം
 DocType: Price List Country,Price List Country,വില പട്ടിക രാജ്യം
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,ഇമെയിൽ ഐഡി സജ്ജീകരിക്കുക
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,ഇമെയിൽ ഐഡി സജ്ജീകരിക്കുക
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},ഇനം {1} വേണ്ടി {0} സാധുവായ സീരിയൽ എണ്ണം
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,ഇനം കോഡ് സീരിയൽ നമ്പർ വേണ്ടി മാറ്റാൻ കഴിയില്ല
@@ -2196,7 +2196,7 @@ DocType: Fiscal Year,Year End Date,വർഷം അവസാന തീയതി
 DocType: Task Depends On,Task Depends On,ടാസ്ക് ആശ്രയിച്ചിരിക്കുന്നു
 DocType: Supplier Quotation,Opportunity,അവസരം
 ,Completed Production Orders,പൂർത്തിയാക്കി പ്രൊഡക്ഷൻ ഓർഡറുകൾ
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,വരി {0}: വിതരണക്കാരൻ വേണ്ടി {0} ഇമെയിൽ ഐഡി ഇമെയിൽ അയയ്ക്കാൻ ആവശ്യമാണ്
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,വരി {0}: വിതരണക്കാരൻ വേണ്ടി {0} ഇമെയിൽ ഐഡി ഇമെയിൽ അയയ്ക്കാൻ ആവശ്യമാണ്
 DocType: Operation,Default Workstation,സ്ഥിരസ്ഥിതി വർക്ക്സ്റ്റേഷൻ
 DocType: Notification Control,Expense Claim Approved Message,ചിലവിടൽ ക്ലെയിം അംഗീകരിച്ചു സന്ദേശം
 DocType: Payment Entry,Deductions or Loss,പൂർണമായും അല്ലെങ്കിൽ നഷ്ടം
@@ -3641,7 +3641,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,എക്സ്ചേഞ്ച�
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,അപേക്ഷാ കാലയളവിൽ രണ്ട് alocation രേഖകള് ഉടനീളം ആകാൻ പാടില്ല
 DocType: Item Group,Default Expense Account,സ്ഥിരസ്ഥിതി ചിലവേറിയ
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,സ്റ്റുഡന്റ് ബാച്ച് അല്ലെങ്കിൽ കോഴ്സ് ഷെഡ്യൂൾ നിര്ബന്ധമാണ്
-DocType: Student,Student Email ID,വിദ്യാർത്ഥിയുടെ ഇമെയിൽ ഐഡി
+DocType: Student,Student Email Address,വിദ്യാർത്ഥിയുടെ ഇമെയിൽ ഐഡി
 DocType: Employee,Notice (days),അറിയിപ്പ് (ദിവസം)
 DocType: Tax Rule,Sales Tax Template,സെയിൽസ് ടാക്സ് ഫലകം
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,ഇൻവോയ്സ് സംരക്ഷിക്കാൻ ഇനങ്ങൾ തിരഞ്ഞെടുക്കുക
@@ -3792,7 +3792,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,ജ
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,കാണുക നയിക്കുന്നു
 DocType: Program Enrollment Tool,New Program,പുതിയ പ്രോഗ്രാം
 DocType: Item Attribute Value,Attribute Value,ന്റെതിരച്ചറിവിനു്തെറ്റായധാര്മ്മികമൂല്യം
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","ഇമെയിൽ ഐഡി അതുല്യമായ ആയിരിക്കണം, ഇതിനകം {0} നിലവിലുണ്ട്"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","ഇമെയിൽ ഐഡി അതുല്യമായ ആയിരിക്കണം, ഇതിനകം {0} നിലവിലുണ്ട്"
 ,Itemwise Recommended Reorder Level,Itemwise പുനഃക്രമീകരിക്കുക ലെവൽ ശുപാർശിത
 DocType: Salary Detail,Salary Detail,ശമ്പള വിശദാംശം
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,ആദ്യം {0} തിരഞ്ഞെടുക്കുക
@@ -3983,7 +3983,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,പ്രോജക്ട് പ്രവർത്തനം / ചുമതല.
 DocType: Vehicle Log,Refuelling Details,Refuelling വിശദാംശങ്ങൾ
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,ശമ്പളം സ്ലിപ്പിൽ ജനറേറ്റുചെയ്യൂ
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,അടുത്തത് ബന്ധപ്പെടുക നയിക്കുന്നത് ഇമെയിൽ id അതേ പാടില്ല
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,അടുത്തത് ബന്ധപ്പെടുക നയിക്കുന്നത് ഇമെയിൽ id അതേ പാടില്ല
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","ബാധകമായ വേണ്ടി {0} തിരഞ്ഞെടുക്കപ്പെട്ടു എങ്കിൽ വാങ്ങൽ, ചെക്ക് ചെയ്തിരിക്കണം"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,ഡിസ്കൗണ്ട് 100 താഴെ ആയിരിക്കണം
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,അവസാനം വാങ്ങൽ നിരക്ക് കണ്ടെത്തിയില്ല
@@ -4278,7 +4278,7 @@ DocType: Purchase Order,Advance Paid,മുൻകൂർ പണമടച്ചു
 DocType: Item,Item Tax,ഇനം നികുതി
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,വിതരണക്കാരൻ വരെ മെറ്റീരിയൽ
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,എക്സൈസ് ഇൻവോയിസ്
-DocType: Expense Claim,Employees Email Id,എംപ്ലോയീസ് ഇമെയിൽ ഐഡി
+DocType: Expense Claim,Employees Email Address,എംപ്ലോയീസ് ഇമെയിൽ ഐഡി
 DocType: Employee Attendance Tool,Marked Attendance,അടയാളപ്പെടുത്തിയിരിക്കുന്ന ഹാജർ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,നിലവിലുള്ള ബാധ്യതകൾ
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,സമ്പർക്കങ്ങളിൽ പിണ്ഡം എസ്എംഎസ് അയയ്ക്കുക
