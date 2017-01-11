@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_import": 1, 
- "allow_rename": 0, 
+ "allow_rename": 1, 
  "autoname": "Prompt", 
  "beta": 0, 
  "creation": "2013-03-07 18:50:29", 
@@ -894,7 +894,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-12-14 02:02:10.848614", 
+ "modified": "2017-01-11 02:02:10.848614", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Structure", 
