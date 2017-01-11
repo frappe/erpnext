@@ -232,7 +232,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Monthly Salary Register",
+					"name": "Salary Register",
 					"doctype": "Salary Slip"
 				},
 				{
