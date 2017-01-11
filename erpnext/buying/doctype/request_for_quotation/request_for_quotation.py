@@ -12,7 +12,7 @@ from frappe.utils.print_format import download_pdf
 from frappe.desk.form.load import get_attachments
 from frappe.core.doctype.communication.email import make
 from erpnext.accounts.party import get_party_account_currency, get_party_details
-from erpnext.stock.doctype.material_request.material_request import set_missing_values
+from erpnext.stock.doctype.material_request.material_request import set_missing_values, make_request_for_quotation
 from erpnext.controllers.buying_controller import BuyingController
 
 STANDARD_USERS = ("Guest", "Administrator")
@@ -244,3 +244,44 @@ def get_rfq_doc(doctype, name, supplier_idx):
 		args = doc.get('suppliers')[cint(supplier_idx) - 1]
 		doc.update_supplier_part_no(args)
 		return doc
+		
+@frappe.whitelist()
+def get_matreq_from_possible_supplier(source_name, target_doc = None):
+
+	item_list = frappe.db.sql("""SELECT matreq.name, matreqi.item_code
+		FROM `tabItem` as item, 
+			`tabItem Supplier` as itemsup, 
+			`tabMaterial Request Item` as matreqi, 
+			`tabMaterial Request`  as matreq 
+		WHERE itemsup.supplier = %(supplier)s 
+			AND item.name = itemsup.parent 
+			AND matreqi.parent = matreq.name 
+			AND matreqi.item_code = item.name 
+			AND matreq.status != "Stopped" 
+			AND matreq.material_request_type = "Purchase" 
+			AND matreq.docstatus = 1 
+			AND matreq.per_ordered < 99.99""", \
+		{"supplier": source_name},as_dict=1)
+	for d in item_list:
+		frappe.msgprint(d.name + " - " + d.item_code)
+		target_doc = get_mapped_doc("Material Request", d.name, 	{
+		"Material Request": {
+			"doctype": "Request for Quotation",
+			"validation": {
+				"docstatus": ["=", 1],
+				"material_request_type": ["=", "Purchase"],
+				
+			}
+		},
+		"Material Request Item": {
+			"doctype": "Request for Quotation Item",
+			"condition": lambda doc: doc.item_code == d.item_code,
+			"field_map": [
+				["name", "material_request_item"],
+				["parent", "material_request"],
+				["uom", "uom"]
+			]
+		}
+	}, target_doc)
+	return target_doc
+		
