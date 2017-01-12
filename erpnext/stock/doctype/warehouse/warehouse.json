@@ -655,7 +655,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-11-07 05:06:39.128312", 
+ "modified": "2017-01-12 16:08:01.207466", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Warehouse", 
@@ -791,7 +791,9 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "search_fields": "", 
  "sort_order": "DESC", 
  "title_field": "warehouse_name", 
+ "track_changes": 0, 
  "track_seen": 0
 }

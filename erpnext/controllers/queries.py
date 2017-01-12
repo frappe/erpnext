@@ -348,3 +348,30 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 			'company': filters.get("company", ""),
 			'txt': "%%%s%%" % frappe.db.escape(txt)
 		})
+
+
+@frappe.whitelist()
+def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
+	# Should be used when item code is passed in filters.
+	conditions = []
+	response = frappe.db.sql("""select distinct `tabWarehouse`.name,
+			CONCAT_WS(" : ", "Actual Qty", ifnull(round(`tabBin`.actual_qty, 2), 0))
+			from `tabWarehouse` INNER JOIN `tabBin`
+			on `tabWarehouse`.name = `tabBin`.warehouse
+			where
+			   `tabWarehouse`.`{key}` like %(txt)s
+				{fcond} {mcond}
+			order by
+				`tabWarehouse`.name, `tabBin`.actual_qty desc
+			limit
+				%(start)s, %(page_len)s """.format(
+					key=frappe.db.escape(searchfield),
+					fcond=get_filters_cond(doctype, filters, conditions),
+					mcond=get_match_cond(doctype)
+				),
+				{
+					"txt": "%%%s%%" % frappe.db.escape(txt),
+					"start": start,
+					"page_len": page_len,
+				})
+	return response

@@ -133,3 +133,19 @@ erpnext.queries.setup_queries = function(frm, options, query_fn) {
 			set_query(df.options, df.fieldname);
 		});
 }
+
+/* 	if item code is selected in child table
+	then list down warehouses with its quantity
+	else apply default filters.
+*/
+erpnext.queries.setup_warehouse_query = function(frm){
+	frm.set_query('warehouse', 'items', function(doc, cdt, cdn) {
+		var row  = locals[cdt][cdn];
+		var filters = erpnext.queries.warehouse(frm.doc);
+		if(row.item_code){
+			$.extend(filters, {"query":"erpnext.controllers.queries.warehouse_query"});
+			filters["filters"].push(["Bin", "item_code", "=", row.item_code]);
+		}
+		return filters
+	});
+}
