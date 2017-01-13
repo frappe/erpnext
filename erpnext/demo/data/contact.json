@@ -105,60 +105,60 @@
   "links": [{"link_doctype": "Supplier", "link_name": "Helios Air"}],
   "email_id": "TewoldeAbaalom@example.com",
   "first_name": "Tewolde",
-  "last_name": "Abaalom",
+  "last_name": "Abaalom"
  },
  {
   "links": [{"link_doctype": "Supplier", "link_name": "Ks Merchandise"}],
   "email_id": "LeilaFernandesRodrigues@example.com",
   "first_name": "Leila",
-  "last_name": "Rodrigues",
+  "last_name": "Rodrigues"
  },
  {
   "links": [{"link_doctype": "Supplier", "link_name": "HomeBase"}],
   "email_id": "DmitryBulgakov@example.com",
   "first_name": "Dmitry",
-  "last_name": "Bulgakov",
+  "last_name": "Bulgakov"
  },
  {
   "links": [{"link_doctype": "Supplier", "link_name": "Scott Ties"}],
   "email_id": "HaiducWhitfoot@example.com",
   "first_name": "Haiduc",
-  "last_name": "Whitfoot",
+  "last_name": "Whitfoot"
  },
  {
   "links": [{"link_doctype": "Supplier", "link_name": "Reliable Investments"}],
   "email_id": "SesseljaPetursdottir@example.com",
   "first_name": "Sesselja",
-  "last_name": "P\u00e9tursd\u00f3ttir",
+  "last_name": "P\u00e9tursd\u00f3ttir"
  },
  {
   "links": [{"link_doctype": "Supplier", "link_name": "Nan Duskin"}],
   "email_id": "HajdarPignar@example.com",
   "first_name": "Hajdar",
-  "last_name": "Pignar",
+  "last_name": "Pignar"
  },
  {
   "links": [{"link_doctype": "Supplier", "link_name": "Rainbow Records"}],
   "email_id": "GustavaLorenzo@example.com",
   "first_name": "Gustava",
-  "last_name": "Lorenzo",
+  "last_name": "Lorenzo"
  },
  {
   "links": [{"link_doctype": "Supplier", "link_name": "New World Realty"}],
   "email_id": "BethanyWood@example.com",
   "first_name": "Bethany",
-  "last_name": "Wood",
+  "last_name": "Wood"
  },
  {
   "links": [{"link_doctype": "Supplier", "link_name": "Asiatic Solutions"}],
   "email_id": "GlorianaBrownlock@example.com",
   "first_name": "Gloriana",
-  "last_name": "Brownlock",
+  "last_name": "Brownlock"
  },
  {
   "links": [{"link_doctype": "Supplier", "link_name": "Eagle Hardware"}],
   "email_id": "JensonFraser@gustr.com",
   "first_name": "Jenson",
-  "last_name": "Fraser",
+  "last_name": "Fraser"
  }
 ]

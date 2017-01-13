@@ -34,6 +34,19 @@ def load_address_and_contact(doc, key):
 
 		doc.set_onload('contact_list', contact_list)
 
+def set_default_role(doc, method):
+	'''Set customer, supplier, student based on email'''
+	contact_name = frappe.get_value('Contact', dict(email_id=doc.email))
+	if contact_name:
+		contact = frappe.get_doc('Contact', contact_name)
+		for link in contact.links:
+			if link.link_doctype=='Customer':
+				doc.add_roles('Customer')
+			elif link.link_doctype=='Supplier':
+				doc.add_roles('Supplier')
+	elif frappe.get_value('Student', dict(student_email_id=doc.email)):
+		doc.add_roles('Student')
+
 def has_permission(doc, ptype, user):
 	links = get_permitted_and_not_permitted_links(doc.doctype)
 	if not links.get("not_permitted_links"):
@@ -105,3 +118,14 @@ def get_permitted_and_not_permitted_links(doctype):
 		"permitted_links": permitted_links,
 		"not_permitted_links": not_permitted_links
 	}
+
+def delete_contact_and_address(doctype, name):
+	for parenttype in ('Contact', 'Address'):
+		items = frappe.db.sql("""select parent from `tabDynamic Link`
+			where parenttype=%s and link_type=%s and link_name=%s""",
+			(parenttype, doctype, name))
+
+		for name in items:
+			doc = frappe.get_doc(parenttype, name)
+			if len(doc.links)==1:
+				doc.delete()

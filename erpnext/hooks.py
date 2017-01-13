@@ -114,10 +114,8 @@ portal_menu_items = [
 ]
 
 default_roles = [
-	{'role': 'Customer', 'doctype':'Contact', 'email_field': 'email_id',
-		'filters': {'ifnull(customer, "")': ('!=', '')}},
-	{'role': 'Supplier', 'doctype':'Contact', 'email_field': 'email_id',
-		'filters': {'ifnull(supplier, "")': ('!=', '')}},
+	{'role': 'Customer', 'doctype':'Contact', 'email_field': 'email_id'},
+	{'role': 'Supplier', 'doctype':'Contact', 'email_field': 'email_id'},
 	{'role': 'Student', 'doctype':'Student', 'email_field': 'student_email_id'}
 ]
 
@@ -154,9 +152,10 @@ doc_events = {
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty"
 	},
 	"User": {
+		"after_insert": "frappe.email.doctype.contact.contact.update_contact",
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
 		"on_update": "erpnext.hr.doctype.employee.employee.update_user_permissions",
-		"on_update": "frappe.email.doctype.contact.contact.update_contact"
+		"on_update": "erpnext.utilities.address_and_contact.set_default_role"
 	},
 	("Sales Taxes and Charges Template", 'Price List'): {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"

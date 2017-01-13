@@ -32,7 +32,7 @@ def setup(domain):
 	import_json('Contact')
 	import_json('Lead')
 	setup_currency_exchange()
-	setup_mode_of_payment()
+	#setup_mode_of_payment()
 	setup_account_to_expense_type()
 	setup_budget()
 	setup_pos_profile()

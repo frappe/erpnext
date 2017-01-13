@@ -5,7 +5,7 @@
   "city": "Larnaka",
   "country": "Cyprus",
   "links": [{"link_doctype": "Customer", "link_name": "Adaptas"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "R Patr\u00e3o Caramelho 116",
@@ -13,7 +13,7 @@
   "city": "Fajozes",
   "country": "Portugal",
   "links": [{"link_doctype": "Customer", "link_name": "Asian Fusion"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "30 Fulford Road",
@@ -21,7 +21,7 @@
   "city": "PENTRE-PIOD",
   "country": "United Kingdom",
   "links": [{"link_doctype": "Customer", "link_name": "Asian Junction"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "Schoenebergerstrasse 13",
@@ -29,7 +29,7 @@
   "city": "Raschau",
   "country": "Germany",
   "links": [{"link_doctype": "Customer", "link_name": "Big D Supermarkets"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "Hoheluftchaussee 43",
@@ -37,7 +37,7 @@
   "city": "Kieritzsch",
   "country": "Germany",
   "links": [{"link_doctype": "Customer", "link_name": "Buttrey Food & Drug"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "R Cimo Vila 6",
@@ -45,7 +45,7 @@
   "city": "Rebordosa",
   "country": "Portugal",
   "links": [{"link_doctype": "Customer", "link_name": "Chi-Chis"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "R 5 Outubro 9",
@@ -53,7 +53,7 @@
   "city": "Quinta Nova S\u00e3o Domingos",
   "country": "Portugal",
   "links": [{"link_doctype": "Customer", "link_name": "Choices"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "Avenida Macambira 953",
@@ -61,7 +61,7 @@
   "city": "Goi\u00e2nia",
   "country": "Brazil",
   "links": [{"link_doctype": "Customer", "link_name": "Consumers and Consumers Express"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "2342 Goyeau Ave",
@@ -69,7 +69,7 @@
   "city": "Windsor",
   "country": "Canada",
   "links": [{"link_doctype": "Customer", "link_name": "Crafts Canada"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "Laukaantie 82",
@@ -77,7 +77,7 @@
   "city": "KOKKOLA",
   "country": "Finland",
   "links": [{"link_doctype": "Customer", "link_name": "Endicott Shoes"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "9 Brown Street",
@@ -85,7 +85,7 @@
   "city": "PETERSHAM",
   "country": "Australia",
   "links": [{"link_doctype": "Customer", "link_name": "Fayva"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "Via Donnalbina 41",
@@ -93,7 +93,7 @@
   "city": "Cala Gonone",
   "country": "Italy",
   "links": [{"link_doctype": "Customer", "link_name": "Intelacard"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "Liljerum Grenadj\u00e4rtorpet 69",
@@ -101,7 +101,7 @@
   "city": "TOMTEBODA",
   "country": "Sweden",
   "links": [{"link_doctype": "Customer", "link_name": "Landskip Yard Care"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "72 Bishopgate Street",
@@ -109,7 +109,7 @@
   "city": "SEAHAM",
   "country": "United Kingdom",
   "links": [{"link_doctype": "Customer", "link_name": "Life Plan Counselling"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "\u03a3\u03ba\u03b1\u03c6\u03af\u03b4\u03b9\u03b1 105",
@@ -117,7 +117,7 @@
   "city": "\u03a0\u0391\u03a1\u0395\u039a\u039a\u039b\u0397\u03a3\u0399\u0391",
   "country": "Cyprus",
   "links": [{"link_doctype": "Customer", "link_name": "Mr Fables"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "Mellemvej 7",
@@ -125,7 +125,7 @@
   "city": "Aabybro",
   "country": "Denmark",
   "links": [{"link_doctype": "Customer", "link_name": "Nelson Brothers"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "Plougg\u00e5rdsvej 98",
@@ -133,7 +133,7 @@
   "city": "Karby",
   "country": "Denmark",
   "links": [{"link_doctype": "Customer", "link_name": "Netobill"}],
-  "phone": "23566775757",
+  "phone": "23566775757"
  },
  {
   "address_line1": "176 Michalakopoulou Street",
@@ -141,7 +141,7 @@
   "city": "Agio Georgoudi",
   "country": "Cyprus",
   "phone": "23566775757",
-  "links": [{"link_doctype": "Supplier", "link_name": "Helios Air"}],
+  "links": [{"link_doctype": "Supplier", "link_name": "Helios Air"}]
  },
  {
   "address_line1": "Fibichova 1102",
@@ -149,7 +149,7 @@
   "city": "Kokor\u00edn",
   "country": "Czech Republic",
   "phone": "23566775757",
-  "links": [{"link_doctype": "Supplier", "link_name": "Ks Merchandise"}],
+  "links": [{"link_doctype": "Supplier", "link_name": "Ks Merchandise"}]
  },
  {
   "address_line1": "Zahradn\u00ed 888",
@@ -157,7 +157,7 @@
   "city": "Cecht\u00edn",
   "country": "Czech Republic",
   "phone": "23566775757",
-  "links": [{"link_doctype": "Supplier", "link_name": "HomeBase"}],
+  "links": [{"link_doctype": "Supplier", "link_name": "HomeBase"}]
  },
  {
   "address_line1": "ul. Grochowska 94",
@@ -165,7 +165,7 @@
   "city": "Warszawa",
   "country": "Poland",
   "phone": "23566775757",
-  "links": [{"link_doctype": "Supplier", "link_name": "Scott Ties"}],
+  "links": [{"link_doctype": "Supplier", "link_name": "Scott Ties"}]
  },
  {
   "address_line1": "Norra Esplanaden 87",
@@ -173,7 +173,7 @@
   "city": "HELSINKI",
   "country": "Finland",
   "phone": "23566775757",
-  "links": [{"link_doctype": "Supplier", "link_name": "Reliable Investments"}],
+  "links": [{"link_doctype": "Supplier", "link_name": "Reliable Investments"}]
  },
  {
   "address_line1": "2038 Fallon Drive",
@@ -181,7 +181,7 @@
   "city": "Dresden",
   "country": "Canada",
   "phone": "23566775757",
-  "links": [{"link_doctype": "Supplier", "link_name": "Nan Duskin"}],
+  "links": [{"link_doctype": "Supplier", "link_name": "Nan Duskin"}]
  },
  {
   "address_line1": "77 cours Franklin Roosevelt",
@@ -189,7 +189,7 @@
   "city": "MARSEILLE",
   "country": "France",
   "phone": "23566775757",
-  "links": [{"link_doctype": "Supplier", "link_name": "Rainbow Records"}],
+  "links": [{"link_doctype": "Supplier", "link_name": "Rainbow Records"}]
  },
  {
   "address_line1": "ul. Tuwima Juliana 85",
@@ -197,7 +197,7 @@
   "city": "\u0141\u00f3d\u017a",
   "country": "Poland",
   "phone": "23566775757",
-  "links": [{"link_doctype": "Supplier", "link_name": "New World Realty"}],
+  "links": [{"link_doctype": "Supplier", "link_name": "New World Realty"}]
  },
  {
   "address_line1": "Gl. Sygehusvej 41",
@@ -205,7 +205,7 @@
   "city": "Narsaq",
   "country": "Greenland",
   "phone": "23566775757",
-  "links": [{"link_doctype": "Supplier", "link_name": "Asiatic Solutions"}],
+  "links": [{"link_doctype": "Supplier", "link_name": "Asiatic Solutions"}]
  },
  {
   "address_line1": "Gosposka ulica 50",
@@ -213,6 +213,6 @@
   "city": "Nova Gorica",
   "country": "Slovenia",
   "phone": "23566775757",
-  "links": [{"link_doctype": "Supplier", "link_name": "Eagle Hardware"}],
+  "links": [{"link_doctype": "Supplier", "link_name": "Eagle Hardware"}]
  }
 ]
