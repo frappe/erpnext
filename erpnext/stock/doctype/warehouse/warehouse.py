@@ -269,26 +269,13 @@ def get_children():
 
 @frappe.whitelist()
 def add_node():
-	doctype = frappe.form_dict.get('doctype')
-	company = frappe.form_dict.get('company')
-	parent_field = 'parent_' + doctype.lower().replace(' ', '_')
-	name_field = doctype.lower().replace(' ', '_') + '_name'
+	from frappe.desk.treeview import make_tree_args
+	args = make_tree_args(**frappe.form_dict)
 
-	doc = frappe.new_doc(doctype)
+	if cint(args.is_root):
+		args.parent_warehouse = None
 
-	parent = frappe.form_dict['parent']
-
-	if cint(frappe.form_dict['is_root']):
-		parent = None
-
-	doc.update({
-		name_field: frappe.form_dict['warehouse_name'],
-		parent_field: parent,
-		"is_group": frappe.form_dict['is_group'],
-		"company": company
-	})
-
-	doc.save()
+	frappe.get_doc(args).insert()
 
 @frappe.whitelist()
 def convert_to_group_or_ledger():

@@ -237,9 +237,12 @@ def get_count_on(account, fieldname, date):
 
 @frappe.whitelist()
 def add_ac(args=None):
+	from frappe.desk.treeview import make_tree_args
+
 	if not args:
 		args = frappe.local.form_dict
-		args.pop("cmd")
+
+	args = make_tree_args(**args)
 
 	ac = frappe.new_doc("Account")
 
@@ -264,9 +267,12 @@ def add_ac(args=None):
 
 @frappe.whitelist()
 def add_cc(args=None):
+	from frappe.desk.treeview import make_tree_args
+
 	if not args:
 		args = frappe.local.form_dict
-		args.pop("cmd")
+
+	args = make_tree_args(**args)
 
 	cc = frappe.new_doc("Cost Center")
 	cc.update(args)

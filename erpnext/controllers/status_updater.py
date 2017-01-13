@@ -103,6 +103,8 @@ class StatusUpdater(Document):
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
 			return
 
 		if self.doctype in status_map:

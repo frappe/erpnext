@@ -42,9 +42,6 @@ def get_item_details(args):
 
 	get_party_item_code(args, item_doc, out)
 
-	if out.get("warehouse"):
-		out.update(get_bin_details(args.item_code, out.warehouse))
-
 	if frappe.db.exists("Product Bundle", args.item_code):
 		valuation_rate = 0.0
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
@@ -65,6 +62,9 @@ def get_item_details(args):
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args))
+		
+	if out.get("warehouse"):
+		out.update(get_bin_details(args.item_code, out.warehouse))
 
 	# update args with out, if key or value not exists
 	for key, value in out.iteritems():

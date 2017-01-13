@@ -102,7 +102,7 @@ def get_item_warehouse_map(filters):
 				"in_qty": 0.0, "in_val": 0.0,
 				"out_qty": 0.0, "out_val": 0.0,
 				"bal_qty": 0.0, "bal_val": 0.0,
-				"val_rate": 0.0, "uom": None
+				"val_rate": 0.0
 			})
 
 		qty_dict = iwb_map[(d.company, d.item_code, d.warehouse)]
@@ -129,6 +129,24 @@ def get_item_warehouse_map(filters):
 		qty_dict.val_rate = d.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
+		
+	iwb_map = filter_items_with_no_transactions(iwb_map)
+
+	return iwb_map
+	
+def filter_items_with_no_transactions(iwb_map):
+	for (company, item, warehouse) in sorted(iwb_map):
+		qty_dict = iwb_map[(company, item, warehouse)]
+		
+		no_transactions = True
+		for key, val in qty_dict.items():
+			val = flt(val, 3)
+			qty_dict[key] = val
+			if key != "val_rate" and val:
+				no_transactions = False
+		
+		if no_transactions:
+			iwb_map.pop((company, item, warehouse))
 
 	return iwb_map
 
