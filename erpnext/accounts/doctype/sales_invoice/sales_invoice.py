@@ -532,10 +532,12 @@ class SalesInvoice(SellingController):
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
-	def make_gl_entries(self, repost_future_gle=True):
+	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
 			return
-		gl_entries = self.get_gl_entries()
+			
+		if not gl_entries:
+			gl_entries = self.get_gl_entries()
 
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries

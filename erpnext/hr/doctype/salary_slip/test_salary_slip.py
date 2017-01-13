@@ -134,7 +134,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertTrue(email_queue)
 
 	def test_payroll_frequency(self):
-		fiscal_year = get_fiscal_year(nowdate())[0]
+		fiscal_year = get_fiscal_year(nowdate(), company="_Test Company")[0]
 		month = "%02d" % getdate(nowdate()).month
 		m = get_month_details(fiscal_year, month)
 
@@ -185,7 +185,7 @@ class TestSalarySlip(unittest.TestCase):
 			}).insert()
 
 	def make_holiday_list(self):
-		fiscal_year = get_fiscal_year(nowdate())
+		fiscal_year = get_fiscal_year(nowdate(), company="_Test Company")
 		if not frappe.db.get_value("Holiday List", "Salary Slip Test Holiday List"):
 			holiday_list = frappe.get_doc({
 				"doctype": "Holiday List",

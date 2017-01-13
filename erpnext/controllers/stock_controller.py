@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt, cstr
+from frappe.utils import cint, flt, cstr, now
 from frappe import msgprint, _
 import frappe.defaults
 from erpnext.accounts.utils import get_fiscal_year
@@ -15,7 +15,7 @@ class StockController(AccountsController):
 		super(StockController, self).validate()
 		self.validate_inspection()
 	
-	def make_gl_entries(self, repost_future_gle=True):
+	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -23,8 +23,9 @@ class StockController(AccountsController):
 			warehouse_account = get_warehouse_account()
 
 			if self.docstatus==1:
-				gl_entries = self.get_gl_entries(warehouse_account)
-				make_gl_entries(gl_entries)
+				if not gl_entries:
+					gl_entries = self.get_gl_entries(warehouse_account)
+				make_gl_entries(gl_entries, from_repost=from_repost)
 
 			if repost_future_gle:
 				items, warehouses = self.get_items_and_warehouses()
@@ -224,7 +225,7 @@ class StockController(AccountsController):
 	def make_gl_entries_on_cancel(self, repost_future_gle=True):
 		if frappe.db.sql("""select name from `tabGL Entry` where voucher_type=%s
 			and voucher_no=%s""", (self.doctype, self.name)):
-				self.make_gl_entries(repost_future_gle)
+				self.make_gl_entries(repost_future_gle=repost_future_gle)
 
 	def get_serialized_items(self):
 		serialized_items = []
@@ -308,7 +309,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 		if expected_gle:
 			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
 				_delete_gl_entries(voucher_type, voucher_no)
-				voucher_obj.make_gl_entries(repost_future_gle=False)
+				voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
 
@@ -363,10 +364,14 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 	return gl_entries
 
 def get_warehouse_account():
-	warehouse_account = frappe._dict()
+	if not frappe.flags.warehouse_account_map:
+		warehouse_account = frappe._dict()
 
-	for d in frappe.db.sql("""select warehouse, name, account_currency from tabAccount
-		where account_type = 'Stock' and (warehouse is not null and warehouse != ''
-		and is_group != 1) and is_group=0 """, as_dict=1):
-			warehouse_account.setdefault(d.warehouse, d)
-	return warehouse_account
+		for d in frappe.db.sql("""select warehouse, name, account_currency from tabAccount
+			where account_type = 'Stock' and (warehouse is not null and warehouse != ''
+			and is_group != 1) and is_group=0 """, as_dict=1):
+				warehouse_account.setdefault(d.warehouse, d)
+		
+		frappe.flags.warehouse_account_map = warehouse_account
+		
+	return frappe.flags.warehouse_account_map
