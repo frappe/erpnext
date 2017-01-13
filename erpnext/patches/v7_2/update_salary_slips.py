@@ -2,6 +2,10 @@ import frappe
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 
 def execute():
+	ss_columns = frappe.db.get_table_columns("Salary Slip")
+	if "fiscal_year" not in ss_columns or "month" not in ss_columns:
+		return
+		
 	salary_slips = frappe.db.sql("""select fiscal_year, month, name from `tabSalary Slip` 
 				where (month is not null and month != '') 
 				and (fiscal_year is not null and fiscal_year != '') and
