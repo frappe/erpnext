@@ -65,7 +65,6 @@ class PurchaseInvoice(BuyingController):
 		self.validate_fixed_asset()
 		self.validate_fixed_asset_account()
 		self.create_remarks()
-		self.set_status()
 
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
