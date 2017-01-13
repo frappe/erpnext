@@ -4,11 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 import math
-from frappe import _
+from frappe import _, msgprint
 from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
 	add_months, add_days, formatdate, cint)
 
-def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
+def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, from_month, to_month):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
@@ -16,8 +16,15 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 	validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year)
 
 	# start with first day, so as to avoid year to_dates like 2-April if ever they occur]
+
+	year_start_date = getdate(from_fy_start_end_date[0])
+       
+	year_end_date = getdate(to_fy_start_end_date[1])
+       
+	validate_fiscal_year(year_start_date, year_end_date)
 	year_start_date = getdate(fiscal_year.year_start_date)
 	year_end_date = getdate(fiscal_year.year_end_date)
+
 
 	months_to_add = {
 		"Yearly": 12,
@@ -29,42 +36,63 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 	period_list = []
 
 	start_date = year_start_date
-	months = get_months(year_start_date, year_end_date)
-
+	months = get_months(year_start_date, year_end_date, from_month, to_month)
+                
 	for i in xrange(months / months_to_add):
 		period = frappe._dict({
-			"from_date": start_date
+			"from_date": from_month
 		})
+
+               
+		to_date = add_months(from_month, months_to_add)
+               
+		from_month = to_date
+               
+   #             if to_date == getdate(get_first_day(to_date)):
+
 
 		to_date = add_months(start_date, months_to_add)
 		start_date = to_date
 
 		if to_date == get_first_day(to_date):
+
 			# if to_date is the first day, get the last day of previous month
 			to_date = add_days(to_date, -1)
 
+    
+	#	else:
+			# to_date should be the last day of the new to_date's month
+#			to_date = get_last_day(to_date)
+ 
+                
+		if getdate(to_date) <= getdate(year_end_date):
+
+
 		if to_date <= year_end_date:
+
 			# the normal case
-			period.to_date = to_date
+			period.to_date = getdate(to_date)
 		else:
 			# if a fiscal year ends before a 12 month period
-			period.to_date = year_end_date
+			period.to_date = getdate(year_end_date)
 
 		period.to_date_fiscal_year = get_date_fiscal_year(period.to_date)
-
+               
 		period_list.append(period)
-
+                
 		if period.to_date == year_end_date:
 			break
 
 	# common processing
 	for opts in period_list:
+               
 		key = opts["to_date"].strftime("%b_%Y").lower()
+               
 		if periodicity == "Monthly":
 			label = formatdate(opts["to_date"], "MMM YYYY")
 		else:
 			label = get_label(periodicity, opts["from_date"], opts["to_date"])
-			
+		
 		opts.update({
 			"key": key.replace(" ", "_").replace("-", "_"),
 			"label": label,
@@ -86,9 +114,22 @@ def validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year):
 	if not fiscal_year.get('year_start_date') and not fiscal_year.get('year_end_date'):
 		frappe.throw(_("End Year cannot be before Start Year"))
 
-def get_months(start_date, end_date):
-	diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
-	return diff + 1
+#def get_months(start_date, end_date):
+#	diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
+        
+#	return diff + 1
+
+def get_months(start_date, end_date, from_month, to_month):
+         fr_mth = getdate(from_month).month
+         to_mth = getdate(to_month).month
+         fr_yr = getdate(from_month).year
+         to_yr = getdate(to_month).year
+        
+  #       diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
+         diff = (12 * to_yr + to_mth) - (12 * fr_yr + fr_mth)
+        
+	 return diff + 1
+
 
 def get_label(periodicity, from_date, to_date):
 	if periodicity=="Yearly":
@@ -101,7 +142,7 @@ def get_label(periodicity, from_date, to_date):
 
 	return label
 	
-def get_data(company, root_type, balance_must_be, period_list, filters=None,
+def get_data(company, root_type, balance_must_be, period_list, exchange_rate, filters=None,
 		accumulated_values=1, only_current_fiscal_year=True, ignore_closing_entries=False,
 		ignore_accumulated_values_for_fy=False):
 	accounts = get_accounts(company, root_type)
@@ -122,31 +163,46 @@ def get_data(company, root_type, balance_must_be, period_list, filters=None,
 			root.lft, root.rgt, filters,
 			gl_entries_by_account, ignore_closing_entries=ignore_closing_entries)
 
-	calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy)
+	calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy, exchange_rate)
 	accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values)
 	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
 	out = filter_out_zero_value_rows(out, parent_children_map)
 	
 	if out:
+
 		add_total_row(out, root_type, balance_must_be, period_list, company_currency)
 
 	return out
 
-def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy):
+def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy, exchange_rate):
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
+                        
 			for period in period_list:
 				# check if posting date is within the period
+
+                                fiscal_year = get_date_fiscal_year(entry.posting_date)
+                                
+                                if entry.posting_date <= period.to_date:
+					if (accumulated_values or entry.posting_date >= getdate(period.from_date)) and \
+						(fiscal_year == period.to_date_fiscal_year or not ignore_accumulated_values_for_fy):
+                                                
+						d[period.key] = (d.get(period.key, 0.0) + ((flt(entry.debit) - flt(entry.credit)) / flt(exchange_rate)))
+                                
+
 
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and \
 						(entry.fiscal_year == period.to_date_fiscal_year or not ignore_accumulated_values_for_fy):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
 
+
 			if entry.posting_date < period_list[0].year_start_date:
-				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
-				
+				d["opening_balance"] = (d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)) 
+                        
+
+			
 def get_date_fiscal_year(date):
 	from erpnext.accounts.utils import get_fiscal_year
 	
@@ -194,7 +250,7 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 				has_value = True
 				total += flt(row[period.key])
 
-		row["has_value"] = has_value
+		row["has_value"] = has_value 
 		row["total"] = total
 		data.append(row)
 		
@@ -348,12 +404,12 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 			"options": "Currency",
 			"hidden": 1
 		})
+                
 	for period in period_list:
 		columns.append({
 			"fieldname": period.key,
 			"label": period.label,
 			"fieldtype": "Currency",
-			"options": "currency",
 			"width": 150
 		})
 	if periodicity!="Yearly":

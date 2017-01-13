@@ -29,7 +29,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			"fieldtype": "Float"
 		},
                 {
-			"fieldname": "from_month",
+			"fieldname": "Month",
 			"label": __("From Month"),
 			"fieldtype": "Date"
                         

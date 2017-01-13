@@ -33,7 +33,7 @@ frappe.query_reports["Sales Register"] = {
 			"fieldname":"inter_transfer",
 			"label": __("Include Inter Transfer"),
 			"fieldtype": "Data",
-                        "default": "Y"
+                        "default": "1"
 			
 		},
 		{

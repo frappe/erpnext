@@ -1,13 +1,13 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.query_reports["Sales Register"] = {
+frappe.query_reports["Purchase Register"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": frappe.defaults.get_default("year_start_date"),
+			"default": frappe.defaults.get_user_default("year_start_date"),
 			"width": "80"
 		},
 		{
@@ -17,10 +17,10 @@ frappe.query_reports["Sales Register"] = {
 			"default": get_today()
 		},
 		{
-			"fieldname":"customer",
-			"label": __("Customer"),
+			"fieldname":"supplier",
+			"label": __("Supplier"),
 			"fieldtype": "Link",
-			"options": "Customer"
+			"options": "Supplier"
 		},
 		{
 			"fieldname":"company",
@@ -28,13 +28,6 @@ frappe.query_reports["Sales Register"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company")
-		},
-                {
-			"fieldname":"inter_transfer",
-			"label": __("Include Inter Transfer"),
-			"fieldtype": "Data",
-                        "default": "Y"
-			
 		},
 		{
 			"fieldname":"mode_of_payment",

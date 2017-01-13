@@ -22,7 +22,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
                         cur_frm.add_custom_button(__("Make Communication"), function() {
 					frappe.route_options = {
-						reference_doctype: "Quotation",
+						reference_doctype: "Quotation,
                                                 reference_name: cur_frm.doc.name
 					}
 					frappe.set_route("List", "Communication");

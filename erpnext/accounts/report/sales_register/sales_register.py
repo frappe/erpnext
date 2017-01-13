@@ -108,7 +108,9 @@ def get_columns(invoice_list):
 def get_conditions(filters):
 	conditions = ""
 
-	if filters.get("company"): conditions += " and company=%(company)s"
+	if filters.get("company"): conditions += " and acc.company=%(company)s"
+        if filters.get("inter_transfer") == 'N':
+		conditions += " and ifnull(acc.inter_transfer, '') = ''"
 	if filters.get("customer"): conditions += " and customer = %(customer)s"
 
 	if filters.get("from_date"): conditions += " and posting_date >= %(from_date)s"
@@ -123,10 +125,17 @@ def get_conditions(filters):
 
 def get_invoices(filters):
 	conditions = get_conditions(filters)
+
+	return frappe.db.sql("""select inv.name, posting_date, debit_to, project, customer, customer_name, remarks, 
+		base_net_total, base_grand_total, base_rounded_total, outstanding_amount, mode_of_payment
+		from `tabSales Invoice` inv, `tabAccount` acc
+		where inv.debit_to = acc.name and inv.docstatus = 1 %s order by posting_date desc, name desc""" %
+
 	return frappe.db.sql("""select name, posting_date, debit_to, project, customer, customer_name, remarks, 
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date desc, name desc""" %
+
 		conditions, filters, as_dict=1)
 
 def get_invoice_income_map(invoice_list):

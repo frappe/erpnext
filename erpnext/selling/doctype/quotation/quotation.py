@@ -84,6 +84,7 @@ class Quotation(SellingController):
 		return print_lst
 
 
+
 @frappe.whitelist()
 def make_sales_order(source_name, target_doc=None):
 	return _make_sales_order(source_name, target_doc)

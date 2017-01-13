@@ -30,12 +30,20 @@ class ProgramEnrollment(Document):
 		
 	def make_fee_records(self):
 		from erpnext.schools.api import get_fee_components
+		from erpnext.schools.api import get_program_fees
 		fee_list = []
-		for d in self.fees:
-			fee_components = get_fee_components(d.fee_structure)
+               	for d in self.fees:
+			
+                        fee_components = get_fee_components(d.fee_structure)
+			print(fee_components)
+	        	fs = get_program_fees(d.fee_structure)
+                        print(fs)
+                        fee_components[0][0] = fs
+                                               
+
 			if fee_components:
 				fees = frappe.new_doc("Fees")
-				fees.update({
+                                fees.update({
 					"student": self.student,
 					"academic_year": self.academic_year,
 					"academic_term": d.academic_term,

@@ -99,8 +99,13 @@ function get_filters(){
 			],
 			"default": "Monthly",
 			"reqd": 1
-         	}
+		},
                
-               
+                {
+			"fieldname":"exchange_rate",
+			"label": __("Exchange Rate"),
+			"fieldtype": "data",
+			"reqd": 1
+		}
 	]
 }
