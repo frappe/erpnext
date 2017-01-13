@@ -19,7 +19,7 @@ class Address(Document):
 	def autoname(self):
 		if not self.address_title:
 			self.address_title = self.customer \
-				or self.supplier or self.sales_partner or self.lead
+				or self.supplier or self.sales_partner or self.lead or self.organisation
 
 		if self.address_title:
 			self.name = (cstr(self.address_title).strip() + "-" + cstr(self.address_type).strip())
@@ -30,7 +30,7 @@ class Address(Document):
 			throw(_("Address Title is mandatory."))
 
 	def validate(self):
-		self.link_fields = ("customer", "supplier", "sales_partner", "lead")
+		self.link_fields = ("customer", "supplier", "sales_partner", "lead", "organisation")
 		self.link_address()
 		self.validate_primary_address()
 		self.validate_shipping_address()
@@ -83,7 +83,7 @@ class Address(Document):
 				frappe.throw(_("Remove reference of customer, supplier, sales partner and lead, as it is your company address"))
 
 	def _unset_other(self, is_address_type):
-		for fieldname in ["customer", "supplier", "sales_partner", "lead"]:
+		for fieldname in ["customer", "supplier", "sales_partner", "lead", "organisation"]:
 			if self.get(fieldname):
 				frappe.db.sql("""update `tabAddress` set `%s`=0 where `%s`=%s and name!=%s""" %
 					(is_address_type, fieldname, "%s", "%s"), (self.get(fieldname), self.name))
