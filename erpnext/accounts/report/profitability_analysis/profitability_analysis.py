@@ -23,7 +23,7 @@ def get_accounts_data(based_on, company):
 		return frappe.db.sql("""select name, parent_cost_center as parent_account, cost_center_name as account_name, lft, rgt
 			from `tabCost Center` where company=%s order by lft""", company, as_dict=True)
 	else:
-		return frappe.get_all('Project', fields = ["name"], filters = {'company': company})
+		return frappe.get_all('Project', fields = ["name"], filters = {'company': company}, order_by = 'name')
 
 def get_data(accounts, filters, based_on):
 	if not accounts:
