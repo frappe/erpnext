@@ -127,7 +127,6 @@ has_website_permission = {
 	"Supplier Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
-	"Address": "erpnext.utilities.doctype.address.address.has_website_permission",
 	"Discussion": "erpnext.schools.web_form.discussion.discussion.has_website_permission"
 }
 
@@ -157,17 +156,11 @@ doc_events = {
 	"User": {
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
 		"on_update": "erpnext.hr.doctype.employee.employee.update_user_permissions",
-		"on_update": "erpnext.utilities.doctype.contact.contact.update_contact"
+		"on_update": "frappe.email.doctype.contact.contact.update_contact"
 	},
 	("Sales Taxes and Charges Template", 'Price List'): {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
-	"Address": {
-		"validate": "erpnext.shopping_cart.cart.set_customer_in_address"
-	},
-	"Communication":{
- 		"after_insert":"erpnext.utilities.doctype.contact.match_email_to_contact"
- 	},
 
 	# bubble transaction notification on master
 	('Opportunity', 'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',

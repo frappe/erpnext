@@ -6,7 +6,7 @@ import frappe
 from frappe import throw, _
 import frappe.defaults
 from frappe.utils import cint, flt, get_fullname, cstr
-from erpnext.utilities.doctype.address.address import get_address_display
+from frappe.geo.doctype.address.address import get_address_display
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
 from frappe.utils.nestedset import get_root_of
 from erpnext.accounts.utils import get_account_name
@@ -382,17 +382,6 @@ def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_
 		address.display = get_address_display(address)
 
 	return address_docs
-
-def set_customer_in_address(doc, method=None):
-	if doc.flags.linked:
-		return
-
-	doc.check_if_linked()
-
-	if not doc.flags.linked and (frappe.db.get_value("User", frappe.session.user, "user_type") == "Website User"):
-		# creates a customer if one does not exist
-		get_party()
-		doc.link_address()
 
 @frappe.whitelist()
 def apply_shipping_rule(shipping_rule):

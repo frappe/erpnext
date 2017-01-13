@@ -6,7 +6,12 @@ frappe.provide("erpnext.crm");
 cur_frm.email_field = "contact_email";
 frappe.ui.form.on("Opportunity", {
 	customer: function(frm) {
+		frm.trigger('set_contact_link');
 		erpnext.utils.get_party_details(frm);
+	},
+
+	lead: function(frm) {
+		frm.trigger('set_contact_link');
 	},
 
 	customer_address: function(frm, cdt, cdn) {
@@ -23,6 +28,8 @@ frappe.ui.form.on("Opportunity", {
 	refresh: function(frm) {
 		var doc = frm.doc;
 		frm.events.enquiry_from(frm);
+		frm.trigger('set_contact_link');
+
 		if(doc.status!=="Lost") {
 			if(doc.with_items){
 				frm.add_custom_button(__('Supplier Quotation'),
@@ -35,13 +42,21 @@ frappe.ui.form.on("Opportunity", {
 				cur_frm.cscript.create_quotation, __("Make"));
 
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
-		
+
 			if(doc.status!=="Quotation") {
 				frm.add_custom_button(__('Lost'),
 					cur_frm.cscript['Declare Opportunity Lost']);
 			}
 		}
 	},
+
+	set_contact_link: function(frm) {
+		if(frm.doc.customer) {
+			frappe.contact_link = {doc: frm.doc, fieldname: 'customer', doctype: 'Customer'}
+		} else if(frm.doc.lead) {
+			frappe.contact_link = {doc: frm.doc, fieldname: 'lead', doctype: 'Lead'}
+		}
+	}
 
 	make_supplier_quotation: function(frm) {
 		frappe.model.open_mapped_doc({
@@ -62,7 +77,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		if(!this.frm.doc.status)
 			set_multiple(this.frm.doc.doctype, this.frm.doc.name, { status:'Open' });
 		if(!this.frm.doc.company && frappe.defaults.get_user_default("Company"))
-			set_multiple(this.frm.doc.doctype, this.frm.doc.name, 
+			set_multiple(this.frm.doc.doctype, this.frm.doc.name,
 				{ company:frappe.defaults.get_user_default("Company") });
 
 		this.setup_queries();
@@ -75,10 +90,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			this.frm.set_query("contact_by", erpnext.queries.user);
 		}
 
-		this.frm.set_query("customer_address", function() {
-			if(me.frm.doc.lead) return {filters: { lead: me.frm.doc.lead } };
-			else if(me.frm.doc.customer) return {filters: { customer: me.frm.doc.customer } };
-		});
+		me.frm.set_query('customer_address', erpnext.queries.address_query);
 
 		this.frm.set_query("item_code", "items", function() {
 			return {

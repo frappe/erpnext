@@ -36,17 +36,41 @@ $.extend(erpnext.queries, {
 
 	customer_filter: function(doc) {
 		if(!doc.customer) {
-			frappe.throw(__("Please specify a") + " " +
-				__(frappe.meta.get_label(doc.doctype, "customer", doc.name)));
+			frappe.throw(__("Please set {0}", __(frappe.meta.get_label(doc.doctype, "customer", doc.name))));
 		}
 
 		return { filters: { customer: doc.customer } };
 	},
 
+	contact_query: function(doc) {
+		if(frappe.contact_link) {
+			if(!doc[frappe.contact_link.fieldname]) {
+				frappe.throw(__("Please set {0}", __(frappe.meta.get_label(doc.doctype,
+					frappe.contact_link.fieldname, doc.name))));
+			}
+
+			return {
+				query: 'frappe.email.doctype.contact.contact.contact_query',
+				filters: { link_doctype: frappe.contact_link.doctype, link_name: doc[frappe.contact_link.fieldname] } };
+		}
+	},
+
+	address_query: function(doc) {
+		if(frappe.contact_link) {
+			if(!doc[frappe.contact_link.fieldname]) {
+				frappe.throw(__("Please set {0}", __(frappe.meta.get_label(doc.doctype,
+					frappe.contact_link.fieldname, doc.name))));
+			}
+
+			return {
+				query: 'frappe.email.doctype.address.address_query',
+				filters: { link_doctype: frappe.contact_link.doctype, link_name: doc[frappe.contact_link.fieldname] } };
+		}
+	},
+
 	supplier_filter: function(doc) {
 		if(!doc.supplier) {
-			frappe.throw(__("Please specify a") + " " +
-				__(frappe.meta.get_label(doc.doctype, "supplier", doc.name)));
+			frappe.throw(__("Please set {0}", __(frappe.meta.get_label(doc.doctype, "supplier", doc.name))));
 		}
 
 		return { filters: { supplier: doc.supplier } };
@@ -74,7 +98,7 @@ $.extend(erpnext.queries, {
 			filters: [
 				["Warehouse", "company", "in", ["", cstr(doc.company)]],
 				["Warehouse", "is_group", "=",0]
-				
+
 			]
 		}
 	}
