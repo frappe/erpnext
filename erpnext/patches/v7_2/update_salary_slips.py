@@ -6,7 +6,7 @@ def execute():
 				where (month is not null and month != '') 
 				and (fiscal_year is not null and fiscal_year != '') and
 				(start_date is null  or start_date = '') and 
-				(end_date is null  or end_date = '') and docstatus != 2""")
+				(end_date is null  or end_date = '') and docstatus != 2""", as_dict=1)
 
 	for salary_slip in salary_slips:
 		get_start_end_date = get_month_details(salary_slip.fiscal_year, salary_slip.month)
