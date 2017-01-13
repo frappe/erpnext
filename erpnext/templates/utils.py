@@ -34,6 +34,8 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 
 	if customer:
 		opportunity.customer = customer
+	elif lead:
+		opportunity.lead = lead
 	else:
 		opportunity.lead = new_lead.name
 
