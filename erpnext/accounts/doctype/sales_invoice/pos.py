@@ -43,7 +43,11 @@ def get_pos_data():
 	}
 
 def get_meta():
-	doctype_meta = {'customer': frappe.get_meta('Customer')}
+	doctype_meta = {
+		'customer': frappe.get_meta('Customer'),
+		'invoice': frappe.get_meta('Sales Invoice')
+	}
+
 	for row in frappe.get_all('DocField', fields = ['fieldname', 'options'],
 		filters = {'parent': 'Sales Invoice', 'fieldtype': 'Table'}):
 		doctype_meta[row.fieldname] = frappe.get_meta(row.options)
