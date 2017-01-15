@@ -56,7 +56,7 @@ frappe.ui.form.on("Opportunity", {
 		} else if(frm.doc.lead) {
 			frappe.contact_link = {doc: frm.doc, fieldname: 'lead', doctype: 'Lead'}
 		}
-	}
+	},
 
 	make_supplier_quotation: function(frm) {
 		frappe.model.open_mapped_doc({
