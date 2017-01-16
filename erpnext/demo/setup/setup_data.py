@@ -163,11 +163,10 @@ def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 	ss.append('deductions', {
 		'salary_component': 'Income Tax',
 		"abbr":'IT',
-		'condition': 'base > 1000',
-		'amount': random.random() * 1000,
+		'condition': 'base > 10000',
+		'formula': 'base*.1',
 		"idx": 1
 	})
-
 	ss.insert()
 
 	return ss
