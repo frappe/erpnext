@@ -182,8 +182,7 @@ def _get_cart_quotation(party=None):
 			(party.doctype.lower()): party.name
 		})
 
-		qdoc.contact_person = frappe.db.get_value("Contact", {"email_id": frappe.session.user,
-			"customer": party.name})
+		qdoc.contact_person = frappe.db.get_value("Contact", {"email_id": frappe.session.user})
 		qdoc.contact_email = frappe.session.user
 
 		qdoc.flags.ignore_permissions = True
@@ -198,8 +197,7 @@ def update_party(fullname, company_name=None, mobile_no=None, phone=None):
 	party.customer_name = company_name or fullname
 	party.customer_type == "Company" if company_name else "Individual"
 
-	contact_name = frappe.db.get_value("Contact", {"email_id": frappe.session.user,
-		"customer": party.name})
+	contact_name = frappe.db.get_value("Contact", {"email_id": frappe.session.user})
 	contact = frappe.get_doc("Contact", contact_name)
 	contact.first_name = fullname
 	contact.last_name = None
@@ -291,10 +289,14 @@ def get_party(user=None):
 	if not user:
 		user = frappe.session.user
 
-	party = frappe.db.get_value("Contact", {"email_id": user}, ["customer", "supplier"], as_dict=1)
-	if party:
-		party_doctype = 'Customer' if party.customer else 'Supplier'
-		party = party.customer or party.supplier
+	contact_name = frappe.db.get_value("Contact", {"email_id": user})
+	party = None
+
+	if contact_name:
+		contact = frappe.get_doc('Contact', contact_name)
+		if contact.links:
+			party_doctype = contact.links[0].link_doctype
+			party = contact.links[0].link_name
 
 	cart_settings = frappe.get_doc("Shopping Cart Settings")
 
@@ -331,10 +333,10 @@ def get_party(user=None):
 
 		contact = frappe.new_doc("Contact")
 		contact.update({
-			"customer": customer.name,
 			"first_name": fullname,
 			"email_id": user
 		})
+		contact.append('links', dict(link_doctype='Customer', link_name=customer.name))
 		contact.flags.ignore_mandatory = True
 		contact.insert(ignore_permissions=True)
 
