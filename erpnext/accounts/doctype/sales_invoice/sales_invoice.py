@@ -532,10 +532,12 @@ class SalesInvoice(SellingController):
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
-	def make_gl_entries(self, repost_future_gle=True):
+	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
 			return
-		gl_entries = self.get_gl_entries()
+			
+		if not gl_entries:
+			gl_entries = self.get_gl_entries()
 
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
@@ -651,32 +653,34 @@ class SalesInvoice(SellingController):
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
 			for payment_mode in self.payments:
-				# POS, make payment entries
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": self.debit_to,
-						"party_type": "Customer",
-						"party": self.customer,
-						"against": payment_mode.account,
-						"credit": payment_mode.base_amount,
-						"credit_in_account_currency": payment_mode.base_amount \
-							if self.party_account_currency==self.company_currency \
-							else payment_mode.amount,
-						"against_voucher": self.return_against if cint(self.is_return) else self.name,
-						"against_voucher_type": self.doctype,
-					}, self.party_account_currency)
-				)
+				if payment_mode.amount:
+					# POS, make payment entries
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": self.debit_to,
+							"party_type": "Customer",
+							"party": self.customer,
+							"against": payment_mode.account,
+							"credit": payment_mode.base_amount,
+							"credit_in_account_currency": payment_mode.base_amount \
+								if self.party_account_currency==self.company_currency \
+								else payment_mode.amount,
+							"against_voucher": self.return_against if cint(self.is_return) else self.name,
+							"against_voucher_type": self.doctype,
+						}, self.party_account_currency)
+					)
 
-				payment_mode_account_currency = get_account_currency(payment_mode.account)
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": payment_mode.account,
-						"against": self.customer,
-						"debit": payment_mode.base_amount,
-						"debit_in_account_currency": payment_mode.base_amount \
-							if payment_mode_account_currency==self.company_currency else payment_mode.amount
-					}, payment_mode_account_currency)
-				)
+					payment_mode_account_currency = get_account_currency(payment_mode.account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": payment_mode.account,
+							"against": self.customer,
+							"debit": payment_mode.base_amount,
+							"debit_in_account_currency": payment_mode.base_amount \
+								if payment_mode_account_currency==self.company_currency \
+								else payment_mode.amount
+						}, payment_mode_account_currency)
+					)
 				
 	def make_gle_for_change_amount(self, gl_entries):
 		if cint(self.is_pos) and self.change_amount:

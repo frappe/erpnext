@@ -2,7 +2,7 @@
 <div class="clearfix"></div>
 {% for(var i=0, l=addr_list.length; i<l; i++) { %}
     <p class="h6">
-        {%= i+1 %}. {%= addr_list[i].address_type %}
+        {%= i+1 %}. {%= addr_list[i].address_type!="Other" ? addr_list[i].address_type : addr_list[i].address_title %}
         {% if(addr_list[i].is_primary_address) { %}
             <span class="text-muted">({%= __("Primary") %})</span>{% } %}
         {% if(addr_list[i].is_shipping_address) { %}

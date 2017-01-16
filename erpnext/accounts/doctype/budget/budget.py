@@ -63,7 +63,7 @@ def validate_expense_against_budget(args):
 				and frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
 
 			if args.project:
-				condition = "and exists(select name from `tabProject` where name=b.project)"
+				condition = "and b.project='%s'" % frappe.db.escape(args.project)
 				args.budget_against_field = "Project"
 			
 			elif args.cost_center:
@@ -88,12 +88,13 @@ def validate_expense_against_budget(args):
 			""".format(condition=condition, 
 				budget_against_field=frappe.scrub(args.get("budget_against_field"))),
 				(args.fiscal_year, args.account), as_dict=True)
-
-			validate_budget_records(args, budget_records)
+				
+			if budget_records:
+				validate_budget_records(args, budget_records)
 
 def validate_budget_records(args, budget_records):
 	for budget in budget_records:
-		if budget.budget_amount:
+		if flt(budget.budget_amount):
 			yearly_action = budget.action_if_annual_budget_exceeded
 			monthly_action = budget.action_if_accumulated_monthly_budget_exceeded
 

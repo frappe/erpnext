@@ -25,8 +25,8 @@ class TestShoppingCart(unittest.TestCase):
 		# test if lead is created and quotation with new lead is fetched
 		quotation = _get_cart_quotation()
 		self.assertEquals(quotation.quotation_to, "Customer")
-		self.assertEquals(frappe.db.get_value("Contact", {"customer": quotation.customer}, "email_id"),
-			"test_cart_user@example.com")
+		self.assertEquals(frappe.db.get_value("Contact", dict(contact_person="test_cart_user@example.com")),
+			quotation.contact_name)
 		self.assertEquals(quotation.lead, None)
 		self.assertEquals(quotation.contact_email, frappe.session.user)
 
@@ -101,7 +101,7 @@ class TestShoppingCart(unittest.TestCase):
 		quotation = self.create_quotation()
 
 		from erpnext.accounts.party import set_taxes
-		
+
 		tax_rule_master = set_taxes(quotation.customer, "Customer", \
 			quotation.transaction_date, quotation.company, None, None, \
 			quotation.customer_address, quotation.shipping_address_name, 1)

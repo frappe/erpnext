@@ -15,7 +15,7 @@ def execute(filters=None):
 	columns=get_columns()
 	data=get_log_data(filters)
 	chart=get_chart_data(data,period_list)
-	return columns,data,None,chart
+	return columns, data, None, chart
 	
 def get_columns():
 	columns = [_("License") + ":Link/Vehicle:100", _("Make") + ":data:50",

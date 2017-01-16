@@ -59,15 +59,3 @@ cur_frm.fields_dict['items'].grid.get_field('project').get_query =
 			]
 		}
 	}
-
-cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return {
-		filters:{'supplier': doc.supplier}
-	}
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return {
-		filters:{'supplier': doc.supplier}
-	}
-}

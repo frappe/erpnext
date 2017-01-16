@@ -8,7 +8,9 @@
         {% if(contact_list[i].is_primary_contact) { %}
             <span class="text-muted">({%= __("Primary") %})</span>
         {% } %}
-
+        {% if(contact_list[i].designation){ %}
+         <span class="text-muted">&ndash; {%= contact_list[i].designation %}</span>
+        {% } %}
         <a href="#Form/Contact/{%= encodeURIComponent(contact_list[i].name) %}"
             class="btn btn-xs btn-default pull-right">
             {%= __("Edit") %}</a>

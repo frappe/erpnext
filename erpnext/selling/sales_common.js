@@ -26,15 +26,16 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
 
-		$.each([["customer_address", "customer_filter"],
-			["shipping_address_name", "customer_filter"],
-			["contact_person", "customer_filter"],
-			["customer", "customer"],
+		$.each([["customer", "customer"],
 			["lead", "lead"]],
 			function(i, opts) {
 				if(me.frm.fields_dict[opts[0]])
 					me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
 			});
+
+		me.frm.set_query('contact_person', erpnext.queries.contact_query);
+		me.frm.set_query('customer_address', erpnext.queries.address_query);
+		me.frm.set_query('shipping_address_name', erpnext.queries.address_query);
 
 		if(this.frm.fields_dict.taxes_and_charges) {
 			this.frm.set_query("taxes_and_charges", function() {
@@ -104,6 +105,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	refresh: function() {
 		this._super();
+
+		frappe.contact_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
+
 		this.frm.toggle_display("customer_name",
 			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
 		if(this.frm.fields_dict.packed_items) {

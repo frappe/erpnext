@@ -50,13 +50,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			});
 		}
 
-		$.each([["supplier", "supplier"],
-			["contact_person", "supplier_filter"],
-			["supplier_address", "supplier_filter"]],
-			function(i, opts) {
-				if(me.frm.fields_dict[opts[0]])
-					me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
-			});
+		me.frm.set_query('supplier', erpnext.queries.supplier);
+		me.frm.set_query('contact_person', erpnext.queries.contact_query);
+		me.frm.set_query('supplier_address', erpnext.queries.address_query);
 
 		if(this.frm.fields_dict.supplier) {
 			this.frm.set_query("supplier", function() {
@@ -79,6 +75,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	refresh: function(doc) {
+		frappe.contact_link = {doc: this.frm.doc, fieldname: 'supplier', doctype: 'Supplier'};
+
 		this.frm.toggle_display("supplier_name",
 			(this.frm.doc.supplier_name && this.frm.doc.supplier_name!==this.frm.doc.supplier));
 
