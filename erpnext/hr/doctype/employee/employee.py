@@ -26,6 +26,8 @@ class Employee(Document):
 				self.name = make_autoname(self.naming_series + '.####')
 			elif naming_method == 'Employee Number':
 				self.name = self.employee_number
+			elif naming_method == 'Full Name':
+				self.name = self.employee_name
 
 		self.employee = self.name
 
@@ -271,7 +273,7 @@ def create_user(employee, user = None):
 		last_name = employee_name[1]
 
 	first_name = employee_name[0]
-	
+
 	user = frappe.new_doc("User")
 	user.update({
 		"name": emp.employee_name,
