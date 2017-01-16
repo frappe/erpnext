@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import cint, validate_email_add
 from frappe import throw, msgprint, _
 from frappe.utils.nestedset import NestedSet
@@ -53,6 +53,8 @@ class Warehouse(NestedSet):
 		self.update_nsm_model()
 
 	def create_account_head(self):
+		'''Create new account head if there is no account linked to this Warehouse'''
+		from erpnext.accounts.doctype.account.account import BalanceMismatchError
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 			if not self.get_account():
 				if self.get("__islocal") or not frappe.db.get_value(
@@ -76,10 +78,12 @@ class Warehouse(NestedSet):
 						ac_doc.insert()
 						msgprint(_("Account head {0} created").format(ac_doc.name), indicator='green', alert=True)
 
-					except frappe.DuplicateEntryError, e:
-						if not (e.args and e.args[0]=='Account'):
-							# if this is not due to creation of Account
-							raise
+					except frappe.DuplicateEntryError:
+						msgprint(_("Please create an Account for this Warehouse and link it. This cannot be done automatically as an account with name {0} already exists").format(frappe.bold(self.name)),
+							indicator='orange')
+
+					except BalanceMismatchError:
+						msgprint(_("Cannot automatically create Account as there is already stock balance in the Account. You must create a matching account before you can make an entry on this warehouse"))
 
 	def validate_parent_account(self):
 		if not self.company:
@@ -111,7 +115,7 @@ class Warehouse(NestedSet):
 			else:
 				frappe.db.sql("delete from `tabBin` where name = %s", d['name'])
 
-		warehouse_account = self.get_account(self.name)
+		warehouse_account = self.get_account()
 		if warehouse_account:
 			frappe.delete_doc("Account", warehouse_account)
 
@@ -131,10 +135,9 @@ class Warehouse(NestedSet):
 		return frappe.db.sql("""select name from `tabWarehouse`
 			where parent_warehouse = %s""", self.name)
 
-	def before_rename(self, olddn, newdn, merge=False):
+	def before_rename(self, old_name, new_name, merge=False):
 		# Add company abbr if not provided
-		from erpnext.setup.doctype.company.company import get_name_with_abbr
-		new_warehouse = get_name_with_abbr(newdn, self.company)
+		new_warehouse = erpnext.encode_company_abbr(new_name, self.company)
 
 		if merge:
 			if not frappe.db.exists("Warehouse", new_warehouse):
@@ -143,64 +146,54 @@ class Warehouse(NestedSet):
 			if self.company != frappe.db.get_value("Warehouse", new_warehouse, "company"):
 				frappe.throw(_("Both Warehouse must belong to same Company"))
 
-		self.rename_account_for(olddn, new_warehouse, merge)
+		self.rename_account_for(old_name, new_warehouse, merge)
 
 		return new_warehouse
 
-	def rename_account_for(self, olddn, newdn, merge):
-		if self.is_group:
-			old_account = self.get_account()
-		else:
-			old_account = self.get_account(olddn)
+	def rename_account_for(self, old_name, new_name, merge):
+		old_account_name = frappe.get_value('Account', dict(warehouse=old_name))
 
-		if old_account:
-			new_account = None
+		if old_account_name:
 			if not merge:
-				if old_account == self.add_abbr_if_missing(olddn):
-					new_account = frappe.rename_doc("Account", old_account, newdn)
+				# old account name is same as old name, so rename the account too
+				if old_account_name == erpnext.encode_company_abbr(old_name, self.company):
+					frappe.rename_doc("Account", old_account_name, new_name)
 			else:
-				existing_new_account = self.get_account(newdn)
-				new_account = frappe.rename_doc("Account", old_account,
-					existing_new_account or newdn, merge=True if existing_new_account else False)
+				# merge
+				target_account = frappe.get_value('Account', dict(warehouse=new_name))
+				if target_account:
+					# target warehouse has account, merge into target account
+					frappe.rename_doc("Account", old_account_name,
+						target_account, merge=True)
+				else:
+					# target warehouse does not have account, use this account
+					frappe.rename_doc("Account", old_account_name,
+						new_name, merge=False)
 
-			frappe.db.set_value("Account", new_account or old_account, "warehouse", newdn)
+					# rename link
+					frappe.db.set_value('Account', new_name, 'warehouse', new_name)
 
-	def add_abbr_if_missing(self, dn):
-		from erpnext.setup.doctype.company.company import get_name_with_abbr
-		return get_name_with_abbr(dn, self.company)
+	def get_account(self):
+		return frappe.get_value('Account', dict(warehouse=self.name))
 
-	def get_account(self, warehouse=None):
-		filters = {
-			"account_type": "Stock",
-			"company": self.company,
-			"is_group": self.is_group
-		}
-
-		if warehouse:
-			filters.update({"warehouse": warehouse})
-		else:
-			filters.update({"account_name": self.warehouse_name})
-
-		return frappe.db.get_value("Account", filters)
-
-	def after_rename(self, olddn, newdn, merge=False):
+	def after_rename(self, old_name, new_name, merge=False):
 		if merge:
-			self.recalculate_bin_qty(newdn)
+			self.recalculate_bin_qty(new_name)
 
-	def recalculate_bin_qty(self, newdn):
+	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
 		frappe.db.auto_commit_on_many_writes = 1
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		repost_stock_for_items = frappe.db.sql_list("""select distinct item_code
-			from tabBin where warehouse=%s""", newdn)
+			from tabBin where warehouse=%s""", new_name)
 
 		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
-		frappe.db.sql("delete from `tabBin` where warehouse=%s", newdn)
+		frappe.db.sql("delete from `tabBin` where warehouse=%s", new_name)
 
 		for item_code in repost_stock_for_items:
-			repost_stock(item_code, newdn)
+			repost_stock(item_code, new_name)
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
@@ -231,7 +224,7 @@ class Warehouse(NestedSet):
 		if self.check_if_sle_exists():
 			throw(_("Warehouses with existing transaction can not be converted to group."))
 		else:
-			account_name = self.get_account(self.name)
+			account_name = self.get_account()
 			if account_name:
 				doc = frappe.get_doc("Account", account_name)
 				doc.flags.exclude_account_type_check = True

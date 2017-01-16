@@ -113,7 +113,7 @@ class AccountsController(TransactionBase):
 				date_field = "transaction_date"
 
 			if date_field and self.get(date_field):
-				validate_fiscal_year(self.get(date_field), self.fiscal_year, self.company, 
+				validate_fiscal_year(self.get(date_field), self.fiscal_year, self.company,
 					self.meta.get_label(date_field), self)
 
 	def validate_due_date(self):
@@ -131,7 +131,7 @@ class AccountsController(TransactionBase):
 			transaction_date = self.posting_date
 		else:
 			transaction_date = self.transaction_date
-		 
+
 		if self.meta.get_field("currency"):
 			# price list part
 			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
@@ -144,7 +144,7 @@ class AccountsController(TransactionBase):
 					self.plc_conversion_rate = 1.0
 
 				elif not self.plc_conversion_rate:
-					self.plc_conversion_rate = get_exchange_rate(self.price_list_currency, 
+					self.plc_conversion_rate = get_exchange_rate(self.price_list_currency,
 						self.company_currency, transaction_date)
 
 			# currency
@@ -570,7 +570,7 @@ class AccountsController(TransactionBase):
 							elif asset.status in ("Scrapped", "Cancelled", "Sold"):
 								frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
 									.format(d.idx, d.asset, asset.status))
-									
+
 	def delink_advance_entries(self, linked_doc_name):
 		total_allocated_amount = 0
 		for adv in self.advances:
@@ -583,7 +583,7 @@ class AccountsController(TransactionBase):
 			if consider_for_total_advance:
 				total_allocated_amount += flt(adv.allocated_amount, adv.precision("allocated_amount"))
 
-		frappe.db.set_value(self.doctype, self.name, "total_advance", 
+		frappe.db.set_value(self.doctype, self.name, "total_advance",
 			total_allocated_amount, update_modified=False)
 
 	def group_similar_items(self):
@@ -711,7 +711,7 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 			.format(order_doctype, order_condition))
 
 	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
-	
+
 	journal_entries = frappe.db.sql("""
 		select
 			"Journal Entry" as reference_type, t1.name as reference_name,
@@ -771,8 +771,8 @@ def get_advance_payment_entries(party_type, party, party_account,
 def update_invoice_status():
 	# Daily update the status of the invoices
 
-	frappe.db.sql(""" update `tabSales Invoice` set status = 'Overdue' 
+	frappe.db.sql(""" update `tabSales Invoice` set status = 'Overdue'
 		where due_date < CURDATE() and docstatus = 1 and outstanding_amount > 0""")
 
-	frappe.db.sql(""" update `tabPurchase Invoice` set status = 'Overdue' 
+	frappe.db.sql(""" update `tabPurchase Invoice` set status = 'Overdue'
 		where due_date < CURDATE() and docstatus = 1 and outstanding_amount > 0""")
