@@ -25,7 +25,7 @@ frappe.ui.form.on('Maintenance Visit', {
 // TODO commonify this code
 erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 	refresh: function() {
-		frappe.contact_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
 
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Maintenance Schedule'),

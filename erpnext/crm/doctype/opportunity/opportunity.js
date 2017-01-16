@@ -52,9 +52,9 @@ frappe.ui.form.on("Opportunity", {
 
 	set_contact_link: function(frm) {
 		if(frm.doc.customer) {
-			frappe.contact_link = {doc: frm.doc, fieldname: 'customer', doctype: 'Customer'}
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'customer', doctype: 'Customer'}
 		} else if(frm.doc.lead) {
-			frappe.contact_link = {doc: frm.doc, fieldname: 'lead', doctype: 'Lead'}
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'lead', doctype: 'Lead'}
 		}
 	},
 

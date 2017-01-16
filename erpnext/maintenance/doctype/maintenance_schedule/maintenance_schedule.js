@@ -23,7 +23,7 @@ frappe.ui.form.on('Maintenance Schedule', {
 // TODO commonify this code
 erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 	refresh: function() {
-		frappe.contact_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
 
 		var me = this;
 

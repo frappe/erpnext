@@ -122,7 +122,7 @@ def get_permitted_and_not_permitted_links(doctype):
 def delete_contact_and_address(doctype, name):
 	for parenttype in ('Contact', 'Address'):
 		items = frappe.db.sql("""select parent from `tabDynamic Link`
-			where parenttype=%s and link_type=%s and link_name=%s""",
+			where parenttype=%s and link_doctype=%s and link_name=%s""",
 			(parenttype, doctype, name))
 
 		for name in items:

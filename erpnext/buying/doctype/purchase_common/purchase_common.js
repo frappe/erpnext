@@ -75,7 +75,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	refresh: function(doc) {
-		frappe.contact_link = {doc: this.frm.doc, fieldname: 'supplier', doctype: 'Supplier'};
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'supplier', doctype: 'Supplier'};
 
 		this.frm.toggle_display("supplier_name",
 			(this.frm.doc.supplier_name && this.frm.doc.supplier_name!==this.frm.doc.supplier));

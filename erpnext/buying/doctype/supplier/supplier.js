@@ -16,7 +16,7 @@ frappe.ui.form.on("Supplier", {
 		});
 	},
 	refresh: function(frm) {
-		frappe.contact_link = {doc: frm.doc, fieldname: 'name', doctype: 'Supplier'}
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Supplier'}
 
 		if(frappe.defaults.get_default("supp_master_name")!="Naming Series") {
 			frm.toggle_display("naming_series", false);

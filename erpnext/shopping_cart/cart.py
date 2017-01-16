@@ -375,15 +375,17 @@ def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_
 	if not party:
 		return []
 
-	address_docs = frappe.db.sql("""select * from `tabAddress`
-		where `{0}`=%s order by name limit {1}, {2}""".format(party.doctype.lower(),
-			limit_start, limit_page_length), party.name,
-		as_dict=True, update={"doctype": "Address"})
+	address_names = frappe.db.get_all('Dyanamic Link', fields=('parent'),
+		filters=dict(parenttype='Address', link_doctype=party.doctype, link_name=party.name))
 
-	for address in address_docs:
-		address.display = get_address_display(address)
+	out = []
 
-	return address_docs
+	for address_name in address_names:
+		address = frappe.get_doc('Address', address_name)
+		address.display = get_address_display(address.as_dict())
+		out.append(address)
+
+	return out
 
 @frappe.whitelist()
 def apply_shipping_rule(shipping_rule):

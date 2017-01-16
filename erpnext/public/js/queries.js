@@ -43,28 +43,28 @@ $.extend(erpnext.queries, {
 	},
 
 	contact_query: function(doc) {
-		if(frappe.contact_link) {
-			if(!doc[frappe.contact_link.fieldname]) {
+		if(frappe.dynamic_link) {
+			if(!doc[frappe.dynamic_link.fieldname]) {
 				frappe.throw(__("Please set {0}", __(frappe.meta.get_label(doc.doctype,
-					frappe.contact_link.fieldname, doc.name))));
+					frappe.dynamic_link.fieldname, doc.name))));
 			}
 
 			return {
 				query: 'frappe.email.doctype.contact.contact.contact_query',
-				filters: { link_doctype: frappe.contact_link.doctype, link_name: doc[frappe.contact_link.fieldname] } };
+				filters: { link_doctype: frappe.dynamic_link.doctype, link_name: doc[frappe.dynamic_link.fieldname] } };
 		}
 	},
 
 	address_query: function(doc) {
-		if(frappe.contact_link) {
-			if(!doc[frappe.contact_link.fieldname]) {
+		if(frappe.dynamic_link) {
+			if(!doc[frappe.dynamic_link.fieldname]) {
 				frappe.throw(__("Please set {0}", __(frappe.meta.get_label(doc.doctype,
-					frappe.contact_link.fieldname, doc.name))));
+					frappe.dynamic_link.fieldname, doc.name))));
 			}
 
 			return {
-				query: 'frappe.email.doctype.address.address_query',
-				filters: { link_doctype: frappe.contact_link.doctype, link_name: doc[frappe.contact_link.fieldname] } };
+				query: 'frappe.geo.doctype.address.address.address_query',
+				filters: { link_doctype: frappe.dynamic_link.doctype, link_name: doc[frappe.dynamic_link.fieldname] } };
 		}
 	},
 
