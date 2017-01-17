@@ -216,7 +216,7 @@ class LeaveApplication(Document):
 				LeaveApproverIdentityError)
 
 	def validate_attendance(self):
-		attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s and (att_date between %s and %s)
+		attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s and (attendance_date between %s and %s)
 					and status = "Present" and docstatus = 1""",
 			(self.employee, self.from_date, self.to_date))
 		if attendance:
@@ -269,6 +269,7 @@ class LeaveApplication(Document):
 		from frappe.desk.page.chat.chat import post
 		post(**{"txt": args.message, "contact": args.message_to, "subject": args.subject,
 			"notify": cint(self.follow_via_email)})
+
 
 @frappe.whitelist()
 def get_approvers(doctype, txt, searchfield, start, page_len, filters):

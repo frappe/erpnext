@@ -176,18 +176,18 @@ def make_leave_application():
 				frappe.db.rollback()
 
 def mark_attendance():
-	att_date = frappe.flags.current_date
+	attendance_date = frappe.flags.current_date
 	for employee in frappe.get_all('Employee', fields=['name'], filters = {'status': 'Active'}):
 
-		if not frappe.db.get_value("Attendance", {"employee": employee.name, "att_date": att_date}):
+		if not frappe.db.get_value("Attendance", {"employee": employee.name, "attendance_date": attendance_date}):
 			attendance = frappe.get_doc({
 				"doctype": "Attendance",
 				"employee": employee.name,
-				"att_date": att_date
+				"attendance_date": attendance_date
 			})
 			leave = frappe.db.sql("""select name from `tabLeave Application`
 				where employee = %s and %s between from_date and to_date and status = 'Approved'
-				and docstatus = 1""", (employee.name, att_date))
+				and docstatus = 1""", (employee.name, attendance_date))
 
 			if leave:
 				attendance.status = "Absent"
