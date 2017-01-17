@@ -10,11 +10,11 @@ frappe.ui.form.on("Student Group", {
                 frappe.set_route("List", "Course Schedule");
             });
 
-            frm.add_custom_button(__("Assessment"), function() {
+            frm.add_custom_button(__("Assessment Plan"), function() {
                 frappe.route_options = {
                     student_group: frm.doc.name
                 }
-                frappe.set_route("List", "Assessment");
+                frappe.set_route("List", "Assessment Plan");
             });
         }
     },

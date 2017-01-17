@@ -10,7 +10,7 @@ def get_data():
 				'items': ['Student Log', 'Student Batch', 'Student Group', 'Program Enrollment']
 			},
 			{
-				'items': ['Fees', 'Assessment', 'Student Attendance', 'Student Leave Application']
+				'items': ['Fees', 'Assessment Result', 'Student Attendance', 'Student Leave Application']
 			}
 		]
 	}

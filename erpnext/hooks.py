@@ -108,8 +108,6 @@ portal_menu_items = [
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
 	{"title": _("Announcements"), "route": "/announcement", "reference_doctype": "Announcement"},
-	{"title": _("Courses"), "route": "/course", "reference_doctype": "Course", "role":"Student"},
-	{"title": _("Assessment Schedule"), "route": "/assessment", "reference_doctype": "Assessment", "role":"Student"},
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"}
 ]
 
