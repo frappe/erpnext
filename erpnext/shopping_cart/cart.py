@@ -375,7 +375,7 @@ def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_
 	if not party:
 		return []
 
-	address_names = frappe.db.get_all('Dyanamic Link', fields=('parent'),
+	address_names = frappe.db.get_all('Dynamic Link', fields=('parent'),
 		filters=dict(parenttype='Address', link_doctype=party.doctype, link_name=party.name))
 
 	out = []

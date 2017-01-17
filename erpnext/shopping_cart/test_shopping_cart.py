@@ -25,8 +25,8 @@ class TestShoppingCart(unittest.TestCase):
 		# test if lead is created and quotation with new lead is fetched
 		quotation = _get_cart_quotation()
 		self.assertEquals(quotation.quotation_to, "Customer")
-		self.assertEquals(frappe.db.get_value("Contact", dict(contact_person="test_cart_user@example.com")),
-			quotation.contact_name)
+		self.assertEquals(frappe.db.get_value("Contact", dict(email_id="test_cart_user@example.com")),
+			quotation.contact_person)
 		self.assertEquals(quotation.lead, None)
 		self.assertEquals(quotation.contact_email, frappe.session.user)
 
