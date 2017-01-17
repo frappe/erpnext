@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import get_url, random_string, cint
+from frappe.utils import get_url, cint
 from frappe.utils.user import get_user_fullname
 from frappe.utils.print_format import download_pdf
 from frappe.desk.form.load import get_attachments
@@ -244,3 +244,49 @@ def get_rfq_doc(doctype, name, supplier_idx):
 		args = doc.get('suppliers')[cint(supplier_idx) - 1]
 		doc.update_supplier_part_no(args)
 		return doc
+		
+@frappe.whitelist()
+def get_item_from_material_requests_based_on_supplier(source_name, target_doc = None):
+	mr_items_list = frappe.db.sql("""
+		SELECT
+			mr.name, mr_item.item_code
+		FROM
+			`tabItem` as item, 
+			`tabItem Supplier` as item_supp, 
+			`tabMaterial Request Item` as mr_item, 
+			`tabMaterial Request`  as mr 
+		WHERE item_supp.supplier = %(supplier)s 
+			AND item.name = item_supp.parent 
+			AND mr_item.parent = mr.name 
+			AND mr_item.item_code = item.name 
+			AND mr.status != "Stopped" 
+			AND mr.material_request_type = "Purchase" 
+			AND mr.docstatus = 1 
+			AND mr.per_ordered < 99.99""", {"supplier": source_name}, as_dict=1)
+	
+	material_requests = {}
+	for d in mr_items_list:
+		material_requests.setdefault(d.name, []).append(d.item_code)
+
+	for mr, items in material_requests.items():
+		target_doc = get_mapped_doc("Material Request", mr, {
+			"Material Request": {
+				"doctype": "Request for Quotation",
+				"validation": {
+					"docstatus": ["=", 1],
+					"material_request_type": ["=", "Purchase"],
+				}
+			},
+			"Material Request Item": {
+				"doctype": "Request for Quotation Item",
+				"condition": lambda row: row.item_code in items,
+				"field_map": [
+					["name", "material_request_item"],
+					["parent", "material_request"],
+					["uom", "uom"]
+				]
+			}
+		}, target_doc)
+		
+	return target_doc
+		
