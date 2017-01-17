@@ -6,13 +6,13 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import get_url, random_string, cint
+from frappe.utils import get_url, cint
 from frappe.utils.user import get_user_fullname
 from frappe.utils.print_format import download_pdf
 from frappe.desk.form.load import get_attachments
 from frappe.core.doctype.communication.email import make
 from erpnext.accounts.party import get_party_account_currency, get_party_details
-from erpnext.stock.doctype.material_request.material_request import set_missing_values, make_request_for_quotation
+from erpnext.stock.doctype.material_request.material_request import set_missing_values
 from erpnext.controllers.buying_controller import BuyingController
 
 STANDARD_USERS = ("Guest", "Administrator")
@@ -246,42 +246,47 @@ def get_rfq_doc(doctype, name, supplier_idx):
 		return doc
 		
 @frappe.whitelist()
-def get_matreq_from_possible_supplier(source_name, target_doc = None):
+def get_item_from_material_requests_based_on_supplier(source_name, target_doc = None):
+	mr_items_list = frappe.db.sql("""
+		SELECT
+			mr.name, mr_item.item_code
+		FROM
+			`tabItem` as item, 
+			`tabItem Supplier` as item_supp, 
+			`tabMaterial Request Item` as mr_item, 
+			`tabMaterial Request`  as mr 
+		WHERE item_supp.supplier = %(supplier)s 
+			AND item.name = item_supp.parent 
+			AND mr_item.parent = mr.name 
+			AND mr_item.item_code = item.name 
+			AND mr.status != "Stopped" 
+			AND mr.material_request_type = "Purchase" 
+			AND mr.docstatus = 1 
+			AND mr.per_ordered < 99.99""", {"supplier": source_name}, as_dict=1)
+	
+	material_requests = {}
+	for d in mr_items_list:
+		material_requests.setdefault(d.name, []).append(d.item_code)
 
-	item_list = frappe.db.sql("""SELECT matreq.name, matreqi.item_code
-		FROM `tabItem` as item, 
-			`tabItem Supplier` as itemsup, 
-			`tabMaterial Request Item` as matreqi, 
-			`tabMaterial Request`  as matreq 
-		WHERE itemsup.supplier = %(supplier)s 
-			AND item.name = itemsup.parent 
-			AND matreqi.parent = matreq.name 
-			AND matreqi.item_code = item.name 
-			AND matreq.status != "Stopped" 
-			AND matreq.material_request_type = "Purchase" 
-			AND matreq.docstatus = 1 
-			AND matreq.per_ordered < 99.99""", \
-		{"supplier": source_name},as_dict=1)
-	for d in item_list:
-		frappe.msgprint(d.name + " - " + d.item_code)
-		target_doc = get_mapped_doc("Material Request", d.name, 	{
-		"Material Request": {
-			"doctype": "Request for Quotation",
-			"validation": {
-				"docstatus": ["=", 1],
-				"material_request_type": ["=", "Purchase"],
-				
+	for mr, items in material_requests.items():
+		target_doc = get_mapped_doc("Material Request", mr, {
+			"Material Request": {
+				"doctype": "Request for Quotation",
+				"validation": {
+					"docstatus": ["=", 1],
+					"material_request_type": ["=", "Purchase"],
+				}
+			},
+			"Material Request Item": {
+				"doctype": "Request for Quotation Item",
+				"condition": lambda row: row.item_code in items,
+				"field_map": [
+					["name", "material_request_item"],
+					["parent", "material_request"],
+					["uom", "uom"]
+				]
 			}
-		},
-		"Material Request Item": {
-			"doctype": "Request for Quotation Item",
-			"condition": lambda doc: doc.item_code == d.item_code,
-			"field_map": [
-				["name", "material_request_item"],
-				["parent", "material_request"],
-				["uom", "uom"]
-			]
-		}
-	}, target_doc)
+		}, target_doc)
+		
 	return target_doc
 		

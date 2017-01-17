@@ -134,21 +134,19 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 						}
 					})
 				}, __("Get items from"));
-			cur_frm.add_custom_button(__('Possible Supplier'),
-				function() {
-					
-
-					
-					//Create a dialog window for the user to pick their supplier
+				
+				// Get items from open Material Requests based on supplier
+				cur_frm.add_custom_button(__('Possible Supplier'), function() {
+					// Create a dialog window for the user to pick their supplier
 					var d = new frappe.ui.Dialog({
 						title: __('Select Possible Supplier'),
 						fields: [
 						{fieldname: 'supplier', fieldtype:'Link', options:'Supplier', label:'Supplier', reqd:1},
-						{fieldname: 'ok_button', fieldtype:'Button', label:'Get Material Requests'},
+						{fieldname: 'ok_button', fieldtype:'Button', label:'Get Items from Material Requests'},
 						]
 					});
 					
-					//On the user clicking the ok button
+					// On the user clicking the ok button
 					d.fields_dict.ok_button.input.onclick = function() {
 						var btn = d.fields_dict.ok_button.input;
 						var v = d.get_values();
@@ -156,7 +154,7 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 							$(btn).set_working();
 							
 							erpnext.utils.map_current_doc({
-								method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_matreq_from_possible_supplier",
+								method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_item_from_material_requests_based_on_supplier",
 								source_name: v.supplier,
 								get_query_filters: {
 									material_request_type: "Purchase",
@@ -167,10 +165,8 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 								}
 							});
 							$(btn).done_working();
-							//msgprint("Loaded Material Requests");
 							d.hide();
 						}
-					
 					}	
 					d.show();
 				}, __("Get items from"));
