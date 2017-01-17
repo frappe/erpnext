@@ -7,7 +7,7 @@ import frappe
 import json
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt
+from frappe.utils import flt, cstr
 
 @frappe.whitelist()
 def enroll_student(source_name):
@@ -84,7 +84,7 @@ def make_attendance_records(student, student_name, status, course_schedule=None,
 
 @frappe.whitelist()
 def get_student_batch_students(student_batch):
-	"""Returns List of student, student_name in Student Batch.
+	"""Returns List of student, student_name, idx in Student Batch.
 
 	:param student_batch: Student Batch.
 	"""
@@ -163,3 +163,92 @@ def get_course_schedule_events(start, end, filters=None):
 			}, as_dict=True, update={"allDay": 0})
 
 	return data
+
+@frappe.whitelist()
+def get_evaluation_criterias(course):
+	"""Returns Evaluation Criterias and their Weightage from Course Master.
+
+	:param Course: Course
+	"""
+	return frappe.get_list("Course Evaluation Criteria", \
+		fields=["evaluation_criteria", "weightage"], filters={"parent": course}, order_by= "idx")
+
+@frappe.whitelist()
+def get_assessment_students(assessment_plan, student_group=None, student_batch=None):
+	student_list = []
+	if student_group:
+		student_list = get_student_group_students(student_group)
+	elif student_batch:
+		student_list = get_student_batch_students(student_batch)
+	for i, student in enumerate(student_list):
+		result = get_result(student.student, assessment_plan)
+		if result:
+			student_result = {}
+			for d in result.details:
+				student_result.update({d.evaluation_criteria: cstr(d.score) + " ("+ d.grade + ")"})
+			student_result.update({"total_score": cstr(result.total_score) + " (" + result.grade + ")"})
+			student.update({'assessment_details': student_result})
+		else:
+			student.update({'assessment_details': None})
+	return student_list
+
+@frappe.whitelist()
+def get_assessment_details(assessment_plan):
+	"""Returns Evaluation Criteria  and Maximum Score from Assessment Plan Master.
+
+	:param Assessment Plan: Assessment Plan
+	"""
+	return frappe.get_list("Assessment Evaluation Criteria", \
+		fields=["evaluation_criteria", "maximum_score"], filters={"parent": assessment_plan}, order_by= "idx")
+
+@frappe.whitelist()
+def get_result(student, assessment_plan):
+	"""Returns Submitted Result of given student for specified Assessment Plan
+
+	:param Student: Student
+	:param Assessment Plan: Assessment Plan
+	"""
+	results = frappe.get_all("Assessment Result", filters={"student": student, "assessment_plan": assessment_plan, "docstatus": 1})
+	if results:
+		return frappe.get_doc("Assessment Result", results[0])
+	else:
+		return None
+
+@frappe.whitelist()
+def get_grade(grading_scale, percentage):
+	"""Returns Grade based on the Grading Scale and Score.
+
+	:param Grading Scale: Grading Scale
+	:param Percentage: Score Percentage Percentage
+	"""
+	grading_scale_intervals = {}
+	for d in frappe.get_all("Grading Scale Interval", fields=["grade_code", "threshold"], filters={"parent": grading_scale}):
+		grading_scale_intervals.update({d.threshold:d.grade_code})
+	intervals = sorted(grading_scale_intervals.keys(), key=float, reverse=True)
+	for interval in intervals:
+		if flt(percentage) >= interval:
+			grade = grading_scale_intervals.get(interval)
+			break
+		else:
+			grade = ""
+	return grade
+
+@frappe.whitelist()
+def mark_assessment_result(student, assessment_plan, scores):
+	student_score = json.loads(scores)
+	details = []
+	for s in student_score.keys():
+		details.append({
+			"evaluation_criteria": s,
+			"score": flt(student_score[s])
+		})
+	assessment_result = frappe.new_doc("Assessment Result")
+	assessment_result.update({
+		"student": student,
+		"student_name": frappe.db.get_value("Student", student, "title"),
+		"assessment_plan": assessment_plan,
+		"details": details
+	})
+	assessment_result.save()
+	assessment_result.submit()	
+	return assessment_result

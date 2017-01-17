@@ -55,11 +55,11 @@ class CourseSchedule(Document):
 
 		#validate overlapping assessment schedules.
 		if self.student_batch:
-			validate_overlap_for(self, "Assessment", "student_batch")
+			validate_overlap_for(self, "Assessment Plan", "student_batch")
 		
 		if self.student_group:
-			validate_overlap_for(self, "Assessment", "student_group")
+			validate_overlap_for(self, "Assessment Plan", "student_group")
 		
-		validate_overlap_for(self, "Assessment", "room")
-		validate_overlap_for(self, "Assessment", "supervisor", self.instructor)
+		validate_overlap_for(self, "Assessment Plan", "room")
+		validate_overlap_for(self, "Assessment Plan", "supervisor", self.instructor)
 

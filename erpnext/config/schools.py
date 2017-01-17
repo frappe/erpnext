@@ -112,7 +112,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Assessment"
+					"name": "Assessment Plan"
 				},
 				{
 					"type": "doctype",
@@ -120,7 +120,19 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Grading Structure"
+					"name": "Assessment Result"
+				},
+				{
+					"type": "doctype",
+					"name": "Grading Scale"
+				},
+				{
+					"type": "doctype",
+					"name": "Evaluation Criteria"
+				},
+				{
+					"type": "doctype",
+					"name": "Assessment Result Tool"
 				}
 			]
 		},
