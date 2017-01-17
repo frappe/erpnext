@@ -14,6 +14,7 @@ class TestShoppingCart(unittest.TestCase):
 	"""
 	def setUp(self):
 		frappe.set_user("Administrator")
+		create_test_contact_and_address()
 		self.enable_shopping_cart()
 
 	def tearDown(self):
@@ -185,7 +186,6 @@ class TestShoppingCart(unittest.TestCase):
 		frappe.set_user("test_cart_user@example.com")
 
 	def login_as_customer(self):
-		create_test_contact_and_address()
 		self.create_user_if_not_exists("test_contact_customer@example.com",
 			"_Test Contact For _Test Customer")
 		frappe.set_user("test_contact_customer@example.com")

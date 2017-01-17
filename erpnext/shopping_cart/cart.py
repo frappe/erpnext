@@ -368,7 +368,8 @@ def get_debtors_account(cart_settings):
 		return debtors_account_name
 
 
-def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None):
+def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20,
+	party=None):
 	if not party:
 		party = get_party()
 
@@ -380,8 +381,8 @@ def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_
 
 	out = []
 
-	for address_name in address_names:
-		address = frappe.get_doc('Address', address_name)
+	for a in address_names:
+		address = frappe.get_doc('Address', a.parent)
 		address.display = get_address_display(address.as_dict())
 		out.append(address)
 
