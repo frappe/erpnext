@@ -16,11 +16,20 @@ test_ignore = ["Price List"]
 test_records = frappe.get_test_records('Customer')
 
 class TestCustomer(unittest.TestCase):
+	def setUp(self):
+		if not frappe.get_value('Item', '_Test Item'):
+			make_test_records('Item')
+
 	def tearDown(self):
 		frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', 0.0)
 
 	def test_party_details(self):
 		from erpnext.accounts.party import get_party_details
+
+		frappe.db.sql('delete from tabContact')
+		frappe.db.sql('delete from tabAddress')
+		frappe.db.sql('delete from `tabDynamic Link`')
+
 
 		to_check = {
 			'selling_price_list': None,
@@ -31,8 +40,8 @@ class TestCustomer(unittest.TestCase):
 			'contact_email': 'test_contact_customer@example.com',
 			'contact_mobile': None,
 			'sales_team': [],
-			'contact_display': '_Test Contact For _Test Customer',
-			'contact_person': '_Test Contact For _Test Customer-_Test Customer',
+			'contact_display': '_Test Contact for _Test Customer',
+			'contact_person': '_Test Contact for _Test Customer-_Test Customer',
 			'territory': u'_Test Territory',
 			'contact_phone': '+91 0000000000',
 			'customer_name': '_Test Customer'
@@ -53,6 +62,8 @@ class TestCustomer(unittest.TestCase):
 
 		contact = frappe.get_doc(dict(
 			doctype='Contact',
+			email_id='test_contact_customer@example.com',
+			phone='+91 0000000000',
 			first_name='_Test Contact for _Test Customer',
 			links = [dict(
 				link_doctype='Customer',
@@ -67,9 +78,6 @@ class TestCustomer(unittest.TestCase):
 
 		for key, value in to_check.iteritems():
 			self.assertEquals(value, details.get(key))
-
-		address.delete()
-		contact.delete()
 
 	def test_rename(self):
 		for name in ("_Test Customer 1", "_Test Customer 1 Renamed"):
