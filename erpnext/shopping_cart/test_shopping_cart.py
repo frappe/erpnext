@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.shopping_cart.cart import _get_cart_quotation, update_cart, get_party
+from erpnext.tests.utils import create_test_contact_and_address
 
 class TestShoppingCart(unittest.TestCase):
 	"""
@@ -25,8 +26,8 @@ class TestShoppingCart(unittest.TestCase):
 		# test if lead is created and quotation with new lead is fetched
 		quotation = _get_cart_quotation()
 		self.assertEquals(quotation.quotation_to, "Customer")
-		self.assertEquals(frappe.db.get_value("Contact", dict(email_id="test_cart_user@example.com")),
-			quotation.contact_person)
+		self.assertEquals(quotation.contact_person,
+			frappe.db.get_value("Contact", dict(email_id="test_cart_user@example.com")))
 		self.assertEquals(quotation.lead, None)
 		self.assertEquals(quotation.contact_email, frappe.session.user)
 
@@ -184,6 +185,7 @@ class TestShoppingCart(unittest.TestCase):
 		frappe.set_user("test_cart_user@example.com")
 
 	def login_as_customer(self):
+		create_test_contact_and_address()
 		self.create_user_if_not_exists("test_contact_customer@example.com",
 			"_Test Contact For _Test Customer")
 		frappe.set_user("test_contact_customer@example.com")
