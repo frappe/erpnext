@@ -258,6 +258,9 @@ class update_entries_after(object):
 
 			if not self.valuation_rate and actual_qty > 0:
 				self.valuation_rate = sle.incoming_rate
+		
+		if not self.valuation_rate:
+			self.valuation_rate = get_valuation_rate(sle, self.allow_zero_rate)
 
 	def get_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
@@ -281,10 +284,8 @@ class update_entries_after(object):
 			qty_to_pop = abs(actual_qty)
 			while qty_to_pop:
 				if not self.stock_queue:
-					if self.qty_after_transaction > 0:
-						_rate = get_valuation_rate(sle.item_code, sle.warehouse, self.allow_zero_rate)
-					else:
-						_rate = 0
+					# Get valuation rate from last sle if exists or from valuation rate field in item master
+					_rate = get_valuation_rate(sle, self.allow_zero_rate)
 					self.stock_queue.append([0, _rate])
 
 				index = None
@@ -404,25 +405,32 @@ def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=No
 			"order": order
 		}, previous_sle, as_dict=1, debug=debug)
 
-def get_valuation_rate(item_code, warehouse, allow_zero_rate=False):
+def get_valuation_rate(sle, allow_zero_rate=False):
+	# Get valuation rate from last sle for the same item and warehouse
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
 		from `tabStock Ledger Entry`
 		where item_code = %s and warehouse = %s
 		and valuation_rate > 0
-		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse))
+		order by posting_date desc, posting_time desc, name desc limit 1""", (sle.item_code, sle.warehouse))
 
 	if not last_valuation_rate:
+		# Get valuation rate from last sle for the item against any warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
 			where item_code = %s and valuation_rate > 0
-			order by posting_date desc, posting_time desc, name desc limit 1""", item_code)
+			order by posting_date desc, posting_time desc, name desc limit 1""", sle.item_code)
 
 	valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
 
 	if not valuation_rate:
-		valuation_rate = frappe.db.get_value("Item Price", {"item_code": item_code, "buying": 1}, "price_list_rate")
+		# If negative stock allowed, and item delivered without any incoming entry,
+		# syste does not found any SLE, then take valuation rate from Item
+		valuation_rate = frappe.db.get_value("Item", sle.item_code, "valuation_rate")
 
-	if not allow_zero_rate and not valuation_rate and cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
-		frappe.throw(_("Purchase rate for item: {0} not found, which is required to book accounting entry (expense). Please mention item price against a buying price list.").format(item_code))
+	if not allow_zero_rate and not valuation_rate \
+			and cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
+			
+		frappe.throw(_("Valuation rate not found for the Item {0}, which is required to do accounting entries (for booking expenses). Please create an incoming stock transaction or mention valuation rate in Item record, and then try submiting {1} {2}")
+		.format(sle.item_code, sle.voucher_type, sle.voucher_no))
 
 	return valuation_rate
