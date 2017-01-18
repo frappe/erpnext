@@ -82,8 +82,7 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.apply_discount_on = pos_profile.get('apply_discount_on') if pos_profile.get('apply_discount') else ''
 	doc.customer_group = pos_profile.get('customer_group') or get_root('Customer Group')
 	doc.territory = pos_profile.get('territory') or get_root('Territory')
-	if pos_profile.get('tc_name'):
-		doc.terms = frappe.db.get_value('Terms and Conditions', pos_profile.get('tc_name'), 'terms')
+	doc.terms = frappe.db.get_value('Terms and Conditions', pos_profile.get('tc_name'), 'terms') or doc.terms or ''
 
 def get_root(table):
 	root = frappe.db.sql(""" select name from `tab%(table)s` having
