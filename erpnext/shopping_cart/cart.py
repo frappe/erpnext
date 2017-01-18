@@ -160,6 +160,7 @@ def decorate_quotation_doc(doc):
 	return doc
 
 def _get_cart_quotation(party=None):
+	'''Return the open Quotation of type "Shopping Cart" or make a new one'''
 	if not party:
 		party = get_party()
 

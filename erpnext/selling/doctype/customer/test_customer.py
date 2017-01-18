@@ -27,11 +27,6 @@ class TestCustomer(unittest.TestCase):
 	def test_party_details(self):
 		from erpnext.accounts.party import get_party_details
 
-		frappe.db.sql('delete from tabContact')
-		frappe.db.sql('delete from tabAddress')
-		frappe.db.sql('delete from `tabDynamic Link`')
-
-
 		to_check = {
 			'selling_price_list': None,
 			'customer_group': '_Test Customer Group',
