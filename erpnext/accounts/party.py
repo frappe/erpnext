@@ -350,6 +350,6 @@ def get_timeline_data(doctype, name):
 	from frappe.desk.form.load import get_communication_data
 	data = get_communication_data(doctype, name,
 		fields = 'unix_timestamp(date(creation)), count(name)',
-		after = add_years(None, -1).strftime('%Y-%m-%d'),
+		after = add_years(None, -1).strftime('%Y-%m-%d'), limit = 366,
 		group_by='group by date(creation)', as_dict=False)
 	return dict(data)
