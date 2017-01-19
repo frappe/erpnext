@@ -6,11 +6,11 @@ frappe.ui.form.on('Sales Partner', {
 		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Sales Person'}
 
 		if(frm.doc.__islocal){
-			hide_field(['address_html', 'contact_html']);
+			hide_field(['address_html', 'contact_html', 'address_contacts']);
 			erpnext.utils.clear_address_and_contact(frm);
 		}
 		else{
-			unhide_field(['address_html', 'contact_html']);
+			unhide_field(['address_html', 'contact_html', 'address_contacts']);
 			erpnext.utils.render_address_and_contact(frm);
 		}
 	}
