@@ -12,7 +12,7 @@ def execute():
 				(end_date is null  or end_date = '') and docstatus != 2""", as_dict=True)
 
 	for salary_slip in salary_slips:
-		get_start_end_date = get_month_details(salary_slip.fiscal_year, salary_slip.month)
+		get_start_end_date = get_month_details(salary_slip.fiscal_year, salary_slip.month + 1)
 		start_date = get_start_end_date['month_start_date']
 		end_date = get_start_end_date['month_end_date']
 		frappe.db.sql("""update `tabSalary Slip` set start_date = %s, end_date = %s where name = %s""",
