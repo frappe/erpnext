@@ -6,7 +6,7 @@ def execute():
 	if not frappe.db.has_column('Salary Slip', 'fiscal_year'):
 		return
 
-	salary_slips = frappe.db.sql("""select month, name from `tabSalary Slip`
+	salary_slips = frappe.db.sql("""select month, name, fiscal_year from `tabSalary Slip`
 				where (month is not null and month != '') and
 				(start_date is null  or start_date = '') and
 				(end_date is null  or end_date = '') and docstatus != 2""", as_dict=True)
