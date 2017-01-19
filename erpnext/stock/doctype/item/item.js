@@ -113,6 +113,12 @@ frappe.ui.form.on("Item", {
 
 	has_variants: function(frm) {
 		erpnext.item.toggle_attributes(frm);
+	},
+
+	show_in_website: function(frm) {
+		if (frm.doc.default_warehouse && !frm.doc.website_warehouse){
+			frm.set_value("website_warehouse", frm.doc.default_warehouse);
+		}
 	}
 });
 
