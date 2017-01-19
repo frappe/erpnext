@@ -1,5 +1,6 @@
 import frappe
 from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_links
+from frappe.utils import update_progress_bar
 
 def execute():
 	frappe.reload_doc('core', 'doctype', 'dynamic_link')
@@ -13,9 +14,9 @@ def execute():
 	)
 	for doctype in ('Contact', 'Address'):
 		if frappe.db.has_column(doctype, 'customer'):
-			for doc in frappe.get_all(doctype, fields='*'):
-				doc.doctype = doctype
-				doc = frappe.get_doc(doc)
+			items = frappe.get_all(doctype)
+			for i, doc in enumerate(items):
+				doc = frappe.get_doc(doctype, doc.name)
 				dirty = False
 				for field in map_fields:
 					if doc.get(field[1]):
@@ -25,3 +26,6 @@ def execute():
 					if dirty:
 						deduplicate_dynamic_links(doc)
 						doc.update_children()
+
+					update_progress_bar('Updating {0}'.format(doctype), i, len(items))
+			print
