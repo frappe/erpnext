@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,የቤት ኪራይ ወጪ
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,መጠን መቀነስ በኋላ
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,መጪ የቀን መቁጠሪያ ክስተቶች
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,ወር እና ዓመት ይምረጡ
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","በኮማ የተለዩ ያስገቡ የኢሜይል መታወቂያ, መጠየቂያ የተወሰነ ቀን ላይ በራስ-ሰር በፖስታ ቤት ይሆናል"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","በኮማ የተለዩ ያስገቡ የኢሜይል መታወቂያ, መጠየቂያ የተወሰነ ቀን ላይ በራስ-ሰር በፖስታ ቤት ይሆናል"
 DocType: Employee,Company Email,የኩባንያ ኢሜይል
 DocType: GL Entry,Debit Amount in Account Currency,መለያ ምንዛሬ ውስጥ ዴት መጠን
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,ፓርቲ ላይ ወይም የውስጥ ለማስተላለፍ ባንክ / ጥሬ ገንዘብ ግብይቶች
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,ቅድመ-የቀጣሪ
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,መለያ {0} በርካታ ጊዜ ገብቷል ታይቷል
 DocType: Account,Expenses Included In Valuation,ወጪዎች ግምቱ ውስጥ ተካቷል
-DocType: Employee,Provide email id registered in company,ኩባንያ ውስጥ የተመዘገበ የኢሜይል መታወቂያ መስጠት
+DocType: Employee,Provide Email Address registered in company,ኩባንያ ውስጥ የተመዘገበ የኢሜይል መታወቂያ መስጠት
 DocType: Hub Settings,Seller City,ሻጭ ከተማ
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,አንድ ተማሪ ቡድን እባክዎ ይምረጡ
 ,Absent Student Report,ብርቅ የተማሪ ሪፖርት
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,ሰማያዊ
 DocType: Purchase Invoice,Is Return,መመለሻ ነው
 DocType: Price List Country,Price List Country,የዋጋ ዝርዝር አገር
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,የኢሜይል መታወቂያ ማዘጋጀት እባክዎ
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,የኢሜይል መታወቂያ ማዘጋጀት እባክዎ
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} ንጥል ትክክለኛ ተከታታይ ቁጥሮች {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,ንጥል ኮድ መለያ ቁጥር ሊቀየር አይችልም
@@ -2196,7 +2196,7 @@ DocType: Fiscal Year,Year End Date,ዓመት መጨረሻ ቀን
 DocType: Task Depends On,Task Depends On,ተግባር ላይ ይመረኮዛል
 DocType: Supplier Quotation,Opportunity,ዕድል
 ,Completed Production Orders,ተጠናቋል የምርት ትዕዛዞች
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,ረድፍ {0}: አቅራቢ ለማግኘት {0} የኢሜይል መታወቂያ ኢሜይል መላክ ያስፈልጋል
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,ረድፍ {0}: አቅራቢ ለማግኘት {0} የኢሜይል መታወቂያ ኢሜይል መላክ ያስፈልጋል
 DocType: Operation,Default Workstation,ነባሪ ከገቢር
 DocType: Notification Control,Expense Claim Approved Message,ወጪ የይገባኛል ጥያቄ ፀድቋል መልዕክት
 DocType: Payment Entry,Deductions or Loss,ቅናሽ ወይም ማጣት
@@ -3641,7 +3641,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,የ Exchange ቅሰም አዘጋ
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,የመተግበሪያ ክፍለ ጊዜ ሁለት alocation መዝገቦች ላይ መሆን አይችልም
 DocType: Item Group,Default Expense Account,ነባሪ የወጪ መለያ
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,የተማሪ ባች ወይም የትምህርት ፕሮግራም የግዴታ ነው
-DocType: Student,Student Email ID,የተማሪ የኢሜይል መታወቂያ
+DocType: Student,Student Email Address,የተማሪ የኢሜይል መታወቂያ
 DocType: Employee,Notice (days),ማስታወቂያ (ቀናት)
 DocType: Tax Rule,Sales Tax Template,የሽያጭ ግብር አብነት
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,ወደ መጠየቂያ ለማስቀመጥ ንጥሎችን ምረጥ
@@ -3792,7 +3792,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,አ
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,ይመልከቱ እርሳሶች
 DocType: Program Enrollment Tool,New Program,አዲስ ፕሮግራም
 DocType: Item Attribute Value,Attribute Value,ዋጋ ይስጡ
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","የኢሜይል መታወቂያ አስቀድሞ ስለ አለ, ልዩ መሆን አለበት {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","የኢሜይል መታወቂያ አስቀድሞ ስለ አለ, ልዩ መሆን አለበት {0}"
 ,Itemwise Recommended Reorder Level,Itemwise አስይዝ ደረጃ የሚመከር
 DocType: Salary Detail,Salary Detail,ደመወዝ ዝርዝር
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,በመጀመሪያ {0} እባክዎ ይምረጡ
@@ -3983,7 +3983,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,የፕሮጀክት እንቅስቃሴ / ተግባር.
 DocType: Vehicle Log,Refuelling Details,Refuelling ዝርዝሮች
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,ደመወዝ ቡቃያ አመንጭ
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,ቀጣይ የእውቂያ በ ቀዳሚ የኢሜይል መታወቂያ ጋር ተመሳሳይ ሊሆን አይችልም
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,ቀጣይ የእውቂያ በ ቀዳሚ የኢሜይል መታወቂያ ጋር ተመሳሳይ ሊሆን አይችልም
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","የሚመለከታቸው ያህል ሆኖ ተመርጧል ከሆነ መግዛትና, ምልክት መደረግ አለበት {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,ቅናሽ ከ 100 መሆን አለበት
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,የመጨረሻው የግዢ መጠን አልተገኘም
@@ -4278,7 +4278,7 @@ DocType: Purchase Order,Advance Paid,የቅድሚያ ክፍያ የሚከፈል�
 DocType: Item,Item Tax,ንጥል ግብር
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,አቅራቢው ቁሳዊ
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,ኤክሳይስ ደረሰኝ
-DocType: Expense Claim,Employees Email Id,ሰራተኞች ኢሜይል መታወቂያ
+DocType: Expense Claim,Employees Email Address,ሰራተኞች ኢሜይል መታወቂያ
 DocType: Employee Attendance Tool,Marked Attendance,ምልክት ተደርጎበታል ክትትል
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,የቅርብ ግዜ አዳ
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,የመገናኛ ኤስ የእርስዎን እውቂያዎች ላክ

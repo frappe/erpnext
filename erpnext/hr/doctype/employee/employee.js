@@ -48,8 +48,8 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 
 });
 frappe.ui.form.on('Employee',{
-	prefered_contact_email:function(frm){
-		frm.events.update_contact(frm)
+	prefered_contact_email:function(frm){		
+		frm.events.update_contact(frm)		
 	},
 	personal_email:function(frm){
 		frm.events.update_contact(frm)
@@ -74,5 +74,19 @@ frappe.ui.form.on('Employee',{
 			}
 		});
 	},
+	create_user: function(frm) {
+		if (!frm.doc.prefered_email)
+		{
+			frappe.throw(__("Please enter Preferred Contact Email"))
+		}
+		frappe.call({
+			method: "erpnext.hr.doctype.employee.employee.create_user",
+			args: { employee: cur_frm.doc.name },
+			callback: function(r)
+			{
+				frm.set_value("user_id", r.message)
+			}
+		});
+	}
 });
 cur_frm.cscript = new erpnext.hr.EmployeeController({frm: cur_frm});

@@ -27,9 +27,6 @@ class StockLedgerEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.block_transactions_against_group_warehouse()
 
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year, self.meta.get_label("posting_date"), self)
-
 	def on_submit(self):
 		self.check_stock_frozen_date()
 		self.actual_amt_check()
@@ -117,6 +114,10 @@ class StockLedgerEntry(Document):
 	def validate_and_set_fiscal_year(self):
 		if not self.fiscal_year:
 			self.fiscal_year = get_fiscal_year(self.posting_date, company=self.company)[0]
+		else:
+			from erpnext.accounts.utils import validate_fiscal_year
+			validate_fiscal_year(self.posting_date, self.fiscal_year, self.company, 
+				self.meta.get_label("posting_date"), self)
 
 	def block_transactions_against_group_warehouse(self):
 		from erpnext.stock.utils import is_group_warehouse

@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,Hyr Kostnad
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Belopp efter avskrivningar
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Kommande kalenderhändelser
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Välj månad och år
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Ange e-post-id åtskilda med kommatecken, kommer fakturan att skickas automatiskt på visst datum"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Ange e-post-id åtskilda med kommatecken, kommer fakturan att skickas automatiskt på visst datum"
 DocType: Employee,Company Email,Företagets e-post
 DocType: GL Entry,Debit Amount in Account Currency,Betal-Belopp i konto Valuta
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Bank / Cash transaktioner mot partiet eller för intern överföring
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Förhandsvisning lönebesked
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Konto {0} har angetts flera gånger
 DocType: Account,Expenses Included In Valuation,Kostnader ingår i rapporten
-DocType: Employee,Provide email id registered in company,Ange E-post ID registrerat i bolaget
+DocType: Employee,Provide Email Address registered in company,Ange E-post ID registrerat i bolaget
 DocType: Hub Settings,Seller City,Säljaren stad
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,Välj en studentgrupp
 ,Absent Student Report,Frånvarande Student Rapport
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Blå
 DocType: Purchase Invoice,Is Return,Är Returnerad
 DocType: Price List Country,Price List Country,Prislista Land
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Ställ in e-ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Ställ in e-ID
 DocType: Item,UOMs,UOM
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} giltigt serienummer för punkt {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Produkt kod kan inte ändras för serienummer
@@ -2196,7 +2196,7 @@ DocType: Fiscal Year,Year End Date,År Slutdatum
 DocType: Task Depends On,Task Depends On,Uppgift Beror på
 DocType: Supplier Quotation,Opportunity,Möjlighet
 ,Completed Production Orders,Genomförda produktionsorder
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Rad {0}: För leverantören {0} e-id som krävs för att skicka e-post
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Rad {0}: För leverantören {0} e-id som krävs för att skicka e-post
 DocType: Operation,Default Workstation,Standard arbetsstation
 DocType: Notification Control,Expense Claim Approved Message,Räkningen Godkänd Meddelande
 DocType: Payment Entry,Deductions or Loss,Avdrag eller förlust
@@ -3641,7 +3641,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Ställ Exchange vinst / förlust
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Ansökningstiden kan inte vara över två alocation register
 DocType: Item Group,Default Expense Account,Standardutgiftskonto
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Student Batch eller kurs schema är obligatorisk
-DocType: Student,Student Email ID,Student E ID
+DocType: Student,Student Email Address,Student E ID
 DocType: Employee,Notice (days),Observera (dagar)
 DocType: Tax Rule,Sales Tax Template,Moms Mall
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Välj objekt för att spara fakturan
@@ -3792,7 +3792,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,All
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Se prospekts
 DocType: Program Enrollment Tool,New Program,nytt program
 DocType: Item Attribute Value,Attribute Value,Attribut Värde
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","E-post ID måste vara unikt, finns redan för {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","E-post ID måste vara unikt, finns redan för {0}"
 ,Itemwise Recommended Reorder Level,Produktvis Rekommenderad Ombeställningsnivå
 DocType: Salary Detail,Salary Detail,lön Detalj
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,Välj {0} först
@@ -3983,7 +3983,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Projektverksamhet / uppgift.
 DocType: Vehicle Log,Refuelling Details,Tanknings Detaljer
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Generera lönebesked
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Next Kontakt Genom kan inte vara densamma som den ledande e-id
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Next Kontakt Genom kan inte vara densamma som den ledande e-id
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Köp måste anges, i förekommande fall väljs som {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Rabatt måste vara mindre än 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Sista köpkurs hittades inte
@@ -4278,7 +4278,7 @@ DocType: Purchase Order,Advance Paid,Förskottsbetalning
 DocType: Item,Item Tax,Produkt Skatt
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Material till leverantören
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Punkt Faktura
-DocType: Expense Claim,Employees Email Id,Anställdas E-post Id
+DocType: Expense Claim,Employees Email Address,Anställdas E-post Id
 DocType: Employee Attendance Tool,Marked Attendance,Marked Närvaro
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Nuvarande Åtaganden
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Skicka mass SMS till dina kontakter

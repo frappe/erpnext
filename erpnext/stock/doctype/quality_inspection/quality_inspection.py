@@ -27,7 +27,7 @@ class QualityInspection(Document):
 		if self.reference_type and self.reference_name:
 			frappe.db.sql("""update `tab{doctype} Item` t1, `tab{doctype}` t2
 				set t1.quality_inspection = %s, t2.modified = %s
-				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name"""
+				where t1.parent = %s and t1.item_code = %s"""
 				.format(doctype=self.reference_type),
 				(self.name, self.modified, self.reference_name, self.item_code))
 				

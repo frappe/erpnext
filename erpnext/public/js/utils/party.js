@@ -65,7 +65,7 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field, 
 	if(!display_field) display_field = "address_display";
 	if(frm.doc[address_field]) {
 		frappe.call({
-			method: "erpnext.utilities.doctype.address.address.get_address_display",
+			method: "frappe.geo.doctype.address.address.get_address_display",
 			args: {"address_dict": frm.doc[address_field] },
 			callback: function(r) {
 				if(r.message) {
@@ -151,7 +151,7 @@ erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
 
 erpnext.utils.get_shipping_address = function(frm, callback){
 	frappe.call({
-		method: "erpnext.utilities.doctype.address.address.get_shipping_address",
+		method: "frappe.geo.doctype.address.address.get_shipping_address",
 		args: {company: frm.doc.company},
 		callback: function(r){
 			if(r.message){

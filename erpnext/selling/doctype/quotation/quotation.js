@@ -16,6 +16,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
+
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
 			cur_frm.add_custom_button(__('Make Sales Order'),
 				cur_frm.cscript['Make Sales Order']);
@@ -66,12 +67,8 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this.frm.toggle_reqd("customer", this.frm.doc.quotation_to == "Customer");
 
 		// to overwrite the customer_filter trigger from queries.js
-		$.each(["customer_address", "shipping_address_name"],
-			function(i, opts) {
-				me.frm.set_query(opts, me.frm.doc.quotation_to==="Lead"
-					? erpnext.queries["lead_filter"] : erpnext.queries["customer_filter"]);
-			}
-		);
+		this.frm.set_query('customer_address', erpnext.queries.address_query);
+		this.frm.set_query('shipping_address_name', erpnext.queries.address_query);
 	},
 
 	tc_name: function() {

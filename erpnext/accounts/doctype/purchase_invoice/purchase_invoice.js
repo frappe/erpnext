@@ -8,7 +8,7 @@ frappe.provide("erpnext.accounts");
 erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	onload: function() {
 		this._super();
-		
+
 		if(!this.frm.doc.__islocal) {
 			// show credit_to in print format
 			if(!this.frm.doc.supplier && this.frm.doc.credit_to) {
@@ -32,7 +32,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		if(doc.update_stock==1 && doc.docstatus==1) {
 			this.show_stock_ledger();
 		}
-		
+
 		if(!doc.is_return && doc.docstatus==1) {
 			if(doc.outstanding_amount != 0) {
 				this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
@@ -215,18 +215,6 @@ cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 			["Account", "is_group", "=",0],
 			["Account", "company", "=", doc.company]
 		]
-	}
-}
-
-cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:{'supplier':  doc.supplier}
-	}
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:{'supplier':  doc.supplier}
 	}
 }
 

@@ -61,6 +61,8 @@
 }
 .item-list-area {
   padding: 15px 0px;
+  overflow-y: scroll;
+  height: calc(100vh - 162px);
 }
 .pos-toolbar,
 .pos-bill-toolbar {
@@ -209,4 +211,26 @@ body[data-route="pos"] .modal-dialog {
 .change_amount {
   margin: 15px;
   width: 130px;
+}
+.frappe-control[data-fieldname='result_html'] {
+  overflow: scroll;
+}
+.assessment-result-tool {
+  table-layout: fixed;
+}
+.assessment-result-tool input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  text-align: right;
+}
+.assessment-result-tool th {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.assessment-result-tool .total-score,
+.assessment-result-tool .grade,
+.assessment-result-tool .score {
+  text-align: right;
 }

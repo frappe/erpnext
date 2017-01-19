@@ -229,15 +229,6 @@ def get_data():
 			"type": "list"
 		},
 		{
-			"module_name": "Assessment",
-			"color": "#8a70be",
-			"icon": "fa fa-file-text-alt",
-			"label": _("Assessment"),
-			"link": "List/Assessment",
-			"_doctype": "Assessment",
-			"type": "list"
-		},
-		{
 			"module_name": "Fees",
 			"color": "#83C21E",
 			"icon": "fa fa-money",

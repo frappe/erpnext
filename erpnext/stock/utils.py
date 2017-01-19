@@ -45,6 +45,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 		
 	return sum(sle_map.values())
 
+@frappe.whitelist()
 def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None, with_valuation_rate=False):
 	"""Returns stock balance quantity at given warehouse on given posting date or current date.
 

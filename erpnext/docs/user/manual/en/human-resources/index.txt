@@ -14,4 +14,5 @@ setup
 holiday-list
 human-resource-setup
 daily-work-summary
+fleet-management
 articles

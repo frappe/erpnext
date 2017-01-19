@@ -32,6 +32,8 @@ frappe.ui.form.on("Customer", {
 			erpnext.toggle_naming_series();
 		}
 
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Customer'}
+
 		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
 
 		if(!frm.doc.__islocal) {

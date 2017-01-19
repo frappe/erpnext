@@ -24,21 +24,23 @@ def execute(filters=None):
 		row = [emp, emp_det.employee_name, emp_det.branch, emp_det.department, emp_det.designation,
 			emp_det.company]
 
-		total_p = total_a = 0.0
+		total_p = total_a = total_l = 0.0
 		for day in range(filters["total_days_in_month"]):
 			status = att_map.get(emp).get(day + 1, "None")
-			status_map = {"Present": "P", "Absent": "A", "Half Day": "H", "None": ""}
+			status_map = {"Present": "P", "Absent": "A", "Half Day": "H", "On Leave": "L", "None": ""}
 			row.append(status_map[status])
 
 			if status == "Present":
 				total_p += 1
 			elif status == "Absent":
 				total_a += 1
+			elif status == "On Leave":
+				total_l += 1	
 			elif status == "Half Day":
 				total_p += 0.5
 				total_a += 0.5
 
-		row += [total_p, total_a]
+		row += [total_p, total_l, total_a]
 		data.append(row)
 
 	return columns, data
@@ -53,12 +55,12 @@ def get_columns(filters):
 	for day in range(filters["total_days_in_month"]):
 		columns.append(cstr(day+1) +"::20")
 
-	columns += [_("Total Present") + ":Float:80", _("Total Absent") + ":Float:80"]
+	columns += [_("Total Present") + ":Float:80", _("Total Leaves") + ":Float:80",  _("Total Absent") + ":Float:80"]
 	return columns
 
 def get_attendance_list(conditions, filters):
-	attendance_list = frappe.db.sql("""select employee, day(att_date) as day_of_month,
-		status from tabAttendance where docstatus = 1 %s order by employee, att_date""" %
+	attendance_list = frappe.db.sql("""select employee, day(attendance_date) as day_of_month,
+		status from tabAttendance where docstatus = 1 %s order by employee, attendance_date""" %
 		conditions, filters, as_dict=1)
 
 	att_map = {}
@@ -77,7 +79,7 @@ def get_conditions(filters):
 
 	filters["total_days_in_month"] = monthrange(cint(filters.year), filters.month)[1]
 
-	conditions = " and month(att_date) = %(month)s and year(att_date) = %(year)s"
+	conditions = " and month(attendance_date) = %(month)s and year(attendance_date) = %(year)s"
 
 	if filters.get("company"): conditions += " and company = %(company)s"
 	if filters.get("employee"): conditions += " and employee = %(employee)s"
@@ -95,7 +97,7 @@ def get_employee_details():
 
 @frappe.whitelist()
 def get_attendance_years():
-	year_list = frappe.db.sql_list("""select distinct YEAR(att_date) from tabAttendance ORDER BY YEAR(att_date) DESC""")
+	year_list = frappe.db.sql_list("""select distinct YEAR(attendance_date) from tabAttendance ORDER BY YEAR(attendance_date) DESC""")
 	if not year_list:
 		year_list = [getdate().year]
 

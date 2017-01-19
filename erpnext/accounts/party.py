@@ -8,8 +8,8 @@ import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff, add_years
-from erpnext.utilities.doctype.address.address import get_address_display
-from erpnext.utilities.doctype.contact.contact import get_contact_details
+from frappe.geo.doctype.address.address import get_address_display, get_default_address
+from frappe.email.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, InvalidCurrency, PartyDisabled, InvalidAccountCurrency
 
 class DuplicatePartyAccountError(frappe.ValidationError): pass
@@ -60,21 +60,18 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 def set_address_details(out, party, party_type):
 	billing_address_field = "customer_address" if party_type == "Lead" \
 		else party_type.lower() + "_address"
-	out[billing_address_field] = frappe.db.get_value("Address",
-		{party_type.lower(): party.name, "is_primary_address":1}, "name")
+	out[billing_address_field] = get_default_address(party_type, party.name)
 
 	# address display
 	out.address_display = get_address_display(out[billing_address_field])
 
 	# shipping address
 	if party_type in ["Customer", "Lead"]:
-		out.shipping_address_name = frappe.db.get_value("Address",
-			{party_type.lower(): party.name, "is_shipping_address":1}, "name")
+		out.shipping_address_name = get_default_address(party_type, party.name, 'is_shipping_address')
 		out.shipping_address = get_address_display(out["shipping_address_name"])
 
 def set_contact_details(out, party, party_type):
-	out.contact_person = frappe.db.get_value("Contact",
-		{party_type.lower(): party.name, "is_primary_contact":1}, "name")
+	out.contact_person = get_default_contact(party_type, party.name)
 
 	if not out.contact_person:
 		out.update({
@@ -184,7 +181,7 @@ def get_party_account(party_type, party, company):
 			default_account_name = "default_receivable_account" \
 				if party_type=="Customer" else "default_payable_account"
 			account = frappe.db.get_value("Company", company, default_account_name)
-			
+
 		existing_gle_currency = get_party_gle_currency(party_type, party, company)
 		if existing_gle_currency:
 			if account:
@@ -211,7 +208,7 @@ def get_party_gle_currency(party_type, party, company):
 
 	return frappe.local_cache("party_gle_currency", (party_type, party, company), generator,
 		regenerate_if_none=True)
-		
+
 def get_party_gle_account(party_type, party, company):
 	def generator():
 		existing_gle_account = frappe.db.sql("""select account from `tabGL Entry`
@@ -353,6 +350,6 @@ def get_timeline_data(doctype, name):
 	from frappe.desk.form.load import get_communication_data
 	data = get_communication_data(doctype, name,
 		fields = 'unix_timestamp(date(creation)), count(name)',
-		after = add_years(None, -1).strftime('%Y-%m-%d'),
+		after = add_years(None, -1).strftime('%Y-%m-%d'), limit = 366,
 		group_by='group by date(creation)', as_dict=False)
 	return dict(data)

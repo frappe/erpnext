@@ -20,7 +20,7 @@ def get_employees(date, department=None, branch=None, company=None):
 		"status": "Active", "department": department, "branch": branch, "company": company}, order_by="employee_name")
 	marked_employee = {}
 	for emp in frappe.get_list("Attendance", fields=["employee", "status"],
-							   filters={"att_date": date}):
+							   filters={"attendance_date": date}):
 		marked_employee[emp['employee']] = emp['status']
 
 	for employee in employee_list:
@@ -36,14 +36,16 @@ def get_employees(date, department=None, branch=None, company=None):
 
 
 @frappe.whitelist()
-def mark_employee_attendance(employee_list, status, date, company=None):
+def mark_employee_attendance(employee_list, status, date, leave_type=None, company=None):
 	employee_list = json.loads(employee_list)
 	for employee in employee_list:
 		attendance = frappe.new_doc("Attendance")
 		attendance.employee = employee['employee']
 		attendance.employee_name = employee['employee_name']
-		attendance.att_date = date
+		attendance.attendance_date = date
 		attendance.status = status
+		if status == "On Leave" and leave_type:
+			attendance.leave_type = leave_type
 		if company:
 			attendance.company = company
 		else:

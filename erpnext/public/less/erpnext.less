@@ -76,6 +76,8 @@
 
 .item-list-area {
 	padding: 15px 0px;
+	overflow-y: scroll;
+	height: ~"calc(100vh - 162px)";
 }
 
 .pos-toolbar, .pos-bill-toolbar {
@@ -254,4 +256,29 @@ body[data-route="pos"] .modal-dialog {
 .write_off_amount, .change_amount {
 	margin: 15px;
 	width: 130px;
+}
+
+// assessment tool
+.frappe-control[data-fieldname='result_html'] {
+	overflow: scroll;
+}
+.assessment-result-tool {
+	table-layout: fixed;
+
+	input {
+		width: 100%;
+		border: 0;
+		outline: none;
+		text-align: right;
+	}
+
+	th {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.total-score, .grade, .score {
+		text-align: right;
+	}
 }

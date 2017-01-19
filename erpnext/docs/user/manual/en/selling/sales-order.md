@@ -80,7 +80,7 @@ Here you can fill in the details like; of how frequently you want to generate an
 
 On updating the Sales Order, a Recurring ID will be generated which will be same for all recurring orders generated from this particular Sales Order.
 
-ERPNext will automatically create new Order and mail a notification to the email IDs you set in the 'Notification Email Address'field.
+ERPNext will automatically create new Order and mail a notification to the Email Addresses you set in the 'Notification Email Address'field.
 
 <img class="screenshot" alt="Reccuring Sales Order" src="{{docs_base_url}}/assets/img/selling/recurring-sales-order.png">
 

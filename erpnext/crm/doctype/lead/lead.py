@@ -41,7 +41,7 @@ class Lead(SellingController):
 				frappe.throw(_("Lead Owner cannot be same as the Lead"))
 
 			if self.email_id == self.contact_by:
-				frappe.throw(_("Next Contact By cannot be same as the Lead Email id"))
+				frappe.throw(_("Next Contact By cannot be same as the Lead Email Address"))
 
 			self.image = has_gravatar(self.email_id)
 
@@ -67,7 +67,7 @@ class Lead(SellingController):
 				where email_id=%s and name!=%s""", (self.email_id, self.name))
 
 			if duplicate_leads:
-				frappe.throw(_("Email id must be unique, already exists for {0}")
+				frappe.throw(_("Email Address must be unique, already exists for {0}")
 					.format(comma_and(duplicate_leads)), frappe.DuplicateEntryError)
 
 	def on_trash(self):

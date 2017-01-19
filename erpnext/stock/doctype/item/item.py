@@ -93,7 +93,6 @@ class Item(WebsiteGenerator):
 				where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
 
 	def on_update(self):
-		super(Item, self).on_update()
 		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
 		self.update_item_price()
