@@ -1,6 +1,6 @@
 import frappe
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
-from frappe import cint
+from frappe.utils import cint
 
 def execute():
 	frappe.reload_doctype('Salary Slip')
