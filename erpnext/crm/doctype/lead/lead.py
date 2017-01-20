@@ -127,7 +127,7 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
-	target_doc = get_mapped_doc("Lead", source_name,
+	target_doc = get_mapped_doc("Lead", source_name, 
 		{"Lead": {
 			"doctype": "Opportunity",
 			"field_map": {

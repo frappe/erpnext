@@ -61,14 +61,6 @@ class Supplier(TransactionBase):
 		validate_party_accounts(self)
 		self.status = get_party_status(self)
 
-	def get_contacts(self,nm):
-		if nm:
-			contact_details =frappe.db.convert_to_lists(frappe.db.sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where supplier = %s", nm))
-
-			return contact_details
-		else:
-			return ''
-
 	def on_trash(self):
 		delete_contact_and_address('Supplier', self.name)
 

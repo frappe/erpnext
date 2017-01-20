@@ -95,9 +95,14 @@ class Customer(TransactionBase):
 	def create_lead_address_contact(self):
 		if self.lead_name:
 			# assign lead address to customer (if already not set)
-			address_name = frappe.get_value('Dynamic Link', dict(parenttype='Address', link_doctype='Lead', link_name=self.name))
-			if address_name:
-				address = frappe.get_doc('Address', address_name)
+			address_names = frappe.db.get_values('Dynamic Link', dict(
+								parenttype='Address',
+								link_doctype='Lead',
+								link_name=self.lead_name
+							), 'parent as name', as_dict=True)
+
+			for address_name in address_names:
+				address = frappe.get_doc('Address', address_name.get('name'))
 				if not address.has_link('Customer', self.name):
 					address.append('links', dict(link_doctype='Customer', link_name=self.name))
 					address.save()
@@ -105,17 +110,17 @@ class Customer(TransactionBase):
 			lead = frappe.db.get_value("Lead", self.lead_name, ["lead_name", "email_id", "phone", "mobile_no"], as_dict=True)
 
 			# create contact from lead
-			c = frappe.new_doc('Contact')
-			c.first_name = lead.lead_name
-			c.email_id = lead.email_id
-			c.phone = lead.phone
-			c.mobile_no = lead.mobile_no
-			c.is_primary_contact = 1
-			c.append('links', dict(link_doctype='Customer', link_name=self.name))
-			c.flags.ignore_permissions = self.flags.ignore_permissions
-			c.autoname()
-			if not frappe.db.exists("Contact", c.name):
-				c.insert()
+			contact = frappe.new_doc('Contact')
+			contact.first_name = lead.lead_name
+			contact.email_id = lead.email_id
+			contact.phone = lead.phone
+			contact.mobile_no = lead.mobile_no
+			contact.is_primary_contact = 1
+			contact.append('links', dict(link_doctype='Customer', link_name=self.name))
+			contact.flags.ignore_permissions = self.flags.ignore_permissions
+			contact.autoname()
+			if not frappe.db.exists("Contact", contact.name):
+				contact.insert()
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
