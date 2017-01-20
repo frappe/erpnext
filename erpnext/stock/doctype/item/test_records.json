@@ -15,6 +15,7 @@
   "item_group": "_Test Item Group",
   "item_name": "_Test Item",
   "apply_warehouse_wise_reorder_level": 1,
+  "valuation_rate": 100,
   "reorder_levels": [
    {
     "material_request_type": "Purchase",
@@ -61,6 +62,7 @@
   "item_code": "_Test Item Home Desktop 100",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Item Home Desktop 100",
+  "valuation_rate": 100,
   "taxes": [
    {
     "doctype": "Item Tax",
