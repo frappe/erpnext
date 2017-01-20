@@ -22,6 +22,7 @@ class Budget(Document):
 			frappe.throw(_("{0} is mandatory").format(self.budget_against))
 		self.validate_duplicate()
 		self.validate_accounts()
+		self.set_null_value()
 
 	def validate_duplicate(self):
 		budget_against_field = frappe.scrub(self.budget_against)
@@ -54,25 +55,31 @@ class Budget(Document):
 				else:
 					account_list.append(d.account)
 
+	def set_null_value(self):
+		if self.budget_against == 'Cost Center':
+			self.project = None
+		else:
+			self.cost_center = None
+
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)
 	if not args.cost_center and not args.project:
 		return
-	for budget_against in [args.project, args.cost_center]:
-		if budget_against \
+	for budget_against in ['project', 'cost_center']:
+		if args.get(budget_against) \
 				and frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
 
-			if args.project:
+			if args.project and budget_against == 'project':
 				condition = "and b.project='%s'" % frappe.db.escape(args.project)
 				args.budget_against_field = "Project"
 			
-			elif args.cost_center:
+			elif args.cost_center and budget_against == 'cost_center':
 				cc_lft, cc_rgt = frappe.db.get_value("Cost Center", args.cost_center, ["lft", "rgt"])
 				condition = """and exists(select name from `tabCost Center` 
 					where lft<=%s and rgt>=%s and name=b.cost_center)""" % (cc_lft, cc_rgt)
 				args.budget_against_field = "Cost Center"
-			
-			args.budget_against = budget_against
+
+			args.budget_against = args.get(budget_against)
 
 			budget_records = frappe.db.sql("""
 				select

@@ -43,7 +43,16 @@ frappe.ui.form.on('Budget', {
 	},
 
 	budget_against: function(frm) {
+		frm.trigger("set_null_value")
 		frm.trigger("toggle_reqd_fields")
+	},
+
+	set_null_value: function(frm) {
+		if(frm.doc.budget_against == 'Cost Center') {
+			frm.set_value('project', null)
+		} else {
+			frm.set_value('cost_center', null)
+		}
 	},
 
 	toggle_reqd_fields: function(frm) {
