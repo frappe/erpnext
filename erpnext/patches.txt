@@ -365,4 +365,5 @@ erpnext.patches.v7_2.update_doctype_status
 erpnext.patches.v7_2.update_salary_slips
 erpnext.patches.v7_2.delete_fleet_management_module_def
 erpnext.patches.v7_2.contact_address_links
+erpnext.patches.v7_2.mark_students_active
 erpnext.patches.v7_2.set_null_value_to_fields
