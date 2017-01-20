@@ -12,22 +12,23 @@ class LandedCostVoucher(Document):
 	def get_items_from_purchase_receipts(self):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
-			pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.description,
-				pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name
-				from `tab{doctype} Item` pr_item where parent = %s
-				and exists(select name from tabItem where name = pr_item.item_code and is_stock_item = 1)
-				""".format(doctype=pr.receipt_document_type), pr.receipt_document, as_dict=True)
+			if pr.receipt_document_type and pr.receipt_document:
+				pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.description,
+					pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name
+					from `tab{doctype} Item` pr_item where parent = %s
+					and exists(select name from tabItem where name = pr_item.item_code and is_stock_item = 1)
+					""".format(doctype=pr.receipt_document_type), pr.receipt_document, as_dict=True)
 
-			for d in pr_items:
-				item = self.append("items")
-				item.item_code = d.item_code
-				item.description = d.description
-				item.qty = d.qty
-				item.rate = d.base_rate
-				item.amount = d.base_amount
-				item.receipt_document_type = pr.receipt_document_type
-				item.receipt_document = pr.receipt_document
-				item.purchase_receipt_item = d.name
+				for d in pr_items:
+					item = self.append("items")
+					item.item_code = d.item_code
+					item.description = d.description
+					item.qty = d.qty
+					item.rate = d.base_rate
+					item.amount = d.base_amount
+					item.receipt_document_type = pr.receipt_document_type
+					item.receipt_document = pr.receipt_document
+					item.purchase_receipt_item = d.name
 
 		if self.get("taxes"):
 			self.set_applicable_charges_for_item()
