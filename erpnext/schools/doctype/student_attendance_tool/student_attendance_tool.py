@@ -18,11 +18,12 @@ def get_student_attendance_records(based_on, date=None, student_batch=None, cour
 		student_group = frappe.db.get_value("Course Schedule", course_schedule, "student_group")
 		if student_group:
 			student_list = frappe.get_list("Student Group Student", fields=["student", "student_name", "idx"] , \
-			filters={"parent": student_group}, order_by= "idx")
+			filters={"parent": student_group, "active": 1}, order_by= "idx")
 		else:
 			student_batch = frappe.db.get_value("Course Schedule", course_schedule, "student_batch")
 	if not student_list: 
-		student_list = frappe.get_list("Student Batch Student", fields=["student", "student_name", "idx"] , filters={"parent": student_batch}, order_by= "idx")
+		student_list = frappe.get_list("Student Batch Student", fields=["student", "student_name", "idx"] , 
+			filters={"parent": student_batch, "active": 1}, order_by= "idx")
 	
 	if course_schedule:
 		student_attendance_list= frappe.db.sql("""select student, status from `tabStudent Attendance` where \

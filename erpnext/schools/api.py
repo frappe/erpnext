@@ -88,7 +88,8 @@ def get_student_batch_students(student_batch):
 
 	:param student_batch: Student Batch.
 	"""
-	students = frappe.get_list("Student Batch Student", fields=["student", "student_name", "idx"] , filters={"parent": student_batch}, order_by= "idx")
+	students = frappe.get_list("Student Batch Student", fields=["student", "student_name", "idx"] , 
+		filters={"parent": student_batch, "active": 1}, order_by= "idx")
 	return students
 
 @frappe.whitelist()
@@ -97,7 +98,8 @@ def get_student_group_students(student_group):
 
 	:param student_group: Student Group.
 	"""
-	students = frappe.get_list("Student Group Student", fields=["student", "student_name"] , filters={"parent": student_group}, order_by= "idx")
+	students = frappe.get_list("Student Group Student", fields=["student", "student_name"] , 
+		filters={"parent": student_group, "active": 1}, order_by= "idx")
 	return students
 
 @frappe.whitelist()
