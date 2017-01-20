@@ -8,4 +8,4 @@ def execute():
 	fields = {"Cost Center": "project", "Project": "cost_center"}
 	for budget_against, field in fields.items():
 		frappe.db.sql(""" update `tabBudget` set {field} = null
-			where budget_against = %s """.format(field = field), budget_against, debug=1)
+			where budget_against = %s """.format(field = field), budget_against)
