@@ -223,7 +223,8 @@ class BuyingController(StockController):
 				})
 				if not rm.rate:
 					from erpnext.stock.stock_ledger import get_valuation_rate
-					rm.rate = get_valuation_rate(bom_item.item_code, self.supplier_warehouse)
+					rm.rate = get_valuation_rate(bom_item.item_code, self.supplier_warehouse, 
+						self.doctype, self.name)
 			else:
 				rm.rate = bom_item.rate
 

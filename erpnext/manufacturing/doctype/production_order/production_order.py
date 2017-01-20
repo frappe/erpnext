@@ -304,9 +304,9 @@ class ProductionOrder(Document):
 
 	def get_operations_data(self, data):
 		return {
-			'from_time': data.planned_start_time,
+			'from_time': get_datetime(data.planned_start_time),
 			'hours': data.time_in_mins / 60.0,
-			'to_time': data.planned_end_time,
+			'to_time': get_datetime(data.planned_end_time),
 			'project': self.project,
 			'operation': data.operation,
 			'operation_id': data.name,
