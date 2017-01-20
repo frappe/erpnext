@@ -46,7 +46,7 @@ def validate_filters(filters):
 
 def get_columns(filters):
 	return [
-		_("Payment Document") + ":Link/DocType: 100",
+		_("Payment Document") + ":: 100",
 		_("Payment Entry") + ":Dynamic Link/"+_("Payment Document")+":140",
 		_("Party Type") + "::100", 
 		_("Party") + ":Dynamic Link/Party Type:140",
