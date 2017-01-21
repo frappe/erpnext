@@ -118,6 +118,7 @@ def make_timesheet_records():
 	employees = get_timesheet_based_salary_slip_employee()
 	for e in employees:
 		ts = make_timesheet(e.employee, simulate = True, billable = 1, activity_type=get_random("Activity Type"))
+		frappe.db.commit()
 
 		rand = random.random()
 		if rand >= 0.3:
@@ -137,7 +138,8 @@ def make_sales_invoice_for_timesheet(name):
 	sales_invoice = make_sales_invoice(name)
 	sales_invoice.customer = get_random("Customer")
 	sales_invoice.append('items', {
-		'item_code': get_random("Item", {"has_variants": 0, "is_stock_item": 0, "is_fixed_asset": 0}),
+		'item_code': get_random("Item", {"has_variants": 0, "is_stock_item": 0,
+			"is_fixed_asset": 0}),
 		'qty': 1,
 		'rate': 1000
 	})
