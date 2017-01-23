@@ -16,6 +16,8 @@ def execute():
 	rename_field("Assessment Plan", "grading_structure", "grading_scale")
 
 	frappe.reload_doc("schools", "doctype", "assessment_result")
+	frappe.reload_doc("schools", "doctype", "assessment_result_detail")
+
 	for assessment in frappe.get_all("Assessment Plan", fields=["name", "grading_scale"]):
 		for stud_result in frappe.db.sql("select * from `tabAssessment Result` where parent= %s", assessment.name, as_dict=True):
 			if stud_result.result:
