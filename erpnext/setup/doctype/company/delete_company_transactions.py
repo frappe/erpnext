@@ -73,11 +73,17 @@ def delete_bins(company_name):
 
 def delete_lead_addresses(company_name):
 	"""Delete addresses to which leads are linked"""
-	for lead in frappe.get_all("Lead", filters={"company": company_name}):
-		frappe.db.sql("""delete from `tabAddress`
-			where lead=%s and (customer='' or customer is null) and (supplier='' or supplier is null)""", lead.name)
+	leads = frappe.get_all("Lead", filters={"company": company_name})
+	leads = [ "'%s'"%row.get("name") for row in leads ]
+	if leads:
+		frappe.db.sql("""delete from tabAddress where name not in (select parent 
+			from `tabDynamic Link` dl where dl.link_doctype<>'Lead' and 
+			dl.parenttype='Address')""", debug=True)
 
-		frappe.db.sql("""update `tabAddress` set lead=null, lead_name=null where lead=%s""", lead.name)
+		frappe.db.sql("""delete from `tabDynamic Link` where link_doctype='Lead' and parenttype='Address' 
+			and link_name in ({leads})""".format(leads=",".join(leads)), debug=True)
+
+		frappe.db.sql("""update tabCustomer set lead_name='' where lead_name in ({leads})""".format(leads=",".join(leads)), debug=True)
 
 def delete_communications(doctype, company_name, company_fieldname):
 		frappe.db.sql("""

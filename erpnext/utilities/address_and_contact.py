@@ -8,9 +8,12 @@ def load_address_and_contact(doc, key):
 	"""Loads address list and contact list in `__onload`"""
 	from frappe.geo.doctype.address.address import get_address_display
 
-	address_list = [frappe.get_value('Address', a.parent, '*')
-		for a in frappe.get_all('Dynamic Link', fields='parent',
-			filters=dict(parenttype='Address', link_doctype=doc.doctype, link_name=doc.name))]
+	filters = [
+		["Dynamic Link", "link_doctype", "=", doc.doctype],
+		["Dynamic Link", "link_name", "=", doc.name],
+		["Dynamic Link", "parenttype", "=", "Address"],
+	]
+	address_list = frappe.get_all("Address", filters=filters, fields=["*"])
 
 	address_list = [a.update({"display": get_address_display(a)})
 		for a in address_list]
@@ -23,9 +26,12 @@ def load_address_and_contact(doc, key):
 	doc.set_onload('addr_list', address_list)
 
 	if doc.doctype != "Lead":
-		contact_list = [frappe.get_value('Contact', a.parent, '*')
-			for a in frappe.get_all('Dynamic Link', fields='parent',
-				filters=dict(parenttype='Contact', link_doctype=doc.doctype, link_name=doc.name))]
+		filters = [
+			["Dynamic Link", "link_doctype", "=", doc.doctype],
+			["Dynamic Link", "link_name", "=", doc.name],
+			["Dynamic Link", "parenttype", "=", "Contact"],
+		]
+		contact_list = frappe.get_all("Contact", filters=filters, fields=["*"])
 
 		contact_list = sorted(contact_list,
 			lambda a, b:
