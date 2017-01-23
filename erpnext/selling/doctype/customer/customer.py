@@ -9,7 +9,7 @@ import frappe.defaults
 from frappe.utils import flt, cint, cstr
 from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.utilities.address_and_contact import load_address_and_contact, delete_contact_and_address
+from frappe.geo.address_and_contact import load_address_and_contact, delete_contact_and_address
 from erpnext.accounts.party import validate_party_accounts, get_timeline_data # keep this
 from erpnext.accounts.party_status import get_party_status
 from erpnext import get_default_currency
@@ -138,7 +138,7 @@ class Customer(TransactionBase):
 	def on_trash(self):
 		delete_contact_and_address('Customer', self.name)
 		if self.lead_name:
-			frappe.db.sql("update `tabLead` set status='Interested' where name=%s",self.lead_name)
+			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if frappe.defaults.get_global_default('cust_master_name') == 'Customer Name':

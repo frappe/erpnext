@@ -35,9 +35,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		}
 
 		if(!this.frm.doc.__islocal) {
-			erpnext.utils.render_address_and_contact(cur_frm);
+			frappe.geo.render_address_and_contact(cur_frm);
 		} else {
-			erpnext.utils.clear_address_and_contact(cur_frm);
+			frappe.geo.clear_address_and_contact(cur_frm);
 		}
 	},
 

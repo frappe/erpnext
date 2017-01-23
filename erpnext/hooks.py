@@ -126,16 +126,6 @@ has_website_permission = {
 	"Discussion": "erpnext.schools.web_form.discussion.discussion.has_website_permission"
 }
 
-permission_query_conditions = {
-	"Contact": "erpnext.utilities.address_and_contact.get_permission_query_conditions_for_contact",
-	"Address": "erpnext.utilities.address_and_contact.get_permission_query_conditions_for_address"
-}
-
-has_permission = {
-	"Contact": "erpnext.utilities.address_and_contact.has_permission",
-	"Address": "erpnext.utilities.address_and_contact.has_permission"
-}
-
 dump_report_map = "erpnext.startup.report_data_map.data_map"
 
 before_tests = "erpnext.setup.utils.before_tests"
@@ -153,7 +143,7 @@ doc_events = {
 		"after_insert": "frappe.email.doctype.contact.contact.update_contact",
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
 		"on_update": "erpnext.hr.doctype.employee.employee.update_user_permissions",
-		"on_update": "erpnext.utilities.address_and_contact.set_default_role"
+		"on_update": "frappe.geo.address_and_contact.set_default_role"
 	},
 	("Sales Taxes and Charges Template", 'Price List'): {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"

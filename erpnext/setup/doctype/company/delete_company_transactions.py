@@ -75,10 +75,16 @@ def delete_lead_addresses(company_name):
 	"""Delete addresses to which leads are linked"""
 	leads = frappe.get_all("Lead", filters={"company": company_name})
 	leads = [ "'%s'"%row.get("name") for row in leads ]
+	addresses = []
 	if leads:
-		frappe.db.sql("""delete from tabAddress where name not in (select parent 
-			from `tabDynamic Link` dl where dl.link_doctype<>'Lead' and 
-			dl.parenttype='Address')""", debug=True)
+		addresses = frappe.db.sql_list("""select parent from `tabDynamic Link` where link_name 
+			in ({leads})""".format(leads=",".join(leads)), debug=True)
+		addresses = ["'%s'"%addr for addr in addresses]
+
+		frappe.db.sql("""delete from tabAddress where name in ({addresses}) and 
+			name not in (select distinct dl1.parent from `tabDynamic Link` dl1 
+			inner join `tabDynamic Link` dl2 on dl1.parent=dl2.parent 
+			and dl1.link_doctype<>dl2.link_doctype)""".format(addresses=",".join(addresses)), debug=True)
 
 		frappe.db.sql("""delete from `tabDynamic Link` where link_doctype='Lead' and parenttype='Address' 
 			and link_name in ({leads})""".format(leads=",".join(leads)), debug=True)
