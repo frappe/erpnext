@@ -24,7 +24,7 @@
 
 <div class="clearfix">
   <h4 style="float: left;">{{ _("Tasks") }}</h4>
-  <a class="btn btn-secondary btn-default btn-sm" style="float: right; position: relative; top: 10px;" href='/tasks?new=1&project={{ doc.project_name }}'>New task</a>
+  <a class="btn btn-secondary btn-default btn-sm" style="float: right; position: relative; top: 10px;" href='/tasks?new=1&project={{ doc.project_name }}'>{{ _("New task") }}</a>
 </div>
 
 <p>
@@ -39,7 +39,7 @@
 		<p><a id= 'more-task' style='display: none;' class='more-tasks small underline'>{{ _("More") }}</a><p>
 	</div>
 {% else %}
-	<p class="text-muted">No tasks</p>
+	<p class="text-muted">{{ _("No tasks") }}</p>
 {% endif %}
 
 
@@ -55,7 +55,7 @@
 		<p><a class='more-timelogs small underline'>{{ _("More") }}</a><p>
 	{% endif %}
 {% else %}
-	<p class="text-muted">No time sheets</p>
+	<p class="text-muted">{{ _("No time sheets") }}</p>
 {% endif %}
 </div>
 
