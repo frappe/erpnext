@@ -3,8 +3,8 @@ business, under Domain. You can enter manufacturing, retail, or services
 depending on the nature of your business activity. If you have more than one
 companies, create the setup under the Company Setup page.
 
-After clicking on Setup, go to Masters and click on Company.
+After clicking on Accounts and click on Company.
 
-> Setup > Masters > Company > New Company
+> Accounts > Company > New Company
 
 {next}
