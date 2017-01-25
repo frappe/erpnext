@@ -34,7 +34,7 @@ Event".
 
 ###Permission for Event
 
-You can set Event as Private or Public. Private Events will be visible only to you, and if any other user selected in the participants table. Instead of User, you can also assign permission for event based on Role.
+You can set Event as Private or Public. Private Events will be visible only to you, and you can also assign permission for event based on Role in the participants table.
 
 Public Event, like Birthday will be visible to all.
 
