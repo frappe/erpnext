@@ -363,3 +363,4 @@ erpnext.patches.v7_2.update_website_for_variant
 erpnext.patches.v7_2.update_doctype_status
 erpnext.patches.v7_2.update_salary_slips
 erpnext.patches.v7_2.set_null_value_to_fields
+erpnext.patches.v7_2.update_abbr_in_salary_slips
