@@ -9,6 +9,11 @@
 				<button class="btn btn-default add-customer-btn">
 					<i class="fa fa-plus"></i>
 				</button>
+				{% if (allow_delete) { %}
+					<button class="btn btn-default btn-danger" style="margin: 0 5px 0 5px;display:none">
+						<i class="octicon octicon-trashcan"></i>
+					</button>
+				{% } %}
             </div>
     		<div class="pos-bill">
     			<div class="item-cart">
@@ -72,8 +77,10 @@
 				<div class="app-listing item-list"></ul>
     		</div>
     	</div>
-		<div class="text-right list-paging-area" style="padding-right:0px">
-			<button class="btn btn-default btn-more btn-sm">More</button>
-		</div>
     </div>
+	<div class="row">
+		<div class="text-right list-paging-area">
+			<button class="btn btn-default btn-more btn-sm" style="margin:5px 20px">{{ __("More") }}</button>
+		</div>
+	</div>
 </div>
