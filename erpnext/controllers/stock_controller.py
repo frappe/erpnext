@@ -52,9 +52,9 @@ class StockController(AccountsController):
 						# from warehouse account
 						
 						self.check_expense_account(item_row)
-						self.update_stock_ledger_entries(sle)
 
 						if not sle.stock_value_difference:
+							self.update_stock_ledger_entries(sle)
 							self.validate_negative_stock(sle)
 
 						gl_list.append(self.get_gl_dict({
@@ -88,13 +88,12 @@ class StockController(AccountsController):
 		return process_gl_map(gl_list)
 
 	def update_stock_ledger_entries(self, sle):
-		if not sle.stock_value_difference:
-			sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, 
-				sle.voucher_type, sle.voucher_no)
-			sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
-			sle.stock_value_difference = sle.stock_value
-			sle.doctype="Stock Ledger Entry"
-			frappe.get_doc(sle).db_update()
+		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, 
+			sle.voucher_type, sle.voucher_no)
+		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
+		sle.stock_value_difference = sle.stock_value
+		sle.doctype="Stock Ledger Entry"
+		frappe.get_doc(sle).db_update()
 
 	def validate_negative_stock(self, sle):
 		if sle.qty_after_transaction < 0 and sle.actual_qty < 0:
