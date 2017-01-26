@@ -116,3 +116,5 @@ In General Ledger, system shows debit / credit amount in both currency if filter
 In Accounts Receivable / Payable report, system shows all the amounts in Party / Account Currency.
 
 <img class="screenshot" alt="Accounts Receivable Report"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/accounts-receivable.png">
+
+{next}
