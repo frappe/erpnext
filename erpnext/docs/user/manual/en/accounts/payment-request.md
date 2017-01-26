@@ -25,4 +25,4 @@ You can notify customer from Payment Request with print format. If customer cont
 ##### Request Mail
 <img class="screenshot" alt="Payment Request" src="{{docs_base_url}}/assets/img/accounts/pr-email.png">
 
-
+{next}
