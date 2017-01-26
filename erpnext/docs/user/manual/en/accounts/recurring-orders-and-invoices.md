@@ -31,3 +31,5 @@ In a situation where recurring invoice is not created successfully, user with Sy
 Failure in creation of recurring invoice could be due to multiple reasons like wrong Email Address mentioned in the Email Notification field in Recurring section etc.
 
 On receipt of notification, if cause of failure is fixed (like correcting Email Address) within 24 hours, then recurring invoice will be generated automatically. If issue is not fixed within the said time, then document should be created for that month/year manually.
+
+{next}
