@@ -30,7 +30,7 @@ frappe.ui.form.on("Opportunity", {
 		frm.events.enquiry_from(frm);
 		frm.trigger('set_contact_link');
 
-		if(doc.status!=="Lost") {
+		if(!doc.__islocal && doc.status!=="Lost") {
 			if(doc.with_items){
 				frm.add_custom_button(__('Supplier Quotation'),
 					function() {
@@ -121,7 +121,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	erpnext.toggle_naming_series();
 
 	var frm = cur_frm;
-	if(frm.perm[0].write && doc.docstatus==0) {
+	if(!doc.__islocal && frm.perm[0].write && doc.docstatus==0) {
 		if(frm.doc.status==="Open") {
 			frm.add_custom_button(__("Close"), function() {
 				frm.set_value("status", "Closed");
