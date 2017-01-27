@@ -28,7 +28,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def on_update(self):
 		NestedSet.on_update(self)
-		WebsiteGenerator.on_update(self)
 		invalidate_cache_for(self)
 		self.validate_name_with_item()
 		self.validate_one_root()
