@@ -216,7 +216,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 1, 
+   "collapsible": 0, 
    "collapsible_depends_on": "", 
    "columns": 0, 
    "fieldname": "section_break_6", 
@@ -311,7 +311,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2016-12-01 12:57:17.125085", 
+ "modified": "2017-01-27 14:50:36.107270", 
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "Student Group", 
@@ -328,7 +328,6 @@
    "export": 0, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 0, 
    "print": 0, 
    "read": 1, 
@@ -349,7 +348,6 @@
    "export": 1, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 0, 
    "print": 1, 
    "read": 1, 
@@ -368,5 +366,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "", 
+ "track_changes": 0, 
  "track_seen": 0
 }
