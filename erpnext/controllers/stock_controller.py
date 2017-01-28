@@ -92,8 +92,10 @@ class StockController(AccountsController):
 			sle.voucher_type, sle.voucher_no)
 		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
 		sle.stock_value_difference = sle.stock_value
-		sle.doctype="Stock Ledger Entry"
-		frappe.get_doc(sle).db_update()
+		if sle.name:
+			frappe.db.sql(""" update `tabStock Ledger Entry` set stock_value = %(stock_value)s,
+				valuation_rate = %(valuation_rate)s, stock_value_difference = %(stock_value_difference)s 
+				where name = %(name)s""", (sle))
 
 	def validate_negative_stock(self, sle):
 		if sle.qty_after_transaction < 0 and sle.actual_qty < 0:
@@ -147,7 +149,7 @@ class StockController(AccountsController):
 
 	def get_stock_ledger_details(self):
 		stock_ledger = {}
-		for sle in frappe.db.sql("""select warehouse, stock_value_difference,
+		for sle in frappe.db.sql("""select name, warehouse, stock_value_difference,
 			voucher_detail_no, item_code, posting_date, posting_time, actual_qty, qty_after_transaction
 			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
 			(self.doctype, self.name), as_dict=True):
