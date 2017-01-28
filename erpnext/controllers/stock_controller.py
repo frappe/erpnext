@@ -92,8 +92,6 @@ class StockController(AccountsController):
 			sle.voucher_type, sle.voucher_no)
 		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
 		sle.stock_value_difference = sle.stock_value
-		sle.doctype="Stock Ledger Entry"
-		frappe.get_doc(sle).db_update()
 
 	def validate_negative_stock(self, sle):
 		if sle.qty_after_transaction < 0 and sle.actual_qty < 0:
