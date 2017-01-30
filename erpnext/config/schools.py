@@ -160,23 +160,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("LMS"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Announcement"
-				},
-				{
-					"type": "doctype",
-					"name": "Topic"
-				},
-				{
-					"type": "doctype",
-					"name": "Discussion"
-				}
-			]
-		},
-		{
 			"label": _("Setup"),
 			"items": [
 				{

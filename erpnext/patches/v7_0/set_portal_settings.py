@@ -8,7 +8,7 @@ from erpnext.setup.setup_wizard import domainify
 
 def execute():
 	frappe.reload_doctype('Role')
-	for dt in ("assessment", "announcement", "course", "fees"):
+	for dt in ("assessment", "course", "fees"):
 		frappe.reload_doc("schools", "doctype", dt)
 
 	frappe.reload_doc('website', 'doctype', 'portal_menu_item')
