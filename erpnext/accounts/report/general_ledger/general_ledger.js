@@ -48,6 +48,12 @@ frappe.query_reports["General Ledger"] = {
 			"fieldtype": "Data",
 		},
 		{
+			"fieldname":"project",
+			"label": __("Project"),
+			"fieldtype": "Link",
+			"options": "Project"
+		},
+		{
 			"fieldtype": "Break",
 		},
 		{
