@@ -376,7 +376,7 @@ class JournalEntry(AccountsController):
 		bank_amount = party_amount = total_amount = 0.0
 		currency = bank_account_currency = party_account_currency = pay_to_recd_from= None
 		for d in self.get('accounts'):
-			if d.party_type and d.party:
+			if d.party_type in ['Customer', 'Supplier'] and d.party:
 				if not pay_to_recd_from:
 					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 						"customer_name" if d.party_type=="Customer" else "supplier_name")

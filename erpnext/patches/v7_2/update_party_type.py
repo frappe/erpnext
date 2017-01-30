@@ -6,7 +6,6 @@ import frappe
 
 def execute():
 	frappe.reload_doc('setup', 'doctype', 'party_type')
-	frappe.reload_doctype("Account")
 	make_party_type()
 
 def make_party_type():
