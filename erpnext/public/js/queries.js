@@ -68,6 +68,13 @@ $.extend(erpnext.queries, {
 		}
 	},
 
+	company_address_query: function(doc) {
+		return {
+			query: 'frappe.geo.doctype.address.address.address_query',
+			filters: { is_your_company_address: 1, link_doctype: 'Company', link_name: doc.company || '' }
+		};
+	},
+
 	supplier_filter: function(doc) {
 		if(!doc.supplier) {
 			frappe.throw(__("Please set {0}", __(frappe.meta.get_label(doc.doctype, "supplier", doc.name))));

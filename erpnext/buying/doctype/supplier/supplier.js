@@ -26,11 +26,11 @@ frappe.ui.form.on("Supplier", {
 
 		if(frm.doc.__islocal){
 	    	hide_field(['address_html','contact_html']);
-			erpnext.utils.clear_address_and_contact(frm);
+			frappe.geo.clear_address_and_contact(frm);
 		}
 		else {
 		  	unhide_field(['address_html','contact_html']);
-			erpnext.utils.render_address_and_contact(frm);
+			frappe.geo.render_address_and_contact(frm);
 
 			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function() {
