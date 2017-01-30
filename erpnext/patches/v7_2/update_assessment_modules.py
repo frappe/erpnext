@@ -30,6 +30,7 @@ def execute():
 				assessment_result.grading_scale = assessment.grading_scale
 				assessment_result.total_score = stud_result.result
 				assessment_result.flags.ignore_validate = True
+				assessment_result.flags.ignore_mandatory = True
 				assessment_result.save()
 	
 	frappe.db.sql("""delete from `tabAssessment Result` where parent != '' or parent is not null""")
