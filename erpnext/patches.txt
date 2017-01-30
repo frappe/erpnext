@@ -369,3 +369,4 @@ erpnext.patches.v7_2.mark_students_active
 erpnext.patches.v7_2.set_null_value_to_fields
 erpnext.patches.v7_2.update_guardian_name_in_student_master
 erpnext.patches.v7_2.update_abbr_in_salary_slips
+execute:patches.v7_2.set_party_status

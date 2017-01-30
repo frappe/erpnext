@@ -149,13 +149,6 @@ doc_events = {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
 
-	# bubble transaction notification on master
-	('Opportunity', 'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
-		'Supplier Quotation', 'Purchase Order', 'Purchase Receipt',
-		'Purchase Invoice', 'Project', 'Issue'): {
-			'on_change': 'erpnext.accounts.party_status.notify_status'
-		},
-
 	"Website Settings": {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},

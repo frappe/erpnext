@@ -6,7 +6,6 @@ import frappe
 from frappe.utils import flt, comma_or, nowdate, getdate
 from frappe import _
 from frappe.model.document import Document
-from erpnext.accounts.party_status import notify_status
 
 def validate_status(status, options):
 	if status not in options:
@@ -287,7 +286,6 @@ class StatusUpdater(Document):
 				target = frappe.get_doc(args["target_parent_dt"], args["name"])
 				target.set_status(update=True)
 				target.notify_update()
-				notify_status(target)
 
 	def _update_modified(self, args, update_modified):
 		args['update_modified'] = ''
