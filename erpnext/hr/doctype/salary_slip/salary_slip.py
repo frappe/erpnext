@@ -89,8 +89,8 @@ class SalarySlip(TransactionBase):
 		    frappe.throw(_("Name error: {0}".format(err)))
 		except SyntaxError as err:
 		    frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
-		except:
-		    frappe.throw(_("Error in formula or condition"))
+		except Exception, e:
+		    frappe.throw(_("Error in formula or condition: {0}".format(e)))
 		    raise
 
 	def get_data_for_eval(self):
@@ -99,7 +99,7 @@ class SalarySlip(TransactionBase):
 
 		for d in self._salary_structure_doc.employees:
 			if d.employee == self.employee:
-				data.base, data.variable = d.base, d.variable
+				data.update(frappe.get_doc("Salary Structure Employee", {"employee": self.employee}).as_dict())
 
 		data.update(frappe.get_doc("Employee", self.employee).as_dict())
 		data.update(self.as_dict())
@@ -108,7 +108,6 @@ class SalarySlip(TransactionBase):
 		salary_components = frappe.get_all("Salary Component", fields=["salary_component_abbr"])
 		for salary_component in salary_components:
 			data[salary_component.salary_component_abbr] = 0
-
 		return data
 
 
