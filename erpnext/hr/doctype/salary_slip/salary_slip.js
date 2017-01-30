@@ -110,6 +110,7 @@ cur_frm.cscript.depends_on_lwp = function(doc,dt,dn){
 	calculate_earning_total(doc, dt, dn, true);
 	calculate_ded_total(doc, dt, dn, true);
 	calculate_net_pay(doc, dt, dn);
+	refresh_many(['amount','gross_pay', 'rounded_total', 'net_pay', 'loan_repayment']);
 };
 
 // Calculate earning total
