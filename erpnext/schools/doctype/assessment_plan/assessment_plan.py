@@ -13,7 +13,7 @@ class AssessmentPlan(Document):
 			frappe.throw(_("Please select Student Group or Student Batch"))
 		self.validate_student_batch()
 		self.validate_overlap()
-
+		self.validate_max_score()
 
 	def validate_overlap(self):
 		"""Validates overlap for Student Group/Student Batch, Instructor, Room"""
@@ -43,3 +43,10 @@ class AssessmentPlan(Document):
 	def validate_student_batch(self):
 		if self.student_group:
 			self.student_batch = frappe.db.get_value("Student Group", self.student_group, "student_batch")
+
+	def validate_max_score(self):
+		max_score = 0
+		for d in self.evaluation_criterias:
+			max_score += d.maximum_score
+		if self.maximum_assessment_score != max_score:
+			frappe.throw(_("Sum of Scores of Evaluation Criterias needs to be {0}.".format(self.maximum_assessment_score)))
