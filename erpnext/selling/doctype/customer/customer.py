@@ -95,11 +95,11 @@ class Customer(TransactionBase):
 	def create_lead_address_contact(self):
 		if self.lead_name:
 			# assign lead address to customer (if already not set)
-			address_names = frappe.db.get_values('Dynamic Link', dict(
-								parenttype='Address',
-								link_doctype='Lead',
-								link_name=self.lead_name
-							), 'parent as name', as_dict=True)
+			address_names = frappe.get_all('Dynamic Link', filters={
+								"parenttype":"Address",
+								"link_doctype":"Lead",
+								"link_name":self.lead_name
+							}, fields=["parent as name"])
 
 			for address_name in address_names:
 				address = frappe.get_doc('Address', address_name.get('name'))

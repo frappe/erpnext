@@ -89,7 +89,7 @@ def delete_lead_addresses(company_name):
 		frappe.db.sql("""delete from `tabDynamic Link` where link_doctype='Lead' and parenttype='Address' 
 			and link_name in ({leads})""".format(leads=",".join(leads)), debug=True)
 
-		frappe.db.sql("""update tabCustomer set lead_name='' where lead_name in ({leads})""".format(leads=",".join(leads)), debug=True)
+		frappe.db.sql("""update tabCustomer set lead_name=NULL where lead_name in ({leads})""".format(leads=",".join(leads)), debug=True)
 
 def delete_communications(doctype, company_name, company_fieldname):
 		frappe.db.sql("""
