@@ -8,7 +8,7 @@ from frappe.utils import cstr, validate_email_add, cint, comma_and, has_gravatar
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
-from erpnext.utilities.address_and_contact import load_address_and_contact
+from frappe.geo.address_and_contact import load_address_and_contact
 from erpnext.accounts.party import set_taxes
 
 sender_field = "email_id"
@@ -127,7 +127,7 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
-	target_doc = get_mapped_doc("Lead", source_name,
+	target_doc = get_mapped_doc("Lead", source_name, 
 		{"Lead": {
 			"doctype": "Opportunity",
 			"field_map": {

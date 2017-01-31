@@ -36,7 +36,7 @@ $.extend(erpnext.queries, {
 
 	customer_filter: function(doc) {
 		if(!doc.customer) {
-			frappe.throw(__("Please set {0}", __(frappe.meta.get_label(doc.doctype, "customer", doc.name))));
+			frappe.throw(__("Please set {0}", [__(frappe.meta.get_label(doc.doctype, "customer", doc.name))]));
 		}
 
 		return { filters: { customer: doc.customer } };
@@ -45,8 +45,8 @@ $.extend(erpnext.queries, {
 	contact_query: function(doc) {
 		if(frappe.dynamic_link) {
 			if(!doc[frappe.dynamic_link.fieldname]) {
-				frappe.throw(__("Please set {0}", __(frappe.meta.get_label(doc.doctype,
-					frappe.dynamic_link.fieldname, doc.name))));
+				frappe.throw(__("Please set {0}",
+					[__(frappe.meta.get_label(doc.doctype, frappe.dynamic_link.fieldname, doc.name))]));
 			}
 
 			return {
@@ -58,8 +58,8 @@ $.extend(erpnext.queries, {
 	address_query: function(doc) {
 		if(frappe.dynamic_link) {
 			if(!doc[frappe.dynamic_link.fieldname]) {
-				frappe.throw(__("Please set {0}", __(frappe.meta.get_label(doc.doctype,
-					frappe.dynamic_link.fieldname, doc.name))));
+				frappe.throw(__("Please set {0}", 
+					[__(frappe.meta.get_label(doc.doctype, frappe.dynamic_link.fieldname, doc.name))]));
 			}
 
 			return {
@@ -68,9 +68,16 @@ $.extend(erpnext.queries, {
 		}
 	},
 
+	company_address_query: function(doc) {
+		return {
+			query: 'frappe.geo.doctype.address.address.address_query',
+			filters: { is_your_company_address: 1, link_doctype: 'Company', link_name: doc.company || '' }
+		};
+	},
+
 	supplier_filter: function(doc) {
 		if(!doc.supplier) {
-			frappe.throw(__("Please set {0}", __(frappe.meta.get_label(doc.doctype, "supplier", doc.name))));
+			frappe.throw(__("Please set {0}", [__(frappe.meta.get_label(doc.doctype, "supplier", doc.name))]));
 		}
 
 		return { filters: { supplier: doc.supplier } };
@@ -78,8 +85,8 @@ $.extend(erpnext.queries, {
 
 	lead_filter: function(doc) {
 		if(!doc.lead) {
-			frappe.throw(__("Please specify a") + " " +
-				__(frappe.meta.get_label(doc.doctype, "lead", doc.name)));
+			frappe.throw(__("Please specify a {0}", 
+				[__(frappe.meta.get_label(doc.doctype, "lead", doc.name))]));
 		}
 
 		return { filters: { lead: doc.lead } };
