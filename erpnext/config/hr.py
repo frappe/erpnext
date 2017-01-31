@@ -146,6 +146,11 @@ def get_data():
 					"name": "Appraisal Template",
 					"description": _("Template for performance appraisals.")
 				},
+				{
+					"type": "page",
+					"name": "team-updates",
+					"label": _("Team Updates")
+				},
 			]
 		},
 
@@ -166,7 +171,7 @@ def get_data():
 				},
 			]
 		},
-		
+
 		{
 			"label": _("Fleet Management"),
 			"items": [
@@ -180,7 +185,7 @@ def get_data():
 				},
 			]
 		},
-		
+
 
 		{
 			"label": _("Setup"),
