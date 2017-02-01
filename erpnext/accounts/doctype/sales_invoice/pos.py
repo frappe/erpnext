@@ -30,6 +30,7 @@ def get_pos_data():
 		'doc': doc,
 		'default_customer': pos_profile.get('customer'),
 		'items': get_items_list(pos_profile),
+		'item_groups': get_item_group(pos_profile),
 		'customers': get_customers_list(pos_profile),
 		'serial_no_data': get_serial_no_data(pos_profile, doc.company),
 		'batch_no_data': get_batch_no_data(),
@@ -139,6 +140,15 @@ def get_items_list(pos_profile):
 		where
 			disabled = 0 and has_variants = 0 and is_sales_item = 1 and {cond}
 		""".format(cond=cond), tuple(item_groups), as_dict=1)
+
+def get_item_group(pos_profile):
+	if pos_profile.get('item_groups'):
+		item_groups = []
+		for d in pos_profile.get('item_groups'):
+			item_groups.extend(get_child_nodes('Item Group', d.item_group))
+		return item_groups
+	else:
+		return frappe.db.sql_list("""Select name from `tabItem Group` order by name""")
 
 def get_customers_list(pos_profile):
 	cond = "1=1"
@@ -276,11 +286,32 @@ def validate_customer(doc):
 		customer_doc = frappe.new_doc('Customer')
 		customer_doc.customer_name = doc.get('customer')
 		customer_doc.customer_type = 'Company'
-		customer_doc.customer_group = doc.get('customer_group')
-		customer_doc.territory = doc.get('territory')
+		customer_doc.customer_group = frappe.db.get_single_value('Selling Settings', 'customer_group')
+		customer_doc.territory = frappe.db.get_single_value('Selling Settings', 'territory')
+		customer_doc.flags.ignore_mandatory = True
 		customer_doc.save(ignore_permissions = True)
 		frappe.db.commit()
 		doc['customer'] = customer_doc.name
+		if doc.get('contact_details'):
+			args = json.loads(doc.get("contact_details"))
+			make_address(doc, args, customer_doc.name)
+
+def make_address(doc, args, customer):
+	if args.get("address_line1"):
+		address = frappe.new_doc('Address')
+		address.address_line1 = args.get('address_line1')
+		address.address_line2 = args.get('address_line2')
+		address.city = args.get('city')
+		address.state = args.get('state')
+		address.zip_code = args.get('zip_code')
+		address.email_id = args.get('email_id')
+		address.flags.ignore_mandatory = True
+		address.country = frappe.db.get_value('Company', doc.get('company'), 'country')
+		address.append('links',{
+			'link_doctype': 'Customer',
+			'link_name': customer
+		})
+		address.save(ignore_permissions = True)
 
 def validate_item(doc):
 	for item in doc.get('items'):

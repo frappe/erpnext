@@ -82,7 +82,7 @@
 
 .pos-toolbar, .pos-bill-toolbar {
 	padding: 10px 0px;
-	border-bottom: 1px solid #d1d8dd;
+	// border-bottom: 1px solid #d1d8dd;
 	height: 51px;
 }
 
@@ -97,6 +97,7 @@
 }
 
 .pos-bill {
+	border-top: 1px solid @border-color;
 	margin-left: -15px;
 	margin-right: -15px;
 }
@@ -211,6 +212,10 @@
 
 .payment-toolbar {
 	padding-right: 30px;
+}
+
+.list-row-head.pos-invoice-list {
+	border-top: 1px solid @border-color;
 }
 
 body[data-route="pos"] .modal-dialog {
