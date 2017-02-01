@@ -9,7 +9,6 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.setup.utils import get_exchange_rate
-# test_records = frappe.get_test_records('Payment Request')
 
 test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
 

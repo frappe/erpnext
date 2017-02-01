@@ -27,7 +27,7 @@ def check_setup_wizard_not_completed():
 
 def set_single_defaults():
 	for dt in ('Accounts Settings', 'Print Settings', 'HR Settings', 'Buying Settings',
-		'Selling Settings', 'Stock Settings'):
+		'Selling Settings', 'Stock Settings', 'Daily Work Summary Settings'):
 		default_values = frappe.db.sql("""select fieldname, `default` from `tabDocField`
 			where parent=%s""", dt)
 		if default_values:

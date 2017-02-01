@@ -16,6 +16,10 @@ class JobOpening(WebsiteGenerator):
 		page_title_field = "job_title",
 	)
 
+	def validate(self):
+		if not self.route:
+			self.route = frappe.scrub(self.job_title).replace('_', '-')
+
 	def get_context(self, context):
 		context.parents = [{'name': 'jobs', 'title': _('All Jobs') }]
 

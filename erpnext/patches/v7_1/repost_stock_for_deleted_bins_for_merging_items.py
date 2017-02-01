@@ -3,6 +3,9 @@ import frappe
 from erpnext.stock.stock_balance import repost_stock
 
 def execute():
+	frappe.reload_doc('manufacturing', 'doctype', 'production_order_item')
+	frappe.reload_doc('manufacturing', 'doctype', 'production_order')
+	
 	modified_items = frappe.db.sql_list("""
 		select name from `tabItem` 
 		where is_stock_item=1 and modified >= '2016-10-31'

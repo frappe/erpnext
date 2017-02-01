@@ -42,9 +42,6 @@ def get_item_details(args):
 
 	get_party_item_code(args, item_doc, out)
 
-	if out.get("warehouse"):
-		out.update(get_bin_details(args.item_code, out.warehouse))
-
 	if frappe.db.exists("Product Bundle", args.item_code):
 		valuation_rate = 0.0
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
@@ -65,6 +62,9 @@ def get_item_details(args):
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args))
+		
+	if out.get("warehouse"):
+		out.update(get_bin_details(args.item_code, out.warehouse))
 
 	# update args with out, if key or value not exists
 	for key, value in out.iteritems():
@@ -74,8 +74,7 @@ def get_item_details(args):
 	out.update(get_pricing_rule_for_item(args))
 
 	if args.get("doctype") in ("Sales Invoice", "Delivery Note"):
-		if item_doc.has_serial_no == 1 and not args.serial_no:
-			out.serial_no = get_serial_nos_by_fifo(args)
+		out.serial_no = get_serial_no(out)
 
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
@@ -144,7 +143,7 @@ def get_basic_details(args, item):
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list)==1 else ""
 
-	warehouse = user_default_warehouse or args.warehouse or item.default_warehouse
+	warehouse = user_default_warehouse or item.default_warehouse or args.warehouse
 
 	out = frappe._dict({
 		"item_code": item.name,
@@ -375,8 +374,21 @@ def get_projected_qty(item_code, warehouse):
 @frappe.whitelist()
 def get_bin_details(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
-		["projected_qty", "actual_qty"], as_dict=True) \
-		or {"projected_qty": 0, "actual_qty": 0}
+			["projected_qty", "actual_qty"], as_dict=True) \
+			or {"projected_qty": 0, "actual_qty": 0}
+
+@frappe.whitelist()
+def get_serial_no_details(item_code, warehouse, qty, serial_no):
+	args = frappe._dict({"item_code":item_code, "warehouse":warehouse, "qty":qty, "serial_no":serial_no})
+	serial_no = get_serial_no(args)
+	return {'serial_no': serial_no}
+	
+@frappe.whitelist()
+def get_bin_details_and_serial_nos(item_code, warehouse, qty=None, serial_no=None):
+	bin_details_and_serial_nos = {}
+	bin_details_and_serial_nos.update(get_bin_details(item_code, warehouse))
+	bin_details_and_serial_nos.update(get_serial_no_details(item_code, warehouse, qty, serial_no))
+	return bin_details_and_serial_nos
 
 @frappe.whitelist()
 def get_batch_qty(batch_no,warehouse,item_code):
@@ -469,7 +481,9 @@ def get_price_list_currency_and_exchange_rate(args):
 
 	if (not plc_conversion_rate) or (price_list_currency and args.price_list_currency \
 		and price_list_currency != args.price_list_currency):
-			plc_conversion_rate = get_exchange_rate(price_list_currency, args.currency) or plc_conversion_rate
+        # cksgb 19/09/2016: added args.transaction_date as posting_date argument for get_exchange_rate
+			plc_conversion_rate = get_exchange_rate(price_list_currency, args.currency, 
+				args.transaction_date) or plc_conversion_rate
 
 	return frappe._dict({
 		"price_list_currency": price_list_currency,
@@ -512,3 +526,16 @@ def get_gross_profit(out):
 
 	return out
 
+@frappe.whitelist()
+def get_serial_no(args):
+	if isinstance(args, basestring):
+		args = json.loads(args)
+		args = frappe._dict(args)
+
+	if args.get('warehouse') and args.get('qty') and args.get('item_code'):
+		
+		if frappe.get_value('Item', {'item_code': args.item_code}, "has_serial_no") == 1:
+			args = json.dumps({"item_code": args.get('item_code'),"warehouse": args.get('warehouse'),"qty": args.get('qty')})
+			args = process_args(args)
+			serial_no = get_serial_nos_by_fifo(args)
+			return serial_no

@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 from erpnext.setup.utils import get_exchange_rate
+from frappe.utils import flt, cint
 import frappe
 
 def execute(filters=None):
@@ -20,6 +21,7 @@ def get_quote_list(item, qty_list):
 		price_data = []
 		suppliers = []
 		company_currency = frappe.db.get_default("currency")
+		float_precision = cint(frappe.db.get_default("float_precision")) or 2 
 		# Get the list of suppliers
 		for root in frappe.db.sql("""select parent, qty, rate from `tabSupplier Quotation Item` where item_code=%s and docstatus < 2""", item, as_dict=1):
 			for splr in frappe.db.sql("""SELECT supplier from `tabSupplier Quotation` where name =%s and docstatus < 2""", root.parent, as_dict=1):
@@ -46,7 +48,7 @@ def get_quote_list(item, qty_list):
 				# Get the quantity for this row
 				for item_price in price_data:
 					if str(item_price.qty) == col.key and item_price.supplier == root:
-						row[col.key] = item_price.rate * exchange_rate
+						row[col.key] = flt(item_price.rate * exchange_rate, float_precision)
 						row[col.key + "QUOTE"] = item_price.parent
 						break
 					else:

@@ -186,7 +186,7 @@
  ], 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
- "icon": "icon-cog", 
+ "icon": "fa fa-cog", 
  "idx": 1, 
  "in_create": 0, 
  "in_dialog": 0, 

@@ -9,7 +9,7 @@ frappe.listview_settings['Stock Entry'] = {
 					data-filter="from_warehouse,=,'+doc.from_warehouse+'">'+doc.from_warehouse+' </span>';
 			}
 			if(doc.from_warehouse || doc.to_warehouse) {
-				html += '<i class="octicon octicon-arrow-right text-muted"></i> ';
+				html += '<i class="octicon octfa fa-arrow-right text-muted"></i> ';
 			}
 			if(doc.to_warehouse) {
 				html += '<span class="filterable h6"\

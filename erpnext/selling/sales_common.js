@@ -206,11 +206,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_bin_details",
+				method: "erpnext.stock.get_item_details.get_bin_details_and_serial_nos",
 				child: item,
 				args: {
 					item_code: item.item_code,
 					warehouse: item.warehouse,
+					qty: item.qty,
+					serial_no: item.serial_no || ""
 				},
 				callback:function(r){
 					if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {

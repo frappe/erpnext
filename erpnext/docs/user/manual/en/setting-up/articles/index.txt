@@ -9,5 +9,4 @@ managing-tree-structure-masters
 naming-series-current-value
 overwriting-data-from-data-import-tool
 rename-user
-setting-up-dropbox-backups
 using-custom-domain-on-erpnext

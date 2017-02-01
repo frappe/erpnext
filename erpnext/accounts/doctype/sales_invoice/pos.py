@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe import _
 from frappe.utils import nowdate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.get_item_details import get_pos_profile
@@ -40,12 +39,20 @@ def get_pos_data():
 		'pricing_rules': get_pricing_rule_data(doc),
 		'print_template': print_template,
 		'pos_profile': pos_profile,
-		'meta': {
-			'invoice': frappe.get_meta('Sales Invoice'),
-			'items': frappe.get_meta('Sales Invoice Item'),
-			'taxes': frappe.get_meta('Sales Taxes and Charges')
-		}
+		'meta': get_meta()
 	}
+
+def get_meta():
+	doctype_meta = {
+		'customer': frappe.get_meta('Customer'),
+		'invoice': frappe.get_meta('Sales Invoice')
+	}
+
+	for row in frappe.get_all('DocField', fields = ['fieldname', 'options'],
+		filters = {'parent': 'Sales Invoice', 'fieldtype': 'Table'}):
+		doctype_meta[row.fieldname] = frappe.get_meta(row.options)
+
+	return doctype_meta
 
 def get_company_data(company):
 	return frappe.get_all('Company', fields = ["*"], filters= {'name': company})[0]
@@ -63,8 +70,10 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 
 	doc.currency = pos_profile.get('currency') or company_data.default_currency
 	doc.conversion_rate = 1.0
+
 	if doc.currency != company_data.default_currency:
-		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency)
+		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency, doc.posting_date)
+
 	doc.selling_price_list = pos_profile.get('selling_price_list') or \
 		frappe.db.get_value('Selling Settings', None, 'selling_price_list')
 	doc.naming_series = pos_profile.get('naming_series') or 'SINV-'
@@ -73,6 +82,7 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.apply_discount_on = pos_profile.get('apply_discount_on') if pos_profile.get('apply_discount') else ''
 	doc.customer_group = pos_profile.get('customer_group') or get_root('Customer Group')
 	doc.territory = pos_profile.get('territory') or get_root('Territory')
+	doc.terms = frappe.db.get_value('Terms and Conditions', pos_profile.get('tc_name'), 'terms') or doc.terms or ''
 
 def get_root(table):
 	root = frappe.db.sql(""" select name from `tab%(table)s` having

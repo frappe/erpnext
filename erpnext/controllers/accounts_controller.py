@@ -63,6 +63,11 @@ class AccountsController(TransactionBase):
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
 
+	def before_print(self):
+		if self.doctype in ['Purchase Order', 'Sales Order']:
+			if self.get("group_same_items"):
+				self.group_similar_items()
+
 	def validate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
 			is_paid = self.get("is_pos") or self.get("is_paid")
@@ -122,6 +127,11 @@ class AccountsController(TransactionBase):
 			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
 
 	def set_price_list_currency(self, buying_or_selling):
+		if self.meta.get_field("posting_date"):
+			transaction_date = self.posting_date
+		else:
+			transaction_date = self.transaction_date
+		 
 		if self.meta.get_field("currency"):
 			# price list part
 			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
@@ -134,8 +144,8 @@ class AccountsController(TransactionBase):
 					self.plc_conversion_rate = 1.0
 
 				elif not self.plc_conversion_rate:
-					self.plc_conversion_rate = get_exchange_rate(
-						self.price_list_currency, self.company_currency)
+					self.plc_conversion_rate = get_exchange_rate(self.price_list_currency, 
+						self.company_currency, transaction_date)
 
 			# currency
 			if not self.currency:
@@ -145,7 +155,7 @@ class AccountsController(TransactionBase):
 				self.conversion_rate = 1.0
 			elif not self.conversion_rate:
 				self.conversion_rate = get_exchange_rate(self.currency,
-					self.company_currency)
+					self.company_currency, transaction_date)
 
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
@@ -575,6 +585,27 @@ class AccountsController(TransactionBase):
 
 		frappe.db.set_value(self.doctype, self.name, "total_advance", 
 			total_allocated_amount, update_modified=False)
+
+	def group_similar_items(self):
+		group_item_qty = {}
+		group_item_amount = {}
+
+		for item in self.items:
+			group_item_qty[item.item_code] = group_item_qty.get(item.item_code, 0) + item.qty
+			group_item_amount[item.item_code] = group_item_amount.get(item.item_code, 0) + item.amount
+
+		duplicate_list = []
+
+		for item in self.items:
+			if item.item_code in group_item_qty:
+				item.qty = group_item_qty[item.item_code]
+				item.amount = group_item_amount[item.item_code]
+				del group_item_qty[item.item_code]
+			else:
+				duplicate_list.append(item)
+
+		for item in duplicate_list:
+			self.remove(item)
 
 @frappe.whitelist()
 def get_tax_rate(account_head):

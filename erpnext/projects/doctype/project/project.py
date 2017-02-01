@@ -8,6 +8,8 @@ from frappe.utils import flt, getdate, get_url
 from frappe import _
 
 from frappe.model.document import Document
+from erpnext.controllers.queries import get_filters_cond
+from frappe.desk.reportview import get_match_cond
 
 class Project(Document):
 	def get_feed(self):
@@ -215,12 +217,29 @@ def get_list_context(context=None):
 	}
 
 def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name)
+	conditions = []
+	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name) 
 		from `tabUser`
 		where enabled=1
-		and name not in ("Guest", "Administrator")
+			and name not in ("Guest", "Administrator") 
+			and ({key} like %(txt)s
+				or full_name like %(txt)s)
+			{fcond} {mcond}
 		order by
-		name asc""")
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, full_name), locate(%(_txt)s, full_name), 99999),
+			idx desc,
+			name, full_name
+		limit %(start)s, %(page_len)s""".format(**{
+			'key': searchfield,
+			'fcond': get_filters_cond(doctype, filters, conditions),
+			'mcond': get_match_cond(doctype)
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len
+		})
 
 @frappe.whitelist()
 def get_cost_center_name(project):

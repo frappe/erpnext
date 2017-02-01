@@ -5,7 +5,11 @@ frappe.provide("erpnext.hr");
 erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.user_id.get_query = function(doc, cdt, cdn) {
-			return { query:"frappe.core.doctype.user.user.user_query"} }
+			return {
+				query: "frappe.core.doctype.user.user.user_query",
+				filters: {ignore_user_type: 1}
+			}
+		}
 		this.frm.fields_dict.reports_to.get_query = function(doc, cdt, cdn) {
 			return { query: "erpnext.controllers.queries.employee_query"} }
 	},
@@ -41,7 +45,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 			}[this.frm.doc.salutation]);
 		}
 	},
-	
+
 });
 frappe.ui.form.on('Employee',{
 	prefered_contact_email:function(frm){
@@ -57,7 +61,18 @@ frappe.ui.form.on('Employee',{
 		frm.events.update_contact(frm)
 	},
 	update_contact:function(frm){
-		frm.set_value("prefered_email",frm.fields_dict[frappe.model.scrub(frm.doc.prefered_contact_email)].value)
-	}
+		var prefered_email_fieldname = frappe.model.scrub(frm.doc.prefered_contact_email) || 'user_id';
+		frm.set_value("prefered_email",
+			frm.fields_dict[prefered_email_fieldname].value)
+	},
+	status: function(frm) {
+		return frm.call({
+			method: "deactivate_sales_person",
+			args: {
+				employee: frm.doc.employee,
+				status: frm.doc.status
+			}
+		});
+	},
 });
 cur_frm.cscript = new erpnext.hr.EmployeeController({frm: cur_frm});

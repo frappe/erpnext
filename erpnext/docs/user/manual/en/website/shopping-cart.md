@@ -6,30 +6,49 @@ the items you intend to buy.
 This software displays the price of the product . It also displays shipping
 and handling charges, along with taxes, if applicable.
 
-To set up a shopping cart, go to the selling module.
+### Shopping Cart Setup
 
-> Selling > Shopping Cart Settings
+To set up a shopping cart, go to the website module.
 
-#### Step 1: Enter Company Details and Default Territory.
+> Website > Shopping Cart Settings
 
-![Shopping Cart]({{docs_base_url}}/assets/old_images/erpnext/shopping-cart-1.png)
+#### Enter Company Details and Checkout Details.
 
-#### Step 2: Enter Price List, Tax Master and Shipping Rule.
+<img class="screenshot" alt="Shopping Cart Settings" src="{{docs_base_url}}/assets/img/website/item-website-specs.png">
 
-![Shopping Cart]({{docs_base_url}}/assets/old_images/erpnext/shopping-cart-2.png)
+To make item available on website go to Item master.
 
-#### Shopping Cart Display
+> Stock > Item
 
-On the Website, the shopping cart image will be seen below the Item price.
-Customers can click on the cart and enter the amount of quantity they wish to
-buy. The Item number will be stored on the right hand corner of the page, next
-to the flower sign.
+#### Enable Item for website.
 
-![Shopping Cart]({{docs_base_url}}/assets/old_images/erpnext/shopping-cart-display-1.png)
+<img class="screenshot" alt="Item" src="{{docs_base_url}}/assets/img/website/item-in-webiste.png">
 
-Click on the flower sign on the right hand side to see the cart details. Click
-on the cart to get the final amount details.
+#### Enter Website Specifications for Item.
 
-![Shopping Cart]({{docs_base_url}}/assets/old_images/erpnext/shopping-cart-display-amount.png)
+<img class="screenshot" alt="Website Specifications" src="{{docs_base_url}}/assets/img/website/item-website-specs.png">
+
+
+### Shop using Shopping Cart
+
+#### Add item to shopping cart
+
+Click on "Add to Cart" to add item to shopping cart.
+
+<img class="screenshot" alt="Website Specifications" src="{{docs_base_url}}/assets/img/website/item-website-view.png">
+
+#### Goto Checkout
+
+Click on "Goto Cart" to checkout or on "Cart" which is on upper right side
+of the screen.
+
+<img class="screenshot" alt="Website Specifications" src="{{docs_base_url}}/assets/img/website/checkout.png">
+
+#### Checkout
+
+Change quantity, select Shipping and Billing Address and click
+on "Place Order" to place the order.
+
+<img class="screenshot" alt="Website Specifications" src="{{docs_base_url}}/assets/img/website/place-order.png">
 
 {next}

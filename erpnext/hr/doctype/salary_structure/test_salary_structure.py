@@ -8,8 +8,8 @@ import erpnext
 from frappe.utils.make_random import get_random
 from frappe.utils import nowdate, add_days, add_years, getdate
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.hr.doctype.salary_slip.test_salary_slip import  make_earning_salary_component, make_deduction_salary_component
-# test_records = frappe.get_test_records('Salary Structure')
+from erpnext.hr.doctype.salary_slip.test_salary_slip \
+	import make_earning_salary_component, make_deduction_salary_component
 
 test_dependencies = ["Fiscal Year"]
 
@@ -19,8 +19,8 @@ class TestSalaryStructure(unittest.TestCase):
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Structure Test Holiday List")
 		make_earning_salary_component(["Basic Salary", "Allowance", "HRA"])
 		make_deduction_salary_component(["Professional Tax", "TDS"])
-		employee1 = self.make_employee("test_employee@salary.com")
-		employee2 = self.make_employee("test_employee_2@salary.com")
+		self.make_employee("test_employee@salary.com")
+		self.make_employee("test_employee_2@salary.com")
 		
 	def make_holiday_list(self):
 		if not frappe.db.get_value("Holiday List", "Salary Structure Test Holiday List"):
@@ -81,9 +81,9 @@ def make_salary_slip_from_salary_structure(employee):
 	sal_struct = make_salary_structure('Salary Structure Sample')
 	sal_slip = make_salary_slip(sal_struct, employee = employee)
 	sal_slip.employee_name = frappe.get_value("Employee", {"name":employee}, "employee_name")
-	sal_slip.fiscal_year = "_Test Fiscal Year 2016"
-	sal_slip.month = getdate(nowdate()).month
+	sal_slip.start_date = nowdate()
 	sal_slip.posting_date = nowdate()
+	sal_slip.payroll_frequency =  "Monthly"
 	sal_slip.insert()
 	sal_slip.submit()
 	return sal_slip	
@@ -98,6 +98,7 @@ def make_salary_structure(sal_struct):
 			"employees": get_employee_details(),
 			"earnings": get_earnings_component(),
 			"deductions": get_deductions_component(),
+			"payroll_frequency": "Monthly",
 			"payment_account": frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 		}).insert()
 	return sal_struct

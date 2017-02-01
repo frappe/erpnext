@@ -1,40 +1,50 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import random
-from frappe.utils import random_string, add_days, cint
+import datetime
+from frappe.utils import random_string, add_days, get_last_day, getdate
 from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from frappe.utils.make_random import get_random
 from erpnext.hr.doctype.expense_claim.expense_claim import get_expense_approver, make_bank_entry
-from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on, OverlapError
+from erpnext.hr.doctype.leave_application.leave_application import (get_leave_balance_on,
+	OverlapError, AttendanceAlreadyMarkedError)
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_hr_user'))
 	year, month = frappe.flags.current_date.strftime("%Y-%m").split("-")
-	prev_month = str(cint(month)- 1).zfill(2)
-	if month=="01":
-		prev_month = "12"
-	
 	mark_attendance()
 	make_leave_application()
 
 	# process payroll
-	if not frappe.db.get_value("Salary Slip", {"month": prev_month, "fiscal_year": year}):
+	if not frappe.db.sql('select name from `tabSalary Slip` where month(adddate(start_date, interval 1 month))=month(curdate())'):
+		# process payroll for previous month
 		process_payroll = frappe.get_doc("Process Payroll", "Process Payroll")
 		process_payroll.company = frappe.flags.company
-		process_payroll.month = prev_month
-		process_payroll.fiscal_year = year
-		process_payroll.from_date = frappe.flags.current_date
-		process_payroll.to_date = add_days(frappe.flags.current_date, random.randint(0, 30))
-		process_payroll.reference_number = "DemoRef23"
-		process_payroll.reference_date = frappe.flags.current_date
+		process_payroll.payroll_frequency = 'Monthly'
+
+		# select a posting date from the previous month
+		process_payroll.posting_date = get_last_day(getdate(frappe.flags.current_date) - datetime.timedelta(days=10))
 		process_payroll.payment_account = frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
-		process_payroll.submit_salary_slip()
-		process_payroll.make_journal_entry()
-		
+
+		process_payroll.set_start_end_dates()
+
+		# based on frequency
+		process_payroll.salary_slip_based_on_timesheet = 0
+		process_payroll.create_salary_slips()
+		process_payroll.submit_salary_slips()
+		process_payroll.make_journal_entry(reference_date=frappe.flags.current_date,
+			reference_number=random_string(10))
+
+		process_payroll.salary_slip_based_on_timesheet = 1
+		process_payroll.create_salary_slips()
+		process_payroll.submit_salary_slips()
+		process_payroll.make_journal_entry(reference_date=frappe.flags.current_date,
+			reference_number=random_string(10))
+
 	if frappe.db.get_global('demo_hr_user'):
 		make_timesheet_records()
-	
+
 		#expense claim
 		expense_claim = frappe.new_doc("Expense Claim")
 		expense_claim.extend('expenses', get_expenses())
@@ -100,7 +110,10 @@ def get_timesheet_based_salary_slip_employee():
 				select employee from `tabSalary Structure Employee`
 				where parent IN %(sal_struct)s""", {"sal_struct": sal_struct}, as_dict=True)
 		return employees
-	
+
+	else:
+		return []
+
 def make_timesheet_records():
 	employees = get_timesheet_based_salary_slip_employee()
 	for e in employees:
@@ -134,10 +147,10 @@ def make_sales_invoice_for_timesheet(name):
 	sales_invoice.insert()
 	sales_invoice.submit()
 	frappe.db.commit()
-	
+
 def make_leave_application():
 	allocated_leaves = frappe.get_all("Leave Allocation", fields=['employee', 'leave_type'])
-	
+
 	for allocated_leave in allocated_leaves:
 		leave_balance = get_leave_balance_on(allocated_leave.employee, allocated_leave.leave_type, frappe.flags.current_date,
 			consider_all_leaves_in_the_allocation_period=True)
@@ -146,7 +159,7 @@ def make_leave_application():
 				to_date = frappe.flags.current_date
 			else:
 				to_date = add_days(frappe.flags.current_date, random.randint(0, leave_balance-1))
-				
+
 			leave_application = frappe.get_doc({
 				"doctype": "Leave Application",
 				"employee": allocated_leave.employee,
@@ -159,13 +172,13 @@ def make_leave_application():
 				leave_application.insert()
 				leave_application.submit()
 				frappe.db.commit()
-			except (OverlapError):
+			except (OverlapError, AttendanceAlreadyMarkedError):
 				frappe.db.rollback()
-			
+
 def mark_attendance():
 	att_date = frappe.flags.current_date
 	for employee in frappe.get_all('Employee', fields=['name'], filters = {'status': 'Active'}):
-		
+
 		if not frappe.db.get_value("Attendance", {"employee": employee.name, "att_date": att_date}):
 			attendance = frappe.get_doc({
 				"doctype": "Attendance",
@@ -175,11 +188,11 @@ def mark_attendance():
 			leave = frappe.db.sql("""select name from `tabLeave Application`
 				where employee = %s and %s between from_date and to_date and status = 'Approved'
 				and docstatus = 1""", (employee.name, att_date))
-			
+
 			if leave:
 				attendance.status = "Absent"
 			else:
 				attendance.status = "Present"
 			attendance.save()
-			attendance.submit()		
+			attendance.submit()
 			frappe.db.commit()

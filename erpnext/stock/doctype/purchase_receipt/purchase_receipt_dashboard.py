@@ -10,7 +10,7 @@ def get_data():
 		'internal_links': {
 			'Purchase Order': ['items', 'purchase_order'],
 			'Project': ['items', 'project'],
-			'Quality Inspection': ['items', 'qa_no'],
+			'Quality Inspection': ['items', 'quality_inspection'],
 		},
 		'transactions': [
 			{

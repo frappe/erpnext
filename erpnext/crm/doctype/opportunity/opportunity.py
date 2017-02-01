@@ -39,7 +39,7 @@ class Opportunity(TransactionBase):
 
 		if not self.title:
 			self.title = self.customer_name
-			
+
 		if not self.with_items:
 			self.items = []
 
@@ -64,7 +64,7 @@ class Opportunity(TransactionBase):
 				lead = frappe.get_doc({
 					"doctype": "Lead",
 					"email_id": self.contact_email,
-					"lead_name": sender_name
+					"lead_name": sender_name or 'Unknown'
 				})
 
 				lead.flags.ignore_email_validation = True
@@ -90,6 +90,14 @@ class Opportunity(TransactionBase):
 	def has_ordered_quotation(self):
 		return frappe.db.sql("""select q.name from `tabQuotation` q, `tabQuotation Item` qi
 			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s and q.status = 'Ordered'""", self.name)
+
+	def has_lost_quotation(self):
+		return frappe.db.sql("""
+			select q.name
+			from `tabQuotation` q, `tabQuotation Item` qi
+			where q.name = qi.parent and q.docstatus=1
+				and qi.prevdoc_docname =%s and q.status = 'Lost'
+			""", self.name)
 
 	def validate_cust_name(self):
 		if self.customer:
@@ -205,7 +213,8 @@ def make_quotation(source_name, target_doc=None):
 		if company_currency == quotation.currency:
 			exchange_rate = 1
 		else:
-			exchange_rate = get_exchange_rate(quotation.currency, company_currency)
+			exchange_rate = get_exchange_rate(quotation.currency, company_currency,
+				quotation.transaction_date)
 
 		quotation.conversion_rate = exchange_rate
 

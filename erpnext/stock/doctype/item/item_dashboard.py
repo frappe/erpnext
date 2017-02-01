@@ -28,7 +28,7 @@ def get_data():
 			{
 				'label': _('Buy'),
 				'items': ['Material Request', 'Supplier Quotation', 'Request for Quotation',
-					'Purchase Order', 'Purchase Invoice']
+					'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 			},
 			{
 				'label': _('Traceability'),

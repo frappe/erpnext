@@ -30,6 +30,7 @@ class Company(Document):
 		self.validate_abbr()
 		self.validate_default_accounts()
 		self.validate_currency()
+		self.validate_coa_input()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -77,6 +78,8 @@ class Company(Document):
 
 		if not frappe.local.flags.ignore_chart_of_accounts:
 			self.set_default_accounts()
+			if self.default_cash_account:
+				self.mode_of_payment()
 
 		if self.default_currency:
 			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
@@ -113,16 +116,25 @@ class Company(Document):
 					warehouse.insert()
 
 	def create_default_accounts(self):
-		if not self.chart_of_accounts:
-			self.chart_of_accounts = "Standard"
-
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
-		create_charts(self.chart_of_accounts, self.name)
+		create_charts(self.name, self.chart_of_accounts, self.existing_company)
 
 		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
 			{"company": self.name, "account_type": "Receivable", "is_group": 0}))
 		frappe.db.set(self, "default_payable_account", frappe.db.get_value("Account",
 			{"company": self.name, "account_type": "Payable", "is_group": 0}))
+			
+	def validate_coa_input(self):
+		if self.create_chart_of_accounts_based_on == "Existing Company":
+			self.chart_of_accounts = None
+			if not self.existing_company:
+				frappe.throw(_("Please select Existing Company for creating Chart of Accounts"))
+
+		else:
+			self.existing_company = None
+			self.create_chart_of_accounts_based_on = "Standard Template"
+			if not self.chart_of_accounts:
+				self.chart_of_accounts = "Standard"
 
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
@@ -151,6 +163,16 @@ class Company(Document):
 
 		if account:
 			self.db_set(fieldname, account)
+
+	def mode_of_payment(self):
+		cash = frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name')
+		if cash and not frappe.db.get_value('Mode of Payment Account', {'company': self.name}):
+			mode_of_payment = frappe.get_doc('Mode of Payment', cash)
+			mode_of_payment.append('accounts', {
+				'company': self.name,
+				'default_account': self.default_cash_account
+			})
+			mode_of_payment.save(ignore_permissions=True)
 
 	def create_default_cost_center(self):
 		cc_list = [

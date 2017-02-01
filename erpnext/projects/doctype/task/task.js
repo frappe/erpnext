@@ -67,4 +67,12 @@ frappe.ui.form.on("Task", {
 
 });
 
+cur_frm.fields_dict['depends_on'].grid.get_field('task').get_query = function(doc) {
+	if(doc.project) {
+		return {
+			filters: {'project': doc.project}
+		}
+	}
+}
+
 cur_frm.add_fetch('task', 'subject', 'subject');

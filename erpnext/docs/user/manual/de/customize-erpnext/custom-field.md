@@ -12,7 +12,7 @@ Um ein benutzerdefiniertes Feld hinzuzufügen, gehen Sie zu:
 
 > Einstellungen > Anpassen > Benutzerdefiniertes Feld > Neu
 
-Sie können ein neues benutzerdefiniertes Feld auch über das [Werkzeug zum Anpassen von Feldern](https://erpnext.com/customize-erpnext/customize-form) einfügen.
+Sie können ein neues benutzerdefiniertes Feld auch über das [Werkzeug zum Anpassen von Feldern]({{docs_base_url}}/user/manual/de/customize-erpnext/customize-form) einfügen.
 
 In einem benutzerdefinierten Formular finden Sie für jedes Feld die Plus(+)-Option. Wenn Sie auf dieses Symbol klicken, wird eine neue Zeile oberhalb dieses Feldes eingefügt. Sie können die Einstellungen für Ihr Feld in der neu eingefügten leeren Zeile eingeben.
 
@@ -50,7 +50,7 @@ Klicken Sie hier um weitere Informationen über Feldtypen, die Sie bei einem ben
 
 ### Optionen einstellen
 
-Wenn Sie ein Verknüpfungsfeld erstellen,dann wird der Name des DocType, mit dem dieses Feld verknüpft werden soll, in das Feld "Optionen" eingefügt. Klicken Sie [hier](https://erpnext.com/kb/customize/creating-custom-link-field) um weitere Informationen darüber zu erhalten, wie man benutzerdefinierte Verknüpfungsfelder erstellt.
+Wenn Sie ein Verknüpfungsfeld erstellen,dann wird der Name des DocType, mit dem dieses Feld verknüpft werden soll, in das Feld "Optionen" eingefügt. Klicken Sie [hier]({{docs_base_url}}/user/manual/en/customize-erpnext/articles/creating-custom-link-field) um weitere Informationen darüber zu erhalten, wie man benutzerdefinierte Verknüpfungsfelder erstellt.
 
 ![Verknüpfung mit einem benutzerdefinierten Feld]({{docs_base_url}}/assets/old_images/erpnext/custom-field-link.png)
 

@@ -15,7 +15,7 @@ frappe.ui.form.on("Bank Reconciliation", {
 		frm.set_query("bank_account", function() {
 			return {
 				"filters": {
-					"account_type": "Bank",
+					"account_type": ["in",["Bank","Cash"]],
 					"is_group": 0
 				}
 			};

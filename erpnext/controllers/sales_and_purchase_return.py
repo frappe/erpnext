@@ -198,6 +198,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			if tax.charge_type == "Actual":
 				tax.tax_amount = -1 * tax.tax_amount
 
+		doc.discount_amount = -1 * source.discount_amount
 		doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):

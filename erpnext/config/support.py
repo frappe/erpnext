@@ -35,13 +35,13 @@ def get_data():
 		},
 		{
 			"label": _("Reports"),
-			"icon": "icon-list",
+			"icon": "fa fa-list",
 			"items": [
 				{
 					"type": "page",
 					"name": "support-analytics",
 					"label": _("Support Analytics"),
-					"icon": "icon-bar-chart"
+					"icon": "fa fa-bar-chart"
 				},
 				{
 					"type": "report",

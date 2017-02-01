@@ -16,6 +16,7 @@ class LeaveDayBlockedError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
 class InvalidLeaveApproverError(frappe.ValidationError): pass
 class LeaveApproverIdentityError(frappe.ValidationError): pass
+class AttendanceAlreadyMarkedError(frappe.ValidationError): pass
 
 from frappe.model.document import Document
 class LeaveApplication(Document):
@@ -100,16 +101,16 @@ class LeaveApplication(Document):
 	def validate_salary_processed_days(self):
 		if not frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
 			return
-			
+
 		last_processed_pay_slip = frappe.db.sql("""
 			select start_date, end_date from `tabSalary Slip`
 			where docstatus = 1 and employee = %s
-			and ((%s between start_date and end_date) or (%s between start_date and end_date)) 
+			and ((%s between start_date and end_date) or (%s between start_date and end_date))
 			order by modified desc limit 1
 		""",(self.employee, self.to_date, self.from_date))
 
 		if last_processed_pay_slip:
-			frappe.throw(_("Salary already processed for period between {0} and {1}, Leave application period cannot be between this date range.").format(formatdate(last_processed_pay_slip[0][0]), 
+			frappe.throw(_("Salary already processed for period between {0} and {1}, Leave application period cannot be between this date range.").format(formatdate(last_processed_pay_slip[0][0]),
 				formatdate(last_processed_pay_slip[0][1])))
 
 
@@ -213,13 +214,14 @@ class LeaveApplication(Document):
 		elif self.docstatus==1 and len(leave_approvers) and self.leave_approver != frappe.session.user:
 			frappe.throw(_("Only the selected Leave Approver can submit this Leave Application"),
 				LeaveApproverIdentityError)
-	
+
 	def validate_attendance(self):
 		attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s and (att_date between %s and %s)
-					and docstatus = 1""",
+					and status = "Present" and docstatus = 1""",
 			(self.employee, self.from_date, self.to_date))
 		if attendance:
-			frappe.throw(_("Attendance for employee {0} is already marked for this day").format(self.employee))		
+			frappe.throw(_("Attendance for employee {0} is already marked for this day").format(self.employee),
+				AttendanceAlreadyMarkedError)
 
 	def notify_employee(self, status):
 		employee = frappe.get_doc("Employee", self.employee)
@@ -416,13 +418,13 @@ def add_leaves(events, start, end, match_conditions=None):
 	query = """select name, from_date, to_date, employee_name, half_day,
 		status, employee, docstatus
 		from `tabLeave Application` where
-		(from_date between %s and %s or to_date between %s and %s)
+		from_date <= %(end)s and to_date >= %(start)s <= to_date
 		and docstatus < 2
 		and status!="Rejected" """
 	if match_conditions:
 		query += " and " + match_conditions
 
-	for d in frappe.db.sql(query, (start, end, start, end), as_dict=True):
+	for d in frappe.db.sql(query, {"start":start, "end": end}, as_dict=True):
 		e = {
 			"name": d.name,
 			"doctype": "Leave Application",
