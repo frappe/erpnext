@@ -17,7 +17,7 @@ frappe.ui.form.on("Assessment Result", {
                     frm.doc.details = [];
                     $.each(r.message, function(i, d) {
                         var row = frappe.model.add_child(frm.doc, "Assessment Result Detail", "details");
-                        row.evaluation_criteria = d.evaluation_criteria;
+                        row.assessment_criteria = d.assessment_criteria;
                         row.maximum_score = d.maximum_score;
                     });
                 }

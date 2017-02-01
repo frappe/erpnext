@@ -21,10 +21,10 @@ class AssessmentResult(Document):
 		assessment_details = get_assessment_details(self.assessment_plan)
 		max_scores = {}
 		for d in assessment_details:
-			max_scores.update({d.evaluation_criteria: d.maximum_score})
+			max_scores.update({d.assessment_criteria: d.maximum_score})
 
 		for d in self.details:
-			d.maximum_score = max_scores.get(d.evaluation_criteria)
+			d.maximum_score = max_scores.get(d.assessment_criteria)
 			if d.score > d.maximum_score:
 				frappe.throw(_("Score cannot be greater than Maximum Score"))
 		

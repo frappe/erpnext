@@ -17,7 +17,7 @@ def execute():
 
 	frappe.reload_doc("schools", "doctype", "assessment_result")
 	frappe.reload_doc("schools", "doctype", "assessment_result_detail")
-	frappe.reload_doc("schools", "doctype", "evaluation_criteria")
+	frappe.reload_doc("schools", "doctype", "assessment_criteria")
 
 
 	for assessment in frappe.get_all("Assessment Plan", fields=["name", "grading_scale"], filters = [["docstatus", "!=", 2 ]]):

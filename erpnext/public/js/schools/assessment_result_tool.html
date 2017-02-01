@@ -3,14 +3,14 @@
         <tr>
             <th style="width: 100px" rowspan="2">Student</th>
             <th style="width: 200px" rowspan="2">Student Name</th>
-            {% for c in criterias %}
-            <th class="score" style="width: 100px">{{ c.evaluation_criteria }}</th>
+            {% for c in criteria %}
+            <th class="score" style="width: 100px">{{ c.assessment_criteria }}</th>
             {% endfor %}
             <th class="score" style="width: 100px">Total Marks</th>
             <!--criteria-->
         </tr>
         <tr>
-            {% for c in criterias %}
+            {% for c in criteria %}
             <th class="score" style="width: 100px">{{ c.maximum_score }}</th>
             {% endfor %}
             <th class="score" style="width: 100px">{{max_total_score}}</th>
@@ -23,15 +23,15 @@
             data-student="{{s.student}}">
             <td>{{ s.student }}</td>
             <td>{{ s.student_name }}</td>
-            {% for c in criterias %}
+            {% for c in criteria %}
             <td>
                 <input type="text"
                     data-max-score="{{c.maximum_score}}"
-                    data-criteria="{{c.evaluation_criteria}}"
+                    data-criteria="{{c.assessment_criteria}}"
                     data-student="{{s.student}}"
                     {% if(s.assessment_details) { %}
                         disabled
-                        value="{{s.assessment_details[c.evaluation_criteria]}}"
+                        value="{{s.assessment_details[c.assessment_criteria]}}"
                     {% } %}/>
             </td>
             {% endfor %}
