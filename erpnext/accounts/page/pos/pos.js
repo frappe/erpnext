@@ -82,10 +82,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.create_new();
 		})
 
-		this.page.add_menu_item(__("View Offline Records"), function () {
-			me.show_unsync_invoice_list();
-		});
-
 		this.page.add_menu_item(__("Sync Master Data"), function () {
 			me.get_data_from_server(function () {
 				me.load_data(false);
@@ -102,52 +98,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.page.add_menu_item(__("POS Profile"), function () {
 			frappe.set_route('List', 'POS Profile');
 		});
-	},
-
-	show_unsync_invoice_list: function () {
-		var me = this;
-		this.si_docs = this.get_doc_from_localstorage();
-		this.list_dialog = new frappe.ui.Dialog({
-			title: 'Invoice List'
-		});
-
-		this.list_dialog.show();
-		this.list_body = this.list_dialog.body;
-
-		if (this.si_docs.length > 0) {
-			me.render_offline_data();
-			me.dialog_actions()
-		} else {
-			$(this.list_body).append(repl('<div class="media-heading">%(message)s</div>', { 'message': __("All records are synced.") }))
-		}
-	},
-
-	render_offline_data: function () {
-		var me = this;
-
-		this.removed_items = [];
-		$(this.list_body).empty();
-
-		$(this.list_body).append('<div class="row list-row list-row-head pos-invoice-list">\
-				<div class="col-xs-1"><input class="list-select-all" type="checkbox"></div>\
-				<div class="col-xs-3">Customer</div>\
-				<div class="col-xs-2 text-left">Status</div>\
-				<div class="col-xs-3 text-right">Paid Amount</div>\
-				<div class="col-xs-3 text-right">Grand Total</div>\
-		</div>')
-
-		$.each(this.si_docs, function (index, data) {
-			for (key in data) {
-				$(frappe.render_template("pos_invoice_list", {
-					sr: index + 1,
-					name: key,
-					customer: data[key].customer,
-					paid_amount: format_currency(data[key].paid_amount, me.frm.doc.currency),
-					grand_total: format_currency(data[key].grand_total, me.frm.doc.currency),
-					data: me.get_doctype_status(data[key])
-				})).appendTo($(me.list_body));
-			}
-		})
 	},
 
 	dialog_actions: function () {
@@ -201,7 +151,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.remove_doc_from_localstorage()
 		this.update_localstorage();
-		this.render_offline_data();
 		this.dialog_actions();
 		this.toggle_primary_action();
 	},
@@ -429,6 +378,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			$(this).toggleClass("view_customer");
 			if($(this).hasClass("view_customer")) {
 				me.render_list_customers();
+				me.bind_delete_event()
 				me.party_field.$input.attr('disabled', true);
 				me.list_customers.show();
 				me.pos_bill.hide();
@@ -468,7 +418,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			<div class="col-xs-3 text-right">Paid Amount</div>\
 			<div class="col-xs-3 text-right">Grand Total</div>\
 		</div>';
-		var me = this;
 		this.si_docs.forEach(function (data, i) {
 			for (key in data) {
 				html += frappe.render_template("pos_invoice_list", {
@@ -517,13 +466,17 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 			me.toggle_primary_action();
 		});
-		
+	},
+
+	bind_delete_event: function() {
+		var me = this;
+
 		$(this.wrapper).find('.btn-danger').click(function(){
 			frappe.confirm(__("Delete permanently?"), function () {
 				me.delete_records();
 				me.render_list_customers();
 			})
-		}) 
+		}) 	
 	},
 
 	set_focus: function () {
