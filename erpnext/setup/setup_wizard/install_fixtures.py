@@ -171,6 +171,10 @@ def install(country=None):
 		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
 		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"},
 
+		{'doctype': "Party Type", "party_type": "Customer"},
+		{'doctype': "Party Type", "party_type": "Supplier"},
+		{'doctype': "Party Type", "party_type": "Employee"},
+
 		{"doctype": "Offer Term", "offer_term": _("Date of Joining")},
 		{"doctype": "Offer Term", "offer_term": _("Annual Salary")},
 		{"doctype": "Offer Term", "offer_term": _("Probationary Period")},

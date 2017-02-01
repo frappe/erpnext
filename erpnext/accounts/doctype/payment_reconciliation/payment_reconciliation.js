@@ -6,12 +6,10 @@ frappe.provide("erpnext.accounts");
 erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.extend({
 	onload: function() {
 		var me = this
-		this.frm.set_query('party_type', function() {
-			return {
-				filters: {
-					"name": ["in", ["Customer", "Supplier"]]
-				}
-			};
+		this.frm.set_query("party_type", function() {
+			return{
+				query: "erpnext.setup.doctype.party_type.party_type.get_party_type"
+			}
 		});
 
 		this.frm.set_query('receivable_payable_account', function() {
