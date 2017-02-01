@@ -4,8 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt, getdate, cint
-from frappe.model.naming import make_autoname
+from frappe.utils import flt, cint
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
@@ -15,7 +14,6 @@ class SalaryStructure(Document):
 	
 	def validate(self):
 		self.validate_amount()
-		self.validate_joining_date()
 		for e in self.get('employees'):
 			set_employee_name(e)
 
@@ -29,12 +27,6 @@ class SalaryStructure(Document):
 	def validate_amount(self):
 		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:
 			frappe.throw(_("Net pay cannot be negative"))
-
-	def validate_joining_date(self):
-		for e in self.get('employees'):
-			joining_date = getdate(frappe.db.get_value("Employee", e.employee, "date_of_joining"))
-			if getdate(self.from_date) < joining_date:
-				frappe.throw(_("From Date in Salary Structure cannot be lesser than Employee Joining Date."))
 				
 
 @frappe.whitelist()
