@@ -360,9 +360,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.party_field.make_input();
 		setTimeout(this.set_focus.bind(this), 500);
-		
+
 		this.wrapper.find(".btn-more").on("click", function() {
 			me.page_len += 20;
+			me.items = me.get_items();
 			me.make_item_list();
 		})
 	},
@@ -476,7 +477,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.delete_records();
 				me.render_list_customers();
 			})
-		}) 	
+		})
 	},
 
 	set_focus: function () {
@@ -574,21 +575,21 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	new_customer: function () {
 		var me = this;
 		if (!this.connection_status) return;
-		
+
 		this.customer_doc = new frappe.ui.Dialog({
 			'title': 'Customer',
 			fields: [
 				{
-					"label": __("Full Name"), 
+					"label": __("Full Name"),
 					"fieldname": "full_name",
 					"fieldtype": "Data",
-					"reqd": 1 
+					"reqd": 1
 				},
 				{
 					"fieldtype": "Section Break"
 				},
 				{
-					"label": __("Email Id"), 
+					"label": __("Email Id"),
 					"fieldname": "email_id",
 					"fieldtype": "Data"
 				},
@@ -596,7 +597,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					"fieldtype": "Column Break"
 				},
 				{
-					"label": __("Contact Number"), 
+					"label": __("Contact Number"),
 					"fieldname": "contact_no",
 					"fieldtype": "Data"
 				},
@@ -604,12 +605,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					"fieldtype": "Section Break"
 				},
 				{
-					"label": __("Address Line 1"), 
+					"label": __("Address Line 1"),
 					"fieldname": "address_line1",
 					"fieldtype": "Data"
 				},
 				{
-					"label": __("Address Line 2"), 
+					"label": __("Address Line 2"),
 					"fieldname": "address_line2",
 					"fieldtype": "Data"
 				},
@@ -617,31 +618,31 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					"fieldtype": "Column Break"
 				},
 				{
-					"label": __("City"), 
+					"label": __("City"),
 					"fieldname": "city",
 					"fieldtype": "Data"
 				},
 				{
-					"label": __("State"), 
+					"label": __("State"),
 					"fieldname": "state",
 					"fieldtype": "Data"
 				},
 				{
-					"label": __("ZIP Code"), 
+					"label": __("ZIP Code"),
 					"fieldname": "zip_code",
 					"fieldtype": "Data"
 				}
 			]
 		})
-		
+
 		this.customer_doc.show()
-		
+
 		this.customer_doc.set_primary_action(__("Save"), function () {
 			me.make_offline_customer();
 			me.pos_bill.show();
 		});
 	},
-	
+
 	make_offline_customer: function() {
 		this.frm.doc.customer = this.customer_doc.get_values().full_name;
 		this.frm.doc.contact_details = JSON.stringify(this.customer_doc.get_values());
@@ -709,7 +710,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 			});
 		} else {
-			$("<h4>Searching record not found.</h4>").appendTo($wrap)
+			$("<p class='text-muted small' style='padding-left: 10px'>"
+				+__("Not items found")+"</p>").appendTo($wrap)
 		}
 
 		if (this.items.length == 1
@@ -744,7 +746,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 			})
 		}
-		
+
 		this.items_list = this.apply_category();
 
 		key = this.serach_item.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g, '\\$&');
@@ -776,7 +778,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			return this.items_list;
 		}
 	},
-	
+
 	apply_category: function() {
 		var me = this;
 		category = this.search_item_group.$input.val();

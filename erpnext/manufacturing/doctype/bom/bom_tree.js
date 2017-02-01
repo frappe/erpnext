@@ -20,14 +20,14 @@ frappe.treeview_settings["BOM"] = {
 		}
 	},
 	toolbar: [
-		{toggle_btn: true},
+		{ toggle_btn: true },
 		{
 			label:__("Edit"),
 			condition: function(node) {
 				return node.expandable;
 			},
 			click: function(node) {
-				
+
 				frappe.set_route("Form", "BOM", node.data.value);
 			}
 		}
@@ -40,5 +40,6 @@ frappe.treeview_settings["BOM"] = {
 			},
 			condition: 'frappe.boot.user.can_create.indexOf("BOM") !== -1'
 		}
-	]
+	],
+	view_template: 'bom_item_preview'
 }
