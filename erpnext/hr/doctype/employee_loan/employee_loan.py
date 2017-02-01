@@ -117,8 +117,8 @@ def get_monthly_repayment_amount(repayment_method, loan_amount, rate_of_interest
 			monthly_repayment_amount = math.ceil((loan_amount * monthly_interest_rate *
 				(1 + monthly_interest_rate)**repayment_periods) \
 				/ ((1 + monthly_interest_rate)**repayment_periods - 1))
-		else:
-			monthly_repayment_amount = math.ceil(flt(loan_amount) / repayment_periods)
+	else:
+		monthly_repayment_amount = math.ceil(flt(loan_amount) / repayment_periods)
 	return monthly_repayment_amount
 
 @frappe.whitelist()
