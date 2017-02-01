@@ -312,6 +312,7 @@ def make_address(doc, args, customer):
 			'link_name': customer
 		})
 		address.save(ignore_permissions = True)
+		frappe.db.commit()
 
 def validate_item(doc):
 	for item in doc.get('items'):
