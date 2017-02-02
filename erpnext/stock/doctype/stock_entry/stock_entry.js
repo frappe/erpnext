@@ -41,6 +41,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				}
 			}
 		}
+
+		this.frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.actual_qty) ? "green" : "orange" })
+
 	},
 
 	onload_post_render: function() {

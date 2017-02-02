@@ -304,6 +304,24 @@ class SalesOrder(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
+	def get_production_order_items(self):
+		'''Returns items with BOM that already do not have a linked production order'''
+		items = []
+		for i in self.packed_items or self.items:
+			bom = frappe.get_all('BOM', dict(item=i.item_code, is_active=True),
+					order_by='is_default desc')
+			bom = bom[0].name if bom else None
+			items.append(dict(
+				item_code= i.item_code,
+				bom = bom,
+				warehouse = i.warehouse,
+				pending_qty= i.qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
+					where production_item=%s and sales_order=%s''', (i.item_code, self.name))[0][0])
+			))
+
+		return items
+
+
 	def on_recurring(self, reference_doc):
 		mcount = month_map[reference_doc.recurring_type]
 		self.set("delivery_date", get_next_date(reference_doc.delivery_date, mcount,
@@ -442,7 +460,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
-		
+
 		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
 		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
 			or item.selling_cost_center \
@@ -651,6 +669,27 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 			'page_len': page_len,
 			'parent': filters.get('parent')
 		})
+
+@frappe.whitelist()
+def make_production_orders(items, sales_order, company, project=None):
+	'''Make Production Orders against the given Sales Order for the given `items`'''
+	items = json.loads(items).get('items')
+	out = []
+
+	for i in items:
+		production_order = frappe.get_doc(dict(
+			doctype='Production Order',
+			production_item=i['item_code'],
+			bom_no=i['bom'],
+			qty=i['pending_qty'],
+			company=company,
+			sales_order=sales_order,
+			project=project,
+			fg_warehouse=i['warehouse']
+		)).insert()
+		out.append(production_order)
+
+	return [p.name for p in out]
 
 @frappe.whitelist()
 def update_status(status, name):
