@@ -48,7 +48,7 @@ def complete_setup(domain='Manufacturing'):
 		setup_complete({
 			"first_name": "Test",
 			"last_name": "User",
-			"email": "demo@erpnext.com",
+			"email": "test_demo@erpnext.com",
 			"company_tagline": 'Awesome Products and Services',
 			"password": "demo",
 			"fy_start_date": "2015-01-01",
