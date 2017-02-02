@@ -1,16 +1,36 @@
 {% for(var i=0, l=items.length; i < l; i++) { %}
-<div class="list-item">
-    <div class="row">
-        <div class="col-sm-6">
-            <h6>{%= items[i].item_name %}<h6>
-        </div>
-        <div class="col-sm-3">
-            <h6>{%= items[i].seller_name %}<h6>
-        </div>
-        <div class="col-sm-3 text-right">
-            <h6 class="text-muted">{%= items[i].seller_country %}<h6>
-        </div>
-    </div>
-    <p class="text-muted small">{%= items[i].description %}</p>
+<div class="hub-item-wrapper image-view-item" data-item-code="{{items[i].item_code}}">
+	<div class="image-view-header doclist-row">
+		<div class="list-value">
+			<a class="grey list-id" data-name="{{items[i].item_code}}" title="{{ items[i].item_name || item_code}}">{{items[i].item_name || items[i].item_code}}</a>
+		</div>
+	</div>
+	<div class="image-view-body">
+		<a  data-item-code="{{ items[i].item_code }}"
+			title="{{ items[i].item_name || items[i].item_code }}"
+		>
+			<div class="image-field"
+				style="
+				{% if (!items[i].image) { %}
+					background-color: #fafbfc;
+				{% } %}
+				border: 0px;"
+			>
+				{% if (!items[i].image) { %}
+				<span class="placeholder-text">
+					{%= frappe.get_abbr(items[i].item_name || items[i].item_code) %}
+				</span>
+				{% } %}
+				{% if (items[i].image) { %}
+				<img src="{{ items[i].image }}" alt="{{items[i].item_name || items[i].item_code}}">
+				{% } %}
+			</div>
+			<span class="price-info" style="background-color: rgba(141, 153, 166, 0.6); padding: 5px 5px;
+  		  									border-radius: 3px;
+  										  	color: #fff;">
+				{{items[i].price}}
+			</span>
+		</a>
+	</div>
 </div>
 {% } %}
