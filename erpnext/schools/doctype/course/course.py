@@ -9,12 +9,12 @@ from frappe import _
 
 class Course(Document):
 	def validate(self):
-		self.validate_evaluation_criterias()
+		self.validate_assessment_criteria()
 	
-	def validate_evaluation_criterias(self):
-		if self.evaluation_criterias:
+	def validate_assessment_criteria(self):
+		if self.assessment_criteria:
 			total_weightage = 0
-			for criteria in self.evaluation_criterias:
+			for criteria in self.assessment_criteria:
 				total_weightage += criteria.weightage
 			if total_weightage != 100:
-				frappe.throw(_("Total Weightage of all Evaluation Criterias must be 100%"))
+				frappe.throw(_("Total Weightage of all Assessment Criteria must be 100%"))

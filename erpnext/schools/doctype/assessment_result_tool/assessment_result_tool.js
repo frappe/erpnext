@@ -39,15 +39,15 @@ frappe.ui.form.on('Assessment Result Tool', {
 				assessment_plan: assessment_plan
 			},
 			callback: function(r) {
-				var criterias = r.message;
+				var criteria_list = r.message;
 				var max_total_score = 0;
-				criterias.forEach(function(c) {
+				criteria_list.forEach(function(c) {
 					max_total_score += c.maximum_score
 				});
 				var result_table = $(frappe.render_template('assessment_result_tool', {
 					frm: frm,
 					students: students,
-					criterias: criterias,
+					criteria: criteria_list,
 					max_total_score: max_total_score
 				}));
 				result_table.appendTo(frm.fields_dict.result_html.wrapper)
@@ -67,7 +67,8 @@ frappe.ui.form.on('Assessment Result Tool', {
 						value = max_score;
 					}
 					student_scores[student][criteria] = value;
-					if(Object.keys(student_scores[student]).length == criterias.length) {
+					if(Object.keys(student_scores[student]).length == criteria_list.length) {
+						console.log("ok");
 						frappe.call(({
 							method: "erpnext.schools.api.mark_assessment_result",
 							args: {
@@ -87,7 +88,7 @@ frappe.ui.form.on('Assessment Result Tool', {
 									var criteria = $input.data().criteria;
 									var value = $input.val();
 									var grade = details.find(function(d) {
-										return d.evaluation_criteria === criteria;
+										return d.assessment_criteria === criteria;
 									}).grade;
 									$input.val(`${value} (${grade})`);
 									$input.attr('disabled', true);

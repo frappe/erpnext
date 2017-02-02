@@ -46,7 +46,7 @@ class AssessmentPlan(Document):
 
 	def validate_max_score(self):
 		max_score = 0
-		for d in self.evaluation_criterias:
+		for d in self.assessment_criteria:
 			max_score += d.maximum_score
 		if self.maximum_assessment_score != max_score:
-			frappe.throw(_("Sum of Scores of Evaluation Criterias needs to be {0}.".format(self.maximum_assessment_score)))
+			frappe.throw(_("Sum of Scores of Assessment Criteria needs to be {0}.".format(self.maximum_assessment_score)))

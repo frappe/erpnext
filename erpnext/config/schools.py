@@ -128,7 +128,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Evaluation Criteria"
+					"name": "Assessment Criteria"
+				},
+				{
+					"type": "doctype",
+					"name": "Assessment Criteria Group"
 				},
 				{
 					"type": "doctype",

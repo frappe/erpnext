@@ -167,13 +167,13 @@ def get_course_schedule_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def get_evaluation_criterias(course):
-	"""Returns Evaluation Criterias and their Weightage from Course Master.
+def get_assessment_criteria(course):
+	"""Returns Assessmemt Criteria and their Weightage from Course Master.
 
 	:param Course: Course
 	"""
-	return frappe.get_list("Course Evaluation Criteria", \
-		fields=["evaluation_criteria", "weightage"], filters={"parent": course}, order_by= "idx")
+	return frappe.get_list("Course Assessment Criteria", \
+		fields=["assessment_criteria", "weightage"], filters={"parent": course}, order_by= "idx")
 
 @frappe.whitelist()
 def get_assessment_students(assessment_plan, student_group=None, student_batch=None):
@@ -187,7 +187,7 @@ def get_assessment_students(assessment_plan, student_group=None, student_batch=N
 		if result:
 			student_result = {}
 			for d in result.details:
-				student_result.update({d.evaluation_criteria: cstr(d.score) + " ("+ d.grade + ")"})
+				student_result.update({d.assessment_criteria: cstr(d.score) + " ("+ d.grade + ")"})
 			student_result.update({"total_score": cstr(result.total_score) + " (" + result.grade + ")"})
 			student.update({'assessment_details': student_result})
 		else:
@@ -196,12 +196,12 @@ def get_assessment_students(assessment_plan, student_group=None, student_batch=N
 
 @frappe.whitelist()
 def get_assessment_details(assessment_plan):
-	"""Returns Evaluation Criteria  and Maximum Score from Assessment Plan Master.
+	"""Returns Assessment Criteria  and Maximum Score from Assessment Plan Master.
 
 	:param Assessment Plan: Assessment Plan
 	"""
-	return frappe.get_list("Assessment Evaluation Criteria", \
-		fields=["evaluation_criteria", "maximum_score"], filters={"parent": assessment_plan}, order_by= "idx")
+	return frappe.get_list("Assessment Plan Criteria", \
+		fields=["assessment_criteria", "maximum_score"], filters={"parent": assessment_plan}, order_by= "idx")
 
 @frappe.whitelist()
 def get_result(student, assessment_plan):
@@ -241,7 +241,7 @@ def mark_assessment_result(student, assessment_plan, scores):
 	details = []
 	for s in student_score.keys():
 		details.append({
-			"evaluation_criteria": s,
+			"assessment_criteria": s,
 			"score": flt(student_score[s])
 		})
 	assessment_result = frappe.new_doc("Assessment Result")
