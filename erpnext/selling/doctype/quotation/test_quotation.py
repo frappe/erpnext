@@ -68,47 +68,6 @@ class TestQuotation(unittest.TestCase):
 		self.assertEquals(quotation.get("items")[0].rate, total_margin)
 		si.save()
 
-	def test_party_status_open(self):
-		from erpnext.selling.doctype.customer.test_customer import get_customer_dict
-
-		customer = frappe.get_doc(get_customer_dict('Party Status Test')).insert()
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
-
-		quotation = frappe.get_doc(get_quotation_dict(customer=customer.name)).insert()
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Open')
-
-		quotation.submit()
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
-
-		quotation.cancel()
-		quotation.delete()
-		customer.delete()
-
-	def test_party_status_close(self):
-		from erpnext.selling.doctype.customer.test_customer import get_customer_dict
-
-		customer = frappe.get_doc(get_customer_dict('Party Status Test')).insert()
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Active')
-
-		# open quotation
-		quotation = frappe.get_doc(get_quotation_dict(customer=customer.name)).insert()
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Open')
-
-		# close quotation (submit)
-		quotation.submit()
-
-		quotation1 = frappe.get_doc(get_quotation_dict(customer=customer.name)).insert()
-
-		# still open
-		self.assertEquals(frappe.db.get_value('Customer', customer.name, 'status'), 'Open')
-
-		quotation.cancel()
-		quotation.delete()
-
-		quotation1.delete()
-
-		customer.delete()
-
 test_records = frappe.get_test_records('Quotation')
 
 def get_quotation_dict(customer=None, item_code=None):

@@ -23,9 +23,25 @@
 	background: #5e64ff;
 }
 
+.activity-row {
+}
+
 .activity-message {
 	border-left: 1px solid #d1d8dd;
+}
+
+.activity-message .row {
 	padding: 15px;
+	margin-right: 0px;
+	border-bottom: 1px solid #d1d8dd;
+}
+
+.activity-row:last-child .activity-message .row {
+	border-bottom: none;
+}
+
+.activity-row .content {
+	padding-left: 0px;
 	padding-right: 30px;
 }
 

@@ -111,12 +111,11 @@ def check_repayment_method(repayment_method, loan_amount, monthly_repayment_amou
 			frappe.throw(_("Monthly Repayment Amount cannot be greater than Loan Amount"))
 
 def get_monthly_repayment_amount(repayment_method, loan_amount, rate_of_interest, repayment_periods):
-	if repayment_method == "Repay Over Number of Periods":
-		if rate_of_interest:
-			monthly_interest_rate = flt(rate_of_interest) / (12 *100)
-			monthly_repayment_amount = math.ceil((loan_amount * monthly_interest_rate *
-				(1 + monthly_interest_rate)**repayment_periods) \
-				/ ((1 + monthly_interest_rate)**repayment_periods - 1))
+	if rate_of_interest:
+		monthly_interest_rate = flt(rate_of_interest) / (12 *100)
+		monthly_repayment_amount = math.ceil((loan_amount * monthly_interest_rate *
+			(1 + monthly_interest_rate)**repayment_periods) \
+			/ ((1 + monthly_interest_rate)**repayment_periods - 1))
 	else:
 		monthly_repayment_amount = math.ceil(flt(loan_amount) / repayment_periods)
 	return monthly_repayment_amount

@@ -7,6 +7,17 @@ cur_frm.add_fetch("examiner", "instructor_name", "examiner_name");
 cur_frm.add_fetch("supervisor", "instructor_name", "supervisor_name");
 
 frappe.ui.form.on("Assessment Plan", {
+        refresh: function(frm) {
+        if (!frm.doc.__islocal) {
+            frm.add_custom_button(__("Assessment Result"), function() {
+                frappe.route_options = {
+                    assessment_plan: frm.doc.name
+                }
+                frappe.set_route("Form", "Assessment Result Tool");
+            });
+        }
+    },
+
     course: function(frm) {
         if (frm.doc.course && frm.doc.maximum_assessment_score) {
             frappe.call({
