@@ -61,7 +61,7 @@ def get_attendance_list(from_date, to_date, student_batch, students_list):
 	students_with_leave_application = get_students_with_leave_application(from_date, to_date, students_list)
 	for d in attendance_list:
 		att_map.setdefault(d.student, frappe._dict()).setdefault(d.date, "")
-		if students_with_leave_application and d.student in students_with_leave_application.get(d.date,[]):
+		if students_with_leave_application and d.student in students_with_leave_application.get(d.date):
 			att_map[d.student][d.date] = "Present"
 		else:
 			att_map[d.student][d.date] = d.status

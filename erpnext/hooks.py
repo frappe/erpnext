@@ -107,7 +107,6 @@ portal_menu_items = [
 	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note", "role":"Customer"},
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
-	{"title": _("Announcements"), "route": "/announcement", "reference_doctype": "Announcement"},
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"}
 ]
 
@@ -122,8 +121,7 @@ has_website_permission = {
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Supplier Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
-	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
-	"Discussion": "erpnext.schools.web_form.discussion.discussion.has_website_permission"
+	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission"
 }
 
 dump_report_map = "erpnext.startup.report_data_map.data_map"

@@ -20,7 +20,8 @@ def execute():
 	frappe.reload_doc("schools", "doctype", "evaluation_criteria")
 
 
-	for assessment in frappe.get_all("Assessment Plan", fields=["name", "grading_scale"]):
+	for assessment in frappe.get_all("Assessment Plan", fields=["name", "grading_scale"], filters = [["docstatus", "!=", 2 ]]):
+		print assessment
 		for stud_result in frappe.db.sql("select * from `tabAssessment Result` where parent= %s", assessment.name, as_dict=True):
 			if stud_result.result:
 				assessment_result = frappe.new_doc("Assessment Result")
@@ -30,6 +31,7 @@ def execute():
 				assessment_result.grading_scale = assessment.grading_scale
 				assessment_result.total_score = stud_result.result
 				assessment_result.flags.ignore_validate = True
+				assessment_result.flags.ignore_mandatory = True
 				assessment_result.save()
 	
 	frappe.db.sql("""delete from `tabAssessment Result` where parent != '' or parent is not null""")

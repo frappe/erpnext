@@ -26,6 +26,12 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		});
 
+		frm.set_query("party_type", function() {
+			return{
+				query: "erpnext.setup.doctype.party_type.party_type.get_party_type"
+			}
+		});
+
 		frm.set_query("paid_to", function() {
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
 	 			["Bank", "Cash"] : party_account_type;

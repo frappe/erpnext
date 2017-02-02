@@ -50,6 +50,11 @@ def get_data():
 					"doctype": "Item",
 				},
 				{
+					"type": "page",
+					"name": "stock-balance",
+					"label": _("Stock Summary")
+				},
+				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Ageing",
