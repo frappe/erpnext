@@ -261,5 +261,12 @@ def get_data():
 			"icon": "octicon octicon-mortar-board",
 			"type": "module",
 			"label": _("Schools")
+		},
+		{
+			"module_name": "Hub Node",
+			"color": "#DE2B37",
+			"icon": "octicon octicon-globe",
+			"type": "module",
+			"label": _("Hub Node")
 		}
 	]
