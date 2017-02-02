@@ -4,7 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cstr, validate_email_add, cint, comma_and, has_gravatar, nowdate
+from frappe.utils import (cstr, validate_email_add, cint, comma_and, has_gravatar,
+	getdate, nowdate)
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
@@ -45,7 +46,7 @@ class Lead(SellingController):
 
 			self.image = has_gravatar(self.email_id)
 
-		if self.contact_date and self.contact_date < nowdate():
+		if self.contact_date and getdate(self.contact_date) < nowdate():
 			frappe.throw(_("Next Contact Date cannot be in the past"))
 
 	def on_update(self):
@@ -87,7 +88,7 @@ class Lead(SellingController):
 			"lead": self.name,
 			"docstatus": 1,
 			"status": ["!=", "Lost"]
-			
+
 		})
 
 	def has_lost_quotation(self):

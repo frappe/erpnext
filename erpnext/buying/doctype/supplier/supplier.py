@@ -11,7 +11,6 @@ from frappe.geo.address_and_contact import (load_address_and_contact,
 
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_timeline_data # keep this
-from erpnext.accounts.party_status import get_party_status
 
 class Supplier(TransactionBase):
 	def get_feed(self):
@@ -59,7 +58,6 @@ class Supplier(TransactionBase):
 				msgprint(_("Series is mandatory"), raise_exception=1)
 
 		validate_party_accounts(self)
-		self.status = get_party_status(self)
 
 	def on_trash(self):
 		delete_contact_and_address('Supplier', self.name)

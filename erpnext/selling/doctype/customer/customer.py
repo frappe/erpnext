@@ -11,7 +11,6 @@ from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.geo.address_and_contact import load_address_and_contact, delete_contact_and_address
 from erpnext.accounts.party import validate_party_accounts, get_timeline_data # keep this
-from erpnext.accounts.party_status import get_party_status
 from erpnext import get_default_currency
 
 class Customer(TransactionBase):
@@ -70,7 +69,6 @@ class Customer(TransactionBase):
 		self.flags.is_new_doc = self.is_new()
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
-		self.status = get_party_status(self)
 		self.validate_credit_limit_on_change()
 
 	def on_update(self):
