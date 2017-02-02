@@ -28,9 +28,7 @@ frappe.Hub = Class.extend({
 		var me = this;
 		frappe.model.with_doc("Hub Settings", "Hub Settings", function() {
 			me.hub = locals["Hub Settings"]["Hub Settings"];
-			if(!me.hub.publish) {
-				$(frappe.render_template("register_in_hub", {})).appendTo(me.page.main);
-			} else {
+			if(me.hub.publish) {
 				me.setup_list();
 			}
 		});
