@@ -1,17 +1,22 @@
-frappe.ui.form.on("Hub Settings", "onload", function(frm) {
-	if(!frm.doc.seller_country) {
-		frm.set_value("seller_country", frappe.defaults.get_default("Country"));
+frappe.ui.form.on("Hub Settings", {
+	onload: function(frm) {
+		if(!frm.doc.country) {
+			frm.set_value("country", frappe.defaults.get_default("Country"));
+		}
+		if(!frm.doc.company) {
+			frm.set_value("company", frappe.defaults.get_default("Company"));
+		}
+	},
+	refresh: function(frm) {
+		frm.trigger("toggle_reqd_fields")
+	},
+	enabled: function(frm) {
+		frm.trigger("toggle_reqd_fields")
+	},
+	toggle_reqd_fields: function(frm) {
+		frm.toggle_reqd("hub_user_name", frm.doc.enabled);
+		frm.toggle_reqd("country", frm.doc.enabled);
+		frm.toggle_reqd("company", frm.doc.enabled);
+		frm.toggle_reqd("email", frm.doc.enabled);
 	}
-	if(!frm.doc.seller_name) {
-		frm.set_value("seller_name", frappe.defaults.get_default("Company"));
-	}
-});
-
-frappe.ui.form.on("Hub Settings", "refresh", function(frm) {
-	// make mandatory if published
-	frm.toggle_reqd(["seller_name", "seller_email", "seller_country"], frm.doc.publish);
-});
-
-frappe.ui.form.on("Hub Settings", "publish", function(frm) {
-	frm.trigger("refresh");
 });
