@@ -71,6 +71,18 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 			data: chart_data
 		});
 	},
+	set_default_values: function() {
+		var values = {
+			from_date: dateutil.str_to_user(dateutil.add_months(dateutil.now_datetime(),-12) ),
+			to_date: dateutil.str_to_user(dateutil.add_months(dateutil.now_datetime(),1))
+		}
+
+		var me = this;
+		$.each(values, function(i, v) {
+			if(me.filter_inputs[i] && !me.filter_inputs[i].val())
+				me.filter_inputs[i].val(v);
+		})
+	},
 
 	prepare_data: function() {
 		// add Opening, Closing, Totals rows
@@ -98,6 +110,8 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 					}
 					var start_period = dateutil.user_to_obj(dateutil.str_to_user(col.id));
 					var end_period = dateutil.user_to_obj(dateutil.str_to_user(col.name));
+					var planned_start_date = dateutil.user_to_obj(dateutil.str_to_user(d.planned_start_date));
+					
 					if (dateobj <= start_period || end_period >= dateobj){
 						all_open_orders[col.field] = flt(all_open_orders[col.field]) + 1;
 						if(d.status=="Completed") {
@@ -105,15 +119,15 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 						}else if(d.status=="In Process") {
 							pending[col.field] = flt(pending[col.field]) + 1;
 						}else if(d.status=="Not Started") {
-							if (d.planned_start_date > start_period) {
+							if (planned_start_date > start_period) {
 								not_started[col.field] = flt(not_started[col.field]) + 1;
-							}else if (d.planned_start_date < end_period) {
+							}else if (planned_start_date < end_period) {
 								overdue[col.field] = flt(overdue[col.field]) + 1;
-							}else if (d.planned_start_date < d.actual_start_date) {
+							}else if (planned_start_date < d.actual_start_date) {
 								not_started[col.field] = flt(not_started[col.field]) + 1;
-							}else if (d.planned_start_date > dateutil.now_datetime()) {
+							}/*else if (d.planned_start_date > dateutil.now_datetime()) {
 								not_started[col.field] = flt(not_started[col.field]) + 1;
-							}
+							}*/
 							else{
 								overdue[col.field] = flt(overdue[col.field]) + 1;
 							}
