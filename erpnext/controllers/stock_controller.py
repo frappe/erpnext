@@ -43,7 +43,7 @@ class StockController(AccountsController):
 
 		gl_list = []
 		warehouse_with_no_account = []
-		
+
 		for item_row in voucher_details:
 			sle_list = sle_map.get(item_row.name)
 			if sle_list:
@@ -58,9 +58,10 @@ class StockController(AccountsController):
 						# or incoming entry not found while delivering the item), 
 						# try to pick valuation rate from previous sle or Item master and update in SLE
 						# Otherwise, throw an exception
-						
-						if not sle.stock_value_difference and sle.voucher_type != "Stock Reconciliation" \
+
+						if not sle.stock_value_difference and self.doctype != "Stock Reconciliation" \
 							and not item_row.get("is_sample_item"):
+
 							sle = self.update_stock_ledger_entries(sle)
 
 						gl_list.append(self.get_gl_dict({
@@ -95,7 +96,7 @@ class StockController(AccountsController):
 
 	def update_stock_ledger_entries(self, sle):
 		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, 
-			sle.voucher_type, sle.voucher_no)
+			self.doctype, self.name)
 
 		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
 		sle.stock_value_difference = flt(sle.actual_qty) * flt(sle.valuation_rate)
@@ -162,18 +163,17 @@ class StockController(AccountsController):
 		stock_ledger = {}
 		stock_ledger_entries = frappe.db.sql("""
 			select 
-				name, warehouse, stock_value_difference, valuation_rate
+				name, warehouse, stock_value_difference, valuation_rate,
 				voucher_detail_no, item_code, posting_date, posting_time, 
-				actual_qty, qty_after_transaction, voucher_type, voucher_no
+				actual_qty, qty_after_transaction
 			from
 				`tabStock Ledger Entry`
 			where
 				voucher_type=%s and voucher_no=%s
 		""", (self.doctype, self.name), as_dict=True)
-			
+
 		for sle in stock_ledger_entries:
 				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
-
 		return stock_ledger
 
 	def make_adjustment_entry(self, expected_gle, voucher_obj):

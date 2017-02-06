@@ -1316,7 +1316,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
@@ -1816,7 +1816,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-02-06 17:05:03.737297", 
+ "modified": "2017-02-07 01:21:03.737800", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice Item", 
