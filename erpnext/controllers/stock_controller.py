@@ -53,9 +53,15 @@ class StockController(AccountsController):
 						
 						self.check_expense_account(item_row)
 
-						if not sle.stock_value_difference:
-							self.update_stock_ledger_entries(sle)
-							self.validate_negative_stock(sle)
+						# If item is not a sample item 
+						# and ( valuation rate not mentioned in an incoming entry
+						# or incoming entry not found while delivering the item), 
+						# try to pick valuation rate from previous sle or Item master and update in SLE
+						# Otherwise, throw an exception
+						
+						if not sle.stock_value_difference and sle.voucher_type != "Stock Reconciliation" \
+							and not item_row.get("is_sample_item"):
+							sle = self.update_stock_ledger_entries(sle)
 
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["name"],
@@ -90,18 +96,23 @@ class StockController(AccountsController):
 	def update_stock_ledger_entries(self, sle):
 		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, 
 			sle.voucher_type, sle.voucher_no)
+
 		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
-		sle.stock_value_difference = sle.stock_value
+		sle.stock_value_difference = flt(sle.actual_qty) * flt(sle.valuation_rate)
+		
 		if sle.name:
-			frappe.db.sql(""" update `tabStock Ledger Entry` set stock_value = %(stock_value)s,
-				valuation_rate = %(valuation_rate)s, stock_value_difference = %(stock_value_difference)s 
-				where name = %(name)s""", (sle))
-
-	def validate_negative_stock(self, sle):
-		if sle.qty_after_transaction < 0 and sle.actual_qty < 0:
-			frappe.throw(_("Valuation rate not found for the Item {0}, which is required to do accounting entries (for booking expenses). Please create an incoming stock transaction or mention valuation rate in Item record, and then try submiting {1} {2}")
-			.format(sle.item_code, sle.voucher_type, sle.voucher_no))
-
+			frappe.db.sql("""
+				update 
+					`tabStock Ledger Entry` 
+				set 
+					stock_value = %(stock_value)s,
+					valuation_rate = %(valuation_rate)s, 
+					stock_value_difference = %(stock_value_difference)s 
+				where 
+					name = %(name)s""", (sle))
+					
+		return sle
+					
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
 		if self.doctype == "Stock Reconciliation":
 			return [frappe._dict({ "name": voucher_detail_no, "expense_account": default_expense_account,
@@ -149,11 +160,20 @@ class StockController(AccountsController):
 
 	def get_stock_ledger_details(self):
 		stock_ledger = {}
-		for sle in frappe.db.sql("""select name, warehouse, stock_value_difference,
-			voucher_detail_no, item_code, posting_date, posting_time, actual_qty, qty_after_transaction
-			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
-			(self.doctype, self.name), as_dict=True):
+		stock_ledger_entries = frappe.db.sql("""
+			select 
+				name, warehouse, stock_value_difference, valuation_rate
+				voucher_detail_no, item_code, posting_date, posting_time, 
+				actual_qty, qty_after_transaction, voucher_type, voucher_no
+			from
+				`tabStock Ledger Entry`
+			where
+				voucher_type=%s and voucher_no=%s
+		""", (self.doctype, self.name), as_dict=True)
+			
+		for sle in stock_ledger_entries:
 				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
+
 		return stock_ledger
 
 	def make_adjustment_entry(self, expected_gle, voucher_obj):
