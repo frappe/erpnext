@@ -123,12 +123,13 @@ def apply_pricing_rule(args):
 	
 def get_serial_no_for_item(args):
 	from erpnext.stock.get_item_details import get_serial_no
+
 	item_details = frappe._dict({
 		"doctype": args.doctype,
 		"name": args.name,
 		"serial_no": args.serial_no
 	})
-	if args.get("parenttype") in ("Sales Invoice", "Delivery Note"):
+	if args.get("parenttype") in ("Sales Invoice", "Delivery Note") and args.qty > 0:
 		item_details.serial_no = get_serial_no(args)
 	return item_details
 

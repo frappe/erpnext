@@ -73,7 +73,7 @@ def get_item_details(args):
 
 	out.update(get_pricing_rule_for_item(args))
 
-	if args.get("doctype") in ("Sales Invoice", "Delivery Note"):
+	if args.get("doctype") in ("Sales Invoice", "Delivery Note") and out.qty > 0:
 		out.serial_no = get_serial_no(out)
 
 	if args.transaction_date and item.lead_time_days:
@@ -387,7 +387,8 @@ def get_serial_no_details(item_code, warehouse, qty, serial_no):
 def get_bin_details_and_serial_nos(item_code, warehouse, qty=None, serial_no=None):
 	bin_details_and_serial_nos = {}
 	bin_details_and_serial_nos.update(get_bin_details(item_code, warehouse))
-	bin_details_and_serial_nos.update(get_serial_no_details(item_code, warehouse, qty, serial_no))
+	if qty > 0:
+		bin_details_and_serial_nos.update(get_serial_no_details(item_code, warehouse, qty, serial_no))
 	return bin_details_and_serial_nos
 
 @frappe.whitelist()
