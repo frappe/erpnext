@@ -221,6 +221,44 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	tc_name: function() {
 		this.get_terms();
+	},
+	link_requests: function() { 
+		
+		cur_frm.add_custom_button(__("Link to Material Requests"),
+			function() {
+				my_items = []
+				for (var i in cur_frm.doc.items) {
+					if(!cur_frm.doc.items[i].material_request){
+						my_items.push(cur_frm.doc.items[i].item_code);
+					}
+					
+				}
+				frappe.call({	
+					method: "erpnext.buying.doctype.purchase_common.purchase_common.get_linked_material_requests", 
+					args:{
+						items: my_items						
+					}, 
+					callback: function(r) { 
+						//frm.reload_doc();
+						console.log(r.message);
+						for (var i in cur_frm.doc.items) {
+							var qty = cur_frm.doc.items[i].qty;
+							(r.message || []).forEach(function(d) {
+								if (d[0].qty > 0 && qty > 0 && cur_frm.doc.items[i].item_code == d[0].item_code)
+								{
+									cur_frm.doc.items[i].material_request = d[0].mr_name;
+									cur_frm.doc.items[i].material_request_item = d[0].mr_item;
+									my_qty = Math.min(qty, d[0].qty);
+									qty = qty - my_qty;
+									d[0].qty = d[0].qty  - my_qty;
+								}
+							
+							});
+						}
+					}
+				});
+			});
+
 	}
 });
 

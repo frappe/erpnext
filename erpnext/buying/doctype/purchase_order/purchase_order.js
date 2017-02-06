@@ -56,6 +56,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 		} else if(doc.docstatus===0) {
 			cur_frm.cscript.add_from_mappers();
+			cur_frm.cscript.link_requests(); 
 		}
 
 		if(doc.docstatus == 1 && in_list(["Closed", "Delivered"], doc.status)) {
