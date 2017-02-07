@@ -6,46 +6,41 @@ from frappe.utils import flt, cint
 import frappe
 
 def execute(filters=None):
-	
-	
 	prod_list = get_production_orders()
-	
-	data = get_item_list( prod_list)
-	
+	data = get_item_list( prod_list, filters)
 	columns = get_columns()
-	
 	return columns, data
-
 	
-def get_item_list(prod_list):
-	
+def get_item_list(prod_list, filters):
 	out = []
 	
 	low_price_data = []
 	low_supplier = []
-	company = frappe.db.get_default("company")
-	float_precision = cint(frappe.db.get_default("float_precision")) or 2
-	company_currency = frappe.db.get_default("currency")
-	# Get the default supplier of suppliers
 	
-		
+	# Get the default supplier of suppliers
 	#Add a row for each item/qty
 	for root in prod_list:
 		bom = frappe.db.get_value("Production Order", root.name,"bom_no")
+		warehouse = frappe.db.get_value("Production Order", root.name,"source_warehouse")
+		warehouse = "Stores - VMI"
 		desc = frappe.db.get_value("BOM", bom, "description")
 		qty = frappe.db.get_value("Production Order", root.name,"qty")
 		
-		item_list = frappe.db.sql("""	SELECT 
-											bom_item.item_code as item_code,
-											SUM(ifnull(ledger.actual_qty,0))/bom_item.qty as build_qty
-										FROM
-											`tabBOM Item` AS bom_item 
-											LEFT JOIN `tabStock Ledger Entry` AS ledger	
-											ON bom_item.item_code = ledger.item_code 
-										WHERE
-											bom_item.parent=%(bom)s 
-										GROUP BY 
-											bom_item.item_code""", {"bom": bom}, as_dict=1)
+		item_list = frappe.db.sql("""SELECT 
+				bom_item.item_code as item_code,
+				SUM(ifnull(ledger.actual_qty * conf_ledger.conversion_factor,0))/(bom_item.qty * conf_item.conversion_factor) as build_qty
+			FROM
+				`tabBOM Item` AS bom_item
+				LEFT JOIN `tabBin` AS ledger	
+					ON bom_item.item_code = ledger.item_code AND ledger.warehouse = ifnull(%(warehouse)s,%(filterhouse)s)
+				LEFT JOIN `tabUOM Conversion Detail` AS conf_item
+					ON conf_item.parent = bom_item.item_code  AND conf_item.uom = bom_item.stock_uom
+				LEFT JOIN `tabUOM Conversion Detail` AS conf_ledger
+					ON conf_ledger.parent = ledger.item_code  AND conf_ledger.uom = ledger.stock_uom
+			WHERE
+				bom_item.parent = %(bom)s 
+			GROUP BY 
+				bom_item.item_code""", {"bom": bom, "warehouse": warehouse, "filterhouse": filters.warehouse}, as_dict=1)
 		stock_qty = 0
 		count = 0
 		for item in item_list:
@@ -64,6 +59,7 @@ def get_item_list(prod_list):
 			"instock": stock_qty,
 			"description": desc,
 			"bom_no": bom,
+			"qty": qty,
 			"ready_to_build": build
 		})
 		
@@ -73,14 +69,15 @@ def get_item_list(prod_list):
 	
 def get_production_orders():
 	
-	out = []
+	#out = []
 	
 	
-	prod_list = frappe.db.sql("""select name, status from `tabProduction Order` as prod where status != "Completed" and docstatus = 1""", {}, as_dict=1)
-	prod_list.sort(reverse=False)
+	#prod_list = frappe.db.sql("""select name, status from `tabProduction Order` as prod where status != "Completed" and docstatus = 1""", {}, as_dict=1)
+	out =  frappe.get_all("Production Order", filters={"docstatus": 1, "status": ( "!=","Completed")}, fields=["name","status"], order_by='name')
+	#prod_list.sort(reverse=False)
 	
-	for po in prod_list:
-		out.append(po)
+	#for po in prod_list:
+		#out.append(po)
 
 	return out
 	
@@ -90,43 +87,49 @@ def get_columns():
 		"label": "Production Order",
 		"fieldtype": "Link",
 		"options": "Production Order",
-		"width": 120
+		"width": 110
 	},{
 		"fieldname": "bom_no",
 		"label": "BOM",
 		"fieldtype": "Link",
 		"options": "BOM",
-		"width": 150
+		"width": 130
 	},{
 		"fieldname": "description",
 		"label": "Description",
 		"fieldtype": "Data",
 		"options": "",
-		"width": 275
+		"width": 250
+	},{
+		"fieldname": "qty",
+		"label": "Qty to Build",
+		"fieldtype": "Data",
+		"options": "",
+		"width": 110
 	},{
 		"fieldname": "status",
 		"label": "Status",
 		"fieldtype": "Data",
 		"options": "",
-		"width": 120
+		"width": 110
 	},{
 		"fieldname": "req_items",
 		"label": "# of Required Items",
 		"fieldtype": "Data",
 		"options": "",
-		"width": 150
+		"width": 135
 	},{
 		"fieldname": "instock",
 		"label": "# of In Stock Items",
 		"fieldtype": "Data",
 		"options": "",
-		"width": 150
+		"width": 135
 	},	{
 		"fieldname": "ready_to_build",
 		"label": "Can Start?",
 		"fieldtype": "Data",
 		"options": "",
-		"width": 80
+		"width": 75
 	}]
 
 	return columns
