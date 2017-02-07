@@ -33,8 +33,13 @@ class SalaryStructure(Document):
 def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):
 	def postprocess(source, target):
 		if employee:
+			employee_details = frappe.db.get_value("Employee", employee, 
+							["employee_name", "branch", "designation", "department"], as_dict=1)
 			target.employee = employee
-			target.employee_name = frappe.get_value("Employee",employee, "employee_name")
+			target.employee_name = employee_details.employee_name
+			target.branch = employee_details.branch
+			target.designation = employee_details.designation
+			target.department = employee_details.department
 		target.run_method('process_salary_structure')
 
 	doc = get_mapped_doc("Salary Structure", source_name, {
