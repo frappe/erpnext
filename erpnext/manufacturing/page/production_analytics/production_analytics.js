@@ -105,38 +105,53 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 
 			$.each(me.columns, function(i,col) {
 				if (i > 1){
-					if (i == 14){
-						var temp = 0;
-					}
 					var start_period = dateutil.user_to_obj(dateutil.str_to_user(col.id));
 					var end_period = dateutil.user_to_obj(dateutil.str_to_user(col.name));
+					var astart_date = dateutil.user_to_obj(dateutil.str_to_user(d.actual_start_date));
 					var planned_start_date = dateutil.user_to_obj(dateutil.str_to_user(d.planned_start_date));
+					var aend_date = dateutil.user_to_obj(dateutil.str_to_user(d.actual_end_date));
+					var modified = dateutil.user_to_obj(dateutil.str_to_user(d.modified));
 					
-					if (dateobj <= start_period || end_period >= dateobj){
+					if (dateobj <= start_period || dateobj <= end_period) {
 						all_open_orders[col.field] = flt(all_open_orders[col.field]) + 1;
+				
 						if(d.status=="Completed") {
-							completed[col.field] = flt(completed[col.field]) + 1;
-						}else if(d.status=="In Process") {
-							pending[col.field] = flt(pending[col.field]) + 1;
-						}else if(d.status=="Not Started") {
-							if (planned_start_date > start_period) {
-								not_started[col.field] = flt(not_started[col.field]) + 1;
-							}else if (planned_start_date < end_period) {
-								overdue[col.field] = flt(overdue[col.field]) + 1;
-							}else if (planned_start_date < d.actual_start_date) {
-								not_started[col.field] = flt(not_started[col.field]) + 1;
-							}/*else if (d.planned_start_date > dateutil.now_datetime()) {
-								not_started[col.field] = flt(not_started[col.field]) + 1;
-							}*/
-							else{
-								overdue[col.field] = flt(overdue[col.field]) + 1;
+							if(aend_date < start_period || modified < start_period) {
+								completed[col.field] = flt(completed[col.field]) + 1;
 							}
-						}
+							else if (astart_date < start_period) {
+								pending[col.field] = flt(pending[col.field]) + 1;
+							}
+							else if (planned_start_date < start_period) {
+								overdue[col.field] = flt(overdue[col.field]) + 1;
+							} else {
+								not_started[col.field] = flt(not_started[col.field]) + 1;
+							}
+						}else if(d.status == "In Process")
+						{
+							if (astart_date < start_period || modified < start_period){
+								pending[col.field] = flt(pending[col.field]) + 1;
+							}else if (planned_start_date < start_period)	{
+								overdue[col.field] = flt(overdue[col.field]) + 1;
+							}else{
+								not_started[col.field] = flt(not_started[col.field]) + 1;
+							}
+						}else if(d.status == "Not Started") {
+							if (planned_start_date < start_period){
+								overdue[col.field] = flt(overdue[col.field]) + 1;
+							}else{
+								not_started[col.field] = flt(not_started[col.field]) + 1;
+							}
+						}							
 					}
 				}
 			});
 		});
-		this.chart_area.toggle(true);
+		if(me.columns.length < 30){
+			this.chart_area.toggle(true);
+		}else {
+			this.chart_area.toggle(false);
+		}
 		this.data = [all_open_orders, not_started, overdue, pending, completed];
 		
 	}

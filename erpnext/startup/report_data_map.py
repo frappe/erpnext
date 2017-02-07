@@ -269,7 +269,7 @@ data_map = {
 	},
 	"Purchase Receipt": {
 		"columns": ["name", "supplier", "posting_date", "company"],
-		"conditions": ["docstatus=1"],
+		"conditions": ["docstatus=1"], 
 		"order_by": "posting_date",
 		"links": {
 			"supplier": ["Supplier", "name"],
@@ -294,7 +294,7 @@ data_map = {
 
 	# Manufacturing
 	"Production Order": {
-		"columns": ["name","status","creation","planned_start_date","status","actual_start_date"],
+		"columns": ["name","status","creation","planned_start_date","planned_end_date","status","actual_start_date","actual_end_date", "modified"],
 		"conditions": ["docstatus = 1"],
 		"order_by": "creation"
 	}
