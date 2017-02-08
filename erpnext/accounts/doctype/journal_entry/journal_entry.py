@@ -46,6 +46,9 @@ class JournalEntry(AccountsController):
 		self.accounts = [account for account in self.accounts
 			if not (account.debit_in_account_currency==0.0 and account.credit_in_account_currency==0.0)]
 
+		if not self.accounts:
+			frappe.throw("Debit or Credit amount is not found in account table")
+
 	def on_submit(self):
 		self.check_credit_limit()
 		self.make_gl_entries()
