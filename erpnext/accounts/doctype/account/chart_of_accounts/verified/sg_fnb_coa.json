@@ -142,7 +142,8 @@
 				"Accounts Payable": {
 					"Creditors":{
 						"account_type": "Payable"
-					}
+					},
+					"Payroll Payable": {}
 			 	},
 			 	"Duties and Taxes": {
 					"account_type": "Tax",

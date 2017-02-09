@@ -324,25 +324,28 @@ class SalarySlip(TransactionBase):
 
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
-		self.gross_pay = flt(self.arrear_amount) + flt(self.leave_encashment_amount)
 		self.total_deduction = 0
+		self.gross_pay = 0
 
 		self.sum_components('earnings', 'gross_pay')
 		self.sum_components('deductions', 'total_deduction')
 		
 		self.set_loan_repayment()
 
-		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.loan_repayment))
+		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 		self.rounded_total = rounded(self.net_pay,
 			self.precision("net_pay") if disable_rounded_total else 0)
 
 	def set_loan_repayment(self):
-		employee_loan = frappe.db.sql("""select sum(total_payment) as loan_repayment from `tabRepayment Schedule`
+		employee_loan = frappe.db.sql("""select sum(principal_amount) as principal_amount, sum(interest_amount) as interest_amount, 
+						sum(total_payment) as total_loan_repayment from `tabRepayment Schedule`
 						where payment_date between %s and %s and parent in (select name from `tabEmployee Loan`
 						where employee = %s and repay_from_salary = 1 and docstatus = 1)""",
-						(self.start_date, self.end_date, self.employee), as_dict=True)
+						(self.start_date, self.end_date, self.employee), as_dict=True)				
 		if employee_loan:
-			self.loan_repayment = employee_loan[0].loan_repayment
+			self.principal_amount = employee_loan[0].principal_amount
+			self.interest_amount = employee_loan[0].interest_amount
+			self.total_loan_repayment = employee_loan[0].total_loan_repayment
 
 	def on_submit(self):
 		if self.net_pay < 0:
