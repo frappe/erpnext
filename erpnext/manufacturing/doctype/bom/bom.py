@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr, flt
 from frappe import _
-from erpnext.setup.utils import get_exchange_rate
-from frappe.model.document import Document
+from erpnext.setup.utils import get_exchange_rate 
+from frappe.website.website_generator import WebsiteGenerator
 
 from operator import itemgetter
 
@@ -14,7 +14,13 @@ form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
 
-class BOM(Document):
+class BOM(WebsiteGenerator):
+	website = frappe._dict(
+		page_title_field = "item_name",
+		condition_field = "show_in_website",
+		template = "templates/generators/bom.html"
+	)
+
 	def autoname(self):
 		names = frappe.db.sql_list("""select name from `tabBOM` where item=%s""", self.item)
 
