@@ -451,7 +451,7 @@ class Item(WebsiteGenerator):
 				"valuation_method", "has_batch_no", "is_fixed_asset")
 
 			vals = frappe.db.get_value("Item", self.name, to_check, as_dict=True)
-			if not vals.get('valuation_method'):
+			if not vals.get('valuation_method') and self.get('valuation_method'):
 				vals['valuation_method'] = frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
 
 			if vals:
