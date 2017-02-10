@@ -116,11 +116,17 @@ def get_columns():
 		"options": "",
 		"width": 135
 	}, {
-		"fieldname": "ready_to_build",
-		"label": "Can Start?",
+		"fieldname": "buildable_qty",
+		"label": "Buildable Qty",
 		"fieldtype": "Data",
 		"options": "",
-		"width": 75
+		"width": 100
+	}, {
+		"fieldname": "ready_to_build",
+		"label": "Can Build All",
+		"fieldtype": "Data",
+		"options": "",
+		"width": 90
 	}]
 
 	return columns
