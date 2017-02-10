@@ -73,7 +73,7 @@ def get_item_details(args):
 
 	out.update(get_pricing_rule_for_item(args))
 
-	if args.get("doctype") in ("Sales Invoice", "Delivery Note") and out.qty > 0:
+	if args.get("doctype") in ("Sales Invoice", "Delivery Note") and out.stock_qty > 0:
 		out.serial_no = get_serial_no(out)
 
 	if args.transaction_date and item.lead_time_days:
@@ -345,7 +345,7 @@ def get_serial_nos_by_fifo(args):
 			order by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {
 				"item_code": args.item_code,
 				"warehouse": args.warehouse,
-				"qty": abs(cint(args.qty))
+				"qty": abs(cint(args.stock_qty))
 			}))
 
 def get_actual_batch_qty(batch_no,warehouse,item_code):
@@ -378,17 +378,17 @@ def get_bin_details(item_code, warehouse):
 			or {"projected_qty": 0, "actual_qty": 0}
 
 @frappe.whitelist()
-def get_serial_no_details(item_code, warehouse, qty, serial_no):
-	args = frappe._dict({"item_code":item_code, "warehouse":warehouse, "qty":qty, "serial_no":serial_no})
+def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
+	args = frappe._dict({"item_code":item_code, "warehouse":warehouse, "stock_qty":stock_qty, "serial_no":serial_no})
 	serial_no = get_serial_no(args)
 	return {'serial_no': serial_no}
 
 @frappe.whitelist()
-def get_bin_details_and_serial_nos(item_code, warehouse, qty=None, serial_no=None):
+def get_bin_details_and_serial_nos(item_code, warehouse, stock_qty=None, serial_no=None):
 	bin_details_and_serial_nos = {}
 	bin_details_and_serial_nos.update(get_bin_details(item_code, warehouse))
-	if qty > 0:
-		bin_details_and_serial_nos.update(get_serial_no_details(item_code, warehouse, qty, serial_no))
+	if stock_qty > 0:
+		bin_details_and_serial_nos.update(get_serial_no_details(item_code, warehouse, stock_qty, serial_no))
 	return bin_details_and_serial_nos
 
 @frappe.whitelist()
@@ -522,7 +522,7 @@ def get_valuation_rate(item_code, warehouse=None):
 def get_gross_profit(out):
 	if out.valuation_rate:
 		out.update({
-			"gross_profit": ((out.base_rate - out.valuation_rate) * out.qty)
+			"gross_profit": ((out.base_rate - out.valuation_rate) * out.stock_qty)
 		})
 
 	return out
@@ -533,10 +533,10 @@ def get_serial_no(args):
 		args = json.loads(args)
 		args = frappe._dict(args)
 
-	if args.get('warehouse') and args.get('qty') and args.get('item_code'):
+	if args.get('warehouse') and args.get('stock_qty') and args.get('item_code'):
 
 		if frappe.get_value('Item', {'item_code': args.item_code}, "has_serial_no") == 1:
-			args = json.dumps({"item_code": args.get('item_code'),"warehouse": args.get('warehouse'),"qty": args.get('qty')})
+			args = json.dumps({"item_code": args.get('item_code'),"warehouse": args.get('warehouse'),"stock_qty": args.get('stock_qty')})
 			args = process_args(args)
 			serial_no = get_serial_nos_by_fifo(args)
 			return serial_no

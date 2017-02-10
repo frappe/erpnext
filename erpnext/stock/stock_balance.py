@@ -73,7 +73,7 @@ def get_reserved_qty(item_code, warehouse):
 				(select
 					qty as dnpi_qty,
 					(
-						select qty from `tabSales Order Item`
+						select stock_qty from `tabSales Order Item`
 						where name = dnpi.parent_detail_docname
 						and (delivered_by_supplier is null or delivered_by_supplier = 0)
 					) as so_item_qty,
@@ -94,7 +94,7 @@ def get_reserved_qty(item_code, warehouse):
 					where name = dnpi_in.parent and docstatus = 1 and status != 'Closed')
 				) dnpi)
 			union
-				(select qty as dnpi_qty, qty as so_item_qty,
+				(select qty as dnpi_qty, stock_qty as so_item_qty,
 					delivered_qty as so_item_delivered_qty, parent, name
 				from `tabSales Order Item` so_item
 				where item_code = %s and warehouse = %s
