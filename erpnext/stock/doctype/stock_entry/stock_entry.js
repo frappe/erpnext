@@ -510,7 +510,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
 		}
 		if(doc.purpose == "Material Receipt") {
-			frm.set_value("from_bom", 0);
+			this.frm.set_value("from_bom", 0);
 		}
 
 		// Addition costs based on purpose
