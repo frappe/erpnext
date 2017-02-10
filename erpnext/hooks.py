@@ -96,7 +96,7 @@ website_route_rules = [
 	},
 	{"from_route": "/jobs", "to_route": "Job Opening"},
 	{"from_route": "/admissions", "to_route": "Student Admission"},
-	{"from_route": "/bom", "to_route": "BOM"},
+	{"from_route": "/boms", "to_route": "BOM"}
 ]
 
 portal_menu_items = [

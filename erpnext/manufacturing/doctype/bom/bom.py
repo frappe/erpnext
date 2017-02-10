@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr, flt
 from frappe import _
-from erpnext.setup.utils import get_exchange_rate 
+from erpnext.setup.utils import get_exchange_rate
 from frappe.website.website_generator import WebsiteGenerator
 
 from operator import itemgetter
@@ -16,7 +16,7 @@ form_grid_templates = {
 
 class BOM(WebsiteGenerator):
 	website = frappe._dict(
-		page_title_field = "item_name",
+		# page_title_field = "item_name",
 		condition_field = "show_in_website",
 		template = "templates/generators/bom.html"
 	)
@@ -40,6 +40,8 @@ class BOM(WebsiteGenerator):
 		self.name = 'BOM-' + self.item + ('-%.3i' % idx)
 
 	def validate(self):
+		# if not self.route:
+		self.route = frappe.scrub(self.name).replace('_', '-')
 		self.clear_operations()
 		self.validate_main_item()
 		self.validate_currency()
@@ -53,9 +55,14 @@ class BOM(WebsiteGenerator):
 		self.validate_operations()
 		self.calculate_cost()
 
+	def get_context(self, context):
+		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
+
 	def on_update(self):
 		self.check_recursion()
 		self.update_exploded_items()
+		self.update_website_items()
+		self.update_website_operations()
 
 	def on_submit(self):
 		self.manage_default_bom()
@@ -433,6 +440,64 @@ class BOM(WebsiteGenerator):
 			for d in self.operations:
 				if not d.description:
 					d.description = frappe.db.get_value('Operation', d.operation, 'description')
+
+	def update_website_items(self):
+		self.get_website_items()
+		self.add_website_items()
+
+	def get_website_items(self):
+		self.cur_website_items = {}
+		for d in self.get('items'):
+			self.add_to_cur_website_items(frappe._dict({
+				'item_code'		: d.item_code,
+				'item_name'		: d.item_name,
+				'description'	: d.description,
+				'website_image'	: d.image
+			}))
+
+	def add_to_cur_website_items(self, args):
+		self.cur_website_items[args.item_code] = args
+
+	def add_website_items(self):
+		frappe.db.sql("""delete from `tabBOM Website Item` where parent=%s""", self.name)
+		self.set('website_items', [])
+		for d in sorted(self.cur_website_items, key=itemgetter(0)):
+			ch = self.append('website_items', {})
+			for i in self.cur_website_items[d].keys():
+				ch.set(i, self.cur_website_items[d][i])
+			ch.docstatus = self.docstatus
+			ch.db_insert()
+
+	def update_website_operations(self):
+		self.get_website_operations()
+		self.add_website_operations()
+
+	def get_website_operations(self):
+		self.cur_website_operations = {}
+		for d in self.get('operations'):
+			self.add_to_cur_website_operations(frappe._dict({
+				'operation'		: d.operation,
+				'workstation'	: d.workstation,
+				'time_in_mins'	: d.time_in_mins,
+				'website_image'	: d.image
+			}))
+
+	def add_to_cur_website_operations(self, args):
+		self.cur_website_operations[args.operation] = args
+
+	def add_website_operations(self):
+		frappe.db.sql("""delete from `tabBOM Website Operation` where parent=%s""", self.name)
+		self.set('website_operations', [])
+		for d in sorted(self.cur_website_operations, key=itemgetter(0)):
+			ch = self.append('website_operations', {})
+			for i in self.cur_website_operations[d].keys():
+				ch.set(i, self.cur_website_operations[d][i])
+			ch.docstatus = self.docstatus
+			ch.db_insert()
+
+def get_list_context(context):
+	context.title = _("Bill of Materials")
+	# context.introduction = _('Boms')
 
 def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_items=0):
 	item_dict = {}
