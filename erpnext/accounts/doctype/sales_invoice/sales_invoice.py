@@ -794,7 +794,7 @@ def make_delivery_note(source_name, target_doc=None):
 			flt(source_doc.base_rate)
 		target_doc.amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
 			flt(source_doc.rate)
-		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
+		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty) * flt(source_doc.conversion_factor)
 
 	doclist = get_mapped_doc("Sales Invoice", source_name, 	{
 		"Sales Invoice": {

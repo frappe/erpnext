@@ -48,7 +48,7 @@ def get_entries(filters):
 	entries = frappe.db.sql("""
 		select
 			dt.name, dt.customer, dt.territory, dt.%s as posting_date, dt_item.item_code,
-			dt_item.qty, dt_item.base_net_amount, st.sales_person, st.allocated_percentage,
+			dt_item.stock_qty, dt_item.base_net_amount, st.sales_person, st.allocated_percentage,
 			dt_item.base_net_amount*st.allocated_percentage/100 as contribution_amt
 		from
 			`tab%s` dt, `tab%s Item` dt_item, `tabSales Team` st

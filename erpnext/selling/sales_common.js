@@ -215,7 +215,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				args: {
 					item_code: item.item_code,
 					warehouse: item.warehouse,
-					qty: item.qty,
+					stock_qty: item.stock_qty,
 					serial_no: item.serial_no || ""
 				},
 				callback:function(r){
