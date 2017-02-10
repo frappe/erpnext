@@ -26,7 +26,7 @@ def get_item_list(prod_list, filters):
 		produced_value = frappe.db.get_value("Production Order", prod_order.name, "produced_qty")
 		item_list = frappe.db.sql("""SELECT 
 				bom_item.item_code as item_code,
-				ifnull(ledger.actual_qty,0)/(bom_item.qty) as build_qty
+				ifnull(ledger.actual_qty/bom_item.qty,0) as build_qty
 			FROM
 				`tabBOM Item` AS bom_item
 				LEFT JOIN `tabBin` AS ledger	
@@ -43,8 +43,9 @@ def get_item_list(prod_list, filters):
 			count = count + 1
 			if item.build_qty >= (qty-produced_value):
 				stock_qty = stock_qty + 1
-			elif buildable_qty > item.build_qty:
-				buidable_qty = item.build_qty
+			elif buildable_qty >= item.build_qty:
+				buildable_qty = item.build_qty
+			
 					
 		if count == stock_qty:
 			build = "Y"
@@ -84,13 +85,13 @@ def get_columns():
 		"label": "BOM",
 		"fieldtype": "Link",
 		"options": "BOM",
-		"width": 130
+		"width": 120
 	}, {
 		"fieldname": "description",
 		"label": "Description",
 		"fieldtype": "Data",
 		"options": "",
-		"width": 250
+		"width": 230
 	}, {
 		"fieldname": "qty",
 		"label": "Qty to Build",
@@ -102,19 +103,19 @@ def get_columns():
 		"label": "Status",
 		"fieldtype": "Data",
 		"options": "",
-		"width": 110
+		"width": 100
 	}, {
 		"fieldname": "req_items",
-		"label": "# of Required Items",
+		"label": "# Req'd Items",
 		"fieldtype": "Data",
 		"options": "",
-		"width": 135
+		"width": 105
 	}, {
 		"fieldname": "instock",
-		"label": "# of In Stock Items",
+		"label": "# In Stock",
 		"fieldtype": "Data",
 		"options": "",
-		"width": 135
+		"width": 105
 	}, {
 		"fieldname": "buildable_qty",
 		"label": "Buildable Qty",
@@ -123,7 +124,7 @@ def get_columns():
 		"width": 100
 	}, {
 		"fieldname": "ready_to_build",
-		"label": "Can Build All",
+		"label": "Build All?",
 		"fieldtype": "Data",
 		"options": "",
 		"width": 90

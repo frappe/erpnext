@@ -7,8 +7,7 @@ frappe.query_reports["Production Order Stock Report"] = {
 		"fieldname":"warehouse",
 		"label": __("Warehouse"),
 		"fieldtype": "Link",
-		"options": "Warehouse",
-		"default": "Stores - VMI"
+		"options": "Warehouse"
 		
 	}
 	]
