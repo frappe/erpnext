@@ -2,7 +2,7 @@
 
 You can set up the Feedback Trigger for various documents to get the Feedback from the user.
 
-For this you will need to setup the Feedback Trigger,
+For this, you will need to setup the Feedback Trigger,
 
 > Setup > Email > Feedback Trigger
 
@@ -10,20 +10,20 @@ For this you will need to setup the Feedback Trigger,
 
 To Setup an Feedback:
 
-1. Select which Document Type you want send feedback request mail.
+1. Select which Document Type you want to send feedback request mail.
 2. Select the Email Field, This field will be used to get the recipients email id.
 3. Set the Subject for feedback request mail.
 4. Set the conditions, if all the conditions are met only then the feedback request mail will be sent.
 5. Compose the message.
 
 ### Setting a Subject
-You can retrieve the data for a particular field by using `doc.[field_name]`. To use it in your subject / message, you have to surround it with `{% raw %}{{ }}{% endraw %}`. These are called [Jinja](http://jinja.pocoo.org/) tags. So, for example to get the name of a document, you use `{% raw %}{{ doc.name }}{% endraw %}`. The below example sends an feedback request whenever Issue is Closed with the Subject, "ISS-##### Issue is Resolved"
+You can retrieve the data for a particular field by using `doc.[field_name]`. To use it in your subject/message, you have to surround it with `{% raw %}{{ }}{% endraw %}`. These are called [Jinja](http://jinja.pocoo.org/) tags. So, for example, to get the name of a document, you use `{% raw %}{{ doc.name }}{% endraw %}`. The below example sends an feedback request whenever Issue is Closed with the Subject, "ISS-##### Issue is Resolved"
 
 <img class="screenshot" alt="Setting Subject" src="{{docs_base_url}}/assets/img/setup/feedback/feedback-trigger-subject.png">
 
 ### Setting Conditions
 
-Feedback Trigger allow you to set conditions according to the field data in your documents. The feedback request email will be sent on document save only if the all conditions are true For example, if you want to trigger the feedback request mail to customer if a Issue is has been saved as "Closed" as it's status, you put `doc.status == "Closed"` in the conditions textbox. You can also set more complex conditions by combining them.
+Feedback Trigger allows you to set conditions according to the field data in your documents. The feedback request email will be sent on document save only if the all conditions are true For example if you want to trigger the feedback request mail to a customer if an Issue is has been saved as "Closed" as it's status, you put `doc.status == "Closed"` in the conditions textbox. You can also set more complex conditions by combining them.
 
 <img class="screenshot" alt="Setting Condition" src="{{docs_base_url}}/assets/img/setup/feedback/feedback-trigger-condition.png">
 
@@ -39,8 +39,6 @@ You can use both Jinja Tags (`{% raw %}{{ doc.[field_name] }}{% endraw %}`) and 
 
 	{{ feedback_url }}
 	{% endraw %}
-
-Please note the to include Feedback URL in the feedback request mail message body you will need to include the `{% raw %}{{ feedback_url }}{% endraw %}` in message while setting up the feedback trigger.
 
 ---
 

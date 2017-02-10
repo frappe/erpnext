@@ -1,3 +1,4 @@
 setting-up-feedback
 submit-feedback
 resend-feedback-request
+manual-feedback-request
