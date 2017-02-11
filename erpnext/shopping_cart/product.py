@@ -50,7 +50,7 @@ def get_qty_in_stock(item_code, template_item_code):
 		in_stock = frappe.db.sql("""select actual_qty from tabBin where
 			item_code=%s and warehouse=%s""", (item_code, warehouse))
 		if in_stock:
-			in_stock = in_stock[0][0] > 0 and 1 or 0
+			in_stock = in_stock[0]
 
 	else:
 		in_stock = 0
