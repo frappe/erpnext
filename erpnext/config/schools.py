@@ -116,7 +116,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Assessment Group"
+					"name": "Assessment Group",
+					"link": "Tree/Assessment Group",
 				},
 				{
 					"type": "doctype",
