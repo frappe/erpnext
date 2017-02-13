@@ -366,7 +366,7 @@ DocType: Workstation,Rent Cost,Chirie Cost
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Suma după amortizare
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Evenimente viitoare Calendar
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Vă rugăm selectați luna și anul
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Introduceți ID-uri de email separate prin virgule, factura va fi trimisa prin email automat la o anumită dată"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Introduceți ID-uri de email separate prin virgule, factura va fi trimisa prin email automat la o anumită dată"
 DocType: Employee,Company Email,E-mail Companie
 DocType: GL Entry,Debit Amount in Account Currency,Suma debit în contul valutar
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,tranzacții bancare / numerar contra partidului sau pentru transfer intern
@@ -684,7 +684,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Previzualizare Salariu alunecare
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Contul {0} a fost introdus de mai multe ori
 DocType: Account,Expenses Included In Valuation,Cheltuieli Incluse în Evaluare
-DocType: Employee,Provide email id registered in company,Furnizarea id-ul de e-mail înregistrată în societate
+DocType: Employee,Provide Email Address registered in company,Furnizarea id-ul de e-mail înregistrată în societate
 DocType: Hub Settings,Seller City,Vânzător oraș
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,Vă rugăm să selectați un grup Student
 ,Absent Student Report,Raport de student absent
@@ -1127,7 +1127,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Albastru
 DocType: Purchase Invoice,Is Return,Este de returnare
 DocType: Price List Country,Price List Country,Lista de preturi Țară
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Vă rugăm să setați Email ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Vă rugăm să setați Email Address
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} numere de serie valabile pentru articolul {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Cod articol nu pot fi schimbate pentru Serial No.
@@ -2212,7 +2212,7 @@ DocType: Fiscal Year,Year End Date,Anul Data de încheiere
 DocType: Task Depends On,Task Depends On,Sarcina Depinde
 DocType: Supplier Quotation,Opportunity,Oportunitate
 ,Completed Production Orders,Comenzi de Producție Finalizate
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Rândul {0}: furnizor {0} e-mail id-ul este necesar pentru a trimite e-mail
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Rândul {0}: furnizor {0} e-mail id-ul este necesar pentru a trimite e-mail
 DocType: Operation,Default Workstation,Implicit Workstation
 DocType: Notification Control,Expense Claim Approved Message,Mesaj Aprobare Revendicare Cheltuieli
 DocType: Payment Entry,Deductions or Loss,Deducerile sau Pierdere
@@ -3687,7 +3687,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Set Exchange Gain / Pierdere
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Perioada de aplicare nu poate fi peste două înregistrări alocation
 DocType: Item Group,Default Expense Account,Cont de Cheltuieli Implicit
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Lot de student sau un curs Program este obligatoriu
-DocType: Student,Student Email ID,ID-ul de student e-mail
+DocType: Student,Student Email Address,ID-ul de student e-mail
 DocType: Employee,Notice (days),Preaviz (zile)
 DocType: Tax Rule,Sales Tax Template,Format impozitul pe vânzări
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Selectați elemente pentru a salva factura
@@ -3838,7 +3838,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Reg
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Vezi Oportunitati
 DocType: Program Enrollment Tool,New Program,programul nou
 DocType: Item Attribute Value,Attribute Value,Valoare Atribut
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","Id Email trebuie să fie unic, există deja pentru {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Id Email trebuie să fie unic, există deja pentru {0}"
 ,Itemwise Recommended Reorder Level,Nivel de Reordonare Recomandat al Articolului-Awesome
 DocType: Salary Detail,Salary Detail,Detalii salariu
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,Vă rugăm selectați 0} {întâi
@@ -4040,7 +4040,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Activitatea de proiect / sarcină.
 DocType: Vehicle Log,Refuelling Details,Detalii de realimentare
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Generează fluturașe de salariu
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,În continuare Contact Prin faptul că nu poate fi la fel ca id-ul de e-mail Plumb
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,În continuare Contact Prin faptul că nu poate fi la fel ca id-ul de e-mail Plumb
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Destinat Cumpărării trebuie să fie bifat, dacă Se Aplica Pentru este selectat ca şi {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Reducerea trebuie să fie mai mică de 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Rata Ultima achiziție nu a fost găsit
@@ -4336,7 +4336,7 @@ DocType: Purchase Order,Advance Paid,Avans plătit
 DocType: Item,Item Tax,Taxa Articol
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Material de Furnizor
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Accize factură
-DocType: Expense Claim,Employees Email Id,Id Email Angajat
+DocType: Expense Claim,Employees Email Address,Id Email Angajat
 DocType: Employee Attendance Tool,Marked Attendance,Participarea marcat
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Raspunderi Curente
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Trimite SMS-uri în masă a persoanelor de contact

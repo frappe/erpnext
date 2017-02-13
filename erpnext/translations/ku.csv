@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,Cost kirê
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Şêwaz Piştî Farhad.
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Calendar Upcoming Events
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Ji kerema xwe re meha û sala hilbijêre
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Enter id email ji hev biqetîne, fatûra wê were li ser date taybetî bêt"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Enter id email ji hev biqetîne, fatûra wê were li ser date taybetî bêt"
 DocType: Employee,Company Email,Company Email
 DocType: GL Entry,Debit Amount in Account Currency,Şêwaz Debit li Account Exchange
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,muamele Bank / Cash dijî partî an jî ji bo veguhestina navxweyî
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Preview Bikini Salary
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Account {0} hatiye bicihkirin çend caran
 DocType: Account,Expenses Included In Valuation,Mesrefên di nav Valuation
-DocType: Employee,Provide email id registered in company,Ne id email qeydkirî li şîrketa
+DocType: Employee,Provide Email Address registered in company,Ne id email qeydkirî li şîrketa
 DocType: Hub Settings,Seller City,Seller City
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,Ji kerema xwe re Komeleya Xwendekarên hilbijêre
 ,Absent Student Report,Absent Report Student
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Şîn
 DocType: Purchase Invoice,Is Return,e Return
 DocType: Price List Country,Price List Country,List Price Country
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Ji kerema xwe ve set Email ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Ji kerema xwe ve set Email Address
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} nos serial derbasdar e ji bo vî babetî {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Code babete dikarin ji bo No. Serial ne bê guhertin
@@ -2196,7 +2196,7 @@ DocType: Fiscal Year,Year End Date,Sal Date End
 DocType: Task Depends On,Task Depends On,Task Dimîne li ser
 DocType: Supplier Quotation,Opportunity,Fersend
 ,Completed Production Orders,Ordênên Production Qediya
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Row {0}: Ji bo dabînkerê {0} email id pêwîst e ji bo şandina email
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Row {0}: Ji bo dabînkerê {0} Email Address pêwîst e ji bo şandina email
 DocType: Operation,Default Workstation,Default Workstation
 DocType: Notification Control,Expense Claim Approved Message,Message mesrefan Pejirandin
 DocType: Payment Entry,Deductions or Loss,Daşikandinên an Loss
@@ -3641,7 +3641,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Set Exchange Gain / Loss
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,dema Application ne dikarin li seranserî du records alocation be
 DocType: Item Group,Default Expense Account,Account Default Expense
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Batch Student an Cedwela Kurs wêneke e
-DocType: Student,Student Email ID,Xwendekarên ID Email
+DocType: Student,Student Email Address,Xwendekarên ID Email
 DocType: Employee,Notice (days),Notice (rojan)
 DocType: Tax Rule,Sales Tax Template,Şablon firotina Bacê
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Select tomar bo rizgarkirina fatûra
@@ -3792,7 +3792,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Led
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,View Leads
 DocType: Program Enrollment Tool,New Program,Program New
 DocType: Item Attribute Value,Attribute Value,nirxê taybetmendiyê
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","Email id, divê yekta be, ji niha ve ji bo heye {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Email Address, divê yekta be, ji niha ve ji bo heye {0}"
 ,Itemwise Recommended Reorder Level,Itemwise Baştir DIRTYHERTZ Level
 DocType: Salary Detail,Salary Detail,Detail meaş
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,Ji kerema xwe {0} hilbijêre yekem
@@ -3983,7 +3983,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,çalakiyên Project / erka.
 DocType: Vehicle Log,Refuelling Details,Details Refuelling
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Çêneke Salary Slips
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Next Contact By nikare bibe wek id Email Lead
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Next Contact By nikare bibe wek id Email Lead
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Kirîn, divê werin kontrolkirin, eger Ji bo serlêdanê ya ku weke hilbijartî {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Discount gerek kêmtir ji 100 be
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Ev rûpel cara rêjeya kirîn nehate dîtin
@@ -4278,7 +4278,7 @@ DocType: Purchase Order,Advance Paid,Advance Paid
 DocType: Item,Item Tax,Bacê babetî
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Madî ji bo Supplier
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,baca bi fatûreyên
-DocType: Expense Claim,Employees Email Id,Karmendên Email Id
+DocType: Expense Claim,Employees Email Address,Karmendên Email Address
 DocType: Employee Attendance Tool,Marked Attendance,Beşdariyê nîşankirin
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Deynên niha:
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Send SMS girseyî ji bo têkiliyên xwe

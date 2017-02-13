@@ -366,7 +366,7 @@ DocType: Workstation,Rent Cost,Custo de Aluguer
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Montante Após Depreciação
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Próximos eventos de calendário
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,"Por favor, selecione o mês e o ano"
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date",Digite o ID de email separado por vírgulas. A fatura será enviada automaticamente em determinada data
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date",Digite o ID de email separado por vírgulas. A fatura será enviada automaticamente em determinada data
 DocType: Employee,Company Email,Email da Empresa
 DocType: GL Entry,Debit Amount in Account Currency,Montante de Débito na Moeda da Conta
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Transações Bancárias/Dinheiro em terceiros ou em transferências internas
@@ -684,7 +684,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Pré-visualizar Folha de Pagamento
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,A conta {0} foi inserida várias vezes
 DocType: Account,Expenses Included In Valuation,Despesas Incluídos na Estimativa
-DocType: Employee,Provide email id registered in company,Forneça o ID do email registado na empresa
+DocType: Employee,Provide Email Address registered in company,Forneça o ID do email registado na empresa
 DocType: Hub Settings,Seller City,Vendedor Cidade
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,"Por favor, selecione um Grupo de Estudantes"
 ,Absent Student Report,Ausente Relatório do Estudante
@@ -1127,7 +1127,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Azul
 DocType: Purchase Invoice,Is Return,É um Retorno
 DocType: Price List Country,Price List Country,País da Lista de Preços
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,"Por favor, defina a ID do Email"
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,"Por favor, defina a ID do Email"
 DocType: Item,UOMs,UOMS
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},Nº de série válido {0} para o Item {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,O Código de Item não pode ser alterado por um Nº de Serie.
@@ -2219,7 +2219,7 @@ DocType: Fiscal Year,Year End Date,Data de Fim de Ano
 DocType: Task Depends On,Task Depends On,Tarefa depende de
 DocType: Supplier Quotation,Opportunity,Oportunidade
 ,Completed Production Orders,Pedidos de Produção Concluídos
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Linha Row {0}:  É necessárioo ID de email de fornecedor {0} para poder enviar o email
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Linha Row {0}:  É necessárioo ID de email de fornecedor {0} para poder enviar o email
 DocType: Operation,Default Workstation,Posto de Trabalho Padrão
 DocType: Notification Control,Expense Claim Approved Message,Mensagem de Reembolso de Despesas Aprovado
 DocType: Payment Entry,Deductions or Loss,Deduções ou Perdas
@@ -3697,7 +3697,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Definir o Exchange Perda / Ganho
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,O período do pedido não pode ser entre dois registos de atribuição
 DocType: Item Group,Default Expense Account,Conta Despesa Padrão
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Batch estudante ou Calendário de Cursos é obrigatória
-DocType: Student,Student Email ID,Student E-mail ID
+DocType: Student,Student Email Address,Student E-mail ID
 DocType: Employee,Notice (days),Aviso (dias)
 DocType: Tax Rule,Sales Tax Template,Template Imposto sobre Vendas
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Selecione os itens para salvar a fatura
@@ -3848,7 +3848,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Raz
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Veja Leads
 DocType: Program Enrollment Tool,New Program,Novo Programa
 DocType: Item Attribute Value,Attribute Value,Valor do Atributo
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","O ID de Email deve ser único, já existe para {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","O ID de Email deve ser único, já existe para {0}"
 ,Itemwise Recommended Reorder Level,Nível de Reposição de Item Recomendado Inteligente
 DocType: Salary Detail,Salary Detail,Detalhe salário
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,"Por favor, seleccione primeiro {0}"
@@ -4050,7 +4050,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Atividade / tarefa do projeto.
 DocType: Vehicle Log,Refuelling Details,Detalhes de reabastecimento
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Gerar Folhas de Vencimento
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Próximo Contactar por não pode ser o mesmo que o chumbo-mail id
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Próximo Contactar por não pode ser o mesmo que o chumbo-mail id
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","A compra deve ser verificada, se for Aplicável Para é selecionada como {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,O Desconto deve ser inferior a 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,A Taxa de Última Compra não foi encontrada
@@ -4345,7 +4345,7 @@ DocType: Purchase Order,Advance Paid,Adiantamento Pago
 DocType: Item,Item Tax,Taxa do Item
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Material para o Fornecedor
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Fatura de Imposto Especial
-DocType: Expense Claim,Employees Email Id,ID de Email de Funcionários
+DocType: Expense Claim,Employees Email Address,ID de Email de Funcionários
 DocType: Employee Attendance Tool,Marked Attendance,Presença Marcada
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Passivo a Curto Prazo
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Enviar SMS em massa para seus contatos

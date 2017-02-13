@@ -31,7 +31,8 @@ erpnext.financial_statements = {
 			"account": data.account,
 			"company": frappe.query_report_filters_by_name.company.get_value(),
 			"from_date": data.from_date || data.year_start_date,
-			"to_date": data.to_date || data.year_end_date
+			"to_date": data.to_date || data.year_end_date,
+			"project": $.grep(frappe.query_report.filters, function(e){ return e.df.fieldname == 'project'; })[0].$input.val()
 		};
 		frappe.set_route("query-report", "General Ledger");
 	},

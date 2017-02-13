@@ -500,10 +500,15 @@ def validate_bom_no(item, bom_no):
 @frappe.whitelist()
 def get_children():
 	if frappe.form_dict.parent:
-		return frappe.db.sql("""select item_code,
-			bom_no as value, qty,
-			if(ifnull(bom_no, "")!="", 1, 0) as expandable
-			from `tabBOM Item`
-			where parent=%s
-			order by idx
+		return frappe.db.sql("""select
+			bom_item.item_code,
+			bom_item.bom_no as value,
+			bom_item.qty,
+			if(ifnull(bom_item.bom_no, "")!="", 1, 0) as expandable,
+			item.image,
+			item.description
+			from `tabBOM Item` bom_item, tabItem item
+			where bom_item.parent=%s
+			and bom_item.item_code = item.name
+			order by bom_item.idx
 			""", frappe.form_dict.parent, as_dict=True)

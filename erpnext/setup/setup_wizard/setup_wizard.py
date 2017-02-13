@@ -407,7 +407,7 @@ def create_customers(args):
 
 				if args.get("customer_contact_" + str(i)):
 					create_contact(args.get("customer_contact_" + str(i)),
-						"customer", doc.name)
+						"Customer", doc.name)
 			except frappe.NameError:
 				pass
 
@@ -425,7 +425,7 @@ def create_suppliers(args):
 
 				if args.get("supplier_contact_" + str(i)):
 					create_contact(args.get("supplier_contact_" + str(i)),
-						"supplier", doc.name)
+						"Supplier", doc.name)
 			except frappe.NameError:
 				pass
 
@@ -433,12 +433,13 @@ def create_contact(contact, party_type, party):
 	"""Create contact based on given contact name"""
 	contact = contact.strip().split(" ")
 
-	frappe.get_doc({
+	contact = frappe.get_doc({
 		"doctype":"Contact",
-		party_type: party,
 		"first_name":contact[0],
 		"last_name": len(contact) > 1 and contact[1] or ""
-	}).insert()
+	})
+	contact.append('links', dict(link_doctype=party_type, link_name=party))
+	contact.insert()
 
 def create_letter_head(args):
 	if args.get("attach_letterhead"):

@@ -4,6 +4,17 @@
 frappe.provide("erpnext.company");
 
 frappe.ui.form.on("Company", {
+	setup: function(frm) {
+		frm.fields_dict['default_payable_account'].get_query = function() {
+			return{
+				filters: {
+					"root_type": "Liability",
+					"account_type": "Payable"
+				}
+			}
+		}
+	},
+
 	onload: function(frm) {
 		erpnext.company.setup_queries(frm);
 	},

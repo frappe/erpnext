@@ -24,7 +24,7 @@ __Step 3:__ System will open the supplier quotation, user has to enter the rate 
 
 #### For Supplier
 
-__Step 1:__ User has to create contact or enter email id against the supplier on request for quotation.
+__Step 1:__ User has to create contact or enter Email Address against the supplier on request for quotation.
 
 ![Request For Quotation]({{docs_base_url}}/assets/img/buying/set-email-id.png)
 

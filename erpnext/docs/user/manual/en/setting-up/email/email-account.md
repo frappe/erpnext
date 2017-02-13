@@ -28,7 +28,7 @@ To setup an incoming Email Account, check on **Enable Incoming** and set your PO
 
 ### How ERPNext handles replies
 
-In ERPNext when you send an email to a contact like a customer, the sender will be the user who sent the email. In the **Reply-To** property, the email id will be of the default incoming account (like `replies@yourcompany.com`). ERPNext will automatically extract these emails from the incoming account and tag it to the relvant communication
+In ERPNext when you send an email to a contact like a customer, the sender will be the user who sent the email. In the **Reply-To** property, the Email Address will be of the default incoming account (like `replies@yourcompany.com`). ERPNext will automatically extract these emails from the incoming account and tag it to the relvant communication
 
 ### Notification for unreplied messages
 

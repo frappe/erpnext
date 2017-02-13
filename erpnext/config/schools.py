@@ -6,10 +6,13 @@ def get_data():
 		{
 			"label": _("Student"),
 			"items": [
-
 				{
 					"type": "doctype",
 					"name": "Student"
+				},
+				{
+					"type": "doctype",
+					"name": "Guardian"
 				},
 				{
 					"type": "doctype",
@@ -109,7 +112,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Assessment"
+					"name": "Assessment Plan"
 				},
 				{
 					"type": "doctype",
@@ -117,7 +120,23 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Grading Structure"
+					"name": "Assessment Result"
+				},
+				{
+					"type": "doctype",
+					"name": "Grading Scale"
+				},
+				{
+					"type": "doctype",
+					"name": "Assessment Criteria"
+				},
+				{
+					"type": "doctype",
+					"name": "Assessment Criteria Group"
+				},
+				{
+					"type": "doctype",
+					"name": "Assessment Result Tool"
 				}
 			]
 		},
@@ -141,23 +160,6 @@ def get_data():
 					"name": "Student Fee Collection",
 					"doctype": "Fees",
 					"is_query_report": True
-				}
-			]
-		},
-		{
-			"label": _("LMS"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Announcement"
-				},
-				{
-					"type": "doctype",
-					"name": "Topic"
-				},
-				{
-					"type": "doctype",
-					"name": "Discussion"
 				}
 			]
 		},

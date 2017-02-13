@@ -117,6 +117,10 @@ class StockReconciliation(StockController):
 					if buying_rate:
 						row.valuation_rate = buying_rate
 
+					else:
+						# get valuation rate from Item
+						row.valuation_rate = frappe.get_value('Item', row.item_code, 'valuation_rate')
+
 		# throw all validation messages
 		if self.validation_messages:
 			for msg in self.validation_messages:

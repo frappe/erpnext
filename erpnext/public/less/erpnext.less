@@ -76,11 +76,13 @@
 
 .item-list-area {
 	padding: 15px 0px;
+	overflow-y: scroll;
+	height: ~"calc(100vh - 162px)";
 }
 
 .pos-toolbar, .pos-bill-toolbar {
 	padding: 10px 0px;
-	border-bottom: 1px solid #d1d8dd;
+	// border-bottom: 1px solid #d1d8dd;
 	height: 51px;
 }
 
@@ -95,6 +97,7 @@
 }
 
 .pos-bill {
+	border-top: 1px solid @border-color;
 	margin-left: -15px;
 	margin-right: -15px;
 }
@@ -211,6 +214,10 @@
 	padding-right: 30px;
 }
 
+.list-row-head.pos-invoice-list {
+	border-top: 1px solid @border-color;
+}
+
 body[data-route="pos"] .modal-dialog {
 	width: 750px;
 
@@ -254,4 +261,29 @@ body[data-route="pos"] .modal-dialog {
 .write_off_amount, .change_amount {
 	margin: 15px;
 	width: 130px;
+}
+
+// assessment tool
+.frappe-control[data-fieldname='result_html'] {
+	overflow: scroll;
+}
+.assessment-result-tool {
+	table-layout: fixed;
+
+	input {
+		width: 100%;
+		border: 0;
+		outline: none;
+		text-align: right;
+	}
+
+	th {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.total-score, .grade, .score {
+		text-align: right;
+	}
 }

@@ -9,9 +9,8 @@ import frappe.defaults
 from frappe.utils import flt, cint, cstr
 from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.utilities.address_and_contact import load_address_and_contact
+from frappe.geo.address_and_contact import load_address_and_contact, delete_contact_and_address
 from erpnext.accounts.party import validate_party_accounts, get_timeline_data # keep this
-from erpnext.accounts.party_status import get_party_status
 from erpnext import get_default_currency
 
 class Customer(TransactionBase):
@@ -70,7 +69,6 @@ class Customer(TransactionBase):
 		self.flags.is_new_doc = self.is_new()
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
-		self.status = get_party_status(self)
 		self.validate_credit_limit_on_change()
 
 	def on_update(self):
@@ -78,9 +76,6 @@ class Customer(TransactionBase):
 
 		if self.flags.old_lead != self.lead_name:
 			self.update_lead_status()
-
-		self.update_address()
-		self.update_contact()
 
 		if self.flags.is_new_doc:
 			self.create_lead_address_contact()
@@ -95,34 +90,35 @@ class Customer(TransactionBase):
 				for d in frappe.get_all(doctype, {'lead': self.lead_name}):
 					frappe.db.set_value(doctype, d.name, 'customer', self.name, update_modified=False)
 
-	def update_address(self):
-		frappe.db.sql("""update `tabAddress` set customer_name=%s, modified=NOW()
-			where customer=%s""", (self.customer_name, self.name))
-
-	def update_contact(self):
-		frappe.db.sql("""update `tabContact` set customer_name=%s, modified=NOW()
-			where customer=%s""", (self.customer_name, self.name))
-
 	def create_lead_address_contact(self):
 		if self.lead_name:
-			if not frappe.db.get_value("Address", {"lead": self.lead_name, "customer": self.name}):
-				frappe.db.sql("""update `tabAddress` set customer=%s, customer_name=%s where lead=%s""",
-					(self.name, self.customer_name, self.lead_name))
+			# assign lead address to customer (if already not set)
+			address_names = frappe.get_all('Dynamic Link', filters={
+								"parenttype":"Address",
+								"link_doctype":"Lead",
+								"link_name":self.lead_name
+							}, fields=["parent as name"])
+
+			for address_name in address_names:
+				address = frappe.get_doc('Address', address_name.get('name'))
+				if not address.has_link('Customer', self.name):
+					address.append('links', dict(link_doctype='Customer', link_name=self.name))
+					address.save()
 
 			lead = frappe.db.get_value("Lead", self.lead_name, ["lead_name", "email_id", "phone", "mobile_no"], as_dict=True)
 
-			c = frappe.new_doc('Contact')
-			c.first_name = lead.lead_name
-			c.email_id = lead.email_id
-			c.phone = lead.phone
-			c.mobile_no = lead.mobile_no
-			c.customer = self.name
-			c.customer_name = self.customer_name
-			c.is_primary_contact = 1
-			c.flags.ignore_permissions = self.flags.ignore_permissions
-			c.autoname()
-			if not frappe.db.exists("Contact", c.name):
-				c.insert()
+			# create contact from lead
+			contact = frappe.new_doc('Contact')
+			contact.first_name = lead.lead_name
+			contact.email_id = lead.email_id
+			contact.phone = lead.phone
+			contact.mobile_no = lead.mobile_no
+			contact.is_primary_contact = 1
+			contact.append('links', dict(link_doctype='Customer', link_name=self.name))
+			contact.flags.ignore_permissions = self.flags.ignore_permissions
+			contact.autoname()
+			if not frappe.db.exists("Contact", contact.name):
+				contact.insert()
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
@@ -137,40 +133,14 @@ class Customer(TransactionBase):
 			if flt(self.credit_limit) < outstanding_amt:
 				frappe.throw(_("""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}""").format(outstanding_amt))
 
-	def delete_customer_address(self):
-		addresses = frappe.db.sql("""select name, lead from `tabAddress`
-			where customer=%s""", (self.name,))
-
-		for name, lead in addresses:
-			if lead:
-				frappe.db.sql("""update `tabAddress` set customer=null, customer_name=null
-					where name=%s""", name)
-			else:
-				frappe.db.sql("""delete from `tabAddress` where name=%s""", name)
-
-	def delete_customer_contact(self):
-		for contact in frappe.db.sql_list("""select name from `tabContact`
-			where customer=%s""", self.name):
-				frappe.delete_doc("Contact", contact)
-
 	def on_trash(self):
-		self.delete_customer_address()
-		self.delete_customer_contact()
+		delete_contact_and_address('Customer', self.name)
 		if self.lead_name:
-			frappe.db.sql("update `tabLead` set status='Interested' where name=%s",self.lead_name)
+			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
 
 	def after_rename(self, olddn, newdn, merge=False):
-		set_field = ''
 		if frappe.defaults.get_global_default('cust_master_name') == 'Customer Name':
 			frappe.db.set(self, "customer_name", newdn)
-			self.update_contact()
-			set_field = ", customer_name=%(newdn)s"
-		self.update_customer_address(newdn, set_field)
-
-	def update_customer_address(self, newdn, set_field):
-		frappe.db.sql("""update `tabAddress` set address_title=%(newdn)s
-			{set_field} where customer=%(newdn)s"""\
-			.format(set_field=set_field), ({"newdn": newdn}))
 
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters):

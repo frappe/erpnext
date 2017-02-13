@@ -88,13 +88,13 @@ frappe.ui.form.on("Item", {
 	image: function(frm) {
 		refresh_field("image_view");
 	},
-	
+
 	is_fixed_asset: function(frm) {
 		if (frm.doc.is_fixed_asset) {
 			frm.set_value("is_stock_item", 0);
 		}
 	},
-	
+
 	page_name: frappe.utils.warn_page_name_change,
 
 	item_code: function(frm) {
@@ -113,6 +113,12 @@ frappe.ui.form.on("Item", {
 
 	has_variants: function(frm) {
 		erpnext.item.toggle_attributes(frm);
+	},
+
+	show_in_website: function(frm) {
+		if (frm.doc.default_warehouse && !frm.doc.website_warehouse){
+			frm.set_value("website_warehouse", frm.doc.default_warehouse);
+		}
 	}
 });
 
@@ -191,15 +197,15 @@ $.extend(erpnext.item, {
 
 		frm.fields_dict.reorder_levels.grid.get_field("warehouse").get_query = function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
-			
+
 			var filters = {
 				"is_group": 0
 			}
-			
+
 			if (d.parent_warehouse) {
 				filters.extend({"parent_warehouse": d.warehouse_group})
 			}
-			
+
 			return {
 				filters: filters
 			}
@@ -212,7 +218,7 @@ $.extend(erpnext.item, {
 			return;
 
 		frappe.require('assets/js/item-dashboard.min.js', function() {
-			var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;"><a href="#stock-balance">Stock Levels</a></h5>');
+			var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;"><a href="#stock-balance">' + __("Stock Levels") + '</a></h5>');
 			erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
 				parent: section,
 				item_code: frm.doc.name
@@ -313,39 +319,38 @@ $.extend(erpnext.item, {
 
 			$(field.input_area).addClass("ui-front");
 
-			field.$input.autocomplete({
-				minLength: 0,
+			var input = field.$input.get(0);
+			input.awesomplete = new Awesomplete(input, {
 				minChars: 0,
-				autoFocus: true,
-				source: function(request, response) {
+				maxItems: 99,
+				autoFirst: true,
+				list: [],
+			});
+			input.field = field;
+
+			field.$input
+				.on('input', function(e) {
+					var term = e.target.value;
 					frappe.call({
 						method:"frappe.client.get_list",
 						args:{
 							doctype:"Item Attribute Value",
 							filters: [
 								["parent","=", i],
-								["attribute_value", "like", request.term + "%"]
+								["attribute_value", "like", term + "%"]
 							],
 							fields: ["attribute_value"]
 						},
 						callback: function(r) {
 							if (r.message) {
-								response($.map(r.message, function(d) { return d.attribute_value; }));
+								e.target.awesomplete.list = r.message.map(function(d) { return d.attribute_value; });
 							}
 						}
 					});
-				},
-				select: function(event, ui) {
-					field.$input.val(ui.item.value);
-					field.$input.trigger("change");
-				},
-			}).on("focus", function(){
-				setTimeout(function() {
-					if(!field.$input.val()) {
-						field.$input.autocomplete("search", "");
-					}
-				}, 500);
-			});
+				})
+				.on('focus', function(e) {
+					$(e.target).val('').trigger('input');
+				})
 		});
 	},
 	toggle_attributes: function(frm) {

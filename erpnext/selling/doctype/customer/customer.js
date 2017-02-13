@@ -32,10 +32,12 @@ frappe.ui.form.on("Customer", {
 			erpnext.toggle_naming_series();
 		}
 
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Customer'}
+
 		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
 
 		if(!frm.doc.__islocal) {
-			erpnext.utils.render_address_and_contact(frm);
+			frappe.geo.render_address_and_contact(frm);
 
 			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function() {
@@ -51,7 +53,7 @@ frappe.ui.form.on("Customer", {
 			erpnext.utils.set_party_dashboard_indicators(frm);
 
 		} else {
-			erpnext.utils.clear_address_and_contact(frm);
+			frappe.geo.clear_address_and_contact(frm);
 		}
 
 		var grid = cur_frm.get_field("sales_team").grid;

@@ -366,8 +366,9 @@ class calculate_taxes_and_totals(object):
 					# discount amount rounding loss adjustment if no taxes
 					if (not taxes or self.doc.apply_discount_on == "Net Total") \
 						and i == len(self.doc.get("items")) - 1:
-							discount_amount_loss = flt(self.doc.total - net_total - self.doc.discount_amount,
+							discount_amount_loss = flt(self.doc.net_total - net_total - self.doc.discount_amount,
 								self.doc.precision("net_total"))
+
 							item.net_amount = flt(item.net_amount + discount_amount_loss,
 								item.precision("net_amount"))
 
@@ -452,7 +453,7 @@ class calculate_taxes_and_totals(object):
 
 		elif self.doc.doctype == "Purchase Invoice":
 			self.doc.outstanding_amount = flt(total_amount_to_pay, self.doc.precision("outstanding_amount"))
-		
+
 	def calculate_paid_amount(self):
 		paid_amount = base_paid_amount = 0.0
 
@@ -469,7 +470,7 @@ class calculate_taxes_and_totals(object):
 		self.doc.change_amount = 0.0
 		self.doc.base_change_amount = 0.0
 		if self.doc.paid_amount > self.doc.grand_total:
-			self.doc.change_amount = flt(self.doc.paid_amount - self.doc.grand_total + 
+			self.doc.change_amount = flt(self.doc.paid_amount - self.doc.grand_total +
 				self.doc.write_off_amount, self.doc.precision("change_amount"))
 
 			self.doc.base_change_amount = flt(self.doc.base_paid_amount - self.doc.base_grand_total +
@@ -485,7 +486,7 @@ class calculate_taxes_and_totals(object):
 	def calculate_margin(self, item):
 		total_margin = 0.0
 		if item.price_list_rate:
-			if item.pricing_rule and not self.doc.ignore_pricing_rule: 
+			if item.pricing_rule and not self.doc.ignore_pricing_rule:
 				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
 				item.margin_type = pricing_rule.margin_type
 				item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
@@ -494,4 +495,4 @@ class calculate_taxes_and_totals(object):
 				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
 				total_margin = flt(item.price_list_rate) + flt(margin_value)
 
-		return total_margin 
+		return total_margin

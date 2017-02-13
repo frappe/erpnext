@@ -25,7 +25,7 @@ To setup an Email Alert:
 	3. Value Change: When a particular value in the selected type changes.
 	4. Days Before / Days After: Trigger this alert a few days before or after the **Reference Date.** To set the days, set **Days Before or After**. This can be useful in reminding you of upcoming due dates or reminding you to follow up on certain leads of quotations.
 3. Set additional conditions if you want.
-4. Set the recipients of this alert. The recipient could either be a field of the document or a list of fixed email ids.
+4. Set the recipients of this alert. The recipient could either be a field of the document or a list of fixed Email Addresses.
 5. Compose the message
 
 

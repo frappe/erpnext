@@ -41,13 +41,13 @@ def get_employees(filters):
 		holiday_names[holiday.holiday_date] = holiday.description
 
 	if(holidays_list):
-		cond = " att_date in %(holidays_list)s"
+		cond = " attendance_date in %(holidays_list)s"
 
 		if filters.holiday_list:
 			cond += """ and (employee in (select employee from tabEmployee where holiday_list = %(holidays)s))"""
 
 		employee_list = frappe.db.sql("""select
-				employee, employee_name, att_date, status
+				employee, employee_name, attendance_date, status
 			from tabAttendance
 			where %s"""% cond.format(', '.join(["%s"] * len(holidays_list))),
 				{'holidays_list':holidays_list,

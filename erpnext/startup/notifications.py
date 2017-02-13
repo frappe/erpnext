@@ -11,8 +11,6 @@ def get_notification_config():
 			"Task": {"status": "Overdue"},
 			"Project": {"status": "Open"},
 			"Item": {"total_projected_qty": ("<", 0)},
-			"Customer": {"status": "Open"},
-			"Supplier": {"status": "Open"},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
 			"Opportunity": {"status": "Open"},
@@ -23,11 +21,11 @@ def get_notification_config():
 			},
 			"Journal Entry": {"docstatus": 0},
 			"Sales Invoice": {
-				"outstanding_amount": (">", 0), 
-				"docstatus": ("<", 2) 
+				"outstanding_amount": (">", 0),
+				"docstatus": ("<", 2)
 			},
 			"Purchase Invoice": {
-				"outstanding_amount": (">", 0), 
+				"outstanding_amount": (">", 0),
 				"docstatus": ("<", 2)
 			},
 			"Payment Entry": {"docstatus": 0},

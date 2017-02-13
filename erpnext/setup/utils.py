@@ -6,7 +6,7 @@ import frappe
 from frappe import _, throw
 from frappe.utils import flt
 from frappe.utils import get_datetime_str, nowdate
-	
+
 def get_company_currency(company):
 	currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
 	if not currency:
@@ -37,8 +37,7 @@ def before_tests():
 	if not frappe.get_list("Company"):
 		setup_complete({
 			"currency"			:"USD",
-			"first_name"		:"Test",
-			"last_name"			:"User",
+			"full_name"			:"Test User",
 			"company_name"		:"Wind Power LLC",
 			"timezone"			:"America/New_York",
 			"company_abbr"		:"WP",
@@ -52,7 +51,7 @@ def before_tests():
 			"password"			:"test",
 			"chart_of_accounts" : "Standard",
 			"domain"			: "Manufacturing",
-			
+
 		})
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
@@ -71,18 +70,18 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None):
 	if not (from_currency and to_currency):
 		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
 		return
-	
+
 	if from_currency == to_currency:
 		return 1
-	
+
 	# cksgb 19/09/2016: get last entry in Currency Exchange with from_currency and to_currency.
-	entries = frappe.get_all("Currency Exchange", fields = ["exchange_rate"], 
+	entries = frappe.get_all("Currency Exchange", fields = ["exchange_rate"],
 		filters=[
-			["date", "<=", get_datetime_str(transaction_date)], 
-			["from_currency", "=", from_currency], 
+			["date", "<=", get_datetime_str(transaction_date)],
+			["from_currency", "=", from_currency],
 			["to_currency", "=", to_currency]
 		], order_by="date desc", limit=1)
-	
+
 	if entries:
 		return flt(entries[0].exchange_rate)
 

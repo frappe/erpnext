@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,Bérleti díj
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Összeg az értékcsökkenési leírás után
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Közelgő naptári események
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,"Kérjük, válasszon hónapot és évet"
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Vesszővel elválasztva kell felsorolni az emailcímeket, ahova a számla automatikusan elküldésre kerül az adott időpontban"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Vesszővel elválasztva kell felsorolni az emailcímeket, ahova a számla automatikusan elküldésre kerül az adott időpontban"
 DocType: Employee,Company Email,Vaállakozás E-mail címe
 DocType: GL Entry,Debit Amount in Account Currency,Tartozik összeg a számla pénznemében
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Bank/készpénz tranzakciókat ügyfélfél vagy belső átutalás szerint
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Bérpapír előnézet
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,A {0} számlát már többször bevitték
 DocType: Account,Expenses Included In Valuation,Költségek beleértve a készletértékelésbe
-DocType: Employee,Provide email id registered in company,Adja meg a vállalathoz bejegyzett email id azonosítót
+DocType: Employee,Provide Email Address registered in company,Adja meg a vállalathoz bejegyzett Email Address azonosítót
 DocType: Hub Settings,Seller City,Eladó városa
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,"Kérjük, válasszon ki egy diákcsoportot"
 ,Absent Student Report,Hiányzik Student Report
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Kék
 DocType: Purchase Invoice,Is Return,Ez visszárú
 DocType: Price List Country,Price List Country,Árlista Ország
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,"Kérjük, állítsa be az E-mail ID azonosítót"
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,"Kérjük, állítsa be az E-mail ID azonosítót"
 DocType: Item,UOMs,Mértékegységek
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},"{0} érvényes sorozatszámok, a(z) {1} tételhez"
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Tételkódot nem lehet lecserélni Széria számmá
@@ -2197,7 +2197,7 @@ DocType: Fiscal Year,Year End Date,Év végi dátum
 DocType: Task Depends On,Task Depends On,A feladat ettől függ:
 DocType: Supplier Quotation,Opportunity,Lehetőség
 ,Completed Production Orders,Befejezett gyártási rendelések
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,"Sor {0}: A beszállító {0} e-mail id szükséges, email küldéshez"
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,"Sor {0}: A beszállító {0} e-mail id szükséges, email küldéshez"
 DocType: Operation,Default Workstation,Alapértelmezett Munkaállomás
 DocType: Notification Control,Expense Claim Approved Message,Jóváhagyott igény indoklása
 DocType: Payment Entry,Deductions or Loss,Levonások vagy veszteségek
@@ -3642,7 +3642,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Árfolyamnyereség / veszteség 
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Jelentkezési időszak nem lehet két elhelyezett bejegyzés között
 DocType: Item Group,Default Expense Account,Alapértelmezett Kiadás számla
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Student Batch vagy Course Schedule kötelező
-DocType: Student,Student Email ID,Tanuló e-mail azonosító
+DocType: Student,Student Email Address,Tanuló e-mail azonosító
 DocType: Employee,Notice (days),Felmondás (nap(ok))
 DocType: Tax Rule,Sales Tax Template,Forgalmi adó Template
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Válassza ki a tételeket a számla mentéséhez
@@ -3793,7 +3793,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Fő
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Érdeklődések megtekintése
 DocType: Program Enrollment Tool,New Program,Új program
 DocType: Item Attribute Value,Attribute Value,Jellemzők értéke
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","Email id-nek egyedinek kell lennie, ez már létezik: {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Email Address-nek egyedinek kell lennie, ez már létezik: {0}"
 ,Itemwise Recommended Reorder Level,Tételenkénti Ajánlott újrarendelési szint
 DocType: Salary Detail,Salary Detail,Bér részletei
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,"Kérjük, válassza ki a {0} először"
@@ -3984,7 +3984,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Projekt téma feladatok / tevékenységek.
 DocType: Vehicle Log,Refuelling Details,Tankolás Részletek
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Bérpapír generálása
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,"Tovább Kapcsolat nem lehet ugyanaz, mint a vezető E-mail azonosító"
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,"Tovább Kapcsolat nem lehet ugyanaz, mint a vezető E-mail azonosító"
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Vásárlást ellenőrizni kell, amennyiben alkalmazható erre a kiválasztottra: {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,"Kedvezménynek kisebbnek kell lennie, mint 100"
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Utolsó vételi ár nem található
@@ -4279,7 +4279,7 @@ DocType: Purchase Order,Advance Paid,A kifizetett előleg
 DocType: Item,Item Tax,Tétel adójának típusa
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Anyag beszállítóhoz
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Jövedéki számla
-DocType: Expense Claim,Employees Email Id,Alkalmazott emailcíme
+DocType: Expense Claim,Employees Email Address,Alkalmazott emailcíme
 DocType: Employee Attendance Tool,Marked Attendance,jelzett Nézőszám
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Rövid lejáratú kötelezettségek
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Küldjön tömeges SMS-t a kapcsolatainak

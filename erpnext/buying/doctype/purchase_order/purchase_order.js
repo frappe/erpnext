@@ -66,7 +66,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		if(doc.docstatus == 1 && doc.status != "Closed") {
 			if(flt(doc.per_received, 2) < 100 && allow_receipt) {
-				cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt, __("Make"));
+				cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __("Make"));
 
 				if(doc.is_subcontracted==="Yes") {
 					cur_frm.add_custom_button(__('Material to Supplier'),
@@ -224,18 +224,6 @@ cur_frm.cscript.update_status= function(label, status){
 			cur_frm.reload_doc();
 		}
 	})
-}
-
-cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return {
-		filters: {'supplier': doc.supplier}
-	}
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return {
-		filters: {'supplier': doc.supplier}
-	}
 }
 
 cur_frm.fields_dict['items'].grid.get_field('project').get_query = function(doc, cdt, cdn) {

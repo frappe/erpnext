@@ -366,7 +366,7 @@ DocType: Workstation,Rent Cost,வாடகை செலவு
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,தொகை தேய்மானம் பிறகு
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,எதிர்வரும் நாட்காட்டி நிகழ்வுகள்
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,மாதம் மற்றும் ஆண்டு தேர்ந்தெடுக்கவும்
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","பிரிக்கப்பட்ட மின்னஞ்சல் ஐடியை உள்ளிடுக, விலைப்பட்டியல் குறிப்பிட்ட தேதியில் தானாக அஞ்சலிடப்படும்"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","பிரிக்கப்பட்ட மின்னஞ்சல் ஐடியை உள்ளிடுக, விலைப்பட்டியல் குறிப்பிட்ட தேதியில் தானாக அஞ்சலிடப்படும்"
 DocType: Employee,Company Email,நிறுவனத்தின் மின்னஞ்சல்
 DocType: GL Entry,Debit Amount in Account Currency,கணக்கு நாணய பற்று தொகை
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,வங்கி / பண கட்சிக்கு எதிராக அல்லது உள் பரிமாற்ற பரிவர்த்தனைகள்
@@ -685,7 +685,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,முன்னோட்டம் சம்பளம் ஸ்லிப்
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,கணக்கு {0} பல முறை உள்ளிட்ட வருகிறது
 DocType: Account,Expenses Included In Valuation,செலவுகள் மதிப்பீட்டு சேர்க்கப்பட்டுள்ளது
-DocType: Employee,Provide email id registered in company,நிறுவனத்தின் பதிவு மின்னஞ்சல் ஐடி வழங்கும்
+DocType: Employee,Provide Email Address registered in company,நிறுவனத்தின் பதிவு மின்னஞ்சல் ஐடி வழங்கும்
 DocType: Hub Settings,Seller City,விற்பனையாளர் நகரத்தை
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,ஒரு மாணவர் குழு தேர்ந்தெடுக்கவும்
 ,Absent Student Report,இல்லாத மாணவர் அறிக்கை
@@ -1128,7 +1128,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,ப்ளூ
 DocType: Purchase Invoice,Is Return,திரும்பி இருக்கிறது
 DocType: Price List Country,Price List Country,விலை பட்டியல் நாடு
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,மின்னஞ்சல் ஐடி அமைக்கவும்
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,மின்னஞ்சல் ஐடி அமைக்கவும்
 DocType: Item,UOMs,UOMs
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},உருப்படி {0} செல்லுபடியாகும் தொடர் இலக்கங்கள் {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,பொருள் கோட் சீரியல் எண் மாற்றப்பட கூடாது
@@ -2219,7 +2219,7 @@ DocType: Fiscal Year,Year End Date,ஆண்டு முடிவு தேத�
 DocType: Task Depends On,Task Depends On,பணி பொறுத்தது
 DocType: Supplier Quotation,Opportunity,சந்தர்ப்பம்
 ,Completed Production Orders,இதன் தயாரிப்பு நிறைவடைந்தது ஆணைகள்
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,ரோ {0}: விநியோகித்து {0} மின்னஞ்சல் ஐடி மின்னஞ்சல் அனுப்ப வேண்டும்
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,ரோ {0}: விநியோகித்து {0} மின்னஞ்சல் ஐடி மின்னஞ்சல் அனுப்ப வேண்டும்
 DocType: Operation,Default Workstation,இயல்புநிலை வேலைநிலையங்களின்
 DocType: Notification Control,Expense Claim Approved Message,இழப்பில் கோரிக்கை செய்தி அங்கீகரிக்கப்பட்ட
 DocType: Payment Entry,Deductions or Loss,விலக்கிற்கு அல்லது இழப்பு
@@ -3698,7 +3698,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,இழப்பு செலா�
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,விண்ணப்ப காலம் இரண்டு alocation பதிவுகள் முழுவதும் இருக்க முடியாது
 DocType: Item Group,Default Expense Account,முன்னிருப்பு செலவு கணக்கு
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,மாணவர் தொகுதி அல்லது பாட அட்டவணை அத்தியாவசியமானதாகும்
-DocType: Student,Student Email ID,மாணவர் மின்னஞ்சல் ஐடி
+DocType: Student,Student Email Address,மாணவர் மின்னஞ்சல் ஐடி
 DocType: Employee,Notice (days),அறிவிப்பு ( நாட்கள்)
 DocType: Tax Rule,Sales Tax Template,விற்பனை வரி டெம்ப்ளேட்
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,விலைப்பட்டியல் காப்பாற்ற பொருட்களை தேர்வு
@@ -3849,7 +3849,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,ப
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,காண்க லீட்ஸ்
 DocType: Program Enrollment Tool,New Program,புதிய திட்டம்
 DocType: Item Attribute Value,Attribute Value,மதிப்பு பண்பு
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","மின்னஞ்சல் அடையாள தனிப்பட்ட இருக்க வேண்டும் , ஏற்கனவே உள்ளது {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","மின்னஞ்சல் அடையாள தனிப்பட்ட இருக்க வேண்டும் , ஏற்கனவே உள்ளது {0}"
 ,Itemwise Recommended Reorder Level,இனவாரியாக நிலை மறுவரிசைப்படுத்துக பரிந்துரைக்கப்பட்ட
 DocType: Salary Detail,Salary Detail,சம்பளம் விபரம்
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,முதல் {0} தேர்வு செய்க
@@ -4051,7 +4051,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,திட்ட செயல்பாடு / பணி.
 DocType: Vehicle Log,Refuelling Details,Refuelling விபரங்கள்
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,சம்பளம் தவறிவிடும் உருவாக்க
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,அடுத்த தொடர்பு மூலம் முன்னணி மின்னஞ்சல் ஐடி அதே இருக்க முடியாது
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,அடுத்த தொடர்பு மூலம் முன்னணி மின்னஞ்சல் ஐடி அதே இருக்க முடியாது
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","பொருந்துகின்ற என தேர்வு என்றால் வாங்குதல், சரிபார்க்கப்பட வேண்டும் {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,தள்ளுபடி 100 க்கும் குறைவான இருக்க வேண்டும்
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,கடைசியாக கொள்முதல் விகிதம் இல்லை
@@ -4347,7 +4347,7 @@ DocType: Purchase Order,Advance Paid,முன்பணம்
 DocType: Item,Item Tax,உருப்படியை வரி
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,சப்ளையர் பொருள்
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,கலால் விலைப்பட்டியல்
-DocType: Expense Claim,Employees Email Id,ஊழியர்கள் மின்னஞ்சல் விலாசம்
+DocType: Expense Claim,Employees Email Address,ஊழியர்கள் மின்னஞ்சல் விலாசம்
 DocType: Employee Attendance Tool,Marked Attendance,அடையாளமிட்ட வருகை
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,நடப்பு பொறுப்புகள்
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,உங்கள் தொடர்புகள் வெகுஜன எஸ்எம்எஸ் அனுப்ப

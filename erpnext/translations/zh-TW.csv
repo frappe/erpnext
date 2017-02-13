@@ -333,7 +333,7 @@ DocType: Student Applicant,Admitted,錄取
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,折舊金額後
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,即將到來的日曆事件
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,請選擇年份和月份
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date",輸入電子郵件ID用逗號隔開，發票會自動在特定的日期郵寄
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date",輸入電子郵件ID用逗號隔開，發票會自動在特定的日期郵寄
 DocType: Employee,Company Email,企業郵箱
 DocType: GL Entry,Debit Amount in Account Currency,在賬戶幣種借記金額
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,銀行/現金對一方或內部轉讓交易
@@ -629,7 +629,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,預覽工資單
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,帳戶{0}已多次輸入
 DocType: Account,Expenses Included In Valuation,支出計入估值
-DocType: Employee,Provide email id registered in company,提供在公司註冊的電子郵件ID
+DocType: Employee,Provide Email Address registered in company,提供在公司註冊的電子郵件ID
 DocType: Hub Settings,Seller City,賣家市
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,請選擇一個學生組
 ,Absent Student Report,缺席學生報告
@@ -1041,7 +1041,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,藍色
 DocType: Purchase Invoice,Is Return,退貨
 DocType: Price List Country,Price List Country,價目表國家
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,請設定電子郵件ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,請設定電子郵件ID
 DocType: Item,UOMs,計量單位
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0}項目{1}的有效的序號
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,產品編號不能為序列號改變
@@ -2027,7 +2027,7 @@ DocType: Fiscal Year,Year End Date,年結結束日期
 DocType: Task Depends On,Task Depends On,任務取決於
 DocType: Supplier Quotation,Opportunity,機會
 ,Completed Production Orders,已完成生產訂單
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,行{0}：對於供應商{0}電子郵件ID需要發送電子郵件
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,行{0}：對於供應商{0}電子郵件ID需要發送電子郵件
 DocType: Operation,Default Workstation,預設工作站
 DocType: Notification Control,Expense Claim Approved Message,報銷批准的訊息
 DocType: Payment Entry,Deductions or Loss,扣除或損失
@@ -3394,7 +3394,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,設置兌換收益/損失
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,申請期間不能跨兩個alocation記錄
 DocType: Item Group,Default Expense Account,預設費用帳戶
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,學生批處理或課程表是強制性
-DocType: Student,Student Email ID,學生的電子郵件ID
+DocType: Student,Student Email Address,學生的電子郵件ID
 DocType: Tax Rule,Sales Tax Template,銷售稅模板
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,選取要保存發票
 DocType: Employee,Encashment Date,兌現日期
@@ -3528,7 +3528,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,總帳
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,查看訊息
 DocType: Item Attribute Value,Attribute Value,屬性值
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}",電子郵件ID必須是唯一的，且已經存在於 {0}
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}",電子郵件ID必須是唯一的，且已經存在於 {0}
 ,Itemwise Recommended Reorder Level,Itemwise推薦級別重新排序
 DocType: Salary Detail,Salary Detail,薪酬詳細
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,請先選擇{0}
@@ -3720,7 +3720,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,專案活動／任務。
 DocType: Vehicle Log,Refuelling Details,加油詳情
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,生成工資條
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,接著聯繫到不能等同於鉛電子郵件ID
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,接著聯繫到不能等同於鉛電子郵件ID
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}",採購必須進行檢查，如果適用於被選擇為{0}
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,折扣必須小於100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,最後購買率未找到
@@ -3992,7 +3992,7 @@ DocType: Purchase Order,Advance Paid,提前支付
 DocType: Item,Item Tax,產品稅
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,材料到供應商
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,消費稅發票
-DocType: Expense Claim,Employees Email Id,員工的電子郵件ID
+DocType: Expense Claim,Employees Email Address,員工的電子郵件ID
 DocType: Employee Attendance Tool,Marked Attendance,明顯考勤
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,流動負債
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,發送群發短信到您的聯絡人

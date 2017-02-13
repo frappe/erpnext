@@ -106,30 +106,6 @@ class Opportunity(TransactionBase):
 			lead_name, company_name = frappe.db.get_value("Lead", self.lead, ["lead_name", "company_name"])
 			self.customer_name = company_name or lead_name
 
-	def get_cust_address(self,name):
-		details = frappe.db.sql("""select customer_name, address, territory, customer_group
-			from `tabCustomer` where name = %s and docstatus != 2""", (name), as_dict = 1)
-		if details:
-			ret = {
-				'customer_name':	details and details[0]['customer_name'] or '',
-				'address'	:	details and details[0]['address'] or '',
-				'territory'			 :	details and details[0]['territory'] or '',
-				'customer_group'		:	details and details[0]['customer_group'] or ''
-			}
-			# ********** get primary contact details (this is done separately coz. , in case there is no primary contact thn it would not be able to fetch customer details in case of join query)
-
-			contact_det = frappe.db.sql("""select contact_name, contact_no, email_id
-				from `tabContact` where customer = %s and is_customer = 1
-					and is_primary_contact = 'Yes' and docstatus != 2""", name, as_dict = 1)
-
-			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
-			ret['contact_no']		 = contact_det and contact_det[0]['contact_no'] or ''
-			ret['email_id']			 = contact_det and contact_det[0]['email_id'] or ''
-
-			return ret
-		else:
-			frappe.throw(_("Customer {0} does not exist").format(name), frappe.DoesNotExistError)
-
 	def on_update(self):
 		self.add_calendar_event()
 

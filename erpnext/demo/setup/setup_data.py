@@ -32,7 +32,7 @@ def setup(domain):
 	import_json('Contact')
 	import_json('Lead')
 	setup_currency_exchange()
-	setup_mode_of_payment()
+	#setup_mode_of_payment()
 	setup_account_to_expense_type()
 	setup_budget()
 	setup_pos_profile()
@@ -46,9 +46,8 @@ def complete_setup(domain='Manufacturing'):
 
 	if not frappe.get_all('Company', limit=1):
 		setup_complete({
-			"first_name": "Test",
-			"last_name": "User",
-			"email": "demo@erpnext.com",
+			"full_name": "Test User",
+			"email": "test_demo@erpnext.com",
 			"company_tagline": 'Awesome Products and Services',
 			"password": "demo",
 			"fy_start_date": "2015-01-01",
@@ -163,11 +162,10 @@ def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 	ss.append('deductions', {
 		'salary_component': 'Income Tax',
 		"abbr":'IT',
-		'condition': 'base > 1000',
-		'amount': random.random() * 1000,
+		'condition': 'base > 10000',
+		'formula': 'base*.1',
 		"idx": 1
 	})
-
 	ss.insert()
 
 	return ss

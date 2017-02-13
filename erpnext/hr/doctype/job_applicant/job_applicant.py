@@ -39,5 +39,5 @@ class JobApplicant(Document):
 				where email_id=%s and name!=%s""", (self.email_id, self.name))
 
 			if names:
-				frappe.throw(_("Email id must be unique, already exists for {0}").format(comma_and(names)), frappe.DuplicateEntryError)
+				frappe.throw(_("Email Address must be unique, already exists for {0}").format(comma_and(names)), frappe.DuplicateEntryError)
 

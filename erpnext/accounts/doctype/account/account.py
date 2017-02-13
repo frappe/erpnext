@@ -3,11 +3,12 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, cint
+from frappe.utils import cint, fmt_money
 from frappe import throw, _
 from frappe.model.document import Document
 
 class RootNotEditable(frappe.ValidationError): pass
+class BalanceMismatchError(frappe.ValidationError): pass
 
 class Account(Document):
 	nsm_parent_field = 'parent_account'
@@ -162,23 +163,38 @@ class Account(Document):
 			throw(_("Report Type is mandatory"))
 
 	def validate_warehouse_account(self):
+		'''If perpetual inventory is set, and warehouse is linked,
+		the account balance and stock balance as of now must always match.
+		'''
+		from erpnext.accounts.utils import get_balance_on
+		from erpnext.stock.utils import get_stock_value_on
 		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 			return
-			
-		if self.account_type == "Stock" and not cint(self.is_group):
-			if not self.warehouse:
-				throw(_("Warehouse is mandatory"))
-				
-			old_warehouse = cstr(frappe.db.get_value("Account", self.name, "warehouse"))
-			if old_warehouse != cstr(self.warehouse):
-				if old_warehouse and frappe.db.exists("Warehouse", old_warehouse):
-					self.validate_warehouse(old_warehouse)
-				if self.warehouse:
-					self.validate_warehouse(self.warehouse)
-					
+
+		if self.account_type == "Stock":
+			if self.is_group == 0 and not self.warehouse:
+				frappe.throw(_("Warehouse is mandatory for non group Accounts of type Stock"))
+
+			if self.warehouse:
+				# company must be same
+				if frappe.get_value('Warehouse', self.warehouse, 'company') != self.company:
+					frappe.throw(_("Warehouse company must be same as Account company"))
+
+				# balance must be same
+				stock_balance = get_stock_value_on(self.warehouse)
+				if self.is_new():
+					account_balance = 0.0
+				else:
+					account_balance = get_balance_on(self.name)
+
+				if account_balance != stock_balance:
+					frappe.throw(_('Account balance ({0}) and stock value ({1}) must be same')\
+						.format(fmt_money(account_balance, self.account_currency),
+							fmt_money(stock_balance, self.account_currency)))
+
 		elif self.warehouse:
 			self.warehouse = None
-	
+
 	def validate_warehouse(self, warehouse):
 		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
 

@@ -366,7 +366,7 @@ DocType: Workstation,Rent Cost,Rent cost
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Iznos nakon amortizacije
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Nadolazeći Kalendar događanja
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Molimo odaberite mjesec i godinu
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Unesite e-mail ID odvojena zarezima, račun će automatski biti poslan na određeni datum"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Unesite e-mail ID odvojena zarezima, račun će automatski biti poslan na određeni datum"
 DocType: Employee,Company Email,tvrtka E-mail
 DocType: GL Entry,Debit Amount in Account Currency,Debitna Iznos u valuti računa
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Banka / Novac transakcije protiv stranke ili za internog transfera
@@ -685,7 +685,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Pregled Plaća proklizavanja
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Račun {0} unesen više puta
 DocType: Account,Expenses Included In Valuation,Troškovi uključeni u vrednovanje
-DocType: Employee,Provide email id registered in company,Osigurati e id registriran u tvrtki
+DocType: Employee,Provide Email Address registered in company,Osigurati e id registriran u tvrtki
 DocType: Hub Settings,Seller City,Prodavač Grad
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,Odaberite grupe studenata
 ,Absent Student Report,Odsutni Student Report
@@ -1128,7 +1128,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Plava
 DocType: Purchase Invoice,Is Return,Je li povratak
 DocType: Price List Country,Price List Country,Država cjenika
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Molimo postavite e-ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Molimo postavite e-ID
 DocType: Item,UOMs,J. MJ.
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} valjani serijski nos za Stavka {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Kod proizvoda ne može se mijenjati za serijski broj.
@@ -2219,7 +2219,7 @@ DocType: Fiscal Year,Year End Date,Završni datum godine
 DocType: Task Depends On,Task Depends On,Zadatak ovisi o
 DocType: Supplier Quotation,Opportunity,Prilika
 ,Completed Production Orders,Završeni Radni nalozi
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,Red {0}: Za dobavljača {0} email id potrebna za slanje e-pošte
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,Red {0}: Za dobavljača {0} Email Address potrebna za slanje e-pošte
 DocType: Operation,Default Workstation,Zadana Workstation
 DocType: Notification Control,Expense Claim Approved Message,Rashodi Zahtjev Odobren poruku
 DocType: Payment Entry,Deductions or Loss,Odbitaka ili gubitak
@@ -3698,7 +3698,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Postavite Exchange dobici / gubi
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Razdoblje zahtjev ne može biti preko dva alocation zapisa
 DocType: Item Group,Default Expense Account,Zadani račun rashoda
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Studentski Batch ili kolegija Raspored je obavezno
-DocType: Student,Student Email ID,Student ID e-pošte
+DocType: Student,Student Email Address,Student ID e-pošte
 DocType: Employee,Notice (days),Obavijest (dani)
 DocType: Tax Rule,Sales Tax Template,Porez Predložak
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,Odaberite stavke za spremanje račun
@@ -3849,7 +3849,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Gla
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Pogledaj vodi
 DocType: Program Enrollment Tool,New Program,Novi program
 DocType: Item Attribute Value,Attribute Value,Vrijednost atributa
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","Email ID mora biti jedinstven , već postoji za {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Email Address mora biti jedinstven , već postoji za {0}"
 ,Itemwise Recommended Reorder Level,Itemwise - preporučena razina ponovne narudžbe
 DocType: Salary Detail,Salary Detail,Plaća Detalj
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,Odaberite {0} Prvi
@@ -4051,7 +4051,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Projekt aktivnost / zadatak.
 DocType: Vehicle Log,Refuelling Details,Punjenje Detalji
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Generiranje plaće gaćice
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Sljedeća Kontakt Po ne može biti ista kao što je vodeći e-mail id
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Sljedeća Kontakt Po ne može biti ista kao što je vodeći e-mail id
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Nabava mora biti provjerena, ako je primjenjivo za odabrano kao {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Popust mora biti manji od 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Posljednja stopa kupnju nije pronađen
@@ -4347,7 +4347,7 @@ DocType: Purchase Order,Advance Paid,Unaprijed plaćeni
 DocType: Item,Item Tax,Porez proizvoda
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Materijal za dobavljača
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Trošarine Račun
-DocType: Expense Claim,Employees Email Id,Zaposlenici Email ID
+DocType: Expense Claim,Employees Email Address,Zaposlenici Email Address
 DocType: Employee Attendance Tool,Marked Attendance,Označena posjećenost
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Kratkoročne obveze
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Pošalji grupne SMS poruke svojim kontaktima

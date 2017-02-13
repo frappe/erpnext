@@ -233,7 +233,7 @@ class StockEntry(StockController):
 		for d in self.get('items'):
 			transferred_serial_no = frappe.db.get_value("Stock Entry Detail",{"parent": previous_se,
 				"item_code": d.item_code}, "serial_no")
-			
+
 			if transferred_serial_no:
 				d.serial_no = transferred_serial_no
 
@@ -496,7 +496,7 @@ class StockEntry(StockController):
 
 		# update uom
 		if args.get("uom") and for_update:
-			ret.update(self.get_uom_details(args))
+			ret.update(get_uom_details(args.get('item_code'), args.get('uom'), args.get('qty')))
 
 		if not ret["expense_account"]:
 			ret["expense_account"] = frappe.db.get_value("Company", self.company, "stock_adjustment_account")
@@ -507,23 +507,6 @@ class StockEntry(StockController):
 		stock_and_rate = args.get('warehouse') and get_warehouse_details(args) or {}
 		ret.update(stock_and_rate)
 
-		return ret
-
-	def get_uom_details(self, args):
-		"""Returns dict `{"conversion_factor": [value], "transfer_qty": qty * [value]}`
-
-		:param args: dict with `item_code`, `uom` and `qty`"""
-		conversion_factor = get_conversion_factor(args.get("item_code"), args.get("uom")).get("conversion_factor")
-
-		if not conversion_factor:
-			frappe.msgprint(_("UOM coversion factor required for UOM: {0} in Item: {1}")
-				.format(args.get("uom"), args.get("item_code")))
-			ret = {'uom' : ''}
-		else:
-			ret = {
-				'conversion_factor'		: flt(conversion_factor),
-				'transfer_qty'			: flt(args.get("qty")) * flt(conversion_factor)
-			}
 		return ret
 
 	def get_items(self):
@@ -559,7 +542,7 @@ class StockEntry(StockController):
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
 
 						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
-					
+
 					self.add_to_stock_entry_detail(item_dict)
 
 					scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
@@ -567,7 +550,7 @@ class StockEntry(StockController):
 						if self.pro_doc and self.pro_doc.scrap_warehouse:
 							item["to_warehouse"] = self.pro_doc.scrap_warehouse
 					self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
-					
+
 			# fetch the serial_no of the first stock entry for the second stock entry
 			if self.production_order and self.purpose == "Manufacture":
 				self.set_serial_nos(self.production_order)
@@ -632,10 +615,10 @@ class StockEntry(StockController):
 		for item in item_dict.values():
 			item.from_warehouse = self.from_warehouse or item.default_warehouse
 		return item_dict
-	
+
 	def get_bom_scrap_material(self, qty):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
-		
+
 		# item dict = { item_code: {qty, description, stock_uom} }
 		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
 			fetch_exploded = 0, fetch_scrap_items = 1)
@@ -643,7 +626,7 @@ class StockEntry(StockController):
 		for item in item_dict.values():
 			item.from_warehouse = ""
 		return item_dict
-	
+
 	def get_transfered_raw_materials(self):
 		transferred_materials = frappe.db.sql("""
 			select
@@ -848,6 +831,24 @@ def get_operating_cost_per_unit(production_order=None, bom_no=None):
 			operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
 
 	return operating_cost_per_unit
+
+@frappe.whitelist()
+def get_uom_details(item_code, uom, qty):
+	"""Returns dict `{"conversion_factor": [value], "transfer_qty": qty * [value]}`
+
+	:param args: dict with `item_code`, `uom` and `qty`"""
+	conversion_factor = get_conversion_factor(item_code, uom).get("conversion_factor")
+
+	if not conversion_factor:
+		frappe.msgprint(_("UOM coversion factor required for UOM: {0} in Item: {1}")
+			.format(uom, item_code))
+		ret = {'uom' : ''}
+	else:
+		ret = {
+			'conversion_factor'		: flt(conversion_factor),
+			'transfer_qty'			: flt(qty) * flt(conversion_factor)
+		}
+	return ret
 
 @frappe.whitelist()
 def get_warehouse_details(args):

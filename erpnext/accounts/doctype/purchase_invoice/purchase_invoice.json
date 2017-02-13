@@ -3343,7 +3343,7 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:doc.is_recurring==1", 
-   "description": "Enter email id separated by commas, invoice will be mailed automatically on particular date", 
+   "description": "Enter Email Address separated by commas, invoice will be mailed automatically on particular date", 
    "fieldname": "notification_email_address", 
    "fieldtype": "Small Text", 
    "hidden": 0, 

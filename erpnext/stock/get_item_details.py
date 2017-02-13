@@ -73,7 +73,7 @@ def get_item_details(args):
 
 	out.update(get_pricing_rule_for_item(args))
 
-	if args.get("doctype") in ("Sales Invoice", "Delivery Note"):
+	if args.get("doctype") in ("Sales Invoice", "Delivery Note") and out.qty > 0:
 		out.serial_no = get_serial_no(out)
 
 	if args.transaction_date and item.lead_time_days:
@@ -239,7 +239,7 @@ def insert_item_price(args):
 		if frappe.has_permission("Item Price", "write"):
 			price_list_rate = args.rate / args.conversion_factor \
 				if args.get("conversion_factor") else args.rate
-		
+
 			item_price = frappe.get_doc({
 				"doctype": "Item Price",
 				"price_list": args.price_list,
@@ -247,16 +247,16 @@ def insert_item_price(args):
 				"currency": args.currency,
 				"price_list_rate": price_list_rate
 			})
-			
+
 			name = frappe.db.get_value('Item Price', {'item_code': args.item_code, 'price_list': args.price_list, 'currency': args.currency}, 'name')
-			
+
 			if name:
 				item_price = frappe.get_doc('Item Price', name)
 				item_price.price_list_rate = price_list_rate
-				item_price.save()	
+				item_price.save()
 				frappe.msgprint(_("Item Price updated for {0} in Price List {1}").format(args.item_code,
 					args.price_list))
-			else:	
+			else:
 				item_price.insert()
 				frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
 					args.price_list))
@@ -269,7 +269,7 @@ def validate_price_list(args):
 	if args.get("price_list"):
 		if not frappe.db.get_value("Price List",
 			{"name": args.price_list, args.transaction_type: 1, "enabled": 1}):
-			throw(_("Price List {0} is disabled").format(args.price_list))
+			throw(_("Price List {0} is disabled or does not exist").format(args.price_list))
 	else:
 		throw(_("Price List not selected"))
 
@@ -382,12 +382,13 @@ def get_serial_no_details(item_code, warehouse, qty, serial_no):
 	args = frappe._dict({"item_code":item_code, "warehouse":warehouse, "qty":qty, "serial_no":serial_no})
 	serial_no = get_serial_no(args)
 	return {'serial_no': serial_no}
-	
+
 @frappe.whitelist()
 def get_bin_details_and_serial_nos(item_code, warehouse, qty=None, serial_no=None):
 	bin_details_and_serial_nos = {}
 	bin_details_and_serial_nos.update(get_bin_details(item_code, warehouse))
-	bin_details_and_serial_nos.update(get_serial_no_details(item_code, warehouse, qty, serial_no))
+	if qty > 0:
+		bin_details_and_serial_nos.update(get_serial_no_details(item_code, warehouse, qty, serial_no))
 	return bin_details_and_serial_nos
 
 @frappe.whitelist()
@@ -468,7 +469,7 @@ def get_price_list_currency(price_list):
 			"enabled": 1}, ["name", "currency"], as_dict=True)
 
 		if not result:
-			throw(_("Price List {0} is disabled").format(price_list))
+			throw(_("Price List {0} is disabled or does not exist").format(price_list))
 
 		return result.currency
 
@@ -482,7 +483,7 @@ def get_price_list_currency_and_exchange_rate(args):
 	if (not plc_conversion_rate) or (price_list_currency and args.price_list_currency \
 		and price_list_currency != args.price_list_currency):
         # cksgb 19/09/2016: added args.transaction_date as posting_date argument for get_exchange_rate
-			plc_conversion_rate = get_exchange_rate(price_list_currency, args.currency, 
+			plc_conversion_rate = get_exchange_rate(price_list_currency, args.currency,
 				args.transaction_date) or plc_conversion_rate
 
 	return frappe._dict({
@@ -533,7 +534,7 @@ def get_serial_no(args):
 		args = frappe._dict(args)
 
 	if args.get('warehouse') and args.get('qty') and args.get('item_code'):
-		
+
 		if frappe.get_value('Item', {'item_code': args.item_code}, "has_serial_no") == 1:
 			args = json.dumps({"item_code": args.get('item_code'),"warehouse": args.get('warehouse'),"qty": args.get('qty')})
 			args = process_args(args)

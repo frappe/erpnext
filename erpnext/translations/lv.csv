@@ -365,7 +365,7 @@ DocType: Workstation,Rent Cost,Rent izmaksas
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +81,Amount After Depreciation,Summa Pēc nolietojums
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +97,Upcoming Calendar Events,Gaidāmie Kalendāra notikumi
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,"Lūdzu, izvēlieties mēnesi un gadu"
-DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Ievadiet e-pasta id atdalīti ar komatiem, rēķins tiks nosūtīts automātiski konkrētā datumā"
+DocType: Purchase Invoice,"Enter Email Address separated by commas, invoice will be mailed automatically on particular date","Ievadiet e-pasta id atdalīti ar komatiem, rēķins tiks nosūtīts automātiski konkrētā datumā"
 DocType: Employee,Company Email,Uzņēmuma e-pasts
 DocType: GL Entry,Debit Amount in Account Currency,Debeta summa konta valūtā
 apps/erpnext/erpnext/config/accounts.py +27,Bank/Cash transactions against party or for internal transfer,Bank / Skaidras naudas darījumi pret pusi vai iekšējai pārskaitījumu
@@ -683,7 +683,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +551,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +368,Preview Salary Slip,Preview Alga Slip
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +53,Account {0} has been entered multiple times,Konts {0} ir ievadīts vairākas reizes
 DocType: Account,Expenses Included In Valuation,Izdevumi iekļauts vērtēšanā
-DocType: Employee,Provide email id registered in company,Nodrošināt e-pasta id reģistrēts uzņēmums
+DocType: Employee,Provide Email Address registered in company,Nodrošināt e-pasta id reģistrēts uzņēmums
 DocType: Hub Settings,Seller City,Pārdevējs City
 apps/erpnext/erpnext/schools/doctype/announcement/announcement.py +22,Please select a Student Group,"Lūdzu, izvēlieties skolēnu grupas"
 ,Absent Student Report,Nekonstatē Student pārskats
@@ -1107,7 +1107,7 @@ DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +165,Blue,Zils
 DocType: Purchase Invoice,Is Return,Vai Return
 DocType: Price List Country,Price List Country,Cenrādis Valsts
-apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email ID,Lūdzu iestatīt e-pasta ID
+apps/erpnext/erpnext/utilities/doctype/contact/contact.py +69,Please set Email Address,Lūdzu iestatīt e-pasta ID
 DocType: Item,UOMs,Mērvienības
 apps/erpnext/erpnext/stock/utils.py +181,{0} valid serial nos for Item {1},{0} derīgas sērijas nos postenim {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,Postenis kodekss nevar mainīt Serial Nr
@@ -2196,7 +2196,7 @@ DocType: Fiscal Year,Year End Date,Gada beigu datums
 DocType: Task Depends On,Task Depends On,Uzdevums Atkarīgs On
 DocType: Supplier Quotation,Opportunity,Iespējas
 ,Completed Production Orders,Aizpildītas pasūtījumu
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} email id is required to send email,"Rinda {0}: piegādātājs {0} e-pasta id ir nepieciešams, lai nosūtītu e-pastu"
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +42,Row {0}: For supplier {0} Email Address is required to send email,"Rinda {0}: piegādātājs {0} e-pasta id ir nepieciešams, lai nosūtītu e-pastu"
 DocType: Operation,Default Workstation,Default Workstation
 DocType: Notification Control,Expense Claim Approved Message,Izdevumu Pretenzija Apstiprināts Message
 DocType: Payment Entry,Deductions or Loss,Samazinājumus vai zaudēšana
@@ -3641,7 +3641,7 @@ DocType: Payment Entry,Set Exchange Gain / Loss,Uzstādīt Exchange Peļņa / za
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +90,Application period cannot be across two alocation records,Pieteikumu iesniegšanas termiņš nevar būt pa diviem alocation ierakstiem
 DocType: Item Group,Default Expense Account,Default Izdevumu konts
 apps/erpnext/erpnext/schools/doctype/student_attendance/student_attendance.py +22,Student Batch or Course Schedule is mandatory,Student Partijas vai Kursu grafiks ir obligāta
-DocType: Student,Student Email ID,Student Email ID
+DocType: Student,Student Email Address,Student Email Address
 DocType: Employee,Notice (days),Paziņojums (dienas)
 DocType: Tax Rule,Sales Tax Template,Sales Tax Template
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1626,Select items to save the invoice,"Izvēlētos objektus, lai saglabātu rēķinu"
@@ -3792,7 +3792,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Gen
 apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Skatīt Leads
 DocType: Program Enrollment Tool,New Program,jaunā programma
 DocType: Item Attribute Value,Attribute Value,Atribūta vērtība
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email id must be unique, already exists for {0}","E-pasta id ir unikāls, kas jau pastāv {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","E-pasta id ir unikāls, kas jau pastāv {0}"
 ,Itemwise Recommended Reorder Level,Itemwise Ieteicams Pārkārtot Level
 DocType: Salary Detail,Salary Detail,alga Detail
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +944,Please select {0} first,"Lūdzu, izvēlieties {0} pirmais"
@@ -3983,7 +3983,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +169,Period From and Peri
 apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Projekta aktivitāte / uzdevums.
 DocType: Vehicle Log,Refuelling Details,Degvielas uzpildes Details
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Izveidot algas lapas
-apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email id,Nākamais Kontaktinformācija Ar nevar būt tāda pati kā vadošais e-pasta id
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Next Contact By cannot be same as the Lead Email Address,Nākamais Kontaktinformācija Ar nevar būt tāda pati kā vadošais e-pasta id
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +42,"Buying must be checked, if Applicable For is selected as {0}","Pirkšana jāpārbauda, ja nepieciešams, par ir izvēlēts kā {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Atlaide jābūt mazāk nekā 100
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +106,Last purchase rate not found,Pēdējā pirkuma likmes nav atrasts
@@ -4278,7 +4278,7 @@ DocType: Purchase Order,Advance Paid,Izmaksāto avansu
 DocType: Item,Item Tax,Postenis Nodokļu
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +752,Material to Supplier,Materiāls piegādātājam
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +173,Excise Invoice,Akcīzes Invoice
-DocType: Expense Claim,Employees Email Id,Darbinieki e-pasta ID
+DocType: Expense Claim,Employees Email Address,Darbinieki e-pasta ID
 DocType: Employee Attendance Tool,Marked Attendance,ievērojama apmeklējums
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +136,Current Liabilities,Tekošo saistību
 apps/erpnext/erpnext/config/selling.py +278,Send mass SMS to your contacts,Sūtīt masu SMS saviem kontaktiem

@@ -33,11 +33,11 @@ class Issue(Document):
 			if not self.lead:
 				self.lead = frappe.db.get_value("Lead", {"email_id": email_id})
 			if not self.contact:
-				values = frappe.db.get_value("Contact",
-					{"email_id": email_id}, ("name", "customer"))
+				self.contact = frappe.db.get_value("Contact", {"email_id": email_id})
 
-				if values:
-					self.contact, self.customer = values
+				if self.contact:
+					contact = frappe.get_doc('Contact', self.contact)
+					self.customer = contact.get_link_for('Customer')
 
 			if not self.company:
 				self.company = frappe.db.get_value("Lead", self.lead, "company") or \
@@ -81,9 +81,15 @@ def set_status(name, status):
 	st.save()
 
 def auto_close_tickets():
-	frappe.db.sql("""update `tabIssue` set status = 'Closed'
-		where status = 'Replied'
-		and date_sub(curdate(),interval 15 Day) > modified""")
+	issues = frappe.db.get_all("Issue", filters={
+		"status": "Replied",
+		"modified": ("<", "date_sub(curdate(),interval 7 Day)")
+	}, fields=["name"])
+
+	for issue in issues:
+		doc = frappe.get_doc("Issue", issue.get("name"))
+		doc.status = "Closed"
+		doc.save(ignore_permissions=True)
 
 @frappe.whitelist()
 def set_multiple_status(names, status):
