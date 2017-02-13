@@ -30,6 +30,7 @@ class StudentGroup(Document):
 	def validate(self):
 		self.validate_strength()
 		self.validate_student_name()
+		self.validate_name()
 		if self.student_batch:
 			self.validate_student_batch()
 		validate_duplicate_student(self.students)
@@ -42,6 +43,10 @@ class StudentGroup(Document):
 		for d in self.students:
 			d.student_name = frappe.db.get_value("Student", d.student, "title")
 	
+	def validate_name(self):
+		if frappe.db.exists("Student Batch", self.name):
+			frappe.throw(_("""Student Batch exists with same name"""))
+
 	def validate_student_batch(self):
 		student_batch_students = []
 		for d in get_student_batch_students(self.student_batch):
