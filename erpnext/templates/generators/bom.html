@@ -8,48 +8,50 @@
 
 {% block page_content %}
 {% from "erpnext/templates/includes/macros.html" import product_image %}
-<div class="item-content" style="margin-top:20px;">
-	<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
+{% from "erpnext/templates/includes/macros.html" import media_image %}
+<div class="bom-content" style="margin-top:20px;">
+	<div class="bom-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
-			<div class="col-sm-6">
-				{% if slideshow %}
-					{% include "templates/includes/slideshow.html" %}
-				{% else %}
-					{{ product_image(website_image, "product-full-image") }}
-				{% endif %}
-			</div>
-			<div class="col-sm-6" style="padding-left:20px;">
-				 <h2 itemprop="name" style="margin-top: 0px;">{{ name }}</h2>
+			<div class="col-sm-12">
+				<h2 itemprop="name" style="margin-top: 0px;">{{ name }}</h2>
 
 				<p class="text-muted">
-                    {{ _("Item Name") }}: <span itemprop="itemName">{{ item_name }}</span></p>
-                    <br>
-                    <!--{{ _("Item Code") }}: <span itemprop="productID">{{ item_code }}</span></p>-->
-                    <div class="h6 text-uppercase">{{ _("Description") }}</div>
-                        <div itemprop="description" class="item-desc">
-                        {{ web_long_description or description or _("No description given") }}</div>
-                    <br>
-                    <div class="h6 text-uppercase">{{ _("Quantity") }}</div>
-                        <div itemprop="quantity" class="item-desc">{{ quantity }}</div>
+				{{ _("Item") }}: <span itemprop="itemName">{{ item_name }}</span></p>
 				<br>
 
 			</div>
 		</div>
-
-		</div>
+		<div class="row">
+			<div class="col-sm-6">
+				{{ product_image(website_image, "product-full-image") }}
+				<br>
+				<p>{{ _("Quantity") }}: <span itemprop="productID">{{ quantity }}</span></p>
+					<br>
+			</div>
 		</div>
 
 		{% if show_items -%}
 		<div class="row items" style="margin-top: 40px">
 			<div class="col-md-12">
-				<div class="h6 text-uppercase">{{ _("Items") }}</div>
-
+				<h3>{{ _("Items") }}</h3>
 				<table class="table borderless" style="width: 100%">
-				{% for d in website_items -%}
 					<tr>
-						<td class="uppercase text-muted" style="width: 30%;">{{ d.item_name }}</td>
-						<td>{{ d.item_code }}</td>
-                        <td>{{ d.description }}</td>
+						<th></th>
+						<th></th>
+                        <th>{{ _("Qty") }}</th>
+					</tr>
+				{% for d in items -%}
+					<tr>
+						<td>{{ media_image(d.image, "product-full-image") }}</td>
+						<td><div><b>{{ d.item_name }}</b></div>
+							{% if d.item_name != d.item_code -%}
+								<div class="text-muted">{{ d.item_code }}</div>
+							{% else -%}
+
+							{%- endif %}
+								<br>
+							{{ d.description }}
+						</td>
                         <td>{{ d.qty }}</td>
 					</tr>
 				{%- endfor %}
@@ -61,15 +63,25 @@
         {% if show_operations -%}
 		<div class="row operations" style="margin-top: 40px">
 			<div class="col-md-12">
-				<div class="h6 text-uppercase">{{ _("Operations") }}</div>
-
+				<h3>{{ _("Operations") }}</h3>
 				<table class="table borderless" style="width: 100%">
-				{% for d in website_operations -%}
 					<tr>
-						<td class="uppercase text-muted" style="width: 30%;">{{ d.operation }}</td>
+						<th></th>
+						<th style="padding:8px 20px;"></th>
+
+						<th>{{ _("Workstation") }}</th>
+                        <th style="width: 20%;">{{ _("Time(in mins)") }}</th>
+					</tr>
+				{% for d in operations -%}
+					<tr>
+						<td>{{ media_image(d.image, d.operation, "product-full-image") }}</td>
+						<td style="padding:8px 20px;"><div>{{ d.operation }}</div>
+							<div class="text-muted">{{ d.description }}</div>
+						</td>
+
 						<td>{{ d.workstation }}</td>
-                        <td>{{ d.time_in_mins }}</td>
-						<td>{{ d.website_image }}</td>
+                        <td class="duration" style="width: 20%;"><span class="duration-bar">
+							<span class="duration-value">{{ d.time_in_mins }}</span></span></td>
 					</tr>
 				{%- endfor %}
 				</table>
@@ -77,6 +89,39 @@
 		</div>
 		{%- endif %}
 
+		<div class="row" style="margin-top: 30px;">
+			<div class="col-sm-12">
+				<br>
+                    <div class="h6 text-uppercase">{{ _("Description") }}</div>
+                        <div itemprop="description" class="item-desc">
+                        {{ web_long_description or _("No description given") }}</div>
+				<br>
+
+			</div>
+		</div>
+
 	</div>
 </div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
+<script>
+	var max_width = $(".duration").width() * 0.8;
+	var durations = [];
+	$(".duration .duration-bar").each(function() {
+		durations.push($(this).find(".duration-value").html());
+	});
+	var max_duration = Math.max(...durations);
+	var width_factor = max_width/max_duration;
+
+	$(".duration .duration-bar").each(function() {
+	var duration = $(this).find(".duration-value").html();
+	$(this).width(duration * width_factor);
+	if($(this).width() < $(this).find(".duration-value").width()) {
+		var html = $($(this).html());
+		html.addClass("duration-bar");
+		html.addClass("bar-outer-text");
+		$(this).find(".duration-value").removeClass("duration-value").addClass("duration-invisible");
+		$(this).closest("td").append(html);
+	}
+	});
+</script>
 {% endblock %}

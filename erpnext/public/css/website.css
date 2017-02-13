@@ -250,3 +250,27 @@
 .product-image-wrapper {
   padding-bottom: 40px;
 }
+.duration-bar {
+  display: inline-block;
+  color: white;
+  /* border-right: 2px solid green; */
+  background: #8FD288;
+  padding: 3px;
+}
+.duration-invisible {
+  visibility: hidden;
+}
+.duration-value {
+  float: right;
+}
+.bar-outer-text {
+  color: #8FD288;
+  background: none;
+  float: none;
+  border: none;
+}
+.thumbsize {
+	width: 200px;
+	height: 200px;
+  padding: 0;
+}
