@@ -119,6 +119,8 @@ class Project(Document):
 
 	def update_percent_complete(self):
 		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
+		if not total and self.percent_complete:
+			self.percent_complete = 0
 		if (self.percent_complete_method == "Task Completion" and total > 0) or (not self.percent_complete_method and total > 0):
 			completed = frappe.db.sql("""select count(name) from tabTask where
 				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
