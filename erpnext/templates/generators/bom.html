@@ -62,13 +62,13 @@
 				<hr>
 				{% for d in operations -%}
 					<div class="row">
-						<div class="col-sm-3">{{ media_image(d.image, d.operation, "product-full-image") }}</div>
-						<div class="col-sm-3"><div>{{ d.operation }}</div>
+						<div class="col-sm-3 bom-spec">{{ media_image(d.image, d.operation, "product-full-image") }}</div>
+						<div class="col-sm-3 bom-spec"><div>{{ d.operation }}</div>
 							<div class="text-muted">{{ d.description }}</div>
 						</div>
 
-						<div class="col-sm-3"><b>{{ _("Workstation") }}</b><br>{{ d.workstation }}</div>
-                        <div class="col-sm-3"><b>{{ _("Time(in mins)") }}</b><br><div class="duration"><span class="duration-bar">
+						<div class="col-sm-3 bom-spec"><b>{{ _("Workstation") }}</b><br>{{ d.workstation }}</div>
+                        <div class="col-sm-3 bom-spec"><b>{{ _("Time(in mins)") }}</b><br><div class="duration"><span class="duration-bar">
 							<span class="duration-value">{{ d.time_in_mins }}</span></span></div></div>
 					</div>
 					<hr>
