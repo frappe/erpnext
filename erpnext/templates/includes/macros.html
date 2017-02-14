@@ -21,23 +21,14 @@
 {% endmacro %}
 
 {% macro media_image(website_image, name, css_class="") %}
-{% if website_image -%}
-	<meta itemprop="image" content="{{ frappe.utils.quoted(website_image) | abs_url }}"></meta>
-{%- endif %}
-<div class="product-image product-image-square thumbsize {{ css_class }}"
-	{% if not website_image -%}{{ name }}{%- endif %}
-	{% if website_image -%}
-	style="background-image: url('{{ frappe.utils.quoted(website_image) | abs_url }}');"
-	{%- endif %}>
-</div>
-{% endmacro %}
-
-{% macro bom_image(website_image, name, css_class="") %}
-	<div class="product-image {{ css_class }}">
-		{% if not website_image -%}{{ name }}{%- endif %}
+	<div class="product-image sidebar-image-wrapper {{ css_class }}">
+		{% if not website_image -%}
+		<div class="sidebar-standard-image"> <div class="standard-image" style="background-color: rgb(250, 251, 252);">{{name}}</div> </div>
+		{%- endif %}
     	{% if website_image -%}
 			<a href="{{ frappe.utils.quoted(website_image) }}">
-				<img itemprop="image" src="{{ frappe.utils.quoted(website_image) | abs_url }}" class="img-responsive">
+				<img itemprop="image" src="{{ frappe.utils.quoted(website_image) | abs_url }}"
+					class="img-responsive img-thumbnail sidebar-image" style="min-height:100%; min-width:100%;">
 			</a>
     	{%- endif %}
     </div>

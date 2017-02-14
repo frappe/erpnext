@@ -13,7 +13,7 @@
 	<div class="bom-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
 			<div class="col-sm-12">
-				<h2 itemprop="name" style="margin-top: 0px;">{{ name }}</h2>
+				<h1 itemprop="name" style="margin-top: 0px;">{{ name }}</h1>
 
 				<p class="text-muted">
 				{{ _("Item") }}: <span itemprop="itemName">{{ item_name }}</span></p>
@@ -22,9 +22,11 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-sm-6">
-				{{ product_image(website_image, "product-full-image") }}
+			<div class="col-sm-4">
+				{{ media_image(website_image, item_name, "product-full-image") }}
 				<br>
+			</div>
+			<div class="col-sm-offset-1 col-sm-4">
 				<p>{{ _("Quantity") }}: <span itemprop="productID">{{ quantity }}</span></p>
 					<br>
 			</div>
@@ -34,28 +36,21 @@
 		<div class="row items" style="margin-top: 40px">
 			<div class="col-md-12">
 				<h3>{{ _("Items") }}</h3>
-				<table class="table borderless" style="width: 100%">
-					<tr>
-						<th></th>
-						<th></th>
-                        <th>{{ _("Qty") }}</th>
-					</tr>
+				<hr>
 				{% for d in items -%}
-					<tr>
-						<td>{{ media_image(d.image, "product-full-image") }}</td>
-						<td><div><b>{{ d.item_name }}</b></div>
+					<div class="row">
+						<div class="col-sm-4">{{ media_image(d.image, d.item_name, "product-full-image") }}</div>
+						<div class="col-sm-4"><div><b>{{ d.item_name }}</b></div>
 							{% if d.item_name != d.item_code -%}
 								<div class="text-muted">{{ d.item_code }}</div>
-							{% else -%}
-
 							{%- endif %}
 								<br>
 							{{ d.description }}
-						</td>
-                        <td>{{ d.qty }}</td>
-					</tr>
+						</div>
+                        <div class="col-sm-4">{{ _("Qty") }}: {{ d.qty }}</div>
+					</div>
+					<hr>
 				{%- endfor %}
-				</table>
 			</div>
 		</div>
 		{%- endif %}
@@ -64,27 +59,20 @@
 		<div class="row operations" style="margin-top: 40px">
 			<div class="col-md-12">
 				<h3>{{ _("Operations") }}</h3>
-				<table class="table borderless" style="width: 100%">
-					<tr>
-						<th></th>
-						<th style="padding:8px 20px;"></th>
-
-						<th>{{ _("Workstation") }}</th>
-                        <th style="width: 20%;">{{ _("Time(in mins)") }}</th>
-					</tr>
+				<hr>
 				{% for d in operations -%}
-					<tr>
-						<td>{{ media_image(d.image, d.operation, "product-full-image") }}</td>
-						<td style="padding:8px 20px;"><div>{{ d.operation }}</div>
+					<div class="row">
+						<div class="col-sm-3">{{ media_image(d.image, d.operation, "product-full-image") }}</div>
+						<div class="col-sm-3"><div>{{ d.operation }}</div>
 							<div class="text-muted">{{ d.description }}</div>
-						</td>
+						</div>
 
-						<td>{{ d.workstation }}</td>
-                        <td class="duration" style="width: 20%;"><span class="duration-bar">
-							<span class="duration-value">{{ d.time_in_mins }}</span></span></td>
-					</tr>
+						<div class="col-sm-3"><b>{{ _("Workstation") }}</b><br>{{ d.workstation }}</div>
+                        <div class="col-sm-3"><b>{{ _("Time(in mins)") }}</b><br><div class="duration"><span class="duration-bar">
+							<span class="duration-value">{{ d.time_in_mins }}</span></span></div></div>
+					</div>
+					<hr>
 				{%- endfor %}
-				</table>
 			</div>
 		</div>
 		{%- endif %}
@@ -96,32 +84,32 @@
                         <div itemprop="description" class="item-desc">
                         {{ web_long_description or _("No description given") }}</div>
 				<br>
-
 			</div>
 		</div>
 
 	</div>
 </div>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
 <script>
-	var max_width = $(".duration").width() * 0.8;
-	var durations = [];
-	$(".duration .duration-bar").each(function() {
-		durations.push($(this).find(".duration-value").html());
-	});
-	var max_duration = Math.max(...durations);
-	var width_factor = max_width/max_duration;
+	frappe.ready(function(){
+		var max_width = $(".duration").width() * 0.8;
+		var durations = [];
+		$(".duration .duration-bar").each(function() {
+			durations.push($(this).find(".duration-value").html());
+		});
+		var max_duration = Math.max(...durations);
+		var width_factor = max_width/max_duration;
 
-	$(".duration .duration-bar").each(function() {
-	var duration = $(this).find(".duration-value").html();
-	$(this).width(duration * width_factor);
-	if($(this).width() < $(this).find(".duration-value").width()) {
-		var html = $($(this).html());
-		html.addClass("duration-bar");
-		html.addClass("bar-outer-text");
-		$(this).find(".duration-value").removeClass("duration-value").addClass("duration-invisible");
-		$(this).closest("td").append(html);
-	}
-	});
+		$(".duration .duration-bar").each(function() {
+		var duration = $(this).find(".duration-value").html();
+		$(this).width(duration * width_factor);
+		if($(this).width() < $(this).find(".duration-value").width()) {
+			var html = $($(this).html());
+			html.addClass("duration-bar");
+			html.addClass("bar-outer-text");
+			$(this).find(".duration-value").removeClass("duration-value").addClass("duration-invisible");
+			$(this).closest("td").append(html);
+		}
+		});
+	})
 </script>
 {% endblock %}

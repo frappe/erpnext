@@ -253,9 +253,8 @@
 .duration-bar {
   display: inline-block;
   color: white;
-  /* border-right: 2px solid green; */
   background: #8FD288;
-  padding: 3px;
+  padding: 2px;
 }
 .duration-invisible {
   visibility: hidden;
@@ -268,9 +267,4 @@
   background: none;
   float: none;
   border: none;
-}
-.thumbsize {
-	width: 200px;
-	height: 200px;
-  padding: 0;
 }

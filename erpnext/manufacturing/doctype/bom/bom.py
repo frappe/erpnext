@@ -54,8 +54,6 @@ class BOM(WebsiteGenerator):
 		self.set_bom_material_details()
 		self.validate_operations()
 		self.calculate_cost()
-		self.validate_website_image()
-		self.make_thumbnail()
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -63,8 +61,6 @@ class BOM(WebsiteGenerator):
 	def on_update(self):
 		self.check_recursion()
 		self.update_exploded_items()
-		self.update_website_items()
-		self.update_website_operations()
 
 	def on_submit(self):
 		self.manage_default_bom()
@@ -442,141 +438,6 @@ class BOM(WebsiteGenerator):
 			for d in self.operations:
 				if not d.description:
 					d.description = frappe.db.get_value('Operation', d.operation, 'description')
-
-	def update_website_items(self):
-		self.get_website_items()
-		self.add_website_items()
-
-	def get_website_items(self):
-		self.cur_website_items = {}
-		for d in self.get('items'):
-			self.add_to_cur_website_items(frappe._dict({
-				'item_code'		: d.item_code,
-				'item_name'		: d.item_name,
-				'description'	: d.description,
-				'qty'			: d.qty,
-				'website_image'	: d.image
-			}))
-
-	def add_to_cur_website_items(self, args):
-		self.cur_website_items[args.item_code] = args
-
-	def add_website_items(self):
-		frappe.db.sql("""delete from `tabBOM Website Item` where parent=%s""", self.name)
-		self.set('website_items', [])
-		for d in sorted(self.cur_website_items, key=itemgetter(0)):
-			ch = self.append('website_items', {})
-			for i in self.cur_website_items[d].keys():
-				ch.set(i, self.cur_website_items[d][i])
-			ch.docstatus = self.docstatus
-			ch.db_insert()
-
-	def update_website_operations(self):
-		self.get_website_operations()
-		self.add_website_operations()
-
-	def get_website_operations(self):
-		self.cur_website_operations = {}
-		for d in self.get('operations'):
-			self.add_to_cur_website_operations(frappe._dict({
-				'operation'		: d.operation,
-				'workstation'	: d.workstation,
-				'time_in_mins'	: d.time_in_mins,
-				'website_image'	: d.image
-			}))
-
-	def add_to_cur_website_operations(self, args):
-		self.cur_website_operations[args.operation] = args
-
-	def add_website_operations(self):
-		frappe.db.sql("""delete from `tabBOM Website Operation` where parent=%s""", self.name)
-		self.set('website_operations', [])
-		for d in sorted(self.cur_website_operations, key=itemgetter(0)):
-			ch = self.append('website_operations', {})
-			for i in self.cur_website_operations[d].keys():
-				ch.set(i, self.cur_website_operations[d][i])
-			ch.docstatus = self.docstatus
-			ch.db_insert()
-
-	def validate_website_image(self):
-		"""Validate if the website image is a public file"""
-		auto_set_website_image = False
-		if not self.website_image and self.image:
-			auto_set_website_image = True
-			self.website_image = self.image
-
-		if not self.website_image:
-			return
-
-		# find if website image url exists as public
-		file_doc = frappe.get_all("File", filters={
-			"file_url": self.website_image
-		}, fields=["name", "is_private"], order_by="is_private asc", limit_page_length=1)
-
-
-		if file_doc:
-			file_doc = file_doc[0]
-
-		if not file_doc:
-			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found")
-					.format(self.website_image, self.name))
-
-			self.website_image = None
-
-		elif file_doc.is_private:
-			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image should be a public file or website URL"))
-
-			self.website_image = None
-
-	def make_thumbnail(self):
-		"""Make a thumbnail of `website_image`"""
-		import requests.exceptions
-
-		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):
-			self.thumbnail = None
-
-		if self.website_image and not self.thumbnail:
-			file_doc = None
-
-			try:
-				file_doc = frappe.get_doc("File", {
-					"file_url": self.website_image,
-					"attached_to_doctype": "Item",
-					"attached_to_name": self.name
-				})
-			except frappe.DoesNotExistError:
-				pass
-				# cleanup
-				frappe.local.message_log.pop()
-
-			except requests.exceptions.HTTPError:
-				frappe.msgprint(_("Warning: Invalid attachment {0}").format(self.website_image))
-				self.website_image = None
-
-			except requests.exceptions.SSLError:
-				frappe.msgprint(_("Warning: Invalid SSL certificate on attachment {0}").format(self.website_image))
-				self.website_image = None
-
-			# for CSV import
-			if self.website_image and not file_doc:
-				try:
-					file_doc = frappe.get_doc({
-						"doctype": "File",
-						"file_url": self.website_image,
-						"attached_to_doctype": "Item",
-						"attached_to_name": self.name
-					}).insert()
-
-				except IOError:
-					self.website_image = None
-
-			if file_doc:
-				if not file_doc.thumbnail_url:
-					file_doc.make_thumbnail()
-
-				self.thumbnail = file_doc.thumbnail_url
 
 def get_list_context(context):
 	context.title = _("Bill of Materials")
