@@ -52,8 +52,8 @@ class LeaveApplication(Document):
 			self.notify_employee(self.status)
 
 	def on_submit(self):
-		if self.status != "Approved":
-			frappe.throw(_("Only Leave Applications with status 'Approved' can be submitted"))
+		#if self.status != "Approved":
+		#	frappe.throw(_("Only Leave Applications with status 'Approved' can be submitted"))
 
 		self.validate_back_dated_application()
 
