@@ -457,7 +457,7 @@ class Item(WebsiteGenerator):
 			if vals:
 				for key in to_check:
 					if self.get(key) != vals.get(key):
-						if not self.check_if_linked_document_exists():
+						if not self.check_if_linked_document_exists(key):
 							break # no linked document, allowed
 						else:
 							frappe.throw(_("As there are existing transactions for this item, you can not change the value of {0}").format(frappe.bold(self.meta.get_label(key))))
@@ -467,10 +467,16 @@ class Item(WebsiteGenerator):
 				if asset:
 					frappe.throw(_('"Is Fixed Asset" cannot be unchecked, as Asset record exists against the item'))
 
-	def check_if_linked_document_exists(self):
-		for doctype in ("Sales Order Item", "Delivery Note Item", "Sales Invoice Item",
-			"Material Request Item", "Purchase Order Item", "Purchase Receipt Item",
-			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"):
+	def check_if_linked_document_exists(self, key):
+		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "Purchase Receipt Item",
+			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"]
+			
+		# For "Is Stock Item", following doctypes is important 
+		# because reserved_qty, ordered_qty and requested_qty updated from these doctypes
+		if key == "is_stock_item":
+			linked_doctypes += ["Sales Order Item", "Purchase Order Item", "Material Request Item"]
+			
+		for doctype in linked_doctypes:
 			if frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
 				frappe.db.get_value("Production Order",
 					filters={"production_item": self.name, "docstatus": 1}):
