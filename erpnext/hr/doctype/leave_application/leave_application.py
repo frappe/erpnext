@@ -25,7 +25,7 @@ class LeaveApplication(Document):
 
 	def validate(self):
 		if not getattr(self, "__islocal", None) and frappe.db.exists(self.doctype, self.name):
-			self.previous_doc = frappe.db.get_value(self.doctype, self.name, "*", as_dict=True)
+			self.previous_doc = frappe.get_value(self.doctype, self.name, "leave_approver", as_dict=True)
 		else:
 			self.previous_doc = None
 
@@ -46,14 +46,10 @@ class LeaveApplication(Document):
 				self.status == "Open" and self.previous_doc.leave_approver != self.leave_approver):
 			# notify leave approver about creation
 			self.notify_leave_approver()
-		elif self.previous_doc and \
-				self.previous_doc.status == "Open" and self.status == "Rejected":
-			# notify employee about rejection
-			self.notify_employee(self.status)
 
 	def on_submit(self):
-		if self.status != "Approved":
-			frappe.throw(_("Only Leave Applications with status 'Approved' can be submitted"))
+		if self.status == "Open":
+			frappe.throw(_("Only Leave Applications with status 'Approved' and 'Rejected' can be submitted"))
 
 		self.validate_back_dated_application()
 
@@ -234,13 +230,18 @@ class LeaveApplication(Document):
 			else:
 				name = self.name
 
-			return (_("Leave Application") + ": %s - %s") % (name, _(status))
+			message = "Leave Application: {name}".format(name=name)+"<br>"
+			message += "Leave Type: {leave_type}".format(leave_type=self.leave_type)+"<br>"
+			message += "From Date: {from_date}".format(from_date=self.from_date)+"<br>"
+			message += "To Date: {to_date}".format(to_date=self.to_date)+"<br>"
+			message += "Status: {status}".format(status=_(status))
+			return message
 
 		self.notify({
 			# for post in messages
 			"message": _get_message(url=True),
 			"message_to": employee.user_id,
-			"subject": _get_message(),
+			"subject": (_("Leave Application") + ": %s - %s") % (self.name, _(status))
 		})
 
 	def notify_leave_approver(self):
@@ -252,8 +253,12 @@ class LeaveApplication(Document):
 			if url:
 				name = get_link_to_form(self.doctype, self.name)
 				employee_name = get_link_to_form("Employee", self.employee, label=employee_name)
-
-			return (_("New Leave Application") + ": %s - " + _("Employee") + ": %s") % (name, employee_name)
+			message = (_("Leave Application") + ": %s") % (name)+"<br>"
+			message += (_("Employee") + ": %s") % (employee_name)+"<br>"
+			message += (_("Leave Type") + ": %s") % (self.leave_type)+"<br>"
+			message += (_("From Date") + ": %s") % (self.from_date)+"<br>"
+			message += (_("To Date") + ": %s") % (self.to_date)
+			return message
 
 		self.notify({
 			# for post in messages
@@ -261,7 +266,7 @@ class LeaveApplication(Document):
 			"message_to": self.leave_approver,
 
 			# for email
-			"subject": _get_message()
+			"subject": (_("New Leave Application") + ": %s - " + _("Employee") + ": %s") % (self.name, cstr(employee.employee_name))
 		})
 
 	def notify(self, args):
