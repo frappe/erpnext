@@ -8,6 +8,7 @@ import json
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, cstr
+from frappe.email.doctype.email_group.email_group import add_subscribers
 
 @frappe.whitelist()
 def enroll_student(source_name):
@@ -81,6 +82,16 @@ def make_attendance_records(student, student_name, status, course_schedule=None,
 	student_attendance.date = date
 	student_attendance.status = status
 	student_attendance.submit()
+
+@frappe.whitelist()
+def get_student_guardians(student):
+	"""Returns List of Guardians of a Student.
+
+	:param student: Student.
+	"""
+	guardians = frappe.get_list("Student Guardian", fields=["guardian"] , 
+		filters={"parent": student})
+	return guardians
 
 @frappe.whitelist()
 def get_student_batch_students(student_batch):
@@ -254,3 +265,22 @@ def mark_assessment_result(student, assessment_plan, scores):
 	assessment_result.save()
 	assessment_result.submit()	
 	return assessment_result
+
+@frappe.whitelist()
+def update_email_group(doctype, name):
+	if not frappe.db.exists("Email Group", name):
+		email_group = frappe.new_doc("Email Group")
+		email_group.title = name
+		email_group.save()
+	email_list = []
+	students = []
+	if doctype == "Student Batch":
+		students = get_student_batch_students(name)
+	if doctype == "Student Group":
+		students = get_student_group_students(name)
+	for stud in students:
+		for guard in get_student_guardians(stud.student):
+			email = frappe.db.get_value("Guardian", guard.guardian, "email_address")
+			if email:
+				email_list.append(email)	
+	add_subscribers(name, email_list)
