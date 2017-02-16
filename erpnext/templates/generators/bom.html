@@ -90,7 +90,7 @@
 	</div>
 </div>
 <script>
-	frappe.ready(function(){
+	frappe.ready(function() {
 		var max_width = $(".duration").width() * 0.8;
 		var durations = [];
 		$(".duration .duration-bar").each(function() {
@@ -100,15 +100,15 @@
 		var width_factor = max_width/max_duration;
 
 		$(".duration .duration-bar").each(function() {
-		var duration = $(this).find(".duration-value").html();
-		$(this).width(duration * width_factor);
-		if($(this).width() < $(this).find(".duration-value").width()) {
-			var html = $($(this).html());
-			html.addClass("duration-bar");
-			html.addClass("bar-outer-text");
-			$(this).find(".duration-value").removeClass("duration-value").addClass("duration-invisible");
-			$(this).closest("td").append(html);
-		}
+			var duration = $(this).find(".duration-value").html();
+			$(this).width(duration * width_factor);
+			if($(this).width() < $(this).find(".duration-value").width()) {
+				var html = $($(this).html());
+				html.addClass("duration-bar");
+				html.addClass("bar-outer-text");
+				$(this).find(".duration-value").removeClass("duration-value").addClass("duration-invisible");
+				$(this).closest(".duration").append(html);
+			}
 		});
 	})
 </script>
