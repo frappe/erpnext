@@ -129,7 +129,7 @@ erpnext.utils.get_contact_details = function(frm) {
 
 	if(frm.doc["contact_person"]) {
 		frappe.call({
-			method: "erpnext.utilities.doctype.contact.contact.get_contact_details",
+			method: "frappe.email.doctype.contact.contact.get_contact_details",
 			args: {contact: frm.doc.contact_person },
 			callback: function(r) {
 				if(r.message)
