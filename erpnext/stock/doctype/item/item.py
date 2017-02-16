@@ -451,24 +451,32 @@ class Item(WebsiteGenerator):
 				"valuation_method", "has_batch_no", "is_fixed_asset")
 
 			vals = frappe.db.get_value("Item", self.name, to_check, as_dict=True)
+			if not vals.get('valuation_method') and self.get('valuation_method'):
+				vals['valuation_method'] = frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
 
 			if vals:
 				for key in to_check:
-					if self.get(key) != vals.get(key):
-						if not self.check_if_linked_document_exists():
+					if cstr(self.get(key)) != cstr(vals.get(key)):
+						if not self.check_if_linked_document_exists(key):
 							break # no linked document, allowed
 						else:
-							frappe.throw(_("As there are existing transactions for this item, you can not change the value of {0}").format(frappe.bold(self.meta.get_label(key))))
+							frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}").format(self.name, frappe.bold(self.meta.get_label(key))))
 
 			if vals and not self.is_fixed_asset and self.is_fixed_asset != vals.is_fixed_asset:
 				asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
 				if asset:
 					frappe.throw(_('"Is Fixed Asset" cannot be unchecked, as Asset record exists against the item'))
 
-	def check_if_linked_document_exists(self):
-		for doctype in ("Sales Order Item", "Delivery Note Item", "Sales Invoice Item",
-			"Material Request Item", "Purchase Order Item", "Purchase Receipt Item",
-			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"):
+	def check_if_linked_document_exists(self, key):
+		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "Purchase Receipt Item",
+			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"]
+			
+		# For "Is Stock Item", following doctypes is important 
+		# because reserved_qty, ordered_qty and requested_qty updated from these doctypes
+		if key == "is_stock_item":
+			linked_doctypes += ["Sales Order Item", "Purchase Order Item", "Material Request Item"]
+			
+		for doctype in linked_doctypes:
 			if frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
 				frappe.db.get_value("Production Order",
 					filters={"production_item": self.name, "docstatus": 1}):
