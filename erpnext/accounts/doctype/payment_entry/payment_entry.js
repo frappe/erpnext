@@ -136,7 +136,7 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_currency_labels(["total_allocated_amount", "unallocated_amount"], party_account_currency);
 
-		currency_field = (frm.doc.payment_type=="Receive") ? "paid_from_account_currency" : "paid_to_account_currency"
+		var currency_field = (frm.doc.payment_type=="Receive") ? "paid_from_account_currency" : "paid_to_account_currency"
 		frm.set_df_property("total_allocated_amount", "options", currency_field);
 		frm.set_df_property("unallocated_amount", "options", currency_field);
 
