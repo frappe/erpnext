@@ -63,6 +63,9 @@ class Item(WebsiteGenerator):
 	def validate(self):
 		super(Item, self).validate()
 
+		if not self.item_name:
+			self.item_name = self.item_code
+
 		if not self.description:
 			self.description = self.item_name
 
@@ -470,12 +473,12 @@ class Item(WebsiteGenerator):
 	def check_if_linked_document_exists(self, key):
 		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "Purchase Receipt Item",
 			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"]
-			
-		# For "Is Stock Item", following doctypes is important 
+
+		# For "Is Stock Item", following doctypes is important
 		# because reserved_qty, ordered_qty and requested_qty updated from these doctypes
 		if key == "is_stock_item":
 			linked_doctypes += ["Sales Order Item", "Purchase Order Item", "Material Request Item"]
-			
+
 		for doctype in linked_doctypes:
 			if frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
 				frappe.db.get_value("Production Order",
