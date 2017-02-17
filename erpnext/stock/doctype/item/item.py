@@ -7,7 +7,7 @@ import erpnext
 import json
 import itertools
 from frappe import msgprint, _
-from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate, strip
+from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate, strip, get_timestamp
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
@@ -670,10 +670,17 @@ class Item(WebsiteGenerator):
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
-	return dict(frappe.db.sql('''select unix_timestamp(posting_date), count(*)
+	out = {}
+	items = dict(frappe.db.sql('''select posting_date, count(*)
 		from `tabStock Ledger Entry` where item_code=%s
 			and posting_date > date_sub(curdate(), interval 1 year)
 			group by posting_date''', name))
+	
+	for date, count in items.iteritems():
+		timestamp = get_timestamp(date)
+		out.update({ timestamp: count })
+
+	return out
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
 	if (not end_of_life) or (disabled is None):
