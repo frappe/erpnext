@@ -34,7 +34,7 @@ class Assessment(Document):
 			validate_overlap_for(self, "Assessment", "student_group")
 		
 		validate_overlap_for(self, "Assessment", "room")
-		validate_overlap_for(self, "Assessment", "supervisor", self.instructor)
+		validate_overlap_for(self, "Assessment", "supervisor", self.supervisor)
 
 
 def get_assessment_list(doctype, txt, filters, limit_start, limit_page_length=20):
