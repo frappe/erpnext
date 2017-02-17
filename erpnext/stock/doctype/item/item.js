@@ -4,6 +4,13 @@
 frappe.provide("erpnext.item");
 
 frappe.ui.form.on("Item", {
+	setup: function(frm) {
+		frm.add_fetch('attribute', 'numeric_values', 'numeric_values');
+		frm.add_fetch('attribute', 'from_range', 'from_range');
+		frm.add_fetch('attribute', 'to_range', 'to_range');
+		frm.add_fetch('attribute', 'increment', 'increment');
+		frm.add_fetch('tax_type', 'tax_rate', 'tax_rate');
+	},
 	onload: function(frm) {
 		erpnext.item.setup_queries(frm);
 		if (frm.doc.variant_of){
@@ -16,7 +23,6 @@ frappe.ui.form.on("Item", {
 	},
 
 	refresh: function(frm) {
-
 		if(frm.doc.is_stock_item) {
 			frm.add_custom_button(__("Balance"), function() {
 				frappe.route_options = {
@@ -54,9 +60,9 @@ frappe.ui.form.on("Item", {
 			}, __("View"));
 
 			frm.add_custom_button(__("Variant"), function() {
-				erpnext.item.make_variant()
+				erpnext.item.make_variant(frm);
 			}, __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(__("This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set", [frm.doc.variant_of]), true);
@@ -79,6 +85,17 @@ frappe.ui.form.on("Item", {
 
 		frm.toggle_enable("is_fixed_asset", (frm.doc.__islocal || (!frm.doc.is_stock_item &&
 			((frm.doc.__onload && frm.doc.__onload.asset_exists) ? false : true))));
+
+		frm.add_custom_button(__('Duplicate'), function() {
+			var new_item = frappe.model.copy_doc(frm.doc);
+			if(new_item.item_name===new_item.item_code) {
+				new_item.item_name = null;
+			}
+			if(new_item.description===new_item.description) {
+				new_item.description = null;
+			}
+			frappe.set_route('Form', 'Item', new_item.name);
+		});
 	},
 
 	validate: function(frm){
@@ -88,13 +105,13 @@ frappe.ui.form.on("Item", {
 	image: function(frm) {
 		refresh_field("image_view");
 	},
-	
+
 	is_fixed_asset: function(frm) {
 		if (frm.doc.is_fixed_asset) {
 			frm.set_value("is_stock_item", 0);
 		}
 	},
-	
+
 	page_name: frappe.utils.warn_page_name_change,
 
 	item_code: function(frm) {
@@ -191,15 +208,15 @@ $.extend(erpnext.item, {
 
 		frm.fields_dict.reorder_levels.grid.get_field("warehouse").get_query = function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
-			
+
 			var filters = {
 				"is_group": 0
 			}
-			
+
 			if (d.parent_warehouse) {
 				filters.extend({"parent_warehouse": d.warehouse_group})
 			}
-			
+
 			return {
 				filters: filters
 			}
@@ -212,7 +229,8 @@ $.extend(erpnext.item, {
 			return;
 
 		frappe.require('assets/js/item-dashboard.min.js', function() {
-			var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;"><a href="#stock-balance">Stock Levels</a></h5>');
+			var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;">\
+				<a href="#stock-balance">Stock Levels</a></h5>');
 			erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
 				parent: section,
 				item_code: frm.doc.name
@@ -234,12 +252,12 @@ $.extend(erpnext.item, {
 		}
 	},
 
-	make_variant: function(doc) {
+	make_variant: function(frm) {
 		var fields = []
 
-		for(var i=0;i< cur_frm.doc.attributes.length;i++){
+		for(var i=0;i< frm.doc.attributes.length;i++){
 			var fieldtype, desc;
-			var row = cur_frm.doc.attributes[i];
+			var row = frm.doc.attributes[i];
 			if (row.numeric_values){
 				fieldtype = "Float";
 				desc = "Min Value: "+ row.from_range +" , Max Value: "+ row.to_range +", in Increments of: "+ row.increment
@@ -268,7 +286,7 @@ $.extend(erpnext.item, {
 			frappe.call({
 				method:"erpnext.controllers.item_variant.get_variant",
 				args: {
-					"template": cur_frm.doc.name,
+					"template": frm.doc.name,
 					"args": d.get_values()
 				},
 				callback: function(r) {
@@ -290,7 +308,7 @@ $.extend(erpnext.item, {
 						frappe.call({
 							method:"erpnext.controllers.item_variant.create_variant",
 							args: {
-								"item": cur_frm.doc.name,
+								"item": frm.doc.name,
 								"args": d.get_values()
 							},
 							callback: function(r) {
@@ -358,10 +376,3 @@ $.extend(erpnext.item, {
 		frm.fields_dict.attributes.grid.toggle_enable("attribute_value", !frm.doc.variant_of);
 	}
 });
-
-
-cur_frm.add_fetch('attribute', 'numeric_values', 'numeric_values');
-cur_frm.add_fetch('attribute', 'from_range', 'from_range');
-cur_frm.add_fetch('attribute', 'to_range', 'to_range');
-cur_frm.add_fetch('attribute', 'increment', 'increment');
-cur_frm.add_fetch('tax_type', 'tax_rate', 'tax_rate');
