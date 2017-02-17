@@ -235,14 +235,15 @@ def get_count_on(account, fieldname, date):
 
 		return count
 
+#added by ahmad ragheb
+#date 16/1/2017
+# how to add shown_number to every account you create
+
 @frappe.whitelist()
 def add_ac(args=None):
-	from frappe.desk.treeview import make_tree_args
-
 	if not args:
 		args = frappe.local.form_dict
-
-	args = make_tree_args(**args)
+		args.pop("cmd")
 
 	ac = frappe.new_doc("Account")
 
@@ -251,19 +252,118 @@ def add_ac(args=None):
 		args.pop("ignore_permissions")
 
 	ac.update(args)
-
 	if not ac.parent_account:
 		ac.parent_account = args.get("parent")
 
 	ac.old_parent = ""
 	ac.freeze_account = "No"
+
+	parent_account_before_cut = args.get("parent")
+
+	# if "-" in parent_account_before_cut:
+	# 	#we cut the parent name " account name - company " to be a  account name only
+	# 	l = list(parent_account_before_cut)  # convert to list=
+	# 	p = l.index("-")  # find position of the letter "-"
+	# 	del (l[p-1:])  # delete it
+	# 	s = "".join(l)  # convert back to string
+
+
 	if cint(ac.get("is_root")):
 		ac.parent_account = None
 		ac.flags.ignore_mandatory = True
 
+		bb3 = frappe.db.sql("""
+					select shown_number
+					from tabAccount
+					where parent_account IS NULL order by shown_number DESC;
+					""", as_dict=1)
+
+
+
+	else:
+		# we cut the parent name " account name - company " to be a  account name only
+		l = list(parent_account_before_cut)  # convert to list
+		p = l.index("-")  # find position of the letter "-"
+		del (l[p - 1:])  # delete it
+		s = "".join(l)  # convert back to string
+
+		query = "select shown_number from `tabAccount` where parent_account = '{0}' order by shown_number DESC;".format(
+			ac.parent_account)
+		query2parent = "select shown_number from `tabAccount` where account_name = '{0}' order by shown_number DESC;".format(
+			s)
+
+		bb3 = frappe.db.sql(query, as_dict=1)
+
+		bb4 = frappe.db.sql(query2parent, as_dict=1)
+
+	# convert shown_number from string to integer
+	r = []
+	x = []
+
+	# indicators
+	have_brothers = False
+	dont_have_brother_have_father = False
+	dont_have_brother_nor_father = False
+
+	# put the result in list
+	for key, value in enumerate(bb3):
+		r.append(value)
+
+		have_brothers = True
+		dont_have_brother_have_father = False
+		dont_have_brother_nor_father = False
+
+	# if list empty
+	if not r:
+
+		have_brothers = False
+		dont_have_brother_have_father = True
+		dont_have_brother_nor_father = False
+
+		# we query for parent shown_number and put it in a list
+		for key, value in enumerate(bb4):
+			r.append(value)
+
+		# if brothers and parent doesn't exist that mean account is the first node we create
+		# in a freash tree
+		if not r:
+			have_brothers = False
+			dont_have_brother_have_father = False
+			dont_have_brother_nor_father = True
+
+			r.append(0)
+
+	# convert list r to int
+	for value in r:
+		x.append(int(value["shown_number"]))
+
+	# sort dict based on value from the biggest number to the smallest
+	sorted_x = sorted(x, reverse=True)
+	count = 0
+	# we take the first element in the list which is the biggest number
+	count = sorted_x[0]
+	# in case it is of 1- have brothers we take the biggest brother shown number and add it to
+	# shown_number +1 , case 2- doesnt' have brothers but have father we take the father shown
+	# number and add a new cell next to it , case 3- if it doesn't have brother nor parent
+	# we keep it as zero which is set in the last loop
+
+	if have_brothers:
+		count = count + 1
+		count2 = str(count)
+	elif dont_have_brother_have_father:
+		count2 = str(count) + "0"
+	elif dont_have_brother_nor_father:
+		count2 = str(count)
+
+	ac.update({"shown_number": count2})
+	ac.update({'item_number': count2})
+
 	ac.insert()
 
 	return ac.name
+
+# Ahmad Ragheb
+
 
 @frappe.whitelist()
 def add_cc(args=None):
@@ -296,6 +396,7 @@ def reconcile_against_document(args):
 		# cancel advance entry
 		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
 
+		doc.make_gl_entries(cancel=1, adv_adj=1)
 		doc.make_gl_entries(cancel=1, adv_adj=1)
 
 		# update ref in advance entry
@@ -668,6 +769,7 @@ def get_children():
 				company, as_dict=1)
 
 		if args["parent"]=="Accounts":
+			#modify the sort root to organized account based on shown_number
 			sort_root_accounts(acc)
 	else:
 		# other

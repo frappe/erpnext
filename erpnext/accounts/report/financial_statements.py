@@ -265,21 +265,29 @@ def filter_accounts(accounts, depth=10):
 
 	return filtered_accounts, accounts_by_name, parent_children_map
 
+#added by ahmad ragheb
+#date 16/1/2017
+
 def sort_root_accounts(roots):
 	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
 
 	def compare_roots(a, b):
-		if a.report_type != b.report_type and a.report_type == "Balance Sheet":
-			return -1
-		if a.root_type != b.root_type and a.root_type == "Asset":
-			return -1
-		if a.root_type == "Liability" and b.root_type == "Equity":
-			return -1
-		if a.root_type == "Income" and b.root_type == "Expense":
-			return -1
-		return 1
+		# if a.report_type != b.report_type and a.report_type == "Balance Sheet":
+		#  	return -1
+		# if a.root_type != b.root_type and a.root_type == "Asset":
+		#  	return -1
+		# if a.root_type == "Liability" and b.root_type == "Equity":
+		#  	return -1
+		# if a.root_type == "Income" and b.root_type == "Expense":
+		#  	return -1
+		# return 1
+		if int(a.shown_number) > int(b.shown_number):
+			return 1
+		return -1
 
 	roots.sort(compare_roots)
+
+#ahmad ragheb
 
 def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, filters, gl_entries_by_account,
 		ignore_closing_entries=False):
