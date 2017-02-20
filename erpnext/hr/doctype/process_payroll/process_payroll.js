@@ -10,6 +10,19 @@ frappe.ui.form.on("Process Payroll", {
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
 	},
 
+	setup: function(frm) {
+		frm.set_query("payment_account", function() {
+			var account_types = ["Bank", "Cash"];
+			return {
+				filters: {
+					"account_type": ["in", account_types],
+					"is_group": 0,
+					"company": frm.doc.company
+				}
+			}
+		})
+	},
+
 	refresh: function(frm) {
 		frm.disable_save();
 	},
@@ -49,16 +62,6 @@ frappe.ui.form.on("Process Payroll", {
 					}
 				}
 			})
-		}
-	},
-	account: function(frm) {
-		var account_types = ["Bank", "Cash"];
-		return {
-			filters: {
-				"account_type": ["in", account_types],
-				"is_group": 0,
-				"company": frm.doc.company
-			}
 		}
 	}
 })

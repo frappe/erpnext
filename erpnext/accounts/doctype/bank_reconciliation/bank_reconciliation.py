@@ -74,6 +74,9 @@ class BankReconciliation(Document):
 		clearance_date_updated = False
 		for d in self.get('payment_entries'):
 			if d.clearance_date:
+				if not d.payment_document:
+					frappe.throw(_("Row #{0}: Payment document is required to complete the trasaction"))
+
 				if d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
 					frappe.throw(_("Row #{0}: Clearance date {1} cannot be before Cheque Date {2}")
 						.format(d.idx, d.clearance_date, d.cheque_date))

@@ -11,9 +11,11 @@ from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 value_fields = ("income", "expense", "gross_profit_loss")
 
 def execute(filters=None):
+	if not filters.get('based_on'): filters["based_on"] = 'Cost Center'
+
 	based_on = filters.based_on.replace(' ', '_').lower()
 	validate_filters(filters)
-	accounts = get_accounts_data(based_on, filters.company)
+	accounts = get_accounts_data(based_on, filters.get("company"))
 	data = get_data(accounts, filters, based_on)
 	columns = get_columns(filters)
 	return columns, data
@@ -27,14 +29,14 @@ def get_accounts_data(based_on, company):
 
 def get_data(accounts, filters, based_on):
 	if not accounts:
-		return None
+		return []
 
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 
 	gl_entries_by_account = {}
 
-	set_gl_entries_by_account(filters.company, filters.from_date,
-		filters.to_date, based_on, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
+	set_gl_entries_by_account(filters.get("company"), filters.get("from_date"),
+		filters.get("to_date"), based_on, gl_entries_by_account, ignore_closing_entries=not flt(filters.get("with_period_closing_entry")))
 
 	total_row = calculate_values(accounts, gl_entries_by_account, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name)
@@ -90,7 +92,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 
 def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 	data = []
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
 
 	for d in accounts:
 		has_value = False
@@ -99,7 +101,7 @@ def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 			"account": d.name,
 			"parent_account": d.parent_account,
 			"indent": d.indent,
-			"fiscal_year": filters.fiscal_year,
+			"fiscal_year": filters.get("fiscal_year"),
 			"currency": company_currency,
 			"based_on": based_on
 		}
@@ -122,9 +124,9 @@ def get_columns(filters):
 	return [
 		{
 			"fieldname": "account",
-			"label": _(filters.based_on),
+			"label": _(filters.get("based_on")),
 			"fieldtype": "Link",
-			"options": filters.based_on,
+			"options": filters.get("based_on"),
 			"width": 300
 		},
 		{

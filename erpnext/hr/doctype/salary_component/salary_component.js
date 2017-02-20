@@ -2,7 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Salary Component', {
-	refresh: function(frm) {
-
+	setup: function(frm) {
+		frm.set_query("default_account", "accounts", function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: {
+					"root_type": "Expense",
+					"is_group": 0,
+					"company": d.company
+				}
+			}
+		})
 	}
 });

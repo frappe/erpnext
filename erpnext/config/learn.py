@@ -44,7 +44,7 @@ def get_data():
 				},
 				{
 					"type": "help",
-					"label": _("Setting up Email"),
+					"label": _("Setting up Email Account"),
 					"youtube_id": "YFYe0DrB95o"
 				},
 				{
@@ -61,11 +61,6 @@ def get_data():
 					"type": "help",
 					"label": _("Workflow"),
 					"youtube_id": "yObJUg9FxFs"
-				},
-				{
-					"type": "help",
-					"label": _("Email Account"),
-					"youtube_id": "YFYe0DrB95o"
 				},
 				{
 					"type": "help",
