@@ -37,7 +37,7 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-				{fieldtype:"Select", label: __("Company"), link:"Company", fieldname: "company",
+		{fieldtype:"Select", label: __("Company"), link:"Company", fieldname: "company",
 			default_value: __("Select Company...")},
 		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
