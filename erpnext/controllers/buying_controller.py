@@ -178,6 +178,9 @@ class BuyingController(StockController):
 			for item in self.get("items"):
 				item.rm_supp_cost = 0.0
 
+		if self.is_subcontracted == "No" and self.get("supplied_items"):
+			self.set('supplied_items', [])
+
 	def update_raw_materials_supplied(self, item, raw_material_table):
 		bom_items = self.get_items_from_bom(item.item_code, item.bom)
 		raw_materials_cost = 0

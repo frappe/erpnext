@@ -7,7 +7,7 @@ import frappe
 import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
-from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff, add_years
+from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff, add_years, get_timestamp
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
 from erpnext.exceptions import PartyFrozen, InvalidCurrency, PartyDisabled, InvalidAccountCurrency
@@ -351,8 +351,17 @@ def validate_party_frozen_disabled(party_type, party_name):
 def get_timeline_data(doctype, name):
 	'''returns timeline data for the past one year'''
 	from frappe.desk.form.load import get_communication_data
+
+	out = {}
 	data = get_communication_data(doctype, name,
-		fields = 'unix_timestamp(date(creation)), count(name)',
+		fields = 'date(creation), count(name)',
 		after = add_years(None, -1).strftime('%Y-%m-%d'),
 		group_by='group by date(creation)', as_dict=False)
-	return dict(data)
+
+	timeline_items = dict(data)
+
+	for date, count in timeline_items.iteritems():
+		timestamp = get_timestamp(date)
+		out.update({ timestamp: count })
+
+	return out
