@@ -242,6 +242,7 @@ def add_ac(args=None):
 	if not args:
 		args = frappe.local.form_dict
 
+	args.doctype = "Account"
 	args = make_tree_args(**args)
 
 	ac = frappe.new_doc("Account")
@@ -271,7 +272,8 @@ def add_cc(args=None):
 
 	if not args:
 		args = frappe.local.form_dict
-
+	
+	args.doctype = "Cost Center"
 	args = make_tree_args(**args)
 
 	cc = frappe.new_doc("Cost Center")

@@ -50,7 +50,7 @@ class Company(Document):
 	def validate_default_accounts(self):
 		for field in ["default_bank_account", "default_cash_account", "default_receivable_account", "default_payable_account",
 			"default_expense_account", "default_income_account", "stock_received_but_not_billed",
-			"stock_adjustment_account", "expenses_included_in_valuation"]:
+			"stock_adjustment_account", "expenses_included_in_valuation", "default_payroll_payable_account"]:
 				if self.get(field):
 					for_company = frappe.db.get_value("Account", self.get(field), "company")
 					if for_company != self.name:

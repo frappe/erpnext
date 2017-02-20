@@ -33,6 +33,9 @@ def install(country=None):
 		# salary component
 		{'doctype': 'Salary Component', 'salary_component': _('Income Tax'), 'description': _('Income Tax'), 'type': 'Deduction'},
 		{'doctype': 'Salary Component', 'salary_component': _('Basic'), 'description': _('Basic'), 'type': 'Earning'},
+		{'doctype': 'Salary Component', 'salary_component': _('Arrear'), 'description': _('Arrear'), 'type': 'Earning'},
+		{'doctype': 'Salary Component', 'salary_component': _('Leave Encashment'), 'description': _('Leave Encashment'), 'type': 'Earning'},
+		
 
 		# expense claim type
 		{'doctype': 'Expense Claim Type', 'name': _('Calls'), 'expense_type': _('Calls')},

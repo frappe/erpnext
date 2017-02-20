@@ -38,6 +38,7 @@ frappe.ui.form.on("Salary Slip", {
 
 	refresh: function(frm) {
 		frm.trigger("toggle_fields")
+		frm.trigger("toggle_reqd_fields")
 		salary_detail_fields = ['formula', 'abbr']
 		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
 		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
@@ -58,8 +59,8 @@ frappe.ui.form.on("Salary Slip", {
 		frm.toggle_display(['payment_days', 'total_working_days', 'leave_without_pay'],
 			frm.doc.payroll_frequency!="");
 	}
+	
 })
-
 
 // Get leave details
 //---------------------------------------------------------------------
@@ -130,7 +131,7 @@ var calculate_earning_total = function(doc, dt, dn, reset_amount) {
 		total_earn += flt(tbl[i].amount);
 		
 	}
-	doc.gross_pay = total_earn + flt(doc.arrear_amount) + flt(doc.leave_encashment_amount);
+	doc.gross_pay = total_earn;
 	refresh_many(['amount','gross_pay']);
 }
 
@@ -160,17 +161,6 @@ var calculate_net_pay = function(doc, dt, dn) {
 	doc.rounded_total = Math.round(doc.net_pay);
 	refresh_many(['net_pay', 'rounded_total']);
 }
-
-// trigger on arrear
-// ------------------------------------------------------------------------
-cur_frm.cscript.arrear_amount = function(doc,dt,dn){
-	calculate_earning_total(doc, dt, dn);
-	calculate_net_pay(doc, dt, dn);
-}
-
-// trigger on encashed amount
-// ------------------------------------------------------------------------
-cur_frm.cscript.leave_encashment_amount = cur_frm.cscript.arrear_amount;
 
 // validate
 // ------------------------------------------------------------------------

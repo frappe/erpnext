@@ -81,7 +81,10 @@ class Asset(Document):
 				frappe.throw(_("Number of Depreciations Booked cannot be greater than Total Number of Depreciations"))
 						
 		if self.next_depreciation_date and getdate(self.next_depreciation_date) < getdate(nowdate()):
-			frappe.msgprint(_("Next Depreciation Date is entered as past date"))
+			frappe.msgprint(_("Next Depreciation Date is entered as past date"), title=_('Warning'), indicator='red')
+		
+		if self.next_depreciation_date and getdate(self.next_depreciation_date) < getdate(self.purchase_date):
+			frappe.throw(_("Next Depreciation Date cannot be before Purchase Date"))
 			
 		if (flt(self.value_after_depreciation) > flt(self.expected_value_after_useful_life) 
 			and not self.next_depreciation_date):
