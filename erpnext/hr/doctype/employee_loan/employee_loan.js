@@ -12,6 +12,16 @@ frappe.ui.form.on('Employee Loan', {
 				}
 			};
 		});
+		
+		frm.set_query("interest_income_account", function() {
+			return {
+				"filters": {
+						"company": frm.doc.company,
+						"root_type": "Income",
+						"is_group": 0
+				}
+			};
+		});
 
 		$.each(["payment_account", "employee_loan_account"], function(i, field) {
 			frm.set_query(field, function() {

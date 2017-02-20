@@ -20,6 +20,21 @@ frappe.ui.form.on("Process Payroll", {
 					"company": frm.doc.company
 				}
 			}
+		}),
+		frm.set_query("cost_center", function() {
+			return {
+				filters: {
+					"is_group": 0,
+					company: frm.doc.company
+				}
+			}
+		}),
+		frm.set_query("project", function() {
+			return {
+				filters: {
+					company: frm.doc.company
+				}
+			}
 		})
 	},
 
@@ -63,7 +78,7 @@ frappe.ui.form.on("Process Payroll", {
 				}
 			})
 		}
-	}
+	},
 })
 
 cur_frm.cscript.display_activity_log = function(msg) {
@@ -108,46 +123,18 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 	});
 }
 
-cur_frm.cscript.make_bank_entry = function(doc,cdt,cdn){
+cur_frm.cscript.make_bank_entry = function(doc, cdt, cdn){
     if(doc.company && doc.start_date && doc.end_date){
-		return cur_frm.cscript.reference_entry(doc,cdt,cdn);
+		return frappe.call({
+			doc: cur_frm.doc,
+			method: "make_payment_entry",
+			callback: function(r) {
+				if (r.message)
+					var doc = frappe.model.sync(r.message)[0];
+					frappe.set_route("Form", doc.doctype, doc.name);
+			}
+		});
     } else {
   	  msgprint(__("Company, From Date and To Date is mandatory"));
     }
-}
-
-cur_frm.cscript.reference_entry = function(doc,cdt,cdn){
-	var dialog = new frappe.ui.Dialog({
-		title: __("Bank Transaction Reference"),
-		fields: [
-			{
-				"label": __("Reference Number"),
-				"fieldname": "reference_number",
-				"fieldtype": "Data",
-				"reqd": 1
-			},
-			{
-				"label": __("Reference Date"),
-				"fieldname": "reference_date",
-				"fieldtype": "Date",
-				"reqd": 1,
-				"default": get_today()
-			}
-		]
-	});
-	dialog.set_primary_action(__("Make"), function() {
-		args = dialog.get_values();
-		if(!args) return;
-		dialog.hide();
-		return frappe.call({
-			doc: cur_frm.doc,
-			method: "make_journal_entry",
-			args: {"reference_number": args.reference_number, "reference_date":args.reference_date},
-			callback: function(r) {
-				if (r.message)
-					cur_frm.cscript.display_activity_log(r.message);
-			}
-		});
-	});
-	dialog.show();
 }

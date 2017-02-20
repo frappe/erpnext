@@ -21,4 +21,4 @@ class SalaryComponent(Document):
 			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
 
 		if frappe.db.sql("select salary_component_abbr from `tabSalary Component` where name!=%s and salary_component_abbr=%s", (self.name, self.salary_component_abbr)):
-			frappe.throw(_("Abbreviation already used for another salary component"))
+			frappe.throw(_("Abbreviation {0} already used for another salary component").format(self.salary_component_abbr))

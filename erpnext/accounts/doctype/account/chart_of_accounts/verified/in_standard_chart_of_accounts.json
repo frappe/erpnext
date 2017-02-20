@@ -136,7 +136,8 @@
 			    "Accounts Payable": {
 			        "Creditors": {
 			            "account_type": "Payable"
-			        }
+			        },
+					"Payroll Payable": {}
 			    },
 			    "Stock Liabilities": {
 				    "Stock Received But Not Billed": {

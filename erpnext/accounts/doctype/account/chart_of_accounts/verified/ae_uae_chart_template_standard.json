@@ -341,9 +341,7 @@
                         "Post Dated Cheques Paid": {
                             "account_type": "Payable"
                         }, 
-                        "Staff Payable": {
-                            "account_type": "Payable"
-                        }, 
+                        "Staff Payable": {}, 
                         "Suppliers Price Protection": {
                             "account_type": "Payable"
                         }, 

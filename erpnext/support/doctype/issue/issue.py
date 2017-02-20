@@ -81,10 +81,9 @@ def set_status(name, status):
 	st.save()
 
 def auto_close_tickets():
-	issues = frappe.db.get_all("Issue", filters={
-		"status": "Replied",
-		"modified": ("<", "date_sub(curdate(),interval 7 Day)")
-	}, fields=["name"])
+	""" auto close the replied support tickets after 7 days """
+	issues = frappe.db.sql(""" select name from tabIssue where status='Replied' and
+		modified<DATE_SUB(CURDATE(), INTERVAL 7 DAY) """, as_dict=True)
 
 	for issue in issues:
 		doc = frappe.get_doc("Issue", issue.get("name"))
