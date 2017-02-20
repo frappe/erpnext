@@ -245,3 +245,15 @@ def set_multiple_status(names, status):
 		opp = frappe.get_doc("Opportunity", name)
 		opp.status = status
 		opp.save()
+
+def auto_close_opportunity():
+	""" auto close the `Replied` Opportunities after 7 days """
+	auto_close_after_days = frappe.db.get_value("Support Settings", "Support Settings", "close_opportunity_after_days") or 15
+
+	opportunities = frappe.db.sql(""" select name from tabOpportunity where status='Replied' and
+		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """, (auto_close_after_days), as_dict=True)
+
+	for opportunity in opportunities:
+		doc = frappe.get_doc("Opportunity", opportunity.get("name"))
+		doc.status = "Closed"
+		doc.save(ignore_permissions=True)

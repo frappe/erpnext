@@ -164,6 +164,7 @@ scheduler_events = {
 		"erpnext.stock.reorder_item.reorder_item",
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
+		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
