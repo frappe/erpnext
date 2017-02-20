@@ -28,7 +28,9 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_query("party_type", function() {
 			return{
-				query: "erpnext.setup.doctype.party_type.party_type.get_party_type"
+				"filters": {
+					"name": ["in",["Customer","Supplier"]],
+				}
 			}
 		});
 
