@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, getdate
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
