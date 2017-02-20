@@ -63,7 +63,10 @@ class LeaveApplication(Document):
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
 			frappe.throw(_("To date cannot be before from date"))
-
+			
+		if self.half_day and (getdate(self.half_day_date) < getdate(self.from_date) or (getdate(self.half_day_date) > getdate(self.to_date))):
+			frappe.throw(_("Half Day Date should be between From Date and To Date"))
+			
 		if not is_lwp(self.leave_type):
 			self.validate_dates_acorss_allocation()
 			self.validate_back_dated_application()
@@ -129,7 +132,7 @@ class LeaveApplication(Document):
 	def validate_balance_leaves(self):
 		if self.from_date and self.to_date:
 			self.total_leave_days = get_number_of_leave_days(self.employee, self.leave_type,
-				self.from_date, self.to_date, self.half_day)
+				self.from_date, self.to_date, self.half_day, self.half_day_date)
 
 			if self.total_leave_days == 0:
 				frappe.throw(_("The day(s) on which you are applying for leave are holidays. You need not apply for leave."))
@@ -294,13 +297,18 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 	return approvers_list
 
 @frappe.whitelist()
-def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day=None):
-	if half_day==1:
-		return 0.5
-	number_of_days = date_diff(to_date, from_date) + 1
+def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day = None, half_day_date = None):
+	number_of_days = 0
+	if half_day == 1:
+		if from_date == to_date:
+			number_of_days = 0.5
+		else:
+			number_of_days = date_diff(to_date, from_date) + .5
+	else:
+		number_of_days = date_diff(to_date, from_date) + 1
+
 	if not frappe.db.get_value("Leave Type", leave_type, "include_holiday"):
 		number_of_days = flt(number_of_days) - flt(get_holidays(employee, from_date, to_date))
-
 	return number_of_days
 
 @frappe.whitelist()
