@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from frappe.utils import flt, cint
+from frappe.utils import cint
 import frappe
 
 def execute(filters=None):
@@ -14,38 +14,38 @@ def execute(filters=None):
 def get_item_list(prod_list, filters):
 	out = []
 	
-	low_price_data = []
-	low_supplier = []
-	
 	#Add a row for each item/qty
 	for prod_order in prod_list:
-		bom = frappe.db.get_value("Production Order", prod_order.name, "bom_no")
-		warehouse = frappe.db.get_value("Production Order", prod_order.name, "source_warehouse")
-		desc = frappe.db.get_value("BOM", bom, "description")
-		qty = frappe.db.get_value("Production Order", prod_order.name, "qty")
-		produced_value = frappe.db.get_value("Production Order", prod_order.name, "produced_qty")
+		prod_details = frappe.db.get_value("Production Order", prod_order.name, 
+			["bom_no", "source_warehouse", "qty", "produced_qty"], as_dict=1)
+		
+		desc = frappe.db.get_value("BOM", prod_details.bom_no, "description")
+		
 		item_list = frappe.db.sql("""SELECT 
 				bom_item.item_code as item_code,
-				ifnull(ledger.actual_qty/bom_item.qty,0) as build_qty
+				ifnull(ledger.actual_qty*bom.quantity/bom_item.qty,0) as build_qty
 			FROM
-				`tabBOM Item` AS bom_item
+				`tabBOM` as bom, `tabBOM Item` AS bom_item
 				LEFT JOIN `tabBin` AS ledger	
 					ON bom_item.item_code = ledger.item_code 
 					AND ledger.warehouse = ifnull(%(warehouse)s,%(filterhouse)s)
 			WHERE
-				bom_item.parent = %(bom)s 
+				bom.name = bom_item.parent
+				and bom.name = %(bom)s 
 			GROUP BY 
-				bom_item.item_code""", {"bom": bom, "warehouse": warehouse, "filterhouse": filters.warehouse}, as_dict=1)
+				bom_item.item_code""", 
+		{"bom": prod_details.bom_no, "warehouse": prod_details.source_warehouse, 
+			"filterhouse": filters.warehouse}, as_dict=1)
+				
 		stock_qty = 0
 		count = 0
-		buildable_qty = qty
+		buildable_qty = prod_details.qty
 		for item in item_list:
 			count = count + 1
-			if item.build_qty >= (qty-produced_value):
+			if item.build_qty >= (prod_details.qty - prod_details.produced_qty):
 				stock_qty = stock_qty + 1
 			elif buildable_qty >= item.build_qty:
 				buildable_qty = item.build_qty
-			
 					
 		if count == stock_qty:
 			build = "Y"
@@ -58,8 +58,8 @@ def get_item_list(prod_list, filters):
 			"req_items": cint(count),
 			"instock": stock_qty,
 			"description": desc,
-			"bom_no": bom,
-			"qty": qty,
+			"bom_no": prod_details.bom_no,
+			"qty": prod_details.qty,
 			"buildable_qty": buildable_qty,
 			"ready_to_build": build
 		})
