@@ -14,6 +14,7 @@ class SalaryStructure(Document):
 	
 	def validate(self):
 		self.validate_amount()
+		self.validate_joining_date()
 		for e in self.get('employees'):
 			set_employee_name(e)
 
@@ -27,7 +28,13 @@ class SalaryStructure(Document):
 	def validate_amount(self):
 		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:
 			frappe.throw(_("Net pay cannot be negative"))
-				
+			
+	def validate_joining_date(self):
+		for e in self.get('employees'):
+			joining_date = getdate(frappe.db.get_value("Employee", e.employee, "date_of_joining"))
+			if e.from_date and getdate(e.from_date) < joining_date:
+				frappe.throw(_("From Date {0} for Employee {1} cannot be before employee's joining Date {2}")
+					    .format(e.from_date, e.employee, joining_date))	
 
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):
