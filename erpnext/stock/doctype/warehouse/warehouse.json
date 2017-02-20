@@ -807,6 +807,7 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "search_fields": "", 
  "show_name_in_global_search": 1, 
  "sort_order": "DESC", 
  "title_field": "warehouse_name", 

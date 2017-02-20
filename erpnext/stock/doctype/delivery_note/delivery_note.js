@@ -13,14 +13,7 @@ frappe.ui.form.on("Delivery Note", {
 				return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
 			})
 
-		frm.set_query("warehouse", "items", function() {
-			return {
-				filters: [
-					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-					["Warehouse", "is_group", "=", 0]
-				]
-			}
-		})
+		erpnext.queries.setup_warehouse_query(frm);
 
 	}
 });
