@@ -89,3 +89,5 @@ The movement of the assets (from one warehouse to another) is also tracked via A
 There is also a dedicated button "Transfer Asset" inside the Asset form to track the Asset Movement.
 
 <img class="screenshot" alt="Asset" src="{{docs_base_url}}/assets/img/accounts/asset-movement-using-button.png">
+
+{next}
