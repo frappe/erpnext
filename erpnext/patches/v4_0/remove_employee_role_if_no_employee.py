@@ -6,7 +6,7 @@ import frappe
 import frappe.permissions
 
 def execute():
-	for user in frappe.db.sql_list("select distinct parent from `tabUserRole` where role='Employee'"):
+	for user in frappe.db.sql_list("select distinct parent from `tabHas Role` where role='Employee'"):
 		# if employee record does not exists, remove employee role!
 		if not frappe.db.get_value("Employee", {"user_id": user}):
 			try:

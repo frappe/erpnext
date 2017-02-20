@@ -35,9 +35,6 @@ class TransactionBase(StatusUpdater):
 			frappe.db.sql("delete from `tabEvent` where name in (%s)"
 				.format(", ".join(['%s']*len(events))), tuple(events))
 
-			frappe.db.sql("delete from `tabEvent Role` where parent in (%s)"
-				.format(", ".join(['%s']*len(events))), tuple(events))
-
 	def _add_calendar_event(self, opts):
 		opts = frappe._dict(opts)
 

@@ -53,7 +53,7 @@ class TestLeaveApplication(unittest.TestCase):
 		frappe.db.sql("""delete from `tabEmployee Leave Approver`""")
 
 	def _clear_roles(self):
-		frappe.db.sql("""delete from `tabUserRole` where parent in
+		frappe.db.sql("""delete from `tabHas Role` where parent in
 			("test@example.com", "test1@example.com", "test2@example.com")""")
 
 	def _clear_applications(self):
