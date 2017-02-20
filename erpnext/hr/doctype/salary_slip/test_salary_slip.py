@@ -14,7 +14,7 @@ from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
-		make_earning_salary_component(["Basic Salary", "Allowance", "HRA"])
+		make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA"])
 		make_deduction_salary_component(["Professional Tax", "TDS"])
 
 		for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
@@ -143,8 +143,8 @@ class TestSalarySlip(unittest.TestCase):
 		ss = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@salary.com", "Monthly"))
 		ss.submit()
-		self.assertEquals(ss.loan_repayment, 582)
-		self.assertEquals(ss.net_pay, (flt(ss.gross_pay) - (flt(ss.total_deduction) + flt(ss.loan_repayment))))
+		self.assertEquals(ss.total_loan_repayment, 582)
+		self.assertEquals(ss.net_pay, (flt(ss.gross_pay) - (flt(ss.total_deduction) + flt(ss.total_loan_repayment))))
 
 	def test_payroll_frequency(self):
 		fiscal_year = get_fiscal_year(nowdate(), company="_Test Company")[0]
@@ -322,8 +322,8 @@ def get_earnings_component():
 					"idx": 3
 				},
 				{
-					"salary_component": 'Allowance',
-					"abbr":'A',
+					"salary_component": 'Special Allowance',
+					"abbr":'SA',
 					"condition": 'H < 10000',
 					"formula": 'BS*.5',
 					"idx": 4

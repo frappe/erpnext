@@ -372,3 +372,4 @@ erpnext.patches.v7_2.update_abbr_in_salary_slips
 erpnext.patches.v7_2.rename_evaluation_criteria
 erpnext.patches.v7_2.update_party_type
 erpnext.patches.v7_2.empty_supplied_items_for_non_subcontracted
+erpnext.patches.v7_2.arrear_leave_encashment_as_salary_component

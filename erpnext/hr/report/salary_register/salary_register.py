@@ -22,7 +22,7 @@ def execute(filters=None):
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
 
-		row += [ss.arrear_amount, ss.leave_encashment_amount, ss.gross_pay]
+		row += [ss.gross_pay]
 
 		for d in ded_types:
 			row.append(ss_ded_map.get(ss.name, {}).get(d))
@@ -50,8 +50,7 @@ def get_columns(salary_slips):
 		salary_components[_(component.type)].append(component.salary_component)
 
 	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
-		[ _("Arrear Amount") + ":Currency:120", _("Leave Encashment Amount") + ":Currency:150",
-		_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
+		[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
 		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
