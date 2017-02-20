@@ -7,7 +7,7 @@ import frappe
 import unittest
 import datetime
 from frappe.utils.make_random import get_random
-from frappe.utils import now_datetime, nowdate, add_days
+from frappe.utils import now_datetime, nowdate, add_days, add_months
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -88,7 +88,8 @@ def make_salary_structure(employee):
 
 		es = salary_structure.append('employees', {
 			"employee": employee,
-			"base": 1200 
+			"base": 1200,
+			"from_date": add_months(nowdate(),-1)
 		})
 		
 		
