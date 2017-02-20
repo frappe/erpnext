@@ -112,13 +112,18 @@ def get_data():
 					"is_query_report": True,
 					"name": "Completed Production Orders",
 					"doctype": "Production Order"
+				},{ 
+					"type": "page",
+					"name": "production-analytics",
+					"label": _("Production Analytics"),  
+					"icon": "fa fa-bar-chart",
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "BOM Search",
 					"doctype": "BOM"
-				},
+				}
 			]
 		},
 		{
