@@ -269,7 +269,7 @@ data_map = {
 	},
 	"Purchase Receipt": {
 		"columns": ["name", "supplier", "posting_date", "company"],
-		"conditions": ["docstatus=1"],
+		"conditions": ["docstatus=1"], 
 		"order_by": "posting_date",
 		"links": {
 			"supplier": ["Supplier", "name"],
@@ -278,7 +278,7 @@ data_map = {
 	},
 	"Purchase Receipt Item[Purchase Analytics]": {
 		"columns": ["name", "parent", "item_code", "qty", "base_net_amount"],
-		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"], 
 		"order_by": "parent",
 		"links": {
 			"parent": ["Purchase Receipt", "name"],
@@ -290,6 +290,12 @@ data_map = {
 		"columns": ["name","status","creation","resolution_date","first_responded_on"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "creation"
-	}
+	},
 
+	# Manufacturing
+	"Production Order": {
+		"columns": ["name","status","creation","planned_start_date","planned_end_date","status","actual_start_date","actual_end_date", "modified"],
+		"conditions": ["docstatus = 1"],
+		"order_by": "creation"
+	}
 }
