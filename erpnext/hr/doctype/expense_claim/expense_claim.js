@@ -107,7 +107,7 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 
 cur_frm.cscript.set_help = function(doc) {
 	cur_frm.set_intro("");
-	if(doc.__islocal && !in_list(user_roles, "HR User")) {
+	if(doc.__islocal && !in_list(roles, "HR User")) {
 		cur_frm.set_intro(__("Fill the form and save it"))
 	} else {
 		if(doc.docstatus==0 && doc.approval_status=="Draft") {

@@ -176,7 +176,7 @@ class TestSalarySlip(unittest.TestCase):
 				"email": user,
 				"first_name": user,
 				"new_password": "password",
-				"user_roles": [{"doctype": "UserRole", "role": "Employee"}]
+				"roles": [{"doctype": "UserRole", "role": "Employee"}]
 			}).insert()
 
 		if not frappe.db.get_value("Employee", {"user_id": user}):

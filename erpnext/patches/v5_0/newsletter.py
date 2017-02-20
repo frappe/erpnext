@@ -22,7 +22,7 @@ def execute():
 	for userrole in frappe.get_all("UserRole", "parent", {"role": "Sales Manager"}):
 		if frappe.db.exists("User", userrole.parent):
 			user = frappe.get_doc("User", userrole.parent)
-			user.append("user_roles", {
+			user.append("roles", {
 				"doctype": "UserRole",
 				"role": "Newsletter Manager"
 			})

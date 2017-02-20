@@ -171,7 +171,7 @@ def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 
 	return ss
 
-def setup_user_roles():
+def setup_roles():
 	user = frappe.get_doc('User', 'demo@erpnext.com')
 	user.add_roles('HR User', 'HR Manager', 'Accounts User', 'Accounts Manager',
 		'Stock User', 'Stock Manager', 'Sales User', 'Sales Manager', 'Purchase User',

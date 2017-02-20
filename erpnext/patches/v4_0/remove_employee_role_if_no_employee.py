@@ -11,8 +11,8 @@ def execute():
 		if not frappe.db.get_value("Employee", {"user_id": user}):
 			try:
 				user = frappe.get_doc("User", user)
-				for role in user.get("user_roles", {"role": "Employee"}):
-					user.get("user_roles").remove(role)
+				for role in user.get("roles", {"role": "Employee"}):
+					user.get("roles").remove(role)
 				user.save()
 			except frappe.DoesNotExistError:
 				pass
