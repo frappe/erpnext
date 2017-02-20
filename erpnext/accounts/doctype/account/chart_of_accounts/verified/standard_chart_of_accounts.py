@@ -137,7 +137,8 @@ def get():
 			    _("Accounts Payable"): {
 			        _("Creditors"): {
 			            "account_type": "Payable"
-			        }
+			        },
+			        _("Payroll Payable"): {},
 			    },
 			    _("Stock Liabilities"): {
 				    _("Stock Received But Not Billed"): {

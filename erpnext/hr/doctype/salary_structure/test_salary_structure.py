@@ -17,7 +17,7 @@ class TestSalaryStructure(unittest.TestCase):
 	def setUp(self):
 		self.make_holiday_list()
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Structure Test Holiday List")
-		make_earning_salary_component(["Basic Salary", "Allowance", "HRA"])
+		make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA"])
 		make_deduction_salary_component(["Professional Tax", "TDS"])
 		make_employee("test_employee@salary.com")
 		make_employee("test_employee_2@salary.com")
@@ -139,8 +139,8 @@ def get_earnings_component():
 					"idx": 3
 				},
 				{
-					"salary_component": 'Allowance',
-					"abbr":'A',
+					"salary_component": 'Special Allowance',
+					"abbr":'SA',
 					"condition": 'H < 10000',
 					"formula": 'BS*.5',
 					"idx": 4
