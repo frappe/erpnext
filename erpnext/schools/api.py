@@ -67,21 +67,31 @@ def mark_attendance(students_present, students_absent, course_schedule=None, stu
 	frappe.msgprint(_("Attendance has been marked successfully."))
 
 def make_attendance_records(student, student_name, status, course_schedule=None, student_batch=None, date=None):
-	"""Creates Attendance Record.
+	"""Creates/Update Attendance Record.
 
 	:param student: Student.
 	:param student_name: Student Name.
 	:param course_schedule: Course Schedule.
 	:param status: Status (Present/Absent)
 	"""
-	student_attendance = frappe.new_doc("Student Attendance")
+	student_attendance_list = frappe.get_list("Student Attendance", fields = ["name"], filters = {
+		"student": student,
+		"course_schedule": course_schedule,
+		"student_batch": student_batch,
+		"date": date
+	})
+		
+	if student_attendance_list:
+		student_attendance = frappe.get_doc("Student Attendance", student_attendance_list[0])
+	else:
+		student_attendance = frappe.new_doc("Student Attendance")
 	student_attendance.student = student
 	student_attendance.student_name = student_name
 	student_attendance.course_schedule = course_schedule
 	student_attendance.student_batch = student_batch
 	student_attendance.date = date
 	student_attendance.status = status
-	student_attendance.submit()
+	student_attendance.save()
 
 @frappe.whitelist()
 def get_student_guardians(student):
