@@ -323,7 +323,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -378,7 +378,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -976,7 +976,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 1, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -1271,8 +1271,8 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-11-21 17:06:49.349654", 
- "modified_by": "rohit@erpnext.com", 
+ "modified": "2017-02-21 13:10:27.394012", 
+ "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 
  "owner": "Administrator", 
