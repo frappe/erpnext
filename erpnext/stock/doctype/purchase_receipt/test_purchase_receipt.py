@@ -11,6 +11,9 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 from erpnext import set_perpetual_inventory
 
 class TestPurchaseReceipt(unittest.TestCase):
+	def setUp(self):
+		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+
 	def test_make_purchase_invoice(self):
 		pr = make_purchase_receipt(do_not_save=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, pr.name)

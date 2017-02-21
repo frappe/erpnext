@@ -112,6 +112,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty)
 		
 	def test_group_same_items(self):
+		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 		frappe.get_doc({
 			"doctype": "Purchase Order",
 			"company": "_Test Company",
@@ -121,10 +122,10 @@ class TestPurchaseOrder(unittest.TestCase):
 			"conversion_factor" : 1,
 			"items" : get_same_items(),
 			"group_same_items": 1
-		}).insert()
+			}).insert(ignore_permissions=True)
 
 		
-def get_same_items():	
+def get_same_items():
 	return [
 				{
 					"item_code": "_Test FG Item",

@@ -50,10 +50,10 @@
    {
     "base_amount": 250.0,
     "conversion_factor": 1.0,
-    "description": "_Test Item",
+    "description": "_Test FG Item",
     "doctype": "Purchase Receipt Item",
-    "item_code": "_Test Item",
-    "item_name": "_Test Item",
+    "item_code": "_Test FG Item",
+    "item_name": "_Test FG Item",
     "parentfield": "items",
     "qty": 5.0,
     "rate": 50.0,

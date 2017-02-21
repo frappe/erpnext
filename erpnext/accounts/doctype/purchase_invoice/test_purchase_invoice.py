@@ -19,6 +19,7 @@ test_ignore = ["Serial No"]
 class TestPurchaseInvoice(unittest.TestCase):
 	def setUp(self):
 		unlink_payment_on_cancel_of_invoice()
+		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
 	def tearDown(self):
 		unlink_payment_on_cancel_of_invoice(0)
