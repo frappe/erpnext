@@ -10,7 +10,7 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
-	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, filters.periodicity)
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, filters.periodicity, filters.company)
 
 	operation_accounts = {
 		"section_name": "Operations",
