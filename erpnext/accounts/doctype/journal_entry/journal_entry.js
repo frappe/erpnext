@@ -38,7 +38,7 @@ frappe.ui.form.on("Journal Entry", {
 	},
 	
 	posting_date: function(frm) {
-		if(!frm.doc.multi_currency) return;
+		if(!frm.doc.multi_currency || !frm.doc.posting_date) return;
 		
 		$.each(frm.doc.accounts || [], function(i, row) {
 			erpnext.journal_entry.set_exchange_rate(frm, row.doctype, row.name);

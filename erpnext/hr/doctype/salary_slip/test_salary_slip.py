@@ -7,7 +7,7 @@ import frappe
 import erpnext
 import calendar
 from erpnext.accounts.utils import get_fiscal_year
-from frappe.utils import getdate, nowdate, add_days, flt
+from frappe.utils import getdate, nowdate, add_days, add_months, flt
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.process_payroll.test_process_payroll import get_salary_component_account
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
@@ -273,7 +273,6 @@ def make_salary_structure(sal_struct, payroll_frequency, employee):
 			"doctype": "Salary Structure",
 			"name": sal_struct,
 			"company": erpnext.get_default_company(),
-			"from_date": nowdate(),
 			"employees": get_employee_details(employee),
 			"earnings": get_earnings_component(),
 			"deductions": get_deductions_component(),
@@ -286,7 +285,8 @@ def make_salary_structure(sal_struct, payroll_frequency, employee):
 		sal_struct.append("employees", {"employee": employee,
 			"employee_name": employee,
 			"base": 32000,
-			"variable": 3200
+			"variable": 3200,
+			"from_date": add_months(nowdate(),-1)
 			})
 		sal_struct.save()
 		sal_struct = sal_struct.name
@@ -295,7 +295,8 @@ def make_salary_structure(sal_struct, payroll_frequency, employee):
 def get_employee_details(employee):
 	return [{"employee": employee,
 			"base": 50000,
-			"variable": 5000
+			"variable": 5000,
+			"from_date": add_months(nowdate(),-1)
 			}
 		]
 
