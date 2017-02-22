@@ -12,8 +12,9 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make
 
 class TestLandedCostVoucher(unittest.TestCase):
 	def test_landed_cost_voucher(self):
+		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 		set_perpetual_inventory(1)
-		pr = frappe.copy_doc(pr_test_records[1])
+		pr = frappe.copy_doc(pr_test_records[0])
 		pr.submit()
 
 		last_sle = frappe.db.get_value("Stock Ledger Entry", {

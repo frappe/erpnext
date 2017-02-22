@@ -249,6 +249,7 @@ def get_gl_entries(voucher_type, voucher_no):
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
 
 def make_purchase_receipt(**args):
+	frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 	pr = frappe.new_doc("Purchase Receipt")
 	args = frappe._dict(args)
 	pr.posting_date = args.posting_date or today()
