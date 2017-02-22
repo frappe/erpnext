@@ -6,7 +6,7 @@ import frappe
 import unittest
 import erpnext
 from frappe.utils.make_random import get_random
-from frappe.utils import nowdate, add_days, add_years, getdate
+from frappe.utils import nowdate, add_days, add_years, getdate, add_months
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.salary_slip.test_salary_slip \
 	import make_earning_salary_component, make_deduction_salary_component
@@ -94,7 +94,6 @@ def make_salary_structure(sal_struct):
 			"doctype": "Salary Structure",
 			"name": sal_struct,
 			"company": erpnext.get_default_company(),
-			"from_date": nowdate(),
 			"employees": get_employee_details(),
 			"earnings": get_earnings_component(),
 			"deductions": get_deductions_component(),
@@ -108,11 +107,13 @@ def get_employee_details():
 	return [{"employee": frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"),
 			"base": 25000,
 			"variable": 5000,
+			"from_date": add_months(nowdate(),-1),
 			"idx": 1
 			},
 			{"employee": frappe.get_value("Employee", {"employee_name":"test_employee_2@salary.com"}, "name"),
 			 "base": 15000,
 			 "variable": 100,
+			 "from_date": add_months(nowdate(),-1),
 			 "idx": 2
 			}
 		]

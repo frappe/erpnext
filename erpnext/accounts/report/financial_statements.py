@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
 	add_months, add_days, formatdate, cint)
 
-def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
+def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, company):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
@@ -50,7 +50,7 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 			# if a fiscal year ends before a 12 month period
 			period.to_date = year_end_date
 
-		period.to_date_fiscal_year = get_date_fiscal_year(period.to_date)
+		period.to_date_fiscal_year = get_date_fiscal_year(period.to_date, company)
 
 		period_list.append(period)
 
@@ -142,15 +142,16 @@ def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accum
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and \
 						(entry.fiscal_year == period.to_date_fiscal_year or not ignore_accumulated_values_for_fy):
+						frappe.errprint([entry.fiscal_year, period.to_date_fiscal_year])
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
 
 			if entry.posting_date < period_list[0].year_start_date:
 				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
 				
-def get_date_fiscal_year(date):
+def get_date_fiscal_year(date, company):
 	from erpnext.accounts.utils import get_fiscal_year
 	
-	return get_fiscal_year(date)[0]
+	return get_fiscal_year(date, company=company)[0]
 
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values):
 	"""accumulate children's values in parent accounts"""
