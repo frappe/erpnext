@@ -7,6 +7,4 @@ import frappe
 from frappe.model.document import Document
 
 class StudentLanguage(Document):
-	
-	def validate(self):
-		self.name = self.student_language
+	pass

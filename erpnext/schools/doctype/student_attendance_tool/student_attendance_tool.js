@@ -121,7 +121,7 @@ schools.StudentsEditor = Class.extend({
 					return !stud.disabled && !stud.checked;
 				});
 
-				frappe.confirm(__("Do you want to save attendance?<br>Present: {0}\
+				frappe.confirm(__("Do you want to update attendance?<br>Present: {0}\
 					<br>Absent: {1}", [students_present.length, students_absent.length]), function() {
 					frappe.call({
 						method: "erpnext.schools.api.mark_attendance",
