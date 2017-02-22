@@ -832,7 +832,7 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 
 # Added posting_date as one of the parameters of get_exchange_rate
 @frappe.whitelist()
-def get_exchange_rate(posting_date, account, account_currency=None, company=None,
+def get_exchange_rate(posting_date, account=None, account_currency=None, company=None,
 		reference_type=None, reference_name=None, debit=None, credit=None, exchange_rate=None):
 	from erpnext.setup.utils import get_exchange_rate
 	account_details = frappe.db.get_value("Account", account,
