@@ -375,3 +375,4 @@ erpnext.patches.v7_2.setup_auto_close_settings
 erpnext.patches.v7_2.empty_supplied_items_for_non_subcontracted
 erpnext.patches.v7_2.arrear_leave_encashment_as_salary_component
 erpnext.patches.v7_2.rename_att_date_attendance
+erpnext.patches.v7_2.update_attendance_docstatus
