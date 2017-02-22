@@ -27,10 +27,10 @@ def get_student_attendance_records(based_on, date=None, student_batch=None, cour
 	
 	if course_schedule:
 		student_attendance_list= frappe.db.sql("""select student, status from `tabStudent Attendance` where \
-			course_schedule= %s and docstatus=1""", (course_schedule), as_dict=1)
+			course_schedule= %s""", (course_schedule), as_dict=1)
 	else:
 		student_attendance_list= frappe.db.sql("""select student, status from `tabStudent Attendance` where \
-			student_batch= %s and date= %s and docstatus=1 and \
+			student_batch= %s and date= %s and \
 			(course_schedule is Null or course_schedule='')""",
 			(student_batch, date), as_dict=1)
 	
@@ -38,4 +38,5 @@ def get_student_attendance_records(based_on, date=None, student_batch=None, cour
 		for student in student_list:
 			if student.student == attendance.student:
 				student.status = attendance.status
+
 	return student_list

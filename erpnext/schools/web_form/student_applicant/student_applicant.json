@@ -16,7 +16,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2017-02-12 01:28:57.997942", 
+ "modified": "2017-02-21 04:44:46.022738", 
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "student-applicant", 
@@ -133,6 +133,7 @@
    "reqd": 0
   }, 
   {
+   "default": "INDIAN", 
    "fieldname": "nationality", 
    "fieldtype": "Data", 
    "hidden": 0, 
