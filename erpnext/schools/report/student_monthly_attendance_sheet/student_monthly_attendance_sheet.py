@@ -53,7 +53,7 @@ def get_students_list(students):
 
 def get_attendance_list(from_date, to_date, student_batch, students_list):
 	attendance_list = frappe.db.sql("""select student, date, status 
-		from `tabStudent Attendance` where docstatus = 1 and student_batch = %s 
+		from `tabStudent Attendance` where student_batch = %s 
 		and date between %s and %s
 		order by student, date""",
 		(student_batch, from_date, to_date), as_dict=1)
