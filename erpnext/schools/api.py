@@ -74,15 +74,15 @@ def make_attendance_records(student, student_name, status, course_schedule=None,
 	:param course_schedule: Course Schedule.
 	:param status: Status (Present/Absent)
 	"""
-	student_attendance_list = frappe.get_list("Student Attendance", fields = ["name"], filters = {
+	student_attendance = frappe.db.get_value("Student Attendance", filters = {
 		"student": student,
 		"course_schedule": course_schedule,
 		"student_batch": student_batch,
 		"date": date
 	})
 		
-	if student_attendance_list:
-		student_attendance = frappe.get_doc("Student Attendance", student_attendance_list[0])
+	if student_attendance:
+		student_attendance = frappe.get_doc("Student Attendance", student_attendance)
 	else:
 		student_attendance = frappe.new_doc("Student Attendance")
 	student_attendance.student = student
