@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
+from frappe.desk.form.linked_with import get_linked_doctypes
 
 class Student(Document):
 	def validate(self):
@@ -14,6 +15,22 @@ class Student(Document):
 		if self.student_applicant:
 			self.check_unique()
 			self.update_applicant_status()
+
+		if frappe.get_value("Student", self.name, "title") != self.title:
+			linked_doctypes = get_linked_doctypes("Student")
+			print linked_doctypes
+			for d in linked_doctypes:
+				print d,linked_doctypes[d]
+				if "child_doctype" not in linked_doctypes[d].keys() and "student_name" in [f.fieldname for f in frappe.get_meta(d).fields]:
+					print "in doctype"
+					frappe.db.sql("""UPDATE `tab{0}` set student_name = %s where {1} = %s"""
+						.format(d, linked_doctypes[d]["fieldname"]),(self.title, self.name))
+
+				elif "child_doctype" in linked_doctypes[d].keys() and "student_name" in \
+					[f.fieldname for f in frappe.get_meta(linked_doctypes[d]["child_doctype"]).fields]:
+					print "in child doctypes"
+					frappe.db.sql("""UPDATE `tab{0}` set student_name = %s where {1} = %s"""
+						.format(linked_doctypes[d]["child_doctype"], linked_doctypes[d]["fieldname"]),(self.title, self.name))
 
 	def check_unique(self):
 		"""Validates if the Student Applicant is Unique"""
