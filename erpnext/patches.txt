@@ -377,3 +377,4 @@ erpnext.patches.v7_2.arrear_leave_encashment_as_salary_component
 erpnext.patches.v7_2.rename_att_date_attendance
 erpnext.patches.v7_2.update_attendance_docstatus
 erpnext.patches.v7_2.move_dates_from_salary_structure_to_employee
+erpnext.patches.v7_2.make_all_assessment_group
