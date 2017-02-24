@@ -469,6 +469,12 @@ cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
 
 frappe.ui.form.on('Sales Invoice', {
 	setup: function(frm){
+		frm.custom_make_buttons = {
+			'Delivery Note': 'Delivery',
+			'Sales Invoice': 'Sales Return',
+			'Payment Request': 'Payment Request',
+			'Payment': 'Payment Entry'
+		},
 		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(doc, cdt, cdn){
 			return{
 				query: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet",

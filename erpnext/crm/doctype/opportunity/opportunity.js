@@ -5,6 +5,12 @@ frappe.provide("erpnext.crm");
 
 cur_frm.email_field = "contact_email";
 frappe.ui.form.on("Opportunity", {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Quotation': 'Quotation',
+			'Supplier Quotation': 'Supplier Quotation'
+		}
+	},
 	customer: function(frm) {
 		erpnext.utils.get_party_details(frm);
 	},
@@ -35,7 +41,7 @@ frappe.ui.form.on("Opportunity", {
 				cur_frm.cscript.create_quotation, __("Make"));
 
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
-		
+
 			if(doc.status!=="Quotation") {
 				frm.add_custom_button(__('Lost'),
 					cur_frm.cscript['Declare Opportunity Lost']);
@@ -62,7 +68,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		if(!this.frm.doc.status)
 			set_multiple(this.frm.doc.doctype, this.frm.doc.name, { status:'Open' });
 		if(!this.frm.doc.company && frappe.defaults.get_user_default("Company"))
-			set_multiple(this.frm.doc.doctype, this.frm.doc.name, 
+			set_multiple(this.frm.doc.doctype, this.frm.doc.name,
 				{ company:frappe.defaults.get_user_default("Company") });
 
 		this.setup_queries();

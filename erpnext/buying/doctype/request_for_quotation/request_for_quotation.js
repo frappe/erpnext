@@ -8,6 +8,10 @@ cur_frm.add_fetch('contact', 'email_id', 'email_id')
 
 frappe.ui.form.on("Request for Quotation",{
 	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Supplier Quotation': 'Supplier Quotation'
+		}
+
 		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function(doc, cdt, cdn){
 			var d =locals[cdt][cdn];
 			return {

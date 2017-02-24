@@ -6,6 +6,12 @@
 frappe.provide("erpnext.stock");
 
 frappe.ui.form.on("Purchase Receipt", {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Stock Entry': 'Return',
+			'Purchase Invoice': 'Invoice'
+		}
+	},
 	onload: function(frm) {
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
 			frm.set_query(field, "items", function() {
@@ -26,7 +32,7 @@ frappe.ui.form.on("Purchase Receipt", {
 				]
 			}
 		});
-		
+
 	}
 });
 

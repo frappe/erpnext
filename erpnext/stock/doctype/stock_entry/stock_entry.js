@@ -66,6 +66,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			this.show_general_ledger();
 		}
 		erpnext.hide_company();
+		erpnext.utils.add_item(this.frm);
 	},
 
 	on_submit: function() {
@@ -176,7 +177,6 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				excise.voucher_type = 'Excise Entry';
 				frappe.set_route('Form', 'Journal Entry', excise.name);
 			}, __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 	},
 
 	items_add: function(doc, cdt, cdn) {
