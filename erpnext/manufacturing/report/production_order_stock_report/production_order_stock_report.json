@@ -7,13 +7,21 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "letter_head": "Standard", 
- "modified": "2017-01-10 14:01:43.905861", 
+ "letter_head": "", 
+ "modified": "2017-02-24 19:59:07.792058", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order Stock Report", 
  "owner": "Administrator", 
  "ref_doctype": "Production Order", 
  "report_name": "Production Order Stock Report", 
- "report_type": "Script Report"
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Manufacturing User"
+  }, 
+  {
+   "role": "Stock User"
+  }
+ ]
 }
