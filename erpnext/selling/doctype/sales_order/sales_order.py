@@ -157,7 +157,7 @@ class SalesOrder(SellingController):
 		self.update_reserved_qty()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
-
+		self.update_project()
 		self.update_prevdoc_status('submit')
 
 	def on_cancel(self):
@@ -167,10 +167,20 @@ class SalesOrder(SellingController):
 
 		self.check_nextdoc_docstatus()
 		self.update_reserved_qty()
-
+		self.update_project()
 		self.update_prevdoc_status('cancel')
 
 		frappe.db.set(self, 'status', 'Cancelled')
+		
+	def update_project(self):
+		project_list = []
+		for d in self.items:
+			if d.project and d.project not in project_list:
+				project = frappe.get_doc("Project", d.project)
+				project.flags.dont_sync_tasks = True
+				project.update_sales_costing()
+				project.save()
+				project_list.append(d.project)			
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
