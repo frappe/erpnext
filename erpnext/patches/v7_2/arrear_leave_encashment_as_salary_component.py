@@ -2,13 +2,14 @@ import frappe
 
 def execute():
 	frappe.reload_doctype('Salary Slip', 'Salary Component')
-	salary_components = ['Arrear', 'Leave Encashment']
-	for salary_component in salary_components:
+	salary_components = [['Arrear', "ARR"], ['Leave Encashment', 'LENC']]
+	for salary_component, salary_abbr in salary_components:
 		if not frappe.db.exists('Salary Component', salary_component):
 			sal_comp = frappe.get_doc({
 				"doctype": "Salary Component",
 				"salary_component": salary_component,
-				"type": "Earning"
+				"type": "Earning",
+				"salary_component_abbr": salary_abbr
 			}).insert()
 
 	salary_slips = frappe.db.sql("""select name, arrear_amount, leave_encashment_amount from `tabSalary Slip`

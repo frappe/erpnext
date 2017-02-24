@@ -64,8 +64,11 @@ class LeaveApplication(Document):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
 			frappe.throw(_("To date cannot be before from date"))
 			
-		if self.half_day and (getdate(self.half_day_date) < getdate(self.from_date) or (getdate(self.half_day_date) > getdate(self.to_date))):
-			frappe.throw(_("Half Day Date should be between From Date and To Date"))
+		if self.half_day and self.half_day_date \
+			and (getdate(self.half_day_date) < getdate(self.from_date) 
+			or getdate(self.half_day_date) > getdate(self.to_date)):
+				
+				frappe.throw(_("Half Day Date should be between From Date and To Date"))
 			
 		if not is_lwp(self.leave_type):
 			self.validate_dates_acorss_allocation()
@@ -154,7 +157,9 @@ class LeaveApplication(Document):
 			# hack! if name is null, it could cause problems with !=
 			self.name = "New Leave Application"
 
-		for d in frappe.db.sql("""select name, leave_type, posting_date, from_date, to_date, total_leave_days
+		for d in frappe.db.sql("""
+			select 
+				name, leave_type, posting_date, from_date, to_date, total_leave_days, half_day_date
 			from `tabLeave Application`
 			where employee = %(employee)s and docstatus < 2 and status in ("Open", "Approved")
 			and to_date >= %(from_date)s and from_date <= %(to_date)s
@@ -164,10 +169,14 @@ class LeaveApplication(Document):
 				"to_date": self.to_date,
 				"name": self.name
 			}, as_dict = 1):
-
-			if d['total_leave_days']==0.5 and cint(self.half_day)==1:
-				sum_leave_days = self.get_total_leaves_on_half_day()
-				if sum_leave_days==1:
+			
+			if cint(self.half_day)==1 and getdate(self.half_day_date) == getdate(d.half_day_date) and (
+				flt(self.total_leave_days)==0.5 
+				or getdate(self.from_date) == getdate(d.to_date) 
+				or getdate(self.to_date) == getdate(d.from_date)):
+				
+				total_leaves_on_half_day = self.get_total_leaves_on_half_day()
+				if total_leaves_on_half_day >= 1:
 					self.throw_overlap_error(d)
 			else:
 				self.throw_overlap_error(d)
@@ -179,18 +188,19 @@ class LeaveApplication(Document):
 		frappe.throw(msg, OverlapError)
 
 	def get_total_leaves_on_half_day(self):
-		return frappe.db.sql("""select sum(total_leave_days) from `tabLeave Application`
+		leave_count_on_half_day_date = frappe.db.sql("""select count(name) from `tabLeave Application`
 			where employee = %(employee)s
 			and docstatus < 2
 			and status in ("Open", "Approved")
-			and from_date = %(from_date)s
-			and to_date = %(to_date)s
+			and half_day = 1
+			and half_day_date = %(half_day_date)s
 			and name != %(name)s""", {
 				"employee": self.employee,
-				"from_date": self.from_date,
-				"to_date": self.to_date,
+				"half_day_date": self.half_day_date,
 				"name": self.name
 			})[0][0]
+			
+		return leave_count_on_half_day_date * 0.5
 
 	def validate_max_days(self):
 		max_days = frappe.db.get_value("Leave Type", self.leave_type, "max_days_allowed")
