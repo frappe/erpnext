@@ -1,71 +1,23 @@
 <div class="pos">
-	<div class="row">
-		<div class="col-sm-6 pos-bill-wrapper">
-			<div class="col-sm-12"><h6 class="form-section-heading uppercase">Item Cart</h6></div>
-			<div class="pos-bill">
-				<div class="item-cart">
-					<div class="pos-list-row pos-bill-header text-muted h6">
-						<span class="cell subject">
-							<!--<input class="list-select-all" type="checkbox" title="{%= __("Select All") %}">-->
-							{{ __("Item Name")}}
-						</span>
-						<span class="cell text-right">{{ __("Quantity") }}</span>
-						<span class="cell text-right">{{ __("Discount") }}</span>
-						<span class="cell text-right">{{ __("Rate") }}</span>
-					</div>
-					<div class="item-cart-items">
-						<div class="no-items-message text-extra-muted">
-							<span class="text-center">
-								<i class="fa fa-4x fa-shopping-cart"></i>
-								<p>Tap items to add them here</p>
-							</span>
+    			</div>
+    			<div class="totals-area">
+                    <div class="row pos-bill-row net-total-area">
+                        <div class="col-xs-6"><h6 class="text-muted">{%= __("Net Total") %}</h6></div>
+                        <div class="col-xs-6"><h6 class="net-total text-right"></h6></div>
+                    </div>
+                    <div class="row pos-bill-row tax-area hide">
+						<div class="col-xs-12 text-muted">
+	                        <h6>{%= __("Taxes") %}</h6>
+							<div class="tax-table small"></div>
 						</div>
-						<div class="items">
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="totals-area">
-				<div class="pos-list-row net-total-area hide">
-					<div class="cell subject"></div>
-					<div class="cell"></div>
-					<div class="cell text-right">{%= __("Net Total") %}</div>
-					<div class="cell net-total text-right"></div>
-				</div>
-				<div class="pos-list-row tax-area">
-					<div class="cell subject"></div>
-					<div class="cell"></div>
-					<div class="cell text-muted">{%= __("Taxes") %}</div>
-					<div class="cell text-right tax-table"></div>
-				</div>
-				{% if (apply_discount_on) { %}
-				<div class="pos-list-row discount-amount-area hide">
-					<div class="cell text-muted">{%= __("Discount") %}</div>
-					<div class="cell discount-field-col">
-						<div class="input-group input-group-sm">
-							<span class="input-group-addon">%</span>
-							<input type="text" class="form-control discount-percentage text-right">
-						</div>
-					</div>
-					<div class="cell discount-field-col">
-						<div class="input-group input-group-sm">
-							<span class="input-group-addon">{%= get_currency_symbol(currency) %}</span>
-							<input type="text" class="form-control discount-amount text-right" placeholder="{%= 0.00 %}">
-						</div>
-					</div>
-				</div>
-				{% } %}
-				<div class="pos-list-row grand-total-area" style="border-bottom:1px solid #d1d8dd;">
-					<div class="cell subject"></div>
-					<div class="cell text-right bold">{%= __("Grand Total") %}</div>
-					<div class="cell grand-total text-right lead"></div>
-				</div>
-			</div>
-			<div class="list-customers" style="display:none">
-
-			</div>
-			<div class="row" style="margin-top: 15px">
-				<div class="col-xs-6 selected-item">
+                    </div>
+					{% if (apply_discount_on) { %}
+	                    <div class="row pos-bill-row discount-amount-area">
+	                        <div class="col-xs-6"><h6 class="text-muted">{%= __("Discount") %}</h6></div>
+							<div class="col-xs-3 discount-field-col">
+								<div class="input-group input-group-sm">
+									<span class="input-group-addon">%</span>
+									<input type="text" class="form-control discount-percentage text-right">
 
 				</div>
 				<div class="col-xs-6 numeric_keypad" style="display:none">

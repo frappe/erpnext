@@ -954,6 +954,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.set_item_details(item_code, "rate", $(this).val());
 		})
 	},
+	
+	get_child_item: function(item_code) {
+		var me = this;
+		return $.map(me.frm.doc.items, function(doc){
+			if(doc.item_code == item_code) {
+				return doc
+			}
+		})
+	},
 
 	render_selected_item: function() {
 		doc = this.get_child_item(this.item_code);
