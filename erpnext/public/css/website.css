@@ -254,7 +254,7 @@
   display: inline-block;
   color: white;
   background: #8FD288;
-  padding: 2px;
+  padding: 3px;
 }
 .duration-invisible {
   visibility: hidden;
@@ -269,5 +269,5 @@
   border: none;
 }
 .bom-spec {
-	margin-bottom: 20px;
+  margin-bottom: 20px;
 }
