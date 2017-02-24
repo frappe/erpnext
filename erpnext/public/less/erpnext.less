@@ -74,7 +74,7 @@
 	border-bottom: 1px solid #d1d8dd;
 }
 
-.item-list-area {
+.item-list-area, .list-customers {
 	padding: 15px 0px;
 	overflow-y: scroll;
 	height: ~"calc(100vh - 162px)";
@@ -100,6 +100,22 @@
 	border-top: 1px solid @border-color;
 	margin-left: -15px;
 	margin-right: -15px;
+}
+
+.item-cart {
+	overflow-y: scroll;
+	height: ~"calc(100vh - 60vh)";
+}
+
+.edit-pos-item {
+	height: 40px;
+	font-size: 14px;
+	border-top: 1px solid @border-color;
+}
+
+.pos-bill-item:hover {
+	background-color: #f5f7fa;
+	cursor: pointer;
 }
 
 .pos-bill-row {
@@ -197,13 +213,21 @@
 
 .pos-keyboard-key, .delete-btn {
 	border: 1px solid #d1d8dd;
-	height:85px;
-	width:85px;
-	margin:10px 10px;
-	font-size:24px;
+	height:69px;
+	width:69px;
+	font-size:20px;
 	font-weight:200;
 	background-color: #FDFDFD;
 	border-color: #e8e8e8;
+	margin-left:-4px;
+}
+
+.pos-pay {
+	height:69px;
+	width:69px;
+	font-size:17px;
+	font-weight:200;
+	margin-left:-4px;
 }
 
 .multimode-payments {

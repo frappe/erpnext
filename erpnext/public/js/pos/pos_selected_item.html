@@ -1,0 +1,27 @@
+<h5 style="margin-top:5px">Item <span class="text-primary no-margin font-montserrat">{%= item_name %}</h5>
+<div class="pos-bill-item" data-item-code="{%= item_code %}">
+	<div class="form-group edit-pos-item">
+		<label class=" text-left col-xs-4">Price:</label>
+		<div class="col-xs-8">
+			<input class="form-control text-right" value="{%= rate %}">
+		</div>
+	</div>
+	<div class="form-group edit-pos-item">
+		<label class=" text-left col-xs-4">Qty:</label>
+		<div class="col-xs-8">
+			<input class="form-control text-right pos-item-qty" value="{%= qty %}">
+		</div>
+	</div>
+	<div class="form-group edit-pos-item">
+		<label class=" text-left col-xs-4">Discount:</label>
+		<div class="col-xs-8">
+			<input class="form-control text-right" value="{%= discount_percentage %}">
+		</div>
+	</div>
+	<div class="form-group edit-pos-item">
+		<label class=" text-left col-xs-4">Amount:</label>
+		<div class="col-xs-8">
+			<input class="form-control text-right " value="{%= amount %}">
+		</div>
+	</div>
+</div>

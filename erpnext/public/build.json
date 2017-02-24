@@ -20,6 +20,7 @@
         "public/js/controllers/transaction.js",
         "public/js/pos/pos.html",
         "public/js/pos/pos_bill_item.html",
+		"public/js/pos/pos_selected_item.html",
         "public/js/pos/pos_item.html",
         "public/js/pos/pos_tax_row.html",
         "public/js/pos/pos_invoice_list.html",
