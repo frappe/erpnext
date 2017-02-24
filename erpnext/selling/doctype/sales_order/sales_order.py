@@ -174,13 +174,12 @@ class SalesOrder(SellingController):
 		
 	def update_project(self):
 		project_list = []
-		for d in self.items:
-			if d.project and d.project not in project_list:
-				project = frappe.get_doc("Project", d.project)
+		if self.project:
+				project = frappe.get_doc("Project", self.project)
 				project.flags.dont_sync_tasks = True
 				project.update_sales_costing()
 				project.save()
-				project_list.append(d.project)			
+				project_list.append(self.project)				
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
