@@ -176,6 +176,13 @@ class Project(Document):
 			from `tabPurchase Invoice Item` where project = %s and docstatus=1""", self.name)
 
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
+		
+	def update_sales_costing(self):
+		total_sales_cost = frappe.db.sql("""select sum(base_net_amount)
+			from `tabSales Order Item` where project = %s and docstatus=1""", self.name)
+
+		self.total_sales_cost = total_sales_cost and total_sales_cost[0][0] or 0
+				
 
 	def send_welcome_email(self):
 		url = get_url("/project/?name={0}".format(self.name))
