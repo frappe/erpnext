@@ -31,7 +31,6 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 						}
 					})
 				}, __("Get items from"));
-			cur_frm.cscript.link_requests(); 
 		}
 	},
 
