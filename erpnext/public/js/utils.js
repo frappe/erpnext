@@ -60,6 +60,7 @@ $.extend(erpnext, {
 					},
 					{
 						"fieldtype": "Button",
+						"fieldname": "add",
 						"label": __("Add")
 					}
 				]
