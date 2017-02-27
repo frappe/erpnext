@@ -47,6 +47,7 @@ $.extend(erpnext, {
 				fields: [
 					{
 						"fieldtype": "Link",
+						"fieldname": "serial_no",
 						"options": "Serial No",
 						"label": __("Serial No"),
 						"get_query": function () {
@@ -60,6 +61,7 @@ $.extend(erpnext, {
 					},
 					{
 						"fieldtype": "Button",
+						"fieldname": "add",
 						"label": __("Add")
 					}
 				]

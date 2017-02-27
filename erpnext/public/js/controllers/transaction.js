@@ -781,7 +781,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					if(k=="price_list_rate") {
 						if(flt(v) != flt(d.price_list_rate)) price_list_rate_changed = true;
 					}
-					frappe.model.set_value(d.doctype, d.name, k, v);
+					if(v) {
+						frappe.model.set_value(d.doctype, d.name, k, v);
+					}
 				}
 			}
 
