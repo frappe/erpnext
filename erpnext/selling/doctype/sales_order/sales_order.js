@@ -4,6 +4,14 @@
 {% include 'erpnext/selling/sales_common.js' %}
 
 frappe.ui.form.on("Sales Order", {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Delivery Note': 'Delivery',
+			'Sales Invoice': 'Invoice',
+			'Material Request': 'Material Request',
+			'Purchase Order': 'Purchase Order'
+		}
+	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);

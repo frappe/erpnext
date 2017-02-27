@@ -231,7 +231,7 @@ def get_data():
 		{
 			"module_name": "Assessment",
 			"color": "#8a70be",
-			"icon": "fa fa-file-text-alt",
+			"icon": "fa fa-file-text",
 			"label": _("Assessment"),
 			"link": "List/Assessment",
 			"_doctype": "Assessment",

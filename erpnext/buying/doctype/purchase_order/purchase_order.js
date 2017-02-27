@@ -6,6 +6,13 @@ frappe.provide("erpnext.buying");
 {% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
 
 frappe.ui.form.on("Purchase Order", {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Purchase Receipt': 'Receive',
+			'Purchase Invoice': 'Invoice',
+			'Stock Entry': 'Material to Supplier'
+		}
+	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
@@ -28,10 +35,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			var item = cur_frm.doc.items[i];
 			if(item.delivered_by_supplier !== 1) {
 				allow_receipt = true;
-			}
-
-			else {
-				is_drop_ship = true
+			} else {
+				is_drop_ship = true;
 			}
 
 			if(is_drop_ship && allow_receipt) {
