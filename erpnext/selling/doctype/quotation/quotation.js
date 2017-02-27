@@ -4,6 +4,14 @@
 
 {% include 'erpnext/selling/sales_common.js' %}
 
+frappe.ui.form.on('Quotation', {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Sales Order': 'Make Sales Order'
+		}
+	}
+});
+
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
 		var me = this;

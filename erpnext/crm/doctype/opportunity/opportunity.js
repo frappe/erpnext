@@ -5,6 +5,12 @@ frappe.provide("erpnext.crm");
 
 cur_frm.email_field = "contact_email";
 frappe.ui.form.on("Opportunity", {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Quotation': 'Quotation',
+			'Supplier Quotation': 'Supplier Quotation'
+		}
+	},
 	customer: function(frm) {
 		frm.trigger('set_contact_link');
 		erpnext.utils.get_party_details(frm);
