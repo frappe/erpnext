@@ -63,8 +63,8 @@ def get_help_messages():
 		if count < 3:
 			messages.append(dict(
 				title=_('Create Leads'),
-				description=_('Create Leads'),
-				action=_('Leads help you get business, add all your contacts and more as your leads'),
+				description=_('Leads help you get business, add all your contacts and more as your leads'),
+				action=_('Make Lead'),
 				route='List/Lead',
 				count=count
 			))
