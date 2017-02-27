@@ -72,7 +72,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.frm.toggle_display("supplier_name",
 			(this.frm.doc.supplier_name && this.frm.doc.supplier_name!==this.frm.doc.supplier));
 
-		if(this.frm.docstatus==0 &&
+		if(this.frm.doc.docstatus==0 &&
 			(this.frm.doctype==="Purchase Order" || this.frm.doctype==="Material Request")) {
 			this.set_from_product_bundle();
 		}
