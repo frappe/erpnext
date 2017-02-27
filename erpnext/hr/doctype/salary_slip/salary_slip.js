@@ -62,6 +62,15 @@ frappe.ui.form.on("Salary Slip", {
 	
 })
 
+frappe.ui.form.on('Salary Detail', {
+	earnings_remove: function(frm, dt, dn) {
+		calculate_all(frm.doc, dt, dn);
+	},
+	deductions_remove: function(frm, dt, dn) {
+		calculate_all(frm.doc, dt, dn);
+	}
+})
+
 // Get leave details
 //---------------------------------------------------------------------
 cur_frm.cscript.start_date = function(doc, dt, dn){
