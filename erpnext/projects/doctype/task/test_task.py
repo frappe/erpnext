@@ -16,6 +16,7 @@ class TestTask(unittest.TestCase):
 		task1.update({
 			"status": "Open",
 			"subject": "_Test Task 1",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-1",
 			"exp_end_date": "2015-1-10"
 		})
@@ -25,6 +26,7 @@ class TestTask(unittest.TestCase):
 		task2.update({
 			"status": "Open",
 			"subject": "_Test Task 2",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-11",
 			"exp_end_date": "2015-1-15",
 			"depends_on":[
@@ -39,6 +41,7 @@ class TestTask(unittest.TestCase):
 		task3.update({
 			"status": "Open",
 			"subject": "_Test Task 2",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-11",
 			"exp_end_date": "2015-1-15",
 			"depends_on":[
@@ -80,6 +83,7 @@ class TestTask(unittest.TestCase):
 		task1.update({
 			"status": "Open",
 			"subject": "_Test Task 1",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-1",
 			"exp_end_date": "2015-1-10"
 		})
@@ -89,11 +93,13 @@ class TestTask(unittest.TestCase):
 		task2.update({
 			"status": "Open",
 			"subject": "_Test Task 2",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-11",
 			"exp_end_date": "2015-1-15",
 			"depends_on":[
 				{
-					"task": task1.name
+					"task": task1.name,
+					"project": "_Test Project"
 				}
 			]
 		})
@@ -103,11 +109,13 @@ class TestTask(unittest.TestCase):
 		task3.update({
 			"status": "Open",
 			"subject": "_Test Task 3",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-16",
 			"exp_end_date": "2015-1-18",
 			"depends_on":[
 				{
-					"task": task2.name
+					"task": task2.name,
+					"project": "_Test Project"
 				}
 			]
 		})
