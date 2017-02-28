@@ -61,6 +61,23 @@
 .pos-item-toolbar .form-group {
   margin-bottom: 0px;
 }
+<<<<<<< d8a807e5853af7f9d633b32c2aff0c80ebca7d3d
+=======
+.pos-bill-wrapper {
+  border: 1px solid #d1d8dd;
+  border-top: none;
+  margin-right: -1px;
+}
+.pos-bill {
+  border-top: 1px solid #d1d8dd;
+  margin-left: -15px;
+  margin-right: -15px;
+}
+.item-cart {
+  overflow-y: scroll;
+  height: calc(100vh - 72vh);
+}
+>>>>>>> added event on numeric keypad
 .edit-pos-item {
   height: 50px;
   font-size: 14px;
@@ -136,6 +153,16 @@
 }
 .pos-keyboard-key,
 .delete-btn {
+  border: 1px solid #d1d8dd;
+  height: 85px;
+  width: 85px;
+  margin: 10px 10px;
+  font-size: 24px;
+  font-weight: 200;
+  background-color: #FDFDFD;
+  border-color: #e8e8e8;
+}
+.numeric-keypad {
   border: 1px solid #d1d8dd;
   height: 69px;
   width: 69px;

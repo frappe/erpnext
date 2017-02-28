@@ -954,6 +954,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.set_item_details(item_code, "rate", $(this).val());
 		})
 	},
+
+	render_selected_item: function() {
+		doc = this.get_child_item(this.item_code);
+		$(this.wrapper).find('.selected-item').empty();
+		if(doc.length) {
+			this.selected_row = frappe.render_template("pos_selected_item", doc[0])
+			$(this.wrapper).find('.selected-item').html(this.selected_row)
+		}
+	},
 	
 	get_child_item: function(item_code) {
 		var me = this;
