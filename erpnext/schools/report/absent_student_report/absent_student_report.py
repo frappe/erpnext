@@ -49,7 +49,7 @@ def get_columns(filters):
 
 def get_absent_students(date):
 	absent_students = frappe.db.sql("""select student, student_name, student_batch from `tabStudent Attendance` 
-		where docstatus = 1 and status="Absent" and date = %s order by student_batch, student_name""", date, as_dict=1)
+		where status="Absent" and date = %s order by student_batch, student_name""", date, as_dict=1)
 	return absent_students
 
 def get_leave_applications(date):

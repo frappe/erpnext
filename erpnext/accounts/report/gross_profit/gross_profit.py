@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
+from erpnext.stock.utils import get_incoming_rate
 from frappe.utils import flt
 
 
@@ -208,21 +209,18 @@ class GrossProfitGenerator(object):
 								flt(my_sle[i+1].stock_value) or 0.0
 							return  previous_stock_value - flt(sle.stock_value)
 			else:
-				return flt(row.qty) * self.get_average_buying_rate(item_code)
-
+				return flt(row.qty) * self.get_average_buying_rate(row, item_code)
 
 		return 0.0
 
-	def get_average_buying_rate(self, item_code):
+	def get_average_buying_rate(self, row, item_code):
 		if not item_code in self.average_buying_rate:
 			if item_code in self.non_stock_items:
 				self.average_buying_rate[item_code] = flt(frappe.db.sql("""select sum(base_net_amount) / sum(qty * conversion_factor)
 					from `tabPurchase Invoice Item`
 					where item_code = %s and docstatus=1""", item_code)[0][0])
 			else:
-				self.average_buying_rate[item_code] = flt(frappe.db.sql("""select avg(valuation_rate)
-					from `tabStock Ledger Entry`
-					where item_code = %s and qty_after_transaction > 0""", item_code)[0][0])
+				self.average_buying_rate[item_code] = get_incoming_rate(row)
 
 		return self.average_buying_rate[item_code]
 

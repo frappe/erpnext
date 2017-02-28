@@ -5,17 +5,6 @@ frappe.provide("erpnext.company");
 
 frappe.ui.form.on("Company", {
 	setup: function(frm) {
-		frm.fields_dict['default_payable_account'].get_query = function() {
-			return{
-				filters: {
-					"root_type": "Liability",
-					"account_type": "Payable"
-				}
-			}
-		}
-	},
-
-	onload: function(frm) {
 		erpnext.company.setup_queries(frm);
 	},
 
@@ -146,6 +135,7 @@ erpnext.company.setup_queries = function(frm) {
 		["default_payable_account", {"account_type": "Payable"}],
 		["default_expense_account", {"root_type": "Expense"}],
 		["default_income_account", {"root_type": "Income"}],
+		["default_payroll_payable_account", {"root_type": "Liability"}],
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
 		["exchange_gain_loss_account", {"root_type": "Expense"}],

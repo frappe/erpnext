@@ -8,7 +8,7 @@ from frappe.utils import flt, cint
 from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 
 def execute(filters=None):
-	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, filters.periodicity)
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, filters.periodicity, filters.company)
 
 	asset = get_data(filters.company, "Asset", "Debit", period_list, only_current_fiscal_year=False)
 	liability = get_data(filters.company, "Liability", "Credit", period_list, only_current_fiscal_year=False)

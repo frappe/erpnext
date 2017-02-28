@@ -1,0 +1,26 @@
+{
+ "content": null, 
+ "creation": "2012-09-21 20:15:16", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "fa fa-bar-chart", 
+ "idx": 1, 
+ "modified": "2017-02-20 17:33:05.913097", 
+ "modified_by": "Administrator", 
+ "module": "Manufacturing", 
+ "name": "production-analytics", 
+ "owner": "Administrator", 
+ "page_name": "production-analytics", 
+ "roles": [
+  {
+   "role": "Analytics"
+  }, 
+  {
+   "role": "Manufacturing Manager"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "title": "Production Analytics"
+}

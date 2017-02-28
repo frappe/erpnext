@@ -11,9 +11,8 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	setup: function(frm) {
-		var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
-
 		frm.set_query("paid_from", function() {
+			var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
 			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : party_account_type;
 
@@ -28,11 +27,14 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_query("party_type", function() {
 			return{
-				query: "erpnext.setup.doctype.party_type.party_type.get_party_type"
+				"filters": {
+					"name": ["in",["Customer","Supplier"]],
+				}
 			}
 		});
 
 		frm.set_query("paid_to", function() {
+			var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
 	 			["Bank", "Cash"] : party_account_type;
 
@@ -85,8 +87,13 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.show_general_ledger(frm);
 	},
 
+	company: function(frm) {
+		frm.events.hide_unhide_fields(frm);
+		frm.events.set_dynamic_labels(frm);
+	},
+
 	hide_unhide_fields: function(frm) {
-		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
 
 		frm.toggle_display("source_exchange_rate",
 			(frm.doc.paid_amount && frm.doc.paid_from_account_currency != company_currency));
@@ -124,7 +131,7 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	set_dynamic_labels: function(frm) {
-		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
 
 		frm.set_currency_labels(["base_paid_amount", "base_received_amount", "base_total_allocated_amount",
 			"difference_amount"], company_currency);
@@ -136,6 +143,10 @@ frappe.ui.form.on('Payment Entry', {
 			frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency;
 
 		frm.set_currency_labels(["total_allocated_amount", "unallocated_amount"], party_account_currency);
+
+		var currency_field = (frm.doc.payment_type=="Receive") ? "paid_from_account_currency" : "paid_to_account_currency"
+		frm.set_df_property("total_allocated_amount", "options", currency_field);
+		frm.set_df_property("unallocated_amount", "options", currency_field);
 
 		frm.set_currency_labels(["total_amount", "outstanding_amount", "allocated_amount"],
 			party_account_currency, "references");

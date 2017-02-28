@@ -96,6 +96,12 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Feedback Trigger",
+					"label": _("Feedback Trigger"),
+					"description": _("Automatically triggers the feedback request based on conditions.")
+				},
+				{
+					"type": "doctype",
 					"name": "Email Digest",
 					"description": _("Create and manage daily, weekly and monthly email digests.")
 				},

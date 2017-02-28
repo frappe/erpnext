@@ -13,7 +13,7 @@ You can either directly create your Customers via
 
 or upload it via the Data Import Tool.
 
-A Customer can avail the features (operations) in the selling process. The general flow can be summarazed as:
+A Customer can avail the features (operations) in the selling process. The general flow can be summarised as:
 
 <img class="screenshot" alt="Customer" src="{{docs_base_url}}/assets/img/crm/customer-to selling-flowchart.jpeg">
 

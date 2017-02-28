@@ -324,6 +324,12 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 }
 
 frappe.ui.form.on("Purchase Invoice", {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Purchase Invoice': 'Debit Note',
+			'Payment Entry': 'Payment'
+		}
+	},
 	onload: function(frm) {
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
 			frm.set_query(field, "items", function() {

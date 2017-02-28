@@ -5,6 +5,12 @@ frappe.provide("erpnext.crm");
 
 cur_frm.email_field = "contact_email";
 frappe.ui.form.on("Opportunity", {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Quotation': 'Quotation',
+			'Supplier Quotation': 'Supplier Quotation'
+		}
+	},
 	customer: function(frm) {
 		frm.trigger('set_contact_link');
 		erpnext.utils.get_party_details(frm);
@@ -101,8 +107,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 
 		$.each([["lead", "lead"],
 			["customer", "customer"],
-			["contact_person", "customer_filter"],
-			["territory", "not_a_group_filter"]], function(i, opts) {
+			["contact_person", "customer_filter"]], function(i, opts) {
 				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
 			});
 	},

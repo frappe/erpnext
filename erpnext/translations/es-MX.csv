@@ -1,5 +1,7 @@
 DocType: Delivery Note,% Installed,% Instalado
-DocType: Sales Order,SO-,OV-
+apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +150,Source and target warehouse must be different,El almacén de origen debe ser diferente al de destino
+DocType: Item,Standard Selling Rate,Tarifa de venta estándar
+DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Especificar el tipo de cambio para convertir de una moneda a otra
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +437,Show Salary Slip,Mostrar recibo de nómina
 DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
 
@@ -42,30 +44,5 @@ La tasa impositiva que se defina aquí será la tasa de gravamen predeterminada 
  8. Línea de referencia: Si se basa en ""Línea anterior al total"" se puede seleccionar el número de la fila que será tomado como base para este cálculo (por defecto es la fila anterior).
  9. Considerar impuesto o cargo para: En esta sección se puede especificar si el impuesto / cargo es sólo para la valoración (no una parte del total) o sólo para el total (no agrega valor al elemento) o para ambos.
  10. Añadir o deducir: Si usted quiere añadir o deducir el impuesto."
-DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Especificar el tipo de cambio para convertir de una moneda a otra
-apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +150,Source and target warehouse must be different,El almacén de origen debe ser diferente al de destino
 DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
-DocType: Item,Standard Selling Rate,Tarifa de venta estándar
-DocType: Address Template,"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<h4> Por defecto la plantilla <!-- h4--> 
- <p> <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </a> y todos los campos de la Dirección ( incluyendo campos personalizados en su caso) estará disponible <!-- p--> 
- </p><pre> <code> {{address_line1}} &amp; lt; br &amp; gt; 
- {% if address_line2%} {{address_line2}} &amp; lt; br &amp; gt; { endif% -%} 
- {{ciudad}} &amp; lt; br &amp; gt; 
- {% if%} Estado {{Estado}} &amp; lt; br &amp; gt; {% endif -%} {% if 
- código PIN%} PIN: {{código PIN}} &amp; lt; br &amp; gt; {% endif -%} 
- {{país}} &amp; lt; br &amp; gt; 
- {% if teléfono%} Teléfono: {{teléfono}} &amp; lt; br &amp; gt; { % endif -%} 
- {% if fax%} Fax: {{fax}} &amp; lt; br &amp; gt; {% endif -%} 
- {% if email_ID%} Email: {{email_ID}} &amp; lt; br &amp; gt ; {% endif -%} 
- <!-- code--> <!-- pre--></code></pre></h4>"
+DocType: Sales Order,SO-,OV-

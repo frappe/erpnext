@@ -8,19 +8,18 @@ frappe.provide("erpnext.stock.delivery_note");
 
 frappe.ui.form.on("Delivery Note", {
 	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Packing Slip': 'Packing Slip',
+			'Installation Note': 'Installation Note',
+			'Sales Invoice': 'Invoice',
+			'Stock Entry': 'Return',
+		},
 		frm.set_indicator_formatter('item_code',
 			function(doc) {
 				return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
 			})
 
-		frm.set_query("warehouse", "items", function() {
-			return {
-				filters: [
-					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-					["Warehouse", "is_group", "=", 0]
-				]
-			}
-		})
+		erpnext.queries.setup_warehouse_query(frm);
 
 	}
 });

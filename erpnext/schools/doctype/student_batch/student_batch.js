@@ -3,7 +3,23 @@
 
 frappe.ui.form.on('Student Batch', {
 	refresh: function(frm) {
-
+		if (!frm.doc.__islocal) {
+			frm.add_custom_button(__("Update Email Group"), function() {
+				frappe.call({
+					method: "erpnext.schools.api.update_email_group",
+					args: {
+						"doctype": "Student Batch",
+						"name": frm.doc.name
+					}
+				});
+			});
+			frm.add_custom_button(__("Newsletter"), function() {
+				frappe.route_options = {
+					email_group: frm.doc.name
+				}
+				frappe.set_route("List", "Newsletter");
+			});
+		}
 	},
 	
 	onload: function(frm){

@@ -6,7 +6,7 @@ import frappe
 import unittest
 import erpnext
 from frappe.utils.make_random import get_random
-from frappe.utils import nowdate, add_days, add_years, getdate
+from frappe.utils import nowdate, add_days, add_years, getdate, add_months
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.salary_slip.test_salary_slip \
 	import make_earning_salary_component, make_deduction_salary_component
@@ -17,7 +17,7 @@ class TestSalaryStructure(unittest.TestCase):
 	def setUp(self):
 		self.make_holiday_list()
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Structure Test Holiday List")
-		make_earning_salary_component(["Basic Salary", "Allowance", "HRA"])
+		make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA"])
 		make_deduction_salary_component(["Professional Tax", "TDS"])
 		make_employee("test_employee@salary.com")
 		make_employee("test_employee_2@salary.com")
@@ -93,7 +93,6 @@ def make_salary_structure(sal_struct):
 			"doctype": "Salary Structure",
 			"name": sal_struct,
 			"company": erpnext.get_default_company(),
-			"from_date": nowdate(),
 			"employees": get_employee_details(),
 			"earnings": get_earnings_component(),
 			"deductions": get_deductions_component(),
@@ -107,11 +106,13 @@ def get_employee_details():
 	return [{"employee": frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"),
 			"base": 25000,
 			"variable": 5000,
+			"from_date": add_months(nowdate(),-1),
 			"idx": 1
 			},
 			{"employee": frappe.get_value("Employee", {"employee_name":"test_employee_2@salary.com"}, "name"),
 			 "base": 15000,
 			 "variable": 100,
+			 "from_date": add_months(nowdate(),-1),
 			 "idx": 2
 			}
 		]
@@ -139,8 +140,8 @@ def get_earnings_component():
 					"idx": 3
 				},
 				{
-					"salary_component": 'Allowance',
-					"abbr":'A',
+					"salary_component": 'Special Allowance',
+					"abbr":'SA',
 					"condition": 'H < 10000',
 					"formula": 'BS*.5',
 					"idx": 4

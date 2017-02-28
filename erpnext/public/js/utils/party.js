@@ -46,9 +46,24 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 				frm.updating_party_details = false;
 				if(callback) callback();
 				frm.refresh();
+				erpnext.utils.add_item(frm);
 			}
 		}
 	});
+}
+
+erpnext.utils.add_item = function(frm) {
+	if(frm.is_new()) {
+		var prev_route = frappe.get_prev_route();
+		if(prev_route[1]==='Item' && !(frm.doc.items && frm.doc.items.length)) {
+			// add row
+			item = frm.add_child('items');
+			frm.refresh_field('items');
+
+			// set item
+			frappe.model.set_value(item.doctype, item.name, 'item_code', prev_route[2]);
+		}
+	}
 }
 
 erpnext.utils.get_address_display = function(frm, address_field, display_field, is_your_company_address) {
@@ -129,7 +144,7 @@ erpnext.utils.get_contact_details = function(frm) {
 
 	if(frm.doc["contact_person"]) {
 		frappe.call({
-			method: "erpnext.utilities.doctype.contact.contact.get_contact_details",
+			method: "frappe.email.doctype.contact.contact.get_contact_details",
 			args: {contact: frm.doc.contact_person },
 			callback: function(r) {
 				if(r.message)

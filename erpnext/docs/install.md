@@ -8,7 +8,7 @@ To intall ERPNext, you will have to install the <a href="https://github.com/frap
 
 After you have installed Frappe Bench, go to you bench folder, which is     `frappe.bench` by default and setup **erpnext**.
 
-    bench get-app erpnext {{ source_link }}
+    bench get-app erpnext https://github.com/frappe/erpnext
 
 Then create a new site to install the app.
 
