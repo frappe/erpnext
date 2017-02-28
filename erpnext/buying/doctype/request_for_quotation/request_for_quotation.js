@@ -47,6 +47,7 @@ frappe.ui.form.on("Request for Quotation",{
 				});
 			});
 		}
+		
 	},
 
 	make_suppplier_quotation: function(frm) {
@@ -138,7 +139,6 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 						}
 					})
 				}, __("Get items from"));
-				
 				// Get items from open Material Requests based on supplier
 				cur_frm.add_custom_button(__('Possible Supplier'), function() {
 					// Create a dialog window for the user to pick their supplier
@@ -174,6 +174,7 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 					}	
 					d.show();
 				}, __("Get items from"));
+				
 		}
 	},
 
