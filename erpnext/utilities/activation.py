@@ -51,8 +51,8 @@ def get_level():
 
 def get_help_messages():
 	'''Returns help messages to be shown on Desktop'''
-	# if get_level() > 6:
-	# 	return []
+	if get_level() > 6:
+		return []
 
 	messages = []
 
