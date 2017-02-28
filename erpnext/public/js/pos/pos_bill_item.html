@@ -18,13 +18,13 @@
     </div>
     <div class="col-xs-2 text-right">
 		<div class="row input-sm">
-            <input type="tel" value="{%= discount_percentage %}" class="form-control text-right pos-item-discount">
+            <input type="tel" value="{%= discount_percentage %}" class="form-control text-right pos-item-disc">
         </div>
     </div>
     <div class="col-xs-3 text-right">
         <div class="text-muted" style="margin-top: 5px;">
 			{% if(enabled) { %}
-				<input type="tel" value="{%= rate %}" class="form-control input-sm pos-item-rate text-right">
+				<input type="tel" value="{%= rate %}" class="form-control input-sm pos-item-price text-right">
 			{% } else { %}
 				<h6>{%= format_currency(rate) %}</h6>
 			{% } %}
