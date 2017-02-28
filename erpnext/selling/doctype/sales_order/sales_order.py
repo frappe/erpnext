@@ -687,6 +687,8 @@ def make_production_orders(items, sales_order, company, project=None):
 			project=project,
 			fg_warehouse=i['warehouse']
 		)).insert()
+		production_order.set_production_order_operations()
+		production_order.save()
 		out.append(production_order)
 
 	return [p.name for p in out]
