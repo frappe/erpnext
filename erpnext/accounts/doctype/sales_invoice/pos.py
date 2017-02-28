@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe.utils import nowdate
 from erpnext.setup.utils import get_exchange_rate
+from frappe.core.doctype.communication.email import make
 from erpnext.stock.get_item_details import get_pos_profile
 from erpnext.accounts.party import get_party_account_currency
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
@@ -257,12 +258,14 @@ def get_pricing_rule_data(doc):
 	return pricing_rules
 
 @frappe.whitelist()
-def make_invoice(doc_list):
+def make_invoice(doc_list, email_queue_list):
 	if isinstance(doc_list, basestring):
 		doc_list = json.loads(doc_list)
 
-	name_list = []
+	if isinstance(email_queue_list, basestring):
+		email_queue = json.loads(email_queue_list)
 
+	name_list = []
 	for docs in doc_list:
 		for name, doc in docs.items():
 			if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
@@ -270,16 +273,36 @@ def make_invoice(doc_list):
 				si_doc = frappe.new_doc('Sales Invoice')
 				si_doc.offline_pos_name = name
 				si_doc.update(doc)
-				submit_invoice(si_doc, name)
+				submit_invoice(si_doc, name, doc)
 				name_list.append(name)
 			else:
 				name_list.append(name)
 
-	return name_list
+	email_queue = make_email_queue(email_queue)
+	return {
+		'invoice': name_list,
+		'email_queue': email_queue
+	}
 
 def validate_records(doc):
 	validate_customer(doc)
 	validate_item(doc)
+
+def make_email_queue(email_queue):
+	name_list = []
+	for key, data in email_queue.items():
+		name = frappe.db.get_value('Sales Invoice', {'offline_pos_name': key}, 'name')
+		data = json.loads(data)
+		sender = frappe.session.user
+		print_format = "POS Invoice"
+		attachments = [frappe.attach_print('Sales Invoice', name, print_format= print_format)]
+
+		make(subject = data.get('subject'), content = data.get('content'), recipients = data.get('recipients'),
+			sender=sender,attachments = attachments, send_email=True,
+			doctype='Sales Invoice', name=name)
+		name_list.append(key)
+
+	return name_list
 
 def validate_customer(doc):
 	if not frappe.db.exists('Customer', doc.get('customer')):
@@ -328,7 +351,8 @@ def validate_item(doc):
 			item_doc.save(ignore_permissions=True)
 			frappe.db.commit()
 
-def submit_invoice(si_doc, name):
+
+def submit_invoice(si_doc, name, doc):
 	try:
 		si_doc.insert()
 		si_doc.submit()

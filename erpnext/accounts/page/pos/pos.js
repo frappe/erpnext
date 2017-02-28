@@ -95,9 +95,63 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.sync_sales_invoice()
 		});
 
+		this.page.add_menu_item(__("Email"), function () {
+			if(me.frm.doc.docstatus == 1) {
+				me.email_prompt()
+			}
+		});
+
 		this.page.add_menu_item(__("POS Profile"), function () {
 			frappe.set_route('List', 'POS Profile');
 		});
+	},
+
+	email_prompt: function() {
+		var me = this;
+		fields = [{label:__("To"), fieldtype:"Data", reqd: 0, fieldname:"recipients",length:524288},
+			{fieldtype: "Section Break", collapsible: 1, label: "CC & Standard Reply"},
+			{fieldtype: "Section Break"},
+			{label:__("Subject"), fieldtype:"Data", reqd: 1,
+				fieldname:"subject",length:524288},
+			{fieldtype: "Section Break"},
+			{label:__("Message"), fieldtype:"Text Editor", reqd: 1,
+				fieldname:"content"},
+			{fieldtype: "Section Break"},
+			{fieldtype: "Column Break"}];
+
+		this.email_dialog = new frappe.ui.Dialog({
+			title: "Email",
+			fields: fields,
+			primary_action_label: __("Send"),
+			primary_action: function() {
+				me.send_action();
+			}
+		});
+
+		this.email_dialog.show()
+	},
+
+	send_action: function() {
+		this.email_queue = this.get_email_queue()
+		this.email_queue[this.frm.doc.offline_pos_name] = JSON.stringify(this.email_dialog.get_values())
+		this.update_email_queue()
+		this.email_dialog.hide()
+	},
+
+	update_email_queue: function () {
+		try {
+			localStorage.setItem('email_queue', JSON.stringify(this.email_queue));
+		} catch (e) {
+			frappe.throw(__("LocalStorage is full , did not save"))
+		}
+	},
+
+	get_email_queue: function () {
+		try {
+			return JSON.parse(localStorage.getItem('email_queue')) || {};
+		} catch (e) {
+			return {}
+		}
 	},
 
 	dialog_actions: function () {
@@ -1282,18 +1336,22 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	sync_sales_invoice: function () {
 		var me = this;
-		this.si_docs = this.get_submitted_invoice();
+		this.si_docs = this.get_submitted_invoice() || [];
+		this.email_queue_list = this.get_email_queue() || {};
 
-		if (this.si_docs.length) {
+		if (this.si_docs.length || this.email_queue_list) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.sales_invoice.pos.make_invoice",
 				args: {
-					doc_list: me.si_docs
+					doc_list: me.si_docs,
+					email_queue_list: me.email_queue_list
 				},
 				callback: function (r) {
 					if (r.message) {
-						me.removed_items = r.message;
+						me.removed_items = r.message.invoice;
+						me.removed_email = r.message.email_queue
 						me.remove_doc_from_localstorage();
+						me.remove_email_queue_from_localstorage();
 					}
 				}
 			})
@@ -1323,16 +1381,29 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.si_docs = this.get_doc_from_localstorage();
 		this.new_si_docs = [];
-		if (this.removed_items) {
+		if (this.removed_email) {
 			$.each(this.si_docs, function (index, data) {
 				for (key in data) {
-					if (!in_list(me.removed_items, key)) {
+					if (!in_list(me.removed_email, key)) {
 						me.new_si_docs.push(data);
 					}
 				}
 			})
 			this.si_docs = this.new_si_docs;
 			this.update_localstorage();
+		}
+	},
+
+	remove_email_queue_from_localstorage: function() {
+		var me = this;
+		this.email_queue = this.get_email_queue()
+		if (this.removed_email) {
+			$.each(this.email_queue_list, function (index, data) {
+				if (in_list(me.removed_email, index)) {
+					delete me.email_queue[index]
+				}
+			})
+			this.update_email_queue();
 		}
 	},
 
