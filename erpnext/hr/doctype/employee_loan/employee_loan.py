@@ -8,7 +8,6 @@ import erpnext
 from frappe import _
 from frappe.utils import flt, rounded, add_months, nowdate
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.general_ledger import make_gl_entries
 
 class EmployeeLoan(AccountsController):
 	def validate(self):
@@ -26,33 +25,32 @@ class EmployeeLoan(AccountsController):
 		self.set_repayment_period()
 		self.calculate_totals()
 
-	def on_submit(self):
-		self.make_gl_entries()
+	def make_jv_entry(self):
+		self.check_permission('write')
+		journal_entry = frappe.new_doc('Journal Entry')
+		journal_entry.voucher_type = 'Bank Entry'
+		journal_entry.user_remark = _('Against Employee Loan: {0}').format(self.name)
+		journal_entry.company = self.company
+		journal_entry.posting_date = nowdate()
 
-	def on_cancel(self):
-		self.make_gl_entries()
+		account_amt_list = []
 
-	def make_gl_entries(self):
-		gl_entries = []
-		# Gl entries for employee loan account
-		gl_entries.append(
-			self.get_gl_dict({
-				"account": self.employee_loan_account,
-				"party_type": "Employee",
-				"party": self.employee,
-				"debit": self.loan_amount,
-				"debit_in_account_currency": self.loan_amount
+		account_amt_list.append({
+			"account": self.employee_loan_account,
+			"party_type": "Employee",
+			"party": self.employee,
+			"debit_in_account_currency": self.loan_amount,
+			"reference_type": "Employee Loan",
+			"reference_name": self.name,
 			})
-		)
-		# Gl entries for payment account
-		gl_entries.append(
-			self.get_gl_dict({
-				"account": self.payment_account,
-				"credit": self.loan_amount,
-				"credit_in_account_currency": self.loan_amount
+		account_amt_list.append({
+			"account": self.payment_account,
+			"credit_in_account_currency": self.loan_amount,
+			"reference_type": "Employee Loan",
+			"reference_name": self.name,
 			})
-		)
-		make_gl_entries(gl_entries, cancel=(self.docstatus == 2))
+		journal_entry.set("accounts", account_amt_list)
+		return journal_entry.as_dict()
 
 	def make_repayment_schedule(self):
 		self.repayment_schedule = []
@@ -94,11 +92,19 @@ class EmployeeLoan(AccountsController):
 			self.total_payment += data.total_payment
 			self.total_interest_payable +=data.interest_amount
 
-	def update_status(self):
-		if self.disbursement_date:
-			self.status = "Loan Paid"
-		if len(self.repayment_schedule)>0:
-			self.status = "repayment in progress"
+
+def update_disbursement_status(doc):
+	disbursed_amount = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as disbursed_amount 
+		from `tabGL Entry` where against_voucher_type = 'Employee Loan' and against_voucher = %s""", 
+		(doc.name), as_dict=1)[0].disbursed_amount
+	if disbursed_amount == doc.loan_amount:
+		frappe.db.set_value("Employee Loan", doc.name , "status", "Fully Disbursed")
+	if disbursed_amount < doc.loan_amount and disbursed_amount != 0:
+		frappe.db.set_value("Employee Loan", doc.name , "status", "Partially Disbursed")
+	if disbursed_amount == 0:
+		frappe.db.set_value("Employee Loan", doc.name , "status", "Sanctioned")
+	if disbursed_amount > doc.loan_amount:
+		frappe.throw(_("Disbursed Amount cannot be greater than Loan Amount {0}").format(doc.loan_amount))
 	
 def check_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods):
 	if repayment_method == "Repay Over Number of Periods" and not repayment_periods:
@@ -125,3 +131,28 @@ def get_employee_loan_application(employee_loan_application):
 	employee_loan = frappe.get_doc("Employee Loan Application", employee_loan_application)
 	if employee_loan:
 		return employee_loan
+
+@frappe.whitelist()
+def make_jv_entry(employee_loan, company, employee_loan_account, employee, loan_amount, payment_account):
+	journal_entry = frappe.new_doc('Journal Entry')
+	journal_entry.voucher_type = 'Bank Entry'
+	journal_entry.user_remark = _('Against Employee Loan: {0}').format(employee_loan)
+	journal_entry.company = company
+	journal_entry.posting_date = nowdate()
+
+	account_amt_list = []
+
+	account_amt_list.append({
+		"account": employee_loan_account,
+		"debit_in_account_currency": loan_amount,
+		"reference_type": "Employee Loan",
+		"reference_name": employee_loan,
+		})
+	account_amt_list.append({
+		"account": payment_account,
+		"credit_in_account_currency": loan_amount,
+		"reference_type": "Employee Loan",
+		"reference_name": employee_loan,
+		})
+	journal_entry.set("accounts", account_amt_list)
+	return journal_entry.as_dict()

@@ -36,7 +36,34 @@ frappe.ui.form.on('Employee Loan', {
 		})
 	},
 
-	mode_of_payment: function(frm){
+	refresh: function(frm) {
+		if (frm.doc.docstatus == 1 && (frm.doc.status == "Sanctioned" || frm.doc.status == "Partially Disbursed")) {
+			frm.add_custom_button(__('Make Disbursement Entry'), function() {
+				frm.trigger("make_jv");
+			})
+		}
+		frm.trigger("toggle_fields");
+	},
+
+	make_jv: function(frm) {
+		frappe.call({
+			args: {
+				"employee_loan": frm.doc.name,
+				"company": frm.doc.company,
+				"employee_loan_account": frm.doc.employee_loan_account,
+				"employee": frm.doc.employee,
+				"loan_amount": frm.doc.loan_amount,
+				"payment_account": frm.doc.payment_account
+			},
+			method: "erpnext.hr.doctype.employee_loan.employee_loan.make_jv_entry",
+			callback: function(r) {
+				if (r.message)
+					var doc = frappe.model.sync(r.message)[0];
+					frappe.set_route("Form", doc.doctype, doc.name);
+			}
+		})
+	},
+	mode_of_payment: function(frm) {
 		frappe.call({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 			args: {
@@ -49,23 +76,6 @@ frappe.ui.form.on('Employee Loan', {
 				}
 			}
 		});
-	},
-
-	refresh: function(frm) {
-		frm.trigger("toggle_fields");
-
-		if(frm.doc.docstatus==1) {
-			frm.add_custom_button(__('Ledger'), function() {
-				frappe.route_options = {
-					"voucher_no": frm.doc.name,
-					"from_date": frm.doc.posting_date,
-					"to_date": frm.doc.posting_date,
-					"company": frm.doc.company,
-					group_by_voucher: 0
-				};
-				frappe.set_route("query-report", "General Ledger");
-			}, "fa fa-table");
-		}
 	},
 
 	employee_loan_application: function(frm) {

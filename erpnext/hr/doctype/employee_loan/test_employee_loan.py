@@ -60,7 +60,8 @@ def	create_employee_loan(employee, loan_type, loan_amount, repayment_method, rep
 				"disbursement_date": nowdate(),
 				"mode_of_payment": frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name'),
 				"payment_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name"),
-				"employee_loan_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
+				"employee_loan_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name"),
+				"interest_income_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 			})
 		employee_loan.insert()
 		return employee_loan
