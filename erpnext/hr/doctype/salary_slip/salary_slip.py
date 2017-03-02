@@ -389,8 +389,6 @@ class SalarySlip(TransactionBase):
 			status = "Draft"
 		elif self.docstatus == 1:
 			status = "Submitted"
-			if self.journal_entry:
-				status = "Paid"
 		elif self.docstatus == 2:
 			status = "Cancelled"
 		return status
@@ -401,5 +399,4 @@ def unlink_ref_doc_from_salary_slip(ref_no):
 	if linked_ss:
 		for ss in linked_ss:
 			ss_doc = frappe.get_doc("Salary Slip", ss)
-			frappe.db.set_value("Salary Slip", ss_doc.name, "status", "Submitted")
 			frappe.db.set_value("Salary Slip", ss_doc.name, "journal_entry", "")
