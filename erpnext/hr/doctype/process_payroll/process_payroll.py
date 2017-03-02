@@ -292,17 +292,18 @@ class ProcessPayroll(Document):
 						"project": self.project
 					})
 			#employee loan
-			account_amt_list.append({
-					"account": loan_accounts.employee_loan_account,
-					"credit_in_account_currency": loan_amounts.total_principal_amount
-				})
-			account_amt_list.append({
-					"account": loan_accounts.interest_income_account,
-					"credit_in_account_currency": loan_amounts.total_interest_amount,
-					"cost_center": self.cost_center,
-					"project": self.project
-				})	
-			adjustment_amt = adjustment_amt-(loan_amounts.total_loan_repayment)
+			if loan_amounts.total_loan_repayment:
+				account_amt_list.append({
+						"account": loan_accounts.employee_loan_account,
+						"credit_in_account_currency": loan_amounts.total_principal_amount
+					})
+				account_amt_list.append({
+						"account": loan_accounts.interest_income_account,
+						"credit_in_account_currency": loan_amounts.total_interest_amount,
+						"cost_center": self.cost_center,
+						"project": self.project
+					})
+				adjustment_amt = adjustment_amt-(loan_amounts.total_loan_repayment)
 			
 			account_amt_list.append({
 					"account": default_payroll_payable_account,
