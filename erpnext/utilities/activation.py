@@ -51,8 +51,8 @@ def get_level():
 
 def get_help_messages():
 	'''Returns help messages to be shown on Desktop'''
-	# if get_level() > 6:
-	# 	return []
+	if get_level() > 6:
+		return []
 
 	messages = []
 
@@ -75,7 +75,7 @@ def get_help_messages():
 			action=_('Make Quotation'),
 			route='List/Quotation',
 			domain=('Manufacturing', 'Retail', 'Services', 'Distribution'),
-			target=30
+			target=3
 		),
 		frappe._dict(
 			doctype='Sales Order',
