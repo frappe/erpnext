@@ -220,7 +220,7 @@ class SellingController(StockController):
 				il.append(frappe._dict({
 					'warehouse': d.warehouse,
 					'item_code': d.item_code,
-					'qty': d.qty,
+					'qty': d.stock_qty,
 					'uom': d.uom,
 					'stock_uom': d.stock_uom,
 					'conversion_factor': d.conversion_factor,
@@ -294,8 +294,6 @@ class SellingController(StockController):
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
 				if flt(d.conversion_factor)==0.0:
 					d.conversion_factor = get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
-
-				qty_in_stock_uom = flt(d.qty * d.conversion_factor)
 				return_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
 					return_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
@@ -306,13 +304,13 @@ class SellingController(StockController):
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==1)
 					or (cint(self.is_return) and self.docstatus==2)):
 						sl_entries.append(self.get_sl_entries(d, {
-							"actual_qty": -1*qty_in_stock_uom,
+							"actual_qty": -1*flt(d.qty),
 							"incoming_rate": return_rate
 						}))
 
 				if d.target_warehouse:
 					target_warehouse_sle = self.get_sl_entries(d, {
-						"actual_qty": qty_in_stock_uom,
+						"actual_qty": flt(d.qty),
 						"warehouse": d.target_warehouse
 					})
 
@@ -338,7 +336,7 @@ class SellingController(StockController):
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==2)
 					or (cint(self.is_return) and self.docstatus==1)):
 						sl_entries.append(self.get_sl_entries(d, {
-							"actual_qty": -1*qty_in_stock_uom,
+							"actual_qty": -1*flt(d.qty),
 							"incoming_rate": return_rate
 						}))
 

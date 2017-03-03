@@ -90,7 +90,7 @@ class ProductionOrder(Document):
 		total_qty = flt(ordered_qty_against_so) + flt(self.qty)
 
 		# get qty from Sales Order Item table
-		so_item_qty = frappe.db.sql("""select sum(qty) from `tabSales Order Item`
+		so_item_qty = frappe.db.sql("""select sum(stock_qty) from `tabSales Order Item`
 			where parent = %s and item_code = %s""",
 			(self.sales_order, self.production_item))[0][0]
 		# get qty from Packing Item table

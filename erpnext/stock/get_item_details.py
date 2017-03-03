@@ -510,7 +510,7 @@ def get_valuation_rate(item_code, warehouse=None):
 			["valuation_rate"], as_dict=True) or {"valuation_rate": 0}
 
 	elif not item.is_stock_item:
-		valuation_rate =frappe.db.sql("""select sum(base_net_amount) / sum(qty)
+		valuation_rate =frappe.db.sql("""select sum(base_net_amount) / sum(stock_qty)
 			from `tabPurchase Invoice Item`
 			where item_code = %s and docstatus=1""", item_code)
 

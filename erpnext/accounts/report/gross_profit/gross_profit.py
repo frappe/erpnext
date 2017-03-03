@@ -254,7 +254,7 @@ class GrossProfitGenerator(object):
 				si.customer, si.customer_group, si.territory,
 				item.item_code, item.item_name, item.description, item.warehouse,
 				item.item_group, item.brand, item.dn_detail, item.delivery_note,
-				item.qty, item.base_net_rate, item.base_net_amount, item.name as "item_row",
+				item.stock_qty as qty, item.base_net_rate, item.base_net_amount, item.name as "item_row",
 				sales.sales_person, sales.allocated_amount, sales.incentives
 			from `tabSales Invoice` si
 			inner join `tabSales Invoice Item` item on item.parent = si.name

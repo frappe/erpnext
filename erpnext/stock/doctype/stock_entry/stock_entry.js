@@ -86,7 +86,7 @@ frappe.ui.form.on('Stock Entry', {
 		var	args = {
 			'item_code'	: d.item_code,
 			'warehouse'	: cstr(d.s_warehouse),
-			'qty'		: d.qty
+			'stock_qty'		: d.transfer_qty
 		};
 		frappe.call({
 			method: "erpnext.stock.get_item_details.get_serial_no",

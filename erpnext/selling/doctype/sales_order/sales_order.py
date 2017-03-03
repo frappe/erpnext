@@ -325,7 +325,7 @@ class SalesOrder(SellingController):
 				item_code= i.item_code,
 				bom = bom,
 				warehouse = i.warehouse,
-				pending_qty= i.qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
+				pending_qty= i.stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
 					where production_item=%s and sales_order=%s''', (i.item_code, self.name))[0][0])
 			))
 
@@ -394,7 +394,8 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"parent": "sales_order",
-				"stock_uom": "uom"
+				"stock_uom": "uom",
+				"stock_qty": "qty"
 			},
 			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code),
 			"postprocess": update_item

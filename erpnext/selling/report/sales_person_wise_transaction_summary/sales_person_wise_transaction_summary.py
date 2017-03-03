@@ -20,7 +20,7 @@ def execute(filters=None):
 		data.append([
 			d.name, d.customer, d.territory, d.posting_date, d.item_code,
 			item_details.get(d.item_code, {}).get("item_group"), item_details.get(d.item_code, {}).get("brand"),
-			d.qty, d.base_net_amount, d.sales_person, d.allocated_percentage, d.contribution_amt
+			d.stock_qty, d.base_net_amount, d.sales_person, d.allocated_percentage, d.contribution_amt
 		])
 
 	if data:

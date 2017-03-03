@@ -274,7 +274,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							doctype: me.frm.doc.doctype,
 							name: me.frm.doc.name,
 							project: item.project || me.frm.doc.project,
-							qty: item.qty
+							qty: item.qty,
+							stock_qty: item.stock_qty
 						}
 					},
 
@@ -318,7 +319,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				refresh_field("serial_no", item.name, item.parentfield);
 				if(!doc.is_return) {
-					frappe.model.set_value(item.doctype, item.name, "qty", sr_no.length);
+					frappe.model.set_value(item.doctype, item.name, 
+						"qty", sr_no.length / item.conversion_factor);
+					frappe.model.set_value(item.doctype, item.name, "stock_qty", sr_no.length);
 				}
 			}
 		}
