@@ -9,6 +9,7 @@ from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock.get_item_details import get_conversion_factor
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -34,6 +35,7 @@ class SellingController(StockController):
 		super(SellingController, self).validate()
 		self.validate_max_discount()
 		self.validate_selling_price()
+		self.set_qty_as_per_stock_uom()
 		check_active_sales_items(self)
 
 	def set_missing_values(self, for_validate=False):
@@ -163,6 +165,13 @@ class SellingController(StockController):
 			if discount and flt(d.discount_percentage) > discount:
 				frappe.throw(_("Maxiumm discount for Item {0} is {1}%").format(d.item_code, discount))
 
+	def set_qty_as_per_stock_uom(self):
+		for d in self.get("items"):
+			if d.meta.get_field("stock_qty"):
+				if not d.conversion_factor:
+					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
+				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)			
+
 	def validate_selling_price(self):
 		def throw_message(item_name, rate, ref_rate_field):
 			frappe.throw(_("""Selling price for item {0} is lower than its {1}. Selling price should be atleast {2}""")
@@ -212,8 +221,9 @@ class SellingController(StockController):
 					'warehouse': d.warehouse,
 					'item_code': d.item_code,
 					'qty': d.qty,
-					'uom': d.stock_uom,
+					'uom': d.uom,
 					'stock_uom': d.stock_uom,
+					'conversion_factor': d.conversion_factor,
 					'batch_no': cstr(d.get("batch_no")).strip(),
 					'serial_no': cstr(d.get("serial_no")).strip(),
 					'name': d.name,
@@ -282,6 +292,10 @@ class SellingController(StockController):
 		sl_entries = []
 		for d in self.get_item_list():
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
+				if flt(d.conversion_factor)==0.0:
+					d.conversion_factor = get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
+
+				qty_in_stock_uom = flt(d.qty * d.conversion_factor)
 				return_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
 					return_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
@@ -292,13 +306,13 @@ class SellingController(StockController):
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==1)
 					or (cint(self.is_return) and self.docstatus==2)):
 						sl_entries.append(self.get_sl_entries(d, {
-							"actual_qty": -1*flt(d.qty),
+							"actual_qty": -1*qty_in_stock_uom,
 							"incoming_rate": return_rate
 						}))
 
 				if d.target_warehouse:
 					target_warehouse_sle = self.get_sl_entries(d, {
-						"actual_qty": flt(d.qty),
+						"actual_qty": qty_in_stock_uom,
 						"warehouse": d.target_warehouse
 					})
 
@@ -324,7 +338,7 @@ class SellingController(StockController):
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==2)
 					or (cint(self.is_return) and self.docstatus==1)):
 						sl_entries.append(self.get_sl_entries(d, {
-							"actual_qty": -1*flt(d.qty),
+							"actual_qty": -1*qty_in_stock_uom,
 							"incoming_rate": return_rate
 						}))
 

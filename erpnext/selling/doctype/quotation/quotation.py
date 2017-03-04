@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt
 from frappe import _
 
 from erpnext.controllers.selling_controller import SellingController
@@ -100,6 +101,9 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
+	def update_item(obj, target, source_parent):
+		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)	
+
 	doclist = get_mapped_doc("Quotation", source_name, {
 			"Quotation": {
 				"doctype": "Sales Order",
@@ -111,7 +115,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 				"doctype": "Sales Order Item",
 				"field_map": {
 					"parent": "prevdoc_docname"
-				}
+				},
+				"postprocess": update_item
 			},
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",
