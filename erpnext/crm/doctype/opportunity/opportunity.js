@@ -107,7 +107,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 
 		$.each([["lead", "lead"],
 			["customer", "customer"],
-			["contact_person", "customer_filter"]], function(i, opts) {
+			["contact_person", "contact_query"]], function(i, opts) {
 				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
 			});
 	},
