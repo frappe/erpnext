@@ -184,7 +184,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doc.return_against = source.name
 		doc.ignore_pricing_rule = 1
 		if doctype == "Sales Invoice":
-			doc.is_pos = 0
+			doc.is_pos = source.is_pos
 
 			# look for Print Heading "Credit Note"
 			if not doc.select_print_heading:
@@ -197,6 +197,20 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		for tax in doc.get("taxes"):
 			if tax.charge_type == "Actual":
 				tax.tax_amount = -1 * tax.tax_amount
+
+		if doc.get("is_return"):
+			if doc.doctype == 'Sales Invoice':
+				doc.set('payments', [])
+				for data in source.payments:
+					doc.append('payments', {
+						'mode_of_payment': data.mode_of_payment,
+						'type': data.type,
+						'amount': -1 * data.amount,
+						'base_amount': -1 * data.base_amount
+					})
+			elif doc.doctype == 'Purchase Invoice':
+				doc.paid_amount = -1 * source.paid_amount
+				doc.base_paid_amount = -1 * source.base_paid_amount
 
 		doc.discount_amount = -1 * source.discount_amount
 		doc.run_method("calculate_taxes_and_totals")
