@@ -2,8 +2,8 @@
 	{%= frappe.boot.letter_heads[filters.letter_head || frappe.defaults.get_default("letter_head")] %}
 </div>
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
-<h5 class="text-center">Fiscal Year: {%= filters.fiscal_year %}</h5>
-<h5 class="text-center">Month: {%= filters.month %}</h5>
+<h5 class="text-center">From Date: {%= filters.from_date %}</h5>
+<h5 class="text-center">To Date: {%= filters.to_date %}</h5>
 <hr>
 <table class="table table-bordered">
 	<thead>
