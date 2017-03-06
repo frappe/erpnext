@@ -21,6 +21,8 @@
     "parentfield": "items",
     "qty": 1.0,
     "rate": 500.0,
+	"uom": "_Test UOM",
+	"conversion_factor": 1,
     "stock_uom": "_Test UOM"
    }
   ],
@@ -91,6 +93,8 @@
     "parentfield": "items",
     "price_list_rate": 500.0,
     "qty": 1.0,
+	"uom": "_Test UOM",
+	"conversion_factor": 1,
     "stock_uom": "_Test UOM"
    }
   ],
@@ -143,6 +147,8 @@
     "price_list_rate": 50,
     "qty": 10,
     "rate": 50,
+	"uom": "_Test UOM",
+	"conversion_factor": 1,
     "stock_uom": "_Test UOM"
    },
    {
@@ -155,6 +161,8 @@
     "parentfield": "items",
     "price_list_rate": 150,
     "qty": 5,
+	"uom": "_Test UOM",
+	"conversion_factor": 1,
     "rate": 150,
     "stock_uom": "_Test UOM"
    }
@@ -265,6 +273,8 @@
     "parentfield": "items",
     "price_list_rate": 62.5,
     "qty": 10,
+	"uom": "_Test UOM",
+	"conversion_factor": 1,
     "stock_uom": "_Test UOM"
 	
    },
@@ -278,6 +288,8 @@
     "parentfield": "items",
     "price_list_rate": 190.66,
     "qty": 5,
+	"uom": "_Test UOM",
+	"conversion_factor": 1,
     "stock_uom": "_Test UOM"
    }
   ],
