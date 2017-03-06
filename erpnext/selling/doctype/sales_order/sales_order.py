@@ -33,6 +33,7 @@ class SalesOrder(SellingController):
 		self.validate_proj_cust()
 		self.validate_po()
 		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_uom_is_integer("uom", "qty")
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_drop_ship()
@@ -324,7 +325,7 @@ class SalesOrder(SellingController):
 				item_code= i.item_code,
 				bom = bom,
 				warehouse = i.warehouse,
-				pending_qty= i.qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
+				pending_qty= i.stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
 					where production_item=%s and sales_order=%s''', (i.item_code, self.name))[0][0])
 			))
 
@@ -393,7 +394,8 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"parent": "sales_order",
-				"stock_uom": "uom"
+				"stock_uom": "uom",
+				"stock_qty": "qty"
 			},
 			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code),
 			"postprocess": update_item
@@ -616,6 +618,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 	def update_item(source, target, source_parent):
 		target.schedule_date = source_parent.delivery_date
 		target.qty = flt(source.qty) - flt(source.ordered_qty)
+		target.stock_qty = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.conversion_factor)
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -636,7 +639,9 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 			"field_map":  [
 				["name", "sales_order_item"],
 				["parent", "sales_order"],
-				["uom", "stock_uom"],
+				["stock_uom", "stock_uom"],
+				["uom", "uom"],
+				["conversion_factor", "conversion_factor"],
 				["delivery_date", "schedule_date"]
 			],
 			"field_no_map": [

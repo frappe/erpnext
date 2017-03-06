@@ -26,7 +26,10 @@
     "parentfield": "items", 
     "qty": 10.0, 
     "rate": 100.0, 
-    "warehouse": "_Test Warehouse - _TC"
+    "warehouse": "_Test Warehouse - _TC",
+    "stock_uom": "_Test UOM",
+	"conversion_factor": 1.0,
+	"uom": "_Test UOM"
    }
   ], 
   "selling_price_list": "_Test Price List", 

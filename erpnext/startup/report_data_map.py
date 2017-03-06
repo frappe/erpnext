@@ -121,7 +121,7 @@ data_map = {
 	},
 	"Purchase Order Item": {
 		"columns": ["item.name as name", "item_code", "warehouse",
-			"(qty - received_qty) as qty"],
+			"(qty - received_qty)*conversion_factor as qty"],
 		"from": "`tabPurchase Order Item` item, `tabPurchase Order` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
 			"ifnull(warehouse, '')!=''", "qty > received_qty"],
@@ -132,7 +132,7 @@ data_map = {
 	},
 
 	"Sales Order Item": {
-		"columns": ["item.name as name", "item_code", "(qty - delivered_qty) as qty", "warehouse"],
+		"columns": ["item.name as name", "item_code", "(qty - delivered_qty)*conversion_factor as qty", "warehouse"],
 		"from": "`tabSales Order Item` item, `tabSales Order` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
 			"ifnull(warehouse, '')!=''", "qty > delivered_qty"],
@@ -173,7 +173,7 @@ data_map = {
 		}
 	},
 	"Sales Invoice Item": {
-		"columns": ["name", "parent", "item_code", "qty", "base_net_amount"],
+		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -191,7 +191,7 @@ data_map = {
 		}
 	},
 	"Sales Order Item[Sales Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "base_net_amount"],
+		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -209,7 +209,7 @@ data_map = {
 		}
 	},
 	"Delivery Note Item[Sales Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "base_net_amount"],
+		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -241,7 +241,7 @@ data_map = {
 		}
 	},
 	"Purchase Invoice Item": {
-		"columns": ["name", "parent", "item_code", "qty", "base_net_amount"],
+		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -259,7 +259,7 @@ data_map = {
 		}
 	},
 	"Purchase Order Item[Purchase Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "base_net_amount"],
+		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -277,7 +277,7 @@ data_map = {
 		}
 	},
 	"Purchase Receipt Item[Purchase Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "base_net_amount"],
+		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"], 
 		"order_by": "parent",
 		"links": {

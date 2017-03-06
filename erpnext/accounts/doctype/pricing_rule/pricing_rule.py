@@ -129,7 +129,7 @@ def get_serial_no_for_item(args):
 		"name": args.name,
 		"serial_no": args.serial_no
 	})
-	if args.get("parenttype") in ("Sales Invoice", "Delivery Note") and args.qty > 0:
+	if args.get("parenttype") in ("Sales Invoice", "Delivery Note") and args.stock_qty > 0:
 		item_details.serial_no = get_serial_no(args)
 	return item_details
 

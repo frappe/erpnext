@@ -790,11 +790,11 @@ def make_delivery_note(source_name, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.base_amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
-			flt(source_doc.base_rate)
-		target_doc.amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
-			flt(source_doc.rate)
 		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
+		target_doc.stock_qty = target_doc.qty * flt(source_doc.conversion_factor)
+		
+		target_doc.base_amount = target_doc.qty * flt(source_doc.base_rate)
+		target_doc.amount = target_doc.qty * flt(source_doc.rate)
 
 	doclist = get_mapped_doc("Sales Invoice", source_name, 	{
 		"Sales Invoice": {
