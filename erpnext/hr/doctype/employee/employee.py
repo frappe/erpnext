@@ -66,7 +66,7 @@ class Employee(Document):
 		user = frappe.get_doc("User", self.user_id)
 		user.flags.ignore_permissions = True
 
-		if "Employee" not in user.get("user_roles"):
+		if "Employee" not in user.get("roles"):
 			user.add_roles("Employee")
 
 		# copy details like Fullname, DOB and Image to User
@@ -186,14 +186,14 @@ def get_retirement_date(date_of_birth=None):
 
 def validate_employee_role(doc, method):
 	# called via User hook
-	if "Employee" in [d.role for d in doc.get("user_roles")]:
+	if "Employee" in [d.role for d in doc.get("roles")]:
 		if not frappe.db.get_value("Employee", {"user_id": doc.name}):
 			frappe.msgprint(_("Please set User ID field in an Employee record to set Employee Role"))
-			doc.get("user_roles").remove(doc.get("user_roles", {"role": "Employee"})[0])
+			doc.get("roles").remove(doc.get("roles", {"role": "Employee"})[0])
 
 def update_user_permissions(doc, method):
 	# called via User hook
-	if "Employee" in [d.role for d in doc.get("user_roles")]:
+	if "Employee" in [d.role for d in doc.get("roles")]:
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 

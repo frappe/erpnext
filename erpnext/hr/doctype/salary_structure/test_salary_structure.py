@@ -52,7 +52,7 @@ def make_employee(user):
 			"email": user,
 			"first_name": user,
 			"new_password": "password",
-			"user_roles": [{"doctype": "UserRole", "role": "Employee"}]
+			"roles": [{"doctype": "Has Role", "role": "Employee"}]
 		}).insert()
 		
 
