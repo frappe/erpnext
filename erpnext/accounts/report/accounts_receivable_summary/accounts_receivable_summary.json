@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 2, 
  "is_standard": "Yes", 
- "modified": "2017-02-24 20:11:19.394317", 
+ "modified": "2017-03-06 05:52:23.751082", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Accounts Receivable Summary", 
@@ -21,9 +21,6 @@
   }, 
   {
    "role": "Accounts User"
-  }, 
-  {
-   "role": "Accounts Manager"
   }
  ]
 }

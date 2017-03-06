@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 3, 
  "is_standard": "Yes", 
- "modified": "2017-02-24 20:11:08.754087", 
+ "modified": "2017-03-06 05:52:57.645281", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Partners Commission", 
@@ -22,9 +22,6 @@
   }, 
   {
    "role": "Accounts User"
-  }, 
-  {
-   "role": "Accounts Manager"
   }
  ]
 }
