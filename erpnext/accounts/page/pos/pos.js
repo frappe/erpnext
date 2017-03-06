@@ -142,7 +142,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		try {
 			localStorage.setItem('email_queue', JSON.stringify(this.email_queue));
 		} catch (e) {
-			frappe.throw(__("LocalStorage is full , did not save"))
+			frappe.throw(__("LocalStorage is full, did not save"))
 		}
 	},
 
@@ -401,21 +401,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.make_item_list();
 		});
 
-		this.party_field = frappe.ui.form.make_control({
-			df: {
-				"fieldtype": "Data",
-				"options": this.party,
-				"label": this.party,
-				"fieldname": this.party.toLowerCase(),
-				"placeholder": __("Select or add new customer")
-			},
-			parent: this.wrapper.find(".party-area"),
-			only_input: true,
-		});
-
-		this.party_field.make_input();
-		setTimeout(this.set_focus.bind(this), 500);
-
 		this.wrapper.find(".btn-more").on("click", function() {
 			me.page_len += 20;
 			me.items = me.get_items();
@@ -584,6 +569,25 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	make_customer: function () {
 		var me = this;
+
+		$(frappe.render_template('customer_toolbar', {
+			allow_delete: this.frm.doc.allow_delete
+		})).insertAfter(this.page.$title_area.hide());
+
+		this.party_field = frappe.ui.form.make_control({
+			df: {
+				"fieldtype": "Data",
+				"options": this.party,
+				"label": this.party,
+				"fieldname": this.party.toLowerCase(),
+				"placeholder": __("Select or add new customer")
+			},
+			parent: this.page.wrapper.find(".party-area"),
+			only_input: true,
+		});
+
+		this.party_field.make_input();
+		setTimeout(this.set_focus.bind(this), 500);
 
 		if (this.default_customer && !this.frm.doc.customer) {
 			this.party_field.$input.val(this.default_customer);
@@ -793,12 +797,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if (this.items.length > 0) {
 			$.each(this.items, function(index, obj) {
-				if(index < me.page_len){
+				if(index < me.page_len) {
 					$(frappe.render_template("pos_item", {
 						item_code: obj.name,
 						item_price: format_currency(me.price_list_data[obj.name], me.frm.doc.currency),
 						item_name: obj.name === obj.item_name ? "" : obj.item_name,
-						item_image: obj.image ? "url('" + obj.image + "')" : null,
+						item_image: obj.image,
 						color: frappe.get_palette(obj.item_name),
 						abbr: frappe.get_abbr(obj.item_name)
 					})).tooltip().appendTo($wrap);
@@ -816,7 +820,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}
 
 		// if form is local then allow this function
-		$(me.wrapper).find("div.pos-item").on("click", function () {
+		$(me.wrapper).on("click", ".pos-item-wrapper", function () {
 			if(me.list_customers_btn.hasClass("view_customer")) return;
 
 			me.customer_validate();
@@ -889,7 +893,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	
 	bind_items_event: function() {
 		var me = this;
-		$(this.wrapper).find(".pos-bill-item").click(function() {
+		$(this.wrapper).on('click', '.pos-bill-item', function() {
+			$(me.wrapper).find('.pos-bill-item').removeClass('active');
+			$(this).addClass('active');
 			me.numeric_val = "";
 			me.numeric_id = ""
 			me.item_code = $(this).attr("data-item-code");
@@ -1139,8 +1145,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	show_items_in_item_cart: function () {
 		var me = this;
 		var $items = this.wrapper.find(".items").empty();
+		var $no_items_message = this.wrapper.find(".no-items-message");
+		$no_items_message.toggle(this.frm.doc.items.length === 0);
+
+		var $totals_area = this.wrapper.find('.totals-area');
+		$totals_area.toggle(this.frm.doc.items.length > 0);
+
 		$.each(this.frm.doc.items || [], function (i, d) {
-			$(frappe.render_template("pos_bill_item", {
+			$(frappe.render_template("pos_bill_item_new", {
 				item_code: d.item_code,
 				item_name: (d.item_name === d.item_code || !d.item_name) ? "" : ("<br>" + d.item_name),
 				qty: d.qty,

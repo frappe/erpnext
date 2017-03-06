@@ -13,9 +13,6 @@
   margin: -10px auto;
 }
 /* pos */
-.pos-item-area {
-  padding: 0px 10px;
-}
 .pos-item-wrapper {
   padding: 5px;
 }
@@ -51,19 +48,10 @@
   background-position: center;
   background-repeat: no-repeat;
 }
-.pos-item-area {
-  border: 1px solid #d1d8dd;
-  border-top: none;
-}
 .pos-item-toolbar {
+  height: 51px;
   padding: 10px 0px;
   border-bottom: 1px solid #d1d8dd;
-}
-.item-list-area,
-.list-customers {
-  padding: 15px 0px;
-  overflow-y: scroll;
-  height: calc(100vh - 162px);
 }
 .pos-toolbar,
 .pos-bill-toolbar {
@@ -72,20 +60,6 @@
 }
 .pos-item-toolbar .form-group {
   margin-bottom: 0px;
-}
-.pos-bill-wrapper {
-  border: 1px solid #d1d8dd;
-  border-top: none;
-  margin-right: -1px;
-}
-.pos-bill {
-  border-top: 1px solid #d1d8dd;
-  margin-left: -15px;
-  margin-right: -15px;
-}
-.item-cart {
-  overflow-y: scroll;
-  height: calc(100vh - 72vh);
 }
 .edit-pos-item {
   height: 50px;
@@ -96,15 +70,6 @@
 .pos-bill-item:hover {
   background-color: #f5f7fa;
   cursor: pointer;
-}
-.pos-bill-row {
-  margin: 0px;
-  padding: 7px 0px;
-  border-top: 1px solid #d1d8dd;
-}
-.pos-bill-header {
-  border: none !important;
-  background-color: #f5f7fa;
 }
 .pos-item-qty {
   display: inline-block;
@@ -181,21 +146,31 @@
   border-color: #e8e8e8;
 }
 .numeric-keypad {
-  border: 1px solid #d1d8dd;
-  height: 69px;
-  width: 69px;
+  height: 60px;
+  width: 60px;
   font-size: 20px;
   font-weight: 200;
-  background-color: #FDFDFD;
-  border-color: #e8e8e8;
+  border-radius: 0;
+  background-color: #fff;
   margin-left: -4px;
 }
+.numeric_keypad {
+  margin-left: -15px;
+}
+.numeric_keypad > .row > button {
+  border: none;
+  border-right: 1px solid #d1d8dd;
+  border-bottom: 1px solid #d1d8dd;
+}
+.numeric_keypad > .row > button:first-child {
+  border-left: 1px solid #d1d8dd;
+}
+.numeric_keypad > .row:first-child > button {
+  border-top: 1px solid #d1d8dd;
+}
 .pos-pay {
-  height: 69px;
-  width: 69px;
-  font-size: 17px;
-  font-weight: 200;
-  margin-left: -4px;
+  background-color: #5E64FF;
+  border: none;
 }
 .multimode-payments {
   padding-left: 30px;
@@ -268,4 +243,64 @@ body[data-route="pos"] .modal-dialog {
 .assessment-result-tool .grade,
 .assessment-result-tool .score {
   text-align: right;
+}
+.pos-list-row {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  padding: 9px 15px;
+  font-size: 12px;
+  margin: 0px;
+  border-bottom: 1px solid #d1d8dd;
+}
+.pos-list-row .cell {
+  display: table-cell;
+  vertical-align: middle;
+}
+.pos-list-row .subject {
+  width: 50%;
+}
+.pos-list-row .list-row-checkbox,
+.pos-list-row .list-select-all {
+  margin-right: 7px;
+}
+.pos-bill-header {
+  background-color: #f5f7fa;
+  border: 1px solid #d1d8dd;
+}
+.pos-bill-item.active {
+  background-color: #fffce7;
+}
+.totals-area {
+  border-right: 1px solid #d1d8dd;
+  border-left: 1px solid #d1d8dd;
+  margin-bottom: 15px;
+}
+body[data-route="pos"] .page-body {
+  height: calc(100vh - 40px);
+}
+.item-cart-items {
+  height: 30vh;
+  overflow: auto;
+  border: 1px solid #d1d8dd;
+  border-top: none;
+}
+.item-cart-items .no-items-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.pos .items .pos-list-row:last-child {
+  border-bottom: none;
+}
+.pos .form-section-heading {
+  padding: 0;
+}
+.pos {
+  overflow: hidden;
+}
+.pos .item-list {
+  border-left: 1px solid #d1d8dd;
+  border-right: 1px solid #d1d8dd;
 }

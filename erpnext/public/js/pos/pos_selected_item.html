@@ -1,26 +1,21 @@
-<div class="pos-bill-item" data-item-code="{%= item_code %}">
-	<div class="form-group edit-pos-item">
-		<label class=" text-left col-xs-4">Price:</label>
-		<div class="col-xs-8">
-			<input class="form-control text-right pos-item-price" disabled value="{%= rate %}">
-		</div>
+<div class="pos-selected-item-action" data-item-code="{%= item_code %}">
+	<div class="pos-list-row">
+		<span class="cell bold">{{item_name}}</span>
 	</div>
-	<div class="form-group edit-pos-item">
-		<label class=" text-left col-xs-4">Qty:</label>
-		<div class="col-xs-8">
-			<input class="form-control text-right pos-item-qty" disabled value="{%= qty %}">
-		</div>
+	<div class="pos-list-row">
+		<div class="cell">Price:</div>
+		<div class="cell pos-item-price">{%= rate %}</div>
 	</div>
-	<div class="form-group edit-pos-item">
-		<label class=" text-left col-xs-4">Discount:</label>
-		<div class="col-xs-8">
-			<input class="form-control text-right pos-item-disc" disabled value="{%= discount_percentage %}">
-		</div>
+	<div class="pos-list-row">
+		<div class="cell">Quantity:</div>
+		<div class="cell pos-item-qty">{%= qty %}</div>
 	</div>
-	<div class="form-group edit-pos-item">
-		<label class=" text-left col-xs-4">Amount:</label>
-		<div class="col-xs-8">
-			<input class="form-control text-right " disabled value="{%= amount %}">
-		</div>
+	<div class="pos-list-row">
+		<div class="cell">Discount:</div>
+		<div class="cell pos-item-disc">{%= discount_percentage %}</div>
+	</div>
+	<div class="pos-list-row">
+		<div class="cell">Amount:</div>
+		<div class="cell pos-item-disc">{%= amount %}</div>
 	</div>
 </div>
