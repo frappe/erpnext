@@ -19,6 +19,6 @@ def get_approver_list(name):
 	return frappe.db.sql("""select user.name, user.first_name, user.last_name from
 		tabUser user, `tabHas Role` user_role where
 		user_role.role = "Leave Approver"
-		and user_role.parent = user.name and
+		and user_role.parent = user.name and user.enabled and
 		user.name != %s 
 		""", name or "")
