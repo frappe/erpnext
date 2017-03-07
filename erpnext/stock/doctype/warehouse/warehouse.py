@@ -177,8 +177,20 @@ class Warehouse(NestedSet):
 		return frappe.get_value('Account', dict(warehouse=self.name))
 
 	def after_rename(self, old_name, new_name, merge=False):
+		new_warehouse_name = self.get_new_warehouse_name_without_abbr(new_name)
+		self.db_set("warehouse_name", new_warehouse_name)
+				
 		if merge:
 			self.recalculate_bin_qty(new_name)
+			
+	def get_new_warehouse_name_without_abbr(self, name):
+		company_abbr = frappe.db.get_value("Company", self.company, "abbr")
+		parts = name.rsplit(" - ", 1)
+		
+		if parts[-1].lower() == company_abbr.lower():
+			name = parts[0]
+			
+		return name
 
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
