@@ -379,9 +379,10 @@ body[data-route="pos"] .modal-dialog {
 .pos-bill-header {
 	background-color: #f5f7fa;
 	border: 1px solid @border-color;
+	padding: 13px 15px;
 }
 
-.pos-bill-item.active {
+.pos-list-row.active {
 	background-color: @light-yellow;
 }
 
@@ -391,12 +392,12 @@ body[data-route="pos"] .modal-dialog {
 	margin-bottom: 15px;
 }
 
-body[data-route="pos"] .page-body {
-	height: ~"calc(100vh - 40px)";
-}
+// body[data-route="pos"] .page-body {
+// 	height: ~"calc(100vh - 40px)";
+// }
 
 .item-cart-items {
-	height: 30vh;
+	height: ~"calc(100vh - 500px)";
 	overflow: auto;
 	border: 1px solid @border-color;
 	border-top: none;
@@ -424,4 +425,27 @@ body[data-route="pos"] .page-body {
 .pos .item-list {
 	border-left: 1px solid @border-color;
 	border-right: 1px solid @border-color;
+	height: ~"calc(100vh - 180px)";
+	overflow: auto;
+
+	.image-field {
+		height: 140px;
+	}
+}
+
+.pos-bill-toolbar {
+	margin-top: 10px;
+}
+
+.pos .search-item .form-group {
+	margin: 0;
+}
+
+.item-list-area .pos-bill-header {
+	padding: 5px;
+	padding-left: 15px;
+}
+
+.pos-selected-item-action > .pos-list-row {
+	border: none;
 }

@@ -301,8 +301,9 @@ body[data-route="pos"] .modal-dialog {
 .pos-bill-header {
   background-color: #f5f7fa;
   border: 1px solid #d1d8dd;
+  padding: 13px 15px;
 }
-.pos-bill-item.active {
+.pos-list-row.active {
   background-color: #fffce7;
 }
 .totals-area {
@@ -310,11 +311,8 @@ body[data-route="pos"] .modal-dialog {
   border-left: 1px solid #d1d8dd;
   margin-bottom: 15px;
 }
-body[data-route="pos"] .page-body {
-  height: calc(100vh - 40px);
-}
 .item-cart-items {
-  height: 30vh;
+  height: calc(100vh - 500px);
   overflow: auto;
   border: 1px solid #d1d8dd;
   border-top: none;
@@ -337,4 +335,22 @@ body[data-route="pos"] .page-body {
 .pos .item-list {
   border-left: 1px solid #d1d8dd;
   border-right: 1px solid #d1d8dd;
+  height: calc(100vh - 180px);
+  overflow: auto;
+}
+.pos .item-list .image-field {
+  height: 140px;
+}
+.pos-bill-toolbar {
+  margin-top: 10px;
+}
+.pos .search-item .form-group {
+  margin: 0;
+}
+.item-list-area .pos-bill-header {
+  padding: 5px;
+  padding-left: 15px;
+}
+.pos-selected-item-action > .pos-list-row {
+  border: none;
 }
