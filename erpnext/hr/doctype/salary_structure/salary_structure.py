@@ -16,7 +16,7 @@ class SalaryStructure(Document):
 		self.validate_amount()
 		for e in self.get('employees'):
 			set_employee_name(e)
-		self.validate_joining_date()
+		self.validate_date()
 
 	def get_ss_values(self,employee):
 		basic_info = frappe.db.sql("""select bank_name, bank_ac_no
@@ -29,12 +29,37 @@ class SalaryStructure(Document):
 		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:
 			frappe.throw(_("Net pay cannot be negative"))
 
-	def validate_joining_date(self):
-		for e in self.get('employees'):
-			joining_date = getdate(frappe.db.get_value("Employee", e.employee, "date_of_joining"))
-			if e.from_date and getdate(e.from_date) < joining_date:
+	def validate_date(self):
+		for employee in self.get('employees'):
+			joining_date, relieving_date = frappe.db.get_value("Employee", employee.employee,
+				["date_of_joining", "relieving_date"])
+			if employee.from_date and getdate(employee.from_date) < joining_date:
 				frappe.throw(_("From Date {0} for Employee {1} cannot be before employee's joining Date {2}")
-					    .format(e.from_date, e.employee, joining_date))	
+					    .format(employee.from_date, employee.employee, joining_date))
+
+		st_name = frappe.db.sql("""select parent from `tabSalary Structure Employee`
+			where
+			employee=%(employee)s
+			and (
+				(%(from_date)s between from_date and ifnull(to_date, '2199-12-31'))
+				or (%(to_date)s between from_date and ifnull(to_date, '2199-12-31'))
+				or (from_date between %(from_date)s and %(to_date)s)
+			)
+			and (
+				exists (select name from `tabSalary Structure`
+				where name = `tabSalary Structure Employee`.parent and is_active = 'Yes')
+			)
+			and parent != %(salary_struct)s""",
+			{
+				'employee': employee.employee,
+				'from_date': employee.from_date,
+				'to_date': (employee.to_date or '2199-12-31'),
+				'salary_struct': self.name
+			})
+
+		if st_name:
+			frappe.throw(_("Active Salary Structure {0} found for employee {1} for the given dates")
+				.format(st_name[0][0], employee.employee))
 
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):

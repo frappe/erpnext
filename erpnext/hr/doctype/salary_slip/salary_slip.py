@@ -49,12 +49,12 @@ class SalarySlip(TransactionBase):
 			self._salary_structure_doc = frappe.get_doc('Salary Structure', self.salary_structure)
 
 		data = self.get_data_for_eval()
+
 		for key in ('earnings', 'deductions'):
 			for struct_row in self._salary_structure_doc.get(key):
 				amount = self.eval_condition_and_formula(struct_row, data)
 				if amount:
 					self.update_component_row(struct_row, amount, key)
-
 
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None
@@ -83,6 +83,7 @@ class SalarySlip(TransactionBase):
 					amount = eval(d.formula, None, data)
 			if amount:
 				data[d.abbr] = amount
+
 			return amount
 
 		except NameError as err:
@@ -97,17 +98,20 @@ class SalarySlip(TransactionBase):
 		'''Returns data for evaluating formula'''
 		data = frappe._dict()
 
-		for d in self._salary_structure_doc.employees:
-			if d.employee == self.employee:
-				data.update(frappe.get_doc("Salary Structure Employee", {"employee": self.employee}).as_dict())
+		data.update(frappe.get_doc("Salary Structure Employee", {"employee": self.employee}).as_dict())
 
 		data.update(frappe.get_doc("Employee", self.employee).as_dict())
 		data.update(self.as_dict())
 
 		# set values for components
 		salary_components = frappe.get_all("Salary Component", fields=["salary_component_abbr"])
-		for salary_component in salary_components:
-			data[salary_component.salary_component_abbr] = 0
+		for sc in salary_components:
+			data.setdefault(sc.salary_component_abbr, 0)
+
+		for key in ('earnings', 'deductions'):
+			for d in self.get(key):
+				data[d.abbr] = d.amount
+
 		return data
 
 
@@ -173,13 +177,16 @@ class SalarySlip(TransactionBase):
 
 	def pull_sal_struct(self):
 		from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-		make_salary_slip(self._salary_structure_doc.name, self)
 
 		if self.salary_slip_based_on_timesheet:
 			self.salary_structure = self._salary_structure_doc.name
 			self.hour_rate = self._salary_structure_doc.hour_rate
 			self.total_working_hours = sum([d.working_hours or 0.0 for d in self.timesheets]) or 0.0
-			self.add_earning_for_hourly_wages(self._salary_structure_doc.salary_component)
+			wages_amount = self.hour_rate * self.total_working_hours
+
+			self.add_earning_for_hourly_wages(self, self._salary_structure_doc.salary_component, wages_amount)
+
+		make_salary_slip(self._salary_structure_doc.name, self)
 
 	def process_salary_structure(self):
 		'''Calculate salary after salary structure details have been updated'''
@@ -188,18 +195,21 @@ class SalarySlip(TransactionBase):
 		self.get_leave_details()
 		self.calculate_net_pay()
 
-	def add_earning_for_hourly_wages(self, salary_component):
-		default_type = False
-		for data in self.earnings:
-			if data.salary_component == salary_component:
-				data.amount = self.hour_rate * self.total_working_hours
-				default_type = True
+	def add_earning_for_hourly_wages(self, doc, salary_component, amount):
+		row_exists = False
+		for row in doc.earnings:
+			if row.salary_component == salary_component:
+				row.amount = amount
+				row_exists = True
 				break
 
-		if not default_type:
-			earnings = self.append('earnings', {})
-			earnings.salary_component = salary_component
-			earnings.amount = self.hour_rate * self.total_working_hours
+		if not row_exists:
+			wages_row = {
+				"salary_component": salary_component,
+				"abbr": frappe.db.get_value("Salary Component", salary_component, "salary_component_abbr"),
+				"amount": self.hour_rate * self.total_working_hours
+			}
+			doc.append('earnings', wages_row)
 
 	def pull_emp_details(self):
 		emp = frappe.db.get_value("Employee", self.employee, ["bank_name", "bank_ac_no"], as_dict=1)
@@ -307,8 +317,15 @@ class SalarySlip(TransactionBase):
 					frappe.throw(_("Salary Slip of employee {0} already created for time sheet {1}").format(self.employee, data.time_sheet))
 
 	def sum_components(self, component_type, total_field):
+		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
+			["date_of_joining", "relieving_date"])
+		if not relieving_date:
+			relieving_date = getdate(self.end_date)
+
 		for d in self.get(component_type):
-			if cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet:
+			if ((cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet) or\
+			getdate(self.start_date) < joining_date or getdate(self.end_date) > relieving_date):
+
 				d.amount = rounded((flt(d.default_amount) * flt(self.payment_days)
 					/ cint(self.total_working_days)), self.precision("amount", component_type))
 			elif not self.payment_days and not self.salary_slip_based_on_timesheet:
