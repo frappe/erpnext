@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
+from frappe.utils import cstr
 from erpnext.schools.api import get_student_batch_students, get_student_group_students
 
 
@@ -49,11 +50,11 @@ class StudentAttendance(Document):
 		attendance_records=None
 		if self.course_schedule:
 			attendance_records= frappe.db.sql("""select name from `tabStudent Attendance` where \
-				student= %s and course_schedule= %s and name != %s and docstatus=1""",
-				(self.student, self.course_schedule, self.name))
+				student= %s and ifnull(course_schedule, '')= %s and name != %s""",
+				(self.student, cstr(self.course_schedule), self.name))
 		else:
 			attendance_records= frappe.db.sql("""select name from `tabStudent Attendance` where \
-				student= %s and student_batch= %s and date= %s and name != %s and docstatus=1 and \
+				student= %s and student_batch= %s and date= %s and name != %s and \
 				(course_schedule is Null or course_schedule='')""",
 				(self.student, self.student_batch, self.date, self.name))
 			
