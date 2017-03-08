@@ -172,20 +172,6 @@ class TestJournalEntry(unittest.TestCase):
 
 		jv.submit()
 
-	def test_clear_blank_rows(self):
-		je = make_journal_entry("_Test Bank - _TC", "_Test Account Stock Expenses - _TC", 100, save=False)
-		je.append("accounts", {
-			"account": "_Test Cash - _TC",
-			"debit_in_account_currency": 0,
-			"credit_in_account_currency": 0,
-			"exchange_rate": 1
-		})
-
-		self.assertEqual(len(je.get("accounts")), 3)
-		je.save()
-		self.assertEqual(len(je.get("accounts")), 2)
-
-
 def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False, project=None):
 	if not cost_center:
 		cost_center = "_Test Cost Center - _TC"
