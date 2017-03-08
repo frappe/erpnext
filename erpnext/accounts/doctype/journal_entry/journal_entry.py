@@ -38,16 +38,8 @@ class JournalEntry(AccountsController):
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
-		self.clear_zero_debit_credit_row()
 		if not self.title:
 			self.title = self.get_title()
-
-	def clear_zero_debit_credit_row(self):
-		self.accounts = [account for account in self.accounts
-			if not (account.debit_in_account_currency==0.0 and account.credit_in_account_currency==0.0)]
-
-		if not self.accounts:
-			frappe.throw("Debit or Credit amount is not found in account table")
 
 	def on_submit(self):
 		self.check_credit_limit()
