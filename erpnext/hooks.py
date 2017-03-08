@@ -100,7 +100,7 @@ website_route_rules = [
 	{"from_route": "/boms", "to_route": "BOM"}
 ]
 
-portal_menu_items = [
+standard_portal_menu_items = [
 	{"title": _("Projects"), "route": "/project", "reference_doctype": "Project"},
 	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation", "role": "Supplier"},
 	{"title": _("Supplier Quotation"), "route": "/quotations", "reference_doctype": "Supplier Quotation", "role": "Supplier"},
