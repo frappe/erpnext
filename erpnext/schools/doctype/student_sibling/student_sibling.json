@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
  "beta": 0, 
@@ -8,7 +9,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "", 
- "editable_grid": 1, 
+ "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -250,17 +251,17 @@
    "unique": 0
   }
  ], 
+ "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "idx": 0, 
  "image_view": 0, 
  "in_create": 0, 
- "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-02-24 11:43:01.311010", 
+ "modified": "2017-03-08 11:26:41.717041", 
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "Student Sibling", 
