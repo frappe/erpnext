@@ -221,7 +221,7 @@ DocType: Stock Reconciliation Item,Stock Reconciliation Item,庫存調整項目
 DocType: Stock Entry,Sales Invoice No,銷售發票號碼
 DocType: Material Request Item,Min Order Qty,最小訂貨量
 DocType: Lead,Do Not Contact,不要聯絡
-DocType: Purchase Invoice,The unique id for tracking all recurring invoices. It is generated on submit.,唯一ID來跟踪所有的經常性發票。它是在提交生成的。
+DocType: Purchase Invoice,The unique id for tracking all recurring invoices. It is generated on submit.,唯一ID來跟踪所有的經常性發票。它是在提交生成的。
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +91,Software Developer,軟件開發人員
 DocType: Item,Minimum Order Qty,最低起訂量
 DocType: Pricing Rule,Supplier Type,供應商類型

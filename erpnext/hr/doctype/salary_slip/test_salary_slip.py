@@ -9,7 +9,6 @@ import calendar
 from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import getdate, nowdate, add_days, add_months, flt
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.hr.doctype.process_payroll.test_process_payroll import get_salary_component_account
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 
 class TestSalarySlip(unittest.TestCase):
@@ -354,3 +353,22 @@ def get_deductions_component():
 					"idx": 3
 				}
 			]
+
+def get_salary_component_account(sal_comp):
+	company = erpnext.get_default_company()
+	sal_comp = frappe.get_doc("Salary Component", sal_comp)
+	sc = sal_comp.append("accounts")
+	sc.company = company
+	sc.default_account = create_account(company)
+	sal_comp.save()
+
+def create_account(company):
+	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.db.get_value('Company', company, 'abbr'))
+	if not salary_account:
+		frappe.get_doc({
+		"doctype": "Account",
+		"account_name": "Salary",
+		"parent_account": "Indirect Expenses - " + frappe.db.get_value('Company', company, 'abbr'),
+		"company": company
+		}).insert()
+	return salary_account			
