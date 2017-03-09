@@ -22,8 +22,8 @@ def get_domain(domain):
 		},
 
 		'Retail': {
-			'desktop_icons': ['POS', 'Item', 'Customer', 'Sales Invoice',  'Purchase Order', 'Warranty Claim',
-			'Accounts', 'Buying', 'ToDo'],
+			'desktop_icons': ['POS', 'Item', 'Customer', 'Sales Invoice',  'Purchase Order',
+			'Warranty Claim', 'Accounts', 'Task', 'Buying', 'ToDo'],
 			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User'],
 			'properties': [
 				{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
@@ -36,7 +36,7 @@ def get_domain(domain):
 		},
 
 		'Distribution': {
-			'desktop_icons': ['Item', 'Customer', 'Supplier', 'Lead', 'Sales Order',
+			'desktop_icons': ['Item', 'Customer', 'Supplier', 'Lead', 'Sales Order', 'Task',
 				 'Sales Invoice', 'CRM', 'Selling', 'Buying', 'Stock', 'Accounts', 'HR', 'ToDo'],
 			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User'],
 			'set_value': [
@@ -46,8 +46,8 @@ def get_domain(domain):
 		},
 
 		'Services': {
-			'desktop_icons': ['Project', 'Timesheet', 'Customer', 'Sales Order', 'Sales Invoice', 'Lead', 'Opportunity',
-				'Expense Claim', 'Employee', 'HR', 'ToDo'],
+			'desktop_icons': ['Project', 'Timesheet', 'Customer', 'Sales Order', 'Sales Invoice',
+				'Lead', 'Opportunity', 'Task', 'Expense Claim', 'Employee', 'HR', 'ToDo'],
 			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User'],
 			'properties': [
 				{'doctype': 'Item', 'fieldname': 'is_stock_item', 'property': 'default', 'value': 0},
@@ -59,10 +59,10 @@ def get_domain(domain):
 		},
 		'Education': {
 			'desktop_icons': ['Student', 'Program', 'Course', 'Student Group', 'Instructor',
-				'Fees',  'ToDo', 'Schools'],
+				'Fees',  'Task', 'ToDo', 'Schools'],
 			'allow_roles': ['Academics User', 'Accounts User', 'Accounts Manager', 'Item Manager',
 				'Website Manager', 'HR User', 'HR Manager', 'Purchase User', 'Purchase Manager',
-				'Student'],
+				'Student', 'Projects User'],
 			'default_portal_role': 'Student'
 		},
 	}
