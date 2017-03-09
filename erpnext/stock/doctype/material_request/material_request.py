@@ -393,11 +393,11 @@ def raise_production_orders(material_request):
 				prod_order.save()
 				production_orders.append(prod_order.name)
 			else:
-				errors.append(d.item_code + " in Row " + cstr(d.idx))
+				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}").format(d.idx, d.item_code))
 	if production_orders:
 		message = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
 			(p, p) for p in production_orders]
-		msgprint(_("The following Production Orders were created:" + '\n' + new_line_sep(message)))
+		msgprint(_("The following Production Orders were created:") + '\n' + new_line_sep(message))
 	if errors:
-		msgprint(_("Productions Orders cannot be raised for:" + '\n' + new_line_sep(errors)))
+		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
 	return production_orders
