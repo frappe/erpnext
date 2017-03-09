@@ -287,7 +287,7 @@ DocType: Material Request Item,Min Order Qty,最小訂貨量
 DocType: Student Group Creation Tool Course,Student Group Creation Tool Course,學生組創建工具課程
 DocType: Lead,Do Not Contact,不要聯絡
 apps/erpnext/erpnext/public/js/setup_wizard.js +365,People who teach at your organisation,誰在您的組織教人
-DocType: Purchase Invoice,The unique id for tracking all recurring invoices. It is generated on submit.,唯一ID來跟踪所有的經常性發票。它是在提交生成的。
+DocType: Purchase Invoice,The unique id for tracking all recurring invoices. It is generated on submit.,唯一ID來跟踪所有的經常性發票。它是在提交生成的。
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +97,Software Developer,軟件開發人員
 DocType: Item,Minimum Order Qty,最低起訂量
 DocType: Pricing Rule,Supplier Type,供應商類型
