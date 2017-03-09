@@ -693,18 +693,8 @@ def get_children():
 
 	return acc
 
-def create_payment_gateway_and_account(gateway):
-	create_payment_gateway(gateway)
+def create_payment_gateway_account(gateway):
 	create_payment_gateway_account(gateway)
-
-def create_payment_gateway(gateway):
-	# NOTE: we don't translate Payment Gateway name because it is an internal doctype
-	if not frappe.db.exists("Payment Gateway", gateway):
-		payment_gateway = frappe.get_doc({
-			"doctype": "Payment Gateway",
-			"gateway": gateway
-		})
-		payment_gateway.insert(ignore_permissions=True)
 
 def create_payment_gateway_account(gateway):
 	from erpnext.setup.setup_wizard.setup_wizard import create_bank_account
