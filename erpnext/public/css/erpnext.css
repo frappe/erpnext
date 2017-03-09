@@ -295,12 +295,13 @@ body[data-route="pos"] .modal-dialog {
   margin-bottom: 15px;
 }
 .item-cart-items {
-  height: calc(100vh - 500px);
+  height: calc(100vh - 526px);
   overflow: auto;
   border: 1px solid #d1d8dd;
   border-top: none;
 }
-.item-cart-items .no-items-message {
+.pos .no-items-message {
+  min-height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -316,13 +317,28 @@ body[data-route="pos"] .modal-dialog {
   overflow: hidden;
 }
 .pos .item-list {
-  border-left: 1px solid #d1d8dd;
-  border-right: 1px solid #d1d8dd;
-  height: calc(100vh - 180px);
+  border: 1px solid #d1d8dd;
+  border-top: none;
+  max-height: calc(100vh - 190px);
   overflow: auto;
+}
+@media (max-width: 767px) {
+  .pos .item-list {
+    max-height: initial;
+  }
 }
 .pos .item-list .image-field {
   height: 140px;
+}
+.pos .item-list .pos-item-wrapper {
+  position: relative;
+}
+.pos .item-list .price-info {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 9px 15px;
 }
 .pos-bill-toolbar {
   margin-top: 10px;
@@ -336,4 +352,18 @@ body[data-route="pos"] .modal-dialog {
 }
 .pos-selected-item-action > .pos-list-row {
   border: none;
+}
+.edit-customer-btn {
+  position: absolute;
+  right: 57px;
+  top: 15px;
+  z-index: 100;
+}
+.btn-more {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: #fafbfc;
+  min-height: 200px;
 }

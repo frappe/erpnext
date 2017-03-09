@@ -19,7 +19,7 @@ frappe.pages['pos'].refresh = function (wrapper) {
 
 erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	init: function (wrapper) {
-		this.page_len = 20;
+		this.page_len = 2;
 		this.page = wrapper.page;
 		this.wrapper = $(wrapper).find('.page-content');
 		this.set_indicator();
@@ -439,15 +439,50 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		// 	me.make_item_list();
 		// });
 
-		this.wrapper.find(".btn-more").on("click", function() {
-			me.page_len += 20;
+		me.toggle_more_btn();
+
+		this.wrapper.on("click", ".btn-more", function() {
+			console.log('asdf')
+			me.page_len += 2;
 			me.items = me.get_items();
 			me.make_item_list();
-		})
+			me.toggle_more_btn();
+		});
 
-		this.wrapper.find(".edit-customer-btn").on("click", function() {
+		this.page.wrapper.on("click", ".edit-customer-btn", function() {
 			me.update_customer()
 		})
+	},
+
+	toggle_more_btn: function() {
+		if(!this.items || this.items.length <= this.page_len) {
+			this.wrapper.find(".btn-more").hide();
+		} else {
+			this.wrapper.find(".btn-more").show();
+		}
+	},
+
+	toggle_totals_area: function(show) {
+
+		if(!show) {
+			show = this.is_totals_area_collapsed;
+		}
+
+		var totals_area = this.wrapper.find('.totals-area');
+		totals_area.find('.net-total-area, .tax-area, .discount-amount-area')
+			.toggle(show);
+
+		if(show) {
+			totals_area.find('.collapse-btn i')
+				.removeClass('octicon-chevron-down')
+				.addClass('octicon-chevron-up');
+		} else {
+			totals_area.find('.collapse-btn i')
+				.removeClass('octicon-chevron-up')
+				.addClass('octicon-chevron-down');
+		}
+
+		this.is_totals_area_collapsed = !show;
 	},
 
 	make_list_customers: function () {
@@ -457,6 +492,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.pos_bill = this.wrapper.find('.pos-bill-wrapper').hide();
 		this.list_customers = this.wrapper.find('.list-customers');
 		this.numeric_keypad = this.wrapper.find('.numeric_keypad');
+
+		me.render_list_customers();
+		me.toggle_totals_area(false);
 
 		this.page.wrapper.on('click', '.list-customers-btn', function() {
 			$(this).toggleClass("view_customer");
@@ -472,7 +510,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					me.party_field.$input.attr('disabled', false);
 				}
 				me.pos_bill.show();
-				me.list_customers.hide()
+				me.toggle_totals_area(false);
+				me.list_customers.hide();
 				if(me.frm.doc.items.length > 0) {
 					me.numeric_keypad.show();
 				}
@@ -483,6 +522,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.create_new();
 			me.refresh();
 			me.set_focus();
+		});
+		this.pos_bill.on('click', '.collapse-btn', function() {
+			me.toggle_totals_area();
 		});
 	},
 	
@@ -535,22 +577,17 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 
 		this.removed_items = [];
-		this.list_customers.empty();
+		// this.list_customers.empty();
 		this.si_docs = this.get_doc_from_localstorage();
 
-		if (!this.si_docs.length) {
+		if (!this.si_docs.length) {fv
 			this.list_customers.append(
 				'<div style="padding: 12px; margin-left:-12px;">' + __("No offline records.") + '</div>'
 			)
 			return;
 		}
-		var html = '<div class="row list-row list-row-head pos-invoice-list">\
-			<div class="col-xs-1"><input class="list-select-all" type="checkbox"></div>\
-			<div class="col-xs-3">Customer</div>\
-			<div class="col-xs-2 text-left">Status</div>\
-			<div class="col-xs-3 text-right">Paid Amount</div>\
-			<div class="col-xs-3 text-right">Grand Total</div>\
-		</div>';
+
+		var html = "";
 		this.si_docs.forEach(function (data, i) {
 			for (key in data) {
 				html += frappe.render_template("pos_invoice_list", {
@@ -563,7 +600,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				});
 			}
 		});
-		this.list_customers.append(html);
+		this.list_customers.find('.list-customers-table').html(html);
 
 		this.list_customers.find('.list-column').click(function () {
 			me.list_customers.hide();
@@ -667,11 +704,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				},
 				item: function (item, input) {
 					var d = item;
-					var html = "<span>" + __(d.label || d.value) + "</span>\
-						<span class='link-btn'>\
-							<a class='btn-open no-decoration' title='" + __('Open Link') + "'>\
-								<i class='octicon octicon-arrow-right'></i></a>\
-						</span>";
+					var html = "<span>" + __(d.label || d.value) + "</span>";
 					return $('<li></li>')
 						.data('item.autocomplete', d)
 						.html('<a><p>' + html + '</p></a>')
@@ -710,12 +743,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					customer.action.apply(me);
 					return;
 				}
+				me.toggle_list_customer(false);
+				me.toggle_edit_button(true);
 				me.update_customer_data(customer);
 				me.refresh();
 				me.set_focus();
 			})
 			.on('focus', function (e) {
 				$(e.target).val('').trigger('input');
+				me.toggle_edit_button(false);
+				me.toggle_list_customer(true);
 			})
 			.on("awesomplete-selectcomplete", function (e) {
 				var item = me.party_field.awesomeplete
@@ -725,6 +762,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					$(this).val("");
 				}
 			});
+	},
+
+	toggle_edit_button: function(flag) {
+		this.page.wrapper.find('.edit-customer-btn').toggle(flag);
+	},
+
+	toggle_list_customer: function(flag) {
+		this.list_customers.toggle(flag);
 	},
 
 	add_customer: function() {
@@ -909,6 +954,26 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					})).tooltip().appendTo($wrap);
 				}
 			});
+			
+			$wrap.append(`
+				<div class="image-view-item btn-more text-muted text-center">
+					<div class="image-view-body">
+						<i class="mega-octicon octicon-package"></i>
+						<div>Load more items</div>
+					</div>
+				</div>
+			`);
+
+			me.toggle_more_btn();
+			// $(frappe.render_template("pos_item", {
+			// 	item_code: 'btn_more',
+			// 	item_price: format_currency(me.price_list_data[obj.name], me.frm.doc.currency),
+			// 	item_name: obj.name === obj.item_name ? "" : obj.item_name,
+			// 	item_image: obj.image,
+			// 	color: frappe.get_palette(obj.item_name),
+			// 	abbr: frappe.get_abbr(obj.item_name)
+			// })).tooltip().appendTo($wrap);
+
 		} else {
 			$("<p class='text-muted small' style='padding-left: 10px'>"
 				+__("Not items found")+"</p>").appendTo($wrap)
@@ -1186,7 +1251,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.add_new_item_to_grid();
 
 		this.update_paid_amount_status(false)
-		this.wrapper.find(".item-cart").scrollTop(1000);
+		this.wrapper.find(".item-cart-items").scrollTop(1000);
 	},
 
 	add_new_item_to_grid: function () {
@@ -1317,7 +1382,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.refresh();
 			me.toggle_input_field();
 			me.set_focus();
-		})
+		}, "fa fa-plus")
 		if (this.frm.doc.docstatus == 0) {
 			// this.page.set_primary_action(__("Pay"), function () {
 			// 	me.validate();

@@ -23,10 +23,10 @@
 				{% if (item_image) { %}
 				<img src="{{ item_image }}" alt="{{item_name || item_code}}">
 				{% } %}
-				<button class="btn btn-default zoom-view hide" data-name="{{item_code}}">
-					<i class="fa fa-search-plus"></i>
-				</button>
 			</div>
+			<span class="price-info">
+				{{item_price}}
+			</span>
 		</a>
 	</div>
 </div>

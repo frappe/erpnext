@@ -19,10 +19,6 @@
 
 /* pos */
 
-// .pos-item-area {
-// 	padding: 0px 10px;
-// }
-
 .pos-item-wrapper {
 	padding: 5px;
 }
@@ -64,22 +60,11 @@
 	background-repeat: no-repeat;
 }
 
-.pos-item-area {
-	// border: 1px solid #d1d8dd;
-	// border-top: none;
-}
-
 .pos-item-toolbar {
 	height: 51px; // remove later
 	padding: 10px 0px;
 	border-bottom: 1px solid #d1d8dd;
 }
-
-// .item-list-area, .list-customers {
-// 	padding: 15px 0px;
-// 	overflow-y: scroll;
-// 	height: ~"calc(100vh - 162px)";
-// }
 
 .pos-toolbar, .pos-bill-toolbar {
 	padding: 10px 0px;
@@ -90,19 +75,6 @@
 .pos-item-toolbar .form-group {
 	margin-bottom: 0px;
 }
-
-.pos-bill-wrapper {
-	// border: 1px solid #d1d8dd;
-	// border-top: none;
-	// margin-right: -1px;
-}
-
-.pos-bill {
-	// border-top: 1px solid @border-color;
-	// margin-left: -15px;
-	// margin-right: -15px;
-}
-
 .edit-pos-item {
 	height: 50px;
 	font-size: 14px;
@@ -229,15 +201,12 @@
 
 
 .numeric-keypad {
-	// border: 1px solid #d1d8dd;
 	height: 60px;
 	width: 60px;
 	font-size: 20px;
 	font-weight: 200;
 	border-radius: 0;
 	background-color: #fff;
-	// background-color: #FDFDFD;
-	// border-color: #e8e8e8;
 	margin-left:-4px;
 }
 
@@ -260,15 +229,8 @@
 }
 
 .pos-pay {
-
 	background-color: @brand-primary;
 	border: none;
-
-	// height:69px;
-	// width:69px;
-	// font-size:17px;
-	// font-weight:200;
-	// margin-left:-4px;
 }
 
 .multimode-payments {
@@ -392,22 +354,19 @@ body[data-route="pos"] .modal-dialog {
 	margin-bottom: 15px;
 }
 
-// body[data-route="pos"] .page-body {
-// 	height: ~"calc(100vh - 40px)";
-// }
-
 .item-cart-items {
-	height: ~"calc(100vh - 500px)";
+	height: ~"calc(100vh - 526px)";
 	overflow: auto;
 	border: 1px solid @border-color;
 	border-top: none;
 
-	.no-items-message {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 100%;
-	}
+}
+.pos .no-items-message {
+	min-height: 200px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
 }
 
 .pos .items .pos-list-row:last-child {
@@ -423,13 +382,29 @@ body[data-route="pos"] .modal-dialog {
 }
 
 .pos .item-list {
-	border-left: 1px solid @border-color;
-	border-right: 1px solid @border-color;
-	height: ~"calc(100vh - 180px)";
+	border: 1px solid @border-color;
+	border-top: none;
+	max-height: ~"calc(100vh - 190px)";
 	overflow: auto;
+
+	@media (max-width: @screen-xs) {
+		max-height: initial;
+	}
 
 	.image-field {
 		height: 140px;
+	}
+
+	.pos-item-wrapper {
+		position: relative;
+	}
+
+	.price-info {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		background-color: rgba(0, 0, 0, 0.1);
+		padding: 9px 15px;
 	}
 }
 
@@ -448,4 +423,20 @@ body[data-route="pos"] .modal-dialog {
 
 .pos-selected-item-action > .pos-list-row {
 	border: none;
+}
+
+.edit-customer-btn {
+	position: absolute;
+	right: 57px;
+	top: 15px;
+	z-index: 100;
+}
+
+.btn-more {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	background-color: @light-bg;
+	min-height: 200px;
 }
