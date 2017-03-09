@@ -464,7 +464,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	toggle_totals_area: function(show) {
 
-		if(!show) {
+		if(show === undefined) {
 			show = this.is_totals_area_collapsed;
 		}
 

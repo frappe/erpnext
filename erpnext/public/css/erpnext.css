@@ -275,7 +275,7 @@ body[data-route="pos"] .modal-dialog {
   vertical-align: middle;
 }
 .pos-list-row .subject {
-  width: 50%;
+  width: 40%;
 }
 .pos-list-row .list-row-checkbox,
 .pos-list-row .list-select-all {
@@ -307,7 +307,7 @@ body[data-route="pos"] .modal-dialog {
   justify-content: center;
   height: 100%;
 }
-.pos .items .pos-list-row:last-child {
+.pos .pos-list-row:last-child {
   border-bottom: none;
 }
 .pos .form-section-heading {
