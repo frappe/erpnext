@@ -748,7 +748,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			.on('focus', function (e) {
 				$(e.target).val('').trigger('input');
 				me.toggle_edit_button(false);
-				if(me.frm.doc.items.length){
+
+				if(me.frm.doc.items.length) {
 					me.toggle_list_customer(false)
 					me.toggle_item_cart(true)
 				} else {

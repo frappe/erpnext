@@ -27,27 +27,25 @@
 			</div>
 			<div class="totals-area">
 				<div class="pos-list-row net-total-area">
-					<div class="cell subject"></div>
 					<div class="cell"></div>
 					<div class="cell text-right">{%= __("Net Total") %}</div>
-					<div class="cell net-total text-right"></div>
+					<div class="cell price-cell bold net-total text-right"></div>
 				</div>
 				<div class="pos-list-row tax-area">
-					<div class="cell subject"></div>
 					<div class="cell"></div>
-					<div class="cell text-muted">{%= __("Taxes") %}</div>
-					<div class="cell text-right tax-table"></div>
+					<div class="cell text-right">{%= __("Taxes") %}</div>
+					<div class="cell price-cell text-right tax-table">
+					</div>
 				</div>
 				{% if (apply_discount_on) { %}
 				<div class="pos-list-row discount-amount-area">
-					<div class="cell text-muted">{%= __("Discount") %}</div>
-					<div class="cell discount-field-col">
+					<div class="cell"></div>
+					<div class="cell text-right">{%= __("Discount") %}</div>
+					<div class="cell price-cell discount-field-col">
 						<div class="input-group input-group-sm">
 							<span class="input-group-addon">%</span>
 							<input type="text" class="form-control discount-percentage text-right">
 						</div>
-					</div>
-					<div class="cell discount-field-col">
 						<div class="input-group input-group-sm">
 							<span class="input-group-addon">{%= get_currency_symbol(currency) %}</span>
 							<input type="text" class="form-control discount-amount text-right" placeholder="{%= 0.00 %}">
@@ -55,21 +53,21 @@
 					</div>
 				</div>
 				{% } %}
-				<div class="pos-list-row grand-total-area" style="border-bottom:1px solid #d1d8dd;">
+				<div class="pos-list-row grand-total-area collapse-btn" style="border-bottom:1px solid #d1d8dd;">
 					<div class="cell">
-						<a class="collapse-btn">
+						<a class="">
 							<i class="octicon octicon-chevron-down"></i>
 						</a>
 					</div>
 					<div class="cell text-right bold">{%= __("Grand Total") %}</div>
-					<div class="cell subject grand-total text-right lead"></div>
+					<div class="cell price-cell grand-total text-right lead"></div>
 				</div>
 			</div>
 			<div class="row" style="margin-top: 30px">
-				<div class="col-xs-6 selected-item">
+				<div class="col-sm-6 selected-item">
 
 				</div>
-				<div class="col-xs-6 numeric_keypad" style="display:none">
+				<div class="col-xs-6 numeric_keypad hidden-xs" style="display:none">
 					{% var chartData = ["Qty", "Disc", "Price"] %} {% for(var i=0; i
 					<3; i++) { %} <div class="row text-right">
 						{% for(var j=i*3; j
@@ -110,10 +108,6 @@
 
 		</div>
 		<span id="customer-results" style="color:#68a;"></span>
-		<div class="row pos-item-toolbar hide">
-			<!--<div class="search-item-group col-xs-5"></div>-->
-			<!--<div class="search-item col-xs-7"></div>-->
-		</div>
 		<div class="item-list-area">
 			<div class="pos-list-row pos-bill-header text-muted h6">
 				<div class="cell subject search-item-group">
