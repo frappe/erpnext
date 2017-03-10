@@ -12,6 +12,8 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
+develop_version = '8.0.0-beta'
+
 error_report_email = "support@erpnext.com"
 
 app_include_js = "assets/js/erpnext.min.js"
