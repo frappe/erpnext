@@ -50,7 +50,9 @@ class SalesOrder(SellingController):
 		# validate transaction date v/s delivery date
 		if self.delivery_date:
 			if getdate(self.transaction_date) > getdate(self.delivery_date):
-				frappe.throw(_("Expected Delivery Date cannot be before Sales Order Date"))
+				frappe.msgprint(_("Expected Delivery Date is be before Sales Order Date"),
+					indicator='orange',
+					title=_('Warning'))
 
 	def validate_po(self):
 		# validate p.o date v/s delivery date
@@ -81,7 +83,8 @@ class SalesOrder(SellingController):
 		unique_chk_list = set(check_list)
 		if len(unique_chk_list) != len(check_list) and \
 			not cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
-			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
+			frappe.msgprint(_("Same item has been entered multiple times"),
+				title=_("Warning"), indicator='orange')
 
 	def product_bundle_has_stock_item(self, product_bundle):
 		"""Returns true if product bundle has stock item"""
@@ -442,7 +445,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
-		
+
 		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
 		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
 			or item.selling_cost_center \
