@@ -166,11 +166,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	dialog_actions: function () {
 		var me = this;
 
-		$(this.list_body).find('.list-column').click(function () {
-			me.name = $(this).parents().attr('invoice-name')
-			me.edit_record();
-		})
-
 		$(this.list_body).find('.list-select-all').click(function () {
 			me.removed_items = [];
 			$(me.list_body).find('.list-delete').prop("checked", $(this).is(":checked"))
@@ -182,7 +177,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				})
 			}
 
-			me.toggle_primary_action();
+			me.toggle_delete_button();
 		})
 
 		$(this.list_body).find('.list-delete').click(function () {
@@ -193,7 +188,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.removed_items.pop(me.name)
 			}
 
-			me.toggle_primary_action();
+			me.toggle_delete_button();
 		})
 	},
 
@@ -212,19 +207,32 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	delete_records: function () {
 		var me = this;
+		this.validate_list()
 		this.remove_doc_from_localstorage()
 		this.update_localstorage();
-		this.dialog_actions();
-		this.toggle_primary_action();
+		// this.dialog_actions();
+		this.toggle_delete_button();
 	},
 
-	toggle_primary_action: function () {
+	validate_list: function() {
 		var me = this;
-		if(this.frm.doc.allow_delete) {
+		this.si_docs = this.get_submitted_invoice()
+		$.each(this.removed_items, function(index, name){
+			$.each(me.si_docs, function(key, data){
+				if(me.si_docs[key][name] && me.si_docs[key][name].offline_pos_name == name ){
+					frappe.throw(__("Submitted orders can not be deleted"))
+				}
+			})
+		})
+	},
+
+	toggle_delete_button: function () {
+		var me = this;
+		if(this.pos_profile_data["allow_delete"]) {
 			if (this.removed_items && this.removed_items.length > 0) {
-				$(this.wrapper).find('.btn-danger').show();
+				$(this.page.wrapper).find('.btn-danger').show();
 			} else {
-				$(this.wrapper).find('.btn-danger').hide();
+				$(this.page.wrapper).find('.btn-danger').hide();
 			}
 		}
 	},
@@ -348,7 +356,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	},
 
 	setup: function () {
-		this.frm.doc.allow_delete = this.pos_profile_data["allow_delete"];
 		this.make();
 		this.set_primary_action();
 		this.party_field.$input.attr('disabled', false);
@@ -403,18 +410,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			}, 1000);
 		});
 
-		// this.search_item_group = frappe.ui.form.make_control({
-		// 	df: {
-		// 		"fieldtype": "Select",
-		// 		"options": me.item_groups,
-		// 		"label": __("Item Group"),
-		// 		"fieldname": "item_group",
-		// 		"placeholder": __("Item Group")
-		// 	},
-		// 	parent: this.wrapper.find(".search-item-group"),
-		// 	only_input: true,
-		// });
-
 		this.search_item_group = this.wrapper.find('.search-item-group');
 
 		var dropdown_html = me.item_groups.map(function(item_group) {
@@ -431,13 +426,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.items = me.get_items();
 			me.make_item_list();
 		})
-
-		// this.search_item_group.make_input();
-		// this.search_item_group.$input.on("change", function () {
-		// 	me.page_len = 20;
-		// 	me.items = me.get_items();
-		// 	me.make_item_list();
-		// });
 
 		me.toggle_more_btn();
 
@@ -499,17 +487,17 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			$(this).toggleClass("view_customer");
 			if($(this).hasClass("view_customer")) {
 				me.render_list_customers();
-				me.bind_delete_event()
-				me.party_field.$input.attr('disabled', true);
 				me.list_customers.show();
 				me.pos_bill.hide();
 				me.numeric_keypad.hide();
+				me.toggle_delete_button()
 			} else {
 				if(me.frm.doc.docstatus == 0) {
 					me.party_field.$input.attr('disabled', false);
 				}
 				me.pos_bill.show();
 				me.toggle_totals_area(false);
+				me.toggle_delete_button()
 				me.list_customers.hide();
 				if(me.frm.doc.items.length > 0) {
 					me.numeric_keypad.show();
@@ -544,7 +532,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.numeric_val += me.val;
 				me.selected_field.val(flt(me.numeric_val))
 				me.selected_field.trigger("change")
-				me.render_selected_item()
+				// me.render_selected_item()
 			}
 
 			if(me.numeric_id && $(this).hasClass('pos-operation')) {
@@ -561,7 +549,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.numeric_val = cstr(flt(me.selected_field.val())).slice(0, -1);
 			me.selected_field.val(me.numeric_val);
 			me.selected_field.trigger("change")
-			me.render_selected_item()
+			// me.render_selected_item()
 		})
 		
 		$(this.numeric_keypad).find('.pos-pay').click(function(){
@@ -578,27 +566,28 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.removed_items = [];
 		// this.list_customers.empty();
 		this.si_docs = this.get_doc_from_localstorage();
-
 		if (!this.si_docs.length) {
 			return;
 		}
 
 		var html = "";
-		this.si_docs.forEach(function (data, i) {
-			for (key in data) {
-				html += frappe.render_template("pos_invoice_list", {
-					sr: i + 1,
-					name: key,
-					customer: data[key].customer,
-					paid_amount: format_currency(data[key].paid_amount, me.frm.doc.currency),
-					grand_total: format_currency(data[key].grand_total, me.frm.doc.currency),
-					data: me.get_doctype_status(data[key])
-				});
-			}
-		});
+		if(this.si_docs.length) {
+			this.si_docs.forEach(function (data, i) {
+				for (key in data) {
+					html += frappe.render_template("pos_invoice_list", {
+						sr: i + 1,
+						name: key,
+						customer: data[key].customer,
+						paid_amount: format_currency(data[key].paid_amount, me.frm.doc.currency),
+						grand_total: format_currency(data[key].grand_total, me.frm.doc.currency),
+						data: me.get_doctype_status(data[key])
+					});
+				}
+			});
+		}
 		this.list_customers.find('.list-customers-table').html(html);
 
-		this.list_customers.find('.list-column').click(function () {
+		this.list_customers.on('click', '.customer-row', function () {
 			me.list_customers.hide();
 			me.numeric_keypad.show();
 			me.list_customers_btn.toggleClass("view_customer");
@@ -620,7 +609,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				});
 			}
 
-			me.toggle_primary_action();
+			me.toggle_delete_button();
 		});
 
 		$(this.wrapper).find('.list-delete').click(function () {
@@ -631,16 +620,17 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.removed_items.pop(me.name)
 			}
 
-			me.toggle_primary_action();
+			me.toggle_delete_button();
 		});
 	},
 
 	bind_delete_event: function() {
 		var me = this;
 
-		$(this.wrapper).find('.btn-danger').click(function(){
+		$(this.page.wrapper).on('click', '.btn-danger', function(){
 			frappe.confirm(__("Delete permanently?"), function () {
 				me.delete_records();
+				me.list_customers.find('.list-customers-table').html("");
 				me.render_list_customers();
 			})
 		})
@@ -660,7 +650,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if(!this.party_field) {
 			if(this.page.wrapper.find('.pos-bill-toolbar').length === 0) {
 				$(frappe.render_template('customer_toolbar', {
-					allow_delete: this.frm.doc.allow_delete
+					allow_delete: this.pos_profile_data["allow_delete"]
 				})).insertAfter(this.page.$title_area.hide());
 			}
 
@@ -678,6 +668,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 			this.party_field.make_input();
 			setTimeout(this.set_focus.bind(this), 500);
+			me.toggle_delete_button();
 		}
 
 		if (this.default_customer && !this.frm.doc.customer) {
@@ -817,6 +808,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					"fieldtype": "Section Break"
 				},
 				{
+					"label": __("Address Name"),
+					"read_only": 1,
+					"fieldname": "name",
+					"fieldtype": "Data"
+				},
+				{
 					"label": __("Address Line 1"),
 					"fieldname": "address_line1",
 					"fieldtype": "Data"
@@ -824,11 +821,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				{
 					"label": __("Address Line 2"),
 					"fieldname": "address_line2",
-					"fieldtype": "Data"
-				},
-				{
-					"label": __("Fax"),
-					"fieldname": "fax",
 					"fieldtype": "Data"
 				},
 				{
@@ -848,12 +840,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					"label": __("ZIP Code"),
 					"fieldname": "pincode",
 					"fieldtype": "Data"
-				},
-				{
-					"label": __("ZIP Code"),
-					"hidden": 1,
-					"fieldname": "name",
-					"fieldtype": "Data"
 				}
 			]
 		})
@@ -870,15 +856,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	render_address_data: function() {
 		var me = this;
 		this.address_data = this.address[this.frm.doc.customer] || this.get_address_from_localstorage();
-		prompt_obj = me.customer_doc.fields_dict;
-		$.each(this.address_data, function(key, value){
-			if(prompt_obj[key] && key!='name') {
-				prompt_obj[key].$input.val(value)
-			}
-		})
+		this.customer_doc.set_values(this.address_data)
 
-		if(!prompt_obj.full_name.$input.val()) {
-			prompt_obj.full_name.$input.val(this.frm.doc.customer)
+		if(!this.customer_doc.fields_dict.full_name.$input.val()) {
+			this.customer_doc.set_value("full_name", this.frm.doc.customer)
 		}
 	},
 
@@ -889,6 +870,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	make_offline_customer: function() {
 		this.frm.doc.customer = this.frm.doc.customer || this.customer_doc.get_values().full_name;
+		this.customer_details = this.get_customers_details();
 		this.customer_details[this.frm.doc.customer] = this.get_prompt_details();
 		this.party_field.$input.val(this.frm.doc.customer);
 		this.customers.push({
@@ -902,7 +884,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	get_prompt_details: function() {
 		this.prompt_details = this.customer_doc.get_values();
-		this.prompt_details['country'] = this.frm.doc.country;
+		this.prompt_details['country'] = this.pos_profile_data.country;
 		return JSON.stringify(this.prompt_details)
 	},
 
@@ -1066,6 +1048,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			var item_code = $(this).parents(".pos-selected-item-action").attr("data-item-code");
 			var qty = $(this).val();
 			me.update_qty(item_code, qty)
+			me.render_selected_item()
 		})
 
 		$(this.wrapper).find("[data-action='increase-qty']").on("click", function () {
@@ -1084,6 +1067,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			var item_code = $(this).parents(".pos-selected-item-action").attr("data-item-code");
 			var discount = $(this).val();
 			me.update_discount(item_code, discount)
+			me.render_selected_item()
 		})
 	},
 
@@ -1100,6 +1084,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.add_to_cart();
 			}
 		});
+
+		me.bind_delete_event()
 	},
 
 	update_qty: function (item_code, qty) {
@@ -1173,7 +1159,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		idx = 0
 		this.items = []
-		idx = 0
 		$.each(this.frm.doc["items"] || [], function (i, d) {
 			if (!in_list(me.remove_item, d.idx)) {
 				d.idx = idx;
@@ -1374,39 +1359,31 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	set_primary_action: function () {
 		var me = this;
-		this.page.set_primary_action(__("New Order"), function () {
-			me.save_previous_entry();
-			me.create_new();
-			me.refresh();
-			me.toggle_input_field();
-			me.set_focus();
+		this.page.set_primary_action(__("New Cart"), function () {
+			me.make_new_cart()
 		}, "fa fa-plus")
-		if (this.frm.doc.docstatus == 0) {
-			// this.page.set_primary_action(__("Pay"), function () {
-			// 	me.validate();
-			// 	me.update_paid_amount_status(true);
-			// 	me.create_invoice();
-			// 	me.make_payment();
-			// }, "fa fa-credit-card");
-		} else if (this.frm.doc.docstatus == 1) {
+
+		if (this.frm.doc.docstatus == 1) {
 			this.page.set_secondary_action(__("Print"), function () {
 				html = frappe.render(me.print_template_data, me.frm.doc)
 				me.print_document(html)
 			})
-		} else {
-			this.page.clear_primary_action()
 		}
+	},
 
-		// this.page.set_secondary_action(__("New"), function () {
-		// 	me.save_previous_entry();
-		// 	me.create_new();
-		// }, "fa fa-plus").addClass("btn-primary");
+	make_new_cart: function (){
+		this.save_previous_entry();
+		this.create_new();
+		this.refresh();
+		this.toggle_input_field();
+		this.render_list_customers();
+		this.set_focus();
 	},
 
 	print_dialog: function () {
 		var me = this;
 
-		msgprint = frappe.msgprint(format('<a class="btn btn-primary print_doc" \
+		this.msgprint = frappe.msgprint(format('<a class="btn btn-primary print_doc" \
 			style="margin-right: 5px;">{0}</a>\
 			<a class="btn btn-default new_doc">{1}</a>', [
 				__('Print'), __('New')
@@ -1418,8 +1395,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		})
 
 		$('.new_doc').click(function () {
-			msgprint.hide()
-			me.create_new();
+			me.msgprint.hide()
+			me.make_new_cart()
 		})
 	},
 
@@ -1456,6 +1433,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$(this.wrapper).find('select').attr("disabled", disabled);
 		$(this.wrapper).find('input').attr("disabled", disabled);
 		$(this.wrapper).find('select').attr("disabled", disabled);
+		$(this.wrapper).find('button').attr("disabled", disabled);
+		this.party_field.$input.attr('disabled', disabled);
 
 		if (this.frm.doc.docstatus == 1) {
 			pointer_events = 'none';
@@ -1527,7 +1506,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.email_queue_list = this.get_email_queue() || {};
 		this.customers_list = this.get_customers_details() || {};
 
-		if (this.si_docs.length || this.email_queue_list) {
+		if (this.si_docs.length || this.email_queue_list || this.customers_list) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.sales_invoice.pos.make_invoice",
 				args: {
@@ -1580,6 +1559,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					}
 				}
 			})
+			this.removed_items = [];
 			this.si_docs = this.new_si_docs;
 			this.update_localstorage();
 		}

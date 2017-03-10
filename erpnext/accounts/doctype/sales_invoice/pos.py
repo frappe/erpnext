@@ -63,6 +63,8 @@ def get_company_data(company):
 
 def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.campaign = pos_profile.get('campaign')
+	if not pos_profile.get('country'):
+		pos_profile["country"] = company_data.country
 
 	doc.write_off_account = pos_profile.get('write_off_account') or \
 		company_data.write_off_account
@@ -273,17 +275,17 @@ def get_pricing_rule_data(doc):
 	return pricing_rules
 
 @frappe.whitelist()
-def make_invoice(doc_list, email_queue_list, customers_list):
+def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 	if isinstance(doc_list, basestring):
 		doc_list = json.loads(doc_list)
 
 	if isinstance(email_queue_list, basestring):
-		email_queue = json.loads(email_queue_list)
+		email_queue_list = json.loads(email_queue_list)
 
 	if isinstance(customers_list, basestring):
-		customers = json.loads(customers_list)
+		customers_list = json.loads(customers_list)
 
-	customers = make_customer_and_address(customers)
+	customers = make_customer_and_address(customers_list)
 	name_list = []
 	for docs in doc_list:
 		for name, doc in docs.items():
@@ -297,7 +299,7 @@ def make_invoice(doc_list, email_queue_list, customers_list):
 			else:
 				name_list.append(name)
 
-	email_queue = make_email_queue(email_queue)
+	email_queue = make_email_queue(email_queue_list)
 	return {
 		'invoice': name_list,
 		'email_queue': email_queue,
@@ -330,8 +332,6 @@ def add_customer(name):
 def make_address(args, customer):
 	if args.get('name'):
 		address = frappe.get_doc('Address', args.get('name'))
-		address.is_primary_address = 1
-		address.is_shipping_address = 1
 	else:
 		address = frappe.new_doc('Address')
 		address.country = frappe.db.get_value('Company', args.get('company'), 'country')
@@ -340,6 +340,8 @@ def make_address(args, customer):
 			'link_name': customer
 		})
 
+	address.is_primary_address = 1
+	address.is_shipping_address = 1
 	address.update(args)
 	address.save(ignore_permissions = True)
 
