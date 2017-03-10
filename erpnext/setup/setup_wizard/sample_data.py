@@ -105,46 +105,34 @@ def make_projects(domain):
 	if domain == 'Education':
 		tasks += [
 			{
-				"title": _("Setup Master Data"),
+				"title": _("Setup your School in ERPNext"),
 				"start_date": current_date,
 				"end_date": frappe.utils.add_days(current_date, 1),
 				"file": "school_masters.md"
 			},
 			{
-				"title": _("Manage Operations"),
+				"title": "Setup Master Data",
 				"start_date": current_date,
-				"end_date": frappe.utils.add_days(current_date, 2),
-				"file": "school_operations.md"
-			},
-			{
-				"title": _("Import Data"),
-				"start_date": current_date,
-				"end_date": frappe.utils.add_days(current_date, 3),
-				"file": "school_import_data.md"
-			},
-			{
-				"title": "Go Live!",
-				"start_date": current_date,
-				"end_date": frappe.utils.add_days(current_date, 4),
-				"file": "school_go_live.md"
+				"end_date": frappe.utils.add_days(current_date, 1),
+				"file": "school_masters.md"
 			}]
 
 	else:
 		tasks += [
 			{
-				"title": "Setup Master Data",
+				"title": "Setup Your Company",
 				"start_date": current_date,
 				"end_date": frappe.utils.add_days(current_date, 1),
 				"file": "masters.md"
 			},
 			{
-				"title": "Try a Sales Cycle",
+				"title": "Start Tracking your Sales",
 				"start_date": current_date,
 				"end_date": frappe.utils.add_days(current_date, 2),
 				"file": "sales.md"
 			},
 			{
-				"title": "Try a Purchase Cycle",
+				"title": "Start Managing Purchases",
 				"start_date": current_date,
 				"end_date": frappe.utils.add_days(current_date, 3),
 				"file": "purchase.md"
@@ -176,6 +164,10 @@ def import_email_alert():
 	with open (os.path.join(os.path.dirname(__file__), "tasks/task_alert.json")) as f:
 		email_alert = frappe.get_doc(json.loads(f.read())[0])
 		email_alert.insert()
+
+	# trigger the first message!
+	from frappe.email.doctype.email_alert.email_alert import trigger_daily_alerts
+	trigger_daily_alerts()
 
 def test_sample():
 	frappe.db.sql('delete from `tabEmail Alert`')

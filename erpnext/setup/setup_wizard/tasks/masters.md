@@ -1,14 +1,7 @@
-💡Tip: Your ERPNext account is a model of your real business 🏠
+Start building a model of your business in ERPNext by adding your Items and Customers.
 
-So what does a business exactly do?
+These videos 📺 will help you get started:
 
-**You sell products (or services) to a customer**
+Adding Customers and Suppliers: https://www.youtube.com/watch?v=zsrrVDk6VBs
 
-To start building a model of your business, you can start with just 2 things:
-
-1. Customers
-2. Items
-
-Start adding them now!
-
-Hint: type "Item" in the search bar above 🔎
+Adding Items and Prices: https://www.youtube.com/watch?v=FcOsV-e8ymE

@@ -1,8 +1,5 @@
-Ready for some real stuff? 💪 Lets import some data!
+Lets import some data! 💪💪
 
-If you are already running a school, you most likely have your Students in some spreadsheet file somewhere.
+If you are already running a school, you most likely have your Students in some spreadsheet file somewhere. Import it into ERPNext with the Data Import Tool.
 
-You can quickly get them into ERPNext by using the data import tool. Just type "data import" in the search bar to get started 🔎
-
-If you need help, just head to the user forum https://discuss.erpnext.com
-
+Watch this video to get started: https://www.youtube.com/watch?v=Ta2Xx3QoK3E
