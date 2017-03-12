@@ -178,6 +178,7 @@ def get_item_details(item_code):
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
+		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 		quotation = frappe.get_doc(target)
 
 		company_currency = frappe.db.get_value("Company", quotation.company, "default_currency")
@@ -193,7 +194,11 @@ def make_quotation(source_name, target_doc=None):
 				quotation.transaction_date)
 
 		quotation.conversion_rate = exchange_rate
-
+		
+		# get default taxes
+		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template")
+		quotation.extend("taxes", taxes)
+		
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
 
