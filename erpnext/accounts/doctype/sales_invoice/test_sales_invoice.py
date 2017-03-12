@@ -558,7 +558,7 @@ class TestSalesInvoice(unittest.TestCase):
 							{'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 330}]
 
 		invoice_data = [{'09052016142': pos}]
-		si = make_invoice(invoice_data)
+		si = make_invoice(invoice_data).get('invoice')
 		self.assertEquals(si[0], '09052016142')
 
 		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': '09052016142', 'docstatus': 1})
