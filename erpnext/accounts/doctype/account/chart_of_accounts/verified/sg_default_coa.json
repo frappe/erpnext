@@ -40,10 +40,7 @@
                     "Rental Deposits": {}
                 }, 
                 "Stock Assets": {
-                    "All Warehouses": {
-                        "account_type": "Stock", 
-                        "is_group": 1
-                    }, 
+					"is_group": 1,
                     "account_type": "Stock"
                 }, 
                 "Tax Assets": {
