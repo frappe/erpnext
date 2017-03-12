@@ -162,14 +162,14 @@ class TestItem(unittest.TestCase):
 
 		variant = create_variant("_Test Numeric Template Item",
 			{"Test Size": "Large", "Test Item Length": 1.1})
-		self.assertEquals(variant.item_code, None)
+		self.assertEquals(variant.item_code, "_Test Numeric Template Item-L-1.1")
 		variant.item_code = "_Test Numeric Variant-L-1.1"
 		variant.item_name = "_Test Numeric Variant Large 1.1m"
 		self.assertRaises(InvalidItemAttributeValueError, variant.save)
 
 		variant = create_variant("_Test Numeric Template Item", 
 			{"Test Size": "Large", "Test Item Length": 1.5})
-		self.assertEquals(variant.item_code, None)
+		self.assertEquals(variant.item_code, "_Test Numeric Template Item-L-1.5")
 		variant.item_code = "_Test Numeric Variant-L-1.5"
 		variant.item_name = "_Test Numeric Variant Large 1.5m"
 		variant.save()
