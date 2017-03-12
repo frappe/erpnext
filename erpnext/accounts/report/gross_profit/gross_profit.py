@@ -248,21 +248,31 @@ class GrossProfitGenerator(object):
 			conditions += " and posting_date >= %(from_date)s"
 		if self.filters.to_date:
 			conditions += " and posting_date <= %(to_date)s"
+					
+		if self.filters.group_by=="Sales Person":
+			sales_person_cols = ", sales.sales_person, sales.allocated_amount, sales.incentives"
+			sales_team_table = "left join `tabSales Team` sales on sales.parent = si.name"
+		else:
+			sales_person_cols = ""
+			sales_team_table = ""
 
 		self.si_list = frappe.db.sql("""select item.parenttype, item.parent,
 				si.posting_date, si.posting_time, si.project, si.update_stock,
 				si.customer, si.customer_group, si.territory,
 				item.item_code, item.item_name, item.description, item.warehouse,
 				item.item_group, item.brand, item.dn_detail, item.delivery_note,
-				item.stock_qty as qty, item.base_net_rate, item.base_net_amount, item.name as "item_row",
-				sales.sales_person, sales.allocated_amount, sales.incentives
-			from `tabSales Invoice` si
-			inner join `tabSales Invoice Item` item on item.parent = si.name
-			left join `tabSales Team` sales on sales.parent = si.name
+				item.stock_qty as qty, item.base_net_rate, item.base_net_amount, item.name as "item_row"
+				{sales_person_cols}
+			from 
+				`tabSales Invoice` si
+				inner join `tabSales Invoice Item` item on item.parent = si.name
+				{sales_team_table}
 			where
-				si.docstatus = 1 and si.is_return != 1 %s
+				si.docstatus = 1 and si.is_return != 1 {conditions}
 			order by
-				si.posting_date desc, si.posting_time desc""" % (conditions,), self.filters, as_dict=1)
+				si.posting_date desc, si.posting_time desc"""
+			.format(conditions=conditions, sales_person_cols=sales_person_cols, 
+				sales_team_table=sales_team_table), self.filters, as_dict=1)
 
 	def load_stock_ledger_entries(self):
 		res = frappe.db.sql("""select item_code, voucher_type, voucher_no,
