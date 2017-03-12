@@ -684,6 +684,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.paid_amount = paid_amount
 	pe.received_amount = received_amount
 	pe.allocate_payment_amount = 1
+	pe.letter_head = doc.get("letter_head")
 	
 	pe.append("references", {
 		"reference_doctype": dt,

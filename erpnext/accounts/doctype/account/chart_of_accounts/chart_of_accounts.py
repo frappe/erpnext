@@ -117,7 +117,7 @@ def get_charts_for_country(country):
 
 def get_account_tree_from_existing_company(existing_company):
 	all_accounts = frappe.get_all('Account', 
-		filters={'company': existing_company}, 
+		filters={'company': existing_company, "warehouse": ""}, 
 		fields = ["name", "account_name", "parent_account", "account_type", 
 			"is_group", "root_type", "tax_rate"], 
 		order_by="lft, rgt")
@@ -126,7 +126,6 @@ def get_account_tree_from_existing_company(existing_company):
 
 	# fill in tree starting with root accounts (those with no parent)
 	build_account_tree(account_tree, None, all_accounts)
-	
 	return account_tree
 	
 def build_account_tree(tree, parent, all_accounts):

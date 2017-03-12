@@ -31,7 +31,8 @@ frappe.ui.form.on("Company", {
 	},
 
 	onload_post_render: function(frm) {
-		frm.get_field("delete_company_transactions").$input.addClass("btn-danger");
+		if(frm.get_field("delete_company_transactions").$input) 
+			frm.get_field("delete_company_transactions").$input.addClass("btn-danger");
 	},
 	country: function(frm) {
 		erpnext.company.set_chart_of_accounts_options(frm.doc);

@@ -28,7 +28,7 @@ class TestCompany(unittest.TestCase):
 				"root_type": "Asset",
 				"parent_account": "Accounts Receivable - CFEC",
 			},
-			"_Test Cash - CFEC": {
+			"Cash - CFEC": {
 				"account_type": "Cash",
 				"is_group": 0,
 				"root_type": "Asset",

@@ -148,8 +148,10 @@ class ProcessPayroll(Document):
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
 			ss_dict = {}
 			ss_dict["Employee Name"] = ss_obj.employee_name
-			ss_dict["Total Pay"] = fmt_money(ss_obj.rounded_total,currency = frappe.defaults.get_global_default("currency"))
+			ss_dict["Total Pay"] = fmt_money(ss_obj.net_pay,
+				currency = frappe.defaults.get_global_default("currency"))	
 			ss_dict["Salary Slip"] = self.format_as_links(ss_obj.name)[0]
+			
 			if ss_obj.net_pay<0:
 				not_submitted_ss.append(ss_dict)
 			else:
