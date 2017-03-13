@@ -63,8 +63,8 @@ def get_company_data(company):
 
 def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.campaign = pos_profile.get('campaign')
-	if not pos_profile.get('country'):
-		pos_profile["country"] = company_data.country
+	if pos_profile and not pos_profile.get('country'):
+		pos_profile.country = company_data.country
 
 	doc.write_off_account = pos_profile.get('write_off_account') or \
 		company_data.write_off_account
