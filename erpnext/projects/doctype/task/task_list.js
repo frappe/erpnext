@@ -28,6 +28,13 @@ frappe.listview_settings['Task'] = {
 		var html = `<h5>${ganttobj.name}</h5>`;
 		if(task.project) html += `<p>Project: ${task.project}</p>`;
 		html += `<p>Progress: ${ganttobj.progress}</p>`;
+
+		if(task._assign_list) {
+			html += task._assign_list.reduce(
+				(html, user) => html + frappe.avatar(user)
+			, '');
+		}
+
 		return html;
 	}
 
