@@ -524,7 +524,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 0, 
+   "collapsible": 1, 
    "columns": 0, 
    "fieldname": "account_info", 
    "fieldtype": "Section Break", 
@@ -916,7 +916,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-03-09 01:30:19.231918", 
+ "modified": "2017-03-13 15:55:11.143936", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Loan", 
