@@ -111,6 +111,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		if ((doc.doctype == "Purchase Receipt") || (doc.doctype == "Purchase Invoice" && doc.update_stock)) {
 			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
+
+			if(!doc.is_return && this.validate_negative_quantity(cdt, cdn, item, ["qty", "received_qty"])){ return }
+			
 			if(!item.rejected_qty && item.qty) {
 				item.received_qty = item.qty;
 			}
@@ -134,8 +137,26 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
 
+		if(!doc.is_return && this.validate_negative_quantity(cdt, cdn, item, ["received_qty", "rejected_qty"])){ return }
+		
 		item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
 		this.qty(doc, cdt, cdn);
+	},
+
+	validate_negative_quantity: function(cdt, cdn, item, fieldnames){
+		if(!item || !fieldnames) { return }
+		
+		var is_negative_qty = false;
+		for(var i = 0; i<fieldnames.length; i++) {
+			if(item[fieldnames[i]] < 0){
+				frappe.msgprint(__("Row #{0}: {1} can not be negative for item {2}",
+					[item.idx,__(frappe.meta.get_label(cdt, fieldnames[i], cdn)), item.item_code]));
+				is_negative_qty = true;
+				break;
+			}
+		}
+
+		return is_negative_qty
 	},
 
 	warehouse: function(doc, cdt, cdn) {
