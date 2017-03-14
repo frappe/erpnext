@@ -1046,7 +1046,7 @@ class TestSalesInvoice(unittest.TestCase):
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
-	if si.posting_date:
+	if args.posting_date:
 		si.set_posting_date = 1
 	si.posting_date = args.posting_date or nowdate()
 

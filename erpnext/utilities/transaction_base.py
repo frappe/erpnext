@@ -18,7 +18,7 @@ class TransactionBase(StatusUpdater):
 				frappe.db.get_value("Notification Control", None, dt + "_message"))
 
 	def validate_posting_time(self):
-		if not getattr(self, 'set_posting_time', False):
+		if not getattr(self, 'set_posting_time', None):
 			now = now_datetime()
 			self.posting_date = now.strftime('%Y-%m-%d')
 			self.posting_time = now.strftime('%H:%M:%S')

@@ -188,7 +188,7 @@ def make_purchase_invoice(asset, item_code, gross_purchase_amount, company, post
 	pi = frappe.new_doc("Purchase Invoice")
 	pi.company = company
 	pi.currency = frappe.db.get_value("Company", company, "default_currency")
-	pi.set_posting_date = 1
+	pi.set_posting_time = 1
 	pi.posting_date = posting_date
 	pi.append("items", {
 		"item_code": item_code,
