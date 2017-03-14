@@ -1413,9 +1413,28 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	submit_invoice: function () {
 		var me = this;
 		this.change_status();
+		this.update_serial_no()
 		if (this.frm.doc.docstatus == 1) {
 			this.print_dialog()
 		}
+	},
+
+	update_serial_no: function() {
+		var me = this;
+
+		//Remove the sold serial no from the cache
+		$.each(this.frm.doc.items, function(index, data) {
+			sn = data.serial_no.split('\n')
+			if(sn.length) {
+				serial_no_list = me.serial_no_data[data.item_code]
+				$.each(sn, function(i, serial_no) {
+					if(in_list(Object.keys(serial_no_list), serial_no)) {
+						delete serial_no_list[serial_no]
+					}
+				})
+				me.serial_no_data[data.item_code] = serial_no_list;
+			}
+		})
 	},
 
 	change_status: function () {
