@@ -10,7 +10,7 @@ from frappe.utils import flt, nowdate, get_url
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
-from frappe.integration_broker.doctype.integration_service.integration_service import get_integration_controller
+from frappe.integrations.utils import get_payment_gateway_controller
 
 class PaymentRequest(Document):
 	def validate(self):
@@ -65,11 +65,11 @@ class PaymentRequest(Document):
 		data = frappe.db.get_value(self.reference_doctype, self.reference_name,
 			["company", "customer_name"], as_dict=1)
 
-		controller = get_integration_controller(self.payment_gateway)
+		controller = get_payment_gateway_controller(self.payment_gateway)
 		controller.validate_transaction_currency(self.currency)
 
 		return controller.get_payment_url(**{
-			"amount": self.grand_total,
+			"amount": flt(self.grand_total, self.precision("grand_total")),
 			"title": data.company,
 			"description": self.subject,
 			"reference_doctype": "Payment Request",
