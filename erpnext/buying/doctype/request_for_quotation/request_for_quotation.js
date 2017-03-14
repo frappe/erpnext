@@ -15,7 +15,8 @@ frappe.ui.form.on("Request for Quotation",{
 		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function(doc, cdt, cdn){
 			var d =locals[cdt][cdn];
 			return {
-				filters: {'supplier': d.supplier}
+				query: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier_contacts",
+				filters: {'supplier': doc.supplier}
 			}
 		}
 	},
