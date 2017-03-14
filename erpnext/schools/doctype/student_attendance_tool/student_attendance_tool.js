@@ -101,6 +101,7 @@ schools.StudentsEditor = Class.extend({
 		student_toolbar.find(".btn-mark-att")
 			.html(__('Mark Attendence'))
 			.on("click", function() {
+				$(me.wrapper.find(".btn-mark-att")).attr("disabled", true);
 				var studs = [];
 				$(me.wrapper.find('input[type="checkbox"]')).each(function(i, check) {
 					var $check = $(check);
@@ -122,22 +123,27 @@ schools.StudentsEditor = Class.extend({
 				});
 
 				frappe.confirm(__("Do you want to update attendance?<br>Present: {0}\
-					<br>Absent: {1}", [students_present.length, students_absent.length]), function() {
-					frappe.call({
-						method: "erpnext.schools.api.mark_attendance",
-						args: {
-							"students_present": students_present,
-							"students_absent": students_absent,
-							"student_batch": frm.doc.student_batch,
-							"course_schedule": frm.doc.course_schedule,
-							"date": frm.doc.date
-						},
-						callback: function(r) {
-							frm.trigger("student_batch");
-						}
-					});
-				});
-
+					<br>Absent: {1}", [students_present.length, students_absent.length]),
+					function() {	//ifyes
+						frappe.call({
+							method: "erpnext.schools.api.mark_attendance",
+							args: {
+								"students_present": students_present,
+								"students_absent": students_absent,
+								"student_batch": frm.doc.student_batch,
+								"course_schedule": frm.doc.course_schedule,
+								"date": frm.doc.date
+							},
+							callback: function(r) {
+								$(me.wrapper.find(".btn-mark-att")).attr("disabled", false);
+								frm.trigger("student_batch");
+							}
+						});
+					},
+					function() {	//ifno
+						$(me.wrapper.find(".btn-mark-att")).attr("disabled", false);
+					}
+				);
 			});
 
 		var htmls = students.map(function(student) {
