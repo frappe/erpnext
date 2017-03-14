@@ -77,7 +77,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 					frappe.model.set_value(cdt, cdn, "current_valuation_rate", r.message.rate);
 					frappe.model.set_value(cdt, cdn, "current_amount", r.message.rate * r.message.qty);
 					frappe.model.set_value(cdt, cdn, "amount", r.message.rate * r.message.qty);
-					
+
 				}
 			});
 		}
@@ -122,7 +122,7 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 	valuation_rate: function(frm, cdt, cdn) {
 		frm.events.set_amount_quantity(frm, cdt, cdn);
 	}
-	
+
 });
 
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
@@ -153,6 +153,8 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	setup: function() {
 		var me = this;
 		this.frm.get_docfield("items").allow_bulk_edit = 1;
+
+		this.setup_posting_date_time_check();
 
 		if (sys_defaults.auto_accounting_for_stock) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");

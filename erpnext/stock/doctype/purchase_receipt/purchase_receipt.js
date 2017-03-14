@@ -37,6 +37,11 @@ frappe.ui.form.on("Purchase Receipt", {
 });
 
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
+	setup: function(doc) {
+		this.setup_posting_date_time_check();
+		this._super(doc);
+	},
+
 	refresh: function() {
 		this._super();
 		if(this.frm.doc.docstatus===1) {

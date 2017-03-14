@@ -62,7 +62,7 @@ def get_item_details(args):
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args))
-		
+
 	if out.get("warehouse"):
 		out.update(get_bin_details(args.item_code, out.warehouse))
 
@@ -482,7 +482,7 @@ def get_price_list_currency_and_exchange_rate(args):
 
 	if (not plc_conversion_rate) or (price_list_currency and args.price_list_currency \
 		and price_list_currency != args.price_list_currency):
-        # cksgb 19/09/2016: added args.transaction_date as posting_date argument for get_exchange_rate
+			# cksgb 19/09/2016: added args.transaction_date as posting_date argument for get_exchange_rate
 			plc_conversion_rate = get_exchange_rate(price_list_currency, args.currency,
 				args.transaction_date) or plc_conversion_rate
 

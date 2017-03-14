@@ -134,7 +134,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			});
 		}
-		
+
 		this.setup_quality_inspection();
 	},
 
@@ -143,9 +143,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return;
 		}
 		var me = this;
-		var inspection_type = in_list(["Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype) 
+		var inspection_type = in_list(["Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype)
 			? "Incoming" : "Outgoing";
-			
+
 		var quality_inspection_field = this.frm.get_docfield("items", "quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function(row) {
 			if(me.frm.is_new()) return;
@@ -159,7 +159,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				"batch_no": row.doc.batch_no
 			}
 		}
-		
+
 		this.frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {
@@ -319,7 +319,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				refresh_field("serial_no", item.name, item.parentfield);
 				if(!doc.is_return) {
-					frappe.model.set_value(item.doctype, item.name, 
+					frappe.model.set_value(item.doctype, item.name,
 						"qty", sr_no.length / item.conversion_factor);
 					frappe.model.set_value(item.doctype, item.name, "stock_qty", sr_no.length);
 				}
@@ -460,7 +460,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		/* manqala 19/09/2016: let the translation date be whichever of the transaction_date or posting_date is available */
 		var transaction_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
 		/* end manqala */
-		
+
 		var me = this;
 		this.set_dynamic_labels();
 
@@ -596,7 +596,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.set_currency_labels(["base_total", "base_net_total", "base_total_taxes_and_charges",
 			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "total_amount_to_pay",
-			"base_paid_amount", "base_write_off_amount", "base_change_amount", "base_operating_cost", 
+			"base_paid_amount", "base_write_off_amount", "base_change_amount", "base_operating_cost",
 			"base_raw_material_cost", "base_total_cost", "base_scrap_material_cost"
 		], company_currency);
 
@@ -619,7 +619,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.toggle_display(["conversion_rate", "base_total", "base_net_total", "base_total_taxes_and_charges",
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted",
 			"base_grand_total", "base_rounded_total", "base_in_words", "base_discount_amount",
-			"base_paid_amount", "base_write_off_amount", "base_operating_cost", 
+			"base_paid_amount", "base_write_off_amount", "base_operating_cost",
 			"base_raw_material_cost", "base_total_cost", "base_scrap_material_cost"],
 			this.frm.doc.currency != company_currency);
 
@@ -1080,5 +1080,5 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		return method
 	},
-	
+
 });
