@@ -1047,7 +1047,7 @@ def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
 	if args.posting_date:
-		si.set_posting_date = 1
+		si.set_posting_time = 1
 	si.posting_date = args.posting_date or nowdate()
 
 	si.company = args.company or "_Test Company"

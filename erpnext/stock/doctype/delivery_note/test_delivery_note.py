@@ -447,6 +447,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(dn1.status, "Completed")
 
 		dn2 = make_delivery_note(so.name)
+		dn2.set_posting_time = 1
 		dn2.posting_time = "08:00"
 		dn2.get("items")[0].qty = 4
 		dn2.submit()
