@@ -910,7 +910,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if(!rows) return "";
 		return '<p><a class="h6 text-muted" href="#" onclick="$(\'.tax-break-up\').toggleClass(\'hide\'); return false;">'
-			+ __("Show tax break-up") + '</a><br><br></p>\
+			+ __("Show tax break-up") + '</a></p>\
 		<div class="tax-break-up hide" style="overflow-x: auto;"><table class="table table-bordered table-hover">\
 			<thead><tr>' + headings + '</tr></thead> \
 			<tbody>' + rows + '</tbody> \
