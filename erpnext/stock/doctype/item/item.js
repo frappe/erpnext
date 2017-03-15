@@ -68,7 +68,7 @@ frappe.ui.form.on("Item", {
 			frm.set_intro(__("This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set", [frm.doc.variant_of]), true);
 		}
 
-		if (frappe.defaults.get_default("item_naming_by")!="Naming Series") {
+		if (frappe.defaults.get_default("item_naming_by")!="Naming Series" || frm.doc.variant_of) {
 			frm.toggle_display("naming_series", false);
 		} else {
 			erpnext.toggle_naming_series();

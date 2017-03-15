@@ -51,7 +51,9 @@ class SalesOrder(SellingController):
 		# validate transaction date v/s delivery date
 		if self.delivery_date:
 			if getdate(self.transaction_date) > getdate(self.delivery_date):
-				frappe.throw(_("Expected Delivery Date cannot be before Sales Order Date"))
+				frappe.msgprint(_("Expected Delivery Date is be before Sales Order Date"),
+					indicator='orange',
+					title=_('Warning'))
 
 	def validate_po(self):
 		# validate p.o date v/s delivery date
@@ -82,7 +84,8 @@ class SalesOrder(SellingController):
 		unique_chk_list = set(check_list)
 		if len(unique_chk_list) != len(check_list) and \
 			not cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
-			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
+			frappe.msgprint(_("Same item has been entered multiple times"),
+				title=_("Warning"), indicator='orange')
 
 	def product_bundle_has_stock_item(self, product_bundle):
 		"""Returns true if product bundle has stock item"""
