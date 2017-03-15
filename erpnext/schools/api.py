@@ -16,6 +16,7 @@ def enroll_student(source_name):
 
 	:param source_name: Student Applicant.
 	"""
+	frappe.publish_realtime('enroll_student_progress', {"progress": [1, 4]}, user=frappe.session.user)
 	student = get_mapped_doc("Student Applicant", source_name,
 		{"Student Applicant": {
 			"doctype": "Student",
@@ -28,6 +29,7 @@ def enroll_student(source_name):
 	program_enrollment.student = student.name
 	program_enrollment.student_name = student.title
 	program_enrollment.program = frappe.db.get_value("Student Applicant", source_name, "program")
+	frappe.publish_realtime('enroll_student_progress', {"progress": [4, 4]}, user=frappe.session.user)	
 	return program_enrollment
 
 @frappe.whitelist()
