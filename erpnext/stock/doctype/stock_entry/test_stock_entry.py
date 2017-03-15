@@ -79,10 +79,10 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_auto_material_request_for_variant(self):
 		self._test_auto_material_request("_Test Variant Item-S")
-	
+
 	def test_auto_material_request_for_warehouse_group(self):
 		self._test_auto_material_request("_Test Item Warehouse Group Wise Reorder", warehouse="_Test Warehouse Group-C1 - _TC")
-		
+
 	def _test_auto_material_request(self, item_code, material_request_type="Purchase", warehouse="_Test Warehouse - _TC"):
 		item = frappe.get_doc("Item", item_code)
 
@@ -126,7 +126,7 @@ class TestStockEntry(unittest.TestCase):
 
 		mr = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
 			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC")
-					
+
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
 			"warehouse": mr.get("items")[0].t_warehouse})
 
@@ -154,7 +154,7 @@ class TestStockEntry(unittest.TestCase):
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
 			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC")
 
-		mi = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC", 
+		mi = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC",
 			qty=40, expense_account="Stock Adjustment - _TC")
 
 		self.check_stock_ledger_entries("Stock Entry", mi.name,
@@ -512,6 +512,7 @@ class TestStockEntry(unittest.TestCase):
 		# test freeze_stocks_upto_days
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 7)
 		se = frappe.copy_doc(test_records[0])
+		se.set_posting_time = 1
 		se.posting_date = add_days(nowdate(), -15)
 		se.insert()
 		self.assertRaises(StockFreezeError, se.submit)

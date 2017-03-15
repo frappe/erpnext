@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "naming_series:", 
@@ -781,6 +782,7 @@
    "unique": 0
   }
  ], 
+ "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "icon": "fa fa-user", 
@@ -788,12 +790,11 @@
  "image_field": "image", 
  "image_view": 0, 
  "in_create": 0, 
- "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-02-17 16:46:48.202078", 
+ "modified": "2017-03-14 17:04:17.785461", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier", 
@@ -948,6 +949,6 @@
  "show_name_in_global_search": 1, 
  "sort_order": "ASC", 
  "title_field": "supplier_name", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 0
 }

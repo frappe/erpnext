@@ -2,6 +2,12 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Production Order", {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Timesheet': 'Make Timesheet',
+			'Stock Entry': 'Make Stock Entry',
+		}
+	},
 	onload: function(frm) {
 		if (!frm.doc.status)
 			frm.doc.status = 'Draft';
@@ -16,7 +22,7 @@ frappe.ui.form.on("Production Order", {
 			});
 			erpnext.production_order.set_default_warehouse(frm);
 		}
-		
+
 		// formatter for production order operation
 		frm.set_indicator_formatter('operation',
 			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange" })
@@ -27,8 +33,8 @@ frappe.ui.form.on("Production Order", {
 	},
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
-		frm.set_intro("");
 		erpnext.production_order.set_custom_buttons(frm);
+		frm.set_intro("");
 
 		if (frm.doc.docstatus === 0 && !frm.doc.__islocal) {
 			frm.set_intro(__("Submit this Production Order for further processing."));
@@ -37,7 +43,7 @@ frappe.ui.form.on("Production Order", {
 		if (frm.doc.docstatus===1) {
 			frm.trigger('show_progress');
 		}
-		
+
 		if(frm.doc.docstatus == 1 && frm.doc.status != 'Stopped'){
 			frm.add_custom_button(__('Make Timesheet'), function(){
 				frappe.model.open_mapped_doc({
@@ -110,34 +116,21 @@ erpnext.production_order = {
 	set_custom_buttons: function(frm) {
 		var doc = frm.doc;
 		if (doc.docstatus === 1) {
-			frm.add_custom_button(__("Stock Entries"), function() {
-				frappe.route_options = {
-					production_order: frm.doc.name
-				}
-				frappe.set_route("List", "Stock Entry");
-			}, __("View"));
-
 			if (doc.status != 'Stopped' && doc.status != 'Completed') {
 				frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Production Order'], __("Status"));
 			} else if (doc.status == 'Stopped') {
 				frm.add_custom_button(__('Re-open'), cur_frm.cscript['Unstop Production Order'], __("Status"));
 			}
 
-			// opertions
-			if (((doc.operations || []).length) && frm.doc.status != 'Stopped') {
-				frm.add_custom_button(__('Timesheet'), function() {
-					frappe.route_options = {"production_order": frm.doc.name};
-					frappe.set_route("List", "Timesheet");
-				}, __("View"));
-			}
-
 			if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
+				frm.has_start_btn = true;
 				var btn = frm.add_custom_button(__('Start'),
 					cur_frm.cscript['Transfer Raw Materials']);
 				btn.addClass('btn-primary');
 			}
 
 			if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) && frm.doc.status != 'Stopped') {
+				frm.has_finish_btn = true;
 				var btn = frm.add_custom_button(__('Finish'),
 					cur_frm.cscript['Update Finished Goods']);
 

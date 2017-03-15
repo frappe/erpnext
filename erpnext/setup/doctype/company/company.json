@@ -416,7 +416,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -1693,7 +1693,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2017-03-12 15:50:23.099622", 
+ "modified": "2017-03-14 17:04:38.115970", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
@@ -1845,6 +1845,6 @@
  "read_only_onload": 0, 
  "show_name_in_global_search": 1, 
  "sort_order": "ASC", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 0
 }

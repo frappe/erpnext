@@ -6,6 +6,10 @@ frappe.provide("erpnext.accounts");
 
 
 erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
+	setup: function(doc) {
+		this.setup_posting_date_time_check();
+		this._super(doc);
+	},
 	onload: function() {
 		this._super();
 

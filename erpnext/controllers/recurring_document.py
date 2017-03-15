@@ -93,6 +93,9 @@ def make_new_document(reference_doc, date_field, posting_date):
 		"next_date": get_next_date(reference_doc.next_date, mcount,cint(reference_doc.repeat_on_day_of_month))
 	})
 
+	if new_document.meta.get_field('set_posting_time'):
+		new_document.set('set_posting_time', 1)
+
 	# copy document fields
 	for fieldname in ("owner", "recurring_type", "repeat_on_day_of_month",
 		"recurring_id", "notification_email_address", "is_recurring", "end_date",

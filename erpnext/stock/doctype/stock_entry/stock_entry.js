@@ -188,6 +188,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	setup: function() {
 		var me = this;
 
+		this.setup_posting_date_time_check();
+
 		this.frm.fields_dict.bom_no.get_query = function() {
 			return {
 				filters:{

@@ -46,8 +46,9 @@ class PurchaseReceipt(BuyingController):
 		}]
 
 	def validate(self):
+		self.validate_posting_time()
 		super(PurchaseReceipt, self).validate()
-		
+
 		if not self._action=="submit":
 			self.set_status()
 		self.po_required()
@@ -57,10 +58,10 @@ class PurchaseReceipt(BuyingController):
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_closed_status(pc_obj)
-		
+
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
-		
+
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({

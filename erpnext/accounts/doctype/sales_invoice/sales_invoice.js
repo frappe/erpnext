@@ -8,6 +8,10 @@ cur_frm.pformat.print_heading = 'Invoice';
 
 frappe.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
+	setup: function(doc) {
+		this.setup_posting_date_time_check();
+		this._super(doc);
+	},
 	onload: function() {
 		var me = this;
 		this._super();
