@@ -6,9 +6,11 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils.make_random import add_random_children
 import frappe.utils
-import random
+import random, os, json
+from frappe import _
+from markdown2 import markdown
 
-def make_sample_data():
+def make_sample_data(args):
 	"""Create a few opportunities, quotes, material requests, issues, todos, projects
 	to help the user get started"""
 	items = frappe.get_all("Item", {'is_sales_item': 1})
@@ -22,7 +24,8 @@ def make_sample_data():
 			make_opportunity(items, customer)
 			make_quote(items, customer)
 
-	make_projects()
+	make_projects(args.get('domain'))
+	import_email_alert()
 
 	if items and warehouses:
 		make_material_request(frappe.get_all("Item"))
@@ -84,42 +87,91 @@ def make_material_request(items):
 def make_issue():
 	pass
 
-def make_projects():
+def make_projects(domain):
+	current_date = frappe.utils.nowdate()
 	project = frappe.get_doc({
 		"doctype": "Project",
 		"project_name": "ERPNext Implementation",
 	})
-	current_date = frappe.utils.nowdate()
-	project.set("tasks", [
+
+	tasks = [
+		{
+			"title": "Explore ERPNext",
+			"start_date": current_date,
+			"end_date": current_date,
+			"file": "explore.md"
+		}]
+
+	if domain == 'Education':
+		tasks += [
 			{
-				"title": "Explore ERPNext",
-				"start_date": frappe.utils.add_days(current_date, 1),
-				"end_date": frappe.utils.add_days(current_date, 2)
+				"title": _("Setup your School in ERPNext"),
+				"start_date": current_date,
+				"end_date": frappe.utils.add_days(current_date, 1),
+				"file": "school_masters.md"
 			},
 			{
-				"title": "Run Sales Cycle",
-				"start_date": frappe.utils.add_days(current_date, 2),
-				"end_date": frappe.utils.add_days(current_date, 3)
+				"title": "Setup Master Data",
+				"start_date": current_date,
+				"end_date": frappe.utils.add_days(current_date, 1),
+				"file": "school_masters.md"
+			}]
+
+	else:
+		tasks += [
+			{
+				"title": "Setup Your Company",
+				"start_date": current_date,
+				"end_date": frappe.utils.add_days(current_date, 1),
+				"file": "masters.md"
 			},
 			{
-				"title": "Run Billing Cycle",
-				"start_date": frappe.utils.add_days(current_date, 3),
-				"end_date": frappe.utils.add_days(current_date, 4)
+				"title": "Start Tracking your Sales",
+				"start_date": current_date,
+				"end_date": frappe.utils.add_days(current_date, 2),
+				"file": "sales.md"
 			},
 			{
-				"title": "Run Purchase Cycle",
-				"start_date": frappe.utils.add_days(current_date, 4),
-				"end_date": frappe.utils.add_days(current_date, 5)
+				"title": "Start Managing Purchases",
+				"start_date": current_date,
+				"end_date": frappe.utils.add_days(current_date, 3),
+				"file": "purchase.md"
 			},
 			{
 				"title": "Import Data",
-				"start_date": frappe.utils.add_days(current_date, 5),
-				"end_date": frappe.utils.add_days(current_date, 6)
+				"start_date": current_date,
+				"end_date": frappe.utils.add_days(current_date, 4),
+				"file": "import_data.md"
 			},
 			{
 				"title": "Go Live!",
-				"start_date": frappe.utils.add_days(current_date, 6),
-				"end_date": frappe.utils.add_days(current_date, 7)
-			}])
+				"start_date": current_date,
+				"end_date": frappe.utils.add_days(current_date, 5),
+				"file": "go_live.md"
+			}]
+
+	for t in tasks:
+		with open (os.path.join(os.path.dirname(__file__), "tasks", t['file'])) as f:
+			t['description'] = markdown(f.read())
+			del t['file']
+
+		project.append('tasks', t)
 
 	project.insert(ignore_permissions=True)
+
+def import_email_alert():
+	'''Import email alert for task start'''
+	with open (os.path.join(os.path.dirname(__file__), "tasks/task_alert.json")) as f:
+		email_alert = frappe.get_doc(json.loads(f.read())[0])
+		email_alert.insert()
+
+	# trigger the first message!
+	from frappe.email.doctype.email_alert.email_alert import trigger_daily_alerts
+	trigger_daily_alerts()
+
+def test_sample():
+	frappe.db.sql('delete from `tabEmail Alert`')
+	frappe.db.sql('delete from tabProject')
+	frappe.db.sql('delete from tabTask')
+	make_projects('Education')
+	import_email_alert()

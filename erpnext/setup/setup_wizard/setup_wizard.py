@@ -60,7 +60,7 @@ def setup_complete(args=None):
 
 	if args.get("add_sample_data"):
 		try:
-			make_sample_data()
+			make_sample_data(args)
 			frappe.clear_cache()
 		except:
 			# clear message
