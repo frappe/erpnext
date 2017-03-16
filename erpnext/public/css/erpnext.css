@@ -144,6 +144,19 @@ body[data-route="pos"] .numeric-keypad {
   background-color: #fff;
   margin-left: -4px;
 }
+@media (max-width: 1199px) {
+  body[data-route="pos"] .numeric-keypad {
+    height: 45px;
+    width: 45px;
+    font-size: 14px;
+  }
+}
+@media (max-width: 991px) {
+  body[data-route="pos"] .numeric-keypad {
+    height: 40px;
+    width: 40px;
+  }
+}
 body[data-route="pos"] .numeric_keypad {
   margin-left: -15px;
 }
@@ -307,8 +320,16 @@ body[data-route="pos"] .item-list-area .pos-bill-header {
   padding: 5px;
   padding-left: 15px;
 }
+body[data-route="pos"] .pos-selected-item-action .pos-list-row:first-child {
+  padding-top: 0;
+}
 body[data-route="pos"] .pos-selected-item-action > .pos-list-row {
   border: none;
+}
+@media (max-width: 1199px) {
+  body[data-route="pos"] .pos-selected-item-action > .pos-list-row {
+    padding: 5px 15px;
+  }
 }
 body[data-route="pos"] .edit-customer-btn {
   position: absolute;
@@ -327,4 +348,3 @@ body[data-route="pos"] .btn-more {
 body[data-route="pos"] .collapse-btn {
   cursor: pointer;
 }
-
