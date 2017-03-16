@@ -139,7 +139,7 @@ def get_items_list(pos_profile):
 		select
 			name, item_code, item_name, description, item_group, expense_account, has_batch_no,
 			has_serial_no, expense_account, selling_cost_center, stock_uom, image, 
-			default_warehouse, is_stock_item, barcode
+			default_warehouse, is_stock_item, barcode, brand
 		from
 			tabItem
 		where
