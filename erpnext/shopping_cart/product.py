@@ -16,6 +16,8 @@ def get_product_info(item_code):
 	if not is_cart_enabled():
 		return {}
 
+        cart_settings = get_shopping_cart_settings()
+
 	qty = 0
 	cart_quotation = _get_cart_quotation()
 	template_item_code = frappe.db.get_value("Item", item_code, "variant_of")
@@ -38,11 +40,14 @@ def get_product_info(item_code):
 		"price": price,
 		"stock": in_stock,
 		"uom": frappe.db.get_value("Item", item_code, "stock_uom"),
-		"qty": qty
+		"qty": qty,
+		"show_stock": cart_settings.show_stock_qty and 1 or 0
 	}
 
 def get_qty_in_stock(item_code, template_item_code):
 	warehouse = frappe.db.get_value("Item", item_code, "website_warehouse")
+        cart_settings = get_shopping_cart_settings()
+
 	if not warehouse and template_item_code and template_item_code != item_code:
 		warehouse = frappe.db.get_value("Item", template_item_code, "website_warehouse")
 
@@ -50,7 +55,10 @@ def get_qty_in_stock(item_code, template_item_code):
 		in_stock = frappe.db.sql("""select actual_qty from tabBin where
 			item_code=%s and warehouse=%s""", (item_code, warehouse))
 		if in_stock:
-			in_stock = in_stock[0][0] > 0 and 1 or 0
+			if cart_settings.show_stock_qty:
+				in_stock = in_stock[0][0]
+			else:
+				in_sock = in_stock[0][0] > 0 and 1 or 0 
 
 	else:
 		in_stock = 0
