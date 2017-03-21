@@ -261,6 +261,45 @@ $.extend(erpnext.item, {
 	make_variant: function(frm) {
 		var fields = []
 
+		if(frm.doc.variant_based_on==="Item Attribute") {
+			erpnext.item.show_modal_for_item_attribute_selection(frm);
+		} else {
+			erpnext.item.show_modal_for_manufacturers(frm);
+		}
+	},
+
+	show_modal_for_manufacturers: function(frm) {
+		var dialog = new frappe.ui.Dialog({
+			fields: [
+				{fieldtype:'Link', options:'Manufacturer',
+					reqd:1, label:'Manufacturer'},
+				{fieldtype:'Data', label:'Manufacturer Part Number',
+					fieldname: 'manufacturer_part_no'},
+			]
+		});
+
+		dialog.set_primary_action(__('Make'), function() {
+			var data = dialog.get_values();
+			if(!data) return;
+
+			// call the server to make the variant
+			data.template = frm.doc.name;
+			frappe.call({
+				method:"erpnext.controllers.item_variant.get_variant",
+				args: data,
+				callback: function(r) {
+					var doclist = frappe.model.sync(r.message);
+					console.log(doclist);
+					dialog.hide();
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			});
+		})
+
+		dialog.show();
+	},
+
+	show_modal_for_item_attribute_selection: function(frm) {
 		for(var i=0;i< frm.doc.attributes.length;i++){
 			var fieldtype, desc;
 			var row = frm.doc.attributes[i];
@@ -371,13 +410,42 @@ $.extend(erpnext.item, {
 				})
 		});
 	},
-	toggle_attributes: function(frm) {
-		frm.toggle_display("attributes", frm.doc.has_variants || frm.doc.variant_of);
-		frm.fields_dict.attributes.grid.toggle_reqd("attribute_value", frm.doc.variant_of ? 1 : 0);
-		frm.fields_dict.attributes.grid.set_column_disp("attribute_value", frm.doc.variant_of ? 1 : 0);
 
-		frm.toggle_enable("attributes", !frm.doc.variant_of);
-		frm.fields_dict.attributes.grid.toggle_enable("attribute", !frm.doc.variant_of);
-		frm.fields_dict.attributes.grid.toggle_enable("attribute_value", !frm.doc.variant_of);
+	toggle_attributes: function(frm) {
+		if((frm.doc.has_variants || frm.doc.variant_of)
+			&& frm.doc.variant_based_on==='Item Attribute') {
+			frm.toggle_display("attributes", true);
+
+			var grid = frm.fields_dict.attributes.grid;
+
+			if(frm.doc.variant_of) {
+				// variant
+
+				// value column is displayed but not editable
+				grid.set_column_disp("attribute_value", true);
+				grid.toggle_enable("attribute_value", false);
+
+				grid.toggle_enable("attribute", false);
+
+				// can't change attributes since they are
+				// saved when the variant was created
+				frm.toggle_enable("attributes", false);
+			} else {
+				// template - values not required!
+
+				// make the grid editable
+				frm.toggle_enable("attributes", true);
+
+				// value column is hidden
+				grid.set_column_disp("attribute_value", false);
+
+				// enable the grid so you can add more attributes
+				grid.toggle_enable("attribute", true);
+			}
+
+		} else {
+			// nothing to do with attributes, hide it
+			frm.toggle_display("attributes", false);
+		}
 	}
 });
