@@ -20,9 +20,9 @@ frappe.ready(function() {
 				if(r.message.stock==0) {
 					$(".item-stock").html("<div style='color: red'>Not in stock</div>");
 				}
-				else if(r.message.stock==1) {
+				else if(r.message.stock>0) {
 					$(".item-stock").html("<div style='color: green'>\
-						<i class='fa fa-check'></i> Available (in stock)</div>");
+						<i class='fa fa-check'></i> "Available (" + r.message.stock +")"</div>");
 				}
 
 				if(r.message.qty) {
