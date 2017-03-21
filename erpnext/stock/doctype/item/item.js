@@ -289,7 +289,6 @@ $.extend(erpnext.item, {
 				args: data,
 				callback: function(r) {
 					var doclist = frappe.model.sync(r.message);
-					console.log(doclist);
 					dialog.hide();
 					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 				}
