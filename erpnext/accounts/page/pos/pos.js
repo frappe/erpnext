@@ -1339,7 +1339,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				projected_qty: d.projected_qty,
 				rate: format_number(d.rate, me.frm.doc.currency),
 				enabled: me.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
-				amount: format_currency(d.amount, me.frm.doc.currency)
+				amount: format_currency(d.amount, me.frm.doc.currency),
+				selected_class: (me.item_code == d.item_code) ? "active" : ""
 			})).appendTo($items);
 		});
 
