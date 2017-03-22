@@ -88,6 +88,12 @@ class Item(WebsiteGenerator):
 		self.validate_website_image()
 		self.make_thumbnail()
 		self.validate_fixed_asset()
+		self.validate_product_bundle()
+		if self.is_stock_item:
+			if (not self.default_warehouse or self.default_warehouse == ""):
+				frappe.throw(_("Default Warehouse is mandatory for stock items"))
+		else:
+			self.default_warehouse = ""
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -235,6 +241,14 @@ class Item(WebsiteGenerator):
 
 			if not self.asset_category:
 				frappe.throw(_("Asset Category is mandatory for Fixed Asset item"))
+
+	def validate_product_bundle(self):
+		if self.is_product_bundle:
+			if self.is_stock_item:
+				frappe.throw(_("Product Bundle Item must be a non-stock item."))
+
+			if self.is_fixed_asset:
+				frappe.throw(_("Product Bundle Item must be a non-asset item."))
 
 	def get_context(self, context):
 		context.show_search=True

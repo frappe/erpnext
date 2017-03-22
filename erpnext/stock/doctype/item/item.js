@@ -112,6 +112,13 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
+	is_product_bundle: function(frm) {
+		if (frm.doc.is_product_bundle) {
+			frm.set_value("is_stock_item", 0);
+			frm.set_value("is_fixed_asset", 0);
+		}
+	},
+
 	page_name: frappe.utils.warn_page_name_change,
 
 	item_code: function(frm) {
