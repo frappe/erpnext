@@ -1,0 +1,25 @@
+{
+ "content": null,
+ "creation": "2017-03-01 17:01:56.959873",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2017-03-05 16:28:17.132713",
+ "modified_by": "Administrator",
+ "module": "Medical",
+ "name": "service-desk",
+ "owner": "Administrator",
+ "page_name": "service-desk",
+ "roles": [
+  {
+   "role": "Laboratory User"
+  },
+  {
+   "role": "Nursing User"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "title": "Service Management Desk"
+}
