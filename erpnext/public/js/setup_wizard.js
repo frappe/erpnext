@@ -21,7 +21,8 @@ var erpnext_slides = [
 					{ "label": __("Education"), "value": "Education" },
 					{ "label": __("Manufacturing"), "value": "Manufacturing" },
 					{ "label": __("Retail"), "value": "Retail" },
-					{ "label": __("Services"), "value": "Services" }
+					{ "label": __("Services"), "value": "Services" },
+					{"label": __("Healthcare"), "value": "Healthcare"}
 				], reqd: 1
 			},
 		],
@@ -153,7 +154,6 @@ var erpnext_slides = [
 				slide.get_field("fy_start_date").set_value(current_year + '-' + fy[0]);
 				slide.get_field("fy_end_date").set_value(next_year + '-' + fy[1]);
 			}
-
 		},
 
 
@@ -232,7 +232,7 @@ var erpnext_slides = [
 	{
 		// Taxes
 		name: 'taxes',
-		domains: ['manufacturing', 'services', 'retail', 'distribution'],
+		domains: ['manufacturing', 'services', 'retail', 'distribution', 'healthcare'],
 		icon: "fa fa-money",
 		title: __("Add Taxes"),
 		help: __("List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
@@ -271,7 +271,7 @@ var erpnext_slides = [
 	{
 		// Suppliers
 		name: 'suppliers',
-		domains: ['manufacturing', 'services', 'retail', 'distribution'],
+		domains: ['manufacturing', 'services', 'retail', 'distribution', 'healthcare'],
 		icon: "fa fa-group",
 		title: __("Your Suppliers"),
 		help: __("List a few of your suppliers. They could be organizations or individuals."),

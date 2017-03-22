@@ -261,5 +261,12 @@ def get_data():
 			"icon": "octicon octicon-mortar-board",
 			"type": "module",
 			"label": _("Schools")
+		},
+		{
+			"module_name": "Medical",
+			"color": "#FF888B",
+			"icon": "octicon octicon-plus",
+			"type": "module",
+			"label": _("Medical")
 		}
 	]

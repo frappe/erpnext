@@ -297,5 +297,39 @@ data_map = {
 		"columns": ["name","status","creation","planned_start_date","planned_end_date","status","actual_start_date","actual_end_date", "modified"],
 		"conditions": ["docstatus = 1"],
 		"order_by": "creation"
+	},
+
+	#Medical
+	"Patient": {
+		"columns": ["name", "creation", "owner", "if(patient_name=name, '', patient_name) as patient_name"],
+		"conditions": ["docstatus < 2"],
+		"order_by": "name",
+		"links": {
+			"owner" : ["User", "name"]
+		}
+	},
+	"Appointment": {
+		"columns": ["name", "appointment_type", "patient", "physician", "start_dt", "department", "status"],
+		"order_by": "name",
+		"links": {
+			"physician": ["Physician", "name"],
+			"appointment_type": ["Appointment Type", "name"]
+		}
+	},
+	"Physician": {
+		"columns": ["name", "department"],
+		"order_by": "name",
+		"links": {
+			"department": ["Department", "name"],
+		}
+
+	},
+	"Appointment Type": {
+		"columns": ["name"],
+		"order_by": "name"
+	},
+	"Medical Department": {
+		"columns": ["name"],
+		"order_by": "name"
 	}
 }
