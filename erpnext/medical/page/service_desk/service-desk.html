@@ -1,0 +1,34 @@
+<div id="{{ menu[doc] }}" class="container-fluid listing padding media hidden" style="margin-top: 0px;">
+  <div class="col-sm-12 media-heading padding" align="center">
+    <div class="col-sm-12" style="margin-bottom: 30px;">
+      <h3>{{ doc }}</h3>
+    </div>
+    {% for (var key in data) {
+    var items = data[key] %}
+    <div class="col-sm-12 list-group">
+      <div class="col-sm-3 list-group-item active">{{ key }}</div>
+      <div class="col-sm-9">
+        {% for item in items %}
+        <div class="col-sm-12 list-group-item"  style="height: 100%;">
+          {% if not item[3] %}
+          <div class="col-sm-1"><input type="checkbox" {% if item[1] %} data-doc="{{ item[1] }}" {% } %} data-id="{{ item[5] }}"> </input></div>
+          {% else %}
+          <div class="col-sm-1"><input type="checkbox" disabled> </input></div>
+          {% } %}
+
+           <div class="col-sm-4">{{ item[0] }} </div>
+           {% if item[1] %}
+              <div class="col-sm-3"  style="height: 100%; border-radius: 3px; background-color:{{ color[item[2]] }}"><a href="#Form/{{ doc }}/{{ item[1] }}">{{ item[1] }} </a> <br> {{ item[2] }} </div>
+           {% else %}
+              <div class="col-sm-3"><button class="btn btn-defult btn-xs create-doc" data-doc="{{ doc }}" data-id="{{ item[5]}}" {% if item[3] %} data-inv="{{ item[3] }}" {% } %} data-item="{{ item[0] }}">Create</button></div>
+           {% }  %}
+           {% if item[3] %}
+              <div class="col-sm-3 col-md-offset-1" style="height: 100%; border-radius: 3px; background-color:{{ color[item[4]] }} "><a  href="#Form/Sales Invoice/{{ item[3] }}">{{ item[3] }}</a> <br> {{ item[4] }}</div>
+           {%  }  %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+</div>

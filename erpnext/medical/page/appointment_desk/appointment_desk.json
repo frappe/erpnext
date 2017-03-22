@@ -1,0 +1,21 @@
+{
+ "content": null, 
+ "creation": "2017-03-03 14:31:40.276004", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2017-03-03 14:31:40.276004", 
+ "modified_by": "Administrator", 
+ "module": "Medical", 
+ "name": "appointment-desk", 
+ "owner": "Administrator", 
+ "page_name": "appointment-desk", 
+ "roles": [
+  {
+   "role": "OP Physician"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null
+}
