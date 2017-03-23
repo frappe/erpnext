@@ -643,7 +643,7 @@ class Item(WebsiteGenerator):
 					.format(self.stock_uom, template_uom))
 
 	def validate_attributes(self):
-		if self.has_variants or self.variant_of:
+		if (self.has_variants or self.variant_of) and self.variant_based_on=='Item Attribute':
 			attributes = []
 			if not self.attributes:
 				frappe.throw(_("Attribute table is mandatory"))
@@ -654,7 +654,7 @@ class Item(WebsiteGenerator):
 					attributes.append(d.attribute)
 
 	def validate_variant_attributes(self):
-		if self.variant_of:
+		if self.variant_of and self.variant_based_on=='Item Attribute':
 			args = {}
 			for d in self.attributes:
 				if not d.attribute_value:
@@ -675,7 +675,7 @@ def get_timeline_data(doctype, name):
 		from `tabStock Ledger Entry` where item_code=%s
 			and posting_date > date_sub(curdate(), interval 1 year)
 			group by posting_date''', name))
-	
+
 	for date, count in items.iteritems():
 		timestamp = get_timestamp(date)
 		out.update({ timestamp: count })

@@ -148,10 +148,9 @@ class SalarySlip(TransactionBase):
 				})
 
 	def get_date_details(self):
-		if not self.end_date:
-			date_details = get_start_end_dates(self.payroll_frequency, self.start_date or self.posting_date)
-			self.start_date = date_details.start_date
-			self.end_date = date_details.end_date
+		date_details = get_start_end_dates(self.payroll_frequency, self.start_date or self.posting_date)
+		self.start_date = date_details.start_date
+		self.end_date = date_details.end_date
 
 	def check_sal_struct(self, joining_date, relieving_date):
 		cond = ''

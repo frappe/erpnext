@@ -63,7 +63,7 @@ def get_list_context(context=None):
 		'no_breadcrumbs': True
 	}
 
-def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20):
+def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by=None):
 	from frappe.www.list import get_list
 	user = frappe.session.user
 	ignore_permissions = False

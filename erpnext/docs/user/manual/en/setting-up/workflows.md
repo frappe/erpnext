@@ -4,9 +4,9 @@ ERPNext tracks the multiple permissions before submission.
 
 Example of a leave application workflow is given below:
 
-If an user applies for a leave, then his request will be sent to the HR
-department. The HR department(HR User) will either reject or approve this
-request. Once this process is completed, the user's Manager(leave approver)
+If a user applies for a leave, then his request will be sent to the HR
+department. The HR department (HR User) will either reject or approve this
+request. Once this process is completed, the user's Manager (leave approver)
 will get an indication that the HR department has Accepted or Rejected. The
 Manager, who is the approving authority, will either Approve or Reject this
 request. Accordingly,the user will get his Approved or Rejected status.
@@ -44,23 +44,17 @@ workflow transition step that says from submitted you can cancel.
 
 #### Example of a Leave Application Process:  
 
-Go to the Human Resources Module and click on Leave Application. Apply for a
-Leave.
+When a Leave Application is saved by Employee, the status of the document changes to "Applied"
 
-When a Leave Application is submitted, the status on the right hand corner of
-the page shows as "Applied"
-
-![Workflow Employee LA]({{docs_base_url}}/assets/old_images/erpnext/workflow-employee-la.png)
+![Workflow Employee LA]({{docs_base_url}}/assets/img/setup/workflow-3.png)
 
 When the HR User logs in, he can either Approve or Reject. If approved the
-status on the right hand corner of the page shows as Approved. However, a blue
-band of information is displayed saying approval is pending by leave approver.
+status of the document changes to "Approved by HR". However, it is yet to be approved by Leave Approver.
 
-![Leave Approver]({{docs_base_url}}/assets/old_images/erpnext/workflow-hr-user-la.png)
+![Leave Approver]({{docs_base_url}}/assets/img/setup/workflow-4.png)
 
-When the leave approver opens the Leave Application page, he should select the
-status and convert to Approved or Rejected.
+When the Leave Approver opens the Leave Application page, he can finally "Approve" or "Reject" the Leave Application.
 
-![Workflow Leave Approver]({{docs_base_url}}/assets/old_images/erpnext/workflow-leave-approver-la.png)
+![Workflow Leave Approver]({{docs_base_url}}/assets/img/setup/workflow-5.png)
 
 {next}
