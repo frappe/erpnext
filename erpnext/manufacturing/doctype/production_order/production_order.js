@@ -213,7 +213,10 @@ $.extend(cur_frm.cscript, {
 	production_item: function(doc) {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
-			args: { item: doc.production_item },
+			args: {
+					item: doc.production_item,
+					project: doc.project
+					},
 			callback: function(r) {
 				$.each(["description", "stock_uom", "bom_no"], function(i, field) {
 					cur_frm.set_value(field, r.message[field]);
@@ -224,6 +227,10 @@ $.extend(cur_frm.cscript, {
 				}
 			}
 		});
+	},
+
+	project: function(doc) {
+		cur_frm.cscript.production_item(doc)
 	},
 
 	make_se: function(purpose) {
