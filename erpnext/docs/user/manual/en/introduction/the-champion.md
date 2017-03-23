@@ -12,7 +12,7 @@ attitude.
 
 Like exercise.
 
-Human body may seem like it does not require exercise today or even tomorrow,
+The human body may seem like it does not require exercise today or even tomorrow,
 but in the long run, if you wish to maintain your body and its health, you
 should get on the treadmill.
 

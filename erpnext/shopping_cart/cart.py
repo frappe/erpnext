@@ -31,10 +31,14 @@ def get_cart_quotation(doc=None):
 		doc = quotation
 		set_cart_count(quotation)
 
+	addresses = get_address_docs(party=party)
+
 	return {
 		"doc": decorate_quotation_doc(doc),
-		"addresses": [{"name": address.name, "display": address.display}
-			for address in get_address_docs(party=party)],
+		"shipping_addresses": [{"name": address.name, "display": address.display}
+			for address in addresses if address.address_type == "Shipping"],
+		"billing_addresses": [{"name": address.name, "display": address.display}
+			for address in addresses if address.address_type == "Billing"],
 		"shipping_rules": get_applicable_shipping_rules(party)
 	}
 
