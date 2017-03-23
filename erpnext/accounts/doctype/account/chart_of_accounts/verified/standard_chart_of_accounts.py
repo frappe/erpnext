@@ -17,7 +17,7 @@ def get():
 	                "account_type": "Bank",
 					"is_group": 1
 	            },
-	            _("Cash In Hand"): {
+	            _("Cash in Hand"): {
 	                _("Cash"): {
 	                    "account_type": "Cash"
 	                },
@@ -107,7 +107,7 @@ def get():
 	            _("Office Maintenance Expenses"): {},
 	            _("Office Rent"): {},
 	            _("Postal Expenses"): {},
-	            _("Print and Stationary"): {},
+	            _("Print and Stationery"): {},
 	            _("Round Off"): {
 	                "account_type": "Round Off"
 	            },
