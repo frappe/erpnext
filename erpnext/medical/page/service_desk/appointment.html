@@ -12,11 +12,11 @@
           <div class="col-sm-1"><input type="checkbox" disabled> </input></div>
           {% } %}
 
-              <div class="col-sm-3" style="min-height: 100%; border-radius: 3px; background-color:{{ color[item[3]] }}"><a href="#Form/{{ doc }}/{{ item[0] }}">{{ item[0] }} </a> <br>{{ item[3] }}</div>
+              <div class="col-sm-3"><span class="indicator {{ color[item[3]] }}"></span><a href="#Form/{{ doc }}/{{ item[0] }}">{{ item[0] }} </a> <br>{{ item[3] }}</div>
               <div class="col-sm-3">{{ item[1] }} </div>
               <div class="col-sm-2">{{ item[2] }} </a></div>
            {% if item[4] %}
-              <div class="col-sm-3" style="min-height: 100%; border-radius: 3px; background-color:{{ color[item[5]] }}"><a href="#Form/Sales Invoice/{{ item[4] }}">{{ item[4] }}</a> <br>{{ item[5] }}</div>
+              <div class="col-sm-3"><span class="indicator {{ color[item[5]] }}"></span><a href="#Form/Sales Invoice/{{ item[4] }}">{{ item[4] }}</a> <br>{{ item[5] }}</div>
            {% endif %}
         </div>
         {% endfor %}
