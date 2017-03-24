@@ -20,7 +20,7 @@ class Patient(Document):
 		if(frappe.db.get_value("OP Settings", None, "manage_customer") == '1' and not self.customer):
 			create_customer(self)
 		if(frappe.db.get_value("OP Settings", None, "register_patient") == '1'):
-			frappe.db.set_value("Patient", self.name, "status", "Open")
+			frappe.db.set_value("Patient", self.name, "disabled", 1)
 			self.reload()
 	def autoname(self):
 		self.name = self.get_patient_name()
@@ -69,7 +69,7 @@ def create_customer(doc):
 
 @frappe.whitelist()
 def register_patient(patient, company=None):
-	frappe.db.set_value("Patient", patient, "status", "Active")
+	frappe.db.set_value("Patient", patient, "disabled", 0)
 	if(frappe.get_value("OP Settings", None, "registration_fee")>0):
 		sales_invoice = make_invoice(patient, company)
 		sales_invoice.save(ignore_permissions=True)

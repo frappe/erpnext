@@ -14,7 +14,7 @@ frappe.ui.form.on('Patient', {
 		});
 	},
  	refresh: function(frm) {
-    if(frappe.defaults.get_default("register_patient") && frm.doc.status != "Active"){
+    if(frappe.defaults.get_default("register_patient") && frm.doc.disabled == 1){
       frm.add_custom_button(__('Register Patient'), function() {
 				btn_register_patient(frm);
 			 });
