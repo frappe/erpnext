@@ -17,12 +17,16 @@ frappe.ready(function() {
 				$(".item-price")
 					.html(r.message.price.formatted_price + " per " + r.message.uom);
 
-				if(r.message.stock==0) {
-					$(".item-stock").html("<div style='color: red'>Not in stock</div>");
+				if(r.message.in_stock==0) {
+					$(".item-stock").html("<div style='color: red'> <i class='fa fa-close'></i> Not in stock</div>");
 				}
-				else if(r.message.stock==1) {
+				else if(r.message.in_stock==1) {
+					qty_display = "In stock"
+					if (r.message.show_stock_qty) {
+						qty_display = "Available ("+r.message.stock_qty+ " in stock)"
+					}
 					$(".item-stock").html("<div style='color: green'>\
-						<i class='fa fa-check'></i> Available (in stock)</div>");
+						<i class='fa fa-check'></i> "+__(qty_display)+"</div>");
 				}
 
 				if(r.message.qty) {
