@@ -18,12 +18,12 @@
 
            <div class="col-sm-4">{{ item[0] }} </div>
            {% if item[1] %}
-              <div class="col-sm-3"  style="height: 100%; border-radius: 3px; background-color:{{ color[item[2]] }}"><a href="#Form/{{ doc }}/{{ item[1] }}">{{ item[1] }} </a> <br> {{ item[2] }} </div>
+              <div class="col-sm-3"><span class="indicator {{ color[item[2]] }}"></span><a href="#Form/{{ doc }}/{{ item[1] }}">{{ item[1] }} </a> <br> {{ item[2] }} </div>
            {% else %}
               <div class="col-sm-3"><button class="btn btn-defult btn-xs create-doc" data-doc="{{ doc }}" data-id="{{ item[5]}}" {% if item[3] %} data-inv="{{ item[3] }}" {% } %} data-item="{{ item[0] }}">Create</button></div>
            {% }  %}
            {% if item[3] %}
-              <div class="col-sm-3 col-md-offset-1" style="height: 100%; border-radius: 3px; background-color:{{ color[item[4]] }} "><a  href="#Form/Sales Invoice/{{ item[3] }}">{{ item[3] }}</a> <br> {{ item[4] }}</div>
+              <div class="col-sm-4"><span class="indicator {{ color[item[4]] }}"></span><a  href="#Form/Sales Invoice/{{ item[3] }}">{{ item[3] }}</a> <br> {{ item[4] }}</div>
            {%  }  %}
         </div>
         {% endfor %}
