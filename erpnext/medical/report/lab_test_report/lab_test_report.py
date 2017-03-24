@@ -25,7 +25,7 @@ def execute(filters=None):
 				status = "Approved"
 		elif(lp.docstatus == 2):
 			status = "Cancelled"
-		row = [ lp.test_name, lp.patient, lp.physician, lp.invoice, status, lp.result_date, lp.lab_test_type]
+		row = [ lp.test_name, lp.patient, lp.physician, lp.invoice, status, lp.result_date, lp.service_type]
 
 		data.append(row)
 
@@ -54,14 +54,14 @@ def get_conditions(filters):
 		conditions += "and result_date >= %(from_date)s"
 	if filters.get("to_date"):
 		conditions += " and result_date <= %(to_date)s"
-	if filters.get("lab_test_type"):
-		conditions += " and lab_test_type = %(lab_test_type)s"
+	if filters.get("service_type"):
+		conditions += " and service_type = %(service_type)s"
 
 	return conditions
 
 def get_lab_test(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, patient, test_name, patient_name, docstatus, 			result_date, physician, invoice, lab_test_type
+	return frappe.db.sql("""select name, patient, test_name, patient_name, docstatus, result_date, physician, invoice, service_type
 		from `tabLab Test`
 		where docstatus<2 %s order by submitted_date desc, name desc""" %
 		conditions, filters, as_dict=1)

@@ -818,7 +818,7 @@
    "bold": 0,
    "collapsible": 0,
    "columns": 0,
-   "fieldname": "lab_test_type",
+   "fieldname": "service_type",
    "fieldtype": "Link",
    "hidden": 1,
    "ignore_user_permissions": 0,
