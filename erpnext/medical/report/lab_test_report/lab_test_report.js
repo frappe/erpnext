@@ -23,7 +23,7 @@ frappe.query_reports["Lab Test Report"] = {
 			"options": "Patient"
 		},
 		{
-			"fieldname":"lab_test_type",
+			"fieldname":"service_type",
 			"label": __("Service Type"),
 			"fieldtype": "Link",
 			"options": "Service Type"

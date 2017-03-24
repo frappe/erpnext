@@ -129,7 +129,7 @@ frappe.ui.form.on("Lab Test Template", "test_description", function(frm,cdt,cdn)
 	frm.doc.change_in_item = 1;
 
 });
-frappe.ui.form.on("Lab Test Template", "lab_test_type", function(frm,cdt,cdn){
+frappe.ui.form.on("Lab Test Template", "service_type", function(frm,cdt,cdn){
 
 	frm.doc.change_in_item = 1;
 

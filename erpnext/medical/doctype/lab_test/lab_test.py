@@ -80,7 +80,7 @@ def create_lab_test_doc(invoice, consultation, patient, template):
 	lab_test.patient_sex = patient.sex
 	lab_test.email = patient.email
 	lab_test.mobile = patient.mobile
-	lab_test.lab_test_type = template.lab_test_type
+	lab_test.service_type = template.service_type
 	lab_test.test_name = template.test_name
 	lab_test.template = template.name
 	lab_test.test_group = template.test_group
@@ -88,7 +88,7 @@ def create_lab_test_doc(invoice, consultation, patient, template):
 	lab_test.report_preference = patient.report_preference
 
 	if patient.admitted:
-		service_type = template.lab_test_type
+		service_type = template.service_type
 		service_unit = get_service_unit(patient.admission, service_type)
 		lab_test.service_unit = service_unit
 
