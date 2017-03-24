@@ -113,7 +113,7 @@ frappe.medical.ServiceDesk = Class.extend({
 	},
 	show_data: function (data) {
 		var me = this;
-		status_color = {Draft:"lightgrey", Submitted: "lightblue", Paid: "lightgreen", Unpaid: "orange", Overdue: "red", Completed: "lightblue", Approved: "lightgreen", Cancelled: "red", Open: "lightgreen", Scheduled: "lightblue", Closed: "lightgrey"}
+		status_color = {Draft:"darkgrey", Submitted: "blue", Paid: "green", Unpaid: "orange", Overdue: "red", Completed: "blue", Approved: "green", Cancelled: "red", Open: "green", Scheduled: "blue", Closed: "darkgrey"}
 		if(data.appointments){
 				$(frappe.render_template("appointment", {data: data.appointments, doc: "Appointment", color: status_color})).appendTo(me.wrapper);
 		};
