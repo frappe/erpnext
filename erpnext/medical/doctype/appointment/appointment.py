@@ -158,6 +158,8 @@ def create_invoice_items(appointment, invoice):
 	item_line.item_name = "Consulting Charges"
 	item_line.description = "Consulting Charges:  " + appointment.physician
 	item_line.qty = 1
+	item_line.uom = "Nos"
+	item_line.conversion_factor = 1
 	item_line.income_account = get_income_account(appointment.physician,appointment.company)
 	item_line.rate = physician.op_consulting_charge
 	item_line.amount = physician.op_consulting_charge
