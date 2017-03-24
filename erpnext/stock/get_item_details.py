@@ -191,8 +191,9 @@ def get_basic_details(args, item):
 
 def get_default_income_account(args, item):
 	item_account = None
-	account = frappe.get_doc("Account", item.income_account)
-	if account.company != args.company:
+        if item.income_account:
+	   account = frappe.get_doc("Account", item.income_account)
+	   if account.company != args.company:
 		company_account = frappe.db.sql("SELECT name FROM `tabAccount` WHERE account_name = %s AND account_type = %s AND company = %s",
 										(account.account_name, account.account_type, args.company))
 		if company_account:
