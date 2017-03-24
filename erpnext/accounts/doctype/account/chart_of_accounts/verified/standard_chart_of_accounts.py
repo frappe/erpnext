@@ -17,7 +17,7 @@ def get():
 	                "account_type": "Bank",
 					"is_group": 1
 	            },
-	            _("Cash in Hand"): {
+	            _("Cash In Hand"): {
 	                _("Cash"): {
 	                    "account_type": "Cash"
 	                },
