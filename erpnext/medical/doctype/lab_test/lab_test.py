@@ -81,6 +81,7 @@ def create_lab_test_doc(invoice, consultation, patient, template):
 	lab_test.email = patient.email
 	lab_test.mobile = patient.mobile
 	lab_test.service_type = template.service_type
+	lab_test.department = template.department
 	lab_test.test_name = template.test_name
 	lab_test.template = template.name
 	lab_test.test_group = template.test_group
@@ -162,7 +163,7 @@ def create_sample_collection(template, patient, invoice):
 				service_unit = get_service_unit(patient.admission, service_type)
 				sample_collection.service_unit = service_unit
 
-			sample_collection.save()
+			sample_collection.save(ignore_permissions=True)
 
 		return sample_collection
 

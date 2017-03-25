@@ -5,9 +5,6 @@ cur_frm.cscript.custom_refresh = function(doc) {
 	cur_frm.toggle_display("sb_sensitivity", doc.sensitivity_toggle=="1");
 	cur_frm.toggle_display("sb_special", doc.special_toggle=="1");
 	cur_frm.toggle_display("sb_normal", doc.normal_toggle=="1");
-	if(frappe.defaults.get_default("require_sample_collection")){
-		cur_frm.set_df_property("sample", "hidden", 0);
-	}else { cur_frm.set_df_property("sample", "hidden", 1); }
 }
 
 
@@ -52,7 +49,6 @@ frappe.ui.form.on('Lab Test', {
 
 	},
 	onload: function (frm) {
-		frm.set_value("user",frappe.user.name);
 		if(frm.doc.employee){
 			frappe.call({
 				method: "frappe.client.get",

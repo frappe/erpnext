@@ -17,16 +17,8 @@ def execute(filters=None):
 		return columns, lab_test_list
 
 	data = []
-	for lp in lab_test_list:
-		status = "Draft"
-		if(lp.docstatus == 1):
-			status = "Submitted"
-			if(lp.approval_status == "Approved"):
-				status = "Approved"
-		elif(lp.docstatus == 2):
-			status = "Cancelled"
-		row = [ lp.test_name, lp.patient, lp.physician, lp.invoice, status, lp.result_date, lp.service_type]
-
+	for lab_test in lab_test_list:
+		row = [ lab_test.test_name, lab_test.patient, lab_test.physician, lab_test.invoice, lab_test.status, lab_test.result_date, lab_test.department]
 		data.append(row)
 
 	return columns, data
@@ -40,7 +32,7 @@ def get_columns():
 		_("Invoice") + ":Link/Sales Invoice:120",
 		_("Status") + ":Data:120",
 		_("Result Date") + ":Date:120",
-		_("Service Type") + ":Data:120",
+		_("Department") + ":Data:120",
 	]
 
 	return columns
@@ -54,14 +46,14 @@ def get_conditions(filters):
 		conditions += "and result_date >= %(from_date)s"
 	if filters.get("to_date"):
 		conditions += " and result_date <= %(to_date)s"
-	if filters.get("service_type"):
-		conditions += " and service_type = %(service_type)s"
+	if filters.get("department"):
+		conditions += " and department = %(department)s"
 
 	return conditions
 
 def get_lab_test(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, patient, test_name, patient_name, docstatus, result_date, physician, invoice, service_type
+	return frappe.db.sql("""select name, patient, test_name, patient_name, status, result_date, physician, invoice, department
 		from `tabLab Test`
 		where docstatus<2 %s order by submitted_date desc, name desc""" %
 		conditions, filters, as_dict=1)
