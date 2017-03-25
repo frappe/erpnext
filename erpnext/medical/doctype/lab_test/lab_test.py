@@ -141,8 +141,8 @@ def create_sample_collection(template, patient, invoice):
 			quantity = int(sample_collection.sample_quantity)+int(template.sample_quantity)
 			if(template.sample_collection_details):
 				sample_collection_details = sample_collection.sample_collection_details+"\n==============\n"+"Test :"+template.test_name+"\n"+"Collection Detials:\n\t"+template.sample_collection_details
-				frappe.db.set_value("Sample Collection", sample_collection.name, 						"sample_collection_details",sample_collection_details)
-			frappe.db.set_value("Sample Collection", sample_collection.name, 						"sample_quantity",quantity)
+				frappe.db.set_value("Sample Collection", sample_collection.name, "sample_collection_details",sample_collection_details)
+			frappe.db.set_value("Sample Collection", sample_collection.name, "sample_quantity",quantity)
 
 		else:
 			#create Sample Collection for template, copy vals from Invoice
