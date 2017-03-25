@@ -41,15 +41,9 @@ frappe.ui.form.on('Consultation', {
 				}
 			} );
 		}
-		cur_frm.set_query("patient", function () {
-			if(frm.doc.admitted){
-				return {
-					filters: {"admitted": 1}
-				}
-			}else{
-				return {
-					filters: {"admitted": 0}
-				}
+		frm.set_query("patient", function () {
+			return {
+				filters: {"disabled": 0}
 			}
 		});
 		frm.set_df_property("appointment", "read_only", frm.doc.__islocal ? 0:1);

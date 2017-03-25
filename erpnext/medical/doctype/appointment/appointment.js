@@ -3,6 +3,11 @@
 frappe.provide("erpnext.queries");
 frappe.ui.form.on('Appointment', {
 	refresh: function(frm) {
+		frm.set_query("patient", function () {
+			return {
+				filters: {"disabled": 0}
+			}
+		});
 		if(frappe.user.has_role("IP Physician")||frappe.user.has_role("OP Physician")){
 			if(frm.doc.patient){
 				frm.add_custom_button(__('History'), function() {
