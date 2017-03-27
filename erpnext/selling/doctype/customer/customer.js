@@ -63,4 +63,18 @@ frappe.ui.form.on("Customer", {
 	validate: function(frm) {
 		if(frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
 	},
+	customer_name: function(frm){
+		// call short code generator
+		if (!frm.doc.short_code && frm.doc.customer_name){
+			frappe.call({
+				method:'erpnext.selling.doctype.customer.customer.short_code_generator',
+				args:{
+					customer_name: frm.doc.customer_name
+				},
+				callback: function(r){
+					frm.set_value('short_code', r.message)
+				}
+			})
+		}
+	}
 });
