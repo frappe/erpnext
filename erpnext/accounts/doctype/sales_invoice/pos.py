@@ -170,6 +170,9 @@ def get_customers_list(pos_profile):
 
 def get_customers_address(customers):
 	customer_address = {}
+	if isinstance(customers, basestring):
+		customers = [frappe._dict({'name': customers})]
+
 	for data in customers:
 		address = frappe.db.sql(""" select name, address_line1, address_line2, city, state,
 			email_id, phone, fax, pincode from `tabAddress` where is_primary_address =1 and name in
@@ -292,6 +295,7 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 			if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
 				validate_records(doc)
 				si_doc = frappe.new_doc('Sales Invoice')
+				si_doc.due_date = doc.get('posting_date')
 				si_doc.offline_pos_name = name
 				si_doc.update(doc)
 				submit_invoice(si_doc, name, doc)
@@ -328,10 +332,16 @@ def add_customer(name):
 	customer_doc.flags.ignore_mandatory = True
 	customer_doc.save(ignore_permissions = True)
 	frappe.db.commit()
+	return customer_doc.name
 
 def make_address(args, customer):
-	if args.get('name'):
-		address = frappe.get_doc('Address', args.get('name'))
+	if not args.get('address_line1'): return
+	
+	name = args.get('name') or get_customers_address(customer)[customer].get("name")
+
+	if name:
+		address = frappe.get_doc('Address', name) 
+		frappe.errprint(address)
 	else:
 		address = frappe.new_doc('Address')
 		address.country = frappe.db.get_value('Company', args.get('company'), 'country')
