@@ -44,8 +44,8 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 		raise FiscalYearError, error_msg
 	return fy
 
-def validate_fiscal_year(date, fiscal_year, label=_("Date"), doc=None):
-	years = [f[0] for f in get_fiscal_years(date, label=label)]
+def validate_fiscal_year(date, fiscal_year, label="Date", doc=None):
+	years = [f[0] for f in get_fiscal_years(date, label=_(label))]
 	if fiscal_year not in years:
 		if doc:
 			doc.fiscal_year = years[0]

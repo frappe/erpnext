@@ -156,6 +156,12 @@ class PurchaseInvoice(BuyingController):
 
 		super(PurchaseInvoice, self).validate_warehouse()
 
+
+	def validate_item_code(self):
+		for d in self.get('items'):
+			if not d.item_code:
+				frappe.msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
+
 	def set_expense_account(self, for_validate=False):
 		auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
@@ -164,6 +170,7 @@ class PurchaseInvoice(BuyingController):
 			stock_items = self.get_stock_items()
 
 		if self.update_stock:
+			self.validate_item_code()
 			self.validate_warehouse()
 			warehouse_account = get_warehouse_account()
 
