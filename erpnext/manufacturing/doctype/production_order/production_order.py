@@ -213,12 +213,29 @@ class ProductionOrder(Document):
 
 	def set_production_order_operations(self):
 		"""Fetch operations from BOM and set in 'Production Order'"""
-		if not self.bom_no or cint(frappe.db.get_single_value("Manufacturing Settings", "disable_capacity_planning")):
-			return
+		
+		if not self.bom_no \
+			or cint(frappe.db.get_single_value("Manufacturing Settings", "disable_capacity_planning")):
+				return
+			
 		self.set('operations', [])
-		operations = frappe.db.sql("""select operation, description, workstation, idx,
-			base_hour_rate as hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
-			where parent = %s order by idx""", self.bom_no, as_dict=1)
+		
+		if self.use_multi_level_bom:
+			bom_list = frappe.get_doc("BOM", self.bom_no).traverse_tree()
+		else:
+			bom_list = [self.bom_no]
+		
+		operations = frappe.db.sql("""
+			select 
+				operation, description, workstation, idx,
+				base_hour_rate as hour_rate, time_in_mins, 
+				"Pending" as status, parent as bom
+			from
+				`tabBOM Operation`
+			where
+				 parent in (%s) order by idx
+		"""	% ", ".join(["%s"]*len(bom_list)), tuple(bom_list), as_dict=1)
+			
 		self.set('operations', operations)
 		self.calculate_time()
 
@@ -257,14 +274,15 @@ class ProductionOrder(Document):
 		plan_days = frappe.db.get_single_value("Manufacturing Settings", "capacity_planning_for_days") or 30
 
 		timesheet = make_timesheet(self.name)
-		workstation_list = []
 		timesheet.set('time_logs', [])
 
 		for i, d in enumerate(self.operations):
-			if d.workstation and d.status != 'Completed':
-				self.set_start_end_time_for_workstation(d, workstation_list, i)
+			
+			if d.status != 'Completed':
+				self.set_start_end_time_for_workstation(d, i)
 
 				args = self.get_operations_data(d)
+
 				add_timesheet_detail(timesheet, args)
 				original_start_time = d.planned_start_time
 
@@ -291,7 +309,7 @@ class ProductionOrder(Document):
 		if timesheet and open_new:
 			return timesheet
 
-		if timesheet:
+		if timesheet and timesheet.get("time_logs"):
 			timesheet.save()
 			timesheets.append(timesheet.name)
 
@@ -312,7 +330,7 @@ class ProductionOrder(Document):
 			'completed_qty': flt(self.qty) - flt(data.completed_qty)
 		}
 
-	def set_start_end_time_for_workstation(self, data, workstation_list, index):
+	def set_start_end_time_for_workstation(self, data, index):
 		"""Set start and end time for given operation. If first operation, set start as
 		`planned_start_date`, else add time diff to end time of earlier operation."""
 
@@ -449,9 +467,14 @@ class ProductionOrder(Document):
 
 @frappe.whitelist()
 def get_item_details(item, project = None):
-	res = frappe.db.sql("""select stock_uom, description
-		from `tabItem` where disabled=0 and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)
-		and name=%s""", (nowdate(), item), as_dict=1)
+	res = frappe.db.sql("""
+		select stock_uom, description
+		from `tabItem` 
+		where disabled=0 
+			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)
+			and name=%s
+	""", (nowdate(), item), as_dict=1)
+	
 	if not res:
 		return {}
 
