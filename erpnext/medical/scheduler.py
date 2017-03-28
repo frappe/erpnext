@@ -108,7 +108,9 @@ def check_availability(doctype, df, token, dt, dn, date, time, end_dt):
 
 	else: #check overlaping schedules for the resource for the given period
 		if not (time and end_dt):
-			frappe.throw("Please provide time and end datetime")
+			availability.append({"msg": _("No Work Schedule or average time specified for {0} {1}").format(dt,dn)})
+			return availability
+
 		start = datetime.datetime.combine(date, time)
 		if(check_overlap(doctype, df, dn, start, end_dt)):
 			availability.append({"msg": _("{0} {1} available for given period").format(dt,dn)})
