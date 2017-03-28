@@ -146,7 +146,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Fees"
+					"name": "Fee Collection"
+				},
+				{
+					"type": "doctype",
+					"name": "Fee Request"
 				},
 				{
 					"type": "doctype",
