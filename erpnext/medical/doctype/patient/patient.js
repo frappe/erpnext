@@ -30,59 +30,62 @@ frappe.ui.form.on('Patient', {
 				btn_create_vital_signs(frm);
 			 },"Create");
 		}
- }
-});
-
-frappe.ui.form.on("Patient", "dob", function(frm) {
-  if(frm.doc.dob && !frm.doc.age){
-    today = new Date();
-    birthDate = new Date(frm.doc.dob);
-    if(today < birthDate){
-      msgprint("Please select a valid Date");
-      frappe.model.set_value(frm.doctype,frm.docname, "dob", null)
-    }else{
-      age_yr = today.getFullYear() - birthDate.getFullYear();
-      today_m = today.getMonth()+1 //Month jan = 0
-      birth_m = birthDate.getMonth()+1 //Month jan = 0
-      m = today_m - birth_m;
-      d = today.getDate() - birthDate.getDate()
-
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age_yr--;
-      }
-      if (m < 0 || m==0) {
-       m = (12 + m);
-      }
-      if (d < 0) {
-        m--;
-        d = 31 + d;// 31 may varry with month Feb(28,29),Even Month(30) or Odd Month(31)
-      }
-      age_str = null
-      if(age_yr > 0)
-        age_str = age_yr+" Year(s), "
-      if(m > 0)
-        age_str = age_str+m+" Month(s), "
-      if(d > 0)
-        age_str = age_str+d+" Day(s)"
-      frappe.model.set_value(frm.doctype,frm.docname, "age", age_str)
-      frm.set_df_property("age_int", "hidden", 1);
-      frm.set_df_property("age", "hidden", 0);
+  },
+  onload: function (frm) {
+    if(!frm.doc.dob && !frm.doc.age){
+      $(frm.fields_dict['age_html'].wrapper).html("Age not specified");
+    }
+    if(frm.doc.dob){
+      $(frm.fields_dict['age_html'].wrapper).html("AGE : " + get_age(frm.doc.dob));
+      frm.set_df_property("age", "hidden", 1);
+    }else if (frm.doc.age) {
+      $(frm.fields_dict['age_html'].wrapper).html("AGE : "+ frm.doc.age + " as on " + frm.doc.age_as_on);
+      frm.set_df_property("dob", "hidden", 1);
     }
   }
 });
 
-frappe.ui.form.on("Patient", "age_int", function(frm) {
-  if(frm.doc.age_int){
-    today = new Date()
-    frm.set_df_property("dob", "hidden", 1);
-    frm.set_df_property("age", "hidden", 1);
-    frm.set_df_property("age_as_on", "hidden", 0);
-    frm.set_df_property("age_int", "hidden", 0);
-    d = today.getDate();m = today.getMonth();y = today.getFullYear();
-    frappe.model.set_value(frm.doctype,frm.docname, "age_as_on", today)
-    frappe.model.set_value(frm.doctype,frm.docname, "age", frm.doc.age_int+" as on "+d+"-"+m+"-"+y)
+frappe.ui.form.on("Patient", "dob", function(frm) {
+  if(frm.doc.dob){
+    today = new Date();
+    birthDate = new Date(frm.doc.dob);
+    if(today < birthDate){
+      msgprint("Please select a valid Date");
+      frappe.model.set_value(frm.doctype,frm.docname, "dob", "");
+      }
+    else{
+      age_str = get_age(frm.doc.dob);
+      frappe.model.set_value(frm.doctype, frm.docname, "age", "");
+      frappe.model.set_value(frm.doctype, frm.docname, "age_as_on", "");
+      frm.set_df_property("age", "hidden", 1);
+      $(frm.fields_dict['age_html'].wrapper).html("AGE : " + age_str);
+      }
+  }else{
+    frm.set_df_property("age", "hidden", 0);
+    $(frm.fields_dict['age_html'].wrapper).html("")
   }
 });
+
+frappe.ui.form.on("Patient", "age", function(frm) {
+  if(frm.doc.age){
+    frm.set_df_property("dob", "hidden", 1);
+    frappe.model.set_value(frm.doctype, frm.docname, "dob", "");
+    frappe.model.set_value(frm.doctype, frm.docname, "age_as_on", frappe.datetime.get_today());
+    $(frm.fields_dict['age_html'].wrapper).html("AGE : "+ frm.doc.age + " as on " + frappe.datetime.get_today());
+  }else{
+    frappe.model.set_value(frm.doctype, frm.docname, "age_as_on", "");
+    frm.set_df_property("dob", "hidden", 0);
+    $(frm.fields_dict['age_html'].wrapper).html("")
+  }
+});
+
+var get_age = function (birth) {
+  ageMS = Date.parse(Date()) - Date.parse(birth);
+  age = new Date();
+  age.setTime(ageMS);
+  years =  age.getFullYear() - 1970
+  return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)"
+}
 
 var btn_create_vital_signs = function(frm){
 	var doc = frm.doc;

@@ -174,7 +174,6 @@ def create_consultation(appointment):
 	consultation.physician = appointment.physician
 	consultation.ref_physician = appointment.ref_physician
 	consultation.visit_department = appointment.department
-	consultation.patient_age = appointment.patient_age
 	consultation.patient_sex = appointment.patient_sex
 	consultation.consultation_date = appointment.appointment_date
 	return consultation.as_dict()

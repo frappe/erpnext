@@ -29,27 +29,7 @@ def send_registration_sms(doc):
 		messages = frappe.render_template(messages, context)
 		number = [doc.mobile]
 		send_sms(number,messages)
-
-def update_patient_age():
-	patients = frappe.get_all("Patient", fields=["name", "dob", "age"])
-	for d in patients:
-		if d.name and d.dob:
-				age = calculate_age(d.dob)
-				if(d.age != age):
-					frappe.db.set_value("Patient", d.name, "age", age)
-
-def calculate_age(born):
-	today = date.today()
-
-	try:
-		birthday = born.replace(year=today.year)
-	except ValueError:# raised when birth date is February 29 and the current year is not a leap year
-		birthday = born.replace(year=today.year, day=born.day-1)
-	if birthday > today:
-		return today.year - born.year - 1
-	else:
-		return today.year - born.year
-
+		
 def get_receivable_account(patient, company):
 	if(patient):
 		receivable_account = get_account("Patient", None, patient, company)

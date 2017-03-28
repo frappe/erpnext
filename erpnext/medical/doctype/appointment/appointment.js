@@ -264,8 +264,8 @@ frappe.ui.form.on("Appointment", "patient",
 					age = null
 					if(data.message.dob){
 						age = calculate_age(data.message.dob)
-					}else if (data.message.age_int){
-						age = data.message.age_int
+					}else if (data.message.age){
+						age = data.message.age
 						if(data.message.age_as_on){
 							age = age+" as on "+data.message.age_as_on
 						}
@@ -276,31 +276,10 @@ frappe.ui.form.on("Appointment", "patient",
 	}
 });
 
-var calculate_age = function(dob){
-	today = new Date();
-	birthDate = new Date(dob);
-	age_yr = today.getFullYear() - birthDate.getFullYear();
-	today_m = today.getMonth()+1 //Month jan = 0
-	birth_m = birthDate.getMonth()+1 //Month jan = 0
-	m = today_m - birth_m;
-	d = today.getDate() - birthDate.getDate()
-
-	if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-		age_yr--;
-	}
-	if (m < 0) {
-	 m = (12 + m);
-	}
-	if (d < 0) {
-		m--;
-		d = 31 + d;// 31 may varry with month Feb(28,29),Even Month(30) or Odd Month(31)
-	}
-	age_str = null
-	if(age_yr > 0)
-		age_str = age_yr+" Year(s), "
-	if(m > 0)
-		age_str = age_str+m+" Month(s), "
-	if(d > 0)
-		age_str = age_str+d+" Day(s)"
-	return age_str
+var calculate_age = function(birth) {
+  ageMS = Date.parse(Date()) - Date.parse(birth);
+  age = new Date();
+  age.setTime(ageMS);
+  years =  age.getFullYear() - 1970
+  return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)"
 }

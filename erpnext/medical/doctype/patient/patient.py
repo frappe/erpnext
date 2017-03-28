@@ -7,14 +7,16 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, cstr, getdate, get_time
-import time
+import time, dateutil
 from erpnext.medical.doctype.op_settings.op_settings import generate_patient_id
 from erpnext.accounts.party import validate_party_accounts
 from erpnext.medical.doctype.patient_medical_record.patient_medical_record import delete_attachment, insert_attachment
 from erpnext.medical.doctype.op_settings.op_settings import get_receivable_account,get_income_account
+
 class Patient(Document):
 	def validate(self):
 		validate_party_accounts(self)
+
 	def after_insert(self):
 		generate_patient_id(self)
 		if(frappe.db.get_value("OP Settings", None, "manage_customer") == '1' and not self.customer):
@@ -46,6 +48,16 @@ class Patient(Document):
 			return "{0} - {1}".format(name, cstr(count))
 
 		return name
+
+	def get_age(self):
+		age_str = ""
+		if self.dob:
+			born = getdate(self.dob)
+			age = dateutil.relativedelta.relativedelta(getdate(), born)
+			age_str = str(age.years) + " year(s) " + str(age.months) + " month(s) " + str(age.days) + " day(s)"
+		elif self.age:
+			age_str = str(self.age) + " as on " + str(self.age_as_on)
+		return age_str
 
 def get_attachments(doc):
 	return frappe.get_all("File", fields=["name"],
