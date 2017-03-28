@@ -95,7 +95,6 @@ def admit_patient(consultationId):
 	patient_admission.patient_age = consultation.patient_age
 	patient_admission.patient_sex = consultation.patient_sex
 	patient_admission.complaints = consultation.symptoms
-	patient_admission.vitals = consultation.vitals
 	patient_admission.diagnosis = consultation.diagnosis
 	patient_admission.save(ignore_permissions=True)
 
