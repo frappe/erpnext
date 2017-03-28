@@ -117,7 +117,7 @@ def apply_pricing_rule(args):
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
 		out.append(get_pricing_rule_for_item(args_copy))
-		if set_serial_nos_based_on_fifo:
+		if set_serial_nos_based_on_fifo and not args.get('is_return'):
 			out.append(get_serial_no_for_item(args_copy))
 	return out
 	

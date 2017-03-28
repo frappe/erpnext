@@ -728,7 +728,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"sales_partner": me.frm.doc.sales_partner,
 			"ignore_pricing_rule": me.frm.doc.ignore_pricing_rule,
 			"doctype": me.frm.doc.doctype,
-			"name": me.frm.doc.name
+			"name": me.frm.doc.name,
+			"is_return": cint(me.frm.doc.is_return)
 		};
 	},
 
