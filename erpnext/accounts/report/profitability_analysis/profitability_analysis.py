@@ -60,7 +60,11 @@ def calculate_values(accounts, gl_entries_by_account, filters):
 		"warn_if_negative": True,
 		"income": 0.0,
 		"expense": 0.0,
-		"gross_profit_loss": 0.0
+		"gross_profit_loss": 0.0,
+		"account": "'" + _("Total") + "'",
+		"parent_account": None,
+		"indent": 0,
+		"has_value": True
 	}
 
 	for d in accounts:
