@@ -58,9 +58,7 @@ def create_invoice_test_report(invoice, patient):
 	invoice_test_report = frappe.new_doc("Invoice Test Report")
 	invoice_test_report.invoice = invoice.name
 	invoice_test_report.patient = patient.name
-	invoice_test_report.physician = invoice.physician
-	invoice_test_report.ref_physician = invoice.ref_physician
-	invoice_test_report.patient_age = patient.age
+	invoice_test_report.patient_age = patient.get_age()
 	invoice_test_report.patient_sex = patient.sex
 	invoice_test_report.email = patient.email
 	invoice_test_report.mobile = patient.mobile
@@ -76,7 +74,7 @@ def create_lab_test_doc(invoice, consultation, patient, template):
 		lab_test.physician = consultation.physician
 		lab_test.ref_physician = consultation.ref_physician
 	lab_test.patient = patient.name
-	lab_test.patient_age = patient.age
+	lab_test.patient_age = patient.get_age()
 	lab_test.patient_sex = patient.sex
 	lab_test.email = patient.email
 	lab_test.mobile = patient.mobile
@@ -150,7 +148,7 @@ def create_sample_collection(template, patient, invoice):
 			if(invoice):
 				sample_collection.invoice = invoice.name
 			sample_collection.patient = patient.name
-			sample_collection.patient_age = patient.age
+			sample_collection.patient_age = patient.get_age()
 			sample_collection.patient_sex = patient.sex
 			sample_collection.sample = template.sample
 			sample_collection.sample_uom = template.sample_uom
@@ -174,9 +172,9 @@ def get_service_unit(admission, service_type):
 	return service_unit
 
 @frappe.whitelist()
-def create_lab_test_from_invoice(invoice):
+def create_lab_test_from_invoice(invoice, patient):
 	doc = frappe.get_doc("Sales Invoice", invoice)
-	patient = frappe.get_doc("Patient", doc.patient)
+	patient = frappe.get_doc("Patient", patient)
 	invoice_test_report = create_invoice_test_report(doc, patient)
 	collect_sample = 0
 	if(frappe.db.get_value("Laboratory Settings", None, "require_sample_collection") == "1"):

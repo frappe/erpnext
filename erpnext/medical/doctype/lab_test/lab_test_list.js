@@ -51,7 +51,7 @@ var get_from = function(frm){
 				if(values["from"]=="Consultation")
 					create_test_from_consultation(values["cs"])
 				if(values["from"]=="Sales Invoice")
-					create_test_from_invoice(values["cs"])
+					create_test_from_invoice(values["cs"], values["patient"])
 				d.hide();
 			}
 	})
@@ -73,10 +73,10 @@ var get_from = function(frm){
 	d.show();
 }
 
-var create_test_from_invoice = function(sale_invoice){
+var create_test_from_invoice = function(sale_invoice, patient){
 	frappe.call({
 		"method": "erpnext.medical.doctype.lab_test.lab_test.create_lab_test_from_invoice",
-		"args": {invoice : sale_invoice},
+		"args": {invoice : sale_invoice, patient: patient},
 			callback: function (data) {
 		if(!data.exc){
 			frappe.route_options = {"invoice": sale_invoice}
