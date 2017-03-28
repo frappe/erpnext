@@ -5,6 +5,10 @@ from erpnext.stock.stock_balance import repost_stock
 def execute():
 	frappe.reload_doc('manufacturing', 'doctype', 'production_order_item')
 	frappe.reload_doc('manufacturing', 'doctype', 'production_order')
+	frappe.reload_doctype('Sales Order')
+	frappe.reload_doctype('Sales Invoice')
+	frappe.reload_doctype('Quotation')
+	frappe.reload_doctype('Delivery Note')
 	
 	modified_items = frappe.db.sql_list("""
 		select name from `tabItem` 
