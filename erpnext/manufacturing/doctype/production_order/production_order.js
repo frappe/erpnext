@@ -272,6 +272,12 @@ $.extend(cur_frm.cscript, {
 			}
 		});
 	},
+	
+	use_multi_level_bom: function() {
+		if(this.frm.doc.bom_no) {
+			this.frm.trigger("bom_no");
+		}
+	},
 
 	qty: function() {
 		frappe.ui.form.trigger("Production Order", 'bom_no')

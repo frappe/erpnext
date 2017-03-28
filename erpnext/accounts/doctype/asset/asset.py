@@ -115,8 +115,8 @@ class Asset(Document):
 	def set_accumulated_depreciation(self):
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
 		for d in self.get("schedules"):
-			accumulated_depreciation  += flt(d.depreciation_amount)
-			d.accumulated_depreciation_amount = accumulated_depreciation
+			accumulated_depreciation  += flt(d.depreciation_amount, d.precision("depreciation_amount"))
+			d.accumulated_depreciation_amount = flt(accumulated_depreciation, d.precision("accumulated_depreciation_amount"))
 
 	def get_depreciation_amount(self, depreciable_value):
 		if self.depreciation_method in ("Straight Line", "Manual"):

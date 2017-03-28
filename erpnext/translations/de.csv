@@ -518,7 +518,7 @@ apps/erpnext/erpnext/stock/dashboard/item_dashboard_list.html +25,Acutal Qty {0}
 DocType: Timesheet Detail,Hrs,Std
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +317,Please select Company,Bitte Firma auswählen
 DocType: Stock Entry Detail,Difference Account,Differenzkonto
-apps/erpnext/erpnext/projects/doctype/task/task.py +46,Cannot close task as its dependant task {0} is not closed.,"Aufgabe kann nicht geschlossen werden, da die von ihr abhängige Aufgabe {0} nicht geschlossen ist."
+apps/erpnext/erpnext/projects/doctype/task/task.py +46,Cannot close task as its dependant task {0} is not closed.,"Aufgabe kann nicht abgeschlossen werden, da die von ihr abhängige Aufgabe {0} nicht abgeschlossen ist."
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +433,Please enter Warehouse for which Material Request will be raised,"Bitte das Lager eingeben, für das eine Materialanfrage erhoben wird"
 DocType: Production Order,Additional Operating Cost,Zusätzliche Betriebskosten
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +20,Cosmetics,Kosmetika
@@ -775,7 +775,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -786,15 +786,15 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten. 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten.
 
- #### Hinweis 
+ #### Hinweis
 
 Der Steuersatz, den sie hier definieren, wird der Standardsteuersatz für alle Artikel. Wenn es Artikel mit davon abweichenden Steuersätzen gibt, müssen diese in der Tabelle ""Artikelsteuer"" im Artikelstamm hinzugefügt werden.
 
- #### Beschreibung der Spalten 
+ #### Beschreibung der Spalten
 
-1. Berechnungsart: 
+1. Berechnungsart:
 - Dies kann sein ""Auf Nettosumme"" (das ist die Summe der Grundbeträge).
 - ""Auf vorherige Zeilensumme/-Betrag"" (für kumulative Steuern oder Abgaben). Wenn diese Option ausgewählt wird, wird die Steuer als Prozentsatz der vorherigen Zeilesumme/des vorherigen Zeilenbetrags (in der Steuertabelle) angewendet.
 - ""Unmittelbar"" (wie bereits erwähnt).
@@ -1010,7 +1010,7 @@ apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +30,"Row {0}: Invoice {1}
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +125,Row {0}: Payment against Sales/Purchase Order should always be marked as advance,"Zeile {0}: ""Zahlung zu Kunden-/Lieferantenauftrag"" sollte immer als ""Vorkasse"" eingestellt werden"
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +16,Chemical,Chemische Industrie
 DocType: Salary Component Account,Default Bank / Cash account will be automatically updated in Salary Journal Entry when this mode is selected.,"Standard Bank / Geldkonto wird automatisch in Gehalts Journal Entry aktualisiert werden, wenn dieser Modus ausgewählt ist."
-apps/erpnext/erpnext/schools/doctype/grading_structure/grading_structure.py +24,"The intervals for Grade Code {0} overlaps with the grade intervals for other grades. 
+apps/erpnext/erpnext/schools/doctype/grading_structure/grading_structure.py +24,"The intervals for Grade Code {0} overlaps with the grade intervals for other grades.
                     Please check intervals {0} and {1} and try again",Die Intervalle für Grade-Code {0} überlappt mit der Note Intervalle für andere Typen. Bitte überprüfen Sie Intervalle {0} und {1} und versuchen Sie es erneut
 DocType: BOM,Raw Material Cost(Company Currency),Rohstoffkosten (Gesellschaft Währung)
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +715,All items have already been transferred for this Production Order.,Alle Artikel wurden schon für diesen Fertigungsauftrag übernommen.
@@ -1430,7 +1430,7 @@ DocType: Rename Tool,Type of document to rename.,"Dokumententyp, der umbenannt w
 apps/erpnext/erpnext/public/js/setup_wizard.js +307,We buy this Item,Wir kaufen diesen Artikel
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +54,{0} {1}: Customer is required against Receivable account {2},{0} {1}: Der Kunde muss gegen Receivable Konto {2}
 DocType: Purchase Invoice,Total Taxes and Charges (Company Currency),Gesamte Steuern und Gebühren (Firmenwährung)
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +60,Show unclosed fiscal year's P&L balances,Zeigen Sie nicht geschlossene Geschäftsjahr des P &amp; L-Waagen
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +60,Show unclosed fiscal year's P&L balances,Zeigen Sie nicht abgeschlossene Geschäftsjahr des P &amp; L-Waagen
 DocType: Shipping Rule,Shipping Account,Versandkonto
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +93,{0} {1}: Account {2} is inactive,{0} {1}: Konto {2} ist inaktiv
 apps/erpnext/erpnext/utilities/activation.py +85,Make Sales Orders to help you plan your work and deliver on-time,Machen Sie Kundenaufträge Sie Ihre Arbeit planen und liefern on-time
@@ -1468,7 +1468,7 @@ DocType: HR Settings,Email Salary Slip to Employee,E-Mail-Gehaltsabrechnung an M
 DocType: Cost Center,Parent Cost Center,Übergeordnete Kostenstelle
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +816,Select Possible Supplier,Wählen Mögliche Lieferant
 DocType: Sales Invoice,Source,Quelle
-apps/erpnext/erpnext/templates/pages/projects.html +31,Show closed,Zeige geschlossen
+apps/erpnext/erpnext/templates/pages/projects.html +31,Show closed,Zeige abgeschlossen
 DocType: Leave Type,Is Leave Without Pay,Ist unbezahlter Urlaub
 apps/erpnext/erpnext/stock/doctype/item/item.py +237,Asset Category is mandatory for Fixed Asset item,Anlagekategorie ist obligatorisch für Posten des Anlagevermögens
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +145,No records found in the Payment table,"Keine Datensätze in der Tabelle ""Zahlungen"" gefunden"
@@ -1578,7 +1578,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +23,Payment Request already exists {0},Zahlungsanordnung bereits vorhanden ist {0}
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Issued Items,Aufwendungen für in Umlauf gebrachte Artikel
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +246,Quantity must not be more than {0},Menge darf nicht mehr als {0} sein
-apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +107,Previous Financial Year is not closed,Zurück Geschäftsjahr nicht geschlossen
+apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +107,Previous Financial Year is not closed,Zurück Geschäftsjahr nicht abgeschlossen
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +44,Age (Days),Alter (Tage)
 DocType: Quotation Item,Quotation Item,Angebotsposition
 DocType: Account,Account Name,Kontenname
@@ -2282,7 +2282,7 @@ DocType: Supplier Quotation,Opportunity,Chance
 DocType: Operation,Default Workstation,Standard-Arbeitsplatz
 DocType: Notification Control,Expense Claim Approved Message,Benachrichtigung über genehmigte Aufwandsabrechnung
 DocType: Payment Entry,Deductions or Loss,Abzüge oder Verlust
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +240,{0} {1} is closed,{0} {1} ist geschlossen
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +240,{0} {1} is closed,{0} {1} ist abgeschlossen
 DocType: Email Digest,How frequently?,Wie häufig?
 DocType: Purchase Receipt,Get Current Stock,Aktuellen Lagerbestand aufrufen
 apps/erpnext/erpnext/config/manufacturing.py +46,Tree of Bill of Materials,Stücklistenstruktur
@@ -2326,7 +2326,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -2338,15 +2338,15 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten. 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten.
 
- #### Hinweis 
+ #### Hinweis
 
 Der Steuersatz, den sie hier definieren, wird der Standardsteuersatz für alle Artikel. Wenn es Artikel mit davon abweichenden Steuersätzen gibt, müssen diese in der Tabelle ""Artikelsteuer"" im Artikelstamm hinzugefügt werden.
 
- #### Beschreibung der Spalten 
+ #### Beschreibung der Spalten
 
-1. Berechnungsart: 
+1. Berechnungsart:
 - Dies kann sein ""Auf Nettosumme"" (das ist die Summe der Grundbeträge).
 - ""Auf vorherige Zeilensumme/-Betrag"" (für kumulative Steuern oder Abgaben). Wenn diese Option ausgewählt wird, wird die Steuer als Prozentsatz der vorherigen Zeilesumme/des vorherigen Zeilenbetrags (in der Steuertabelle) angewendet.
 - ""Unmittelbar"" (wie bereits erwähnt).
@@ -2557,7 +2557,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Allgemeine Geschäftsbedingungen, die bei Ver- und Einkäufen verwendet werden können.
 
- Beispiele: 
+ Beispiele:
 
 1. Gültigkeit des Angebots.
 2. Zahlungsbedingungen (Vorkasse, auf Rechnung, Teilweise Vorkasse usw.)
@@ -2566,7 +2566,7 @@ Examples:
 5. Garantie, falls vorhanden.
 6. Rückgabebedingungen.
 7. Lieferbedingungen, falls zutreffend.
-8. Beschwerdemanagement, Schadensersatz, Haftung usw. 
+8. Beschwerdemanagement, Schadensersatz, Haftung usw.
 9. Adresse und Kontaktdaten des Unternehmens."
 DocType: Attendance,Leave Type,Urlaubstyp
 apps/erpnext/erpnext/controllers/stock_controller.py +222,Expense / Difference account ({0}) must be a 'Profit or Loss' account,"Aufwands-/Differenz-Konto ({0}) muss ein ""Gewinn oder Verlust""-Konto sein"
@@ -2583,6 +2583,7 @@ DocType: Bin,FCFS Rate,"""Wer-zuerst-kommt-mahlt-zuerst""-Anteil (Windhundverfah
 DocType: Payment Reconciliation Invoice,Outstanding Amount,Ausstehender Betrag
 apps/erpnext/erpnext/templates/generators/bom.html +71,Time(in mins),Zeit (in Min)
 DocType: Project Task,Working,In Bearbeitung
+DocType: Project Task,Closed,Abgeschlossen
 DocType: Stock Ledger Entry,Stock Queue (FIFO),Lagerverfahren (FIFO)
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +39,{0} does not belong to Company {1},{0} gehört nicht zu Firma {1}
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +119,Cost as on,"Kosten, da auf"
@@ -2805,7 +2806,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +79,Party T
 DocType: Quality Inspection,Outgoing,Ausgang
 DocType: Material Request,Requested For,Angefordert für
 DocType: Quotation Item,Against Doctype,Zu DocType
-apps/erpnext/erpnext/controllers/buying_controller.py +380,{0} {1} is cancelled or closed,{0} {1} wurde abgebrochen oder geschlossen
+apps/erpnext/erpnext/controllers/buying_controller.py +380,{0} {1} is cancelled or closed,{0} {1} wurde abgebrochen oder abgeschlossen
 DocType: Delivery Note,Track this Delivery Note against any Project,Diesen Lieferschein in jedem Projekt nachverfolgen
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +30,Net Cash from Investing,Nettocashflow aus Investitionen
 ,Is Primary Address,Ist Hauptadresse
@@ -2838,7 +2839,7 @@ apps/erpnext/erpnext/accounts/doctype/asset/asset.py +58,Expected Value After Us
 DocType: Sales Invoice Item,Available Qty at Warehouse,Verfügbarer Lagerbestand
 apps/erpnext/erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py +20,Billed Amount,Rechnungsbetrag
 DocType: Asset,Double Declining Balance,Doppelte degressive
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +166,Closed order cannot be cancelled. Unclose to cancel.,Geschlossen Auftrag nicht abgebrochen werden kann. Unclose abzubrechen.
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +166,Closed order cannot be cancelled. Unclose to cancel.,Abgeschlossen Auftrag kann nicht abgebrochen werden. Abschließen rückgängig machen um abzubrechen.
 DocType: Student Guardian,Father,Vater
 apps/erpnext/erpnext/controllers/accounts_controller.py +568,'Update Stock' cannot be checked for fixed asset sale,'Update Bestand' kann nicht für einen festen Asset-Verkauf überprüft werden
 DocType: Bank Reconciliation,Bank Reconciliation,Kontenabgleich
@@ -3724,7 +3725,7 @@ DocType: Purchase Invoice,Return,Zurück
 DocType: Production Order Operation,Production Order Operation,Arbeitsgang im Fertigungsauftrag
 DocType: Pricing Rule,Disable,Deaktivieren
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +153,Mode of payment is required to make a payment,"Modus der Zahlung ist erforderlich, um eine Zahlung zu leisten"
-DocType: Project Task,Pending Review,Wartet auf Überprüfung
+DocType: Project Task,Pending Review,Warte auf Überprüfung
 apps/erpnext/erpnext/accounts/doctype/asset/depreciation.py +106,"Asset {0} cannot be scrapped, as it is already {1}","Asset-{0} kann nicht verschrottet werden, als es ohnehin schon ist {1}"
 DocType: Task,Total Expense Claim (via Expense Claim),Gesamtbetrag der Aufwandsabrechnung (über Aufwandsabrechnung)
 apps/erpnext/erpnext/accounts/report/sales_register/sales_register.py +70,Customer Id,Kunden-ID
@@ -3800,7 +3801,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +133,Please find attached
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +34,Bank Statement balance as per General Ledger,Kontoauszug Bilanz nach Hauptbuch
 DocType: Job Applicant,Applicant Name,Bewerbername
 DocType: Authorization Rule,Customer / Item Name,Kunde / Artikelname
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -4151,7 +4152,7 @@ DocType: Purchase Invoice Item,Rejected Serial No,Abgelehnte Seriennummer
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +82,Year start date or end date is overlapping with {0}. To avoid please set company,Jahresbeginn oder Enddatum überlappt mit {0}. Um dies zu verhindern setzen Sie eine Firma.
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +157,Start date should be less than end date for Item {0},Startdatum sollte für den Artikel {0} vor dem Enddatum liegen
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Beispiel: ABCD.##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Beispiel: ABCD.#####
  Wenn ""Serie"" eingestellt ist und ""Seriennummer"" in den Transaktionen nicht aufgeführt ist, dann wird eine Seriennummer automatisch auf der Grundlage dieser Serie erstellt. Wenn immer explizit Seriennummern für diesen Artikel aufgeführt werden sollen, muss das Feld leer gelassen werden."
 DocType: Upload Attendance,Upload Attendance,Anwesenheit hochladen
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +300,BOM and Manufacturing Quantity are required,Stückliste und Fertigungsmenge werden benötigt
