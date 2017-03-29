@@ -143,6 +143,7 @@ erpnext.patches.v5_0.update_time_log_title
 erpnext.patches.v7_0.create_warehouse_nestedset
 erpnext.patches.v7_0.merge_account_type_stock_and_warehouse_to_stock
 erpnext.patches.v7_0.set_is_group_for_warehouse
+erpnext.patches.v7_2.stock_uom_in_selling
 erpnext.patches.v4_2.repost_sle_for_si_with_no_warehouse
 erpnext.patches.v5_0.newsletter
 execute:frappe.delete_doc("DocType", "Chart of Accounts")
@@ -381,3 +382,4 @@ erpnext.patches.v7_2.make_all_assessment_group
 erpnext.patches.v7_2.stock_uom_in_selling
 erpnext.patches.v8_0.manufacturer_childtable_migrate
 erpnext.patches.v8_0.generate_customer_short_code
+erpnext.patches.v8_0.repost_reserved_qty_for_multiple_sales_uom

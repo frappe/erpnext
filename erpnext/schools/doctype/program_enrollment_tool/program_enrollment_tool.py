@@ -23,6 +23,16 @@ class ProgramEnrollmentTool(Document):
 			else:
 				students = frappe.db.sql("select student, student_name from \
 					`tabProgram Enrollment` where program = %s and academic_year = %s",(self.program, self.academic_year), as_dict=1)
+				student_list = [d.student for d in students]
+
+				inactive_students = frappe.db.sql('''
+					select name as student, title as student_name from `tabStudent` where name in (%s) and enabled = 0''' %
+					', '.join(['%s']*len(student_list)), tuple(student_list), as_dict=1)
+
+				for student in students:
+					if student.student in [d.student for d in inactive_students]:
+						students.remove(student)
+
 		if students:
 			return students
 		else:
