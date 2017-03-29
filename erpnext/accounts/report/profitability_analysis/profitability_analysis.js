@@ -61,6 +61,12 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 		"formatter": function(row, cell, value, columnDef, dataContext, default_formatter) {
 			if (columnDef.df.fieldname=="account") {
 				value = dataContext.account_name;
+				
+				if (typeof dataContext.account_name != 'undefined' && dataContext.account_name[0] == "'"
+					&& dataContext.account_name[dataContext.account_name.length -1] == "'") 
+				{
+					dataContext.account = dataContext.account_name.substring(1, dataContext.account_name.length - 1);
+				}
 
 				columnDef.df.link_onclick =
 					"frappe.query_reports['Profitability Analysis'].open_profit_and_loss_statement(" + JSON.stringify(dataContext) + ")";
