@@ -6,6 +6,8 @@ cur_frm.pformat.print_heading = 'Invoice';
 
 {% include 'erpnext/selling/sales_common.js' %};
 
+cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
+
 frappe.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
 	setup: function(doc) {
