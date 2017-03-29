@@ -379,5 +379,5 @@ erpnext.patches.v7_2.rename_att_date_attendance
 erpnext.patches.v7_2.update_attendance_docstatus
 erpnext.patches.v7_2.move_dates_from_salary_structure_to_employee
 erpnext.patches.v7_2.make_all_assessment_group
-
 erpnext.patches.v8_0.manufacturer_childtable_migrate
+erpnext.patches.v8_0.repost_reserved_qty_for_multiple_sales_uom
