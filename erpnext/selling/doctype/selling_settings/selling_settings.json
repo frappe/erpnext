@@ -434,7 +434,7 @@
    "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
-   "label": "Hide Tax Id in Print Format", 
+   "label": "Hide Customer's Tax Id from Sales Transactions", 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
