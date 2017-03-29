@@ -36,6 +36,14 @@ frappe.ui.form.on("Production Order", {
 		erpnext.production_order.set_custom_buttons(frm);
 		frm.set_intro("");
 
+		frm.fields_dict['production_item'].get_query = function(doc, cdt, cdn) {
+		    return {
+		        filters: [
+				        {'is_purchase_item': false},
+		        ]
+		    }
+		 }
+
 		if (frm.doc.docstatus === 0 && !frm.doc.__islocal) {
 			frm.set_intro(__("Submit this Production Order for further processing."));
 		}
@@ -272,7 +280,7 @@ $.extend(cur_frm.cscript, {
 			}
 		});
 	},
-	
+
 	use_multi_level_bom: function() {
 		if(this.frm.doc.bom_no) {
 			this.frm.trigger("bom_no");
