@@ -27,7 +27,16 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 
 	refresh: function() {
 		var me = this;
+		frappe.dynamic_link = {doc: me.frm.doc, fieldname: 'name', doctype: 'Employee'};
 		erpnext.toggle_naming_series();
+		if(me.frm.doc.__islocal){
+			hide_field(['address_html']);
+			frappe.geo.clear_address_and_contact(me.frm);
+		}
+		else {
+			unhide_field(['address_html']);
+			frappe.geo.render_address_and_contact(me.frm);
+		}
 	},
 
 	date_of_birth: function() {
