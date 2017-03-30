@@ -7,14 +7,14 @@ import frappe
 import erpnext
 import calendar
 from erpnext.accounts.utils import get_fiscal_year
-from frappe.utils import getdate, nowdate, add_days, add_months
+from frappe.utils import getdate, nowdate, add_days, add_months, flt
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.process_payroll.test_process_payroll import get_salary_component_account
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
-		make_earning_salary_component(["Basic Salary", "Allowance", "HRA"])
+		make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA"])
 		make_deduction_salary_component(["Professional Tax", "TDS"])
 
 		for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
@@ -23,7 +23,6 @@ class TestSalarySlip(unittest.TestCase):
 		self.make_holiday_list()
 
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
-
 
 	def tearDown(self):
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
@@ -40,12 +39,12 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEquals(ss.total_working_days, no_of_days[0])
 		self.assertEquals(ss.payment_days, no_of_days[0])
-		self.assertEquals(ss.earnings[0].amount, 5000)
+		self.assertEquals(ss.earnings[0].amount, 25000)
 		self.assertEquals(ss.earnings[1].amount, 3000)
 		self.assertEquals(ss.deductions[0].amount, 5000)
-		self.assertEquals(ss.deductions[1].amount, 2500)
-		self.assertEquals(ss.gross_pay, 10500)
-		self.assertEquals(ss.net_pay, 3000)
+		self.assertEquals(ss.deductions[1].amount, 5000)
+		self.assertEquals(ss.gross_pay, 40500)
+		self.assertEquals(ss.net_pay, 29918)
 
 	def test_salary_slip_with_holidays_excluded(self):
 		no_of_days = self.get_no_of_days()
@@ -58,13 +57,13 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEquals(ss.total_working_days, no_of_days[0] - no_of_days[1])
 		self.assertEquals(ss.payment_days, no_of_days[0] - no_of_days[1])
-		self.assertEquals(ss.earnings[0].amount, 5000)
-		self.assertEquals(ss.earnings[0].default_amount, 5000)
+		self.assertEquals(ss.earnings[0].amount, 25000)
+		self.assertEquals(ss.earnings[0].default_amount, 25000)
 		self.assertEquals(ss.earnings[1].amount, 3000)
 		self.assertEquals(ss.deductions[0].amount, 5000)
-		self.assertEquals(ss.deductions[1].amount, 2500)
-		self.assertEquals(ss.gross_pay, 10500)
-		self.assertEquals(ss.net_pay, 3000)
+		self.assertEquals(ss.deductions[1].amount, 5000)
+		self.assertEquals(ss.gross_pay, 40500)
+		self.assertEquals(ss.net_pay, 29918)
 
 	def test_payment_days(self):
 		no_of_days = self.get_no_of_days()
@@ -76,7 +75,7 @@ class TestSalarySlip(unittest.TestCase):
 		if getdate(nowdate()).day >= 15:
 			date_of_joining = getdate(add_days(nowdate(),-10))
 			relieving_date = getdate(add_days(nowdate(),-10))
-		elif getdate(nowdate()).day < 15 and getdate(nowdate()).day > 5:
+		elif getdate(nowdate()).day < 15 and getdate(nowdate()).day >= 5:
 			date_of_joining = getdate(add_days(nowdate(),-3))
 			relieving_date = getdate(add_days(nowdate(),-3))
 		elif getdate(nowdate()).day < 5 and not getdate(nowdate()).day == 1:
@@ -130,11 +129,25 @@ class TestSalarySlip(unittest.TestCase):
 		ss = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@salary.com", "Monthly"))
 		ss.submit()
+
 		email_queue = frappe.db.sql("""select name from `tabEmail Queue`""")
 		self.assertTrue(email_queue)
 
+	def test_loan_repayment_salary_slip(self):
+		from erpnext.hr.doctype.employee_loan.test_employee_loan import create_loan_type, create_employee_loan
+		employee = self.make_employee("test_employee@salary.com")
+		create_loan_type("Car Loan", 500000, 6.4)
+		employee_loan = create_employee_loan(employee, "Car Loan", 11000, "Repay Over Number of Periods", 20)
+		employee_loan.repay_from_salary = 1
+		employee_loan.submit()
+		ss = frappe.get_doc("Salary Slip",
+			self.make_employee_salary_slip("test_employee@salary.com", "Monthly"))
+		ss.submit()
+		self.assertEquals(ss.total_loan_repayment, 582)
+		self.assertEquals(ss.net_pay, (flt(ss.gross_pay) - (flt(ss.total_deduction) + flt(ss.total_loan_repayment))))
+
 	def test_payroll_frequency(self):
-		fiscal_year = get_fiscal_year(nowdate())[0]
+		fiscal_year = get_fiscal_year(nowdate(), company="_Test Company")[0]
 		month = "%02d" % getdate(nowdate()).month
 		m = get_month_details(fiscal_year, month)
 
@@ -163,11 +176,11 @@ class TestSalarySlip(unittest.TestCase):
 				"email": user,
 				"first_name": user,
 				"new_password": "password",
-				"user_roles": [{"doctype": "UserRole", "role": "Employee"}]
+				"roles": [{"doctype": "Has Role", "role": "Employee"}]
 			}).insert()
 
 		if not frappe.db.get_value("Employee", {"user_id": user}):
-			frappe.get_doc({
+			employee = frappe.get_doc({
 				"doctype": "Employee",
 				"naming_series": "EMP-",
 				"employee_name": user,
@@ -183,9 +196,12 @@ class TestSalarySlip(unittest.TestCase):
 				"status": "Active",
 				"employment_type": "Intern"
 			}).insert()
+			return employee.name
+		else:
+			return frappe.get_value("Employee", {"employee_name":user}, "name")
 
 	def make_holiday_list(self):
-		fiscal_year = get_fiscal_year(nowdate())
+		fiscal_year = get_fiscal_year(nowdate(), company="_Test Company")
 		if not frappe.db.get_value("Holiday List", "Salary Slip Test Holiday List"):
 			holiday_list = frappe.get_doc({
 				"doctype": "Holiday List",
@@ -278,7 +294,7 @@ def make_salary_structure(sal_struct, payroll_frequency, employee):
 
 def get_employee_details(employee):
 	return [{"employee": employee,
-			"base": 25000,
+			"base": 50000,
 			"variable": 5000,
 			"from_date": add_months(nowdate(),-1)
 			}
@@ -290,14 +306,14 @@ def get_earnings_component():
 					"salary_component": 'Basic Salary',
 					"abbr":'BS',
 					"condition": 'base > 10000',
-					"formula": 'base*.2',
+					"formula": 'base*.5',
 					"idx": 1
 				},
 				{
 					"salary_component": 'Basic Salary',
 					"abbr":'BS',
 					"condition": 'base < 10000',
-					"formula": 'base*.1',
+					"formula": 'base*.2',
 					"idx": 2
 				},
 				{
@@ -307,8 +323,8 @@ def get_earnings_component():
 					"idx": 3
 				},
 				{
-					"salary_component": 'Allowance',
-					"abbr":'A',
+					"salary_component": 'Special Allowance',
+					"abbr":'SA',
 					"condition": 'H < 10000',
 					"formula": 'BS*.5',
 					"idx": 4
@@ -321,13 +337,13 @@ def get_deductions_component():
 					"salary_component": 'Professional Tax',
 					"abbr":'PT',
 					"condition": 'base > 10000',
-					"formula": 'base*.2',
+					"formula": 'base*.1',
 					"idx": 1
 				},
 				{
 					"salary_component": 'TDS',
 					"abbr":'T',
-					"formula": 'base*.5',
+					"formula": 'base*.1',
 					"idx": 2
 				},
 				{

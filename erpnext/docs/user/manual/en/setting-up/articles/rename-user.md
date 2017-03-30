@@ -1,6 +1,6 @@
 #Rename User
 
-Renaming functionality allows you to edit id of specific record. User is saved with person's email id. Only User with System Manager's role will be able to rename User IDs.
+Renaming functionality allows you to edit id of specific record. User is saved with person's Email Address. Only User with System Manager's role will be able to rename User IDs.
 
 Following are the steps to rename user id.
 
@@ -18,7 +18,7 @@ From Menu, select Rename.
 
 #### Step 3: Update
 
-Enter valid email id and click on Rename.
+Enter valid Email Address and click on Rename.
 
 <img alt="Update" class="screenshot" src="{{docs_base_url}}/assets/img/articles/rename-user-2.png"> 
 

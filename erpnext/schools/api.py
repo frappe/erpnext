@@ -7,7 +7,8 @@ import frappe
 import json
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt
+from frappe.utils import flt, cstr
+from frappe.email.doctype.email_group.email_group import add_subscribers
 
 @frappe.whitelist()
 def enroll_student(source_name):
@@ -15,6 +16,7 @@ def enroll_student(source_name):
 
 	:param source_name: Student Applicant.
 	"""
+	frappe.publish_realtime('enroll_student_progress', {"progress": [1, 4]}, user=frappe.session.user)
 	student = get_mapped_doc("Student Applicant", source_name,
 		{"Student Applicant": {
 			"doctype": "Student",
@@ -27,6 +29,7 @@ def enroll_student(source_name):
 	program_enrollment.student = student.name
 	program_enrollment.student_name = student.title
 	program_enrollment.program = frappe.db.get_value("Student Applicant", source_name, "program")
+	frappe.publish_realtime('enroll_student_progress', {"progress": [4, 4]}, user=frappe.session.user)	
 	return program_enrollment
 
 @frappe.whitelist()
@@ -66,29 +69,50 @@ def mark_attendance(students_present, students_absent, course_schedule=None, stu
 	frappe.msgprint(_("Attendance has been marked successfully."))
 
 def make_attendance_records(student, student_name, status, course_schedule=None, student_batch=None, date=None):
-	"""Creates Attendance Record.
+	"""Creates/Update Attendance Record.
 
 	:param student: Student.
 	:param student_name: Student Name.
 	:param course_schedule: Course Schedule.
 	:param status: Status (Present/Absent)
 	"""
-	student_attendance = frappe.new_doc("Student Attendance")
+	student_attendance_list = frappe.get_list("Student Attendance", fields = ['name'], filters = {
+		"student": student,
+		"course_schedule": course_schedule,
+		"student_batch": student_batch,
+		"date": date
+	})
+		
+	if student_attendance_list:
+		student_attendance = frappe.get_doc("Student Attendance", student_attendance_list[0])
+	else:
+		student_attendance = frappe.new_doc("Student Attendance")
 	student_attendance.student = student
 	student_attendance.student_name = student_name
 	student_attendance.course_schedule = course_schedule
 	student_attendance.student_batch = student_batch
 	student_attendance.date = date
 	student_attendance.status = status
-	student_attendance.submit()
+	student_attendance.save()
+
+@frappe.whitelist()
+def get_student_guardians(student):
+	"""Returns List of Guardians of a Student.
+
+	:param student: Student.
+	"""
+	guardians = frappe.get_list("Student Guardian", fields=["guardian"] , 
+		filters={"parent": student})
+	return guardians
 
 @frappe.whitelist()
 def get_student_batch_students(student_batch):
-	"""Returns List of student, student_name in Student Batch.
+	"""Returns List of student, student_name, idx in Student Batch.
 
 	:param student_batch: Student Batch.
 	"""
-	students = frappe.get_list("Student Batch Student", fields=["student", "student_name", "idx"] , filters={"parent": student_batch}, order_by= "idx")
+	students = frappe.get_list("Student Batch Student", fields=["student", "student_name", "idx"] , 
+		filters={"parent": student_batch, "active": 1}, order_by= "idx")
 	return students
 
 @frappe.whitelist()
@@ -97,7 +121,8 @@ def get_student_group_students(student_group):
 
 	:param student_group: Student Group.
 	"""
-	students = frappe.get_list("Student Group Student", fields=["student", "student_name"] , filters={"parent": student_group}, order_by= "idx")
+	students = frappe.get_list("Student Group Student", fields=["student", "student_name"] , 
+		filters={"parent": student_group, "active": 1}, order_by= "idx")
 	return students
 
 @frappe.whitelist()
@@ -163,3 +188,111 @@ def get_course_schedule_events(start, end, filters=None):
 			}, as_dict=True, update={"allDay": 0})
 
 	return data
+
+@frappe.whitelist()
+def get_assessment_criteria(course):
+	"""Returns Assessmemt Criteria and their Weightage from Course Master.
+
+	:param Course: Course
+	"""
+	return frappe.get_list("Course Assessment Criteria", \
+		fields=["assessment_criteria", "weightage"], filters={"parent": course}, order_by= "idx")
+
+@frappe.whitelist()
+def get_assessment_students(assessment_plan, student_group=None, student_batch=None):
+	student_list = []
+	if student_group:
+		student_list = get_student_group_students(student_group)
+	elif student_batch:
+		student_list = get_student_batch_students(student_batch)
+	for i, student in enumerate(student_list):
+		result = get_result(student.student, assessment_plan)
+		if result:
+			student_result = {}
+			for d in result.details:
+				student_result.update({d.assessment_criteria: cstr(d.score) + " ("+ d.grade + ")"})
+			student_result.update({"total_score": cstr(result.total_score) + " (" + result.grade + ")"})
+			student.update({'assessment_details': student_result})
+		else:
+			student.update({'assessment_details': None})
+	return student_list
+
+@frappe.whitelist()
+def get_assessment_details(assessment_plan):
+	"""Returns Assessment Criteria  and Maximum Score from Assessment Plan Master.
+
+	:param Assessment Plan: Assessment Plan
+	"""
+	return frappe.get_list("Assessment Plan Criteria", \
+		fields=["assessment_criteria", "maximum_score"], filters={"parent": assessment_plan}, order_by= "idx")
+
+@frappe.whitelist()
+def get_result(student, assessment_plan):
+	"""Returns Submitted Result of given student for specified Assessment Plan
+
+	:param Student: Student
+	:param Assessment Plan: Assessment Plan
+	"""
+	results = frappe.get_all("Assessment Result", filters={"student": student, "assessment_plan": assessment_plan, "docstatus": 1})
+	if results:
+		return frappe.get_doc("Assessment Result", results[0])
+	else:
+		return None
+
+@frappe.whitelist()
+def get_grade(grading_scale, percentage):
+	"""Returns Grade based on the Grading Scale and Score.
+
+	:param Grading Scale: Grading Scale
+	:param Percentage: Score Percentage Percentage
+	"""
+	grading_scale_intervals = {}
+	for d in frappe.get_all("Grading Scale Interval", fields=["grade_code", "threshold"], filters={"parent": grading_scale}):
+		grading_scale_intervals.update({d.threshold:d.grade_code})
+	intervals = sorted(grading_scale_intervals.keys(), key=float, reverse=True)
+	for interval in intervals:
+		if flt(percentage) >= interval:
+			grade = grading_scale_intervals.get(interval)
+			break
+		else:
+			grade = ""
+	return grade
+
+@frappe.whitelist()
+def mark_assessment_result(student, assessment_plan, scores):
+	student_score = json.loads(scores)
+	details = []
+	for s in student_score.keys():
+		details.append({
+			"assessment_criteria": s,
+			"score": flt(student_score[s])
+		})
+	assessment_result = frappe.new_doc("Assessment Result")
+	assessment_result.update({
+		"student": student,
+		"student_name": frappe.db.get_value("Student", student, "title"),
+		"assessment_plan": assessment_plan,
+		"details": details
+	})
+	assessment_result.save()
+	assessment_result.submit()	
+	return assessment_result
+
+@frappe.whitelist()
+def update_email_group(doctype, name):
+	if not frappe.db.exists("Email Group", name):
+		email_group = frappe.new_doc("Email Group")
+		email_group.title = name
+		email_group.save()
+	email_list = []
+	students = []
+	if doctype == "Student Batch":
+		students = get_student_batch_students(name)
+	if doctype == "Student Group":
+		students = get_student_group_students(name)
+	for stud in students:
+		for guard in get_student_guardians(stud.student):
+			email = frappe.db.get_value("Guardian", guard.guardian, "email_address")
+			if email:
+				email_list.append(email)	
+	add_subscribers(name, email_list)

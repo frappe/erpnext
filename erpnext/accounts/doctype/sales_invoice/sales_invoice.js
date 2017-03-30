@@ -6,8 +6,14 @@ cur_frm.pformat.print_heading = 'Invoice';
 
 {% include 'erpnext/selling/sales_common.js' %};
 
+cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
+
 frappe.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
+	setup: function(doc) {
+		this.setup_posting_date_time_check();
+		this._super(doc);
+	},
 	onload: function() {
 		var me = this;
 		this._super();
@@ -51,7 +57,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			})
 
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
-				cur_frm.add_custom_button(doc.update_stock ? __('Sales Return') : __('Credit Note'),
+				cur_frm.add_custom_button(__('Return / Credit Note'),
 					this.make_sales_return, __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}

@@ -1,8 +1,7 @@
 import frappe
-from erpnext.accounts.party_status import status_depends_on, default_status
-from frappe.desk.notifications import get_filters_for
 
 def execute():
+	return
 	for party_type in ('Customer', 'Supplier'):
 		frappe.reload_doctype(party_type)
 

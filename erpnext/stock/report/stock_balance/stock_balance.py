@@ -63,12 +63,22 @@ def get_conditions(filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if filters.get("to_date"):
-		conditions += " and posting_date <= '%s'" % frappe.db.escape(filters["to_date"])
+		conditions += " and sle.posting_date <= '%s'" % frappe.db.escape(filters["to_date"])
 	else:
 		frappe.throw(_("'To Date' is required"))
 
+	if filters.get("item_group"):		
+		ig_details = frappe.db.get_value("Item Group", filters.get("item_group"), 
+			["lft", "rgt"], as_dict=1)
+			
+		if ig_details:
+			conditions += """ 
+				and exists (select name from `tabItem Group` ig 
+				where ig.lft >= %s and ig.rgt <= %s and item.item_group = ig.name)
+			""" % (ig_details.lft, ig_details.rgt)
+		
 	if filters.get("item_code"):
-		conditions += " and item_code = '%s'" % frappe.db.escape(filters.get("item_code"), percent=False)
+		conditions += " and sle.item_code = '%s'" % frappe.db.escape(filters.get("item_code"), percent=False)
 
 	if filters.get("warehouse"):
 		warehouse_details = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
@@ -81,11 +91,20 @@ def get_conditions(filters):
 
 def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select item_code, warehouse, posting_date, actual_qty, valuation_rate,
-			company, voucher_type, qty_after_transaction, stock_value_difference
-		from `tabStock Ledger Entry` sle force index (posting_sort_index)
-		where docstatus < 2 %s order by posting_date, posting_time, name""" %
-		conditions, as_dict=1)
+	
+	join_table_query = ""
+	if filters.get("item_group"):
+		join_table_query = "inner join `tabItem` item on item.name = sle.item_code"
+	
+	return frappe.db.sql("""
+		select
+			sle.item_code, warehouse, sle.posting_date, sle.actual_qty, sle.valuation_rate,
+			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference
+		from
+			`tabStock Ledger Entry` sle force index (posting_sort_index) %s
+		where sle.docstatus < 2 %s 
+		order by sle.posting_date, sle.posting_time, sle.name""" %
+		(join_table_query, conditions), as_dict=1)
 
 def get_item_warehouse_map(filters):
 	iwb_map = {}

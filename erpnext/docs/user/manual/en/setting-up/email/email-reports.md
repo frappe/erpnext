@@ -12,7 +12,7 @@ Or just type "Auto Email Report" on the Search bar.
 
 #### Step 1
 
-Select the Report, the user for which you want to create this report (permissions will apply for this user), the email ids where you want this report emailed and the frequency of the report.
+Select the Report, the user for which you want to create this report (permissions will apply for this user), the Email Addresses where you want this report emailed and the frequency of the report.
 
 <img class="screenshot" alt="Make Auto Email Report" src="{{docs_base_url}}/assets/img/setup/email/auto-email-1.png">
 

@@ -11,9 +11,8 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	setup: function(frm) {
-		var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
-
 		frm.set_query("paid_from", function() {
+			var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
 			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : party_account_type;
 
@@ -26,7 +25,16 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		});
 
+		frm.set_query("party_type", function() {
+			return{
+				"filters": {
+					"name": ["in",["Customer","Supplier"]],
+				}
+			}
+		});
+
 		frm.set_query("paid_to", function() {
+			var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
 	 			["Bank", "Cash"] : party_account_type;
 

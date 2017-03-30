@@ -6,6 +6,7 @@ from frappe.utils import random_string, add_days, get_last_day, getdate
 from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from frappe.utils.make_random import get_random
+from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_account
 from erpnext.hr.doctype.expense_claim.expense_claim import get_expense_approver, make_bank_entry
 from erpnext.hr.doctype.leave_application.leave_application import (get_leave_balance_on,
 	OverlapError, AttendanceAlreadyMarkedError)
@@ -50,6 +51,7 @@ def work():
 		expense_claim.extend('expenses', get_expenses())
 		expense_claim.employee = get_random("Employee")
 		expense_claim.company = frappe.flags.company
+		expense_claim.payable_account = get_payable_account(expense_claim.company)
 		expense_claim.posting_date = frappe.flags.current_date
 		expense_claim.exp_approver = filter((lambda x: x[0] != 'Administrator'), get_expense_approver(None, '', None, 0, 20, None))[0][0]
 		expense_claim.insert()
@@ -118,6 +120,7 @@ def make_timesheet_records():
 	employees = get_timesheet_based_salary_slip_employee()
 	for e in employees:
 		ts = make_timesheet(e.employee, simulate = True, billable = 1, activity_type=get_random("Activity Type"))
+		frappe.db.commit()
 
 		rand = random.random()
 		if rand >= 0.3:
@@ -137,7 +140,8 @@ def make_sales_invoice_for_timesheet(name):
 	sales_invoice = make_sales_invoice(name)
 	sales_invoice.customer = get_random("Customer")
 	sales_invoice.append('items', {
-		'item_code': get_random("Item", {"has_variants": 0, "is_stock_item": 0, "is_fixed_asset": 0}),
+		'item_code': get_random("Item", {"has_variants": 0, "is_stock_item": 0,
+			"is_fixed_asset": 0}),
 		'qty': 1,
 		'rate': 1000
 	})
@@ -176,18 +180,18 @@ def make_leave_application():
 				frappe.db.rollback()
 
 def mark_attendance():
-	att_date = frappe.flags.current_date
+	attendance_date = frappe.flags.current_date
 	for employee in frappe.get_all('Employee', fields=['name'], filters = {'status': 'Active'}):
 
-		if not frappe.db.get_value("Attendance", {"employee": employee.name, "att_date": att_date}):
+		if not frappe.db.get_value("Attendance", {"employee": employee.name, "attendance_date": attendance_date}):
 			attendance = frappe.get_doc({
 				"doctype": "Attendance",
 				"employee": employee.name,
-				"att_date": att_date
+				"attendance_date": attendance_date
 			})
 			leave = frappe.db.sql("""select name from `tabLeave Application`
 				where employee = %s and %s between from_date and to_date and status = 'Approved'
-				and docstatus = 1""", (employee.name, att_date))
+				and docstatus = 1""", (employee.name, attendance_date))
 
 			if leave:
 				attendance.status = "Absent"

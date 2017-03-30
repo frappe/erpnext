@@ -12,7 +12,12 @@ frappe.ui.form.on("Opportunity", {
 		}
 	},
 	customer: function(frm) {
+		frm.trigger('set_contact_link');
 		erpnext.utils.get_party_details(frm);
+	},
+
+	lead: function(frm) {
+		frm.trigger('set_contact_link');
 	},
 
 	customer_address: function(frm, cdt, cdn) {
@@ -29,6 +34,8 @@ frappe.ui.form.on("Opportunity", {
 	refresh: function(frm) {
 		var doc = frm.doc;
 		frm.events.enquiry_from(frm);
+		frm.trigger('set_contact_link');
+
 		if(!doc.__islocal && doc.status!=="Lost") {
 			if(doc.with_items){
 				frm.add_custom_button(__('Supplier Quotation'),
@@ -46,6 +53,14 @@ frappe.ui.form.on("Opportunity", {
 				frm.add_custom_button(__('Lost'),
 					cur_frm.cscript['Declare Opportunity Lost']);
 			}
+		}
+	},
+
+	set_contact_link: function(frm) {
+		if(frm.doc.customer) {
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'customer', doctype: 'Customer'}
+		} else if(frm.doc.lead) {
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'lead', doctype: 'Lead'}
 		}
 	},
 
@@ -81,10 +96,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			this.frm.set_query("contact_by", erpnext.queries.user);
 		}
 
-		this.frm.set_query("customer_address", function() {
-			if(me.frm.doc.lead) return {filters: { lead: me.frm.doc.lead } };
-			else if(me.frm.doc.customer) return {filters: { customer: me.frm.doc.customer } };
-		});
+		me.frm.set_query('customer_address', erpnext.queries.address_query);
 
 		this.frm.set_query("item_code", "items", function() {
 			return {
@@ -95,8 +107,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 
 		$.each([["lead", "lead"],
 			["customer", "customer"],
-			["contact_person", "customer_filter"],
-			["territory", "not_a_group_filter"]], function(i, opts) {
+			["contact_person", "contact_query"]], function(i, opts) {
 				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
 			});
 	},

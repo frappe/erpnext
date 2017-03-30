@@ -53,12 +53,12 @@ def get_active_student_batch():
 
 def get_student_batch_strength(student_batch):
 	student_batch_strength = frappe.db.sql("""select count(*) from `tabStudent Batch Student` 
-		where parent = %s""", student_batch)[0][0]
+		where parent = %s and active=1""", student_batch)[0][0]
 	return student_batch_strength
 
 def get_student_attendance(student_batch, date):
 	student_attendance = frappe.db.sql("""select count(*) as count, status from `tabStudent Attendance` where \
-				student_batch= %s and date= %s and docstatus=1 and\
+				student_batch= %s and date= %s and\
 				(course_schedule is Null or course_schedule='') group by status""",
 				(student_batch, date), as_dict=1)
 	return student_attendance

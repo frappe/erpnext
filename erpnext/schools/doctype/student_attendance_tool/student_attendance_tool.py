@@ -18,18 +18,19 @@ def get_student_attendance_records(based_on, date=None, student_batch=None, cour
 		student_group = frappe.db.get_value("Course Schedule", course_schedule, "student_group")
 		if student_group:
 			student_list = frappe.get_list("Student Group Student", fields=["student", "student_name", "idx"] , \
-			filters={"parent": student_group}, order_by= "idx")
+			filters={"parent": student_group, "active": 1}, order_by= "idx")
 		else:
 			student_batch = frappe.db.get_value("Course Schedule", course_schedule, "student_batch")
 	if not student_list: 
-		student_list = frappe.get_list("Student Batch Student", fields=["student", "student_name", "idx"] , filters={"parent": student_batch}, order_by= "idx")
+		student_list = frappe.get_list("Student Batch Student", fields=["student", "student_name", "idx"] , 
+			filters={"parent": student_batch, "active": 1}, order_by= "idx")
 	
 	if course_schedule:
 		student_attendance_list= frappe.db.sql("""select student, status from `tabStudent Attendance` where \
-			course_schedule= %s and docstatus=1""", (course_schedule), as_dict=1)
+			course_schedule= %s""", (course_schedule), as_dict=1)
 	else:
 		student_attendance_list= frappe.db.sql("""select student, status from `tabStudent Attendance` where \
-			student_batch= %s and date= %s and docstatus=1 and \
+			student_batch= %s and date= %s and \
 			(course_schedule is Null or course_schedule='')""",
 			(student_batch, date), as_dict=1)
 	
@@ -37,4 +38,5 @@ def get_student_attendance_records(based_on, date=None, student_batch=None, cour
 		for student in student_list:
 			if student.student == attendance.student:
 				student.status = attendance.status
+
 	return student_list

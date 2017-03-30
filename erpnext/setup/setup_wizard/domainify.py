@@ -96,7 +96,7 @@ def setup_properties(data):
 def setup_roles(data):
 	'''Add, remove roles from `data.allow_roles` or `data.remove_roles`'''
 	def remove_role(role):
-		frappe.db.sql('delete from tabUserRole where role=%s', role)
+		frappe.db.sql('delete from `tabHas Role` where role=%s', role)
 		frappe.set_value('Role', role, 'disabled', 1)
 
 	if data.remove_roles:

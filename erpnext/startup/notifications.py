@@ -11,8 +11,6 @@ def get_notification_config():
 			"Task": {"status": ("in", ("Open", "Overdue"))},
 			"Project": {"status": "Open"},
 			"Item": {"total_projected_qty": ("<", 0)},
-			"Customer": {"status": "Open"},
-			"Supplier": {"status": "Open"},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
 			"Opportunity": {"status": "Open"},

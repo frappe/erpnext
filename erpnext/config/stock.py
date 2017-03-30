@@ -50,6 +50,11 @@ def get_data():
 					"doctype": "Item",
 				},
 				{
+					"type": "page",
+					"name": "stock-balance",
+					"label": _("Stock Summary")
+				},
+				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Ageing",
@@ -260,6 +265,12 @@ def get_data():
 					"is_query_report": True,
 					"name": "Batch-Wise Balance History",
 					"doctype": "Batch"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Batch Item Expiry Status",
+					"doctype": "Stock Ledger Entry"
 				},
 				{
 					"type": "report",

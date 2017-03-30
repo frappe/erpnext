@@ -9,12 +9,35 @@
         </div>
     </div>
     <br>
+    <h3>ERPNext Demonstrations</h3>
+    <ul class="list-unstyled video-list">
+        <li><a href="{{docs_base_url}}/user/videos/learn/services.html">
+              ERPNext for Services Business</a>
+            <span class="text-muted pull-right">52:50</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/distributors.html">
+              ERPNext for Distributors</a>
+            <span class="text-muted pull-right">51:47</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/manufacturing-make-to-order.html">
+              ERPNext for Manufacturers</a>
+            <span class="text-muted pull-right">14:26</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/retailers.html">
+              ERPNext for Retailers</a>
+            <span class="text-muted pull-right">39:21</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/schools.html">
+              ERPNext for Schools</a>
+            <span class="text-muted pull-right">39:21</span>
+        </li>
+    </ul>
+    <br>
     <h3>Using ERPNext</h3>
     <ul class="list-unstyled video-list">
-        <li>
-            <a href="{{docs_base_url}}/user/videos/learn/navigation.html">
+        <li><a href="{{docs_base_url}}/user/videos/learn/navigation.html">
               User Interface and Navigation</a>
-            <span class="text-muted pull-right">1:17</span>
+            <span class="text-muted pull-right">2:17</span>
         </li>
     </ul>
     <br>
@@ -26,11 +49,11 @@
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/user-and-permission.html">
             User and Permissions</a>
-            <span class="text-muted pull-right">4:20</span>
+            <span class="text-muted pull-right">6:16</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/data-import-tool.html">
             Data Import Tool</a>
-            <span class="text-muted pull-right">3:24</span>
+            <span class="text-muted pull-right">6:31</span>
     	</li>
         <li><a href="{{docs_base_url}}/user/videos/learn/printing-and-branding.html">
             Printing and Branding</a>
@@ -38,23 +61,23 @@
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/customer-and-supplier.html">
             Customer and Supplier</a>
-            <span class="text-muted pull-right">3:21</span>
+            <span class="text-muted pull-right">4:35</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/item.html">
             Item and Pricing</a>
-            <span class="text-muted pull-right">3:17</span>
+            <span class="text-muted pull-right">3:55</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/opening-stock.html">
             Opening Stock</a>
-            <span class="text-muted pull-right">2:06</span>
+            <span class="text-muted pull-right">4:27</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/chart-of-accounts.html">
             Chart of Accounts</a>
-            <span class="text-muted pull-right">2:26</span>
+            <span class="text-muted pull-right">3:10</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/opening-account-balances.html">
             Opening Account Balances</a>
-            <span class="text-muted pull-right">3:46</span>
+            <span class="text-muted pull-right">4:40</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/email-account.html">
             Email Account</a>
@@ -69,8 +92,12 @@
     <h3>CRM and Sales</h3>
     <ul class="list-unstyled video-list">
         <li><a href="{{docs_base_url}}/user/videos/learn/lead-to-quotation.html">
-            Lead to Quotation</a>
-            <span class="text-muted pull-right">2:00</span>
+            Customer Relationship Management</a>
+            <span class="text-muted pull-right">3:29</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/customer-and-supplier.html">
+            Customer</a>
+            <span class="text-muted pull-right">4:35</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/sales-cycle.html">
             Sales Order to Payment</a>
@@ -96,9 +123,17 @@
     <br>
     <h3>Buying</h3>
     <ul class="list-unstyled video-list">
+        <li><a href="{{docs_base_url}}/user/videos/learn/customer-and-supplier.html">
+            Supplier</a>
+            <span class="text-muted pull-right">4:35</span>
+        </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/material-request-to-purchase-order.html">
             Material Request to Purchase Order</a>
             <span class="text-muted pull-right">2:25</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/request-for-quotation.html">
+            Request for Quotation</a>
+            <span class="text-muted pull-right">3:17</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/purchase-cycle.html">
             Purchase Order to Payment</a>
@@ -106,7 +141,7 @@
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/taxes.html">
             Taxes</a>
-            <span class="text-muted pull-right">3:00</span>
+            <span class="text-muted pull-right">5:13</span>
         </li>
     </ul>
     <br>
@@ -121,19 +156,19 @@
             <span class="text-muted pull-right">2:38</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/opening-stock.html">
-            Opening Stock</a>
-            <span class="text-muted pull-right">2:06</span>
+            Stock Opening Balance</a>
+            <span class="text-muted pull-right">4:27</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/stock-entries.html">
             Stock Entries</a>
               <span class="text-muted pull-right">3:46</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/serialized-inventory.html">
-            Seriralized Inventory</a>
+            Serialized Inventory</a>
             <span class="text-muted pull-right">4:12</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/batch-inventory.html">
-            Batch Inventory</a>
+            Batched Inventory</a>
             <span class="text-muted pull-right">3:46</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/subcontracting.html">
@@ -144,25 +179,33 @@
             Quality Inspection</a>
             <span class="text-muted pull-right">2:36</span>
         </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/fixed-assets.html">
+              Fixed Assets Management</a>
+            <span class="text-muted pull-right">6:35</span>
+        </li>
     </ul>
     <br>
     <h3>Accounts</h3>
     <ul class="list-unstyled video-list">
         <li><a href="{{docs_base_url}}/user/videos/learn/chart-of-accounts.html">
             Chart of Accounts</a>
-            <span class="text-muted pull-right">2:26</span>
+            <span class="text-muted pull-right">3:10</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/opening-account-balances.html">
-            Opening Account Balances</a>
-            <span class="text-muted pull-right">3:46</span>
+            Accounts Opening Balances</a>
+            <span class="text-muted pull-right">4:40</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/taxes.html">
             Taxes</a>
-              <span class="text-muted pull-right">3:00</span>
+              <span class="text-muted pull-right">5:13</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/advance-payments.html">
             Advance Payments</a>
               <span class="text-muted pull-right">2:52</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/budgeting.html">
+              Budgeting</a>
+            <span class="text-muted pull-right">3:26</span>
         </li>
     </ul>
     <br>
@@ -180,12 +223,22 @@
             Production Order</a>
             <span class="text-muted pull-right">2:24</span>
         </li>
+        <li>
+            <a href="{{docs_base_url}}/user/videos/learn/manufacturing-make-to-order.html">
+              ERPNext for Manufacturers (Make to Order)</a>
+            <span class="text-muted pull-right">14:26</span>
+        </li>
+        <li>
+            <a href="{{docs_base_url}}/user/videos/learn/manufacturing-enigneer-to-order.html">
+              ERPNext for Manufacturers (Engineer to Order)</a>
+            <span class="text-muted pull-right">44:40</span>
+        </li>
     </ul>
     <br>
     <h3>Human Resource</h3>
     <ul class="list-unstyled video-list">
         <li><a href="{{docs_base_url}}/user/videos/learn/employee.html">
-            Employee</a>
+            Employees</a>
             <span class="text-muted pull-right">1:59</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/processing-payroll.html">
@@ -197,7 +250,7 @@
             <span class="text-muted pull-right">2:50</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/expense-claim.html">
-            Expense Claim</a>
+            Expense Claims</a>
             <span class="text-muted pull-right">2:52</span>
         </li>
     </ul>
@@ -207,6 +260,10 @@
         <li><a href="{{docs_base_url}}/user/videos/learn/point-of-sale.html">
             Point of Sale</a>
             <span class="text-muted pull-right">2:34</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/retailers.html">
+              ERPNext for Retailers (Demo)</a>
+            <span class="text-muted pull-right">39:21</span>
         </li>
     </ul>
     <br>
@@ -234,6 +291,10 @@
         <li><a href="{{docs_base_url}}/user/videos/learn/field-customization.html">
             Field Customization</a>
             <span class="text-muted pull-right">3:10</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/bulk-update.html">
+            Bulk Update Data</a>
+            <span class="text-muted pull-right">1:38</span>
         </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/workflow.html">
             Workflow</a>

@@ -42,19 +42,19 @@ def get_columns(filters):
 		_("Student") + ":Link/Student:90", 
 		_("Student Name") + "::150", 
 		_("Student Batch") + "::180",
-		_("Student Email ID") + "::180",
+		_("Student Email Address") + "::180",
 		_("Student Mobile No.") + "::150",
 	]
 	return columns
 
 def get_absent_students(date):
 	absent_students = frappe.db.sql("""select student, student_name, student_batch from `tabStudent Attendance` 
-		where docstatus = 1 and status="Absent" and date = %s order by student_batch, student_name""", date, as_dict=1)
+		where status="Absent" and date = %s order by student_batch, student_name""", date, as_dict=1)
 	return absent_students
 
 def get_leave_applications(date):
 	leave_applicants = []
 	for student in frappe.db.sql("""select student from `tabStudent Leave Application` 
-		where docstatus = 1 and date = %s""", date):
+	where docstatus = 1 and from_date <= %s and to_date >= %s""", (date, date)):
 		leave_applicants.append(student[0])
 	return leave_applicants

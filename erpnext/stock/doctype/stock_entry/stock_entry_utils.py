@@ -9,6 +9,9 @@ def make_stock_entry(**args):
 	s = frappe.new_doc("Stock Entry")
 	args = frappe._dict(args)
 
+	if args.posting_date or args.posting_time:
+		s.set_posting_time = 1
+
 	if args.posting_date:
 		s.posting_date = args.posting_date
 	if args.posting_time:

@@ -120,6 +120,16 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Addresses And Contacts",
+					"label": "Sales Partner Addresses And Contacts",
+					"doctype": "Address",
+					"route_options": {
+						"party_type": "Sales Partner"
+					}
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Territory Target Variance (Item Group-Wise)",
 					"route": "query-report/Territory Target Variance Item Group-Wise",
 					"doctype": "Territory"
@@ -215,8 +225,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Customer Addresses And Contacts",
-					"doctype": "Contact"
+					"name": "Addresses And Contacts",
+					"label": "Customer Addresses And Contacts",
+					"doctype": "Address",
+					"route_options": {
+						"party_type": "Customer"
+					}
 				},
 				{
 					"type": "report",

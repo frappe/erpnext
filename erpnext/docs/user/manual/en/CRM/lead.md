@@ -22,7 +22,7 @@ Leads are the  entities constituting a first contact. Leads can be created by a 
 
 To create a Lead, go to:
 
-> Selling > Lead > New Lead
+> CRM > Lead > New Lead
 
 <img class="screenshot" alt="Lead" src="{{docs_base_url}}/assets/img/crm/lead.png">
 
@@ -37,15 +37,16 @@ has to contact the lead next.
 
 ### Difference between Lead, Contact and Customer
 
-The difference is that a Lead is a potential Customer, someone who can give
-you business. A Customer is an organization or individual who has given you
-business before (and has an Account in your system). A Contact is a person who
-belongs to the Customer.
+A Lead is a potential Customer, someone who can give you business. A Customer is an
+organization or individual who has given you business before (and has an Account
+in your system). A Contact is a person who belongs to the Customer.
 
-A Lead can be converted to a Customer by clicking on the “Create Customer”
-button. Once the Customer is created, the Lead becomes “Converted” and any
-further Opportunities from the same source can be created against the
+A Lead can be converted to a Customer by selecting “Customer” from the **Make**
+dropdown. Once the Customer is created, the Lead becomes “Converted” and any
+further Opportunities from the same source can be created against this
 Customer.
+
+<img class="screenshot" alt="Create Customer" src="{{docs_base_url}}/assets/img/crm/lead-to-customer.gif">
 
 ---
 

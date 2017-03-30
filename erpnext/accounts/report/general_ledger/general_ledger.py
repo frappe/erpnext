@@ -149,6 +149,9 @@ def get_conditions(filters):
 	if not (filters.get("account") or filters.get("party") or filters.get("group_by_account")):
 		conditions.append("posting_date >=%(from_date)s")
 
+	if filters.get("project"):
+		conditions.append("project=%(project)s")
+
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 	if match_conditions: conditions.append(match_conditions)

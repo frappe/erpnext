@@ -18,11 +18,11 @@ Note: Invoice/Order currency and Payment Gateway Account currency should be same
 ---
 
 ##### Notify Customer
-You can notify customer from Payment Request with print format. If customer contact email is mentioned, it will automatically fetch email. If not so you can set email id on Payment Request. 
+You can notify customer from Payment Request with print format. If customer contact email is mentioned, it will automatically fetch email. If not so you can set Email Address on Payment Request. 
 
 <img class="screenshot" alt="Payment Request" src="{{docs_base_url}}/assets/img/accounts/pr-details-2.png">
 
 ##### Request Mail
 <img class="screenshot" alt="Payment Request" src="{{docs_base_url}}/assets/img/accounts/pr-email.png">
 
-
+{next}

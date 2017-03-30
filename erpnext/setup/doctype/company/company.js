@@ -4,7 +4,7 @@
 frappe.provide("erpnext.company");
 
 frappe.ui.form.on("Company", {
-	onload: function(frm) {
+	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
 	},
 
@@ -31,7 +31,8 @@ frappe.ui.form.on("Company", {
 	},
 
 	onload_post_render: function(frm) {
-		frm.get_field("delete_company_transactions").$input.addClass("btn-danger");
+		if(frm.get_field("delete_company_transactions").$input) 
+			frm.get_field("delete_company_transactions").$input.addClass("btn-danger");
 	},
 	country: function(frm) {
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
@@ -135,6 +136,7 @@ erpnext.company.setup_queries = function(frm) {
 		["default_payable_account", {"account_type": "Payable"}],
 		["default_expense_account", {"root_type": "Expense"}],
 		["default_income_account", {"root_type": "Income"}],
+		["default_payroll_payable_account", {"root_type": "Liability"}],
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
 		["exchange_gain_loss_account", {"root_type": "Expense"}],

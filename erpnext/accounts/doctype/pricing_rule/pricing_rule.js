@@ -91,8 +91,8 @@ cur_frm.cscript.buying = function() {
 }
 
 //Dynamically change the description based on type of margin
-cur_frm.cscript.type = function(doc){
-	cur_frm.set_df_property('rate', 'description', doc.type=='Percentage'?'In Percentage %':'In Amount')
+cur_frm.cscript.margin_type = function(doc){
+	cur_frm.set_df_property('margin_rate_or_amount', 'description', doc.margin_type=='Percentage'?'In Percentage %':'In Amount')
 }
 
 frappe.ui.form.on('Pricing Rule', 'price_or_discount', function(frm){

@@ -8,8 +8,12 @@ import frappe
 import frappe.defaults
 from frappe.utils import cint, flt, cstr, today
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+from erpnext import set_perpetual_inventory
 
 class TestPurchaseReceipt(unittest.TestCase):
+	def setUp(self):
+		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+
 	def test_make_purchase_invoice(self):
 		pr = make_purchase_receipt(do_not_save=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, pr.name)
@@ -26,10 +30,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 	def test_purchase_receipt_no_gl_entry(self):
 		set_perpetual_inventory(0)
-		
+
 		existing_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
 			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
-		
+
 		pr = make_purchase_receipt()
 
 		stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
@@ -78,22 +82,22 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 	def test_subcontracting(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-		
+
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100)
-		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TC", 
+		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TC",
 			qty=100, basic_rate=100)
-		
+
 		pr = make_purchase_receipt(item_code="_Test FG Item", qty=10, rate=500, is_subcontracted="Yes")
 		self.assertEquals(len(pr.get("supplied_items")), 2)
-		
+
 		rm_supp_cost = sum([d.amount for d in pr.get("supplied_items")])
 		self.assertEquals(pr.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
 
 	def test_serial_no_supplier(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
-		self.assertEquals(frappe.db.get_value("Serial No", pr.get("items")[0].serial_no, "supplier"), 
+		self.assertEquals(frappe.db.get_value("Serial No", pr.get("items")[0].serial_no, "supplier"),
 			pr.supplier)
-		
+
 		pr.cancel()
 		self.assertFalse(frappe.db.get_value("Serial No", pr.get("items")[0].serial_no, "warehouse"))
 
@@ -118,21 +122,21 @@ class TestPurchaseReceipt(unittest.TestCase):
 		for serial_no in rejected_serial_nos:
 			self.assertEquals(frappe.db.get_value("Serial No", serial_no, "warehouse"),
 				pr.get("items")[0].rejected_warehouse)
-				
+
 	def test_purchase_return(self):
 		set_perpetual_inventory()
-		
+
 		pr = make_purchase_receipt()
-		
+
 		return_pr = make_purchase_receipt(is_return=1, return_against=pr.name, qty=-2)
 
 		# check sle
-		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt", 
+		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
 			"voucher_no": return_pr.name}, "outgoing_rate")
-			
+
 		self.assertEqual(outgoing_rate, 50)
-		
-		
+
+
 		# check gl entries for return
 		gl_entries = get_gl_entries("Purchase Receipt", return_pr.name)
 
@@ -146,7 +150,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEquals(expected_values[gle.account][0], gle.debit)
 			self.assertEquals(expected_values[gle.account][1], gle.credit)
-		
+
 		set_perpetual_inventory(0)
 
 	def test_purchase_return_for_rejected_qty(self):
@@ -158,7 +162,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		actual_qty = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
 			"voucher_no": return_pr.name, 'warehouse': return_pr.items[0].rejected_warehouse}, "actual_qty")
-		
+
 		self.assertEqual(actual_qty, -2)
 
 		set_perpetual_inventory(0)
@@ -168,88 +172,84 @@ class TestPurchaseReceipt(unittest.TestCase):
 			serial_no = frappe.get_doc("Serial No", serial_no)
 			for field, value in field_values.items():
 				self.assertEquals(cstr(serial_no.get(field)), value)
-		
+
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-		
+
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
-		
+
 		serial_no = get_serial_nos(pr.get("items")[0].serial_no)[0]
-		
+
 		_check_serial_no_values(serial_no, {
 			"warehouse": "_Test Warehouse - _TC",
 			"purchase_document_no": pr.name
 		})
-		
-		return_pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=-1, 
+
+		return_pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=-1,
 			is_return=1, return_against=pr.name, serial_no=serial_no)
-			
+
 		_check_serial_no_values(serial_no, {
 			"warehouse": "",
 			"purchase_document_no": pr.name,
 			"delivery_document_no": return_pr.name
 		})
-	
+
 	def test_closed_purchase_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_purchase_receipt_status
-		
+
 		pr = make_purchase_receipt(do_not_submit=True)
 		pr.submit()
-		
+
 		update_purchase_receipt_status(pr.name, "Closed")
 		self.assertEquals(frappe.db.get_value("Purchase Receipt", pr.name, "status"), "Closed")
-		
+
 	def test_pr_billing_status(self):
 		# PO -> PR1 -> PI and PO -> PI and PO -> PR2
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 		from erpnext.buying.doctype.purchase_order.purchase_order \
 			import make_purchase_receipt, make_purchase_invoice as make_purchase_invoice_from_po
-		
+
 		po = create_purchase_order()
-		
+
 		pr1 = make_purchase_receipt(po.name)
 		pr1.posting_date = today()
 		pr1.posting_time = "10:00"
 		pr1.get("items")[0].received_qty = 2
 		pr1.get("items")[0].qty = 2
 		pr1.submit()
-		
+
 		pi1 = make_purchase_invoice(pr1.name)
 		pi1.submit()
-		
+
 		pr1.load_from_db()
 		self.assertEqual(pr1.per_billed, 100)
-		
+
 		pi2 = make_purchase_invoice_from_po(po.name)
 		pi2.get("items")[0].qty = 4
 		pi2.submit()
-		
+
 		pr2 = make_purchase_receipt(po.name)
 		pr2.posting_date = today()
 		pr2.posting_time = "08:00"
 		pr2.get("items")[0].received_qty = 5
 		pr2.get("items")[0].qty = 5
 		pr2.submit()
-		
+
 		pr1.load_from_db()
 		self.assertEqual(pr1.get("items")[0].billed_amt, 1000)
 		self.assertEqual(pr1.per_billed, 100)
 		self.assertEqual(pr1.status, "Completed")
-		
+
 		self.assertEqual(pr2.get("items")[0].billed_amt, 2000)
 		self.assertEqual(pr2.per_billed, 80)
 		self.assertEqual(pr2.status, "To Bill")
-		
+
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
 
-def set_perpetual_inventory(enable=1):
-	accounts_settings = frappe.get_doc("Accounts Settings")
-	accounts_settings.auto_accounting_for_stock = enable
-	accounts_settings.save()
-	
 def make_purchase_receipt(**args):
+	frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 	pr = frappe.new_doc("Purchase Receipt")
 	args = frappe._dict(args)
 	pr.posting_date = args.posting_date or today()

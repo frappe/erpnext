@@ -40,6 +40,7 @@ class PurchaseInvoice(BuyingController):
 		if not self.is_opening:
 			self.is_opening = 'No'
 
+		self.validate_posting_time()
 		super(PurchaseInvoice, self).validate()
 
 		if not self.is_return:
@@ -309,12 +310,12 @@ class PurchaseInvoice(BuyingController):
 				asset.flags.ignore_validate_update_after_submit = True
 				asset.save()
 
-	def make_gl_entries(self, repost_future_gle=True):
+	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
 			return
-		
-		gl_entries = self.get_gl_entries()
-		
+		if not gl_entries:
+			gl_entries = self.get_gl_entries()
+
 		if gl_entries:
 			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 
@@ -351,7 +352,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_payment_gl_entries(gl_entries)
 		self.make_write_off_gl_entry(gl_entries)
-		
+
 		return gl_entries
 
 	def make_supplier_gl_entry(self, gl_entries):

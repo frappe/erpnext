@@ -6,6 +6,10 @@ frappe.provide("erpnext.accounts");
 
 
 erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
+	setup: function(doc) {
+		this.setup_posting_date_time_check();
+		this._super(doc);
+	},
 	onload: function() {
 		this._super();
 
@@ -40,7 +44,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			}
 
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
-				cur_frm.add_custom_button(doc.update_stock ? __('Purchase Return') : __('Debit Note'),
+				cur_frm.add_custom_button(__('Return / Debit Note'),
 					this.make_debit_note, __("Make"));
 			}
 		}
@@ -216,18 +220,6 @@ cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 			["Account", "is_group", "=",0],
 			["Account", "company", "=", doc.company]
 		]
-	}
-}
-
-cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:{'supplier':  doc.supplier}
-	}
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:{'supplier':  doc.supplier}
 	}
 }
 

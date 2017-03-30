@@ -6,11 +6,16 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
+from frappe.utils import cstr
+from erpnext.schools.api import get_student_batch_students, get_student_group_students
+
 
 class StudentAttendance(Document):
 	def validate(self):
 		self.validate_date()
 		self.validate_mandatory()
+		self.validate_course_schedule()
+		self.validate_student()
 		self.validate_duplication()
 		
 	def validate_date(self):
@@ -21,17 +26,35 @@ class StudentAttendance(Document):
 		if not (self.student_batch or self.course_schedule):
 			frappe.throw(_("""Student Batch or Course Schedule is mandatory"""))
 	
+	def validate_course_schedule(self):
+		if self.course_schedule:
+			self.student_batch = frappe.db.get_value("Course Schedule", self.course_schedule, "student_batch")
+	
+	def validate_student(self):
+		if self.course_schedule:
+			student_group = frappe.db.get_value("Course Schedule", self.course_schedule, "student_group")
+			student_group_students = []
+			for d in get_student_group_students(student_group):
+				student_group_students.append(d.student)
+			if student_group and self.student not in student_group_students:
+				frappe.throw(_("""Student {0}: {1} does not belong to Student Group {2}""".format(self.student, self.student_name, student_group)))
+		else:
+			student_batch_students = []
+			for d in get_student_batch_students(self.student_batch):
+				student_batch_students.append(d.student)
+			if self.student not in student_batch_students:
+				frappe.throw(_("""Student {0}: {1} does not belong to Student Batch {2}""".format(self.student, self.student_name, self.student_batch)))
+
 	def validate_duplication(self):
 		"""Check if the Attendance Record is Unique"""
-		
 		attendance_records=None
 		if self.course_schedule:
 			attendance_records= frappe.db.sql("""select name from `tabStudent Attendance` where \
-				student= %s and course_schedule= %s and name != %s and docstatus=1""",
-				(self.student, self.course_schedule, self.name))
+				student= %s and ifnull(course_schedule, '')= %s and name != %s""",
+				(self.student, cstr(self.course_schedule), self.name))
 		else:
 			attendance_records= frappe.db.sql("""select name from `tabStudent Attendance` where \
-				student= %s and student_batch= %s and date= %s and name != %s and docstatus=1 and \
+				student= %s and student_batch= %s and date= %s and name != %s and \
 				(course_schedule is Null or course_schedule='')""",
 				(self.student, self.student_batch, self.date, self.name))
 			

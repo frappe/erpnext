@@ -3,10 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
-import math
 from frappe import _
-from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
-	add_months, add_days, formatdate, cint)
+from frappe.utils import flt, getdate, get_first_day, add_months, add_days, formatdate
 
 def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, company):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
@@ -149,7 +147,6 @@ def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accum
 				
 def get_date_fiscal_year(date, company):
 	from erpnext.accounts.utils import get_fiscal_year
-	
 	return get_fiscal_year(date, company=company)[0]
 
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values):
@@ -219,7 +216,7 @@ def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False
 def add_total_row(out, root_type, balance_must_be, period_list, company_currency):
 	total_row = {
 		"account_name": "'" + _("Total {0} ({1})").format(root_type, balance_must_be) + "'",
-		"account": None,
+		"account": "'" + _("Total {0} ({1})").format(root_type, balance_must_be) + "'",
 		"currency": company_currency
 	}
 

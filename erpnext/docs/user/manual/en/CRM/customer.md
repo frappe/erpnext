@@ -11,9 +11,9 @@ You can either directly create your Customers via
 
 <img class="screenshot" alt="Create Customer" src="{{docs_base_url}}/assets/img/crm/create-customer.gif">
 
-or upload it via the Data Import Tool.
+or upload it via the [Data Import Tool]({{docs_base_url}}/user/manual/en/setting-up/data/data-import-tool.html).
 
-A Customer can avail the features (operations) in the selling process. The general flow can be summarazed as:
+A Customer can avail the features (operations) in the selling process. The general flow can be summarised as:
 
 <img class="screenshot" alt="Customer" src="{{docs_base_url}}/assets/img/crm/customer-to selling-flowchart.jpeg">
 
@@ -22,12 +22,11 @@ have multiple Contacts and Addresses.
 
 ### Contacts and Addresses
 
-Contacts and Addresses in ERPNext are stored separately so that you can
-attach multiple Contacts or Addresses to Customers and Suppliers.
+[Contacts and Addresses]({{docs_base_url}}/user/manual/en/CRM/contact.html) in ERPNext are stored separately so that you can
+attach multiple Contacts or Addresses to Customers and Suppliers
 
-Read [Contact]({{docs_base_url}}/user/manual/en/CRM/contact.html) to know more.
-
-Thus we may have identical Customer Names that are uniquely identified by the ID. Since the email address is not part of the customer information the linking of customer and User is through [Contacts]({{docs_base_url}}/user/manual/en/CRM/contact.html)
+Thus we may have identical Customer Names that are uniquely identified by the ID. Since the email address is not part of the
+customer information, the linking of Customer and User is through Contacts.
 
 ### Integration with Accounts
 
@@ -39,10 +38,15 @@ Ledger for the Customer under “Accounts Receivable” in the Company set in th
 Customer record.
 
 > Advanced Tip: If you want to change the Account Group under which the
-Customer Account is created, you can set it in the Company master.
+Customer Account is created, you can set it in the Company master. If you want
+to create an Account in another Company, just change the Company value and
+“Save” the Customer again.
 
-If you want to create an Account in another Company, just change the Company
-value and “Save” the Customer again.
+By default, the system does not generate an account for every customer. All
+Customers can be booked in one account called Debtors. In order to manage a
+separate account for each customer, you have to first create the account under
+Accounts Receivable in the [Chart of Accounts]({{docs_base_url}}/user/manual/en/accounts/chart-of-accounts.html) and then add it on the customer's
+form accounts table.
 
 ### Customer Settings
 
@@ -56,7 +60,7 @@ You can set how much credit you want to allow for a Customer by adding the
 “Credit Limit”. You can also set a global “Credit Limit” in the Company
 master. Classifying Customers
 
-ERPNext allows you to group your Customers using [Customer Group]({{docs_base_url}}/user/manual/en/CRM/setup/customer-group.html) 
+ERPNext allows you to group your Customers using [Customer Group]({{docs_base_url}}/user/manual/en/CRM/setup/customer-group.html)
 and also divide them into [Territories]({{docs_base_url}}/user/manual/en/setting-up/territory.html)
 Grouping will help you get better analysis of your data and
 identify which Customers are profitable and which are not. Territories will

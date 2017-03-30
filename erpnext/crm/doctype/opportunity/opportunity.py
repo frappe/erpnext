@@ -106,30 +106,6 @@ class Opportunity(TransactionBase):
 			lead_name, company_name = frappe.db.get_value("Lead", self.lead, ["lead_name", "company_name"])
 			self.customer_name = company_name or lead_name
 
-	def get_cust_address(self,name):
-		details = frappe.db.sql("""select customer_name, address, territory, customer_group
-			from `tabCustomer` where name = %s and docstatus != 2""", (name), as_dict = 1)
-		if details:
-			ret = {
-				'customer_name':	details and details[0]['customer_name'] or '',
-				'address'	:	details and details[0]['address'] or '',
-				'territory'			 :	details and details[0]['territory'] or '',
-				'customer_group'		:	details and details[0]['customer_group'] or ''
-			}
-			# ********** get primary contact details (this is done separately coz. , in case there is no primary contact thn it would not be able to fetch customer details in case of join query)
-
-			contact_det = frappe.db.sql("""select contact_name, contact_no, email_id
-				from `tabContact` where customer = %s and is_customer = 1
-					and is_primary_contact = 'Yes' and docstatus != 2""", name, as_dict = 1)
-
-			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
-			ret['contact_no']		 = contact_det and contact_det[0]['contact_no'] or ''
-			ret['email_id']			 = contact_det and contact_det[0]['email_id'] or ''
-
-			return ret
-		else:
-			frappe.throw(_("Customer {0} does not exist").format(name), frappe.DoesNotExistError)
-
 	def on_update(self):
 		self.add_calendar_event()
 
@@ -202,6 +178,7 @@ def get_item_details(item_code):
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
+		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 		quotation = frappe.get_doc(target)
 
 		company_currency = frappe.db.get_value("Company", quotation.company, "default_currency")
@@ -217,7 +194,11 @@ def make_quotation(source_name, target_doc=None):
 				quotation.transaction_date)
 
 		quotation.conversion_rate = exchange_rate
-
+		
+		# get default taxes
+		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template")
+		quotation.extend("taxes", taxes)
+		
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
 
@@ -269,3 +250,15 @@ def set_multiple_status(names, status):
 		opp = frappe.get_doc("Opportunity", name)
 		opp.status = status
 		opp.save()
+
+def auto_close_opportunity():
+	""" auto close the `Replied` Opportunities after 7 days """
+	auto_close_after_days = frappe.db.get_value("Support Settings", "Support Settings", "close_opportunity_after_days") or 15
+
+	opportunities = frappe.db.sql(""" select name from tabOpportunity where status='Replied' and
+		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """, (auto_close_after_days), as_dict=True)
+
+	for opportunity in opportunities:
+		doc = frappe.get_doc("Opportunity", opportunity.get("name"))
+		doc.status = "Closed"
+		doc.save(ignore_permissions=True)

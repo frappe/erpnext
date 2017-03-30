@@ -21,8 +21,18 @@ class ProgramEnrollmentTool(Document):
 				students = frappe.db.sql("select name as student_applicant, title as student_name from \
 					`tabStudent Applicant` where program = %s and academic_year = %s",(self.program, self.academic_year), as_dict=1)
 			else:
-				students = frappe.db.sql("select student, student_name from \
+				students = frappe.db.sql("select student, student_name, student_batch_name from \
 					`tabProgram Enrollment` where program = %s and academic_year = %s",(self.program, self.academic_year), as_dict=1)
+				student_list = [d.student for d in students]
+
+				inactive_students = frappe.db.sql('''
+					select name as student, title as student_name from `tabStudent` where name in (%s) and enabled = 0''' %
+					', '.join(['%s']*len(student_list)), tuple(student_list), as_dict=1)
+
+				for student in students:
+					if student.student in [d.student for d in inactive_students]:
+						students.remove(student)
+
 		if students:
 			return students
 		else:
@@ -34,6 +44,7 @@ class ProgramEnrollmentTool(Document):
 				prog_enrollment = frappe.new_doc("Program Enrollment")
 				prog_enrollment.student = stud.student
 				prog_enrollment.student_name = stud.student_name
+				prog_enrollment.student_batch_name = stud.student_batch_name
 				prog_enrollment.program = self.new_program
 				prog_enrollment.academic_year = self.new_academic_year
 				prog_enrollment.save()

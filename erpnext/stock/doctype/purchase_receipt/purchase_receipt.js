@@ -37,6 +37,11 @@ frappe.ui.form.on("Purchase Receipt", {
 });
 
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
+	setup: function(doc) {
+		this.setup_posting_date_time_check();
+		this._super(doc);
+	},
+
 	refresh: function() {
 		this._super();
 		if(this.frm.doc.docstatus===1) {
@@ -126,26 +131,6 @@ cur_frm.cscript.update_status = function(status) {
 			frappe.ui.form.is_saving = false;
 		}
 	})
-}
-
-cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return {
-		filters: { 'supplier': doc.supplier}
-	}
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return {
-		filters: { 'supplier': doc.supplier }
-	}
-}
-
-cur_frm.cscript.new_contact = function() {
-	tn = frappe.model.make_new_doc_and_get_name('Contact');
-	locals['Contact'][tn].is_supplier = 1;
-	if(doc.supplier)
-		locals['Contact'][tn].supplier = doc.supplier;
-	frappe.set_route('Form', 'Contact', tn);
 }
 
 cur_frm.fields_dict['items'].grid.get_field('project').get_query = function(doc, cdt, cdn) {

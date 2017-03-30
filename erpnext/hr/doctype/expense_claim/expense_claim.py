@@ -4,13 +4,17 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import get_fullname, flt
+from frappe.utils import get_fullname, flt, cstr
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
+from erpnext.accounts.party import get_party_account
+from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+from erpnext.controllers.accounts_controller import AccountsController
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 
-class ExpenseClaim(Document):
+class ExpenseClaim(AccountsController):
 	def get_feed(self):
 		return _("{0}: From {0} for {1}").format(self.approval_status,
 			self.employee_name, self.total_claimed_amount)
@@ -21,22 +25,132 @@ class ExpenseClaim(Document):
 		self.calculate_total_amount()
 		set_employee_name(self)
 		self.set_expense_account()
+		self.set_payable_account()
+		self.set_cost_center()
+		self.set_status()
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
+
+	def set_status(self):
+		self.status = {
+			"0": "Draft",
+			"1": "Submitted",
+			"2": "Cancelled"
+		}[cstr(self.docstatus or 0)]
+
+		if self.total_sanctioned_amount == self.total_amount_reimbursed and self.docstatus == 1:
+			self.status = "Paid"
+		elif self.docstatus == 1:
+			self.status = "Unpaid"
+
+	def set_payable_account(self):
+		if not self.payable_account and not self.is_paid:
+			self.payable_account = frappe.db.get_value("Company", self.company, "default_payable_account")
+
+	def set_cost_center(self):
+		if not self.cost_center:
+			self.cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
 
 	def on_submit(self):
 		if self.approval_status=="Draft":
 			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
+
 		self.update_task_and_project()
+		self.make_gl_entries()
+
+		if self.is_paid:
+			update_reimbursed_amount(self)
+
+		self.set_status()
 
 	def on_cancel(self):
 		self.update_task_and_project()
+		if self.payable_account:
+			self.make_gl_entries(cancel=True)
+
+		if self.is_paid:
+			update_reimbursed_amount(self)
+
+		self.set_status()
 
 	def update_task_and_project(self):
 		if self.task:
 			self.update_task()
 		elif self.project:
 			frappe.get_doc("Project", self.project).update_project()
+
+	def make_gl_entries(self, cancel = False):
+		if flt(self.total_sanctioned_amount) > 0:
+			gl_entries = self.get_gl_entries()
+			make_gl_entries(gl_entries, cancel)
+
+	def get_gl_entries(self):
+		gl_entry = []
+		self.validate_account_details()
+		
+		# payable entry
+		gl_entry.append(
+			self.get_gl_dict({
+				"account": self.payable_account,
+				"credit": self.total_sanctioned_amount,
+				"credit_in_account_currency": self.total_sanctioned_amount,
+				"against": ",".join([d.default_account for d in self.expenses]),
+				"party_type": "Employee",
+				"party": self.employee,
+				"against_voucher_type": self.doctype,
+				"against_voucher": self.name
+			})
+		)
+
+		# expense entries
+		for data in self.expenses:
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": data.default_account,
+					"debit": data.sanctioned_amount,
+					"debit_in_account_currency": data.sanctioned_amount,
+					"against": self.employee,
+					"cost_center": self.cost_center
+				})
+			)
+
+		if self.is_paid:
+			# payment entry
+			payment_account = get_bank_cash_account(self.mode_of_payment, self.company).get("account")
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": payment_account,
+					"credit": self.total_sanctioned_amount,
+					"credit_in_account_currency": self.total_sanctioned_amount,
+					"against": self.employee
+				})
+			)
+
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": self.payable_account,
+					"party_type": "Employee",
+					"party": self.employee,
+					"against": payment_account,
+					"debit": self.total_sanctioned_amount,
+					"debit_in_account_currency": self.total_sanctioned_amount,
+					"against_voucher": self.name,
+					"against_voucher_type": self.doctype,
+				})
+			)
+
+		return gl_entry
+
+	def validate_account_details(self):
+		if not self.cost_center:
+			frappe.throw(_("Cost center is required to book an expense claim"))
+
+		if not self.payable_account:
+			frappe.throw(_("Please set default payable account in the employee {0}").format(self.employee))
+
+		if self.is_paid:
+			if not self.mode_of_payment:
+				frappe.throw(_("Mode of payment is required to make a payment").format(self.employee))
 
 	def calculate_total_amount(self):
 		self.total_claimed_amount = 0
@@ -64,12 +178,23 @@ class ExpenseClaim(Document):
 		for expense in self.expenses:
 			if not expense.default_account:
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
-		
+
+def update_reimbursed_amount(doc):
+	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
+		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
+		and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
+
+	doc.total_amount_reimbursed = amt
+	frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)
+
+	doc.set_status()
+	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
+
 @frappe.whitelist()
 def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		select u.name, concat(u.first_name, ' ', u.last_name)
-		from tabUser u, tabUserRole r
+		from tabUser u, `tabHas Role` r
 		where u.name = r.parent and r.role = 'Expense Approver' 
 		and u.enabled = 1 and u.name like %s
 	""", ("%" + txt + "%"))
@@ -80,23 +205,26 @@ def make_bank_entry(docname):
 
 	expense_claim = frappe.get_doc("Expense Claim", docname)
 	default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Bank")
+	if not default_bank_cash_account:
+		default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Cash")
 
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = 'Bank Entry'
 	je.company = expense_claim.company
 	je.remark = 'Payment against Expense Claim: ' + docname;
 
-	for expense in expense_claim.expenses:
-		je.append("accounts", {
-			"account": expense.default_account,
-			"debit_in_account_currency": expense.sanctioned_amount,
-			"reference_type": "Expense Claim",
-			"reference_name": expense_claim.name
-		})
+	je.append("accounts", {
+		"account": expense_claim.payable_account,
+		"debit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_amount_reimbursed),
+		"reference_type": "Expense Claim",
+		"party_type": "Employee",
+		"party": expense_claim.employee,
+		"reference_name": expense_claim.name
+	})
 
 	je.append("accounts", {
 		"account": default_bank_cash_account.account,
-		"credit_in_account_currency": expense_claim.total_sanctioned_amount,
+		"credit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_amount_reimbursed),
 		"reference_type": "Expense Claim",
 		"reference_name": expense_claim.name,
 		"balance": default_bank_cash_account.balance,

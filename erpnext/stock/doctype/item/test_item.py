@@ -7,7 +7,7 @@ import frappe
 
 from frappe.test_runner import make_test_records
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
-	InvalidItemAttributeValueError)
+	InvalidItemAttributeValueError, get_variant)
 
 from frappe.model.rename_doc import rename_doc
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -167,31 +167,66 @@ class TestItem(unittest.TestCase):
 		variant.item_name = "_Test Numeric Variant Large 1.1m"
 		self.assertRaises(InvalidItemAttributeValueError, variant.save)
 
-		variant = create_variant("_Test Numeric Template Item", 
+		variant = create_variant("_Test Numeric Template Item",
 			{"Test Size": "Large", "Test Item Length": 1.5})
 		self.assertEquals(variant.item_code, "_Test Numeric Template Item-L-1.5")
 		variant.item_code = "_Test Numeric Variant-L-1.5"
 		variant.item_name = "_Test Numeric Variant Large 1.5m"
 		variant.save()
-		
-	def test_item_merging(self):		
+
+	def test_item_merging(self):
 		create_item("Test Item for Merging 1")
 		create_item("Test Item for Merging 2")
-		
-		make_stock_entry(item_code="Test Item for Merging 1", target="_Test Warehouse - _TC", 
+
+		make_stock_entry(item_code="Test Item for Merging 1", target="_Test Warehouse - _TC",
 			qty=1, rate=100)
-		make_stock_entry(item_code="Test Item for Merging 2", target="_Test Warehouse 1 - _TC", 
+		make_stock_entry(item_code="Test Item for Merging 2", target="_Test Warehouse 1 - _TC",
 			qty=1, rate=100)
-		
+
 		rename_doc("Item", "Test Item for Merging 1", "Test Item for Merging 2", merge=True)
-		
+
 		self.assertFalse(frappe.db.exists("Item", "Test Item for Merging 1"))
-		
-		self.assertTrue(frappe.db.get_value("Bin", 
+
+		self.assertTrue(frappe.db.get_value("Bin",
 			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse - _TC"}))
-			
-		self.assertTrue(frappe.db.get_value("Bin", 
-			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse 1 - _TC"}))		
+
+		self.assertTrue(frappe.db.get_value("Bin",
+			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse 1 - _TC"}))
+
+	def test_item_variant_by_manufacturer(self):
+		if frappe.db.exists('Item', '_Test Variant Mfg'):
+			frappe.delete_doc('Item', '_Test Variant Mfg')
+		if frappe.db.exists('Item', '_Test Variant Mfg-1'):
+			frappe.delete_doc('Item', '_Test Variant Mfg-1')
+		if frappe.db.exists('Manufacturer', 'MSG1'):
+			frappe.delete_doc('Manufacturer', 'MSG1')
+
+		template = frappe.get_doc(dict(
+			doctype='Item',
+			item_code='_Test Variant Mfg',
+			has_variant=1,
+			item_group='Products',
+			variant_based_on='Manufacturer'
+		)).insert()
+
+		manufacturer = frappe.get_doc(dict(
+			doctype='Manufacturer',
+			short_name='MSG1'
+		)).insert()
+
+		variant = get_variant(template.name, manufacturer=manufacturer.name)
+		self.assertEquals(variant.item_code, '_Test Variant Mfg-1')
+		self.assertEquals(variant.description, '_Test Variant Mfg')
+		self.assertEquals(variant.get("manufacturers")[0].manufacturer, 'MSG1')
+		variant.insert()
+
+		variant = get_variant(template.name, manufacturer=manufacturer.name,
+			manufacturer_part_no='007')
+		self.assertEquals(variant.item_code, '_Test Variant Mfg-2')
+		self.assertEquals(variant.description, '_Test Variant Mfg')
+		self.assertEquals(variant.get("manufacturers")[0].manufacturer, 'MSG1')
+		self.assertEquals(variant.get("manufacturers")[0].manufacturer_part_no, '007')
+
 
 def make_item_variant():
 	if not frappe.db.exists("Item", "_Test Variant Item-S"):
@@ -215,6 +250,5 @@ def create_item(item_code, is_stock_item=None):
 		item.item_name = item_code
 		item.description = item_code
 		item.item_group = "All Item Groups"
-		item.is_stock_item = is_stock_item or 1		
+		item.is_stock_item = is_stock_item or 1
 		item.save()
-		
