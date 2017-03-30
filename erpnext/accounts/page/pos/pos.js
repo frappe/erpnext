@@ -1089,6 +1089,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		// if form is local then allow this function
 		// $(me.wrapper).find(".pos-item-wrapper").on("click", function () {
 		$(this.wrapper).on("click", ".pos-item-wrapper", function () {
+			me.item_code = '';
 			if($(me.pos_bill).is(":hidden")) return;
 
 			me.customer_validate();
@@ -1419,6 +1420,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	},
 
 	make_new_cart: function (){
+		this.item_code = '';
 		this.page.clear_secondary_action();
 		this.save_previous_entry();
 		this.create_new();
