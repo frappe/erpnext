@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+import random
 import frappe
 from frappe.model.naming import make_autoname
 from frappe import _, msgprint, throw
@@ -70,6 +71,7 @@ class Customer(TransactionBase):
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
+		self.validate_short_code()
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -84,7 +86,7 @@ class Customer(TransactionBase):
 		'''If Customer created from Lead, update lead status to "Converted"
 		update Customer link in Quotation, Opportunity'''
 		if self.lead_name:
-		 	frappe.db.set_value('Lead', self.lead_name, 'status', 'Converted', update_modified=False)
+			frappe.db.set_value('Lead', self.lead_name, 'status', 'Converted', update_modified=False)
 
 			for doctype in ('Opportunity', 'Quotation'):
 				for d in frappe.get_all(doctype, {'lead': self.lead_name}):
@@ -132,6 +134,23 @@ class Customer(TransactionBase):
 			outstanding_amt = get_customer_outstanding(self.name, company.name)
 			if flt(self.credit_limit) < outstanding_amt:
 				frappe.throw(_("""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}""").format(outstanding_amt))
+
+	def validate_short_code(self):
+		if self.short_code:
+			self.short_code = self.short_code.upper()
+			if len(self.short_code) > 3:
+				frappe.throw(_("Short Code should be 3 characters long."))
+
+			blacklist = [
+				doc.code for doc
+				in frappe.get_all('Short Code Blacklist', fields='code')
+			]
+			if self.short_code in blacklist:
+				frappe.throw(_("Short Code is blacklisted."))
+
+			if any(i.isdigit() for i in self.short_code):
+				frappe.throw(_("Short Code can not have digits."))
+		return
 
 	def on_trash(self):
 		delete_contact_and_address('Customer', self.name)
@@ -231,3 +250,48 @@ def get_credit_limit(customer, company):
 		credit_limit = frappe.db.get_value("Company", company, "credit_limit")
 
 	return flt(credit_limit)
+
+
+@frappe.whitelist()
+def short_code_generator(customer_name):
+	new_sc = ''
+	# insanity check with customer name
+	if customer_name not in ['']:
+		# Get blacklist short codes
+		blacklist = [
+			doc.code for doc
+			in frappe.get_all('Short Code Blacklist', fields='code')
+		]
+		# Get short code used from other customers (unique)
+		already_used = [
+			doc.short_code for doc
+			in frappe.get_all('Customer', fields='short_code')
+		]
+		customer_name = customer_name.split()
+		# Remove Digits
+		customer_name = [
+			filter(lambda c: not c.isdigit(), name) for name in customer_name
+		]
+		# Remove empty
+		customer_name = [
+			name for name in customer_name if name not in ['', None]
+		]
+		# Final Cut:  "Lala 2132 is232" --> ['Lala', 'is']
+
+		new_sc = ''
+		if len(customer_name) == 1:
+			new_sc = customer_name[0][:3].upper()
+		elif len(customer_name) == 2:
+			new_sc = customer_name[0][:2].upper() + customer_name[1][:1].upper()
+		else:
+			new_sc = customer_name[0][0].upper() + customer_name[1][0].upper() \
+					 + customer_name[2][0].upper()
+
+		is_already_in = (new_sc in already_used)
+		in_blacklisted_in = (new_sc in blacklist)
+		while is_already_in or in_blacklisted_in:
+			new_sc = new_sc[:2] \
+					 + ''.join(random.sample(''.join(customer_name), 1)).upper()
+			is_already_in = (new_sc in already_used)
+			in_blacklisted_in = (new_sc in blacklist)
+	return new_sc
