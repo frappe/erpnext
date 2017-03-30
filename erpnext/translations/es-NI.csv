@@ -2,7 +2,7 @@ DocType: Tax Rule,Tax Rule,Regla Fiscal
 DocType: POS Profile,Account for Change Amount,Cuenta para el Cambio de Monto
 apps/erpnext/erpnext/config/learn.py +217,Bill of Materials,Lista de Materiales
 apps/erpnext/erpnext/controllers/accounts_controller.py +568,'Update Stock' cannot be checked for fixed asset sale,"""Actualización de Existencia' no puede ser escogida para venta de activo fijo"
-DocType: Customer,Tax ID,RUC
+DocType: Sales Invoice,Tax ID,RUC
 DocType: BOM Item,Basic Rate (Company Currency),Taza Base (Divisa de la Empresa)
 DocType: Timesheet Detail,Bill,Factura
 DocType: Activity Cost,Billing Rate,Monto de Facturación
