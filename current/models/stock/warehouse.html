@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/stock/warehouse">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/stock/warehouse" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/stock">
 		Module stock</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Warehouse</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Warehouse</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Warehouse -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/stock/doctype/warehouse"
@@ -294,7 +300,7 @@ A logical Warehouse against which stock entries are made.
             <td >
                 Data</td>
             <td class="text-muted" title="Hidden">
-                Email Id
+                Email Address
                 
             </td>
             <td></td>
@@ -504,24 +510,10 @@ A logical Warehouse against which stock entries are made.
     
     
 	<p class="docs-attr-name">
-        <a name="add_abbr_if_missing" href="#add_abbr_if_missing" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>add_abbr_if_missing</b>
-        <i class="text-muted">(self, dn)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
         <a name="after_rename" href="#after_rename" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>after_rename</b>
-        <i class="text-muted">(self, olddn, newdn, merge=False)</i>
+        <i class="text-muted">(self, old_name, new_name, merge=False)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -533,7 +525,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="autoname" href="#autoname" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>autoname</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -547,9 +539,9 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="before_rename" href="#before_rename" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>before_rename</b>
-        <i class="text-muted">(self, olddn, newdn, merge=False)</i>
+        <i class="text-muted">(self, old_name, new_name, merge=False)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -561,7 +553,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="check_if_child_exists" href="#check_if_child_exists" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>check_if_child_exists</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -575,7 +567,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="check_if_sle_exists" href="#check_if_sle_exists" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>check_if_sle_exists</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -589,7 +581,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="convert_to_group" href="#convert_to_group" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>convert_to_group</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -603,7 +595,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="convert_to_group_or_ledger" href="#convert_to_group_or_ledger" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>convert_to_group_or_ledger</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -617,7 +609,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="convert_to_ledger" href="#convert_to_ledger" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>convert_to_ledger</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -631,8 +623,22 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="create_account_head" href="#create_account_head" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>create_account_head</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Create new account head if there is no account linked to this Warehouse</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_account" href="#get_account" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_account</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -644,10 +650,10 @@ A logical Warehouse against which stock entries are made.
     
     
 	<p class="docs-attr-name">
-        <a name="get_account" href="#get_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>get_account</b>
-        <i class="text-muted">(self, warehouse=None)</i>
+        <a name="get_new_warehouse_name_without_abbr" href="#get_new_warehouse_name_without_abbr" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_new_warehouse_name_without_abbr</b>
+        <i class="text-muted">(self, name)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -659,7 +665,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="on_trash" href="#on_trash" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_trash</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -673,7 +679,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="on_update" href="#on_update" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_update</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -687,7 +693,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="onload" href="#onload" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>onload</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -701,9 +707,9 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="recalculate_bin_qty" href="#recalculate_bin_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>recalculate_bin_qty</b>
-        <i class="text-muted">(self, newdn)</i>
+        <i class="text-muted">(self, new_name)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -715,9 +721,9 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="rename_account_for" href="#rename_account_for" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>rename_account_for</b>
-        <i class="text-muted">(self, olddn, newdn, merge)</i>
+        <i class="text-muted">(self, old_name, new_name, merge)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -729,7 +735,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="update_nsm_model" href="#update_nsm_model" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_nsm_model</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -743,7 +749,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="update_parent_account" href="#update_parent_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_parent_account</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -757,7 +763,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -771,7 +777,7 @@ A logical Warehouse against which stock entries are made.
     
 	<p class="docs-attr-name">
         <a name="validate_parent_account" href="#validate_parent_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_parent_account</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -793,7 +799,7 @@ A logical Warehouse against which stock entries are made.
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.doctype.warehouse.warehouse.add_node" href="#erpnext.stock.doctype.warehouse.warehouse.add_node" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.doctype.warehouse.warehouse.<b>add_node</b>
         <i class="text-muted">()</i>
     </p>
@@ -811,7 +817,7 @@ A logical Warehouse against which stock entries are made.
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.doctype.warehouse.warehouse.convert_to_group_or_ledger" href="#erpnext.stock.doctype.warehouse.warehouse.convert_to_group_or_ledger" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.doctype.warehouse.warehouse.<b>convert_to_group_or_ledger</b>
         <i class="text-muted">()</i>
     </p>
@@ -829,7 +835,7 @@ A logical Warehouse against which stock entries are made.
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.doctype.warehouse.warehouse.get_children" href="#erpnext.stock.doctype.warehouse.warehouse.get_children" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.doctype.warehouse.warehouse.<b>get_children</b>
         <i class="text-muted">()</i>
     </p>
@@ -1141,8 +1147,8 @@ A logical Warehouse against which stock entries are made.
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -1172,7 +1178,7 @@ A logical Warehouse against which stock entries are made.
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -1193,5 +1199,17 @@ A logical Warehouse against which stock entries are made.
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

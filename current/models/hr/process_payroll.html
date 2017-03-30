@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/hr/process_payroll">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/hr/process_payroll" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/hr">
 		Module hr</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Process Payroll</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Process Payroll</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Process Payroll -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/hr/doctype/process_payroll"
@@ -218,6 +224,49 @@
         
         <tr >
             <td>4</td>
+            <td class="danger" title="Mandatory"><code>posting_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Posting Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td class="danger" title="Mandatory"><code>payroll_frequency</code></td>
+            <td >
+                Select</td>
+            <td >
+                Payroll Frequency
+                
+            </td>
+            <td>
+                <pre>
+Monthly
+Fortnightly
+Bimonthly
+Weekly
+Daily</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>column_break1</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
             <td ><code>branch</code></td>
             <td >
                 Link</td>
@@ -238,19 +287,7 @@
         </tr>
         
         <tr >
-            <td>5</td>
-            <td ><code>column_break1</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>6</td>
+            <td>8</td>
             <td ><code>department</code></td>
             <td >
                 Link</td>
@@ -271,7 +308,7 @@
         </tr>
         
         <tr >
-            <td>7</td>
+            <td>9</td>
             <td ><code>designation</code></td>
             <td >
                 Link</td>
@@ -292,7 +329,7 @@
         </tr>
         
         <tr class="info">
-            <td>8</td>
+            <td>10</td>
             <td ><code>section_break_8</code></td>
             <td >
                 Section Break</td>
@@ -304,11 +341,11 @@
         </tr>
         
         <tr >
-            <td>9</td>
+            <td>11</td>
             <td ><code>salary_slip_based_on_timesheet</code></td>
             <td >
                 Check</td>
-            <td class="text-muted" title="Hidden">
+            <td >
                 Salary Slip Based on Timesheet
                 
             </td>
@@ -316,40 +353,31 @@
         </tr>
         
         <tr class="info">
-            <td>10</td>
-            <td ><code>select_payroll_year_and_month</code></td>
+            <td>12</td>
+            <td ><code>select_payroll_period</code></td>
             <td >
                 Section Break</td>
             <td >
-                Select Payroll Year and Month
+                Select Payroll Period
                 
             </td>
             <td></td>
         </tr>
         
         <tr >
-            <td>11</td>
-            <td class="danger" title="Mandatory"><code>fiscal_year</code></td>
+            <td>13</td>
+            <td ><code>start_date</code></td>
             <td >
-                Link</td>
+                Date</td>
             <td >
-                Fiscal Year
+                Start Date
                 
             </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/accounts/fiscal_year">Fiscal Year</a>
-
-
-                
-            </td>
+            <td></td>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>14</td>
             <td ><code>column_break_11</code></td>
             <td class="info">
                 Column Break</td>
@@ -361,33 +389,85 @@
         </tr>
         
         <tr >
-            <td>13</td>
-            <td class="danger" title="Mandatory"><code>month</code></td>
+            <td>15</td>
+            <td ><code>end_date</code></td>
             <td >
-                Select</td>
+                Date</td>
             <td >
-                Month
+                End Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>16</td>
+            <td ><code>section_break_16</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Accounts
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td class="danger" title="Mandatory"><code>cost_center</code></td>
+            <td >
+                Link</td>
+            <td >
+                Cost Center
                 
             </td>
             <td>
-                <pre>
-01
-02
-03
-04
-05
-06
-07
-08
-09
-10
-11
-12</pre>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/cost_center">Cost Center</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>column_break_18</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>project</code></td>
+            <td >
+                Link</td>
+            <td >
+                Project
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/project">Project</a>
+
+
+                
             </td>
         </tr>
         
         <tr class="info">
-            <td>14</td>
+            <td>20</td>
             <td ><code>process_payroll</code></td>
             <td >
                 Section Break</td>
@@ -399,7 +479,7 @@
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>21</td>
             <td ><code>column_break2</code></td>
             <td class="info">
                 Column Break</td>
@@ -411,7 +491,7 @@
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>22</td>
             <td ><code>create_salary_slip</code></td>
             <td >
                 Button</td>
@@ -424,7 +504,7 @@
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>23</td>
             <td ><code>column_break3</code></td>
             <td class="info">
                 Column Break</td>
@@ -436,7 +516,7 @@
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>24</td>
             <td ><code>submit_salary_slip</code></td>
             <td >
                 Button</td>
@@ -448,24 +528,46 @@
             <td></td>
         </tr>
         
-        <tr >
-            <td>19</td>
-            <td ><code>column_break4</code></td>
-            <td class="info">
-                Column Break</td>
+        <tr class="info">
+            <td>25</td>
+            <td ><code>account</code></td>
             <td >
-                
+                Section Break</td>
+            <td >
+                Payment Entry
                 
             </td>
             <td></td>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>26</td>
+            <td ><code>payment_account</code></td>
+            <td >
+                Link</td>
+            <td >
+                Payment Account
+                <p class="text-muted small">
+                    Select Payment Account to make Bank Entry</p>
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/account">Account</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>27</td>
             <td ><code>make_bank_entry</code></td>
             <td >
                 Button</td>
-            <td >
+            <td class="text-muted" title="Hidden">
                 Make Bank Entry
                 <p class="text-muted small">
                     Create Bank Entry for the total salary paid for the above selected criteria</p>
@@ -474,7 +576,7 @@
         </tr>
         
         <tr class="info">
-            <td>21</td>
+            <td>28</td>
             <td ><code>section_break2</code></td>
             <td >
                 Section Break</td>
@@ -486,7 +588,7 @@
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>29</td>
             <td ><code>activity_log</code></td>
             <td >
                 HTML</td>
@@ -524,7 +626,7 @@
     
 	<p class="docs-attr-name">
         <a name="check_mandatory" href="#check_mandatory" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>check_mandatory</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -538,7 +640,7 @@
     
 	<p class="docs-attr-name">
         <a name="create_log" href="#create_log" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>create_log</b>
         <i class="text-muted">(self, ss_list)</i>
     </p>
@@ -551,12 +653,13 @@
     
     
 	<p class="docs-attr-name">
-        <a name="create_sal_slip" href="#create_sal_slip" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>create_sal_slip</b>
+        <a name="create_salary_slips" href="#create_salary_slips" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>create_salary_slips</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Creates salary slip for selected employees if already not created</p>
+	<div class="docs-attr-desc"><pre><code>        Creates salary slip for selected employees if already not created
+</code></pre>
 </div>
 	<br>
 
@@ -566,9 +669,9 @@
     
 	<p class="docs-attr-name">
         <a name="create_submit_log" href="#create_submit_log" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>create_submit_log</b>
-        <i class="text-muted">(self, all_ss, not_submitted_ss)</i>
+        <i class="text-muted">(self, submitted_ss, not_submitted_ss, jv_name)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -580,9 +683,37 @@
     
 	<p class="docs-attr-name">
         <a name="format_as_links" href="#format_as_links" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>format_as_links</b>
-        <i class="text-muted">(self, ss_list)</i>
+        <i class="text-muted">(self, salary_slip)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_account" href="#get_account" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_account</b>
+        <i class="text-muted">(self, component_dict=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_default_payroll_payable_account" href="#get_default_payroll_payable_account" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_default_payroll_payable_account</b>
+        <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -594,12 +725,13 @@
     
 	<p class="docs-attr-name">
         <a name="get_emp_list" href="#get_emp_list" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_emp_list</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Returns list of active employees based on selected criteria
-and for which salary structure exists</p>
+	<div class="docs-attr-desc"><pre><code>        Returns list of active employees based on selected criteria
+        and for which salary structure exists
+</code></pre>
 </div>
 	<br>
 
@@ -609,7 +741,7 @@ and for which salary structure exists</p>
     
 	<p class="docs-attr-name">
         <a name="get_filter_condition" href="#get_filter_condition" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_filter_condition</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -623,7 +755,7 @@ and for which salary structure exists</p>
     
 	<p class="docs-attr-name">
         <a name="get_joining_releiving_condition" href="#get_joining_releiving_condition" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_joining_releiving_condition</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -636,39 +768,10 @@ and for which salary structure exists</p>
     
     
 	<p class="docs-attr-name">
-        <a name="get_sal_slip_list" href="#get_sal_slip_list" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>get_sal_slip_list</b>
+        <a name="get_loan_accounts" href="#get_loan_accounts" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_loan_accounts</b>
         <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p>Returns list of salary slips based on selected criteria
-which are not submitted</p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="get_total_salary" href="#get_total_salary" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>get_total_salary</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p>Get total salary amount from submitted salary slip based on selected criteria</p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="make_journal_entry" href="#make_journal_entry" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>make_journal_entry</b>
-        <i class="text-muted">(self, salary_account=None)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -679,12 +782,141 @@ which are not submitted</p>
     
     
 	<p class="docs-attr-name">
-        <a name="submit_salary_slip" href="#submit_salary_slip" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>submit_salary_slip</b>
+        <a name="get_sal_slip_list" href="#get_sal_slip_list" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_sal_slip_list</b>
+        <i class="text-muted">(self, ss_status, as_dict=False)</i>
+    </p>
+	<div class="docs-attr-desc"><pre><code>        Returns list of salary slips based on selected criteria
+</code></pre>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_salary_component_account" href="#get_salary_component_account" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_salary_component_account</b>
+        <i class="text-muted">(self, salary_component)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_salary_component_total" href="#get_salary_component_total" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_salary_component_total</b>
+        <i class="text-muted">(self, component_type=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_salary_components" href="#get_salary_components" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_salary_components</b>
+        <i class="text-muted">(self, component_type)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_total_salary_and_loan_amounts" href="#get_total_salary_and_loan_amounts" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_total_salary_and_loan_amounts</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Submit all salary slips based on selected criteria</p>
+	<div class="docs-attr-desc"><pre><code>        Get total loan principal, loan interest and salary amount from submitted salary slip based on selected criteria
+</code></pre>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="make_accural_jv_entry" href="#make_accural_jv_entry" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>make_accural_jv_entry</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="make_payment_entry" href="#make_payment_entry" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>make_payment_entry</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_start_end_dates" href="#set_start_end_dates" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>set_start_end_dates</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="submit_salary_slips" href="#submit_salary_slips" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>submit_salary_slips</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><pre><code>        Submit all salary slips based on selected criteria
+</code></pre>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_salary_slip_status" href="#update_salary_slip_status" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>update_salary_slip_status</b>
+        <i class="text-muted">(self, jv_name=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -697,16 +929,32 @@ which are not submitted</p>
 	
         
     
-    <p><span class="label label-info">Public API</span>
-        <br><code>/api/method/erpnext.hr.doctype.process_payroll.process_payroll.get_month_details</code>
-    </p>
+    
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.process_payroll.process_payroll.get_month_details" href="#erpnext.hr.doctype.process_payroll.process_payroll.get_month_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.process_payroll.process_payroll.<b>get_month_details</b>
         <i class="text-muted">(year, month)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.hr.doctype.process_payroll.process_payroll.get_start_end_dates</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.process_payroll.process_payroll.get_start_end_dates" href="#erpnext.hr.doctype.process_payroll.process_payroll.get_start_end_dates" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.process_payroll.process_payroll.<b>get_start_end_dates</b>
+        <i class="text-muted">(payroll_frequency, start_date=None, company=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns dict of start and end dates for given payroll frequency based on start_date</p>
 </div>
 	<br>
 
@@ -721,8 +969,8 @@ which are not submitted</p>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -752,7 +1000,7 @@ which are not submitted</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -773,5 +1021,17 @@ which are not submitted</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

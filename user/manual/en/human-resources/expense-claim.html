@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="user/manual/en/human-resources/expense-claim">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-user/manual/en/human-resources/expense-claim" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//user/manual/en/human-resources">
 		Human Resources</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Expense Claim</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Expense Claim</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <p>Expense Claim is made when Employee’s make expenses out of their pocket on behalf of the company. For example, if they take a customer out for lunch, they can make a request for reimbursement via the Expense Claim form.</p>
 
 <p>To make a new Expense Claim, go to:</p>
@@ -146,6 +152,11 @@
 <p>Set the Employee ID, date and the list of expenses that are to be claimed and
 “Submit” the record.</p>
 
+<h3>Set Account for Employee</h3>
+
+<p>Set employee's expense account on the employee form, system books an expense amount of an employee under this account.
+<img class="screenshot" alt="Expense Claim" src="https://frappe.github.io/erpnext/assets/img/human-resources/employee_account.png"></p>
+
 <h3>Approving Expenses</h3>
 
 <p>Approver for the Expense Claim is selected by an Employee himself. Users to whom <code>Expense Approver</code> role is assigned will shown in the Expense Claim Approver field.</p>
@@ -155,11 +166,27 @@
 <p>Expense Claim Approver can update the “Sanctioned Amounts” against Claimed Amount of an Employee. If submitting, Approval Status should be submitted to Approved or Rejected. If Approved, then Expense Claim gets submitted. If rejected, then Expen
 Comments can be added in the Comments section explaining why the claim was approved or rejected.</p>
 
-<h3>Booking the Expense and Reimbursement</h3>
+<h3>Booking the Expense</h3>
 
-<p>The approved Expense Claim must then be converted into a Journal Entry and a
-payment must be made. Note: This amount should not be clubbed with Salary
-because the amount will then be taxable to the Employee.</p>
+<p>On submission of Expense Claim, system books an expense against the expense account and the employee account
+<img class="screenshot" alt="Expense Claim" src="https://frappe.github.io/erpnext/assets/img/human-resources/expense_claim_book.png"></p>
+
+<p>User can view unpaid expense claim using report "Unclaimed Expense Claims"
+<img class="screenshot" alt="Expense Claim" src="https://frappe.github.io/erpnext/assets/img/human-resources/unclaimed_expense_claims.png"></p>
+
+<h3>Payment for Expense Claim</h3>
+
+<p>To make payment against the expense claim, user has to click on Make &gt; Bank Entry</p>
+
+<h4>Expense Claim</h4>
+
+<p><img class="screenshot" alt="Expense Claim" src="https://frappe.github.io/erpnext/assets/img/human-resources/payment.png"></p>
+
+<h4>Payment Entry</h4>
+
+<p><img class="screenshot" alt="Expense Claim" src="https://frappe.github.io/erpnext/assets/img/human-resources/payment_entry.png"></p>
+
+<p>Note: This amount should not be clubbed with Salary because the amount will then be taxable to the Employee.</p>
 
 <h3>Linking with Task &amp; Project</h3>
 
@@ -172,15 +199,15 @@ because the amount will then be taxable to the Employee.</p>
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/human-resources/attendance">Attendance</a></p></p>
 
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
+		<i class="fa fa-smile"></i>
 		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/human-resources/expense-claim.md">
 			Improve this page
 		</a>
@@ -213,7 +240,7 @@ because the amount will then be taxable to the Employee.</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -234,5 +261,17 @@ because the amount will then be taxable to the Employee.</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

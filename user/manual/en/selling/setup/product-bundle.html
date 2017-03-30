@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="user/manual/en/selling/setup/product-bundle">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,51 +99,50 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-user/manual/en/selling/setup/product-bundle" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//user/manual/en/selling/setup">
 		Setup</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <h1>Product Bundle</h1>
 
-<p>Product Bundle stands for Sales Bill-of-Material. It's a master where you can list item which are bundled together and 
-sold as one item. For instance, when laptop is delivered, you need to ensure that charger, mouse and laptop bag are 
-delivered and stock level of these items gets affected. To address this scenario, you can set create Product Bundle for 
-the main item, i.e. laptop, and list deliverable items i.e. laptop + charger + other accessories as child items.</p>
+<p>Product Bundle can be seen as something like a "Bill-of-Material" on the Sales side. It's a master where you can list existing items which are bundled together and sold as a set (or bundle). For instance, when you sell a laptop, you need to ensure that charger, mouse and laptop bag are delivered with it and stock levels of these items get affected. 
+To address this scenario, you can set create a Product Bundle for the main item, i.e. laptop, and list deliverable items i.e. laptop + charger + mouse + laptop bag as so-called "Child Items".</p>
 
 <p>Following are the steps on how to setup Product Bundle master, and how is it used in the sales transactions.</p>
 
@@ -152,25 +156,27 @@ the main item, i.e. laptop, and list deliverable items i.e. laptop + charger + o
 
 <h3>Select Parent Item</h3>
 
-<p>In Product Bundle master, there are two sections. Product Bundle Item and Package Item.</p>
+<p>In Product Bundle master, there are two sections. The "Parent Item" and a List of items to be shipped (Child Items).</p>
 
-<p>In Product Bundle item, you will select a Parent Item. The parent item must be a <b>non-stock item</b>. 
-This is non-stock item because there is no stock maintained for it but only the Package Items. 
+<p>The "Parent Item" must be a so called <b>non-stock item</b>. The "Parent Item" is to be seen more like a vessel or virtual item and not a physical product.
+To create a <b>non-stock item</b> you have to unmark "Maintain Stock" in the Item Form.
+This is non-stock item because there is no stock maintained for it but only for the "Child Items". 
 If you want to maintain stock for the Parent Item, then you must create a regular Bill of Material (BOM) 
 and package them using a Stock Entry Transactions.</p>
 
 <h3>Select Child Items</h3>
 
-<p>In Package Item section, you will list all the child items for which we maintain stock and is delivered to customer.</p>
+<p>In Package Item section, you will list all the child items for which we maintain stock and is delivered to customer.
+Remember: The "Parent Item" is just virtual, so your main product (a laptop in our example here) also has to be listed on the List of Child (or Package) Items</p>
 
 <h3>Product Bundle in the Sales Transactions</h3>
 
-<p>When making Sales transactions like Sales Invoice, Sales Order and Delivery Note, 
-Parent Item will be selected in the main item table.</p>
+<p>When making Sales transactions (Sales Invoice, Sales Order, Delivery Note) 
+the Parent Item will be selected in the main item table.</p>
 
 <p><img class="screenshot" alt="Product Bundle" src="https://frappe.github.io/erpnext/assets/img/selling/product-bundle.gif"></p>
 
-<p>On selection on Parent Item in the main item table, its child items will be fetched in Packing List 
+<p>On selection of a Parent Item in the main item table, its child items will be fetched in Packing List 
 table of the transaction. If child item is the serialized item, you will be able to specify its Serial Mo. 
 in packing List table itself. On submission of transaction, system will reduce the stock level of child items from 
 warehouse specified in Packing List table.</p>
@@ -182,15 +188,15 @@ This work-around in Product Bundle was discovered when a customer dealing into n
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/selling/setup/item-price">Item Price</a></p></p>
 
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
+		<i class="fa fa-smile"></i>
 		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/selling/setup/product-bundle.md">
 			Improve this page
 		</a>
@@ -223,7 +229,7 @@ This work-around in Product Bundle was discovered when a customer dealing into n
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -244,5 +250,17 @@ This work-around in Product Bundle was discovered when a customer dealing into n
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

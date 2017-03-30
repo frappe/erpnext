@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/accounts/sales_invoice_item">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/accounts/sales_invoice_item" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/accounts">
 		Module accounts</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Sales Invoice Item</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Sales Invoice Item</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Sales Invoice Item -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/accounts/doctype/sales_invoice_item"
@@ -330,15 +336,22 @@
         
         <tr >
             <td>13</td>
-            <td ><code>price_list_rate</code></td>
+            <td ><code>stock_uom</code></td>
             <td >
-                Currency</td>
+                Link</td>
             <td >
-                Price List Rate
+                Stock UOM
                 
             </td>
             <td>
-                <pre>currency</pre>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/uom">UOM</a>
+
+
+                
             </td>
         </tr>
         
@@ -356,7 +369,7 @@
         
         <tr >
             <td>15</td>
-            <td ><code>stock_uom</code></td>
+            <td class="danger" title="Mandatory"><code>uom</code></td>
             <td >
                 Link</td>
             <td >
@@ -377,6 +390,56 @@
         
         <tr >
             <td>16</td>
+            <td class="danger" title="Mandatory"><code>conversion_factor</code></td>
+            <td >
+                Float</td>
+            <td >
+                UOM Conversion Factor
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>stock_qty</code></td>
+            <td >
+                Float</td>
+            <td >
+                Qty as per Stock UOM
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>18</td>
+            <td ><code>section_break_17</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>price_list_rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Price List Rate
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
             <td ><code>base_price_list_rate</code></td>
             <td >
                 Currency</td>
@@ -390,7 +453,7 @@
         </tr>
         
         <tr class="info">
-            <td>17</td>
+            <td>21</td>
             <td ><code>discount_and_margin</code></td>
             <td >
                 Section Break</td>
@@ -402,7 +465,7 @@
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>22</td>
             <td ><code>discount_percentage</code></td>
             <td >
                 Percent</td>
@@ -414,7 +477,7 @@
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>23</td>
             <td ><code>column_break_19</code></td>
             <td class="info">
                 Column Break</td>
@@ -426,7 +489,7 @@
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>24</td>
             <td ><code>margin_type</code></td>
             <td >
                 Select</td>
@@ -442,7 +505,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>25</td>
             <td ><code>margin_rate_or_amount</code></td>
             <td >
                 Float</td>
@@ -454,10 +517,10 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>26</td>
             <td ><code>total_margin</code></td>
             <td >
-                Float</td>
+                Currency</td>
             <td >
                 Total Margin
                 
@@ -466,7 +529,7 @@ Amount</pre>
         </tr>
         
         <tr class="info">
-            <td>23</td>
+            <td>27</td>
             <td ><code>section_break1</code></td>
             <td >
                 Section Break</td>
@@ -478,7 +541,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>24</td>
+            <td>28</td>
             <td class="danger" title="Mandatory"><code>rate</code></td>
             <td >
                 Currency</td>
@@ -492,7 +555,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>25</td>
+            <td>29</td>
             <td class="danger" title="Mandatory"><code>amount</code></td>
             <td >
                 Currency</td>
@@ -506,7 +569,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>26</td>
+            <td>30</td>
             <td ><code>col_break3</code></td>
             <td class="info">
                 Column Break</td>
@@ -518,7 +581,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>27</td>
+            <td>31</td>
             <td class="danger" title="Mandatory"><code>base_rate</code></td>
             <td >
                 Currency</td>
@@ -532,7 +595,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>28</td>
+            <td>32</td>
             <td class="danger" title="Mandatory"><code>base_amount</code></td>
             <td >
                 Currency</td>
@@ -546,7 +609,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>29</td>
+            <td>33</td>
             <td ><code>pricing_rule</code></td>
             <td >
                 Link</td>
@@ -567,7 +630,7 @@ Amount</pre>
         </tr>
         
         <tr class="info">
-            <td>30</td>
+            <td>34</td>
             <td ><code>section_break_21</code></td>
             <td >
                 Section Break</td>
@@ -579,7 +642,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>31</td>
+            <td>35</td>
             <td ><code>net_rate</code></td>
             <td >
                 Currency</td>
@@ -593,7 +656,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>32</td>
+            <td>36</td>
             <td ><code>net_amount</code></td>
             <td >
                 Currency</td>
@@ -607,7 +670,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>33</td>
+            <td>37</td>
             <td ><code>column_break_24</code></td>
             <td class="info">
                 Column Break</td>
@@ -619,7 +682,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>34</td>
+            <td>38</td>
             <td ><code>base_net_rate</code></td>
             <td >
                 Currency</td>
@@ -633,7 +696,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>35</td>
+            <td>39</td>
             <td ><code>base_net_amount</code></td>
             <td >
                 Currency</td>
@@ -647,7 +710,7 @@ Amount</pre>
         </tr>
         
         <tr class="info">
-            <td>36</td>
+            <td>40</td>
             <td ><code>drop_ship</code></td>
             <td >
                 Section Break</td>
@@ -659,7 +722,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>37</td>
+            <td>41</td>
             <td ><code>delivered_by_supplier</code></td>
             <td >
                 Check</td>
@@ -671,7 +734,7 @@ Amount</pre>
         </tr>
         
         <tr class="info">
-            <td>38</td>
+            <td>42</td>
             <td ><code>accounting</code></td>
             <td >
                 Section Break</td>
@@ -683,7 +746,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>39</td>
+            <td>43</td>
             <td class="danger" title="Mandatory"><code>income_account</code></td>
             <td >
                 Link</td>
@@ -704,7 +767,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>40</td>
+            <td>44</td>
             <td ><code>expense_account</code></td>
             <td >
                 Link</td>
@@ -725,7 +788,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>41</td>
+            <td>45</td>
             <td ><code>col_break4</code></td>
             <td class="info">
                 Column Break</td>
@@ -737,7 +800,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>42</td>
+            <td>46</td>
             <td class="danger" title="Mandatory"><code>cost_center</code></td>
             <td >
                 Link</td>
@@ -758,7 +821,7 @@ Amount</pre>
         </tr>
         
         <tr class="info">
-            <td>43</td>
+            <td>47</td>
             <td ><code>warehouse_and_reference</code></td>
             <td >
                 Section Break</td>
@@ -770,7 +833,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>44</td>
+            <td>48</td>
             <td ><code>warehouse</code></td>
             <td >
                 Link</td>
@@ -791,7 +854,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>45</td>
+            <td>49</td>
             <td ><code>target_warehouse</code></td>
             <td >
                 Link</td>
@@ -812,19 +875,28 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>46</td>
-            <td ><code>serial_no</code></td>
+            <td>50</td>
+            <td ><code>quality_inspection</code></td>
             <td >
-                Small Text</td>
+                Link</td>
             <td >
-                Serial No
+                Quality Inspection
                 
             </td>
-            <td></td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/quality_inspection">Quality Inspection</a>
+
+
+                
+            </td>
         </tr>
         
         <tr >
-            <td>47</td>
+            <td>51</td>
             <td ><code>batch_no</code></td>
             <td >
                 Link</td>
@@ -845,7 +917,43 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>48</td>
+            <td>52</td>
+            <td ><code>col_break5</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>53</td>
+            <td ><code>is_sample_item</code></td>
+            <td >
+                Check</td>
+            <td >
+                Is Sample Item
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>54</td>
+            <td ><code>serial_no</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Serial No
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>55</td>
             <td ><code>item_group</code></td>
             <td >
                 Link</td>
@@ -866,7 +974,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>49</td>
+            <td>56</td>
             <td ><code>brand</code></td>
             <td >
                 Data</td>
@@ -878,7 +986,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>50</td>
+            <td>57</td>
             <td ><code>item_tax_rate</code></td>
             <td >
                 Small Text</td>
@@ -890,19 +998,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>51</td>
-            <td ><code>col_break5</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>52</td>
+            <td>58</td>
             <td ><code>actual_batch_qty</code></td>
             <td >
                 Float</td>
@@ -914,7 +1010,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>53</td>
+            <td>59</td>
             <td ><code>actual_qty</code></td>
             <td >
                 Float</td>
@@ -926,7 +1022,7 @@ Amount</pre>
         </tr>
         
         <tr class="info">
-            <td>54</td>
+            <td>60</td>
             <td ><code>edit_references</code></td>
             <td >
                 Section Break</td>
@@ -938,7 +1034,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>55</td>
+            <td>61</td>
             <td ><code>sales_order</code></td>
             <td >
                 Link</td>
@@ -959,7 +1055,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>56</td>
+            <td>62</td>
             <td ><code>so_detail</code></td>
             <td >
                 Data</td>
@@ -971,7 +1067,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>57</td>
+            <td>63</td>
             <td ><code>column_break_50</code></td>
             <td class="info">
                 Column Break</td>
@@ -983,7 +1079,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>58</td>
+            <td>64</td>
             <td ><code>delivery_note</code></td>
             <td >
                 Link</td>
@@ -1004,7 +1100,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>59</td>
+            <td>65</td>
             <td ><code>dn_detail</code></td>
             <td >
                 Data</td>
@@ -1016,7 +1112,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>60</td>
+            <td>66</td>
             <td ><code>delivered_qty</code></td>
             <td >
                 Float</td>
@@ -1028,7 +1124,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>61</td>
+            <td>67</td>
             <td ><code>is_fixed_asset</code></td>
             <td >
                 Check</td>
@@ -1040,7 +1136,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>62</td>
+            <td>68</td>
             <td ><code>asset</code></td>
             <td >
                 Link</td>
@@ -1061,7 +1157,7 @@ Amount</pre>
         </tr>
         
         <tr class="info">
-            <td>63</td>
+            <td>69</td>
             <td ><code>section_break_54</code></td>
             <td >
                 Section Break</td>
@@ -1073,7 +1169,7 @@ Amount</pre>
         </tr>
         
         <tr >
-            <td>64</td>
+            <td>70</td>
             <td ><code>page_break</code></td>
             <td >
                 Check</td>
@@ -1108,8 +1204,8 @@ Amount</pre>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -1139,7 +1235,7 @@ Amount</pre>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -1160,5 +1256,17 @@ Amount</pre>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

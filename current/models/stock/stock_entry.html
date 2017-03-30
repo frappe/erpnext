@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/stock/stock_entry">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/stock/stock_entry" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/stock">
 		Module stock</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Stock Entry</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Stock Entry</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Stock Entry -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/stock/doctype/stock_entry"
@@ -383,7 +389,19 @@ Subcontract</pre>
         
         <tr >
             <td>13</td>
-            <td class="danger" title="Mandatory"><code>posting_date</code></td>
+            <td ><code>set_posting_time</code></td>
+            <td >
+                Check</td>
+            <td >
+                Edit Posting Date and Time
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>posting_date</code></td>
             <td >
                 Date</td>
             <td >
@@ -394,8 +412,8 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>14</td>
-            <td class="danger" title="Mandatory"><code>posting_time</code></td>
+            <td>15</td>
+            <td ><code>posting_time</code></td>
             <td >
                 Time</td>
             <td >
@@ -406,7 +424,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>15</td>
+            <td>16</td>
             <td ><code>sb1</code></td>
             <td >
                 Section Break</td>
@@ -418,7 +436,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>17</td>
             <td ><code>bom_no</code></td>
             <td >
                 Link</td>
@@ -439,7 +457,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>18</td>
             <td ><code>fg_completed_qty</code></td>
             <td >
                 Float</td>
@@ -452,7 +470,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>19</td>
             <td ><code>cb1</code></td>
             <td class="info">
                 Column Break</td>
@@ -464,7 +482,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>20</td>
             <td ><code>use_multi_level_bom</code></td>
             <td >
                 Check</td>
@@ -477,7 +495,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>21</td>
             <td ><code>get_items</code></td>
             <td >
                 Button</td>
@@ -489,7 +507,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>21</td>
+            <td>22</td>
             <td ><code>section_break_12</code></td>
             <td >
                 Section Break</td>
@@ -501,7 +519,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>23</td>
             <td ><code>from_warehouse</code></td>
             <td >
                 Link</td>
@@ -522,7 +540,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>23</td>
+            <td>24</td>
             <td ><code>cb0</code></td>
             <td class="info">
                 Column Break</td>
@@ -534,7 +552,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>24</td>
+            <td>25</td>
             <td ><code>to_warehouse</code></td>
             <td >
                 Link</td>
@@ -555,7 +573,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>25</td>
+            <td>26</td>
             <td ><code>sb0</code></td>
             <td >
                 Section Break</td>
@@ -569,7 +587,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>26</td>
+            <td>27</td>
             <td class="danger" title="Mandatory"><code>items</code></td>
             <td >
                 Table</td>
@@ -590,7 +608,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>27</td>
+            <td>28</td>
             <td ><code>get_stock_and_rate</code></td>
             <td >
                 Button</td>
@@ -604,7 +622,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>28</td>
+            <td>29</td>
             <td ><code>section_break_19</code></td>
             <td >
                 Section Break</td>
@@ -616,7 +634,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>29</td>
+            <td>30</td>
             <td ><code>total_incoming_value</code></td>
             <td >
                 Currency</td>
@@ -630,7 +648,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>30</td>
+            <td>31</td>
             <td ><code>column_break_22</code></td>
             <td class="info">
                 Column Break</td>
@@ -642,7 +660,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>31</td>
+            <td>32</td>
             <td ><code>total_outgoing_value</code></td>
             <td >
                 Currency</td>
@@ -656,7 +674,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>32</td>
+            <td>33</td>
             <td ><code>value_difference</code></td>
             <td >
                 Currency</td>
@@ -666,27 +684,6 @@ Subcontract</pre>
             </td>
             <td>
                 <pre>Company:company:default_currency</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>33</td>
-            <td ><code>difference_account</code></td>
-            <td >
-                Link</td>
-            <td >
-                Difference Account
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/accounts/account">Account</a>
-
-
-                
             </td>
         </tr>
         
@@ -1090,7 +1087,7 @@ Subcontract</pre>
     
 	<p class="docs-attr-name">
         <a name="add_to_stock_entry_detail" href="#add_to_stock_entry_detail" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>add_to_stock_entry_detail</b>
         <i class="text-muted">(self, item_dict, bom_no=None)</i>
     </p>
@@ -1104,7 +1101,7 @@ Subcontract</pre>
     
 	<p class="docs-attr-name">
         <a name="calculate_rate_and_amount" href="#calculate_rate_and_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_rate_and_amount</b>
         <i class="text-muted">(self, force=False, update_finished_item_rate=True)</i>
     </p>
@@ -1118,7 +1115,7 @@ Subcontract</pre>
     
 	<p class="docs-attr-name">
         <a name="check_duplicate_entry_for_production_order" href="#check_duplicate_entry_for_production_order" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>check_duplicate_entry_for_production_order</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1132,7 +1129,7 @@ Subcontract</pre>
     
 	<p class="docs-attr-name">
         <a name="check_if_operations_completed" href="#check_if_operations_completed" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>check_if_operations_completed</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1146,7 +1143,7 @@ Subcontract</pre>
     
 	<p class="docs-attr-name">
         <a name="distribute_additional_costs" href="#distribute_additional_costs" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>distribute_additional_costs</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1160,7 +1157,7 @@ Subcontract</pre>
     
 	<p class="docs-attr-name">
         <a name="get_bom_raw_materials" href="#get_bom_raw_materials" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_bom_raw_materials</b>
         <i class="text-muted">(self, qty)</i>
     </p>
@@ -1173,8 +1170,22 @@ Subcontract</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="get_bom_scrap_material" href="#get_bom_scrap_material" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_bom_scrap_material</b>
+        <i class="text-muted">(self, qty)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="get_feed" href="#get_feed" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_feed</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1188,7 +1199,7 @@ Subcontract</pre>
     
 	<p class="docs-attr-name">
         <a name="get_gl_entries" href="#get_gl_entries" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_gl_entries</b>
         <i class="text-muted">(self, warehouse_account)</i>
     </p>
@@ -1202,7 +1213,7 @@ Subcontract</pre>
     
 	<p class="docs-attr-name">
         <a name="get_issued_qty" href="#get_issued_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_issued_qty</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1216,7 +1227,7 @@ Subcontract</pre>
     
 	<p class="docs-attr-name">
         <a name="get_item_details" href="#get_item_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_item_details</b>
         <i class="text-muted">(self, args=None, for_update=False)</i>
     </p>
@@ -1230,7 +1241,7 @@ Subcontract</pre>
     
 	<p class="docs-attr-name">
         <a name="get_items" href="#get_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_items</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1244,12 +1255,13 @@ Subcontract</pre>
     
 	<p class="docs-attr-name">
         <a name="get_pending_raw_materials" href="#get_pending_raw_materials" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_pending_raw_materials</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>issue (item quantity) that is pending to issue or desire to transfer,
-whichever is less</p>
+	<div class="docs-attr-desc"><pre><code>        issue (item quantity) that is pending to issue or desire to transfer,
+        whichever is less
+</code></pre>
 </div>
 	<br>
 
@@ -1259,7 +1271,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="get_stock_and_rate" href="#get_stock_and_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_stock_and_rate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1273,7 +1285,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="get_transfered_raw_materials" href="#get_transfered_raw_materials" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_transfered_raw_materials</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1286,28 +1298,8 @@ whichever is less</p>
     
     
 	<p class="docs-attr-name">
-        <a name="get_uom_details" href="#get_uom_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>get_uom_details</b>
-        <i class="text-muted">(self, args)</i>
-    </p>
-	<div class="docs-attr-desc"><p>Returns dict <code>{"conversion_factor": [value], "transfer_qty": qty * [value]}</code></p>
-
-<p><strong>Parameters:</strong></p>
-
-<ul>
-<li><strong><code>args</code></strong> -  dict with <code>item_code</code>, <code>uom</code> and <code>qty</code></li>
-</ul>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
         <a name="load_items_from_bom" href="#load_items_from_bom" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>load_items_from_bom</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1321,7 +1313,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="on_cancel" href="#on_cancel" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_cancel</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1335,7 +1327,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="on_submit" href="#on_submit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_submit</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1349,7 +1341,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="onload" href="#onload" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>onload</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1363,7 +1355,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="set_actual_qty" href="#set_actual_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_actual_qty</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1377,7 +1369,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="set_basic_rate" href="#set_basic_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_basic_rate</b>
         <i class="text-muted">(self, force=False, update_finished_item_rate=True)</i>
     </p>
@@ -1391,9 +1383,37 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="set_basic_rate_for_finished_goods" href="#set_basic_rate_for_finished_goods" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_basic_rate_for_finished_goods</b>
-        <i class="text-muted">(self, raw_material_cost)</i>
+        <i class="text-muted">(self, raw_material_cost, scrap_material_cost)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_production_order_details" href="#set_production_order_details" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>set_production_order_details</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_serial_nos" href="#set_serial_nos" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>set_serial_nos</b>
+        <i class="text-muted">(self, production_order)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1405,7 +1425,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="set_total_amount" href="#set_total_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_total_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1419,7 +1439,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="set_total_incoming_outgoing_value" href="#set_total_incoming_outgoing_value" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_total_incoming_outgoing_value</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1433,7 +1453,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="set_transfer_qty" href="#set_transfer_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_transfer_qty</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1447,7 +1467,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="update_production_order" href="#update_production_order" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_production_order</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1461,7 +1481,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="update_stock_ledger" href="#update_stock_ledger" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_stock_ledger</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1475,7 +1495,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="update_valuation_rate" href="#update_valuation_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_valuation_rate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1489,7 +1509,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1503,7 +1523,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="validate_batch" href="#validate_batch" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_batch</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1517,7 +1537,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="validate_bom" href="#validate_bom" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_bom</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1531,7 +1551,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="validate_finished_goods" href="#validate_finished_goods" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_finished_goods</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1545,7 +1565,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="validate_item" href="#validate_item" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_item</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1559,7 +1579,7 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="validate_production_order" href="#validate_production_order" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_production_order</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1573,12 +1593,12 @@ whichever is less</p>
     
 	<p class="docs-attr-name">
         <a name="validate_purchase_order" href="#validate_purchase_order" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_purchase_order</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p>Throw exception if more raw material is transferred against Purchase Order than in
-the raw materials supplied table</p>
+        the raw materials supplied table</p>
 </div>
 	<br>
 
@@ -1588,7 +1608,7 @@ the raw materials supplied table</p>
     
 	<p class="docs-attr-name">
         <a name="validate_purpose" href="#validate_purpose" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_purpose</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1602,7 +1622,7 @@ the raw materials supplied table</p>
     
 	<p class="docs-attr-name">
         <a name="validate_warehouse" href="#validate_warehouse" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_warehouse</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1616,7 +1636,7 @@ the raw materials supplied table</p>
     
 	<p class="docs-attr-name">
         <a name="validate_with_material_request" href="#validate_with_material_request" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_with_material_request</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1636,7 +1656,7 @@ the raw materials supplied table</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.doctype.stock_entry.stock_entry.get_additional_costs" href="#erpnext.stock.doctype.stock_entry.stock_entry.get_additional_costs" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.doctype.stock_entry.stock_entry.<b>get_additional_costs</b>
         <i class="text-muted">(production_order=None, bom_no=None, fg_qty=None)</i>
     </p>
@@ -1652,7 +1672,7 @@ the raw materials supplied table</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.doctype.stock_entry.stock_entry.get_operating_cost_per_unit" href="#erpnext.stock.doctype.stock_entry.stock_entry.get_operating_cost_per_unit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.doctype.stock_entry.stock_entry.<b>get_operating_cost_per_unit</b>
         <i class="text-muted">(production_order=None, bom_no=None)</i>
     </p>
@@ -1670,7 +1690,7 @@ the raw materials supplied table</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.doctype.stock_entry.stock_entry.get_production_order_details" href="#erpnext.stock.doctype.stock_entry.stock_entry.get_production_order_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.doctype.stock_entry.stock_entry.<b>get_production_order_details</b>
         <i class="text-muted">(production_order)</i>
     </p>
@@ -1684,11 +1704,35 @@ the raw materials supplied table</p>
         
     
     <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.doctype.stock_entry.stock_entry.get_uom_details</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.doctype.stock_entry.stock_entry.get_uom_details" href="#erpnext.stock.doctype.stock_entry.stock_entry.get_uom_details" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.doctype.stock_entry.stock_entry.<b>get_uom_details</b>
+        <i class="text-muted">(item_code, uom, qty)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns dict <code>{"conversion_factor": [value], "transfer_qty": qty * [value]}</code></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>args</code></strong> -  dict with <code>item_code</code>, <code>uom</code> and <code>qty</code></li>
+</ul>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.stock.doctype.stock_entry.stock_entry.get_warehouse_details</code>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.doctype.stock_entry.stock_entry.get_warehouse_details" href="#erpnext.stock.doctype.stock_entry.stock_entry.get_warehouse_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.doctype.stock_entry.stock_entry.<b>get_warehouse_details</b>
         <i class="text-muted">(args)</i>
     </p>
@@ -1730,8 +1774,8 @@ the raw materials supplied table</p>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -1761,7 +1805,7 @@ the raw materials supplied table</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -1782,5 +1826,17 @@ the raw materials supplied table</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

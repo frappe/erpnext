@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="user/manual/en/website/shopping-cart">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-user/manual/en/website/shopping-cart" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//user/manual/en/website">
 		Website</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Shopping Cart</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Shopping Cart</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <p>On the Webpage, a shopping cart is an icon that allows you to store all the
 things that you have earmarked for purchasing. It is a graphical
 representation of a shopping basket or a shopping cart that allows you to save
@@ -141,46 +147,66 @@ the items you intend to buy.</p>
 <p>This software displays the price of the product . It also displays shipping
 and handling charges, along with taxes, if applicable.</p>
 
-<p>To set up a shopping cart, go to the selling module.</p>
+<h3>Shopping Cart Setup</h3>
+
+<p>To set up a shopping cart, go to the website module.</p>
 
 <blockquote>
-  <p>Selling &gt; Shopping Cart Settings</p>
+  <p>Website &gt; Shopping Cart Settings</p>
 </blockquote>
 
-<h4>Step 1: Enter Company Details and Default Territory.</h4>
+<h4>Enter Company Details and Checkout Details.</h4>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/shopping-cart-1.png" alt="Shopping Cart" /></p>
+<p><img class="screenshot" alt="Shopping Cart Settings" src="https://frappe.github.io/erpnext/assets/img/website/item-website-specs.png"></p>
 
-<h4>Step 2: Enter Price List, Tax Master and Shipping Rule.</h4>
+<p>To make item available on website go to Item master.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/shopping-cart-2.png" alt="Shopping Cart" /></p>
+<blockquote>
+  <p>Stock &gt; Item</p>
+</blockquote>
 
-<h4>Shopping Cart Display</h4>
+<h4>Enable Item for website.</h4>
 
-<p>On the Website, the shopping cart image will be seen below the Item price.
-Customers can click on the cart and enter the amount of quantity they wish to
-buy. The Item number will be stored on the right hand corner of the page, next
-to the flower sign.</p>
+<p><img class="screenshot" alt="Item" src="https://frappe.github.io/erpnext/assets/img/website/item-in-webiste.png"></p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/shopping-cart-display-1.png" alt="Shopping Cart" /></p>
+<h4>Enter Website Specifications for Item.</h4>
 
-<p>Click on the flower sign on the right hand side to see the cart details. Click
-on the cart to get the final amount details.</p>
+<p><img class="screenshot" alt="Website Specifications" src="https://frappe.github.io/erpnext/assets/img/website/item-website-specs.png"></p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/shopping-cart-display-amount.png" alt="Shopping Cart" /></p>
+<h3>Shop using Shopping Cart</h3>
+
+<h4>Add item to shopping cart</h4>
+
+<p>Click on "Add to Cart" to add item to shopping cart.</p>
+
+<p><img class="screenshot" alt="Website Specifications" src="https://frappe.github.io/erpnext/assets/img/website/item-website-view.png"></p>
+
+<h4>Goto Checkout</h4>
+
+<p>Click on "Goto Cart" to checkout or on "Cart" which is on upper right side
+of the screen.</p>
+
+<p><img class="screenshot" alt="Website Specifications" src="https://frappe.github.io/erpnext/assets/img/website/checkout.png"></p>
+
+<h4>Checkout</h4>
+
+<p>Change quantity, select Shipping and Billing Address and click
+on "Place Order" to place the order.</p>
+
+<p><img class="screenshot" alt="Website Specifications" src="https://frappe.github.io/erpnext/assets/img/website/place-order.png"></p>
 
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/website/articles">Articles</a></p></p>
 
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
+		<i class="fa fa-smile"></i>
 		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/website/shopping-cart.md">
 			Improve this page
 		</a>
@@ -213,7 +239,7 @@ on the cart to get the final amount details.</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -234,5 +260,17 @@ on the cart to get the final amount details.</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

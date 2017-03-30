@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/manufacturing/bom">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/manufacturing/bom" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/manufacturing">
 		Module manufacturing</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>BOM</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>BOM</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: BOM -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/manufacturing/doctype/bom"
@@ -308,6 +314,63 @@ Price List</pre>
         
         <tr class="info">
             <td>10</td>
+            <td ><code>currency_detail</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td class="danger" title="Mandatory"><code>currency</code></td>
+            <td >
+                Link</td>
+            <td >
+                Currency
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/geo/currency">Currency</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>column_break_12</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td class="danger" title="Mandatory"><code>conversion_rate</code></td>
+            <td >
+                Float</td>
+            <td >
+                Conversion Rate
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>14</td>
             <td ><code>operations_section</code></td>
             <td >
                 Section Break</td>
@@ -320,7 +383,7 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>15</td>
             <td ><code>operations</code></td>
             <td >
                 Table</td>
@@ -341,7 +404,7 @@ Price List</pre>
         </tr>
         
         <tr class="info">
-            <td>12</td>
+            <td>16</td>
             <td ><code>materials_section</code></td>
             <td >
                 Section Break</td>
@@ -353,7 +416,7 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>17</td>
             <td class="danger" title="Mandatory"><code>items</code></td>
             <td >
                 Table</td>
@@ -374,7 +437,40 @@ Price List</pre>
         </tr>
         
         <tr class="info">
-            <td>14</td>
+            <td>18</td>
+            <td ><code>scrap_section</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Scrap
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>scrap_items</code></td>
+            <td >
+                Table</td>
+            <td >
+                Scrap Items
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/bom_scrap_item">BOM Scrap Item</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>20</td>
             <td ><code>costing</code></td>
             <td >
                 Section Break</td>
@@ -386,7 +482,7 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>21</td>
             <td ><code>operating_cost</code></td>
             <td >
                 Currency</td>
@@ -395,12 +491,12 @@ Price List</pre>
                 
             </td>
             <td>
-                <pre>Company:company:default_currency</pre>
+                <pre>currency</pre>
             </td>
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>22</td>
             <td ><code>raw_material_cost</code></td>
             <td >
                 Currency</td>
@@ -409,12 +505,26 @@ Price List</pre>
                 
             </td>
             <td>
-                <pre>Company:company:default_currency</pre>
+                <pre>currency</pre>
             </td>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>23</td>
+            <td ><code>scrap_material_cost</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Scrap Material Cost
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>24</td>
             <td ><code>cb1</code></td>
             <td class="info">
                 Column Break</td>
@@ -426,12 +536,40 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>18</td>
-            <td ><code>total_cost</code></td>
+            <td>25</td>
+            <td ><code>base_operating_cost</code></td>
             <td >
                 Currency</td>
             <td >
-                Total Cost
+                Operating Cost (Company Currency)
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>26</td>
+            <td ><code>base_raw_material_cost</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Raw Material Cost(Company Currency)
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>27</td>
+            <td ><code>base_scrap_material_cost</code></td>
+            <td >
+                Data</td>
+            <td >
+                Scrap Material Cost(Company Currency)
                 
             </td>
             <td>
@@ -440,7 +578,59 @@ Price List</pre>
         </tr>
         
         <tr class="info">
-            <td>19</td>
+            <td>28</td>
+            <td ><code>total_cost_of_bom</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>29</td>
+            <td ><code>total_cost</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Total Cost
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>30</td>
+            <td ><code>column_break_26</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>31</td>
+            <td ><code>base_total_cost</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Total Cost(Company Currency)
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>32</td>
             <td ><code>more_info_section</code></td>
             <td >
                 Section Break</td>
@@ -452,7 +642,7 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>33</td>
             <td ><code>project</code></td>
             <td >
                 Link</td>
@@ -473,8 +663,8 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>21</td>
-            <td ><code>company</code></td>
+            <td>34</td>
+            <td class="danger" title="Mandatory"><code>company</code></td>
             <td >
                 Link</td>
             <td >
@@ -494,7 +684,7 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>35</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -515,7 +705,7 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>23</td>
+            <td>36</td>
             <td ><code>col_break23</code></td>
             <td class="info">
                 Column Break</td>
@@ -527,7 +717,7 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>24</td>
+            <td>37</td>
             <td ><code>uom</code></td>
             <td >
                 Link</td>
@@ -548,7 +738,7 @@ Price List</pre>
         </tr>
         
         <tr class="info">
-            <td>25</td>
+            <td>38</td>
             <td ><code>section_break_25</code></td>
             <td >
                 Section Break</td>
@@ -560,19 +750,19 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>26</td>
+            <td>39</td>
             <td ><code>description</code></td>
             <td >
                 Small Text</td>
             <td >
-                Item Desription
+                Item Description
                 
             </td>
             <td></td>
         </tr>
         
         <tr >
-            <td>27</td>
+            <td>40</td>
             <td ><code>column_break_27</code></td>
             <td class="info">
                 Column Break</td>
@@ -584,7 +774,7 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>28</td>
+            <td>41</td>
             <td ><code>image</code></td>
             <td >
                 Attach</td>
@@ -596,7 +786,7 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>29</td>
+            <td>42</td>
             <td ><code>image_view</code></td>
             <td >
                 Image</td>
@@ -610,7 +800,7 @@ Price List</pre>
         </tr>
         
         <tr class="info">
-            <td>30</td>
+            <td>43</td>
             <td ><code>section_break0</code></td>
             <td >
                 Section Break</td>
@@ -622,7 +812,7 @@ Price List</pre>
         </tr>
         
         <tr >
-            <td>31</td>
+            <td>44</td>
             <td ><code>exploded_items</code></td>
             <td >
                 Table</td>
@@ -642,6 +832,115 @@ Price List</pre>
             </td>
         </tr>
         
+        <tr class="info">
+            <td>45</td>
+            <td ><code>website_section</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Website
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>46</td>
+            <td ><code>show_in_website</code></td>
+            <td >
+                Check</td>
+            <td >
+                Show in Website
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>47</td>
+            <td ><code>route</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Route
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>48</td>
+            <td ><code>website_image</code></td>
+            <td >
+                Attach Image</td>
+            <td >
+                Image
+                <p class="text-muted small">
+                    Item Image (if not slideshow)</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>49</td>
+            <td ><code>thumbnail</code></td>
+            <td >
+                Data</td>
+            <td >
+                Thumbnail
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>50</td>
+            <td ><code>sb_web_spec</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Website Specifications
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>51</td>
+            <td ><code>web_long_description</code></td>
+            <td >
+                Text Editor</td>
+            <td >
+                Website Description
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>52</td>
+            <td ><code>show_items</code></td>
+            <td >
+                Check</td>
+            <td >
+                Show Items
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>53</td>
+            <td ><code>show_operations</code></td>
+            <td >
+                Check</td>
+            <td >
+                Show Operations
+                
+            </td>
+            <td></td>
+        </tr>
+        
     </tbody>
 </table>
 
@@ -658,7 +957,7 @@ Price List</pre>
         
 	<h3 style="font-weight: normal;">Class <b>BOM</b></h3>
     
-    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    <p style="padding-left: 30px;"><i>Inherits from frappe.website.website_generator.WebsiteGenerator</i></h4>
     
     <div class="docs-attr-desc"><p></p>
 </div>
@@ -669,7 +968,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="add_exploded_items" href="#add_exploded_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>add_exploded_items</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -683,7 +982,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="add_to_cur_exploded_items" href="#add_to_cur_exploded_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>add_to_cur_exploded_items</b>
         <i class="text-muted">(self, args)</i>
     </p>
@@ -697,7 +996,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="autoname" href="#autoname" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>autoname</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -711,7 +1010,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="calculate_cost" href="#calculate_cost" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_cost</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -725,7 +1024,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="calculate_op_cost" href="#calculate_op_cost" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_op_cost</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -739,7 +1038,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="calculate_rm_cost" href="#calculate_rm_cost" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_rm_cost</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -752,8 +1051,22 @@ Price List</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="calculate_sm_cost" href="#calculate_sm_cost" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>calculate_sm_cost</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Fetch RM rate as per today's valuation rate and calculate totals</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="check_recursion" href="#check_recursion" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>check_recursion</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -767,7 +1080,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="clear_operations" href="#clear_operations" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>clear_operations</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -780,8 +1093,22 @@ Price List</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="company_currency" href="#company_currency" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>company_currency</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="get_bom_material_detail" href="#get_bom_material_detail" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_bom_material_detail</b>
         <i class="text-muted">(self, args=None)</i>
     </p>
@@ -795,7 +1122,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="get_bom_unitcost" href="#get_bom_unitcost" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_bom_unitcost</b>
         <i class="text-muted">(self, bom_no)</i>
     </p>
@@ -809,7 +1136,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="get_child_exploded_items" href="#get_child_exploded_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_child_exploded_items</b>
         <i class="text-muted">(self, bom_no, qty)</i>
     </p>
@@ -822,8 +1149,22 @@ Price List</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="get_context" href="#get_context" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_context</b>
+        <i class="text-muted">(self, context)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="get_exploded_items" href="#get_exploded_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_exploded_items</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -837,7 +1178,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="get_item_det" href="#get_item_det" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_item_det</b>
         <i class="text-muted">(self, item_code)</i>
     </p>
@@ -851,7 +1192,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="get_rm_rate" href="#get_rm_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_rm_rate</b>
         <i class="text-muted">(self, arg)</i>
     </p>
@@ -866,7 +1207,7 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="get_valuation_rate" href="#get_valuation_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_valuation_rate</b>
         <i class="text-muted">(self, args)</i>
     </p>
@@ -880,12 +1221,12 @@ Price List</pre>
     
 	<p class="docs-attr-name">
         <a name="manage_default_bom" href="#manage_default_bom" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>manage_default_bom</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p>Uncheck others if current one is selected as default,
-update default bom in item master</p>
+            update default bom in item master</p>
 </div>
 	<br>
 
@@ -895,7 +1236,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="on_cancel" href="#on_cancel" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_cancel</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -909,7 +1250,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="on_submit" href="#on_submit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_submit</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -923,7 +1264,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="on_update" href="#on_update" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_update</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -937,7 +1278,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="on_update_after_submit" href="#on_update_after_submit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_update_after_submit</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -951,7 +1292,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="set_bom_material_details" href="#set_bom_material_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_bom_material_details</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -964,8 +1305,22 @@ update default bom in item master</p>
     
     
 	<p class="docs-attr-name">
+        <a name="set_conversion_rate" href="#set_conversion_rate" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>set_conversion_rate</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="traverse_tree" href="#traverse_tree" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>traverse_tree</b>
         <i class="text-muted">(self, bom_list=[])</i>
     </p>
@@ -979,7 +1334,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="update_cost" href="#update_cost" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_cost</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -993,7 +1348,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="update_cost_and_exploded_items" href="#update_cost_and_exploded_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_cost_and_exploded_items</b>
         <i class="text-muted">(self, bom_list=[])</i>
     </p>
@@ -1007,7 +1362,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="update_exploded_items" href="#update_exploded_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_exploded_items</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1021,7 +1376,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1034,8 +1389,22 @@ update default bom in item master</p>
     
     
 	<p class="docs-attr-name">
+        <a name="validate_bom_currecny" href="#validate_bom_currecny" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_bom_currecny</b>
+        <i class="text-muted">(self, item)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="validate_bom_links" href="#validate_bom_links" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_bom_links</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1048,8 +1417,22 @@ update default bom in item master</p>
     
     
 	<p class="docs-attr-name">
+        <a name="validate_currency" href="#validate_currency" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_currency</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="validate_main_item" href="#validate_main_item" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_main_item</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1063,7 +1446,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="validate_materials" href="#validate_materials" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_materials</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1077,7 +1460,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="validate_operations" href="#validate_operations" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_operations</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1091,7 +1474,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="validate_rm_item" href="#validate_rm_item" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_rm_item</b>
         <i class="text-muted">(self, item)</i>
     </p>
@@ -1113,7 +1496,7 @@ update default bom in item master</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.manufacturing.doctype.bom.bom.get_bom_items" href="#erpnext.manufacturing.doctype.bom.bom.get_bom_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.manufacturing.doctype.bom.bom.<b>get_bom_items</b>
         <i class="text-muted">(bom, company, qty=1, fetch_exploded=1)</i>
     </p>
@@ -1129,9 +1512,9 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.manufacturing.doctype.bom.bom.get_bom_items_as_dict" href="#erpnext.manufacturing.doctype.bom.bom.get_bom_items_as_dict" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.manufacturing.doctype.bom.bom.<b>get_bom_items_as_dict</b>
-        <i class="text-muted">(bom, company, qty=1, fetch_exploded=1)</i>
+        <i class="text-muted">(bom, company, qty=1, fetch_exploded=1, fetch_scrap_items=0)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1147,9 +1530,25 @@ update default bom in item master</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.manufacturing.doctype.bom.bom.get_children" href="#erpnext.manufacturing.doctype.bom.bom.get_children" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.manufacturing.doctype.bom.bom.<b>get_children</b>
-        <i class="text-muted">(parent=None)</i>
+        <i class="text-muted">()</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.manufacturing.doctype.bom.bom.get_list_context" href="#erpnext.manufacturing.doctype.bom.bom.get_list_context" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.manufacturing.doctype.bom.bom.<b>get_list_context</b>
+        <i class="text-muted">(context)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1163,7 +1562,7 @@ update default bom in item master</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.manufacturing.doctype.bom.bom.validate_bom_no" href="#erpnext.manufacturing.doctype.bom.bom.validate_bom_no" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.manufacturing.doctype.bom.bom.<b>validate_bom_no</b>
         <i class="text-muted">(item, bom_no)</i>
     </p>
@@ -1220,6 +1619,15 @@ update default bom in item master</p>
 
 
 <a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_order">Production Order</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_order_operation">Production Order Operation</a>
 
 </li>
 			
@@ -1286,8 +1694,8 @@ update default bom in item master</p>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -1317,7 +1725,7 @@ update default bom in item master</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -1338,5 +1746,17 @@ update default bom in item master</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

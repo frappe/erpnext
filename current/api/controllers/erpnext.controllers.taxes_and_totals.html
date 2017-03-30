@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/api/controllers/erpnext.controllers.taxes_and_totals">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,49 +99,50 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/api/controllers/erpnext.controllers.taxes_and_totals" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/api/controllers">
 		controllers</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>erpnext.controllers.taxes_and_totals</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>erpnext.controllers.taxes_and_totals</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: erpnext.controllers.taxes_and_totals --><div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/controllers/taxes_and_totals.py"
@@ -163,7 +169,7 @@
     
 	<p class="docs-attr-name">
         <a name="__init__" href="#__init__" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>__init__</b>
         <i class="text-muted">(self, doc)</i>
     </p>
@@ -177,7 +183,7 @@
     
 	<p class="docs-attr-name">
         <a name="_calculate" href="#_calculate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>_calculate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -191,7 +197,7 @@
     
 	<p class="docs-attr-name">
         <a name="_cleanup" href="#_cleanup" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>_cleanup</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -205,7 +211,7 @@
     
 	<p class="docs-attr-name">
         <a name="_get_tax_rate" href="#_get_tax_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>_get_tax_rate</b>
         <i class="text-muted">(self, tax, item_tax_map)</i>
     </p>
@@ -219,7 +225,7 @@
     
 	<p class="docs-attr-name">
         <a name="_load_item_tax_rate" href="#_load_item_tax_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>_load_item_tax_rate</b>
         <i class="text-muted">(self, item_tax_rate)</i>
     </p>
@@ -233,7 +239,7 @@
     
 	<p class="docs-attr-name">
         <a name="_set_in_company_currency" href="#_set_in_company_currency" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>_set_in_company_currency</b>
         <i class="text-muted">(self, doc, fields)</i>
     </p>
@@ -247,7 +253,7 @@
     
 	<p class="docs-attr-name">
         <a name="adjust_discount_amount_loss" href="#adjust_discount_amount_loss" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>adjust_discount_amount_loss</b>
         <i class="text-muted">(self, tax)</i>
     </p>
@@ -261,7 +267,7 @@
     
 	<p class="docs-attr-name">
         <a name="apply_discount_amount" href="#apply_discount_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>apply_discount_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -275,7 +281,7 @@
     
 	<p class="docs-attr-name">
         <a name="calculate" href="#calculate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -289,7 +295,7 @@
     
 	<p class="docs-attr-name">
         <a name="calculate_change_amount" href="#calculate_change_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_change_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -303,7 +309,7 @@
     
 	<p class="docs-attr-name">
         <a name="calculate_item_values" href="#calculate_item_values" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_item_values</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -317,7 +323,7 @@
     
 	<p class="docs-attr-name">
         <a name="calculate_margin" href="#calculate_margin" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_margin</b>
         <i class="text-muted">(self, item)</i>
     </p>
@@ -331,7 +337,7 @@
     
 	<p class="docs-attr-name">
         <a name="calculate_net_total" href="#calculate_net_total" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_net_total</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -345,7 +351,7 @@
     
 	<p class="docs-attr-name">
         <a name="calculate_outstanding_amount" href="#calculate_outstanding_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_outstanding_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -359,7 +365,7 @@
     
 	<p class="docs-attr-name">
         <a name="calculate_paid_amount" href="#calculate_paid_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_paid_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -373,7 +379,7 @@
     
 	<p class="docs-attr-name">
         <a name="calculate_taxes" href="#calculate_taxes" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_taxes</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -387,7 +393,7 @@
     
 	<p class="docs-attr-name">
         <a name="calculate_total_advance" href="#calculate_total_advance" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_total_advance</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -401,7 +407,7 @@
     
 	<p class="docs-attr-name">
         <a name="calculate_totals" href="#calculate_totals" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_totals</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -414,8 +420,22 @@
     
     
 	<p class="docs-attr-name">
+        <a name="calculate_write_off_amount" href="#calculate_write_off_amount" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>calculate_write_off_amount</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="determine_exclusive_rate" href="#determine_exclusive_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>determine_exclusive_rate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -429,7 +449,7 @@
     
 	<p class="docs-attr-name">
         <a name="get_current_tax_amount" href="#get_current_tax_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_current_tax_amount</b>
         <i class="text-muted">(self, item, tax, item_tax_map)</i>
     </p>
@@ -443,12 +463,13 @@
     
 	<p class="docs-attr-name">
         <a name="get_current_tax_fraction" href="#get_current_tax_fraction" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_current_tax_fraction</b>
         <i class="text-muted">(self, tax, item_tax_map)</i>
     </p>
-	<div class="docs-attr-desc"><p>Get tax fraction for calculating tax exclusive amount
-from tax inclusive amount</p>
+	<div class="docs-attr-desc"><pre><code>        Get tax fraction for calculating tax exclusive amount
+        from tax inclusive amount
+</code></pre>
 </div>
 	<br>
 
@@ -458,7 +479,7 @@ from tax inclusive amount</p>
     
 	<p class="docs-attr-name">
         <a name="get_total_for_discount_amount" href="#get_total_for_discount_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_total_for_discount_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -472,7 +493,7 @@ from tax inclusive amount</p>
     
 	<p class="docs-attr-name">
         <a name="initialize_taxes" href="#initialize_taxes" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>initialize_taxes</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -486,7 +507,7 @@ from tax inclusive amount</p>
     
 	<p class="docs-attr-name">
         <a name="manipulate_grand_total_for_inclusive_tax" href="#manipulate_grand_total_for_inclusive_tax" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>manipulate_grand_total_for_inclusive_tax</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -500,7 +521,7 @@ from tax inclusive amount</p>
     
 	<p class="docs-attr-name">
         <a name="round_off_totals" href="#round_off_totals" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>round_off_totals</b>
         <i class="text-muted">(self, tax)</i>
     </p>
@@ -514,7 +535,7 @@ from tax inclusive amount</p>
     
 	<p class="docs-attr-name">
         <a name="set_discount_amount" href="#set_discount_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_discount_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -528,7 +549,7 @@ from tax inclusive amount</p>
     
 	<p class="docs-attr-name">
         <a name="set_item_wise_tax" href="#set_item_wise_tax" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_item_wise_tax</b>
         <i class="text-muted">(self, item, tax, tax_rate, current_tax_amount)</i>
     </p>
@@ -542,7 +563,7 @@ from tax inclusive amount</p>
     
 	<p class="docs-attr-name">
         <a name="validate_conversion_rate" href="#validate_conversion_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_conversion_rate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -560,8 +581,8 @@ from tax inclusive amount</p>
 
 <!-- autodoc -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -591,7 +612,7 @@ from tax inclusive amount</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -612,5 +633,17 @@ from tax inclusive amount</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/hr/employee">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/hr/employee" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/hr">
 		Module hr</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Employee</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Employee</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Employee -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/hr/doctype/employee"
@@ -284,6 +290,18 @@ Ms</pre>
         
         <tr >
             <td>8</td>
+            <td ><code>create_user</code></td>
+            <td >
+                Button</td>
+            <td >
+                Create User
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
             <td ><code>image</code></td>
             <td >
                 Attach Image</td>
@@ -295,7 +313,7 @@ Ms</pre>
         </tr>
         
         <tr >
-            <td>9</td>
+            <td>10</td>
             <td ><code>column_break1</code></td>
             <td class="info">
                 Column Break</td>
@@ -307,7 +325,7 @@ Ms</pre>
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>11</td>
             <td ><code>employee_number</code></td>
             <td >
                 Data</td>
@@ -319,7 +337,7 @@ Ms</pre>
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>12</td>
             <td class="danger" title="Mandatory"><code>date_of_joining</code></td>
             <td >
                 Date</td>
@@ -331,7 +349,7 @@ Ms</pre>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>13</td>
             <td class="danger" title="Mandatory"><code>date_of_birth</code></td>
             <td >
                 Date</td>
@@ -344,7 +362,7 @@ Ms</pre>
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>14</td>
             <td class="danger" title="Mandatory"><code>gender</code></td>
             <td >
                 Select</td>
@@ -360,7 +378,7 @@ Female</pre>
         </tr>
         
         <tr class="info">
-            <td>14</td>
+            <td>15</td>
             <td ><code>employment_details</code></td>
             <td >
                 Section Break</td>
@@ -372,7 +390,7 @@ Female</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>16</td>
             <td class="danger" title="Mandatory"><code>status</code></td>
             <td >
                 Select</td>
@@ -388,7 +406,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>17</td>
             <td ><code>employment_type</code></td>
             <td >
                 Link</td>
@@ -409,7 +427,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>18</td>
             <td ><code>holiday_list</code></td>
             <td >
                 Link</td>
@@ -431,7 +449,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>19</td>
             <td ><code>col_break_22</code></td>
             <td class="info">
                 Column Break</td>
@@ -443,7 +461,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>20</td>
             <td ><code>scheduled_confirmation_date</code></td>
             <td >
                 Date</td>
@@ -455,7 +473,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>21</td>
             <td ><code>final_confirmation_date</code></td>
             <td >
                 Date</td>
@@ -467,7 +485,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>22</td>
             <td ><code>contract_end_date</code></td>
             <td >
                 Date</td>
@@ -479,7 +497,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>23</td>
             <td ><code>date_of_retirement</code></td>
             <td >
                 Date</td>
@@ -491,7 +509,7 @@ Left</pre>
         </tr>
         
         <tr class="info">
-            <td>23</td>
+            <td>24</td>
             <td ><code>job_profile</code></td>
             <td >
                 Section Break</td>
@@ -503,7 +521,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>24</td>
+            <td>25</td>
             <td ><code>branch</code></td>
             <td >
                 Link</td>
@@ -524,7 +542,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>25</td>
+            <td>26</td>
             <td ><code>department</code></td>
             <td >
                 Link</td>
@@ -545,7 +563,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>26</td>
+            <td>27</td>
             <td ><code>designation</code></td>
             <td >
                 Link</td>
@@ -566,14 +584,14 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>27</td>
+            <td>28</td>
             <td ><code>company_email</code></td>
             <td >
                 Data</td>
             <td >
                 Company Email
                 <p class="text-muted small">
-                    Provide email id registered in company</p>
+                    Provide Email Address registered in company</p>
             </td>
             <td>
                 <pre>Email</pre>
@@ -581,7 +599,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>28</td>
+            <td>29</td>
             <td ><code>notice_number_of_days</code></td>
             <td >
                 Int</td>
@@ -593,7 +611,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>29</td>
+            <td>30</td>
             <td ><code>salary_information</code></td>
             <td class="info">
                 Column Break</td>
@@ -605,7 +623,7 @@ Left</pre>
         </tr>
         
         <tr >
-            <td>30</td>
+            <td>31</td>
             <td ><code>salary_mode</code></td>
             <td >
                 Select</td>
@@ -622,7 +640,7 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>31</td>
+            <td>32</td>
             <td ><code>bank_name</code></td>
             <td >
                 Data</td>
@@ -634,7 +652,7 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>32</td>
+            <td>33</td>
             <td ><code>bank_ac_no</code></td>
             <td >
                 Data</td>
@@ -646,7 +664,7 @@ Cheque</pre>
         </tr>
         
         <tr class="info">
-            <td>33</td>
+            <td>34</td>
             <td ><code>organization_profile</code></td>
             <td >
                 Section Break</td>
@@ -658,7 +676,7 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>34</td>
+            <td>35</td>
             <td ><code>reports_to</code></td>
             <td >
                 Link</td>
@@ -679,7 +697,7 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>35</td>
+            <td>36</td>
             <td ><code>leave_approvers</code></td>
             <td >
                 Table</td>
@@ -701,7 +719,7 @@ Cheque</pre>
         </tr>
         
         <tr class="info">
-            <td>36</td>
+            <td>37</td>
             <td ><code>contact_details</code></td>
             <td >
                 Section Break</td>
@@ -713,7 +731,38 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>37</td>
+            <td>38</td>
+            <td ><code>prefered_contact_email</code></td>
+            <td >
+                Select</td>
+            <td >
+                Prefered Contact Email
+                
+            </td>
+            <td>
+                <pre>
+Company Email
+Personal Email
+User ID</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>39</td>
+            <td ><code>prefered_email</code></td>
+            <td >
+                Data</td>
+            <td >
+                Prefered Email
+                
+            </td>
+            <td>
+                <pre>Email</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>40</td>
             <td ><code>cell_number</code></td>
             <td >
                 Data</td>
@@ -725,7 +774,7 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>38</td>
+            <td>41</td>
             <td ><code>personal_email</code></td>
             <td >
                 Data</td>
@@ -739,7 +788,7 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>39</td>
+            <td>42</td>
             <td ><code>unsubscribed</code></td>
             <td >
                 Check</td>
@@ -751,7 +800,7 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>40</td>
+            <td>43</td>
             <td ><code>person_to_be_contacted</code></td>
             <td >
                 Data</td>
@@ -763,7 +812,7 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>41</td>
+            <td>44</td>
             <td ><code>relation</code></td>
             <td >
                 Data</td>
@@ -775,7 +824,7 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>42</td>
+            <td>45</td>
             <td ><code>emergency_phone_number</code></td>
             <td >
                 Data</td>
@@ -787,7 +836,7 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>43</td>
+            <td>46</td>
             <td ><code>column_break4</code></td>
             <td class="info">
                 Column Break</td>
@@ -799,7 +848,7 @@ Cheque</pre>
         </tr>
         
         <tr >
-            <td>44</td>
+            <td>47</td>
             <td ><code>permanent_accommodation_type</code></td>
             <td >
                 Select</td>
@@ -815,7 +864,7 @@ Owned</pre>
         </tr>
         
         <tr >
-            <td>45</td>
+            <td>48</td>
             <td ><code>permanent_address</code></td>
             <td >
                 Small Text</td>
@@ -827,7 +876,7 @@ Owned</pre>
         </tr>
         
         <tr >
-            <td>46</td>
+            <td>49</td>
             <td ><code>current_accommodation_type</code></td>
             <td >
                 Select</td>
@@ -843,7 +892,7 @@ Owned</pre>
         </tr>
         
         <tr >
-            <td>47</td>
+            <td>50</td>
             <td ><code>current_address</code></td>
             <td >
                 Small Text</td>
@@ -855,7 +904,7 @@ Owned</pre>
         </tr>
         
         <tr class="info">
-            <td>48</td>
+            <td>51</td>
             <td ><code>sb53</code></td>
             <td >
                 Section Break</td>
@@ -867,7 +916,7 @@ Owned</pre>
         </tr>
         
         <tr >
-            <td>49</td>
+            <td>52</td>
             <td ><code>bio</code></td>
             <td >
                 Text Editor</td>
@@ -880,7 +929,7 @@ Owned</pre>
         </tr>
         
         <tr class="info">
-            <td>50</td>
+            <td>53</td>
             <td ><code>personal_details</code></td>
             <td >
                 Section Break</td>
@@ -892,7 +941,7 @@ Owned</pre>
         </tr>
         
         <tr >
-            <td>51</td>
+            <td>54</td>
             <td ><code>passport_number</code></td>
             <td >
                 Data</td>
@@ -904,7 +953,7 @@ Owned</pre>
         </tr>
         
         <tr >
-            <td>52</td>
+            <td>55</td>
             <td ><code>date_of_issue</code></td>
             <td >
                 Date</td>
@@ -916,7 +965,7 @@ Owned</pre>
         </tr>
         
         <tr >
-            <td>53</td>
+            <td>56</td>
             <td ><code>valid_upto</code></td>
             <td >
                 Date</td>
@@ -928,7 +977,7 @@ Owned</pre>
         </tr>
         
         <tr >
-            <td>54</td>
+            <td>57</td>
             <td ><code>place_of_issue</code></td>
             <td >
                 Data</td>
@@ -940,7 +989,7 @@ Owned</pre>
         </tr>
         
         <tr >
-            <td>55</td>
+            <td>58</td>
             <td ><code>column_break6</code></td>
             <td class="info">
                 Column Break</td>
@@ -952,7 +1001,7 @@ Owned</pre>
         </tr>
         
         <tr >
-            <td>56</td>
+            <td>59</td>
             <td ><code>marital_status</code></td>
             <td >
                 Select</td>
@@ -970,7 +1019,7 @@ Widowed</pre>
         </tr>
         
         <tr >
-            <td>57</td>
+            <td>60</td>
             <td ><code>blood_group</code></td>
             <td >
                 Select</td>
@@ -992,7 +1041,7 @@ O-</pre>
         </tr>
         
         <tr >
-            <td>58</td>
+            <td>61</td>
             <td ><code>family_background</code></td>
             <td >
                 Small Text</td>
@@ -1005,7 +1054,7 @@ O-</pre>
         </tr>
         
         <tr >
-            <td>59</td>
+            <td>62</td>
             <td ><code>health_details</code></td>
             <td >
                 Small Text</td>
@@ -1018,7 +1067,7 @@ O-</pre>
         </tr>
         
         <tr class="info">
-            <td>60</td>
+            <td>63</td>
             <td ><code>educational_qualification</code></td>
             <td >
                 Section Break</td>
@@ -1030,7 +1079,7 @@ O-</pre>
         </tr>
         
         <tr >
-            <td>61</td>
+            <td>64</td>
             <td ><code>education</code></td>
             <td >
                 Table</td>
@@ -1051,7 +1100,7 @@ O-</pre>
         </tr>
         
         <tr class="info">
-            <td>62</td>
+            <td>65</td>
             <td ><code>previous_work_experience</code></td>
             <td >
                 Section Break</td>
@@ -1065,7 +1114,7 @@ O-</pre>
         </tr>
         
         <tr >
-            <td>63</td>
+            <td>66</td>
             <td ><code>external_work_history</code></td>
             <td >
                 Table</td>
@@ -1086,7 +1135,7 @@ O-</pre>
         </tr>
         
         <tr class="info">
-            <td>64</td>
+            <td>67</td>
             <td ><code>history_in_company</code></td>
             <td >
                 Section Break</td>
@@ -1100,7 +1149,7 @@ O-</pre>
         </tr>
         
         <tr >
-            <td>65</td>
+            <td>68</td>
             <td ><code>internal_work_history</code></td>
             <td >
                 Table</td>
@@ -1121,7 +1170,7 @@ O-</pre>
         </tr>
         
         <tr class="info">
-            <td>66</td>
+            <td>69</td>
             <td ><code>exit</code></td>
             <td >
                 Section Break</td>
@@ -1133,7 +1182,7 @@ O-</pre>
         </tr>
         
         <tr >
-            <td>67</td>
+            <td>70</td>
             <td ><code>resignation_letter_date</code></td>
             <td >
                 Date</td>
@@ -1145,7 +1194,7 @@ O-</pre>
         </tr>
         
         <tr >
-            <td>68</td>
+            <td>71</td>
             <td ><code>relieving_date</code></td>
             <td >
                 Date</td>
@@ -1157,7 +1206,7 @@ O-</pre>
         </tr>
         
         <tr >
-            <td>69</td>
+            <td>72</td>
             <td ><code>reason_for_leaving</code></td>
             <td >
                 Data</td>
@@ -1169,7 +1218,7 @@ O-</pre>
         </tr>
         
         <tr >
-            <td>70</td>
+            <td>73</td>
             <td ><code>leave_encashed</code></td>
             <td >
                 Select</td>
@@ -1185,7 +1234,7 @@ No</pre>
         </tr>
         
         <tr >
-            <td>71</td>
+            <td>74</td>
             <td ><code>encashment_date</code></td>
             <td >
                 Date</td>
@@ -1197,7 +1246,7 @@ No</pre>
         </tr>
         
         <tr >
-            <td>72</td>
+            <td>75</td>
             <td ><code>exit_interview_details</code></td>
             <td class="info">
                 Column Break</td>
@@ -1209,7 +1258,7 @@ No</pre>
         </tr>
         
         <tr >
-            <td>73</td>
+            <td>76</td>
             <td ><code>held_on</code></td>
             <td >
                 Date</td>
@@ -1221,7 +1270,7 @@ No</pre>
         </tr>
         
         <tr >
-            <td>74</td>
+            <td>77</td>
             <td ><code>reason_for_resignation</code></td>
             <td >
                 Select</td>
@@ -1237,7 +1286,7 @@ Health Concerns</pre>
         </tr>
         
         <tr >
-            <td>75</td>
+            <td>78</td>
             <td ><code>new_workplace</code></td>
             <td >
                 Data</td>
@@ -1249,7 +1298,7 @@ Health Concerns</pre>
         </tr>
         
         <tr >
-            <td>76</td>
+            <td>79</td>
             <td ><code>feedback</code></td>
             <td >
                 Small Text</td>
@@ -1287,7 +1336,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="autoname" href="#autoname" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>autoname</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1301,7 +1350,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="on_trash" href="#on_trash" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_trash</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1315,7 +1364,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="on_update" href="#on_update" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_update</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1329,7 +1378,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="update_user" href="#update_user" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_user</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1343,7 +1392,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="update_user_permissions" href="#update_user_permissions" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_user_permissions</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1357,7 +1406,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1371,7 +1420,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_date" href="#validate_date" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_date</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1385,7 +1434,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_duplicate_user_id" href="#validate_duplicate_user_id" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_duplicate_user_id</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1399,7 +1448,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_email" href="#validate_email" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_email</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1413,7 +1462,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_employee_leave_approver" href="#validate_employee_leave_approver" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_employee_leave_approver</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1427,7 +1476,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_for_enabled_user_id" href="#validate_for_enabled_user_id" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_for_enabled_user_id</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1440,8 +1489,22 @@ Health Concerns</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="validate_prefered_email" href="#validate_prefered_email" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_prefered_email</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="validate_reports_to" href="#validate_reports_to" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_reports_to</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1455,7 +1518,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_status" href="#validate_status" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_status</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1487,10 +1550,46 @@ Health Concerns</pre>
 	
         
     
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.hr.doctype.employee.employee.create_user</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.employee.employee.create_user" href="#erpnext.hr.doctype.employee.employee.create_user" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.employee.employee.<b>create_user</b>
+        <i class="text-muted">(employee, user=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.hr.doctype.employee.employee.deactivate_sales_person</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.employee.employee.deactivate_sales_person" href="#erpnext.hr.doctype.employee.employee.deactivate_sales_person" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.employee.employee.<b>deactivate_sales_person</b>
+        <i class="text-muted">(status=None, employee=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.employee.employee.get_employees_who_are_born_today" href="#erpnext.hr.doctype.employee.employee.get_employees_who_are_born_today" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.employee.employee.<b>get_employees_who_are_born_today</b>
         <i class="text-muted">()</i>
     </p>
@@ -1506,7 +1605,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.employee.employee.get_holiday_list_for_employee" href="#erpnext.hr.doctype.employee.employee.get_holiday_list_for_employee" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.employee.employee.<b>get_holiday_list_for_employee</b>
         <i class="text-muted">(employee, raise_exception=True)</i>
     </p>
@@ -1524,7 +1623,7 @@ Health Concerns</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.employee.employee.get_retirement_date" href="#erpnext.hr.doctype.employee.employee.get_retirement_date" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.employee.employee.<b>get_retirement_date</b>
         <i class="text-muted">(date_of_birth=None)</i>
     </p>
@@ -1540,7 +1639,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.employee.employee.get_timeline_data" href="#erpnext.hr.doctype.employee.employee.get_timeline_data" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.employee.employee.<b>get_timeline_data</b>
         <i class="text-muted">(doctype, name)</i>
     </p>
@@ -1553,16 +1652,21 @@ Health Concerns</pre>
 	
         
     
-    <p><span class="label label-info">Public API</span>
-        <br><code>/api/method/erpnext.hr.doctype.employee.employee.make_salary_structure</code>
-    </p>
+    
 	<p class="docs-attr-name">
-        <a name="erpnext.hr.doctype.employee.employee.make_salary_structure" href="#erpnext.hr.doctype.employee.employee.make_salary_structure" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.hr.doctype.employee.employee.<b>make_salary_structure</b>
-        <i class="text-muted">(source_name, target=None)</i>
+        <a name="erpnext.hr.doctype.employee.employee.is_holiday" href="#erpnext.hr.doctype.employee.employee.is_holiday" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.employee.employee.<b>is_holiday</b>
+        <i class="text-muted">(employee, date=None)</i>
     </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+	<div class="docs-attr-desc"><p>Returns True if given Employee has an holiday on the given date</p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>employee</code></strong> -  Employee <code>name</code></li>
+<li><strong><code>date</code></strong> -  Date to check. Will check for today if None</li>
+</ul>
 </div>
 	<br>
 
@@ -1574,7 +1678,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.employee.employee.send_birthday_reminders" href="#erpnext.hr.doctype.employee.employee.send_birthday_reminders" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.employee.employee.<b>send_birthday_reminders</b>
         <i class="text-muted">()</i>
     </p>
@@ -1590,7 +1694,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.employee.employee.update_user_permissions" href="#erpnext.hr.doctype.employee.employee.update_user_permissions" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.employee.employee.<b>update_user_permissions</b>
         <i class="text-muted">(doc, method)</i>
     </p>
@@ -1606,7 +1710,7 @@ Health Concerns</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.employee.employee.validate_employee_role" href="#erpnext.hr.doctype.employee.employee.validate_employee_role" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.employee.employee.<b>validate_employee_role</b>
         <i class="text-muted">(doc, method)</i>
     </p>
@@ -1671,6 +1775,33 @@ Health Concerns</pre>
             <li>
 
 
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee_loan">Employee Loan</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee_loan_application">Employee Loan Application</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee_loan_detail">Employee Loan Detail</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
 <a href="https://frappe.github.io/erpnext/current/models/hr/expense_claim">Expense Claim</a>
 
 </li>
@@ -1716,7 +1847,7 @@ Health Concerns</pre>
             <li>
 
 
-<a href="https://frappe.github.io/erpnext/current/models/hr/salary_structure">Salary Structure</a>
+<a href="https://frappe.github.io/erpnext/current/models/hr/salary_structure_employee">Salary Structure Employee</a>
 
 </li>
 			
@@ -1739,6 +1870,51 @@ Health Concerns</pre>
 </li>
 			
         
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/training_event_employee">Training Event Employee</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/training_feedback">Training Feedback</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/training_result_employee">Training Result Employee</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/vehicle">Vehicle</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/vehicle_log">Vehicle Log</a>
+
+</li>
+			
+        
         </ul>
     
 
@@ -1747,8 +1923,8 @@ Health Concerns</pre>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -1778,7 +1954,7 @@ Health Concerns</pre>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -1799,5 +1975,17 @@ Health Concerns</pre>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

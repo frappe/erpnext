@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/selling/customer">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/selling/customer" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/selling">
 		Module selling</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Customer</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Customer</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Customer -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/selling/doctype/customer"
@@ -183,7 +189,7 @@ Buyer of Goods and Services.
                 
             </td>
             <td>
-                <pre>icon-user</pre>
+                <pre>fa fa-user</pre>
             </td>
         </tr>
         
@@ -264,22 +270,6 @@ Individual</pre>
         
         <tr >
             <td>7</td>
-            <td ><code>status</code></td>
-            <td >
-                Select</td>
-            <td class="text-muted" title="Hidden">
-                Status
-                
-            </td>
-            <td>
-                <pre>Active
-Dormant
-Open</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>8</td>
             <td ><code>column_break0</code></td>
             <td class="info">
                 Column Break</td>
@@ -291,7 +281,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>9</td>
+            <td>8</td>
             <td class="danger" title="Mandatory"><code>customer_group</code></td>
             <td >
                 Link</td>
@@ -312,7 +302,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>9</td>
             <td class="danger" title="Mandatory"><code>territory</code></td>
             <td >
                 Link</td>
@@ -333,7 +323,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>10</td>
             <td ><code>tax_id</code></td>
             <td >
                 Data</td>
@@ -345,7 +335,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>11</td>
             <td ><code>disabled</code></td>
             <td >
                 Check</td>
@@ -357,7 +347,7 @@ Open</pre>
         </tr>
         
         <tr class="info">
-            <td>13</td>
+            <td>12</td>
             <td ><code>currency_and_price_list</code></td>
             <td >
                 Section Break</td>
@@ -369,7 +359,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>13</td>
             <td ><code>default_currency</code></td>
             <td >
                 Link</td>
@@ -390,7 +380,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>14</td>
             <td ><code>default_price_list</code></td>
             <td >
                 Link</td>
@@ -411,7 +401,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>15</td>
             <td ><code>column_break_14</code></td>
             <td class="info">
                 Column Break</td>
@@ -423,21 +413,28 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>16</td>
             <td ><code>language</code></td>
             <td >
-                Select</td>
+                Link</td>
             <td >
                 Print Language
                 
             </td>
             <td>
-                <pre>Loading...</pre>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/core/language">Language</a>
+
+
+                
             </td>
         </tr>
         
         <tr class="info">
-            <td>18</td>
+            <td>17</td>
             <td ><code>address_contacts</code></td>
             <td >
                 Section Break</td>
@@ -446,12 +443,12 @@ Open</pre>
                 
             </td>
             <td>
-                <pre>icon-map-marker</pre>
+                <pre>fa fa-map-marker</pre>
             </td>
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>18</td>
             <td ><code>address_html</code></td>
             <td >
                 HTML</td>
@@ -463,7 +460,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>19</td>
             <td ><code>website</code></td>
             <td >
                 Data</td>
@@ -475,7 +472,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>20</td>
             <td ><code>column_break1</code></td>
             <td class="info">
                 Column Break</td>
@@ -487,7 +484,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>21</td>
             <td ><code>contact_html</code></td>
             <td >
                 HTML</td>
@@ -499,7 +496,7 @@ Open</pre>
         </tr>
         
         <tr class="info">
-            <td>23</td>
+            <td>22</td>
             <td ><code>default_receivable_accounts</code></td>
             <td >
                 Section Break</td>
@@ -511,7 +508,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>24</td>
+            <td>23</td>
             <td ><code>accounts</code></td>
             <td >
                 Table</td>
@@ -533,7 +530,7 @@ Open</pre>
         </tr>
         
         <tr class="info">
-            <td>25</td>
+            <td>24</td>
             <td ><code>credit_limit_section</code></td>
             <td >
                 Section Break</td>
@@ -545,7 +542,7 @@ Open</pre>
         </tr>
         
         <tr >
-            <td>26</td>
+            <td>25</td>
             <td ><code>credit_days_based_on</code></td>
             <td >
                 Select</td>
@@ -561,7 +558,7 @@ Last Day of the Next Month</pre>
         </tr>
         
         <tr >
-            <td>27</td>
+            <td>26</td>
             <td ><code>credit_days</code></td>
             <td >
                 Int</td>
@@ -573,7 +570,7 @@ Last Day of the Next Month</pre>
         </tr>
         
         <tr >
-            <td>28</td>
+            <td>27</td>
             <td ><code>credit_limit</code></td>
             <td >
                 Currency</td>
@@ -585,7 +582,7 @@ Last Day of the Next Month</pre>
         </tr>
         
         <tr class="info">
-            <td>29</td>
+            <td>28</td>
             <td ><code>more_info</code></td>
             <td >
                 Section Break</td>
@@ -594,12 +591,12 @@ Last Day of the Next Month</pre>
                 
             </td>
             <td>
-                <pre>icon-file-text</pre>
+                <pre>fa fa-file-text</pre>
             </td>
         </tr>
         
         <tr >
-            <td>30</td>
+            <td>29</td>
             <td ><code>customer_details</code></td>
             <td >
                 Text</td>
@@ -612,7 +609,7 @@ Last Day of the Next Month</pre>
         </tr>
         
         <tr >
-            <td>31</td>
+            <td>30</td>
             <td ><code>is_frozen</code></td>
             <td >
                 Check</td>
@@ -624,7 +621,7 @@ Last Day of the Next Month</pre>
         </tr>
         
         <tr class="info">
-            <td>32</td>
+            <td>31</td>
             <td ><code>sales_team_section_break</code></td>
             <td >
                 Section Break</td>
@@ -633,12 +630,12 @@ Last Day of the Next Month</pre>
                 
             </td>
             <td>
-                <pre>icon-group</pre>
+                <pre>fa fa-group</pre>
             </td>
         </tr>
         
         <tr >
-            <td>33</td>
+            <td>32</td>
             <td ><code>default_sales_partner</code></td>
             <td >
                 Link</td>
@@ -659,7 +656,7 @@ Last Day of the Next Month</pre>
         </tr>
         
         <tr >
-            <td>34</td>
+            <td>33</td>
             <td ><code>default_commission_rate</code></td>
             <td >
                 Float</td>
@@ -671,7 +668,7 @@ Last Day of the Next Month</pre>
         </tr>
         
         <tr class="info">
-            <td>35</td>
+            <td>34</td>
             <td ><code>sales_team_section</code></td>
             <td >
                 Section Break</td>
@@ -683,7 +680,7 @@ Last Day of the Next Month</pre>
         </tr>
         
         <tr >
-            <td>36</td>
+            <td>35</td>
             <td ><code>sales_team</code></td>
             <td >
                 Table</td>
@@ -729,8 +726,22 @@ Last Day of the Next Month</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="after_insert" href="#after_insert" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>after_insert</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>If customer created from Lead, update customer id in quotations, opportunities</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="after_rename" href="#after_rename" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>after_rename</b>
         <i class="text-muted">(self, olddn, newdn, merge=False)</i>
     </p>
@@ -744,7 +755,7 @@ Last Day of the Next Month</pre>
     
 	<p class="docs-attr-name">
         <a name="autoname" href="#autoname" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>autoname</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -758,7 +769,7 @@ Last Day of the Next Month</pre>
     
 	<p class="docs-attr-name">
         <a name="create_lead_address_contact" href="#create_lead_address_contact" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>create_lead_address_contact</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -771,36 +782,8 @@ Last Day of the Next Month</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="delete_customer_address" href="#delete_customer_address" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>delete_customer_address</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="delete_customer_contact" href="#delete_customer_contact" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>delete_customer_contact</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
         <a name="get_customer_name" href="#get_customer_name" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_customer_name</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -814,7 +797,7 @@ Last Day of the Next Month</pre>
     
 	<p class="docs-attr-name">
         <a name="get_feed" href="#get_feed" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_feed</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -827,8 +810,22 @@ Last Day of the Next Month</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="load_dashboard_info" href="#load_dashboard_info" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>load_dashboard_info</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="on_trash" href="#on_trash" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_trash</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -842,7 +839,7 @@ Last Day of the Next Month</pre>
     
 	<p class="docs-attr-name">
         <a name="on_update" href="#on_update" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_update</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -856,7 +853,7 @@ Last Day of the Next Month</pre>
     
 	<p class="docs-attr-name">
         <a name="onload" href="#onload" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>onload</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -869,54 +866,13 @@ Last Day of the Next Month</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="update_address" href="#update_address" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>update_address</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="update_contact" href="#update_contact" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>update_contact</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="update_customer_address" href="#update_customer_address" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>update_customer_address</b>
-        <i class="text-muted">(self, newdn, set_field)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
         <a name="update_lead_status" href="#update_lead_status" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_lead_status</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+	<div class="docs-attr-desc"><p>If Customer created from Lead, update lead status to "Converted"
+        update Customer link in Quotation, Opportunity</p>
 </div>
 	<br>
 
@@ -926,7 +882,7 @@ Last Day of the Next Month</pre>
     
 	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -939,8 +895,22 @@ Last Day of the Next Month</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="validate_credit_limit_on_change" href="#validate_credit_limit_on_change" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_credit_limit_on_change</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="validate_name_with_customer_group" href="#validate_name_with_customer_group" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_name_with_customer_group</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -960,7 +930,7 @@ Last Day of the Next Month</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.selling.doctype.customer.customer.check_credit_limit" href="#erpnext.selling.doctype.customer.customer.check_credit_limit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.selling.doctype.customer.customer.<b>check_credit_limit</b>
         <i class="text-muted">(customer, company)</i>
     </p>
@@ -976,7 +946,7 @@ Last Day of the Next Month</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.selling.doctype.customer.customer.get_credit_limit" href="#erpnext.selling.doctype.customer.customer.get_credit_limit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.selling.doctype.customer.customer.<b>get_credit_limit</b>
         <i class="text-muted">(customer, company)</i>
     </p>
@@ -992,7 +962,7 @@ Last Day of the Next Month</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.selling.doctype.customer.customer.get_customer_list" href="#erpnext.selling.doctype.customer.customer.get_customer_list" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.selling.doctype.customer.customer.<b>get_customer_list</b>
         <i class="text-muted">(doctype, txt, searchfield, start, page_len, filters)</i>
     </p>
@@ -1008,7 +978,7 @@ Last Day of the Next Month</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.selling.doctype.customer.customer.get_customer_outstanding" href="#erpnext.selling.doctype.customer.customer.get_customer_outstanding" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.selling.doctype.customer.customer.<b>get_customer_outstanding</b>
         <i class="text-muted">(customer, company)</i>
     </p>
@@ -1028,25 +998,7 @@ Last Day of the Next Month</pre>
             <li>
 
 
-<a href="https://frappe.github.io/erpnext/current/models/utilities/address">Address</a>
-
-</li>
-			
-        
-			
-            <li>
-
-
 <a href="https://frappe.github.io/erpnext/current/models/accounts/c_form">C-Form</a>
-
-</li>
-			
-        
-			
-            <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/utilities/contact">Contact</a>
 
 </li>
 			
@@ -1257,8 +1209,8 @@ Last Day of the Next Month</pre>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -1288,7 +1240,7 @@ Last Day of the Next Month</pre>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -1309,5 +1261,17 @@ Last Day of the Next Month</pre>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/hr/expense_claim">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/hr/expense_claim" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/hr">
 		Module hr</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Expense Claim</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Expense Claim</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Expense Claim -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/hr/doctype/expense_claim"
@@ -189,6 +195,18 @@
         
         <tr >
             <td>2</td>
+            <td ><code>is_paid</code></td>
+            <td >
+                Check</td>
+            <td >
+                Is Paid
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
             <td ><code>approval_status</code></td>
             <td >
                 Select</td>
@@ -204,7 +222,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>3</td>
+            <td>4</td>
             <td ><code>exp_approver</code></td>
             <td >
                 Link</td>
@@ -226,7 +244,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>4</td>
+            <td>5</td>
             <td ><code>column_break0</code></td>
             <td class="info">
                 Column Break</td>
@@ -238,7 +256,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>5</td>
+            <td>6</td>
             <td ><code>total_claimed_amount</code></td>
             <td >
                 Currency</td>
@@ -252,7 +270,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>7</td>
             <td ><code>total_sanctioned_amount</code></td>
             <td >
                 Currency</td>
@@ -266,7 +284,7 @@ Rejected</pre>
         </tr>
         
         <tr class="info">
-            <td>7</td>
+            <td>8</td>
             <td ><code>expense_details</code></td>
             <td >
                 Section Break</td>
@@ -278,7 +296,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>8</td>
+            <td>9</td>
             <td class="danger" title="Mandatory"><code>expenses</code></td>
             <td >
                 Table</td>
@@ -299,7 +317,7 @@ Rejected</pre>
         </tr>
         
         <tr class="info">
-            <td>9</td>
+            <td>10</td>
             <td ><code>sb1</code></td>
             <td >
                 Section Break</td>
@@ -313,7 +331,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>11</td>
             <td class="danger" title="Mandatory"><code>posting_date</code></td>
             <td >
                 Date</td>
@@ -325,7 +343,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>12</td>
             <td class="danger" title="Mandatory"><code>employee</code></td>
             <td >
                 Link</td>
@@ -346,7 +364,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>13</td>
             <td ><code>employee_name</code></td>
             <td >
                 Data</td>
@@ -358,12 +376,12 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>13</td>
-            <td class="danger" title="Mandatory"><code>company</code></td>
+            <td>14</td>
+            <td ><code>vehicle_log</code></td>
             <td >
                 Link</td>
             <td >
-                Company
+                Vehicle Log
                 
             </td>
             <td>
@@ -371,53 +389,15 @@ Rejected</pre>
                 
 
 
-<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
+<a href="https://frappe.github.io/erpnext/current/models/hr/vehicle_log">Vehicle Log</a>
 
 
                 
             </td>
-        </tr>
-        
-        <tr >
-            <td>14</td>
-            <td ><code>cb1</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
         </tr>
         
         <tr >
             <td>15</td>
-            <td ><code>total_amount_reimbursed</code></td>
-            <td >
-                Currency</td>
-            <td >
-                Total Amount Reimbursed
-                
-            </td>
-            <td>
-                <pre>Company:company:default_currency</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>16</td>
-            <td ><code>remark</code></td>
-            <td >
-                Small Text</td>
-            <td >
-                Remark
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>17</td>
             <td ><code>project</code></td>
             <td >
                 Link</td>
@@ -438,7 +418,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>16</td>
             <td ><code>task</code></td>
             <td >
                 Link</td>
@@ -459,7 +439,45 @@ Rejected</pre>
         </tr>
         
         <tr >
+            <td>17</td>
+            <td ><code>cb1</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>total_amount_reimbursed</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Total Amount Reimbursed
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
             <td>19</td>
+            <td ><code>remark</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Remark
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
             <td ><code>title</code></td>
             <td >
                 Data</td>
@@ -471,7 +489,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>21</td>
             <td ><code>email_id</code></td>
             <td >
                 Data</td>
@@ -482,8 +500,146 @@ Rejected</pre>
             <td></td>
         </tr>
         
+        <tr class="info">
+            <td>22</td>
+            <td ><code>accounting_details</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Accounting Details
+                
+            </td>
+            <td></td>
+        </tr>
+        
         <tr >
-            <td>21</td>
+            <td>23</td>
+            <td class="danger" title="Mandatory"><code>company</code></td>
+            <td >
+                Link</td>
+            <td >
+                Company
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>24</td>
+            <td ><code>mode_of_payment</code></td>
+            <td >
+                Link</td>
+            <td >
+                Mode of Payment
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/mode_of_payment">Mode of Payment</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>25</td>
+            <td ><code>column_break_24</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>26</td>
+            <td ><code>payable_account</code></td>
+            <td >
+                Link</td>
+            <td >
+                Payable Account
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/account">Account</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>27</td>
+            <td ><code>cost_center</code></td>
+            <td >
+                Link</td>
+            <td >
+                Cost Center
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/cost_center">Cost Center</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>28</td>
+            <td ><code>more_details</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                More Details
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>29</td>
+            <td ><code>status</code></td>
+            <td >
+                Select</td>
+            <td >
+                Status
+                
+            </td>
+            <td>
+                <pre>Draft
+Paid
+Unpaid
+Submitted
+Cancelled</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>30</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -519,7 +675,7 @@ Rejected</pre>
         
 	<h3 style="font-weight: normal;">Class <b>ExpenseClaim</b></h3>
     
-    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    <p style="padding-left: 30px;"><i>Inherits from erpnext.controllers.accounts_controller.AccountsController</i></h4>
     
     <div class="docs-attr-desc"><p></p>
 </div>
@@ -530,7 +686,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="calculate_total_amount" href="#calculate_total_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>calculate_total_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -544,7 +700,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="get_feed" href="#get_feed" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_feed</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -557,8 +713,36 @@ Rejected</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="get_gl_entries" href="#get_gl_entries" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_gl_entries</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="make_gl_entries" href="#make_gl_entries" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>make_gl_entries</b>
+        <i class="text-muted">(self, cancel=False)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="on_cancel" href="#on_cancel" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_cancel</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -572,7 +756,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="on_submit" href="#on_submit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_submit</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -585,8 +769,22 @@ Rejected</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="set_cost_center" href="#set_cost_center" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>set_cost_center</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="set_expense_account" href="#set_expense_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_expense_account</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -599,8 +797,36 @@ Rejected</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="set_payable_account" href="#set_payable_account" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>set_payable_account</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_status" href="#set_status" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>set_status</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="update_task" href="#update_task" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_task</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -614,7 +840,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="update_task_and_project" href="#update_task_and_project" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_task_and_project</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -628,7 +854,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -641,8 +867,22 @@ Rejected</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="validate_account_details" href="#validate_account_details" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_account_details</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="validate_expense_approver" href="#validate_expense_approver" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_expense_approver</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -656,7 +896,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_sanctioned_amount" href="#validate_sanctioned_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_sanctioned_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -693,7 +933,7 @@ Rejected</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.expense_claim.expense_claim.get_expense_approver" href="#erpnext.hr.doctype.expense_claim.expense_claim.get_expense_approver" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.expense_claim.expense_claim.<b>get_expense_approver</b>
         <i class="text-muted">(doctype, txt, searchfield, start, page_len, filters)</i>
     </p>
@@ -711,7 +951,7 @@ Rejected</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account" href="#erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.expense_claim.expense_claim.<b>get_expense_claim_account</b>
         <i class="text-muted">(expense_claim_type, company)</i>
     </p>
@@ -729,9 +969,25 @@ Rejected</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.expense_claim.expense_claim.make_bank_entry" href="#erpnext.hr.doctype.expense_claim.expense_claim.make_bank_entry" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.expense_claim.expense_claim.<b>make_bank_entry</b>
         <i class="text-muted">(docname)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.expense_claim.expense_claim.update_reimbursed_amount" href="#erpnext.hr.doctype.expense_claim.expense_claim.update_reimbursed_amount" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.expense_claim.expense_claim.<b>update_reimbursed_amount</b>
+        <i class="text-muted">(doc)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -762,8 +1018,8 @@ Rejected</pre>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -793,7 +1049,7 @@ Rejected</pre>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -814,5 +1070,17 @@ Rejected</pre>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

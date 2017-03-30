@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/accounts/account">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/accounts/account" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/accounts">
 		Module accounts</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Account</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Account</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Account -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/accounts/doctype/account"
@@ -494,7 +500,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="after_rename" href="#after_rename" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>after_rename</b>
         <i class="text-muted">(self, old, new, merge=False)</i>
     </p>
@@ -508,7 +514,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="autoname" href="#autoname" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>autoname</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -522,7 +528,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="before_rename" href="#before_rename" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>before_rename</b>
         <i class="text-muted">(self, old, new, merge=False)</i>
     </p>
@@ -536,7 +542,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="check_gle_exists" href="#check_gle_exists" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>check_gle_exists</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -550,7 +556,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="check_if_child_exists" href="#check_if_child_exists" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>check_if_child_exists</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -564,7 +570,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="convert_group_to_ledger" href="#convert_group_to_ledger" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>convert_group_to_ledger</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -578,7 +584,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="convert_ledger_to_group" href="#convert_ledger_to_group" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>convert_ledger_to_group</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -592,7 +598,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="on_trash" href="#on_trash" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_trash</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -606,7 +612,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="on_update" href="#on_update" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_update</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -620,7 +626,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="onload" href="#onload" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>onload</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -634,7 +640,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="set_root_and_report_type" href="#set_root_and_report_type" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_root_and_report_type</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -648,7 +654,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="update_nsm_model" href="#update_nsm_model" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_nsm_model</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -662,7 +668,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -676,7 +682,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_account_currency" href="#validate_account_currency" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_account_currency</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -690,7 +696,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_balance_must_be_debit_or_credit" href="#validate_balance_must_be_debit_or_credit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_balance_must_be_debit_or_credit</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -704,7 +710,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_frozen_accounts_modifier" href="#validate_frozen_accounts_modifier" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_frozen_accounts_modifier</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -718,7 +724,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_group_or_ledger" href="#validate_group_or_ledger" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_group_or_ledger</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -732,7 +738,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_mandatory" href="#validate_mandatory" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_mandatory</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -746,7 +752,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_parent" href="#validate_parent" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_parent</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -760,7 +766,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_root_details" href="#validate_root_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_root_details</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -774,7 +780,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_trash" href="#validate_trash" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_trash</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -788,7 +794,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_warehouse" href="#validate_warehouse" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_warehouse</b>
         <i class="text-muted">(self, warehouse)</i>
     </p>
@@ -802,14 +808,30 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_warehouse_account" href="#validate_warehouse_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_warehouse_account</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+	<div class="docs-attr-desc"><p>If perpetual inventory is set, and warehouse is linked,
+        the account balance and stock balance as of now must always match.</p>
 </div>
 	<br>
 
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>BalanceMismatchError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
         
     </div>
     <hr>
@@ -837,7 +859,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.account.account.get_account_currency" href="#erpnext.accounts.doctype.account.account.get_account_currency" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.account.account.<b>get_account_currency</b>
         <i class="text-muted">(account)</i>
     </p>
@@ -853,7 +875,7 @@ Credit</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.account.account.get_parent_account" href="#erpnext.accounts.doctype.account.account.get_parent_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.account.account.<b>get_parent_account</b>
         <i class="text-muted">(doctype, txt, searchfield, start, page_len, filters)</i>
     </p>
@@ -928,6 +950,24 @@ Credit</pre>
 
 
 <a href="https://frappe.github.io/erpnext/current/models/stock/delivery_note_item">Delivery Note Item</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee_loan">Employee Loan</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/expense_claim">Expense Claim</a>
 
 </li>
 			
@@ -1053,15 +1093,6 @@ Credit</pre>
             <li>
 
 
-<a href="https://frappe.github.io/erpnext/current/models/accounts/payment_tool">Payment Tool</a>
-
-</li>
-			
-        
-			
-            <li>
-
-
 <a href="https://frappe.github.io/erpnext/current/models/accounts/period_closing_voucher">Period Closing Voucher</a>
 
 </li>
@@ -1072,6 +1103,15 @@ Credit</pre>
 
 
 <a href="https://frappe.github.io/erpnext/current/models/accounts/pos_profile">POS Profile</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/process_payroll">Process Payroll</a>
 
 </li>
 			
@@ -1099,6 +1139,24 @@ Credit</pre>
 
 
 <a href="https://frappe.github.io/erpnext/current/models/accounts/purchase_taxes_and_charges">Purchase Taxes and Charges</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/salary_component_account">Salary Component Account</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/salary_structure">Salary Structure</a>
 
 </li>
 			
@@ -1152,15 +1210,6 @@ Credit</pre>
             <li>
 
 
-<a href="https://frappe.github.io/erpnext/current/models/stock/stock_entry">Stock Entry</a>
-
-</li>
-			
-        
-			
-            <li>
-
-
 <a href="https://frappe.github.io/erpnext/current/models/stock/stock_entry_detail">Stock Entry Detail</a>
 
 </li>
@@ -1192,8 +1241,8 @@ Credit</pre>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -1223,7 +1272,7 @@ Credit</pre>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -1244,5 +1293,17 @@ Credit</pre>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/api/schools/erpnext.schools.api">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,49 +99,50 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/api/schools/erpnext.schools.api" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/api/schools">
 		schools</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>erpnext.schools.api</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>erpnext.schools.api</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: erpnext.schools.api --><div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/schools/api.py"
@@ -156,16 +162,18 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.schools.api.check_attendance_records_exist" href="#erpnext.schools.api.check_attendance_records_exist" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>check_attendance_records_exist</b>
-        <i class="text-muted">(course_schedule)</i>
+        <i class="text-muted">(course_schedule=None, student_batch=None, date=None)</i>
     </p>
-	<div class="docs-attr-desc"><p>Check if Attendance Records are made against the specified Course Schedule.</p>
+	<div class="docs-attr-desc"><p>Check if Attendance Records are made against the specified Course Schedule or Student Batch for given date.</p>
 
 <p><strong>Parameters:</strong></p>
 
 <ul>
 <li><strong><code>course_schedule</code></strong> -  Course Schedule.</li>
+<li><strong><code>student_batch</code></strong> -  Student Batch.</li>
+<li><strong><code>date</code></strong> -  Date.</li>
 </ul>
 </div>
 	<br>
@@ -180,7 +188,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.schools.api.collect_fees" href="#erpnext.schools.api.collect_fees" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>collect_fees</b>
         <i class="text-muted">(fees, amt)</i>
     </p>
@@ -198,7 +206,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.schools.api.enroll_student" href="#erpnext.schools.api.enroll_student" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>enroll_student</b>
         <i class="text-muted">(source_name)</i>
     </p>
@@ -218,11 +226,77 @@
         
     
     <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.schools.api.get_assessment_criteria</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.api.get_assessment_criteria" href="#erpnext.schools.api.get_assessment_criteria" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.api.<b>get_assessment_criteria</b>
+        <i class="text-muted">(course)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns Assessmemt Criteria and their Weightage from Course Master.</p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>Course</code></strong> -  Course</li>
+</ul>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.schools.api.get_assessment_details</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.api.get_assessment_details" href="#erpnext.schools.api.get_assessment_details" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.api.<b>get_assessment_details</b>
+        <i class="text-muted">(assessment_plan)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns Assessment Criteria  and Maximum Score from Assessment Plan Master.</p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>Assessment Plan</code></strong> -  Assessment Plan</li>
+</ul>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.schools.api.get_assessment_students</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.api.get_assessment_students" href="#erpnext.schools.api.get_assessment_students" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.api.<b>get_assessment_students</b>
+        <i class="text-muted">(assessment_plan, student_group=None, student_batch=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.schools.api.get_course_schedule_events</code>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.schools.api.get_course_schedule_events" href="#erpnext.schools.api.get_course_schedule_events" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>get_course_schedule_events</b>
         <i class="text-muted">(start, end, filters=None)</i>
     </p>
@@ -244,15 +318,15 @@
         
     
     <p><span class="label label-info">Public API</span>
-        <br><code>/api/method/erpnext.schools.api.get_fee_amount</code>
+        <br><code>/api/method/erpnext.schools.api.get_fee_components</code>
     </p>
 	<p class="docs-attr-name">
-        <a name="erpnext.schools.api.get_fee_amount" href="#erpnext.schools.api.get_fee_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.schools.api.<b>get_fee_amount</b>
+        <a name="erpnext.schools.api.get_fee_components" href="#erpnext.schools.api.get_fee_components" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.api.<b>get_fee_components</b>
         <i class="text-muted">(fee_structure)</i>
     </p>
-	<div class="docs-attr-desc"><p>Returns Fee Amount.</p>
+	<div class="docs-attr-desc"><p>Returns Fee Components.</p>
 
 <p><strong>Parameters:</strong></p>
 
@@ -272,9 +346,9 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.schools.api.get_fee_schedule" href="#erpnext.schools.api.get_fee_schedule" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>get_fee_schedule</b>
-        <i class="text-muted">(program)</i>
+        <i class="text-muted">(program, student_category=None)</i>
     </p>
 	<div class="docs-attr-desc"><p>Returns Fee Schedule.</p>
 
@@ -282,6 +356,7 @@
 
 <ul>
 <li><strong><code>program</code></strong> -  Program.</li>
+<li><strong><code>student_category</code></strong> -  Student Category</li>
 </ul>
 </div>
 	<br>
@@ -296,7 +371,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.schools.api.get_fee_structure" href="#erpnext.schools.api.get_fee_structure" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>get_fee_structure</b>
         <i class="text-muted">(program, academic_term=None)</i>
     </p>
@@ -317,11 +392,85 @@
         
     
     <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.schools.api.get_grade</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.api.get_grade" href="#erpnext.schools.api.get_grade" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.api.<b>get_grade</b>
+        <i class="text-muted">(grading_scale, percentage)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns Grade based on the Grading Scale and Score.</p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>Grading Scale</code></strong> -  Grading Scale</li>
+<li><strong><code>Percentage</code></strong> -  Score Percentage Percentage</li>
+</ul>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.schools.api.get_result</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.api.get_result" href="#erpnext.schools.api.get_result" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.api.<b>get_result</b>
+        <i class="text-muted">(student, assessment_plan)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns Submitted Result of given student for specified Assessment Plan</p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>Student</code></strong> -  Student</li>
+<li><strong><code>Assessment Plan</code></strong> -  Assessment Plan</li>
+</ul>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.schools.api.get_student_batch_students</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.api.get_student_batch_students" href="#erpnext.schools.api.get_student_batch_students" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.api.<b>get_student_batch_students</b>
+        <i class="text-muted">(student_batch)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns List of student, student_name, idx in Student Batch.</p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>student_batch</code></strong> -  Student Batch.</li>
+</ul>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.schools.api.get_student_group_students</code>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.schools.api.get_student_group_students" href="#erpnext.schools.api.get_student_group_students" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>get_student_group_students</b>
         <i class="text-muted">(student_group)</i>
     </p>
@@ -340,14 +489,38 @@
 	
         
     
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.schools.api.get_student_guardians</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.api.get_student_guardians" href="#erpnext.schools.api.get_student_guardians" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.api.<b>get_student_guardians</b>
+        <i class="text-muted">(student)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns List of Guardians of a Student.</p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>student</code></strong> -  Student.</li>
+</ul>
+</div>
+	<br>
+
+	
+
+	
+        
+    
     
 	<p class="docs-attr-name">
         <a name="erpnext.schools.api.make_attendance_records" href="#erpnext.schools.api.make_attendance_records" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>make_attendance_records</b>
-        <i class="text-muted">(student, student_name, course_schedule, status)</i>
+        <i class="text-muted">(student, student_name, status, course_schedule=None, student_batch=None, date=None)</i>
     </p>
-	<div class="docs-attr-desc"><p>Creates Attendance Record.</p>
+	<div class="docs-attr-desc"><p>Creates/Update Attendance Record.</p>
 
 <p><strong>Parameters:</strong></p>
 
@@ -366,13 +539,31 @@
         
     
     <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.schools.api.mark_assessment_result</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.api.mark_assessment_result" href="#erpnext.schools.api.mark_assessment_result" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.api.<b>mark_assessment_result</b>
+        <i class="text-muted">(student, assessment_plan, scores)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.schools.api.mark_attendance</code>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.schools.api.mark_attendance" href="#erpnext.schools.api.mark_attendance" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>mark_attendance</b>
-        <i class="text-muted">(students_present, students_absent, course_schedule)</i>
+        <i class="text-muted">(students_present, students_absent, course_schedule=None, student_batch=None, date=None)</i>
     </p>
 	<div class="docs-attr-desc"><p>Creates Multiple Attendance Records.</p>
 
@@ -382,7 +573,27 @@
 <li><strong><code>students_present</code></strong> -  Students Present JSON.</li>
 <li><strong><code>students_absent</code></strong> -  Students Absent JSON.</li>
 <li><strong><code>course_schedule</code></strong> -  Course Schedule.</li>
+<li><strong><code>student_batch</code></strong> -  Student Batch.</li>
+<li><strong><code>date</code></strong> -  Date.</li>
 </ul>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.schools.api.update_email_group</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.api.update_email_group" href="#erpnext.schools.api.update_email_group" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.api.<b>update_email_group</b>
+        <i class="text-muted">(doctype, name)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -392,8 +603,8 @@
 
 <!-- autodoc -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -423,7 +634,7 @@
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -444,5 +655,17 @@
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

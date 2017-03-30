@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="user/manual/en/selling/quotation">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,51 +99,56 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-user/manual/en/selling/quotation" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//user/manual/en/selling">
 		Selling</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Quotation</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Quotation</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <p>During a sale, the customer may request for a written note about the products
 or services you are planning to offer, along with the prices and other terms
 of engagement. This is called a “Proposal” or an “Estimate” or a “Pro Forma
-Invoice”or a Quotation.</p>
+Invoice”or a <strong>Quotation</strong>.</p>
 
-<p>To create a new Quotation go to:</p>
+<p>A typical Selling flow looks like:</p>
+
+<p><img class="screenshot" alt="Make Quotation from Opportunity" src="https://frappe.github.io/erpnext/assets/img/selling/selling-flow.png"></p>
+
+<p>To create a new Quotation navigate to:</p>
 
 <blockquote>
   <p>Selling &gt; Quotation &gt; New Quotation</p>
@@ -150,16 +160,12 @@ Invoice”or a Quotation.</p>
 
 <p><img class="screenshot" alt="Make Quotation from Opportunity" src="https://frappe.github.io/erpnext/assets/img/selling/make-quote-from-opp.png"></p>
 
-<p>Or You can create a new Quotation and pull details from an Opportunity.</p>
-
-<p><img class="screenshot" alt="Make Quotation from Opportunity" src="https://frappe.github.io/erpnext/assets/img/selling/make-quotation.gif"></p>
-
 <p>A Quotation contains details about:</p>
 
 <ul>
 <li>The recipient of the Quotation</li>
 <li>The Items and quantities you are offering.</li>
-<li>The rates at which they are offered. For details refer </li>
+<li>The rates at which they are offered.</li>
 <li>The taxes applicable.</li>
 <li>Other charges (like shipping, insurance) if applicable.</li>
 <li>The validity of contract.</li>
@@ -168,8 +174,7 @@ Invoice”or a Quotation.</p>
 </ul>
 
 <blockquote>
-  <p>Tip: Images look great on Quotations. To add images to your Quotations,
-  attach the corresponding image in the Item master.</p>
+  <p>Tip: Images look great on Quotations. Make sure your items have an image attached.</p>
 </blockquote>
 
 <h3>Rates</h3>
@@ -183,11 +188,13 @@ Invoice”or a Quotation.</p>
 
 <h3>Taxes</h3>
 
-<p>To add taxes to your Quotation, you can either select a tax template, Sales
-Taxes and Charges Template or add the taxes on your own. To understand taxes in
-detail visit <a href="https://frappe.github.io/erpnext/user/manual/en/setting-up/setting-up-taxes.html">Taxes</a></p>
+<p>To add taxes to your Quotation, you can select a <strong>Sales Taxes and Charges Template</strong> or add the taxes on your own.</p>
 
-<p>You can add taxes in the same manner as the Sales Taxes and Charges Template.</p>
+<p>For e.g</p>
+
+<p><img class="screenshot" alt="Taxes and Charges" src="https://frappe.github.io/erpnext/assets/img/selling/taxes-and-charges.gif"></p>
+
+<p>To understand taxes in detail visit <a href="https://frappe.github.io/erpnext/user/manual/en/setting-up/setting-up-taxes.html">Taxes</a>.</p>
 
 <h3>Terms and Conditions</h3>
 
@@ -217,35 +224,33 @@ you have a standard set of terms. You can do this by going to:</p>
 
 <p>Quotation is a “Submittable” transaction. Since you send this Quotation to
 your Customer or Lead, you must freeze it so that changes are not made after
-you send the Quotation. See Document Stages.</p>
+you send the Quotation.</p>
 
 <blockquote>
   <p>Tip: Quotations can also be titled as “Proforma Invoice” or “Proposal”.
-  Select the right heading in the “Print Heading” field in the “More Info”
-  section. To create new Print Headings go to Setup &gt; Branding and Printing &gt;
-  Print Headings.</p>
+  You can do this by selecting a <strong>Print Heading</strong> in the <strong>Print Settings</strong>
+  section. To create new Print Headings go to Setup &gt; Printing &gt;
+  Print Heading.</p>
 </blockquote>
 
 <h3>Discount</h3>
 
 <p>While making your sales transactions like a Quotation (or Sales Order) you
-would already have noticed that there is a “Discount” column. On the left is
-the “Price List Rate” on the right is the “Basic Rate”. You can add a
-“Discount” value to update the basic rate. To understand more about discount
-read <a href="http://erpnext.org/discount">Discount.</a></p>
+can also give discounts to your customers. In the Discount section, add
+the discount in percentage or fixed amount. Read <a href="https://frappe.github.io/erpnext/user/manual/en/selling/articles/applying-discount">Discount</a> for more explanation.</p>
 
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/selling/sales-order">Sales Order</a></p></p>
 
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
+		<i class="fa fa-smile"></i>
 		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/selling/quotation.md">
 			Improve this page
 		</a>
@@ -278,7 +283,7 @@ read <a href="http://erpnext.org/discount">Discount.</a></p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -299,5 +304,17 @@ read <a href="http://erpnext.org/discount">Discount.</a></p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

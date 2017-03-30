@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/api/accounts/erpnext.accounts.utils">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,49 +99,50 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/api/accounts/erpnext.accounts.utils" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/api/accounts">
 		accounts</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>erpnext.accounts.utils</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>erpnext.accounts.utils</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: erpnext.accounts.utils --><div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/accounts/utils.py"
@@ -171,7 +177,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.add_ac" href="#erpnext.accounts.utils.add_ac" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>add_ac</b>
         <i class="text-muted">(args=None)</i>
     </p>
@@ -189,7 +195,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.add_cc" href="#erpnext.accounts.utils.add_cc" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>add_cc</b>
         <i class="text-muted">(args=None)</i>
     </p>
@@ -205,13 +211,30 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.check_if_advance_entry_modified" href="#erpnext.accounts.utils.check_if_advance_entry_modified" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>check_if_advance_entry_modified</b>
         <i class="text-muted">(args)</i>
     </p>
-	<div class="docs-attr-desc"><p>check if there is already a voucher reference
-check if amount is same
-check if jv is submitted</p>
+	<div class="docs-attr-desc"><pre><code>    check if there is already a voucher reference
+    check if amount is same
+    check if jv is submitted
+</code></pre>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.utils.create_payment_gateway_account" href="#erpnext.accounts.utils.create_payment_gateway_account" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.utils.<b>create_payment_gateway_account</b>
+        <i class="text-muted">(gateway)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -223,7 +246,7 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.fix_total_debit_credit" href="#erpnext.accounts.utils.fix_total_debit_credit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>fix_total_debit_credit</b>
         <i class="text-muted">()</i>
     </p>
@@ -239,7 +262,7 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.get_account_name" href="#erpnext.accounts.utils.get_account_name" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>get_account_name</b>
         <i class="text-muted">(account_type=None, root_type=None, is_group=None, account_currency=None, company=None)</i>
     </p>
@@ -257,7 +280,7 @@ check if jv is submitted</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.get_balance_on" href="#erpnext.accounts.utils.get_balance_on" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>get_balance_on</b>
         <i class="text-muted">(account=None, date=None, party_type=None, party=None, company=None, in_account_currency=True)</i>
     </p>
@@ -275,7 +298,7 @@ check if jv is submitted</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.get_children" href="#erpnext.accounts.utils.get_children" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>get_children</b>
         <i class="text-muted">()</i>
     </p>
@@ -293,7 +316,7 @@ check if jv is submitted</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.get_companies" href="#erpnext.accounts.utils.get_companies" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>get_companies</b>
         <i class="text-muted">()</i>
     </p>
@@ -311,7 +334,7 @@ check if jv is submitted</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.get_company_default" href="#erpnext.accounts.utils.get_company_default" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>get_company_default</b>
         <i class="text-muted">(company, fieldname)</i>
     </p>
@@ -326,8 +349,24 @@ check if jv is submitted</p>
     
     
 	<p class="docs-attr-name">
+        <a name="erpnext.accounts.utils.get_count_on" href="#erpnext.accounts.utils.get_count_on" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.utils.<b>get_count_on</b>
+        <i class="text-muted">(account, fieldname, date)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.get_currency_precision" href="#erpnext.accounts.utils.get_currency_precision" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>get_currency_precision</b>
         <i class="text-muted">(currency=None)</i>
     </p>
@@ -345,7 +384,7 @@ check if jv is submitted</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.get_fiscal_year" href="#erpnext.accounts.utils.get_fiscal_year" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>get_fiscal_year</b>
         <i class="text-muted">(date=None, fiscal_year=None, label=Date, verbose=1, company=None, as_dict=False)</i>
     </p>
@@ -361,7 +400,7 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.get_fiscal_years" href="#erpnext.accounts.utils.get_fiscal_years" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>get_fiscal_years</b>
         <i class="text-muted">(transaction_date=None, fiscal_year=None, label=Date, verbose=1, company=None, as_dict=False)</i>
     </p>
@@ -377,7 +416,7 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.get_outstanding_invoices" href="#erpnext.accounts.utils.get_outstanding_invoices" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>get_outstanding_invoices</b>
         <i class="text-muted">(party_type, party, account, condition=None)</i>
     </p>
@@ -393,7 +432,7 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.get_stock_and_account_difference" href="#erpnext.accounts.utils.get_stock_and_account_difference" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>get_stock_and_account_difference</b>
         <i class="text-muted">(account_list=None, posting_date=None)</i>
     </p>
@@ -409,7 +448,7 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.get_stock_rbnb_difference" href="#erpnext.accounts.utils.get_stock_rbnb_difference" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>get_stock_rbnb_difference</b>
         <i class="text-muted">(posting_date, company)</i>
     </p>
@@ -425,11 +464,12 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.reconcile_against_document" href="#erpnext.accounts.utils.reconcile_against_document" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>reconcile_against_document</b>
         <i class="text-muted">(args)</i>
     </p>
-	<div class="docs-attr-desc"><p>Cancel JV, Update aginst document, split if required and resubmit jv</p>
+	<div class="docs-attr-desc"><pre><code>    Cancel JV, Update aginst document, split if required and resubmit jv
+</code></pre>
 </div>
 	<br>
 
@@ -441,7 +481,7 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.remove_ref_doc_link_from_jv" href="#erpnext.accounts.utils.remove_ref_doc_link_from_jv" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>remove_ref_doc_link_from_jv</b>
         <i class="text-muted">(ref_type, ref_no)</i>
     </p>
@@ -457,7 +497,7 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.remove_ref_doc_link_from_pe" href="#erpnext.accounts.utils.remove_ref_doc_link_from_pe" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>remove_ref_doc_link_from_pe</b>
         <i class="text-muted">(ref_type, ref_no)</i>
     </p>
@@ -473,9 +513,9 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.unlink_ref_doc_from_payment_entries" href="#erpnext.accounts.utils.unlink_ref_doc_from_payment_entries" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>unlink_ref_doc_from_payment_entries</b>
-        <i class="text-muted">(ref_type, ref_no)</i>
+        <i class="text-muted">(ref_doc)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -489,11 +529,12 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.update_reference_in_journal_entry" href="#erpnext.accounts.utils.update_reference_in_journal_entry" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>update_reference_in_journal_entry</b>
         <i class="text-muted">(d, jv_obj)</i>
     </p>
-	<div class="docs-attr-desc"><p>Updates against document, if partial amount splits into rows</p>
+	<div class="docs-attr-desc"><pre><code>    Updates against document, if partial amount splits into rows
+</code></pre>
 </div>
 	<br>
 
@@ -505,7 +546,7 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.update_reference_in_payment_entry" href="#erpnext.accounts.utils.update_reference_in_payment_entry" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>update_reference_in_payment_entry</b>
         <i class="text-muted">(d, payment_entry)</i>
     </p>
@@ -521,7 +562,7 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.validate_allocated_amount" href="#erpnext.accounts.utils.validate_allocated_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>validate_allocated_amount</b>
         <i class="text-muted">(args)</i>
     </p>
@@ -537,9 +578,9 @@ check if jv is submitted</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.utils.validate_fiscal_year" href="#erpnext.accounts.utils.validate_fiscal_year" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.utils.<b>validate_fiscal_year</b>
-        <i class="text-muted">(date, fiscal_year, label=Date, doc=None)</i>
+        <i class="text-muted">(date, fiscal_year, company, label=Date, doc=None)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -551,8 +592,8 @@ check if jv is submitted</p>
 
 <!-- autodoc -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -582,7 +623,7 @@ check if jv is submitted</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -603,5 +644,17 @@ check if jv is submitted</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

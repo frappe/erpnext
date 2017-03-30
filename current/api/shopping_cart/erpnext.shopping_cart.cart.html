@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/api/shopping_cart/erpnext.shopping_cart.cart">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,49 +99,50 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/api/shopping_cart/erpnext.shopping_cart.cart" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/api/shopping_cart">
 		shopping_cart</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>erpnext.shopping_cart.cart</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>erpnext.shopping_cart.cart</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: erpnext.shopping_cart.cart --><div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/shopping_cart/cart.py"
@@ -169,7 +175,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart._apply_shipping_rule" href="#erpnext.shopping_cart.cart._apply_shipping_rule" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>_apply_shipping_rule</b>
         <i class="text-muted">(party=None, quotation=None, cart_settings=None)</i>
     </p>
@@ -185,11 +191,11 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart._get_cart_quotation" href="#erpnext.shopping_cart.cart._get_cart_quotation" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>_get_cart_quotation</b>
         <i class="text-muted">(party=None)</i>
     </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+	<div class="docs-attr-desc"><p>Return the open Quotation of type "Shopping Cart" or make a new one</p>
 </div>
 	<br>
 
@@ -201,7 +207,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart._set_price_list" href="#erpnext.shopping_cart.cart._set_price_list" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>_set_price_list</b>
         <i class="text-muted">(quotation, cart_settings)</i>
     </p>
@@ -217,7 +223,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.apply_cart_settings" href="#erpnext.shopping_cart.cart.apply_cart_settings" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>apply_cart_settings</b>
         <i class="text-muted">(party=None, quotation=None)</i>
     </p>
@@ -235,7 +241,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.apply_shipping_rule" href="#erpnext.shopping_cart.cart.apply_shipping_rule" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>apply_shipping_rule</b>
         <i class="text-muted">(shipping_rule)</i>
     </p>
@@ -251,7 +257,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.decorate_quotation_doc" href="#erpnext.shopping_cart.cart.decorate_quotation_doc" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>decorate_quotation_doc</b>
         <i class="text-muted">(doc)</i>
     </p>
@@ -267,7 +273,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.get_address_docs" href="#erpnext.shopping_cart.cart.get_address_docs" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>get_address_docs</b>
         <i class="text-muted">(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None)</i>
     </p>
@@ -283,7 +289,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.get_address_territory" href="#erpnext.shopping_cart.cart.get_address_territory" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>get_address_territory</b>
         <i class="text-muted">(address_name)</i>
     </p>
@@ -299,7 +305,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.get_applicable_shipping_rules" href="#erpnext.shopping_cart.cart.get_applicable_shipping_rules" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>get_applicable_shipping_rules</b>
         <i class="text-muted">(party=None, quotation=None)</i>
     </p>
@@ -317,7 +323,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.get_cart_quotation" href="#erpnext.shopping_cart.cart.get_cart_quotation" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>get_cart_quotation</b>
         <i class="text-muted">(doc=None)</i>
     </p>
@@ -333,7 +339,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.get_debtors_account" href="#erpnext.shopping_cart.cart.get_debtors_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>get_debtors_account</b>
         <i class="text-muted">(cart_settings)</i>
     </p>
@@ -349,7 +355,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.get_party" href="#erpnext.shopping_cart.cart.get_party" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>get_party</b>
         <i class="text-muted">(user=None)</i>
     </p>
@@ -365,7 +371,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.get_shipping_rules" href="#erpnext.shopping_cart.cart.get_shipping_rules" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>get_shipping_rules</b>
         <i class="text-muted">(quotation=None, cart_settings=None)</i>
     </p>
@@ -383,7 +389,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.get_shopping_cart_menu" href="#erpnext.shopping_cart.cart.get_shopping_cart_menu" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>get_shopping_cart_menu</b>
         <i class="text-muted">(context=None)</i>
     </p>
@@ -399,7 +405,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.guess_territory" href="#erpnext.shopping_cart.cart.guess_territory" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>guess_territory</b>
         <i class="text-muted">()</i>
     </p>
@@ -417,7 +423,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.place_order" href="#erpnext.shopping_cart.cart.place_order" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>place_order</b>
         <i class="text-muted">()</i>
     </p>
@@ -433,7 +439,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.set_cart_count" href="#erpnext.shopping_cart.cart.set_cart_count" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>set_cart_count</b>
         <i class="text-muted">(quotation=None)</i>
     </p>
@@ -448,24 +454,8 @@
     
     
 	<p class="docs-attr-name">
-        <a name="erpnext.shopping_cart.cart.set_customer_in_address" href="#erpnext.shopping_cart.cart.set_customer_in_address" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.shopping_cart.cart.<b>set_customer_in_address</b>
-        <i class="text-muted">(doc, method=None)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-	
-
-	
-        
-    
-    
-	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.set_price_list_and_rate" href="#erpnext.shopping_cart.cart.set_price_list_and_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>set_price_list_and_rate</b>
         <i class="text-muted">(quotation, cart_settings)</i>
     </p>
@@ -481,7 +471,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.set_taxes" href="#erpnext.shopping_cart.cart.set_taxes" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>set_taxes</b>
         <i class="text-muted">(quotation, cart_settings)</i>
     </p>
@@ -497,7 +487,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.show_terms" href="#erpnext.shopping_cart.cart.show_terms" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>show_terms</b>
         <i class="text-muted">(doc)</i>
     </p>
@@ -515,7 +505,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.update_cart" href="#erpnext.shopping_cart.cart.update_cart" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>update_cart</b>
         <i class="text-muted">(item_code, qty, with_items=False)</i>
     </p>
@@ -533,7 +523,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.update_cart_address" href="#erpnext.shopping_cart.cart.update_cart_address" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>update_cart_address</b>
         <i class="text-muted">(address_fieldname, address_name)</i>
     </p>
@@ -549,7 +539,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.shopping_cart.cart.update_party" href="#erpnext.shopping_cart.cart.update_party" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.shopping_cart.cart.<b>update_party</b>
         <i class="text-muted">(fullname, company_name=None, mobile_no=None, phone=None)</i>
     </p>
@@ -563,8 +553,8 @@
 
 <!-- autodoc -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -594,7 +584,7 @@
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -615,5 +605,17 @@
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

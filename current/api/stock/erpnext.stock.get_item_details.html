@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/api/stock/erpnext.stock.get_item_details">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,49 +99,50 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/api/stock/erpnext.stock.get_item_details" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/api/stock">
 		stock</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>erpnext.stock.get_item_details</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>erpnext.stock.get_item_details</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: erpnext.stock.get_item_details --><div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/stock/get_item_details.py"
@@ -156,12 +162,12 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.apply_price_list" href="#erpnext.stock.get_item_details.apply_price_list" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>apply_price_list</b>
         <i class="text-muted">(args, as_doc=False)</i>
     </p>
 	<div class="docs-attr-desc"><p>Apply pricelist on a document-like dict object and return as
-{'parent': dict, 'children': list}</p>
+    {'parent': dict, 'children': list}</p>
 
 <p><strong>Parameters:</strong></p>
 
@@ -169,22 +175,23 @@
 <li><strong><code>args</code></strong> -  See below</li>
 <li><p><strong><code>as_doc</code></strong> -  Updates value in the passed dict</p>
 
-<p>args = {
+<pre><code>args = {
     "doctype": "",
     "name": "",
-    "items": [{"doctype": "", "name": "", "item<em>code": "", "brand": "", "item</em>group": ""}, ...],
-    "conversion<em>rate": 1.0,
-    "selling</em>price<em>list": None,
-    "price</em>list<em>currency": None,
-    "plc</em>conversion<em>rate": 1.0,
+    "items": [{"doctype": "", "name": "", "item_code": "", "brand": "", "item_group": ""}, ...],
+    "conversion_rate": 1.0,
+    "selling_price_list": None,
+    "price_list_currency": None,
+    "plc_conversion_rate": 1.0,
     "doctype": "",
     "name": "",
     "supplier": None,
-    "transaction</em>date": None,
-    "conversion<em>rate": 1.0,
-    "buying</em>price<em>list": None,
-    "ignore</em>pricing_rule": 0/1
-}</p></li>
+    "transaction_date": None,
+    "conversion_rate": 1.0,
+    "buying_price_list": None,
+    "ignore_pricing_rule": 0/1
+}
+</code></pre></li>
 </ul>
 </div>
 	<br>
@@ -197,7 +204,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.apply_price_list_on_item" href="#erpnext.stock.get_item_details.apply_price_list_on_item" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>apply_price_list_on_item</b>
         <i class="text-muted">(args)</i>
     </p>
@@ -213,7 +220,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_actual_batch_qty" href="#erpnext.stock.get_item_details.get_actual_batch_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_actual_batch_qty</b>
         <i class="text-muted">(batch_no, warehouse, item_code)</i>
     </p>
@@ -229,7 +236,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_basic_details" href="#erpnext.stock.get_item_details.get_basic_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_basic_details</b>
         <i class="text-muted">(args, item)</i>
     </p>
@@ -247,7 +254,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_batch_qty" href="#erpnext.stock.get_item_details.get_batch_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_batch_qty</b>
         <i class="text-muted">(batch_no, warehouse, item_code)</i>
     </p>
@@ -265,9 +272,27 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_bin_details" href="#erpnext.stock.get_item_details.get_bin_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_bin_details</b>
         <i class="text-muted">(item_code, warehouse)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.get_bin_details_and_serial_nos</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_bin_details_and_serial_nos" href="#erpnext.stock.get_item_details.get_bin_details_and_serial_nos" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_bin_details_and_serial_nos</b>
+        <i class="text-muted">(item_code, warehouse, stock_qty=None, serial_no=None)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -283,7 +308,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_conversion_factor" href="#erpnext.stock.get_item_details.get_conversion_factor" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_conversion_factor</b>
         <i class="text-muted">(item_code, uom)</i>
     </p>
@@ -301,7 +326,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_default_bom" href="#erpnext.stock.get_item_details.get_default_bom" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_default_bom</b>
         <i class="text-muted">(item_code=None)</i>
     </p>
@@ -317,7 +342,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_default_cost_center" href="#erpnext.stock.get_item_details.get_default_cost_center" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_default_cost_center</b>
         <i class="text-muted">(args, item)</i>
     </p>
@@ -333,7 +358,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_default_expense_account" href="#erpnext.stock.get_item_details.get_default_expense_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_default_expense_account</b>
         <i class="text-muted">(args, item)</i>
     </p>
@@ -349,7 +374,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_default_income_account" href="#erpnext.stock.get_item_details.get_default_income_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_default_income_account</b>
         <i class="text-muted">(args, item)</i>
     </p>
@@ -365,7 +390,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_gross_profit" href="#erpnext.stock.get_item_details.get_gross_profit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_gross_profit</b>
         <i class="text-muted">(out)</i>
     </p>
@@ -383,7 +408,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_item_code" href="#erpnext.stock.get_item_details.get_item_code" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_item_code</b>
         <i class="text-muted">(barcode=None, serial_no=None)</i>
     </p>
@@ -401,28 +426,29 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_item_details" href="#erpnext.stock.get_item_details.get_item_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_item_details</b>
         <i class="text-muted">(args)</i>
     </p>
-	<div class="docs-attr-desc"><p>args = {
-    "item<em>code": "",
-    "warehouse": None,
-    "customer": "",
-    "conversion</em>rate": 1.0,
-    "selling<em>price</em>list": None,
-    "price<em>list</em>currency": None,
-    "plc<em>conversion</em>rate": 1.0,
-    "doctype": "",
-    "name": "",
-    "supplier": None,
-    "transaction<em>date": None,
-    "conversion</em>rate": 1.0,
-    "buying<em>price</em>list": None,
-    "is<em>subcontracted": "Yes" / "No",
-    "ignore</em>pricing_rule": 0/1
-    "project": ""
-}</p>
+	<div class="docs-attr-desc"><pre><code>    args = {
+        "item_code": "",
+        "warehouse": None,
+        "customer": "",
+        "conversion_rate": 1.0,
+        "selling_price_list": None,
+        "price_list_currency": None,
+        "plc_conversion_rate": 1.0,
+        "doctype": "",
+        "name": "",
+        "supplier": None,
+        "transaction_date": None,
+        "conversion_rate": 1.0,
+        "buying_price_list": None,
+        "is_subcontracted": "Yes" / "No",
+        "ignore_pricing_rule": 0/1
+        "project": ""
+    }
+</code></pre>
 </div>
 	<br>
 
@@ -434,7 +460,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_party_item_code" href="#erpnext.stock.get_item_details.get_party_item_code" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_party_item_code</b>
         <i class="text-muted">(args, item_doc, out)</i>
     </p>
@@ -452,7 +478,7 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_pos_profile" href="#erpnext.stock.get_item_details.get_pos_profile" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_pos_profile</b>
         <i class="text-muted">(company)</i>
     </p>
@@ -468,7 +494,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_pos_profile_item_details" href="#erpnext.stock.get_item_details.get_pos_profile_item_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_pos_profile_item_details</b>
         <i class="text-muted">(company, args, pos_profile=None)</i>
     </p>
@@ -484,7 +510,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_price_list_currency" href="#erpnext.stock.get_item_details.get_price_list_currency" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_price_list_currency</b>
         <i class="text-muted">(price_list)</i>
     </p>
@@ -500,7 +526,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_price_list_currency_and_exchange_rate" href="#erpnext.stock.get_item_details.get_price_list_currency_and_exchange_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_price_list_currency_and_exchange_rate</b>
         <i class="text-muted">(args)</i>
     </p>
@@ -516,7 +542,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_price_list_rate" href="#erpnext.stock.get_item_details.get_price_list_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_price_list_rate</b>
         <i class="text-muted">(args, item_doc, out)</i>
     </p>
@@ -532,7 +558,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_price_list_rate_for" href="#erpnext.stock.get_item_details.get_price_list_rate_for" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_price_list_rate_for</b>
         <i class="text-muted">(price_list, item_code)</i>
     </p>
@@ -550,9 +576,45 @@
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_projected_qty" href="#erpnext.stock.get_item_details.get_projected_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_projected_qty</b>
         <i class="text-muted">(item_code, warehouse)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.get_serial_no</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_serial_no" href="#erpnext.stock.get_item_details.get_serial_no" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_serial_no</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.get_serial_no_details</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_serial_no_details" href="#erpnext.stock.get_item_details.get_serial_no_details" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_serial_no_details</b>
+        <i class="text-muted">(item_code, warehouse, stock_qty, serial_no)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -566,9 +628,9 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_serial_nos_by_fifo" href="#erpnext.stock.get_item_details.get_serial_nos_by_fifo" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_serial_nos_by_fifo</b>
-        <i class="text-muted">(args, item_doc)</i>
+        <i class="text-muted">(args)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -582,7 +644,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.get_valuation_rate" href="#erpnext.stock.get_item_details.get_valuation_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>get_valuation_rate</b>
         <i class="text-muted">(item_code, warehouse=None)</i>
     </p>
@@ -598,7 +660,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.insert_item_price" href="#erpnext.stock.get_item_details.insert_item_price" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>insert_item_price</b>
         <i class="text-muted">(args)</i>
     </p>
@@ -614,7 +676,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.process_args" href="#erpnext.stock.get_item_details.process_args" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>process_args</b>
         <i class="text-muted">(args)</i>
     </p>
@@ -630,7 +692,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.validate_conversion_rate" href="#erpnext.stock.get_item_details.validate_conversion_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>validate_conversion_rate</b>
         <i class="text-muted">(args, meta)</i>
     </p>
@@ -646,7 +708,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.validate_item_details" href="#erpnext.stock.get_item_details.validate_item_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>validate_item_details</b>
         <i class="text-muted">(args, item)</i>
     </p>
@@ -662,7 +724,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.get_item_details.validate_price_list" href="#erpnext.stock.get_item_details.validate_price_list" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.get_item_details.<b>validate_price_list</b>
         <i class="text-muted">(args)</i>
     </p>
@@ -676,8 +738,8 @@
 
 <!-- autodoc -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -707,7 +769,7 @@
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -728,5 +790,17 @@
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

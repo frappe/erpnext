@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/manufacturing/production_planning_tool">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/manufacturing/production_planning_tool" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/manufacturing">
 		Module manufacturing</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Production Planning Tool</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Production Planning Tool</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Production Planning Tool -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/manufacturing/doctype/production_planning_tool"
@@ -459,19 +465,6 @@ Material Request</pre>
         
         <tr >
             <td>19</td>
-            <td ><code>use_multi_level_bom</code></td>
-            <td >
-                Check</td>
-            <td >
-                Use Multi-Level BOM
-                <p class="text-muted small">
-                    If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.</p>
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>20</td>
             <td ><code>items</code></td>
             <td >
                 Table</td>
@@ -492,7 +485,7 @@ Material Request</pre>
         </tr>
         
         <tr class="info">
-            <td>21</td>
+            <td>20</td>
             <td ><code>create_production_orders</code></td>
             <td >
                 Section Break</td>
@@ -504,7 +497,7 @@ Material Request</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>21</td>
             <td ><code>create_production_order</code></td>
             <td >
                 Button</td>
@@ -517,7 +510,7 @@ Material Request</pre>
         </tr>
         
         <tr class="info">
-            <td>23</td>
+            <td>22</td>
             <td ><code>sb5</code></td>
             <td >
                 Section Break</td>
@@ -529,7 +522,7 @@ Material Request</pre>
         </tr>
         
         <tr >
-            <td>24</td>
+            <td>23</td>
             <td ><code>purchase_request_for_warehouse</code></td>
             <td >
                 Link</td>
@@ -550,7 +543,7 @@ Material Request</pre>
         </tr>
         
         <tr >
-            <td>25</td>
+            <td>24</td>
             <td ><code>create_material_requests_for_all_required_qty</code></td>
             <td >
                 Check</td>
@@ -562,7 +555,7 @@ Material Request</pre>
         </tr>
         
         <tr >
-            <td>26</td>
+            <td>25</td>
             <td ><code>create_material_requests</code></td>
             <td >
                 Button</td>
@@ -574,7 +567,7 @@ Material Request</pre>
         </tr>
         
         <tr >
-            <td>27</td>
+            <td>26</td>
             <td ><code>download_materials_required</code></td>
             <td >
                 Button</td>
@@ -582,6 +575,70 @@ Material Request</pre>
                 Download Materials Required
                 <p class="text-muted small">
                     Download a report containing all raw materials with their latest inventory status</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>27</td>
+            <td ><code>column_break_2</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>28</td>
+            <td ><code>create_material_requests_non_stock_request</code></td>
+            <td >
+                Check</td>
+            <td >
+                Include non-stock items
+                <p class="text-muted small">
+                    If checked, Will include non-stock items in the Material Requests.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>29</td>
+            <td ><code>use_multi_level_bom</code></td>
+            <td >
+                Check</td>
+            <td >
+                Use Multi-Level BOM
+                <p class="text-muted small">
+                    If checked, all the children of each production item will be included in the Material Requests.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>30</td>
+            <td ><code>only_raw_materials</code></td>
+            <td >
+                Check</td>
+            <td >
+                Only Obtain Raw Materials
+                <p class="text-muted small">
+                    If checked, only Purchase material requests for final raw materials will be included in the Material Requests. Otherwise, Material Requests for parent items will be created</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>31</td>
+            <td ><code>include_subcontracted</code></td>
+            <td >
+                Check</td>
+            <td >
+                Include sub-contracted raw materials
+                <p class="text-muted small">
+                    If checked, raw materials for items that are sub-contracted will be included in the Material Requests</p>
             </td>
             <td></td>
         </tr>
@@ -613,7 +670,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="__init__" href="#__init__" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>__init__</b>
         <i class="text-muted">(self, arg1, arg2=None)</i>
     </p>
@@ -627,7 +684,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="add_items" href="#add_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>add_items</b>
         <i class="text-muted">(self, items)</i>
     </p>
@@ -641,7 +698,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="add_mr_in_table" href="#add_mr_in_table" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>add_mr_in_table</b>
         <i class="text-muted">(self, pending_mr)</i>
     </p>
@@ -655,7 +712,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="add_so_in_table" href="#add_so_in_table" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>add_so_in_table</b>
         <i class="text-muted">(self, open_so)</i>
     </p>
@@ -669,7 +726,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="clear_table" href="#clear_table" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>clear_table</b>
         <i class="text-muted">(self, table_name)</i>
     </p>
@@ -683,7 +740,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="create_material_request" href="#create_material_request" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>create_material_request</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -697,7 +754,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="create_production_order" href="#create_production_order" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>create_production_order</b>
         <i class="text-muted">(self, item_dict)</i>
     </p>
@@ -711,7 +768,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="download_raw_materials" href="#download_raw_materials" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>download_raw_materials</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -725,7 +782,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="get_csv" href="#get_csv" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_csv</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -738,8 +795,22 @@ Material Request</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="get_item_projected_qty" href="#get_item_projected_qty" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_item_projected_qty</b>
+        <i class="text-muted">(self, item)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="get_items" href="#get_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_items</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -753,7 +824,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="get_mr_items" href="#get_mr_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_mr_items</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -767,7 +838,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="get_open_sales_orders" href="#get_open_sales_orders" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_open_sales_orders</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -781,7 +852,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="get_pending_material_requests" href="#get_pending_material_requests" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_pending_material_requests</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -795,7 +866,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="get_production_items" href="#get_production_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_production_items</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -809,7 +880,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="get_projected_qty" href="#get_projected_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_projected_qty</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -823,14 +894,14 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="get_raw_materials" href="#get_raw_materials" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_raw_materials</b>
-        <i class="text-muted">(self, bom_dict)</i>
+        <i class="text-muted">(self, bom_dict, non_stock_item=0)</i>
     </p>
 	<div class="docs-attr-desc"><p>Get raw materials considering sub-assembly items
-{
-    "item<em>code": [qty</em>required, description, stock<em>uom, min</em>order_qty]
-}</p>
+            {
+                "item<em>code": [qty</em>required, description, stock<em>uom, min</em>order_qty]
+            }</p>
 </div>
 	<br>
 
@@ -840,7 +911,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="get_requested_items" href="#get_requested_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_requested_items</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -854,7 +925,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="get_so_items" href="#get_so_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_so_items</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -868,13 +939,28 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="get_so_wise_planned_qty" href="#get_so_wise_planned_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_so_wise_planned_qty</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>bom<em>dict {
-    bom</em>no: ['sales_order', 'qty']
-}</p>
+	<div class="docs-attr-desc"><pre><code>        bom_dict {
+            bom_no: ['sales_order', 'qty']
+        }
+</code></pre>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_subitems" href="#get_subitems" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_subitems</b>
+        <i class="text-muted">(self, bom_wise_item_details, bom, parent_qty, include_sublevel, only_raw, supply_subs, non_stock_item=0)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -884,7 +970,7 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="make_items_dict" href="#make_items_dict" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>make_items_dict</b>
         <i class="text-muted">(self, item_list)</i>
     </p>
@@ -898,12 +984,13 @@ Material Request</pre>
     
 	<p class="docs-attr-name">
         <a name="raise_material_requests" href="#raise_material_requests" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>raise_material_requests</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Raise Material Request if projected qty is less than qty required
-Requested qty should be shortage qty considering minimum order qty</p>
+	<div class="docs-attr-desc"><pre><code>        Raise Material Request if projected qty is less than qty required
+        Requested qty should be shortage qty considering minimum order qty
+</code></pre>
 </div>
 	<br>
 
@@ -913,7 +1000,7 @@ Requested qty should be shortage qty considering minimum order qty</p>
     
 	<p class="docs-attr-name">
         <a name="raise_production_orders" href="#raise_production_orders" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>raise_production_orders</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -927,7 +1014,7 @@ Requested qty should be shortage qty considering minimum order qty</p>
     
 	<p class="docs-attr-name">
         <a name="validate_company" href="#validate_company" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_company</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -941,7 +1028,7 @@ Requested qty should be shortage qty considering minimum order qty</p>
     
 	<p class="docs-attr-name">
         <a name="validate_data" href="#validate_data" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_data</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -964,8 +1051,8 @@ Requested qty should be shortage qty considering minimum order qty</p>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -995,7 +1082,7 @@ Requested qty should be shortage qty considering minimum order qty</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -1016,5 +1103,17 @@ Requested qty should be shortage qty considering minimum order qty</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/hr/leave_application">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/hr/leave_application" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/hr">
 		Module hr</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Leave Application</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Leave Application</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Leave Application -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/hr/doctype/leave_application"
@@ -175,6 +181,20 @@ Apply / Approve Leaves
         
         <tr >
             <td>1</td>
+            <td class="danger" title="Mandatory"><code>naming_series</code></td>
+            <td >
+                Select</td>
+            <td >
+                Series
+                
+            </td>
+            <td>
+                <pre>LAP/</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
             <td ><code>status</code></td>
             <td >
                 Select</td>
@@ -190,7 +210,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>2</td>
+            <td>3</td>
             <td ><code>column_break_12</code></td>
             <td class="info">
                 Column Break</td>
@@ -202,7 +222,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>3</td>
+            <td>4</td>
             <td class="danger" title="Mandatory"><code>leave_type</code></td>
             <td >
                 Link</td>
@@ -223,7 +243,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>4</td>
+            <td>5</td>
             <td ><code>leave_balance</code></td>
             <td >
                 Float</td>
@@ -235,7 +255,7 @@ Rejected</pre>
         </tr>
         
         <tr class="info">
-            <td>5</td>
+            <td>6</td>
             <td ><code>section_break_5</code></td>
             <td >
                 Section Break</td>
@@ -247,7 +267,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>7</td>
             <td class="danger" title="Mandatory"><code>from_date</code></td>
             <td >
                 Date</td>
@@ -259,7 +279,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>7</td>
+            <td>8</td>
             <td class="danger" title="Mandatory"><code>to_date</code></td>
             <td >
                 Date</td>
@@ -271,7 +291,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>8</td>
+            <td>9</td>
             <td ><code>half_day</code></td>
             <td >
                 Check</td>
@@ -283,7 +303,19 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>9</td>
+            <td>10</td>
+            <td ><code>half_day_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Half Day Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
             <td ><code>total_leave_days</code></td>
             <td >
                 Float</td>
@@ -295,7 +327,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>12</td>
             <td ><code>column_break1</code></td>
             <td class="info">
                 Column Break</td>
@@ -307,7 +339,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>13</td>
             <td ><code>description</code></td>
             <td >
                 Small Text</td>
@@ -319,7 +351,7 @@ Rejected</pre>
         </tr>
         
         <tr class="info">
-            <td>12</td>
+            <td>14</td>
             <td ><code>section_break_7</code></td>
             <td >
                 Section Break</td>
@@ -331,7 +363,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>15</td>
             <td class="danger" title="Mandatory"><code>employee</code></td>
             <td >
                 Link</td>
@@ -352,7 +384,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>16</td>
             <td ><code>employee_name</code></td>
             <td >
                 Data</td>
@@ -364,7 +396,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>17</td>
             <td ><code>column_break_15</code></td>
             <td class="info">
                 Column Break</td>
@@ -376,7 +408,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>18</td>
             <td ><code>leave_approver</code></td>
             <td >
                 Link</td>
@@ -397,7 +429,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>19</td>
             <td ><code>leave_approver_name</code></td>
             <td >
                 Read Only</td>
@@ -409,7 +441,7 @@ Rejected</pre>
         </tr>
         
         <tr class="info">
-            <td>18</td>
+            <td>20</td>
             <td ><code>sb10</code></td>
             <td >
                 Section Break</td>
@@ -421,7 +453,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>21</td>
             <td class="danger" title="Mandatory"><code>posting_date</code></td>
             <td >
                 Date</td>
@@ -433,7 +465,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>22</td>
             <td ><code>follow_via_email</code></td>
             <td >
                 Check</td>
@@ -445,7 +477,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>23</td>
             <td ><code>column_break_17</code></td>
             <td class="info">
                 Column Break</td>
@@ -457,7 +489,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>24</td>
             <td class="danger" title="Mandatory"><code>company</code></td>
             <td >
                 Link</td>
@@ -478,7 +510,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>23</td>
+            <td>25</td>
             <td ><code>letter_head</code></td>
             <td >
                 Link</td>
@@ -499,7 +531,7 @@ Rejected</pre>
         </tr>
         
         <tr >
-            <td>24</td>
+            <td>26</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -533,6 +565,21 @@ Rejected</pre>
 
 	
         
+	<h3 style="font-weight: normal;">Class <b>AttendanceAlreadyMarkedError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
 	<h3 style="font-weight: normal;">Class <b>InvalidLeaveApproverError</b></h3>
     
     <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
@@ -561,7 +608,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="get_feed" href="#get_feed" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_feed</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -575,7 +622,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="get_total_leaves_on_half_day" href="#get_total_leaves_on_half_day" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_total_leaves_on_half_day</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -589,7 +636,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="notify" href="#notify" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>notify</b>
         <i class="text-muted">(self, args)</i>
     </p>
@@ -603,7 +650,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="notify_employee" href="#notify_employee" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>notify_employee</b>
         <i class="text-muted">(self, status)</i>
     </p>
@@ -617,7 +664,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="notify_leave_approver" href="#notify_leave_approver" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>notify_leave_approver</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -631,7 +678,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="on_cancel" href="#on_cancel" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_cancel</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -645,7 +692,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="on_submit" href="#on_submit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_submit</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -659,7 +706,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="on_update" href="#on_update" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_update</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -673,7 +720,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="show_block_day_warning" href="#show_block_day_warning" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>show_block_day_warning</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -687,7 +734,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="throw_overlap_error" href="#throw_overlap_error" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>throw_overlap_error</b>
         <i class="text-muted">(self, d)</i>
     </p>
@@ -701,7 +748,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -714,8 +761,22 @@ Rejected</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="validate_attendance" href="#validate_attendance" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_attendance</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="validate_back_dated_application" href="#validate_back_dated_application" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_back_dated_application</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -729,7 +790,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_balance_leaves" href="#validate_balance_leaves" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_balance_leaves</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -743,7 +804,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_block_days" href="#validate_block_days" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_block_days</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -757,7 +818,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_dates" href="#validate_dates" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_dates</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -771,7 +832,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_dates_acorss_allocation" href="#validate_dates_acorss_allocation" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_dates_acorss_allocation</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -785,7 +846,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_leave_approver" href="#validate_leave_approver" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_leave_approver</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -799,7 +860,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_leave_overlap" href="#validate_leave_overlap" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_leave_overlap</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -813,8 +874,22 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_max_days" href="#validate_max_days" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_max_days</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_salary_processed_days" href="#validate_salary_processed_days" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_salary_processed_days</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -878,7 +953,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.add_block_dates" href="#erpnext.hr.doctype.leave_application.leave_application.add_block_dates" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>add_block_dates</b>
         <i class="text-muted">(events, start, end, employee, company)</i>
     </p>
@@ -894,7 +969,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.add_department_leaves" href="#erpnext.hr.doctype.leave_application.leave_application.add_department_leaves" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>add_department_leaves</b>
         <i class="text-muted">(events, start, end, employee, company)</i>
     </p>
@@ -910,7 +985,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.add_holidays" href="#erpnext.hr.doctype.leave_application.leave_application.add_holidays" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>add_holidays</b>
         <i class="text-muted">(events, start, end, employee, company)</i>
     </p>
@@ -926,7 +1001,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.add_leaves" href="#erpnext.hr.doctype.leave_application.leave_application.add_leaves" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>add_leaves</b>
         <i class="text-muted">(events, start, end, match_conditions=None)</i>
     </p>
@@ -942,7 +1017,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.get_approved_leaves_for_period" href="#erpnext.hr.doctype.leave_application.leave_application.get_approved_leaves_for_period" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>get_approved_leaves_for_period</b>
         <i class="text-muted">(employee, leave_type, from_date, to_date)</i>
     </p>
@@ -960,7 +1035,7 @@ Rejected</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.get_approvers" href="#erpnext.hr.doctype.leave_application.leave_application.get_approvers" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>get_approvers</b>
         <i class="text-muted">(doctype, txt, searchfield, start, page_len, filters)</i>
     </p>
@@ -978,7 +1053,7 @@ Rejected</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.get_events" href="#erpnext.hr.doctype.leave_application.leave_application.get_events" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>get_events</b>
         <i class="text-muted">(start, end)</i>
     </p>
@@ -994,7 +1069,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.get_holidays" href="#erpnext.hr.doctype.leave_application.leave_application.get_holidays" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>get_holidays</b>
         <i class="text-muted">(employee, from_date, to_date)</i>
     </p>
@@ -1010,7 +1085,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.get_leave_allocation_records" href="#erpnext.hr.doctype.leave_application.leave_application.get_leave_allocation_records" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>get_leave_allocation_records</b>
         <i class="text-muted">(date, employee=None)</i>
     </p>
@@ -1028,7 +1103,7 @@ Rejected</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.get_leave_balance_on" href="#erpnext.hr.doctype.leave_application.leave_application.get_leave_balance_on" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>get_leave_balance_on</b>
         <i class="text-muted">(employee, leave_type, date, allocation_records=None, consider_all_leaves_in_the_allocation_period=False)</i>
     </p>
@@ -1046,9 +1121,9 @@ Rejected</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.get_number_of_leave_days" href="#erpnext.hr.doctype.leave_application.leave_application.get_number_of_leave_days" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>get_number_of_leave_days</b>
-        <i class="text-muted">(employee, leave_type, from_date, to_date, half_day=None)</i>
+        <i class="text-muted">(employee, leave_type, from_date, to_date, half_day=None, half_day_date=None)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1062,7 +1137,7 @@ Rejected</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.hr.doctype.leave_application.leave_application.is_lwp" href="#erpnext.hr.doctype.leave_application.leave_application.is_lwp" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.hr.doctype.leave_application.leave_application.<b>is_lwp</b>
         <i class="text-muted">(leave_type)</i>
     </p>
@@ -1095,8 +1170,8 @@ Rejected</pre>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -1126,7 +1201,7 @@ Rejected</pre>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -1147,5 +1222,17 @@ Rejected</pre>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

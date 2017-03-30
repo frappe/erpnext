@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/api">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/api" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current">
 		ERPNext: Developer Docs</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>ERPNext API</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>ERPNext API</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: ERPNext API -->
 
 
@@ -140,7 +146,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext"
@@ -158,122 +164,17 @@
     <ol>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.__init__">frappe.__init__</a>
+            <a href="https://frappe.github.io/erpnext/current/api/erpnext.__init__">erpnext.__init__</a>
             
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.api">frappe.api</a>
+            <a href="https://frappe.github.io/erpnext/current/api/erpnext.exceptions">erpnext.exceptions</a>
             
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.app">frappe.app</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.async">frappe.async</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.auth">frappe.auth</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.boot">frappe.boot</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.build">frappe.build</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.client">frappe.client</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.database">frappe.database</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.defaults">frappe.defaults</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.exceptions">frappe.exceptions</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.frappeclient">frappe.frappeclient</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.handler">frappe.handler</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.hooks">frappe.hooks</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.installer">frappe.installer</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.limits">frappe.limits</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.middlewares">frappe.middlewares</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.migrate">frappe.migrate</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.permissions">frappe.permissions</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.pythonrc">frappe.pythonrc</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.sessions">frappe.sessions</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.share">frappe.share</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.test_runner">frappe.test_runner</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/frappe.translate">frappe.translate</a>
+            <a href="https://frappe.github.io/erpnext/current/api/erpnext.hooks">erpnext.hooks</a>
             
         </li>
     
@@ -357,6 +258,43 @@
 			
         </li>
     
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/hr/web_form">web_form</a>
+            
+				
+    <ol>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/hr/web_form/erpnext.hr.web_form">erpnext.hr.web_form</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/hr/web_form/job_application">job_application</a>
+            
+				
+    <ol>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/hr/web_form/job_application/erpnext.hr.web_form.job_application">erpnext.hr.web_form.job_application</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/hr/web_form/job_application/erpnext.hr.web_form.job_application.job_application">erpnext.hr.web_form.job_application.job_application</a>
+            
+        </li>
+    
+    </ol>
+
+			
+        </li>
+    
+    </ol>
+
+			
+        </li>
+    
     </ol>
 
 			
@@ -421,11 +359,6 @@
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/erpnext.exceptions">erpnext.exceptions</a>
-            
-        </li>
-    
-        <li>
             <a href="https://frappe.github.io/erpnext/current/api/support">support</a>
             
 				
@@ -471,233 +404,6 @@
     </ol>
 
 			
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/portal">portal</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/portal/erpnext.portal">erpnext.portal</a>
-            
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils">utils</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.autodoc">frappe.utils.autodoc</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.background_jobs">frappe.utils.background_jobs</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.backups">frappe.utils.backups</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.bench_helper">frappe.utils.bench_helper</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.boilerplate">frappe.utils.boilerplate</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.bot">frappe.utils.bot</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.change_log">frappe.utils.change_log</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.csvutils">frappe.utils.csvutils</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.data">frappe.utils.data</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.dateutils">frappe.utils.dateutils</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.doctor">frappe.utils.doctor</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.error">frappe.utils.error</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.file_lock">frappe.utils.file_lock</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.file_manager">frappe.utils.file_manager</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.fixtures">frappe.utils.fixtures</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.formatters">frappe.utils.formatters</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.help">frappe.utils.help</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils">frappe.utils</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.identicon">frappe.utils.identicon</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.image">frappe.utils.image</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.install">frappe.utils.install</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.jinja">frappe.utils.jinja</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.logger">frappe.utils.logger</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.make_random">frappe.utils.make_random</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.minify">frappe.utils.minify</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.momentjs">frappe.utils.momentjs</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.nestedset">frappe.utils.nestedset</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.oauth">frappe.utils.oauth</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.password">frappe.utils.password</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.password_strength">frappe.utils.password_strength</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.pdf">frappe.utils.pdf</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.print_format">frappe.utils.print_format</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.redis_wrapper">frappe.utils.redis_wrapper</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.response">frappe.utils.response</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.scheduler">frappe.utils.scheduler</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.sel">frappe.utils.sel</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.setup_docs">frappe.utils.setup_docs</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.testutils">frappe.utils.testutils</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.user">frappe.utils.user</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utils/frappe.utils.verified_command">frappe.utils.verified_command</a>
-            
         </li>
     
     </ol>
@@ -754,11 +460,6 @@
     
         <li>
             <a href="https://frappe.github.io/erpnext/current/api/accounts/erpnext.accounts.party">erpnext.accounts.party</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/accounts/erpnext.accounts.party_status">erpnext.accounts.party_status</a>
             
         </li>
     
@@ -885,11 +586,6 @@
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/erpnext.__init__">erpnext.__init__</a>
-            
-        </li>
-    
-        <li>
             <a href="https://frappe.github.io/erpnext/current/api/demo">demo</a>
             
 				
@@ -907,11 +603,6 @@
     
         <li>
             <a href="https://frappe.github.io/erpnext/current/api/demo/erpnext.demo">erpnext.demo</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/demo/erpnext.demo.setup_data">erpnext.demo.setup_data</a>
             
         </li>
     
@@ -962,6 +653,11 @@
         </li>
     
         <li>
+            <a href="https://frappe.github.io/erpnext/current/api/demo/user/erpnext.demo.user.schools">erpnext.demo.user.schools</a>
+            
+        </li>
+    
+        <li>
             <a href="https://frappe.github.io/erpnext/current/api/demo/user/erpnext.demo.user.stock">erpnext.demo.user.stock</a>
             
         </li>
@@ -971,149 +667,35 @@
 			
         </li>
     
-    </ol>
-
-			
-        </li>
-    
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/commands">commands</a>
+            <a href="https://frappe.github.io/erpnext/current/api/demo/setup">setup</a>
             
 				
     <ol>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/commands/frappe.commands.docs">frappe.commands.docs</a>
+            <a href="https://frappe.github.io/erpnext/current/api/demo/setup/erpnext.demo.setup.education">erpnext.demo.setup.education</a>
             
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/commands/frappe.commands">frappe.commands</a>
+            <a href="https://frappe.github.io/erpnext/current/api/demo/setup/erpnext.demo.setup">erpnext.demo.setup</a>
             
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/commands/frappe.commands.scheduler">frappe.commands.scheduler</a>
+            <a href="https://frappe.github.io/erpnext/current/api/demo/setup/erpnext.demo.setup.manufacture">erpnext.demo.setup.manufacture</a>
             
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/commands/frappe.commands.site">frappe.commands.site</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/commands/frappe.commands.translate">frappe.commands.translate</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/commands/frappe.commands.utils">frappe.commands.utils</a>
+            <a href="https://frappe.github.io/erpnext/current/api/demo/setup/erpnext.demo.setup.setup_data">erpnext.demo.setup.setup_data</a>
             
         </li>
     
     </ol>
 
 			
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/geo">geo</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/geo/frappe.geo.country_info">frappe.geo.country_info</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/geo/frappe.geo">frappe.geo</a>
-            
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/modules">modules</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/modules/frappe.modules.export_file">frappe.modules.export_file</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/modules/frappe.modules">frappe.modules</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/modules/frappe.modules.import_file">frappe.modules.import_file</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/modules/frappe.modules.patch_handler">frappe.modules.patch_handler</a>
-            
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/print">print</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/print/frappe.print">frappe.print</a>
-            
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/email">email</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/email/frappe.email.email_body">frappe.email.email_body</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/email/frappe.email">frappe.email</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/email/frappe.email.queue">frappe.email.queue</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/email/frappe.email.receive">frappe.email.receive</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/email/frappe.email.smtp">frappe.email.smtp</a>
-            
         </li>
     
     </ol>
@@ -1128,7 +710,7 @@
     <ol>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/utilities/erpnext.utilities.address_and_contact">erpnext.utilities.address_and_contact</a>
+            <a href="https://frappe.github.io/erpnext/current/api/utilities/erpnext.utilities.activation">erpnext.utilities.activation</a>
             
         </li>
     
@@ -1198,79 +780,6 @@
         <li>
             <a href="https://frappe.github.io/erpnext/current/api/selling/erpnext.selling">erpnext.selling</a>
             
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/website">website</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/website/frappe.website.context">frappe.website.context</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/website/frappe.website">frappe.website</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/website/frappe.website.render">frappe.website.render</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/website/frappe.website.router">frappe.website.router</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/website/frappe.website.utils">frappe.website.utils</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/website/frappe.website.website_generator">frappe.website.website_generator</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/website/website_theme">website_theme</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/website/website_theme/frappe.website.website_theme">frappe.website.website_theme</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/website/website_theme/standard">standard</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/website/website_theme/standard/frappe.website.website_theme.standard">frappe.website.website_theme.standard</a>
-            
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-    </ol>
-
-			
         </li>
     
     </ol>
@@ -1360,146 +869,41 @@
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/custom">custom</a>
+            <a href="https://frappe.github.io/erpnext/current/api/buying">buying</a>
             
 				
     <ol>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/custom/frappe.custom">frappe.custom</a>
+            <a href="https://frappe.github.io/erpnext/current/api/buying/erpnext.buying">erpnext.buying</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/buying/print_format">print_format</a>
+            
+				
+    <ol>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/buying/print_format/erpnext.buying.print_format">erpnext.buying.print_format</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/buying/print_format/drop_shipping_format">drop_shipping_format</a>
+            
+				
+    <ol>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/buying/print_format/drop_shipping_format/erpnext.buying.print_format.drop_shipping_format">erpnext.buying.print_format.drop_shipping_format</a>
             
         </li>
     
     </ol>
 
 			
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk">desk</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.calendar">frappe.desk.calendar</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.desk_page">frappe.desk.desk_page</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk">frappe.desk</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.like">frappe.desk.like</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.moduleview">frappe.desk.moduleview</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.notifications">frappe.desk.notifications</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.query_builder">frappe.desk.query_builder</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.query_report">frappe.desk.query_report</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.report_dump">frappe.desk.report_dump</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.reportview">frappe.desk.reportview</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.search">frappe.desk.search</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.tags">frappe.desk.tags</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/frappe.desk.treeview">frappe.desk.treeview</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/form">form</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/form/frappe.desk.form.assign_to">frappe.desk.form.assign_to</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/form/frappe.desk.form.document_flow">frappe.desk.form.document_flow</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/form/frappe.desk.form">frappe.desk.form</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/form/frappe.desk.form.linked_with">frappe.desk.form.linked_with</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/form/frappe.desk.form.load">frappe.desk.form.load</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/form/frappe.desk.form.meta">frappe.desk.form.meta</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/form/frappe.desk.form.run_method">frappe.desk.form.run_method</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/form/frappe.desk.form.save">frappe.desk.form.save</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/form/frappe.desk.form.test_form">frappe.desk.form.test_form</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/desk/form/frappe.desk.form.utils">frappe.desk.form.utils</a>
-            
         </li>
     
     </ol>
@@ -1545,6 +949,27 @@
         </li>
     
         <li>
+            <a href="https://frappe.github.io/erpnext/current/api/schools/web_form/student_applicant">student_applicant</a>
+            
+				
+    <ol>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/schools/web_form/student_applicant/erpnext.schools.web_form.student_applicant">erpnext.schools.web_form.student_applicant</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/schools/web_form/student_applicant/erpnext.schools.web_form.student_applicant.student_applicant">erpnext.schools.web_form.student_applicant.student_applicant</a>
+            
+        </li>
+    
+    </ol>
+
+			
+        </li>
+    
+        <li>
             <a href="https://frappe.github.io/erpnext/current/api/schools/web_form/discussion">discussion</a>
             
 				
@@ -1576,18 +1001,13 @@
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/core">core</a>
+            <a href="https://frappe.github.io/erpnext/current/api/portal">portal</a>
             
 				
     <ol>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/core/frappe.core">frappe.core</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/core/frappe.core.notifications">frappe.core.notifications</a>
+            <a href="https://frappe.github.io/erpnext/current/api/portal/erpnext.portal">erpnext.portal</a>
             
         </li>
     
@@ -1604,22 +1024,6 @@
     
         <li>
             <a href="https://frappe.github.io/erpnext/current/api/maintenance/erpnext.maintenance">erpnext.maintenance</a>
-            
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/workflow">workflow</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/workflow/frappe.workflow">frappe.workflow</a>
             
         </li>
     
@@ -1711,108 +1115,13 @@
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www">www</a>
+            <a href="https://frappe.github.io/erpnext/current/api/hub_node">hub_node</a>
             
 				
     <ol>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.404">frappe.www.404</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.about">frappe.www.about</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.complete_signup">frappe.www.complete_signup</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.contact">frappe.www.contact</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.desk">frappe.www.desk</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.edit_profile">frappe.www.edit_profile</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.error">frappe.www.error</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www">frappe.www</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.list">frappe.www.list</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.login">frappe.www.login</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.me">frappe.www.me</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.message">frappe.www.message</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.print">frappe.www.print</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.profile">frappe.www.profile</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.robots">frappe.www.robots</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.rss">frappe.www.rss</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.sitemap">frappe.www.sitemap</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.update_password">frappe.www.update_password</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.website_script">frappe.www.website_script</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/www/frappe.www.website_theme">frappe.www.website_theme</a>
+            <a href="https://frappe.github.io/erpnext/current/api/hub_node/erpnext.hub_node">erpnext.hub_node</a>
             
         </li>
     
@@ -1849,22 +1158,6 @@
     
         <li>
             <a href="https://frappe.github.io/erpnext/current/api/shopping_cart/erpnext.shopping_cart.utils">erpnext.shopping_cart.utils</a>
-            
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/integrations">integrations</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/integrations/frappe.integrations">frappe.integrations</a>
             
         </li>
     
@@ -1936,200 +1229,13 @@
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model">model</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.base_document">frappe.model.base_document</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.create_new">frappe.model.create_new</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.db_query">frappe.model.db_query</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.db_schema">frappe.model.db_schema</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.delete_doc">frappe.model.delete_doc</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.docfield">frappe.model.docfield</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.document">frappe.model.document</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.dynamic_links">frappe.model.dynamic_links</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model">frappe.model</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.mapper">frappe.model.mapper</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.meta">frappe.model.meta</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.naming">frappe.model.naming</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.rename_doc">frappe.model.rename_doc</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.sync">frappe.model.sync</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/frappe.model.workflow">frappe.model.workflow</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/utils">utils</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/utils/frappe.model.utils">frappe.model.utils</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/utils/frappe.model.utils.link_count">frappe.model.utils.link_count</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/utils/frappe.model.utils.list_settings">frappe.model.utils.list_settings</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/model/utils/frappe.model.utils.rename_field">frappe.model.utils.rename_field</a>
-            
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-        <li>
             <a href="https://frappe.github.io/erpnext/current/api/config">config</a>
             
 				
     <ol>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/frappe.config.core">frappe.config.core</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/frappe.config.desk">frappe.config.desk</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/frappe.config.desktop">frappe.config.desktop</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/frappe.config.docs">frappe.config.docs</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/frappe.config">frappe.config</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/frappe.config.setup">frappe.config.setup</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/frappe.config.tools">frappe.config.tools</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/frappe.config.website">frappe.config.website</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.stock">erpnext.config.stock</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.manufacturing">erpnext.config.manufacturing</a>
-            
-        </li>
-    
-        <li>
             <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.accounts">erpnext.config.accounts</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.maintenance">erpnext.config.maintenance</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.learn">erpnext.config.learn</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.projects">erpnext.config.projects</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.crm">erpnext.config.crm</a>
             
         </li>
     
@@ -2139,12 +1245,52 @@
         </li>
     
         <li>
+            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.crm">erpnext.config.crm</a>
+            
+        </li>
+    
+        <li>
             <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.desktop">erpnext.config.desktop</a>
             
         </li>
     
         <li>
+            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.docs">erpnext.config.docs</a>
+            
+        </li>
+    
+        <li>
             <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.hr">erpnext.config.hr</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config">erpnext.config</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.learn">erpnext.config.learn</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.maintenance">erpnext.config.maintenance</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.manufacturing">erpnext.config.manufacturing</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.projects">erpnext.config.projects</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.schools">erpnext.config.schools</a>
             
         </li>
     
@@ -2159,17 +1305,7 @@
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.schools">erpnext.config.schools</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.docs">erpnext.config.docs</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config">erpnext.config</a>
+            <a href="https://frappe.github.io/erpnext/current/api/config/erpnext.config.stock">erpnext.config.stock</a>
             
         </li>
     
@@ -2204,80 +1340,11 @@
 			
         </li>
     
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/buying">buying</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/buying/erpnext.buying">erpnext.buying</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/buying/print_format">print_format</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/buying/print_format/erpnext.buying.print_format">erpnext.buying.print_format</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/buying/print_format/drop_shipping_format">drop_shipping_format</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/buying/print_format/drop_shipping_format/erpnext.buying.print_format.drop_shipping_format">erpnext.buying.print_format.drop_shipping_format</a>
-            
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/erpnext.hooks">erpnext.hooks</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/hub_node">hub_node</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/current/api/hub_node/erpnext.hub_node">erpnext.hub_node</a>
-            
-        </li>
-    
-    </ol>
-
-			
-        </li>
-    
     </ol>
 
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -2307,7 +1374,7 @@
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -2328,5 +1395,17 @@
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

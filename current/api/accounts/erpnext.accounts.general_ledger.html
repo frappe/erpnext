@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/api/accounts/erpnext.accounts.general_ledger">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,49 +99,50 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/api/accounts/erpnext.accounts.general_ledger" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/api/accounts">
 		accounts</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>erpnext.accounts.general_ledger</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>erpnext.accounts.general_ledger</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: erpnext.accounts.general_ledger --><div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/accounts/general_ledger.py"
@@ -169,7 +175,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.general_ledger.check_if_in_list" href="#erpnext.accounts.general_ledger.check_if_in_list" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.general_ledger.<b>check_if_in_list</b>
         <i class="text-muted">(gle, gl_map)</i>
     </p>
@@ -185,7 +191,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.general_ledger.delete_gl_entries" href="#erpnext.accounts.general_ledger.delete_gl_entries" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.general_ledger.<b>delete_gl_entries</b>
         <i class="text-muted">(gl_entries=None, voucher_type=None, voucher_no=None, adv_adj=False, update_outstanding=Yes)</i>
     </p>
@@ -201,9 +207,9 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.general_ledger.make_entry" href="#erpnext.accounts.general_ledger.make_entry" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.general_ledger.<b>make_entry</b>
-        <i class="text-muted">(args, adv_adj, update_outstanding)</i>
+        <i class="text-muted">(args, adv_adj, update_outstanding, from_repost=False)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -217,9 +223,9 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.general_ledger.make_gl_entries" href="#erpnext.accounts.general_ledger.make_gl_entries" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.general_ledger.<b>make_gl_entries</b>
-        <i class="text-muted">(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding=Yes)</i>
+        <i class="text-muted">(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding=Yes, from_repost=False)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -233,7 +239,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.general_ledger.make_round_off_gle" href="#erpnext.accounts.general_ledger.make_round_off_gle" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.general_ledger.<b>make_round_off_gle</b>
         <i class="text-muted">(gl_map, debit_credit_diff)</i>
     </p>
@@ -249,7 +255,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.general_ledger.merge_similar_entries" href="#erpnext.accounts.general_ledger.merge_similar_entries" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.general_ledger.<b>merge_similar_entries</b>
         <i class="text-muted">(gl_map)</i>
     </p>
@@ -265,7 +271,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.general_ledger.process_gl_map" href="#erpnext.accounts.general_ledger.process_gl_map" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.general_ledger.<b>process_gl_map</b>
         <i class="text-muted">(gl_map, merge_entries=True)</i>
     </p>
@@ -281,7 +287,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.general_ledger.round_off_debit_credit" href="#erpnext.accounts.general_ledger.round_off_debit_credit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.general_ledger.<b>round_off_debit_credit</b>
         <i class="text-muted">(gl_map)</i>
     </p>
@@ -297,9 +303,9 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.general_ledger.save_entries" href="#erpnext.accounts.general_ledger.save_entries" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.general_ledger.<b>save_entries</b>
-        <i class="text-muted">(gl_map, adv_adj, update_outstanding)</i>
+        <i class="text-muted">(gl_map, adv_adj, update_outstanding, from_repost=False)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -313,7 +319,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.general_ledger.validate_account_for_auto_accounting_for_stock" href="#erpnext.accounts.general_ledger.validate_account_for_auto_accounting_for_stock" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.general_ledger.<b>validate_account_for_auto_accounting_for_stock</b>
         <i class="text-muted">(gl_map)</i>
     </p>
@@ -327,8 +333,8 @@
 
 <!-- autodoc -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -358,7 +364,7 @@
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -379,5 +385,17 @@
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

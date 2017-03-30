@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/accounts/payment_request">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/accounts/payment_request" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/accounts">
 		Module accounts</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Payment Request</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Payment Request</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Payment Request -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/accounts/doctype/payment_request"
@@ -173,8 +179,22 @@
     </thead>
     <tbody>
         
-        <tr class="info">
+        <tr >
             <td>1</td>
+            <td class="danger" title="Mandatory"><code>naming_series</code></td>
+            <td >
+                Select</td>
+            <td >
+                Series
+                
+            </td>
+            <td>
+                <pre>PR</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>2</td>
             <td ><code>recipient_and_message</code></td>
             <td >
                 Section Break</td>
@@ -186,7 +206,7 @@
         </tr>
         
         <tr >
-            <td>2</td>
+            <td>3</td>
             <td ><code>print_format</code></td>
             <td >
                 Select</td>
@@ -198,7 +218,7 @@
         </tr>
         
         <tr >
-            <td>3</td>
+            <td>4</td>
             <td ><code>email_to</code></td>
             <td >
                 Data</td>
@@ -210,7 +230,7 @@
         </tr>
         
         <tr >
-            <td>4</td>
+            <td>5</td>
             <td ><code>subject</code></td>
             <td >
                 Data</td>
@@ -222,7 +242,7 @@
         </tr>
         
         <tr >
-            <td>5</td>
+            <td>6</td>
             <td ><code>column_break_9</code></td>
             <td class="info">
                 Column Break</td>
@@ -234,7 +254,7 @@
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>7</td>
             <td ><code>payment_gateway_account</code></td>
             <td >
                 Link</td>
@@ -255,7 +275,7 @@
         </tr>
         
         <tr >
-            <td>7</td>
+            <td>8</td>
             <td ><code>currency</code></td>
             <td >
                 Link</td>
@@ -276,7 +296,7 @@
         </tr>
         
         <tr >
-            <td>8</td>
+            <td>9</td>
             <td ><code>grand_total</code></td>
             <td >
                 Currency</td>
@@ -291,7 +311,7 @@
         </tr>
         
         <tr >
-            <td>9</td>
+            <td>10</td>
             <td ><code>status</code></td>
             <td >
                 Select</td>
@@ -310,7 +330,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>11</td>
             <td ><code>make_sales_invoice</code></td>
             <td >
                 Check</td>
@@ -322,7 +342,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>11</td>
+            <td>12</td>
             <td ><code>section_break_10</code></td>
             <td >
                 Section Break</td>
@@ -334,10 +354,10 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>13</td>
             <td ><code>message</code></td>
             <td >
-                Small Text</td>
+                Text</td>
             <td >
                 Message
                 
@@ -346,7 +366,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>14</td>
             <td ><code>message_examples</code></td>
             <td >
                 HTML</td>
@@ -358,7 +378,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>15</td>
             <td ><code>mute_email</code></td>
             <td >
                 Check</td>
@@ -370,10 +390,10 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>16</td>
             <td ><code>payment_url</code></td>
             <td >
-                Data</td>
+                Small Text</td>
             <td class="text-muted" title="Hidden">
                 payment_url
                 
@@ -382,7 +402,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>16</td>
+            <td>17</td>
             <td ><code>section_break_7</code></td>
             <td >
                 Section Break</td>
@@ -394,7 +414,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>18</td>
             <td ><code>payment_gateway</code></td>
             <td >
                 Read Only</td>
@@ -408,7 +428,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>19</td>
             <td ><code>payment_account</code></td>
             <td >
                 Read Only</td>
@@ -422,7 +442,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>19</td>
+            <td>20</td>
             <td ><code>reference_details</code></td>
             <td >
                 Section Break</td>
@@ -434,7 +454,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>21</td>
             <td ><code>reference_doctype</code></td>
             <td >
                 Link</td>
@@ -455,7 +475,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>22</td>
             <td ><code>reference_name</code></td>
             <td >
                 Dynamic Link</td>
@@ -469,7 +489,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>23</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -515,8 +535,22 @@ Cancelled</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="check_if_payment_entry_exists" href="#check_if_payment_entry_exists" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>check_if_payment_entry_exists</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="create_payment_entry" href="#create_payment_entry" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>create_payment_entry</b>
         <i class="text-muted">(self, submit=True)</i>
     </p>
@@ -530,7 +564,7 @@ Cancelled</pre>
     
 	<p class="docs-attr-name">
         <a name="get_message" href="#get_message" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_message</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -544,7 +578,7 @@ Cancelled</pre>
     
 	<p class="docs-attr-name">
         <a name="get_payment_success_url" href="#get_payment_success_url" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_payment_success_url</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -558,12 +592,11 @@ Cancelled</pre>
     
 	<p class="docs-attr-name">
         <a name="get_payment_url" href="#get_payment_url" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_payment_url</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>This is blanck method to trigger hooks call from individual payment gateway app
-which will return respective payment gateway</p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 
@@ -573,7 +606,7 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="make_communication_entry" href="#make_communication_entry" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>make_communication_entry</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -587,7 +620,7 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="make_invoice" href="#make_invoice" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>make_invoice</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -601,7 +634,7 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="on_cancel" href="#on_cancel" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_cancel</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -614,8 +647,22 @@ which will return respective payment gateway</p>
     
     
 	<p class="docs-attr-name">
+        <a name="on_payment_authorized" href="#on_payment_authorized" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>on_payment_authorized</b>
+        <i class="text-muted">(self, status=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="on_submit" href="#on_submit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_submit</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -629,7 +676,7 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="send_email" href="#send_email" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>send_email</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -642,22 +689,8 @@ which will return respective payment gateway</p>
     
     
 	<p class="docs-attr-name">
-        <a name="send_payment_request" href="#send_payment_request" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>send_payment_request</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
         <a name="set_as_cancelled" href="#set_as_cancelled" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_as_cancelled</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -671,7 +704,7 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="set_as_paid" href="#set_as_paid" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_as_paid</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -685,7 +718,7 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="set_failed" href="#set_failed" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_failed</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -698,8 +731,22 @@ which will return respective payment gateway</p>
     
     
 	<p class="docs-attr-name">
+        <a name="set_payment_request_url" href="#set_payment_request_url" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>set_payment_request_url</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -713,7 +760,7 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="validate_currency" href="#validate_currency" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_currency</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -727,7 +774,7 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="validate_payment_request" href="#validate_payment_request" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_payment_request</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -744,28 +791,10 @@ which will return respective payment gateway</p>
 	
         
     
-    <p><span class="label label-info">Public API</span>
-        <br><code>/api/method/erpnext.accounts.doctype.payment_request.payment_request.generate_payment_request</code>
-    </p>
-	<p class="docs-attr-name">
-        <a name="erpnext.accounts.doctype.payment_request.payment_request.generate_payment_request" href="#erpnext.accounts.doctype.payment_request.payment_request.generate_payment_request" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		erpnext.accounts.doctype.payment_request.payment_request.<b>generate_payment_request</b>
-        <i class="text-muted">(name)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-	
-
-	
-        
-    
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_request.payment_request.get_amount" href="#erpnext.accounts.doctype.payment_request.payment_request.get_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_request.payment_request.<b>get_amount</b>
         <i class="text-muted">(ref_doc, dt)</i>
     </p>
@@ -781,9 +810,9 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_request.payment_request.get_dummy_message" href="#erpnext.accounts.doctype.payment_request.payment_request.get_dummy_message" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_request.payment_request.<b>get_dummy_message</b>
-        <i class="text-muted">(use_dummy_message=True)</i>
+        <i class="text-muted">(doc)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -797,7 +826,7 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_request.payment_request.get_gateway_details" href="#erpnext.accounts.doctype.payment_request.payment_request.get_gateway_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_request.payment_request.<b>get_gateway_details</b>
         <i class="text-muted">(args)</i>
     </p>
@@ -813,7 +842,7 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_request.payment_request.get_payment_gateway_account" href="#erpnext.accounts.doctype.payment_request.payment_request.get_payment_gateway_account" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_request.payment_request.<b>get_payment_gateway_account</b>
         <i class="text-muted">(args)</i>
     </p>
@@ -831,7 +860,7 @@ which will return respective payment gateway</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_request.payment_request.get_print_format_list" href="#erpnext.accounts.doctype.payment_request.payment_request.get_print_format_list" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_request.payment_request.<b>get_print_format_list</b>
         <i class="text-muted">(ref_doctype)</i>
     </p>
@@ -849,7 +878,7 @@ which will return respective payment gateway</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_request.payment_request.make_payment_entry" href="#erpnext.accounts.doctype.payment_request.payment_request.make_payment_entry" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_request.payment_request.<b>make_payment_entry</b>
         <i class="text-muted">(docname)</i>
     </p>
@@ -867,7 +896,7 @@ which will return respective payment gateway</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_request.payment_request.make_payment_request" href="#erpnext.accounts.doctype.payment_request.payment_request.make_payment_request" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_request.payment_request.<b>make_payment_request</b>
         <i class="text-muted">()</i>
     </p>
@@ -883,7 +912,7 @@ which will return respective payment gateway</p>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid" href="#erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_request.payment_request.<b>make_status_as_paid</b>
         <i class="text-muted">(doc, method)</i>
     </p>
@@ -901,7 +930,7 @@ which will return respective payment gateway</p>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_request.payment_request.resend_payment_email" href="#erpnext.accounts.doctype.payment_request.payment_request.resend_payment_email" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_request.payment_request.<b>resend_payment_email</b>
         <i class="text-muted">(docname)</i>
     </p>
@@ -934,8 +963,8 @@ which will return respective payment gateway</p>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -965,7 +994,7 @@ which will return respective payment gateway</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -986,5 +1015,17 @@ which will return respective payment gateway</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

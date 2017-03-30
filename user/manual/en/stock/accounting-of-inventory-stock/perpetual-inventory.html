@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="user/manual/en/stock/accounting-of-inventory-stock/perpetual-inventory">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,62 +99,56 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-user/manual/en/stock/accounting-of-inventory-stock/perpetual-inventory" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//user/manual/en/stock/accounting-of-inventory-stock">
 		Accounting Of Inventory Stock</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Perpetual Inventory</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
-<p>In perpetual inventory, system creates accounting entries for each stock
-transactions, so that stock and account balance will always remain same. The
-account balance will be posted against their respective account heads for each
-Warehouse. On saving of a Warehouse, the system will automatically create an
-account head with the same name as warehouse. As account balance is maintained
-for each Warehouse, you should create Warehouses, based on the type of items
-(Current / Fixed Assets) it stores.</p>
+					<div class="col-sm-8 col-xs-6">
+						<h1>Perpetual Inventory</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
 
-<p>At the time of items received in a particular warehouse, the balance of asset
-account (linked to that warehouse) will be increased. Similarly when you
-deliver some items from that warehouse, an expense will be booked and the
-asset account will be reduced, based on the valuation amount of those items.</p>
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
+<p>As per the perpetual inventory system, accounts posting is done for every stock transaction.</p>
 
-<h2><strong>Activation</strong></h2>
+<p>On creating new Warehouse, the system will automatically create an Account in the Chart of Accout, with the same name as Warehouse Name.</p>
+
+<p>On receipt of items in a particular warehouse, the balance in the Warehouse Account will increase. Similarly when items are delivered from the Warehouse, an expense will be booked, and balance in the Warehouse Account will reduce.</p>
+
+<h2>Activation</h2>
 
 <ol>
-<li><p>Setup the following default accounts for each Company </p>
+<li><p>Setup the following default accounts for each Company. These accounts are created automatically in the new ERPNext accounts.</p>
 
 <ul>
 <li>Stock Received But Not Billed</li>
@@ -157,17 +156,19 @@ asset account will be reduced, based on the valuation amount of those items.</p>
 <li>Expenses Included In Valuation</li>
 <li>Cost Center</li>
 </ul></li>
-<li><p>In perpetual inventory, the system will maintain separate account balance for each warehouse under separate account head. To create that account head, enter "Create Account Under" in Warehouse master.</p></li>
-<li><p>Activate Perpetual Inventory</p></li>
-</ol>
+<li><p>Ensure each Warehouse is an Account in the Chart of Accounts master. As per the default configuration, Accounts for Warehouse are created under <code>Assets &gt; Current Asset &gt; Stock Assets &gt; (Warehouse)</code></p></li>
+<li><p>Activate Perpetual Inventory</p>
 
 <blockquote>
-  <p>Setup &gt; Accounts Settings &gt; Make Accounting Entry For Every Stock Movement</p>
-</blockquote>
+  <p>Explore &gt; Accounts &gt; Accounts Settings &gt; "Make Accounting Entry For Every Stock Movement"</p>
+</blockquote></li>
+</ol>
+
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-1.png"></p>
 
 <hr />
 
-<h2><strong>Example</strong></h2>
+<h2>Example</h2>
 
 <p>Consider following Chart of Accounts and Warehouse setup for your company:</p>
 
@@ -179,7 +180,7 @@ asset account will be reduced, based on the valuation amount of those items.</p>
 <li>Current Assets</li>
 <li>Accounts Receivable 
 <ul>
-<li>Jane Doe</li>
+<li>Debtor</li>
 </ul></li>
 <li>Stock Assets 
 <ul>
@@ -191,15 +192,17 @@ asset account will be reduced, based on the valuation amount of those items.</p>
 <ul>
 <li>VAT</li>
 </ul></li>
-<li>Fixed Assets</li>
+<li>Fixed Assets
+<ul>
 <li>Fixed Asset Warehouse</li>
+</ul></li>
 </ul></li>
 <li>Liabilities (Cr) 
 <ul>
 <li>Current Liabilities</li>
 <li>Accounts Payable 
 <ul>
-<li>East Wind Inc.</li>
+<li>Creditors</li>
 </ul></li>
 <li>Stock Liabilities 
 <ul>
@@ -235,14 +238,11 @@ asset account will be reduced, based on the valuation amount of those items.</p>
 <li>Stores</li>
 <li>Work In Progress</li>
 <li>Finished Goods</li>
-<li>Fixed Asset Warehouse</li>
 </ul>
 
-<h3><strong>Purchase Receipt</strong></h3>
+<h3>Purchase Receipt</h3>
 
-<p>Suppose you have purchased <em>10 nos</em> of item "RM0001" at <em>$200</em> and <em>5 nos</em> of
-item "Desktop" at <strong>$100</strong> from supplier "East Wind Inc". Following are the
-details of Purchase Receipt:</p>
+<p>Suppose you have purchased <em>10 nos</em> of item "RM0001" at <em>$200</em> and <em>5 nos</em> of item "Base Plate" at <strong>$100</strong> from supplier "East Wind Inc". Following are the details of Purchase Receipt:</p>
 
 <p><strong>Supplier:</strong> East Wind Inc.</p>
 
@@ -266,15 +266,7 @@ details of Purchase Receipt:</p>
             <td>10</td>
             <td>200</td>
             <td>2000</td>
-            <td>2200</td>
-        </tr>
-        <tr>
-            <td>Desktop</td>
-            <td>Fixed Asset Warehouse</td>
-            <td>5</td>
-            <td>100</td>
-            <td>500</td>
-            <td>550</td>
+            <td>2250</td>
         </tr>
     </tbody>
 </table>
@@ -297,8 +289,8 @@ details of Purchase Receipt:</p>
             <td>Total and Valuation</td>
         </tr>
         <tr>
-            <td>VAT</td>
-            <td>120</td>
+            <td>VAT (10%)</td>
+            <td>200</td>
             <td>Total</td>
         </tr>
         <tr>
@@ -309,25 +301,21 @@ details of Purchase Receipt:</p>
     </tbody>
 </table>
 
-<p><strong>Stock Ledger</strong>
-</p>
+<p><strong>Stock Ledger</strong></p>
 
-<p><img alt="Stock" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-2.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-2.png"></p>
 
 <p><strong>General Ledger</strong></p>
 
-<p><img alt="Leger" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-3.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-3.png"></p>
 
-<p>As stock balance increases through Purchase Receipt, "Store" and "Fixed Asset
-Warehouse" accounts are debited and a temporary account "Stock Receipt But Not
-Billed" account is credited, to maintain double entry accounting system. At the same time, negative expense is booked in account "Expense included in Valuation" for the amount added for valuation purpose, to avoid double expense booking.</p>
+<p>As stock balance increases through Purchase Receipt, "Store" accounts are debited and a temporary account "Stock Receipt But Not Billed" account is credited, to maintain double entry accounting system. At the same time, negative expense is booked in account "Expense included in Valuation" for the amount added for valuation purpose, to avoid double expense booking.</p>
 
 <hr />
 
-<h3><strong>Purchase Invoice</strong></h3>
+<h3>Purchase Invoice</h3>
 
-<p>On receiving Bill from supplier, for the above Purchase Receipt, you will make
-Purchase Invoice for the same. The general ledger entries are as follows:</p>
+<p>On receiving Bill from supplier, for the above Purchase Receipt, you will make Purchase Invoice for the same. The general ledger entries are as follows:</p>
 
 <p><strong>General Ledger</strong></p>
 
@@ -338,7 +326,7 @@ effect of Purchase Receipt.</p>
 
 <hr />
 
-<h3><strong>Delivery Note</strong></h3>
+<h3>Delivery Note</h3>
 
 <p>Lets say, you have an order from "Jane Doe" to deliver 5 nos of item "RM0001"
 at $300. Following are the details of Delivery Note:</p>
@@ -414,7 +402,7 @@ Total Valuation Amount  = 220 * 5
 
 <hr />
 
-<h3><strong>Sales Invoice with Update Stock</strong></h3>
+<h3>Sales Invoice with Update Stock</h3>
 
 <p>Lets say, you did not make Delivery Note against the above order and instead
 you have made Sales Invoice directly, with "Update Stock" options. The details
@@ -433,7 +421,7 @@ Goods Sold" accounts are also affected based on the valuation amount.</p>
 
 <hr />
 
-<h3><strong>Stock Entry (Material Receipt)</strong></h3>
+<h3>Stock Entry (Material Receipt)</h3>
 
 <p><strong>Items:</strong></p>
 
@@ -468,7 +456,7 @@ Goods Sold" accounts are also affected based on the valuation amount.</p>
 
 <hr />
 
-<h3><strong>Stock Entry (Material Issue)</strong></h3>
+<h3>Stock Entry (Material Issue)</h3>
 
 <p><strong>Items:</strong></p>
 
@@ -503,7 +491,7 @@ Goods Sold" accounts are also affected based on the valuation amount.</p>
 
 <hr />
 
-<h3><strong>Stock Entry (Material Transfer)</strong></h3>
+<h3>Stock Entry (Material Transfer)</h3>
 
 <p><strong>Items:</strong></p>
 
@@ -541,15 +529,15 @@ Goods Sold" accounts are also affected based on the valuation amount.</p>
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/stock/accounting-of-inventory-stock/migrate-to-perpetual-inventory">Migrate To Perpetual Inventory</a></p></p>
 
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
+		<i class="fa fa-smile"></i>
 		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/stock/accounting-of-inventory-stock/perpetual-inventory.md">
 			Improve this page
 		</a>
@@ -582,7 +570,7 @@ Goods Sold" accounts are also affected based on the valuation amount.</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -603,5 +591,17 @@ Goods Sold" accounts are also affected based on the valuation amount.</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

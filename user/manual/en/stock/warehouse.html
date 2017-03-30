@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="user/manual/en/stock/warehouse">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,79 +99,77 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-user/manual/en/stock/warehouse" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//user/manual/en/stock">
 		Stock</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Warehouse</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Warehouse</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <p>A warehouse is a commercial building for storage of goods. Warehouses are used
 by manufacturers, importers, exporters, wholesalers, transport businesses,
 customs, etc. They are usually large plain buildings in industrial areas of
 cities, towns, and villages. They mostly have loading docks to load and unload
 goods from trucks.</p>
 
-<p>To go to Warehouse, click on Stock and go to Warehouse under Masters.  You
-could also go to the Setup module and click on Warehouse under Master Data.</p>
+<p>The terminology of 'Warehouse" in ERPNext is a bit broader though and maybe can be 
+regarded as "storage locations". For example you can create a sub-Warehouse which 
+practically is a shelf inside your actual location. 
+This can become quite a detailed Tree like &gt;Warehouse &gt;Room &gt;Row &gt;Shelf &gt;Box</p>
 
-<blockquote>
-  <p>Stock &gt; Warehouse &gt; New Warehouse</p>
-</blockquote>
+<p>To go to Warehouse, click on Stock and go to Warehouse under Setup.  You
+could also switch to 'Tree' View or simply type warehouse tree in the awsone bar.</p>
 
 <p><img class="screenshot" alt="Warehouse" src="https://frappe.github.io/erpnext/assets/img/stock/warehouse.png"></p>
 
 <p>In ERPNext, every Warehouse must belong to a specific company, to maintain
-company wise stock balance. The Warehouses are saved with their respective
-company’s abbreviations. This facilitates in identifying which Warehouse
-belongs to which company, at a glance.</p>
+company wise stock balance. In order to do so each Warehouse is linked with an 
+Account in the Chart of Accounts (by default of the the same name as the Warehouse 
+itself) which captures the monetary equivalent of the goods or materials stored 
+in that specific warehouse. If you have a more detailed Warehouse Tree as the one 
+described above most likely it's a good idea to link the sub-locations (&gt;room &gt;row &gt;Shelf, ...)
+to the account of the actual Warehouse (the root Warehouse of that Tree) as most 
+scenarios do not require to account for value of stock items per Shelf or Box.</p>
+
+<p>Warehouses are saved with their respective company’s abbreviations. This facilitates 
+identifying which Warehouse belongs to which company, at a glance.</p>
 
 <p>You can include user restrictions for these Warehouses. In case you do not
 wish a particular user to operate on a particular Warehouse, you can refrain
 the user from accessing that Warehouse.</p>
-
-<h3>Merge Warehouse</h3>
-
-<p>In day to day transactions, duplicate entries are done by mistake, resulting
-in duplicate Warehouses. Duplicate records can be merged into a single
-Warehouse. From the top bar of the system select the File menu. Select Rename
-and Enter the correct Warehouse and check the Merge button. The system will
-replace all the links of wrong Warehouse with the correct Warehouse, in all
-transactions. Also, the available quantity (actual qty, reserved qty, ordered
-qty etc) of all items in the duplicate warehouse will be transferred to the
-correct warehouse. Once merging is done, delete the duplicate Warehouse.</p>
 
 <blockquote>
   <p>Note: ERPNext system maintains stock balance for every distinct combination
@@ -177,15 +180,15 @@ correct warehouse. Once merging is done, delete the duplicate Warehouse.</p>
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/stock/serial-no">Serial No</a></p></p>
 
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
+		<i class="fa fa-smile"></i>
 		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/stock/warehouse.md">
 			Improve this page
 		</a>
@@ -218,7 +221,7 @@ correct warehouse. Once merging is done, delete the duplicate Warehouse.</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -239,5 +242,17 @@ correct warehouse. Once merging is done, delete the duplicate Warehouse.</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

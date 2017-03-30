@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="user/manual/en/setting-up/users-and-permissions/user-permissions">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,48 +99,47 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-user/manual/en/setting-up/users-and-permissions/user-permissions" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//user/manual/en/setting-up/users-and-permissions">
 		Users And Permissions</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
-<h1>User Permissions</h1>
+					<div class="col-sm-8 col-xs-6">
+						
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
 
-<p>Limit access for a User to a set of documents using User Permissions Manager</p>
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
+<h1>User Permissions</h1>
 
 <p>Role Base Permissions define the periphery of document types within which a user with a set of Roles can move around in. However, you can have an even finer control by defining User Permissions for a User. By setting specific documents in User Permissions list, you can limit access for that User to specific documents of a particular DocType, on the condition that "Apply User Permissions" is checked in Role Permissions Manager.</p>
 
@@ -145,85 +149,66 @@
   <p>Setup &gt; Permissions &gt; User Permissions Manager</p>
 </blockquote>
 
-<figure>
-    <img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permissions-company.png"
-        class="img-responsive" alt="User Permissions Manager">
-    <figcaption>User Permissions Manager displaying how users can access only a specific Company.</figcaption>
-</figure>
+<p>User Permissions Manager displaying how users can access only a specific Company.</p>
 
 <h4>Example</h4>
 
-<p>User 'aromn@example.com' has Sales User role and we want to limit the user to access records for only a specific Company 'Wind Power LLC'.</p>
+<p>User 'tom.hagen@riosolutions.com' has Sales User role and we want to limit the user to access records for only a specific Company 'Rio Solutions'.</p>
 
 <ol>
 <li><p>We add a User Permissions row for Company.</p>
 
-<figure>
-    <img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permission-user-limited-by-company.png"
-        class="img-responsive" alt="User Permissions For Company">
-    <figcaption>Add User Permissions row for a combination of User 'aromn@example.com' and Company 'Wind Power LLC'.</figcaption>
-</figure></li>
+<p><img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permissions-new.gif" class="screen" alt="User Permissions For Company"></p>
+
+<p>Add User Permissions row for a combination of User 'tom.hagen@riosolutions.com' and Company 'Rio Solutions'.</p></li>
 <li><p>Also Role "All" has only Read permission for Company, with 'Apply User Permissions' checked.</p>
 
-<figure>
-    <img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permissions-company-role-all.png"
-        class="img-responsive" alt="Role Permissions for All on Company">
-    <figcaption>Read Permission with Apply User Permissions checked for DocType Company.</figcaption>
-</figure></li>
-<li><p>The combined effect of the above two rules lead to User 'aromn@example.com' having only Read access to Company 'Wind Power LLC'.</p>
+<p><img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permissions-company-role-all.png" class="screen" alt="Role Permissions for All on Company"></p>
 
-<figure>
-    <img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permissions-company-wind-power-llc.png"
-        class="img-responsive" alt="Effect of Role and User Permissions on Company">
-    <figcaption>Access is limited to Company 'Wind Power LLC'.</figcaption>
-</figure></li>
-<li><p>We want this User Permission on Company to get applied on other documents like Quotation, Sales Order, etc.
-These forms have a <strong>Link Field based on Company</strong>. As a result, User Permissions on Company also get applied on these documents, which leads to User 'aromn@example.com' to acces these documents having Company 'Wind Power LLC'.</p>
+<p>Read Permission with Apply User Permissions checked for DocType Company.</p></li>
+<li><p>The combined effect of the above two rules lead to User 'tom.hagen@riosolutions.com' having only Read access to Company 'Rio Solutions'.</p>
 
-<figure>
-    <img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permissions-quotation-sales-user.png"
-        class="img-responsive" alt="Sales User Role Permissions for Quotation">
-    <figcaption>Users with Sales User Role can Read, Write, Create, Submit and Cancel Quotations based on their User Permissions, since 'Apply User Permissions' is checked.</figcaption>
-</figure>
+<p><img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permission-company.png" class="screen" alt="Effect of Role and User Permissions on Company"></p>
 
-<figure>
-    <img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/user-permissions-quotation-list.png"
-        class="img-responsive" alt="Quotation List limited to results for Company 'Wind Power LLC'">
-    <figcaption>Quotation List is limited to results for Company 'Wind Power LLC' for User 'aromn@example.com'.</figcaption>
-</figure></li>
-<li><p>User Permissions get applied automatically based on Link Fields, just like how it worked for Quotation. But, Lead Form has 4 Link fields: Territory, Company, Lead Owner and Next Contact By. Say, you want Leads to limit access to Users based only on Territory, even though you have defined User Permissions for DocTypes User, Territory and Company. You can do this by setting 'Ignore User Permissions' for Link fields: Company, Lead Owner and Next Contact By.</p>
+<p>Access is limited to Company 'Rio Solutions'.</p></li>
+<li><p>We want this User Permission on Company to get applied on other documents like Quotation, Sales Order, etc.</p>
 
-<figure>
-    <img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permissions-lead-role-permissions.png"
-        class="img-responsive" alt="Role Permissions on Lead for Sales User Role">
-    <figcaption>Sales User can Read, Write and Create Leads limited by User Permissions.</figcaption>
-</figure>
+<p>These forms have a <strong>Link Field based on Company</strong>. As a result, User Permissions on Company also get applied on these documents, which leads to User 'tom.hagen@riosolutions' to acces these documents having Company 'Rio Solutions'.</p>
 
-<figure>
-    <img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permissions-ignore-user-permissions.png"
-        class="img-responsive" alt="Set Ingore User Permissions from Setup > Customize > Customize Form">
-    <figcaption>Check 'Ingore User Permissions' for Company, Lead Owner and Next Contact By fields using Setup > Customize > Customize Form for Lead.</figcaption>
-</figure>
+<p><img class="screen" alt="Sales User Role Permissions for Quotation" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permissions-quotation-sales-user.png" &gt;</p>
 
-<figure>
-    <img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/user-permissions-lead-based-on-territory.png"
-        class="img-responsive" alt="Lead List is limited to records with Territory 'United States'">
-    <figcaption>Due to the effect of the above combination, User 'aromn@example.com' can only access Leads with Territory 'United States'.</figcaption>
-</figure></li>
+<p>Users with Sales User Role can Read, Write, Create, Submit and Cancel Quotations based on their User Permissions, since 'Apply User Permissions' is checked.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permission-quotation.png" class="screenshot" alt="Quotation List limited to results for Company 'Rio Solutions'"></p>
+
+<p>Quotation List is limited to results for Company 'Rio Solutions' for User 'tom.hagen@riosolutions.com'.</p></li>
+<li><p>User Permissions get applied automatically based on Link Fields, just like how it worked for Quotation. But, Lead Form has 4 Link fields: Territory, Company, Lead Owner and Next Contact By. Say, you want Leads to limit access to Users based only on Territory, even though you have defined User Permissions for DocTypes User, Territory and Company. You can do this by setting 'Ignore User Permissions' for Link fields: Company, Lead Owner and Next Contact By.  </p></li>
 </ol>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permissions-lead-role-permissions.png" class="screen" alt="Role Permissions on Lead for Sales User Role"></p>
+
+<p>Sales User can Read, Write and Create Leads limited by User Permissions.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/user-permissions-ignore-user-permissions.png" class="screenshot" alt="Set Ingore User Permissions from Setup &gt; Customize &gt; Customize Form">    </p>
+
+<p>Check 'Ingore User Permissions' for Company, Lead Owner and Next Contact By fields using Setup &gt; Customize &gt; Customize Form for Lead.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/permissions-lead-list.png" class="screenshot" alt="Lead List is limited to records with Territory 'United States'">    </p>
+
+<p>Due to the effect of the above combination, User 'tom.hagen@riosolutions.com' can only access Leads with Territory 'United States'.</p>
 
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/setting-up/users-and-permissions/sharing">Sharing</a></p></p>
 
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
+		<i class="fa fa-smile"></i>
 		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/setting-up/users-and-permissions/user-permissions.md">
 			Improve this page
 		</a>
@@ -256,7 +241,7 @@ These forms have a <strong>Link Field based on Company</strong>. As a result, Us
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -277,5 +262,17 @@ These forms have a <strong>Link Field based on Company</strong>. As a result, Us
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

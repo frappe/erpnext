@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/models/accounts/payment_entry">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,45 +99,46 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/models/accounts/payment_entry" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/models/accounts">
 		Module accounts</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Payment Entry</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Payment Entry</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: Payment Entry -->
 
 
@@ -142,7 +148,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/accounts/doctype/payment_entry"
@@ -217,35 +223,6 @@ Internal Transfer</pre>
         
         <tr >
             <td>4</td>
-            <td ><code>party_type</code></td>
-            <td >
-                Select</td>
-            <td >
-                Party Type
-                
-            </td>
-            <td>
-                <pre>Customer
-Supplier</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>5</td>
-            <td ><code>party</code></td>
-            <td >
-                Dynamic Link</td>
-            <td >
-                Party
-                
-            </td>
-            <td>
-                <pre>party_type</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>6</td>
             <td ><code>column_break_5</code></td>
             <td class="info">
                 Column Break</td>
@@ -257,7 +234,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>7</td>
+            <td>5</td>
             <td class="danger" title="Mandatory"><code>posting_date</code></td>
             <td >
                 Date</td>
@@ -269,7 +246,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>8</td>
+            <td>6</td>
             <td class="danger" title="Mandatory"><code>company</code></td>
             <td >
                 Link</td>
@@ -290,7 +267,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>9</td>
+            <td>7</td>
             <td ><code>mode_of_payment</code></td>
             <td >
                 Link</td>
@@ -311,7 +288,78 @@ Supplier</pre>
         </tr>
         
         <tr class="info">
+            <td>8</td>
+            <td ><code>party_section</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Payment From / To
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>party_type</code></td>
+            <td >
+                Link</td>
+            <td >
+                Party Type
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/core/doctype">DocType</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
             <td>10</td>
+            <td ><code>party</code></td>
+            <td >
+                Dynamic Link</td>
+            <td >
+                Party
+                
+            </td>
+            <td>
+                <pre>party_type</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td ><code>column_break_11</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>party_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Party Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>13</td>
             <td ><code>payment_accounts_section</code></td>
             <td >
                 Section Break</td>
@@ -323,7 +371,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>14</td>
             <td ><code>party_balance</code></td>
             <td >
                 Currency</td>
@@ -335,7 +383,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>15</td>
             <td class="danger" title="Mandatory"><code>paid_from</code></td>
             <td >
                 Link</td>
@@ -356,7 +404,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>16</td>
             <td class="danger" title="Mandatory"><code>paid_from_account_currency</code></td>
             <td >
                 Link</td>
@@ -377,7 +425,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>17</td>
             <td ><code>paid_from_account_balance</code></td>
             <td >
                 Currency</td>
@@ -391,7 +439,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>18</td>
             <td ><code>column_break_18</code></td>
             <td class="info">
                 Column Break</td>
@@ -403,7 +451,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>19</td>
             <td class="danger" title="Mandatory"><code>paid_to</code></td>
             <td >
                 Link</td>
@@ -424,7 +472,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>20</td>
             <td class="danger" title="Mandatory"><code>paid_to_account_currency</code></td>
             <td >
                 Link</td>
@@ -445,7 +493,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>21</td>
             <td ><code>paid_to_account_balance</code></td>
             <td >
                 Currency</td>
@@ -459,7 +507,7 @@ Supplier</pre>
         </tr>
         
         <tr class="info">
-            <td>19</td>
+            <td>22</td>
             <td ><code>payment_amounts_section</code></td>
             <td >
                 Section Break</td>
@@ -471,7 +519,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>23</td>
             <td class="danger" title="Mandatory"><code>paid_amount</code></td>
             <td >
                 Currency</td>
@@ -485,7 +533,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>24</td>
             <td class="danger" title="Mandatory"><code>source_exchange_rate</code></td>
             <td >
                 Float</td>
@@ -497,7 +545,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>25</td>
             <td class="danger" title="Mandatory"><code>base_paid_amount</code></td>
             <td >
                 Currency</td>
@@ -511,7 +559,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>23</td>
+            <td>26</td>
             <td ><code>column_break_21</code></td>
             <td class="info">
                 Column Break</td>
@@ -523,7 +571,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>24</td>
+            <td>27</td>
             <td class="danger" title="Mandatory"><code>received_amount</code></td>
             <td >
                 Currency</td>
@@ -537,7 +585,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>25</td>
+            <td>28</td>
             <td class="danger" title="Mandatory"><code>target_exchange_rate</code></td>
             <td >
                 Float</td>
@@ -549,7 +597,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>26</td>
+            <td>29</td>
             <td class="danger" title="Mandatory"><code>base_received_amount</code></td>
             <td >
                 Currency</td>
@@ -563,7 +611,7 @@ Supplier</pre>
         </tr>
         
         <tr class="info">
-            <td>27</td>
+            <td>30</td>
             <td ><code>section_break_14</code></td>
             <td >
                 Section Break</td>
@@ -575,7 +623,19 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>28</td>
+            <td>31</td>
+            <td ><code>allocate_payment_amount</code></td>
+            <td >
+                Check</td>
+            <td >
+                Allocate Payment Amount
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>32</td>
             <td ><code>references</code></td>
             <td >
                 Table</td>
@@ -596,7 +656,7 @@ Supplier</pre>
         </tr>
         
         <tr class="info">
-            <td>29</td>
+            <td>33</td>
             <td ><code>section_break_34</code></td>
             <td >
                 Section Break</td>
@@ -608,7 +668,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>30</td>
+            <td>34</td>
             <td ><code>total_allocated_amount</code></td>
             <td >
                 Currency</td>
@@ -620,7 +680,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>31</td>
+            <td>35</td>
             <td ><code>base_total_allocated_amount</code></td>
             <td >
                 Currency</td>
@@ -634,7 +694,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>32</td>
+            <td>36</td>
             <td ><code>set_exchange_gain_loss</code></td>
             <td >
                 Button</td>
@@ -646,7 +706,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>33</td>
+            <td>37</td>
             <td ><code>column_break_36</code></td>
             <td class="info">
                 Column Break</td>
@@ -658,7 +718,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>34</td>
+            <td>38</td>
             <td ><code>unallocated_amount</code></td>
             <td >
                 Currency</td>
@@ -670,7 +730,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>35</td>
+            <td>39</td>
             <td ><code>difference_amount</code></td>
             <td >
                 Currency</td>
@@ -684,7 +744,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>36</td>
+            <td>40</td>
             <td ><code>write_off_difference_amount</code></td>
             <td >
                 Button</td>
@@ -696,7 +756,7 @@ Supplier</pre>
         </tr>
         
         <tr class="info">
-            <td>37</td>
+            <td>41</td>
             <td ><code>deductions_or_loss_section</code></td>
             <td >
                 Section Break</td>
@@ -708,7 +768,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>38</td>
+            <td>42</td>
             <td ><code>deductions</code></td>
             <td >
                 Table</td>
@@ -729,7 +789,7 @@ Supplier</pre>
         </tr>
         
         <tr class="info">
-            <td>39</td>
+            <td>43</td>
             <td ><code>transaction_references</code></td>
             <td >
                 Section Break</td>
@@ -741,7 +801,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>40</td>
+            <td>44</td>
             <td ><code>reference_no</code></td>
             <td >
                 Data</td>
@@ -753,7 +813,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>41</td>
+            <td>45</td>
             <td ><code>column_break_23</code></td>
             <td class="info">
                 Column Break</td>
@@ -765,7 +825,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>42</td>
+            <td>46</td>
             <td ><code>reference_date</code></td>
             <td >
                 Date</td>
@@ -777,7 +837,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>43</td>
+            <td>47</td>
             <td ><code>clearance_date</code></td>
             <td >
                 Date</td>
@@ -789,7 +849,7 @@ Supplier</pre>
         </tr>
         
         <tr class="info">
-            <td>44</td>
+            <td>48</td>
             <td ><code>section_break_12</code></td>
             <td >
                 Section Break</td>
@@ -801,7 +861,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>45</td>
+            <td>49</td>
             <td ><code>project</code></td>
             <td >
                 Link</td>
@@ -822,7 +882,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>46</td>
+            <td>50</td>
             <td ><code>remarks</code></td>
             <td >
                 Small Text</td>
@@ -834,7 +894,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>47</td>
+            <td>51</td>
             <td ><code>column_break_16</code></td>
             <td class="info">
                 Column Break</td>
@@ -846,7 +906,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>48</td>
+            <td>52</td>
             <td ><code>letter_head</code></td>
             <td >
                 Link</td>
@@ -867,7 +927,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>49</td>
+            <td>53</td>
             <td ><code>print_heading</code></td>
             <td >
                 Link</td>
@@ -888,7 +948,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>50</td>
+            <td>54</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -909,7 +969,7 @@ Supplier</pre>
         </tr>
         
         <tr >
-            <td>51</td>
+            <td>55</td>
             <td ><code>title</code></td>
             <td >
                 Data</td>
@@ -962,7 +1022,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="add_bank_gl_entries" href="#add_bank_gl_entries" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>add_bank_gl_entries</b>
         <i class="text-muted">(self, gl_entries)</i>
     </p>
@@ -976,7 +1036,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="add_deductions_gl_entries" href="#add_deductions_gl_entries" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>add_deductions_gl_entries</b>
         <i class="text-muted">(self, gl_entries)</i>
     </p>
@@ -990,7 +1050,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="add_party_gl_entries" href="#add_party_gl_entries" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>add_party_gl_entries</b>
         <i class="text-muted">(self, gl_entries)</i>
     </p>
@@ -1004,7 +1064,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="clear_unallocated_reference_document_rows" href="#clear_unallocated_reference_document_rows" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>clear_unallocated_reference_document_rows</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1017,8 +1077,22 @@ Supplier</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="delink_advance_entry_references" href="#delink_advance_entry_references" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>delink_advance_entry_references</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="make_gl_entries" href="#make_gl_entries" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>make_gl_entries</b>
         <i class="text-muted">(self, cancel=0, adv_adj=0)</i>
     </p>
@@ -1032,7 +1106,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="on_cancel" href="#on_cancel" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_cancel</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1046,7 +1120,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="on_submit" href="#on_submit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>on_submit</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1060,7 +1134,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="set_amounts" href="#set_amounts" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_amounts</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1074,7 +1148,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="set_amounts_in_company_currency" href="#set_amounts_in_company_currency" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_amounts_in_company_currency</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1088,7 +1162,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="set_difference_amount" href="#set_difference_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_difference_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1102,7 +1176,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="set_exchange_rate" href="#set_exchange_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_exchange_rate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1116,7 +1190,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="set_missing_ref_details" href="#set_missing_ref_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_missing_ref_details</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1130,7 +1204,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="set_missing_values" href="#set_missing_values" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_missing_values</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1144,7 +1218,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="set_remarks" href="#set_remarks" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_remarks</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1158,7 +1232,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="set_title" href="#set_title" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_title</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1172,7 +1246,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="set_total_allocated_amount" href="#set_total_allocated_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_total_allocated_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1186,7 +1260,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="set_unallocated_amount" href="#set_unallocated_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_unallocated_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1200,7 +1274,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="setup_party_account_field" href="#setup_party_account_field" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>setup_party_account_field</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1214,7 +1288,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="update_advance_paid" href="#update_advance_paid" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_advance_paid</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1228,7 +1302,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1242,7 +1316,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_account_type" href="#validate_account_type" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_account_type</b>
         <i class="text-muted">(self, account, account_types)</i>
     </p>
@@ -1256,7 +1330,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_bank_accounts" href="#validate_bank_accounts" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_bank_accounts</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1270,7 +1344,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_journal_entry" href="#validate_journal_entry" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_journal_entry</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1284,7 +1358,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_mandatory" href="#validate_mandatory" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_mandatory</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1298,7 +1372,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_party_details" href="#validate_party_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_party_details</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1312,7 +1386,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_payment_against_negative_invoice" href="#validate_payment_against_negative_invoice" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_payment_against_negative_invoice</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1326,7 +1400,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_payment_type" href="#validate_payment_type" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_payment_type</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1340,7 +1414,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_reference_documents" href="#validate_reference_documents" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_reference_documents</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1354,7 +1428,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="validate_transaction_reference" href="#validate_transaction_reference" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_transaction_reference</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -1376,7 +1450,7 @@ Supplier</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details" href="#erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_entry.payment_entry.<b>get_account_details</b>
         <i class="text-muted">(account, date)</i>
     </p>
@@ -1394,7 +1468,7 @@ Supplier</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_entry.payment_entry.get_company_defaults" href="#erpnext.accounts.doctype.payment_entry.payment_entry.get_company_defaults" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_entry.payment_entry.<b>get_company_defaults</b>
         <i class="text-muted">(company)</i>
     </p>
@@ -1410,7 +1484,7 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_entry.payment_entry.get_negative_outstanding_invoices" href="#erpnext.accounts.doctype.payment_entry.payment_entry.get_negative_outstanding_invoices" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_entry.payment_entry.<b>get_negative_outstanding_invoices</b>
         <i class="text-muted">(party_type, party, party_account, total_field)</i>
     </p>
@@ -1426,9 +1500,9 @@ Supplier</pre>
     
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_entry.payment_entry.get_orders_to_be_billed" href="#erpnext.accounts.doctype.payment_entry.payment_entry.get_orders_to_be_billed" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_entry.payment_entry.<b>get_orders_to_be_billed</b>
-        <i class="text-muted">(party_type, party, party_account_currency, company_currency)</i>
+        <i class="text-muted">(posting_date, party_type, party, party_account_currency, company_currency)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1444,7 +1518,7 @@ Supplier</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_entry.payment_entry.get_outstanding_reference_documents" href="#erpnext.accounts.doctype.payment_entry.payment_entry.get_outstanding_reference_documents" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_entry.payment_entry.<b>get_outstanding_reference_documents</b>
         <i class="text-muted">(args)</i>
     </p>
@@ -1462,7 +1536,7 @@ Supplier</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details" href="#erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_entry.payment_entry.<b>get_party_details</b>
         <i class="text-muted">(company, party_type, party, date)</i>
     </p>
@@ -1480,7 +1554,7 @@ Supplier</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry" href="#erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_entry.payment_entry.<b>get_payment_entry</b>
         <i class="text-muted">(dt, dn, party_amount=None, bank_account=None, bank_amount=None)</i>
     </p>
@@ -1498,7 +1572,7 @@ Supplier</pre>
     </p>
 	<p class="docs-attr-name">
         <a name="erpnext.accounts.doctype.payment_entry.payment_entry.get_reference_details" href="#erpnext.accounts.doctype.payment_entry.payment_entry.get_reference_details" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.accounts.doctype.payment_entry.payment_entry.<b>get_reference_details</b>
         <i class="text-muted">(reference_doctype, reference_name, party_account_currency)</i>
     </p>
@@ -1531,8 +1605,8 @@ Supplier</pre>
 <!-- jinja -->
 <!-- static -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -1562,7 +1636,7 @@ Supplier</pre>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -1583,5 +1657,17 @@ Supplier</pre>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

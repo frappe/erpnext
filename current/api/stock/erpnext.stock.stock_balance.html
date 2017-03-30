@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/api/stock/erpnext.stock.stock_balance">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,49 +99,50 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/api/stock/erpnext.stock.stock_balance" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/api/stock">
 		stock</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>erpnext.stock.stock_balance</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>erpnext.stock.stock_balance</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: erpnext.stock.stock_balance --><div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/stock/stock_balance.py"
@@ -154,7 +160,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.get_balance_qty_from_sle" href="#erpnext.stock.stock_balance.get_balance_qty_from_sle" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>get_balance_qty_from_sle</b>
         <i class="text-muted">(item_code, warehouse)</i>
     </p>
@@ -170,7 +176,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.get_indented_qty" href="#erpnext.stock.stock_balance.get_indented_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>get_indented_qty</b>
         <i class="text-muted">(item_code, warehouse)</i>
     </p>
@@ -186,7 +192,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.get_ordered_qty" href="#erpnext.stock.stock_balance.get_ordered_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>get_ordered_qty</b>
         <i class="text-muted">(item_code, warehouse)</i>
     </p>
@@ -202,7 +208,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.get_planned_qty" href="#erpnext.stock.stock_balance.get_planned_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>get_planned_qty</b>
         <i class="text-muted">(item_code, warehouse)</i>
     </p>
@@ -218,7 +224,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.get_reserved_qty" href="#erpnext.stock.stock_balance.get_reserved_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>get_reserved_qty</b>
         <i class="text-muted">(item_code, warehouse)</i>
     </p>
@@ -234,11 +240,12 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.repost" href="#erpnext.stock.stock_balance.repost" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>repost</b>
         <i class="text-muted">(only_actual=False, allow_negative_stock=False, allow_zero_rate=False, only_bin=False)</i>
     </p>
-	<div class="docs-attr-desc"><p>Repost everything!</p>
+	<div class="docs-attr-desc"><pre><code>Repost everything!
+</code></pre>
 </div>
 	<br>
 
@@ -250,7 +257,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.repost_actual_qty" href="#erpnext.stock.stock_balance.repost_actual_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>repost_actual_qty</b>
         <i class="text-muted">(item_code, warehouse, allow_zero_rate=False)</i>
     </p>
@@ -266,7 +273,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.repost_all_stock_vouchers" href="#erpnext.stock.stock_balance.repost_all_stock_vouchers" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>repost_all_stock_vouchers</b>
         <i class="text-muted">()</i>
     </p>
@@ -282,7 +289,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.repost_stock" href="#erpnext.stock.stock_balance.repost_stock" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>repost_stock</b>
         <i class="text-muted">(item_code, warehouse, allow_zero_rate=False, only_actual=False, only_bin=False)</i>
     </p>
@@ -298,7 +305,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.reset_serial_no_status_and_warehouse" href="#erpnext.stock.stock_balance.reset_serial_no_status_and_warehouse" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>reset_serial_no_status_and_warehouse</b>
         <i class="text-muted">(serial_nos=None)</i>
     </p>
@@ -314,7 +321,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.set_stock_balance_as_per_serial_no" href="#erpnext.stock.stock_balance.set_stock_balance_as_per_serial_no" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>set_stock_balance_as_per_serial_no</b>
         <i class="text-muted">(item_code=None, posting_date=None, posting_time=None, fiscal_year=None)</i>
     </p>
@@ -330,7 +337,7 @@
     
 	<p class="docs-attr-name">
         <a name="erpnext.stock.stock_balance.update_bin_qty" href="#erpnext.stock.stock_balance.update_bin_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.stock.stock_balance.<b>update_bin_qty</b>
         <i class="text-muted">(item_code, warehouse, qty_dict=None)</i>
     </p>
@@ -344,8 +351,8 @@
 
 <!-- autodoc -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -375,7 +382,7 @@
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -396,5 +403,17 @@
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

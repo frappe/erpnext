@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="current/api/controllers/erpnext.controllers.buying_controller">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,49 +99,50 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-current/api/controllers/erpnext.controllers.buying_controller" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//current/api/controllers">
 		controllers</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>erpnext.controllers.buying_controller</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>erpnext.controllers.buying_controller</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <!-- title: erpnext.controllers.buying_controller --><div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+	Version 7.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/controllers/buying_controller.py"
@@ -163,7 +169,7 @@
     
 	<p class="docs-attr-name">
         <a name="__setup__" href="#__setup__" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>__setup__</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -177,7 +183,7 @@
     
 	<p class="docs-attr-name">
         <a name="cleanup_raw_materials_supplied" href="#cleanup_raw_materials_supplied" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>cleanup_raw_materials_supplied</b>
         <i class="text-muted">(self, parent_items, raw_material_table)</i>
     </p>
@@ -191,7 +197,7 @@
     
 	<p class="docs-attr-name">
         <a name="create_raw_materials_supplied" href="#create_raw_materials_supplied" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>create_raw_materials_supplied</b>
         <i class="text-muted">(self, raw_material_table)</i>
     </p>
@@ -205,7 +211,7 @@
     
 	<p class="docs-attr-name">
         <a name="get_feed" href="#get_feed" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_feed</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -219,7 +225,7 @@
     
 	<p class="docs-attr-name">
         <a name="get_items_from_bom" href="#get_items_from_bom" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_items_from_bom</b>
         <i class="text-muted">(self, item_code, bom)</i>
     </p>
@@ -233,7 +239,7 @@
     
 	<p class="docs-attr-name">
         <a name="make_sl_entries_for_supplier_warehouse" href="#make_sl_entries_for_supplier_warehouse" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>make_sl_entries_for_supplier_warehouse</b>
         <i class="text-muted">(self, sl_entries)</i>
     </p>
@@ -247,7 +253,7 @@
     
 	<p class="docs-attr-name">
         <a name="set_landed_cost_voucher_amount" href="#set_landed_cost_voucher_amount" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_landed_cost_voucher_amount</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -261,7 +267,7 @@
     
 	<p class="docs-attr-name">
         <a name="set_missing_values" href="#set_missing_values" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_missing_values</b>
         <i class="text-muted">(self, for_validate=False)</i>
     </p>
@@ -275,7 +281,7 @@
     
 	<p class="docs-attr-name">
         <a name="set_qty_as_per_stock_uom" href="#set_qty_as_per_stock_uom" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_qty_as_per_stock_uom</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -289,7 +295,7 @@
     
 	<p class="docs-attr-name">
         <a name="set_supplier_from_item_default" href="#set_supplier_from_item_default" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_supplier_from_item_default</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -303,7 +309,7 @@
     
 	<p class="docs-attr-name">
         <a name="set_total_in_words" href="#set_total_in_words" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_total_in_words</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -317,7 +323,7 @@
     
 	<p class="docs-attr-name">
         <a name="update_ordered_qty" href="#update_ordered_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_ordered_qty</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -331,7 +337,7 @@
     
 	<p class="docs-attr-name">
         <a name="update_raw_materials_supplied" href="#update_raw_materials_supplied" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_raw_materials_supplied</b>
         <i class="text-muted">(self, item, raw_material_table)</i>
     </p>
@@ -345,7 +351,7 @@
     
 	<p class="docs-attr-name">
         <a name="update_stock_ledger" href="#update_stock_ledger" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_stock_ledger</b>
         <i class="text-muted">(self, allow_negative_stock=False, via_landed_cost_voucher=False)</i>
     </p>
@@ -359,14 +365,15 @@
     
 	<p class="docs-attr-name">
         <a name="update_valuation_rate" href="#update_valuation_rate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_valuation_rate</b>
         <i class="text-muted">(self, parentfield)</i>
     </p>
-	<div class="docs-attr-desc"><p>item<em>tax</em>amount is the total tax amount applied on that item
-stored for valuation</p>
+	<div class="docs-attr-desc"><pre><code>        item_tax_amount is the total tax amount applied on that item
+        stored for valuation
 
-<p>TODO: rename item<em>tax</em>amount to valuation<em>tax</em>amount</p>
+        TODO: rename item_tax_amount to valuation_tax_amount
+</code></pre>
 </div>
 	<br>
 
@@ -376,7 +383,7 @@ stored for valuation</p>
     
 	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -390,7 +397,7 @@ stored for valuation</p>
     
 	<p class="docs-attr-name">
         <a name="validate_accepted_rejected_qty" href="#validate_accepted_rejected_qty" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_accepted_rejected_qty</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -404,7 +411,7 @@ stored for valuation</p>
     
 	<p class="docs-attr-name">
         <a name="validate_for_subcontracting" href="#validate_for_subcontracting" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_for_subcontracting</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -417,8 +424,22 @@ stored for valuation</p>
     
     
 	<p class="docs-attr-name">
+        <a name="validate_negative_quantity" href="#validate_negative_quantity" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_negative_quantity</b>
+        <i class="text-muted">(self, item_row, field_list)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="validate_purchase_return" href="#validate_purchase_return" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_purchase_return</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -432,7 +453,7 @@ stored for valuation</p>
     
 	<p class="docs-attr-name">
         <a name="validate_rejected_warehouse" href="#validate_rejected_warehouse" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_rejected_warehouse</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -446,7 +467,7 @@ stored for valuation</p>
     
 	<p class="docs-attr-name">
         <a name="validate_stock_or_nonstock_items" href="#validate_stock_or_nonstock_items" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_stock_or_nonstock_items</b>
         <i class="text-muted">(self)</i>
     </p>
@@ -464,8 +485,8 @@ stored for valuation</p>
 
 <!-- autodoc -->
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				<!-- edit-link -->
@@ -495,7 +516,7 @@ stored for valuation</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -516,5 +537,17 @@ stored for valuation</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

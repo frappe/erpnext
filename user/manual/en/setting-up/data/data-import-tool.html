@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="user/manual/en/setting-up/data/data-import-tool">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,50 +99,49 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-user/manual/en/setting-up/data/data-import-tool" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//user/manual/en/setting-up/data">
 		Data Management</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Data Import Tool</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
-<p>The Data Import Tool is a great way to upload (or edit) bulk data, specially
-master data, into the system.</p>
+					<div class="col-sm-8 col-xs-6">
+						<h1>Data Import Tool</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
 
-<p>To Open the data import tool, you either go to Setup or go to the Transaction
-you want to Import. If Data Import is allowed, you will see an Import Button:</p>
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
+<p>The Data Import Tool is a great way to upload (or edit) bulk data, specially master data, into the system.</p>
+
+<p>To Open the data import tool, you either go to Setup or go to the Transaction you want to Import. If Data Import is allowed, you will see an Import Button:</p>
 
 <p><img alt="Start Import" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/data-import/data-import-1.png"></p>
 
@@ -155,24 +159,26 @@ with it too. The child tables are linked to the parent tables and are
 implemented where there are multiple values for any property. For example an
 Item can have multiple prices, An Invoice has multiple Items and so on.</p>
 
-<p><img alt="Download Template" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/data-import/data-import-2.png"></p>
-
 <ul>
-<li>Click on the table you want to download or "All Tables"</li>
-<li>For bulk editing, you can click on "Download With Data"</li>
+<li>Select Doctype for which template should be downloaded.</li>
+<li>Check fields to be included in the template.</li>
+<li>Click on "Download Blank Template".</li>
+<li>For bulk editing, you can click on "Download With Data".</li>
 </ul>
+
+<p><img alt="Download Template" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/data-import/data-import-tool-template.gif"></p>
 
 <h3>2. Fill in the Template</h3>
 
 <p>After downloading the template, open it in a spreadsheet application and fill
 in the data below the column headings.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/import-3.png" alt="Spreadsheet" /></p>
+<p><img alt="Download Template" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/data-import/import-file.png"></p>
 
 <p>Then export your template or save it as a <strong>Comma Separated Values</strong> (CSV)
 file.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/import-4.png" alt="Spreadsheet" /></p>
+<p><img alt="Download Template" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/data-import/import-csv.png"></p>
 
 <h3>3. Upload the .csv File</h3>
 
@@ -250,18 +256,22 @@ to save your file encoded as UTF-8. For older versions of Excel, there is no
 clear way of saving as UTF-8. So save your file as a CSV, then open it in
 Notepad, and save as “UTF-8”. (Sorry blame Microsoft for this!)</p>
 
+<h4>Help Video on Importing Data in ERPNext from Spreadsheet file</h4>
+
+<iframe width="660" height="371" src="https://www.youtube.com/embed/Ta2Xx3QoK3E" frameborder="0" allowfullscreen></iframe>
+
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/setting-up/data/bulk-rename">Bulk Renaming of Records</a></p></p>
 
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
+		<i class="fa fa-smile"></i>
 		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/setting-up/data/data-import-tool.md">
 			Improve this page
 		</a>
@@ -294,7 +304,7 @@ Notepad, and save as “UTF-8”. (Sorry blame Microsoft for this!)</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -315,5 +325,17 @@ Notepad, and save as “UTF-8”. (Sorry blame Microsoft for this!)</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>

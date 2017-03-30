@@ -14,10 +14,10 @@
 
     
 	<link rel="shortcut icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
 	<link rel="icon"
-		href="/assets/img/favicon.ico"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
 		type="image/x-icon">
     
 
@@ -25,18 +25,13 @@
 <body data-path="user/manual/en/accounts/sales-invoice">
 	<div class="main-section">
 		<div>
-				<header>
-	<nav class="navbar navbar-default navbar-main" role="navigation">
+					<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<!-- <a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext//"> -->
 				<a class="navbar-brand ellipsis"
 					 href="https://frappe.github.io/erpnext//">
-					<span>ERPNext</span>
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
 				</a>
-				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
-					<i class="octicon octicon-three-bars"></i>
-				</a> -->
 				<div class="dropdown">
 					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						<i class="octicon octicon-three-bars"></i>
@@ -54,13 +49,18 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
 
 <li class="divider"></li>
+
 <!-- post login tools -->
 
 </ul>
@@ -82,11 +82,16 @@
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
-	Videos</a></li><li data-label='API Documentation' >
+	Videos</a></li><li data-label='API' >
 	<a href="https://frappe.github.io/erpnext/current"
 		
 		>
-	API Documentation</a></li>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
 	
 	<!-- post login tools -->
 
@@ -94,54 +99,55 @@
 				
 			</div>
 		</div>
-	</nav>
-</header><div class="hero-and-content">
+	</nav><div class="hero-and-content">
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
 <div class="page-container" id="page-user/manual/en/accounts/sales-invoice" data-path="{{ pathname }}"
 	>
-			<div class="row ">
-				
-				<div class=" page-content col-sm-12 ">
-					<div class="page-content-wrapper">
-						<div class="row page-head">
-							<div class="col-sm-8 col-xs-6">
-								
-								<div class="page-breadcrumbs">
-									
-									
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12'>
+						
+						<div class="page-breadcrumbs">
+							
+							
 <ul class="breadcrumb">
 	<li>
-		<span class="icon icon-angle-left"></span>
+		<span class="fa fa-angle-left"></span>
 		<a href="https://frappe.github.io/erpnext//user/manual/en/accounts">
 		Accounts</a>
 	</li>
 	
 </ul>
 
-									
-								</div>
-								
-								<h1>Sales Invoice</h1>
-							</div>
-							<div class="col-sm-4 col-xs-6">
-								
-
-								
-							</div>
+							
 						</div>
+						
 					</div>
-					<div class="page_content">
+					<div class="col-sm-8 col-xs-6">
+						<h1>Sales Invoice</h1>
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
 <p>A Sales Invoice is a bill that you send to your customers, against which the customer processes the payment. Sales Invoice is an accounting transaction. On submission of Sales Invoice,  the system updates the receivable and books income against a Customer Account.</p>
 
 <p>You can create a Sales Invoice directly from</p>
 
 <blockquote>
-  <p>Accounting &gt; Documents &gt; Sales Invoice &gt; New Sales Invoice</p>
+  <p>Accounts &gt; Billing &gt; Sales Invoice &gt; New Sales Invoice</p>
 </blockquote>
 
-<p>or Click on Make Invoice at the right hand corner of the Delivery Note.</p>
+<p>or you can Make a new Sales Invoice after you submit the Delivery Note.</p>
 
 <p><img class="screenshot" alt="Sales Invoice" src="https://frappe.github.io/erpnext/assets/img/accounts/sales-invoice.png"></p>
 
@@ -192,8 +198,27 @@ monthly, quarterly, half-yearly or annual basis, you can check the “Recurring
 Invoice” box. Here you can fill in the details of how frequently you want to
 bill this Invoice and the period for which the contract is valid.</p>
 
-<p>ERPNext will automatically create new Invoices and mail it to the email ids
+<p>ERPNext will automatically create new Invoices and mail it to the Email Addresses
 you set.</p>
+
+<h4>POS Invoices</h4>
+
+<p>Consider a scenario where retail transaction is carried out. For e.g: A retail shop.
+If you check the <strong>Is POS</strong> checkbox, then all your <strong>POS Profile</strong> data is fetched
+into the Sales Invoice and you can easily make payments.
+Also, if you check the <strong>Update Stock</strong> the stock will also update automatically,
+without the need of a Delivery Note.</p>
+
+<p><img class="screenshot" alt="POS Invoice" src="https://frappe.github.io/erpnext/assets/img/accounts/pos-sales-invoice.png"></p>
+
+<h4>Billing Timesheet with Project</h4>
+
+<p>If you want to bill employees working on Projects on hourly basis (contract based),
+they can fill out Timesheets which consists their billing rate. When you make a new
+Sales Invoice, select the Project for which the billing is to be made, and the
+corresponding Timesheet entries for that Project will be fetched.</p>
+
+<p><img class="screenshot" alt="POS Invoice" src="https://frappe.github.io/erpnext/assets/img/accounts/billing-timesheet-sales-invoice.png"></p>
 
 <hr />
 
@@ -210,20 +235,19 @@ not ideal as your Customer may or may not decide to pay up. But since your
 Customer wants an “Invoice”, you could give the Customer a Quotation (in
 ERPNext) titled as “Pro Forma Invoice”. This way everyone is happy.</p>
 
-<p>This is a fairly common practice. We follow this at Frappe too.</p>
-
-<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/accounts/point-of-sale-pos-invoice">Point of Sale Invoice</a></p></p>
+<p>This is a fairly common practice. We follow this at Frappe too.
+<p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/accounts/point-of-sale-pos-invoice">Point of Sale Invoice</a></p></p>
 
 </div>
-				</div>
-			</div>
+		</div>
+	</div>
 </div>
 
 				
 <div class="page-container">
 	<div class="page-content">
 	<div class="edit-container text-center">
-		<i class="icon icon-smile"></i>
+		<i class="fa fa-smile"></i>
 		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/sales-invoice.md">
 			Improve this page
 		</a>
@@ -256,7 +280,7 @@ ERPNext) titled as “Pro Forma Invoice”. This way everyone is happy.</p>
                             Forum</a>
                         </li>
                         <li>
-                            <a href="https://frappe.io/apps">
+                            <a href="https://community.erpnext.com/apps">
                             Frappe Apps</a>
                         </li>
                     </ul>
@@ -277,5 +301,17 @@ ERPNext) titled as “Pro Forma Invoice”. This way everyone is happy.</p>
         window.docs_base_url = "https://frappe.github.io/erpnext";
     </script>
 
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
 	<!-- csrf_token --></body>
 </html>
