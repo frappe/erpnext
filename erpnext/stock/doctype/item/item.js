@@ -259,8 +259,6 @@ $.extend(erpnext.item, {
 	},
 
 	make_variant: function(frm) {
-		var fields = []
-
 		if(frm.doc.variant_based_on==="Item Attribute") {
 			erpnext.item.show_modal_for_item_attribute_selection(frm);
 		} else {
@@ -299,6 +297,8 @@ $.extend(erpnext.item, {
 	},
 
 	show_modal_for_item_attribute_selection: function(frm) {
+		var fields = []
+
 		for(var i=0;i< frm.doc.attributes.length;i++){
 			var fieldtype, desc;
 			var row = frm.doc.attributes[i];
