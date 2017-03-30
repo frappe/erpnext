@@ -21,7 +21,9 @@ class SalarySlip(TransactionBase):
 		self.status = self.get_status()
 		self.validate_dates()
 		self.check_existing()
-		self.get_date_details()
+		if not self.salary_slip_based_on_timesheet:
+			self.get_date_details()
+
 		if not (len(self.get("earnings")) or len(self.get("deductions"))):
 			# get details from salary structure
 			self.get_emp_and_leave_details()
@@ -121,7 +123,8 @@ class SalarySlip(TransactionBase):
 			self.set("earnings", [])
 			self.set("deductions", [])
 
-			self.get_date_details()
+			if not self.salary_slip_based_on_timesheet:
+				self.get_date_details()
 			self.validate_dates()
 			joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
 				["date_of_joining", "relieving_date"])
@@ -189,7 +192,8 @@ class SalarySlip(TransactionBase):
 
 	def process_salary_structure(self):
 		'''Calculate salary after salary structure details have been updated'''
-		self.get_date_details()
+		if not self.salary_slip_based_on_timesheet:
+			self.get_date_details()
 		self.pull_emp_details()
 		self.get_leave_details()
 		self.calculate_net_pay()
