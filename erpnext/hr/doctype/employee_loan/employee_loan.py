@@ -94,17 +94,19 @@ class EmployeeLoan(AccountsController):
 
 
 def update_disbursement_status(doc):
-	disbursed_amount = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as disbursed_amount 
+	disbursement = frappe.db.sql("""select posting_date, ifnull(sum(debit_in_account_currency), 0) as disbursed_amount 
 		from `tabGL Entry` where against_voucher_type = 'Employee Loan' and against_voucher = %s""", 
-		(doc.name), as_dict=1)[0].disbursed_amount
-	if disbursed_amount == doc.loan_amount:
+		(doc.name), as_dict=1)[0]
+	if disbursement.disbursed_amount == doc.loan_amount:
 		frappe.db.set_value("Employee Loan", doc.name , "status", "Fully Disbursed")
-	if disbursed_amount < doc.loan_amount and disbursed_amount != 0:
+	if disbursement.disbursed_amount < doc.loan_amount and disbursement.disbursed_amount != 0:
 		frappe.db.set_value("Employee Loan", doc.name , "status", "Partially Disbursed")
-	if disbursed_amount == 0:
+	if disbursement.disbursed_amount == 0:
 		frappe.db.set_value("Employee Loan", doc.name , "status", "Sanctioned")
-	if disbursed_amount > doc.loan_amount:
+	if disbursement.disbursed_amount > doc.loan_amount:
 		frappe.throw(_("Disbursed Amount cannot be greater than Loan Amount {0}").format(doc.loan_amount))
+	if disbursement.disbursed_amount > 0:
+		frappe.db.set_value("Employee Loan", doc.name , "disbursement_date", disbursement.posting_date)	
 	
 def check_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods):
 	if repayment_method == "Repay Over Number of Periods" and not repayment_periods:
