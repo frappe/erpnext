@@ -9,7 +9,7 @@ def execute():
 	map_fields = (
 		('Customer', 'customer'),
 		('Supplier', 'supplier'),
-		('Load', 'lead'),
+		('Lead', 'lead'),
 		('Sales Partner', 'sales_partner')
 	)
 	for doctype in ('Contact', 'Address'):
