@@ -6,6 +6,7 @@ import frappe
 from frappe import _, scrub
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.controllers.queries import get_match_cond
+from erpnext.stock.stock_ledger import get_valuation_rate
 from frappe.utils import flt
 
 
@@ -221,7 +222,10 @@ class GrossProfitGenerator(object):
 					from `tabPurchase Invoice Item`
 					where item_code = %s and docstatus=1""", item_code)[0][0])
 			else:
-				self.average_buying_rate[item_code] = get_incoming_rate(row)
+				average_buying_rate = get_incoming_rate(row)
+				if not average_buying_rate:
+					average_buying_rate = get_valuation_rate(item_code, row.warehouse, allow_zero_rate=True)
+				self.average_buying_rate[item_code] =  average_buying_rate
 
 		return self.average_buying_rate[item_code]
 
