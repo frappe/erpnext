@@ -4,11 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, flt, cstr, comma_or
-from erpnext.setup.utils import get_company_currency
 from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
-from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.get_item_details import get_conversion_factor
 
 from erpnext.controllers.stock_controller import StockController
@@ -113,13 +111,11 @@ class SellingController(StockController):
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
-		company_currency = get_company_currency(self.company)
-
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
 		if self.meta.get_field("base_in_words"):
 			self.base_in_words = money_in_words(disable_rounded_total and
-				abs(self.base_grand_total) or abs(self.base_rounded_total), company_currency)
+				abs(self.base_grand_total) or abs(self.base_rounded_total), self.company_currency)
 		if self.meta.get_field("in_words"):
 			self.in_words = money_in_words(disable_rounded_total and
 				abs(self.grand_total) or abs(self.rounded_total), self.currency)
@@ -170,7 +166,7 @@ class SellingController(StockController):
 			if d.meta.get_field("stock_qty"):
 				if not d.conversion_factor:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
-				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)			
+				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
 
 	def validate_selling_price(self):
 		def throw_message(item_name, rate, ref_rate_field):

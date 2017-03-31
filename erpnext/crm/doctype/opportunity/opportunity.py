@@ -194,11 +194,12 @@ def make_quotation(source_name, target_doc=None):
 				quotation.transaction_date)
 
 		quotation.conversion_rate = exchange_rate
-		
+
 		# get default taxes
 		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template")
-		quotation.extend("taxes", taxes)
-		
+		if taxes:
+			quotation.extend("taxes", taxes)
+
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
 

@@ -6,9 +6,10 @@ import frappe
 from frappe import _, msgprint
 from frappe.utils import flt,cint, cstr
 
-from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
 from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.buying.utils import validate_for_items
+from erpnext.stock.stock_ledger import get_valuation_rate
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -40,9 +41,7 @@ class BuyingController(StockController):
 			# self.validate_purchase_return()
 			self.validate_rejected_warehouse()
 			self.validate_accepted_rejected_qty()
-
-			pc_obj = frappe.get_doc('Purchase Common')
-			pc_obj.validate_for_items(self)
+			validate_for_items(self)
 
 			#sub-contracting
 			self.validate_for_subcontracting()
@@ -88,9 +87,8 @@ class BuyingController(StockController):
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
-		company_currency = get_company_currency(self.company)
 		if self.meta.get_field("base_in_words"):
-			self.base_in_words = money_in_words(self.base_grand_total, company_currency)
+			self.base_in_words = money_in_words(self.base_grand_total, self.company_currency)
 		if self.meta.get_field("in_words"):
 			self.in_words = money_in_words(self.grand_total, self.currency)
 
@@ -225,9 +223,8 @@ class BuyingController(StockController):
 					"serial_no": rm.serial_no
 				})
 				if not rm.rate:
-					from erpnext.stock.stock_ledger import get_valuation_rate
-					rm.rate = get_valuation_rate(bom_item.item_code, self.supplier_warehouse, 
-						self.doctype, self.name)
+					rm.rate = get_valuation_rate(bom_item.item_code, self.supplier_warehouse,
+						self.doctype, self.name, currency=self.company_currency)
 			else:
 				rm.rate = bom_item.rate
 

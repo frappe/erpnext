@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _, throw
 from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate
-from erpnext.setup.utils import get_company_currency, get_exchange_rate
+from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
@@ -22,7 +22,7 @@ class AccountsController(TransactionBase):
 	@property
 	def company_currency(self):
 		if not hasattr(self, "__company_currency"):
-			self.__company_currency = get_company_currency(self.company)
+			self.__company_currency = erpnext.get_company_currency(self.company)
 
 		return self.__company_currency
 

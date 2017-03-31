@@ -2,13 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 
 from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
-from erpnext.setup.utils import get_company_currency
 from erpnext.hr.doctype.process_payroll.process_payroll import get_start_end_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
@@ -33,7 +32,7 @@ class SalarySlip(TransactionBase):
 		# if self.salary_slip_based_on_timesheet or not self.net_pay:
 		self.calculate_net_pay()
 
-		company_currency = get_company_currency(self.company)
+		company_currency = erpnext.get_company_currency(self.company)
 		self.total_in_words = money_in_words(self.rounded_total, company_currency)
 
 		if frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet"):
@@ -348,7 +347,7 @@ class SalarySlip(TransactionBase):
 
 		self.sum_components('earnings', 'gross_pay')
 		self.sum_components('deductions', 'total_deduction')
-		
+
 		self.set_loan_repayment()
 
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
@@ -356,11 +355,11 @@ class SalarySlip(TransactionBase):
 			self.precision("net_pay") if disable_rounded_total else 0)
 
 	def set_loan_repayment(self):
-		employee_loan = frappe.db.sql("""select sum(principal_amount) as principal_amount, sum(interest_amount) as interest_amount, 
+		employee_loan = frappe.db.sql("""select sum(principal_amount) as principal_amount, sum(interest_amount) as interest_amount,
 						sum(total_payment) as total_loan_repayment from `tabRepayment Schedule`
 						where payment_date between %s and %s and parent in (select name from `tabEmployee Loan`
 						where employee = %s and repay_from_salary = 1 and docstatus = 1)""",
-						(self.start_date, self.end_date, self.employee), as_dict=True)				
+						(self.start_date, self.end_date, self.employee), as_dict=True)
 		if employee_loan:
 			self.principal_amount = employee_loan[0].principal_amount
 			self.interest_amount = employee_loan[0].interest_amount
