@@ -13,7 +13,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
-
+from erpnext.buying.utils import check_for_closed_status, validate_for_items
 
 form_grid_templates = {
 	"items": "templates/form_grid/material_request_grid.html"
@@ -72,12 +72,9 @@ class MaterialRequest(BuyingController):
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
 
-		pc_obj = frappe.get_doc('Purchase Common')
-		pc_obj.validate_for_items(self)
+		validate_for_items(self)
 
 		# self.set_title()
-
-
 		# self.validate_qty_against_so()
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
@@ -112,9 +109,7 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty()
 
 	def on_cancel(self):
-		pc_obj = frappe.get_doc('Purchase Common')
-
-		pc_obj.check_for_closed_status(self.doctype, self.name)
+		check_for_closed_status(self.doctype, self.name)
 
 		self.update_requested_qty()
 

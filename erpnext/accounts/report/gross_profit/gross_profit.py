@@ -12,7 +12,7 @@ from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = frappe._dict()
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	filters.currency = frappe.db.get_value("Company", filters.company, "default_currency")
 
 	gross_profit_data = GrossProfitGenerator(filters)
 
@@ -50,7 +50,7 @@ def execute(filters=None):
 		for col in group_wise_columns.get(scrub(filters.group_by)):
 			row.append(src.get(col))
 
-		row.append(company_currency)
+		row.append(filters.currency)
 		data.append(row)
 
 	return columns, data
@@ -224,8 +224,11 @@ class GrossProfitGenerator(object):
 			else:
 				average_buying_rate = get_incoming_rate(row)
 				if not average_buying_rate:
-					average_buying_rate = get_valuation_rate(item_code, row.warehouse, allow_zero_rate=True)
-				self.average_buying_rate[item_code] =  average_buying_rate
+					average_buying_rate = get_valuation_rate(item_code, row.warehouse,
+            row.parenttype, row.parent, allow_zero_rate=True, 
+            currency=self.filters.currency)
+
+          self.average_buying_rate[item_code] =  average_buying_rate
 
 		return self.average_buying_rate[item_code]
 
@@ -235,7 +238,7 @@ class GrossProfitGenerator(object):
 			select (a.base_rate / a.conversion_factor)
 			from `tabPurchase Invoice Item` a
 			where a.item_code = %s and a.docstatus=1
-			and modified <= %s 
+			and modified <= %s
 			order by a.modified desc limit 1""", (item_code,self.filters.to_date))
 		else:
 			last_purchase_rate = frappe.db.sql("""
@@ -253,7 +256,7 @@ class GrossProfitGenerator(object):
 			conditions += " and posting_date >= %(from_date)s"
 		if self.filters.to_date:
 			conditions += " and posting_date <= %(to_date)s"
-					
+
 		if self.filters.group_by=="Sales Person":
 			sales_person_cols = ", sales.sales_person, sales.allocated_amount, sales.incentives"
 			sales_team_table = "left join `tabSales Team` sales on sales.parent = `tabSales Invoice`.name"
@@ -269,7 +272,7 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice Item`.dn_detail, `tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
 				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount, `tabSales Invoice Item`.name as "item_row"
 				{sales_person_cols}
-			from 
+			from
 				`tabSales Invoice`
 				inner join `tabSales Invoice Item` on `tabSales Invoice Item`.parent = `tabSales Invoice`.name
 				{sales_team_table}
@@ -277,7 +280,7 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice`.docstatus = 1 and `tabSales Invoice`.is_return != 1 {conditions} {match_cond}
 			order by
 				`tabSales Invoice`.posting_date desc, `tabSales Invoice`.posting_time desc"""
-			.format(conditions=conditions, sales_person_cols=sales_person_cols, 
+			.format(conditions=conditions, sales_person_cols=sales_person_cols,
 				sales_team_table=sales_team_table, match_cond = get_match_cond('Sales Invoice')), self.filters, as_dict=1)
 
 	def load_stock_ledger_entries(self):

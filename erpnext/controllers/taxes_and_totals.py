@@ -3,10 +3,9 @@
 
 from __future__ import unicode_literals
 import json
-import frappe
+import frappe, erpnext
 from frappe import _, scrub
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
-from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
 
@@ -38,7 +37,7 @@ class calculate_taxes_and_totals(object):
 
 	def validate_conversion_rate(self):
 		# validate conversion rate
-		company_currency = get_company_currency(self.doc.company)
+		company_currency = erpnext.get_company_currency(self.doc.company)
 		if not self.doc.currency or self.doc.currency == company_currency:
 			self.doc.currency = company_currency
 			self.doc.conversion_rate = 1.0
@@ -327,7 +326,7 @@ class calculate_taxes_and_totals(object):
 			self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
 				self.doc.currency, self.doc.precision("rounded_total"))
 		if self.doc.meta.get_field("base_rounded_total"):
-			company_currency = get_company_currency(self.doc.company)
+			company_currency = erpnext.get_company_currency(self.doc.company)
 
 			self.doc.base_rounded_total = \
 				round_based_on_smallest_currency_fraction(self.doc.base_grand_total,

@@ -97,7 +97,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 
 			if(this.frm.doc.company && !this.frm.doc.amended_from) {
-				this.frm.script_manager.trigger("company");
+				this.frm.trigger("company");
 			}
 		}
 
@@ -295,7 +295,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if (item.serial_no) {
 			if (!item.item_code) {
-				this.frm.script_manager.trigger("item_code", cdt, cdn);
+				this.frm.trigger("item_code", cdt, cdn);
 			}
 			else {
 				var sr_no = [];

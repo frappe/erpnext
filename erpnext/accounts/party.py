@@ -151,13 +151,6 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	}
 	return out
 
-def get_company_currency():
-	company_currency = frappe._dict()
-	for d in frappe.get_all("Company", fields=["name", "default_currency"]):
-		company_currency.setdefault(d.name, d.default_currency)
-
-	return company_currency
-
 @frappe.whitelist()
 def get_party_account(party_type, party, company):
 	"""Returns the account for the given `party`.
