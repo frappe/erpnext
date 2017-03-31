@@ -2,13 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import flt, fmt_money, getdate, formatdate
 from frappe.model.document import Document
 from erpnext.accounts.party import validate_party_gle_currency, validate_party_frozen_disabled
 from erpnext.accounts.utils import get_account_currency
-from erpnext.setup.doctype.company.company import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
 
@@ -19,7 +18,7 @@ class GLEntry(Document):
 		self.flags.ignore_submit_comment = True
 		self.check_mandatory()
 		self.validate_and_set_fiscal_year()
-		
+
 		if not self.flags.from_repost:
 			self.pl_must_have_cost_center()
 			self.check_pl_account()
@@ -32,7 +31,7 @@ class GLEntry(Document):
 		if not from_repost:
 			self.validate_account_details(adv_adj)
 			check_freezing_date(self.posting_date, adv_adj)
-			
+
 		validate_frozen_account(self.account, adv_adj)
 		validate_balance_type(self.account, adv_adj)
 
@@ -56,7 +55,7 @@ class GLEntry(Document):
 			elif account_type == "Payable":
 				frappe.throw(_("{0} {1}: Supplier is required against Payable account {2}")
 					.format(self.voucher_type, self.voucher_no, self.account))
-				
+
 		# Zero value transaction is not allowed
 		if not (flt(self.debit) or flt(self.credit)):
 			frappe.throw(_("{0} {1}: Either debit or credit amount is required for {2}")
@@ -116,7 +115,7 @@ class GLEntry(Document):
 		validate_party_frozen_disabled(self.party_type, self.party)
 
 	def validate_currency(self):
-		company_currency = get_company_currency(self.company)
+		company_currency = erpnext.get_company_currency(self.company)
 		account_currency = get_account_currency(self.account)
 
 		if not self.account_currency:
@@ -124,7 +123,7 @@ class GLEntry(Document):
 
 		if account_currency != self.account_currency:
 			frappe.throw(_("{0} {1}: Accounting Entry for {2} can only be made in currency: {3}")
-				.format(self.voucher_type, self.voucher_no, self.account, 
+				.format(self.voucher_type, self.voucher_no, self.account,
 				(account_currency or company_currency)), InvalidAccountCurrency)
 
 		if self.party_type and self.party:

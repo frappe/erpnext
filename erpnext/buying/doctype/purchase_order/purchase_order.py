@@ -11,6 +11,8 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
+from erpnext.buying.utils import (validate_for_items, check_for_closed_status,
+	update_last_purchase_rate)
 
 
 form_grid_templates = {
@@ -37,9 +39,8 @@ class PurchaseOrder(BuyingController):
 		super(PurchaseOrder, self).validate()
 
 		self.set_status()
-		pc_obj = frappe.get_doc('Purchase Common')
-		pc_obj.validate_for_items(self)
-		self.check_for_closed_status(pc_obj)
+		validate_for_items(self)
+		self.check_for_closed_status()
 
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", ["qty", "required_qty"])
@@ -111,12 +112,12 @@ class PurchaseOrder(BuyingController):
 							= d.rate = item_last_purchase_rate
 
 	# Check for Closed status
-	def check_for_closed_status(self, pc_obj):
+	def check_for_closed_status(self):
 		check_list =[]
 		for d in self.get('items'):
 			if d.meta.get_field('material_request') and d.material_request and d.material_request not in check_list:
 				check_list.append(d.material_request)
-				pc_obj.check_for_closed_status('Material Request', d.material_request)
+				check_for_closed_status('Material Request', d.material_request)
 
 	def update_requested_qty(self):
 		material_request_map = {}
@@ -155,7 +156,7 @@ class PurchaseOrder(BuyingController):
 		if date_diff and date_diff[0][0]:
 			msgprint(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
 				raise_exception=True)
-				
+
 	def update_status(self, status):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
@@ -168,8 +169,6 @@ class PurchaseOrder(BuyingController):
 		if self.is_against_so():
 			self.update_status_updater()
 
-		purchase_controller = frappe.get_doc("Purchase Common")
-
 		self.update_prevdoc_status()
 		self.update_requested_qty()
 		self.update_ordered_qty()
@@ -177,7 +176,7 @@ class PurchaseOrder(BuyingController):
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 
-		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
+		update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
 		if self.is_against_so():
@@ -186,8 +185,7 @@ class PurchaseOrder(BuyingController):
 		if self.has_drop_ship_item():
 			self.update_delivered_qty_in_sales_order()
 
-		pc_obj = frappe.get_doc('Purchase Common')
-		self.check_for_closed_status(pc_obj)
+		self.check_for_closed_status()
 
 		frappe.db.set(self,'status','Cancelled')
 
@@ -197,7 +195,7 @@ class PurchaseOrder(BuyingController):
 		self.update_requested_qty()
 		self.update_ordered_qty()
 
-		pc_obj.update_last_purchase_rate(self, is_submit = 0)
+		update_last_purchase_rate(self, is_submit = 0)
 
 	def on_update(self):
 		pass
@@ -303,7 +301,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
-		
+
 		item = frappe.db.get_value("Item", target.item_code, ["item_group", "buying_cost_center"], as_dict=1)
 		target.cost_center = frappe.db.get_value("Project", obj.project, "cost_center") \
 			or item.buying_cost_center \

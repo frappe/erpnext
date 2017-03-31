@@ -54,9 +54,9 @@ class StockController(AccountsController):
 
 						self.check_expense_account(item_row)
 
-						# If item is not a sample item 
+						# If item is not a sample item
 						# and ( valuation rate not mentioned in an incoming entry
-						# or incoming entry not found while delivering the item), 
+						# or incoming entry not found while delivering the item),
 						# try to pick valuation rate from previous sle or Item master and update in SLE
 						# Otherwise, throw an exception
 
@@ -96,25 +96,25 @@ class StockController(AccountsController):
 		return process_gl_map(gl_list)
 
 	def update_stock_ledger_entries(self, sle):
-		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, 
-			self.doctype, self.name)
+		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
+			self.doctype, self.name, currency=self.company_currency)
 
 		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
 		sle.stock_value_difference = flt(sle.actual_qty) * flt(sle.valuation_rate)
-		
+
 		if sle.name:
 			frappe.db.sql("""
-				update 
-					`tabStock Ledger Entry` 
-				set 
+				update
+					`tabStock Ledger Entry`
+				set
 					stock_value = %(stock_value)s,
-					valuation_rate = %(valuation_rate)s, 
-					stock_value_difference = %(stock_value_difference)s 
-				where 
+					valuation_rate = %(valuation_rate)s,
+					stock_value_difference = %(stock_value_difference)s
+				where
 					name = %(name)s""", (sle))
-					
+
 		return sle
-					
+
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
 		if self.doctype == "Stock Reconciliation":
 			return [frappe._dict({ "name": voucher_detail_no, "expense_account": default_expense_account,
@@ -163,9 +163,9 @@ class StockController(AccountsController):
 	def get_stock_ledger_details(self):
 		stock_ledger = {}
 		stock_ledger_entries = frappe.db.sql("""
-			select 
+			select
 				name, warehouse, stock_value_difference, valuation_rate,
-				voucher_detail_no, item_code, posting_date, posting_time, 
+				voucher_detail_no, item_code, posting_date, posting_time,
 				actual_qty, qty_after_transaction
 			from
 				`tabStock Ledger Entry`

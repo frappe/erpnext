@@ -123,7 +123,7 @@ class Company(Document):
 			{"company": self.name, "account_type": "Receivable", "is_group": 0}))
 		frappe.db.set(self, "default_payable_account", frappe.db.get_value("Account",
 			{"company": self.name, "account_type": "Payable", "is_group": 0}))
-			
+
 	def validate_coa_input(self):
 		if self.create_chart_of_accounts_based_on == "Existing Company":
 			self.chart_of_accounts = None
@@ -294,7 +294,3 @@ def get_name_with_abbr(name, company):
 		parts.append(company_abbr)
 
 	return " - ".join(parts)
-
-def get_company_currency(company):
-	return frappe.local_cache("company_currency", company,
-		lambda: frappe.db.get_value("Company", company, "default_currency"))
