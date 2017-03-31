@@ -27,7 +27,7 @@ In ERPNext all Sales and Purchase transactions, like Sales Invoice, Quotation, S
 
 ### Customer
 
-You can select one of the existing Customer from the Customer master. If Customer doesn't exist in the Customer master, enter Customer Name in the POS Invoice view itself. On creation of POS Invoice, Customer will be auto-created in the Customer master.
+In POS, user can select the existing customer during making an order or create the new customer. This features works in the offline mode also. User can also add the customer details like contact number, address details etc on the form. The customer which has been created from the POS will be synced when the internet connection is active.
 
 <img class="screenshot" alt="POS Customer" src="{{docs_base_url}}/assets/img/accounts/pos-customer.png">
 
@@ -104,5 +104,10 @@ Credits:
   * Account for Change Amount (optional)
 
 To see entries after “Submit”, click on “View Ledger”.
+
+### Email
+User can send email from the POS, after submission of an order, user has to click on menu > email
+<img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/pos-email.png">
+After sync of an order, email sent to the customer with the print of the bill in the attachment
 
 {next}
