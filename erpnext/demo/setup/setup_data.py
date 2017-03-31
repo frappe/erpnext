@@ -63,6 +63,10 @@ def complete_setup(domain='Manufacturing'):
 			"language": "english"
 		})
 
+		company = erpnext.get_default_company()
+		company.db_set('default_payroll_payable_account',
+			frappe.db.get_value('Account', dict(account_name='Payroll Payable')))
+
 def setup_demo_page():
 	# home page should always be "start"
 	website_settings = frappe.get_doc("Website Settings", "Website Settings")

@@ -25,6 +25,14 @@ def get_default_currency():
 	if company:
 		return frappe.db.get_value('Company', company, 'default_currency')
 
+def get_company_currency(company):
+	'''Returns the default company currency'''
+	if not frappe.flags.company_currency:
+		frappe.flags.company_currency = {}
+	if not company in frappe.flags.company_currency:
+		frappe.flags.company_currency[company] = frappe.db.get_value('Company', company, 'default_currency')
+	return frappe.flags.company_currency[company]
+
 def set_perpetual_inventory(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.auto_accounting_for_stock = enable

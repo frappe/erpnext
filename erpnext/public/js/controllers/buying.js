@@ -113,7 +113,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
 
 			if(!doc.is_return && this.validate_negative_quantity(cdt, cdn, item, ["qty", "received_qty"])){ return }
-			
+
 			if(!item.rejected_qty && item.qty) {
 				item.received_qty = item.qty;
 			}
@@ -138,14 +138,14 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
 
 		if(!doc.is_return && this.validate_negative_quantity(cdt, cdn, item, ["received_qty", "rejected_qty"])){ return }
-		
+
 		item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
 		this.qty(doc, cdt, cdn);
 	},
 
 	validate_negative_quantity: function(cdt, cdn, item, fieldnames){
 		if(!item || !fieldnames) { return }
-		
+
 		var is_negative_qty = false;
 		for(var i = 0; i<fieldnames.length; i++) {
 			if(item[fieldnames[i]] < 0){
@@ -219,12 +219,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 						my_items.push(cur_frm.doc.items[i].item_code);
 					}
 				}
-				frappe.call({	
+				frappe.call({
 					method: "erpnext.buying.doctype.purchase_common.purchase_common.get_linked_material_requests",
 					args:{
-						items: my_items						
-					}, 
-					callback: function(r) { 
+						items: my_items
+					},
+					callback: function(r) {
 						var i = 0;
 						var item_length = cur_frm.doc.items.length;
 						while (i < item_length) {
@@ -239,32 +239,32 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 									d.qty = d.qty  - my_qty;
 									cur_frm.doc.items[i].stock_qty = my_qty*cur_frm.doc.items[i].conversion_factor;
 									cur_frm.doc.items[i].qty = my_qty;
-									
+
 									frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + cur_frm.doc.items[i].idx + ")");
 									if (qty > 0)
 									{
 										frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
 										var newrow = frappe.model.add_child(cur_frm.doc, cur_frm.doc.items[i].doctype, "items");
 										item_length++;
-										
+
 										for (key in cur_frm.doc.items[i])
 										{
 											newrow[key] = cur_frm.doc.items[i][key];
 										}
-										
+
 										newrow.idx = item_length;
 										newrow["stock_qty"] = newrow.conversion_factor*qty;
 										newrow["qty"] = qty;
-										
+
 										newrow["material_request"] = "";
 										newrow["material_request_item"] = "";
-										
+
 									}
-									
-									
-									
+
+
+
 								}
-							
+
 							});
 							i++;
 						}

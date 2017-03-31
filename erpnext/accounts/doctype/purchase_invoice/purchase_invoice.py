@@ -2,10 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import cint, formatdate, flt, getdate
 from frappe import _, throw
-from erpnext.setup.utils import get_company_currency
 import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
@@ -15,6 +14,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_bille
 from erpnext.controllers.stock_controller import get_warehouse_account
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
+from erpnext.buying.utils import check_for_closed_status
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -93,7 +93,7 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
 	def check_conversion_rate(self):
-		default_currency = get_company_currency(self.company)
+		default_currency = erpnext.get_company_currency(self.company)
 		if not default_currency:
 			throw(_('Please enter default currency in Company Master'))
 		if (self.currency == default_currency and flt(self.conversion_rate) != 1.00) or not self.conversion_rate or (self.currency != default_currency and flt(self.conversion_rate) == 1.00):
@@ -113,12 +113,11 @@ class PurchaseInvoice(BuyingController):
 
 	def check_for_closed_status(self):
 		check_list = []
-		pc_obj = frappe.get_doc('Purchase Common')
 
 		for d in self.get('items'):
 			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
 				check_list.append(d.purchase_order)
-				pc_obj.check_for_closed_status('Purchase Order', d.purchase_order)
+				check_for_closed_status('Purchase Order', d.purchase_order)
 
 	def validate_with_previous_doc(self):
 		super(PurchaseInvoice, self).validate_with_previous_doc({
