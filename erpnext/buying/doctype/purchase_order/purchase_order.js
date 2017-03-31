@@ -3,7 +3,7 @@
 
 frappe.provide("erpnext.buying");
 
-{% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'erpnext/public/js/controllers/buying.js' %};
 
 frappe.ui.form.on("Purchase Order", {
 	setup: function(frm) {

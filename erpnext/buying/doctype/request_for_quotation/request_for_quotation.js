@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 
-{% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'erpnext/public/js/controllers/buying.js' %};
 
 cur_frm.add_fetch('contact', 'email_id', 'email_id')
 
