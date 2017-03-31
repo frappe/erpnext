@@ -1013,7 +1013,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Không gửi nhân v
 DocType: Item,Inspection Criteria,Tiêu chuẩn kiểm tra
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Nhận chuyển nhượng
 DocType: BOM Website Item,BOM Website Item,BOM Trang web mục
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Tải lên tiêu đề trang và logo. (Bạn có thể chỉnh sửa chúng sau này).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Tải lên tiêu đề trang và logo. (Bạn có thể chỉnh sửa chúng sau này).
 DocType: Timesheet Detail,Bill,Hóa đơn
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Tiếp Khấu hao ngày được nhập như ngày trong quá khứ
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Trắng
@@ -3053,7 +3053,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Tổng lợi nhuận / lỗ
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Mua hàng mục Cung cấp
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Tên Công ty không thể công ty
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Tiêu đề trang cho các mẫu tài liệu in
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Tiêu đề trang cho các mẫu tài liệu in
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Tiêu đề cho các mẫu in, ví dụ như hóa đơn chiếu lệ."
 DocType: Student Guardian,Student Guardian,Người giám hộ sinh viên
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Phí kiểu định giá không thể đánh dấu là Inclusive
@@ -3089,7 +3089,7 @@ DocType: Homepage,"URL for ""All Products""",URL cho &quot;Tất cả các sản
 DocType: Leave Application,Leave Balance Before Application,Trước khi rời khỏi cân ứng dụng
 DocType: SMS Center,Send SMS,Gửi tin nhắn SMS
 DocType: Cheque Print Template,Width of amount in word,Chiều rộng của số tiền trong từ
-DocType: Company,Default Letter Head,Tiêu đề trang mặc định
+DocType: Company,Default LetterHead,Tiêu đề trang mặc định
 DocType: Purchase Order,Get Items from Open Material Requests,Nhận Items từ yêu cầu mở Material
 DocType: Item,Standard Selling Rate,Tiêu chuẩn bán giá
 DocType: Account,Rate at which this tax is applied,Tốc độ thuế này được áp dụng

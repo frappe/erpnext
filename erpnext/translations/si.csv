@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,සේවක උප�
 DocType: Item,Inspection Criteria,පරීක්ෂණ නිර්ණායක
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,යැවීමට
 DocType: BOM Website Item,BOM Website Item,ද්රව්ය ලේඛණය වෙබ් අඩවිය අයිතමය
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,ඔබේ ලිපිය හිස සහ ලාංඡනය උඩුගත කරන්න. (ඔබ ඔවුන්ට පසුව සංස්කරණය කළ හැකි).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,ඔබේ ලිපිය හිස සහ ලාංඡනය උඩුගත කරන්න. (ඔබ ඔවුන්ට පසුව සංස්කරණය කළ හැකි).
 DocType: Timesheet Detail,Bill,පනත් කෙටුම්පත
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,ඊළඟ ක්ෂය දිනය පසුගිය දිනය ලෙස ඇතුලත් කර
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,සුදු
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,දළ ලාභය / අලාභය
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,මිලදී ගැනීමේ නියෝගයක් අයිතමය සපයා
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,සමාගම් නම සමාගම විය නොහැකි
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,මුද්රණය සැකිලි සඳහා ලිපිය ධා.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,මුද්රණය සැකිලි සඳහා ලිපිය ධා.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,මුද්රණය සැකිලි සඳහා මාතෘකා Proforma ඉන්වොයිසිය වර්ග උදා.
 DocType: Student Guardian,Student Guardian,ශිෂ්ය ගාඩියන්
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,තක්සේරු වර්ගය චෝදනා සියල්ල ඇතුළත් ලෙස සලකුණු නොහැකි
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""",&quot;සියලු නිෂ්�
 DocType: Leave Application,Leave Balance Before Application,අයදුම් කිරීමට පෙර ශේෂ තබන්න
 DocType: SMS Center,Send SMS,කෙටි පණිවුඩ යවන්න
 DocType: Cheque Print Template,Width of amount in word,වචනය මුදල පළල
-DocType: Company,Default Letter Head,පෙරනිමි ලිපි ශීර්ෂයක
+DocType: Company,Default LetterHead,පෙරනිමි ලිපි ශීර්ෂයක
 DocType: Purchase Order,Get Items from Open Material Requests,විවෘත ද්රව්ය ඉල්ලීම් සිට අයිතම ලබා ගන්න
 DocType: Item,Standard Selling Rate,සම්මත විකිණීම අනුපාතිකය
 DocType: Account,Rate at which this tax is applied,මෙම බදු අයදුම් වන අවස්ථාවේ අනුපාතය

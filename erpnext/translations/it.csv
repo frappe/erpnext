@@ -1031,7 +1031,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Non inviare Dipenden
 DocType: Item,Inspection Criteria,Criteri di ispezione
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Trasferiti
 DocType: BOM Website Item,BOM Website Item,BOM sito Articolo
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Carica la tua testa lettera e logo. (È possibile modificare in un secondo momento).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Carica la tua testa lettera e logo. (È possibile modificare in un secondo momento).
 DocType: Timesheet Detail,Bill,Conto
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Successivo ammortamento Data viene inserita come data passata
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Bianco
@@ -3090,7 +3090,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Utile lordo / Perdita
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Ordine di acquisto Articolo inserito
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Nome azienda non può essere azienda
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Lettera Teste per modelli di stampa .
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Lettera Teste per modelli di stampa .
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,Titoli di modelli di stampa p. es. Fattura proforma
 DocType: Student Guardian,Student Guardian,Student Guardiano
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Spese tipo di valutazione non possono contrassegnata come Inclusive
@@ -3127,7 +3127,7 @@ DocType: Homepage,"URL for ""All Products""",URL per &quot;tutti i prodotti&quot
 DocType: Leave Application,Leave Balance Before Application,Lascia equilibrio prima applicazione
 DocType: SMS Center,Send SMS,Invia SMS
 DocType: Cheque Print Template,Width of amount in word,Larghezza di importo in parola
-DocType: Company,Default Letter Head,Predefinito Carta Intestata
+DocType: Company,Default LetterHead,Predefinito Carta Intestata
 DocType: Purchase Order,Get Items from Open Material Requests,Ottenere elementi dal Richieste Aperto Materiale
 DocType: Item,Standard Selling Rate,Standard di vendita Tasso
 DocType: Account,Rate at which this tax is applied,Tasso a cui viene applicata questa tassa

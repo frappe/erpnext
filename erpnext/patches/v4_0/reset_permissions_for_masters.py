@@ -10,7 +10,7 @@ def execute():
 		"Communication", "Company", "Contact Us Settings",
 		"Country", "Currency", "Currency Exchange", "Deduction Type", "Department",
 		"Designation", "Earning Type", "Event", "Feed", "File", "Fiscal Year",
-		"HR Settings", "Industry Type", "Leave Type", "Letter Head",
+		"HR Settings", "Industry Type", "Leave Type", "LetterHead",
 		"Mode of Payment", "Module Def", "Naming Series", "POS Setting", "Print Heading",
 		"Report", "Role", "Selling Settings", "Stock Settings", "Supplier Type", "UOM"):
 		try:

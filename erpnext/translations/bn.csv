@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,কর্মচা�
 DocType: Item,Inspection Criteria,ইন্সপেকশন নির্ণায়ক
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,স্থানান্তরিত
 DocType: BOM Website Item,BOM Website Item,BOM ওয়েবসাইট আইটেম
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,আপনার চিঠি মাথা এবং লোগো আপলোড করুন. (আপনি তাদের পরে সম্পাদনা করতে পারেন).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,আপনার চিঠি মাথা এবং লোগো আপলোড করুন. (আপনি তাদের পরে সম্পাদনা করতে পারেন).
 DocType: Timesheet Detail,Bill,বিল
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,পরবর্তী অবচয় তারিখ অতীত তারিখ হিসাবে প্রবেশ করানো হয়
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,সাদা
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,গ্রস লাভ / ক্ষতি
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,অর্ডার আইটেমটি সরবরাহ ক্রয়
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,কোম্পানির নাম কোম্পানি হতে পারে না
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,মুদ্রণ টেমপ্লেট জন্য পত্র নেতৃবৃন্দ.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,মুদ্রণ টেমপ্লেট জন্য পত্র নেতৃবৃন্দ.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,মুদ্রণ টেমপ্লেট শিরোনাম চালানকল্প যেমন.
 DocType: Student Guardian,Student Guardian,ছাত্র গার্ডিয়ান
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,মূল্যনির্ধারণ টাইপ চার্জ সমেত হিসাবে চিহ্নিত করতে পারেন না
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""",জন্য &quot;সকল পণ
 DocType: Leave Application,Leave Balance Before Application,আবেদন করার আগে ব্যালান্স ত্যাগ
 DocType: SMS Center,Send SMS,এসএমএস পাঠান
 DocType: Cheque Print Template,Width of amount in word,শব্দ পরিমাণ প্রস্থ
-DocType: Company,Default Letter Head,চিঠি মাথা ডিফল্ট
+DocType: Company,Default LetterHead,চিঠি মাথা ডিফল্ট
 DocType: Purchase Order,Get Items from Open Material Requests,ওপেন উপাদান অনুরোধ থেকে আইটেম পেতে
 DocType: Item,Standard Selling Rate,স্ট্যান্ডার্ড বিক্রয় হার
 DocType: Account,Rate at which this tax is applied,"এই ট্যাক্স প্রয়োগ করা হয়, যা এ হার"

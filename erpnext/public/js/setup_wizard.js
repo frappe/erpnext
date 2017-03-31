@@ -165,7 +165,7 @@ function load_erpnext_slides() {
 			domains: ["all"],
 			icon: "fa fa-bookmark",
 			title: __("The Brand"),
-			help: __('Upload your letter head and logo. (you can edit them later).'),
+			help: __('Upload your LetterHead and logo. (you can edit them later).'),
 			fields: [
 				{fieldtype:"Attach Image", fieldname:"attach_letterhead",
 					label: __("Attach Letterhead"),

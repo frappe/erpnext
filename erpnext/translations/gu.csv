@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,કર્મચા�
 DocType: Item,Inspection Criteria,નિરીક્ષણ માપદંડ
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,ટ્રાન્સફર
 DocType: BOM Website Item,BOM Website Item,BOM વેબસાઇટ વસ્તુ
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,તમારો પત્ર વડા અને લોગો અપલોડ કરો. (જો તમે પછીથી તેમને ફેરફાર કરી શકો છો).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,તમારો પત્ર વડા અને લોગો અપલોડ કરો. (જો તમે પછીથી તેમને ફેરફાર કરી શકો છો).
 DocType: Timesheet Detail,Bill,બિલ
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,આગળ અવમૂલ્યન તારીખ છેલ્લા તારીખ તરીકે દાખલ થયેલ
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,વ્હાઇટ
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,ગ્રોસ પ્રોફિટ / નુકશાન
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,ઓર્ડર વસ્તુ પાડેલ ખરીદી
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,કંપની નામ કંપની ન હોઈ શકે
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,પ્રિન્ટ નમૂનાઓ માટે પત્ર ચેતવણી.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,પ્રિન્ટ નમૂનાઓ માટે પત્ર ચેતવણી.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,પ્રિન્ટ ટેમ્પલેટો માટે શિર્ષકો કાચું ભરતિયું દા.ત..
 DocType: Student Guardian,Student Guardian,વિદ્યાર્થી ગાર્ડિયન
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,મૂલ્યાંકન પ્રકાર ખર્ચ વ્યાપક તરીકે ચિહ્નિત નથી કરી શકો છો
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""",માટે &quot;બધા ઉત
 DocType: Leave Application,Leave Balance Before Application,એપ્લિકેશન પહેલાં બેલેન્સ છોડો
 DocType: SMS Center,Send SMS,એસએમએસ મોકલો
 DocType: Cheque Print Template,Width of amount in word,શબ્દ રકમ પહોળાઈ
-DocType: Company,Default Letter Head,પત્ર હેડ મૂળભૂત
+DocType: Company,Default LetterHead,પત્ર હેડ મૂળભૂત
 DocType: Purchase Order,Get Items from Open Material Requests,ઓપન સામગ્રી અરજીઓ માંથી વસ્તુઓ વિચાર
 DocType: Item,Standard Selling Rate,સ્ટાન્ડર્ડ વેચાણ દર
 DocType: Account,Rate at which this tax is applied,"આ કર લાગુ પડે છે, જે અંતે દર"

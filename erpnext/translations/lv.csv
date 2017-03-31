@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Nesūtiet darbinieku
 DocType: Item,Inspection Criteria,Pārbaudes kritēriji
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Nodota
 DocType: BOM Website Item,BOM Website Item,BOM Website punkts
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Augšupielādēt jūsu vēstules galva un logo. (Jūs varat rediģēt tos vēlāk).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Augšupielādēt jūsu vēstules galva un logo. (Jūs varat rediģēt tos vēlāk).
 DocType: Timesheet Detail,Bill,Rēķins
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Nākamais Nolietojums datums tiek ievadīta kā pagātnes datumu
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Balts
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Bruto peļņa / zaudējumi
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Pasūtījuma Prece Kopā
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Uzņēmuma nosaukums nevar būt uzņēmums
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Vēstuļu Heads iespiesto veidnes.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Vēstuļu Heads iespiesto veidnes.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Nosaukumi drukāt veidnes, piemēram, rēķins."
 DocType: Student Guardian,Student Guardian,Student Guardian
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Vērtēšanas veida maksājumus nevar atzīmēts kā Inclusive
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""",URL &quot;All Products&quot;
 DocType: Leave Application,Leave Balance Before Application,Atstājiet Balance pirms uzklāšanas
 DocType: SMS Center,Send SMS,Sūtit SMS
 DocType: Cheque Print Template,Width of amount in word,Platums no summas vārdos
-DocType: Company,Default Letter Head,Default Letter vadītājs
+DocType: Company,Default LetterHead,Default Letter vadītājs
 DocType: Purchase Order,Get Items from Open Material Requests,Dabūtu preces no Atvērts Materiālzinātnes Pieprasījumi
 DocType: Item,Standard Selling Rate,Standard pārdošanas kurss
 DocType: Account,Rate at which this tax is applied,"Ātrums, kādā tiek piemērots šis nodoklis"

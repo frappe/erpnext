@@ -1031,7 +1031,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Nu trimiteți Mement
 DocType: Item,Inspection Criteria,Criteriile de inspecție
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Transferat
 DocType: BOM Website Item,BOM Website Item,Site-ul BOM Articol
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Încărcați capul scrisoare și logo-ul. (Le puteți edita mai târziu).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Încărcați capul scrisoare și logo-ul. (Le puteți edita mai târziu).
 DocType: Timesheet Detail,Bill,Factură
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,În continuare Amortizarea Data este introdusă ca dată rămas singur
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Alb
@@ -3087,7 +3087,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Profit brut / Pierdere
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Comandă de aprovizionare Articol Livrat
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Numele companiei nu poate fi companie
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Antete de Scrisoare de Sabloane de Imprimare.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Antete de Scrisoare de Sabloane de Imprimare.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Titluri de șabloane de imprimare, de exemplu proforma Factura."
 DocType: Student Guardian,Student Guardian,student la Guardian
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Taxele de tip evaluare nu poate marcate ca Inclusive
@@ -3123,7 +3123,7 @@ DocType: Homepage,"URL for ""All Products""",URL-ul pentru &quot;Toate produsele
 DocType: Leave Application,Leave Balance Before Application,Balanta Concediu Inainte de Aplicare
 DocType: SMS Center,Send SMS,Trimite SMS
 DocType: Cheque Print Template,Width of amount in word,Lățimea de cuvânt în sumă
-DocType: Company,Default Letter Head,Implicit Scrisoare Șef
+DocType: Company,Default LetterHead,Implicit Scrisoare Șef
 DocType: Purchase Order,Get Items from Open Material Requests,Obține elemente din materiale Cereri deschide
 DocType: Item,Standard Selling Rate,Standard de vânzare Rata
 DocType: Account,Rate at which this tax is applied,Rata la care se aplică acest impozit

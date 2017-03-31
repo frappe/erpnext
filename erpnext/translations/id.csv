@@ -1032,7 +1032,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Jangan Kirim Penging
 DocType: Item,Inspection Criteria,Kriteria Inspeksi
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Ditransfer
 DocType: BOM Website Item,BOM Website Item,BOM Situs Barang
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Upload kop surat dan logo. (Anda dapat mengeditnya nanti).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Upload kop surat dan logo. (Anda dapat mengeditnya nanti).
 DocType: Timesheet Detail,Bill,Tagihan
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Berikutnya Penyusutan Tanggal dimasukkan sebagai tanggal terakhir
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Putih
@@ -3092,7 +3092,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Laba Kotor / Rugi
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Purchase Order Stok Barang Disediakan
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Nama perusahaan tidak dapat perusahaan
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Surat Kepala untuk mencetak template.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Surat Kepala untuk mencetak template.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,Judul untuk mencetak template misalnya Proforma Invoice.
 DocType: Student Guardian,Student Guardian,Wali murid
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Jenis penilaian biaya tidak dapat ditandai sebagai Inklusif
@@ -3128,7 +3128,7 @@ DocType: Homepage,"URL for ""All Products""",URL untuk &quot;Semua Produk&quot;
 DocType: Leave Application,Leave Balance Before Application,Cuti Saldo Sebelum Aplikasi
 DocType: SMS Center,Send SMS,Kirim SMS
 DocType: Cheque Print Template,Width of amount in word,Lebar jumlah dalam kata
-DocType: Company,Default Letter Head,Standar Surat Kepala
+DocType: Company,Default LetterHead,Standar Surat Kepala
 DocType: Purchase Order,Get Items from Open Material Requests,Dapatkan Produk dari Permintaan Buka Material
 DocType: Item,Standard Selling Rate,Standard Jual Tingkat
 DocType: Account,Rate at which this tax is applied,Tingkat di mana pajak ini diterapkan

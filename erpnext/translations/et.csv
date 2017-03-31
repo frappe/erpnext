@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Ärge saatke Tööta
 DocType: Item,Inspection Criteria,Inspekteerimiskriteeriumitele
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Siirdus
 DocType: BOM Website Item,BOM Website Item,Bom Koduleht toode
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Laadi üles oma kirjas pea ja logo. (seda saab muuta hiljem).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Laadi üles oma kirjas pea ja logo. (seda saab muuta hiljem).
 DocType: Timesheet Detail,Bill,arve
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Järgmine kulum kuupäev on sisestatud viimase kuupäeva
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Valge
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Gross kasum / kahjum
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Ostutellimuse tooteühiku
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Firma nimi ei saa olla ettevõte
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Kiri Heads print malle.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Kiri Heads print malle.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,Tiitel mallide nt Esialgse arve.
 DocType: Student Guardian,Student Guardian,Student Guardian
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Hindamine tüübist tasu ei märgitud Inclusive
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""",URL &quot;Kõik tooted&quot;
 DocType: Leave Application,Leave Balance Before Application,Jäta Balance Enne taotlemine
 DocType: SMS Center,Send SMS,Saada SMS
 DocType: Cheque Print Template,Width of amount in word,Laius summa sõnaga
-DocType: Company,Default Letter Head,Vaikimisi kiri Head
+DocType: Company,Default LetterHead,Vaikimisi kiri Head
 DocType: Purchase Order,Get Items from Open Material Requests,Võta Kirjed Open Material taotlused
 DocType: Item,Standard Selling Rate,Standard müügi hind
 DocType: Account,Rate at which this tax is applied,Hinda kus see maks kohaldub

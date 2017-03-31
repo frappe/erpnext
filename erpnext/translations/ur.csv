@@ -998,7 +998,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,ملازم سالگ�
 DocType: Item,Inspection Criteria,معائنہ کا کلیہ
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,transfered کیا
 DocType: BOM Website Item,BOM Website Item,BOM ویب آئٹم
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,اپنے خط سر اور علامت (لوگو). (آپ کو بعد ان میں ترمیم کر سکتے ہیں).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,اپنے خط سر اور علامت (لوگو). (آپ کو بعد ان میں ترمیم کر سکتے ہیں).
 DocType: Timesheet Detail,Bill,بل
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,اگلا ہراس کی تاریخ ماضی تاریخ کے طور پر درج کیا جاتا ہے
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,وائٹ
@@ -2982,7 +2982,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,مجموعی منافع / نقصان
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,آرڈر آئٹم فراہم خریدیں
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,کمپنی کا نام نہیں ہو سکتا
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,پرنٹ کے سانچوں کے لئے خط سر.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,پرنٹ کے سانچوں کے لئے خط سر.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,پرنٹ کے سانچوں کے لئے عنوانات پروفارما انوائس مثلا.
 DocType: Student Guardian,Student Guardian,طالب علم گارڈین
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,تشخیص قسم کے الزامات شامل کے طور پر نشان نہیں کر سکتے ہیں
@@ -3018,7 +3018,7 @@ DocType: Homepage,"URL for ""All Products""",کے لئے &quot;تمام مصنو
 DocType: Leave Application,Leave Balance Before Application,درخواست سے پہلے توازن چھوڑ دو
 DocType: SMS Center,Send SMS,ایس ایم ایس بھیجیں
 DocType: Cheque Print Template,Width of amount in word,لفظ میں رقم کی چوڑائی
-DocType: Company,Default Letter Head,خط سر پہلے سے طے شدہ
+DocType: Company,Default LetterHead,خط سر پہلے سے طے شدہ
 DocType: Purchase Order,Get Items from Open Material Requests,کھلا مواد درخواستوں سے اشیاء حاصل
 DocType: Item,Standard Selling Rate,سٹینڈرڈ فروخت کی شرح
 DocType: Account,Rate at which this tax is applied,اس ٹیکس لاگو کیا جاتا ہے جس میں شرح

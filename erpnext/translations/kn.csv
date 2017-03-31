@@ -1032,7 +1032,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,ನೌಕರರ ಜ�
 DocType: Item,Inspection Criteria,ಇನ್ಸ್ಪೆಕ್ಷನ್ ಮಾನದಂಡ
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,ವರ್ಗಾವಣೆಯ
 DocType: BOM Website Item,BOM Website Item,ಬಿಒಎಮ್ ವೆಬ್ಸೈಟ್ ಐಟಂ
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,ನಿಮ್ಮ ಪತ್ರ ತಲೆ ಮತ್ತು ಲೋಗೋ ಅಪ್ಲೋಡ್. (ನೀವು ಅವುಗಳನ್ನು ನಂತರ ಸಂಪಾದಿಸಬಹುದು).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,ನಿಮ್ಮ ಪತ್ರ ತಲೆ ಮತ್ತು ಲೋಗೋ ಅಪ್ಲೋಡ್. (ನೀವು ಅವುಗಳನ್ನು ನಂತರ ಸಂಪಾದಿಸಬಹುದು).
 DocType: Timesheet Detail,Bill,ಬಿಲ್
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,ಮುಂದಿನ ಸವಕಳಿ ದಿನಾಂಕ ಕಳೆದ ದಿನಾಂಕ ದಾಖಲಿಸಿದರೆ
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,ಬಿಳಿ
@@ -3092,7 +3092,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,ಒಟ್ಟು ಲಾಭ / ನಷ್ಟ
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,ಪರ್ಚೇಸ್ ಆರ್ಡರ್ ಐಟಂ ವಿತರಿಸುತ್ತಾರೆ
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,ಕಂಪೆನಿ ಹೆಸರು ಕಂಪನಿ ಸಾಧ್ಯವಿಲ್ಲ
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,ಮುದ್ರಣ ಟೆಂಪ್ಲೆಟ್ಗಳನ್ನು letterheads .
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,ಮುದ್ರಣ ಟೆಂಪ್ಲೆಟ್ಗಳನ್ನು letterheads .
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,ಮುದ್ರಣ ಶೀರ್ಷಿಕೆ ಇ ಜಿ ಟೆಂಪ್ಲೇಟ್ಗಳು Proforma ಸರಕುಪಟ್ಟಿ .
 DocType: Student Guardian,Student Guardian,ವಿದ್ಯಾರ್ಥಿ ಗಾರ್ಡಿಯನ್
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,ಮೌಲ್ಯಾಂಕನ ರೀತಿಯ ಆರೋಪಗಳನ್ನು ಇನ್ಕ್ಲೂಸಿವ್ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ ಸಾಧ್ಯವಿಲ್ಲ
@@ -3128,7 +3128,7 @@ DocType: Homepage,"URL for ""All Products""",&quot;ಎಲ್ಲಾ ಉತ್ಪ�
 DocType: Leave Application,Leave Balance Before Application,ಅಪ್ಲಿಕೇಶನ್ ಮೊದಲು ಬ್ಯಾಲೆನ್ಸ್ ಬಿಡಿ
 DocType: SMS Center,Send SMS,ಎಸ್ಎಂಎಸ್ ಕಳುಹಿಸಿ
 DocType: Cheque Print Template,Width of amount in word,ಪದ ಯಲ್ಲಿ ಪ್ರಮಾಣದ ಅಗಲ
-DocType: Company,Default Letter Head,ಪತ್ರ ಹೆಡ್ ಡೀಫಾಲ್ಟ್
+DocType: Company,Default LetterHead,ಪತ್ರ ಹೆಡ್ ಡೀಫಾಲ್ಟ್
 DocType: Purchase Order,Get Items from Open Material Requests,ಓಪನ್ ಮೆಟೀರಿಯಲ್ ವಿನಂತಿಗಳು ರಿಂದ ವಸ್ತುಗಳನ್ನು ಪಡೆಯಲು
 DocType: Item,Standard Selling Rate,ಸ್ಟ್ಯಾಂಡರ್ಡ್ ಮಾರಾಟ ದರ
 DocType: Account,Rate at which this tax is applied,ದರ ಈ ತೆರಿಗೆ ಅನ್ವಯಿಸಲಾಗುತ್ತದೆ ನಲ್ಲಿ

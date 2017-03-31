@@ -444,7 +444,7 @@ def create_contact(contact, party_type, party):
 def create_letter_head(args):
 	if args.get("attach_letterhead"):
 		frappe.get_doc({
-			"doctype":"Letter Head",
+			"doctype":"LetterHead",
 			"letter_head_name": _("Standard"),
 			"is_default": 1
 		}).insert()
@@ -452,8 +452,8 @@ def create_letter_head(args):
 		attach_letterhead = args.get("attach_letterhead").split(",")
 		if len(attach_letterhead)==3:
 			filename, filetype, content = attach_letterhead
-			fileurl = save_file(filename, content, "Letter Head", _("Standard"), decode=True).file_url
-			frappe.db.set_value("Letter Head", _("Standard"), "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
+			fileurl = save_file(filename, content, "LetterHead", _("Standard"), decode=True).file_url
+			frappe.db.set_value("LetterHead", _("Standard"), "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
 
 def create_logo(args):
 	if args.get("attach_logo"):

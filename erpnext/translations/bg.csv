@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Не изпраща�
 DocType: Item,Inspection Criteria,Критериите за инспекция
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Прехвърлят
 DocType: BOM Website Item,BOM Website Item,BOM Website Точка
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Качете ваш дизайн за заглавно писмо и лого. (Можете да ги редактирате по-късно).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Качете ваш дизайн за заглавно писмо и лого. (Можете да ги редактирате по-късно).
 DocType: Timesheet Detail,Bill,законопроект
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Следваща Амортизация Дата се вписва като минало дата
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Бял
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Брутна печалба / загуба
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Поръчка за покупка приложените аксесоари
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Фирма не може да бъде Company
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Писмо глави за шаблони за печат.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Писмо глави за шаблони за печат.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Заглавия за шаблони за печат, например проформа фактура."
 DocType: Student Guardian,Student Guardian,Student Guardian
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Такси тип оценка не може маркирани като Inclusive
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""",URL за &quot;Всички про�
 DocType: Leave Application,Leave Balance Before Application,Оставете Balance Преди Application
 DocType: SMS Center,Send SMS,Изпратете SMS
 DocType: Cheque Print Template,Width of amount in word,Ширина на сума с думи
-DocType: Company,Default Letter Head,По подразбиране Letter Head
+DocType: Company,Default LetterHead,По подразбиране LetterHead
 DocType: Purchase Order,Get Items from Open Material Requests,Получават от Open Материал Заявки
 DocType: Item,Standard Selling Rate,Standard Selling Rate
 DocType: Account,Rate at which this tax is applied,"Скоростта, с която се прилага този данък"

@@ -1022,7 +1022,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,不要发送员工�
 DocType: Item,Inspection Criteria,检验标准
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,转移
 DocType: BOM Website Item,BOM Website Item,BOM网站项目
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,上传你的信头和logo。(您可以在以后对其进行编辑）。
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,上传你的信头和logo。(您可以在以后对其进行编辑）。
 DocType: Timesheet Detail,Bill,法案
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,接下来折旧日期输入为过去的日期
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,白
@@ -3061,7 +3061,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,总利润/亏损
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,采购订单项目提供
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,公司名称不能为公司
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,打印模板的信头。
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,打印模板的信头。
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,标题打印模板例如形式发票。
 DocType: Student Guardian,Student Guardian,学生家长
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,估值类型罪名不能标记为包容性
@@ -3097,7 +3097,7 @@ DocType: Homepage,"URL for ""All Products""",网址“所有产品”
 DocType: Leave Application,Leave Balance Before Application,申请前假期余量
 DocType: SMS Center,Send SMS,发送短信
 DocType: Cheque Print Template,Width of amount in word,在字量的宽度
-DocType: Company,Default Letter Head,默认信头
+DocType: Company,Default LetterHead,默认信头
 DocType: Purchase Order,Get Items from Open Material Requests,获得从公开材料请求项目，
 DocType: Item,Standard Selling Rate,标准销售率
 DocType: Account,Rate at which this tax is applied,应用此税率的单价

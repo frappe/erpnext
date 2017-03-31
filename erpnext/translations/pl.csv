@@ -1032,7 +1032,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Nie wysyłaj przypom
 DocType: Item,Inspection Criteria,Kryteria kontrolne
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Przeniesione
 DocType: BOM Website Item,BOM Website Item,BOM Website Element
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Prześlij nagłówek firmowy i logo. (Można je edytować później).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Prześlij nagłówek firmowy i logo. (Można je edytować później).
 DocType: Timesheet Detail,Bill,Rachunek
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Następny Amortyzacja Data jest wpisana w minionym dniem
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Biały
@@ -3092,7 +3092,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Zysk / Strata
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Zamówienie Kupna Zaopatrzenia
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Nazwa firmy nie może być firma
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Nagłówki to wzorów druku
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Nagłówki to wzorów druku
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,Tytuł szablonu wydruku np.: Faktura Proforma
 DocType: Student Guardian,Student Guardian,Student Stróża
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Opłaty typu Wycena nie oznaczone jako Inclusive
@@ -3128,7 +3128,7 @@ DocType: Homepage,"URL for ""All Products""",URL &quot;Wszystkie produkty&quot;
 DocType: Leave Application,Leave Balance Before Application,Status Urlopu przed Wnioskiem
 DocType: SMS Center,Send SMS,Wyślij SMS
 DocType: Cheque Print Template,Width of amount in word,Szerokość kwoty w słowie
-DocType: Company,Default Letter Head,Domyślny nagłówek Listowy
+DocType: Company,Default LetterHead,Domyślny nagłówek Listowy
 DocType: Purchase Order,Get Items from Open Material Requests,Elementy z żądań Otwórz Materiał
 DocType: Item,Standard Selling Rate,Standardowy kurs sprzedaży
 DocType: Account,Rate at which this tax is applied,Stawka przy użyciu której ten podatek jest aplikowany
