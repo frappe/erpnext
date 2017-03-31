@@ -22,7 +22,6 @@ class RequestforQuotation(BuyingController):
 	def validate(self):
 		self.validate_duplicate_supplier()
 		validate_for_items(self)
-		self.validate_common()
 		self.update_email_id()
 
 	def validate_duplicate_supplier(self):
