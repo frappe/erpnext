@@ -218,7 +218,7 @@ $.extend(cur_frm.cscript, {
 					project: doc.project
 					},
 			callback: function(r) {
-				$.each(["description", "stock_uom", "bom_no"], function(i, field) {
+				$.each(["description", "stock_uom", "project", "bom_no"], function(i, field) {
 					cur_frm.set_value(field, r.message[field]);
 				});
 
