@@ -22,4 +22,5 @@ def execute():
             })
             item_doc.flags.ignore_validate = True
             item_doc.flags.ignore_mandatory = True
+            item_doc.flags.dont_update_variants = True
             item_doc.save()
