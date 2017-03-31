@@ -7,17 +7,12 @@ frappe.ui.form.on('Procedure', {
 			frm.add_custom_button(__('Check Availability'), function() {
 				check_availability(frm);
 			 });
-	 		frm.add_custom_button(__('From Consultation'), function() {
+	 		frm.add_custom_button(__('Get from Consultation'), function() {
  				get_procedures(frm);
-			},"Get Procedure");
-		 frm.add_custom_button(__('From Invoice'), function() {
-			 if(frm.doc.patient){
-				 get_from_invoice(frm);
-			 }
-			 else{
-		 			msgprint("Please select Patient to get procedures");
-		 		}
-			},"Get Procedure");
+			});
+		//  frm.add_custom_button(__('From Invoice'), function() {
+		// 		 get_from_invoice(frm);
+		// 	},"Get Procedure");
 		}else if (!frm.doc.invoiced){
 			frm.add_custom_button(__('Invoice Procedure'), function(){
 				invoice_procedure(frm);
@@ -113,7 +108,7 @@ var get_procedures_by_sales_invoice = function(invoice){
 
 var get_from_invoice = function(frm){
 	var d = new frappe.ui.Dialog({
-		title: __("Invoice"),
+		title: __("Select Invoice"),
 		fields: [
 			{
 					"fieldtype": "Link",
@@ -122,7 +117,7 @@ var get_from_invoice = function(frm){
 					"reqd": 1
 			}
 		],
-		primary_action_label: __("Create Procedures"),
+		primary_action_label: __("Get Procedures"),
 		primary_action : function(){
 				var values = d.get_values();
 				if(!values)

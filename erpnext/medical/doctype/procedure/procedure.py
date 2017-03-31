@@ -65,14 +65,16 @@ def get_procedures(patient):
 @frappe.whitelist()
 def get_procedures_by_sales_invoice(invoice):
 	sales_invoice = frappe.get_doc("Sales Invoice", invoice)
+	procedures = []
 	for item_line in sales_invoice.items:
 		template_exist = frappe.db.exists({
 			"doctype": "Procedure Template",
 			"item": item_line.item_code
 			})
 		if template_exist :
-			return frappe.db.sql("""select procedure_name, service_type from
-			`tabProcedure Template` where item_code='{0}' """.format(item_line.item_code))
+			procedures.append(frappe.db.sql("""select name, service_type from
+			`tabProcedure Template` where item_code='{0}' """.format(item_line.item_code))[0])
+	return procedures
 
 def create_item_line(template, sales_invoice):
 	if template:
