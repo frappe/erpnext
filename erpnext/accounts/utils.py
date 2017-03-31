@@ -21,36 +21,36 @@ def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, compan
 
 def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False):
 	fiscal_years = frappe.cache().hget("fiscal_years", company) or []
-	
-	if not fiscal_years:		
+
+	if not fiscal_years:
 		# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 		cond = ""
 		if fiscal_year:
 			cond += " and fy.name = {0}".format(frappe.db.escape(fiscal_year))
 		if company:
 			cond += """
-				and (not exists (select name 
-					from `tabFiscal Year Company` fyc 
-					where fyc.parent = fy.name) 
-				or exists(select company 
-					from `tabFiscal Year Company` fyc 
-					where fyc.parent = fy.name 
+				and (not exists (select name
+					from `tabFiscal Year Company` fyc
+					where fyc.parent = fy.name)
+				or exists(select company
+					from `tabFiscal Year Company` fyc
+					where fyc.parent = fy.name
 					and fyc.company=%(company)s)
 				)
 			"""
 
 		fiscal_years = frappe.db.sql("""
-			select 
-				fy.name, fy.year_start_date, fy.year_end_date 
-			from 
+			select
+				fy.name, fy.year_start_date, fy.year_end_date
+			from
 				`tabFiscal Year` fy
-			where 
+			where
 				disabled = 0 {0}
-			order by 
+			order by
 				fy.year_start_date desc""".format(cond), {
 				"company": company
 			}, as_dict=True)
-			
+
 		frappe.cache().hset("fiscal_years", company, fiscal_years)
 
 	if transaction_date:
@@ -61,10 +61,10 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 		if fiscal_year and fy.name == fiscal_year:
 			matched = True
 
-		if (transaction_date and getdate(fy.year_start_date) <= transaction_date 
+		if (transaction_date and getdate(fy.year_start_date) <= transaction_date
 			and getdate(fy.year_end_date) >= transaction_date):
 			matched = True
-			
+
 		if matched:
 			if as_dict:
 				return (fy,)
@@ -272,7 +272,7 @@ def add_cc(args=None):
 
 	if not args:
 		args = frappe.local.form_dict
-	
+
 	args.doctype = "Cost Center"
 	args = make_tree_args(**args)
 
@@ -660,7 +660,7 @@ def get_children():
 
 	# root
 	if args['parent'] in ("Accounts", "Cost Centers"):
-		fields = ", root_type, report_type, account_currency" if doctype=="Account" else ""
+		fields = ", root_type, report_type, account_currency, account_number" if doctype=="Account" else ""
 		acc = frappe.db.sql(""" select
 			name as value, is_group as expandable {fields}
 			from `tab{doctype}`
@@ -673,7 +673,7 @@ def get_children():
 			sort_root_accounts(acc)
 	else:
 		# other
-		fields = ", account_currency" if doctype=="Account" else ""
+		fields = ", account_currency, account_number" if doctype=="Account" else ""
 		acc = frappe.db.sql("""select
 			name as value, is_group as expandable, parent_{fieldname} as parent {fields}
 			from `tab{doctype}`
