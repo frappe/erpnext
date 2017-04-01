@@ -102,6 +102,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.page.add_menu_item(__("POS Profile"), function() {
 			frappe.set_route('List', 'POS Profile');
 		});
+		this.page.add_menu_item(__("Sales Register"), function() {
+			frappe.set_route("query-report", "Sales Register");
+		});
+		this.page.add_menu_item(__("Profit and Loss Statement"), function() {
+			frappe.set_route("query-report", "Profit and Loss Statement");
+		});
+		this.page.add_menu_item(__("Item-wise Sales Register"), function() {
+			frappe.set_route("query-report", "Item-wise Sales Register");
+		});
 	},
 
 	show_unsync_invoice_list: function(){
@@ -287,6 +296,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.meta = r.message.meta;
 		this.item_data = r.message.items;
+		this.item_groups = r.message.item_groups;
 		this.customers = r.message.customers;
 		this.serial_no_data = r.message.serial_no_data;
 		this.batch_no_data = r.message.batch_no_data;
@@ -350,12 +360,45 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	},
 
 	make: function() {
+		this.make_item_group();
 		this.make_search();
 		this.make_customer();
 		this.make_item_list();
 		this.make_discount_field()
 	},
 
+	make_item_group: function() {
+		var me = this;		
+		var options = ["1", "2", "3", "4", "5"];
+		$('.item-groups').empty();
+		$.each(this.item_groups, function(i, p) {
+			
+			//~ $('.item-groups').append($('<button type="button" class="btn btn-primary" name="selected_group"></button>').val(p).html(p));
+			$('.item-groups').append($('<li class="nav-item item-groups-group" value="'+p+'"><a value="'+p+'">'+p+'</a></li>'))
+		});
+		
+			
+		$('.item-groups-group').on('click',function(){
+				$('.nav-item').removeClass('Active');
+				$(this).addClass('Active');
+				me.selected_item_group =  $(this).attr('value');
+				me.items = me.get_items() ;
+				me.make_item_list();
+			});
+	}
+	,
+	apply_category: function() {
+		var me = this;
+		category = this.selected_item_group || "All Item Groups";
+		if(category == 'All Item Groups') {
+			return this.item_data
+		} else {
+			return this.item_data.filter(function(element, index, array){
+				return element.item_group == category;
+			});
+		}
+	}
+	,
 	make_search: function() {
 		var me = this;
 		this.search = frappe.ui.form.make_control({
@@ -558,34 +601,36 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 			})
 		}
-
+		this.items_list = this.apply_category();
+		//~ return this.items_list
 		key =  this.search.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g,'\\$&');
+		console.log(key)
 		var re = new RegExp('%', 'g');
 		var reg = new RegExp(key.replace(re, '[\\w*\\s*[a-zA-Z0-9]*]*'))
 		search_status = true
 
-		if(key){
-			return $.grep(this.item_data, function(item){
-				if(search_status){
-					if(in_list(me.batch_no_data[item.item_code], me.search.$input.val())){
+		if (key) {
+			return $.grep(this.items_list, function (item) {
+				if (search_status) {
+					if (in_list(me.batch_no_data[item.item_code], me.search.$input.val())) {
 						search_status = false;
 						return me.item_batch_no[item.item_code] = me.search.$input.val()
-					} else if( me.serial_no_data[item.item_code]
+					} else if (me.serial_no_data[item.item_code]
 						&& in_list(Object.keys(me.serial_no_data[item.item_code]), me.search.$input.val())) {
 						search_status = false;
 						me.item_serial_no[item.item_code] = [me.search.$input.val(), me.serial_no_data[item.item_code][me.search.$input.val()]]
 						return true
-					} else if(item.barcode == me.search.$input.val()) {
+					} else if (item.barcode == me.search.$input.val()) {
 						search_status = false;
 						return item.barcode == me.search.$input.val();
-					} else if(reg.test(item.item_code.toLowerCase()) || reg.test(item.description.toLowerCase()) ||
-					reg.test(item.item_name.toLowerCase()) || reg.test(item.item_group.toLowerCase()) ){
+					} else if (reg.test(item.item_code.toLowerCase()) || reg.test(item.description.toLowerCase()) ||
+						reg.test(item.item_name.toLowerCase()) || reg.test(item.item_group.toLowerCase())) {
 						return true
 					}
 				}
 			})
-		}else{
-			return this.item_data;
+		} else {
+			return this.items_list;
 		}
 	},
 
@@ -874,13 +919,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	print_dialog: function(){
 		var me = this;
 
-		msgprint = frappe.msgprint(format('<a class="btn btn-primary print_doc" \
+		msgprint = frappe.msgprint(format('<h4>ملاحظات</h4><textarea type="text" class="input-with-feedback form-control"  data-fieldname="remarks" placeholder="" style="height: 70px; font-family: Monaco, &quot;Courier New&quot;, monospace;"></textarea>\
+		<a class="btn btn-primary print_doc" \
 			style="margin-right: 5px;">{0}</a>\
 			<a class="btn btn-default new_doc">{1}</a>', [
 			__('Print'), __('New')
 		]));
 
+
 		$('.print_doc').click(function(){
+			me.frm.doc.remarks =$( "textarea[data-fieldname='remarks']" ).val();
 			html = frappe.render(me.print_template_data, me.frm.doc)
 			me.print_document(html)
 		})

@@ -3335,7 +3335,7 @@ DocType: Purchase Taxes and Charges Template,Purchase Taxes and Charges Template
 DocType: Upload Attendance,Download Template,تحميل قالب
 DocType: Timesheet,TS-,TS-
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +57,{0} {1}: Either debit or credit amount is required for {2},{0} {1}: مطلوب إما الخصم أو مبلغ الائتمان ل{2}
-DocType: GL Entry,Remarks,تصريحات
+DocType: GL Entry,Remarks,ملاحظات
 DocType: Payment Entry,Account Paid From,حساب مدفوع من
 DocType: Purchase Order Item Supplied,Raw Material Item Code,قانون المواد الخام المدينة
 DocType: Journal Entry,Write Off Based On,شطب بناء على
@@ -3359,6 +3359,8 @@ DocType: Holiday List,Weekly Off,العطلة الأسبوعية
 DocType: Fiscal Year,"For e.g. 2012, 2012-13",ل، 2012 على سبيل المثال 2012-13
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +87,Provisional Profit / Loss (Credit),الربح المؤقت / الخسارة (الائتمان)
 DocType: Sales Invoice,Return Against Sales Invoice,العودة ضد فاتورة المبيعات
+,Qty,عدد
+,Amount,مبلغ
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +32,Item 5,البند 5
 DocType: Serial No,Creation Time,تاريخ الإنشاء
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +62,Total Revenue,إجمالي الإيرادات
@@ -3671,6 +3673,8 @@ DocType: Project,Customer Details,تفاصيل الزبون
 DocType: Employee,Reports to,تقارير إلى
 DocType: SMS Settings,Enter url parameter for receiver nos,ادخل معامل العنوان لمشغل شبكة المستقبل
 DocType: Payment Entry,Paid Amount,المبلغ المدفوع
+,Paid Amount,المبلغ المدفوع
+,Remarks,ملاحظات
 DocType: Assessment,Supervisor,مشرف
 apps/erpnext/erpnext/accounts/page/pos/pos.js +688,Online,على الانترنت
 ,Available Stock for Packing Items,المخزون المتاج للأصناف المعبأة

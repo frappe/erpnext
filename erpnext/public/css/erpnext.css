@@ -100,7 +100,7 @@
   cursor: pointer;
   font-size: 120%;
 }
-.pos .search-area .form-group {
+.pos .search-area .item-group-area .form-group {
   max-width: 100% !important;
 }
 .pos .tax-table {

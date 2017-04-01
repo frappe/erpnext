@@ -30,6 +30,7 @@ def get_pos_data():
 		'doc': doc,
 		'default_customer': pos_profile.get('customer'),
 		'items': get_items_list(pos_profile),
+		'item_groups': get_item_group(pos_profile),
 		'customers': get_customers_list(pos_profile),
 		'serial_no_data': get_serial_no_data(pos_profile, doc.company),
 		'batch_no_data': get_batch_no_data(),
@@ -119,6 +120,17 @@ def update_tax_table(doc):
 	taxes = get_taxes_and_charges('Sales Taxes and Charges Template', doc.taxes_and_charges)
 	for tax in taxes:
 		doc.append('taxes', tax)
+
+
+def get_item_group(pos_profile):
+	if pos_profile.get('item_groups'):
+		item_groups = []
+		for d in pos_profile.get('item_groups'):
+			item_groups.extend(get_child_nodes('Item Group', d.item_group))
+		return item_groups
+	else:
+		return frappe.db.sql_list("""Select name from `tabItem Group` order by name""")
+
 
 def get_items_list(pos_profile):
 	cond = "1=1"
