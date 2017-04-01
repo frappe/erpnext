@@ -13,11 +13,7 @@ frappe.ui.form.on("Lab Test Template",{
 )
 
 cur_frm.cscript.custom_refresh = function(doc) {
-	// use the __islocal value of doc, to check if the doc is saved or not
 	cur_frm.set_df_property("test_code", "read_only", doc.__islocal ? 0 : 1);
-	if(frappe.defaults.get_default("require_sample_collection")){
-		cur_frm.set_df_property("sb_sample_collection", "hidden", 0);
-	}else { cur_frm.set_df_property("sb_sample_collection", "hidden", 1); }
 
 	if(!doc.__islocal) {
 		cur_frm.add_custom_button(__('Change Template Code'), function() {
@@ -133,4 +129,12 @@ frappe.ui.form.on("Lab Test Template", "service_type", function(frm,cdt,cdn){
 
 	frm.doc.change_in_item = 1;
 
+});
+
+frappe.ui.form.on("Lab Test Groups", "template_or_new_line", function (frm, cdt, cdn) {
+	var child = locals[cdt][cdn];
+	if(child.template_or_new_line =="Add new line"){
+		frappe.model.set_value(cdt, cdn, 'test_template', "")
+		frappe.model.set_value(cdt, cdn, 'test_description', "")
+	}
 });

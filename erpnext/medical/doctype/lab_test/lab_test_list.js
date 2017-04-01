@@ -43,7 +43,7 @@ var get_from = function(frm){
 					"reqd": 1
 			}
 		],
-		primary_action_label: __("Create Procedures"),
+		primary_action_label: __("Create Lab Test"),
 		primary_action : function(){
 				var values = d.get_values();
 				if(!values)
