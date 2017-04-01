@@ -8,7 +8,7 @@ from frappe.model.document import Document
 
 class DrugPrescription(Document):
 	def get_quantity(self):
-		quantity = 1.0
+		quantity = 0
 		dosage = None
 		period = None
 
@@ -28,5 +28,7 @@ class DrugPrescription(Document):
 				quantity = period.get_days()/self.interval
 			elif(interval_in == 'Hour' and (self.interval < period.get_hours())):
 				quantity = period.get_hours()/self.interval
-
-		return quantity
+		if quantity > 0:
+			return quantity
+		else:
+			return 1

@@ -182,13 +182,8 @@ var show_availability = function(frm, result){
 				var row = $(repl('<div class="col-xs-12" style="padding-top:12px; text-align:center;" ><div class="col-xs-4"> %(start)s </div><div class="col-xs-4"> %(token)s </div><div class="col-xs-4"><a data-start="%(start)s" data-end="%(end)s" data-token="%(token)s" data-physician="%(physician)s"  href="#"><button class="btn btn-default btn-xs">Book</button></a></div></div>', {start: y["start"], end: y["end"], token: y["token"], physician: i})).appendTo(html_field);
 			}
 			row.find("a").click(function() {
-				app_datetime = new Date($(this).attr("data-start"));
-				/*hours = app_datetime.getHours();
-				minutes = app_datetime.getMinutes();
-				seconds = app_datetime.getSeconds();
-				appointment_time = hours + ":" + minutes + ":" + seconds;*/
-				appointment_time = app_datetime.toLocaleTimeString();
-				frm.doc.appointment_time = appointment_time
+				var date_obj = frappe.datetime.str_to_obj($(this).attr("data-start"))
+				frm.doc.appointment_time = date_obj.toLocaleTimeString();
 				frm.doc.physician = $(this).attr("data-physician");
 				frm.doc.start_dt = $(this).attr("data-start");
 				frm.doc.end_dt = $(this).attr("data-end");

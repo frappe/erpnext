@@ -1,7 +1,8 @@
 <div id="{{ menu[doc] }}" class="listing padding media hidden" style="margin-top: 0px;">
   <div class="col-md-12 media-heading padding" align="center">
-    <div class="col-md-12" style="margin-bottom: 30px;">
-      <h3>{{ doc }}</h3>
+    <div class="col-xs-12" style="margin-bottom: 30px;">
+      <div class="col-xs-9"><h3>{{ doc }}</h3></div>
+      <div class="col-xs-3" style="padding-top: 15px;"> <button class="btn btn-default btn-xs create-invoice">Create Invoice</button></div>
     </div>
     {% for (var key in data) {
     var items = data[key] %}

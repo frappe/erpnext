@@ -270,21 +270,21 @@ def create_lab_test(patient, template, prescription,  consultation, invoice, col
 			if(test_group.test_template):
 				template_in_group = frappe.get_doc("Lab Test Template",
 								test_group.test_template)
-			if(template_in_group):
-				if(template_in_group.test_template_type == 'Single'):
-					create_normals(template_in_group, lab_test)
-				elif(template_in_group.test_template_type == 'Compound'):
-					normal_heading = lab_test.append("normal_test_items")
-					normal_heading.test_name = template_in_group.test_name
-					normal_heading.require_result_value = 0
-					normal_heading.template = template_in_group.name
-					create_compounds(template_in_group, lab_test, True)
-				elif(template_in_group.test_template_type == 'Descriptive'):
-					special_heading = lab_test.append("special_test_items")
-					special_heading.test_name = template_in_group.test_name
-					special_heading.require_result_value = 0
-					special_heading.template = template_in_group.name
-					create_specials(template_in_group, lab_test)
+				if(template_in_group):
+					if(template_in_group.test_template_type == 'Single'):
+						create_normals(template_in_group, lab_test)
+					elif(template_in_group.test_template_type == 'Compound'):
+						normal_heading = lab_test.append("normal_test_items")
+						normal_heading.test_name = template_in_group.test_name
+						normal_heading.require_result_value = 0
+						normal_heading.template = template_in_group.name
+						create_compounds(template_in_group, lab_test, True)
+					elif(template_in_group.test_template_type == 'Descriptive'):
+						special_heading = lab_test.append("special_test_items")
+						special_heading.test_name = template_in_group.test_name
+						special_heading.require_result_value = 0
+						special_heading.template = template_in_group.name
+						create_specials(template_in_group, lab_test)
 			else:
 				normal = lab_test.append("normal_test_items")
 				normal.test_name = test_group.group_event

@@ -31,26 +31,6 @@ frappe.medical.ServiceDesk = Class.extend({
 			me.get_data(menu_active);
 			me.page.wrapper.find('.btn-secondary').removeClass('disabled');
 		}, "fa fa-refresh");
-		this.page.set_secondary_action(__("Invoice"), function() {
-			$(this).addClass('disabled');
-			var active_div = me.page.sidebar.find("li.active").attr("data-div");
-			var prescriptions = [];
-			var doc_ids = [];
-			$('#'+active_div).find('input:checked').each(function(){
-				if($(this).attr('data-doc')){
-					doc_ids.push($(this).attr('data-doc'));
-				}else{
-					if($(this).attr('data-id')){
-						prescriptions.push($(this).attr('data-id'));
-					};
-				}
-			})
-			if (prescriptions.length > 0 || doc_ids.length > 0){
-				me.create_invoice(active_div, prescriptions, doc_ids);
-			}else{
-				$(this).removeClass('disabled');
-			}
-		})
 	},
 	make_page: function() {
 		if (this.page)
@@ -138,6 +118,27 @@ frappe.medical.ServiceDesk = Class.extend({
 			appointment['physician'] = me.physician.get_value();;
 			frappe.set_route('Form', "Appointment", appointment.name);
 		});
+		this.page.wrapper.find('.create-invoice').on('click', function() {
+			$(this).addClass('disabled');
+			var active_div = me.page.sidebar.find("li.active").attr("data-div");
+			var prescriptions = [];
+			var doc_ids = [];
+			$('#'+active_div).find('input:checked').each(function(){
+				if($(this).attr('data-doc')){
+					doc_ids.push($(this).attr('data-doc'));
+				}else{
+					if($(this).attr('data-id')){
+						prescriptions.push($(this).attr('data-id'));
+					};
+				}
+			})
+			if (prescriptions.length > 0 || doc_ids.length > 0){
+				me.create_invoice(active_div, prescriptions, doc_ids);
+			}else{
+				frappe.msgprint("Select items to create invoice")
+				$(this).removeClass('disabled');
+			}
+		})
 	},
 	create_invoice: function (div_id, prescriptions, doc_ids) {
 		var me = this;

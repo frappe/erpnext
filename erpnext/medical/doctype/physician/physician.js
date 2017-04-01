@@ -15,9 +15,11 @@ frappe.ui.form.on('Physician', {
 	},
   validate: function (frm) {
     schedules = frm.doc.schedule
-    for(j=0; j<schedules.length; j++){
-      if (validate_schedule(schedules, schedules[j]) == false) return false;
-    }
+    if (schedules){
+      for(j=0; j<schedules.length; j++){
+        if (validate_schedule(schedules, schedules[j]) == false) return false;
+      }
+    };
   }
 });
 

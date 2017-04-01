@@ -4,14 +4,14 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import getdate, get_time
+from frappe.utils import getdate, get_time, now_datetime, nowtime
 from frappe import msgprint, _
 import datetime
 from datetime import timedelta
 import calendar
 
 def check_overlap(doctype, df, dn, start, end):
-	scheduled = frappe.db.sql("""select name, start_dt, end_dt from `tab{0}` where {1}='{2}' and status!='cancelled' and ((start_dt > '{3}' and start_dt < '{4}') or (end_dt > '{3}' and end_dt < '{4}') or (start_dt >='{3}' and end_dt <='{4}'))""".format(doctype, df, dn, start, end))
+	scheduled = frappe.db.sql("""select name, start_dt, end_dt from `tab{0}` where {1}='{2}' and status in ('Open', 'Scheduled') and ((start_dt > '{3}' and start_dt < '{4}') or (end_dt > '{3}' and end_dt < '{4}') or (start_dt >='{3}' and end_dt <='{4}'))""".format(doctype, df, dn, start, end))
 	if scheduled:
 		return False
 	else:
@@ -40,9 +40,26 @@ def get_dict_by_token(start, end, token, slots=None):
 
 def get_availability_from_schedule(doctype, df, dn, schedules, token, date, time):
 	data = []
+	now_dt = now_datetime()
 	for line in schedules:
+		started = False
+		if(line["start"] < now_dt):
+			started = True
 		duration = get_time(line["average"])
-		scheduled_items = frappe.db.sql("""select start_dt from `tab{0}` where status!="Cancelled" and {1}='{2}' and start_dt between '{3}' and '{4}' order by start_dt""".format(doctype, df, dn, line["start"], line["end"]))
+		scheduled_items = frappe.db.sql("""select start_dt from `tab{0}` where status in ('Open', 'Scheduled') and {1}='{2}' and start_dt between '{3}' and '{4}' order by start_dt""".format(doctype, df, dn, line["start"], line["end"]))
+
+		if started:
+			slots = get_all_slots(line["start"], line["end"], line["average"])
+			if scheduled_items:
+				scheduled_map = set(map(lambda x : x[0], scheduled_items))
+				slots_free = [x for x in slots if x not in scheduled_map]
+				start, end = get_nearest_slot(date, get_time(nowtime()), duration, slots_free)
+				data.append(get_dict_by_token(start, end, token, slots))
+			else:
+				start, end = get_nearest_slot(date, get_time(nowtime()), duration, slots)
+				data.append(get_dict_by_token(start, end, token, slots))
+			continue
+
 		if not scheduled_items and not time:
 			start = datetime.datetime.combine(date, get_time(line["start"]))
 			end = start + datetime.timedelta(hours = duration.hour, minutes=duration.minute)
@@ -76,10 +93,16 @@ def check_availability(doctype, df, token, dt, dn, date, time, end_dt):
 	#date: date to check availability
 	#time: time to check availability
 	#end_dt: datetime end time to check availability
-	resource = frappe.get_doc(dt, dn)
+
 	date = getdate(date)
 	if time: time = get_time(time)
 	day = calendar.day_name[date.weekday()]
+	if date < getdate():
+		frappe.throw("You cannot schedule for past date/time")
+	if time and datetime.datetime.combine(date, time) < now_datetime():
+		frappe.throw("You cannot schedule for past date/time")
+
+	resource = frappe.get_doc(dt, dn)
 	availability = []
 	schedules = []
 	if hasattr(resource, "schedule") and resource.schedule: #build schedules based on work schedule
@@ -92,13 +115,13 @@ def check_availability(doctype, df, token, dt, dn, date, time, end_dt):
 				if(time>=get_time(line.start) and time <=get_time(line.end)):#add only if time between start and end
 					schedules.append({"start": datetime.datetime.combine(date, get_time(line.start)), "end": datetime.datetime.combine(date, get_time(line.end)), "average": line.average})
 			else:
-				schedules.append({"start": datetime.datetime.combine(date, get_time(line.start)), "end": datetime.datetime.combine(date, get_time(line.end)), "average": line.average})
-
+				if(datetime.datetime.combine(date, get_time(line.end)) > now_datetime()):
+					schedules.append({"start": datetime.datetime.combine(date, get_time(line.start)), "end": datetime.datetime.combine(date, get_time(line.end)), "average": line.average})
 		if time and not schedules:
 			msg = ""
 			for sch in day_sch:
-				msg += " &emsp;&emsp;{0}-{1}".format(sch.start, sch.end)
-			availability.append({"msg": _("Schedules for {0} on  {1}   {2} ").format(dn, date, msg)})
+				msg += " <br>{0}-{1}".format(sch.start, sch.end)
+			availability.append({"msg": _("Schedules for {0} on  {1} :  {2} ").format(dn, date, msg)})
 		if schedules:
 			availability.extend(get_availability_from_schedule(doctype, df, dn, schedules, token, date, time))
 
