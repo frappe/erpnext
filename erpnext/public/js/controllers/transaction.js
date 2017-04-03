@@ -260,6 +260,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							customer: me.frm.doc.customer,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
+							update_stock: in_list(['Sales Invoice', 'Purchase Invoice'], me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
 							conversion_rate: me.frm.doc.conversion_rate,
 							price_list: me.frm.doc.selling_price_list ||
 								 me.frm.doc.buying_price_list,
@@ -275,7 +276,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							name: me.frm.doc.name,
 							project: item.project || me.frm.doc.project,
 							qty: item.qty,
-							stock_qty: item.stock_qty
+							stock_qty: item.stock_qty,
+							conversion_factor: item.conversion_factor
 						}
 					},
 
@@ -762,7 +764,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"ignore_pricing_rule": me.frm.doc.ignore_pricing_rule,
 			"doctype": me.frm.doc.doctype,
 			"name": me.frm.doc.name,
-			"is_return": cint(me.frm.doc.is_return)
+			"is_return": cint(me.frm.doc.is_return),
+			"update_stock": in_list(['Sales Invoice', 'Purchase Invoice'], me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
 		};
 	},
 
@@ -781,7 +784,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"parent": d.parent,
 					"pricing_rule": d.pricing_rule,
 					"warehouse": d.warehouse,
-					"serial_no": d.serial_no
+					"serial_no": d.serial_no,
+					"conversion_factor": d.conversion_factor
 				});
 
 				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list
