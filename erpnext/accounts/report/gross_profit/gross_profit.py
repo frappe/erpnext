@@ -225,10 +225,10 @@ class GrossProfitGenerator(object):
 				average_buying_rate = get_incoming_rate(row)
 				if not average_buying_rate:
 					average_buying_rate = get_valuation_rate(item_code, row.warehouse,
-            row.parenttype, row.parent, allow_zero_rate=True, 
-            currency=self.filters.currency)
+						row.parenttype, row.parent, allow_zero_rate=True, 
+						currency=self.filters.currency)
 
-          self.average_buying_rate[item_code] =  average_buying_rate
+				self.average_buying_rate[item_code] =  average_buying_rate
 
 		return self.average_buying_rate[item_code]
 
