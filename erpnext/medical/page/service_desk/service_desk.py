@@ -9,14 +9,24 @@ from collections import OrderedDict
 
 @frappe.whitelist()
 def get_patient_services_info(company, patient, from_date, to_date, physician=None):
+    if not company:
+        frappe.throw("Please select company")
+    if not patient:
+        frappe.throw("Please select patient")
     payload = {}
     drugs = OrderedDict()
     procedures = OrderedDict()
     labtests = OrderedDict()
-    consultations = frappe.db.sql(_("""select name from tabConsultation where company='{0}' and patient='{1}' and docstatus<2 and consultation_date between '{2}' and '{3}' order by consultation_date desc""").format(company, patient, from_date, to_date), as_dict=1)
+
+    conditions = ("company='{0}' and patient='{1}'").format(company, patient)
+    if physician:
+        conditions += ("and physician='{0}'").format(physician)
+    consultations = frappe.db.sql(_("""select name from tabConsultation where {0}
+    and docstatus<2 and consultation_date between '{1}' and '{2}' order by consultation_date desc""").format(
+    conditions, from_date, to_date), as_dict=1)
     for consultation in consultations:
         c_obj = frappe.get_doc("Consultation", consultation.name)
-        key = consultation.name + " - " +c_obj.physician
+        key = consultation.name
         if(c_obj.drug_prescription):
             for drug in c_obj.drug_prescription:
                 if drugs.has_key(key):
@@ -32,7 +42,7 @@ def get_patient_services_info(company, patient, from_date, to_date, physician=No
             if test_dict:
                 labtests.update(test_dict)
 
-    appointments = get_appointments(company, patient, from_date, to_date, physician)
+    appointments = get_appointments(conditions, from_date, to_date)
     if appointments:
         payload["appointments"] = appointments
     if drugs:
@@ -44,9 +54,9 @@ def get_patient_services_info(company, patient, from_date, to_date, physician=No
 
     return payload
 
-def get_appointments(company, patient, from_date, to_date, physician=None):
+def get_appointments(conditions, from_date, to_date):
     data = []
-    appointments = frappe.db.sql(_("""select name, physician, start_dt,  status, invoice from tabAppointment where company='{0}' and patient='{1}' and appointment_date between '{2}' and '{3}' order by start_dt desc""").format(company, patient, from_date, to_date), as_dict=1)
+    appointments = frappe.db.sql(_("""select name, physician, start_dt,  status, invoice from tabAppointment where {0} and appointment_date between '{1}' and '{2}' order by start_dt desc""").format(conditions, from_date, to_date), as_dict=1)
     for item in appointments:
         status = False
         invoice = False
@@ -57,7 +67,7 @@ def get_appointments(company, patient, from_date, to_date, physician=None):
     return data
 
 def get_details_by_line(dt, consultation, physician, lines):
-    key = consultation + " - " + physician
+    key = consultation
     data = {key: []}
     for line in lines:
         doc = False

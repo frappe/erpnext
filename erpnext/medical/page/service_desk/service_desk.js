@@ -13,17 +13,20 @@ frappe.medical.ServiceDesk = Class.extend({
 	},
 	make_toolbar: function () {
 		var me = this;
-		this.patient = this.page.add_field({label: __("Patient"), fieldtype: 'Link', options: 'Patient'})
+		this.patient = this.page.add_field({label: __("Patient"), fieldtype: 'Link', options: 'Patient', reqd:1})
 		this.patient.$input.on('change', function(){
-			me.get_data(false);
+			me.get_data(me.page.sidebar.find("li.active").attr("data-div"));
 		});
 		this.physician = this.page.add_field({label: __("Physician"), fieldtype: 'Link', options: 'Physician'})
 		this.physician.$input.on('change', function(){
-			me.get_data(false);
+			me.get_data(me.page.sidebar.find("li.active").attr("data-div"));
 		});
 		this.from_date = this.page.add_date(__("From Date"), frappe.datetime.add_days(frappe.datetime.get_today(), -30))
 		this.to_date = this.page.add_date(__("To Date"),  frappe.datetime.get_today())
-		this.company = this.page.add_field({label: __("Company"), fieldtype: 'Link', options: 'Company', default: frappe.defaults.get_user_default("Company")})
+		this.company = this.page.add_field({label: __("Company"), fieldtype: 'Link', options: 'Company', default: frappe.defaults.get_user_default("Company"), reqd:1})
+		this.company.$input.on('change', function(){
+			me.get_data(me.page.sidebar.find("li.active").attr("data-div"));
+		});
 		// this.from_date.on('change', function(){ me.get_data(false);});
 		// this.to_date.on('change', function(){	me.get_data(false);});
 		this.page.set_primary_action(__("Refresh"), function() {
