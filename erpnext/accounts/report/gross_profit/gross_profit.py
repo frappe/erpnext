@@ -228,7 +228,7 @@ class GrossProfitGenerator(object):
             row.parenttype, row.parent, allow_zero_rate=True, 
             currency=self.filters.currency)
 
-          self.average_buying_rate[item_code] =  average_buying_rate
+          	self.average_buying_rate[item_code] =  average_buying_rate
 
 		return self.average_buying_rate[item_code]
 
