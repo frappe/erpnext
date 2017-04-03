@@ -115,52 +115,52 @@ erpnext.utils.map_current_doc = function(opts) {
 	}
 	var _map = function() {
 		// remove first item row if empty
-		if($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {
-			if(!cur_frm.doc.items[0].item_code) {
-				cur_frm.doc.items = cur_frm.doc.items.splice(1);
-			}
+		// if($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {
+		// 	if(!cur_frm.doc.items[0].item_code) {
+		// 		cur_frm.doc.items = cur_frm.doc.items.splice(1);
+		// 	}
 
-			// find the doctype of the items table
-			var items_doctype = frappe.meta.get_docfield(cur_frm.doctype, 'items').options;
-			
-			// find the link fieldname from items table for the given
-			// source_doctype
-			var link_fieldname = null;
-			frappe.get_meta(items_doctype).fields.forEach(function(d) { 
-				if(d.options===opts.source_doctype) link_fieldname = d.fieldname; });
+		// 	// find the doctype of the items table
+		// 	var items_doctype = frappe.meta.get_docfield(cur_frm.doctype, 'items').options;
 
-			// search in existing items if the source_name is already set and full qty fetched
-			var already_set = false;
-			var item_qty_map = {};
-			
-			$.each(cur_frm.doc.items, function(i, d) {
-				if(d[link_fieldname]==opts.source_name) {
-					already_set = true;
-					if (item_qty_map[d.item_code])
-						item_qty_map[d.item_code] += flt(d.qty);
-					else
-						item_qty_map[d.item_code] = flt(d.qty);
-				}
-			});
-			
-			if(already_set) {
-				frappe.model.with_doc(opts.source_doctype, opts.source_name, function(r) {
-					var source_doc = frappe.model.get_doc(opts.source_doctype, opts.source_name);
-					$.each(source_doc.items || [], function(i, row) {
-						if(row.qty > flt(item_qty_map[row.item_code])) {
-							already_set = false;
-							return false;
-						}
-					})
-				})
+		// 	// find the link fieldname from items table for the given
+		// 	// source_doctype
+		// 	var link_fieldname = null;
+		// 	frappe.get_meta(items_doctype).fields.forEach(function(d) {
+		// 		if(d.options===opts.source_doctype) link_fieldname = d.fieldname; });
 
-				if(already_set) {
-					frappe.msgprint(__("You have already selected items from {0} {1}", 
-						[opts.source_doctype, opts.source_name]));
-					return;
-				}
-			}
-		}
+		// 	// search in existing items if the source_name is already set and full qty fetched
+		// 	var already_set = false;
+		// 	var item_qty_map = {};
+
+		// 	$.each(cur_frm.doc.items, function(i, d) {
+		// 		if(d[link_fieldname]==opts.source_name) {
+		// 			already_set = true;
+		// 			if (item_qty_map[d.item_code])
+		// 				item_qty_map[d.item_code] += flt(d.qty);
+		// 			else
+		// 				item_qty_map[d.item_code] = flt(d.qty);
+		// 		}
+		// 	});
+
+		// 	if(already_set) {
+		// 		frappe.model.with_doc(opts.source_doctype, opts.source_name, function(r) {
+		// 			var source_doc = frappe.model.get_doc(opts.source_doctype, opts.source_name);
+		// 			$.each(source_doc.items || [], function(i, row) {
+		// 				if(row.qty > flt(item_qty_map[row.item_code])) {
+		// 					already_set = false;
+		// 					return false;
+		// 				}
+		// 			})
+		// 		})
+
+		// 		if(already_set) {
+		// 			frappe.msgprint(__("You have already selected items from {0} {1}",
+		// 				[opts.source_doctype, opts.source_name]));
+		// 			return;
+		// 		}
+		// 	}
+		// }
 
 
 		return frappe.call({
@@ -181,28 +181,48 @@ erpnext.utils.map_current_doc = function(opts) {
 		});
 	}
 	if(opts.source_doctype) {
-		var d = new frappe.ui.Dialog({
-			title: __("Get From ") + __(opts.source_doctype),
-			fields: [
-				{
-					fieldtype: "Link",
-					label: __(opts.source_doctype),
-					fieldname: opts.source_doctype,
-					options: opts.source_doctype,
-					get_query: opts.get_query,
-					reqd:1
-				},
-			]
+		// var d = new frappe.ui.Dialog({
+		// 	title: __("Get From ") + __(opts.source_doctype),
+		// 	fields: [
+		// 		{
+		// 			fieldtype: "Link",
+		// 			label: __(opts.source_doctype),
+		// 			fieldname: opts.source_doctype,
+		// 			options: opts.source_doctype,
+		// 			get_query: opts.get_query,
+		// 			reqd:1
+		// 		},
+		// 	]
+		// });
+
+		// d.set_primary_action(__('Get Items'), function() {
+		// 	var values = d.get_values();
+		// 	console.log("values", values, opts.source_doctype);
+		// 	if(!values)
+		// 		return;
+		// 	opts.source_name = values[opts.source_doctype];
+		// 	d.hide();
+		// 	_map();
+		// })
+		// d.show();
+
+		var d = new frappe.ui.form.MultiLinkSelector({
+			doctype: opts.source_doctype,
+			// fieldname: link,
+			// qty_fieldname: qty,
+			action: function() {
+				var values = d.get_values();
+				if(!values) return;
+				var all = values[opts.source_doctype];
+				d.dialog.hide();
+				opts.source_name = all.join(',');
+				console.log("opts.source_name", opts.source_name);
+				// opts.source_name = "QTN-00002";
+				_map();
+			},
+			txt: ""
 		});
-		d.set_primary_action(__('Get Items'), function() {
-			var values = d.get_values();
-			if(!values)
-				return;
-			opts.source_name = values[opts.source_doctype];
-			d.hide();
-			_map();
-		})
-		d.show();
+
 	} else if(opts.source_name) {
 		_map();
 	}
