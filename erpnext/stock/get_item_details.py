@@ -161,7 +161,7 @@ def get_basic_details(args, item):
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"conversion_factor": 1.0,
 		"qty": args.qty or 1.0,
-		"stock_qty": 1.0,
+		"stock_qty": args.qty or 1.0,
 		"price_list_rate": 0.0,
 		"base_price_list_rate": 0.0,
 		"rate": 0.0,
@@ -172,8 +172,16 @@ def get_basic_details(args, item):
 		"net_amount": 0.0,
 		"discount_percentage": 0.0,
 		"supplier": item.default_supplier,
+		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
 		"is_fixed_asset": item.is_fixed_asset
+	})
+
+	# calculate conversion factor
+	conversion_factor = args.get("conversion_factor") or get_conversion_factor(item.item_code, args.uom).get("conversion_factor") or 1.0
+	out.update({
+		"conversion_factor": conversion_factor,
+		"stock_qty": out.qty * conversion_factor
 	})
 
 	# if default specified in item is for another company, fetch from company
@@ -531,6 +539,9 @@ def get_serial_no(args):
 	if isinstance(args, basestring):
 		args = json.loads(args)
 		args = frappe._dict(args)
+
+	if args.get('doctype') == 'Sales Invoice' and not args.get('update_stock'):
+		return ""
 
 	if args.get('warehouse') and args.get('stock_qty') and args.get('item_code'):
 
