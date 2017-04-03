@@ -404,7 +404,7 @@ class calculate_taxes_and_totals(object):
 			self.doc.total_advance = flt(total_allocated_amount, self.doc.precision("total_advance"))
 
 			if self.doc.party_account_currency == self.doc.currency:
-				invoice_total = flt(self.doc.grand_total - self.write_off_amount, 
+				invoice_total = flt(self.doc.grand_total - self.doc.write_off_amount, 
 					self.doc.precision("grand_total"))
 			else:
 				base_write_off_amount = flt(self.doc.write_off_amount * self.doc.conversion_rate, 
