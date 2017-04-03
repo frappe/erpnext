@@ -38,50 +38,41 @@ def get_dict_by_token(start, end, token, slots=None):
 	else:
 		return {"start": start, "end": end}
 
+def find_available_slot(date, time, duration, line, scheduled_items, token):
+	slots = get_all_slots(line["start"], line["end"], line["average"])
+	if scheduled_items:
+		scheduled_map = set(map(lambda x : x[0], scheduled_items))
+		slots_free = [x for x in slots if x not in scheduled_map]
+		if not slots_free:
+			return {"msg": _("No slots left for schedule {0} {1}").format(line["start"], line["end"])}
+		if time:
+			start, end = get_nearest_slot(date, time, duration, slots_free)
+			return get_dict_by_token(start, end, token, slots)
+		else:
+			end = slots_free[0] + datetime.timedelta(hours = duration.hour, minutes=duration.minute)
+			return get_dict_by_token(slots_free[0], end, token, slots)
+	else:
+		start, end = get_nearest_slot(date, time, duration, slots)
+		return get_dict_by_token(start, end, token, slots)
+
 def get_availability_from_schedule(doctype, df, dn, schedules, token, date, time):
 	data = []
-	now_dt = now_datetime()
 	for line in schedules:
-		started = False
-		if(line["start"] < now_dt):
-			started = True
 		duration = get_time(line["average"])
 		scheduled_items = frappe.db.sql("""select start_dt from `tab{0}` where status in ('Open', 'Scheduled') and {1}='{2}' and start_dt between '{3}' and '{4}' order by start_dt""".format(doctype, df, dn, line["start"], line["end"]))
-
-		if started:
-			slots = get_all_slots(line["start"], line["end"], line["average"])
-			if scheduled_items:
-				scheduled_map = set(map(lambda x : x[0], scheduled_items))
-				slots_free = [x for x in slots if x not in scheduled_map]
-				start, end = get_nearest_slot(date, get_time(nowtime()), duration, slots_free)
-				data.append(get_dict_by_token(start, end, token, slots))
-			else:
-				start, end = get_nearest_slot(date, get_time(nowtime()), duration, slots)
-				data.append(get_dict_by_token(start, end, token, slots))
+		#A session in progress - return slot > current time
+		if(line["start"] < now_datetime()):
+			if not time: time = get_time(nowtime())
+			data.append(find_available_slot(date, time, duration, line, scheduled_items, token))
 			continue
-
+		#Return first slot
 		if not scheduled_items and not time:
 			start = datetime.datetime.combine(date, get_time(line["start"]))
 			end = start + datetime.timedelta(hours = duration.hour, minutes=duration.minute)
 			data.append(get_dict_by_token(start, end, token))
 			continue
 
-		slots = get_all_slots(line["start"], line["end"], line["average"])
-		if scheduled_items:
-			scheduled_map = set(map(lambda x : x[0], scheduled_items))
-			slots_free = [x for x in slots if x not in scheduled_map]
-			if not slots_free:
-				data.append({"msg": _("No slots left for schedule {0} {1}").format(line["start"], line["end"])})
-				continue
-			if time:
-				start, end = get_nearest_slot(date, time, duration, slots_free)
-				data.append(get_dict_by_token(start, end, token, slots))
-			else:
-				end = slots_free[0] + datetime.timedelta(hours = duration.hour, minutes=duration.minute)
-				data.append(get_dict_by_token(slots_free[0], end, token, slots))
-		else:
-			start, end = get_nearest_slot(date, time, duration, slots)
-			data.append(get_dict_by_token(start, end, token, slots))
+		data.append(find_available_slot(date, time, duration, line, scheduled_items, token))
 	return data
 
 def check_availability(doctype, df, token, dt, dn, date, time, end_dt):
