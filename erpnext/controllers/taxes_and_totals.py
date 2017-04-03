@@ -50,16 +50,21 @@ class calculate_taxes_and_totals(object):
 	def calculate_item_values(self):
 		if not self.discount_amount_applied:
 			for item in self.doc.get("items"):
+				price_list_rate = 0.0
 				self.doc.round_floats_in(item)
 
 				if item.discount_percentage == 100:
 					item.rate = 0.0
 				elif not item.rate:
-					item.rate = flt(item.price_list_rate *
+					price_list_rate = item.price_list_rate if item.uom == item.stock_uom \
+						else item.price_list_rate * item.stock_qty
+
+					item.rate = flt(price_list_rate *
 						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 
 				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']:
 					item.total_margin = self.calculate_margin(item)
+
 					item.rate = flt(item.total_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))\
 						if item.total_margin > 0 else item.rate
 
@@ -488,13 +493,16 @@ class calculate_taxes_and_totals(object):
 	def calculate_margin(self, item):
 		total_margin = 0.0
 		if item.price_list_rate:
+			price_list_rate = item.price_list_rate if item.uom == item.stock_uom \
+						else item.price_list_rate * item.stock_qty
+
 			if item.pricing_rule and not self.doc.ignore_pricing_rule:
 				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
 				item.margin_type = pricing_rule.margin_type
 				item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 
 			if item.margin_type and item.margin_rate_or_amount:
-				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
-				total_margin = flt(item.price_list_rate) + flt(margin_value)
+				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(price_list_rate) * flt(item.margin_rate_or_amount) / 100
+				total_margin = flt(price_list_rate) + flt(margin_value)
 
 		return total_margin

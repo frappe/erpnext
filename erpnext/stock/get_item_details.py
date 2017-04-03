@@ -176,6 +176,13 @@ def get_basic_details(args, item):
 		"is_fixed_asset": item.is_fixed_asset
 	})
 
+	if out.uom != args.uom:
+		# calculate conversion factor
+		conversion_factor = get_conversion_factor(item.item_code, args.uom).get("conversion_factor") or 1
+		out.update({
+			"conversion_factor": conversion_factor,
+		})
+
 	# if default specified in item is for another company, fetch from company
 	for d in [["Account", "income_account", "default_income_account"],
 		["Account", "expense_account", "default_expense_account"],
