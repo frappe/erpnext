@@ -159,9 +159,8 @@ def get_basic_details(args, item):
 			item.get("taxes")))),
 		"uom": item.stock_uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
-		"conversion_factor": 1.0,
 		"qty": args.qty or 1.0,
-		"stock_qty": 1.0,
+		"stock_qty": args.qty or 1.0,
 		"price_list_rate": 0.0,
 		"base_price_list_rate": 0.0,
 		"rate": 0.0,
@@ -176,12 +175,14 @@ def get_basic_details(args, item):
 		"is_fixed_asset": item.is_fixed_asset
 	})
 
-	if out.uom != args.uom:
-		# calculate conversion factor
-		conversion_factor = get_conversion_factor(item.item_code, args.uom).get("conversion_factor") or 1
-		out.update({
-			"conversion_factor": conversion_factor,
-		})
+	if item.stock_uom == args.uom:
+		out.conversion_factor = 1.0
+	else:
+		out.conversion_factor = args.conversion_factor or \
+			get_conversion_factor(item.item_code, args.uom).get("conversion_factor")  or 1.0
+
+	args.conversion_factor = out.conversion_factor
+	out.stock_qty = out.qty * out.conversion_factor
 
 	# if default specified in item is for another company, fetch from company
 	for d in [["Account", "income_account", "default_income_account"],
@@ -233,6 +234,8 @@ def get_price_list_rate(args, item_doc, out):
 
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
+
+		out.price_list_rate = flt(out.price_list_rate * (args.conversion_factor or 1.0))
 
 		if not out.price_list_rate and args.transaction_type=="buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details

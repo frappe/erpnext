@@ -4,17 +4,11 @@
 erpnext.taxes_and_totals = erpnext.payments.extend({
 	setup: function() {},
 	apply_pricing_rule_on_item: function(item){
-		if(item.uom != item.stock_uom) {
-			price_list_rate = flt(item.price_list_rate) * item.stock_qty
-		} else {
-			price_list_rate = flt(item.price_list_rate)
-		}
-
 		if(item.margin_type == "Percentage"){
-			item.total_margin = flt(price_list_rate) 
-				+ flt(price_list_rate) * ( flt(item.margin_rate_or_amount) / 100);
+			item.total_margin = flt(item.price_list_rate) 
+				+ flt(item.price_list_rate) * ( flt(item.margin_rate_or_amount) / 100);
 		} else {
-			item.total_margin = flt(price_list_rate) + flt(item.margin_rate_or_amount);
+			item.total_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
 		}
 
 		item.rate = flt(item.total_margin , precision("rate", item));
