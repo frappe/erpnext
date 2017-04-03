@@ -218,7 +218,8 @@ class GrossProfitGenerator(object):
 	def get_average_buying_rate(self, row, item_code):
 		if not item_code in self.average_buying_rate:
 			if item_code in self.non_stock_items:
-				self.average_buying_rate[item_code] = flt(frappe.db.sql("""select sum(base_net_amount) / sum(qty * conversion_factor)
+				self.average_buying_rate[item_code] = flt(frappe.db.sql("""
+					select sum(base_net_amount) / sum(qty * conversion_factor)
 					from `tabPurchase Invoice Item`
 					where item_code = %s and docstatus=1""", item_code)[0][0])
 			else:
@@ -228,7 +229,7 @@ class GrossProfitGenerator(object):
 						row.parenttype, row.parent, allow_zero_rate=True, 
 						currency=self.filters.currency)
 
-				self.average_buying_rate[item_code] =  average_buying_rate
+				self.average_buying_rate[item_code] =  flt(average_buying_rate)
 
 		return self.average_buying_rate[item_code]
 
