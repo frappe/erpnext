@@ -327,9 +327,9 @@ def get_pos_profile_item_details(company, args, pos_profile=None):
 
 @frappe.whitelist()
 def get_pos_profile(company):
-	condition = "and company = '%s'"%(company) if company else ''
+	condition = "and company = %s" if company else ''
 	pos_profile = frappe.db.sql("""select * from `tabPOS Profile` where user = %s
-		{cond}""".format(cond=condition), (frappe.session['user']), as_dict=1)
+		{cond}""".format(cond=condition), (frappe.session['user'], company), as_dict=1)
 
 	if not pos_profile and company:
 		pos_profile = frappe.db.sql("""select * from `tabPOS Profile`
