@@ -182,6 +182,7 @@ def get_customers_address(customers):
 			address_data = address[0]
 			address_data.update({'full_name': data.customer_name})
 			customer_address[data.name] = address_data
+
 	return customer_address
 
 def get_child_nodes(group_type, root):
@@ -337,11 +338,14 @@ def add_customer(name):
 def make_address(args, customer):
 	if not args.get('address_line1'): return
 	
-	name = args.get('name') or get_customers_address(customer)[customer].get("name")
+	name = args.get('name')
+
+	if not name:
+		data = get_customers_address(customer)
+		name = data[customer].get('name') if data else None
 
 	if name:
-		address = frappe.get_doc('Address', name) 
-		frappe.errprint(address)
+		address = frappe.get_doc('Address', name)
 	else:
 		address = frappe.new_doc('Address')
 		address.country = frappe.db.get_value('Company', args.get('company'), 'country')
