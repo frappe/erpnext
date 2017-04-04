@@ -337,7 +337,7 @@ DocType: Item,Show in Website (Variant),Mostar no Site (variante)
 DocType: Employee,Health Concerns,Preocupações com a Saúde
 DocType: Process Payroll,Select Payroll Period,Selecione Período de Pagamento
 DocType: Process Payroll,Select Payroll Period,Selecione Período de Pagamento
-DocType: Packing Slip,From Package No.,De No. Package
+DocType: Packing Slip,From Package No.,Do nº do pacote
 DocType: Item Attribute,To Range,Para a Faixa
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +82,Total leaves allocated is mandatory,Total de folhas alocados é obrigatória
 DocType: Job Opening,Description of a Job Opening,Descrição de uma vaga de emprego
@@ -833,6 +833,7 @@ DocType: Support Settings,Close Issue After Days,Fechar Incidente Após Dias
 DocType: Leave Control Panel,Leave blank if considered for all branches,Deixe em branco se considerado para todos os ramos
 apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +21,C-form is not applicable for Invoice: {0},C-forma não é aplicável para a fatura: {0}
 DocType: Payment Reconciliation,Unreconciled Payment Details,Detalhes do Pagamento não Conciliado
+DocType: Global Defaults,Disable Rounded Total,Desativar total arredondado
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +436,'Entries' cannot be empty,'Entradas' não pode estar vazio
 apps/erpnext/erpnext/config/hr.py +296,Setting up Employees,Configurando Colaboradores
 DocType: Sales Order,SO-,OV-
@@ -885,7 +886,7 @@ DocType: Employee,Place of Issue,Local de Envio
 DocType: Email Digest,Add Quote,Adicionar Citar
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +843,UOM coversion factor required for UOM: {0} in Item: {1},Fator de Conversão de Unidade de Medida é necessário para Unidade de Medida: {0} no Item: {1}
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +77,Row {0}: Qty is mandatory,Linha {0}: Qtde é obrigatória
-apps/erpnext/erpnext/accounts/page/pos/pos.js +714,Sync Master Data,Sincronizar com o servidor
+apps/erpnext/erpnext/accounts/page/pos/pos.js +714,Sync Master Data,Sincronizar com o Servidor
 apps/erpnext/erpnext/public/js/setup_wizard.js +288,Your Products or Services,Seus Produtos ou Serviços
 DocType: Mode of Payment,Mode of Payment,Forma de Pagamento
 apps/erpnext/erpnext/stock/doctype/item/item.py +179,Website Image should be a public file or website URL,Site de imagem deve ser um arquivo público ou URL do site
@@ -988,6 +989,7 @@ DocType: Warranty Claim,Warranty / AMC Status,Garantia / Status do CAM
 DocType: GL Entry,GL Entry,Lançamento GL
 DocType: HR Settings,Employee Settings,Configurações de Colaboradores
 ,Batch-Wise Balance History,Balanço por Histórico de Lotes
+DocType: Package Code,Package Code,Código do pacote
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +103,Negative Quantity is not allowed,Negativo Quantidade não é permitido
 DocType: Purchase Invoice Item,"Tax detail table fetched from item master as a string and stored in this field.
 Used for Taxes and Charges",Detalhe da tabela de imposto obtido a partir do cadastro do item como texto e armazenado neste campo. Usado para Tributos e Encargos
@@ -1225,7 +1227,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +91,Associate,Associ
 DocType: Asset Movement,Asset Movement,Movimentação de Ativos
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +44,Item {0} is not a serialized Item,Item {0} não é um item serializado
 DocType: SMS Center,Create Receiver List,Criar Lista de Receptor
-DocType: Packing Slip,To Package No.,Para Pacote Nº.
+DocType: Packing Slip,To Package No.,Até nº do pacote
 DocType: Production Planning Tool,Material Requests,Requisições de Material
 DocType: Warranty Claim,Issue Date,Data do Incidente
 DocType: Sales Invoice Timesheet,Timesheet Detail,Detalhes do Registro de Tempo
@@ -1746,6 +1748,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +79,Row {0}: UOM C
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +17,Ref,Referência
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +36,Voucher #,Comprovante #
 DocType: Notification Control,Purchase Order Message,Mensagem do Pedido de Compra
+DocType: Selling Settings,Hide Customer's Tax Id from Sales Transactions,Esconder CPF/CNPJ em transações de vendas
 DocType: Upload Attendance,Upload HTML,Upload HTML
 DocType: Employee,Relieving Date,Data da Liberação
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +12,"Pricing Rule is made to overwrite Price List / define discount percentage, based on some criteria.","Regra de preços é feita para substituir Lista de Preços / define percentual de desconto, com base em alguns critérios."
@@ -2049,6 +2052,7 @@ DocType: Leave Block List,Leave Block List Allowed,Deixe Lista de Bloqueios admi
 apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py +49,Expense Claim for Vehicle Log {0},Reembolso de Despesa para o Log do Veículo {0}
 DocType: Sales Partner,Retailer,Varejista
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +107,Credit To account must be a Balance Sheet account,Para crédito de conta deve ser uma conta de Balanço
+DocType: Global Defaults,Disable In Words,Desativar por extenso
 apps/erpnext/erpnext/stock/doctype/item/item.py +44,Item Code is mandatory because Item is not automatically numbered,Código do item é obrigatório porque Item não é numerada automaticamente
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +101,Quotation {0} not of type {1},O Orçamento {0} não é do tipo {1}
 DocType: Maintenance Schedule Item,Maintenance Schedule Item,Ítem da Programação da Manutenção

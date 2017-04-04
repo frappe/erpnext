@@ -2182,7 +2182,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +52,Invali
 DocType: Purchase Invoice,PINV-RET-,PINV-RET-
 DocType: Sales Invoice Advance,Advance Amount,ಅಡ್ವಾನ್ಸ್ ಪ್ರಮಾಣ
 DocType: Manufacturing Settings,Capacity Planning,ಸಾಮರ್ಥ್ಯವನ್ನು ಯೋಜನೆ
-apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py +43,'From Date' is required,' ದಿನಾಂಕದಿಂದ ' ಅಗತ್ಯವಿದೆ
+apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py +43,'From Date' is required,ಇಂದ ದಿನಾಂಕ ಬೇಕು
 DocType: Journal Entry,Reference Number,ಉಲ್ಲೇಖ ಸಂಖ್ಯೆ
 DocType: Employee,Employment Details,ಉದ್ಯೋಗದ ವಿವರಗಳು
 DocType: Employee,New Workplace,ಹೊಸ ಕೆಲಸದ
@@ -2885,7 +2885,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +107,Disbursed Amount cannot be greater than Loan Amount {0},ಪಾವತಿಸಲಾಗುತ್ತದೆ ಪ್ರಮಾಣ ಸಾಲದ ಪ್ರಮಾಣ ಹೆಚ್ಚು ಹೆಚ್ಚಿರಬಾರದು {0}
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +86,Purchase Order number required for Item {0},ಪರ್ಚೇಸ್ ಆರ್ಡರ್ ಸಂಖ್ಯೆ ಐಟಂ ಅಗತ್ಯವಿದೆ {0}
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +871,Production Order not created,ಪ್ರೊಡಕ್ಷನ್ ಆರ್ಡರ್ ರಚಿಸಿಲ್ಲ
-apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date',' ದಿನಾಂಕದಿಂದ ' ' ದಿನಾಂಕ ' ನಂತರ ಇರಬೇಕು
+apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date',"ಇಂದ ದಿನಾಂಕ, ಗೆ ದಿನಾಂಕದ ಆಮೇಲೆ ಬರಬೇಕು"
 apps/erpnext/erpnext/schools/doctype/student_applicant/student_applicant.py +29,Cannot change status as student {0} is linked with student application {1},ಅಲ್ಲ ವಿದ್ಯಾರ್ಥಿಯಾಗಿ ಸ್ಥಿತಿಯನ್ನು ಬದಲಾಯಿಸಬಹುದು {0} ವಿದ್ಯಾರ್ಥಿ ಅಪ್ಲಿಕೇಶನ್ ಸಂಬಂಧ ಇದೆ {1}
 DocType: Asset,Fully Depreciated,ಸಂಪೂರ್ಣವಾಗಿ Depreciated
 ,Stock Projected Qty,ಸ್ಟಾಕ್ ಪ್ರಮಾಣ ಯೋಜಿತ
