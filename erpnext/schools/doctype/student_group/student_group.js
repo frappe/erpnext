@@ -26,9 +26,6 @@ frappe.ui.form.on("Student Group", {
 				});
 			});
 			frm.add_custom_button(__("Newsletter"), function() {
-				frappe.route_options = {
-					email_group: frm.doc.name
-				}
 				frappe.set_route("List", "Newsletter");
 			});
 		}
