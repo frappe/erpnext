@@ -76,7 +76,7 @@ class SalarySlip(TransactionBase):
 	def eval_condition_and_formula(self, d, data):
 		try:
 			if d.condition:
-				if not eval(d.condition, None, data):
+				if not eval(d.condition, {}, data):
 					return None
 			amount = d.amount
 			if d.amount_based_on_formula:
