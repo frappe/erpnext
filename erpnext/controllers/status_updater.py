@@ -119,7 +119,7 @@ class StatusUpdater(Document):
 					self.status = s[0]
 					break
 				elif s[1].startswith("eval:"):
-					if frappe.safe_eval(s[1][5:]):
+					if eval(s[1][5:]):
 						self.status = s[0]
 						break
 				elif getattr(self, s[1])():
