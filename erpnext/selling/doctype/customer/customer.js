@@ -37,7 +37,7 @@ frappe.ui.form.on("Customer", {
 		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
 
 		if(!frm.doc.__islocal) {
-			frappe.geo.render_address_and_contact(frm);
+			frappe.contacts.render_address_and_contact(frm);
 
 			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function() {
@@ -53,7 +53,7 @@ frappe.ui.form.on("Customer", {
 			erpnext.utils.set_party_dashboard_indicators(frm);
 
 		} else {
-			frappe.geo.clear_address_and_contact(frm);
+			frappe.contacts.clear_address_and_contact(frm);
 		}
 
 		var grid = cur_frm.get_field("sales_team").grid;
