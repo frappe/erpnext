@@ -146,7 +146,7 @@ doc_events = {
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty"
 	},
 	"User": {
-		"after_insert": "frappe.email.doctype.contact.contact.update_contact",
+		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
 		"on_update": ["erpnext.hr.doctype.employee.employee.update_user_permissions",
 			"erpnext.portal.utils.set_default_role"]
