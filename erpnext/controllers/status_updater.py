@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, comma_or
+from frappe.utils import flt, comma_or, nowdate, getdate
 from frappe import _
 from frappe.model.document import Document
 
@@ -119,7 +119,7 @@ class StatusUpdater(Document):
 					self.status = s[0]
 					break
 				elif s[1].startswith("eval:"):
-					if eval(s[1][5:]):
+					if frappe.safe_eval(s[1][5:], None, { "self": self.as_dict(), "getdate": getdate, "nowdate": nowdate }):
 						self.status = s[0]
 						break
 				elif getattr(self, s[1])():
