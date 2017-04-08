@@ -10,8 +10,13 @@ from frappe.model.document import Document
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_fixed_asset_account
 from erpnext.accounts.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_depreciation_accounts
+from frappe.model.naming import make_autoname
 
 class Asset(Document):
+
+	# def autoname(self):
+	# 	self.asset_name = make_autoname(self.title +'-.####')
+
 	def validate(self):
 		self.status = self.get_status()
 		self.validate_item()
