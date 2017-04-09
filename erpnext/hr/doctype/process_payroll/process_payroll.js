@@ -123,10 +123,8 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 	});
 }
 
-<<<<<<< HEAD
 cur_frm.cscript.make_bank_entry = function(doc, cdt, cdn){
     if(doc.company && doc.start_date && doc.end_date){
-=======
 cur_frm.cscript.make_bank_entry = function(doc,cdt,cdn){
     if(doc.company && doc.from_date && doc.to_date){
 		return cur_frm.cscript.reference_entry(doc,cdt,cdn);
@@ -140,26 +138,24 @@ cur_frm.cscript.reference_entry = function(doc,cdt,cdn){
 		title: __("Bank Transaction Reference"),
 		fields: [
 			{
-				"label": __("Reference Number"), 
+				"label": __("Reference Number"),
 				"fieldname": "reference_number",
-				"fieldtype": "Data", 
+				"fieldtype": "Data",
 				"reqd": 1
 			},
 			{
-				"label": __("Reference Date"), 
+				"label": __("Reference Date"),
 				"fieldname": "reference_date",
-				"fieldtype": "Date", 
+				"fieldtype": "Date",
 				"reqd": 1,
 				"default": get_today()
 			}
 		]
 	});
-<<<<<<< HEAD
 	dialog.set_primary_action(__("Make"), function() {
 		args = dialog.get_values();
 		if(!args) return;
 		dialog.hide();
->>>>>>> Vhrs Update 12/11/16
 		return frappe.call({
 			doc: cur_frm.doc,
 			method: "make_payment_entry",
@@ -169,21 +165,16 @@ cur_frm.cscript.reference_entry = function(doc,cdt,cdn){
 					frappe.set_route("Form", doc.doctype, doc.name);
 			}
 		});
-<<<<<<< HEAD
     } else {
   	  msgprint(__("Company, From Date and To Date is mandatory"));
     }
 }
-=======
 	});
 	dialog.show();
 }
-=======
 }
 
 
 frappe.ui.form.on("Process Payroll", "refresh", function(frm) {
 	frm.disable_save();
 });
->>>>>>> Vhrs Update 12/11/16
->>>>>>> Vhrs Update 12/11/16

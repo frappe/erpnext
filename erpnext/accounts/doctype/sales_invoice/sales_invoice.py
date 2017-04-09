@@ -553,7 +553,7 @@ class SalesInvoice(SellingController):
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
 			return
-			
+
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
@@ -671,7 +671,6 @@ class SalesInvoice(SellingController):
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
 			for payment_mode in self.payments:
-<<<<<<< HEAD
 				if payment_mode.amount:
 					# POS, make payment entries
 					gl_entries.append(
@@ -688,7 +687,6 @@ class SalesInvoice(SellingController):
 							"against_voucher_type": self.doctype,
 						}, self.party_account_currency)
 					)
-=======
 
 				# POS, make payment entries
 				gl_entries.append(
@@ -705,7 +703,6 @@ class SalesInvoice(SellingController):
 						"against_voucher_type": self.doctype,
 					}, self.party_account_currency)
 				)
->>>>>>> Vhrs Update 12/11/16
 
 					payment_mode_account_currency = get_account_currency(payment_mode.account)
 					gl_entries.append(
@@ -718,7 +715,7 @@ class SalesInvoice(SellingController):
 								else payment_mode.amount
 						}, payment_mode_account_currency)
 					)
-				
+
 
 				if payment_mode.base_amount > 0:
 					# POS, make payment entries
@@ -859,7 +856,7 @@ def make_delivery_note(source_name, target_doc=None):
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
 		target_doc.stock_qty = target_doc.qty * flt(source_doc.conversion_factor)
-		
+
 		target_doc.base_amount = target_doc.qty * flt(source_doc.base_rate)
 		target_doc.amount = target_doc.qty * flt(source_doc.rate)
 

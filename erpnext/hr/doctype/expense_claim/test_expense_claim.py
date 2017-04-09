@@ -32,12 +32,8 @@ class TestExpenseClaim(unittest.TestCase):
 			 "project": "_Test Project 1",
 			 "task": task_name,
 			 "expenses":
-<<<<<<< HEAD
 			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "claim_amount": 300, "sanctioned_amount": 200 }]
-=======
-			 	[{ "expense_type": "Food", "claim_amount": 300, "sanctioned_amount": 200 }]
->>>>>>> Vhrs Update 12/11/16
-		})
+	})
 		expense_claim.submit()
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 200)
@@ -50,12 +46,8 @@ class TestExpenseClaim(unittest.TestCase):
 			 "project": "_Test Project 1",
 			 "task": task_name,
 			 "expenses":
-<<<<<<< HEAD
 			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "claim_amount": 600, "sanctioned_amount": 500 }]
-=======
-			 	[{ "expense_type": "Food", "claim_amount": 600, "sanctioned_amount": 500 }]
->>>>>>> Vhrs Update 12/11/16
-		})
+})
 		expense_claim2.submit()
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 700)
@@ -66,7 +58,7 @@ class TestExpenseClaim(unittest.TestCase):
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 200)
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
-		
+
 	def test_expense_claim_status(self):
 		payable_account = get_payable_account("Wind Power LLC")
 		expense_claim = frappe.get_doc({
@@ -88,7 +80,7 @@ class TestExpenseClaim(unittest.TestCase):
 
 		expense_claim = frappe.get_doc("Expense Claim", expense_claim.name)
 		self.assertEqual(expense_claim.status, "Paid")
-		
+
 		je.cancel()
 		expense_claim = frappe.get_doc("Expense Claim", expense_claim.name)
 		self.assertEqual(expense_claim.status, "Unpaid")
@@ -104,7 +96,7 @@ class TestExpenseClaim(unittest.TestCase):
 			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "claim_amount": 300, "sanctioned_amount": 200 }]
 		})
 		expense_claim.submit()
-		
+
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Expense Claim' and voucher_no=%s
 			order by account asc""", expense_claim.name, as_dict=1)

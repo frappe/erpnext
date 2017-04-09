@@ -539,7 +539,6 @@ frappe.ui.form.on('Sales Invoice Timesheet', {
 	}
 })
 
-<<<<<<< HEAD
 var calculate_total_billing_amount =  function(frm) {
 	var doc = frm.doc;
 
@@ -552,5 +551,3 @@ var calculate_total_billing_amount =  function(frm) {
 
 	refresh_field('total_billing_amount')
 }
-=======
->>>>>>> Vhrs Update 12/11/16

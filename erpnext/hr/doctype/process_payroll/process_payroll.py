@@ -19,15 +19,11 @@ class ProcessPayroll(Document):
 		cond = self.get_filter_condition()
 		cond += self.get_joining_releiving_condition()
 
-<<<<<<< HEAD
 
 		condition = ''
 		if self.payroll_frequency:
 			condition = """and payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}
 
-=======
-<<<<<<< HEAD
->>>>>>> Vhrs Update 12/11/16
 		sal_struct = frappe.db.sql("""
 				select
 					name from `tabSalary Structure`
@@ -50,18 +46,13 @@ class ProcessPayroll(Document):
 					t1.docstatus!=2
 					and t1.name = t2.employee
 			%s """% cond, {"sal_struct": sal_struct})
-<<<<<<< HEAD
-=======
-=======
 		emp_list = frappe.db.sql("""
 			select t1.name
 			from `tabEmployee` t1, `tabSalary Structure` t2
 			where t1.docstatus!=2 and t2.docstatus != 2
 			and t1.name = t2.employee
 		%s """% cond)
->>>>>>> Vhrs Update 12/11/16
 
->>>>>>> Vhrs Update 12/11/16
 			return emp_list
 
 
@@ -97,7 +88,6 @@ class ProcessPayroll(Document):
 
 		emp_list = self.get_emp_list()
 		ss_list = []
-<<<<<<< HEAD
 		if emp_list:
 			for emp in emp_list:
 				if not frappe.db.sql("""select
@@ -121,15 +111,12 @@ class ProcessPayroll(Document):
 						"posting_date": self.posting_date
 					})
 					ss.insert()
-<<<<<<< HEAD
 					ss_dict = {}
 					ss_dict["Employee Name"] = ss.employee_name
 					ss_dict["Total Pay"] = fmt_money(ss.rounded_total,currency = frappe.defaults.get_global_default("currency"))
 					ss_dict["Salary Slip"] = self.format_as_links(ss.name)[0]
 					ss_list.append(ss_dict)
-=======
 					ss_list.append(ss.name)
-=======
 		for emp in emp_list:
 			if not frappe.db.sql("""select name from `tabSalary Slip`
 					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
@@ -144,8 +131,6 @@ class ProcessPayroll(Document):
 				ss.insert()
 				ss_list.append(ss.name)
 
->>>>>>> Vhrs Update 12/11/16
->>>>>>> Vhrs Update 12/11/16
 		return self.create_log(ss_list)
 
 
@@ -187,9 +172,9 @@ class ProcessPayroll(Document):
 			ss_dict = {}
 			ss_dict["Employee Name"] = ss_obj.employee_name
 			ss_dict["Total Pay"] = fmt_money(ss_obj.net_pay,
-				currency = frappe.defaults.get_global_default("currency"))	
+				currency = frappe.defaults.get_global_default("currency"))
 			ss_dict["Salary Slip"] = self.format_as_links(ss_obj.name)[0]
-			
+
 			if ss_obj.net_pay<0:
 				not_submitted_ss.append(ss_dict)
 			else:
@@ -199,7 +184,7 @@ class ProcessPayroll(Document):
 				except frappe.ValidationError:
 					not_submitted_ss.append(ss_dict)
 		if submitted_ss:
-			jv_name = self.make_accural_jv_entry()		
+			jv_name = self.make_accural_jv_entry()
 
 		return self.create_submit_log(submitted_ss, not_submitted_ss, jv_name)
 
@@ -215,7 +200,7 @@ class ProcessPayroll(Document):
 						title=_('Submitted Salary Slips')))
 			if jv_name:
 				log += "<b>" + _("Accural Journal Entry Submitted") + "</b>\
-					%s" % '<br>''<a href="#Form/Journal Entry/{0}">{0}</a>'.format(jv_name)			
+					%s" % '<br>''<a href="#Form/Journal Entry/{0}">{0}</a>'.format(jv_name)
 
 		if not_submitted_ss:
 			log += frappe.render_template("templates/includes/salary_slip_log.html",
@@ -239,14 +224,14 @@ class ProcessPayroll(Document):
 		"""
 		cond = self.get_filter_condition()
 		totals = frappe.db.sql("""
-			select sum(principal_amount) as total_principal_amount, sum(interest_amount) as total_interest_amount, 
+			select sum(principal_amount) as total_principal_amount, sum(interest_amount) as total_interest_amount,
 			sum(total_loan_repayment) as total_loan_repayment, sum(rounded_total) as rounded_total from `tabSalary Slip` t1
 			where t1.docstatus = 1 and start_date >= %s and end_date <= %s %s
 			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_dict=True)
 		return totals[0]
-	
+
 	def get_loan_accounts(self):
-		loan_accounts = frappe.get_all("Employee Loan", fields=["employee_loan_account", "interest_income_account"], 
+		loan_accounts = frappe.get_all("Employee Loan", fields=["employee_loan_account", "interest_income_account"],
 						filters = {"company": self.company, "docstatus":1})
 		if loan_accounts:
 			return loan_accounts[0]
@@ -284,7 +269,7 @@ class ProcessPayroll(Document):
 			account = self.get_salary_component_account(s)
 			account_dict[account] = account_dict.get(account, 0) + a
 		return account_dict
-	
+
 	def get_default_payroll_payable_account(self):
 		payroll_payable_account = frappe.db.get_value("Company",
 			{"company_name": self.company}, "default_payroll_payable_account")
@@ -293,7 +278,7 @@ class ProcessPayroll(Document):
 			frappe.throw(_("Please set Default Payroll Payable Account in Company {0}")
 				.format(self.company))
 
-		return payroll_payable_account	
+		return payroll_payable_account
 
 
 	def make_accural_jv_entry(self):
@@ -344,7 +329,7 @@ class ProcessPayroll(Document):
 						"project": self.project
 					})
 				adjustment_amt = adjustment_amt-(loan_amounts.total_loan_repayment)
-			
+
 			account_amt_list.append({
 					"account": default_payroll_payable_account,
 					"credit_in_account_currency": adjustment_amt
@@ -373,7 +358,7 @@ class ProcessPayroll(Document):
 			journal_entry.posting_date = nowdate()
 
 			account_amt_list = []
-		
+
 			account_amt_list.append({
 					"account": self.payment_account,
 					"credit_in_account_currency": total_salary_amount.rounded_total
@@ -381,7 +366,7 @@ class ProcessPayroll(Document):
 			account_amt_list.append({
 					"account": default_payroll_payable_account,
 					"debit_in_account_currency": total_salary_amount.rounded_total
-				})	
+				})
 			journal_entry.set("accounts", account_amt_list)
 		return journal_entry.as_dict()
 
@@ -393,7 +378,7 @@ class ProcessPayroll(Document):
 			frappe.db.set_value("Salary Slip", ss_obj.name, "journal_entry", jv_name)
 
 	def set_start_end_dates(self):
-		self.update(get_start_end_dates(self.payroll_frequency, 
+		self.update(get_start_end_dates(self.payroll_frequency,
 			self.start_date or self.posting_date, self.company))
 
 

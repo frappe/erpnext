@@ -27,29 +27,21 @@ def execute(filters=None):
 		total_p = total_a = total_l = 0.0
 		for day in range(filters["total_days_in_month"]):
 			status = att_map.get(emp).get(day + 1, "None")
-<<<<<<< HEAD
-			status_map = {"Present": "P", "Absent": "A", "Half Day": "H", "On Leave": "L", "None": ""}
-=======
-			status_map = {"Present": "P", "Absent": "A", "Half Day": "H","Permission":"LP","Late":"L","Loss of Pay":"LoP","OD":"OD","None": ""}
->>>>>>> Vhrs Update 12/11/16
-			row.append(status_map[status])
+status_map = {"Present": "P", "Absent": "A", "Half Day": "H","Permission":"LP","Late":"L","Loss of Pay":"LoP","OD":"OD","None": ""}
+row.append(status_map[status])
 
 			if status == "Present" or status == "Late" or status == "Late with Permission" or status == "OD":
 				total_p += 1
 			elif status == "Absent" or status == "Loss of Pay":
 				total_a += 1
 			elif status == "On Leave":
-				total_l += 1	
+				total_l += 1
 			elif status == "Half Day":
 				total_p += 0.5
 				total_a += 0.5
-<<<<<<< HEAD
 
 		row += [total_p, total_l, total_a]
-=======
-		row += [total_p, total_a]
->>>>>>> Vhrs Update 12/11/16
-		data.append(row)
+data.append(row)
 
 	return columns, data
 
@@ -63,11 +55,7 @@ def get_columns(filters):
 	for day in range(filters["total_days_in_month"]):
 		columns.append(cstr(day+1) +"::20")
 
-<<<<<<< HEAD
 	columns += [_("Total Present") + ":Float:80", _("Total Leaves") + ":Float:80",  _("Total Absent") + ":Float:80"]
-=======
-	columns += [_("Total Present") + ":Float:80", _("Total Absent") + ":Float:80",_("Total Late") + ":Float:80"]
->>>>>>> Vhrs Update 12/11/16
 	return columns
 
 def get_attendance_list(conditions, filters):

@@ -290,5 +290,3 @@ def create_user(employee, user = None):
 	})
 	user.insert()
 	return user.name
-=======
->>>>>>> Vhrs Update 12/11/16

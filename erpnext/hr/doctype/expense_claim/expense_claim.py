@@ -24,13 +24,10 @@ class ExpenseClaim(AccountsController):
 		self.validate_expense_approver()
 		self.calculate_total_amount()
 		set_employee_name(self)
-<<<<<<< HEAD
 		self.set_expense_account()
 		self.set_payable_account()
 		self.set_cost_center()
 		self.set_status()
-=======
->>>>>>> Vhrs Update 12/11/16
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
 
@@ -90,7 +87,7 @@ class ExpenseClaim(AccountsController):
 	def get_gl_entries(self):
 		gl_entry = []
 		self.validate_account_details()
-		
+
 		# payable entry
 		gl_entry.append(
 			self.get_gl_dict({
@@ -177,14 +174,13 @@ class ExpenseClaim(AccountsController):
 			if flt(d.sanctioned_amount) > flt(d.claim_amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
 
-<<<<<<< HEAD
 	def set_expense_account(self):
 		for expense in self.expenses:
 			if not expense.default_account:
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
 
 def update_reimbursed_amount(doc):
-	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
+	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt
 		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
 		and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
 
@@ -193,18 +189,15 @@ def update_reimbursed_amount(doc):
 
 	doc.set_status()
 	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
-=======
->>>>>>> Vhrs Update 12/11/16
 
 @frappe.whitelist()
 def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		select u.name, concat(u.first_name, ' ', u.last_name)
 		from tabUser u, `tabHas Role` r
-		where u.name = r.parent and r.role = 'Expense Approver' 
+		where u.name = r.parent and r.role = 'Expense Approver'
 		and u.enabled = 1 and u.name like %s
 	""", ("%" + txt + "%"))
-<<<<<<< HEAD
 
 @frappe.whitelist()
 def make_bank_entry(docname):
@@ -245,13 +238,11 @@ def make_bank_entry(docname):
 def get_expense_claim_account(expense_claim_type, company):
 	account = frappe.db.get_value("Expense Claim Account",
 		{"parent": expense_claim_type, "company": company}, "default_account")
-	
+
 	if not account:
 		frappe.throw(_("Please set default account in Expense Claim Type {0}")
 			.format(expense_claim_type))
-	
+
 	return {
 		"account": account
 	}
-=======
->>>>>>> Vhrs Update 12/11/16
