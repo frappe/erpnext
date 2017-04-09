@@ -111,14 +111,37 @@ def get():
 				},
 				"is_group": 1
 			},
-			_("2600 Cash"): {
-				_("Cash bag 0001"): {
+			_("2600 Cash and cash equivalents"): {
+				_("2610 Cash bag A"): {
 					"account_type": "Cash"
 				},
-				"account_type": "Cash"
-				"is_group": 1
-			},
-			_("2700 Cash equivalents"): {
+				_("2611 Cash bag B"): {
+					"account_type": "Cash"
+				},
+				_("2620 Current account 00000000 - Good Bank"): {
+					"account_type": "Bank"
+				},
+				_("2621 USD current account 00000000 - Better Bank"): {
+					"account_type": "Bank"
+				},
+				_("2630 Savings account 00000000 - Better Bank"): {
+					"account_type": "Bank"
+				},
+				_("2631 GBP savings account 00000000 - Best Bank"): {
+					"account_type": "Bank"
+				},
+				_("2640 Fixed deposit account 00000000 - Best Bank"): {
+					"account_type": "Bank"
+				},
+				_("2640 EUR fixed deposit account 00000000 - Best Bank"): {
+					"account_type": "Bank"
+				},
+				_("2650 E-money account - PayFast"): {
+					"account_type": "Bank"
+				},
+				_("2651 E-money account - CoinBest"): {
+					"account_type": "Bank"
+				},
 				"account_type": "Bank",
 				"is_group": 1
 			},
@@ -404,7 +427,9 @@ def get():
 				},
 				"is_group": 1
 			},
-			_("8300 Share of net profit of associates and joint ventures"): {},
+			_("8300 Share of net profit of associates and joint ventures"): {
+				"is_group": 1
+			},
 			"root_type": "Expense"
 		},
 		_("9000 INCOME TAX"): {
