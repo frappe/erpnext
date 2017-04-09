@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe, json
-
 from frappe.utils import getdate, date_diff, add_days, cstr
+from frappe.utils.data import today
 from frappe import _
 
 from frappe.model.document import Document
@@ -12,13 +12,52 @@ from frappe.model.document import Document
 class CircularReferenceError(frappe.ValidationError): pass
 
 class Task(Document):
+
+
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.subject)
 
+	def onload(self):
+		#Load task candidates for quick view
+		if not self.get('__unsaved') and not self.get("candidates"):
+			self.load_candidates()
+
+	def __setup__(self):
+		self.onload()
+
+	def load_candidates(self):
+		 #Load `candidates` from the database
+		self.candidates = []
+
+		for candidate in self.get_candidates():
+			self.append("candidates", {
+				"passport_no": candidate.passport_no,
+				"pending_for": candidate.pending_for,
+				"given_name": candidate.given_name,
+				"india_experience":candidate.india_experience,
+				"gulf_experience":candidate.gulf_experience,
+				"current_ctc":candidate.current_ctc,
+				"currency_type":candidate.currency_type,
+				"expected_ctc":candidate.expected_ctc,
+				"currency_type1":candidate.currency_type1,
+				"expiry_date":candidate.expiry_date,
+				"ecr_status":candidate.ecr_status,
+				"current_location":candidate.current_location,
+				"mobile": candidate.mobile,
+				"landline":candidate.landline,
+				"skype_id":candidate.skype_id,
+				"associate_name":candidate.associate_name,
+				"contact_email":candidate.contact_no,
+				"email": candidate.email,
+				"candidate_id": candidate.name
+			})
+
+	def get_candidates(self):
+		return frappe.get_all("Candidate", "*", {"task": self.name}, order_by="given_name asc")
+		# frappe.db.sql("select * from `tabCandidate` where task=%s order_by='given_name asc'", self.name)
+
 	def get_project_details(self):
-		return {
-			"project": self.project
-		}
+		return { "project": self.project }
 
 	def get_customer_details(self):
 		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.customer)
@@ -30,7 +69,13 @@ class Task(Document):
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
+<<<<<<< HEAD
 		self.update_depends_on()
+=======
+		self.sync_candidates()
+		self.pending_count()
+		self.update_dow()
+>>>>>>> Vhrs Update 12/11/16
 
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -38,6 +83,54 @@ class Task(Document):
 
 		if self.act_start_date and self.act_end_date and getdate(self.act_start_date) > getdate(self.act_end_date):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
+
+	#Custom for candidates -->
+	def sync_candidates(self):
+		"""sync candidates and remove table"""
+		if self.flags.dont_sync_candidates: return
+		candidate_names = []
+		for c in self.candidates:
+			if c.candidate_id:
+				candidate = frappe.get_doc("Candidate", c.candidate_id)
+			else:
+				candidate = frappe.new_doc("Candidate")
+				candidate.task = self.name
+
+			candidate.update({
+				"passport_no": c.passport_no,
+				"pending_for": c.pending_for,
+				"given_name": c.given_name,
+				"landline":c.landline,
+				"mobile": c.mobile,
+				"email": c.email,
+				"india_experience":c.india_experience,
+				"gulf_experience":c.gulf_experience,
+				"current_ctc":c.current_ctc,
+				"currency_type":c.currency_type,
+				"expected_ctc":c.expected_ctc,
+				"currency_type1":c.currency_type1,
+				"expiry_date":c.expiry_date,
+				"ecr_status":c.ecr_status,
+				"current_location":c.current_location,
+				"mobile": c.mobile,
+				"landline":c.landline,
+				"skype_id":c.skype_id,
+				"associate_name":c.associate_name,
+				"contact_email":c.contact_no,
+				})
+
+			candidate.flags.ignore_links = True
+			candidate.flags.from_task = True
+			candidate.flags.ignore_feed = True
+			candidate.save(ignore_permissions = True)
+			candidate_names.append(candidate.name)
+
+		# delete
+		for c in frappe.get_all("Candidate", ["name"], {"task": self.name, "name": ("not in", candidate_names)}):
+			frappe.delete_doc("Candidate", c.name)
+
+
+    #<---
 
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Closed":
@@ -52,12 +145,35 @@ class Task(Document):
 		if self.progress > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
+<<<<<<< HEAD
 	def update_depends_on(self):
 		depends_on_tasks = ""
 		for d in self.depends_on:
 			if d.task:
 				depends_on_tasks += d.task + ","
 		self.depends_on_tasks = depends_on_tasks
+=======
+	def pending_count(self):
+		count = 0
+		for candidate in self.get_candidates() :
+			if candidate.pending_for == "Client Interview":
+				count = count + 1
+
+		self.r2_test = count
+
+		if self.r1_count:
+			r1 = int(self.r1_count)
+			r3 = int(self.r3_count)
+			r4 = int(self.r4_count)
+			r6 = int(self.r6_count)
+			r8 = int(self.r8_count)
+			prop = int(self.proposition)
+			self.pending_profiles_to_send = (r1 - (r6 + r8))*prop - (r3 + r4)
+
+	def update_dow(self):
+		if self.status == 'Working':
+			self.date_of_working =today()
+>>>>>>> Vhrs Update 12/11/16
 
 	def on_update(self):
 		self.check_recursion()
@@ -169,5 +285,13 @@ def set_tasks_as_overdue():
 	frappe.db.sql("""update tabTask set `status`='Overdue'
 		where exp_end_date is not null
 		and exp_end_date < CURDATE()
+<<<<<<< HEAD
 		and `status` not in ('Closed', 'Cancelled')""")
 		
+=======
+		and `status` not in ('Closed', 'Cancelled', 'Hold','Pending Review','DnD')""")
+
+def set_dow():
+	frappe.db.sql("""update tabTask set `date_of_working`=%s
+		where `status`='Working'""",today())
+>>>>>>> Vhrs Update 12/11/16

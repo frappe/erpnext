@@ -15,6 +15,12 @@ class JobOpening(WebsiteGenerator):
 		condition_field = "publish",
 		page_title_field = "job_title",
 	)
+<<<<<<< HEAD
+=======
+	
+	def get_route(self):
+		return 'jobs/' + quoted(self.page_name)
+>>>>>>> Vhrs Update 12/11/16
 
 	def validate(self):
 		if not self.route:
@@ -26,3 +32,5 @@ class JobOpening(WebsiteGenerator):
 def get_list_context(context):
 	context.title = _("Jobs")
 	context.introduction = _('Current Job Openings')
+	context.show_sidebar=True
+	context.show_search=True

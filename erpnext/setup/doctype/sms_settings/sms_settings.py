@@ -89,12 +89,36 @@ def send_via_gateway(arg):
 		if arg.get('success_msg'):
 			frappe.msgprint(_("SMS sent to following numbers: {0}").format("\n" + "\n".join(success_list)))
 
+<<<<<<< HEAD
 
 def send_request(gateway_url, params):
 	import requests
 	response = requests.get(gateway_url, params = params, headers={'Accept': "text/plain, text/html, */*"})
 	response.raise_for_status()
 	return response.status_code
+=======
+# Send Request
+# =========================================================
+def send_request(gateway_url, args):
+	import httplib, urllib
+	server, api_url = scrub_gateway_url(gateway_url)
+	conn = httplib.HTTPConnection(server)  # open connection
+	headers = {}
+	headers['Accept'] = "text/plain, text/html, */*"
+	conn.request('GET', api_url + urllib.urlencode(args), headers = headers)    # send request
+	resp = conn.getresponse()     # get response
+	return resp.status
+
+# Split gateway url to server and api url
+# =========================================================
+def scrub_gateway_url(url):
+	url = url.replace('https://', '').strip().split('/')
+	server = url.pop(0)
+	api_url = '/' + '/'.join(url)
+	if not api_url.endswith('?'):
+		api_url += '?'
+	return server, api_url
+>>>>>>> Vhrs Update 12/11/16
 
 
 # Create SMS Log

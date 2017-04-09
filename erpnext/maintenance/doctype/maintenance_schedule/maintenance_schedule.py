@@ -54,7 +54,7 @@ class MaintenanceSchedule(TransactionBase):
 					email_map[d.sales_person] = sp.get_email_id()
 				except frappe.ValidationError:
 					no_email_sp.append(d.sales_person)
-					
+
 			if no_email_sp:
 				frappe.msgprint(
 					frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
@@ -268,5 +268,4 @@ def make_maintenance_visit(source_name, target_doc=None):
 			}
 		}
 	}, target_doc)
-
 	return doclist

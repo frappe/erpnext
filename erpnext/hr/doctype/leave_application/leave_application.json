@@ -3,7 +3,10 @@
  "allow_import": 0, 
  "allow_rename": 0, 
  "autoname": "LAP/.#####", 
+<<<<<<< HEAD
  "beta": 0, 
+=======
+>>>>>>> Vhrs Update 12/11/16
  "creation": "2013-02-20 11:18:11", 
  "custom": 0, 
  "description": "Apply / Approve Leaves", 
@@ -21,7 +24,6 @@
    "fieldtype": "Select", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -46,6 +48,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "default": "Open", 
    "fieldname": "status", 
@@ -77,11 +80,12 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+=======
+>>>>>>> Vhrs Update 12/11/16
    "fieldname": "column_break_12", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -109,9 +113,13 @@
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 1, 
+<<<<<<< HEAD
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
+=======
+   "in_filter": 1, 
+>>>>>>> Vhrs Update 12/11/16
    "in_list_view": 0, 
    "in_standard_filter": 1, 
    "label": "Leave Type", 
@@ -138,7 +146,6 @@
    "fieldtype": "Float", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -166,7 +173,6 @@
    "fieldtype": "Section Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -194,7 +200,6 @@
    "fieldtype": "Date", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 1, 
@@ -222,7 +227,6 @@
    "fieldtype": "Date", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -250,7 +254,6 @@
    "fieldtype": "Check", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -308,7 +311,6 @@
    "fieldtype": "Float", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 1, 
@@ -337,7 +339,6 @@
    "fieldtype": "Column Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -366,7 +367,6 @@
    "fieldtype": "Small Text", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -394,7 +394,6 @@
    "fieldtype": "Section Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -422,9 +421,13 @@
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
+<<<<<<< HEAD
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 1, 
+=======
+   "in_filter": 1, 
+>>>>>>> Vhrs Update 12/11/16
    "in_list_view": 0, 
    "in_standard_filter": 1, 
    "label": "Employee", 
@@ -451,9 +454,13 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
+<<<<<<< HEAD
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 1, 
+=======
+   "in_filter": 1, 
+>>>>>>> Vhrs Update 12/11/16
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Employee Name", 
@@ -479,7 +486,6 @@
    "fieldtype": "Column Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -508,7 +514,6 @@
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 1, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -537,7 +542,6 @@
    "fieldtype": "Read Only", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -566,7 +570,6 @@
    "fieldtype": "Section Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -595,7 +598,6 @@
    "fieldtype": "Date", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -624,7 +626,6 @@
    "fieldtype": "Check", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -652,7 +653,6 @@
    "fieldtype": "Column Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -679,7 +679,6 @@
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -708,7 +707,6 @@
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 1, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -737,7 +735,6 @@
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 1, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
@@ -769,7 +766,15 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 3, 
+<<<<<<< HEAD
  "modified": "2017-02-24 07:33:08.907824", 
+=======
+<<<<<<< HEAD
+ "modified": "2016-11-07 05:53:59.896341", 
+=======
+ "modified": "2016-02-03 01:18:00.202671", 
+>>>>>>> Vhrs Update 12/11/16
+>>>>>>> Vhrs Update 12/11/16
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 
@@ -919,7 +924,6 @@
    "write": 1
   }
  ], 
- "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days", 
@@ -927,7 +931,11 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "timeline_field": "employee", 
+<<<<<<< HEAD
  "title_field": "employee_name", 
  "track_changes": 0, 
  "track_seen": 0
+=======
+ "title_field": "employee_name"
+>>>>>>> Vhrs Update 12/11/16
 }

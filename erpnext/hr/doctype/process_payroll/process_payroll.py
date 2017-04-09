@@ -15,14 +15,19 @@ class ProcessPayroll(Document):
 			Returns list of active employees based on selected criteria
 			and for which salary structure exists
 		"""
+
 		cond = self.get_filter_condition()
 		cond += self.get_joining_releiving_condition()
 
+<<<<<<< HEAD
 
 		condition = ''
 		if self.payroll_frequency:
 			condition = """and payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}
 
+=======
+<<<<<<< HEAD
+>>>>>>> Vhrs Update 12/11/16
 		sal_struct = frappe.db.sql("""
 				select
 					name from `tabSalary Structure`
@@ -45,6 +50,18 @@ class ProcessPayroll(Document):
 					t1.docstatus!=2
 					and t1.name = t2.employee
 			%s """% cond, {"sal_struct": sal_struct})
+<<<<<<< HEAD
+=======
+=======
+		emp_list = frappe.db.sql("""
+			select t1.name
+			from `tabEmployee` t1, `tabSalary Structure` t2
+			where t1.docstatus!=2 and t2.docstatus != 2
+			and t1.name = t2.employee
+		%s """% cond)
+>>>>>>> Vhrs Update 12/11/16
+
+>>>>>>> Vhrs Update 12/11/16
 			return emp_list
 
 
@@ -80,6 +97,7 @@ class ProcessPayroll(Document):
 
 		emp_list = self.get_emp_list()
 		ss_list = []
+<<<<<<< HEAD
 		if emp_list:
 			for emp in emp_list:
 				if not frappe.db.sql("""select
@@ -103,11 +121,31 @@ class ProcessPayroll(Document):
 						"posting_date": self.posting_date
 					})
 					ss.insert()
+<<<<<<< HEAD
 					ss_dict = {}
 					ss_dict["Employee Name"] = ss.employee_name
 					ss_dict["Total Pay"] = fmt_money(ss.rounded_total,currency = frappe.defaults.get_global_default("currency"))
 					ss_dict["Salary Slip"] = self.format_as_links(ss.name)[0]
 					ss_list.append(ss_dict)
+=======
+					ss_list.append(ss.name)
+=======
+		for emp in emp_list:
+			if not frappe.db.sql("""select name from `tabSalary Slip`
+					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
+					""", (emp[0], self.month, self.fiscal_year, self.company)):
+				ss = frappe.get_doc({
+					"doctype": "Salary Slip",
+					"fiscal_year": self.fiscal_year,
+					"employee": emp[0],
+					"month": self.month,
+					"company": self.company,
+				})
+				ss.insert()
+				ss_list.append(ss.name)
+
+>>>>>>> Vhrs Update 12/11/16
+>>>>>>> Vhrs Update 12/11/16
 		return self.create_log(ss_list)
 
 

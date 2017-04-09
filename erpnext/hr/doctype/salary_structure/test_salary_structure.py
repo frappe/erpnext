@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
+<<<<<<< HEAD
 import erpnext
 from frappe.utils.make_random import get_random
 from frappe.utils import nowdate, add_days, add_years, getdate, add_months
@@ -173,3 +174,10 @@ def get_deductions_component():
 				}
 			]			
 			
+=======
+
+test_records = frappe.get_test_records('Salary Structure')
+
+class TestSalaryStructure(unittest.TestCase):
+	pass
+>>>>>>> Vhrs Update 12/11/16

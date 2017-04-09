@@ -2,8 +2,7 @@
  "allow_copy": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "autoname": "naming_series:", 
- "beta": 0, 
+ "autoname": "APRSL.#####", 
  "creation": "2013-01-10 16:34:12", 
  "custom": 0, 
  "docstatus": 0, 
@@ -44,6 +43,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
@@ -75,6 +75,8 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+=======
+>>>>>>> Vhrs Update 12/11/16
    "description": "", 
    "fieldname": "kra_template", 
    "fieldtype": "Link", 
@@ -602,7 +604,15 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
+<<<<<<< HEAD
  "modified": "2017-02-17 16:55:49.559295", 
+=======
+<<<<<<< HEAD
+ "modified": "2016-11-07 05:47:32.082712", 
+=======
+ "modified": "2016-04-13 01:49:09.748819", 
+>>>>>>> Vhrs Update 12/11/16
+>>>>>>> Vhrs Update 12/11/16
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal", 
@@ -669,7 +679,6 @@
    "write": 1
   }
  ], 
- "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "status, employee, employee_name", 

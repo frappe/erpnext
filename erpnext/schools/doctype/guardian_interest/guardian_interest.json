@@ -14,7 +14,12 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD:erpnext/schools/doctype/guardian_interest/guardian_interest.json
    "fieldname": "interest", 
+=======
+   "columns": 0, 
+   "fieldname": "document_type", 
+>>>>>>> Vhrs Update 12/11/16:erpnext/support/doctype/doctype_change/doctype_change.json
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -47,7 +52,11 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
+<<<<<<< HEAD:erpnext/schools/doctype/guardian_interest/guardian_interest.json
  "modified": "2016-07-25 07:20:32.837356", 
+=======
+ "modified": "2016-09-01 13:05:13.837403", 
+>>>>>>> Vhrs Update 12/11/16:erpnext/support/doctype/doctype_change/doctype_change.json
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "Guardian Interest", 

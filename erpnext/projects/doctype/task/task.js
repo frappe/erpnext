@@ -78,5 +78,16 @@ frappe.ui.form.on("Task", {
 
 });
 
+frappe.ui.form.on("Task Candidate", {
+	edit_candidate: function(frm, doctype, name) {
+		var doc = frappe.get_doc(doctype, name);
+		if(doc.candidate_id) {
+			frappe.set_route("Form", "Candidate", doc.candidate_id);
+		} else {
+			msgprint(__("Save the document first."));
+		}
+	},
+	});
+
 cur_frm.add_fetch('task', 'subject', 'subject');
 cur_frm.add_fetch('task', 'project', 'project');

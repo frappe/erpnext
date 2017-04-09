@@ -2,7 +2,7 @@ frappe.ui.form.on("Employee Attendance Tool", {
 	refresh: function(frm) {
 		frm.disable_save();
 	},
-	
+
 	onload: function(frm) {
 		frm.doc.department = frm.doc.branch = frm.doc.company = "All";
 		frm.set_value("date", get_today());
@@ -24,7 +24,7 @@ frappe.ui.form.on("Employee Attendance Tool", {
 	company: function(frm) {
 		erpnext.employee_attendance_tool.load_employees(frm);
 	}
-	
+
 });
 
 
@@ -126,7 +126,11 @@ erpnext.EmployeeSelector = Class.extend({
 		var mark_employee_toolbar = $('<div class="col-sm-12 bottom-toolbar">\
 			<button class="btn btn-primary btn-mark-present btn-xs"></button>\
 			<button class="btn btn-default btn-mark-absent btn-xs"></button>\
-			<button class="btn btn-default btn-mark-half-day btn-xs"></button></div>')
+			<button class="btn btn-default btn-mark-half-day btn-xs"></button>\
+			<button class="btn btn-default btn-mark-permission btn-xs"></button>\
+			<button class="btn btn-default btn-mark-late btn-xs"></button>\
+			<button class="btn btn-default btn-mark-od btn-xs"></button>\
+			</div>')
 
 		employee_toolbar.find(".btn-add")
 			.html(__('Check all'))
@@ -224,6 +228,106 @@ erpnext.EmployeeSelector = Class.extend({
 				});
 			});
 
+		mark_employee_toolbar.find(".btn-mark-permission")
+			.html(__('Mark Late with Permission'))
+			.on("click", function() {
+				var employee_permission = [];
+				$(me.wrapper).find('input[type="checkbox"]').each(function(i, check) {
+					if($(check).is(":checked")) {
+						employee_permission.push(employee[i]);
+					}
+				});
+				frappe.call({
+					method: "erpnext.hr.doctype.employee_attendance_tool.employee_attendance_tool.mark_employee_attendance",
+					args:{
+						"employee_list":employee_permission,
+						"status":"Late with Permission",
+						"date":frm.doc.date,
+						"company":frm.doc.company
+					},
+
+					callback: function(r) {
+						erpnext.employee_attendance_tool.load_employees(frm);
+
+					}
+				});
+			});
+
+		mark_employee_toolbar.find(".btn-mark-late")
+			.html(__('Mark Late'))
+			.on("click", function() {
+				var employee_late = [];
+				$(me.wrapper).find('input[type="checkbox"]').each(function(i, check) {
+					if($(check).is(":checked")) {
+						employee_late.push(employee[i]);
+					}
+				});
+				frappe.call({
+					method: "erpnext.hr.doctype.employee_attendance_tool.employee_attendance_tool.mark_employee_attendance",
+					args:{
+						"employee_list":employee_late,
+						"status":"Late",
+						"date":frm.doc.date,
+						"company":frm.doc.company
+					},
+
+					callback: function(r) {
+						erpnext.employee_attendance_tool.load_employees(frm);
+
+					}
+				});
+			});
+
+	 mark_employee_toolbar.find(".btn-mark-od")
+		 .html(__('Mark OD'))
+		 .on("click", function() {
+			 var employee_od = [];
+			 $(me.wrapper).find('input[type="checkbox"]').each(function(i, check) {
+				 if($(check).is(":checked")) {
+					 employee_od.push(employee[i]);
+				 }
+			 });
+			 frappe.call({
+				 method: "erpnext.hr.doctype.employee_attendance_tool.employee_attendance_tool.mark_employee_attendance",
+				 args:{
+					 "employee_list":employee_od,
+					 "status":"OD",
+					 "date":frm.doc.date,
+					 "company":frm.doc.company
+				 },
+
+				 callback: function(r) {
+					 erpnext.employee_attendance_tool.load_employees(frm);
+
+				 }
+			 });
+		 });
+
+	mark_employee_toolbar.find(".btn-mark-lop")
+		.html(__('Mark LoP'))
+		.on("click", function() {
+			var employee_lop = [];
+			$(me.wrapper).find('input[type="checkbox"]').each(function(i, check) {
+				if($(check).is(":checked")) {
+					employee_lop.push(employee[i]);
+				}
+			});
+			frappe.call({
+				method: "erpnext.hr.doctype.employee_attendance_tool.employee_attendance_tool.mark_employee_attendance",
+				args:{
+					"employee_list":employee_lop,
+					"status":"Loss of Pay",
+					"date":frm.doc.date,
+					"company":frm.doc.company
+				},
+
+				callback: function(r) {
+					erpnext.employee_attendance_tool.load_employees(frm);
+
+				}
+			});
+		});
+
 
 		var row;
 		$.each(employee, function(i, m) {
@@ -241,5 +345,3 @@ erpnext.EmployeeSelector = Class.extend({
 		mark_employee_toolbar.appendTo($(this.wrapper));
 	}
 });
-
-

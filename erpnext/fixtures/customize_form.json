@@ -1,0 +1,22 @@
+[
+ {
+  "allow_copy": 0, 
+  "default_print_format": null, 
+  "doc_type": null, 
+  "docstatus": 0, 
+  "doctype": "Customize Form", 
+  "editable_grid": 0, 
+  "fields": [], 
+  "image_field": null, 
+  "image_view": 0, 
+  "istable": 0, 
+  "max_attachments": 0, 
+  "modified": null, 
+  "name": "Customize Form", 
+  "quick_entry": 1, 
+  "search_fields": null, 
+  "sort_field": null, 
+  "sort_order": "ASC", 
+  "title_field": null
+ }
+]

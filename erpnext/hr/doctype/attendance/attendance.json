@@ -153,7 +153,11 @@
    "no_copy": 1, 
    "oldfieldname": "status", 
    "oldfieldtype": "Select", 
+<<<<<<< HEAD
    "options": "\nPresent\nAbsent\nOn Leave\nHalf Day", 
+=======
+   "options": "\nPresent\nAbsent\nHalf Day\nLate with Permission\nLate\nOD\nLoss  of Pay", 
+>>>>>>> Vhrs Update 12/11/16
    "permlevel": 0, 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
@@ -328,7 +332,15 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
+<<<<<<< HEAD
  "modified": "2017-02-17 16:55:33.866723", 
+=======
+<<<<<<< HEAD
+ "modified": "2016-11-07 05:50:01.058617", 
+=======
+ "modified": "2016-11-03 20:29:43.092816", 
+>>>>>>> Vhrs Update 12/11/16
+>>>>>>> Vhrs Update 12/11/16
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Attendance", 
@@ -361,7 +373,7 @@
    "create": 1, 
    "delete": 1, 
    "email": 1, 
-   "export": 0, 
+   "export": 1, 
    "if_owner": 0, 
    "import": 0, 
    "permlevel": 0, 

@@ -266,3 +266,9 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_cost_center_name(project):
 	return frappe.db.get_value("Project", project, "cost_center")
+
+def set_project_as_overdue():
+	frappe.db.sql("""update tabProject set `status`='Overdue'
+		where expected_end_date is not null
+		and expected_end_date < CURDATE()
+		and `status` not in ('Completed', 'Cancelled', 'Hold','DnD')""")

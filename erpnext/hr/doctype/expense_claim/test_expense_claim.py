@@ -32,7 +32,11 @@ class TestExpenseClaim(unittest.TestCase):
 			 "project": "_Test Project 1",
 			 "task": task_name,
 			 "expenses":
+<<<<<<< HEAD
 			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "claim_amount": 300, "sanctioned_amount": 200 }]
+=======
+			 	[{ "expense_type": "Food", "claim_amount": 300, "sanctioned_amount": 200 }]
+>>>>>>> Vhrs Update 12/11/16
 		})
 		expense_claim.submit()
 
@@ -46,7 +50,11 @@ class TestExpenseClaim(unittest.TestCase):
 			 "project": "_Test Project 1",
 			 "task": task_name,
 			 "expenses":
+<<<<<<< HEAD
 			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "claim_amount": 600, "sanctioned_amount": 500 }]
+=======
+			 	[{ "expense_type": "Food", "claim_amount": 600, "sanctioned_amount": 500 }]
+>>>>>>> Vhrs Update 12/11/16
 		})
 		expense_claim2.submit()
 

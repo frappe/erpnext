@@ -57,7 +57,9 @@ class Lead(SellingController):
 			"starts_on": self.contact_date,
 			"subject": ('Contact ' + cstr(self.lead_name)),
 			"description": ('Contact ' + cstr(self.lead_name)) + \
+				(' of ' + cstr(self.company_name)) + \
 				(self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
+
 		}, force)
 
 	def check_email_id_is_unique(self):

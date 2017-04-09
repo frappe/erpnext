@@ -40,7 +40,12 @@ def get_columns(salary_slips):
 		_("Company") + ":Link/Company:120", _("Start Date") + "::80", _("End Date") + "::80", _("Leave Without Pay") + ":Float:130",
 		_("Payment Days") + ":Float:120"
 	]
+<<<<<<< HEAD:erpnext/hr/report/salary_register/salary_register.py
 
+=======
+	
+<<<<<<< HEAD
+>>>>>>> Vhrs Update 12/11/16:erpnext/hr/report/monthly_salary_register/monthly_salary_register.py
 	salary_components = {_("Earning"): [], _("Deduction"): []}
 
 	for component in frappe.db.sql("""select distinct sd.salary_component, sc.type
@@ -54,6 +59,20 @@ def get_columns(salary_slips):
 		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
+=======
+	earning_types = frappe.db.sql_list("""select distinct e_type from `tabSalary Slip Earning`
+		where e_modified_amount != 0 and parent in (%s)""" % 
+		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]))
+		
+	ded_types = frappe.db.sql_list("""select distinct d_type from `tabSalary Slip Deduction`
+		where d_modified_amount != 0 and parent in (%s)""" % 
+		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]))
+		
+	columns = columns + [(e + ":Currency:120") for e in earning_types] + \
+		["Arrear Amount:Currency:120", "Leave Encashment Amount:Currency:150", 
+		"Gross Pay:Currency:120"] + [(d + ":Currency:120") for d in ded_types] + \
+		["Total Deduction:Currency:120", "Net Pay:Currency:120"]
+>>>>>>> Vhrs Update 12/11/16
 
 def get_salary_slips(filters):
 	filters.update({"from_date": filters.get("date_range")[0], "to_date":filters.get("date_range")[1]})
@@ -76,12 +95,18 @@ def get_conditions(filters):
 	return conditions, filters
 
 def get_ss_earning_map(salary_slips):
+<<<<<<< HEAD:erpnext/hr/report/salary_register/salary_register.py
 	ss_earnings = frappe.db.sql("""select parent, salary_component, amount
 		from `tabSalary Detail` where parent in (%s)""" %
+=======
+	ss_earnings = frappe.db.sql("""select parent, e_type, e_modified_amount 
+		from `tabSalary Slip Earning` where parent in (%s)""" %
+>>>>>>> Vhrs Update 12/11/16:erpnext/hr/report/monthly_salary_register/monthly_salary_register.py
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1)
 
 	ss_earning_map = {}
 	for d in ss_earnings:
+<<<<<<< HEAD:erpnext/hr/report/salary_register/salary_register.py
 		ss_earning_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, [])
 		ss_earning_map[d.parent][d.salary_component] = flt(d.amount)
 
@@ -90,11 +115,27 @@ def get_ss_earning_map(salary_slips):
 def get_ss_ded_map(salary_slips):
 	ss_deductions = frappe.db.sql("""select parent, salary_component, amount
 		from `tabSalary Detail` where parent in (%s)""" %
+=======
+		ss_earning_map.setdefault(d.parent, frappe._dict()).setdefault(d.e_type, [])
+		ss_earning_map[d.parent][d.e_type] = flt(d.e_modified_amount)
+	
+	return ss_earning_map
+
+def get_ss_ded_map(salary_slips):
+	ss_deductions = frappe.db.sql("""select parent, d_type, d_modified_amount 
+		from `tabSalary Slip Deduction` where parent in (%s)""" %
+>>>>>>> Vhrs Update 12/11/16:erpnext/hr/report/monthly_salary_register/monthly_salary_register.py
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1)
 
 	ss_ded_map = {}
 	for d in ss_deductions:
+<<<<<<< HEAD:erpnext/hr/report/salary_register/salary_register.py
 		ss_ded_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, [])
 		ss_ded_map[d.parent][d.salary_component] = flt(d.amount)
 
+=======
+		ss_ded_map.setdefault(d.parent, frappe._dict()).setdefault(d.d_type, [])
+		ss_ded_map[d.parent][d.d_type] = flt(d.d_modified_amount)
+	
+>>>>>>> Vhrs Update 12/11/16:erpnext/hr/report/monthly_salary_register/monthly_salary_register.py
 	return ss_ded_map

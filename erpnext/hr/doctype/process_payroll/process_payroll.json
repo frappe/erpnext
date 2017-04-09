@@ -2,7 +2,6 @@
  "allow_copy": 1, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "beta": 0, 
  "creation": "2012-03-27 14:35:59", 
  "custom": 0, 
  "docstatus": 0, 
@@ -259,6 +258,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "fieldname": "section_break_8", 
    "fieldtype": "Section Break", 
@@ -314,6 +314,9 @@
    "collapsible": 0, 
    "columns": 0, 
    "fieldname": "select_payroll_period", 
+=======
+   "fieldname": "select_payroll_year_and_month", 
+>>>>>>> Vhrs Update 12/11/16
    "fieldtype": "Section Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -799,14 +802,21 @@
  "hide_toolbar": 1, 
  "icon": "fa fa-cog", 
  "idx": 1, 
- "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
  "max_attachments": 0, 
+<<<<<<< HEAD
  "modified": "2017-02-08 02:34:59.130475", 
+=======
+<<<<<<< HEAD
+ "modified": "2016-11-03 16:02:34.040851", 
+=======
+ "modified": "2016-04-26 07:22:41.792785", 
+>>>>>>> Vhrs Update 12/11/16
+>>>>>>> Vhrs Update 12/11/16
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Process Payroll", 
@@ -833,11 +843,14 @@
    "write": 1
   }
  ], 
- "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_field": "modified", 
+<<<<<<< HEAD
  "sort_order": "DESC", 
  "track_changes": 0, 
  "track_seen": 0
+=======
+ "sort_order": "DESC"
+>>>>>>> Vhrs Update 12/11/16
 }

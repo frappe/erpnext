@@ -24,10 +24,13 @@ class ExpenseClaim(AccountsController):
 		self.validate_expense_approver()
 		self.calculate_total_amount()
 		set_employee_name(self)
+<<<<<<< HEAD
 		self.set_expense_account()
 		self.set_payable_account()
 		self.set_cost_center()
 		self.set_status()
+=======
+>>>>>>> Vhrs Update 12/11/16
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
 
@@ -174,6 +177,7 @@ class ExpenseClaim(AccountsController):
 			if flt(d.sanctioned_amount) > flt(d.claim_amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
 
+<<<<<<< HEAD
 	def set_expense_account(self):
 		for expense in self.expenses:
 			if not expense.default_account:
@@ -189,6 +193,8 @@ def update_reimbursed_amount(doc):
 
 	doc.set_status()
 	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
+=======
+>>>>>>> Vhrs Update 12/11/16
 
 @frappe.whitelist()
 def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
@@ -198,6 +204,7 @@ def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
 		where u.name = r.parent and r.role = 'Expense Approver' 
 		and u.enabled = 1 and u.name like %s
 	""", ("%" + txt + "%"))
+<<<<<<< HEAD
 
 @frappe.whitelist()
 def make_bank_entry(docname):
@@ -246,3 +253,5 @@ def get_expense_claim_account(expense_claim_type, company):
 	return {
 		"account": account
 	}
+=======
+>>>>>>> Vhrs Update 12/11/16

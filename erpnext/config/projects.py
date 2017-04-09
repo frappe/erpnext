@@ -18,6 +18,18 @@ def get_data():
 					"description": _("Project activity / task."),
 				},
 				{
+
+					"type": "doctype",
+					"name": "Candidate",
+					"description": _("Candidate belongs to task."),
+				},
+				{
+					"type": "doctype",
+					"name": "Interview",
+					"description": _("Interviews for Projects"),
+				},		
+				{
+
 					"type": "report",
 					"route": "List/Task/Gantt",
 					"doctype": "Task",

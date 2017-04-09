@@ -3,13 +3,11 @@
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:department_name", 
- "beta": 0, 
  "creation": "2013-02-05 11:48:26", 
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
- "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -20,7 +18,6 @@
    "fieldtype": "Data", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 1, 
@@ -32,7 +29,6 @@
    "oldfieldtype": "Data", 
    "permlevel": 0, 
    "print_hide": 0, 
-   "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
@@ -51,7 +47,6 @@
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 1, 
@@ -62,7 +57,6 @@
    "options": "Leave Block List", 
    "permlevel": 0, 
    "print_hide": 0, 
-   "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
@@ -76,14 +70,21 @@
  "hide_toolbar": 0, 
  "icon": "fa fa-sitemap", 
  "idx": 1, 
- "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
+<<<<<<< HEAD
  "modified": "2017-02-17 16:55:19.875594", 
+=======
+<<<<<<< HEAD
+ "modified": "2016-08-01 12:44:43.338689", 
+=======
+ "modified": "2015-11-16 06:29:45.172261", 
+>>>>>>> Vhrs Update 12/11/16
+>>>>>>> Vhrs Update 12/11/16
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Department", 
@@ -108,6 +109,7 @@
    "share": 1, 
    "submit": 0, 
    "write": 1
+<<<<<<< HEAD
   }, 
   {
    "amend": 0, 
@@ -128,13 +130,18 @@
    "share": 1, 
    "submit": 0, 
    "write": 1
+=======
+>>>>>>> Vhrs Update 12/11/16
   }
  ], 
- "quick_entry": 1, 
  "read_only": 0, 
+<<<<<<< HEAD
  "read_only_onload": 0, 
  "show_name_in_global_search": 1, 
  "sort_order": "ASC", 
  "track_changes": 0, 
  "track_seen": 0
+=======
+ "read_only_onload": 0
+>>>>>>> Vhrs Update 12/11/16
 }

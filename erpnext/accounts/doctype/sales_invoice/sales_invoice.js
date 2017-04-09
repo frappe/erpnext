@@ -91,6 +91,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !doc.is_return) {
 			cur_frm.cscript.sales_order_btn();
 			cur_frm.cscript.delivery_note_btn();
+	  //  cur_frm.cscript.candidate_btn();
 		}
 
 		this.set_default_print_format();
@@ -127,6 +128,19 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				})
 			}, __("Get items from"));
 	},
+
+/*	candidate_btn: function() {
+		this.$candidate_btn = cur_frm.add_custom_button(__('Task'),
+			function() {
+				erpnext.utils.map_current_doc({
+					method: "cvhrsian.cvhrsian.doctype.candidate.candidate.make_candidate",
+					source_doctype: "Task",
+					get_query_filters: {
+						project:cur_frm.doc.project
+						}
+				})
+			}, __("Get Candidates from"));
+	},*/
 
 	delivery_note_btn: function() {
 		this.$delivery_note_btn = cur_frm.add_custom_button(__('Delivery Note'),
@@ -525,6 +539,7 @@ frappe.ui.form.on('Sales Invoice Timesheet', {
 	}
 })
 
+<<<<<<< HEAD
 var calculate_total_billing_amount =  function(frm) {
 	var doc = frm.doc;
 
@@ -537,3 +552,5 @@ var calculate_total_billing_amount =  function(frm) {
 
 	refresh_field('total_billing_amount')
 }
+=======
+>>>>>>> Vhrs Update 12/11/16

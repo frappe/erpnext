@@ -1,15 +1,18 @@
 {
  "allow_copy": 0, 
  "allow_import": 1, 
+<<<<<<< HEAD
  "allow_rename": 1, 
  "autoname": "Prompt", 
  "beta": 0, 
+=======
+ "allow_rename": 0, 
+>>>>>>> Vhrs Update 12/11/16
  "creation": "2013-03-07 18:50:29", 
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Document", 
- "editable_grid": 0, 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -43,8 +46,12 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "fieldname": "company", 
+=======
+   "fieldname": "employee", 
+>>>>>>> Vhrs Update 12/11/16
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -52,11 +59,17 @@
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
+<<<<<<< HEAD
    "in_standard_filter": 0, 
    "label": "Company", 
+=======
+   "label": "Employee", 
+>>>>>>> Vhrs Update 12/11/16
    "length": 0, 
    "no_copy": 0, 
-   "options": "Company", 
+   "oldfieldname": "employee", 
+   "oldfieldtype": "Link", 
+   "options": "Employee", 
    "permlevel": 0, 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
@@ -72,26 +85,43 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "fieldname": "letter_head", 
    "fieldtype": "Link", 
+=======
+   "fieldname": "employee_name", 
+   "fieldtype": "Data", 
+>>>>>>> Vhrs Update 12/11/16
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+<<<<<<< HEAD
    "in_global_search": 0, 
+=======
+<<<<<<< HEAD
+>>>>>>> Vhrs Update 12/11/16
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Letter Head", 
+=======
+   "in_list_view": 1, 
+   "label": "Employee Name", 
+>>>>>>> Vhrs Update 12/11/16
    "length": 0, 
    "no_copy": 0, 
-   "options": "Letter Head", 
+   "oldfieldname": "employee_name", 
+   "oldfieldtype": "Data", 
    "permlevel": 0, 
-   "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
+<<<<<<< HEAD
    "read_only": 0, 
    "remember_last_selected_value": 0, 
+=======
+   "read_only": 1, 
+>>>>>>> Vhrs Update 12/11/16
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
@@ -102,6 +132,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
@@ -134,22 +165,36 @@
    "default": "Yes", 
    "fieldname": "is_active", 
    "fieldtype": "Select", 
+=======
+   "fieldname": "branch", 
+   "fieldtype": "Link", 
+>>>>>>> Vhrs Update 12/11/16
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
+<<<<<<< HEAD
    "in_filter": 0, 
    "in_global_search": 0, 
+=======
+   "in_filter": 1, 
+<<<<<<< HEAD
+>>>>>>> Vhrs Update 12/11/16
    "in_list_view": 1, 
    "in_standard_filter": 1, 
    "label": "Is Active", 
+=======
+   "in_list_view": 0, 
+   "label": "Branch", 
+>>>>>>> Vhrs Update 12/11/16
    "length": 0, 
    "no_copy": 0, 
-   "oldfieldname": "is_active", 
+   "oldfieldname": "branch", 
    "oldfieldtype": "Select", 
-   "options": "\nYes\nNo", 
+   "options": "Branch", 
    "permlevel": 0, 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
+<<<<<<< HEAD
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
@@ -167,6 +212,41 @@
    "depends_on": "eval:(!doc.salary_slip_based_on_timesheet)", 
    "fieldname": "payroll_frequency", 
    "fieldtype": "Select", 
+<<<<<<< HEAD
+=======
+   "hidden": 1, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 0, 
+   "in_list_view": 0, 
+   "in_standard_filter": 0, 
+   "label": "Is Default", 
+   "length": 0, 
+   "no_copy": 1, 
+   "options": "Yes\nNo", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "print_hide_if_no_value": 0, 
+=======
+>>>>>>> Vhrs Update 12/11/16
+   "read_only": 1, 
+   "remember_last_selected_value": 0, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 0, 
+   "set_only_once": 0, 
+   "unique": 0
+  }, 
+  {
+   "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
+<<<<<<< HEAD
+   "columns": 0, 
+   "fieldname": "from_date", 
+   "fieldtype": "Date", 
+>>>>>>> Vhrs Update 12/11/16
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
@@ -205,16 +285,43 @@
    "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
+<<<<<<< HEAD
    "label": "Is Default", 
    "length": 0, 
    "no_copy": 1, 
    "options": "Yes\nNo", 
+=======
+   "label": "To Date", 
+=======
+   "fieldname": "designation", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 1, 
+   "in_list_view": 0, 
+   "label": "Designation", 
+>>>>>>> Vhrs Update 12/11/16
+   "length": 0, 
+   "no_copy": 0, 
+   "oldfieldname": "designation", 
+   "oldfieldtype": "Select", 
+   "options": "Designation", 
+>>>>>>> Vhrs Update 12/11/16
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 
+<<<<<<< HEAD
    "read_only": 1, 
+=======
+<<<<<<< HEAD
+   "read_only": 0, 
+>>>>>>> Vhrs Update 12/11/16
    "remember_last_selected_value": 0, 
+=======
+   "read_only": 1, 
+>>>>>>> Vhrs Update 12/11/16
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
@@ -225,24 +332,43 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "fieldname": "employee_break", 
    "fieldtype": "Section Break", 
+=======
+   "fieldname": "department", 
+   "fieldtype": "Link", 
+>>>>>>> Vhrs Update 12/11/16
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
+<<<<<<< HEAD
    "in_filter": 0, 
    "in_global_search": 0, 
+=======
+   "in_filter": 1, 
+>>>>>>> Vhrs Update 12/11/16
    "in_list_view": 0, 
+<<<<<<< HEAD
    "in_standard_filter": 0, 
+=======
+   "label": "Department", 
+>>>>>>> Vhrs Update 12/11/16
    "length": 0, 
    "no_copy": 0, 
+   "oldfieldname": "department", 
+   "oldfieldtype": "Select", 
+   "options": "Department", 
    "permlevel": 0, 
-   "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
+<<<<<<< HEAD
    "read_only": 0, 
    "remember_last_selected_value": 0, 
+=======
+   "read_only": 1, 
+>>>>>>> Vhrs Update 12/11/16
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
@@ -253,23 +379,35 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "description": "Select employees for current Salary Structure", 
    "fieldname": "employees", 
    "fieldtype": "Table", 
+=======
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+>>>>>>> Vhrs Update 12/11/16
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
+<<<<<<< HEAD
    "in_filter": 0, 
    "in_global_search": 0, 
+=======
+   "in_filter": 1, 
+>>>>>>> Vhrs Update 12/11/16
    "in_list_view": 0, 
+<<<<<<< HEAD
    "in_standard_filter": 0, 
    "label": "Employees", 
+=======
+   "label": "Company", 
+>>>>>>> Vhrs Update 12/11/16
    "length": 0, 
    "no_copy": 0, 
-   "options": "Salary Structure Employee", 
+   "options": "Company", 
    "permlevel": 0, 
-   "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
@@ -284,19 +422,29 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "fieldname": "time_sheet_earning_detail", 
    "fieldtype": "Section Break", 
+=======
+   "fieldname": "letter_head", 
+   "fieldtype": "Link", 
+>>>>>>> Vhrs Update 12/11/16
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
+<<<<<<< HEAD
    "in_standard_filter": 0, 
    "label": "", 
+=======
+   "label": "Letter Head", 
+>>>>>>> Vhrs Update 12/11/16
    "length": 0, 
    "no_copy": 0, 
+   "options": "Letter Head", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -313,22 +461,29 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "depends_on": "", 
    "fieldname": "salary_slip_based_on_timesheet", 
    "fieldtype": "Check", 
+=======
+   "fieldname": "column_break1", 
+   "fieldtype": "Column Break", 
+>>>>>>> Vhrs Update 12/11/16
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
+<<<<<<< HEAD
    "in_standard_filter": 0, 
    "label": "Salary Slip Based on Timesheet", 
+=======
+>>>>>>> Vhrs Update 12/11/16
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
-   "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
@@ -337,12 +492,14 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 0
+   "unique": 0, 
+   "width": "50%"
   }, 
   {
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "fieldname": "column_break_17", 
    "fieldtype": "Column Break", 
@@ -353,16 +510,29 @@
    "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
+=======
+   "default": "Yes", 
+   "fieldname": "is_active", 
+   "fieldtype": "Select", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Is Active", 
+>>>>>>> Vhrs Update 12/11/16
    "length": 0, 
    "no_copy": 0, 
+   "oldfieldname": "is_active", 
+   "oldfieldtype": "Select", 
+   "options": "\nYes\nNo", 
    "permlevel": 0, 
-   "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -371,30 +541,43 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "depends_on": "", 
    "description": "Salary Component for timesheet based payroll.", 
    "fieldname": "salary_component", 
    "fieldtype": "Link", 
+=======
+   "fieldname": "from_date", 
+   "fieldtype": "Date", 
+>>>>>>> Vhrs Update 12/11/16
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+<<<<<<< HEAD
    "in_global_search": 0, 
+=======
+<<<<<<< HEAD
+>>>>>>> Vhrs Update 12/11/16
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Salary Component", 
+=======
+   "in_list_view": 1, 
+   "label": "From Date", 
+>>>>>>> Vhrs Update 12/11/16
    "length": 0, 
    "no_copy": 0, 
-   "options": "Salary Component", 
+   "oldfieldname": "from_date", 
+   "oldfieldtype": "Date", 
    "permlevel": 0, 
-   "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -403,23 +586,40 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "depends_on": "", 
    "fieldname": "hour_rate", 
    "fieldtype": "Currency", 
+=======
+   "fieldname": "to_date", 
+   "fieldtype": "Date", 
+>>>>>>> Vhrs Update 12/11/16
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+<<<<<<< HEAD
    "in_global_search": 0, 
+=======
+<<<<<<< HEAD
+>>>>>>> Vhrs Update 12/11/16
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Hour Rate", 
+=======
+   "in_list_view": 1, 
+   "label": "To Date", 
+>>>>>>> Vhrs Update 12/11/16
    "length": 0, 
    "no_copy": 0, 
+<<<<<<< HEAD
    "options": "Company:company:default_currency", 
+=======
+   "oldfieldname": "to_date", 
+   "oldfieldtype": "Date", 
+>>>>>>> Vhrs Update 12/11/16
    "permlevel": 0, 
-   "precision": "2", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
@@ -434,8 +634,11 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "depends_on": "", 
+=======
+>>>>>>> Vhrs Update 12/11/16
    "description": "Salary breakup based on Earning and Deduction.", 
    "fieldname": "earning_deduction", 
    "fieldtype": "Section Break", 
@@ -445,14 +648,17 @@
    "in_filter": 0, 
    "in_global_search": 0, 
    "in_list_view": 0, 
+<<<<<<< HEAD
    "in_standard_filter": 0, 
    "label": "", 
+=======
+   "label": "Monthly Earning & Deduction", 
+>>>>>>> Vhrs Update 12/11/16
    "length": 0, 
    "no_copy": 0, 
    "oldfieldname": "earning_deduction", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0, 
-   "precision": "2", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
@@ -498,8 +704,11 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "depends_on": "", 
+=======
+>>>>>>> Vhrs Update 12/11/16
    "fieldname": "earnings", 
    "fieldtype": "Table", 
    "hidden": 0, 
@@ -514,14 +723,14 @@
    "no_copy": 0, 
    "oldfieldname": "earning_details", 
    "oldfieldtype": "Table", 
-   "options": "Salary Detail", 
+   "options": "Salary Structure Earning", 
    "permlevel": 0, 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -576,7 +785,7 @@
    "no_copy": 0, 
    "oldfieldname": "deduction_details", 
    "oldfieldtype": "Table", 
-   "options": "Salary Detail", 
+   "options": "Salary Structure Deduction", 
    "permlevel": 0, 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
@@ -592,9 +801,13 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
    "depends_on": "", 
    "fieldname": "net_pay_detail", 
+=======
+   "fieldname": "section_break0", 
+>>>>>>> Vhrs Update 12/11/16
    "fieldtype": "Section Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -652,7 +865,7 @@
    "columns": 0, 
    "fieldname": "total_earning", 
    "fieldtype": "Currency", 
-   "hidden": 1, 
+   "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
@@ -683,7 +896,7 @@
    "columns": 0, 
    "fieldname": "total_deduction", 
    "fieldtype": "Currency", 
-   "hidden": 1, 
+   "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
@@ -711,10 +924,37 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
+<<<<<<< HEAD
    "columns": 0, 
+=======
+   "fieldname": "column_break3", 
+   "fieldtype": "Column Break", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 0, 
+   "in_list_view": 0, 
+   "length": 0, 
+   "no_copy": 0, 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "print_hide_if_no_value": 0, 
+   "read_only": 0, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 0, 
+   "set_only_once": 0, 
+   "unique": 0, 
+   "width": "50%"
+  }, 
+  {
+   "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
+>>>>>>> Vhrs Update 12/11/16
    "fieldname": "net_pay", 
    "fieldtype": "Currency", 
-   "hidden": 1, 
+   "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
@@ -858,14 +1098,21 @@
  "hide_toolbar": 0, 
  "icon": "fa fa-file-text", 
  "idx": 1, 
- "image_view": 0, 
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
+<<<<<<< HEAD
  "modified": "2017-02-22 06:09:55.491748", 
+=======
+<<<<<<< HEAD
+ "modified": "2016-11-07 05:13:46.584365", 
+=======
+ "modified": "2016-03-18 16:10:30.031811", 
+>>>>>>> Vhrs Update 12/11/16
+>>>>>>> Vhrs Update 12/11/16
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Structure", 
@@ -896,7 +1143,7 @@
    "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
-   "delete": 1, 
+   "delete": 0, 
    "email": 1, 
    "export": 1, 
    "if_owner": 0, 
@@ -912,14 +1159,18 @@
    "write": 1
   }
  ], 
- "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "show_name_in_global_search": 1, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+<<<<<<< HEAD
  "timeline_field": "", 
  "title_field": "", 
  "track_changes": 0, 
  "track_seen": 0
+=======
+ "timeline_field": "employee", 
+ "title_field": "employee_name"
+>>>>>>> Vhrs Update 12/11/16
 }

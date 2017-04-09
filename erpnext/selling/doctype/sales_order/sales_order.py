@@ -533,7 +533,6 @@ def make_maintenance_schedule(source_name, target_doc=None):
 				"add_if_empty": True
 			}
 		}, target_doc)
-
 		return doclist
 
 @frappe.whitelist()
@@ -560,7 +559,6 @@ def make_maintenance_visit(source_name, target_doc=None):
 				"add_if_empty": True
 			}
 		}, target_doc)
-
 		return doclist
 
 @frappe.whitelist()

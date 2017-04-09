@@ -45,7 +45,15 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 			}[this.frm.doc.salutation]);
 		}
 	},
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+	
+=======
+
+>>>>>>> Vhrs Update 12/11/16
+>>>>>>> Vhrs Update 12/11/16
 });
 frappe.ui.form.on('Employee',{
 	prefered_contact_email:function(frm){		

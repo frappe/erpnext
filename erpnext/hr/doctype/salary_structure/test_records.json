@@ -1,0 +1,16 @@
+[
+	{
+		"doctype": "Salary Structure",
+		"name": "_Test Salary Structure 1",
+		"employee": "_T-Employee-0001",
+		"from_date": "2014-02-01",
+		"earnings": [
+			{
+				"e_type": "_Test Basic Salary"
+			},
+			{
+				"e_type": "_Test Allowance"
+			}
+		]
+	}
+]

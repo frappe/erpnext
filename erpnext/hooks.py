@@ -49,7 +49,7 @@ email_append_to = ["Job Applicant", "Opportunity", "Issue"]
 
 calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Holiday List"]
 
-fixtures = ["Web Form"]
+fixtures = ["Web Form","Custom Field","Customize Form"]
 
 website_generators = ["Item Group", "Item", "BOM", "Sales Partner", "Job Opening", "Student Admission"]
 
@@ -141,6 +141,9 @@ standard_queries = {
 }
 
 doc_events = {
+	"Attendance": {
+	"before_save": "cvhrsian.cvhrsian.doctype.candidate.candidate.validate_attendance_status"
+	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty"
@@ -177,8 +180,17 @@ scheduler_events = {
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
+<<<<<<< HEAD
 		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries",
 		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary'
+=======
+<<<<<<< HEAD
+=======
+		"erpnext.projects.doctype.task.task.set_dow",
+		"erpnext.projects.doctype.project.project.set_project_as_overdue",
+>>>>>>> Vhrs Update 12/11/16
+		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries"
+>>>>>>> Vhrs Update 12/11/16
 	]
 }
 
