@@ -238,7 +238,6 @@ def get_holiday_list_for_employee(employee, raise_exception=True):
 		frappe.throw(_('Please set a default Holiday List for Employee {0} or Company {1}').format(employee, company))
 
 	return holiday_list
-<<<<<<< HEAD
 
 def is_holiday(employee, date=None):
 	'''Returns True if given Employee has an holiday on the given date
