@@ -15,7 +15,6 @@ class ProcessPayroll(Document):
 			Returns list of active employees based on selected criteria
 			and for which salary structure exists
 		"""
-
 		cond = self.get_filter_condition()
 		cond += self.get_joining_releiving_condition()
 
@@ -46,13 +45,6 @@ class ProcessPayroll(Document):
 					t1.docstatus!=2
 					and t1.name = t2.employee
 			%s """% cond, {"sal_struct": sal_struct})
-		emp_list = frappe.db.sql("""
-			select t1.name
-			from `tabEmployee` t1, `tabSalary Structure` t2
-			where t1.docstatus!=2 and t2.docstatus != 2
-			and t1.name = t2.employee
-		%s """% cond)
-
 			return emp_list
 
 
@@ -116,21 +108,6 @@ class ProcessPayroll(Document):
 					ss_dict["Total Pay"] = fmt_money(ss.rounded_total,currency = frappe.defaults.get_global_default("currency"))
 					ss_dict["Salary Slip"] = self.format_as_links(ss.name)[0]
 					ss_list.append(ss_dict)
-					ss_list.append(ss.name)
-		for emp in emp_list:
-			if not frappe.db.sql("""select name from `tabSalary Slip`
-					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
-					""", (emp[0], self.month, self.fiscal_year, self.company)):
-				ss = frappe.get_doc({
-					"doctype": "Salary Slip",
-					"fiscal_year": self.fiscal_year,
-					"employee": emp[0],
-					"month": self.month,
-					"company": self.company,
-				})
-				ss.insert()
-				ss_list.append(ss.name)
-
 		return self.create_log(ss_list)
 
 
