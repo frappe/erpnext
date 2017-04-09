@@ -180,17 +180,10 @@ scheduler_events = {
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
-<<<<<<< HEAD
 		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries",
 		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary'
-=======
-<<<<<<< HEAD
-=======
 		"erpnext.projects.doctype.task.task.set_dow",
 		"erpnext.projects.doctype.project.project.set_project_as_overdue",
->>>>>>> Vhrs Update 12/11/16
-		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries"
->>>>>>> Vhrs Update 12/11/16
 	]
 }
 
