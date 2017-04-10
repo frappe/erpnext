@@ -1654,7 +1654,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-04-05 03:18:05.437204", 
+ "modified": "2017-04-10 12:01:40.888115", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 
@@ -1749,6 +1749,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "title", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 0
 }
