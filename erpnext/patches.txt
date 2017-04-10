@@ -383,3 +383,4 @@ erpnext.patches.v8_0.manufacturer_childtable_migrate
 erpnext.patches.v8_0.repost_reserved_qty_for_multiple_sales_uom
 erpnext.patches.v8_0.addresses_linked_to_lead
 execute:frappe.delete_doc('DocType', 'Purchase Common')
+erpnext.patches.v8_0.update_stock_qty_value_in_purchase_invoice
