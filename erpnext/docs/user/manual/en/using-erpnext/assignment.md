@@ -22,7 +22,7 @@ With assignment, you can also leave a comment for the review of assignee.
 
 ####ToDo List of Assignee
 
-This transaction will appear in the To-do list of the ser in “Todo” section.
+This transaction will appear in the To-do list of the user in “Todo” section.
 
 <img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/assign-3.png">
 
@@ -32,6 +32,6 @@ User will be able to remove assignment by clicking on "Assignment Completed" but
 
 <img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/assign-4.png">
 
-Once assignment is set as completed, Status of its ToDo record will be set as Closed.
+Once assignment is set as completed, the Status of its ToDo record will be set as Closed.
 
 {next}
