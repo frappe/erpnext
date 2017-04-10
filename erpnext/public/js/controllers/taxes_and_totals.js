@@ -7,7 +7,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		if(item.margin_type == "Percentage"){
 			item.total_margin = flt(item.price_list_rate) 
 				+ flt(item.price_list_rate) * ( flt(item.margin_rate_or_amount) / 100);
-		}else{
+		} else {
 			item.total_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
 		}
 
