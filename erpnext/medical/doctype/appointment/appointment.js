@@ -66,15 +66,6 @@ frappe.ui.form.on('Appointment', {
 				check_availability_by_dept(frm);
 			 },__("Check Availability") );
 		};
-		frm.set_df_property("patient", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("token", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("appointment_type", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("physician", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("ref_physician", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("department", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("appointment_date", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("appointment_time", "hidden", frm.doc.__islocal ? 0:0);
-		frm.set_df_property("appointment_time", "read_only", frm.doc.__islocal ? 0:1);
 	},
 	onload:function(frm){
 		if(frm.doc.__islocal){
@@ -182,6 +173,15 @@ var show_availability = function(frm, result){
 				frm.doc.start_dt = $(this).attr("data-start");
 				frm.doc.end_dt = $(this).attr("data-end");
 				frm.doc.token = $(this).attr("data-token");
+				frm.set_df_property("patient", "read_only", 1);
+				frm.set_df_property("token", "read_only", 1);
+				frm.set_df_property("appointment_type", "read_only", 1);
+				frm.set_df_property("physician", "read_only", 1);
+				frm.set_df_property("ref_physician", "read_only", 1);
+				frm.set_df_property("department", "read_only", 1);
+				frm.set_df_property("appointment_date", "read_only", 1);
+				frm.set_df_property("appointment_time", "hidden", 0);
+				frm.set_df_property("appointment_time", "read_only", 1);
 				refresh_field("physician");refresh_field("token");refresh_field("start_dt");
 				refresh_field("appointment_time");refresh_field("end_dt")
 				d.hide();
