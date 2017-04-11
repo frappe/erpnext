@@ -167,7 +167,8 @@ class Account(Document):
 			
 		if self.account_type == "Stock" and not cint(self.is_group):
 			if not self.warehouse:
-				throw(_("Warehouse is mandatory"))
+				#~ throw(_("Warehouse is mandatory"))
+				pass
 				
 			old_warehouse = cstr(frappe.db.get_value("Account", self.name, "warehouse"))
 			if old_warehouse != cstr(self.warehouse):

@@ -19,11 +19,11 @@ frappe.ui.form.on('Fixed Asset Custody', {
             //     });
             // }
             // if (in_list(["Submitted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
-            frm.add_custom_button("Transfer Asset", function() {
+            frm.add_custom_button(__("Transfer Asset"), function() {
                 transfer_asset(frm);
             });
 
-            frm.add_custom_button("Scrap Asset", function() {
+            frm.add_custom_button(__("Scrap Asset"), function() {
                 scrap_asset(frm);
             });
 
