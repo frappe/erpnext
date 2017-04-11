@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015, ESS LLP and Contributors
+# Copyright (c) 2017, ESS LLP and Contributors
 # See license.txt
 from __future__ import unicode_literals
 
 import frappe
 import unittest
-
-# test_records = frappe.get_test_records('Procedure')
 
 class TestProcedure(unittest.TestCase):
 	pass
