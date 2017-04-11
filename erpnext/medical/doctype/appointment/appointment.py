@@ -56,6 +56,10 @@ def appointment_cancel(appointmentId):
 				fee_validity = frappe.get_doc("Fee Validity",validity[0][0])
 				visited = fee_validity.visited - 1
 				frappe.db.set_value("Fee Validity",fee_validity.name,"visited",visited)
+				if visited <= 0:
+					frappe.msgprint(_("Appointment cancelled, Please review and cancel the invoice {0}".format(appointment.invoice)))
+				else:
+					frappe.msgprint(_("Appointment cancelled"))
 
 @frappe.whitelist()
 def check_availability_by_dept(department, date, time=None, end_dt=None):
