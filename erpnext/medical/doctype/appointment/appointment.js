@@ -16,12 +16,6 @@ frappe.ui.form.on('Appointment', {
 				 },__("View") );
 			};
 			if(frm.doc.status == "Open"){
-				frm.add_custom_button(__('Mark Closed'), function() {
-					btn_update_status(frm, "Closed");
-				 } );
-				frm.add_custom_button(__('Mark Pending'), function() {
-					btn_update_status(frm, "Pending");
-				 } );
 				 frm.add_custom_button(__('Cancel'), function() {
 	 				btn_update_status(frm, "Cancelled");
 	 			 } );
