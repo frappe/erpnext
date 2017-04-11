@@ -628,10 +628,12 @@ class PurchaseInvoice(BuyingController):
 				pi = frappe.db.sql('''select name from `tabPurchase Invoice`
 					where
 						bill_no = %(bill_no)s
+						and supplier = %(supplier)s
 						and name != %(name)s
 						and docstatus < 2
 						and posting_date between %(year_start_date)s and %(year_end_date)s''', {
 							"bill_no": self.bill_no,
+							"supplier": self.supplier,
 							"name": self.name,
 							"year_start_date": fiscal_year.year_start_date,
 							"year_end_date": fiscal_year.year_end_date

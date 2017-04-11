@@ -163,7 +163,7 @@ apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_templat
 DocType: Employee Loan,Repay Over Number of Periods,Rimborsare corso Numero di periodi
 DocType: Stock Entry,Additional Costs,Costi aggiuntivi
 apps/erpnext/erpnext/accounts/doctype/account/account.py +142,Account with existing transaction can not be converted to group.,Account con transazioni registrate non può essere convertito a gruppo.
-DocType: Lead,Product Enquiry,Prodotto Inchiesta
+DocType: Lead,Product Enquiry,Richiesta di informazioni sui prodotti
 DocType: Academic Term,Schools,scuole
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +35,No leave record found for employee {0} for {1},Nessun record congedo trovato per dipendente {0} per {1}
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +23,Please enter company first,Inserisci prima azienda
@@ -242,7 +242,7 @@ DocType: Guardian,Students,Alunni
 apps/erpnext/erpnext/config/selling.py +91,Rules for applying pricing and discount.,Le modalità di applicazione di prezzi e sconti .
 apps/erpnext/erpnext/stock/doctype/price_list/price_list.py +14,Price List must be applicable for Buying or Selling,Prezzo di listino deve essere applicabile per l'acquisto o la vendita di
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +79,Installation date cannot be before delivery date for Item {0},Data di installazione non può essere prima della data di consegna per la voce {0}
-DocType: Pricing Rule,Discount on Price List Rate (%),Sconto Listino Tasso (%)
+DocType: Pricing Rule,Discount on Price List Rate (%),Sconto su Prezzo di Listino (%)
 DocType: Offer Letter,Select Terms and Conditions,Selezionare i Termini e Condizioni
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +51,Out Value,Valore out
 DocType: Production Planning Tool,Sales Orders,Ordini di vendita
@@ -1063,7 +1063,7 @@ DocType: Company,Default Terms,Predefinito Termini
 DocType: Packing Slip Item,Packing Slip Item,Distinta di imballaggio articolo
 DocType: Purchase Invoice,Cash/Bank Account,Conto Cassa/Banca
 apps/erpnext/erpnext/public/js/queries.js +88,Please specify a {0},Si prega di specificare un {0}
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +71,Removed items with no change in quantity or value.,Elementi rimossi senza variazione di quantità o valore.
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +71,Removed items with no change in quantity or value.,Eliminati elementi senza variazione di quantità o valore.
 DocType: Delivery Note,Delivery To,Consegna a
 apps/erpnext/erpnext/stock/doctype/item/item.py +649,Attribute table is mandatory,Tavolo attributo è obbligatorio
 DocType: Production Planning Tool,Get Sales Orders,Ottieni Ordini di Vendita
@@ -2553,7 +2553,7 @@ DocType: Currency Exchange,Specify Exchange Rate to convert one currency into an
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +149,Quotation {0} is cancelled,Preventivo {0} è annullato
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +26,Total Outstanding Amount,Importo totale Eccezionale
 DocType: Sales Partner,Targets,Obiettivi
-DocType: Price List,Price List Master,Listino Maestro
+DocType: Price List,Price List Master,Listino Principale
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,Tutte le transazioni di vendita possono essere etichettati contro più persone ** ** di vendita in modo da poter impostare e monitorare gli obiettivi.
 ,S.O. No.,S.O. No.
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +163,Please create Customer from Lead {0},Si prega di creare il Cliente dal Lead {0}
@@ -3369,7 +3369,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +194,
 DocType: BOM,Website Description,Descrizione del sito
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +42,Net Change in Equity,Variazione netta Patrimonio
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +152,Please cancel Purchase Invoice {0} first,Si prega di annullare Acquisto Fattura {0} prima
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Indirizzo e-mail deve essere unico, esiste già per {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +42,"Email Address must be unique, already exists for {0}","Indirizzo e-mail deve essere univoco, esiste già per {0}"
 DocType: Serial No,AMC Expiry Date,AMC Data Scadenza
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +795,Receipt,Ricevuta
 ,Sales Register,Registro Vendite
@@ -4032,7 +4032,7 @@ DocType: Appraisal,Start Date,Data di inizio
 apps/erpnext/erpnext/config/hr.py +75,Allocate leaves for a period.,Allocare le foglie per un periodo .
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +42,Cheques and Deposits incorrectly cleared,Assegni e depositi cancellati in modo non corretto
 apps/erpnext/erpnext/accounts/doctype/account/account.py +51,Account {0}: You can not assign itself as parent account,Account {0}: non è possibile assegnare se stesso come conto principale
-DocType: Purchase Invoice Item,Price List Rate,Prezzo di listino Vota
+DocType: Purchase Invoice Item,Price List Rate,Prezzo di Listino
 apps/erpnext/erpnext/utilities/activation.py +73,Create customer quotes,Creare le citazioni dei clienti
 DocType: Item,"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",Mostra &quot;Disponibile&quot; o &quot;Non disponibile&quot; sulla base di scorte disponibili in questo magazzino.
 apps/erpnext/erpnext/config/manufacturing.py +38,Bill of Materials (BOM),Distinte materiali (BOM)
@@ -4164,7 +4164,7 @@ apps/erpnext/erpnext/accounts/doctype/period_closing_voucher/period_closing_vouc
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +320,Salary Slip of employee {0} already created for time sheet {1},Salario Slip of dipendente {0} già creato per foglio di tempo {1}
 DocType: Vehicle Log,Odometer,Odometro
 DocType: Sales Order Item,Ordered Qty,Quantità ordinato
-apps/erpnext/erpnext/stock/doctype/item/item.py +694,Item {0} is disabled,Voce {0} è disattivato
+apps/erpnext/erpnext/stock/doctype/item/item.py +694,Item {0} is disabled,Articolo {0} è disattivato
 DocType: Stock Settings,Stock Frozen Upto,Giacenza Bloccate Fino
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +876,BOM does not contain any stock item,BOM non contiene alcun elemento magazzino
 apps/erpnext/erpnext/controllers/recurring_document.py +172,Period From and Period To dates mandatory for recurring {0},Periodo Dal periodo e per date obbligatorie per ricorrenti {0}

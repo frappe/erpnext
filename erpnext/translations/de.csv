@@ -49,7 +49,7 @@ apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +18,Checkout,Aus
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +179,Accural Journal Entry Submitted,Accural Journal Entry Eingereicht
 DocType: Pricing Rule,Apply On,Anwenden auf
 DocType: Item Price,Multiple Item prices.,Mehrere verschiedene Artikelpreise
-,Purchase Order Items To Be Received,Eingehende Lieferantenauftrags-Artikel
+,Purchase Order Items To Be Received,Eingehende Bestellungs-Artikel
 DocType: SMS Center,All Supplier Contact,Alle Lieferantenkontakte
 DocType: Support Settings,Support Settings,Support-Einstellungen
 DocType: SMS Parameter,Parameter,Parameter
@@ -325,7 +325,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +710,Item {0} is cancelled,Artik
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +877,Material Request,Materialanfrage
 DocType: Bank Reconciliation,Update Clearance Date,Abwicklungsdatum aktualisieren
 DocType: Item,Purchase Details,Einkaufsdetails
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +348,Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1},"Artikel {0} in Tabelle ""Rohmaterialien geliefert"" des Lieferantenauftrags {1} nicht gefunden"
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +348,Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1},"Artikel {0} in Tabelle ""Rohmaterialien geliefert"" der Bestellung {1} nicht gefunden"
 DocType: Employee,Relation,Beziehung
 DocType: Shipping Rule,Worldwide Shipping,Weltweiter Versand
 DocType: Student Guardian,Mother,Mutter
@@ -784,7 +784,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -795,15 +795,15 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten. 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten.
 
- #### Hinweis 
+ #### Hinweis
 
 Der Steuersatz, den sie hier definieren, wird der Standardsteuersatz für alle Artikel. Wenn es Artikel mit davon abweichenden Steuersätzen gibt, müssen diese in der Tabelle ""Artikelsteuer"" im Artikelstamm hinzugefügt werden.
 
- #### Beschreibung der Spalten 
+ #### Beschreibung der Spalten
 
-1. Berechnungsart: 
+1. Berechnungsart:
 - Dies kann sein ""Auf Nettosumme"" (das ist die Summe der Grundbeträge).
 - ""Auf vorherige Zeilensumme/-Betrag"" (für kumulative Steuern oder Abgaben). Wenn diese Option ausgewählt wird, wird die Steuer als Prozentsatz der vorherigen Zeilesumme/des vorherigen Zeilenbetrags (in der Steuertabelle) angewendet.
 - ""Unmittelbar"" (wie bereits erwähnt).
@@ -890,7 +890,7 @@ DocType: Production Order,Item To Manufacture,Zu fertigender Artikel
 apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +81,{0} {1} status is {2},{0} {1} Status ist {2}
 DocType: Employee,Provide Email Address registered in company,Geben Sie E-Mail-Adresse in Unternehmen registriert
 DocType: Shopping Cart Settings,Enable Checkout,Aktivieren Kasse
-apps/erpnext/erpnext/config/learn.py +202,Purchase Order to Payment,Vom Lieferantenauftrag zur Zahlung
+apps/erpnext/erpnext/config/learn.py +202,Purchase Order to Payment,Von Bestellung zur Zahlung
 apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +48,Projected Qty,Geplante Menge
 DocType: Sales Invoice,Payment Due Date,Zahlungsstichtag
 apps/erpnext/erpnext/stock/doctype/item/item.js +340,Item Variant {0} already exists with same attributes,Artikelvariante {0} mit denselben Attributen existiert bereits
@@ -1002,7 +1002,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +642,"For '
 DocType: Job Opening,Publish on website,Veröffentlichen Sie auf der Website
 apps/erpnext/erpnext/config/stock.py +17,Shipments to customers.,Lieferungen an Kunden
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +623,Supplier Invoice Date cannot be greater than Posting Date,Lieferant Rechnungsdatum kann nicht größer sein als Datum der Veröffentlichung
-DocType: Purchase Invoice Item,Purchase Order Item,Lieferantenauftrags-Artikel
+DocType: Purchase Invoice Item,Purchase Order Item,Bestell-Artikel
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +130,Indirect Income,Indirekte Erträge
 DocType: Student Attendance Tool,Student Attendance Tool,Schülerteilnahme Werkzeug
 DocType: Cheque Print Template,Date Settings,Datums-Einstellungen
@@ -1017,10 +1017,10 @@ DocType: Selling Settings,Allow user to edit Price List Rate in transactions,"Be
 DocType: Pricing Rule,Max Qty,Maximalmenge
 apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +30,"Row {0}: Invoice {1} is invalid, it might be cancelled / does not exist. \
 						Please enter a valid Invoice","Row {0}: Rechnung {1} ist ungültig, könnte es abgebrochen werden / nicht vorhanden. \ Bitte geben Sie eine gültige Rechnung"
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +120,Row {0}: Payment against Sales/Purchase Order should always be marked as advance,"Zeile {0}: ""Zahlung zu Kunden-/Lieferantenauftrag"" sollte immer als ""Vorkasse"" eingestellt werden"
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +120,Row {0}: Payment against Sales/Purchase Order should always be marked as advance,"Zeile {0}: ""Zahlung zu Kundenauftrag / Bestellung"" sollte immer als ""Vorkasse"" eingestellt werden"
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +16,Chemical,Chemische Industrie
 DocType: Salary Component Account,Default Bank / Cash account will be automatically updated in Salary Journal Entry when this mode is selected.,"Standard Bank / Geldkonto wird automatisch in Gehalts Journal Entry aktualisiert werden, wenn dieser Modus ausgewählt ist."
-apps/erpnext/erpnext/schools/doctype/grading_structure/grading_structure.py +24,"The intervals for Grade Code {0} overlaps with the grade intervals for other grades. 
+apps/erpnext/erpnext/schools/doctype/grading_structure/grading_structure.py +24,"The intervals for Grade Code {0} overlaps with the grade intervals for other grades.
                     Please check intervals {0} and {1} and try again",Die Intervalle für Grade-Code {0} überlappt mit der Note Intervalle für andere Typen. Bitte überprüfen Sie Intervalle {0} und {1} und versuchen Sie es erneut
 DocType: BOM,Raw Material Cost(Company Currency),Rohstoffkosten (Gesellschaft Währung)
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +715,All items have already been transferred for this Production Order.,Alle Artikel wurden schon für diesen Fertigungsauftrag übernommen.
@@ -1290,7 +1290,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +179,Website Image should be a p
 DocType: Student Applicant,AP,AP
 DocType: Purchase Invoice Item,BOM,Stückliste
 apps/erpnext/erpnext/setup/doctype/item_group/item_group.js +37,This is a root item group and cannot be edited.,Dies ist eine Root-Artikelgruppe und kann nicht bearbeitet werden.
-DocType: Journal Entry Account,Purchase Order,Lieferantenauftrag
+DocType: Journal Entry Account,Purchase Order,Bestellung
 DocType: Vehicle,Fuel UOM,Kraftstoff UOM
 DocType: Warehouse,Warehouse Contact Info,Kontaktinformation des Lager
 DocType: Payment Entry,Write Off Difference Amount,Write Off Differenzbetrag
@@ -1541,7 +1541,7 @@ DocType: Sales Partner,Sales Partner Target,Vertriebspartner-Ziel
 DocType: Loan Type,Maximum Loan Amount,Maximale Darlehensbetrag
 DocType: Pricing Rule,Pricing Rule,Preisregel
 DocType: Budget,Action if Annual Budget Exceeded,Erwünschte Aktion bei überschrittenem jährlichem Budget
-apps/erpnext/erpnext/config/learn.py +197,Material Request to Purchase Order,Von der Materialanfrage zum Lieferantenauftrag
+apps/erpnext/erpnext/config/learn.py +197,Material Request to Purchase Order,Von der Materialanfrage zur Bestellung
 DocType: Shopping Cart Settings,Payment Success URL,Payment Success URL
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +80,Row # {0}: Returned Item {1} does not exists in {2} {3},Zeile # {0}: Zurückgegebener Artikel {1} existiert nicht in {2} {3}
 DocType: Purchase Receipt,PREC-,PREC-
@@ -1552,7 +1552,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: C-Form,III,III
 apps/erpnext/erpnext/config/stock.py +305,Opening Stock Balance,Eröffnungsbestände
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +58,{0} must appear only once,{0} darf nur einmal vorkommen
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +359,Not allowed to tranfer more {0} than {1} against Purchase Order {2},Übertragung von mehr {0} als {1} mit Lieferantenauftrag {2} nicht erlaubt
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +359,Not allowed to tranfer more {0} than {1} against Purchase Order {2},Übertragung von mehr {0} als {1} gegen Bestellung {2} nicht erlaubt
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py +59,Leaves Allocated Successfully for {0},Erfolgreich zugewiesene Abwesenheiten für {0}
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +40,No Items to pack,Keine Artikel zum Verpacken
 DocType: Shipping Rule Condition,From Value,Von-Wert
@@ -1730,7 +1730,7 @@ DocType: Employee,Leave Encashed?,Urlaub eingelöst?
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +32,Opportunity From field is mandatory,"Feld ""Chance von"" ist zwingend erforderlich"
 DocType: Email Digest,Annual Expenses,Jährliche Kosten
 DocType: Item,Variants,Varianten
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +994,Make Purchase Order,Lieferantenauftrag erstellen
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +994,Make Purchase Order,Bestellung erstellen
 DocType: SMS Center,Send To,Senden an
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +152,There is not enough leave balance for Leave Type {0},Es gibt nicht genügend verfügbaren Urlaub für Urlaubstyp {0}
 DocType: Payment Reconciliation Payment,Allocated amount,Zugewiesene Menge
@@ -2333,7 +2333,7 @@ apps/erpnext/erpnext/public/js/financial_statements.js +82,End Year,Ende Jahr
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +119,Contract End Date must be greater than Date of Joining,Vertragsende muss weiter in der Zukunft liegen als Eintrittsdatum sein
 DocType: Delivery Note,DN-,DN-
 DocType: Sales Partner,A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,"Ein Drittanbieter/Händler/Kommissionär/verbundenes Unternehmen/Wiederverkäufer, der die Produkte auf Provisionsbasis verkauft."
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +364,{0} against Purchase Order {1},{0} zu Lieferantenauftrag {1}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +364,{0} against Purchase Order {1},{0} zu Bestellung {1}
 DocType: SMS Settings,"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)","Statische URL-Parameter hier eingeben (z. B. Absender=ERPNext, Benutzername=ERPNext, Passwort=1234 usw.)"
 DocType: Task,Actual Start Date (via Time Sheet),Das tatsächliche Startdatum (durch Zeiterfassung)
 apps/erpnext/erpnext/portal/doctype/homepage/homepage.py +15,This is an example website auto-generated from ERPNext,"Dies ist eine Beispiel-Webseite, von ERPNext automatisch generiert"
@@ -2346,7 +2346,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -2358,15 +2358,15 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten. 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten.
 
- #### Hinweis 
+ #### Hinweis
 
 Der Steuersatz, den sie hier definieren, wird der Standardsteuersatz für alle Artikel. Wenn es Artikel mit davon abweichenden Steuersätzen gibt, müssen diese in der Tabelle ""Artikelsteuer"" im Artikelstamm hinzugefügt werden.
 
- #### Beschreibung der Spalten 
+ #### Beschreibung der Spalten
 
-1. Berechnungsart: 
+1. Berechnungsart:
 - Dies kann sein ""Auf Nettosumme"" (das ist die Summe der Grundbeträge).
 - ""Auf vorherige Zeilensumme/-Betrag"" (für kumulative Steuern oder Abgaben). Wenn diese Option ausgewählt wird, wird die Steuer als Prozentsatz der vorherigen Zeilesumme/des vorherigen Zeilenbetrags (in der Steuertabelle) angewendet.
 - ""Unmittelbar"" (wie bereits erwähnt).
@@ -2480,7 +2480,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +79,Row {0}: UOM C
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +17,Ref,Ref.
 DocType: Budget,Cost Center,Kostenstelle
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +36,Voucher #,Beleg #
-DocType: Notification Control,Purchase Order Message,Lieferantenauftrags-Nachricht
+DocType: Notification Control,Purchase Order Message,Bestellungs-Nachricht
 DocType: Tax Rule,Shipping Country,Zielland der Lieferung
 DocType: Selling Settings,Hide Customer's Tax Id from Sales Transactions,Ausblenden Kundensteuernummer aus Verkaufstransaktionen
 DocType: Upload Attendance,Upload HTML,HTML hochladen
@@ -2490,7 +2490,7 @@ DocType: Serial No,Warehouse can only be changed via Stock Entry / Delivery Note
 DocType: Employee Education,Class / Percentage,Klasse / Anteil
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +96,Head of Marketing and Sales,Leiter Marketing und Vertrieb
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +34,Income Tax,Einkommensteuer
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +15,"If selected Pricing Rule is made for 'Price', it will overwrite Price List. Pricing Rule price is the final price, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.","Wenn für ""Preis"" eine Preisregel ausgewählt wurde, wird die Preisliste überschrieben. Der Preis aus der Preisregel ist der endgültige Preis, es sollte also kein weiterer Rabatt gewährt werden. Daher wird er in Transaktionen wie Kundenauftrag, Lieferantenauftrag etc., vorrangig aus dem Feld ""Preis"" gezogen, und dann erst aus dem Feld ""Preisliste""."
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +15,"If selected Pricing Rule is made for 'Price', it will overwrite Price List. Pricing Rule price is the final price, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.","Wenn für ""Preis"" eine Preisregel ausgewählt wurde, wird die Preisliste überschrieben. Der Preis aus der Preisregel ist der endgültige Preis, es sollte also kein weiterer Rabatt gewährt werden. Daher wird er in Transaktionen wie Kundenauftrag, Bestellung etc., vorrangig aus dem Feld ""Preis"" gezogen, und dann erst aus dem Feld ""Preisliste""."
 apps/erpnext/erpnext/config/selling.py +174,Track Leads by Industry Type.,Leads nach Branchentyp nachverfolgen
 DocType: Item Supplier,Item Supplier,Artikellieferant
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +423,Please enter Item Code to get batch no,Bitte die Artikelnummer eingeben um die Chargennummer zu erhalten
@@ -2580,7 +2580,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Allgemeine Geschäftsbedingungen, die bei Ver- und Einkäufen verwendet werden können.
 
- Beispiele: 
+ Beispiele:
 
 1. Gültigkeit des Angebots.
 2. Zahlungsbedingungen (Vorkasse, auf Rechnung, Teilweise Vorkasse usw.)
@@ -2589,7 +2589,7 @@ Examples:
 5. Garantie, falls vorhanden.
 6. Rückgabebedingungen.
 7. Lieferbedingungen, falls zutreffend.
-8. Beschwerdemanagement, Schadensersatz, Haftung usw. 
+8. Beschwerdemanagement, Schadensersatz, Haftung usw.
 9. Adresse und Kontaktdaten des Unternehmens."
 DocType: Attendance,Leave Type,Urlaubstyp
 DocType: Purchase Invoice,Supplier Invoice Details,Lieferant Rechnungsdetails
@@ -2879,7 +2879,7 @@ DocType: Lead,Lower Income,Niedrigeres Einkommen
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +160,Source and target warehouse cannot be same for row {0},Ausgangs- und Eingangslager können nicht gleich sein für die Zeile {0}
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +243,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry","Differenzkonto muss ein Vermögens-/Verbindlichkeiten-Konto sein, da dieser Lagerabgleich eine Eröffnungsbuchung ist"
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +107,Disbursed Amount cannot be greater than Loan Amount {0},Zahlter Betrag kann nicht größer sein als Darlehensbetrag {0}
-apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +86,Purchase Order number required for Item {0},Lieferantenauftragsnummer ist für den Artikel {0} erforderlich
+apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +86,Purchase Order number required for Item {0},Bestellnummer ist für den Artikel {0} erforderlich
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +871,Production Order not created,Fertigungsauftrag nicht erstellt
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date',"""Von-Datum"" muss nach ""Bis-Datum"" liegen"
 apps/erpnext/erpnext/schools/doctype/student_applicant/student_applicant.py +29,Cannot change status as student {0} is linked with student application {1},Kann nicht den Status als Student ändern {0} ist mit Studenten Anwendung verknüpft {1}
@@ -2986,7 +2986,7 @@ DocType: Lead,From Customer,Von Kunden
 apps/erpnext/erpnext/demo/setup/setup_data.py +314,Calls,Anrufe
 DocType: Project,Total Costing Amount (via Time Logs),Gesamtkostenbetrag (über Zeitprotokolle)
 DocType: Purchase Order Item Supplied,Stock UOM,Lagermaßeinheit
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +226,Purchase Order {0} is not submitted,Lieferantenauftrag {0} wurde nicht übertragen
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +226,Purchase Order {0} is not submitted,Bestellung {0} wurde nicht übertragen
 DocType: Customs Tariff Number,Tariff Number,Tarifnummer
 apps/erpnext/erpnext/stock/doctype/item/item.js +39,Projected,Geplant
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +218,Serial No {0} does not belong to Warehouse {1},Seriennummer {0} gehört nicht zu Lager {1}
@@ -3086,7 +3086,7 @@ apps/erpnext/erpnext/accounts/utils.py +501,Please set default {0} in Company {1
 DocType: Cheque Print Template,Starting position from top edge,Ausgangsposition von der Oberkante
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +29,Same supplier has been entered multiple times,Same Anbieter wurde mehrmals eingegeben
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Bruttogewinn / Verlust
-DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Lieferantenauftrags-Artikel geliefert
+DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Bestell-Artikel geliefert
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Firmenname kann keine Firma sein
 apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Briefköpfe für Druckvorlagen
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Bezeichnungen für Druckvorlagen, z. B. Proforma-Rechnung"
@@ -3103,7 +3103,7 @@ DocType: Manufacturer,Manufacturers used in Items,Hersteller im Artikel verwende
 apps/erpnext/erpnext/accounts/general_ledger.py +145,Please mention Round Off Cost Center in Company,Bitte Abschlusskostenstelle in Firma vermerken
 DocType: Purchase Invoice,Terms,Geschäftsbedingungen
 DocType: Academic Term,Term Name,Zeit Namen
-DocType: Buying Settings,Purchase Order Required,Lieferantenauftrag erforderlich
+DocType: Buying Settings,Purchase Order Required,Bestellung erforderlich
 ,Item-wise Sales History,Artikelbezogene Verkaufshistorie
 DocType: Expense Claim,Total Sanctioned Amount,Summe genehmigter Beträge
 ,Purchase Analytics,Einkaufsanalyse
@@ -3842,7 +3842,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +136,Please find attached
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +34,Bank Statement balance as per General Ledger,Kontoauszug Bilanz nach Hauptbuch
 DocType: Job Applicant,Applicant Name,Bewerbername
 DocType: Authorization Rule,Customer / Item Name,Kunde / Artikelname
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -3876,7 +3876,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +76,Dispatch,Versand
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +71,Max discount allowed for item: {0} is {1}%,Max erlaubter Rabatt für Artikel: {0} ist {1}%
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +173,Net Asset value as on,Nettoinventarwert als auf
 DocType: Account,Receivable,Forderung
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +278,Row #{0}: Not allowed to change Supplier as Purchase Order already exists,"Zeile #{0}: Es ist nicht erlaubt den Lieferanten zu wechseln, da bereits ein Lieferantenauftrag vorhanden ist"
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +278,Row #{0}: Not allowed to change Supplier as Purchase Order already exists,"Zeile #{0}: Es ist nicht erlaubt den Lieferanten zu wechseln, da bereits eine Bestellung vorhanden ist"
 DocType: Accounts Settings,Role that is allowed to submit transactions that exceed credit limits set.,"Rolle, welche Transaktionen, die das gesetzte Kreditlimit überschreiten, übertragen darf."
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +904,Select Items to Manufacture,Wählen Sie die Elemente Herstellung
 apps/erpnext/erpnext/accounts/page/pos/pos.js +909,"Master data syncing, it might take some time","Stammdaten-Synchronisierung, kann es einige Zeit dauern,"
@@ -3977,7 +3977,7 @@ DocType: BOM,Manufacturing User,Nutzer Fertigung
 DocType: Purchase Invoice,Raw Materials Supplied,Gelieferte Rohmaterialien
 DocType: Purchase Invoice,Recurring Print Format,Wiederkehrendes Druckformat
 DocType: C-Form,Series,Nummernkreise
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +61,Expected Delivery Date cannot be before Purchase Order Date,Voraussichtlicher Liefertermin kann nicht vor dem Datum des Lieferantenauftrags liegen
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +61,Expected Delivery Date cannot be before Purchase Order Date,Voraussichtlicher Liefertermin kann nicht vor dem Datum der Bestellung liegen
 DocType: Appraisal,Appraisal Template,Bewertungsvorlage
 DocType: Item Group,Item Classification,Artikeleinteilung
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +93,Business Development Manager,Leiter der kaufmännischen Abteilung
@@ -4195,7 +4195,7 @@ DocType: Purchase Invoice Item,Rejected Serial No,Abgelehnte Seriennummer
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +82,Year start date or end date is overlapping with {0}. To avoid please set company,Jahresbeginn oder Enddatum überlappt mit {0}. Um dies zu verhindern setzen Sie eine Firma.
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +157,Start date should be less than end date for Item {0},Startdatum sollte für den Artikel {0} vor dem Enddatum liegen
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Beispiel: ABCD.##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Beispiel: ABCD.#####
  Wenn ""Serie"" eingestellt ist und ""Seriennummer"" in den Transaktionen nicht aufgeführt ist, dann wird eine Seriennummer automatisch auf der Grundlage dieser Serie erstellt. Wenn immer explizit Seriennummern für diesen Artikel aufgeführt werden sollen, muss das Feld leer gelassen werden."
 DocType: Upload Attendance,Upload Attendance,Anwesenheit hochladen
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +302,BOM and Manufacturing Quantity are required,Stückliste und Fertigungsmenge werden benötigt
@@ -4286,7 +4286,7 @@ apps/erpnext/erpnext/accounts/doctype/asset_movement/asset_movement.py +28,Sourc
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +517,Posting date and posting time is mandatory,Buchungsdatum und Buchungszeit sind zwingend erfoderlich
 apps/erpnext/erpnext/config/buying.py +76,Tax template for buying transactions.,Steuervorlage für Einkaufstransaktionen
 ,Item Prices,Artikelpreise
-DocType: Purchase Order,In Words will be visible once you save the Purchase Order.,"""In Worten"" wird sichtbar, sobald Sie den Lieferantenauftrag speichern."
+DocType: Purchase Order,In Words will be visible once you save the Purchase Order.,"""In Worten"" wird sichtbar, sobald Sie die Bestellung speichern."
 DocType: Period Closing Voucher,Period Closing Voucher,Periodenabschlussbeleg
 apps/erpnext/erpnext/config/selling.py +67,Price List master.,Preislisten-Vorlagen
 DocType: Task,Review Date,Überprüfungsdatum

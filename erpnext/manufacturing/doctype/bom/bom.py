@@ -281,12 +281,15 @@ class BOM(WebsiteGenerator):
 
 		return bom_list
 
-	def traverse_tree(self, bom_list=[]):
+	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
 			return [cstr(d[0]) for d in frappe.db.sql("""select bom_no from `tabBOM Item`
 				where parent = %s and ifnull(bom_no, '') != ''""", bom_no)]
 
 		count = 0
+		if not bom_list:
+			bom_list = []
+		
 		if self.name not in bom_list:
 			bom_list.append(self.name)
 

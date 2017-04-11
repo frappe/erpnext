@@ -44,30 +44,30 @@ class TestStockEntry(unittest.TestCase):
 
 		make_stock_entry(item_code=item_code, target=warehouse, qty=1, basic_rate=10)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
-		self.assertEqual([[1, 10]], eval(sle.stock_queue))
+		self.assertEqual([[1, 10]], frappe.safe_eval(sle.stock_queue))
 
 		# negative qty
 		make_stock_entry(item_code=item_code, source=warehouse, qty=2, basic_rate=10)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 
-		self.assertEqual([[-1, 10]], eval(sle.stock_queue))
+		self.assertEqual([[-1, 10]], frappe.safe_eval(sle.stock_queue))
 
 		# further negative
 		make_stock_entry(item_code=item_code, source=warehouse, qty=1)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 
-		self.assertEqual([[-2, 10]], eval(sle.stock_queue))
+		self.assertEqual([[-2, 10]], frappe.safe_eval(sle.stock_queue))
 
 		# move stock to positive
 		make_stock_entry(item_code=item_code, target=warehouse, qty=3, basic_rate=20)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
-		self.assertEqual([[1, 20]], eval(sle.stock_queue))
+		self.assertEqual([[1, 20]], frappe.safe_eval(sle.stock_queue))
 
 		# incoming entry with diff rate
 		make_stock_entry(item_code=item_code, target=warehouse, qty=1, basic_rate=30)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 
-		self.assertEqual([[1, 20],[1, 30]], eval(sle.stock_queue))
+		self.assertEqual([[1, 20],[1, 30]], frappe.safe_eval(sle.stock_queue))
 
 		frappe.db.set_default("allow_negative_stock", 0)
 

@@ -127,6 +127,8 @@ schools.StudentsEditor = Class.extend({
 					function() {	//ifyes
 						frappe.call({
 							method: "erpnext.schools.api.mark_attendance",
+							freeze: true,
+							freeze_message: "Marking attendance",
 							args: {
 								"students_present": students_present,
 								"students_absent": students_absent,
