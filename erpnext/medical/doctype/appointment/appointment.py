@@ -93,6 +93,11 @@ def set_open_appointments():
 	today = getdate()
 	frappe.db.sql("""update `tabAppointment` set status='Open' where status = 'Scheduled' and appointment_date = %s""",(today))
 
+@frappe.whitelist()
+def set_pending_appointments():
+	today = getdate()
+	frappe.db.sql("""update `tabAppointment` set status='Pending' where status in ('Scheduled','Open') and appointment_date < %s""",(today))
+
 def confirm_sms(doc):
 	if (frappe.db.get_value("OP Settings", None, "app_con")=='1'):
 		message = frappe.db.get_value("OP Settings", None, "app_con_msg")
