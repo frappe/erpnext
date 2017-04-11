@@ -150,9 +150,12 @@ var show_availability = function(frm, result){
 	});
 	var html_field = d.fields_dict.availability.$wrapper;
 	html_field.empty();
-
 	var list = ''
 	$.each(result, function(i, v) {
+		if(!v[0]){
+			$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(physician)s not available</div></div>', {physician: i})).appendTo(html_field);
+			return
+		}
 		if(v[0]["msg"]){
 			var message = $(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: v[0]["msg"]})).appendTo(html_field);
 			return
