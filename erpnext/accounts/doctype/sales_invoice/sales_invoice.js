@@ -3,6 +3,8 @@
 
 // print heading
 cur_frm.pformat.print_heading = 'Invoice';
+cur_frm.add_fetch('project', 'payment_terms', 'payment_terms');
+cur_frm.add_fetch('payment_terms', 'debit_to', 'debit_to');
 
 {% include 'erpnext/selling/sales_common.js' %};
 
@@ -286,6 +288,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		this.frm.refresh_fields();
 	}
+
 });
 
 // for backward compatibility: combine new and previous states
@@ -293,6 +296,51 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 
 // Hide Fields
 // ------------
+cur_frm.cscript.custom_total_from_project_cost = function(doc) {
+		frappe.call({
+				method: "set_items_by_project",
+				doc:doc,
+				callback: function(r) {
+				console.log(r.message)
+				cur_frm.refresh_field('items');	
+				}
+			});
+}
+cur_frm.cscript.custom_payment_term_unit = function(doc) {
+	frappe.call({
+				method: "get_payment_units_share",
+				doc:doc,
+				callback: function(r) {
+				console.log(r.message)
+				cur_frm.set_value("share_payment_terms",r.message)		
+				}
+			});
+	frappe.call({
+				method: "set_items_by_project",
+				doc:doc,
+				callback: function(r) {
+				console.log(r.message)
+				cur_frm.refresh_field('items');	
+				}
+			});
+}
+cur_frm.cscript.custom_payment_terms = function(doc) {
+	frappe.call({
+				method: "get_payment_units",
+				doc:doc,
+				callback: function(r) {
+				console.log(r.message)
+				 var options = [];
+				 (r.message || []).forEach(function(row){   // start a loop over all options in the response, or in a empty list;
+					 console.log( row.key,row.value)
+					 console.log( "row",row)
+				   options.push({'value': row["name"], 'label': row["Term"]}) // makes a option entry 'value' and 'label'
+				 });
+				cur_frm.set_df_property('payment_term_unit', 'options', options);
+				cur_frm.refresh_field('payment_term_unit');
+				}
+			});
+}
 cur_frm.cscript.hide_fields = function(doc) {
 	parent_fields = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
 		'advances', 'sales_partner', 'commission_rate', 'total_commission', 'advances', 'from_date', 'to_date'];

@@ -27,6 +27,11 @@ def get_data():
 					"description": _("Bank/Cash transactions against party or for internal transfer")
 				},
 				{
+					"type": "doctype",
+					"name": "Payment Terms",
+					"description": _("Payment Terms")
+				},
+				{
 					"type": "page",
 					"name": "pos",
 					"label": _("POS"),

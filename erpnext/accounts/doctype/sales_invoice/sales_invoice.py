@@ -87,7 +87,29 @@ class SalesInvoice(SellingController):
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
 		self.set_status()
-
+	
+	def set_items_by_project(self):
+		if self.total_from_project_cost and  self.payment_terms and  self.payment_term_unit:
+			payment_terms= frappe.get_doc("Payment Terms",{"name":self.payment_terms})
+			payment_term_unit = frappe.get_doc("Payment Term Unit",{"name":self.payment_term_unit})
+			self.items =[]
+			child = self.append('items', {})
+			child.income_account = payment_term_unit.income_account
+			
+		
+	def get_payment_units_share(self):
+		if self.payment_term_unit :
+			p_options= frappe.get_doc("Payment Term Unit",{"name":self.payment_term_unit})
+			return p_options.payment_percentage
+		else:
+			return 0.0
+			
+	def get_payment_units(self):
+		if self.payment_terms :
+			p_options= frappe.get_list("Payment Term Unit", fields=["Term", "name"], filters={"parent":self.payment_terms})
+			return p_options
+		else:
+			return {}
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 
@@ -757,6 +779,8 @@ class SalesInvoice(SellingController):
 			self.set(fieldname, reference_doc.get(fieldname))
 
 		self.due_date = None
+	
+
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

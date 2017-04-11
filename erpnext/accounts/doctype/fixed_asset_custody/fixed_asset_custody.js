@@ -1,6 +1,8 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+
+cur_frm.add_fetch("fixed_asset", "image", "image");
 cur_frm.fields_dict['fixed_asset'].get_query = function(doc) {
     return {
         filters: [
