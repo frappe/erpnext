@@ -20,7 +20,8 @@ class LabTestTemplate(Document):
 		self.reload()
 
 	def after_insert(self):
-		create_item_from_template(self)
+		if not self.item:
+			create_item_from_template(self)
 
 	#Call before delete the template
 	def on_trash(self):
