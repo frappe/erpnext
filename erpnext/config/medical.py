@@ -28,6 +28,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Procedure Appointment",
+					"description": _("Procedure Appointments"),
+				},
+				{
+					"type": "doctype",
 					"name": "Procedure",
 					"description": _("Procedures"),
 				},
