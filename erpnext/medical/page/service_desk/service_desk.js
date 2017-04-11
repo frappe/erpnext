@@ -169,8 +169,8 @@ frappe.medical.ServiceDesk = Class.extend({
 			});
 		}else if (div_id === "procedure") {
 			frappe.call({
-				method: "erpnext.medical.doctype.procedure.procedure.create_invoice",
-				args: {company: me.company.get_value(), patient: me.patient.get_value(), procedures: doc_ids, prescriptions: prescriptions},
+				method: "erpnext.medical.doctype.procedure_appointment.procedure_appointment.create_invoice",
+				args: {company: me.company.get_value(), patient: me.patient.get_value(), procedure_appointment: doc_ids, prescriptions: prescriptions},
 				callback: function (r) {
 					if(!r.exe){
 						me.show_invoice_created(r.message)
