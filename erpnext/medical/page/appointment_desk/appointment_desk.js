@@ -21,6 +21,7 @@ frappe.medical.Appointment = Class.extend({
 			method: "erpnext.medical.page.appointment_desk.appointment_desk.get_appointments",
 			args: {date: date, physician: me.physician.get_value(), dept: me.department.get_value()},
 			callback: function (r) {
+				me.wrapper.empty();
 				if(r.message){
 					me.make_list(r.message)
 				}else{
