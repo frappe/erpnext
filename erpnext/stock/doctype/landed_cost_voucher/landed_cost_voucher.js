@@ -3,34 +3,41 @@
 
 
 frappe.provide("erpnext.stock");
-frappe.require("assets/erpnext/js/controllers/stock_controller.js");
 
 erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	setup: function() {
 		var me = this;
-		this.frm.fields_dict.purchase_receipts.grid.get_field('purchase_receipt').get_query =
-			function() {
+		this.frm.fields_dict.purchase_receipts.grid.get_field('receipt_document').get_query =
+			function(doc, cdt ,cdn) {
+				var d = locals[cdt][cdn]
+
+				var filters = [
+					[d.receipt_document_type, 'docstatus', '=', '1'],
+					[d.receipt_document_type, 'company', '=', me.frm.doc.company],
+				]
+
+				if(d.receipt_document_type == "Purchase Invoice") {
+					filters.push(["Purchase Invoice", "update_stock", "=", "1"])
+				}
+
 				if(!me.frm.doc.company) msgprint(__("Please enter company first"));
 				return {
-					filters:[
-						['Purchase Receipt', 'docstatus', '=', '1'],
-						['Purchase Receipt', 'company', '=', me.frm.doc.company],
-					]
+					filters:filters
 				}
 		};
 
-		this.frm.add_fetch("purchase_receipt", "supplier", "supplier");
-		this.frm.add_fetch("purchase_receipt", "posting_date", "posting_date");
-		this.frm.add_fetch("purchase_receipt", "base_grand_total", "grand_total");
+		this.frm.add_fetch("receipt_document", "supplier", "supplier");
+		this.frm.add_fetch("receipt_document", "posting_date", "posting_date");
+		this.frm.add_fetch("receipt_document", "base_grand_total", "grand_total");
 
 	},
 
-	refresh: function() {
+	refresh: function(frm) {
 		var help_content = [
 			'<br><br>',
 			'<table class="table table-bordered" style="background-color: #f9f9f9;">',
 				'<tr><td>',
-					'<h4><i class="icon-hand-right"></i> ',
+					'<h4><i class="fa fa-hand-right"></i> ',
 						__('Notes'),
 					':</h4>',
 					'<ul>',
@@ -63,12 +70,15 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		} else {
 			return this.frm.call({
 				doc: me.frm.doc,
-				method: "get_items_from_purchase_receipts"
+				method: "get_items_from_purchase_receipts",
+				callback: function(r, rt) {
+					me.set_applicable_charges_for_item();
+				}
 			});
 		}
 	},
 
-	amount: function() {
+	amount: function(frm) {
 		this.set_total_taxes_and_charges();
 		this.set_applicable_charges_for_item();
 	},
@@ -83,17 +93,23 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	set_applicable_charges_for_item: function() {
 		var me = this;
+
 		if(this.frm.doc.taxes.length) {
+			
 			var total_item_cost = 0.0;
+			var based_on = this.frm.doc.distribute_charges_based_on.toLowerCase();
 			$.each(this.frm.doc.items || [], function(i, d) {
-				total_item_cost += flt(d.amount)
+				total_item_cost += flt(d[based_on])
 			});
 
 			$.each(this.frm.doc.items || [], function(i, item) {
-				item.applicable_charges = flt(item.amount) *  flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)
+				item.applicable_charges = flt(item[based_on]) * flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)			
 			});
 			refresh_field("items");
 		}
+	},
+	distribute_charges_based_on: function (frm) {
+		this.set_applicable_charges_for_item();
 	}
 
 });

@@ -4,72 +4,57 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.desk.reportview import execute as runreport
+from erpnext.hr.doctype.leave_application.leave_application \
+	import get_leave_allocation_records, get_leave_balance_on, get_approved_leaves_for_period
+
 
 def execute(filters=None):
-	if not filters: filters = {}
-
-	employee_filters = {
-		"status": "Active"
-	}
+	leave_types = frappe.db.sql_list("select name from `tabLeave Type` order by name asc")
 	
-	if filters.get("company"):
-		filters["company"] = filters.company
-
-	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"],
-		filters=employee_filters, limit_page_length=None)
-
-	if not employees:
-		frappe.throw(_("No employee found!"))
-
-	leave_types = frappe.db.sql_list("select name from `tabLeave Type`")
-
-	if filters.get("fiscal_year"):
-		fiscal_years = [filters["fiscal_year"]]
-	else:
-		fiscal_years = frappe.db.sql_list("select name from `tabFiscal Year` order by name desc")
-
-	employee_names = [d.name for d in employees]
-
-	allocations = frappe.db.sql("""select employee, fiscal_year, leave_type, total_leaves_allocated
-	 	from `tabLeave Allocation`
-		where docstatus=1 and employee in (%s)""" %
-		','.join(['%s']*len(employee_names)), employee_names, as_dict=True)
-
-	applications = frappe.db.sql("""select employee, fiscal_year, leave_type,
-			SUM(total_leave_days) as leaves
-		from `tabLeave Application`
-		where status="Approved" and docstatus = 1 and employee in (%s)
-		group by employee, fiscal_year, leave_type""" %
-			','.join(['%s']*len(employee_names)), employee_names, as_dict=True)
-
+	columns = get_columns(leave_types)
+	data = get_data(filters, leave_types)
+	
+	return columns, data
+	
+def get_columns(leave_types):
 	columns = [
-		_("Fiscal Year"), _("Employee") + ":Link/Employee:150", _("Employee Name") + "::200", _("Department") +"::150"
+		_("Employee") + ":Link/Employee:150", 
+		_("Employee Name") + "::200", 
+		_("Department") +"::150"
 	]
 
 	for leave_type in leave_types:
-		columns.append(_(leave_type) + " " + _("Allocated") + ":Float")
-		columns.append(_(leave_type) + " " + _("Taken") + ":Float")
-		columns.append(_(leave_type) + " " + _("Balance") + ":Float")
+		columns.append(_(leave_type) + " " + _("Taken") + ":Float:160")
+		columns.append(_(leave_type) + " " + _("Balance") + ":Float:160")
+	
+	return columns
+	
+def get_data(filters, leave_types):
+	user = frappe.session.user
+	allocation_records_based_on_to_date = get_leave_allocation_records(filters.to_date)
 
-	data = {}
-	for d in allocations:
-		data.setdefault((d.fiscal_year, d.employee,
-			d.leave_type), frappe._dict()).allocation = d.total_leaves_allocated
+	active_employees = frappe.get_all("Employee", 
+		filters = { "status": "Active", "company": filters.company}, 
+		fields = ["name", "employee_name", "department", "user_id"])
+	
+	data = []
+	for employee in active_employees:
+		leave_approvers = [l.leave_approver for l in frappe.db.sql("""select leave_approver from `tabEmployee Leave Approver` where parent = %s""",
+							(employee.name),as_dict=True)]
+		if (len(leave_approvers) and user in leave_approvers) or (user in ["Administrator", employee.user_id]) or ("HR Manager" in frappe.get_roles(user)):
+			row = [employee.name, employee.employee_name, employee.department]
 
-	for d in applications:
-		data.setdefault((d.fiscal_year, d.employee,
-			d.leave_type), frappe._dict()).leaves = d.leaves
-
-	result = []
-	for fiscal_year in fiscal_years:
-		for employee in employees:
-			row = [fiscal_year, employee.name, employee.employee_name, employee.department]
-			result.append(row)
 			for leave_type in leave_types:
-				tmp = data.get((fiscal_year, employee.name, leave_type), frappe._dict())
-				row.append(tmp.allocation or 0)
-				row.append(tmp.leaves or 0)
-				row.append((tmp.allocation or 0) - (tmp.leaves or 0))
+				# leaves taken
+				leaves_taken = get_approved_leaves_for_period(employee.name, leave_type,
+					filters.from_date, filters.to_date)
+	
+				# closing balance
+				closing = get_leave_balance_on(employee.name, leave_type, filters.to_date,
+					allocation_records_based_on_to_date.get(employee.name, frappe._dict()))
 
-	return columns, result
+				row += [leaves_taken, closing]
+			
+			data.append(row)
+		
+	return data

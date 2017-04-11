@@ -9,7 +9,7 @@ frappe.query_reports["Customer Credit Balance"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"reqd": 1,
-			"default": frappe.defaults.get_user_default("company")
+			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
 			"fieldname":"customer",

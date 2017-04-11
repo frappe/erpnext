@@ -1,32 +1,128 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.require("assets/erpnext/js/controllers/stock_controller.js");
-frappe.require("assets/erpnext/js/utils.js");
 frappe.provide("erpnext.stock");
 
-frappe.ui.form.on("Stock Reconciliation", "get_items", function(frm) {
-	frappe.prompt({label:"Warehouse", fieldtype:"Link", options:"Warehouse", reqd: 1},
-		function(data) {
+frappe.ui.form.on("Stock Reconciliation", {
+	onload: function(frm) {
+		frm.add_fetch("item_code", "item_name", "item_name");
+
+		// end of life
+		frm.set_query("item_code", "items", function(doc, cdt, cdn) {
+			return {
+				query: "erpnext.controllers.queries.item_query",
+				filters:{
+					"is_stock_item": 1,
+					"has_serial_no": 0
+				}
+			}
+		});
+
+		if (frm.doc.company) {
+			erpnext.queries.setup_queries(frm, "Warehouse", function() {
+				return erpnext.queries.warehouse(frm.doc);
+			});
+		}
+	},
+
+	refresh: function(frm) {
+		if(frm.doc.docstatus < 1) {
+			frm.add_custom_button(__("Items"), function() {
+				frm.events.get_items(frm);
+			});
+		}
+	},
+
+	get_items: function(frm) {
+		frappe.prompt({label:"Warehouse", fieldtype:"Link", options:"Warehouse", reqd: 1},
+			function(data) {
+				frappe.call({
+					method:"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",
+					args: {
+						warehouse: data.warehouse,
+						posting_date: frm.doc.posting_date,
+						posting_time: frm.doc.posting_time
+					},
+					callback: function(r) {
+						var items = [];
+						frm.clear_table("items");
+						for(var i=0; i< r.message.length; i++) {
+							var d = frm.add_child("items");
+							$.extend(d, r.message[i]);
+							if(!d.qty) d.qty = null;
+							if(!d.valuation_rate) d.valuation_rate = null;
+						}
+						frm.refresh_field("items");
+					}
+				});
+			}
+		, __("Get Items"), __("Update"));
+	},
+
+	set_valuation_rate_and_qty: function(frm, cdt, cdn) {
+		var d = frappe.model.get_doc(cdt, cdn);
+		if(d.item_code && d.warehouse) {
 			frappe.call({
-				method:"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",
+				method: "erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_stock_balance_for",
 				args: {
-					warehouse: data.warehouse,
+					item_code: d.item_code,
+					warehouse: d.warehouse,
 					posting_date: frm.doc.posting_date,
 					posting_time: frm.doc.posting_time
 				},
 				callback: function(r) {
-					var items = [];
-					frm.clear_table("items");
-					for(var i=0; i< r.message.length; i++) {
-						var d = frm.add_child("items");
-						$.extend(d, r.message[i]);
-					}
-					frm.refresh_field("items");
+					frappe.model.set_value(cdt, cdn, "qty", r.message.qty);
+					frappe.model.set_value(cdt, cdn, "valuation_rate", r.message.rate);
+					frappe.model.set_value(cdt, cdn, "current_qty", r.message.qty);
+					frappe.model.set_value(cdt, cdn, "current_valuation_rate", r.message.rate);
+					frappe.model.set_value(cdt, cdn, "current_amount", r.message.rate * r.message.qty);
+					frappe.model.set_value(cdt, cdn, "amount", r.message.rate * r.message.qty);
+
 				}
 			});
 		}
-	, __("Get Items"), __("Update"));
+	},
+	set_item_code: function(doc, cdt, cdn) {
+		var d = frappe.model.get_doc(cdt, cdn);
+		if (d.barcode) {
+			frappe.call({
+				method: "erpnext.stock.get_item_details.get_item_code",
+				args: {"barcode": d.barcode },
+				callback: function(r) {
+					if (!r.exe){
+						frappe.model.set_value(cdt, cdn, "item_code", r.message);
+					}
+				}
+			});
+		}
+	},
+	set_amount_quantity: function(doc, cdt, cdn) {
+		var d = frappe.model.get_doc(cdt, cdn);
+		if (d.qty & d.valuation_rate) {
+			frappe.model.set_value(cdt, cdn, "amount", flt(d.qty) * flt(d.valuation_rate));
+			frappe.model.set_value(cdt, cdn, "quantity_difference", flt(d.qty) - flt(d.current_qty));
+			frappe.model.set_value(cdt, cdn, "amount_difference", flt(d.amount) - flt(d.current_amount));
+		}
+	}
+});
+
+frappe.ui.form.on("Stock Reconciliation Item", {
+	barcode: function(frm, cdt, cdn) {
+		frm.events.set_item_code(frm, cdt, cdn);
+	},
+	warehouse: function(frm, cdt, cdn) {
+		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
+	},
+	item_code: function(frm, cdt, cdn) {
+		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
+	},
+	qty: function(frm, cdt, cdn) {
+		frm.events.set_amount_quantity(frm, cdt, cdn);
+	},
+	valuation_rate: function(frm, cdt, cdn) {
+		frm.events.set_amount_quantity(frm, cdt, cdn);
+	}
+
 });
 
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
@@ -36,26 +132,29 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 
 	set_default_expense_account: function() {
 		var me = this;
-
-		if (sys_defaults.auto_accounting_for_stock && !this.frm.doc.expense_account) {
-			return this.frm.call({
-				method: "erpnext.accounts.utils.get_company_default",
-				args: {
-					"fieldname": "stock_adjustment_account",
-					"company": this.frm.doc.company
-				},
-				callback: function(r) {
-					if (!r.exc) {
-						me.frm.set_value("expense_account", r.message);
+		if(this.frm.doc.company) {
+			if (sys_defaults.auto_accounting_for_stock && !this.frm.doc.expense_account) {
+				return this.frm.call({
+					method: "erpnext.accounts.utils.get_company_default",
+					args: {
+						"fieldname": "stock_adjustment_account",
+						"company": this.frm.doc.company
+					},
+					callback: function(r) {
+						if (!r.exc) {
+							me.frm.set_value("expense_account", r.message);
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	},
 
 	setup: function() {
 		var me = this;
 		this.frm.get_docfield("items").allow_bulk_edit = 1;
+
+		this.setup_posting_date_time_check();
 
 		if (sys_defaults.auto_accounting_for_stock) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
@@ -92,19 +191,3 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 });
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});
-
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}
-
-cur_frm.cscript.posting_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}
-
-cur_frm.fields_dict.items.grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
-	return {
-		filters:[
-			['Item', 'end_of_life', '>=', frappe.datetime.nowdate()]
-		]
-	}
-}

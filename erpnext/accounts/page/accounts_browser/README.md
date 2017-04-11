@@ -1,1 +1,0 @@
-Tree view browser for Chart of Accounts and Chart of Cost Centers

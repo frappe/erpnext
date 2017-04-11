@@ -25,18 +25,19 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		var doc = this.frm.doc;
 		erpnext.toggle_naming_series();
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'name', doctype: 'Lead'}
 
 		if(!this.frm.doc.__islocal && this.frm.doc.__onload && !this.frm.doc.__onload.is_customer) {
-			this.frm.add_custom_button(__("Create Customer"), this.create_customer,
-				frappe.boot.doctype_icons["Customer"], "btn-default");
-			this.frm.add_custom_button(__("Create Opportunity"), this.create_opportunity,
-				frappe.boot.doctype_icons["Opportunity"], "btn-default");
-			this.frm.add_custom_button(__("Make Quotation"), this.make_quotation,
-				frappe.boot.doctype_icons["Quotation"], "btn-default");
+			this.frm.add_custom_button(__("Customer"), this.create_customer, __("Make"));
+			this.frm.add_custom_button(__("Opportunity"), this.create_opportunity, __("Make"));
+			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 
 		if(!this.frm.doc.__islocal) {
-			erpnext.utils.render_address_and_contact(cur_frm);
+			frappe.geo.render_address_and_contact(cur_frm);
+		} else {
+			frappe.geo.clear_address_and_contact(cur_frm);
 		}
 	},
 
@@ -53,7 +54,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			frm: cur_frm
 		})
 	},
-	
+
 	make_quotation: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_quotation",

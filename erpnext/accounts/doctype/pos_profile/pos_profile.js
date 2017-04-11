@@ -1,9 +1,19 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+{% include "erpnext/public/js/controllers/accounts.js" %}
+
 frappe.ui.form.on("POS Profile", "onload", function(frm) {
 	frm.set_query("selling_price_list", function() {
-		return { filter: { selling: 1 } };
+		return { filters: { selling: 1 } };
+	});
+
+	frm.set_query("print_format", function() {
+		return { filters: { doc_type: "Sales Invoice", print_format_type: "Js"} };
+	});
+
+	erpnext.queries.setup_queries(frm, "Warehouse", function() {
+		return erpnext.queries.warehouse(frm.doc);
 	});
 
 	frm.call({
@@ -15,18 +25,6 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 		}
 	});
 });
-
-//cash bank account
-//------------------------------------
-cur_frm.fields_dict['cash_bank_account'].get_query = function(doc,cdt,cdn) {
-	return{
-		filters:{
-			'report_type': "Balance Sheet",
-			'is_group': 0,
-			'company': doc.company
-		}
-	}
-}
 
 // Income Account
 // --------------------------------

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import unittest, frappe
 from frappe.utils import flt
-from erpnext.accounts.utils import get_actual_expense, BudgetError, get_fiscal_year
+from erpnext.exceptions import InvalidAccountCurrency
 
 
 class TestJournalEntry(unittest.TestCase):
@@ -95,102 +95,114 @@ class TestJournalEntry(unittest.TestCase):
 
 		set_perpetual_inventory(0)
 
-	def test_monthly_budget_crossed_ignore(self):
-		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
+	def test_multi_currency(self):
+		jv = make_journal_entry("_Test Bank USD - _TC",
+			"_Test Bank - _TC", 100, exchange_rate=50, save=False)
 
-		self.set_total_expense_zero("2013-02-28")
+		jv.get("accounts")[1].credit_in_account_currency = 5000
+		jv.submit()
 
-		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Account Bank Account - _TC", 40000, "_Test Cost Center - _TC", submit=True)
+		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
+			order by account asc""", jv.name, as_dict=1)
 
-		self.assertTrue(frappe.db.get_value("GL Entry",
-			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
+		self.assertTrue(gl_entries)
 
-	def test_monthly_budget_crossed_stop(self):
-		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
+		expected_values = {
+			"_Test Bank USD - _TC": {
+				"account_currency": "USD",
+				"debit": 5000,
+				"debit_in_account_currency": 100,
+				"credit": 0,
+				"credit_in_account_currency": 0
+			},
+			"_Test Bank - _TC": {
+				"account_currency": "INR",
+				"debit": 0,
+				"debit_in_account_currency": 0,
+				"credit": 5000,
+				"credit_in_account_currency": 5000
+			}
+		}
 
-		self.set_total_expense_zero("2013-02-28")
+		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
+			for i, gle in enumerate(gl_entries):
+				self.assertEquals(expected_values[gle.account][field], gle[field])
 
-		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Account Bank Account - _TC", 40000, "_Test Cost Center - _TC")
+		# cancel
+		jv.cancel()
 
-		self.assertRaises(BudgetError, jv.submit)
+		gle = frappe.db.sql("""select name from `tabGL Entry`
+			where voucher_type='Sales Invoice' and voucher_no=%s""", jv.name)
 
-		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
+		self.assertFalse(gle)
 
-	def test_yearly_budget_crossed_stop(self):
-		self.test_monthly_budget_crossed_ignore()
+	def test_disallow_change_in_account_currency_for_a_party(self):
+		# create jv in USD
+		jv = make_journal_entry("_Test Bank USD - _TC",
+			"_Test Receivable USD - _TC", 100, save=False)
 
-		frappe.db.set_value("Company", "_Test Company", "yearly_bgt_flag", "Stop")
-
-		self.set_total_expense_zero("2013-02-28")
-
-		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Account Bank Account - _TC", 150000, "_Test Cost Center - _TC")
-
-		self.assertRaises(BudgetError, jv.submit)
-
-		frappe.db.set_value("Company", "_Test Company", "yearly_bgt_flag", "Ignore")
-
-	def test_monthly_budget_on_cancellation(self):
-		self.set_total_expense_zero("2013-02-28")
-
-		jv1 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Account Bank Account - _TC", 20000, "_Test Cost Center - _TC", submit=True)
-
-		self.assertTrue(frappe.db.get_value("GL Entry",
-			{"voucher_type": "Journal Entry", "voucher_no": jv1.name}))
-
-		jv2 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Account Bank Account - _TC", 20000, "_Test Cost Center - _TC", submit=True)
-
-		self.assertTrue(frappe.db.get_value("GL Entry",
-			{"voucher_type": "Journal Entry", "voucher_no": jv2.name}))
-
-		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
-
-		self.assertRaises(BudgetError, jv1.cancel)
-
-		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
-
-	def get_actual_expense(self, monthly_end_date):
-		return get_actual_expense({
-			"account": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"monthly_end_date": monthly_end_date,
-			"company": "_Test Company",
-			"fiscal_year": get_fiscal_year(monthly_end_date)[0]
+		jv.accounts[1].update({
+			"party_type": "Customer",
+			"party": "_Test Customer USD"
 		})
 
-	def set_total_expense_zero(self, posting_date):
-		existing_expense = self.get_actual_expense(posting_date)
-		make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Account Bank Account - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True)
+		jv.submit()
 
-def make_journal_entry(account1, account2, amount, cost_center=None, submit=False):
+		# create jv in USD, but account currency in INR
+		jv = make_journal_entry("_Test Bank - _TC",
+			"_Test Receivable - _TC", 100, save=False)
+
+		jv.accounts[1].update({
+			"party_type": "Customer",
+			"party": "_Test Customer USD"
+		})
+
+		self.assertRaises(InvalidAccountCurrency, jv.submit)
+
+		# back in USD
+		jv = make_journal_entry("_Test Bank USD - _TC",
+			"_Test Receivable USD - _TC", 100, save=False)
+
+		jv.accounts[1].update({
+			"party_type": "Customer",
+			"party": "_Test Customer USD"
+		})
+
+		jv.submit()
+
+def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False, project=None):
+	if not cost_center:
+		cost_center = "_Test Cost Center - _TC"
+
 	jv = frappe.new_doc("Journal Entry")
-	jv.posting_date = "2013-02-14"
+	jv.posting_date = posting_date or "2013-02-14"
 	jv.company = "_Test Company"
-	jv.fiscal_year = "_Test Fiscal Year 2013"
 	jv.user_remark = "test"
-
+	jv.multi_currency = 1
 	jv.set("accounts", [
 		{
 			"account": account1,
 			"cost_center": cost_center,
-			"debit": amount if amount > 0 else 0,
-			"credit": abs(amount) if amount < 0 else 0,
+			"project": project,
+			"debit_in_account_currency": amount if amount > 0 else 0,
+			"credit_in_account_currency": abs(amount) if amount < 0 else 0,
+			"exchange_rate": exchange_rate
 		}, {
 			"account": account2,
 			"cost_center": cost_center,
-			"credit": amount if amount > 0 else 0,
-			"debit": abs(amount) if amount < 0 else 0,
+			"project": project,
+			"credit_in_account_currency": amount if amount > 0 else 0,
+			"debit_in_account_currency": abs(amount) if amount < 0 else 0,
+			"exchange_rate": exchange_rate
 		}
 	])
-	jv.insert()
+	if save or submit:
+		jv.insert()
 
-	if submit:
-		jv.submit()
+		if submit:
+			jv.submit()
 
 	return jv
 

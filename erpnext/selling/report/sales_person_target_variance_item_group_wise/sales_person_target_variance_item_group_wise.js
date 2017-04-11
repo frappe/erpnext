@@ -14,7 +14,12 @@ frappe.query_reports["Sales Person Target Variance Item Group-Wise"] = {
 			fieldname: "period",
 			label: __("Period"),
 			fieldtype: "Select",
-			options: "Monthly\nQuarterly\nHalf-Yearly\nYearly",
+			options: [
+				{ "value": "Monthly", "label": __("Monthly") },
+				{ "value": "Quarterly", "label": __("Quarterly") },
+				{ "value": "Half-Yearly", "label": __("Half-Yearly") },
+				{ "value": "Yearly", "label": __("Yearly") }
+			],
 			default: "Monthly"
 		},
 		{

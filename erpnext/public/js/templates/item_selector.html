@@ -1,0 +1,16 @@
+<div class="row pos-item-area">
+{% for (var i=0; i < data.length; i++) { var item = data[i]; %}
+<div class="col-xs-3 pos-item-wrapper">
+	<div class="pos-item" data-name="{{ item.name }}">
+		<div class="pos-item-image"
+			{% if(item.image) { %}style="background-image: url({{ item.image }});"{% }
+			else { %}style="background-color: {{ item.color }};"{% } %}>
+			{% if(!item.image) { %}{{ item.abbr }}{% } %}
+		</div>
+		<div class="pos-item-text">
+			<h6 class="item-code ellipsis">{{ item.name }}</h6>
+		</div>
+	</div>
+</div>
+{% } %}
+</div>

@@ -2,7 +2,7 @@
 	{%- if doc.discount_amount -%}
 		<div class="row">
 			<div class="col-xs-5 text-right">
-				<label>{{ "Discount Amount" }}</label></div>
+				<label>{{ _("Discount Amount") }}</label></div>
 			<div class="col-xs-7 text-right">
 				- {{ doc.get_formatted("discount_amount", doc) }}
 			</div>

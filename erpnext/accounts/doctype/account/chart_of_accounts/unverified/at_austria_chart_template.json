@@ -1,7 +1,6 @@
 {
     "country_code": "at",
     "name": "Austria - Chart of Accounts",
-	"is_active": "Yes",
     "tree": {
         "Summe Abschreibungen und Aufwendungen": {
             "7010 bis 7080 Abschreibungen auf das Anlageverm\u00f6gen (ausgenommen Finanzanlagen)": {},

@@ -1,18 +1,22 @@
 [
  {
   "doctype": "Holiday List",
-  "fiscal_year": "_Test Fiscal Year 2013", 
+  "from_date": "2013-01-01",
+  "to_date":"2013-12-31",
   "holidays": [
    {
-    "description": "New Year", 
+    "description": "New Year",
     "holiday_date": "2013-01-01"
    },
    {
-    "description": "Test Holiday", 
+    "description": "Republic Day",
+    "holiday_date": "2013-01-26"
+   },
+   {
+    "description": "Test Holiday",
     "holiday_date": "2013-02-01"
    }
-  ], 
-  "holiday_list_name": "_Test Holiday List", 
-  "is_default": 1
+  ],
+  "holiday_list_name": "_Test Holiday List"
  }
 ]

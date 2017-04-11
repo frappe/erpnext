@@ -7,7 +7,6 @@
   "customer_group": "_Test Customer Group", 
   "customer_name": "_Test Customer", 
   "doctype": "Quotation", 
-  "fiscal_year": "_Test Fiscal Year 2013", 
   "base_grand_total": 1000.0, 
   "grand_total": 1000.0, 
   "order_type": "Sales", 
@@ -23,7 +22,10 @@
     "item_name": "CPU", 
     "parentfield": "items", 
     "qty": 10.0, 
-    "rate": 100.0
+    "rate": 100.0,
+	"uom": "_Test UOM",
+    "stock_uom": "_Test UOM",
+	"conversion_factor": 1.0
    }
   ], 
   "quotation_to": "Customer", 

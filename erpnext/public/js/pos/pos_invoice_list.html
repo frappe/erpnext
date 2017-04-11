@@ -1,0 +1,9 @@
+<div class="pos-list-row" invoice-name = "{{name}}">
+	<div class="list-column cell subject" invoice-name = "{{name}}">
+		<input class="list-delete text-left" type="checkbox" style = "margin-right:5px">
+		<a class="grey list-id text-left customer-row" title="{{ customer }}">{%= customer %}</a>
+	</div>
+	<div class="list-column cell text-left customer-row"><span class="indicator {{data.indicator}}">{{ data.status }}</span></div>
+	<div class="list-column cell text-right customer-row">{%= paid_amount %}</div>
+	<div class="list-column cell text-right customer-row">{%= grand_total %}</div>
+</div>

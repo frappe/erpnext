@@ -1,17 +1,27 @@
 {
+ "add_total_row": 0, 
  "apply_user_permissions": 1, 
  "creation": "2013-07-30 17:28:49", 
+ "disabled": 0, 
  "docstatus": 0, 
  "doctype": "Report", 
- "idx": 1, 
+ "idx": 3, 
  "is_standard": "Yes", 
- "modified": "2015-03-30 05:33:45.353064", 
+ "modified": "2017-02-24 20:20:20.613388", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Delivered Items To Be Billed", 
  "owner": "Administrator", 
- "query": "select\n    `tabDelivery Note`.`name` as \"Delivery Note:Link/Delivery Note:120\",\n\t`tabDelivery Note`.`customer` as \"Customer:Link/Customer:120\",\n\t`tabDelivery Note`.`posting_date` as \"Date:Date\",\n\t`tabDelivery Note`.`project_name` as \"Project\",\n\t`tabDelivery Note Item`.`item_code` as \"Item:Link/Item:120\",\n\t(`tabDelivery Note Item`.`qty` - ifnull((select sum(qty) from `tabSales Invoice Item` \n\t    where `tabSales Invoice Item`.docstatus=1 and \n            `tabSales Invoice Item`.delivery_note = `tabDelivery Note`.name and\n\t        `tabSales Invoice Item`.dn_detail = `tabDelivery Note Item`.name), 0))\n\t\tas \"Qty:Float:110\",\n\t(`tabDelivery Note Item`.`base_amount` - ifnull((select sum(base_amount) from `tabSales Invoice Item` \n        where `tabSales Invoice Item`.docstatus=1 and \n            `tabSales Invoice Item`.delivery_note = `tabDelivery Note`.name and\n            `tabSales Invoice Item`.dn_detail = `tabDelivery Note Item`.name), 0))\n\t\tas \"Amount:Currency:110\",\n\t`tabDelivery Note Item`.`item_name` as \"Item Name::150\",\n\t`tabDelivery Note Item`.`description` as \"Description::200\",\n\t`tabDelivery Note`.`company` as \"Company:Link/Company:\"\nfrom `tabDelivery Note`, `tabDelivery Note Item`\nwhere\n    `tabDelivery Note`.docstatus = 1 and\n\t`tabDelivery Note`.`status` != \"Stopped\" and\n    `tabDelivery Note`.name = `tabDelivery Note Item`.parent and\n    (`tabDelivery Note Item`.qty > ifnull((select sum(qty) from `tabSales Invoice Item` \n        where `tabSales Invoice Item`.docstatus=1 and \n            `tabSales Invoice Item`.delivery_note = `tabDelivery Note`.name and\n            `tabSales Invoice Item`.dn_detail = `tabDelivery Note Item`.name), 0))\norder by `tabDelivery Note`.`name` desc", 
+ "query": "select\n    `tabDelivery Note`.`name` as \"Delivery Note:Link/Delivery Note:120\",\n\t`tabDelivery Note`.`customer` as \"Customer:Link/Customer:120\",\n\t`tabDelivery Note`.`customer_name` as \"Customer Name::150\",\n\t`tabDelivery Note`.`posting_date` as \"Date:Date\",\n\t`tabDelivery Note`.`project` as \"Project\",\n\t`tabDelivery Note Item`.`item_code` as \"Item:Link/Item:120\",\n\t(`tabDelivery Note Item`.`base_amount` - `tabDelivery Note Item`.`billed_amt`*ifnull(`tabDelivery Note`.conversion_rate, 1)) as \"Pending Amount:Currency:110\",\n\t`tabDelivery Note Item`.`item_name` as \"Item Name::150\",\n\t`tabDelivery Note Item`.`description` as \"Description::200\",\n\t`tabDelivery Note`.`company` as \"Company:Link/Company:\"\nfrom `tabDelivery Note`, `tabDelivery Note Item`\nwhere  \n    `tabDelivery Note`.name = `tabDelivery Note Item`.parent \n    and `tabDelivery Note`.docstatus = 1 \n    and `tabDelivery Note`.`status` not in (\"Stopped\", \"Closed\") \n    and `tabDelivery Note Item`.amount > 0\n    and `tabDelivery Note Item`.billed_amt < `tabDelivery Note Item`.amount\norder by `tabDelivery Note`.`name` desc", 
  "ref_doctype": "Sales Invoice", 
  "report_name": "Delivered Items To Be Billed", 
- "report_type": "Query Report"
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Accounts User"
+  }
+ ]
 }

@@ -13,128 +13,78 @@ $.extend(shopping_cart, {
 	},
 
 	bind_events: function() {
-		// bind update button
-		$(document).on("click", ".item-update-cart button", function() {
-			var item_code = $(this).attr("data-item-code");
-			shopping_cart.update_cart({
-				item_code: item_code,
-				qty: $('input[data-item-code="'+item_code+'"]').val(),
-				with_doc: 1,
-				btn: this,
-				callback: function(r) {
-					if(!r.exc) {
-						shopping_cart.render(r.message);
-						var $button = $('button[data-item-code="'+item_code+'"]').addClass("btn-success");
-						setTimeout(function() { $button.removeClass("btn-success"); }, 1000);
+		shopping_cart.bind_address_select();
+		shopping_cart.bind_place_order();
+		shopping_cart.bind_change_qty();
+		shopping_cart.bind_dropdown_cart_buttons();
+	},
+	
+	bind_address_select: function() {
+		$(".cart-addresses").find('input[data-address-name]').on("click", function() {
+			if($(this).prop("checked")) {
+				var me = this;
+
+				// uncheck other shipping or billing addresses:
+				if ( $(this).is('input[data-fieldname=customer_address]') ) {
+					$('input[data-fieldname=customer_address]').not(this).prop('checked', false);
+				} else {
+					$('input[data-fieldname=shipping_address_name]').not(this).prop('checked', false);
+				}
+
+				return frappe.call({
+					type: "POST",
+					method: "erpnext.shopping_cart.cart.update_cart_address",
+					freeze: true,
+					args: {
+						address_fieldname: $(this).attr("data-fieldname"),
+						address_name: $(this).attr("data-address-name")
+					},
+					callback: function(r) {
+						if(!r.exc) {
+							$(".cart-tax-items").html(r.message.taxes);
+						}
 					}
-				},
-			});
+				});
+			} else {
+				return false;
+			}
 		});
 
-		$("#cart-add-shipping-address").on("click", function() {
-			window.location.href = "addresses";
-		});
+	},
 
-		$("#cart-add-billing-address").on("click", function() {
-			window.location.href = "address";
-		});
-
+	bind_place_order: function() {
 		$(".btn-place-order").on("click", function() {
 			shopping_cart.place_order(this);
 		});
 	},
 
-	render: function(out) {
-		var doc = out.doc;
-		var addresses = out.addresses;
-
-		var $cart_items = $("#cart-items").empty();
-		var $cart_taxes = $("#cart-taxes").empty();
-		var $cart_totals = $("#cart-totals").empty();
-		var $cart_billing_address = $("#cart-billing-address").empty();
-		var $cart_shipping_address = $("#cart-shipping-address").empty();
-
-		var no_items = $.map(doc.items || [],
-			function(d) { return d.item_code || null;}).length===0;
-		if(no_items) {
-			shopping_cart.show_error("Cart Empty", frappe._("Go ahead and add something to your cart."));
-			$("#cart-addresses").toggle(false);
-			return;
-		}
-
-		var shipping_rule_added = false;
-		var taxes_exist = false;
-		var shipping_rule_labels = $.map(out.shipping_rules || [], function(rule) { return rule[1]; });
-
-		$.each(doc.items || [], function(i, d) {
-			shopping_cart.render_item_row($cart_items, d);
+	bind_change_qty: function() {
+		// bind update button
+		$(".cart-items").on("change", ".cart-qty", function() {
+			var item_code = $(this).attr("data-item-code");
+			var newVal = $(this).val();
+			shopping_cart.shopping_cart_update(item_code, newVal);
 		});
-
-		$.each(doc.taxes || [], function(i, d) {
-			if(out.shipping_rules && out.shipping_rules.length &&
-				shipping_rule_labels.indexOf(d.description)!==-1) {
-					shipping_rule_added = true;
-					shopping_cart.render_tax_row($cart_taxes, d, out.shipping_rules);
+		
+		$(".cart-items").on('click', '.number-spinner button', function () {  
+			var btn = $(this),
+				input = btn.closest('.number-spinner').find('input'),
+				oldValue = input.val().trim(),
+				newVal = 0;
+	
+			if (btn.attr('data-dir') == 'up') {
+				newVal = parseInt(oldValue) + 1;
 			} else {
-				shopping_cart.render_tax_row($cart_taxes, d);
+				if (oldValue > 1) {
+					newVal = parseInt(oldValue) - 1;
+				}
 			}
-
-			taxes_exist = true;
+			input.val(newVal);
+			var item_code = input.attr("data-item-code"); 
+			shopping_cart.shopping_cart_update(item_code, newVal);
 		});
-
-		if(out.shipping_rules && out.shipping_rules.length && !shipping_rule_added) {
-			shopping_cart.render_tax_row($cart_taxes, {description: "", formatted_tax_amount: ""},
-				out.shipping_rules);
-			taxes_exist = true;
-		}
-
-		if(taxes_exist)
-			$('<hr>').appendTo($cart_taxes);
-
-		shopping_cart.render_tax_row($cart_totals, {
-			description: "<strong>Total</strong>",
-			formatted_tax_amount: "<strong>" + doc.formatted_grand_total_export + "</strong>"
-		});
-
-		if(!(addresses && addresses.length)) {
-			$cart_shipping_address.html('<div class="msg-box">'+frappe._("Hey! Go ahead and add an address")+'</div>');
-		} else {
-			shopping_cart.render_address($cart_shipping_address, addresses, doc.shipping_address_name);
-			shopping_cart.render_address($cart_billing_address, addresses, doc.customer_address);
-		}
 	},
-
-	render_item_row: function($cart_items, doc) {
-		doc.image_html = doc.website_image ?
-		'<div style="height: 120px; overflow: hidden;"><img src="' + doc.website_image + '" /></div>': "";
-
-		if(doc.description === doc.item_name) doc.description = "";
-
-		$(repl('<div class="row">\
-			<div class="col-md-9 col-sm-9">\
-				<div class="row">\
-					<div class="col-md-3">%(image_html)s</div>\
-					<div class="col-md-9">\
-						<h4><a href="%(page_name)s">%(item_name)s</a></h4>\
-						<p>%(description)s</p>\
-					</div>\
-				</div>\
-			</div>\
-			<div class="col-md-3 col-sm-3 text-right">\
-				<div class="input-group item-update-cart">\
-					<input type="text" placeholder="Qty" value="%(qty)s" \
-						data-item-code="%(item_code)s" class="text-right form-control">\
-					<div class="input-group-btn">\
-						<button class="btn btn-primary" data-item-code="%(item_code)s">\
-							<i class="icon-ok"></i></button>\
-					</div>\
-				</div>\
-				<p style="margin-top: 10px;">at %(formatted_rate)s</p>\
-				<small class="text-muted" style="margin-top: 10px;">= %(formatted_amount)s</small>\
-			</div>\
-		</div><hr>', doc)).appendTo($cart_items);
-	},
-
+	
 	render_tax_row: function($cart_taxes, doc, shipping_rules) {
 		var shipping_selector;
 		if(shipping_rules) {
@@ -182,72 +132,6 @@ $.extend(shopping_cart, {
 		});
 	},
 
-	render_address: function($address_wrapper, addresses, address_name) {
-		$.each(addresses, function(i, address) {
-			$(repl('<div class="panel panel-default"> \
-				<div class="panel-heading"> \
-					<div class="row"> \
-						<div class="col-md-10 address-title" \
-							data-address-name="%(name)s"><strong>%(name)s</strong></div> \
-						<div class="col-md-2"><input type="checkbox" \
-							data-address-name="%(name)s"></div> \
-					</div> \
-				</div> \
-				<div class="panel-collapse collapse" data-address-name="%(name)s"> \
-					<div class="panel-body">%(display)s</div> \
-				</div> \
-			</div>', address))
-				.css({"margin": "10px auto"})
-				.appendTo($address_wrapper);
-		});
-
-		$address_wrapper.find(".panel-heading")
-			.find(".address-title")
-				.css({"cursor": "pointer"})
-				.on("click", function() {
-					$address_wrapper.find('.panel-collapse[data-address-name="'
-						+$(this).attr("data-address-name")+'"]').collapse("toggle");
-				});
-
-		$address_wrapper.find('input[type="checkbox"]').on("click", function() {
-			if($(this).prop("checked")) {
-				var me = this;
-				$address_wrapper.find('input[type="checkbox"]').each(function(i, chk) {
-					if($(chk).attr("data-address-name")!=$(me).attr("data-address-name")) {
-						$(chk).prop("checked", false);
-					}
-				});
-
-				return frappe.call({
-					type: "POST",
-					method: "erpnext.shopping_cart.cart.update_cart_address",
-					args: {
-						address_fieldname: $address_wrapper.attr("data-fieldname"),
-						address_name: $(this).attr("data-address-name")
-					},
-					callback: function(r) {
-						if(!r.exc) {
-							shopping_cart.render(r.message);
-						}
-					}
-				});
-			} else {
-				return false;
-			}
-		});
-
-		$address_wrapper.find('input[type="checkbox"][data-address-name="'+ address_name +'"]')
-			.prop("checked", true);
-
-		$address_wrapper.find(".panel-collapse").collapse({
-			parent: $address_wrapper,
-			toggle: false
-		});
-
-		$address_wrapper.find('.panel-collapse[data-address-name="'+ address_name +'"]')
-			.collapse("show");
-	},
-
 	place_order: function(btn) {
 		return frappe.call({
 			type: "POST",
@@ -272,26 +156,12 @@ $.extend(shopping_cart, {
 	}
 });
 
-$(document).ready(function() {
+frappe.ready(function() {
+	$(".cart-icon").hide();
 	shopping_cart.bind_events();
-	return frappe.call({
-		type: "POST",
-		method: "erpnext.shopping_cart.cart.get_cart_quotation",
-		callback: function(r) {
-			$("#cart-container").removeClass("hide");
-			$(".progress").remove();
-			if(r.exc) {
-				if(r.exc.indexOf("WebsitePriceListMissingError")!==-1) {
-					shopping_cart.show_error("Configuration Error", frappe._("Price List not configured."));
-				} else if(r["403"]) {
-					shopping_cart.show_error("Not Allowed", frappe._("You need to be logged in to view your cart."));
-				} else {
-					shopping_cart.show_error("Error", frappe._("Something went wrong."));
-				}
-			} else {
-				shopping_cart.set_cart_count();
-				shopping_cart.render(r.message);
-			}
-		}
-	});
 });
+
+function show_terms() {
+  var html = $(".cart-terms").html();
+    frappe.msgprint(html);
+}

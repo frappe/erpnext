@@ -18,7 +18,7 @@ frappe.send_message = function(opts, btn) {
 erpnext.subscribe_to_newsletter = function(opts, btn) {
 	return frappe.call({
 		type: "POST",
-		method: "erpnext.crm.doctype.newsletter.newsletter.subscribe",
+		method: "frappe.email.doctype.newsletter.newsletter.subscribe",
 		btn: btn,
 		args: {"email": opts.email},
 		callback: opts.callback

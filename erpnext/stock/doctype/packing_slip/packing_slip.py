@@ -84,22 +84,29 @@ class PackingSlip(Document):
 			* No. of Cases of this packing slip
 		"""
 
+		# also pick custom fields from delivery note
 		rows = [d.item_code for d in self.get("items")]
+
+		custom_fields = ', '.join(['dni.`{0}`'.format(d.fieldname) for d in \
+			frappe.get_meta("Delivery Note Item").get_custom_fields()])
+
+		if custom_fields:
+			custom_fields = ', ' + custom_fields
 
 		condition = ""
 		if rows:
 			condition = " and item_code in (%s)" % (", ".join(["%s"]*len(rows)))
 
 		# gets item code, qty per item code, latest packed qty per item code and stock uom
-		res = frappe.db.sql("""select item_code, ifnull(sum(qty), 0) as qty,
-			(select sum(ifnull(psi.qty, 0) * (abs(ps.to_case_no - ps.from_case_no) + 1))
+		res = frappe.db.sql("""select item_code, sum(qty) as qty,
+			(select sum(psi.qty * (abs(ps.to_case_no - ps.from_case_no) + 1))
 				from `tabPacking Slip` ps, `tabPacking Slip Item` psi
 				where ps.name = psi.parent and ps.docstatus = 1
 				and ps.delivery_note = dni.parent and psi.item_code=dni.item_code) as packed_qty,
-			stock_uom, item_name, description, dni.batch_no
+			stock_uom, item_name, description, dni.batch_no {custom_fields}
 			from `tabDelivery Note Item` dni
-			where parent=%s %s
-			group by item_code""" % ("%s", condition),
+			where parent=%s {condition}
+			group by item_code""".format(condition=condition, custom_fields=custom_fields),
 			tuple([self.delivery_note] + rows), as_dict=1)
 
 		ps_item_qty = dict([[d.item_code, d.qty] for d in self.get("items")])
@@ -146,6 +153,8 @@ class PackingSlip(Document):
 	def get_items(self):
 		self.set("items", [])
 
+		custom_fields = frappe.get_meta("Delivery Note Item").get_custom_fields()
+
 		dn_details = self.get_details_for_packing()[0]
 		for item in dn_details:
 			if flt(item.qty) > flt(item.packed_qty):
@@ -156,6 +165,12 @@ class PackingSlip(Document):
 				ch.description = item.description
 				ch.batch_no = item.batch_no
 				ch.qty = flt(item.qty) - flt(item.packed_qty)
+
+				# copy custom fields
+				for d in custom_fields:
+					if item.get(d.fieldname):
+						ch.set(d.fieldname, item.get(d.fieldname))
+
 		self.update_item_details()
 
 def item_details(doctype, txt, searchfield, start, page_len, filters):

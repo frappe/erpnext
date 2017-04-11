@@ -1,7 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.require("assets/erpnext/js/stock_grid_report.js");
 
 erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	init: function(wrapper, opts) {
@@ -51,7 +50,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	filters: [
 		{fieldtype:"Select", label: __("Value or Qty"), fieldname: "value_or_qty",
-			options:["Value", "Quantity"],
+			options:[{label:__("Value"), value:"Value"}, {label:__("Quantity"), value:"Quantity"}],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
@@ -64,7 +63,13 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype:"Select", label: __("Range"), fieldname: "range",
-			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]}
+			options:[
+				{label:__("Daily"), value:"Daily"},
+				{label:__("Weekly"), value:"Weekly"},
+				{label:__("Monthly"), value:"Monthly"},
+				{label:__("Quarterly"), value:"Quarterly"},
+				{label:__("Yearly"), value:"Yearly"},
+			]}
 	],
 	setup_filters: function() {
 		var me = this;
@@ -73,7 +78,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		this.trigger_refresh_on_change(["value_or_qty", "brand", "warehouse", "range"]);
 
 		this.show_zero_check();
-		this.setup_plot_check();
+		this.setup_chart_check();
 	},
 	init_filter_values: function() {
 		this._super();
@@ -193,9 +198,6 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 			}
 		});
 	},
-	get_plot_points: function(item, col, idx) {
-		return [[dateutil.user_to_obj(col.name).getTime(), item[col.field]]]
-	},
 	show_stock_ledger: function(item_code) {
 		frappe.route_options = {
 			item_code: item_code,
@@ -205,3 +207,4 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		frappe.set_route("query-report", "Stock Ledger");
 	}
 });
+

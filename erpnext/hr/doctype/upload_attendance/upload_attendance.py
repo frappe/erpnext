@@ -36,13 +36,11 @@ def add_header(w):
 	w.writerow(["Please do not change the template headings"])
 	w.writerow(["Status should be one of these values: " + status])
 	w.writerow(["If you are overwriting existing attendance records, 'ID' column mandatory"])
-	w.writerow(["ID", "Employee", "Employee Name", "Date", "Status",
-		"Fiscal Year", "Company", "Naming Series"])
+	w.writerow(["ID", "Employee", "Employee Name", "Date", "Status", "Leave Type",
+		 "Company", "Naming Series"])
 	return w
 
 def add_data(w, args):
-	from erpnext.accounts.utils import get_fiscal_year
-
 	dates = get_dates(args)
 	employees = get_active_employees()
 	existing_attendance_records = get_existing_attendance_records(args)
@@ -56,7 +54,7 @@ def add_data(w, args):
 				existing_attendance and existing_attendance.name or "",
 				employee.name, employee.employee_name, date,
 				existing_attendance and existing_attendance.status or "",
-				get_fiscal_year(date)[0], employee.company,
+				existing_attendance and existing_attendance.leave_type or "", employee.company,
 				existing_attendance and existing_attendance.naming_series or get_naming_series(),
 			]
 			w.writerow(row)
@@ -74,13 +72,13 @@ def get_active_employees():
 	return employees
 
 def get_existing_attendance_records(args):
-	attendance = frappe.db.sql("""select name, att_date, employee, status, naming_series
-		from `tabAttendance` where att_date between %s and %s and docstatus < 2""",
+	attendance = frappe.db.sql("""select name, attendance_date, employee, status, leave_type, naming_series
+		from `tabAttendance` where attendance_date between %s and %s and docstatus < 2""",
 		(args["from_date"], args["to_date"]), as_dict=1)
 
 	existing_attendance = {}
 	for att in attendance:
-		existing_attendance[tuple([att.att_date, att.employee])] = att
+		existing_attendance[tuple([att.attendance_date, att.employee])] = att
 
 	return existing_attendance
 
@@ -106,7 +104,7 @@ def upload():
 		return {"messages": msg, "error": msg}
 	columns = [scrub(f) for f in rows[4]]
 	columns[0] = "name"
-	columns[3] = "att_date"
+	columns[3] = "attendance_date"
 	ret = []
 	error = False
 

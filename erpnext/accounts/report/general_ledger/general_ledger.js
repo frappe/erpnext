@@ -8,7 +8,7 @@ frappe.query_reports["General Ledger"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": frappe.defaults.get_user_default("company"),
+			"default": frappe.defaults.get_user_default("Company"),
 			"reqd": 1
 		},
 		{
@@ -33,7 +33,7 @@ frappe.query_reports["General Ledger"] = {
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
-				var company = frappe.query_report.filters_by_name.company.get_value();
+				var company = frappe.query_report_filters_by_name.company.get_value();
 				return {
 					"doctype": "Account",
 					"filters": {
@@ -48,13 +48,19 @@ frappe.query_reports["General Ledger"] = {
 			"fieldtype": "Data",
 		},
 		{
+			"fieldname":"project",
+			"label": __("Project"),
+			"fieldtype": "Link",
+			"options": "Project"
+		},
+		{
 			"fieldtype": "Break",
 		},
 		{
 			"fieldname":"party_type",
 			"label": __("Party Type"),
-			"fieldtype": "Select",
-			"options": ["", "Customer", "Supplier"],
+			"fieldtype": "Link",
+			"options": "Party Type",
 			"default": ""
 		},
 		{
@@ -62,8 +68,8 @@ frappe.query_reports["General Ledger"] = {
 			"label": __("Party"),
 			"fieldtype": "Dynamic Link",
 			"get_options": function() {
-				var party_type = frappe.query_report.filters_by_name.party_type.get_value();
-				var party = frappe.query_report.filters_by_name.party.get_value();
+				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
+				var party = frappe.query_report_filters_by_name.party.get_value();
 				if(party && !party_type) {
 					frappe.throw(__("Please select Party Type first"));
 				}
@@ -80,13 +86,6 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"group_by_account",
 			"label": __("Group by Account"),
 			"fieldtype": "Check",
-		},
-		{
-			"fieldname":"letter_head",
-			"label": __("Letter Head"),
-			"fieldtype": "Link",
-			"options": "Letter Head",
-			"default": frappe.defaults.get_default("letter_head"),
 		}
 	]
 }

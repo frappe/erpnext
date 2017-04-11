@@ -1,0 +1,16 @@
+DocType: Request for Quotation Item,Project Name,Naziv Projekta
+DocType: Budget,Project,Projekat
+DocType: Journal Entry Account,Sales Invoice,Fakture
+apps/erpnext/erpnext/config/learn.py +263,Managing Projects,Upravljanje projektima
+apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +28,Project Status,Status Projekta
+DocType: Project,Project will be accessible on the website to these users,Projekat će biti dostupan na sajtu sledećim korisnicima
+DocType: Project,Project Type,Tip Projekta
+DocType: Project User,Project User,Projektni user
+apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +30,Project Start Date,Datum početka projekta
+apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +95,Project Manager,Projektni menadzer
+DocType: Project Task,Project Task,Projektni zadatak
+apps/erpnext/erpnext/config/projects.py +13,Project master.,Projektni master
+apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Project Id,ID Projekta
+apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +29,Project Value,Vrijednost Projekta
+apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Projektna aktivnost / zadatak
+DocType: Journal Entry Account,Sales Order,Narudžbine kupaca

@@ -6,7 +6,7 @@ import unittest, frappe
 from frappe.utils import sel
 from frappe.utils import formatdate
 
-selenium_tests = True
+#selenium_tests = True
 
 # class TestLogin(unittest.TestCase):
 # 	def setUp(self):

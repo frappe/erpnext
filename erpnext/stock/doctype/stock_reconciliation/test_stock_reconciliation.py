@@ -7,9 +7,10 @@
 from __future__ import unicode_literals
 import frappe, unittest
 from frappe.utils import flt, nowdate, nowtime
-from erpnext.accounts.utils import get_fiscal_year, get_stock_and_account_difference
+from erpnext.accounts.utils import get_stock_and_account_difference
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import EmptyStockReconciliationItemsError
 
 class TestStockReconciliation(unittest.TestCase):
 	def setUp(self):
@@ -35,7 +36,7 @@ class TestStockReconciliation(unittest.TestCase):
 		]
 
 		for d in input_data:
-			repost_stock_as_per_valuation_method(valuation_method)
+			set_valuation_method("_Test Item", valuation_method)
 
 			last_sle = get_previous_sle({
 				"item_code": "_Test Item",
@@ -95,8 +96,8 @@ def create_stock_reconciliation(**args):
 	sr = frappe.new_doc("Stock Reconciliation")
 	sr.posting_date = args.posting_date or nowdate()
 	sr.posting_time = args.posting_time or nowtime()
+	sr.set_posting_time = 1
 	sr.company = args.company or "_Test Company"
-	sr.fiscal_year = get_fiscal_year(sr.posting_date)[0]
 	sr.expense_account = args.expense_account or \
 		("Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC")
 	sr.cost_center = args.cost_center or "_Test Cost Center - _TC"
@@ -107,14 +108,20 @@ def create_stock_reconciliation(**args):
 		"valuation_rate": args.rate
 	})
 
-	sr.submit()
+	try:
+		sr.submit()
+	except EmptyStockReconciliationItemsError:
+		pass
 	return sr
 
-def repost_stock_as_per_valuation_method(valuation_method):
-	frappe.db.set_value("Item", "_Test Item", "valuation_method", valuation_method)
-	update_entries_after({
-		"item_code": "_Test Item",
-		"warehouse": "_Test Warehouse - _TC",
-	}, allow_negative_stock=1)
+def set_valuation_method(item_code, valuation_method):
+	frappe.db.set_value("Item", item_code, "valuation_method", valuation_method)
+
+	for warehouse in frappe.get_all("Warehouse", filters={"company": "_Test Company"}, fields=["name", "is_group"]):
+		if not warehouse.is_group:
+			update_entries_after({
+				"item_code": item_code,
+				"warehouse": warehouse.name
+			}, allow_negative_stock=1)
 
 test_dependencies = ["Item", "Warehouse"]

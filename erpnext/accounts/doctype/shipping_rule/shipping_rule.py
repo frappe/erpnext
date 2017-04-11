@@ -4,11 +4,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _, msgprint, throw
 from frappe.utils import flt, fmt_money
 from frappe.model.document import Document
-from erpnext.setup.utils import get_company_currency
 
 class OverlappingConditionError(frappe.ValidationError): pass
 class FromGreaterThanToError(frappe.ValidationError): pass
@@ -21,6 +20,12 @@ class ShippingRule(Document):
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
 		self.validate_overlapping_shipping_rule_conditions()
+
+		if self.worldwide_shipping:
+			self.countries = []
+
+		elif not len([d.country for d in self.countries if d.country]):
+			frappe.throw(_("Please specify a country for this Shipping Rule or check Worldwide Shipping"))
 
 	def validate_from_to_values(self):
 		zero_to_values = []
@@ -71,7 +76,7 @@ class ShippingRule(Document):
 						overlaps.append([d1, d2])
 
 		if overlaps:
-			company_currency = get_company_currency(self.company)
+			company_currency = erpnext.get_company_currency(self.company)
 			msgprint(_("Overlapping conditions found between:"))
 			messages = []
 			for d1, d2 in overlaps:

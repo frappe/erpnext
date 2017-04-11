@@ -8,6 +8,7 @@ frappe.query_reports["Stock Balance"] = {
 			"label": __("From Date"),
 			"fieldtype": "Date",
 			"width": "80",
+			"reqd": 1,
 			"default": sys_defaults.year_start_date,
 		},
 		{
@@ -15,7 +16,15 @@ frappe.query_reports["Stock Balance"] = {
 			"label": __("To Date"),
 			"fieldtype": "Date",
 			"width": "80",
+			"reqd": 1,
 			"default": frappe.datetime.get_today()
+		},
+		{
+			"fieldname": "item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Item Group"
 		},
 		{
 			"fieldname": "item_code",
@@ -23,6 +32,13 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldtype": "Link",
 			"width": "80",
 			"options": "Item"
-		}
+		},
+		{
+			"fieldname": "warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Warehouse"
+		},
 	]
 }

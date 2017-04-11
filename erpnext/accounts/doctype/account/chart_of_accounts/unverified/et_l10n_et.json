@@ -1,7 +1,6 @@
 {
     "country_code": "et",
-    "name": "Ethiopia Tax and Account Chart Template",
-	"is_active": "Yes",
+    "name": "Ethiopia - Chart of Accounts",
     "tree": {
         "ASSETS": {
             "Cash and Cash Equivalents": {

@@ -8,9 +8,12 @@ from frappe import _
 from frappe.utils import flt, getdate, add_days, formatdate
 from frappe.model.document import Document
 from datetime import date
-from erpnext.stock.doctype.item.item import ItemTemplateCannotHaveStock
+from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
+from erpnext.accounts.utils import get_fiscal_year
 
 class StockFreezeError(frappe.ValidationError): pass
+
+exclude_from_linked_with = True
 
 class StockLedgerEntry(Document):
 	def validate(self):
@@ -21,9 +24,8 @@ class StockLedgerEntry(Document):
 		self.validate_batch()
 		validate_warehouse_company(self.warehouse, self.company)
 		self.scrub_posting_time()
-
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year, self.meta.get_label("posting_date"), self)
+		self.validate_and_set_fiscal_year()
+		self.block_transactions_against_group_warehouse()
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
@@ -108,6 +110,18 @@ class StockLedgerEntry(Document):
 			if expiry_date:
 				if getdate(self.posting_date) > getdate(expiry_date):
 					frappe.throw(_("Batch {0} of Item {1} has expired.").format(self.batch_no, self.item_code))
+
+	def validate_and_set_fiscal_year(self):
+		if not self.fiscal_year:
+			self.fiscal_year = get_fiscal_year(self.posting_date, company=self.company)[0]
+		else:
+			from erpnext.accounts.utils import validate_fiscal_year
+			validate_fiscal_year(self.posting_date, self.fiscal_year, self.company, 
+				self.meta.get_label("posting_date"), self)
+
+	def block_transactions_against_group_warehouse(self):
+		from erpnext.stock.utils import is_group_warehouse
+		is_group_warehouse(self.warehouse)
 
 def on_doctype_update():
 	if not frappe.db.sql("""show index from `tabStock Ledger Entry`

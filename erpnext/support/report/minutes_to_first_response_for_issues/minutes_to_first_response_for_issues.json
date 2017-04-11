@@ -1,0 +1,24 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2016-06-14 17:44:26.034112", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 2, 
+ "is_standard": "Yes", 
+ "modified": "2017-02-24 20:06:18.391100", 
+ "modified_by": "Administrator", 
+ "module": "Support", 
+ "name": "Minutes to First Response for Issues", 
+ "owner": "Administrator", 
+ "query": "select date(creation) as creation_date, avg(mins_to_first_response) from tabIssue where creation > '2016-05-01' group by date(creation) order by creation_date;", 
+ "ref_doctype": "Issue", 
+ "report_name": "Minutes to First Response for Issues", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Support Team"
+  }
+ ]
+}

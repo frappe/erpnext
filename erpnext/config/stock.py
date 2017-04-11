@@ -4,14 +4,8 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
-			"icon": "icon-star",
+			"label": _("Stock Transactions"),
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Material Request",
-					"description": _("Requests for items."),
-				},
 				{
 					"type": "doctype",
 					"name": "Stock Entry",
@@ -29,122 +23,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Installation Note",
-					"description": _("Installation record for a Serial No.")
-				},
-				{
-					"type": "doctype",
-					"name": "Item",
-					"description": _("All Products or Services."),
-				},
-				{
-					"type": "doctype",
-					"name": "Warehouse",
-					"description": _("Where items are stored."),
-				},
-				{
-					"type": "doctype",
-					"name": "Serial No",
-					"description": _("Single unit of an Item."),
-				},
-				{
-					"type": "doctype",
-					"name": "Batch",
-					"description": _("Batch (lot) of an Item."),
+					"name": "Material Request",
+					"description": _("Requests for items."),
 				},
 			]
 		},
 		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Stock Reconciliation",
-					"description": _("Upload stock balance via csv.")
-				},
-				{
-					"type": "doctype",
-					"name": "Packing Slip",
-					"description": _("Split Delivery Note into packages.")
-				},
-				{
-					"type": "doctype",
-					"name": "Quality Inspection",
-					"description": _("Incoming quality inspection.")
-				},
-				{
-					"type": "doctype",
-					"name": "Landed Cost Voucher",
-					"description": _("Update additional costs to calculate landed cost of items"),
-				},
-				{
-					"type": "doctype",
-					"name": "Stock UOM Replace Utility",
-					"description": _("Change UOM for an Item."),
-				},
-				{
-					"type": "doctype",
-					"name": "Manage Variants",
-					"description": _("Manage Item Variants."),
-				},
-			]
-		},
-		{
-			"label": _("Setup"),
-			"icon": "icon-cog",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Stock Settings",
-					"description": _("Default settings for stock transactions.")
-				},
-				{
-					"type": "page",
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"label": _("Item Group Tree"),
-					"link": "Sales Browser/Item Group",
-					"description": _("Tree of Item Groups."),
-					"doctype": "Item Group",
-				},
-				{
-					"type": "doctype",
-					"name": "UOM",
-					"label": _("Unit of Measure") + " (UOM)",
-					"description": _("e.g. Kg, Unit, Nos, m")
-				},
-				{
-					"type": "doctype",
-					"name": "Warehouse",
-					"description": _("Warehouses.")
-				},
-				{
-					"type": "doctype",
-					"name": "Brand",
-					"description": _("Brand master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Price List",
-					"description": _("Price List master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Item Price",
-					"description": _("Multiple Item prices."),
-					"route": "Report/Item Price"
-				},
-				{
-					"type": "doctype",
-					"name": "Item Attribute",
-					"description": _("Attributes for Item Variants. e.g Size, Color etc."),
-				},
-			]
-		},
-		{
-			"label": _("Main Reports"),
-			"icon": "icon-table",
+			"label": _("Stock Reports"),
 			"items": [
 				{
 					"type": "report",
@@ -165,11 +50,161 @@ def get_data():
 					"doctype": "Item",
 				},
 				{
+					"type": "page",
+					"name": "stock-balance",
+					"label": _("Stock Summary")
+				},
+				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Ageing",
 					"doctype": "Item",
 				},
+
+			]
+		},
+		{
+			"label": _("Items and Pricing"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Item",
+					"description": _("All Products or Services."),
+				},
+				{
+					"type": "doctype",
+					"name": "Product Bundle",
+					"description": _("Bundle items at time of sale."),
+				},
+				{
+					"type": "doctype",
+					"name": "Price List",
+					"description": _("Price List master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Item Group",
+					"icon": "fa fa-sitemap",
+					"label": _("Item Group"),
+					"link": "Tree/Item Group",
+					"description": _("Tree of Item Groups."),
+				},
+				{
+					"type": "doctype",
+					"name": "Item Price",
+					"description": _("Multiple Item prices."),
+					"route": "Report/Item Price"
+				},
+				{
+					"type": "doctype",
+					"name": "Shipping Rule",
+					"description": _("Rules for adding shipping costs.")
+				},
+				{
+					"type": "doctype",
+					"name": "Pricing Rule",
+					"description": _("Rules for applying pricing and discount.")
+				},
+
+			]
+		},
+		{
+			"label": _("Serial No and Batch"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Serial No",
+					"description": _("Single unit of an Item."),
+				},
+				{
+					"type": "doctype",
+					"name": "Batch",
+					"description": _("Batch (lot) of an Item."),
+				},
+				{
+					"type": "doctype",
+					"name": "Installation Note",
+					"description": _("Installation record for a Serial No.")
+				},
+				{
+					"type": "report",
+					"name": "Serial No Service Contract Expiry",
+					"doctype": "Serial No"
+				},
+				{
+					"type": "report",
+					"name": "Serial No Status",
+					"doctype": "Serial No"
+				},
+				{
+					"type": "report",
+					"name": "Serial No Warranty Expiry",
+					"doctype": "Serial No"
+				},
+			]
+		},
+		{
+			"label": _("Tools"),
+			"icon": "fa fa-wrench",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Stock Reconciliation",
+					"description": _("Upload stock balance via csv.")
+				},
+				{
+					"type": "doctype",
+					"name": "Packing Slip",
+					"description": _("Split Delivery Note into packages.")
+				},
+				{
+					"type": "doctype",
+					"name": "Quality Inspection",
+					"description": _("Incoming quality inspection.")
+				},
+				{
+					"type": "doctype",
+					"name": "Landed Cost Voucher",
+					"description": _("Update additional costs to calculate landed cost of items"),
+				}
+			]
+		},
+		{
+			"label": _("Setup"),
+			"icon": "fa fa-cog",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Stock Settings",
+					"description": _("Default settings for stock transactions.")
+				},
+				{
+					"type": "doctype",
+					"name": "Warehouse",
+					"description": _("Where items are stored."),
+				},
+				{
+					"type": "doctype",
+					"name": "UOM",
+					"label": _("Unit of Measure") + " (UOM)",
+					"description": _("e.g. Kg, Unit, Nos, m")
+				},
+				{
+					"type": "doctype",
+					"name": "Item Attribute",
+					"description": _("Attributes for Item Variants. e.g Size, Color etc."),
+				},
+				{
+					"type": "doctype",
+					"name": "Brand",
+					"description": _("Brand master.")
+				},
+			]
+		},
+		{
+			"label": _("Analytics"),
+			"icon": "fa fa-table",
+			"items": [
 				{
 					"type": "report",
 					"is_query_report": False,
@@ -180,13 +215,26 @@ def get_data():
 					"type": "page",
 					"name": "stock-analytics",
 					"label": _("Stock Analytics"),
-					"icon": "icon-bar-chart"
-				}
+					"icon": "fa fa-bar-chart"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Delivery Note Trends",
+					"doctype": "Delivery Note"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Purchase Receipt Trends",
+					"doctype": "Purchase Receipt"
+				},
+
 			]
 		},
 		{
-			"label": _("Standard Reports"),
-			"icon": "icon-list",
+			"label": _("Reports"),
+			"icon": "fa fa-list",
 			"items": [
 				{
 					"type": "report",
@@ -208,21 +256,6 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Serial No Service Contract Expiry",
-					"doctype": "Serial No"
-				},
-				{
-					"type": "report",
-					"name": "Serial No Status",
-					"doctype": "Serial No"
-				},
-				{
-					"type": "report",
-					"name": "Serial No Warranty Expiry",
-					"doctype": "Serial No"
-				},
-				{
-					"type": "report",
 					"is_query_report": True,
 					"name": "Requested Items To Be Transferred",
 					"doctype": "Material Request"
@@ -236,6 +269,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Batch Item Expiry Status",
+					"doctype": "Stock Ledger Entry"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Item Prices",
 					"doctype": "Price List"
 				},
@@ -245,23 +284,11 @@ def get_data():
 					"name": "Itemwise Recommended Reorder Level",
 					"doctype": "Item"
 				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Delivery Note Trends",
-					"doctype": "Delivery Note"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Purchase Receipt Trends",
-					"doctype": "Purchase Receipt"
-				},
 			]
 		},
 		{
 			"label": _("Help"),
-			"icon": "icon-facetime-video",
+			"icon": "fa fa-facetime-video",
 			"items": [
 				{
 					"type": "help",
@@ -270,13 +297,33 @@ def get_data():
 				},
 				{
 					"type": "help",
+					"label": _("Item Variants"),
+					"youtube_id": "OGBETlCzU5o"
+				},
+				{
+					"type": "help",
 					"label": _("Opening Stock Balance"),
 					"youtube_id": "0yPgrtfeCTs"
 				},
 				{
 					"type": "help",
-					"label": _("Item Variants"),
-					"youtube_id": "OGBETlCzU5o"
+					"label": _("Making Stock Entries"),
+					"youtube_id": "Njt107hlY3I"
+				},
+				{
+					"type": "help",
+					"label": _("Serialized Inventory"),
+					"youtube_id": "gvOVlEwFDAk"
+				},
+				{
+					"type": "help",
+					"label": _("Batch Inventory"),
+					"youtube_id": "J0QKl7ABPKM"
+				},
+				{
+					"type": "help",
+					"label": _("Managing Subcontracting"),
+					"youtube_id": "ThiMCC2DtKo"
 				},
 			]
 		}

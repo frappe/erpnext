@@ -2,20 +2,32 @@
 // License: GNU General Public License v3. See license.txt
 
 // attach required files
-{% include 'buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'erpnext/public/js/controllers/buying.js' %};
+
+frappe.ui.form.on('Suppier Quotation', {
+	setup: function() {
+		frm.custom_make_buttons = {
+			'Purchase Order': 'Purchase Order'
+		}
+	}
+});
 
 erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
-
 		if (this.frm.doc.docstatus === 1) {
-			cur_frm.add_custom_button(__("Make Purchase Order"), this.make_purchase_order,
-				frappe.boot.doctype_icons["Journal Entry"]);
+			cur_frm.add_custom_button(__("Purchase Order"), this.make_purchase_order,
+				__("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			cur_frm.add_custom_button(__("Quotation"), this.make_quotation,
+				__("Make"));
+
 		}
 		else if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('From Material Request'),
+			
+			cur_frm.add_custom_button(__('Material Request'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
 						source_doctype: "Material Request",
 						get_query_filters: {
@@ -26,7 +38,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 							company: cur_frm.doc.company
 						}
 					})
-				}, "icon-download", "btn-default");
+				}, __("Get items from"));
 		}
 	},
 
@@ -35,17 +47,20 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
 			frm: cur_frm
 		})
+	},
+	make_quotation: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_quotation",
+			frm: cur_frm
+		})
+
 	}
 });
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.SupplierQuotationController({frm: cur_frm}));
 
-cur_frm.cscript.uom = function(doc, cdt, cdn) {
-	// no need to trigger updation of stock uom, as this field doesn't exist in supplier quotation
-}
-
-cur_frm.fields_dict['items'].grid.get_field('project_name').get_query =
+cur_frm.fields_dict['items'].grid.get_field('project').get_query =
 	function(doc, cdt, cdn) {
 		return{
 			filters:[
@@ -53,15 +68,3 @@ cur_frm.fields_dict['items'].grid.get_field('project_name').get_query =
 			]
 		}
 	}
-
-cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return {
-		filters:{'supplier': doc.supplier}
-	}
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return {
-		filters:{'supplier': doc.supplier}
-	}
-}

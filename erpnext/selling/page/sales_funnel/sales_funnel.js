@@ -31,7 +31,7 @@ erpnext.SalesFunnel = Class.extend({
 			from_date: wrapper.page.add_date(__("From Date")),
 			to_date: wrapper.page.add_date(__("To Date")),
 			refresh_btn: wrapper.page.set_primary_action(__("Refresh"),
-				function() { me.get_data(); }, "icon-refresh"),
+				function() { me.get_data(); }, "fa fa-refresh"),
 		};
 
 		this.elements.no_data = $('<div class="alert alert-warning">' + __("No Data") + '</div>')
@@ -180,6 +180,6 @@ erpnext.SalesFunnel = Class.extend({
 		context.fillStyle = "black";
 		context.textBaseline = "middle";
 		context.font = "1.1em sans-serif";
-		context.fillText(title, width + 20, y_mid);
+		context.fillText(__(title), width + 20, y_mid);
 	}
 });

@@ -3,51 +3,72 @@
 
 from __future__ import unicode_literals
 import frappe
+import erpnext
+import json
+import itertools
 from frappe import msgprint, _
-from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate
+from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate, strip, get_timestamp
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
-from erpnext.stock.doctype.manage_variants.manage_variants import update_variant
+from erpnext.controllers.item_variant import (get_variant, copy_attributes_to_variant,
+	make_variant_item_code, validate_item_variant_attributes, ItemVariantExistsError)
 
-class WarehouseNotSet(frappe.ValidationError): pass
-class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
+class DuplicateReorderRows(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	website = frappe._dict(
 		page_title_field = "item_name",
 		condition_field = "show_in_website",
 		template = "templates/generators/item.html",
-		parent_website_route_field = "item_group",
+		no_cache = 1
 	)
 
 	def onload(self):
 		super(Item, self).onload()
-		self.get("__onload").sle_exists = self.check_if_sle_exists()
+		self.set_onload('sle_exists', self.check_if_sle_exists())
+		if self.is_fixed_asset:
+			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
+			self.set_onload("asset_exists", True if asset else False)
 
 	def autoname(self):
-		if frappe.db.get_default("item_naming_by")=="Naming Series" and not self.variant_of:
-			from frappe.model.naming import make_autoname
-			self.item_code = make_autoname(self.naming_series+'.#####')
+		if frappe.db.get_default("item_naming_by")=="Naming Series":
+			if self.variant_of:
+				if not self.item_code:
+					self.item_code = make_variant_item_code(self.variant_of, self)
+			else:
+				from frappe.model.naming import make_autoname
+				self.item_code = make_autoname(self.naming_series+'.#####')
 		elif not self.item_code:
 			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
 
+		self.item_code = strip(self.item_code)
 		self.name = self.item_code
 
 	def before_insert(self):
-		if self.is_sales_item=="Yes":
-			self.publish_in_hub = 1
+		if not self.description:
+			self.description = self.item_name
+
+		self.publish_in_hub = 1
+
+	def after_insert(self):
+		'''set opening stock and item price'''
+		if self.standard_rate:
+			self.add_price()
+
+		if self.opening_stock:
+			self.set_opening_stock()
 
 	def validate(self):
 		super(Item, self).validate()
 
-		if not self.stock_uom:
-			msgprint(_("Please enter default Unit of Measure"), raise_exception=1)
-		if self.image and not self.website_image:
-			self.website_image = self.image
+		if not self.item_name:
+			self.item_name = self.item_code
 
-		self.check_warehouse_is_set_for_stock_item()
+		if not self.description:
+			self.description = self.item_name
+
 		self.validate_uom()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
@@ -57,39 +78,291 @@ class Item(WebsiteGenerator):
 		self.check_item_tax()
 		self.validate_barcode()
 		self.cant_change()
-		self.validate_reorder_level()
 		self.validate_warehouse_for_reorder()
 		self.update_item_desc()
 		self.synced_with_hub = 0
+
 		self.validate_has_variants()
-		self.validate_stock_for_template_must_be_zero()
+		self.validate_attributes()
+		self.validate_variant_attributes()
+		self.validate_website_image()
+		self.make_thumbnail()
+		self.validate_fixed_asset()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
-			self.old_website_item_groups = frappe.db.sql_list("""select item_group from `tabWebsite Item Group`
+			self.old_website_item_groups = frappe.db.sql_list("""select item_group
+				from `tabWebsite Item Group`
 				where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
 
 	def on_update(self):
-		super(Item, self).on_update()
 		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
 		self.update_item_price()
 		self.update_variants()
+		self.update_template_item()
+
+	def add_price(self, price_list=None):
+		'''Add a new price'''
+		if not price_list:
+			price_list = (frappe.db.get_single_value('Selling Settings', 'selling_price_list')
+				or frappe.db.get_value('Price List', _('Standard Selling')))
+		if price_list:
+			item_price = frappe.get_doc({
+				"doctype": "Item Price",
+				"price_list": price_list,
+				"item_code": self.name,
+				"currency": erpnext.get_default_currency(),
+				"price_list_rate": self.standard_rate
+			})
+			item_price.insert()
+
+	def set_opening_stock(self):
+		'''set opening stock'''
+		if not self.is_stock_item or self.has_serial_no or self.has_batch_no:
+			return
+
+		if not self.valuation_rate and self.standard_rate:
+			self.valuation_rate = self.standard_rate
+
+		if not self.valuation_rate:
+			frappe.throw(_("Valuation Rate is mandatory if Opening Stock entered"))
+
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		# default warehouse, or Stores
+		default_warehouse = (frappe.db.get_single_value('Stock Settings', 'default_warehouse')
+			or frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')}))
+
+		if default_warehouse:
+			stock_entry = make_stock_entry(item_code=self.name, target=default_warehouse,
+				qty=self.opening_stock, rate=self.valuation_rate)
+
+			stock_entry.add_comment("Comment", _("Opening Stock"))
+
+	def make_route(self):
+		if not self.route:
+			return cstr(frappe.db.get_value('Item Group', self.item_group, 'route')) + '/' + self.scrub(self.item_name)
+
+	def get_parents(self, context):
+		item_group, route = frappe.db.get_value('Item Group', self.item_group, ['name', 'route'])
+		context.parents = [{'name': route, 'label': item_group}]
+
+	def validate_website_image(self):
+		"""Validate if the website image is a public file"""
+		auto_set_website_image = False
+		if not self.website_image and self.image:
+			auto_set_website_image = True
+			self.website_image = self.image
+
+		if not self.website_image:
+			return
+
+		# find if website image url exists as public
+		file_doc = frappe.get_all("File", filters={
+			"file_url": self.website_image
+		}, fields=["name", "is_private"], order_by="is_private asc", limit_page_length=1)
+
+
+		if file_doc:
+			file_doc = file_doc[0]
+
+		if not file_doc:
+			if not auto_set_website_image:
+				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found")
+					.format(self.website_image, self.name))
+
+			self.website_image = None
+
+		elif file_doc.is_private:
+			if not auto_set_website_image:
+				frappe.msgprint(_("Website Image should be a public file or website URL"))
+
+			self.website_image = None
+
+	def make_thumbnail(self):
+		"""Make a thumbnail of `website_image`"""
+		import requests.exceptions
+
+		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):
+			self.thumbnail = None
+
+		if self.website_image and not self.thumbnail:
+			file_doc = None
+
+			try:
+				file_doc = frappe.get_doc("File", {
+					"file_url": self.website_image,
+					"attached_to_doctype": "Item",
+					"attached_to_name": self.name
+				})
+			except frappe.DoesNotExistError:
+				pass
+				# cleanup
+				frappe.local.message_log.pop()
+
+			except requests.exceptions.HTTPError:
+				frappe.msgprint(_("Warning: Invalid attachment {0}").format(self.website_image))
+				self.website_image = None
+
+			except requests.exceptions.SSLError:
+				frappe.msgprint(_("Warning: Invalid SSL certificate on attachment {0}").format(self.website_image))
+				self.website_image = None
+
+			# for CSV import
+			if self.website_image and not file_doc:
+				try:
+					file_doc = frappe.get_doc({
+						"doctype": "File",
+						"file_url": self.website_image,
+						"attached_to_doctype": "Item",
+						"attached_to_name": self.name
+					}).insert()
+
+				except IOError:
+					self.website_image = None
+
+			if file_doc:
+				if not file_doc.thumbnail_url:
+					file_doc.make_thumbnail()
+
+				self.thumbnail = file_doc.thumbnail_url
+
+	def validate_fixed_asset(self):
+		if self.is_fixed_asset:
+			if self.is_stock_item:
+				frappe.throw(_("Fixed Asset Item must be a non-stock item."))
+
+			if not self.asset_category:
+				frappe.throw(_("Asset Category is mandatory for Fixed Asset item"))
 
 	def get_context(self, context):
-		context["parent_groups"] = get_parent_item_groups(self.item_group) + \
-			[{"name": self.name}]
-		if self.slideshow:
-			context.update(get_slideshow(self))
+		context.show_search=True
+		context.search_link = '/product_search'
 
-		context["parents"] = self.get_parents(context)
+		context.parent_groups = get_parent_item_groups(self.item_group) + \
+			[{"name": self.name}]
+
+		self.set_variant_context(context)
+		self.set_attribute_context(context)
+		self.set_disabled_attributes(context)
+
+		context.parents = self.get_parents(context)
 
 		return context
 
-	def check_warehouse_is_set_for_stock_item(self):
-		if self.is_stock_item==1 and not self.default_warehouse and frappe.get_all("Warehouse"):
-			frappe.msgprint(_("Default Warehouse is mandatory for stock Item."),
-				raise_exception=WarehouseNotSet)
+	def set_variant_context(self, context):
+		if self.has_variants:
+			context.no_cache = True
+
+			# load variants
+			# also used in set_attribute_context
+			context.variants = frappe.get_all("Item",
+				filters={"variant_of": self.name, "show_variant_in_website": 1},
+				order_by="name asc")
+
+			variant = frappe.form_dict.variant
+			if not variant and context.variants:
+				# the case when the item is opened for the first time from its list
+				variant = context.variants[0]
+
+			if variant:
+				context.variant = frappe.get_doc("Item", variant)
+
+				for fieldname in ("website_image", "web_long_description", "description",
+					"website_specifications"):
+					if context.variant.get(fieldname):
+						value = context.variant.get(fieldname)
+						if isinstance(value, list):
+							value = [d.as_dict() for d in value]
+
+						context[fieldname] = value
+
+		if self.slideshow:
+			if context.variant and context.variant.slideshow:
+				context.update(get_slideshow(context.variant))
+			else:
+				context.update(get_slideshow(self))
+
+	def set_attribute_context(self, context):
+		if self.has_variants:
+			attribute_values_available = {}
+			context.attribute_values = {}
+			context.selected_attributes = {}
+
+			# load attributes
+			for v in context.variants:
+				v.attributes = frappe.get_all("Item Variant Attribute",
+					fields=["attribute", "attribute_value"], filters={"parent": v.name})
+
+				for attr in v.attributes:
+					values = attribute_values_available.setdefault(attr.attribute, [])
+					if attr.attribute_value not in values:
+						values.append(attr.attribute_value)
+
+					if v.name==context.variant.name:
+						context.selected_attributes[attr.attribute] = attr.attribute_value
+
+			# filter attributes, order based on attribute table
+			for attr in self.attributes:
+				values = context.attribute_values.setdefault(attr.attribute, [])
+
+				if cint(frappe.db.get_value("Item Attribute", attr.attribute, "numeric_values")):
+					for val in sorted(attribute_values_available.get(attr.attribute, []), key=flt):
+						values.append(val)
+
+				else:
+					# get list of values defined (for sequence)
+					for attr_value in frappe.db.get_all("Item Attribute Value",
+						fields=["attribute_value"], filters={"parent": attr.attribute}, order_by="idx asc"):
+
+						if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
+							values.append(attr_value.attribute_value)
+
+			context.variant_info = json.dumps(context.variants)
+
+	def set_disabled_attributes(self, context):
+		"""Disable selection options of attribute combinations that do not result in a variant"""
+		if not self.attributes:
+			return
+
+		context.disabled_attributes = {}
+		attributes = [attr.attribute for attr in self.attributes]
+
+		def find_variant(combination):
+			for variant in context.variants:
+				if len(variant.attributes) < len(attributes):
+					continue
+
+				if "combination" not in variant:
+					ref_combination = []
+
+					for attr in variant.attributes:
+						idx = attributes.index(attr.attribute)
+						ref_combination.insert(idx, attr.attribute_value)
+
+					variant["combination"] = ref_combination
+
+				if not (set(combination) - set(variant["combination"])):
+					# check if the combination is a subset of a variant combination
+					# eg. [Blue, 0.5] is a possible combination if exists [Blue, Large, 0.5]
+					return True
+
+		for i, attr in enumerate(self.attributes):
+			if i==0:
+				continue
+
+			combination_source = []
+
+			# loop through previous attributes
+			for prev_attr in self.attributes[:i]:
+				combination_source.append([context.selected_attributes.get(prev_attr.attribute)])
+
+			combination_source.append(context.attribute_values[attr.attribute])
+
+			for combination in itertools.product(*combination_source):
+				if not find_variant(combination):
+					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
 
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
@@ -133,9 +406,6 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx))
 
 	def validate_item_type(self):
-		if self.is_pro_applicable == 1 and self.is_stock_item==0:
-			frappe.throw(_("As Production Order can be made for this item, it must be a stock item."))
-
 		if self.has_serial_no == 1 and self.is_stock_item == 0:
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
 
@@ -180,26 +450,44 @@ class Item(WebsiteGenerator):
 
 	def cant_change(self):
 		if not self.get("__islocal"):
-			vals = frappe.db.get_value("Item", self.name,
-				["has_serial_no", "is_stock_item", "valuation_method", "has_batch_no"], as_dict=True)
+			to_check = ("has_serial_no", "is_stock_item",
+				"valuation_method", "has_batch_no", "is_fixed_asset")
 
-			if vals and ((self.is_stock_item == 0 and vals.is_stock_item == 1) or
-				vals.has_serial_no != self.has_serial_no or
-				vals.has_batch_no != self.has_batch_no or
-				cstr(vals.valuation_method) != cstr(self.valuation_method)):
-					if self.check_if_sle_exists() == "exists":
-						frappe.throw(_("As there are existing stock transactions for this item, \
-							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'"))
+			vals = frappe.db.get_value("Item", self.name, to_check, as_dict=True)
+			if not vals.get('valuation_method') and self.get('valuation_method'):
+				vals['valuation_method'] = frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
 
-	def validate_reorder_level(self):
-		if cint(self.apply_warehouse_wise_reorder_level):
-			self.re_order_level, self.re_order_qty = 0, 0
-		else:
-			self.set("reorder_levels", [])
+			if vals:
+				for key in to_check:
+					if cstr(self.get(key)) != cstr(vals.get(key)):
+						if not self.check_if_linked_document_exists(key):
+							break # no linked document, allowed
+						else:
+							frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}").format(self.name, frappe.bold(self.meta.get_label(key))))
 
-		if self.re_order_level or len(self.get("reorder_levels", {"material_request_type": "Purchase"})):
-			if not self.is_purchase_item:
-				frappe.throw(_("""To set reorder level, item must be a Purchase Item"""))
+			if vals and not self.is_fixed_asset and self.is_fixed_asset != vals.is_fixed_asset:
+				asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
+				if asset:
+					frappe.throw(_('"Is Fixed Asset" cannot be unchecked, as Asset record exists against the item'))
+
+	def check_if_linked_document_exists(self, key):
+		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "Purchase Receipt Item",
+			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"]
+
+		# For "Is Stock Item", following doctypes is important
+		# because reserved_qty, ordered_qty and requested_qty updated from these doctypes
+		if key == "is_stock_item":
+			linked_doctypes += ["Sales Order Item", "Purchase Order Item", "Material Request Item"]
+
+		for doctype in linked_doctypes:
+			if frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
+				frappe.db.get_value("Production Order",
+					filters={"production_item": self.name, "docstatus": 1}):
+				return True
+
+		for d in self.get("reorder_levels"):
+			if d.warehouse_reorder_level and not d.warehouse_reorder_qty:
+				frappe.throw(_("Row #{0}: Please set reorder quantity").format(d.idx))
 
 	def validate_warehouse_for_reorder(self):
 		warehouse = []
@@ -208,7 +496,7 @@ class Item(WebsiteGenerator):
 				warehouse += [i.get("warehouse")]
 			else:
 				frappe.throw(_("Row {0}: An Reorder entry already exists for this warehouse {1}")
-					.format(i.idx, i.warehouse))
+					.format(i.idx, i.warehouse), DuplicateReorderRows)
 
 	def check_if_sle_exists(self):
 		sle = frappe.db.sql("""select name from `tabStock Ledger Entry`
@@ -225,9 +513,6 @@ class Item(WebsiteGenerator):
 			item_description=%s, modified=NOW() where item_code=%s""",
 			(self.item_name, self.description, self.name))
 
-	def get_tax_rate(self, tax_type):
-		return { "tax_rate": frappe.db.get_value("Account", tax_type, "tax_rate") }
-
 	def on_trash(self):
 		super(Item, self).on_trash()
 		frappe.db.sql("""delete from tabBin where item_code=%s""", self.item_code)
@@ -235,43 +520,62 @@ class Item(WebsiteGenerator):
 		for variant_of in frappe.get_all("Item", filters={"variant_of": self.name}):
 			frappe.delete_doc("Item", variant_of.name)
 
-	def before_rename(self, olddn, newdn, merge=False):
+	def before_rename(self, old_name, new_name, merge=False):
+		if self.item_name==old_name:
+			self.item_name=new_name
+
 		if merge:
 			# Validate properties before merging
-			if not frappe.db.exists("Item", newdn):
-				frappe.throw(_("Item {0} does not exist").format(newdn))
+			if not frappe.db.exists("Item", new_name):
+				frappe.throw(_("Item {0} does not exist").format(new_name))
 
 			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
-			new_properties = [cstr(d) for d in frappe.db.get_value("Item", newdn, field_list)]
+			new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, field_list)]
 			if new_properties != [cstr(self.get(fld)) for fld in field_list]:
 				frappe.throw(_("To merge, following properties must be same for both items")
 					+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
 
-			frappe.db.sql("delete from `tabBin` where item_code=%s", olddn)
-
-	def after_rename(self, olddn, newdn, merge):
-		super(Item, self).after_rename(olddn, newdn, merge)
-		if self.page_name:
+	def after_rename(self, old_name, new_name, merge):
+		if self.route:
 			invalidate_cache_for_item(self)
-			clear_cache(self.page_name)
+			clear_cache(self.route)
 
-		frappe.db.set_value("Item", newdn, "item_code", newdn)
+		frappe.db.set_value("Item", new_name, "item_code", new_name)
+
 		if merge:
-			self.set_last_purchase_rate(newdn)
-			self.recalculate_bin_qty(newdn)
+			self.set_last_purchase_rate(new_name)
+			self.recalculate_bin_qty(new_name)
 
-	def set_last_purchase_rate(self, newdn):
-		last_purchase_rate = get_last_purchase_details(newdn).get("base_rate", 0)
-		frappe.db.set_value("Item", newdn, "last_purchase_rate", last_purchase_rate)
+		for dt in ("Sales Taxes and Charges", "Purchase Taxes and Charges"):
+			for d in frappe.db.sql("""select name, item_wise_tax_detail from `tab{0}`
+					where ifnull(item_wise_tax_detail, '') != ''""".format(dt), as_dict=1):
 
-	def recalculate_bin_qty(self, newdn):
-		from erpnext.utilities.repost_stock import repost_stock
+				item_wise_tax_detail = json.loads(d.item_wise_tax_detail)
+				if old_name in item_wise_tax_detail:
+					item_wise_tax_detail[new_name] = item_wise_tax_detail[old_name]
+					item_wise_tax_detail.pop(old_name)
+
+					frappe.db.set_value(dt, d.name, "item_wise_tax_detail",
+						json.dumps(item_wise_tax_detail), update_modified=False)
+
+	def set_last_purchase_rate(self, new_name):
+		last_purchase_rate = get_last_purchase_details(new_name).get("base_rate", 0)
+		frappe.db.set_value("Item", new_name, "last_purchase_rate", last_purchase_rate)
+
+	def recalculate_bin_qty(self, new_name):
+		from erpnext.stock.stock_balance import repost_stock
 		frappe.db.auto_commit_on_many_writes = 1
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
-		for warehouse in frappe.db.sql("select name from `tabWarehouse`"):
-			repost_stock(newdn, warehouse[0])
+		repost_stock_for_warehouses = frappe.db.sql_list("""select distinct warehouse
+			from tabBin where item_code=%s""", new_name)
+
+		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
+		frappe.db.sql("delete from `tabBin` where item_code=%s", new_name)
+
+		for warehouse in repost_stock_for_warehouses:
+			repost_stock(new_name, warehouse)
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
@@ -293,12 +597,30 @@ class Item(WebsiteGenerator):
 			frappe.db.sql("""update `tabBOM Explosion Item` set description = %s where
 				item_code = %s and docstatus < 2""",(self.description, self.name))
 
+	def update_template_item(self):
+		"""Set Show in Website for Template Item if True for its Variant"""
+		if self.variant_of and self.show_in_website:
+			self.show_variant_in_website = 1
+			self.show_in_website = 0
+
+		if self.show_variant_in_website:
+			# show template
+			template_item = frappe.get_doc("Item", self.variant_of)
+
+			if not template_item.show_in_website:
+				template_item.show_in_website = 1
+				template_item.flags.ignore_permissions = True
+				template_item.flags.dont_update_variants = True
+				template_item.save()
+
 	def update_variants(self):
-		if self.has_variants:
+		if self.has_variants and not self.flags.dont_update_variants:
 			updated = []
 			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name })
 			for d in variants:
-				update_variant(self.name, d)
+				variant = frappe.get_doc("Item", d)
+				copy_attributes_to_variant(self, variant)
+				variant.save()
 				updated.append(d.item_code)
 			if updated:
 				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
@@ -308,14 +630,6 @@ class Item(WebsiteGenerator):
 			if frappe.db.exists("Item", {"variant_of": self.name}):
 				frappe.throw(_("Item has variants."))
 
-	def validate_stock_for_template_must_be_zero(self):
-		if self.has_variants:
-			stock_in = frappe.db.sql_list("""select warehouse from tabBin
-				where item_code=%s and (ifnull(actual_qty, 0) > 0 or ifnull(ordered_qty, 0) > 0
-				or ifnull(reserved_qty, 0) > 0 or ifnull(indented_qty, 0) > 0 or ifnull(planned_qty, 0) > 0)""", self.name)
-			if stock_in:
-				frappe.throw(_("Item Template cannot have stock or Open Sales/Purchase/Production Orders."), ItemTemplateCannotHaveStock)
-				
 	def validate_uom(self):
 		if not self.get("__islocal"):
 			check_stock_uom_with_bin(self.name, self.stock_uom)
@@ -325,15 +639,59 @@ class Item(WebsiteGenerator):
 		if self.variant_of:
 			template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
 			if template_uom != self.stock_uom:
-				frappe.throw(_("Default Unit of Measure for Variant must be same as Template"))
+				frappe.throw(_("Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'")
+					.format(self.stock_uom, template_uom))
 
-def validate_end_of_life(item_code, end_of_life=None, verbose=1):
-	if not end_of_life:
-		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")
+	def validate_attributes(self):
+		if (self.has_variants or self.variant_of) and self.variant_based_on=='Item Attribute':
+			attributes = []
+			if not self.attributes:
+				frappe.throw(_("Attribute table is mandatory"))
+			for d in self.attributes:
+				if d.attribute in attributes:
+					frappe.throw(_("Attribute {0} selected multiple times in Attributes Table".format(d.attribute)))
+				else:
+					attributes.append(d.attribute)
+
+	def validate_variant_attributes(self):
+		if self.variant_of and self.variant_based_on=='Item Attribute':
+			args = {}
+			for d in self.attributes:
+				if not d.attribute_value:
+					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
+				args[d.attribute] = d.attribute_value
+
+			variant = get_variant(self.variant_of, args, self.name)
+			if variant:
+				frappe.throw(_("Item variant {0} exists with same attributes")
+					.format(variant), ItemVariantExistsError)
+
+			validate_item_variant_attributes(self, args)
+
+def get_timeline_data(doctype, name):
+	'''returns timeline data based on stock ledger entry'''
+	out = {}
+	items = dict(frappe.db.sql('''select posting_date, count(*)
+		from `tabStock Ledger Entry` where item_code=%s
+			and posting_date > date_sub(curdate(), interval 1 year)
+			group by posting_date''', name))
+
+	for date, count in items.iteritems():
+		timestamp = get_timestamp(date)
+		out.update({ timestamp: count })
+
+	return out
+
+def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
+	if (not end_of_life) or (disabled is None):
+		end_of_life, disabled = frappe.db.get_value("Item", item_code, ["end_of_life", "disabled"])
 
 	if end_of_life and end_of_life!="0000-00-00" and getdate(end_of_life) <= now_datetime().date():
 		msg = _("Item {0} has reached its end of life on {1}").format(item_code, formatdate(end_of_life))
 		_msgprint(msg, verbose)
+
+	if disabled:
+		_msgprint(_("Item {0} is disabled").format(item_code), verbose)
 
 def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
 	if not is_stock_item:
@@ -455,6 +813,5 @@ def check_stock_uom_with_bin(item, stock_uom):
 			frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""", (stock_uom, item))
 
 	if not matched:
-		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because \
-			you have already made some transaction(s) with another UOM. To change default UOM, \
-			use 'UOM Replace Utility' tool under Stock module.").format(item))
+		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
+

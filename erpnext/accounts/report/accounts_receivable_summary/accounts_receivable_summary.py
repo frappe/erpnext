@@ -18,18 +18,26 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			columns += [ args.get("party_type") + " Name::140"]
 
 		columns += [
-			_("Total Invoiced Amt") + ":Currency:140",
-			_("Total Paid Amt") + ":Currency:140",
-			_("Total Outstanding Amt") + ":Currency:160",
-			"0-" + str(self.filters.range1) + ":Currency:100",
-			str(self.filters.range1) + "-" + str(self.filters.range2) + ":Currency:100",
-			str(self.filters.range2) + "-" + str(self.filters.range3) + ":Currency:100",
-			str(self.filters.range3) + _("-Above") + ":Currency:100"]
+			_("Total Invoiced Amt") + ":Currency/currency:140",
+			_("Total Paid Amt") + ":Currency/currency:140",
+			_("Total Outstanding Amt") + ":Currency/currency:160",
+			"0-" + str(self.filters.range1) + ":Currency/currency:100",
+			str(self.filters.range1) + "-" + str(self.filters.range2) + ":Currency/currency:100",
+			str(self.filters.range2) + "-" + str(self.filters.range3) + ":Currency/currency:100",
+			str(self.filters.range3) + _("-Above") + ":Currency/currency:100"]
 
 		if args.get("party_type") == "Customer":
 			columns += [_("Territory") + ":Link/Territory:80"]
 		if args.get("party_type") == "Supplier":
 			columns += [_("Supplier Type") + ":Link/Supplier Type:80"]
+			
+		columns.append({
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"width": 80
+		})
 
 		return columns
 
@@ -53,6 +61,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				row += [self.get_territory(party)]
 			if args.get("party_type") == "Supplier":
 				row += [self.get_supplier_type(party)]
+				
+			row.append(party_dict.currency)
 			data.append(row)
 
 		return data
@@ -73,6 +83,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			)
 			for k in party_total[d.party].keys():
 				party_total[d.party][k] += d.get(k, 0)
+				
+			party_total[d.party].currency = d.currency
 
 		return party_total
 
@@ -90,7 +102,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			cols += ["bill_no", "bill_date"]
 
 		cols += ["invoiced_amt", "paid_amt",
-		"outstanding_amt", "age", "range1", "range2", "range3", "range4"]
+		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "currency"]
 
 		if args.get("party_type") == "Supplier":
 			cols += ["supplier_type", "remarks"]

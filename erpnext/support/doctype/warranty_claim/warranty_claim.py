@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import session, _
-from frappe.utils import today
+from frappe.utils import today, now_datetime
 
 
 
@@ -19,9 +19,9 @@ class WarrantyClaim(TransactionBase):
 		if session['user'] != 'Guest' and not self.customer:
 			frappe.throw(_("Customer is required"))
 
-		if self.status=="Closed" and \
+		if self.status=="Closed" and not self.resolution_date and \
 			frappe.db.get_value("Warranty Claim", self.name, "status")!="Closed":
-			self.resolution_date = today()
+			self.resolution_date = now_datetime()
 
 	def on_cancel(self):
 		lst = frappe.db.sql("""select t1.name

@@ -15,26 +15,37 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 	values, condition = [posting_date], ""
 
 	if warehouse:
-		values.append(warehouse)
-		condition += " AND warehouse = %s"
+		
+		lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
+		
+		if is_group:
+			values.extend([lft, rgt])
+			condition += "and exists (\
+				select name from `tabWarehouse` wh where wh.name = sle.warehouse\
+				and wh.lft >= %s and wh.rgt <= %s)"
+		
+		else:
+			values.append(warehouse)
+			condition += " AND warehouse = %s"
 
 	if item_code:
 		values.append(item_code)
 		condition.append(" AND item_code = %s")
 
 	stock_ledger_entries = frappe.db.sql("""
-		SELECT item_code, stock_value
-		FROM `tabStock Ledger Entry`
+		SELECT item_code, stock_value, name, warehouse
+		FROM `tabStock Ledger Entry` sle
 		WHERE posting_date <= %s {0}
 		ORDER BY timestamp(posting_date, posting_time) DESC, name DESC
 	""".format(condition), values, as_dict=1)
 
 	sle_map = {}
 	for sle in stock_ledger_entries:
-		sle_map.setdefault(sle.item_code, flt(sle.stock_value))
-
+		sle_map[sle.item_code] = sle_map.get(sle.item_code, 0.0) + flt(sle.stock_value)
+		
 	return sum(sle_map.values())
 
+@frappe.whitelist()
 def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None, with_valuation_rate=False):
 	"""Returns stock balance quantity at given warehouse on given posting date or current date.
 
@@ -88,9 +99,13 @@ def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	else:
 		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
+@frappe.whitelist()
 def get_incoming_rate(args):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle
+	
+	if isinstance(args, basestring):
+		args = json.loads(args)
 
 	in_rate = 0
 	if (args.get("serial_no") or "").strip():
@@ -112,7 +127,7 @@ def get_avg_purchase_rate(serial_nos):
 	"""get average value of serial numbers"""
 
 	serial_nos = get_valid_serial_nos(serial_nos)
-	return flt(frappe.db.sql("""select avg(ifnull(purchase_rate, 0)) from `tabSerial No`
+	return flt(frappe.db.sql("""select avg(purchase_rate) from `tabSerial No`
 		where name in (%s)""" % ", ".join(["%s"] * len(serial_nos)),
 		tuple(serial_nos))[0][0])
 
@@ -173,3 +188,8 @@ def validate_warehouse_company(warehouse, company):
 	if warehouse_company and warehouse_company != company:
 		frappe.throw(_("Warehouse {0} does not belong to company {1}").format(warehouse, company),
 			InvalidWarehouseCompany)
+
+def is_group_warehouse(warehouse):
+	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
+		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
+	

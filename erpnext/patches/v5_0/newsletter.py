@@ -10,27 +10,27 @@ def execute():
 	frappe.reload_doctype("Lead")
 	frappe.reload_doctype("Contact")
 
-	frappe.reload_doc('crm', 'doctype', 'newsletter_list')
-	frappe.reload_doc('crm', 'doctype', 'newsletter_list_subscriber')
-	frappe.reload_doc('crm', 'doctype', 'newsletter')
+	frappe.reload_doc('email', 'doctype', 'email_group')
+	frappe.reload_doc('email', 'doctype', 'email_group_member')
+	frappe.reload_doc('email', 'doctype', 'newsletter')
 
 	frappe.permissions.reset_perms("Newsletter")
 
 	if not frappe.db.exists("Role", "Newsletter Manager"):
 		frappe.get_doc({"doctype": "Role", "role": "Newsletter Manager"}).insert()
 
-	for userrole in frappe.get_all("UserRole", "parent", {"role": "Sales Manager"}):
+	for userrole in frappe.get_all("Has Role", "parent", {"role": "Sales Manager", "parenttype": "User"}):
 		if frappe.db.exists("User", userrole.parent):
 			user = frappe.get_doc("User", userrole.parent)
-			user.append("user_roles", {
-				"doctype": "UserRole",
+			user.append("roles", {
+				"doctype": "Has Role",
 				"role": "Newsletter Manager"
 			})
 			user.flags.ignore_mandatory = True
 			user.save()
 
 	# create default lists
-	general = frappe.new_doc("Newsletter List")
+	general = frappe.new_doc("Email Group")
 	general.title = "General"
 	general.insert()
 	general.import_from("Lead")

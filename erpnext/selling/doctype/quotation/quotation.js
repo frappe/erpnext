@@ -2,7 +2,15 @@
 // License: GNU General Public License v3. See license.txt
 
 
-{% include 'selling/sales_common.js' %}
+{% include 'erpnext/selling/sales_common.js' %}
+
+frappe.ui.form.on('Quotation', {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Sales Order': 'Make Sales Order'
+		}
+	}
+});
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
@@ -19,18 +27,18 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
 			cur_frm.add_custom_button(__('Make Sales Order'),
-				cur_frm.cscript['Make Sales Order'], frappe.boot.doctype_icons["Sales Order"]);
+				cur_frm.cscript['Make Sales Order']);
+
 			if(doc.status!=="Ordered") {
 				cur_frm.add_custom_button(__('Set as Lost'),
-					cur_frm.cscript['Declare Order Lost'], "icon-exclamation", "btn-default");
+					cur_frm.cscript['Declare Order Lost']);
 			}
-
 		}
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('From Opportunity'),
+			cur_frm.add_custom_button(__('Opportunity'),
 				function() {
-					frappe.model.map_current_doc({
+					erpnext.utils.map_current_doc({
 						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
 						get_query_filters: {
@@ -41,10 +49,11 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				}, "icon-download", "btn-default");
+				}, __("Get items from"), "btn-default");
 		}
 
 		this.toggle_reqd_lead_customer();
+
 	},
 
 	quotation_to: function() {
@@ -66,12 +75,8 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this.frm.toggle_reqd("customer", this.frm.doc.quotation_to == "Customer");
 
 		// to overwrite the customer_filter trigger from queries.js
-		$.each(["customer_address", "shipping_address_name"],
-			function(i, opts) {
-				me.frm.set_query(opts, me.frm.doc.quotation_to==="Lead"
-					? erpnext.queries["lead_filter"] : erpnext.queries["customer_filter"]);
-			}
-		);
+		this.frm.set_query('customer_address', erpnext.queries.address_query);
+		this.frm.set_query('shipping_address_name', erpnext.queries.address_query);
 	},
 
 	tc_name: function() {
@@ -93,7 +98,11 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		var me = this;
 		frappe.call({
 			method: "erpnext.crm.doctype.lead.lead.get_lead_details",
-			args: { "lead": this.frm.doc.lead },
+			args: {
+				'lead': this.frm.doc.lead,
+				'posting_date': this.frm.doc.transaction_date,
+				'company': this.frm.doc.company,
+			},
 			callback: function(r) {
 				if(r.message) {
 					me.frm.updating_party_details = true;
@@ -159,4 +168,10 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 
 frappe.ui.form.on("Quotation Item", "items_on_form_rendered", function(frm, cdt, cdn) {
 	// enable tax_amount field if Actual
+})
+
+frappe.ui.form.on("Quotation Item", "stock_balance", function(frm, cdt, cdn) {
+	var d = frappe.model.get_doc(cdt, cdn);
+	frappe.route_options = {"item_code": d.item_code};
+	frappe.set_route("query-report", "Stock Balance");
 })

@@ -13,7 +13,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.onload_post_render = function(doc,cdt,cdn){
-	if(doc.__islocal && doc.employee==frappe.defaults.get_user_default("employee")) {
+	if(doc.__islocal && doc.employee==frappe.defaults.get_user_default("Employee")) {
 		cur_frm.set_value("employee", "");
 		cur_frm.set_value("employee_name", "")
 	}
@@ -24,7 +24,7 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.kra_template = function(doc, dt, dn) {
-	frappe.model.map_current_doc({
+	erpnext.utils.map_current_doc({
 		method: "erpnext.hr.doctype.appraisal.appraisal.fetch_appraisal_template",
 		source_name: cur_frm.doc.kra_template,
 		frm: cur_frm

@@ -19,16 +19,16 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_ordered_qty(self):
 		existing_ordered_qty = get_ordered_qty()
-		
+
 		po = create_purchase_order(do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, po.name)
-		
+
 		po.submit()
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
 
-		create_pr_against_po(po.name)	
+		create_pr_against_po(po.name)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 6)
-		
+
 		po.load_from_db()
 		self.assertEquals(po.get("items")[0].received_qty, 4)
 
@@ -36,15 +36,41 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		pr = create_pr_against_po(po.name, received_qty=8)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
-		
+
 		po.load_from_db()
 		self.assertEquals(po.get("items")[0].received_qty, 12)
 
 		pr.cancel()
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 6)
-		
+
 		po.load_from_db()
 		self.assertEquals(po.get("items")[0].received_qty, 4)
+		
+	def test_ordered_qty_against_pi_with_update_stock(self):
+		existing_ordered_qty = get_ordered_qty()
+
+		po = create_purchase_order()
+		
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
+
+		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
+
+		pi = make_purchase_invoice(po.name)
+		pi.update_stock = 1
+		pi.items[0].qty = 12
+		pi.insert()
+		pi.submit()
+		
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
+
+		po.load_from_db()
+		self.assertEquals(po.get("items")[0].received_qty, 12)
+
+		pi.cancel()
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
+
+		po.load_from_db()
+		self.assertEquals(po.get("items")[0].received_qty, 0)
 
 	def test_make_purchase_invoice(self):
 		po = create_purchase_order(do_not_submit=True)
@@ -71,6 +97,52 @@ class TestPurchaseOrder(unittest.TestCase):
 		po = create_purchase_order(qty=3.4, do_not_save=True)
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
 
+	def test_ordered_qty_for_closing_po(self):
+		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
+			fields=["ordered_qty"])
+
+		existing_ordered_qty = bin[0].ordered_qty if bin else 0.0
+
+		po = create_purchase_order(item_code= "_Test Item", qty=1)
+
+		self.assertEquals(get_ordered_qty(item_code= "_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty+1)
+
+		po.update_status("Closed")
+
+		self.assertEquals(get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty)
+		
+	def test_group_same_items(self):
+		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+		frappe.get_doc({
+			"doctype": "Purchase Order",
+			"company": "_Test Company",
+			"supplier" : "_Test Supplier",
+			"is_subcontracted" : "No",
+			"currency" : frappe.db.get_value("Company", "_Test Company", "default_currency"),
+			"conversion_factor" : 1,
+			"items" : get_same_items(),
+			"group_same_items": 1
+			}).insert(ignore_permissions=True)
+
+		
+def get_same_items():
+	return [
+				{
+					"item_code": "_Test FG Item",
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": 1,
+					"rate": 500,
+					"schedule_date": add_days(nowdate(), 1)
+				},
+				{
+					"item_code": "_Test FG Item",
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": 4,
+					"rate": 500,
+					"schedule_date": add_days(nowdate(), 1)
+				}
+			]		
+
 def create_purchase_order(**args):
 	po = frappe.new_doc("Purchase Order")
 	args = frappe._dict(args)
@@ -94,9 +166,9 @@ def create_purchase_order(**args):
 		po.insert()
 		if not args.do_not_submit:
 			po.submit()
-			
+
 	return po
-	
+
 def create_pr_against_po(po, received_qty=4):
 	pr = make_purchase_receipt(po)
 	pr.get("items")[0].qty = received_qty

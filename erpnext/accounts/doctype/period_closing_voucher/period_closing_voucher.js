@@ -1,21 +1,37 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-
-//========================== On Load =================================================
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
-}
-
-
-// ***************** Get Account Head *****************
-cur_frm.fields_dict['closing_account_head'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:{
-			"company": doc.company,
-			"report_type": "Balance Sheet",
-			"freeze_account": "No",
-			"is_group": 0
+frappe.ui.form.on('Period Closing Voucher', {
+	onload: function(frm) {
+		if (!frm.doc.transaction_date) frm.doc.transaction_date = dateutil.obj_to_str(new Date());
+	},
+	
+	setup: function(frm) {
+		frm.set_query("closing_account_head", function() {
+			return {
+				filters: [
+					['Account', 'company', '=', frm.doc.company],
+					['Account', 'is_group', '=', '0'],
+					['Account', 'freeze_account', '=', 'No'],
+					['Account', 'root_type', 'in', 'Liability, Equity']
+				]
+			}
+		});
+	},
+	
+	refresh: function(frm) {
+		if(frm.doc.docstatus==1) {
+			frm.add_custom_button(__('Ledger'), function() {
+				frappe.route_options = {
+					"voucher_no": frm.doc.name,
+					"from_date": frm.doc.posting_date,
+					"to_date": frm.doc.posting_date,
+					"company": frm.doc.company,
+					group_by_voucher: 0
+				};
+				frappe.set_route("query-report", "General Ledger");
+			}, "fa fa-table");
 		}
 	}
-}
+	
+})

@@ -1,7 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.list_route = "Accounts Browser/Account";
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.__islocal) {
@@ -42,19 +41,19 @@ cur_frm.add_fetch('parent_account', 'root_type', 'root_type');
 cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 	if(doc.is_group==0) {
 		cur_frm.toggle_display(['tax_rate'], doc.account_type == 'Tax');
-		cur_frm.toggle_display('warehouse', doc.account_type=='Warehouse');
+		cur_frm.toggle_display('warehouse', doc.account_type=='Stock');
 	}
 }
 
 cur_frm.cscript.add_toolbar_buttons = function(doc) {
 	cur_frm.add_custom_button(__('Chart of Accounts'),
-		function() { frappe.set_route("Accounts Browser", "Account"); }, 'icon-sitemap')
+		function() { frappe.set_route("Tree", "Account"); });
 
 	if (doc.is_group == 1) {
-		cur_frm.add_custom_button(__('Convert to non-Group'),
-			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet', 'btn-default');
+		cur_frm.add_custom_button(__('Group to Non-Group'),
+			function() { cur_frm.cscript.convert_to_ledger(); }, 'fa fa-retweet', 'btn-default');
 	} else if (cint(doc.is_group) == 0) {
-		cur_frm.add_custom_button(__('View Ledger'), function() {
+		cur_frm.add_custom_button(__('Ledger'), function() {
 			frappe.route_options = {
 				"account": doc.name,
 				"from_date": sys_defaults.year_start_date,
@@ -62,10 +61,10 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 				"company": doc.company
 			};
 			frappe.set_route("query-report", "General Ledger");
-		}, "icon-table");
+		});
 
-		cur_frm.add_custom_button(__('Convert to Group'),
-			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet', 'btn-default')
+		cur_frm.add_custom_button(__('Non-Group to Group'),
+			function() { cur_frm.cscript.convert_to_group(); }, 'fa fa-retweet', 'btn-default')
 	}
 }
 

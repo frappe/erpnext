@@ -17,6 +17,7 @@ keydict = {
 	'hide_currency_symbol':'hide_currency_symbol',
 	'account_url':'account_url',
 	'disable_rounded_total': 'disable_rounded_total',
+	'disable_in_words': 'disable_in_words',
 }
 
 from frappe.model.document import Document
@@ -44,6 +45,7 @@ class GlobalDefaults(Document):
 			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
 
 		self.toggle_rounded_total()
+		self.toggle_in_words()
 
 		# clear cache
 		frappe.clear_cache()
@@ -61,3 +63,12 @@ class GlobalDefaults(Document):
 
 			make_property_setter(doctype, "rounded_total", "hidden", self.disable_rounded_total, "Check")
 			make_property_setter(doctype, "rounded_total", "print_hide", self.disable_rounded_total, "Check")
+
+	def toggle_in_words(self):
+		self.disable_in_words = cint(self.disable_in_words)
+
+		# Make property setters to hide in words fields
+		for doctype in ("Quotation", "Sales Order", "Sales Invoice", "Delivery Note",
+						"Supplier Quotation", "Purchase Order", "Purchase Invoice", "Purchase Receipt"):
+			make_property_setter(doctype, "in_words", "hidden", self.disable_in_words, "Check")
+			make_property_setter(doctype, "in_words", "print_hide", self.disable_in_words, "Check")

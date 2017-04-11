@@ -3,39 +3,53 @@
 
 from __future__ import unicode_literals
 import frappe
-
 from frappe.utils import flt
-
 from frappe import msgprint, _
-
 from frappe.model.document import Document
+from erpnext.accounts.utils import get_outstanding_invoices
+from erpnext.controllers.accounts_controller import get_advance_payment_entries
 
 class PaymentReconciliation(Document):
 	def get_unreconciled_entries(self):
-		self.get_jv_entries()
+		self.get_nonreconciled_payment_entries()
 		self.get_invoice_entries()
+		
+	def get_nonreconciled_payment_entries(self):
+		self.check_mandatory_to_fetch()
+		
+		payment_entries = self.get_payment_entries()
+		journal_entries = self.get_jv_entries()
+				
+		self.add_payment_entries(payment_entries + journal_entries)
+		
+	def get_payment_entries(self):
+		order_doctype = "Sales Order" if self.party_type=="Customer" else "Purchase Order"
+		payment_entries = get_advance_payment_entries(self.party_type, self.party, 
+			self.receivable_payable_account, order_doctype, against_all_orders=True)
+			
+		return payment_entries
 
 	def get_jv_entries(self):
-		self.check_mandatory_to_fetch()
-		dr_or_cr = "credit" if self.party_type == "Customer" else "debit"
-
-		cond = self.check_condition(dr_or_cr)
+		dr_or_cr = "credit_in_account_currency" if self.party_type == "Customer" \
+			else "debit_in_account_currency"
 
 		bank_account_condition = "t2.against_account like %(bank_cash_account)s" \
 				if self.bank_cash_account else "1=1"
 
-		jv_entries = frappe.db.sql("""
+		journal_entries = frappe.db.sql("""
 			select
-				t1.name as voucher_no, t1.posting_date, t1.remark,
-				t2.name as voucher_detail_no, {dr_or_cr} as payment_amount, t2.is_advance
+				"Journal Entry" as reference_type, t1.name as reference_name, 
+				t1.posting_date, t1.remark as remarks, t2.name as reference_row, 
+				{dr_or_cr} as amount, t2.is_advance
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
 				t1.name = t2.parent and t1.docstatus = 1 and t2.docstatus = 1
 				and t2.party_type = %(party_type)s and t2.party = %(party)s
 				and t2.account = %(account)s and {dr_or_cr} > 0
-				and ifnull(t2.reference_type, '') in ('', 'Sales Order', 'Purchase Order')
-				{cond}
+				and (t2.reference_type is null or t2.reference_type = '' or 
+					(t2.reference_type in ('Sales Order', 'Purchase Order') 
+						and t2.reference_name is not null and t2.reference_name != ''))
 				and (CASE
 					WHEN t1.voucher_type in ('Debit Note', 'Credit Note')
 					THEN 1=1
@@ -43,7 +57,6 @@ class PaymentReconciliation(Document):
 				END)
 			""".format(**{
 				"dr_or_cr": dr_or_cr,
-				"cond": cond,
 				"bank_account_condition": bank_account_condition,
 			}), {
 				"party_type": self.party_type,
@@ -52,73 +65,21 @@ class PaymentReconciliation(Document):
 				"bank_cash_account": "%%%s%%" % self.bank_cash_account
 			}, as_dict=1)
 
-		self.add_payment_entries(jv_entries)
+		return list(journal_entries)
 
-	def add_payment_entries(self, jv_entries):
+	def add_payment_entries(self, entries):
 		self.set('payments', [])
-		for e in jv_entries:
-			ent = self.append('payments', {})
-			ent.journal_entry = e.get('voucher_no')
-			ent.posting_date = e.get('posting_date')
-			ent.amount = flt(e.get('payment_amount'))
-			ent.remark = e.get('remark')
-			ent.voucher_detail_number = e.get('voucher_detail_no')
-			ent.is_advance = e.get('is_advance')
+		for e in entries:
+			row = self.append('payments', {})
+			row.update(e)
 
 	def get_invoice_entries(self):
 		#Fetch JVs, Sales and Purchase Invoices for 'invoices' to reconcile against
-		non_reconciled_invoices = []
-		dr_or_cr = "debit" if self.party_type == "Customer" else "credit"
-		cond = self.check_condition(dr_or_cr)
 
-		invoice_list = frappe.db.sql("""
-			select
-				voucher_no, voucher_type, posting_date,
-				ifnull(sum({dr_or_cr}), 0) as invoice_amount
-			from
-				`tabGL Entry`
-			where
-				party_type = %(party_type)s and party = %(party)s
-				and account = %(account)s and {dr_or_cr} > 0 {cond}
-			group by voucher_type, voucher_no
-		""".format(**{
-			"cond": cond,
-			"dr_or_cr": dr_or_cr
-		}), {
-			"party_type": self.party_type,
-			"party": self.party,
-			"account": self.receivable_payable_account,
-		}, as_dict=True)
+		condition = self.check_condition()
 
-		for d in invoice_list:
-			payment_amount = frappe.db.sql("""
-				select
-					ifnull(sum(ifnull({0}, 0)), 0)
-				from
-					`tabGL Entry`
-				where
-					party_type = %(party_type)s and party = %(party)s
-					and account = %(account)s and {0} > 0
-					and against_voucher_type = %(against_voucher_type)s
-					and ifnull(against_voucher, '') = %(against_voucher)s
-			""".format("credit" if self.party_type == "Customer" else "debit"), {
-				"party_type": self.party_type,
-				"party": self.party,
-				"account": self.receivable_payable_account,
-				"against_voucher_type": d.voucher_type,
-				"against_voucher": d.voucher_no
-			})
-
-			payment_amount = payment_amount[0][0] if payment_amount else 0
-
-			if d.invoice_amount - payment_amount > 0.005:
-				non_reconciled_invoices.append({
-					'voucher_no': d.voucher_no,
-					'voucher_type': d.voucher_type,
-					'posting_date': d.posting_date,
-					'invoice_amount': flt(d.invoice_amount),
-					'outstanding_amount': flt(d.invoice_amount - payment_amount, 2)
-				})
+		non_reconciled_invoices = get_outstanding_invoices(self.party_type, self.party,
+			self.receivable_payable_account, condition=condition)
 
 		self.add_invoice_entries(non_reconciled_invoices)
 
@@ -135,15 +96,23 @@ class PaymentReconciliation(Document):
 			ent.outstanding_amount = e.get('outstanding_amount')
 
 	def reconcile(self, args):
+		for e in self.get('payments'):
+			e.invoice_type = None
+			if e.invoice_number and " | " in e.invoice_number:
+				e.invoice_type, e.invoice_number = e.invoice_number.split(" | ")
+
 		self.get_invoice_entries()
 		self.validate_invoice()
-		dr_or_cr = "credit" if self.party_type == "Customer" else "debit"
+		dr_or_cr = "credit_in_account_currency" \
+			if self.party_type == "Customer" else "debit_in_account_currency"
+			
 		lst = []
 		for e in self.get('payments'):
-			if e.invoice_type and e.invoice_number and e.allocated_amount:
-				lst.append({
-					'voucher_no' : e.journal_entry,
-					'voucher_detail_no' : e.voucher_detail_number,
+			if e.invoice_number and e.allocated_amount:
+				lst.append(frappe._dict({
+					'voucher_type': e.reference_type,
+					'voucher_no' : e.reference_name,
+					'voucher_detail_no' : e.reference_row,
 					'against_voucher_type' : e.invoice_type,
 					'against_voucher'  : e.invoice_number,
 					'account' : self.receivable_payable_account,
@@ -151,13 +120,14 @@ class PaymentReconciliation(Document):
 					'party': self.party,
 					'is_advance' : e.is_advance,
 					'dr_or_cr' : dr_or_cr,
-					'unadjusted_amt' : flt(e.amount),
-					'allocated_amt' : flt(e.allocated_amount)
-				})
-
+					'unadjusted_amount' : flt(e.amount),
+					'allocated_amount' : flt(e.allocated_amount)
+				}))
+				
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
+			
 			msgprint(_("Successfully Reconciled"))
 			self.get_unreconciled_entries()
 
@@ -188,7 +158,7 @@ class PaymentReconciliation(Document):
 						.format(p.invoice_type, p.invoice_number))
 
 				if flt(p.allocated_amount) > flt(p.amount):
-					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to JV amount {2}")
+					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to Payment Entry amount {2}")
 						.format(p.idx, p.allocated_amount, p.amount))
 
 				invoice_outstanding = unreconciled_invoices.get(p.invoice_type, {}).get(p.invoice_number)
@@ -199,13 +169,18 @@ class PaymentReconciliation(Document):
 		if not invoices_to_reconcile:
 			frappe.throw(_("Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row"))
 
-	def check_condition(self, dr_or_cr):
-		cond = self.from_date and " and posting_date >= '" + self.from_date + "'" or ""
-		cond += self.to_date and " and posting_date <= '" + self.to_date + "'" or ""
+	def check_condition(self):
+		cond = " and posting_date >= '{0}'".format(frappe.db.escape(self.from_date)) if self.from_date else ""
+		cond += " and posting_date <= '{0}'".format(frappe.db.escape(self.to_date)) if self.to_date else ""
+
+		if self.party_type == "Customer":
+			dr_or_cr = "debit_in_account_currency"
+		else:
+			dr_or_cr = "credit_in_account_currency"
 
 		if self.minimum_amount:
-			cond += " and {0} >= %s".format(dr_or_cr) % self.minimum_amount
+			cond += " and `{0}` >= {1}".format(dr_or_cr, flt(self.minimum_amount))
 		if self.maximum_amount:
-			cond += " and {0} <= %s".format(dr_or_cr) % self.maximum_amount
+			cond += " and `{0}` <= {1}".format(dr_or_cr, flt(self.maximum_amount))
 
 		return cond

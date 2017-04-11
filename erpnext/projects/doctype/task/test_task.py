@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 import frappe
 import unittest
-from frappe.utils import getdate
+from frappe.utils import getdate, nowdate, add_days
 
 # test_records = frappe.get_test_records('Task')
 
@@ -16,6 +16,7 @@ class TestTask(unittest.TestCase):
 		task1.update({
 			"status": "Open",
 			"subject": "_Test Task 1",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-1",
 			"exp_end_date": "2015-1-10"
 		})
@@ -25,6 +26,7 @@ class TestTask(unittest.TestCase):
 		task2.update({
 			"status": "Open",
 			"subject": "_Test Task 2",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-11",
 			"exp_end_date": "2015-1-15",
 			"depends_on":[
@@ -39,6 +41,7 @@ class TestTask(unittest.TestCase):
 		task3.update({
 			"status": "Open",
 			"subject": "_Test Task 2",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-11",
 			"exp_end_date": "2015-1-15",
 			"depends_on":[
@@ -80,6 +83,7 @@ class TestTask(unittest.TestCase):
 		task1.update({
 			"status": "Open",
 			"subject": "_Test Task 1",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-1",
 			"exp_end_date": "2015-1-10"
 		})
@@ -89,11 +93,13 @@ class TestTask(unittest.TestCase):
 		task2.update({
 			"status": "Open",
 			"subject": "_Test Task 2",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-11",
 			"exp_end_date": "2015-1-15",
 			"depends_on":[
 				{
-					"task": task1.name
+					"task": task1.name,
+					"project": "_Test Project"
 				}
 			]
 		})
@@ -103,11 +109,13 @@ class TestTask(unittest.TestCase):
 		task3.update({
 			"status": "Open",
 			"subject": "_Test Task 3",
+			"project": "_Test Project",
 			"exp_start_date": "2015-1-16",
 			"exp_end_date": "2015-1-18",
 			"depends_on":[
 				{
-					"task": task2.name
+					"task": task2.name,
+					"project": "_Test Project"
 				}
 			]
 		})
@@ -123,29 +131,6 @@ class TestTask(unittest.TestCase):
 
 		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_start_date"), getdate('2015-1-26'))
 		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_end_date"), getdate('2015-1-28'))
-
-		time_log = frappe.new_doc('Time Log')
-		time_log.update({
-			"from_time": "2015-1-1",
-			"to_time": "2015-1-20",
-			"task": task1.name
-		})
-		time_log.submit()
-
-		self.assertEqual(frappe.db.get_value("Task", task2.name, "exp_start_date"), getdate('2015-1-21'))
-		self.assertEqual(frappe.db.get_value("Task", task2.name, "exp_end_date"), getdate('2015-1-25'))
-
-		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_start_date"), getdate('2015-1-26'))
-		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_end_date"), getdate('2015-1-28'))
-
-		time_log.cancel()
-
-		self.assertEqual(frappe.db.get_value("Task", task2.name, "exp_start_date"), getdate('2015-1-21'))
-		self.assertEqual(frappe.db.get_value("Task", task2.name, "exp_end_date"), getdate('2015-1-25'))
-
-		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_start_date"), getdate('2015-1-26'))
-		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_end_date"), getdate('2015-1-28'))
-
 
 	def test_close_assignment(self):
 		task = frappe.new_doc("Task")
@@ -177,3 +162,18 @@ class TestTask(unittest.TestCase):
 		todo = get_owner_and_status()
 		self.assertEquals(todo.owner, "test@example.com")
 		self.assertEquals(todo.status, "Closed")
+
+	def test_overdue(self):
+		task = frappe.get_doc({
+			"doctype":"Task",
+			"subject": "Testing Overdue",
+			"status": "Open",
+			"exp_end_date": add_days(nowdate(), -1)
+		})
+
+		task.insert()
+
+		from erpnext.projects.doctype.task.task import set_tasks_as_overdue
+		set_tasks_as_overdue()
+
+		self.assertEquals(frappe.db.get_value("Task", task.name, "status"), "Overdue")

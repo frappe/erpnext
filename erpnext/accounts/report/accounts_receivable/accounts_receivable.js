@@ -8,7 +8,7 @@ frappe.query_reports["Accounts Receivable"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": frappe.defaults.get_user_default("company")
+			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
 			"fieldname":"customer",
@@ -18,7 +18,7 @@ frappe.query_reports["Accounts Receivable"] = {
 		},
 		{
 			"fieldname":"report_date",
-			"label": __("Date"),
+			"label": __("As on Date"),
 			"fieldtype": "Date",
 			"default": get_today()
 		},
@@ -53,5 +53,12 @@ frappe.query_reports["Accounts Receivable"] = {
 			"default": "90",
 			"reqd": 1
 		}
-	]
+	],
+
+	onload: function(report) {
+		report.page.add_inner_button(__("Accounts Receivable Summary"), function() {
+			var filters = report.get_values();
+			frappe.set_route('query-report', 'Accounts Receivable Summary', {company: filters.company});
+		});
+	}
 }

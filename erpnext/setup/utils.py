@@ -3,17 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, throw
+from frappe import _
 from frappe.utils import flt
-
-def get_company_currency(company):
-	currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
-	if not currency:
-		currency = frappe.db.get_default("currency")
-	if not currency:
-		throw(_('Please specify Default Currency in Company Master and Global Defaults'))
-
-	return currency
+from frappe.utils import get_datetime_str, nowdate
 
 def get_root_of(doctype):
 	"""Get root element of a DocType with a tree structure"""
@@ -32,24 +24,25 @@ def get_ancestors_of(doctype, name):
 def before_tests():
 	frappe.clear_cache()
 	# complete setup if missing
-	from erpnext.setup.page.setup_wizard.setup_wizard import setup_account
+	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 	if not frappe.get_list("Company"):
-		setup_account({
+		setup_complete({
 			"currency"			:"USD",
-			"first_name"		:"Test",
-			"last_name"			:"User",
+			"full_name"			:"Test User",
 			"company_name"		:"Wind Power LLC",
 			"timezone"			:"America/New_York",
 			"company_abbr"		:"WP",
 			"industry"			:"Manufacturing",
 			"country"			:"United States",
-			"fy_start_date"		:"2014-01-01",
-			"fy_end_date"		:"2014-12-31",
+			"fy_start_date"		:"2011-01-01",
+			"fy_end_date"		:"2011-12-31",
 			"language"			:"english",
 			"company_tagline"	:"Testing",
 			"email"				:"test@erpnext.com",
 			"password"			:"test",
-			"chart_of_accounts" : "Standard"
+			"chart_of_accounts" : "Standard",
+			"domain"			: "Manufacturing",
+
 		})
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
@@ -62,22 +55,44 @@ def before_tests():
 	frappe.db.commit()
 
 @frappe.whitelist()
-def get_exchange_rate(from_currency, to_currency):
+def get_exchange_rate(from_currency, to_currency, transaction_date=None):
+	if not transaction_date:
+		transaction_date = nowdate()
+	if not (from_currency and to_currency):
+		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
+		return
+
+	if from_currency == to_currency:
+		return 1
+
+	# cksgb 19/09/2016: get last entry in Currency Exchange with from_currency and to_currency.
+	entries = frappe.get_all("Currency Exchange", fields = ["exchange_rate"],
+		filters=[
+			["date", "<=", get_datetime_str(transaction_date)],
+			["from_currency", "=", from_currency],
+			["to_currency", "=", to_currency]
+		], order_by="date desc", limit=1)
+
+	if entries:
+		return flt(entries[0].exchange_rate)
+
 	try:
 		cache = frappe.cache()
 		key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
 		value = cache.get(key)
+
 		if not value:
 			import requests
 			response = requests.get("http://api.fixer.io/latest", params={
 				"base": from_currency,
 				"symbols": to_currency
 			})
-			# expire in 24 hours
+			# expire in 6 hours
 			response.raise_for_status()
 			value = response.json()["rates"][to_currency]
-			cache.setex(key, value, 24 * 60 * 60)
+			cache.setex(key, value, 6 * 60 * 60)
+
 		return flt(value)
 	except:
-		exchange = "%s-%s" % (from_currency, to_currency)
-		return flt(frappe.db.get_value("Currency Exchange", exchange, "exchange_rate"))
+		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}").format(from_currency, to_currency, transaction_date))
+		return 0.0

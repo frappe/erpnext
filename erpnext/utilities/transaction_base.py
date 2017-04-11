@@ -18,8 +18,10 @@ class TransactionBase(StatusUpdater):
 				frappe.db.get_value("Notification Control", None, dt + "_message"))
 
 	def validate_posting_time(self):
-		if not self.posting_time:
-			self.posting_time = now_datetime().strftime('%H:%M:%S')
+		if not getattr(self, 'set_posting_time', None):
+			now = now_datetime()
+			self.posting_date = now.strftime('%Y-%m-%d')
+			self.posting_time = now.strftime('%H:%M:%S')
 
 	def add_calendar_event(self, opts, force=False):
 		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \
@@ -34,9 +36,6 @@ class TransactionBase(StatusUpdater):
 		if events:
 			frappe.db.sql("delete from `tabEvent` where name in (%s)"
 				.format(", ".join(['%s']*len(events))), tuple(events))
-				
-			frappe.db.sql("delete from `tabEvent Role` where parent in (%s)"
-				.format(", ".join(['%s']*len(events))), tuple(events))
 
 	def _add_calendar_event(self, opts):
 		opts = frappe._dict(opts)
@@ -47,7 +46,7 @@ class TransactionBase(StatusUpdater):
 				"owner": opts.owner or self.owner,
 				"subject": opts.subject,
 				"description": opts.description,
-				"starts_on": self.contact_date + " 10:00:00",
+				"starts_on":  self.contact_date,
 				"event_type": "Private",
 				"ref_type": self.doctype,
 				"ref_name": self.name
@@ -56,7 +55,7 @@ class TransactionBase(StatusUpdater):
 			event.insert(ignore_permissions=True)
 
 			if frappe.db.exists("User", self.contact_by):
-				frappe.share.add("Event", event.name, self.contact_by, 
+				frappe.share.add("Event", event.name, self.contact_by,
 					flags={"ignore_share_permission": True})
 
 	def validate_uom_is_integer(self, uom_field, qty_fields):
@@ -89,21 +88,42 @@ class TransactionBase(StatusUpdater):
 				prevdoc_values = frappe.db.get_value(reference_doctype, reference_name,
 					[d[0] for d in fields], as_dict=1)
 
+				if not prevdoc_values:
+					frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
+
 				for field, condition in fields:
 					if prevdoc_values[field] is not None:
 						self.validate_value(field, condition, prevdoc_values[field], doc)
-						
-						
+
+
 	def validate_rate_with_reference_doc(self, ref_details):
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:
 			for d in self.get("items"):
 				if d.get(ref_link_field):
 					ref_rate = frappe.db.get_value(ref_dt + " Item", d.get(ref_link_field), "rate")
-					
+
 					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= .01:
 						frappe.throw(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ")
 							.format(d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
 
+	def get_link_filters(self, for_doctype):
+		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
+			fieldname = self.prev_link_mapper[for_doctype]["fieldname"]
+
+			values = filter(None, tuple([item.as_dict()[fieldname] for item in self.items]))
+
+			if values:
+				ret = {
+					for_doctype : {
+						"filters": [[for_doctype, "name", "in", values]]
+					}
+				}
+			else:
+				ret = None
+		else:
+			ret = None
+
+		return ret
 
 def delete_events(ref_type, ref_name):
 	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`

@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _
 import frappe.defaults
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import is_cart_enabled
 
@@ -16,6 +15,8 @@ def show_cart_count():
 	return False
 
 def set_cart_count(login_manager):
+	role, parties = check_customer_or_supplier()
+	if role == 'Supplier': return
 	if show_cart_count():
 		from erpnext.shopping_cart.cart import set_cart_count
 		set_cart_count()
@@ -28,21 +29,13 @@ def update_website_context(context):
 	cart_enabled = is_cart_enabled()
 	context["shopping_cart_enabled"] = cart_enabled
 
-	if cart_enabled:
-		post_login = [
-			{"label": _("Cart"), "url": "cart", "class": "cart-count"},
-			{"class": "divider"}
-		]
-		context["post_login"] = post_login + context.get("post_login", [])
+def check_customer_or_supplier():
+	if frappe.session.user:
+		contact_name = frappe.get_value("Contact", {"email_id": frappe.session.user})
+		if contact_name:
+			contact = frappe.get_doc('Contact', contact_name)
+			for link in contact.links:
+				if link.link_doctype in ('Customer', 'Supplier'):
+					return link.link_doctype, link.link_name
 
-def update_my_account_context(context):
-	if is_cart_enabled():
-		context["my_account_list"].append({"label": _("Cart"), "url": "cart"})
-
-	context["my_account_list"].extend([
-		{"label": _("Orders"), "url": "orders"},
-		{"label": _("Invoices"), "url": "invoices"},
-		{"label": _("Shipments"), "url": "shipments"},
-		{"label": _("Issues"), "url": "issues"},
-		{"label": _("Addresses"), "url": "addresses"},
-	])
+		return 'Customer', None

@@ -1,8 +1,6 @@
 {
     "country_code": "ch",
-    "name": "Plan comptable STERCHI",
-	"is_active": "Yes",
-	"disabled": "Yes",
+    "name": "Switzerland - Plan comptable STERCHI",
     "tree": {
         "Actif": {
             "Actifs circulants": {

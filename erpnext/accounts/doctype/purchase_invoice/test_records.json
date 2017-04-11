@@ -22,7 +22,8 @@
     "parentfield": "items",
     "qty": 10,
     "rate": 50,
-    "uom": "_Test UOM"
+    "uom": "_Test UOM",
+	"warehouse": "_Test Warehouse - _TC"
    },
    {
     "amount": 750,
@@ -37,10 +38,10 @@
     "parentfield": "items",
     "qty": 5,
     "rate": 150,
-    "uom": "_Test UOM"
+    "uom": "_Test UOM",
+	"warehouse": "_Test Warehouse - _TC"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "grand_total": 0,
   "naming_series": "_T-BILL",
   "taxes": [
@@ -141,6 +142,9 @@
   "supplier": "_Test Supplier",
   "supplier_name": "_Test Supplier"
  },
+ 
+ 
+ 
  {
   "bill_no": "NA",
   "buying_price_list": "_Test Price List",
@@ -163,7 +167,6 @@
     "uom": "_Test UOM"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "grand_total": 0,
   "naming_series": "_T-Purchase Invoice-",
   "taxes": [

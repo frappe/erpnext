@@ -8,15 +8,18 @@ from frappe.utils import cstr
 from frappe import msgprint, throw, _
 
 from frappe.model.document import Document
+from frappe.permissions import get_doctypes_with_read
 
 class NamingSeriesNotSetError(frappe.ValidationError): pass
 
 class NamingSeries(Document):
 	def get_transactions(self, arg=None):
 		doctypes = list(set(frappe.db.sql_list("""select parent
-				from `tabDocField` where fieldname='naming_series'""")
+				from `tabDocField` df where fieldname='naming_series'""")
 			+ frappe.db.sql_list("""select dt from `tabCustom Field`
 				where fieldname='naming_series'""")))
+
+		doctypes = list(set(get_doctypes_with_read()) | set(doctypes))
 
 		prefixes = ""
 		for d in doctypes:
@@ -24,6 +27,8 @@ class NamingSeries(Document):
 			try:
 				options = self.get_options(d)
 			except frappe.DoesNotExistError:
+				frappe.msgprint('Unable to find DocType {0}'.format(d))
+				#frappe.pass_does_not_exist_error()
 				continue
 
 			if options:
@@ -69,12 +74,13 @@ class NamingSeries(Document):
 
 		# update in property setter
 		prop_dict = {'options': "\n".join(options), 'default': default}
+
 		for prop in prop_dict:
-			ps_exists = frappe.db.sql("""SELECT name FROM `tabProperty Setter`
-					WHERE doc_type = %s AND field_name = 'naming_series'
-					AND property = %s""", (doctype, prop))
+			ps_exists = frappe.db.get_value("Property Setter",
+				{"field_name": 'naming_series', 'doc_type': doctype, 'property': prop})
+
 			if ps_exists:
-				ps = frappe.get_doc('Property Setter', ps_exists[0][0])
+				ps = frappe.get_doc('Property Setter', ps_exists)
 				ps.value = prop_dict[prop]
 				ps.save()
 			else:
@@ -124,13 +130,14 @@ class NamingSeries(Document):
 			throw(_('Special Characters except "-", "#", "." and "/" not allowed in naming series'))
 
 	def get_options(self, arg=None):
-		return frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series").options
+		if frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series"):
+			return frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series").options
 
 	def get_current(self, arg=None):
 		"""get series current"""
 		if self.prefix:
 			self.current_value = frappe.db.get_value("Series",
-				self.prefix.split('.')[0], "current")
+				self.prefix.split('.')[0], "current", order_by = "name")
 
 	def insert_series(self, series):
 		"""insert series if missing"""
@@ -180,6 +187,9 @@ def get_default_naming_series(doctype):
 	naming_series = frappe.get_meta(doctype).get_field("naming_series").options or ""
 	naming_series = naming_series.split("\n")
 	out = naming_series[0] or (naming_series[1] if len(naming_series) > 1 else None)
-	if out:
+
+	if not out:
 		frappe.throw(_("Please set Naming Series for {0} via Setup > Settings > Naming Series").format(doctype),
 			NamingSeriesNotSetError)
+	else:
+		return out

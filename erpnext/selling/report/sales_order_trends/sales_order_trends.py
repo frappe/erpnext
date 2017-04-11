@@ -10,5 +10,4 @@ def execute(filters=None):
 	data = []
 	conditions = get_columns(filters, "Sales Order")
 	data = get_data(filters, conditions)
-	
-	return conditions["columns"], data 
+	return conditions["columns"], data

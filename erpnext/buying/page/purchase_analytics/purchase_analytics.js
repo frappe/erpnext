@@ -110,7 +110,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		this.trigger_refresh_on_change(["value_or_qty", "tree_type", "based_on", "company"]);
 
 		this.show_zero_check()
-		this.setup_plot_check();
+		this.setup_chart_check();
 	},
 	init_filter_values: function() {
 		this._super();
@@ -248,9 +248,5 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		if(!this.checked) {
 			this.data[0].checked = true;
 		}
-	},
-	get_plot_points: function(item, col, idx) {
-		return [[dateutil.str_to_obj(col.id).getTime(), item[col.field]],
-			[dateutil.user_to_obj(col.name).getTime(), item[col.field]]];
 	}
 });

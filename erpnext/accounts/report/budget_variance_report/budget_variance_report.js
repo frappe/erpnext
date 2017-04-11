@@ -8,21 +8,37 @@ frappe.query_reports["Budget Variance Report"] = {
 			label: __("Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: sys_defaults.fiscal_year
+			default: sys_defaults.fiscal_year,
+			reqd: 1
 		},
 		{
 			fieldname: "period",
 			label: __("Period"),
 			fieldtype: "Select",
-			options: "Monthly\nQuarterly\nHalf-Yearly\nYearly",
-			default: "Monthly"
+			options: [
+				{ "value": "Monthly", "label": __("Monthly") },
+				{ "value": "Quarterly", "label": __("Quarterly") },
+				{ "value": "Half-Yearly", "label": __("Half-Yearly") },
+				{ "value": "Yearly", "label": __("Yearly") }
+			],
+			default: "Monthly",
+			reqd: 1
 		},
 		{
 			fieldname: "company",
 			label: __("Company"),
 			fieldtype: "Link",
 			options: "Company",
-			default: frappe.defaults.get_user_default("company")
+			default: frappe.defaults.get_user_default("Company"),
+			reqd: 1
 		},
+		{
+			fieldname: "budget_against",
+			label: __("Budget Against"),
+			fieldtype: "Select",
+			options: ["Cost Center", "Project"],
+			default: "Cost Center",
+			reqd: 1
+		}
 	]
 }

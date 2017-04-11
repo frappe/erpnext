@@ -3,8 +3,8 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
-			"icon": "icon-star",
+			"label": _("Sales Pipeline"),
+			"icon": "fa fa-star",
 			"items": [
 				{
 					"type": "doctype",
@@ -13,29 +13,106 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Customer",
-					"description": _("Customer database."),
+					"name": "Opportunity",
+					"description": _("Potential opportunities for selling."),
 				},
 				{
 					"type": "doctype",
-					"name": "Opportunity",
-					"description": _("Potential opportunities for selling."),
+					"name": "Customer",
+					"description": _("Customer database."),
 				},
 				{
 					"type": "doctype",
 					"name": "Contact",
 					"description": _("All Contacts."),
 				},
+			]
+		},
+		{
+			"label": _("Reports"),
+			"icon": "fa fa-list",
+			"items": [
 				{
-					"type": "doctype",
-					"name": "Newsletter",
-					"description": _("Newsletters to contacts, leads."),
+					"type": "page",
+					"name": "sales-funnel",
+					"label": _("Sales Funnel"),
+					"icon": "fa fa-bar-chart",
+				},
+				{
+					"type": "report",
+					"name": "Minutes to First Response for Opportunity",
+					"doctype": "Opportunity",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Lead Details",
+					"doctype": "Lead"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Customer Addresses And Contacts",
+					"doctype": "Contact"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Inactive Customers",
+					"doctype": "Sales Order"
 				},
 			]
 		},
 		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
+			"label": _("Communication"),
+			"icon": "fa fa-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Communication",
+					"description": _("Record of all communications of type email, phone, chat, visit, etc."),
+				},
+			]
+		},
+		{
+			"label": _("Setup"),
+			"icon": "fa fa-cog",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Campaign",
+					"description": _("Sales campaigns."),
+				},
+				{
+					"type": "doctype",
+					"label": _("Customer Group"),
+					"name": "Customer Group",
+					"icon": "fa fa-sitemap",
+					"link": "Tree/Customer Group",
+					"description": _("Manage Customer Group Tree."),
+				},
+				{
+					"type": "doctype",
+					"label": _("Territory"),
+					"name": "Territory",
+					"icon": "fa fa-sitemap",
+					"link": "Tree/Territory",
+					"description": _("Manage Territory Tree."),
+				},
+				{
+					"type": "doctype",
+					"label": _("Sales Person"),
+					"name": "Sales Person",
+					"icon": "fa fa-sitemap",
+					"link": "Tree/Sales Person",
+					"description": _("Manage Sales Person Tree."),
+				},
+			]
+		},
+		{
+			"label": _("SMS"),
+			"icon": "fa fa-wrench",
 			"items": [
 				{
 					"type": "doctype",
@@ -46,91 +123,12 @@ def get_data():
 					"type": "doctype",
 					"name": "SMS Log",
 					"description":_("Logs for maintaining sms delivery status"),
-				}
-			]
-		},
-		{
-			"label": _("Setup"),
-			"icon": "icon-cog",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Campaign",
-					"description": _("Sales campaigns."),
-				},
-				{
-					"type": "page",
-					"label": _("Customer Group"),
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"link": "Sales Browser/Customer Group",
-					"description": _("Manage Customer Group Tree."),
-					"doctype": "Customer Group",
-				},
-				{
-					"type": "page",
-					"label": _("Territory"),
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"link": "Sales Browser/Territory",
-					"description": _("Manage Territory Tree."),
-					"doctype": "Territory",
-				},
-				{
-					"type": "page",
-					"label": _("Sales Person"),
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"link": "Sales Browser/Sales Person",
-					"description": _("Manage Sales Person Tree."),
-					"doctype": "Sales Person",
-				},
-				{
-					"type": "doctype",
-					"name": "Newsletter List",
-					"description": _("Newsletter Mailing List"),
 				},
 				{
 					"type": "doctype",
 					"name": "SMS Settings",
 					"description": _("Setup SMS gateway settings")
-				},
-			]
-		},
-		{
-			"label": _("Main Reports"),
-			"icon": "icon-table",
-			"items": [
-				{
-					"type": "page",
-					"name": "sales-funnel",
-					"label": _("Sales Funnel"),
-					"icon": "icon-bar-chart",
-				},
-			]
-		},
-		{
-			"label": _("Standard Reports"),
-			"icon": "icon-list",
-			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Lead Details",
-					"doctype": "Lead"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Customer Addresses and Contacts",
-					"doctype": "Contact"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Customers Not Buying Since Long Time",
-					"doctype": "Sales Order"
-				},
+				}
 			]
 		},
 		{
@@ -140,6 +138,11 @@ def get_data():
 					"type": "help",
 					"label": _("Lead to Quotation"),
 					"youtube_id": "TxYX4r4JAKA"
+				},
+				{
+					"type": "help",
+					"label": _("Newsletters"),
+					"youtube_id": "muLKsCrrDRo"
 				},
 			]
 		},

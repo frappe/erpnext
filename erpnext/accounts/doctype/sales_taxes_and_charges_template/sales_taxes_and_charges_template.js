@@ -3,8 +3,5 @@
 
 cur_frm.cscript.tax_table = "Sales Taxes and Charges";
 
-{% include "public/js/controllers/accounts.js" %}
+{% include "erpnext/public/js/controllers/accounts.js" %}
 
-frappe.ui.form.on("Sales Taxes and Charges Template", "onload", function(frm) {
-	erpnext.add_applicable_territory();
-});

@@ -3,21 +3,20 @@
 
 from __future__ import unicode_literals
 import frappe
-
-from frappe.utils import cint
-from frappe.model.naming import make_autoname
+import json
+from frappe.utils import cint, getdate, formatdate
 from frappe import throw, _
-
 from frappe.model.document import Document
+
+class OverlapError(frappe.ValidationError): pass
 
 class HolidayList(Document):
 	def validate(self):
-		self.update_default_holiday_list()
+		self.validate_days()
 
 	def get_weekly_off_dates(self):
 		self.validate_values()
-		yr_start_date, yr_end_date = self.get_fy_start_end_dates()
-		date_list = self.get_weekly_off_date_list(yr_start_date, yr_end_date)
+		date_list = self.get_weekly_off_date_list(self.from_date, self.to_date)
 		last_idx = max([cint(d.idx) for d in self.get("holidays")] or [0,])
 		for i, d in enumerate(date_list):
 			ch = self.append('holidays', {})
@@ -26,29 +25,35 @@ class HolidayList(Document):
 			ch.idx = last_idx + i + 1
 
 	def validate_values(self):
-		if not self.fiscal_year:
-			throw(_("Please select Fiscal Year"))
 		if not self.weekly_off:
 			throw(_("Please select weekly off day"))
 
-	def get_fy_start_end_dates(self):
-		return frappe.db.sql("""select year_start_date, year_end_date
-			from `tabFiscal Year` where name=%s""", (self.fiscal_year,))[0]
 
-	def get_weekly_off_date_list(self, year_start_date, year_end_date):
-		from frappe.utils import getdate
-		year_start_date, year_end_date = getdate(year_start_date), getdate(year_end_date)
+	def validate_days(self):
+		if self.from_date > self.to_date:
+			throw(_("To Date cannot be before From Date"))
+
+		for day in self.get("holidays"):
+			if not (getdate(self.from_date) <= getdate(day.holiday_date) <= getdate(self.to_date)):
+				frappe.throw(_("The holiday on {0} is not between From Date and To Date").format(formatdate(day.holiday_date)))
+
+	def get_weekly_off_date_list(self, start_date, end_date):
+		start_date, end_date = getdate(start_date), getdate(end_date)
 
 		from dateutil import relativedelta
 		from datetime import timedelta
 		import calendar
 
 		date_list = []
+		existing_date_list = []
 		weekday = getattr(calendar, (self.weekly_off).upper())
-		reference_date = year_start_date + relativedelta.relativedelta(weekday=weekday)
+		reference_date = start_date + relativedelta.relativedelta(weekday=weekday)
 
-		while reference_date <= year_end_date:
-			date_list.append(reference_date)
+		existing_date_list = [getdate(holiday.holiday_date) for holiday in self.get("holidays")]
+
+		while reference_date <= end_date:
+			if reference_date not in existing_date_list:
+				date_list.append(reference_date)
 			reference_date += timedelta(days=7)
 
 		return date_list
@@ -56,6 +61,35 @@ class HolidayList(Document):
 	def clear_table(self):
 		self.set('holidays', [])
 
-	def update_default_holiday_list(self):
-		frappe.db.sql("""update `tabHoliday List` set is_default = 0
-			where ifnull(is_default, 0) = 1 and fiscal_year = %s""", (self.fiscal_year,))
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	"""Returns events for Gantt / Calendar view rendering.
+
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	condition = ''
+	values = {
+		"start_date": getdate(start),
+		"end_date": getdate(end)
+	}
+
+	if filters:
+		if isinstance(filters, basestring):
+			filters = json.loads(filters)
+
+		if filters.get('holiday_list'):
+			condition = 'and hlist.name=%(holiday_list)s'
+			values['holiday_list'] = filters['holiday_list']
+
+	data = frappe.db.sql("""select hlist.name, h.holiday_date, h.description
+		from `tabHoliday List` hlist, tabHoliday h
+		where h.parent = hlist.name
+		and h.holiday_date is not null
+		and h.holiday_date >= %(start_date)s
+		and h.holiday_date <= %(end_date)s
+		{condition}""".format(condition=condition),
+		values, as_dict=True, update={"allDay": 1})
+
+	return data

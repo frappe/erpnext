@@ -1,0 +1,5 @@
+student
+admission
+schedule
+fees
+setup

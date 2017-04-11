@@ -4,5 +4,5 @@
 import frappe
 
 def execute():
-	for dt in ("Stock Ledger Entry", "Communication", "Comment", "DefaultValue", "DocShare", "File Data", "ToDo", "Feed"):
+	for dt in ("Stock Ledger Entry", "Communication", "DefaultValue", "DocShare", "File", "ToDo"):
 		frappe.get_doc("DocType", dt).run_module_method("on_doctype_update")

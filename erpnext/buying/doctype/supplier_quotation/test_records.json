@@ -5,7 +5,6 @@
   "conversion_rate": 1.0, 
   "currency": "INR", 
   "doctype": "Supplier Quotation", 
-  "fiscal_year": "_Test Fiscal Year 2013", 
   "base_grand_total": 5000.0, 
   "grand_total": 5000.0, 
   "is_subcontracted": "No", 

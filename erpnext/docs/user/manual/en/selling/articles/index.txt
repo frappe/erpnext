@@ -1,0 +1,6 @@
+applying-discount
+drop-shipping
+erpnext-for-services-organization
+shipping-rule
+sales-persons-in-the-sales-transactions
+close-sales-order

@@ -1,7 +1,6 @@
 {
     "country_code": "cr",
-    "name": "Costa Rica - Company 0",
-	"is_active": "Yes",
+    "name": "Costa Rica - Chart of Accounts 1",
     "tree": {
         "0-Activo": {
             "0-Activo circulante": {

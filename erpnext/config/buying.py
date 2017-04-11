@@ -4,18 +4,18 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Documents"),
-			"icon": "icon-star",
+			"label": _("Purchasing"),
+			"icon": "fa fa-star",
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Supplier",
-					"description": _("Supplier database."),
-				},
 				{
 					"type": "doctype",
 					"name": "Material Request",
 					"description": _("Request for purchase."),
+				},
+				{
+					"type": "doctype",
+					"name": "Request for Quotation",
+					"description": _("Request for quotation."),
 				},
 				{
 					"type": "doctype",
@@ -27,6 +27,21 @@ def get_data():
 					"name": "Purchase Order",
 					"description": _("Purchase Orders given to Suppliers."),
 				},
+			]
+		},
+		{
+			"label": _("Supplier"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Supplier",
+					"description": _("Supplier database."),
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Type",
+					"description": _("Supplier Type master.")
+				},
 				{
 					"type": "doctype",
 					"name": "Contact",
@@ -37,35 +52,17 @@ def get_data():
 					"name": "Address",
 					"description": _("All Addresses."),
 				},
-				{
-					"type": "doctype",
-					"name": "Item",
-					"description": _("All Products or Services."),
-				},
+
 			]
 		},
 		{
 			"label": _("Setup"),
-			"icon": "icon-cog",
+			"icon": "fa fa-cog",
 			"items": [
 				{
 					"type": "doctype",
 					"name": "Buying Settings",
 					"description": _("Default settings for buying transactions.")
-				},
-				{
-					"type": "doctype",
-					"name": "Supplier Type",
-					"description": _("Supplier Type master.")
-				},
-				{
-					"type": "page",
-					"name": "Sales Browser",
-					"icon": "icon-sitemap",
-					"label": _("Item Group Tree"),
-					"link": "Sales Browser/Item Group",
-					"description": _("Tree of Item Groups."),
-					"doctype": "Item Group",
 				},
 				{
 					"type": "doctype",
@@ -78,10 +75,33 @@ def get_data():
 					"name": "Purchase Taxes and Charges Template",
 					"description": _("Tax template for buying transactions.")
 				},
+			]
+		},
+		{
+			"label": _("Items and Pricing"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Item",
+					"description": _("All Products or Services."),
+				},
+				{
+					"type": "doctype",
+					"name": "Product Bundle",
+					"description": _("Bundle items at time of sale."),
+				},
 				{
 					"type": "doctype",
 					"name": "Price List",
 					"description": _("Price List master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Item Group",
+					"icon": "fa fa-sitemap",
+					"label": _("Item Group"),
+					"link": "Tree/Item Group",
+					"description": _("Tree of Item Groups."),
 				},
 				{
 					"type": "doctype",
@@ -94,23 +114,36 @@ def get_data():
 					"name": "Pricing Rule",
 					"description": _("Rules for applying pricing and discount.")
 				},
+
 			]
 		},
 		{
-			"label": _("Main Reports"),
-			"icon": "icon-table",
+			"label": _("Analytics"),
+			"icon": "fa fa-table",
 			"items": [
 				{
 					"type": "page",
 					"name": "purchase-analytics",
 					"label": _("Purchase Analytics"),
-					"icon": "icon-bar-chart",
+					"icon": "fa fa-bar-chart",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Supplier-Wise Sales Analytics",
+					"doctype": "Stock Ledger Entry"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Purchase Order Trends",
+					"doctype": "Purchase Order"
 				},
 			]
 		},
 		{
-			"label": _("Standard Reports"),
-			"icon": "icon-list",
+			"label": _("Other Reports"),
+			"icon": "fa fa-list",
 			"items": [
 				{
 					"type": "report",
@@ -139,21 +172,13 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Purchase Order Trends",
-					"doctype": "Purchase Order"
+					"name": "Addresses And Contacts",
+					"label": "Supplier Addresses And Contacts",
+					"doctype": "Address",
+					"route_options": {
+						"party_type": "Supplier"
+					}
 				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Supplier Addresses and Contacts",
-					"doctype": "Supplier"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Supplier-Wise Sales Analytics",
-					"doctype": "Stock Ledger Entry"
-				}
 			]
 		},
 		{
@@ -163,6 +188,21 @@ def get_data():
 					"type": "help",
 					"label": _("Customer and Supplier"),
 					"youtube_id": "anoGi_RpQ20"
+				},
+				{
+					"type": "help",
+					"label": _("Material Request to Purchase Order"),
+					"youtube_id": "4TN9kPyfIqM"
+				},
+				{
+					"type": "help",
+					"label": _("Purchase Order to Payment"),
+					"youtube_id": "EK65tLdVUDk"
+				},
+				{
+					"type": "help",
+					"label": _("Managing Subcontracting"),
+					"youtube_id": "ThiMCC2DtKo"
 				},
 			]
 		},

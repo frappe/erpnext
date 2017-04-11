@@ -1,18 +1,16 @@
-{% block title %} {{ "Product Search" }} {% endblock %}
+{% extends "templates/web.html" %}
 
-{% block header %}<h2>Product Search</h2>{% endblock %}
+{% block title %} {{ _("Product Search") }} {% endblock %}
 
-{% block header_actions %}
-{% include 'templates/includes/product_search_box.html' %}
-{% endblock %}
+{% block header %}<h2>{{ _("Product Search") }}</h2>{% endblock %}
 
-{% block content %}
+{% block page_content %}
 <script>{% include "templates/includes/product_list.js" %}</script>
 
 <script>
-$(document).ready(function() {
-	var txt = get_url_arg("q");
-	$(".search-results").html("Search results for: " + txt);
+frappe.ready(function() {
+	var txt = get_url_arg("search");
+	$(".search-results").html("{{ _('Search results for') }}: " + txt);
 	window.search = txt;
 	window.start = 0;
 	window.get_product_list();
@@ -20,14 +18,14 @@ $(document).ready(function() {
 </script>
 
 <div class="product-search-content">
-	<h3 class="search-results">Search Results</h3>
+    <h3 class="search-results">{{ _("Search Results") }}</h3>
 	<div id="search-list" class="row">
 
 	</div>
 	<div style="text-align: center;">
 		<div class="more-btn"
 			style="display: none; text-align: center;">
-			<button class="btn btn-default">More...</button>
+            <button class="btn btn-default">{{ _("More...") }}</button>
 		</div>
 	</div>
 </div>

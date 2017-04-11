@@ -4,15 +4,12 @@
 frappe.provide("erpnext.accounts");
 
 erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.extend({
-
 	onload: function() {
 		var me = this
-		this.frm.set_query('party_type', function() {
-			return {
-				filters: {
-					"name": ["in", ["Customer", "Supplier"]]
-				}
-			};
+		this.frm.set_query("party_type", function() {
+			return{
+				query: "erpnext.setup.doctype.party_type.party_type.get_party_type"
+			}
 		});
 
 		this.frm.set_query('receivable_payable_account', function() {
@@ -44,9 +41,14 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			}
 		});
 	},
-	
+
 	refresh: function() {
 		this.frm.disable_save();
+		this.toggle_primary_action();
+	},
+
+	onload_post_render: function() {
+		this.toggle_primary_action();
 	},
 
 	party: function() {
@@ -74,21 +76,8 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			doc: me.frm.doc,
 			method: 'get_unreconciled_entries',
 			callback: function(r, rt) {
-				var invoices = [];
-
-				$.each(me.frm.doc.invoices || [], function(i, row) {
-						if (row.invoice_number && !inList(invoices, row.invoice_number))
-							invoices.push(row.invoice_number);
-				});
-
-				frappe.meta.get_docfield("Payment Reconciliation Payment", "invoice_number",
-					me.frm.doc.name).options = invoices.join("\n");
-
-				$.each(me.frm.doc.payments || [], function(i, p) {
-					if(!inList(invoices, cstr(p.invoice_number))) p.invoice_number = null;
-				});
-
-				refresh_field("payments");
+				me.set_invoice_options();
+				me.toggle_primary_action();
 			}
 		});
 
@@ -98,8 +87,46 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 		var me = this;
 		return this.frm.call({
 			doc: me.frm.doc,
-			method: 'reconcile'
+			method: 'reconcile',
+			callback: function(r, rt) {
+				me.set_invoice_options();
+				me.toggle_primary_action();
+			}
 		});
+	},
+
+	set_invoice_options: function() {
+		var invoices = [];
+
+		$.each(me.frm.doc.invoices || [], function(i, row) {
+			if (row.invoice_number && !inList(invoices, row.invoice_number))
+				invoices.push(row.invoice_type + " | " + row.invoice_number);
+		});
+
+		if (invoices) {
+			frappe.meta.get_docfield("Payment Reconciliation Payment", "invoice_number",
+				me.frm.doc.name).options = "\n" + invoices.join("\n");
+
+			$.each(me.frm.doc.payments || [], function(i, p) {
+				if(!inList(invoices, cstr(p.invoice_number))) p.invoice_number = null;
+			});
+		}
+
+		refresh_field("payments");
+	},
+
+	toggle_primary_action: function() {
+		if ((this.frm.doc.payments || []).length) {
+			this.frm.fields_dict.reconcile.$input
+				&& this.frm.fields_dict.reconcile.$input.addClass("btn-primary");
+			this.frm.fields_dict.get_unreconciled_entries.$input
+				&& this.frm.fields_dict.get_unreconciled_entries.$input.removeClass("btn-primary");
+		} else {
+			this.frm.fields_dict.reconcile.$input
+				&& this.frm.fields_dict.reconcile.$input.removeClass("btn-primary");
+			this.frm.fields_dict.get_unreconciled_entries.$input
+				&& this.frm.fields_dict.get_unreconciled_entries.$input.addClass("btn-primary");
+		}
 	}
 
 });

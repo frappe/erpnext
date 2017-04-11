@@ -1,14 +1,14 @@
-# ERPNext - Open source ERP for small and medium-size business [![Build Status](https://travis-ci.org/frappe/erpnext.png)](https://travis-ci.org/frappe/erpnext)
+# ERPNext - ERP made simple
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/frappe/erpnext?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/frappe/erpnext.png)](https://travis-ci.org/frappe/erpnext) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/frappe/erpnext?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [https://erpnext.com](https://erpnext.com)
 
-Includes: Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Requires MariaDB.
+Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Management, HRMS. Requires MariaDB.
 
-ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & Javascript.
+ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & JavaScript.
 
-- [User Guide](https://manual.erpnext.com)
+- [User Guide](https://frappe.github.io/erpnext/)
 - [Getting Help](http://erpnext.org/getting-help.html)
 - [Discussion Forum](https://discuss.erpnext.com/)
 
@@ -63,7 +63,7 @@ Your project neither promotes nor is associated with entities that currently fai
 
 Use of the ERPNext name and logo is additionally allowed in the following situations:
 
-All other ERPNext-related businesses or projects can use the ERPNext name and logo to refer to and explain their services, but they cannot use them as part of a product, project, service, domain, or company name and they cannot use them in any way that suggests an affiliation with or endorsement by the ERPNext or WebNotes or the ERPNext open source project. For example, a consulting company can describe its business as “123 Web Services, offering ERPNext consulting for small businesses,” but cannot call its business “The ERPNext Consulting Company.”
+All other ERPNext-related businesses or projects can use the ERPNext name and logo to refer to and explain their services, but they cannot use them as part of a product, project, service, domain, or company name and they cannot use them in any way that suggests an affiliation with or endorsement by ERPNext or Frappe Technologies or the ERPNext open source project. For example, a consulting company can describe its business as “123 Web Services, offering ERPNext consulting for small businesses,” but cannot call its business “The ERPNext Consulting Company.”
 
 Similarly, it’s OK to use the ERPNext logo as part of a page that describes your products or services, but it is not OK to use it as part of your company or product logo or branding itself. Under no circumstances is it permitted to use ERPNext as part of a top-level domain name.
 

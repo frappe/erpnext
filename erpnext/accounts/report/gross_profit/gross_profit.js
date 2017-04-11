@@ -9,7 +9,7 @@ frappe.query_reports["Gross Profit"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"reqd": 1,
-			"default": frappe.defaults.get_user_default("company")
+			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
 			"fieldname":"from_date",

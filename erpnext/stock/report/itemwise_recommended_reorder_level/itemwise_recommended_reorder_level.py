@@ -27,9 +27,9 @@ def execute(filters=None):
 
 		total_outgoing = consumed_item_map.get(item.name, 0)+delivered_item_map.get(item.name,0)
 		avg_daily_outgoing = flt(total_outgoing/diff, float_preceision)
-		reorder_level = (avg_daily_outgoing * flt(item.lead_time_days)) + flt(item.min_order_qty)
+		reorder_level = (avg_daily_outgoing * flt(item.lead_time_days)) + flt(item.safety_stock)
 
-		data.append([item.name, item.item_name, item.description, item.min_order_qty, item.lead_time_days,
+		data.append([item.name, item.item_name, item.description, item.safety_stock, item.lead_time_days,
 			consumed_item_map.get(item.name, 0), delivered_item_map.get(item.name,0), total_outgoing,
 			avg_daily_outgoing, reorder_level])
 
@@ -38,13 +38,13 @@ def execute(filters=None):
 def get_columns():
 	return[
 			_("Item") + ":Link/Item:120", _("Item Name") + ":Data:120", _("Description") + "::160",
-			_("Minimum Inventory Level") + ":Float:160", _("Lead Time Days") + ":Float:120", _("Consumed") + ":Float:120",
+			_("Safety Stock") + ":Float:160", _("Lead Time Days") + ":Float:120", _("Consumed") + ":Float:120",
 			_("Delivered") + ":Float:120", _("Total Outgoing") + ":Float:120", _("Avg Daily Outgoing") + ":Float:160",
 			_("Reorder Level") + ":Float:120"
 	]
 
 def get_item_info():
-	return frappe.db.sql("""select name, item_name, description, min_order_qty,
+	return frappe.db.sql("""select name, item_name, description, safety_stock,
 		lead_time_days	from tabItem""", as_dict=1)
 
 def get_consumed_items(condition):
@@ -72,7 +72,7 @@ def get_delivered_items(condition):
 	si_items = frappe.db.sql("""select si_item.item_name, sum(si_item.qty) as si_qty
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 and
-		ifnull(si.update_stock, 0) = 1 and ifnull(si.is_pos, 0) = 1 %s
+		si.update_stock = 1 and si.is_pos = 1 %s
 		group by si_item.item_name""" % (condition), as_dict=1)
 
 	dn_item_map = {}

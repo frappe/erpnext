@@ -1,0 +1,74 @@
+{% extends "templates/web.html" %}
+{% from "erpnext/templates/includes/macros.html" import product_image_square %}
+
+{% block page_content %}
+
+<div class="row">
+	<div class="col-sm-12">
+		<div class="hero">
+			<h1 class="text-center">{{ homepage.tag_line or '' }}</h1>
+			<p class="text-center">{{ homepage.description or '' }}</p>
+		</div>
+		{% if homepage.products %}
+		<div class='featured-products-section' itemscope itemtype="http://schema.org/Product">
+			<h5 class='featured-product-heading'>{{ _("Featured Products") }}</h5>
+			<div class="featured-products">
+				<div id="search-list" class="row" style="margin-top:40px;">
+					{% for item in homepage.products %}
+					<a class="product-link" href="{{ item.route|abs_url }}">
+						<div class="col-sm-4 col-xs-4 product-image-wrapper">
+							<div class="product-image-img">
+								{{ product_image_square(item.thumbnail or item.image) }}
+							<div class="product-text" itemprop="name">{{ item.item_name }}</div>
+							</div>
+						</div>
+					</a>
+					{% endfor %}
+				</div>
+			</div>
+			<div class="text-center padding">
+				<a href="{{ homepage.products_url or "/products" }}" class="btn btn-primary all-products">
+					{{ _("View All Products") }}</a></div>
+		</div>
+		{% endif %}
+	</div>
+</div>
+{% endblock %}
+
+{% block style %}
+<style>
+	.hero {
+		padding-top: 50px;
+		padding-bottom: 100px;
+	}
+
+	.hero h1 {
+		font-size: 40px;
+		font-weight: 200;
+	}
+
+	.home-login {
+		margin-top: 30px;
+	}
+	.btn-login {
+		width: 80px;
+	}
+
+	.featured-product-heading, .all-products {
+		 text-transform: uppercase;
+		 letter-spacing: 0.5px;
+		 font-size: 12px;
+		 font-weight: 500;
+	}
+
+	.all-products {
+		 font-weight: 300;
+		 padding-left: 25px;
+		 padding-right: 25px;
+		 padding-top: 10px;
+		 padding-bottom: 10px;
+	}
+
+
+</style>
+{% endblock %}

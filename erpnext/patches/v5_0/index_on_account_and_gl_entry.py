@@ -16,7 +16,7 @@ def execute():
 
 		for old, column in existing_indexes:
 			if column in ("parent", "group_or_ledger", "is_group", "is_pl_account", "debit_or_credit", 
-					"account_name", "company", "project_name", "voucher_date", "due_date", "bill_no", 
+					"account_name", "company", "project", "voucher_date", "due_date", "bill_no", 
 					"bill_date", "is_opening", "fiscal_year", "outstanding_amount"):
 				frappe.db.sql("alter table `tab{0}` drop index {1}".format(dt, old))
 		
