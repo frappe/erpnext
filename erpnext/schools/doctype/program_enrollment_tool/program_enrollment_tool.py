@@ -11,11 +11,11 @@ from erpnext.schools.api import enroll_student
 class ProgramEnrollmentTool(Document):
 	def get_students(self):
 		if not self.get_students_from:
-			frappe.throw(_("Mandatory feild - Get Students From"))
+			frappe.throw(_("Mandatory field - Get Students From"))
 		elif not self.program:
-			frappe.throw(_("Mandatory feild - Program"))
+			frappe.throw(_("Mandatory field - Program"))
 		elif not self.academic_year:
-			frappe.throw(_("Mandatory feild - Academic Year"))
+			frappe.throw(_("Mandatory field - Academic Year"))
 		else:
 			if self.get_students_from == "Student Applicants":
 				students = frappe.db.sql("select name as student_applicant, title as student_name from \
