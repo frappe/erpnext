@@ -276,12 +276,6 @@ frappe.ui.form.on("IP Routine Observation", {
 	}
 });
 
-frappe.ui.form.on("Procedure Prescription", {
-	procedure_template: function(frm, cdt, cdn){
-		frappe.model.set_value(cdt, cdn, 'patient', frm.doc.patient)
-	},
-});
-
 var btn_create_vital_signs = function(frm){
 	var doc = frm.doc;
 	frappe.call({
