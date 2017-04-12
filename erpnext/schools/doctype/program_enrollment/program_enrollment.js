@@ -3,7 +3,35 @@
 
 cur_frm.add_fetch('fee_structure', 'total_amount', 'amount');
 
-frappe.ui.form.on("Program Enrollment", {
+frappe.ui.form.on("Program Enrollment", {	
+	onload: function(frm, cdt, cdn){
+		frm.set_query("academic_term", "fees", function(){
+			return{
+				"filters":{
+					"academic_year": (frm.doc.academic_year)
+				}
+			};
+		});
+				
+		frm.fields_dict['fees'].grid.get_field('fee_structure').get_query = function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: {'academic_term': d.academic_term}
+			}
+		};
+
+		if (frm.doc.program) {
+			frm.set_query("course", "courses", function(doc, cdt, cdn) {
+				return{
+					query: "erpnext.schools.doctype.program_enrollment.program_enrollment.get_program_courses",
+					filters: {
+						'program': frm.doc.program	
+					}
+				}
+			});
+		}
+	},
+
 	program: function(frm) {
 		if (frm.doc.program) {
 			frappe.call({
@@ -18,28 +46,32 @@ frappe.ui.form.on("Program Enrollment", {
 					}
 				}
 			});
+			frm.trigger.onload()
 		}
 	},
 	
 	student_category: function() {
 		frappe.ui.form.trigger("Program Enrollment", "program");
 	},
-	
-	onload: function(frm, cdt, cdn){
-		cur_frm.set_query("academic_term", "fees", function(){
-			return{
-				"filters":{
-					"academic_year": (frm.doc.academic_year)
+
+	get_courses: function(frm) {
+		if (frm.doc.program) {
+			frm.set_value("courses",[]);
+			frappe.call({
+				method: "get_courses",
+				doc:frm.doc,
+				callback: function(r) {
+					if(r.message) {
+						frm.set_value("courses", r.message);
+					}
+					else {
+						frappe.msgprint(__("There is no mandatory course for the program {0}",[frm.doc.program]));
+					}
 				}
-			};
-		});
-				
-		cur_frm.fields_dict['fees'].grid.get_field('fee_structure').get_query = function(doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
-			return {
-				filters: {'academic_term': d.academic_term}
-			}
-		};
-		
+			})
+		}
+		else {
+			frappe.throw(__("Select the Program to fetch mandatory courses."))
+		}
 	}
 });
