@@ -42,7 +42,7 @@ frappe.ui.form.on('Consultation', {
 		refresh_field('drug_prescription');
 		refresh_field('test_prescription');
 		if((frappe.user.has_role("IP Physician")) || (frappe.user.has_role("OP Physician"))){
-			frm.add_custom_button(__('View History'), function() {
+			frm.add_custom_button(__('Medical Record'), function() {
 				if(frm.doc.patient){
 					frappe.route_options = {"patient": frm.doc.patient}
 					frappe.set_route("medical_record");
