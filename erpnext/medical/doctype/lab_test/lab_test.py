@@ -8,6 +8,7 @@ from frappe.model.document import Document
 import time, json
 from frappe.utils import cstr, getdate, get_time, math
 from erpnext.medical.doctype.op_settings.op_settings import get_receivable_account,get_income_account
+from frappe import _
 
 class LabTest(Document):
 	def on_submit(self):
@@ -34,6 +35,13 @@ class LabTest(Document):
 				item.idx = i+1
 			self.sensitivity_test_items = sensitivity
 
+	def after_insert(self):
+		if(self.prescription):
+			frappe.db.set_value("Lab Prescription", self.prescription, "test_created", 1)
+		if not self.test_name and self.template:
+			load_test_from_template(self)
+			self.reload()
+
 def lab_test_result_status(lab_test,status):
 	frappe.db.sql("""update `tabInvoice Test Item` set workflow=%s where lab_test=%s""",(status, lab_test))
 
@@ -44,8 +52,7 @@ def exists_inv_test_item(lab_test):
 
 @frappe.whitelist()
 def update_status(status, name):
-	frappe.db.set_value("Lab Test", name, "status", status)
-	frappe.db.set_value("Lab Test", name, "approved_date", getdate())
+	frappe.db.sql("""update `tabLab Test` set status=%s, approved_date=%s where name = %s""", (status, getdate(), name))
 	lab_test_result_status(name,status)
 
 @frappe.whitelist()
@@ -126,7 +133,7 @@ def create_specials(template, lab_test):
 		special.require_result_value = 1
 		special.template = template.name
 
-def create_sample_collection(template, patient, invoice):
+def create_sample_doc(template, patient, invoice):
 	if(template.sample):
 		sample_exist = frappe.db.exists({
 			"doctype": "Sample Collection",
@@ -146,7 +153,7 @@ def create_sample_collection(template, patient, invoice):
 			#create Sample Collection for template, copy vals from Invoice
 			sample_collection = frappe.new_doc("Sample Collection")
 			if(invoice):
-				sample_collection.invoice = invoice.name
+				sample_collection.invoice = invoice
 			sample_collection.patient = patient.name
 			sample_collection.patient_age = patient.get_age()
 			sample_collection.patient_sex = patient.sex
@@ -171,70 +178,9 @@ def get_service_unit(admission, service_type):
 	service_unit = frappe.db.get_value("Service Unit List", {"parent": zone, "type" : service_type}, "service_unit")
 	return service_unit
 
-@frappe.whitelist()
-def create_lab_test_from_invoice(invoice, patient):
-	doc = frappe.get_doc("Sales Invoice", invoice)
-	patient = frappe.get_doc("Patient", patient)
-	invoice_test_report = create_invoice_test_report(doc, patient)
-	collect_sample = 0
-	if(frappe.db.get_value("Laboratory Settings", None, "require_sample_collection") == "1"):
-		collect_sample = 1
-
-	for item_line in doc.items:
-		template_exist = frappe.db.exists({
-			"doctype": "Lab Test Template",
-			"item": item_line.item_code
-			})
-		if template_exist :
-			template = frappe.get_doc("Lab Test Template",{"item":item_line.item_code})
-		else:
-			continue
-		#skip the loop if there is no test_template for Item
-		if not (template):
-			continue
-		lab_test_exist = frappe.db.exists({
-			"doctype": "Lab Test",
-			"invoice": doc.name,
-			"test_name": template.test_name
-			})
-		if lab_test_exist:
-			continue
-		lab_test = create_lab_test(patient, template, None, None, doc.name, collect_sample)
-		if(lab_test):
-			lab_test_item = invoice_test_report.append("lab_test_items")
-			lab_test_item.lab_test = lab_test.name
-			lab_test_item.workflow = "Draft"
-			lab_test_item.invoice = doc.name
-
-	if hasattr(invoice_test_report, "lab_test_items"):
-		invoice_test_report.save(ignore_permissions=True)
-
-@frappe.whitelist()
-def create_lab_test_from_consultation(consultation):
-	doc = frappe.get_doc("Consultation", consultation)
-	patient = frappe.get_doc("Patient", doc.patient)
-	collect_sample = 0
-	if(frappe.db.get_value("Laboratory Settings", None, "require_sample_collection") == "1"):
-		collect_sample = 1
-
-	for item_line in doc.test_prescription:
-		lab_test_exist = frappe.db.exists({
-			"doctype": "Lab Test",
-			"prescription": item_line.name
-			})
-		if lab_test_exist:
-			continue
-		template = frappe.get_doc("Lab Test Template",item_line.test_code)
-		#skip the loop if there is no test_template for Item
-		if not (template):
-			continue
-		lab_test = create_lab_test(patient, template, item_line.name, doc, None, collect_sample)
 
 @frappe.whitelist()
 def create_lab_test_from_desk(patient, template, prescription, invoice=None):
-	collect_sample = 0
-	if(frappe.db.get_value("Laboratory Settings", None, "require_sample_collection") == "1"):
-		collect_sample = 1
 	lab_test_exist = frappe.db.exists({
 		"doctype": "Lab Test",
 		"prescription": prescription
@@ -248,15 +194,30 @@ def create_lab_test_from_desk(patient, template, prescription, invoice=None):
 	patient = frappe.get_doc("Patient", patient)
 	consultation_id = frappe.get_value("Lab Prescription", prescription, "parent")
 	consultation = frappe.get_doc("Consultation", consultation_id)
-	lab_test = create_lab_test(patient, template, prescription, consultation, invoice, collect_sample)
+	lab_test = create_lab_test(patient, template, prescription, consultation, invoice)
 	return lab_test.name
 
-def create_lab_test(patient, template, prescription,  consultation, invoice, collect_sample):
-	lab_test = create_lab_test_doc(invoice, consultation, patient, template)
-	if(collect_sample == 1):
-		sample_collection = create_sample_collection(template, patient, invoice)
+def load_test_from_template(lab_test):
+	template = frappe.get_doc("Lab Test Template", lab_test.template)
+	patient = frappe.get_doc("Patient", lab_test.patient)
+
+	lab_test.test_name = template.test_name
+	lab_test.result_date = getdate()
+	lab_test.service_type = template.service_type
+	lab_test.department = template.department
+	lab_test.test_group = template.test_group
+
+	create_sample_collection(lab_test, template, patient, None)
+	load_result_format(lab_test, template, None, None)
+
+def create_sample_collection(lab_test, template, patient, invoice):
+	if(frappe.db.get_value("Laboratory Settings", None, "require_sample_collection") == "1"):
+		sample_collection = create_sample_doc(template, patient, invoice)
 		if(sample_collection):
 			lab_test.sample = sample_collection.name
+	return lab_test
+
+def load_result_format(lab_test, template, prescription, invoice):
 	if(template.test_template_type == 'Single'):
 		create_normals(template, lab_test)
 	elif(template.test_template_type == 'Compound'):
@@ -299,6 +260,12 @@ def create_lab_test(patient, template, prescription,  consultation, invoice, col
 				frappe.db.set_value("Lab Prescription", prescription, "invoice", invoice)
 		lab_test.save(ignore_permissions=True) # insert the result
 		return lab_test
+
+def create_lab_test(patient, template, prescription,  consultation, invoice):
+	lab_test = create_lab_test_doc(invoice, consultation, patient, template)
+	lab_test = create_sample_collection(lab_test, template, patient, invoice)
+	lab_test = load_result_format(lab_test, template, prescription, invoice)
+	return lab_test
 
 @frappe.whitelist()
 def get_employee_by_user_id(user_id):
@@ -366,3 +333,8 @@ def create_invoice(company, patient, lab_tests, prescriptions):
 	for line in line_ids:
 		frappe.db.set_value("Lab Prescription", line, "invoice", sales_invoice.name)
 	return sales_invoice.name
+
+@frappe.whitelist()
+def get_lab_test_prescribed(patient):
+	return frappe.db.sql(_("""select cp.name, cp.test_code, cp.parent, cp.invoice, ct.physician, ct.consultation_date from tabConsultation ct,
+	`tabLab Prescription` cp where ct.patient='{0}' and cp.parent=ct.name and cp.test_created=0""").format(patient))

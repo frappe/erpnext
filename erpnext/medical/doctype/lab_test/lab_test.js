@@ -25,10 +25,15 @@ frappe.ui.form.on('Lab Test', {
 	refresh :  function(frm){
 		refresh_field('normal_test_items');
 		refresh_field('special_test_items');
-		if(!frm.doc.invoice){
+		if(!frm.doc.__islocal && !frm.doc.invoice){
 			frm.add_custom_button(__('Make Invoice'), function() {
 				make_invoice(frm);
 			 } );
+		}
+		if(frm.doc.__islocal){
+			frm.add_custom_button(__('Get from Consultation'), function () {
+				get_lab_test_prescribed(frm);
+			})
 		}
 		if(frm.doc.docstatus==1 && frm.doc.status!='Approved' &&
 		 		frm.doc.status!='Rejected' &&
@@ -49,6 +54,7 @@ frappe.ui.form.on('Lab Test', {
 
 	},
 	onload: function (frm) {
+		frm.add_fetch("physician", "department", "department")
 		if(frm.doc.employee){
 			frappe.call({
 				method: "frappe.client.get",
@@ -62,9 +68,36 @@ frappe.ui.form.on('Lab Test', {
 				}
 			})
 		}
-   	},
-
+  },
 })
+
+frappe.ui.form.on("Lab Test", "patient",
+    function(frm) {
+        if(frm.doc.patient){
+		frappe.call({
+				"method": "erpnext.medical.doctype.patient.patient.get_patient_detail",
+		    args: {
+		        patient: frm.doc.patient
+		    },
+		    callback: function (data) {
+					age = ""
+					if(data.message.dob){
+						age = calculate_age(data.message.dob)
+					}else if (data.message.age){
+						age = data.message.age
+						if(data.message.age_as_on){
+							age = age+" as on "+data.message.age_as_on
+						}
+					}
+					frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age)
+					frappe.model.set_value(frm.doctype,frm.docname, "patient_sex", data.message.sex)
+					frappe.model.set_value(frm.doctype,frm.docname, "email", data.message.email)
+					frappe.model.set_value(frm.doctype,frm.docname, "mobile", data.message.mobile)
+					frappe.model.set_value(frm.doctype,frm.docname, "report_preference", data.message.report_preference)
+		    }
+		})
+	}
+});
 
 frappe.ui.form.on('Normal Test Items', {
     normal_test_items_remove: function(frm) {
@@ -95,6 +128,70 @@ var status_update = function(approve,frm){
 			cur_frm.reload_doc();
 		}
 	});
+}
+
+var get_lab_test_prescribed = function(frm){
+	if(frm.doc.patient){
+		frappe.call({
+			method:
+			"erpnext.medical.doctype.lab_test.lab_test.get_lab_test_prescribed",
+			args: {patient: frm.doc.patient},
+			callback: function(r){
+				show_lab_tests(frm, r.message)
+			}
+		});
+	}
+	else{
+			msgprint("Please select Patient to get Lab Tests");
+	}
+}
+var show_lab_tests = function(frm, result){
+	var d = new frappe.ui.Dialog({
+		title: __("Lab Test Prescriptions"),
+		fields: [
+			{
+				fieldtype: "HTML", fieldname: "lab_test"
+			}
+		]
+	});
+	var html_field = d.fields_dict.lab_test.$wrapper;
+	html_field.empty();
+	$.each(result, function(x, y){
+		var row = $(repl('<div class="col-xs-12" style="padding-top:12px; text-align:center;" >\
+		<div class="col-xs-2"> %(lab_test)s </div>\
+		<div class="col-xs-2"> %(consultation)s </div>\
+		<div class="col-xs-3"> %(physician)s </div>\
+		<div class="col-xs-3"> %(date)s </div>\
+		<div class="col-xs-1">\
+		<a data-name="%(name)s" data-lab-test="%(lab_test)s"\
+		data-consultation="%(consultation)s" data-physician="%(physician)s"\
+		data-invoice="%(invoice)s" href="#"><button class="btn btn-default btn-xs">Get Lab Test\
+		</button></a></div></div>', {name:y[0], lab_test: y[1], consultation:y[2], invoice:y[3], physician:y[4], date:y[5]})).appendTo(html_field);
+		row.find("a").click(function() {
+			frm.doc.template = $(this).attr("data-lab-test");
+			frm.doc.prescription = $(this).attr("data-name");
+			frm.doc.physician = $(this).attr("data-physician");
+			frm.set_df_property("template", "read_only", 1);
+			frm.set_df_property("patient", "read_only", 1);
+			frm.set_df_property("physician", "read_only", 1);
+			if($(this).attr("data-invoice") != 'null'){
+				frm.doc.invoice = $(this).attr("data-invoice");
+				refresh_field("invoice");
+			}else {
+				frm.doc.invoice = "";
+				refresh_field("invoice");
+			}
+
+			refresh_field("template");
+			d.hide();
+			return false;
+		});
+	})
+	if(!result){
+		var msg = "There are no Lab Test prescribed for "+frm.doc.patient
+		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
+	}
+	d.show();
 }
 
 var make_invoice = function(frm){
@@ -212,4 +309,12 @@ var send_sms = function(v,frm){
 			}
 		}
 	});
+}
+
+var calculate_age = function(birth) {
+  ageMS = Date.parse(Date()) - Date.parse(birth);
+  age = new Date();
+  age.setTime(ageMS);
+  years =  age.getFullYear() - 1970
+  return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)"
 }
