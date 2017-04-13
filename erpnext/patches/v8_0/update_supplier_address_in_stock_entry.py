@@ -19,4 +19,4 @@ def execute():
 		se.address_display = stock_entry.get("supplier_address")
 		se.supplier_address = frappe.db.get_value("Purchase Order", stock_entry.get("purchase_order"),"supplier_address") or None
 
-		se.save(ignore_permissions=True)
+		se.db_update()
