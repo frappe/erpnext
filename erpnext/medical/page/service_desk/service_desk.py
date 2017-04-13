@@ -15,8 +15,8 @@ def get_patient_services_info(company, patient, from_date, to_date, physician=No
         frappe.throw("Please select patient")
     payload = {}
     drugs = OrderedDict()
-    procedures = OrderedDict()
-    labtests = OrderedDict()
+    procedures = []
+    labtests = []
 
     conditions = ("company='{0}' and patient='{1}'").format(company, patient)
     if physician:
@@ -34,13 +34,13 @@ def get_patient_services_info(company, patient, from_date, to_date, physician=No
                 else:
                     drugs[key] = [[drug.drug_name, drug.dosage, drug.period, drug.name]]
         if(c_obj.procedure_prescription):
-            procedure_dict = get_details_by_line("Procedure", c_obj.name, c_obj.physician, c_obj.procedure_prescription)
+            procedure_dict = get_details_by_line("Procedure Appointment", c_obj.name, c_obj.physician, c_obj.procedure_prescription)
             if procedure_dict:
-                procedures.update(procedure_dict)
+                procedures.extend(procedure_dict)
         if(c_obj.test_prescription):
             test_dict = get_details_by_line("Lab Test", c_obj.name, c_obj.physician, c_obj.test_prescription)
             if test_dict:
-                labtests.update(test_dict)
+                labtests.extend(test_dict)
 
     appointments = get_appointments(conditions, from_date, to_date)
     if appointments:
@@ -68,7 +68,7 @@ def get_appointments(conditions, from_date, to_date):
 
 def get_details_by_line(dt, consultation, physician, lines):
     key = consultation
-    data = {key: []}
+    data = []
     for line in lines:
         doc = False
         docstatus = False
@@ -82,10 +82,10 @@ def get_details_by_line(dt, consultation, physician, lines):
             doc = docs[0][0]
             docstatus = frappe.get_value(dt, doc, "status")
         if (dt == "Lab Test"):
-            data[key].append([line.test_code, doc, docstatus, invoice, status, line.name])
+            data.append([line.test_code, doc, docstatus, invoice, status, line.name, consultation, physician])
         else:
-            data[key].append([line.procedure_template, doc, docstatus, invoice, status, line.name])
+            data.append([line.procedure_template, doc, docstatus, invoice, status, line.name, consultation, physician])
 
-    if data[key]:
+    if data:
         return data
     return False

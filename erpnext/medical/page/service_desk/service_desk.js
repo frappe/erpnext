@@ -72,7 +72,7 @@ frappe.medical.ServiceDesk = Class.extend({
 	},
 	make_sidebar: function (data, menu_active) {
 		var me = this;
-		menu = { "Appointment" : data.appointments? "appointment": false, "Drug Prescription": data.drugs ? "drug" : false, "Lab Test": data.labtests ? "labtest" : false, "Procedure": data.procedures ? "procedure": false}
+		menu = { "Appointment" : data.appointments? "appointment": false, "Drug Prescription": data.drugs ? "drug" : false, "Lab Test": data.labtests ? "labtest" : false, "Procedure Appointment": data.procedures ? "procedure": false}
 		me.page.sidebar.addClass("col-sm-3");
 		me.page.sidebar.html(frappe.render_template("desk_sidebar", {menu: menu}));
 		me.page.sidebar.find("a").on("click", function() {
@@ -107,7 +107,7 @@ frappe.medical.ServiceDesk = Class.extend({
 				$(frappe.render_template("service-desk", {data: data.labtests, doc: "Lab Test", color: status_color})).appendTo(me.wrapper);
 		};
 		if(data.procedures){
-				$(frappe.render_template("service-desk", {data: data.procedures, doc: "Procedure", color: status_color})).appendTo(me.wrapper);
+				$(frappe.render_template("service-desk", {data: data.procedures, doc: "Procedure Appointment", color: status_color})).appendTo(me.wrapper);
 		};
 		me.page.wrapper.find(".select-all").on("click", function(){
 			group = $(this).closest(".list-group").find('input[type="checkbox"]').prop('checked', $(this).prop("checked"));
@@ -212,13 +212,13 @@ frappe.medical.ServiceDesk = Class.extend({
 					}
 				}
 			});
-		}else if (doc === "Procedure") {
-			procedure = frappe.model.get_new_doc("Procedure");
+		}else if (doc === "Procedure Appointment") {
+			procedure = frappe.model.get_new_doc("Procedure Appointment");
 			procedure['patient'] = me.patient.get_value();
 			procedure['procedure_template'] = template;
 			procedure['invoice'] = invoice;
 			procedure['prescription'] = line;
-			frappe.set_route('Form', "Procedure", procedure.name);
+			frappe.set_route('Form', "Procedure Appointment", procedure.name);
 		}
 	}
 });
