@@ -205,6 +205,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Academic Year"
+				},
+				{
+					"type": "doctype",
+					"name": "School Settings"
 				}
 			]
 		},
