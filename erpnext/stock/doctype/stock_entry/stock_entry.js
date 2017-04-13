@@ -230,7 +230,6 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			function(doc) { return (doc.qty<=doc.actual_qty) ? "green" : "orange" })
 
 		this.frm.add_fetch("purchase_order", "supplier", "supplier");
-		this.frm.add_fetch("supplier", "supplier_name", "supplier_name");
 
 		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'supplier', doctype: 'Supplier' }
 		this.frm.set_query("supplier_address", erpnext.queries.address_query)
