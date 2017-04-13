@@ -20,7 +20,7 @@ frappe.ui.form.on('Patient', {
 			 });
     }
  		if(frm.doc.patient_name && (frappe.user.has_role("IP Physician")||frappe.user.has_role("OP Physician"))){
- 			frm.add_custom_button(__('View History'), function() {
+ 			frm.add_custom_button(__('Medical Record'), function() {
  				frappe.route_options = {"patient": frm.doc.name}
  				frappe.set_route("medical_record");
  			 });

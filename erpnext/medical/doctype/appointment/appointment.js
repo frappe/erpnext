@@ -10,7 +10,7 @@ frappe.ui.form.on('Appointment', {
 		});
 		if(frappe.user.has_role("IP Physician")||frappe.user.has_role("OP Physician")){
 			if(frm.doc.patient){
-				frm.add_custom_button(__('History'), function() {
+				frm.add_custom_button(__('Medical Record'), function() {
 					frappe.route_options = {"patient": frm.doc.patient}
 					frappe.set_route("medical_record");
 				 },__("View") );

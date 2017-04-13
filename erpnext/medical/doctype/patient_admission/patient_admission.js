@@ -5,7 +5,7 @@ frappe.ui.form.on('Patient Admission', {
 	refresh: function(frm) {
 		frm.enable_save();
 		if(frm.doc.patient && frappe.user.has_role("IP Physician")){
-			frm.add_custom_button(__('History'), function() {
+			frm.add_custom_button(__('Medical Record'), function() {
 				frappe.route_options = {"patient": frm.doc.patient}
 				frappe.set_route("medical_record");
 			 } );
