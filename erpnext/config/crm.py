@@ -46,6 +46,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Prospects Engaged But Not Converted",
+					"doctype": "Lead",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"is_query_report": True,
 					"name": "Lead Details",
 					"doctype": "Lead"
