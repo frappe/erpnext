@@ -140,20 +140,16 @@ def period_wise_columns_query(filters, trans):
 	else:
 		trans_date = 'transaction_date'
 
-	qty_field = "t2.stock_qty" 
-	if trans == 'Purchase Invoice':
-		qty_field = "t2.qty"
-
 	if filters.get("period") != 'Yearly':
 		for dt in bet_dates:
 			get_period_wise_columns(dt, filters.get("period"), pwc)
-			query_details = get_period_wise_query(dt, trans_date, query_details, qty_field)
+			query_details = get_period_wise_query(dt, trans_date, query_details)
 	else:
 		pwc = [_(filters.get("fiscal_year")) + " ("+_("Qty") + "):Float:120",
 			_(filters.get("fiscal_year")) + " ("+ _("Amt") + "):Currency:120"]
-		query_details = " SUM(%s), SUM(t2.base_net_amount),"%(qty_field)
+		query_details = " SUM(t2.stock_qty), SUM(t2.base_net_amount),"
 
-	query_details += 'SUM(%s), SUM(t2.base_net_amount)'%(qty_field)
+	query_details += 'SUM(t2.stock_qty), SUM(t2.base_net_amount)'
 	return pwc, query_details
 
 def get_period_wise_columns(bet_dates, period, pwc):
@@ -164,10 +160,10 @@ def get_period_wise_columns(bet_dates, period, pwc):
 		pwc += [_(get_mon(bet_dates[0])) + "-" + _(get_mon(bet_dates[1])) + " (" + _("Qty") + "):Float:120",
 			_(get_mon(bet_dates[0])) + "-" + _(get_mon(bet_dates[1])) + " (" + _("Amt") + "):Currency:120"]
 
-def get_period_wise_query(bet_dates, trans_date, query_details, qty_field):
-	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', %(qty_field)s, NULL)),
+def get_period_wise_query(bet_dates, trans_date, query_details):
+	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.stock_qty, NULL)),
 					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.base_net_amount, NULL)),
-				""" % {"trans_date": trans_date, "sd": bet_dates[0],"ed": bet_dates[1], "qty_field": qty_field}
+				""" % {"trans_date": trans_date, "sd": bet_dates[0],"ed": bet_dates[1]}
 	return query_details
 
 @frappe.whitelist(allow_guest=True)

@@ -639,7 +639,7 @@ DocType: Vehicle Service,Vehicle Service,usluga vozila
 apps/erpnext/erpnext/config/setup.py +101,Automatically triggers the feedback request based on conditions.,Automatski aktivira se zahtjev povratne informacije na temelju uvjeta.
 DocType: Employee,Reason for Resignation,Razlog za ostavku
 apps/erpnext/erpnext/config/hr.py +147,Template for performance appraisals.,Predložak za ocjene rada .
-DocType: Sales Invoice,Credit Note Issued,Kreditne Napomena Izdano
+DocType: Sales Invoice,Credit Note Issued,Odobrenje kupcu izdano
 DocType: Project Task,Weight,Težina
 DocType: Payment Reconciliation,Invoice/Journal Entry Details,Račun / Temeljnica Detalji
 apps/erpnext/erpnext/accounts/utils.py +84,{0} '{1}' not in Fiscal Year {2},{0} '{1}' nije u fiskalnoj godini {2}
@@ -2396,7 +2396,7 @@ DocType: Salary Component Account,Salary Component Account,Račun plaća Kompone
 DocType: Global Defaults,Hide Currency Symbol,Sakrij simbol valute
 apps/erpnext/erpnext/config/accounts.py +289,"e.g. Bank, Cash, Credit Card","npr. banka, gotovina, kreditne kartice"
 DocType: Lead Source,Source Name,source Name
-DocType: Journal Entry,Credit Note,Kreditne Napomena
+DocType: Journal Entry,Credit Note,Odobrenje kupcu
 DocType: Warranty Claim,Service Address,Usluga Adresa
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +47,Furnitures and Fixtures,Namještaja i rasvjete
 DocType: Item,Manufacture,Proizvodnja
@@ -3559,7 +3559,7 @@ DocType: Program Enrollment,Enrollment Date,Datum registracije
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +62,Probation,Probni rad
 apps/erpnext/erpnext/config/hr.py +115,Salary Components,Plaća Komponente
 DocType: Program Enrollment Tool,New Academic Year,Nova akademska godina
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +769,Return / Credit Note,Povratak / kreditne Napomena
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +769,Return / Credit Note,Povrat / odobrenje kupcu
 DocType: Stock Settings,Auto insert Price List rate if missing,"Ako ne postoji, automatski ubaciti cjenik"
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +25,Total Paid Amount,Ukupno uplaćeni iznos
 DocType: Production Order Item,Transferred Qty,prebačen Kol

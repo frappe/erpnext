@@ -39,7 +39,7 @@ frappe.ui.form.on("Delivery Note", {
 		});
 
 		if (sys_defaults.auto_accounting_for_stock) {
-			frm.set_query('expense_account', 'items', function(frm) {
+			frm.set_query('expense_account', 'items', function(doc, cdt, cdn) {
 				return {
 					filters: {
 						"report_type": "Profit and Loss",
@@ -49,7 +49,7 @@ frappe.ui.form.on("Delivery Note", {
 				}
 			});
 
-			frm.set_query('cost_center', 'items', function(frm) {
+			frm.set_query('cost_center', 'items', function(doc, cdt, cdn) {
 				return {
 					filters: {
 						'company': doc.company,

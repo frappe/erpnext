@@ -3288,7 +3288,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2017-04-03 03:13:58.051782", 
+ "modified": "2017-04-10 12:03:29.645642", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 
@@ -3404,6 +3404,6 @@
  "sort_order": "DESC", 
  "timeline_field": "customer", 
  "title_field": "title", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 0
 }

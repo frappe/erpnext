@@ -818,7 +818,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +205,Warning: Invalid Attachment
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +744,No Permission,Ei oikeuksia
 DocType: Company,Default Bank Account,oletus pankkitili
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +50,"To filter based on Party, select Party Type first",Valitse osapuoli tyyppi saadaksesi osapuolen mukaisen suodatuksen
-apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +48,'Update Stock' can not be checked because items are not delivered via {0},"'Päivitä varastotase' ei voida käyttää tuotteille, joita ei ole toimitettu {0} kautta"
+apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +48,'Update Stock' can not be checked because items are not delivered via {0},"'Päivitä varasto' ei voida käyttää tuotteille, joita ei ole toimitettu {0} kautta"
 DocType: Vehicle,Acquisition Date,Hankintapäivä
 apps/erpnext/erpnext/public/js/setup_wizard.js +303,Nos,Nos
 DocType: Item,Items with higher weightage will be shown higher,tuotteet joilla on korkeampi painoarvo nätetään ylempänä
@@ -1235,7 +1235,7 @@ DocType: Purchase Invoice,Rejected Warehouse,Hylätty varasto
 DocType: GL Entry,Against Voucher,kuitin kohdistus
 DocType: Item,Default Buying Cost Center,ostojen oletuskustannuspaikka
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +6,"To get the best out of ERPNext, we recommend that you take some time and watch these help videos.","Saadaksesi kaiken irti ERPNextistä, Suosittelemme katsomaan nämä ohjevideot."
-apps/erpnext/erpnext/accounts/page/pos/pos.js +73, to ,että
+apps/erpnext/erpnext/accounts/page/pos/pos.js +73, to ,lle
 DocType: Item,Lead Time in days,"virtausaika, päivinä"
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +58,Accounts Payable Summary,maksettava tilien yhteenveto
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +332,Payment of salary from {0} to {1},Palkanmaksu välillä {0} ja {1}
@@ -1636,7 +1636,7 @@ DocType: Leave Type,Include holidays within leaves as leaves,sisältää vapaap�
 DocType: Sales Invoice,Packed Items,Pakatut tuotteet
 apps/erpnext/erpnext/config/support.py +27,Warranty Claim against Serial No.,Takuuvaatimus sarjanumerolle
 DocType: BOM Replace Tool,"Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM","korvaa BOM kaikissa muissa BOM:ssa, jossa sitä käytetään, korvaa vanhan BOM linkin, päivittää kustannukset ja muodostaa uuden ""BOM tuote räjäytyksen"" tilaston uutena BOM:na"
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +59,'Total',&#39;Kaikki yhteensä&#39;
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +59,'Total','Yhteensä'
 DocType: Shopping Cart Settings,Enable Shopping Cart,aktivoi ostoskori
 DocType: Employee,Permanent Address,Pysyvä osoite
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +248,"Advance paid against {0} {1} cannot be greater \
@@ -2381,7 +2381,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +286, or ,tai
 DocType: Sales Order,Billing Status,Laskutus tila
 apps/erpnext/erpnext/public/js/conf.js +32,Report an Issue,Raportoi asia
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +118,Utility Expenses,Hyödykekulut
-apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +64,90-Above,90-yli
+apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +64,90-Above,90 ja yli
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +213,Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher,Rivi # {0}: Päiväkirjakirjaus {1} ei ole huomioon {2} tai jo sovitettu toista voucher
 DocType: Buying Settings,Default Buying Price List,"oletus hinnasto, osto"
 DocType: Process Payroll,Salary Slip Based on Timesheet,Palkka tuntilomakkeen mukaan
@@ -2814,7 +2814,7 @@ apps/erpnext/erpnext/accounts/report/delivered_items_to_be_billed/delivered_item
 DocType: Asset,Double Declining Balance,Double jäännösarvopoisto
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +170,Closed order cannot be cancelled. Unclose to cancel.,Suljettu järjestys ei voi peruuttaa. Unclose peruuttaa.
 DocType: Student Guardian,Father,Isä
-apps/erpnext/erpnext/controllers/accounts_controller.py +568,'Update Stock' cannot be checked for fixed asset sale,Päivitä Stock &quot;ei voida tarkistaa käyttöomaisuushankintoihin myytävänä
+apps/erpnext/erpnext/controllers/accounts_controller.py +568,'Update Stock' cannot be checked for fixed asset sale,'Päivitä varasto' ei voida valita käyttöomaisuuden myynteihin
 DocType: Bank Reconciliation,Bank Reconciliation,pankin täsmäytys
 DocType: Attendance,On Leave,lomalla
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +7,Get Updates,hae päivitykset
@@ -3950,7 +3950,7 @@ DocType: Salary Detail,Default Amount,oletus arvomäärä
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +93,Warehouse not found in the system,Varastoa ei löydy järjestelmästä
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +116,This Month's Summary,Tämän kuun yhteenveto
 DocType: Quality Inspection Reading,Quality Inspection Reading,Laarutarkistuksen luku
-apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +24,`Freeze Stocks Older Than` should be smaller than %d days.,Jäädytä varasto joka on vanhempi kuin % päivää
+apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +24,`Freeze Stocks Older Than` should be smaller than %d days.,Kylmävarasto pitäisi olla vähemmän kuin % päivää
 DocType: Tax Rule,Purchase Tax Template,Myyntiverovelkojen malli
 ,Project wise Stock Tracking,"projekt työkalu, varastoseuranta"
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +166,Maintenance Schedule {0} exists against {0},huoltoaikataulu {0} on olemassa kohdistettuna{0}

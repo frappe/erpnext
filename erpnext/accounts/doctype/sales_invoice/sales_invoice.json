@@ -7,7 +7,7 @@
  "beta": 0, 
  "creation": "2013-05-24 19:29:05", 
  "custom": 0, 
- "default_print_format": "Sample Print", 
+ "default_print_format": "", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "", 
@@ -4417,8 +4417,8 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2017-03-29 05:09:56.656338", 
- "modified_by": "Administrator", 
+ "modified": "2017-04-12 15:11:45.931485", 
+ "modified_by": "faris@erpnext.com", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
  "owner": "Administrator", 
@@ -4513,6 +4513,6 @@
  "sort_order": "DESC", 
  "timeline_field": "customer", 
  "title_field": "title", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 0
 }

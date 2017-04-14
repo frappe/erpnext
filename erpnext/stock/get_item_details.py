@@ -270,7 +270,7 @@ def validate_price_list(args):
 		if not frappe.db.get_value("Price List",
 			{"name": args.price_list, args.transaction_type: 1, "enabled": 1}):
 			throw(_("Price List {0} is disabled or does not exist").format(args.price_list))
-	else:
+	elif not args.get("supplier"):
 		throw(_("Price List not selected"))
 
 def validate_conversion_rate(args, meta):

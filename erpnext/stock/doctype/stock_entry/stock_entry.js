@@ -229,6 +229,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.actual_qty) ? "green" : "orange" })
 
+		this.frm.add_fetch("purchase_order", "supplier", "supplier");
+
+		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'supplier', doctype: 'Supplier' }
+		this.frm.set_query("supplier_address", erpnext.queries.address_query)
 	},
 
 	onload_post_render: function() {
@@ -509,7 +513,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		} else {
 			doc.customer = doc.customer_name = doc.customer_address =
 				doc.delivery_note_no = doc.sales_invoice_no = doc.supplier =
-				doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
+				doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = 
+				doc.address_display = null;
 		}
 		if(doc.purpose == "Material Receipt") {
 			this.frm.set_value("from_bom", 0);
@@ -520,5 +525,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			doc.purpose!='Material Issue');
 
 		this.frm.fields_dict["items"].grid.set_column_disp("additional_cost", doc.purpose!='Material Issue');
+	},
+
+	supplier: function(doc) {
+		erpnext.utils.get_party_details(this.frm, null, null, null);
 	}
 });

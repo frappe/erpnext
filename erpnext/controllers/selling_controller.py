@@ -203,7 +203,7 @@ class SellingController(StockController):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
 						il.append(frappe._dict({
-							'warehouse': p.warehouse,
+							'warehouse': p.warehouse or d.warehouse,
 							'item_code': p.item_code,
 							'qty': flt(p.qty),
 							'uom': p.uom,
