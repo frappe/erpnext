@@ -90,7 +90,7 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field, 
 			}
 		})
 	} else {
-		frm.set_value(display_field, null);
+		frm.set_value(display_field, '');
 	}
 };
 
