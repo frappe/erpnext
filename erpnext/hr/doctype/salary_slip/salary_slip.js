@@ -39,7 +39,7 @@ frappe.ui.form.on("Salary Slip", {
 	refresh: function(frm) {
 		frm.trigger("toggle_fields")
 		frm.trigger("toggle_reqd_fields")
-		salary_detail_fields = ['formula', 'abbr']
+		salary_detail_fields = ['formula', 'abbr', 'statistical_component']
 		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
 		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
 	},	
@@ -138,7 +138,6 @@ var calculate_earning_total = function(doc, dt, dn, reset_amount) {
 			refresh_field('amount', tbl[i].name, 'earnings');
 		}
 		total_earn += flt(tbl[i].amount);
-		
 	}
 	doc.gross_pay = total_earn;
 	refresh_many(['amount','gross_pay']);

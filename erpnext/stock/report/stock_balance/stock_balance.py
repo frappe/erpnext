@@ -63,7 +63,7 @@ def get_conditions(filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if filters.get("to_date"):
-		conditions += " and sle.posting_date <= '%s'" % frappe.db.escape(filters["to_date"])
+		conditions += " and sle.posting_date <= '%s'" % frappe.db.escape(filters.get("to_date"))
 	else:
 		frappe.throw(_("'To Date' is required"))
 
@@ -108,8 +108,8 @@ def get_stock_ledger_entries(filters):
 
 def get_item_warehouse_map(filters):
 	iwb_map = {}
-	from_date = getdate(filters["from_date"])
-	to_date = getdate(filters["to_date"])
+	from_date = getdate(filters.get("from_date"))
+	to_date = getdate(filters.get("to_date"))
 
 	sle = get_stock_ledger_entries(filters)
 
@@ -174,7 +174,7 @@ def get_item_details(filters):
 	value = ()
 	if filters.get("item_code"):
 		condition = "where item_code=%s"
-		value = (filters["item_code"],)
+		value = (filters.get("item_code"),)
 
 	items = frappe.db.sql("""select name, item_name, stock_uom, item_group, brand, description
 		from tabItem {condition}""".format(condition=condition), value, as_dict=1)

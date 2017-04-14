@@ -951,6 +951,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 						item_price: format_currency(me.price_list_data[obj.name], me.frm.doc.currency),
 						item_name: obj.name === obj.item_name ? "" : obj.item_name,
 						item_image: obj.image,
+						item_stock: __('Stock Qty') + ": " + me.get_actual_qty(obj),
 						color: frappe.get_palette(obj.item_name),
 						abbr: frappe.get_abbr(obj.item_name)
 					})).tooltip().appendTo($wrap);

@@ -7,7 +7,7 @@ from frappe.utils import flt
 from frappe import msgprint, _
 
 def execute(filters=None):
-	if not filters: filters = {}
+	if not filters: filters = frappe._dict({})
 
 	invoice_list = get_invoices(filters)
 	columns, income_accounts, tax_accounts = get_columns(invoice_list)
