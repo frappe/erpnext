@@ -54,14 +54,14 @@ class StockController(AccountsController):
 
 						self.check_expense_account(item_row)
 
-						# If item is not a sample item
+						# If the item does not have the allow zero valuation rate flag set
 						# and ( valuation rate not mentioned in an incoming entry
 						# or incoming entry not found while delivering the item),
 						# try to pick valuation rate from previous sle or Item master and update in SLE
 						# Otherwise, throw an exception
 
 						if not sle.stock_value_difference and self.doctype != "Stock Reconciliation" \
-							and not item_row.get("is_sample_item"):
+							and not item_row.get("allow_zero_valuation_rate"):
 
 							sle = self.update_stock_ledger_entries(sle)
 
