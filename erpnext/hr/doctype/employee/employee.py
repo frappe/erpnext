@@ -48,6 +48,13 @@ class Employee(Document):
 			if existing_user_id:
 				frappe.permissions.remove_user_permission(
 					"Employee", self.name, existing_user_id)
+		self.validate_employee_custody()
+	def validate_employee_custody(self):
+		if self.status == 'Left':
+			ac = frappe.db.get_values("Fixed Asset Custody", {"employee": self.employee,
+			"docstatus": 1}, ["fixed_asset", "item_code"], as_dict=True)
+			if ac:
+				frappe.throw(_("This employee has custody {0} and should be cancelled in the Fixed Asset Custody before marked as Left".format(ac[0])))
 
 	def on_update(self):
 		if self.user_id:

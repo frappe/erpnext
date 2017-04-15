@@ -11,8 +11,35 @@ cur_frm.fields_dict['fixed_asset'].get_query = function(doc) {
         ]
     }
 }
+cur_frm.fields_dict['employee'].get_query = function(doc) {
+    return {
+        filters: {
+            "status": "Active"
+        }
+    }
+}
 
 frappe.ui.form.on('Fixed Asset Custody', {
+    // fixed_asset: function(frm){
+    //     frappe.call({
+    //         "method": "frappe.client.get",
+    //         args: {
+    //             doctype: "Asset",
+    //             name: frm.doc.fixed_asset
+    //         },
+    //         callback: function (data) {
+    //             frappe.model.set_value(frm.doctype,
+    //                 frm.docname, "image",
+    //                 data.message.image);
+    //             console.log(data.message.image);
+    //             // frappe.model.set_value(frm.doctype,
+    //             //     frm.docname, "member_name",
+    //             //     data.message.first_name
+    //             //     + (data.message.last_name ?
+    //             //         (" " + data.message.last_name) : ""))
+    //         }
+    //     })
+    // },
     refresh: function(frm) {
         if (frm.doc.docstatus == 1) {
             // if (frm.doc.status == 'Submitted' && !frm.doc.is_existing_asset && !frm.doc.purchase_invoice) {

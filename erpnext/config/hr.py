@@ -29,6 +29,24 @@ def get_data():
 					"description":_("Upload attendance from a .csv file"),
 					"hide_count": True
 				},
+				{
+					"type": "doctype",
+					"name": "Grade",
+					"description":_("Grade"),
+					"hide_count": True
+				},
+				{
+					"type": "doctype",
+					"name": "Level",
+					"description":_("Level"),
+					"hide_count": True
+				},
+				{
+					"type": "doctype",
+					"name": "May Concern Letter",
+					"description":_("May Concern Letter"),
+					"hide_count": True
+				},
 			]
 		},
 		{

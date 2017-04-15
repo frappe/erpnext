@@ -2,7 +2,7 @@
  "allow_copy": 0, 
  "allow_import": 1, 
  "allow_rename": 1, 
- "autoname": "field:asset_name", 
+ "autoname": "ASSET.######", 
  "beta": 0, 
  "creation": "2016-03-01 17:01:27.920130", 
  "custom": 0, 
@@ -825,7 +825,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-04-11 19:43:37.971362", 
+ "modified": "2017-04-13 12:21:11.818221", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Asset", 
@@ -859,5 +859,6 @@
  "read_only_onload": 1, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "title_field": "asset_name", 
  "track_seen": 0
 }
