@@ -33,6 +33,12 @@ def get_data():
 			"icon": "fa fa-list",
 			"items": [
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Lead Details",
+					"doctype": "Lead"
+				},
+				{
 					"type": "page",
 					"name": "sales-funnel",
 					"label": _("Sales Funnel"),
@@ -40,15 +46,15 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Minutes to First Response for Opportunity",
-					"doctype": "Opportunity",
+					"name": "Prospects Engaged But Not Converted",
+					"doctype": "Lead",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
-					"is_query_report": True,
-					"name": "Lead Details",
-					"doctype": "Lead"
+					"name": "Minutes to First Response for Opportunity",
+					"doctype": "Opportunity",
+					"is_query_report": True
 				},
 				{
 					"type": "report",
