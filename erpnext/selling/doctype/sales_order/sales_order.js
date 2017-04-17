@@ -136,12 +136,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
+						target: me.frm,
+						setters: {
+							customer: me.frm.doc.customer || undefined,
+							company: me.frm.doc.company,
+							order_type: me.frm.doc.order_type,
+						},
 						get_query_filters: {
 							docstatus: 1,
 							status: ["!=", "Lost"],
-							order_type: me.frm.doc.order_type,
-							customer: me.frm.doc.customer || undefined,
-							company: me.frm.doc.company
 						}
 					})
 				}, __("Get items from"));

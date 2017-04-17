@@ -187,6 +187,8 @@ erpnext.utils.map_current_doc = function(opts) {
 	if(opts.source_doctype) {
 		var d = new frappe.ui.form.MultiSelect({
 			doctype: opts.source_doctype,
+			target: opts.target,
+			setters: opts.setters,
 			get_query: opts.get_query,
 			action: function(selections) {
 				var values = selections.join(',');
