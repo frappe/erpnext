@@ -2,7 +2,7 @@ frappe.listview_settings['Issue'] = {
 	colwidths: {"subject": 6},
 	onload: function(listview) {
 		frappe.route_options = {
-			"status": "Open"
+			"status": ["in","Open,Replied"]
 		};
 
 		var method = "erpnext.support.doctype.issue.issue.set_multiple_status";
