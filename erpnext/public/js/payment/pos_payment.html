@@ -10,11 +10,11 @@
 			<p class="amount-label"> Outstanding <h3 class="outstanding_amount">{%= format_currency(outstanding_amount, currency) %} </h3></p>
 		</div>
 		<div class="col-xs-6 col-sm-3 text-center">
-			<p class="amount-label"> Change <input class="form-control text-right change_amount bold" type="text" idx="change_amount" value="{{format_number(change_amount, 2)}}">
+			<p class="amount-label"> Change <input class="form-control text-right change_amount bold" type="text" idx="change_amount" value="{{format_number(change_amount, null, 2)}}">
 			</p>
 		</div>
 		<div class="col-xs-6 col-sm-3 text-center">
-			<p class="amount-label"> Write off <input class="form-control text-right write_off_amount bold" type="text" idx="write_off_amount" value="{{format_number(write_off_amount, 2)}}">
+			<p class="amount-label"> Write off <input class="form-control text-right write_off_amount bold" type="text" idx="write_off_amount" value="{{format_number(write_off_amount, null, 2)}}">
 			</p>
 		</div>
 	</div>
