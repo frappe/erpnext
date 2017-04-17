@@ -385,3 +385,4 @@ erpnext.patches.v8_0.addresses_linked_to_lead
 execute:frappe.delete_doc('DocType', 'Purchase Common')
 erpnext.patches.v8_0.update_stock_qty_value_in_purchase_invoice
 erpnext.patches.v8_0.update_supplier_address_in_stock_entry
+erpnext.patches.v8_0.employee_address_update

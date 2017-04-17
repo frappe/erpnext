@@ -10,6 +10,8 @@ from frappe import throw, _, scrub
 import frappe.permissions
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
+from frappe.contacts.address_and_contact import (load_address_and_contact,
+	delete_contact_and_address)
 
 
 class EmployeeUserDisabledError(frappe.ValidationError):
@@ -17,6 +19,10 @@ class EmployeeUserDisabledError(frappe.ValidationError):
 
 
 class Employee(Document):
+	def onload(self):
+		"""Load address and contacts in `__onload`"""
+		load_address_and_contact(self, "employee")
+
 	def autoname(self):
 		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:
@@ -155,6 +161,7 @@ class Employee(Document):
 
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
+		delete_contact_and_address('Employee', self.name)
 
 	def validate_prefered_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
