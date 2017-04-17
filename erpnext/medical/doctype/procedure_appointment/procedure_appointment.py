@@ -61,9 +61,11 @@ def check_availability_by_relation(service_type, date, time=None, end_dt=None):
 
 @frappe.whitelist()
 def get_procedures_rx(patient):
-	return frappe.db.sql("""select name, procedure_template, parent, service_type, invoice from
-	`tabProcedure Prescription` where patient='{0}' and scheduled = 0
-	 order by parent desc""".format(patient))
+	return frappe.db.sql(_("""
+	 select cp.name, cp.procedure_template, cp.parent, cp.service_type, cp.invoice, ct.physician, ct.consultation_date
+	 from tabConsultation ct, `tabProcedure Prescription` cp
+	 where ct.patient='{0}' and cp.parent=ct.name and cp.scheduled=0
+	 """).format(patient))
 
 @frappe.whitelist()
 def update_status(appointmentId, status):

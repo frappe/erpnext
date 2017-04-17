@@ -191,11 +191,12 @@ var show_procedure_rx = function(frm, result){
 	html_field.empty();
 	$.each(result, function(x, y){
 		var row = $(repl('<div class="col-xs-12" style="padding-top:12px; text-align:center;" >\
-		<div class="col-xs-3"> %(procedure)s </div>\
-		<div class="col-xs-3"> %(consultation)s </div>\
-		<div class="col-xs-3"> %(service_type)s </div>\
+		<div class="col-xs-2"> %(procedure)s </div>\
+		<div class="col-xs-2"> %(consultation)s </div>\
+		<div class="col-xs-2"> %(physician)s </div>\
+		<div class="col-xs-3"> %(date)s </div>\
 		<div class="col-xs-3">\
-		<a data-name="%(name)s" data-procedure="%(procedure)s" data-consultation="%(consultation)s" data-service_type="%(service_type)s" data-invoice="%(invoice)s" href="#"><button class="btn btn-default btn-xs">Get Procedure Rx</button></a></div></div>', {name:y[0], procedure: y[1], consultation:y[2], service_type: y[3], invoice:y[4]})).appendTo(html_field);
+		<a data-name="%(name)s" data-procedure="%(procedure)s" data-consultation="%(consultation)s" data-service_type="%(service_type)s" data-invoice="%(invoice)s" href="#"><button class="btn btn-default btn-xs">Get Procedure</button></a></div></div>', {name:y[0], procedure: y[1], consultation:y[2], service_type: y[3], invoice:y[4], physician:y[5], date:y[6]})).appendTo(html_field);
 		row.find("a").click(function() {
 			frm.doc.procedure_template = $(this).attr("data-procedure");
 			frm.doc.service_type = $(this).attr("data-service_type");
