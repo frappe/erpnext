@@ -407,8 +407,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		});
 
 		this.search_item_group = this.wrapper.find('.search-item-group');
-
-		var dropdown_html = me.item_groups.map(function(item_group) {
+		sorted_item_groups = this.get_sorted_item_groups()
+		var dropdown_html = sorted_item_groups.map(function(item_group) {
 			return "<li><a class='option' data-value='"+item_group+"'>"+item_group+"</a></li>";
 		}).join("");
 
@@ -435,6 +435,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.page.wrapper.on("click", ".edit-customer-btn", function() {
 			me.update_customer()
 		})
+	},
+
+	get_sorted_item_groups: function() {
+		list = {}
+		$.each(this.item_groups, function(i, data) {
+			list[i] = data[0]
+		})
+
+		return Object.keys(list).sort(function(a,b){return list[a]-list[b]})
 	},
 
 	toggle_more_btn: function() {
@@ -1091,9 +1100,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		// $(me.wrapper).find(".pos-item-wrapper").on("click", function () {
 		$(this.wrapper).on("click", ".pos-item-wrapper", function () {
 			me.item_code = '';
+			me.customer_validate();
 			if($(me.pos_bill).is(":hidden")) return;
 
-			me.customer_validate();
 			if (me.frm.doc.docstatus == 0) {
 				me.items = me.get_items($(this).attr("data-item-code"))
 				me.add_to_cart();
@@ -1768,7 +1777,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		return $.grep(this.pricing_rules, function (data) {
 			if (item.qty >= data.min_qty && (item.qty <= (data.max_qty ? data.max_qty : item.qty))) {
-				if (data.item_code == item.item_code || in_list(['All Item Groups', item.item_group], data.item_group) || item.brand == data.brand) {
+				if (me.validate_item_condition(data, item)) {
 					if (in_list(['Customer', 'Customer Group', 'Territory', 'Campaign'], data.applicable_for)) {
 						return me.validate_condition(data)
 					} else {
@@ -1777,6 +1786,26 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 			}
 		})
+	},
+
+	validate_item_condition: function (data, item) {
+		var apply_on = frappe.model.scrub(data.apply_on);
+
+		return (data.apply_on == 'Item Group')
+			? this.validate_item_group(data.item_group, item.item_group) : (data[apply_on] == item[apply_on]);
+	},
+
+	validate_item_group: function (pr_item_group, cart_item_group) {
+		//pr_item_group = pricing rule's item group
+		//cart_item_group = cart item's item group
+		//this.item_groups has information about item group's lft and rgt
+		//for example: {'Foods': [12, 19]}
+
+		pr_item_group = this.item_groups[pr_item_group]
+		cart_item_group = this.item_groups[cart_item_group]
+
+		return (cart_item_group[0] >= pr_item_group[0] &&
+			cart_item_group[1] <= pr_item_group[1])
 	},
 
 	validate_condition: function (data) {
