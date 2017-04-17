@@ -1,13 +1,13 @@
 [
 	{
-		"program": "_Test Program",
-		"course": "_Test Course",
+		"program": "_TP1",
+		"course": "TC100",
 		"academic_year": "2014-2015",
 		"academic_term": "2014-2015 (_Test Academic Term)"
 	},
 	{
-		"program": "_Test Program",
-		"course": "_Test Course 2",
+		"program": "_TP2",
+		"course": "TC101",
 		"academic_year": "2014-2015",
 		"academic_term": "2014-2015 (_Test Academic Term)"
 	}
