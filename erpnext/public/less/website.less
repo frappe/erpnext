@@ -36,8 +36,6 @@
 	background-size: cover;
 	background-repeat: no-repeat;
 	background-position: center top;
-	border-radius-top: 4px;
-	border-radius-right: 4px;
 }
 
 .product-image.missing-image {
@@ -49,10 +47,6 @@
 .product-image.missing-image .octicon {
 	font-size: 32px;
 	color: @border-color;
-}
-
-.product-text {
-	padding: 15px 0px;
 }
 
 .product-search {
@@ -316,6 +310,14 @@
 	padding: 15px;
 	word-wrap: break-word;
 	height: 75px;
+	display: block; /* Fallback for non-webkit */
+	display: -webkit-box;
+	max-width: 100%;
+	margin: 0 auto;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .product-image-wrapper {
