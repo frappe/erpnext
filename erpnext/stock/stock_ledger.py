@@ -259,10 +259,11 @@ class update_entries_after(object):
 			if not self.valuation_rate and actual_qty > 0:
 				self.valuation_rate = sle.incoming_rate
 
-			# Get valuation rate from previous SLE or Item master, if item is not a sample item
+			# Get valuation rate from previous SLE or Item master, if item does not have the 
+			# allow zero valuration rate flag set
 			if not self.valuation_rate and sle.voucher_detail_no:
-				is_sample_item = self.check_if_sample_item(sle.voucher_type, sle.voucher_detail_no)
-				if not is_sample_item:
+				allow_zero_valuation_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
+				if not allow_zero_valuation_rate:
 					self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
 						currency=erpnext.get_company_currency(sle.company))
@@ -290,8 +291,8 @@ class update_entries_after(object):
 			while qty_to_pop:
 				if not self.stock_queue:
 					# Get valuation rate from last sle if exists or from valuation rate field in item master
-					is_sample_item = self.check_if_sample_item(sle.voucher_type, sle.voucher_detail_no)
-					if not is_sample_item:
+					allow_zero_valuation_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
+					if not allow_zero_valuation_rate:
 						_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 							sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
 							currency=erpnext.get_company_currency(sle.company))
@@ -344,9 +345,9 @@ class update_entries_after(object):
 		if not self.stock_queue:
 			self.stock_queue.append([0, sle.incoming_rate or sle.outgoing_rate or self.valuation_rate])
 
-	def check_if_sample_item(self, voucher_type, voucher_detail_no):
+	def check_if_allow_zero_valuation_rate(self, voucher_type, voucher_detail_no):
 		ref_item_dt = voucher_type + (" Detail" if voucher_type == "Stock Entry" else " Item")
-		return frappe.db.get_value(ref_item_dt, voucher_detail_no, "is_sample_item")
+		return frappe.db.get_value(ref_item_dt, voucher_detail_no, "allow_zero_valuation_rate")
 
 	def get_sle_before_datetime(self):
 		"""get previous stock ledger entry before current time-bucket"""
