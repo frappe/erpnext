@@ -180,7 +180,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					}
 				})
 			}, __("Add items from"));
-
 	},
 
 	tc_name: function() {
