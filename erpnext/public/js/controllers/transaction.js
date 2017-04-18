@@ -570,7 +570,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
 			refresh_field("stock_qty", item.name, item.parentfield);
 			this.toggle_conversion_factor(item);
-			this.apply_price_list();
+			this.apply_price_list(item, true);
 		}
 	},
 
@@ -581,7 +581,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	qty: function(doc, cdt, cdn) {
-		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
 		this.conversion_factor(doc, cdt, cdn);
 	},
 

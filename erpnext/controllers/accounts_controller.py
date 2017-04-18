@@ -199,9 +199,8 @@ class AccountsController(TransactionBase):
 								if stock_qty != len(item.get('serial_no').split('\n')):
 									item.set(fieldname, value)
 
-							elif fieldname in ["conversion_factor", "price_list_rate"]:
-								if for_validate and not item.get(fieldname):
-									item.set(fieldname, value)
+							elif fieldname == "conversion_factor" and not item.get("conversion_factor"):
+								item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
