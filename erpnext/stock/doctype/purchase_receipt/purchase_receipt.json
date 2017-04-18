@@ -352,7 +352,7 @@
    "remember_last_selected_value": 1, 
    "report_hide": 0, 
    "reqd": 1, 
-   "search_index": 1, 
+   "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0, 
    "width": "150px"
@@ -2846,7 +2846,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2017-04-10 12:02:07.434102", 
+ "modified": "2017-04-18 18:51:10.457027", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt", 
