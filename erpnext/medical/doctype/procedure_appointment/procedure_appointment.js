@@ -121,11 +121,10 @@ var invoice_procedure_appointment = function (frm){
 		args: {company:doc.company, patient:doc.patient, procedure_appointment: [doc.name], prescriptions:[]},
 		callback: function(data){
 			if(!data.exc){
-				/*if(data.message){
-					var doclist = frappe.model.sync(data.message);
-					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-				}*/
 				cur_frm.reload_doc();
+				if(data.message){
+					frappe.msgprint(__("Sales Invoice <a href='#Form/Sales Invoice/{0}'>{0}</a> created", [data.message]))
+				}
 			}
 		}
 	});

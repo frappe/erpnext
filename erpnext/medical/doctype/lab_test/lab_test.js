@@ -201,6 +201,9 @@ var make_invoice = function(frm){
 		args: {company:doc.company, patient:doc.patient, lab_tests: [doc.name], prescriptions:[]},
 		callback: function(r){
 			cur_frm.reload_doc();
+			if(r.message){
+				frappe.msgprint(__("Sales Invoice <a href='#Form/Sales Invoice/{0}'>{0}</a> created", [r.message]))
+			}
 		}
 	});
 }
