@@ -62,7 +62,7 @@ In each row, you have to mention:
   * Calculation Type:
 
     * On Net Total : This can be on net total (total amount without taxes).
-    * On Previous Row Total/Amount: You can apply taxes on previous row total / amount. If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total. Previous row amount means a particular tax amount.And, previous row total means net total plus taxes applied up to that row. In the Enter Row Field, mention row number on which you want to apply the current tax. If you want to apply the tax on the 3rd row, mention "3" in the Enter Row field.
+    * On Previous Row Total/Amount: You can apply taxes on previous row total / amount. If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total. Previous row amount means a particular tax amount. And, previous row total means net total plus taxes applied up to that row. In the Enter Row Field, mention row number on which you want to apply the current tax. If you want to apply the tax on the 3rd row, mention "3" in the Enter Row field.
 
     * Actual : Enter as per actual amount in rate column.
 
