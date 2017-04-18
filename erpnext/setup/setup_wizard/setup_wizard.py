@@ -49,7 +49,7 @@ def setup_complete(args=None):
 		create_antibiotics()
 		create_test_uom()
 		create_duration()
-		#create_dosage()
+		create_dosage()
 		create_lab_test_items()
 		create_lab_test_template()
 
@@ -730,40 +730,40 @@ def create_duration():
 def create_dosage():
 	records = [
 		{"doctype": "Dosage", "name": "1-1-1-1", "dosage": "1-1-1-1","dosage_strength":
-		[{"strength": "1.0","time": "9:00:00"}, {"strength": "1.0","time": "13:00:00"},{"strength": "1.0","time": "17:00:00"},{"strength": "1.0","time": "21:00:00"}]
+		[{"strength": "1.0","strength_time": "9:00:00"}, {"strength": "1.0","strength_time": "13:00:00"},{"strength": "1.0","strength_time": "17:00:00"},{"strength": "1.0","strength_time": "21:00:00"}]
 		},
 		{"doctype": "Dosage", "name": "0-0-1", "dosage": "0-0-1","dosage_strength":
-		[{"strength": "1.0","time": "21:00:00"}]
+		[{"strength": "1.0","strength_time": "21:00:00"}]
 		},
 		{"doctype": "Dosage", "name": "1-0-0", "dosage": "1-0-0","dosage_strength":
-		[{"strength": "1.0","time": "9:00:00"}]
+		[{"strength": "1.0","strength_time": "9:00:00"}]
 		},
 		{"doctype": "Dosage", "name": "0-1-0", "dosage": "0-1-0","dosage_strength":
-		[{"strength": "1.0","time": "14:00:00"}]
+		[{"strength": "1.0","strength_time": "14:00:00"}]
 		},
 		{"doctype": "Dosage", "name": "1-1-1", "dosage": "1-1-1","dosage_strength":
-		[{"strength": "1.0","time": "9:00:00"}, {"strength": "1.0","time": "14:00:00"},{"strength": "1.0","time": "21:00:00"}]
+		[{"strength": "1.0","strength_time": "9:00:00"}, {"strength": "1.0","strength_time": "14:00:00"},{"strength": "1.0","strength_time": "21:00:00"}]
 		},
 		{"doctype": "Dosage", "name": "1-0-1", "dosage": "1-0-1","dosage_strength":
-		[{"strength": "1.0","time": "9:00:00"}, {"strength": "1.0","time": "21:00:00"}]
+		[{"strength": "1.0","strength_time": "9:00:00"}, {"strength": "1.0","strength_time": "21:00:00"}]
 		},
 		{"doctype": "Dosage", "name": "Once Bedtime", "dosage": "Once Bedtime","dosage_strength":
-		[{"strength": "1.0","time": "21:00:00"}]
+		[{"strength": "1.0","strength_time": "21:00:00"}]
 		},
 		{"doctype": "Dosage", "name": "5 times a day", "dosage": "5 times a day","dosage_strength":
-		[{"strength": "1.0","time": "5:00:00"}, {"strength": "1.0","time": "9:00:00"}, {"strength": "1.0","time": "13:00:00"},{"strength": "1.0","time": "17:00:00"},{"strength": "1.0","time": "21:00:00"}]
+		[{"strength": "1.0","strength_time": "5:00:00"}, {"strength": "1.0","strength_time": "9:00:00"}, {"strength": "1.0","strength_time": "13:00:00"},{"strength": "1.0","strength_time": "17:00:00"},{"strength": "1.0","strength_time": "21:00:00"}]
 		},
 		{"doctype": "Dosage", "name": "QID", "dosage": "QID","dosage_strength":
-		[{"strength": "1.0","time": "9:00:00"}, {"strength": "1.0","time": "13:00:00"},{"strength": "1.0","time": "17:00:00"},{"strength": "1.0","time": "21:00:00"}]
+		[{"strength": "1.0","strength_time": "9:00:00"}, {"strength": "1.0","strength_time": "13:00:00"},{"strength": "1.0","strength_time": "17:00:00"},{"strength": "1.0","strength_time": "21:00:00"}]
 		},
 		{"doctype": "Dosage", "name": "TID", "dosage": "TID","dosage_strength":
-		[{"strength": "1.0","time": "9:00:00"}, {"strength": "1.0","time": "14:00:00"},{"strength": "1.0","time": "21:00:00"}]
+		[{"strength": "1.0","strength_time": "9:00:00"}, {"strength": "1.0","strength_time": "14:00:00"},{"strength": "1.0","strength_time": "21:00:00"}]
 		},
 		{"doctype": "Dosage", "name": "BID", "dosage": "BID","dosage_strength":
-		[{"strength": "1.0","time": "9:00:00"}, {"strength": "1.0","time": "21:00:00"}]
+		[{"strength": "1.0","strength_time": "9:00:00"}, {"strength": "1.0","strength_time": "21:00:00"}]
 		},
 		{"doctype": "Dosage", "name": "Once Daily", "dosage": "Once Daily","dosage_strength":
-		[{"strength": "1.0","time": "9:00:00"}]
+		[{"strength": "1.0","strength_time": "9:00:00"}]
 		}
 	]
 	insert_record(records)
