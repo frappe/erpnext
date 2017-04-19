@@ -166,6 +166,23 @@ class TestAsset(unittest.TestCase):
 
 		self.assertEqual(gle, expected_gle)
 		self.assertEqual(asset.get("value_after_depreciation"), 70000)
+		
+	def test_depreciation_entry_cancellation(self):
+		asset = frappe.get_doc("Asset", "Macbook Pro 1")
+		asset.submit()
+		post_depreciation_entries(date="2021-01-01")
+		
+		asset.load_from_db()
+		
+		# cancel depreciation entry
+		depr_entry = asset.get("schedules")[0].journal_entry
+		self.assertTrue(depr_entry)
+		frappe.get_doc("Journal Entry", depr_entry).cancel()
+		
+		asset.load_from_db()
+		depr_entry = asset.get("schedules")[0].journal_entry
+		self.assertFalse(depr_entry)
+		
 
 	def test_scrap_asset(self):
 		asset = frappe.get_doc("Asset", "Macbook Pro 1")
@@ -298,3 +315,6 @@ def set_depreciation_settings_in_company():
 	company.disposal_account = "_Test Gain/Loss on Asset Disposal - _TC"
 	company.depreciation_cost_center = "_Test Cost Center - _TC"
 	company.save()
+	
+	# Enable booking asset depreciation entry automatically
+	frappe.db.set_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically", 1)
