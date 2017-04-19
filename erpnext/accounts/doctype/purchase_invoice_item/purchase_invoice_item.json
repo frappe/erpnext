@@ -1508,7 +1508,7 @@
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
-   "search_index": 1, 
+   "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
   }, 
@@ -1939,7 +1939,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-04-17 13:44:17.460674", 
+ "modified": "2017-04-18 18:51:33.829468", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice Item", 
