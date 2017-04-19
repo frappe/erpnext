@@ -52,6 +52,7 @@ def setup_complete(args=None):
 		create_dosage()
 		create_lab_test_items()
 		create_lab_test_template()
+		create_sensitivity()
 
 	if args.get('setup_website'):
 		website_maker(args)
@@ -837,6 +838,17 @@ def create_lab_test_template():
 		"item": "BS","test_template_type": "Single",
 		"is_billable": 1,"test_rate": 0.0,"test_uom": "","test_normal_range": "",
 		"sensitivity": 0,"test_description": "Bile Salt"}
+	]
+	insert_record(records)
+
+def create_sensitivity():
+	records = [
+		{"doctype": "Sensitivity", "sensitivity": "Low Sensitivity"},
+		{"doctype": "Sensitivity", "sensitivity": "High Sensitivity"},
+		{"doctype": "Sensitivity", "sensitivity": "Moderate Sensitivity"},
+		{"doctype": "Sensitivity", "sensitivity": "Susceptible"},
+		{"doctype": "Sensitivity", "sensitivity": "Resistant"},
+		{"doctype": "Sensitivity", "sensitivity": "Intermediate"}
 	]
 	insert_record(records)
 
