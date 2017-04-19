@@ -369,7 +369,7 @@ class PaymentEntry(AccountsController):
 			if self.payment_type=="Receive":
 				against_account = self.paid_to
 			else:
-				 against_account = self.paid_from
+				against_account = self.paid_from
 			
 				
 			party_gl_dict = self.get_gl_dict({
@@ -389,8 +389,8 @@ class PaymentEntry(AccountsController):
 					"against_voucher": d.reference_name
 				})
 				
-				allocated_amount_in_company_currency = flt(flt(d.allocated_amount) * flt(d.exchange_rate), 
-					self.precision("paid_amount"))	
+				allocated_amount_in_company_currency = flt(flt(d.allocated_amount) * flt(d.exchange_rate),
+					self.precision("paid_amount"))
 				
 				gle.update({
 					dr_or_cr + "_in_account_currency": d.allocated_amount,
@@ -400,11 +400,10 @@ class PaymentEntry(AccountsController):
 				gl_entries.append(gle)
 				
 			if self.unallocated_amount:
-				base_unallocated_amount = base_unallocated_amount = self.unallocated_amount * \
+				base_unallocated_amount = self.unallocated_amount * \
 					(self.source_exchange_rate if self.payment_type=="Receive" else self.target_exchange_rate)
 					
 				gle = party_gl_dict.copy()
-				
 				gle.update({
 					dr_or_cr + "_in_account_currency": self.unallocated_amount,
 					dr_or_cr: base_unallocated_amount
