@@ -20,10 +20,9 @@ def get_product_list(search=None, start=0, limit=12):
 	query = """select name, item_name, item_code, route, website_image, thumbnail, item_group,
 			description, web_long_description as website_description
 		from `tabItem`
-		where show_in_website = 1
+		where (show_in_website = 1 or show_variant_in_website = 1)
 			and disabled=0
-			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)
-			and (variant_of is null or variant_of = '')"""
+			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)"""
 
 	# search term condition
 	if search:

@@ -1,4 +1,4 @@
-# purchase details
+# Purchase Details
 
 # How Do I Track Warranty Status?
 

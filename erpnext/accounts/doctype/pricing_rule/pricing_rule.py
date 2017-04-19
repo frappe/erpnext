@@ -23,6 +23,8 @@ class PricingRule(Document):
 		self.validate_price_or_discount()
 		self.validate_max_discount()
 
+		if not self.margin_type: self.margin_rate_or_amount = 0.0
+
 	def validate_mandatory(self):
 		for field in ["apply_on", "applicable_for"]:
 			tocheck = frappe.scrub(self.get(field) or "")
@@ -143,7 +145,7 @@ def get_pricing_rule_for_item(args):
 	})
 	
 	if args.ignore_pricing_rule or not args.item_code:
-		if frappe.db.exists(args.doctype, args.name) and args.get("pricing_rule"):
+		if args.get("pricing_rule"):
 			item_details = remove_pricing_rule(args, item_details)
 		return item_details
 
@@ -178,7 +180,7 @@ def get_pricing_rule_for_item(args):
 		item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 		if pricing_rule.price_or_discount == "Price":
 			item_details.update({
-				"price_list_rate": pricing_rule.price/flt(args.conversion_rate) \
+				"price_list_rate": (pricing_rule.price/flt(args.conversion_rate)) * args.conversion_factor or 1.0 \
 					if args.conversion_rate else 0.0,
 				"discount_percentage": 0.0
 			})

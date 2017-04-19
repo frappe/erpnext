@@ -41,7 +41,7 @@ class SellingController(StockController):
 
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details()
-		self.set_price_list_and_item_details()
+		self.set_price_list_and_item_details(for_validate=for_validate)
 
 	def set_missing_lead_customer_details(self):
 		if getattr(self, "customer", None):
@@ -60,9 +60,9 @@ class SellingController(StockController):
 				posting_date=self.get('transaction_date') or self.get('posting_date'),
 				company=self.company))
 
-	def set_price_list_and_item_details(self):
+	def set_price_list_and_item_details(self, for_validate=False):
 		self.set_price_list_currency("Selling")
-		self.set_missing_item_details()
+		self.set_missing_item_details(for_validate=for_validate)
 
 	def apply_shipping_rule(self):
 		if self.shipping_rule:

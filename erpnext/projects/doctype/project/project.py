@@ -205,6 +205,32 @@ class Project(Document):
 	def on_update(self):
 		self.load_tasks()
 		self.sync_tasks()
+		self.update_dependencies_on_duplicated_project()
+	
+	def update_dependencies_on_duplicated_project(self):
+		if self.flags.dont_sync_tasks: return
+		if not self.copied_from:
+			self.copied_from = self.name
+
+		if self.name != self.copied_from and self.get('__unsaved'):
+			# duplicated project
+			dependency_map = {}
+			for task in self.tasks:
+				name, depends_on_tasks = frappe.db.get_value(
+					'Task', { "subject": task.title, "project": self.copied_from }, ['name', 'depends_on_tasks']
+				)
+				depends_on_tasks = [x for x in depends_on_tasks.split(',') if x]
+				dependency_map[task.title] = [ x['subject'] for x in frappe.get_list(
+					'Task Depends On', {"parent": name}, ['subject'])]
+
+			for key, value in dependency_map.iteritems():
+				task_name = frappe.db.get_value('Task', {"subject": key, "project": self.name })
+				task_doc = frappe.get_doc('Task', task_name)
+
+				for dt in value:
+					dt_name = frappe.db.get_value('Task', {"subject": dt, "project": self.name })
+					task_doc.append('depends_on', {"task": dt_name})
+				task_doc.save()
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''

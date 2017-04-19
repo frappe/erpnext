@@ -186,7 +186,6 @@ class AccountsController(TransactionBase):
 
 					ret = get_item_details(args)
 
-
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (item.get(fieldname) is None or fieldname in force_item_fields):
@@ -199,6 +198,9 @@ class AccountsController(TransactionBase):
 								stock_qty = item.get("stock_qty") * -1 if item.get("stock_qty") < 0 else item.get("stock_qty")
 								if stock_qty != len(item.get('serial_no').split('\n')):
 									item.set(fieldname, value)
+
+							elif fieldname == "conversion_factor" and not item.get("conversion_factor"):
+								item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
