@@ -757,7 +757,6 @@
    "oldfieldtype": "Currency", 
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
-   "precision": "9", 
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 
    "read_only": 1, 
