@@ -15,8 +15,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	onload: function() {
-		this._super();
 		this.setup_queries();
+		this._super();
 	},
 
 	setup_queries: function() {
