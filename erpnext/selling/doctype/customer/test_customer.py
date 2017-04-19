@@ -54,25 +54,30 @@ class TestCustomer(unittest.TestCase):
 			self.assertEquals(value, details.get(key))
 
 	def test_rename(self):
+		# delete communication linked to these 2 customers
 		for name in ("_Test Customer 1", "_Test Customer 1 Renamed"):
 			frappe.db.sql("""delete from `tabCommunication`
 				where communication_type='Comment' and reference_doctype=%s and reference_name=%s""",
 				("Customer", name))
 
+		# add comments
 		comment = frappe.get_doc("Customer", "_Test Customer 1").add_comment("Comment", "Test Comment for Rename")
 
+		# rename
 		frappe.rename_doc("Customer", "_Test Customer 1", "_Test Customer 1 Renamed")
 
+		# check if customer renamed
 		self.assertTrue(frappe.db.exists("Customer", "_Test Customer 1 Renamed"))
 		self.assertFalse(frappe.db.exists("Customer", "_Test Customer 1"))
 
-		# test that comment gets renamed
+		# test that comment gets linked to renamed doc
 		self.assertEquals(frappe.db.get_value("Communication", {
 			"communication_type": "Comment",
 			"reference_doctype": "Customer",
 			"reference_name": "_Test Customer 1 Renamed"
 		}), comment.name)
 
+		# rename back to original
 		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 
 	def test_freezed_customer(self):
