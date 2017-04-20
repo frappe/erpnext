@@ -10,9 +10,9 @@ def execute(filters=None):
 	sl_entries = get_stock_ledger_entries(filters)
 	item_details = get_item_details(filters)
 	opening_row = get_opening_balance(filters, columns)
-	
+
 	data = []
-	
+
 	if opening_row:
 		data.append(opening_row)
 
@@ -25,7 +25,7 @@ def execute(filters=None):
 			(sle.incoming_rate if sle.actual_qty > 0 else 0.0),
 			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no,
 			sle.batch_no, sle.serial_no, sle.company])
-			
+
 	return columns, data
 
 def get_columns():
@@ -76,6 +76,8 @@ def get_sle_conditions(filters):
 		conditions.append(get_warehouse_condition(filters.get("warehouse")))
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
+	if filters.get("batch_no"):
+		conditions.append("batch_no=%(batch_no)s")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -90,14 +92,14 @@ def get_opening_balance(filters, columns):
 		"posting_date": filters.from_date,
 		"posting_time": "00:00:00"
 	})
-	
+
 	row = [""]*len(columns)
 	row[1] = _("'Opening'")
 	for i, v in ((9, 'qty_after_transaction'), (11, 'valuation_rate'), (12, 'stock_value')):
 			row[i] = last_entry.get(v, 0)
-		
+
 	return row
-	
+
 def get_warehouse_condition(warehouse):
 	warehouse_details = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"], as_dict=1)
 	if warehouse_details:
