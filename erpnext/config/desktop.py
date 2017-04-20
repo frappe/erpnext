@@ -65,7 +65,8 @@ def get_data():
 			"color": "#3498db",
 			"icon": "octicon octicon-repo",
 			"type": "link",
-			"link": "query-report/Profit and Loss Statement"
+			"link": "query-report/Profit and Loss Statement",
+			"hidden": 1
 		},
 
 		# old
