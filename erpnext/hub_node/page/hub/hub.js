@@ -1,5 +1,5 @@
 frappe.pages['hub'].on_page_load = function(wrapper) {
-	var page = frappe.ui.make_app_page({
+	let page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Hub',
 		single_column: true
@@ -25,19 +25,30 @@ frappe.Hub = Class.extend({
 	},
 	render: function() {
 		this.page.main.empty();
-		var me = this;
+		let me = this;
 		frappe.model.with_doc("Hub Settings", "Hub Settings", function() {
 			me.hub = locals["Hub Settings"]["Hub Settings"];
-			if(me.hub.publish) {
+			if(!me.hub.publish) {
+				$(frappe.render_template("register_in_hub", {})).appendTo(me.page.main);
+			} else {
+				const $toolbar_template = $(`<div class="col-md-12"  style="padding: 0px">
+					<input class="form-control search-input" name="search" placeholder="${__("Search")}">
+				</div>`);
+				$toolbar_template.appendTo(me.page.page_actions);
+				me.page.$title_area.html("");
 				me.setup_list();
+				me.show_as_list("erpnext.hub_node.get_all_users", me.hub_users, "hub_user_name");
+				me.show_as_list("erpnext.hub_node.get_categories", me.hub_categories);
 			}
 		});
 	},
 	setup_list: function() {
-		var me = this;
+		let me = this;
 		$(frappe.render_template("hub_body", {})).appendTo(this.page.main);
 		this.hub_list = this.page.main.find(".hub-list");
-		this.search = this.page.main.find("input").on("keypress", function(e) {
+		this.hub_users = this.page.main.find(".hub-users");
+		this.hub_categories = this.page.main.find(".hub-categories");
+		this.search = this.page.page_actions.find(".search-input").on("keypress", function(e) {
 			if(e.which===13) {
 				me.reset();
 			}
@@ -54,13 +65,16 @@ frappe.Hub = Class.extend({
 		this.page_length = 20;
 		this.next_page();
 	},
+	get_search_term: function() {
+		return this.search.val();
+	},
 	next_page: function() {
-		var me = this;
+		let me = this;
 		this.loading.toggleClass("hide", false);
 		frappe.call({
 			method: "erpnext.hub_node.get_items",
 			args: {
-				text: this.get_text(),
+				text: this.get_search_term(),
 				start: this.start,
 				limit: this.page_length
 			},
@@ -69,7 +83,9 @@ frappe.Hub = Class.extend({
 				if(!r.message)
 					r.message = [];
 				me.start += r.message.length;
-				$(frappe.render_template("hub_list", {items: r.message})).appendTo(me.hub_list);
+				r.message.forEach(function(item) {
+					me.make_item_view(item).appendTo(me.hub_list);
+				});
 				if(r.message.length && r.message.length===me.page_length) {
 					// more
 					me.more.removeClass("hide");
@@ -82,7 +98,47 @@ frappe.Hub = Class.extend({
 			}
 		});
 	},
-	get_text: function() {
-		return this.search.val();
+	make_item_view: function(item) {
+		const $item = $(`<div class="image-view-item" data-item-code="${item.item_code}">
+			<div class="image-view-body">
+				<a data-item-code="${item.item_code}"
+					title="${item.item_name || item.item_code}">
+					<div class="image-field" style="
+						${ !item.image ? `background-color: #fafbfc;` : `` }
+						border: 0px;">
+						${ item.image
+							? `<img src="${item.image}" alt="${item.item_name || item.item_code}">`
+							: `<span class="placeholder-text">
+								${frappe.get_abbr(item.item_name || item.item_code)}
+							</span>`  }
+					</div>
+				</a>
+			</div>
+			<div class="image-view-header doclist-row">
+				<div class="list-value">
+					<a class="grey list-id" data-name="${item.item_code}" title="${ item.item_name || item.item_code}">${item.item_name || item.item_code}</a>
+				</div>
+				<h6>${ item.hub_user_name }<h6>
+			</div>
+		</div>`);
+
+		return $item;
 	},
+
+	show_as_list: function(method, parent_element, property = '') {
+		let me = this;
+		frappe.call({
+			method: method,
+			args: {},
+			callback: function(r) {
+				if(!r.message)
+					r.message = [];
+				r.message.forEach(function(result) {
+					if(property === '') console.log(result);
+					$(`<h6>${property !== '' ? `${result[property]}` : `${result}`}</h6>`).appendTo(parent_element);
+				});
+			}
+		});
+	}
+
 })
