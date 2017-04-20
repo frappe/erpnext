@@ -46,11 +46,11 @@ class ReceivablePayableReport(object):
 		self.ageing_col_idx_start = len(columns)
 
 		if not "range1" in self.filters:
-			self.filters["range1"] = "30"
+			self.filters["range1"] = 30
 		if not "range2" in self.filters:
-			self.filters["range2"] = "60"
+			self.filters["range2"] = 60
 		if not "range3" in self.filters:
-			self.filters["range3"] = "90"
+			self.filters["range3"] = 90
 			
 		for label in ("0-{range1}".format(range1=self.filters["range1"]),
 			"{range1}-{range2}".format(range1=cint(self.filters["range1"])+ 1, range2=self.filters["range2"]),
