@@ -1,23 +1,31 @@
 <div class="padding">
-	<div class="row">
-	    <div class="col-md-4 col-md-offset-4">
-	        <input class="form-control" name="search" placeholder="{%= __("Search") %}">
-	    </div>
-	</div>
-	<hr style="margin: 15px -15px">
-	 <div class="row">
-		<div class="item-list-area">
-			<div class="hub-list app-listing item-list image-view-container">
-			</div>
-		</div>
-		<div class="loading">
-		    <p class="text-muted text-center">{%= __("Loading...") %}</p>
-		</div>
-		<div class="more text-center hide">
-		    <button class="btn btn-default btn-sm">{%= __("More") %}</div>
-		</div>
-		<div class="done text-center text-extra-muted hide">
-		    <p>{%= __("No more results.") %}</p>
-		</div>
-	</div>
+    <!--<hr style="margin: 15px -15px">-->
+
+    <div class="row" style="padding: 50px;">
+        <h1 class="text-center">{%= __("ERPNext Hub") %}</h1>
+        <p class="text-center text-muted">Free product listing and discovery for ERPNext users</p>
+    </div>
+    <div class="all-products">
+    <div class="row">
+        <div class="col-sm-9 hub-list image-view-container">
+        </div>
+        <div class="col-sm-3">
+            <h6>GROUPS</h6>
+            <div class="hub-categories">
+            </div>
+            <hr>
+            <h6>USERS</h6>
+            <div class="hub-users">
+            </div>
+        </div>
+    </div>
+    <div class="loading">
+        <p class="text-muted text-center">{%= __("Loading...") %}</p>
+    </div>
+    <div class="more text-center hide">
+        <button class="btn btn-default btn-sm">{%= __("More") %}</div>
+    </div>
+    <div class="done text-center text-extra-muted hide">
+        <p>{%= __("No more results.") %}</p>
+    </div>
 </div>
