@@ -3,8 +3,6 @@
 
 {% include 'erpnext/selling/sales_common.js' %}
 
-cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
-
 frappe.ui.form.on("Sales Order", {
 	setup: function(frm) {
 		$.extend(frm.cscript, new erpnext.selling.SalesOrderController({frm: frm}));
@@ -14,6 +12,7 @@ frappe.ui.form.on("Sales Order", {
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order'
 		}
+		frm.add_fetch('customer', 'tax_id', 'tax_id');
 	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
