@@ -26,13 +26,14 @@ erpnext.financial_statements = {
 	},
 	"open_general_ledger": function(data) {
 		if (!data.account) return;
+		var project = $.grep(frappe.query_report.filters, function(e){ return e.df.fieldname == 'project'; })
 
 		frappe.route_options = {
 			"account": data.account,
 			"company": frappe.query_report_filters_by_name.company.get_value(),
 			"from_date": data.from_date || data.year_start_date,
 			"to_date": data.to_date || data.year_end_date,
-			"project": $.grep(frappe.query_report.filters, function(e){ return e.df.fieldname == 'project'; })[0].$input.val()
+			"project": (project && project.length > 0) ? project[0].$input.val() : ""
 		};
 		frappe.set_route("query-report", "General Ledger");
 	},

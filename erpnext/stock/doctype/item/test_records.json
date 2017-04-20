@@ -24,6 +24,16 @@
     "warehouse_reorder_qty": 20
    }
   ],
+  "uoms": [
+    {
+      "uom": "_Test UOM",
+      "conversion_factor": 1.0
+    },
+    {
+      "uom": "_Test UOM 1",
+      "conversion_factor": 10.0
+    }
+  ],
   "stock_uom": "_Test UOM",
   "show_in_website": 1,
   "website_warehouse": "_Test Warehouse - _TC"
