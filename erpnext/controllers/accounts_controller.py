@@ -192,7 +192,7 @@ class AccountsController(TransactionBase):
 							if (item.get(fieldname) is None or fieldname in force_item_fields):
 								item.set(fieldname, value)
 
-							elif fieldname == "cost_center" and not item.get("cost_center"):
+							elif fieldname == "cost_center" and (item.get(fieldname) != value or not item.get(fieldname)):
 								item.set(fieldname, value)
 
 							elif fieldname == "conversion_factor" and not item.get("conversion_factor"):
