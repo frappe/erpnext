@@ -15,3 +15,17 @@ def get_items(text, start, limit):
 	})
 	response.raise_for_status()
 	return response.json().get("message")
+
+@frappe.whitelist()
+def get_all_users():
+	hub = frappe.get_single("Hub Settings")
+	response = requests.get(hub.hub_url + "/api/method/hub.hub.api.get_all_users")
+	response.raise_for_status()
+	return response.json().get("message")
+
+@frappe.whitelist()
+def get_categories():
+	hub = frappe.get_single("Hub Settings")
+	response = requests.get(hub.hub_url + "/api/method/hub.hub.api.get_categories")
+	response.raise_for_status()
+	return response.json().get("message")

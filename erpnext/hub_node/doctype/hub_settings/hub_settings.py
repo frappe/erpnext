@@ -10,7 +10,7 @@ from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_
 
 
 class HubSettings(Document):
-	hub_url = "http://hub.ch:8000"
+	hub_url = "http://erpnext.hub:8000"
 	# hub_url = "http://hub.erpnext.org"
 	def validate(self):
 		if self.enabled:
@@ -87,7 +87,7 @@ class HubSettings(Document):
 		items = frappe.db.get_all("Item",
 			fields=["name", "item_code", "item_name", "description", "image", "item_group", "stock_uom", "modified"],
 			filters={"publish_in_hub": 1})
-		
+
 		for item in items:
 			if item.modified > get_datetime(self.last_sync_datetime):
 				item.to_sync = 1
@@ -95,7 +95,7 @@ class HubSettings(Document):
 			if item.image:
 				item.image = expand_relative_urls(item.image)
 
-			item = self.get_item_details(item)	
+			item = self.get_item_details(item)
 		items_to_update = [a for a in items if a.to_sync == 1]
 
 		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
@@ -112,7 +112,7 @@ class HubSettings(Document):
 			response.raise_for_status()
 			response = response.json()
 			self.last_sync_datetime = response.get("message").get("last_sync_datetime")
-			
+
 			if verbose:
 				frappe.msgprint(_("{0} Items synced".format(len(items))))
 		else:
@@ -122,7 +122,7 @@ class HubSettings(Document):
 	def get_item_details(self, item):
 		item_code = item.item_code
 		template_item_code = frappe.db.get_value("Item", item_code, "variant_of")
-	
+
 		item = get_qty_in_stock(item, template_item_code, self.warehouse, self.last_sync_datetime)
 		item = get_price(item, template_item_code, self.selling_price_list, self.company, self.last_sync_datetime)
 		return item
@@ -172,7 +172,7 @@ def get_price(item, template_item_code, price_list, company, last_sync_datetime,
 					price[0].price_list_rate = flt(price[0].price_list_rate * (1.0 - (pricing_rule.discount_percentage / 100.0)))
 
 				if pricing_rule.pricing_rule_for == "Price":
-					price[0].price_list_rate = pricing_rule.price_list_rate	
+					price[0].price_list_rate = pricing_rule.price_list_rate
 		if price:
 			price = price[0]
 			price["formatted_price"] = fmt_money(price["price_list_rate"], currency=price["currency"])
