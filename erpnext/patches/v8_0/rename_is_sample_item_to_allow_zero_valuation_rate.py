@@ -9,4 +9,5 @@ def execute():
 	
 	for doctype in doc_list:
 		frappe.reload_doctype(doctype)
-		rename_field(doctype, "is_sample_item", "allow_zero_valuation_rate")
+		if "is_sample_item" in frappe.db.get_table_columns(doctype):
+			rename_field(doctype, "is_sample_item", "allow_zero_valuation_rate")
