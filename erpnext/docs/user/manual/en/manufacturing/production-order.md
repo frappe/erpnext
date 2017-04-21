@@ -62,6 +62,13 @@ by:
 
 <img class="screenshot" alt="Stock Entry for PO" src="{{docs_base_url}}/assets/img/manufacturing/PO-material-transfer-updated.png">
 
+#### Transfer through Stock Entry
+Use cases for this option are:
+* If material transfer is done in bulk and/or is not required to be tracked against a particular Production Order
+* If the responsibility for Material Transfer and Production Entry lies with two separate users
+
+If this is the case, you can select the Skip Material Transfer check box, which will allow you to make the “Manufacture” Stock Entry directly by clicking on the ‘Finish’ button.
+
 ### Making Time Logs
 
 * Progress in the Production Order can be tracked using [Timesheet]({{docs_base_url}}/user/manual/en/projects/timesheet/timesheet-against-production-order.html)
