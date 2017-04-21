@@ -571,6 +571,7 @@ def create_program(args):
 	for i in xrange(1,6):
 		if args.get("program_" + str(i)):
 			program = frappe.new_doc("Program")
+			program.program_code = args.get("program_" + str(i))
 			program.program_name = args.get("program_" + str(i))
 			try:
 				program.save()
@@ -581,6 +582,7 @@ def create_course(args):
 	for i in xrange(1,6):
 		if args.get("course_" + str(i)):
 			course = frappe.new_doc("Course")
+			course.course_code = args.get("course_" + str(i))
 			course.course_name = args.get("course_" + str(i))
 			try:
 				course.save()
