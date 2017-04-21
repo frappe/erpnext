@@ -15,6 +15,13 @@
 		"academic_term": "2014-2015 (_Test Academic Term)"
 	},
 	{
+		"student_group_name": "Course-TC102-2014-2015 (_Test Academic Term)",
+		"group_based_on": "Course",
+		"course": "TC102",
+		"academic_year": "2014-2015",
+		"academic_term": "2014-2015 (_Test Academic Term)"
+	},
+	{
 		"student_group_name": "Activity-2014-2015 (_Test Academic Term)",
 		"group_based_on": "Activity",
 		"academic_year": "2014-2015",

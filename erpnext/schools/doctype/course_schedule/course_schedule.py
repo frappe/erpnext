@@ -13,7 +13,7 @@ class CourseSchedule(Document):
 		self.set_title()
 		self.validate_mandatory()
 		self.validate_course()
-		self.set_student_batch()
+		# self.set_student_batch()
 		self.validate_date()
 		self.validate_overlap()
 	

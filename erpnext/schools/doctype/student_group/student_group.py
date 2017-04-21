@@ -27,47 +27,42 @@ class StudentGroup(Document):
 			frappe.throw(_("""Cannot enroll more than {0} students for this student group.""").format(self.max_strength))
 
 	def validate_students(self):
-		program_enrollment = self.get_program_enrollment()
+		program_enrollment = get_program_enrollment(self.academic_year, self.group_based_on, self.program, self.batch, self.course)
 		students = [d.student for d in program_enrollment] if program_enrollment else None
 		for d in self.students:
-			if d.student not in students:
+			if self.group_based_on != "Activity" and d.student not in students:
 				frappe.throw(_("{0} - {1} is not enrolled in the given {2}".format(d.student, d.student_name, self.group_based_on)))
 			if not frappe.db.get_value("Student", d.student, "enabled") and d.active:
 				d.active = 0
 				frappe.throw(_("{0} - {1} is inactive student".format(d.student, d.student_name)))
 
+@frappe.whitelist()
+def get_students(academic_year, group_based_on, program=None, batch=None, course=None):
+	enrolled_students = get_program_enrollment(academic_year, group_based_on, program, batch, course)
 
-	def update_students(self):
-		enrolled_students = self.get_program_enrollment()
-		group_student_list = [student.student for student in self.students]
+	if enrolled_students:
+		student_list = []
+		for s in enrolled_students:
+			if frappe.db.get_value("Student", s.student, "enabled"):
+				s.update({"active": 1})
+			else:
+				s.update({"active": 0})
+			student_list.append(s)
+		return student_list
 
-		if enrolled_students:
-			student_list = [];
-			for s in enrolled_students:
-				if s.student not in group_student_list:
-					student_list.append(s.update({"active": 1}) if frappe.db.get_value("Student", s.student, "enabled")
-						else s.update({"active": 0}))
-			return student_list
-		elif self.group_based_on != "Activity":
-			frappe.throw(_("No students are enrolled in the given {}".format(self.group_based_on)))
-		else:
-			frappe.throw(_("Select students manually for the Activity based Group"))
+def get_program_enrollment(academic_year, group_based_on, program=None, batch=None, course=None):
+	if group_based_on == "Batch":
+		return frappe.db.sql('''select student, student_name from `tabProgram Enrollment` where academic_year = %s
+			and program = %s and student_batch_name = %s order by student_name asc''',(academic_year, program, batch), as_dict=1)
 
-	def get_program_enrollment(self):
-		if self.group_based_on == "Batch":
-			return frappe.db.sql('''select student, student_name from `tabProgram Enrollment` where academic_year = %s
-				and program = %s and student_batch_name = %s order by student_name asc''',(self.academic_year, self.program, self.batch), as_dict=1)
-
-		elif self.group_based_on == "Course":
-			return frappe.db.sql('''
-				select 
-					pe.student, pe.student_name 
-				from 
-					`tabProgram Enrollment` pe, `tabProgram Enrollment Course` pec
-				where
-					pe.name = pec.parent and pec.course = %s
-				order by
-					pe.student_name asc
-				''', (self.course), as_dict=1)
-		else:
-			return
+	elif group_based_on == "Course":
+		return frappe.db.sql('''
+			select 
+				pe.student, pe.student_name 
+			from 
+				`tabProgram Enrollment` pe, `tabProgram Enrollment Course` pec
+			where
+				pe.name = pec.parent and pec.course = %s
+			order by
+				pe.student_name asc
+			''', (course), as_dict=1)
