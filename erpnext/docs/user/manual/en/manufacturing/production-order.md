@@ -62,7 +62,7 @@ by:
 
 <img class="screenshot" alt="Stock Entry for PO" src="{{docs_base_url}}/assets/img/manufacturing/PO-material-transfer-updated.png">
 
-#### Transfer through Stock Entry
+#### Material Transfer through Stock Entry
 Use cases for this option are:
 * If material transfer is done in bulk and/or is not required to be tracked against a particular Production Order
 * If the responsibility for Material Transfer and Production Entry lies with two separate users
