@@ -145,7 +145,7 @@ erpnext.production_order = {
 						btn.addClass('btn-primary');
 					}
 				}
-			} else if(frm.doc.skip_transfer){
+			} else {
 				if ((flt(doc.produced_qty) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
 					frm.has_finish_btn = true;
 					var btn = frm.add_custom_button(__('Finish'),
@@ -252,10 +252,8 @@ $.extend(cur_frm.cscript, {
 			var max = (purpose === "Manufacture") ?
 				flt(this.frm.doc.material_transferred_for_manufacturing) - flt(this.frm.doc.produced_qty) :
 				flt(this.frm.doc.qty) - flt(this.frm.doc.material_transferred_for_manufacturing);
-		} else if(this.frm.doc.skip_transfer){
-			var max = (purpose === "Manufacture") ?
-				flt(this.frm.doc.qty) - flt(this.frm.doc.produced_qty) :
-				flt(this.frm.doc.qty) - flt(this.frm.doc.produced_qty);
+		} else {
+			var max = flt(this.frm.doc.qty) - flt(this.frm.doc.produced_qty);
 		}
 
 		frappe.prompt({fieldtype:"Float", label: __("Qty for {0}", [purpose]), fieldname:"qty",
