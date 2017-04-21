@@ -51,7 +51,7 @@ class PurchaseReceipt(BuyingController):
 		super(PurchaseReceipt, self).validate()
 
 		if self._action=="submit":
-			self.make_batches()
+			self.make_batches('warehouse')
 		else:
 			self.set_status()
 

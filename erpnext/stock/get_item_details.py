@@ -9,6 +9,7 @@ import json
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
+from erpnext.stock.doctype.batch.batch import get_batch_no
 
 @frappe.whitelist()
 def get_item_details(args):
@@ -74,7 +75,12 @@ def get_item_details(args):
 	out.update(get_pricing_rule_for_item(args))
 
 	if args.get("doctype") in ("Sales Invoice", "Delivery Note") and out.stock_qty > 0:
-		out.serial_no = get_serial_no(out)
+		if out.has_serial_no:
+			out.serial_no = get_serial_no(out)
+
+		if out.has_batch_no:
+			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
+
 
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
@@ -154,6 +160,8 @@ def get_basic_details(args, item):
 		"income_account": get_default_income_account(args, item),
 		"expense_account": get_default_expense_account(args, item),
 		"cost_center": get_default_cost_center(args, item),
+		'has_serial_no': item.has_serial_no,
+		'has_batch_no': item.has_batch_no,
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
 			item.get("taxes")))),
