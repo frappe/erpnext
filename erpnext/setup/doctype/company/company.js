@@ -6,6 +6,15 @@ frappe.provide("erpnext.company");
 frappe.ui.form.on("Company", {
 	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
+
+		frm.fields_dict['default_inventory_account'].get_query = function() {
+			return {
+				filters: {
+					"is_group": 0,
+					"account_type": "Stock"
+				}
+			}
+		}
 	},
 
 	refresh: function(frm) {
