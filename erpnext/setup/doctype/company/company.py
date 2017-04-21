@@ -111,8 +111,7 @@ class Company(Document):
 						"is_group": wh_detail["is_group"],
 						"company": self.name,
 						"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr) \
-							if not wh_detail["is_group"] else "",
-						"create_account_under": stock_group
+							if not wh_detail["is_group"] else ""
 					})
 					warehouse.flags.ignore_permissions = True
 					warehouse.insert()
@@ -147,6 +146,7 @@ class Company(Document):
 
 		if cint(frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock")):
 			self._set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
+			self._set_default_account("default_inventory_account", "Stock")
 			self._set_default_account("stock_adjustment_account", "Stock Adjustment")
 			self._set_default_account("expenses_included_in_valuation", "Expenses Included In Valuation")
 			self._set_default_account("default_expense_account", "Cost of Goods Sold")

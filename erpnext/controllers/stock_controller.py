@@ -66,7 +66,7 @@ class StockController(AccountsController):
 							sle = self.update_stock_ledger_entries(sle)
 
 						gl_list.append(self.get_gl_dict({
-							"account": warehouse_account[sle.warehouse]["name"],
+							"account": warehouse_account[sle.warehouse]["account"],
 							"against": item_row.expense_account,
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -76,7 +76,7 @@ class StockController(AccountsController):
 						# to target warehouse / expense account
 						gl_list.append(self.get_gl_dict({
 							"account": item_row.expense_account,
-							"against": warehouse_account[sle.warehouse]["name"],
+							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
@@ -411,16 +411,29 @@ def get_warehouse_account():
 	if not frappe.flags.warehouse_account_map or frappe.flags.in_test:
 		warehouse_account = frappe._dict()
 
-		for d in frappe.db.sql("""select
-				warehouse, name, account_currency
-			from
-				tabAccount
-			where
-				account_type = 'Stock'
-				and (warehouse is not null and warehouse != '')
-				and is_group=0 """, as_dict=1):
-			warehouse_account.setdefault(d.warehouse, d)
+		for d in frappe.get_all('Warehouse', filters = {"is_group": 0},
+			fields = ["name", "account", "parent_warehouse", "company"]):
+			if not d.account:
+				d.account = get_parent_warehouse_account(d.name)
+
+			if not d.account:
+				d.account = frappe.db.get_value('Company',
+					d.company, 'default_inventory_account')
+
+			d.account_currency = frappe.db.get_value('Account', d.account, 'account_currency')
+			warehouse_account.setdefault(d.name, d)
 
 		frappe.flags.warehouse_account_map = warehouse_account
-
 	return frappe.flags.warehouse_account_map
+
+def get_parent_warehouse_account(warehouse):
+	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+	acccount = frappe.db.sql("""
+		select
+			account from `tabWarehouse`
+		where
+			lft < %s and rgt > %s and is_group=1 and
+			account is not null and ifnull(account, '') !=''
+		order by lft desc limit 1""", (lft, rgt), as_list=1)
+
+	return acccount[0][0] if acccount else None

@@ -35,7 +35,6 @@ class Account(Document):
 		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
 		self.validate_mandatory()
-		self.validate_warehouse_account()
 		self.validate_frozen_accounts_modifier()
 		self.validate_balance_must_be_debit_or_credit()
 		self.validate_account_currency()
@@ -162,46 +161,6 @@ class Account(Document):
 		if not self.report_type:
 			throw(_("Report Type is mandatory"))
 
-	def validate_warehouse_account(self):
-		'''If perpetual inventory is set, and warehouse is linked,
-		the account balance and stock balance as of now must always match.
-		'''
-		from erpnext.accounts.utils import get_balance_on
-		from erpnext.stock.utils import get_stock_value_on
-		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-			return
-
-		if self.account_type == "Stock":
-			if self.is_group == 0 and not self.warehouse:
-				frappe.throw(_("Warehouse is mandatory for non group Accounts of type Stock"))
-
-			if self.warehouse:
-				# company must be same
-				if frappe.get_value('Warehouse', self.warehouse, 'company') != self.company:
-					frappe.throw(_("Warehouse company must be same as Account company"))
-
-				# balance must be same
-				stock_balance = get_stock_value_on(self.warehouse)
-				if self.is_new():
-					account_balance = 0.0
-				else:
-					account_balance = get_balance_on(self.name)
-
-				if account_balance != stock_balance:
-					frappe.throw(_('Account balance ({0}) for {1} and stock value ({2}) for warehouse {3} must be same')
-						.format(fmt_money(account_balance, currency=self.account_currency), self.name, 
-							fmt_money(stock_balance, currency=self.account_currency), self.warehouse))
-
-		elif self.warehouse:
-			self.warehouse = None
-
-	def validate_warehouse(self, warehouse):
-		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-
-		if lft and rgt:
-			if frappe.db.sql_list("""select sle.name from `tabStock Ledger Entry` sle where exists (select wh.name from
-				tabWarehouse wh where lft >= %s and rgt <= %s and sle.warehouse = wh.name)""", (lft, rgt)):
-				throw(_("Stock entries exist against Warehouse {0}, hence you cannot re-assign or modify it").format(warehouse))
 
 	def update_nsm_model(self):
 		"""update lft, rgt indices for nested set model"""
