@@ -15,6 +15,6 @@ class Course(Document):
 		if self.assessment_criteria:
 			total_weightage = 0
 			for criteria in self.assessment_criteria:
-				total_weightage += criteria.weightage
+				total_weightage += criteria.weightage or 0
 			if total_weightage != 100:
 				frappe.throw(_("Total Weightage of all Assessment Criteria must be 100%"))
