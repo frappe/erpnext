@@ -5,6 +5,14 @@ cur_frm.add_fetch("assessment_plan", "student_group", "student_group");
 cur_frm.add_fetch("assessment_plan", "student_batch", "student_batch");
 
 frappe.ui.form.on('Assessment Result Tool', {
+
+	onload: function(frm) {
+		if (frappe.route_options) {
+			frm.doc.assessment_plan = frappe.route_options.assessment_plan;
+			frappe.route_options = null;
+		}
+	},
+
     refresh: function(frm) {
        frm.disable_save();
 	   frm.page.clear_indicator();
