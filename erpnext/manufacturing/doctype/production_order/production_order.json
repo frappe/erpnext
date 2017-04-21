@@ -318,7 +318,7 @@
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
-  },
+  }, 
   {
    "allow_on_submit": 0, 
    "bold": 0, 
@@ -355,7 +355,7 @@
    "collapsible": 0, 
    "columns": 0, 
    "default": "0", 
-   "depends_on": "eval:doc.docstatus==1", 
+   "depends_on": "eval:doc.docstatus==1 && doc.skip_transfer==0", 
    "description": "", 
    "fieldname": "material_transferred_for_manufacturing", 
    "fieldtype": "Float", 
@@ -1346,8 +1346,8 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-04-10 12:13:09.312186", 
- "modified_by": "Administrator", 
+ "modified": "2017-04-21 16:31:19.509721", 
+ "modified_by": "ishan@loyapeb.com", 
  "module": "Manufacturing", 
  "name": "Production Order", 
  "owner": "Administrator", 
