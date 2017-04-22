@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, requests, json
 from frappe.model.document import Document
-from frappe.utils import cint, expand_relative_urls, fmt_money, flt, add_years, now, get_datetime, get_datetime_str
+from frappe.utils import cint, expand_relative_urls, fmt_money, flt, add_years, add_to_date, now, get_datetime, get_datetime_str
 from frappe import _
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 
@@ -80,6 +80,13 @@ class HubSettings(Document):
 
 	def sync(self, verbose=True):
 		"""Sync items with hub.erpnext.org"""
+		args = self.get_args()
+		if self.password:
+			response = requests.post(self.hub_url + "/api/method/hub.hub.api.update_user_details", data={
+				"password": self.password,
+				"args": json.dumps(args)
+			})
+			response.raise_for_status()
 		if not self.publish:
 			if verbose:
 				frappe.msgprint(_("Publish to sync items"))
@@ -89,7 +96,9 @@ class HubSettings(Document):
 			filters={"publish_in_hub": 1})
 
 		for item in items:
-			if item.modified > get_datetime(self.last_sync_datetime):
+			print "::::::::::::::::::::::::"
+			print item.name, item.modified, add_to_date(get_datetime(self.last_sync_datetime), hours=-6)
+			if item.modified > add_to_date(get_datetime(self.last_sync_datetime), hours=-6):
 				item.to_sync = 1
 			item.modified = get_datetime_str(item.modified)
 			if item.image:
@@ -101,7 +110,7 @@ class HubSettings(Document):
 		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
 
 		data = {"password": self.password, "items_to_update": json.dumps(items_to_update), "item_list": json.dumps(item_list) }
-		print data, "data"
+		print "data", data
 		if items:
 			response = requests.post(self.hub_url + "/api/method/hub.hub.api.sync", data={
 				"password": self.password,
@@ -122,15 +131,17 @@ class HubSettings(Document):
 	def get_item_details(self, item):
 		item_code = item.item_code
 		template_item_code = frappe.db.get_value("Item", item_code, "variant_of")
-
 		item = get_qty_in_stock(item, template_item_code, self.warehouse, self.last_sync_datetime)
 		item = get_price(item, template_item_code, self.selling_price_list, self.company, self.last_sync_datetime)
 		return item
 
 def get_qty_in_stock(item, template_item_code, warehouse, last_sync_datetime):
 	item_code = item.item_code
-	if not warehouse and template_item_code and template_item_code != item_code:
-		warehouse = frappe.db.get_value("Item", template_item_code, warehouse)
+	# if not warehouse and template_item_code and template_item_code != item_code:
+	# 	print item_code
+	# 	print template_item_code
+	# 	print warehouse
+	# 	warehouse = frappe.db.get_value("Item", template_item_code, warehouse)
 
 	if warehouse:
 		stock_qty = frappe.db.sql("""select actual_qty from tabBin where
