@@ -100,7 +100,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 	}
 })
 
-erpnext.stock.move_item = function(item, source, target, actual_qty, rate, callback) {
+erpnext.stock.move_item = function(item, source, target, actual_qty, rate, posting_time, callback) {
 	var dialog = new frappe.ui.Dialog({
 		title: target ? __('Add Item') : __('Move Item'),
 		fields: [
@@ -113,6 +113,7 @@ erpnext.stock.move_item = function(item, source, target, actual_qty, rate, callb
 			{fieldname: 'qty', label: __('Quantity'), reqd: 1,
 				fieldtype: 'Float', description: __('Available {0}', [actual_qty]) },
 			{fieldname: 'rate', label: __('Rate'), fieldtype: 'Currency', hidden: 1 },
+			{fieldname: 'posting_time', label: __('Hora'), fieldtype: 'Time', hidden: 0 },
 		],
 	})
 	dialog.show();
