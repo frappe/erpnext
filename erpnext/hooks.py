@@ -55,7 +55,7 @@ website_generators = ["Item Group", "Item", "BOM", "Sales Partner", "Job Opening
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
-	"splash_image": "/assets/erpnext/images/erp-icon.svg"
+	
 }
 
 website_route_rules = [
