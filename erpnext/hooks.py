@@ -54,8 +54,7 @@ fixtures = ["Web Form"]
 website_generators = ["Item Group", "Item", "BOM", "Sales Partner", "Job Opening", "Student Admission"]
 
 website_context = {
-	"favicon": 	"/assets/erpnext/images/favicon.png",
-	"splash_image": "/assets/erpnext/images/erp-icon.svg"
+	"A"
 }
 
 website_route_rules = [
