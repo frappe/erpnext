@@ -7,17 +7,30 @@
     </div>
     <div class="all-products">
     <div class="row">
-        <div class="col-sm-9 hub-list image-view-container">
-        </div>
-        <div class="col-sm-3">
-            <h6>GROUPS</h6>
-            <div class="hub-categories">
+        <div class="col-sm-12">
+            <div class="row">
+                <div class="col-sm-4" style="display: flex;">
+                    <input class="input-with-feedback form-control bold category-filter" style="flex: 1;" placeholder="Category">
+                </div>
+                <div class="col-sm-4" style="display: flex;">
+                    <input class="input-with-feedback form-control bold seller-filter" style="flex: 1;" placeholder="Seller">
+                </div>
+                <div class="col-sm-4" style="display: flex;">
+                    <input class="input-with-feedback form-control bold country-filter" style="flex: 1;" placeholder="Country">
+                </div>
             </div>
             <hr>
-            <h6>USERS</h6>
-            <div class="hub-users">
+            <div class="row">
+                <div class="col-sm-12">
+                <div class="hub-list image-view-container">
+                </div>
+                </div>
             </div>
         </div>
+
+        <!--<div class="col-sm-3">
+            <button class="btn btn-default test-rfq">Request a Quote</button>
+        </div>-->
     </div>
     <div class="loading">
         <p class="text-muted text-center">{%= __("Loading...") %}</p>
