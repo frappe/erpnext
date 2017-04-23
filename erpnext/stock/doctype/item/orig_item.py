@@ -88,12 +88,6 @@ class Item(WebsiteGenerator):
 		self.validate_website_image()
 		self.make_thumbnail()
 		self.validate_fixed_asset()
-		self.validate_product_bundle()
-		if self.is_stock_item:
-			if (not self.default_warehouse or self.default_warehouse == ""):
-				frappe.throw(_("Default Warehouse is mandatory for stock items"))
-		else:
-			self.default_warehouse = ""
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -241,14 +235,6 @@ class Item(WebsiteGenerator):
 
 			if not self.asset_category:
 				frappe.throw(_("Asset Category is mandatory for Fixed Asset item"))
-
-	def validate_product_bundle(self):
-		if self.is_product_bundle:
-			if self.is_stock_item:
-				frappe.throw(_("Product Bundle Item must be a non-stock item."))
-
-			if self.is_fixed_asset:
-				frappe.throw(_("Product Bundle Item must be a non-asset item."))
 
 	def get_context(self, context):
 		context.show_search=True
@@ -657,7 +643,7 @@ class Item(WebsiteGenerator):
 					.format(self.stock_uom, template_uom))
 
 	def validate_attributes(self):
-		if (self.has_variants or self.variant_of) and self.variant_based_on=='Item Attribute':
+		if self.has_variants or self.variant_of:
 			attributes = []
 			if not self.attributes:
 				frappe.throw(_("Attribute table is mandatory"))
@@ -668,7 +654,7 @@ class Item(WebsiteGenerator):
 					attributes.append(d.attribute)
 
 	def validate_variant_attributes(self):
-		if self.variant_of and self.variant_based_on=='Item Attribute':
+		if self.variant_of:
 			args = {}
 			for d in self.attributes:
 				if not d.attribute_value:
@@ -689,7 +675,7 @@ def get_timeline_data(doctype, name):
 		from `tabStock Ledger Entry` where item_code=%s
 			and posting_date > date_sub(curdate(), interval 1 year)
 			group by posting_date''', name))
-
+	
 	for date, count in items.iteritems():
 		timestamp = get_timestamp(date)
 		out.update({ timestamp: count })
