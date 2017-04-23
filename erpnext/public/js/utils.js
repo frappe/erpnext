@@ -114,8 +114,8 @@ erpnext.utils.map_current_doc = function(opts) {
 		}
 	}
 	var _map = function() {
-		// remove first item row if empty
 		if($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {
+			// remove first item row if empty
 			if(!cur_frm.doc.items[0].item_code) {
 				cur_frm.doc.items = cur_frm.doc.items.splice(1);
 			}
@@ -174,7 +174,8 @@ erpnext.utils.map_current_doc = function(opts) {
 			method: opts.method,
 			args: {
 				"source_name": opts.source_name,
-				"target_doc": cur_frm.doc
+				"target_doc": cur_frm.doc,
+				"fields": opts.setters
 			},
 			callback: function(r) {
 				if(!r.exc) {
@@ -190,17 +191,18 @@ erpnext.utils.map_current_doc = function(opts) {
 			target: opts.target,
 			setters: opts.setters,
 			get_query: opts.get_query,
-			action: function(selections) {
-				var values = selections.join(',');
-				if(!values)
-				// Show "please select"
+			action: function(selections, args) {
+				let values = selections.join(',');
+				if(values.length === 0){
+					frappe.msgprint(__("Please select Quotations"))
 					return;
+				}
 				opts.source_name = values;
+				opts.setters = args;
 				d.dialog.hide();
 				_map();
 			},
 		});
-
 	} else if(opts.source_name) {
 		_map();
 	}
