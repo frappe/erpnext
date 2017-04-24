@@ -7,16 +7,18 @@ cur_frm.add_fetch("assessment_plan", "student_batch", "student_batch");
 frappe.ui.form.on('Assessment Result Tool', {
 
 	onload: function(frm) {
-		if (frappe.route_options) {
-			frm.doc.assessment_plan = frappe.route_options.assessment_plan;
-			frappe.route_options = null;
-		}
+		frm.trigger("refresh");
 	},
 
-    refresh: function(frm) {
-       frm.disable_save();
-	   frm.page.clear_indicator();
-    },
+	refresh: function(frm) {
+		if (frappe.route_options) {
+			frm.doc.assessment_plan = frappe.route_options.assessment_plan;
+			frm.trigger("assessment_plan");
+			frappe.route_options = null;
+		}
+		frm.disable_save();
+		frm.page.clear_indicator();
+	},
 
 	assessment_plan: function(frm) {
 		if(!(frm.doc.student_batch || frm.doc.student_group)) return;
