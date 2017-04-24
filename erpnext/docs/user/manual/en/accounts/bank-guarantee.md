@@ -4,4 +4,6 @@ A client may ask you to provide a Bank Guarantee from a third party such as a ba
 
 This document allows you to track Bank Guarantees given to clients. You can set Email Alerts as the Bank Guarantee expiry date approaches to remind yourself to get the Bank Guarantee back from your client. 
 
+<img class="screenshot" alt="Bank Guarantee" src="{{docs_base_url}}/assets/img/accounts/bank-guarantee.png">
+
 {next}

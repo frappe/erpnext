@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "autoname": "BNG.#####", 
+ "autoname": "BG-.#####", 
  "beta": 0, 
  "creation": "2016-12-17 10:43:35.731631", 
  "custom": 0, 
@@ -284,7 +284,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 0
+   "unique": 1
   }, 
   {
    "allow_bulk_edit": 0, 
@@ -327,12 +327,12 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-04-24 14:23:49.322924", 
+ "modified": "2017-04-24 20:08:20.940782", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Bank Guarantee", 
  "name_case": "", 
- "owner": "Administrator", 
+ "owner": "ishan@loyapeb.com", 
  "permissions": [
   {
    "amend": 0, 
