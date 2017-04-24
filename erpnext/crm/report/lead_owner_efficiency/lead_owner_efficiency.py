@@ -28,7 +28,8 @@ def get_lead_data(filters):
 		conditions += " and date(creation) >= %(from_date)s"
 	if filters.to_date:
 		conditions += " and date(creation) <= %(to_date)s"
-	data = frappe.db.sql("""select lead_owner as "Lead Owner", count(name) as "Lead Count" from `tabLead` where 1 = 1 %s group by lead_owner""" % (conditions,),filters, as_dict=1)
+	data = frappe.db.sql("""select lead_owner as "Lead Owner", count(name) as "Lead Count" 
+	from `tabLead` where 1 = 1 %s group by lead_owner""" % (conditions,),filters, as_dict=1)
 	dl=list(data)
 	for row in dl:
 		is_quot_count_zero = False
@@ -49,23 +50,23 @@ def get_lead_data(filters):
 	
 def get_lead_quotation_count(leadowner):
 	quotation_count = frappe.db.sql("""select count(name) from `tabQuotation` 
-										where lead in (select name from `tabLead` where lead_owner = %s)""",leadowner)
+	where lead in (select name from `tabLead` where lead_owner = %s)""",leadowner)
 	return flt(quotation_count[0][0]) if quotation_count else 0
 	
 def get_lead_opp_count(leadowner):
 	opportunity_count = frappe.db.sql("""select count(name) from `tabOpportunity` 
-											where lead in (select name from `tabLead` where lead_owner = %s)""",leadowner)
+	where lead in (select name from `tabLead` where lead_owner = %s)""",leadowner)
 	return flt(opportunity_count[0][0]) if opportunity_count else 0
 	
 def get_quotation_ordered_count(leadowner):
 	quotation_ordered_count = frappe.db.sql("""select count(name) from `tabQuotation` 
-												where status = 'Ordered' and lead in 
-												(select name from `tabLead` where lead_owner = %s)""",leadowner)
+	where status = 'Ordered' and lead in 
+	(select name from `tabLead` where lead_owner = %s)""",leadowner)
 	return flt(quotation_ordered_count[0][0]) if quotation_ordered_count else 0
 	
 def get_order_amount(leadowner):
 	ordered_count_amount = frappe.db.sql("""select sum(base_net_amount) from `tabSales Order Item` 
-												where prevdoc_docname in (select name from `tabQuotation` 
-												where status = 'Ordered' and lead in 
-												(select name from `tabLead` where lead_owner = %s))""",leadowner)
+	where prevdoc_docname in (select name from `tabQuotation` 
+	where status = 'Ordered' and lead in 
+	(select name from `tabLead` where lead_owner = %s))""",leadowner)
 	return flt(ordered_count_amount[0][0]) if ordered_count_amount else 0
