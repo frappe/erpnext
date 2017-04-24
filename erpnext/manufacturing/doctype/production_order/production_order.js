@@ -72,15 +72,17 @@ frappe.ui.form.on("Production Order", {
 		message = title;
 
 		// pending qty
-		var pending_complete = frm.doc.material_transferred_for_manufacturing - frm.doc.produced_qty;
-		if(pending_complete) {
-			var title = __('{0} items in progress', [pending_complete]);
-			bars.push({
-				'title': title,
-				'width': ((pending_complete / frm.doc.qty * 100) - added_min)  + '%',
-				'progress_class': 'progress-bar-warning'
-			})
-			message = message + '. ' + title;
+		if(!frm.doc.skip_transfer){
+			var pending_complete = frm.doc.material_transferred_for_manufacturing - frm.doc.produced_qty;
+			if(pending_complete) {
+				var title = __('{0} items in progress', [pending_complete]);
+				bars.push({
+					'title': title,
+					'width': ((pending_complete / frm.doc.qty * 100) - added_min)  + '%',
+					'progress_class': 'progress-bar-warning'
+				})
+				message = message + '. ' + title;
+			}
 		}
 		frm.dashboard.add_progress(__('Status'), bars, message);
 	}
@@ -122,21 +124,32 @@ erpnext.production_order = {
 				frm.add_custom_button(__('Re-open'), cur_frm.cscript['Unstop Production Order'], __("Status"));
 			}
 
-			if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
+			if(!frm.doc.skip_transfer){
+				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
 				frm.has_start_btn = true;
 				var btn = frm.add_custom_button(__('Start'),
 					cur_frm.cscript['Transfer Raw Materials']);
 				btn.addClass('btn-primary');
+				}
 			}
 
-			if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) && frm.doc.status != 'Stopped') {
-				frm.has_finish_btn = true;
-				var btn = frm.add_custom_button(__('Finish'),
-					cur_frm.cscript['Update Finished Goods']);
+			if(!frm.doc.skip_transfer){
+				if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) && frm.doc.status != 'Stopped') {
+					frm.has_finish_btn = true;
+					var btn = frm.add_custom_button(__('Finish'),
+						cur_frm.cscript['Update Finished Goods']);
 
-				if(doc.material_transferred_for_manufacturing==doc.qty) {
-					// all materials transferred for manufacturing,
-					// make this primary
+					if(doc.material_transferred_for_manufacturing==doc.qty) {
+						// all materials transferred for manufacturing,
+						// make this primary
+						btn.addClass('btn-primary');
+					}
+				}
+			} else {
+				if ((flt(doc.produced_qty) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
+					frm.has_finish_btn = true;
+					var btn = frm.add_custom_button(__('Finish'),
+						cur_frm.cscript['Update Finished Goods']);
 					btn.addClass('btn-primary');
 				}
 			}
@@ -235,9 +248,13 @@ $.extend(cur_frm.cscript, {
 
 	make_se: function(purpose) {
 		var me = this;
-		var max = (purpose === "Manufacture") ?
-			flt(this.frm.doc.material_transferred_for_manufacturing) - flt(this.frm.doc.produced_qty) :
-			flt(this.frm.doc.qty) - flt(this.frm.doc.material_transferred_for_manufacturing);
+		if(!this.frm.doc.skip_transfer){
+			var max = (purpose === "Manufacture") ?
+				flt(this.frm.doc.material_transferred_for_manufacturing) - flt(this.frm.doc.produced_qty) :
+				flt(this.frm.doc.qty) - flt(this.frm.doc.material_transferred_for_manufacturing);
+		} else {
+			var max = flt(this.frm.doc.qty) - flt(this.frm.doc.produced_qty);
+		}
 
 		frappe.prompt({fieldtype:"Float", label: __("Qty for {0}", [purpose]), fieldname:"qty",
 			description: __("Max: {0}", [max]), 'default': max },

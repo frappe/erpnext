@@ -9,6 +9,7 @@ import json
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
+from erpnext.stock.doctype.batch.batch import get_batch_no
 
 @frappe.whitelist()
 def get_item_details(args):
@@ -74,7 +75,12 @@ def get_item_details(args):
 	out.update(get_pricing_rule_for_item(args))
 
 	if args.get("doctype") in ("Sales Invoice", "Delivery Note") and out.stock_qty > 0:
-		out.serial_no = get_serial_no(out)
+		if out.has_serial_no:
+			out.serial_no = get_serial_no(out)
+
+		if out.has_batch_no:
+			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
+
 
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
@@ -154,6 +160,8 @@ def get_basic_details(args, item):
 		"income_account": get_default_income_account(args, item),
 		"expense_account": get_default_expense_account(args, item),
 		"cost_center": get_default_cost_center(args, item),
+		'has_serial_no': item.has_serial_no,
+		'has_batch_no': item.has_batch_no,
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
 			item.get("taxes")))),
@@ -187,9 +195,11 @@ def get_basic_details(args, item):
 	out.stock_qty = out.qty * out.conversion_factor
 
 	# if default specified in item is for another company, fetch from company
-	for d in [["Account", "income_account", "default_income_account"],
+	for d in [
+		["Account", "income_account", "default_income_account"],
 		["Account", "expense_account", "default_expense_account"],
-		["Cost Center", "cost_center", "cost_center"], ["Warehouse", "warehouse", ""]]:
+		["Cost Center", "cost_center", "cost_center"],
+		["Warehouse", "warehouse", ""]]:
 			company = frappe.db.get_value(d[0], out.get(d[1]), "company")
 			if not out[d[1]] or (company and args.company != company):
 				out[d[1]] = frappe.db.get_value("Company", args.company, d[2]) if d[2] else None
@@ -359,15 +369,6 @@ def get_serial_nos_by_fifo(args):
 				"qty": abs(cint(args.stock_qty))
 			}))
 
-def get_actual_batch_qty(batch_no,warehouse,item_code):
-	actual_batch_qty = 0
-	if batch_no:
-		actual_batch_qty = flt(frappe.db.sql("""select sum(actual_qty)
-			from `tabStock Ledger Entry`
-			where warehouse=%s and item_code=%s and batch_no=%s""",
-			(warehouse, item_code, batch_no))[0][0])
-	return actual_batch_qty
-
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
 	variant_of = frappe.db.get_value("Item", item_code, "variant_of")
@@ -403,10 +404,10 @@ def get_bin_details_and_serial_nos(item_code, warehouse, stock_qty=None, serial_
 	return bin_details_and_serial_nos
 
 @frappe.whitelist()
-def get_batch_qty(batch_no,warehouse,item_code):
-	actual_batch_qty = get_actual_batch_qty(batch_no,warehouse,item_code)
+def get_batch_qty(batch_no, warehouse, item_code):
+	from frappe.stock.doctype.batch import batch
 	if batch_no:
-		return {'actual_batch_qty': actual_batch_qty}
+		return {'actual_batch_qty': batch.get_batch_qty(batch_no, warehouse)}
 
 @frappe.whitelist()
 def apply_price_list(args, as_doc=False):

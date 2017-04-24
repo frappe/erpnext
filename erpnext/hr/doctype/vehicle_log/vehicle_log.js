@@ -6,7 +6,7 @@ frappe.ui.form.on("Vehicle Log", {
 		vehicle_log=frappe.model.get_doc(cdt,cdn);
 		if (vehicle_log.license_plate) {
 			frappe.call({
-				method: "erpnext.fleet_management.doctype.vehicle_log.vehicle_log.get_make_model",
+				method: "erpnext.hr.doctype.vehicle_log.vehicle_log.get_make_model",
 				args: {
 					license_plate: vehicle_log.license_plate
 				},
@@ -19,7 +19,7 @@ frappe.ui.form.on("Vehicle Log", {
 	},
 	expense_claim: function(frm){
 			frappe.call({
-				method: "erpnext.fleet_management.doctype.vehicle_log.vehicle_log.make_expense_claim",
+				method: "erpnext.hr.doctype.vehicle_log.vehicle_log.make_expense_claim",
 				args:{
 					docname: frm.doc.name
 				},
