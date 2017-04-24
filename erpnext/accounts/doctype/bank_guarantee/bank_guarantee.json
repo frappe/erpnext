@@ -332,7 +332,7 @@
  "module": "Accounts", 
  "name": "Bank Guarantee", 
  "name_case": "", 
- "owner": "ishan@loyapeb.com", 
+ "owner": "Administrator", 
  "permissions": [
   {
    "amend": 0, 
