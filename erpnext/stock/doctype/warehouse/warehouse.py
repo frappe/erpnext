@@ -21,7 +21,7 @@ class Warehouse(NestedSet):
 
 	def onload(self):
 		'''load account name for General Ledger Report'''
-		account = self.account or get_parent_warehouse_account(self.name)
+		account = self.account or get_parent_warehouse_account(self.name, self.company)
 		if not account:
 			account = frappe.db.get_value('Company',
 				self.company, 'default_inventory_account')
@@ -50,10 +50,6 @@ class Warehouse(NestedSet):
 			else:
 				frappe.db.sql("delete from `tabBin` where name = %s", d['name'])
 
-		warehouse_account = self.get_account()
-		if warehouse_account:
-			frappe.delete_doc("Account", warehouse_account)
-
 		if self.check_if_sle_exists():
 			throw(_("Warehouse can not be deleted as stock ledger entry exists for this warehouse."))
 
@@ -81,35 +77,9 @@ class Warehouse(NestedSet):
 			if self.company != frappe.db.get_value("Warehouse", new_warehouse, "company"):
 				frappe.throw(_("Both Warehouse must belong to same Company"))
 
-		self.rename_account_for(old_name, new_warehouse, merge)
+		# self.rename_account_for(old_name, new_warehouse, merge)
 
 		return new_warehouse
-
-	def rename_account_for(self, old_name, new_name, merge):
-		old_account_name = frappe.get_value('Account', dict(warehouse=old_name))
-
-		if old_account_name:
-			if not merge:
-				# old account name is same as old name, so rename the account too
-				if old_account_name == erpnext.encode_company_abbr(old_name, self.company):
-					frappe.rename_doc("Account", old_account_name, new_name)
-			else:
-				# merge
-				target_account = frappe.get_value('Account', dict(warehouse=new_name))
-				if target_account:
-					# target warehouse has account, merge into target account
-					frappe.rename_doc("Account", old_account_name,
-						target_account, merge=True)
-				else:
-					# target warehouse does not have account, use this account
-					frappe.rename_doc("Account", old_account_name,
-						new_name, merge=False)
-
-					# rename link
-					frappe.db.set_value('Account', new_name, 'warehouse', new_name)
-
-	def get_account(self):
-		return frappe.get_value('Account', dict(warehouse=self.name))
 
 	def after_rename(self, old_name, new_name, merge=False):
 		new_warehouse_name = self.get_new_warehouse_name_without_abbr(new_name)
@@ -157,12 +127,6 @@ class Warehouse(NestedSet):
 		elif self.check_if_sle_exists():
 			throw(_("Warehouses with existing transaction can not be converted to ledger."))
 		else:
-			account_name = self.get_account()
-			if account_name:
-				doc = frappe.get_doc("Account", account_name)
-				doc.warehouse = self.name
-				doc.convert_group_to_ledger()
-
 			self.is_group = 0
 			self.save()
 			return 1
@@ -171,12 +135,6 @@ class Warehouse(NestedSet):
 		if self.check_if_sle_exists():
 			throw(_("Warehouses with existing transaction can not be converted to group."))
 		else:
-			account_name = self.get_account()
-			if account_name:
-				doc = frappe.get_doc("Account", account_name)
-				doc.flags.exclude_account_type_check = True
-				doc.convert_ledger_to_group()
-
 			self.is_group = 1
 			self.save()
 			return 1

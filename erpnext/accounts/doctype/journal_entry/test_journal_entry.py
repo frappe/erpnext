@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import unittest, frappe
 from frappe.utils import flt
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.exceptions import InvalidAccountCurrency
 
 
@@ -83,7 +84,8 @@ class TestJournalEntry(unittest.TestCase):
 
 		jv = frappe.copy_doc(test_records[0])
 		jv.get("accounts")[0].update({
-			"account": "_Test Warehouse - _TC",
+			"account": get_inventory_account('_Test Company'),
+			"company": "_Test Company",
 			"party_type": None,
 			"party": None
 		})
