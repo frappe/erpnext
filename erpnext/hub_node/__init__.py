@@ -43,11 +43,28 @@ def get_seller_details(user_name):
 	return response.json().get("message")
 
 @frappe.whitelist()
-def send_rfq(website, supplier, supplier_name, email_id, company):
-	response = requests.get(website + "/api/method/erpnext.hub_node.api.make_rfq", params={
+def send_rfq():
+	hub = frappe.get_single("Hub Settings")
+	response = requests.get(hub.hub_url + "/api/method/hub.hub.api.send_rfq")
+	response.raise_for_status()
+	return frappe._dict({"message":"sent_rfq_message"})
+
+@frappe.whitelist()
+def send_rfq_message(website, supplier, supplier_name, email_id, company):
+	response = requests.get(website + "/api/method/erpnext.hub_node.api.load_message", params={
 		"supplier": supplier,
 		"supplier_name": supplier_name,
 		"email_id": email_id,
 		"company": company
 	})
-	return frappe._dict({"message":"sent_rfq"})
+	return frappe._dict({"message":"sent_rfq_message"})
+
+@frappe.whitelist()
+def send_opportunity_message(website, supplier, supplier_name, email_id, company):
+	response = requests.get(website + "/api/method/erpnext.hub_node.api.load_message", params={
+		"supplier": supplier,
+		"supplier_name": supplier_name,
+		"email_id": email_id,
+		"company": company
+	})
+	return frappe._dict({"message":"sent_opportunity_message"})

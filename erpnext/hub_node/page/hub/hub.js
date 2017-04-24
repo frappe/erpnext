@@ -35,6 +35,8 @@ frappe.Hub = Class.extend({
 			} else {
 				const $toolbar_template = $(`<div class="col-md-12"  style="padding: 0px">
 					<input class="form-control search-input" name="search" placeholder="${__("Search")}">
+					<button class="btn btn-default cart-btn"><i class="fa fa-shopping-cart"></i>Cart</button>
+					<button class="btn btn-default test-btn">Test</button>
 				</div>`);
 				$toolbar_template.appendTo(me.page.page_actions);
 				me.page.$title_area.html("");
@@ -46,13 +48,45 @@ frappe.Hub = Class.extend({
 					}
 				});
 
+				me.items = {};
+
+				me.setup_cart();
 				me.setup_list();
 				me.setup_sidebar();
-				me.setup_filters();
 
-				me.show_as_list("erpnext.hub_node.get_all_users", me.$hub_users, "hub_user_name");
-				me.show_as_list("erpnext.hub_node.get_categories", me.$hub_categories, "category_name");
+				me.$test_button = me.page.page_actions.find(".test-btn");
+				me.$test_button.on('click', function(e) {
+					console.log("test button clicked");
+					me.send_rfq();
+				});
 			}
+		});
+	},
+	setup_cart: function() {
+		var me = this;
+		this.cart_items = {};
+		this.cart_dialog = new frappe.ui.Dialog({
+			title: __("Cart"),
+			fields: [
+				{
+					fieldtype: "HTML",
+					label: __("Cart Items"),
+					fieldname: "cart_items",
+				},
+			],
+			primary_action_label: __("Request Quotes"),
+			primary_action: function() {
+				console.log("here pri action");
+			}
+		});
+
+		this.$cart_list = this.cart_dialog.fields_dict.cart_items.$wrapper;
+
+		this.$cart_button = this.page.page_actions.find(".cart-btn");
+		this.$cart_button.on('click', (e) => {
+			this.$cart_list.empty();
+			this.$cart_list.append("<h1>Hello Cart</h1>");
+			this.cart_dialog.show();
 		});
 	},
 	setup_list: function() {
@@ -64,108 +98,135 @@ frappe.Hub = Class.extend({
 		this.more = this.page.main.find(".more")
 		this.more.find(".btn").on("click", function() { me.next_page('','') });
 
+		this.page.main.on('click', '.add-to-cart-btn', function(e) {
+			let $item = $(this);
+			let item_code = $item.attr('data-item-code');
+
+			this.send_messages(item_code);
+		});
+
 		this.reset();
+		this.next_page('', '');
 	},
 	setup_sidebar: function() {
-		this.$hub_users = this.page.main.find(".hub-users");
-		this.$hub_categories = this.page.main.find(".hub-categories");
+		let me = this;
+		this.$sidebar = this.page.main.find(".sidebar");
 
-		this.rfq = this.page.main.find(".test-rfq");
-		this.rfq.on('click', function(e) {
-			console.log("user clicked");
-			me.get_seller_details("Prateeksha");
+		this.setup_filters();
+	},
+
+	send_messages: function(item_code) {
+
+	},
+
+	send_rfq: function() {
+		let me = this;
+		frappe.call({
+			method: "erpnext.hub_node.send_rfq",
+			args: {},
+			callback: function(r) {
+				if(!r.message)
+					r.message = [];
+					console.log("DONE");
+			}
 		});
 	},
 	setup_filters: function() {
 		let me = this;
-		this.$category_filter = this.page.main.find(".category-filter");
-		let category_input = this.$category_filter.get(0);
-		category_input.awesomplete = new Awesomplete(category_input, {
-			minChars: 0,
-			maxItems: 99,
-			autoFirst: true,
-			list: [],
-		});
+		this.$categories = this.page.main.find(".category-filters");
+		this.$sellers = this.page.main.find(".seller-filters");
+		this.$countries = this.page.main.find(".country-filters");
 
-		this.$category_filter.on('input', function(e) {
-				let term = e.target.value;
-				frappe.call({
-					method: "erpnext.hub_node.get_categories",
-					args: {},
-					callback: function(r) {
-						if (r.message) {
-							e.target.awesomplete.list = r.message.map(function(category) { return category.category_name; });
-						}
-					}
-				});
-			})
-			.on('focus', function(e) {
-				$(e.target).val('').trigger('input');
-			})
-			.on("awesomplete-select", function(e) {
-				me.reset();
-				let o = e.originalEvent;
-				let value = o.text.value;
-				me.next_page(value, '');
-			})
+		this.show_filters("Categories", "erpnext.hub_node.get_categories", {}, this.$categories, "category_name");
+		this.show_filters("Sellers", "erpnext.hub_node.get_all_users", {}, this.$sellers, "hub_user_name");
+		this.show_filters("Countries", "erpnext.hub_node.get_all_users", {}, this.$countries, "country");
 
-		this.$seller_filter = this.page.main.find(".seller-filter");
-		let seller_input = this.$seller_filter.get(0);
-		seller_input.awesomplete = new Awesomplete(seller_input, {
-			minChars: 0,
-			maxItems: 99,
-			autoFirst: true,
-			list: [],
-		});
+		// events
 
-		this.$seller_filter.on('input', function(e) {
-				let term = e.target.value;
-				frappe.call({
-					method: "erpnext.hub_node.get_all_users",
-					args: {},
-					callback: function(r) {
-						if (r.message) {
-							e.target.awesomplete.list = r.message.map(function(seller) { return seller.hub_user_name; });
-						}
-					}
-				});
-			})
-			.on('focus', function(e) {
-				$(e.target).val('').trigger('input');
-			})
-			.on("awesomplete-select", function(e) {
-				me.reset();
-				let o = e.originalEvent;
-				let value = o.text.value;
-				me.next_page('', value);
-			})
+		// $('.filters').on('change', '.list-item-container :checkbox', function (e) {
+		// 	var $item = $(this).closest('.list-item-container');
+		// 	var filename = $item.attr('data-filename');
+		// 	var $target = $(e.target);
 
-		this.$country_filter = this.page.main.find(".country-filter");
-		let country_input = this.$country_filter.get(0);
-		country_input.awesomplete = new Awesomplete(country_input, {
-			minChars: 0,
-			maxItems: 99,
-			autoFirst: true,
-			list: [],
-		});
-
-		this.$country_filter.on('input', function(e) {
-				let term = e.target.value;
-				frappe.call({
-					method: "erpnext.hub_node.get_all_users",
-					args: {},
-					callback: function(r) {
-						if (r.message) {
-							e.target.awesomplete.list = r.message.map(function(seller) { return seller.country; });
-						}
-					}
-				});
-			})
-			.on('focus', function(e) {
-				$(e.target).val('').trigger('input');
-			})
+		// 	var checked = $target.is(':checked');
+		// 	if (checked){
+		// 		me.selections.push(filename);
+		// 	} else {
+		// 		var index = me.selections.indexOf(filename);
+		// 		if (index > -1) me.selections.splice(index, 1);
+		// 	}
+		// });
+		// this.$results.on('click', '.list-item-container', function (e) {
+		// 	if (!$(e.target).is(':checkbox') && !$(e.target).is('a')) {
+		// 		$(this).find(':checkbox').trigger('click');
+		// 	}
+		// });
+		// this.$results.on('click', '.list-item--head :checkbox', function (e) {
+		// 	// TO DO: more complex than it seems, think of uncheck case
+		// 	if ($(e.target).is(':checked')) {
+		// 		me.$results.find('.list-item-container :checkbox:not(:checked)').trigger('click');
+		// 	} else {
+		// 		me.$results.find('.list-item-container :checkbox(:checked)').trigger('click');
+		// 	}
+		// });
 
 	},
+
+	make_filter_list_row: function(filter_name, result={}, column_name="") {
+		var me = this;
+		// Make a head row by default (if result not passed)
+		let head = Object.keys(result).length === 0;
+		let $row = $(`<div class="list-item"  style="height:30px;">
+			<div class="list-item__content ellipsis" style="flex: 0 0 10px;">
+				<input type="checkbox"/>
+			</div>
+			${	(() => {
+					let contents = ``;
+					contents = `<div class="list-item__content ellipsis">
+						${
+							head ? filter_name : result[column_name]
+						}
+					</div>`;
+
+					return contents;
+				})()
+			}
+		</div>`);
+
+		head ? $row.addClass('list-item--head')
+			: $row = $(`<div class="list-item-container" style="border-bottom: none;"
+				data-filename="${result[column_name]}"></div>`).append($row);
+		return $row;
+	},
+
+	render_filter_list: function(parent, filter_name, results, column_name) {
+		var me = this;
+		parent.empty();
+		if(results.length === 0) {
+			// parent.append(me.$placeholder);
+			return;
+		}
+		parent.append(this.make_filter_list_row(filter_name));
+		let $list_items = $('<div class="list-items" style="height: 100px; overflow-y: auto"></div>');
+		results.forEach((result) => {
+			$list_items.append(me.make_filter_list_row(filter_name, result, column_name));
+		})
+		parent.append($list_items);
+	},
+
+	show_filters: function(filter_name, method, args, parent, column_name) {
+		let me = this;
+		frappe.call({
+			method: method,
+			args: args,
+			callback: function(r) {
+				if(!r.message)
+					r.message = [];
+				me.render_filter_list(parent, filter_name, r.message, column_name);
+			}
+		});
+	},
+
 	reset: function() {
 		this.$hub_list.empty();
 		this.start = 0;
@@ -197,6 +258,11 @@ frappe.Hub = Class.extend({
 				me.loading.toggleClass("hide", true);
 				if(!r.message)
 					r.message = [];
+				else {
+					r.message.forEach( function(value){
+						me.items[value.item_code] = value;
+					})
+				}
 				me.start += r.message.length;
 				r.message.forEach(function(item) {
 					me.make_item_view(item).appendTo(me.$hub_list);
@@ -234,6 +300,7 @@ frappe.Hub = Class.extend({
 					<a class="grey list-id" data-name="${item.item_code}" title="${ item.item_name || item.item_code}">${item.item_name || item.item_code}</a>
 				</div>
 				<h6>${ item.hub_user_name }<h6>
+				<button class="btn btn-default add-to-cart-btn" data-item-code="${item.item_code}">Add to Cart</button>
 			</div>
 		</div>`);
 
@@ -284,24 +351,5 @@ frappe.Hub = Class.extend({
 			}
 		});
 	},
-
-	send_rfq: function(seller, item) {
-		let me = this;
-		frappe.call({
-			method: "erpnext.hub_node.send_rfq",
-			args: {
-				website: seller.seller_website,
-				supplier: seller.hub_user_name,
-				supplier_name: seller.hub_user_name,
-				email_id: seller.email,
-				company: seller.company
-			},
-			callback: function(r) {
-				if(!r.message)
-					r.message = [];
-					console.log("DONE");
-			}
-		});
-	}
 
 })
