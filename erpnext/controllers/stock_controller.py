@@ -414,26 +414,28 @@ def get_warehouse_account():
 		for d in frappe.get_all('Warehouse', filters = {"is_group": 0},
 			fields = ["name", "account", "parent_warehouse", "company"]):
 			if not d.account:
-				d.account = get_parent_warehouse_account(d.name)
+				d.account = get_parent_warehouse_account(d.name, d.company)
 
 			if not d.account:
-				d.account = frappe.db.get_value('Company',
-					d.company, 'default_inventory_account')
+				d.account = get_company_default_inventory_account(d.company)
 
 			d.account_currency = frappe.db.get_value('Account', d.account, 'account_currency')
 			warehouse_account.setdefault(d.name, d)
-
 		frappe.flags.warehouse_account_map = warehouse_account
 	return frappe.flags.warehouse_account_map
 
-def get_parent_warehouse_account(warehouse):
+def get_parent_warehouse_account(warehouse, company):
 	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
 	acccount = frappe.db.sql("""
 		select
 			account from `tabWarehouse`
 		where
-			lft < %s and rgt > %s and is_group=1 and
-			account is not null and ifnull(account, '') !=''
-		order by lft desc limit 1""", (lft, rgt), as_list=1)
+			lft < %s and rgt > %s and is_group=1 and company = %s
+			and account is not null and ifnull(account, '') !=''
+		order by lft desc limit 1""", (lft, rgt, company), as_list=1)
 
 	return acccount[0][0] if acccount else None
+
+def get_company_default_inventory_account(company):
+	return frappe.db.get_value('Company',
+				company, 'default_inventory_account')
