@@ -28,18 +28,3 @@ frappe.ui.form.on('Bank Guarantee', {
 		cur_frm.set_value("end_date", end_date);
 	}
 });
-
-// $.extend(cur_frm.cscript, {
-// 	start_date: function(doc, dt, dn) {
-// 		var me = this;
-// 		end_date =
-// 			frappe.datetime.add_days(this.frm.doc.start_date, this.frm.doc.validity - 1);
-// 		this.frm.set_value("end_date", end_date);
-// 	},
-// 	validity: function(doc, dt, dn) {
-// 		var me = this;
-// 		end_date =
-// 			frappe.datetime.add_days(this.frm.doc.start_date, this.frm.doc.validity - 1);
-// 		this.frm.set_value("end_date", end_date);
-// 	}
-// });
