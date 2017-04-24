@@ -54,16 +54,18 @@ def get_lead_quotation_count(leadowner):
 	
 def get_lead_opp_count(leadowner):
 	opportunity_count = frappe.db.sql("""select count(name) from `tabOpportunity` 
-										where lead in (select name from `tabLead` where lead_owner = %s)""",leadowner)
+											where lead in (select name from `tabLead` where lead_owner = %s)""",leadowner)
 	return flt(opportunity_count[0][0]) if opportunity_count else 0
 	
 def get_quotation_ordered_count(leadowner):
 	quotation_ordered_count = frappe.db.sql("""select count(name) from `tabQuotation` 
-												where status = 'Ordered' and lead in (select name from `tabLead` where lead_owner = %s)""",leadowner)
+												where status = 'Ordered' and lead in 
+												(select name from `tabLead` where lead_owner = %s)""",leadowner)
 	return flt(quotation_ordered_count[0][0]) if quotation_ordered_count else 0
 	
 def get_order_amount(leadowner):
 	ordered_count_amount = frappe.db.sql("""select sum(base_net_amount) from `tabSales Order Item` 
-											where prevdoc_docname in (select name from `tabQuotation` 
-											where status = 'Ordered' and lead in (select name from `tabLead` where lead_owner = %s))""",leadowner)
+												where prevdoc_docname in (select name from `tabQuotation` 
+												where status = 'Ordered' and lead in 
+												(select name from `tabLead` where lead_owner = %s))""",leadowner)
 	return flt(ordered_count_amount[0][0]) if ordered_count_amount else 0

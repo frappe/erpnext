@@ -1,7 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-frappe.require("assets/erpnext/js/financial_statements.js", function() {
-	frappe.query_reports["Campaign Efficiency"] = {
+frappe.query_reports["Campaign Efficiency"] = {
 		"filters": [
 			{
 				"fieldname": "from_date",
@@ -16,6 +15,5 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"default": frappe.defaults.get_user_default("year_end_date"),
 			}
 		]
-	}
-});
+	};
 

@@ -28,7 +28,8 @@ def get_lead_data(filters):
 		conditions += " and date(creation) >= %(from_date)s"
 	if filters.to_date:
 		conditions += " and date(creation) <= %(to_date)s"
-	data = frappe.db.sql("""select campaign_name as "Campaign Name", count(name) as "Lead Count" from `tabLead` where 1 = 1 %s group by campaign_name""" % (conditions,),filters, as_dict=1)
+	data = frappe.db.sql("""select campaign_name as "Campaign Name", count(name) as "Lead Count" from `tabLead` 
+							where 1 = 1 %s group by campaign_name""" % (conditions,),filters, as_dict=1)
 	dl=list(data)
 	for row in dl:
 		is_quot_count_zero = False
@@ -54,16 +55,19 @@ def get_lead_quotation_count(campaign):
 	
 def get_lead_opp_count(campaign):
 	opportunity_count = frappe.db.sql("""select count(name) from `tabOpportunity` 
-										where lead in (select name from `tabLead` where campaign_name = %s)""",campaign)
+											where lead in (select name from `tabLead` where campaign_name = %s)""",campaign)
 	return flt(opportunity_count[0][0]) if opportunity_count else 0
 	
 def get_quotation_ordered_count(campaign):
 	quotation_ordered_count = frappe.db.sql("""select count(name) from `tabQuotation` 
-												where status = 'Ordered' and lead in (select name from `tabLead` where campaign_name = %s)""",campaign)
+												where status = 'Ordered' and lead in 
+												(select name from `tabLead` where campaign_name = %s)""",campaign)
 	return flt(quotation_ordered_count[0][0]) if quotation_ordered_count else 0
 	
 def get_order_amount(campaign):
 	ordered_count_amount = frappe.db.sql("""select sum(base_net_amount) from `tabSales Order Item` 
-											where prevdoc_docname in (select name from `tabQuotation` 
-											where status = 'Ordered' and lead in (select name from `tabLead` where campaign_name = %s))""",campaign)
+												where prevdoc_docname in 
+												(select name from `tabQuotation` 
+												where status = 'Ordered' and lead in 
+												(select name from `tabLead` where campaign_name = %s))""",campaign)
 	return flt(ordered_count_amount[0][0]) if ordered_count_amount else 0
