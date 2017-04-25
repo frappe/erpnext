@@ -28,10 +28,6 @@ class CourseSchedule(Document):
 		if self.student_group:
 			self.course= frappe.db.get_value("Student Group", self.student_group, "course")
 	
-	def set_student_batch(self):
-		if self.student_group:
-			self.student_batch = frappe.db.get_value("Student Group", self.student_group, "student_batch")
-	
 	def validate_date(self):
 		"""Validates if from_time is greater than to_time"""
 		if self.from_time > self.to_time:
@@ -45,19 +41,13 @@ class CourseSchedule(Document):
 		#Validate overlapping course schedules.
 		if self.student_batch:
 			validate_overlap_for(self, "Course Schedule", "student_batch")
-
-		if self.student_group:
-			validate_overlap_for(self, "Course Schedule", "student_group")
 		
 		validate_overlap_for(self, "Course Schedule", "instructor")
 		validate_overlap_for(self, "Course Schedule", "room")
 
 		#validate overlapping assessment schedules.
 		if self.student_batch:
-			validate_overlap_for(self, "Assessment Plan", "student_batch")
-		
-		if self.student_group:
-			validate_overlap_for(self, "Assessment Plan", "student_group")
+			validate_overlap_for(self, "Assessment Plan", "student_batch")		
 		
 		validate_overlap_for(self, "Assessment Plan", "room")
 		validate_overlap_for(self, "Assessment Plan", "supervisor", self.instructor)
