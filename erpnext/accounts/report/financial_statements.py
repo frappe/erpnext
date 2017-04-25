@@ -4,9 +4,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, get_first_day, add_months, add_days, formatdate
+from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
+	add_months, add_days, formatdate, cint)
 
-def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, company):
+def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False, company=None):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
@@ -58,11 +59,14 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, company):
 	# common processing
 	for opts in period_list:
 		key = opts["to_date"].strftime("%b_%Y").lower()
-		if periodicity == "Monthly":
+		if periodicity == "Monthly" and not accumulated_values:
 			label = formatdate(opts["to_date"], "MMM YYYY")
 		else:
-			label = get_label(periodicity, opts["from_date"], opts["to_date"])
-			
+			if not accumulated_values:
+				label = get_label(periodicity, opts["from_date"], opts["to_date"])
+			else:
+				label = get_label(periodicity, period_list[0]["from_date"], opts["to_date"])
+
 		opts.update({
 			"key": key.replace(" ", "_").replace("-", "_"),
 			"label": label,
