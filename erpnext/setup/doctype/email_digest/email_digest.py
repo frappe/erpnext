@@ -10,7 +10,7 @@ from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from frappe.core.doctype.user.user import STANDARD_USERS
 import frappe.desk.notifications
-from erpnext.accounts.utils import get_balance_on, get_count_on, get_currency_precision
+from erpnext.accounts.utils import get_balance_on, get_count_on
 
 user_specific_content = ["calendar_events", "todo_list"]
 
