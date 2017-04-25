@@ -390,3 +390,4 @@ erpnext.patches.v8_0.enable_booking_asset_depreciation_automatically
 erpnext.patches.v8_0.set_project_copied_from
 erpnext.patches.v8_0.update_status_as_paid_for_completed_expense_claim
 erpnext.patches.v7_2.stock_uom_in_selling
+erpnext.patches.v8_0.revert_manufacturers_table_from_item
