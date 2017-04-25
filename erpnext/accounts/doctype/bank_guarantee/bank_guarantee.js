@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Bank Guarantee', {
 	refresh: function(frm) {
-		cur_frm.set_query("account_name", function() {
+		cur_frm.set_query("account", function() {
 			return {
 				"filters": {
 					"account_type": "Bank",
