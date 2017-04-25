@@ -11,7 +11,8 @@ frappe.ui.form.on("Assessment Plan", {
         if (frm.doc.docstatus == 1) {
             frm.add_custom_button(__("Assessment Result"), function() {
                 frappe.route_options = {
-                    assessment_plan: frm.doc.name
+                    assessment_plan: frm.doc.name,
+                    student_batch: frm.doc.student_batch
                 }
                 frappe.set_route("Form", "Assessment Result Tool");
             });
