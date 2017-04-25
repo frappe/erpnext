@@ -143,7 +143,8 @@ def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accum
 
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and \
-						(not ignore_accumulated_values_for_fy or entry.fiscal_year == period.to_date_fiscal_year):
+						(not ignore_accumulated_values_for_fy or 
+							entry.fiscal_year == period.to_date_fiscal_year):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
 
 			if entry.posting_date < period_list[0].year_start_date:
