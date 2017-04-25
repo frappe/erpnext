@@ -18,14 +18,20 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 		});
 	},
 	
-	expense_type: function(frm, cdt, cdn) {
+	expense_type: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
+		if(!doc.company) {
+			d.expense_type = "";
+			frappe.msgprint(__("Please set the Company"));
+			this.frm.refresh_fields()
+			return;
+		}
 
 		return frappe.call({
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account",
 			args: {
 				"expense_claim_type": d.expense_type,
-				"company": frm.company
+				"company": doc.company
 			},
 			callback: function(r) {
 				if (r.message) {
