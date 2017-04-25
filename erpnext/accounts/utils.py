@@ -4,13 +4,13 @@
 from __future__ import unicode_literals
 
 import frappe
+import frappe.defaults
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
-from frappe.utils import formatdate
+from frappe.utils import formatdate, get_number_format_info
 
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
-import frappe.defaults
 from erpnext.accounts.report.financial_statements import sort_root_accounts
 
 class FiscalYearError(frappe.ValidationError): pass
@@ -537,15 +537,14 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 
 	return difference
 
-def get_currency_precision(currency=None):
-	if not currency:
-		currency = frappe.db.get_value("Company",
-			frappe.db.get_default("Company"), "default_currency", cache=True)
-	currency_format = frappe.db.get_value("Currency", currency, "number_format", cache=True)
-
-	from frappe.utils import get_number_format_info
-	return get_number_format_info(currency_format)[2]
-
+def get_currency_precision():	
+	precision = cint(frappe.db.get_default("currency_precision"))
+	if not precision:
+		number_format = frappe.db.get_default("number_format") or "#,###.##"
+		precision = get_number_format_info(number_format)[2]
+	
+	return precision
+	
 def get_stock_rbnb_difference(posting_date, company):
 	stock_items = frappe.db.sql_list("""select distinct item_code
 		from `tabStock Ledger Entry` where company=%s""", company)
