@@ -1,29 +1,35 @@
-Taxes selected in the Tax and Other Charges in transactions are applied on all the items. If you need different taxes applied on items selected in the same transaction, you should setup you item and tax master as explained in the steps below.
+In the sales and purchase transactions, you can apply taxes and other charges on the items. For the ease of applying taxes, you can fetch values from the [Sales Taxes and Charges master](/contents//setting-up/setting-up-taxes). Taxes and charges are applied equally on all the items. For example, if tax GST 16% is added in the tax table, then it will be applied on all the items. However, if you need to have different tax rate applied on some of the items, following is how you should setup Items and Sales Taxes and Other Charges master in your ERPNext account.
+
+Let's assume that we are creating a Sales Order. We have Sales Taxes and Charges master for GST 16%. Out of all the Sales Items, on one item, only 12% GST will be applied, while one more item is exempted from the tax.
 
 ####Step 1: Mention Tax Applicable in the Item master
 
-Item master has tax table where you can list taxes which will be applied on it.
+Items on which differential tax rate is applied, you should mention tax rate for that item in the Item master itself. Item master has tax table where you can list taxes which will be applied on it.
 
-![Item wise Tax]({{docs_base_url}}/assets/old_images/erpnext/item-wise-tax.png)
+> Tax rate mentioned in the item master gets preference over tax rate entered in the transactions.
 
-Tax rate mentioned in the item master gets preference over tax rate entered in the transactions. 
+Here is the example of Item on which 12% GST is applied only.
 
-For example, if you provide tax rate for VAT as 10% for item ABC, where for same VAT ledger 12% rate is entered in the Sales Order/Invoice, for item ABC, tax rate applied would be 10%, as mentioned in the item master.
+<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/item-wise-tax.png">
+
+For the item which is exempted from GST totally, mention 0% as tax rate in the Item master.
+
+<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/exempted-item.png">
 
 ####Step 2: Setup Taxes and Other Charges
 
-In Taxes and Other Charges master, you should select all the applicable taxes which could be applicable on item.
+In Sales Taxes and Other Charges master, select GST 16% account and mention Tax Rate as 16. This tax rate will be applied on all the Items selected in the Sales Order, unless specific Tax Rate is defined in the Item master.
 
-For example, if few items has VAT 5 applied on them, other has Service Tax applied, and some other has Excise Duty applicable, then you tax master should have all these taxes selected.
+<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/tax-master.png">
 
-![item wise tax master]({{docs_base_url}}/assets/old_images/erpnext/item-wise-tax-master.png)
+<div class="well">If you want to have tax rate always applied from the Item master, then you should update Rate for the tax account as zero in the Taxes and Charges master.</div>
 
-####Step 3: Set Tax Rate as Zero in Taxes and Charges Template
+####Step 3: Tax Calculation in transaction	
 
-In the Taxes and Other Charges master, tax rate will be updated as ZERO. It means, tax rate applicable on items will be pulled from the respective Item master. While for other items, 0% tax will be applied, means no other taxes will be applied on that item.
+In the Sales Order, we have selected many Items. For the items mentioned in blue, tax rate is applied based on tax rate mentioned in the taxes table. For the items highlited in red, tax rate has fetched for them from the respective item master.
 
-Based on the above setting, you will have taxes applied on items as mentioned in the respective item master. Check following for an instance.
+<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/tax-calulation.png">
 
-![item wise tax calculation]({{docs_base_url}}/assets/old_images/erpnext/item-wise-tax-calc.png)
+Please note that item's tax rate will be pulled from the item master only if you have update same tax account (GST 16% in this case) in both Item master and tax master.
 
 {next}

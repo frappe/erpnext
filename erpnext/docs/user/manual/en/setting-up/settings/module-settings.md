@@ -2,7 +2,7 @@
 
 You can globally switch off certain desktop module via:
 
-> Setup > Settings > Show or Hide Modules
+> Setup > Permissions > Show / Hide Modules
 
 For example if you are in the services business, you want to hide the Manufacturing Module, you can do this via **Show or Hide Modules**
 
