@@ -159,6 +159,11 @@ def get_data():
 					"is_query_report": True,
 					"doctype": "Journal Entry"
 				},
+				{
+					"type": "doctype",
+					"name": "Bank Guarantee",
+					"doctype": "Bank Guarantee"
+				},
 			]
 		},
 		{

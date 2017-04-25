@@ -3,6 +3,12 @@
 
 frappe.require("assets/erpnext/js/financial_statements.js", function() {
 	frappe.query_reports["Balance Sheet"] = erpnext.financial_statements;
+
+	frappe.query_reports["Balance Sheet"]["filters"].push({
+		"fieldname": "accumulated_values",
+		"label": __("Accumulated Values"),
+		"fieldtype": "Check"
+	});
 });
 
 

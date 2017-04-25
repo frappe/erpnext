@@ -68,6 +68,18 @@ def get_data():
 					"name": "Inactive Customers",
 					"doctype": "Sales Order"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Campaign Efficiency",
+					"doctype": "Lead"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Lead Owner Efficiency",
+					"doctype": "Lead"
+				}
 			]
 		},
 		{
