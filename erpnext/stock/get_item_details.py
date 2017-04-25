@@ -405,7 +405,7 @@ def get_bin_details_and_serial_nos(item_code, warehouse, stock_qty=None, serial_
 
 @frappe.whitelist()
 def get_batch_qty(batch_no, warehouse, item_code):
-	from frappe.stock.doctype.batch import batch
+	from erpnext.stock.doctype.batch import batch
 	if batch_no:
 		return {'actual_batch_qty': batch.get_batch_qty(batch_no, warehouse)}
 
