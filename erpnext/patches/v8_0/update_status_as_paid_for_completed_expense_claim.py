@@ -7,6 +7,8 @@ import frappe
 def execute():
 	""" set status as Paid in Expense Claim if total_sactioned_amount 
 		and total_amount_reimbursed is equal """
+	
+	frappe.reload_doctype('Expense Claim')
 
 	frappe.db.sql("""
 		update 
