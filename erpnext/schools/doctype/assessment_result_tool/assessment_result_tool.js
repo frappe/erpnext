@@ -8,6 +8,8 @@ cur_frm.add_fetch("assessment_plan", "student_batch", "student_batch");
 frappe.ui.form.on('Assessment Result Tool', {
 	refresh: function(frm) {
 		if (frappe.route_options) {
+			frm.set_value("student_batch", frappe.route_options.student_batch);
+			frm.set_value("assessment_plan", frappe.route_options.assessment_plan);
 			frappe.route_options = null;
 		}
 		frm.disable_save();
