@@ -101,16 +101,18 @@ def set_batch_nos(doc, warehouse_field, throw = False):
 
 def get_batch_no(item_code, warehouse, qty, throw=False):
 	'''get the smallest batch with for the given item_code, warehouse and qty'''
-	batches = sorted(
-		get_batch_qty(item_code = item_code, warehouse = warehouse),
-		lambda a, b: 1 if a.qty > b.qty else -1)
-
+	
 	batch_no = None
-	for b in batches:
-		if b.qty >= qty:
-			batch_no = b.batch_no
-			# found!
-			break
+	
+	batches = get_batch_qty(item_code = item_code, warehouse = warehouse)
+	if batches:
+		batches = sorted(batches, lambda a, b: 1 if a.qty > b.qty else -1)
+
+		for b in batches:
+			if b.qty >= qty:
+				batch_no = b.batch_no
+				# found!
+				break
 
 	if not batch_no:
 		frappe.msgprint(_('Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement').format(frappe.bold(item_code)))
