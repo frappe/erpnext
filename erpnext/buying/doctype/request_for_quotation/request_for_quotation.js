@@ -48,7 +48,7 @@ frappe.ui.form.on("Request for Quotation",{
 				});
 			});
 		}
-		
+
 	},
 
 	make_suppplier_quotation: function(frm) {
@@ -131,12 +131,15 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 					erpnext.utils.map_current_doc({
 						method: "erpnext.stock.doctype.material_request.material_request.make_request_for_quotation",
 						source_doctype: "Material Request",
+						target: cur_frm,
+						setters: {
+							company: cur_frm.doc.company
+						},
 						get_query_filters: {
 							material_request_type: "Purchase",
 							docstatus: 1,
 							status: ["!=", "Stopped"],
-							per_ordered: ["<", 99.99],
-							company: cur_frm.doc.company
+							per_ordered: ["<", 99.99]
 						}
 					})
 				}, __("Get items from"));
@@ -150,32 +153,35 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 						{fieldname: 'ok_button', fieldtype:'Button', label:'Get Items from Material Requests'},
 						]
 					});
-					
+
 					// On the user clicking the ok button
 					d.fields_dict.ok_button.input.onclick = function() {
 						var btn = d.fields_dict.ok_button.input;
 						var v = d.get_values();
 						if(v) {
 							$(btn).set_working();
-							
+
 							erpnext.utils.map_current_doc({
 								method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_item_from_material_requests_based_on_supplier",
 								source_name: v.supplier,
+								target: cur_frm,
+								setters: {
+									company: cur_frm.doc.company
+								},
 								get_query_filters: {
 									material_request_type: "Purchase",
 									docstatus: 1,
 									status: ["!=", "Stopped"],
-									per_ordered: ["<", 99.99],
-									company: cur_frm.doc.company
+									per_ordered: ["<", 99.99]
 								}
 							});
 							$(btn).done_working();
 							d.hide();
 						}
-					}	
+					}
 					d.show();
 				}, __("Get items from"));
-				
+
 		}
 	},
 

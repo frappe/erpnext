@@ -48,11 +48,14 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 					erpnext.utils.map_current_doc({
 						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
 						source_doctype: "Delivery Note",
+						target: cur_frm,
+						setters: {
+							customer: cur_frm.doc.customer || undefined,
+						},
 						get_query_filters: {
 							docstatus: 1,
 							status: ["not in", ["Stopped", "Closed"]],
 							per_installed: ["<", 99.99],
-							customer: cur_frm.doc.customer || undefined,
 							company: cur_frm.doc.company
 						}
 					})

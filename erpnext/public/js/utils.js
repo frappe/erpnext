@@ -204,6 +204,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			},
 		});
 	} else if(opts.source_name) {
+		opts.source_name = [opts.source_name];
 		_map();
 	}
 }

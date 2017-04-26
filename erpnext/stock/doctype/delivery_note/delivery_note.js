@@ -119,13 +119,16 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 						erpnext.utils.map_current_doc({
 							method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 							source_doctype: "Sales Order",
+							target: me.frm,
+							setters: {
+								customer: me.frm.doc.customer || undefined,
+							},
 							get_query_filters: {
 								docstatus: 1,
 								status: ["!=", "Closed"],
 								per_delivered: ["<", 99.99],
+								company: me.frm.doc.company,
 								project: me.frm.doc.project || undefined,
-								customer: me.frm.doc.customer || undefined,
-								company: me.frm.doc.company
 							}
 						})
 					}, __("Get items from"));

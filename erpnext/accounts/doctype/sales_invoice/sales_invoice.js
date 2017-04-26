@@ -117,11 +117,14 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				erpnext.utils.map_current_doc({
 					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
 					source_doctype: "Sales Order",
+					target: cur_frm,
+					setters: {
+						customer: cur_frm.doc.customer || undefined,
+					},
 					get_query_filters: {
 						docstatus: 1,
 						status: ["!=", "Closed"],
 						per_billed: ["<", 99.99],
-						customer: cur_frm.doc.customer || undefined,
 						company: cur_frm.doc.company
 					}
 				})
@@ -134,9 +137,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				erpnext.utils.map_current_doc({
 					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 					source_doctype: "Delivery Note",
+					target: cur_frm,
+					setters: {
+						company: cur_frm.doc.company
+					},
 					get_query: function() {
 						var filters = {
-							company: cur_frm.doc.company
+							docstatus: 1,
 						};
 						if(cur_frm.doc.customer) filters["customer"] = cur_frm.doc.customer;
 						return {

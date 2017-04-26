@@ -33,9 +33,12 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 					erpnext.utils.map_current_doc({
 						method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
 						source_doctype: "Maintenance Schedule",
+						target: cur_frm,
+						setters: {
+							customer: cur_frm.doc.customer || undefined,
+						},
 						get_query_filters: {
 							docstatus: 1,
-							customer: cur_frm.doc.customer || undefined,
 							company: cur_frm.doc.company
 						}
 					})
@@ -45,9 +48,12 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 					erpnext.utils.map_current_doc({
 						method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
 						source_doctype: "Warranty Claim",
+						target: cur_frm,
+						setters: {
+							customer: cur_frm.doc.customer || undefined,
+						},
 						get_query_filters: {
 							status: ["in", "Open, Work in Progress"],
-							customer: cur_frm.doc.customer || undefined,
 							company: cur_frm.doc.company
 						}
 					})
@@ -57,11 +63,14 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
 						source_doctype: "Sales Order",
+						target: cur_frm,
+						setters: {
+							customer: cur_frm.doc.customer || undefined,
+						},
 						get_query_filters: {
 							docstatus: 1,
+							company: cur_frm.doc.company,
 							order_type: cur_frm.doc.order_type,
-							customer: cur_frm.doc.customer || undefined,
-							company: cur_frm.doc.company
 						}
 					})
 				}, __("Get items from"));

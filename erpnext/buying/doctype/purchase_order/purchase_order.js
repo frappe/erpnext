@@ -158,12 +158,15 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				erpnext.utils.map_current_doc({
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					source_doctype: "Material Request",
+					target: cur_frm,
+					setters: {
+						company: cur_frm.doc.company
+					},
 					get_query_filters: {
 						material_request_type: "Purchase",
 						docstatus: 1,
 						status: ["!=", "Stopped"],
 						per_ordered: ["<", 99.99],
-						company: cur_frm.doc.company
 					}
 				})
 			}, __("Add items from"));
@@ -173,10 +176,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				erpnext.utils.map_current_doc({
 					method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
 					source_doctype: "Supplier Quotation",
+					target: cur_frm,
+					setters: {
+						company: cur_frm.doc.company
+					},
 					get_query_filters: {
 						docstatus: 1,
 						status: ["!=", "Stopped"],
-						company: cur_frm.doc.company
 					}
 				})
 			}, __("Add items from"));

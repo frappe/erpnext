@@ -38,15 +38,22 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Opportunity'),
 				function() {
+					var setters = {};
+					if(cur_frm.doc.customer) {
+						setters.customer = cur_frm.doc.customer || undefined;
+					} else if (cur_frm.doc.lead) {
+						setters.lead = cur_frm.doc.lead || undefined;
+					}
 					erpnext.utils.map_current_doc({
 						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
+						target: cur_frm,
+						setters: setters,
 						get_query_filters: {
 							status: ["not in", ["Lost", "Closed"]],
+							company: cur_frm.doc.company,
+							// cannot set enquiry_type as setter, as the fieldname is order_type
 							enquiry_type: cur_frm.doc.order_type,
-							customer: cur_frm.doc.customer || undefined,
-							lead: cur_frm.doc.lead || undefined,
-							company: cur_frm.doc.company
 						}
 					})
 				}, __("Get items from"), "btn-default");

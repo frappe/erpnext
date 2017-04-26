@@ -58,8 +58,11 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 						erpnext.utils.map_current_doc({
 							method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
 							source_doctype: "Purchase Order",
-							get_query_filters: {
+							target: cur_frm,
+							setters: {
 								supplier: cur_frm.doc.supplier || undefined,
+							},
+							get_query_filters: {
 								docstatus: 1,
 								status: ["!=", "Closed"],
 								per_received: ["<", 99.99],

@@ -100,11 +100,14 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
 						source_doctype: "Sales Order",
+						target: cur_frm,
+						setters: {
+							company: cur_frm.doc.company
+						},
 						get_query_filters: {
 							docstatus: 1,
 							status: ["!=", "Closed"],
 							per_delivered: ["<", 99.99],
-							company: cur_frm.doc.company
 						}
 					})
 				}, __("Get items from"));

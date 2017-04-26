@@ -139,10 +139,10 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						target: me.frm,
 						setters: {
 							customer: me.frm.doc.customer || undefined,
-							// company: me.frm.doc.company,
 							order_type: me.frm.doc.order_type,
 						},
 						get_query_filters: {
+							company: me.frm.doc.company,
 							docstatus: 1,
 							status: ["!=", "Lost"],
 						}
