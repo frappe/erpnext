@@ -86,10 +86,10 @@ class Quotation(SellingController):
 
 
 @frappe.whitelist()
-def make_sales_order(source_name, target_doc=None, fields=None):
-	return _make_sales_order(source_name, target_doc, fields)
+def make_sales_order(source_name, target_doc=None):
+	return _make_sales_order(source_name, target_doc)
 
-def _make_sales_order(source_name, target_doc=None, fields=None, ignore_permissions=False):
+def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	customer = _make_customer(source_name, ignore_permissions)
 
 	def set_missing_values(source, target):
@@ -126,7 +126,7 @@ def _make_sales_order(source_name, target_doc=None, fields=None, ignore_permissi
 				"doctype": "Sales Team",
 				"add_if_empty": True
 			}
-		}, target_doc, fields, set_missing_values, ignore_permissions=ignore_permissions)
+		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
 	# postprocess: fetch shipping address, set missing values
 

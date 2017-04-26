@@ -134,7 +134,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			var item_qty_map = {};
 
 			$.each(cur_frm.doc.items, function(i, d) {
-				opts.source_name.split(',').forEach(function(src) {
+				opts.source_name.forEach(function(src) {
 					if(d[link_fieldname]==src) {
 						already_set = true;
 						if (item_qty_map[d.item_code])
@@ -146,7 +146,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			});
 
 			if(already_set) {
-				opts.source_name.split(',').forEach(function(src) {
+				opts.source_name.forEach(function(src) {
 					frappe.model.with_doc(opts.source_doctype, src, function(r) {
 						var source_doc = frappe.model.get_doc(opts.source_doctype, src);
 						$.each(source_doc.items || [], function(i, row) {
@@ -171,11 +171,11 @@ erpnext.utils.map_current_doc = function(opts) {
 			// Sometimes we hit the limit for URL length of a GET request
 			// as we send the full target_doc. Hence this is a POST request.
 			type: "POST",
-			method: opts.method,
+			method: 'frappe.model.mapper.map_docs',
 			args: {
-				"source_name": opts.source_name,
+				"method": opts.method,
+				"source_names": opts.source_name,
 				"target_doc": cur_frm.doc,
-				"fields": opts.setters
 			},
 			callback: function(r) {
 				if(!r.exc) {
@@ -186,13 +186,13 @@ erpnext.utils.map_current_doc = function(opts) {
 		});
 	}
 	if(opts.source_doctype) {
-		var d = new frappe.ui.form.MultiSelect({
+		var d = new frappe.ui.form.MultiSelectDialog({
 			doctype: opts.source_doctype,
 			target: opts.target,
 			setters: opts.setters,
 			get_query: opts.get_query,
 			action: function(selections, args) {
-				let values = selections.join(',');
+				let values = selections;
 				if(values.length === 0){
 					frappe.msgprint(__("Please select Quotations"))
 					return;
