@@ -217,15 +217,15 @@ class TestItem(unittest.TestCase):
 		variant = get_variant(template.name, manufacturer=manufacturer.name)
 		self.assertEquals(variant.item_code, '_Test Variant Mfg-1')
 		self.assertEquals(variant.description, '_Test Variant Mfg')
-		self.assertEquals(variant.get("manufacturers")[0].manufacturer, 'MSG1')
+		self.assertEquals(variant.manufacturer, 'MSG1')
 		variant.insert()
 
 		variant = get_variant(template.name, manufacturer=manufacturer.name,
 			manufacturer_part_no='007')
 		self.assertEquals(variant.item_code, '_Test Variant Mfg-2')
 		self.assertEquals(variant.description, '_Test Variant Mfg')
-		self.assertEquals(variant.get("manufacturers")[0].manufacturer, 'MSG1')
-		self.assertEquals(variant.get("manufacturers")[0].manufacturer_part_no, '007')
+		self.assertEquals(variant.manufacturer, 'MSG1')
+		self.assertEquals(variant.manufacturer_part_no, '007')
 
 
 def make_item_variant():
