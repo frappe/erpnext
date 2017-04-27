@@ -1,4 +1,4 @@
-cur_frm.add_fetch("student", "title", "student_name");
+	cur_frm.add_fetch("student", "title", "student_name");
 
 frappe.ui.form.on("Student Group", {
 	onload: function(frm) {
@@ -42,6 +42,11 @@ frappe.ui.form.on("Student Group", {
 		else if (frm.doc.group_based_on == "Course") {
 			frm.doc.program = null;
 			frm.doc.batch = null;
+		}
+		else if (frm.doc.group_based_on == "Activity") {
+			frm.doc.program =null;
+			frm.doc.batch =null;
+			frm.doc.CourseQ =null;
 		}
 		frm.trigger("set_name");
 	},
@@ -103,6 +108,7 @@ frappe.ui.form.on("Student Group", {
 								s.group_roll_number = ++max_roll_no;
 							}
 						});
+						refresh_field("students");
 						frm.save();
 					} else {
 						frappe.msgprint(__("Student Group is already updated."))

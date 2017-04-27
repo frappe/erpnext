@@ -13,7 +13,8 @@ class StudentGroup(Document):
 	def validate(self):
 		self.validate_mandatory_fields()
 		self.validate_strength()
-		self.validate_students()
+		if frappe.defaults.get_defaults().student_validation_setting 
+			self.validate_students()
 		validate_duplicate_student(self.students)
 
 	def validate_mandatory_fields(self):
@@ -39,6 +40,7 @@ class StudentGroup(Document):
 @frappe.whitelist()
 def get_students(academic_year, group_based_on, program=None, batch=None, course=None):
 	enrolled_students = get_program_enrollment(academic_year, group_based_on, program, batch, course)
+	print enrolled_students
 
 	if enrolled_students:
 		student_list = []
@@ -51,18 +53,30 @@ def get_students(academic_year, group_based_on, program=None, batch=None, course
 		return student_list
 
 def get_program_enrollment(academic_year, group_based_on, program=None, batch=None, course=None):
-	if group_based_on == "Batch":
-		return frappe.db.sql('''select student, student_name from `tabProgram Enrollment` where academic_year = %s
-			and program = %s and student_batch_name = %s order by student_name asc''',(academic_year, program, batch), as_dict=1)
+	
+	condition_course = " and pe.name = pec.parent and pec.course = %(course)s"
+	condition1_course = ", `tabProgram Enrollment Course` pec"
+	condition_batch = " and pe.program = %(program)s and pe.student_batch_name = %(batch)s"
 
-	elif group_based_on == "Course":
-		return frappe.db.sql('''
-			select 
-				pe.student, pe.student_name 
-			from 
-				`tabProgram Enrollment` pe, `tabProgram Enrollment Course` pec
-			where
-				pe.name = pec.parent and pec.course = %s
-			order by
-				pe.student_name asc
-			''', (course), as_dict=1)
+	if group_based_on == "Batch":
+		condition1 = ""
+		condition2 = condition_batch
+	elif group_based_on == "Course" and not (program and batch):
+		condition1 = condition1_course
+		condition2 = condition_course
+	elif group_based_on == "Course" and program and batch:
+		condition1 = condition1_course
+		condition2 = condition_course + condition_batch
+
+	return frappe.db.sql('''
+		select 
+			pe.student, pe.student_name 
+		from 
+			`tabProgram Enrollment` pe {condition1}
+		where
+			pe.academic_year = %(academic_year)s  {condition2}
+		order by
+			pe.student_name asc
+		'''.format(condition1=condition1, condition2=condition2),
+		({"academic_year": academic_year, "program": program, "batch": batch, "course": course}), as_dict=1)
+
