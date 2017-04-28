@@ -145,8 +145,8 @@ def get_pricing_rule_for_item(args):
 	})
 	
 	if args.ignore_pricing_rule or not args.item_code:
-		if args.get("pricing_rule"):
-			item_details = remove_pricing_rule(args, item_details)
+		if frappe.db.exists(args.doctype, args.name) and args.get("pricing_rule"):
+			item_details = remove_pricing_rule_for_item(args.get("pricing_rule"), item_details)
 		return item_details
 
 	if not (args.item_group and args.brand):
@@ -187,12 +187,13 @@ def get_pricing_rule_for_item(args):
 		else:
 			item_details.discount_percentage = pricing_rule.discount_percentage
 	elif args.get('pricing_rule'):
-		item_details = remove_pricing_rule(args, item_details)
+		item_details = remove_pricing_rule_for_item(args.get("pricing_rule"), item_details)
 
 	return item_details
 
-def remove_pricing_rule(args, item_details):
-	pricing_rule = frappe.db.get_value('Pricing Rule', args.get('pricing_rule'), ['price_or_discount', 'margin_type'], as_dict=1)
+def remove_pricing_rule_for_item(pricing_rule, item_details):
+	pricing_rule = frappe.db.get_value('Pricing Rule', pricing_rule, 
+		['price_or_discount', 'margin_type'], as_dict=1)
 	if pricing_rule and pricing_rule.price_or_discount == 'Discount Percentage':
 		item_details.discount_percentage = 0.0
 
@@ -202,6 +203,18 @@ def remove_pricing_rule(args, item_details):
 
 	return item_details
 
+@frappe.whitelist()
+def remove_pricing_rules(item_list):
+	if isinstance(item_list, basestring):
+		item_list = json.loads(item_list)
+	
+	out = []	
+	for item in item_list:
+		item = frappe._dict(item)
+		out.append(remove_pricing_rule_for_item(item.get("pricing_rule"), item))
+		
+	return out
+	
 def get_pricing_rules(args):
 	def _get_tree_conditions(parenttype, allow_blank=True):
 		field = frappe.scrub(parenttype)
