@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, math
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, rounded
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
@@ -35,9 +35,21 @@ class EmployeeLoanApplication(Document):
 			else:
 				self.repayment_periods = self.loan_amount / self.repayment_amount
 
-		self.total_payable_amount = self.repayment_amount * self.repayment_periods
-		self.total_payable_interest = self.total_payable_amount - self.loan_amount
+		self.calculate_payable_amount()
+		
+	def calculate_payable_amount(self):
+		balance_amount = self.loan_amount
+		self.total_payable_amount = 0
+		self.total_payable_interest = 0
 
+		while(balance_amount > 0):
+			interest_amount = rounded(balance_amount * flt(self.rate_of_interest) / (12*100))
+			balance_amount = rounded(balance_amount + interest_amount - self.repayment_amount)
+
+			self.total_payable_interest += interest_amount
+			
+		self.total_payable_amount = self.loan_amount + self.total_payable_interest
+		
 @frappe.whitelist()
 def make_employee_loan(source_name, target_doc = None):
 	doclist = get_mapped_doc("Employee Loan Application", source_name, {
