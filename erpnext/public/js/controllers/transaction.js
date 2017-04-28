@@ -726,7 +726,33 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	ignore_pricing_rule: function() {
-		this.apply_pricing_rule();
+		if(this.frm.doc.ignore_pricing_rule) {
+			var me = this;
+			var item_list = [];
+			
+			$.each(this.frm.doc["items"] || [], function(i, d) {
+				if (d.item_code) {
+					item_list.push({
+						"doctype": d.doctype,
+						"name": d.name,
+						"pricing_rule": d.pricing_rule
+					})
+				}
+			});
+			return this.frm.call({
+				method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rules",
+				args: { item_list: item_list },
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						me._set_values_for_item_list(r.message);
+						me.calculate_taxes_and_totals();
+						if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on")
+					}
+				}
+			});
+		} else {
+			this.apply_pricing_rule();
+		}
 	},
 
 	apply_pricing_rule: function(item, calculate_taxes_and_totals) {
