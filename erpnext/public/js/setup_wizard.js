@@ -19,7 +19,8 @@ function load_erpnext_slides() {
 						{"label": __("Education"), "value": "Education"},
 						{"label": __("Manufacturing"), "value": "Manufacturing"},
 						{"label": __("Retail"), "value": "Retail"},
-						{"label": __("Services"), "value": "Services"}
+						{"label": __("Services"), "value": "Services"},
+						{"label": __("Medical"), "value": "Medical"}
 					], reqd:1},
 			],
 			help: __('Select the nature of your business.'),
@@ -100,7 +101,7 @@ function load_erpnext_slides() {
 						fy = ["01-01", "12-31"];
 						next_year = current_year;
 					}
-					
+
 					var year_start_date = current_year + "-" + fy[0];
 					if(year_start_date > get_today()) {
 						next_year = current_year
@@ -216,7 +217,7 @@ function load_erpnext_slides() {
 		},
 
 		taxes: {
-			domains: ['manufacturing', 'services', 'retail', 'distribution'],
+			domains: ['manufacturing', 'services', 'retail', 'distribution', 'medical'],
 			icon: "fa fa-money",
 			title: __("Add Taxes"),
 			help: __("List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
@@ -260,7 +261,7 @@ function load_erpnext_slides() {
 		},
 
 		suppliers: {
-			domains: ['manufacturing', 'services', 'retail', 'distribution'],
+			domains: ['manufacturing', 'services', 'retail', 'distribution', 'medical'],
 			icon: "fa fa-group",
 			title: __("Your Suppliers"),
 			help: __("List a few of your suppliers. They could be organizations or individuals."),
@@ -283,7 +284,7 @@ function load_erpnext_slides() {
 		},
 
 		items: {
-			domains: ['manufacturing', 'services', 'retail', 'distribution'],
+			domains: ['manufacturing', 'services', 'retail', 'distribution', 'medical'],
 			icon: "fa fa-barcode",
 			title: __("Your Products or Services"),
 			help: __("List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start."),

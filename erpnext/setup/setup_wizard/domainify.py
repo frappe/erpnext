@@ -11,7 +11,8 @@ def get_domain(domain):
 			'desktop_icons': ['Item', 'BOM', 'Customer', 'Supplier', 'Sales Order',
 				'Production Order',  'Stock Entry', 'Purchase Order', 'Task', 'Buying', 'Selling',
 				 'Accounts', 'HR', 'ToDo'],
-			'remove_roles': ['Academics User'],
+			'remove_roles': ['Academics User', 'OP Physician', 'IP Physician', 'Nursing User',
+				'Laboratory user', 'LabTest Approver', 'Medical Administrator'],
 			'properties': [
 				{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'collapsible_depends_on', 'value': 'is_stock_item'},
 			],
@@ -24,7 +25,9 @@ def get_domain(domain):
 		'Retail': {
 			'desktop_icons': ['POS', 'Item', 'Customer', 'Sales Invoice',  'Purchase Order',
 			'Warranty Claim', 'Accounts', 'Task', 'Buying', 'ToDo'],
-			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User'],
+			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User',
+				'OP Physician', 'IP Physician', 'Nursing User', 'Laboratory user',
+				'LabTest Approver', 'Medical Administrator'],
 			'properties': [
 				{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
 				{'doctype': 'Customer', 'fieldname': 'credit_limit_section', 'property': 'hidden', 'value': 1},
@@ -38,7 +41,9 @@ def get_domain(domain):
 		'Distribution': {
 			'desktop_icons': ['Item', 'Customer', 'Supplier', 'Lead', 'Sales Order', 'Task',
 				 'Sales Invoice', 'CRM', 'Selling', 'Buying', 'Stock', 'Accounts', 'HR', 'ToDo'],
-			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User'],
+			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User',
+				'OP Physician', 'IP Physician', 'Nursing User', 'Laboratory user',
+				'LabTest Approver', 'Medical Administrator'],
 			'set_value': [
 				['Stock Settings', None, 'show_barcode_field', 1]
 			],
@@ -48,7 +53,9 @@ def get_domain(domain):
 		'Services': {
 			'desktop_icons': ['Project', 'Timesheet', 'Customer', 'Sales Order', 'Sales Invoice',
 				'Lead', 'Opportunity', 'Task', 'Expense Claim', 'Employee', 'HR', 'ToDo'],
-			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User'],
+			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User',
+				'OP Physician', 'IP Physician', 'Nursing User', 'Laboratory user',
+				'LabTest Approver', 'Medical Administrator'],
 			'properties': [
 				{'doctype': 'Item', 'fieldname': 'is_stock_item', 'property': 'default', 'value': 0},
 			],
@@ -64,6 +71,13 @@ def get_domain(domain):
 				'Website Manager', 'HR User', 'HR Manager', 'Purchase User', 'Purchase Manager',
 				'Student', 'Projects User'],
 			'default_portal_role': 'Student'
+		},
+		'Medical': {
+			'desktop_icons': ['Patient', 'Appointment', 'Consultation', 'Lab Test', 'Medical',
+				'Accounts',  'Buying', 'Stock', 'HR', 'ToDo'],
+			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Projects User', 'Projects Manager',
+				'Academics User', 'Instructor'],
+			'default_portal_role': 'Patient'
 		},
 	}
 	if not domain in data:

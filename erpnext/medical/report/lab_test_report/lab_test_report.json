@@ -1,0 +1,17 @@
+{
+ "add_total_row": 1, 
+ "apply_user_permissions": 1, 
+ "creation": "2013-04-23 18:15:29", 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 1, 
+ "is_standard": "Yes", 
+ "modified": "2014-06-03 07:18:17.317451", 
+ "modified_by": "Administrator", 
+ "module": "Medical", 
+ "name": "Lab Test Report", 
+ "owner": "Administrator", 
+ "ref_doctype": "Lab Test", 
+ "report_name": "Lab Test Report", 
+ "report_type": "Script Report"
+}

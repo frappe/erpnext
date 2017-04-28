@@ -176,7 +176,7 @@
    "label": "Domain", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "Distribution\nManufacturing\nRetail\nServices\nEducation\nOther", 
+   "options": "Distribution\nManufacturing\nRetail\nServices\nEducation\nMedical\nOther", 
    "permlevel": 0, 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 

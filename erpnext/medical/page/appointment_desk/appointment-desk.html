@@ -1,0 +1,18 @@
+<div class="app-listing padding media"
+    data-title="{{ data.name }}">
+		<div class="col-xs-12 media-heading">
+        <b><div class="col-xs-3">{{ data.patient }}</div>
+        <div class="col-xs-2">{{ data.physician }}</div>
+        <div class="col-xs-1">{{ data.token }}</div>
+        <div class="col-xs-2">{{ data.appointment_time }}</div></b>
+        <div class="col-xs-1">
+          <button class="btn btn-default btn-md call" data-patient="{{ data.patient }}" data-token="{{ data.token }}">{{ __("Call") }}</button>
+        </div>
+        <div class="col-xs-2">
+          <button class="btn btn-default btn-md record-vitals" data-patient="{{ data.patient }}">{{ __("Record Vitals") }}</button>
+        </div>
+        <div class="col-xs-1">
+          <button class="btn btn-default btn-md attend" data-name="{{ data.name }}">{{ __("Attend") }}</button>
+        </div>
+		</div>
+</div>
