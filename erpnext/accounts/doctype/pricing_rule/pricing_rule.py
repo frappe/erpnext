@@ -201,6 +201,8 @@ def remove_pricing_rule_for_item(pricing_rule, item_details):
 		item_details.margin_rate_or_amount = 0.0
 		item_details.margin_type = None
 
+	if item_details.pricing_rule:
+		item_details.pricing_rule = None
 	return item_details
 
 @frappe.whitelist()
