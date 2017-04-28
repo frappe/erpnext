@@ -55,7 +55,13 @@ def get_notification_config():
 			},
 			"Production Order": { "status": ("in", ("Draft", "Not Started", "In Process")) },
 			"BOM": {"docstatus": 0},
-			"Timesheet": {"status": "Draft"}
+			"Timesheet": {"status": "Draft"},
+			"Lab Test": {"docstatus": 0},
+			"Sample Collection": {"docstatus": 0},
+			"Appointment": {"status": "Open"},
+			"Service Task": {"status": "Open"},
+			"Consultation": {"docstatus": 0},
+			"Procedure Appointment": {"status": "Draft"}
 		}
 	}
 

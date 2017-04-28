@@ -1,0 +1,27 @@
+<div id="{{ menu[doc] }}" class="listing padding media hidden" style="margin-top: 0px;">
+  <div class="col-md-12 media-heading padding" align="center">
+    <div class="col-md-12" style="margin-bottom: 30px;">
+      <div class="col-xs-9"><h3>{{ doc }} &emsp; <button class="new-app btn btn-sm btn-default"><span class="octicon octicon-plus"></span> </button> </h3></div>
+      <div class="col-xs-3" style="padding-top: 15px;"> <button class="btn btn-default btn-xs create-invoice">Create Invoice</button></div>
+
+    </div>
+    <div class="col-sm-12 list-group">
+        {% for item in data %}
+        <div class="col-sm-12 list-group-item">
+          {% if not item[4] %}
+          <div class="col-sm-1"><input type="checkbox" data-doc="{{ item[0] }}"> </input></div>
+          {% else %}
+          <div class="col-sm-1"><input type="checkbox" disabled> </input></div>
+          {% } %}
+
+              <div class="col-sm-3"><span class="indicator {{ color[item[3]] }}"></span><a href="#Form/{{ doc }}/{{ item[0] }}">{{ item[0] }} </a> <br>{{ item[3] }}</div>
+              <div class="col-sm-3">{{ item[1] }} </div>
+              <div class="col-sm-2">{{ item[2] }} </a></div>
+           {% if item[4] %}
+              <div class="col-sm-3"><span class="indicator {{ color[item[5]] }}"></span><a href="#Form/Sales Invoice/{{ item[4] }}">{{ item[4] }}</a> <br>{{ item[5] }}</div>
+           {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+</div>

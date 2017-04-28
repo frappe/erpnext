@@ -1,0 +1,26 @@
+<div id="{{ menu[doc] }}" class="listing padding media hidden" style="margin-top: 0px;">
+  <div class="col-md-12 media-heading padding" align="center">
+    <div class="col-xs-12" style="margin-bottom: 30px;">
+      <div class="col-xs-9"><h3>{{ doc }}</h3></div>
+      <div class="col-xs-3" style="padding-top: 15px;"> <button class="btn btn-default btn-xs create-invoice">Create Invoice</button></div>
+    </div>
+    {% for (var key in data) {
+    var items = data[key] %}
+    <div class="col-sm-12 list-group">
+      <div class="col-sm-3 list-group-item active">
+      <input type="checkbox" class="select-all"></input> &ensp;   {{ key }}
+      </div>
+      <div class="col-sm-9">
+      {% for item in items %}
+      <div class="col-sm-12 list-group-item">
+        <div class="col-sm-1"><input type="checkbox" data-id="{{ item[3] }}"> </input></div>
+         <div class="col-sm-4">{{ item[0] }}</div>
+         <div class="col-sm-4">{{ item[1] }}</div>
+         <div class="col-sm-3">{{ item[2] }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

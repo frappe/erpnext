@@ -1,0 +1,10 @@
+<ul class="nav nav-pills nav-stacked"  style="padding-top:50px;">
+ {% for (var key in menu) {
+ var div = menu[key] %}
+     {% if div %}
+      <li data-div="{{ div }}" class="h6 module-sidebar-item">
+        <a class="{{ div }}"> {{ key }} </a>
+      <li>
+      {% } %}
+  {% endfor %}
+</ul>
