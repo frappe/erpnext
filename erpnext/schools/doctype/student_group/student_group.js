@@ -1,4 +1,4 @@
-	cur_frm.add_fetch("student", "title", "student_name");
+cur_frm.add_fetch("student", "title", "student_name");
 
 frappe.ui.form.on("Student Group", {
 	onload: function(frm) {
@@ -39,41 +39,6 @@ frappe.ui.form.on("Student Group", {
 		if (frm.doc.group_based_on == "Batch") {
 			frm.doc.course = null;
 		}
-		else if (frm.doc.group_based_on == "Course") {
-			frm.doc.program = null;
-			frm.doc.batch = null;
-		}
-		else if (frm.doc.group_based_on == "Activity") {
-			frm.doc.program =null;
-			frm.doc.batch =null;
-			frm.doc.CourseQ =null;
-		}
-		frm.trigger("set_name");
-	},
-
-	set_name: function(frm) {
-		var name;
-		if (frm.doc.group_based_on == "Course") {
-			name = "Course-" + frm.doc.course + "-" + (frm.doc.academic_term?frm.doc.academic_term:frm.doc.academic_year);
-		} else if (frm.doc.group_based_on == "Batch") {
-			name = "Batch-" + frm.doc.program + "-" + frm.doc.batch + "-"
-				+ (frm.doc.academic_term?frm.doc.academic_term:frm.doc.academic_year); 
-		} else if (frm.doc.group_based_on == "Activity") {
-			name = "Activity" + "-" + (frm.doc.academic_term?frm.doc.academic_term:frm.doc.academic_year);
-		}
-		frm.set_value("student_group_name", name);
-	},
-
-	program:function(frm) {
-		frm.trigger("set_name");
-	},
-
-	batch:function(frm) {
-		frm.trigger("set_name");
-	},
-
-	course:function(frm) {
-		frm.trigger("set_name");
 	},
 
 	get_students: function(frm) {
@@ -90,6 +55,7 @@ frappe.ui.form.on("Student Group", {
 				method: "erpnext.schools.doctype.student_group.student_group.get_students",
 				args: {
 					"academic_year": frm.doc.academic_year,
+					"academic_term": frm.doc.academic_term,
 					"group_based_on": frm.doc.group_based_on,
 					"program": frm.doc.program,
 					"batch" : frm.doc.batch,
@@ -119,5 +85,4 @@ frappe.ui.form.on("Student Group", {
 			frappe.msgprint(__("Select students manually for the Activity based Group"));
 		}
 	}
-
 });
