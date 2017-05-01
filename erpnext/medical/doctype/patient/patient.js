@@ -128,3 +128,10 @@ var btn_register_patient= function(frm){
 		}
 	});
 }
+me.frm.set_query("patient", "patient_relation", function(doc, cdt, cdn) {
+  	return {
+			filters: [
+        ["Patient", "name", "!=", me.frm.doc.name]
+			]
+		};
+	});
