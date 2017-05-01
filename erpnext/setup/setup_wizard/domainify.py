@@ -62,7 +62,7 @@ def get_domain(domain):
 				'Fees',  'Task', 'ToDo', 'Schools'],
 			'allow_roles': ['Academics User', 'Accounts User', 'Accounts Manager', 'Item Manager',
 				'Website Manager', 'HR User', 'HR Manager', 'Purchase User', 'Purchase Manager',
-				'Student', 'Projects User'],
+				'Student', 'Projects User', 'Instructor'],
 			'default_portal_role': 'Student'
 		},
 	}
