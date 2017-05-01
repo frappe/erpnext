@@ -25,8 +25,12 @@ class Appointment(Document):
 			self.reload()
 
 	def validate(self):
+		if not self.appointment_date:
+			frappe.throw(_("Please select date of appointment"))
 		if not self.end_dt:
-			frappe.throw(_("Please use Check Availabilty to create Appointment"))
+			physician = frappe.get_doc("Physician", self.physician)
+			if physician.schedule:
+				frappe.throw(_("Please use Check Availabilty to create Appointment"))
 
 	def after_insert(self):
 		#Check fee validity exists
