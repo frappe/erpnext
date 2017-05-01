@@ -50,6 +50,12 @@ frappe.ui.form.on('Consultation', {
 					frappe.msgprint("Please select Patient");
 				}
 			} );
+			frm.add_custom_button(__('Vital Signs'), function() {
+				btn_create_vital_signs(frm);
+			 },"Create");
+			 frm.add_custom_button(__('Medical Record'), function() {
+				create_medical_record(frm);
+			 },"Create");
 		}
 		frm.set_query("patient", function () {
 			return {
@@ -77,15 +83,23 @@ frappe.ui.form.on('Consultation', {
 					btn_admit_patient(frm);
 				 });
 			}
-			if(frappe.user.has_role("Nursing User")||frappe.user.has_role("IP Physician")||frappe.user.has_role("OP Physician")){
-				frm.add_custom_button(__('Vital Signs'), function() {
-					btn_create_vital_signs(frm);
-				 },"Create");
-			}
 		}
 
 	}
 });
+
+var create_medical_record = function (frm) {
+	if(!frm.doc.patient){
+		frappe.throw("Please select patient")
+	}
+	frappe.route_options = {
+		"patient": frm.doc.patient,
+		"status": "Open",
+		"reference_doctype": "Patient Medical Record",
+		"reference_owner": frm.doc.owner
+	}
+	frappe.new_doc("Patient Medical Record")
+}
 
 var show_details = function(data){
 	var details = "";
@@ -278,6 +292,9 @@ frappe.ui.form.on("IP Routine Observation", {
 
 var btn_create_vital_signs = function(frm){
 	var doc = frm.doc;
+	if(!doc.patient){
+		frappe.throw("Please select patient")
+	}
 	frappe.call({
 		method:"erpnext.medical.doctype.vital_signs.vital_signs.create_vital_signs",
 		args: {patient: doc.patient},
