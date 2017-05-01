@@ -1585,7 +1585,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 0, 
+   "collapsible": 1, 
    "columns": 0, 
    "fieldname": "ac_sb", 
    "fieldtype": "Section Break", 
@@ -1684,7 +1684,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 50, 
- "modified": "2017-03-25 19:05:27.613337", 
+ "modified": "2017-04-26 15:43:34.694349", 
  "modified_by": "Administrator", 
  "module": "Medical", 
  "name": "Patient", 
