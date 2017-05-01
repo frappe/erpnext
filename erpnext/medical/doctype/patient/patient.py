@@ -10,7 +10,6 @@ from frappe.utils import cint, flt, cstr, getdate, get_time
 import time, dateutil
 from erpnext.medical.doctype.op_settings.op_settings import generate_patient_id
 from erpnext.accounts.party import validate_party_accounts
-from erpnext.medical.doctype.patient_medical_record.patient_medical_record import delete_attachment, insert_attachment
 from erpnext.medical.doctype.op_settings.op_settings import get_receivable_account,get_income_account
 
 class Patient(Document):
@@ -29,14 +28,6 @@ class Patient(Document):
 
 	def on_trash(self):
 		frappe.throw("""Not permitted. Please disable Patient""")
-
-	def on_update(self):
-		attachments = get_attachments(self)
-		if attachments:
-			delete_attachment("File", self.name)
-			for i in range(0,len(attachments)):
-				attachment = frappe.get_doc("File", attachments[i]['name'])
-				insert_attachment(attachment,attachment.attached_to_name)
 
 	def get_patient_name(self):
 		name = " ".join(filter(None,
@@ -58,10 +49,6 @@ class Patient(Document):
 		elif self.age:
 			age_str = str(self.age) + " as on " + str(self.age_as_on)
 		return age_str
-
-def get_attachments(doc):
-	return frappe.get_all("File", fields=["name"],
-		filters = {"attached_to_name": doc.name, "attached_to_doctype": doc.doctype})
 
 def create_customer(doc):
 	customer_group = frappe.get_value("Selling Settings", None, "customer_group")

@@ -9,7 +9,6 @@ from frappe.model.document import Document
 from frappe.utils import cstr, getdate, get_time, math
 import time, json, datetime
 from datetime import timedelta
-from erpnext.medical.doctype.patient_medical_record.patient_medical_record import delete_attachment, insert_attachment
 from erpnext.medical.doctype.op_settings.op_settings import get_receivable_account
 
 class Consultation(Document):
@@ -21,12 +20,6 @@ class Consultation(Document):
 			schedule_routine_observe_task(self)
 			if (frappe.db.get_value("IP Settings", None, "drug_task")=='1'):
 				schedule_drug_task(self)
-		attachments = get_attachments(self)
-		if attachments:
-			delete_attachment("File", self.name)
-			for i in range(0,len(attachments)):
-				attachment = frappe.get_doc("File", attachments[i]['name'])
-				insert_attachment(attachment,self.patient)
 
 	def after_insert(self):
 		insert_consultation_to_medical_record(self)
@@ -38,10 +31,6 @@ class Consultation(Document):
 		physician = frappe.get_doc("Physician",self.physician)
 		if(frappe.session.user != physician.user_id):
 			frappe.throw(_("You don't have permission to submit"))
-
-def get_attachments(doc):
-	return frappe.get_all("File", fields=["name"],
-		filters = {"attached_to_name": doc.name, "attached_to_doctype": doc.doctype})
 
 def set_sales_invoice_fields(company, patient):
 	sales_invoice = frappe.new_doc("Sales Invoice")

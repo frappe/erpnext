@@ -29,6 +29,9 @@ frappe.ui.form.on('Patient', {
 			frm.add_custom_button(__('Vital Signs'), function() {
 				btn_create_vital_signs(frm);
 			 },"Create");
+       frm.add_custom_button(__('Medical Record'), function() {
+        create_medical_record(frm);
+       },"Create");
 		}
   },
   onload: function (frm) {
@@ -78,6 +81,16 @@ frappe.ui.form.on("Patient", "age", function(frm) {
     $(frm.fields_dict['age_html'].wrapper).html("")
   }
 });
+
+var create_medical_record = function (frm) {
+	frappe.route_options = {
+		"patient": frm.doc.name,
+		"status": "Open",
+		"reference_doctype": "Patient Medical Record",
+		"reference_owner": frm.doc.owner
+	}
+	frappe.new_doc("Patient Medical Record")
+}
 
 var get_age = function (birth) {
   ageMS = Date.parse(Date()) - Date.parse(birth);
