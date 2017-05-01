@@ -57,7 +57,8 @@ frappe.Hub = Class.extend({
 				me.$test_button = me.page.page_actions.find(".test-btn");
 				me.$test_button.on('click', function(e) {
 					console.log("test button clicked");
-					me.send_rfq();
+					// call test method
+					me.send_messages();
 				});
 			}
 		});
@@ -102,7 +103,7 @@ frappe.Hub = Class.extend({
 			let $item = $(this);
 			let item_code = $item.attr('data-item-code');
 
-			this.send_messages(item_code);
+			me.load_message(item_code);
 		});
 
 		this.reset();
@@ -115,14 +116,32 @@ frappe.Hub = Class.extend({
 		this.setup_filters();
 	},
 
-	send_messages: function(item_code) {
-
+	load_message: function(item_code) {
+		// Get item details
+		let msg_type = "Request for Quotation";
+		let item = this.items[item_code];
+		let item_subset = (({ item_code, item_group, hub_user_name, email, company }) =>
+			({ item_code, item_group, hub_user_name, email, company }))(item);
+		frappe.call({
+			method: "erpnext.hub_node.load_message",
+			args: {
+				msg_type: msg_type,
+				receiver: item.hub_user_name,
+				receiver_website: item.seller_website,
+				item: item_subset,
+			},
+			callback: function(r) {
+				if(!r.message)
+					r.message = [];
+					console.log("DONE");
+			}
+		});
 	},
 
-	send_rfq: function() {
+	test_api_calls: function() {
 		let me = this;
 		frappe.call({
-			method: "erpnext.hub_node.send_rfq",
+			method: "erpnext.hub_node.test",
 			args: {},
 			callback: function(r) {
 				if(!r.message)
