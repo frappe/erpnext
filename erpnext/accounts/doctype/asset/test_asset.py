@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import cstr, nowdate, getdate
+from frappe.utils import cstr, nowdate, getdate, flt
 from erpnext.accounts.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
 from erpnext.accounts.doctype.asset.asset import make_sales_invoice, make_purchase_invoice
 
@@ -242,6 +242,23 @@ class TestAsset(unittest.TestCase):
 		si.cancel()
 
 		self.assertEqual(frappe.db.get_value("Asset", "Macbook Pro 1", "status"), "Partially Depreciated")
+
+	def test_asset_expected_value_after_useful_life(self):
+		asset = frappe.get_doc("Asset", "Macbook Pro 1")
+		asset.depreciation_method = "Straight Line"
+		asset.is_existing_asset = 1
+		asset.total_number_of_depreciations = 400
+		asset.gross_purchase_amount = 16866177.00
+		asset.expected_value_after_useful_life = 500000
+		asset.save()
+
+		accumulated_depreciation_after_full_schedule = \
+			max([d.accumulated_depreciation_amount for d in asset.get("schedules")])
+
+		asset_value_after_full_schedule = (flt(asset.gross_purchase_amount) -
+			flt(accumulated_depreciation_after_full_schedule))
+
+		self.assertTrue(asset.expected_value_after_useful_life >= asset_value_after_full_schedule)
 
 	def tearDown(self):
 		asset = frappe.get_doc("Asset", "Macbook Pro 1")
