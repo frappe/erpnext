@@ -58,10 +58,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Program Enrollment Tool"
-				},
-				{
-					"type": "doctype",
-					"name": "Student Batch Creation Tool"
 				}
 			]
 		},
