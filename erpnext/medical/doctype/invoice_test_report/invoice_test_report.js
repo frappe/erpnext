@@ -31,7 +31,17 @@ frappe.ui.form.on('Invoice Test Report', {
 		}
 		if(btn_send_sms_show){
 			frm.add_custom_button(__('Send SMS'), function() {
-				make_dialog(frm);
+				frappe.call({
+					method: "smarte.medical.doctype.laboratory_settings.laboratory_settings.get_sms_text",
+					args:{doc: frm.doc.name},
+					callback: function(r) {
+						if(!r.exc) {
+							emailed = r.message.emailed
+							printed = r.message.printed
+							make_dialog(frm, emailed, printed);
+						}
+					}
+				});
 			 } );
 		}
 		if(frm.doc.status == "In Progress"){
@@ -96,11 +106,8 @@ var mark_as_completed = function(frm){
 
 }
 
-var make_dialog = function(frm) {
+var make_dialog = function(frm, emailed, printed) {
 	var number = frm.doc.mobile;
-	var company  = frappe.defaults.get_user_default("company")
-	var emailed = 	"Hello, "+ frm.doc.patient + "\nYour test result has been emailed to " + frm.doc.email + ".\nThank You, \n"+company ;
-	var printed = 	"Hello, " + frm.doc.patient + "\nYour test result is ready with "+company+". \nThank You, Good Day";
 
 	var dialog = new frappe.ui.Dialog({
 		title: 'Send SMS',
