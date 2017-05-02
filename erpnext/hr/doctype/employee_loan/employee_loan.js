@@ -79,7 +79,7 @@ frappe.ui.form.on('Employee Loan', {
 	},
 
 	employee_loan_application: function(frm) {
-		return frm.call({
+		return frappe.call({
 			method: "erpnext.hr.doctype.employee_loan.employee_loan.get_employee_loan_application",
 			args: {
 				"employee_loan_application": frm.doc.employee_loan_application

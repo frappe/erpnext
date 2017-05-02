@@ -14,6 +14,7 @@
  "engine": "InnoDB", 
  "fields": [
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -44,6 +45,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -74,6 +76,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -104,6 +107,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -134,6 +138,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -162,6 +167,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -192,6 +198,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -222,10 +229,12 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "default": "Sanctioned", 
    "fieldname": "status", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -237,7 +246,7 @@
    "in_standard_filter": 0, 
    "label": "Status", 
    "length": 0, 
-   "no_copy": 0, 
+   "no_copy": 1, 
    "options": "Sanctioned\nPartially Disbursed\nFully Disbursed\nRepaid/Closed", 
    "permlevel": 0, 
    "precision": "", 
@@ -252,6 +261,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -281,6 +291,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -310,6 +321,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -340,6 +352,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -371,6 +384,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -400,6 +414,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -428,6 +443,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -459,6 +475,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -490,6 +507,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -522,6 +540,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 1, 
@@ -551,6 +570,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -581,6 +601,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -611,6 +632,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -639,6 +661,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -669,6 +692,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -699,6 +723,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -728,6 +753,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -758,6 +784,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -787,6 +814,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -818,6 +846,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -846,6 +875,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -877,6 +907,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -916,7 +947,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-03-30 12:59:40.650035", 
+ "modified": "2017-05-02 13:52:30.884154", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Loan", 
