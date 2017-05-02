@@ -9,4 +9,4 @@ from frappe.model.document import Document
 class PatientMedicalRecord(Document):
 	def after_insert(self):
 		if self.reference_doctype == "Patient Medical Record" :
-			frappe.db.set_value("Patient Medical Record", self.name, "reference_name", self.reference_name)
+			frappe.db.set_value("Patient Medical Record", self.name, "reference_name", self.name)
