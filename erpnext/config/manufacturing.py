@@ -61,6 +61,11 @@ def get_data():
 					"name": "Operation",
 					"description": _("Details of the operations carried out."),
 				},
+				{
+					"type": "doctype",
+					"name": "Quality Report 8D",
+					"description": _("Eight Disciplines (8Ds) of Problem Solving."),
+				},
 
 			]
 		},
