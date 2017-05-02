@@ -34,8 +34,7 @@ class ProcedureAppointment(Document):
 				if not self.end_dt:
 					frappe.throw("Please use Check Availability to create Procedure Appointment")
 			else:
-				if(self.start_dt):
-					frappe.db.set_value("Procedure Appointment", self.name, "end_dt", self.start_dt)
+				self.end_dt = self.start_dt
 
 	def after_insert(self):
 		if(self.prescription):
@@ -105,6 +104,11 @@ def create_procedure(appointment):
 	procedure.token = appointment.token
 	procedure.prescription = appointment.prescription
 	procedure.invoice = appointment.invoice
+	check_detail = frappe.db.get_values("Procedure Template", appointment.procedure_template, ["maintain_stock","is_staged"], as_dict=True)
+	if check_detail[0]['maintain_stock']:
+		procedure.maintain_stock = 1
+	if check_detail[0]['is_staged']:
+		procedure.is_staged = 1
 	return procedure.as_dict()
 
 def create_item_line(template, sales_invoice):
