@@ -32,7 +32,7 @@ frappe.ui.form.on('Invoice Test Report', {
 		if(btn_send_sms_show){
 			frm.add_custom_button(__('Send SMS'), function() {
 				frappe.call({
-					method: "smarte.medical.doctype.laboratory_settings.laboratory_settings.get_sms_text",
+					method: "erpnext.medical.doctype.laboratory_settings.laboratory_settings.get_sms_text",
 					args:{doc: frm.doc.name},
 					callback: function(r) {
 						if(!r.exc) {
