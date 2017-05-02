@@ -106,16 +106,6 @@ def get_student_guardians(student):
 	return guardians
 
 @frappe.whitelist()
-def get_student_batch_students(student_batch):
-	"""Returns List of student, student_name, idx in Student Batch.
-
-	:param student_batch: Student Batch.
-	"""
-	students = frappe.get_list("Student Batch Student", fields=["student", "student_name", "idx"] , 
-		filters={"parent": student_batch, "active": 1}, order_by= "idx")
-	return students
-
-@frappe.whitelist()
 def get_student_group_students(student_group):
 	"""Returns List of student, student_name in Student Group.
 
@@ -283,8 +273,6 @@ def update_email_group(doctype, name):
 		email_group.save()
 	email_list = []
 	students = []
-	if doctype == "Student Batch":
-		students = get_student_batch_students(name)
 	if doctype == "Student Group":
 		students = get_student_group_students(name)
 	for stud in students:
