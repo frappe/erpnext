@@ -16,4 +16,4 @@ def execute():
 
 	table_columns = frappe.db.get_table_columns("Student Attendance")
 	if "student_batch" in table_columns:
-		rename_field(doctype, "student_batch", "student_group")
+		rename_field("Student Attendance", "student_batch", "student_group")
