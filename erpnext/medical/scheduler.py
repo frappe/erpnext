@@ -122,7 +122,7 @@ def check_availability(doctype, df, token, dt, dn, date, time, end_dt):
 
 	else: #check overlaping schedules for the resource for the given period
 		if not (time and end_dt):
-			availability.append({"msg": _("No Work Schedule or average time specified for {0} {1}").format(dt,dn)})
+			availability.append({"msg": _("Save to book appointments for {0} {1}. You cannot check availability as there are no schedules.").format(dt,dn)})
 			return availability
 
 		start = datetime.datetime.combine(date, time)
