@@ -220,7 +220,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					}
 				}
 				frappe.call({
-					method: "erpnext.buying.doctype.purchase_common.purchase_common.get_linked_material_requests",
+					method: "erpnext.buying.utils.get_linked_material_requests",
 					args:{
 						items: my_items
 					},
