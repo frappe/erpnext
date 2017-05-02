@@ -40,7 +40,8 @@ The ERPNext code is licensed as GNU General Public License (v3) and the Document
 
 ## Contributing
 
-1. [Pull Request Requirements](https://github.com/frappe/erpnext/wiki/Pull-Request-Guidelines)
+1. [Issue Guidelines](https://github.com/frappe/erpnext/wiki/Issue-Guidelines)
+1. [Pull Request Requirements](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines)
 1. [Translations](https://translate.erpnext.com)
 1. [Chart of Accounts](https://charts.erpnext.com)
 
