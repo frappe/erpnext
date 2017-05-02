@@ -126,3 +126,76 @@ frappe.ui.form.on("Procedure Template", "service_type", function(frm,cdt,cdn){
 	frm.doc.change_in_item = 1;
 
 });
+
+frappe.ui.form.on('Procedure Stock Detail', {
+	quantity: function(frm, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "transfer_qty", d.quantity*d.conversion_factor);
+	},
+	barcode: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if (d.barcode) {
+			frappe.call({
+				method: "erpnext.stock.get_item_details.get_item_code",
+				args: {"barcode": d.barcode },
+				callback: function(r) {
+					if (!r.exe){
+						frappe.model.set_value(cdt, cdn, "item_code", r.message);
+					}
+				}
+			});
+		}
+	},
+	uom: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(d.uom && d.item_code){
+			return frappe.call({
+				method: "erpnext.stock.doctype.stock_entry.stock_entry.get_uom_details",
+				args: {
+					item_code: d.item_code,
+					uom: d.uom,
+					qty: d.quantity
+				},
+				callback: function(r) {
+					if(r.message) {
+						frappe.model.set_value(cdt, cdn, r.message);
+					}
+				}
+			});
+		}
+	},
+	item_code: function(frm, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(d.item_code) {
+			args = {
+				'item_code'			: d.item_code,
+				'transfer_qty'		: d.transfer_qty,
+				'company'			: frm.doc.company,
+				'quantity'				: d.quantity
+			};
+			return frappe.call({
+				doc: frm.doc,
+				method: "get_item_details",
+				args: args,
+				callback: function(r) {
+					if(r.message) {
+						var d = locals[cdt][cdn];
+						$.each(r.message, function(k, v) {
+							d[k] = v;
+						});
+						refresh_field("items");
+					}
+				}
+			});
+		}
+	}
+});
+
+//List Stock items
+me.frm.set_query("item_code", "items", function(doc, cdt, cdn) {
+		return {
+			filters: {
+				is_stock_item:1
+			}
+		};
+	});

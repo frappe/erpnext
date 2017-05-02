@@ -8,12 +8,46 @@ frappe.ui.form.on('Procedure', {
 				filters: {"disabled": 0}
 			}
 		});
+		if (!frm.doc.complete_procedure && !frm.doc.__islocal){
+
+			if(frm.doc.maintain_stock){
+				btn_label = 'Complete and Consume'
+				msg = 'Are you sure to Complete and Consume Stock?'
+			}else{
+				btn_label = 'Complete'
+				msg = 'Are you sure to Complete?'
+			}
+
+			frm.add_custom_button(__(btn_label), function () {
+				frappe.confirm(
+				    msg,
+				    function(){
+							frappe.call({
+							 doc: frm.doc,
+							 method: "complete",
+							 callback: function(r) {
+								 if(!r.exc) cur_frm.reload_doc();
+							 }
+						 });
+				    }
+				)
+
+			})
+		};
+		if (frm.doc.__islocal){
+			frm.set_df_property("stock_items", "hidden", 1);
+			frm.set_df_property("sb_stages", "hidden", 1);
+		}else{
+			frm.set_df_property("stock_items", "hidden", 0);
+			frm.set_df_property("sb_stages", "hidden", 0);
+		}
 	},
 	onload: function(frm){
-		if(frm.doc.__islocal){
-			frm.add_fetch("procedure_template", "service_type", "service_type")
+		if(frm.doc.complete_procedure){
+			frm.set_df_property("items", "read_only", 1);
+			frm.set_df_property("stages", "read_only", 1);
 		}
-	}
+	},
 });
 
 frappe.ui.form.on("Procedure", "patient",
@@ -59,6 +93,23 @@ frappe.ui.form.on("Procedure", "appointment",
 				frappe.model.set_value(frm.doctype,frm.docname, "end_dt", data.message.end_dt)
 				frappe.model.set_value(frm.doctype,frm.docname, "token", data.message.token)
 		    }
+		})
+	}
+});
+
+frappe.ui.form.on("Procedure", "procedure_template", function(frm) {
+	if(frm.doc.procedure_template){
+		frappe.call({
+		    "method": "frappe.client.get",
+		    args: {
+		        doctype: "Procedure Template",
+		        name: frm.doc.procedure_template
+		    },
+		    callback: function (data) {
+					frappe.model.set_value(frm.doctype,frm.docname, "service_type", data.message.service_type)
+					frappe.model.set_value(frm.doctype,frm.docname, "maintain_stock", data.message.maintain_stock)
+					frappe.model.set_value(frm.doctype,frm.docname, "is_staged", data.message.is_staged)
+				}
 		})
 	}
 });

@@ -5,7 +5,9 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe.model.document import Document
+from frappe.utils import nowdate
 from frappe import _
+from erpnext.stock.doctype.stock_entry.stock_entry import get_uom_details
 
 class ProcedureTemplate(Document):
 	def on_update(self):
@@ -22,6 +24,31 @@ class ProcedureTemplate(Document):
 
 	def after_insert(self):
 		create_item_from_template(self)
+
+	def get_item_details(self, args=None, for_update=False):
+		item = frappe.db.sql("""select stock_uom, description, image, item_name,
+			expense_account, buying_cost_center, item_group from `tabItem`
+			where name = %s
+				and disabled=0
+				and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)""",
+			(args.get('item_code'), nowdate()), as_dict = 1)
+		if not item:
+			frappe.throw(_("Item {0} is not active or end of life has been reached").format(args.get("item_code")))
+
+		item = item[0]
+
+		ret = {
+			'uom'			      	: item.stock_uom,
+			'stock_uom'			  	: item.stock_uom,
+			'item_name' 		  	: item.item_name,
+			'quantity'				: 0,
+			'transfer_qty'			: 0,
+			'conversion_factor'		: 1
+		}
+		# update uom
+		if args.get("uom") and for_update:
+			ret.update(get_uom_details(args.get('item_code'), args.get('uom'), args.get('quantity')))
+		return ret
 
 def updating_item(self):
 	frappe.db.sql("""update `tabItem` set item_name=%s, item_group=%s, disabled=0,
