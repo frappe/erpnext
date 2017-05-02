@@ -323,24 +323,24 @@ class calculate_taxes_and_totals(object):
 			self._set_in_company_currency(self.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"])
 
 		self.doc.round_floats_in(self.doc, ["grand_total", "base_grand_total"])
+
 		round_up = frappe.db.get_value("Company", filters={"name": self.doc.company }, fieldname="round_up_total_in_sales_invoice")
-		if round_up == 0:
-			if self.doc.meta.get_field("rounded_total"):
+
+		if self.doc.meta.get_field("rounded_total"):
+			if round_up == 0:
 				self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
 					self.doc.currency, self.doc.precision("rounded_total"))
-			if self.doc.meta.get_field("base_rounded_total"):
-				company_currency = erpnext.get_company_currency(self.doc.company)
+			else:
+				self.doc.rounded_total = math.ceil(float(self.doc.grand_total))
 
+		if self.doc.meta.get_field("base_rounded_total"):
+			if round_up == 0:
+				company_currency = erpnext.get_company_currency(self.doc.company)
 				self.doc.base_rounded_total = \
 					round_based_on_smallest_currency_fraction(self.doc.base_grand_total,
 						company_currency, self.doc.precision("base_rounded_total"))
-		else:
-			if self.doc.meta.get_field("rounded_total"):
-				self.doc.rounded_total = math.ceil(float(self.doc.grand_total))
-			if self.doc.meta.get_field("base_rounded_total"):
-				company_currency = erpnext.get_company_currency(self.doc.company)
-
-				self.doc.base_rounded_total =  math.ceil(float(self.doc.grand_total))
+			else:
+				self.doc.base_rounded_total =  math.ceil(float(self.doc.base_grand_total))
 
 	def _cleanup(self):
 		for tax in self.doc.get("taxes"):
