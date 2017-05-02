@@ -24,6 +24,7 @@ class Procedure(Document):
 			patient = frappe.get_doc("Patient", self.patient)
 			sample_collection = create_sample_doc(template, patient, None)
 			frappe.db.set_value("Procedure", self.name, "sample", sample_collection.name)
+		self.reload()
 	def complete(self):
 		if self.maintain_stock:
 			create_stock_entry(self)
