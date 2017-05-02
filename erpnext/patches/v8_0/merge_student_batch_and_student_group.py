@@ -26,6 +26,14 @@ def execute():
 			doc.extend("instructors", instructor_list)
 		doc.save()
 
+	# delete the student batch and child-table
+	frappe.delete_doc("DocType", "Student Batch", force=1)
+	frappe.db.sql("drop table if exists `tabStudent Batch`")
+	frappe.delete_doc("DocType", "Student Batch Student", force=1)
+	frappe.db.sql("drop table if exists `tabStudent Batch Student`")
+	frappe.delete_doc("DocType", "Student Batch Instructor", force=1)
+	frappe.db.sql("drop table if exists `tabStudent Batch Instructor`")
+
 	# delete the student batch creation tool
 	frappe.delete_doc("DocType", "Student Batch Creation Tool", force=1)
 	frappe.db.sql("drop table if exists `tabStudent Batch Creation Tool`")
