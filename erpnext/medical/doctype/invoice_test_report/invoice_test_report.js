@@ -134,7 +134,7 @@ var make_dialog = function(frm, emailed, printed) {
 			'number': number
 		})
 		dialog.fields_dict.messages_label.html("Message".bold())
-		dialog.fields_dict.messages.html(printed)
+		dialog.fields_dict.messages.html(emailed)
 	}else{
 		dialog.set_values({
 			'sms_type': "Printed",
