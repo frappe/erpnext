@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt, cstr, cint
 from frappe import _
+import json
 
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.doctype.item.item import validate_end_of_life
@@ -77,4 +78,26 @@ def check_for_closed_status(doctype, docname):
 
 	if status == "Closed":
 		frappe.throw(_("{0} {1} status is {2}").format(doctype, docname, status), frappe.InvalidStatusError)
+
+@frappe.whitelist()
+def get_linked_material_requests(items):
+	items = json.loads(items)
+	mr_list = []
+	for item in items:
+		material_request = frappe.db.sql("""SELECT distinct mr.name AS mr_name, 
+				(mr_item.qty - mr_item.ordered_qty) AS qty, 
+				mr_item.item_code AS item_code,
+				mr_item.name AS mr_item 
+			FROM `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
+			WHERE mr.name = mr_item.parent
+				AND mr_item.item_code = %(item)s 
+				AND mr.material_request_type = 'Purchase'
+				AND mr.per_ordered < 99.99
+				AND mr.docstatus = 1
+				AND mr.status != 'Stopped'
+                        ORDER BY mr_item.item_code ASC""",{"item": item}, as_dict=1)
+		if material_request:
+			mr_list.append(material_request)
+	
+	return mr_list
 
