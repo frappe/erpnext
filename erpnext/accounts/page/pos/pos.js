@@ -866,6 +866,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.customer_doc.set_primary_action(__("Save"), function () {
 			me.make_offline_customer(new_customer);
 			me.pos_bill.show();
+			me.list_customers.hide();
 		});
 	},
 
