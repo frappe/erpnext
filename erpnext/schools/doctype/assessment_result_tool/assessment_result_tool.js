@@ -3,12 +3,11 @@
 // For license information, please see license.txt
 
 cur_frm.add_fetch("assessment_plan", "student_group", "student_group");
-cur_frm.add_fetch("assessment_plan", "student_batch", "student_batch");
 
 frappe.ui.form.on('Assessment Result Tool', {
 	refresh: function(frm) {
 		if (frappe.route_options) {
-			frm.set_value("student_batch", frappe.route_options.student_batch);
+			frm.set_value("student_group", frappe.route_options.student_group);
 			frm.set_value("assessment_plan", frappe.route_options.assessment_plan);
 			frappe.route_options = null;
 		}
@@ -17,12 +16,11 @@ frappe.ui.form.on('Assessment Result Tool', {
 	},
 
 	assessment_plan: function(frm) {
-		if(!(frm.doc.student_batch || frm.doc.student_group)) return;
+		if(!frm.doc.student_group) return;
 		frappe.call({
 			method: "erpnext.schools.api.get_assessment_students",
 			args: {
 				"assessment_plan": frm.doc.assessment_plan,
-				"student_batch": frm.doc.student_batch,
 				"student_group": frm.doc.student_group
 			},
 			callback: function(r) {
