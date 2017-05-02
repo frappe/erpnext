@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.utils import cstr
-from erpnext.schools.api import get_student_batch_students, get_student_group_students
+from erpnext.schools.api import get_student_group_students
 
 
 class StudentAttendance(Document):
@@ -24,7 +24,7 @@ class StudentAttendance(Document):
 	
 	def validate_mandatory(self):
 		if not (self.student_group or self.course_schedule):
-			frappe.throw(_("""Student Batch or Course Schedule is mandatory"""))
+			frappe.throw(_("""Student Group or Course Schedule is mandatory"""))
 	
 	def validate_course_schedule(self):
 		if self.course_schedule:

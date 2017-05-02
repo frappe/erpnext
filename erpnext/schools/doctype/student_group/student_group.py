@@ -7,7 +7,6 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from erpnext.schools.utils import validate_duplicate_student
-from erpnext.schools.api import get_student_batch_students
 
 class StudentGroup(Document):
 	def validate(self):
