@@ -13,12 +13,6 @@ class VitalSigns(Document):
 	def on_cancel(self):
 		delete_vital_signs_from_medical_record(self)
 
-@frappe.whitelist()
-def create_vital_signs(patient):
-	vital_signs = frappe.new_doc("Vital Signs")
-	vital_signs.patient = patient
-	return vital_signs.as_dict()
-
 def insert_vital_signs_to_medical_record(doc):
 	subject = set_subject_field(doc)
 	medical_record = frappe.new_doc("Patient Medical Record")

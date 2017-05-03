@@ -67,16 +67,10 @@ frappe.medical.Appointment = Class.extend({
 		});
 	},
 	create_vitals:function (patient) {
-		frappe.call({
-			method:"erpnext.medical.doctype.vital_signs.vital_signs.create_vital_signs",
-			args: {patient: patient},
-			callback: function(data){
-				if(!data.exc){
-					var doclist = frappe.model.sync(data.message);
-					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-				}
-			}
-		});
+		frappe.route_options = {
+			"patient": patient,
+		}
+		frappe.new_doc("Vital Signs")
 	},
 	make_toolbar: function () {
 		var me = this;

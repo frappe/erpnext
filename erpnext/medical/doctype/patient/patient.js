@@ -100,18 +100,14 @@ var get_age = function (birth) {
   return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)"
 }
 
-var btn_create_vital_signs = function(frm){
-	var doc = frm.doc;
-	frappe.call({
-		method:"erpnext.medical.doctype.vital_signs.vital_signs.create_vital_signs",
-		args: {patient: doc.name},
-		callback: function(data){
-			if(!data.exc){
-				var doclist = frappe.model.sync(data.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			}
-		}
-	});
+var btn_create_vital_signs = function (frm) {
+	if(!frm.doc.name){
+		frappe.throw("Please save the patient first")
+	}
+	frappe.route_options = {
+		"patient": frm.doc.name,
+	}
+	frappe.new_doc("Vital Signs")
 }
 
 var btn_register_patient= function(frm){

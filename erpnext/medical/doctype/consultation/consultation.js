@@ -107,6 +107,16 @@ var create_medical_record = function (frm) {
 	frappe.new_doc("Patient Medical Record")
 }
 
+var btn_create_vital_signs = function (frm) {
+	if(!frm.doc.patient){
+		frappe.throw("Please select patient")
+	}
+	frappe.route_options = {
+		"patient": frm.doc.patient,
+	}
+	frappe.new_doc("Vital Signs")
+}
+
 var show_details = function(data){
 	var details = "";
 	if(data.email) details += "<br><b>Email :</b> " + data.email;
@@ -333,23 +343,6 @@ frappe.ui.form.on("Review Detail", {
 		frappe.model.set_value(cdt, cdn, 'review', review)
 	}
 });
-
-var btn_create_vital_signs = function(frm){
-	var doc = frm.doc;
-	if(!doc.patient){
-		frappe.throw("Please select patient")
-	}
-	frappe.call({
-		method:"erpnext.medical.doctype.vital_signs.vital_signs.create_vital_signs",
-		args: {patient: doc.patient},
-		callback: function(data){
-			if(!data.exc){
-				var doclist = frappe.model.sync(data.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			}
-		}
-	});
-}
 
 var btn_admit_patient = function(frm){
 	var doc = frm.doc;
