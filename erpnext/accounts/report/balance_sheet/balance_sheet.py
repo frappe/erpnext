@@ -14,17 +14,17 @@ def execute(filters=None):
 	asset = get_data(filters.company, "Asset", "Debit", period_list, 
 		only_current_fiscal_year=False, filters=filters,
 		accumulated_values=filters.accumulated_values, 
-		ignore_closing_entries=True, ignore_accumulated_values_for_fy=True)
+		ignore_closing_entries=False, ignore_accumulated_values_for_fy=True)
 		
 	liability = get_data(filters.company, "Liability", "Credit", period_list, 
 		only_current_fiscal_year=False, filters=filters,
 		accumulated_values=filters.accumulated_values, 
-		ignore_closing_entries=True, ignore_accumulated_values_for_fy=True)
+		ignore_closing_entries=False, ignore_accumulated_values_for_fy=True)
 		
 	equity = get_data(filters.company, "Equity", "Credit", period_list, 
 		only_current_fiscal_year=False, filters=filters,
 		accumulated_values=filters.accumulated_values, 
-		ignore_closing_entries=True, ignore_accumulated_values_for_fy=True)
+		ignore_closing_entries=False, ignore_accumulated_values_for_fy=True)
 
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(asset, liability, equity,
 		period_list, filters.company)
@@ -110,15 +110,18 @@ def check_opening_balance(asset, liability, equity):
 	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 	if asset:
 		opening_balance = flt(asset[0].get("opening_balance", 0), float_precision)
+
 	if liability:
 		opening_balance -= flt(liability[0].get("opening_balance", 0), float_precision)
+
 	if equity:
 		opening_balance -= flt(equity[0].get("opening_balance", 0), float_precision)
 
+	opening_balance = flt(opening_balance, float_precision)
 	if opening_balance:
 		return _("Previous Financial Year is not closed"),opening_balance
 	return None,None
-		
+
 def get_chart_data(filters, columns, asset, liability, equity):
 	x_intervals = ['x'] + [d.get("label") for d in columns[2:]]
 	
