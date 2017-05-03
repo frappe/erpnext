@@ -20,10 +20,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Student Batch"
-				},
-				{
-					"type": "doctype",
 					"name": "Student Group"
 				},
 				{
