@@ -81,7 +81,7 @@ def get_item_details(args):
 		if out.has_serial_no:
 			out.serial_no = get_serial_no(out)
 
-		if out.has_batch_no and out.warehouse:
+		if out.has_batch_no:
 			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
 
 
