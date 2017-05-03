@@ -74,11 +74,14 @@ def get_item_details(args):
 
 	out.update(get_pricing_rule_for_item(args))
 
-	if args.get("doctype") in ("Sales Invoice", "Delivery Note") and out.stock_qty > 0:
+	if (args.get("doctype") == "Delivery Note" or 
+		(args.get("doctype") == "Sales Invoice" and args.get('update_stock'))) \
+		and out.warehouse and out.stock_qty > 0:
+		
 		if out.has_serial_no:
 			out.serial_no = get_serial_no(out)
 
-		if out.has_batch_no:
+		if out.has_batch_no and out.warehouse:
 			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
 
 
