@@ -125,12 +125,10 @@ var erpnext_slides = [
 				frappe.msgprint(__("Please enter valid Financial Year Start and End Dates"));
 				return false;
 			}
-
 			if ((this.values.company_name || "").toLowerCase() == "company") {
 				frappe.msgprint(__("Company Name cannot be Company"));
 				return false;
 			}
-
 			return true;
 		},
 

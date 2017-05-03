@@ -263,10 +263,10 @@ def get_data():
 			"label": _("Schools")
 		},
 		{
-			"module_name": "Medical",
+			"module_name": "Healthcare",
 			"color": "#FF888B",
 			"icon": "octicon octicon-plus",
 			"type": "module",
-			"label": _("Medical")
+			"label": _("Healthcare")
 		}
 	]

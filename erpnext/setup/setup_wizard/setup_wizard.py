@@ -44,7 +44,7 @@ def setup_complete(args=None):
 		create_instructor(args)
 		create_room(args)
 
-	if args.domain.lower() == 'medical':
+	if args.domain.lower() == 'healthcare':
 		create_medical_departments()
 		create_antibiotics()
 		create_test_uom()
