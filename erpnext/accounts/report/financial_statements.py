@@ -6,8 +6,11 @@ import frappe
 from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
 	add_months, add_days, formatdate, cint)
+from erpnext.accounts.utils import get_fiscal_year
 
-def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False, company=None):
+
+def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False, 
+	company=None, reset_period_on_fy_change=True):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
@@ -49,7 +52,8 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_v
 			# if a fiscal year ends before a 12 month period
 			period.to_date = year_end_date
 
-		period.to_date_fiscal_year = get_date_fiscal_year(period.to_date, company)
+		period.to_date_fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
+		period.from_date_fiscal_year_start_date = get_fiscal_year(period.from_date, company=company)[1]
 
 		period_list.append(period)
 
@@ -65,7 +69,10 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_v
 			if not accumulated_values:
 				label = get_label(periodicity, opts["from_date"], opts["to_date"])
 			else:
-				label = get_label(periodicity, period_list[0]["from_date"], opts["to_date"])
+				if reset_period_on_fy_change:
+					label = get_label(periodicity, opts.from_date_fiscal_year_start_date, opts["to_date"])
+				else:
+					label = get_label(periodicity, period_list[0].from_date, opts["to_date"])
 
 		opts.update({
 			"key": key.replace(" ", "_").replace("-", "_"),
@@ -150,10 +157,6 @@ def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accum
 			if entry.posting_date < period_list[0].year_start_date:
 				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
 				
-def get_date_fiscal_year(date, company):
-	from erpnext.accounts.utils import get_fiscal_year
-	return get_fiscal_year(date, company=company)[0]
-
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values):
 	"""accumulate children's values in parent accounts"""
 	for d in reversed(accounts):
