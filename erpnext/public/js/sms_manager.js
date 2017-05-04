@@ -21,9 +21,9 @@ function SMSManager(doc) {
 		}
 
 		if (in_list(['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'], doc.doctype))
-			this.show(doc.contact_person, 'customer', doc.customer, '', default_msg[doc.doctype]);
+			this.show(doc.contact_person, 'Customer', doc.customer, '', default_msg[doc.doctype]);
 		else if (in_list(['Purchase Order', 'Purchase Receipt'], doc.doctype))
-			this.show(doc.contact_person, 'supplier', doc.supplier, '', default_msg[doc.doctype]);
+			this.show(doc.contact_person, 'Supplier', doc.supplier, '', default_msg[doc.doctype]);
 		else if (doc.doctype == 'Lead')
 			this.show('', '', '', doc.mobile_no, default_msg[doc.doctype]);
 		else if (doc.doctype == 'Opportunity')
@@ -33,13 +33,13 @@ function SMSManager(doc) {
 
 	};
 
-	this.get_contact_number = function(contact, key, value) {
+	this.get_contact_number = function(contact, ref_doctype, ref_name) {
 		frappe.call({
 			method: "erpnext.setup.doctype.sms_settings.sms_settings.get_contact_number",
 			args: {
-				contact_name:contact,
-				value:value,
-				key:key
+				contact_name: contact,
+				ref_doctype: ref_doctype,
+				ref_name: ref_name
 			},
 			callback: function(r) {
 				if(r.exc) { msgprint(r.exc); return; }
@@ -49,13 +49,13 @@ function SMSManager(doc) {
 		});
 	};
 
-	this.show = function(contact, key, value, mobile_nos, message) {
+	this.show = function(contact, ref_doctype, ref_name, mobile_nos, message) {
 		this.message = message;
 		if (mobile_nos) {
 			me.number = mobile_nos;
 			me.show_dialog();
 		} else if (contact){
-			this.get_contact_number(contact, key, value)
+			this.get_contact_number(contact, ref_doctype, ref_name)
 		} else {
 			me.show_dialog();
 		}
