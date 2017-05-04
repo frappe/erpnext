@@ -524,7 +524,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		} else {
 			doc.customer = doc.customer_name = doc.customer_address =
 				doc.delivery_note_no = doc.sales_invoice_no = doc.supplier =
-				doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = 
+				doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no =
 				doc.address_display = null;
 		}
 		if(doc.purpose == "Material Receipt") {
@@ -542,3 +542,35 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		erpnext.utils.get_party_details(this.frm, null, null, null);
 	}
 });
+
+erpnext.select_batch_and_serial_no = (frm) => {
+	frm.items.forEach(function(d) {
+		if(d.has_batch_no && !d.batch_no) {
+			show_modal(item_code, qty);
+		}
+	});
+
+	let show_modal = (item_code, qty) => {
+		let d = new frappe.ui.Dialog({
+			fields: [
+				{fieldname: 'item_code', read_only: 1, fieldtype:'Link', options: 'Item',
+					label: __('Item Code'), 'default': item_code},
+				{fieldname: 'qty', fieldtype:'Float', label: __('Qty'), 'default': qty},
+				{fieldname: 'batches', fieldtype: 'Table',
+					fields: [
+						{fieldtype:'Link', fieldname:'batch_no', options: 'Batch', reqd: 1,
+							label: __('Select Batch'), in_list_view:1, get_query: function(doc) {
+								return {filters: {item: item_code }};
+							}},
+						{fieldtype:'Float', fieldname:'available_qty', reqd: 1,
+							label: __('Available'), in_list_view:1},
+						{fieldtype:'Float', fieldname:'selected_qty', reqd: 1,
+							label: __('Qty'), in_list_view:1},
+					],
+				}
+			]
+		});
+	}
+
+
+}
