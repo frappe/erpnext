@@ -8,8 +8,12 @@ from frappe.model.document import Document
 from frappe import throw, _
 from frappe.utils import cstr
 from erpnext.accounts.party import validate_party_accounts
+from frappe.geo.address_and_contact import load_address_and_contact, delete_contact_and_address
 
 class Physician(Document):
+	def onload(self):
+		load_address_and_contact(self)
+
 	def autoname(self):
 		# physician first_name and last_name
 		self.name = " ".join(filter(None,
@@ -50,3 +54,6 @@ class Physician(Document):
 		if physician:
 			throw(_("User {0} is already assigned to Physician {1}").format(
 				self.user_id, physician[0]), frappe.DuplicateEntryError)
+
+	def on_trash(self):
+		delete_contact_and_address('Physician', self.name)
