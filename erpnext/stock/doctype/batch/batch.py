@@ -105,9 +105,10 @@ def set_batch_nos(doc, warehouse_field, throw = False):
 				if flt(batch_qty) < flt(d.qty):
 					frappe.throw(_("Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches").format(d.idx, d.batch_no, batch_qty, d.qty))
 
-def get_batch_no(item_code, warehouse, qty, throw=False):
-	'''get the smallest batch with for the given item_code, warehouse and qty'''
-	
+def get_batch_no(item_code, warehouse, qty):
+	'''get the batch number with for the given item_code, warehouse and qty if there
+		is only one batch'''
+
 	batch_no = None
 	batches = get_batch_qty(item_code = item_code, warehouse = warehouse)
 	if batches:
@@ -117,7 +118,7 @@ def get_batch_no(item_code, warehouse, qty, throw=False):
 				batch_no = b.batch_no
 				# found!
 				break
-	
+
 	if not batch_no:
 		frappe.msgprint(_('Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement').format(frappe.bold(item_code)))
 		if throw: raise UnableToSelectBatchError

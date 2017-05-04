@@ -259,7 +259,7 @@ class update_entries_after(object):
 			if not self.valuation_rate and actual_qty > 0:
 				self.valuation_rate = sle.incoming_rate
 
-			# Get valuation rate from previous SLE or Item master, if item does not have the 
+			# Get valuation rate from previous SLE or Item master, if item does not have the
 			# allow zero valuration rate flag set
 			if not self.valuation_rate and sle.voucher_detail_no:
 				allow_zero_valuation_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
@@ -445,10 +445,15 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 		# syste does not found any SLE, then take valuation rate from Item
 		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
 
-	if not valuation_rate:
-		# try in price list
-		valuation_rate = frappe.db.get_value('Item Price',
-			dict(item_code=item_code, buying=1, currency=currency), 'price_list_rate')
+		if not valuation_rate:
+			# try Item Standard rate
+			valuation_rate = frappe.db.get_value("Item", item_code, "standard_rate")
+
+			if not valuation_rate:
+				# try in price list
+				valuation_rate = frappe.db.get_value('Item Price',
+					dict(item_code=item_code, buying=1, currency=currency),
+					'price_list_rate')
 
 	if not allow_zero_rate and not valuation_rate \
 			and cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
