@@ -9,22 +9,19 @@ from erpnext.accounts.report.financial_statements import (get_period_list, get_c
 
 def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
-		filters.periodicity, filters.accumulated_values, filters.company)
+		filters.periodicity, company=filters.company)
 
 	asset = get_data(filters.company, "Asset", "Debit", period_list, 
 		only_current_fiscal_year=False, filters=filters,
-		accumulated_values=filters.accumulated_values, 
-		ignore_closing_entries=True, ignore_accumulated_values_for_fy=True)
+		accumulated_values=filters.accumulated_values)
 		
 	liability = get_data(filters.company, "Liability", "Credit", period_list, 
 		only_current_fiscal_year=False, filters=filters,
-		accumulated_values=filters.accumulated_values, 
-		ignore_closing_entries=True, ignore_accumulated_values_for_fy=True)
+		accumulated_values=filters.accumulated_values)
 		
 	equity = get_data(filters.company, "Equity", "Credit", period_list, 
 		only_current_fiscal_year=False, filters=filters,
-		accumulated_values=filters.accumulated_values, 
-		ignore_closing_entries=True, ignore_accumulated_values_for_fy=True)
+		accumulated_values=filters.accumulated_values)
 
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(asset, liability, equity,
 		period_list, filters.company)
@@ -114,7 +111,8 @@ def check_opening_balance(asset, liability, equity):
 		opening_balance -= flt(liability[0].get("opening_balance", 0), float_precision)
 	if equity:
 		opening_balance -= flt(equity[0].get("opening_balance", 0), float_precision)
-
+		
+	opening_balance = flt(opening_balance, float_precision)
 	if opening_balance:
 		return _("Previous Financial Year is not closed"),opening_balance
 	return None,None

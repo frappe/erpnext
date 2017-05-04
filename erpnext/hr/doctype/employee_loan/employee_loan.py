@@ -132,7 +132,7 @@ def get_monthly_repayment_amount(repayment_method, loan_amount, rate_of_interest
 def get_employee_loan_application(employee_loan_application):
 	employee_loan = frappe.get_doc("Employee Loan Application", employee_loan_application)
 	if employee_loan:
-		return employee_loan
+		return employee_loan.as_dict()
 
 @frappe.whitelist()
 def make_jv_entry(employee_loan, company, employee_loan_account, employee, loan_amount, payment_account):

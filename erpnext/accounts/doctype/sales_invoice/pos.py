@@ -325,8 +325,10 @@ def make_customer_and_address(customers):
 		if not frappe.db.exists('Customer', name):
 			name = add_customer(name)
 		data = json.loads(data)
+		make_contact(data, name)
 		make_address(data, name)
 		customer_list.append(name)
+	frappe.db.commit()
 	return customer_list
 
 def add_customer(name):
@@ -339,6 +341,29 @@ def add_customer(name):
 	customer_doc.save(ignore_permissions = True)
 	frappe.db.commit()
 	return customer_doc.name
+
+def make_contact(args,customer):
+	if args.get('email_id') or args.get('phone'):
+		name = frappe.db.get_value('Dynamic Link',
+			{'link_doctype': 'Customer', 'link_name': customer, 'parenttype': 'Contact'}, 'parent')
+
+		args = {
+			'email_id': args.get('email_id'),
+			'phone': args.get('phone')
+		}
+
+		doc = frappe.new_doc('Contact')
+		if name:
+			doc = frappe.get_doc('Contact', name)
+
+		doc.update(args)
+		if not name:
+			doc.first_name = customer
+			doc.append('links',{
+				'link_doctype': 'Customer',
+				'link_name': customer
+			})
+		doc.save(ignore_permissions=True)
 
 def make_address(args, customer):
 	if not args.get('address_line1'): return
