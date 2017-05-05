@@ -321,8 +321,12 @@ class SalarySlip(TransactionBase):
 	def sum_components(self, component_type, total_field):
 		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
+		
 		if not relieving_date:
 			relieving_date = getdate(self.end_date)
+
+		if not joining_date:
+			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(employee.employee)))
 
 		for d in self.get(component_type):
 			if ((cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet) or\
