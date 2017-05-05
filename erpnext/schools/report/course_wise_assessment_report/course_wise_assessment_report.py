@@ -19,6 +19,8 @@ def execute(filters=None):
 		where ap.assessment_group=%s and ap.student_group=%s and ap.name=apc.parent and ap.docstatus=1
 		order by apc.assessment_criteria''', (assessment_group, student_group), as_dict=1)
 	assessment_plan_list = set([d["name"] for d in assessment_plan])
+	if not assessment_plan_list:
+		frappe.throw(_("No assessment plan linked with this assessment group"))
 
 	assessment_result = frappe.db.sql('''select ar.student, ard.assessment_criteria, ard.grade, ard.score 
 		from `tabAssessment Result` ar, `tabAssessment Result Detail` ard
@@ -44,11 +46,11 @@ def execute(filters=None):
 
 def get_column(assessment_plan):
 	columns = [ 
-		_("Group Roll No") + "::80", 
+		_("Roll No") + "::60", 
 		_("Student ID") + ":Link/Student:90", 
 		_("Student Name") + "::160", 
 	]
 	for d in assessment_plan:
 		columns.append(d.get("assessment_criteria") + "::110")
-		columns.append("Max Score(" + str(int(d.get("max_score"))) + ")::110")
+		columns.append("Max Score(" + str(int(d.get("max_score"))) + ")::100")
 	return columns
