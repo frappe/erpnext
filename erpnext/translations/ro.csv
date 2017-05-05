@@ -36,7 +36,7 @@ DocType: Purchase Receipt Item,Required By,Cerute de
 DocType: Delivery Note,Return Against Delivery Note,Reveni Împotriva livrare Nota
 DocType: Purchase Order,% Billed,% Facurat
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +43,Exchange Rate must be same as {0} {1} ({2}),Rata de schimb trebuie să fie aceeași ca și {0} {1} ({2})
-DocType: Sales Invoice,Customer Name,Nume client
+DocType: Sales Invoice,Customer Name,Cumpărător
 DocType: Vehicle,Natural Gas,Gaz natural
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +130,Bank account cannot be named as {0},Contul bancar nu poate fi numit ca {0}
 DocType: Account,Heads (or groups) against which Accounting Entries are made and balances are maintained.,Heads (sau grupuri) față de care înregistrările contabile sunt făcute și soldurile sunt menținute.
@@ -785,7 +785,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -796,19 +796,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Șablon de impozitare standard, care pot fi aplicate la toate tranzacțiile de vânzare. Acest model poate conține lista de capete fiscale și, de asemenea, mai multe capete de cheltuieli / venituri, cum ar fi ""de transport"", ""asigurare"", ""manipulare"" etc. 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Șablon de impozitare standard, care pot fi aplicate la toate tranzacțiile de vânzare. Acest model poate conține lista de capete fiscale și, de asemenea, mai multe capete de cheltuieli / venituri, cum ar fi ""de transport"", ""asigurare"", ""manipulare"" etc.
 
- #### Notă 
+ #### Notă
 
  vă Rata de impozitare defini aici va fi cota de impozitare standard pentru toate Articole ** **. Dacă există articole ** **, care au preturi diferite, acestea trebuie să fie adăugate în ** Impozitul Postul ** masă în ** ** postul comandantului.
 
- #### Descrierea de coloane 
+ #### Descrierea de coloane
 
- 1. Calcul Tip: 
+ 1. Calcul Tip:
  - Acest lucru poate fi pe ** net total ** (care este suma cuantum de bază).
  - ** La rândul precedent Raport / Suma ** (pentru impozite sau taxe cumulative). Dacă selectați această opțiune, impozitul va fi aplicat ca procent din rândul anterior (în tabelul de impozitare) suma totală sau.
  - ** ** Real (după cum sa menționat).
- 2. Șeful cont: Registrul cont în care acest impozit va fi rezervat 
+ 2. Șeful cont: Registrul cont în care acest impozit va fi rezervat
  3. Cost Center: În cazul în care taxa / taxa este un venit (cum ar fi de transport maritim) sau cheltuieli trebuie să se rezervat împotriva unui centru de cost.
  4. Descriere: Descriere a taxei (care vor fi tipărite în facturi / citate).
  5. Notă: Rata de Profit Brut.
@@ -893,7 +893,7 @@ DocType: Employee,Provide Email Address registered in company,Furnizarea Adresa 
 DocType: Shopping Cart Settings,Enable Checkout,activaţi Checkout
 apps/erpnext/erpnext/config/learn.py +202,Purchase Order to Payment,Comandă de aprovizionare de plata
 apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +48,Projected Qty,Proiectat Cantitate
-DocType: Sales Invoice,Payment Due Date,Data scadentă de plată
+DocType: Sales Invoice,Payment Due Date,Scadentă
 apps/erpnext/erpnext/stock/doctype/item/item.js +340,Item Variant {0} already exists with same attributes,Postul Varianta {0} există deja cu aceleași atribute
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +95,'Opening',&quot;Deschiderea&quot;
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +130,Open To Do,Deschideți To Do
@@ -1021,7 +1021,7 @@ apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +30,"Row {0}: Invoice {1}
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +120,Row {0}: Payment against Sales/Purchase Order should always be marked as advance,Rând {0}: Plata împotriva Vânzări / Ordinului de Procurare ar trebui să fie întotdeauna marcate ca avans
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +16,Chemical,Chimic
 DocType: Salary Component Account,Default Bank / Cash account will be automatically updated in Salary Journal Entry when this mode is selected.,Default cont bancar / numerar vor fi actualizate automat în Jurnalul de intrare a salariului când este selectat acest mod.
-apps/erpnext/erpnext/schools/doctype/grading_structure/grading_structure.py +24,"The intervals for Grade Code {0} overlaps with the grade intervals for other grades. 
+apps/erpnext/erpnext/schools/doctype/grading_structure/grading_structure.py +24,"The intervals for Grade Code {0} overlaps with the grade intervals for other grades.
                     Please check intervals {0} and {1} and try again",Intervalele de cod Grad {0} se suprapune cu intervalele de grad pentru alte clase. Vă rugăm să verificați intervalele de {0} și {1} și încercați din nou
 DocType: BOM,Raw Material Cost(Company Currency),Brut Costul materialelor (companie Moneda)
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +715,All items have already been transferred for this Production Order.,Toate articolele acestei comenzi de producție au fost deja transferate.
@@ -2345,7 +2345,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -2357,19 +2357,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Șablon de impozitare standard care pot fi aplicate la toate tranzacțiile de cumpărare. Acest model poate conține lista de capete fiscale și, de asemenea, mai multe capete de cheltuieli, cum ar fi ""de transport"", ""asigurare"", ""manipulare"" etc. 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Șablon de impozitare standard care pot fi aplicate la toate tranzacțiile de cumpărare. Acest model poate conține lista de capete fiscale și, de asemenea, mai multe capete de cheltuieli, cum ar fi ""de transport"", ""asigurare"", ""manipulare"" etc.
 
- #### Notă 
+ #### Notă
 
  Rata de impozitare pe care o definiți aici va fi rata de impozitare standard pentru toate Articole ** **. Dacă există articole ** **, care au preturi diferite, acestea trebuie să fie adăugate în ** Impozitul Postul ** masă în ** ** postul comandantului.
 
- #### Descrierea de coloane 
+ #### Descrierea de coloane
 
- 1. Calcul Tip: 
+ 1. Calcul Tip:
  - Acest lucru poate fi pe ** net total ** (care este suma cuantum de bază).
  - ** La rândul precedent Raport / Suma ** (pentru impozite sau taxe cumulative). Dacă selectați această opțiune, impozitul va fi aplicat ca procent din rândul anterior (în tabelul de impozitare) suma totală sau.
  - ** ** Real (după cum sa menționat).
- 2. Șeful cont: Registrul cont în care acest impozit va fi rezervat 
+ 2. Șeful cont: Registrul cont în care acest impozit va fi rezervat
  3. Cost Center: În cazul în care taxa / taxa este un venit (cum ar fi de transport maritim) sau cheltuieli trebuie să se rezervat împotriva unui centru de cost.
  4. Descriere: Descriere a taxei (care vor fi tipărite în facturi / citate).
  5. Notă: Rata de Profit Brut.
@@ -2579,7 +2579,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Termeni și Condiții care pot fi adăugate la vânzările și achizițiile standard.
 
- Exemple: 
+ Exemple:
 
  1. Perioada de valabilitate a ofertei.
  1. Conditii de plata (in avans, pe credit, parte în avans etc.).
@@ -2588,7 +2588,7 @@ Examples:
  1. Garantie dacă este cazul.
  1. Politica de Returnare.
  1. Condiții de transport maritim, dacă este cazul.
- 1. Modalitati de litigii de adresare, indemnizație, răspunderea, etc. 
+ 1. Modalitati de litigii de adresare, indemnizație, răspunderea, etc.
  1. Adresa și de contact ale companiei."
 DocType: Attendance,Leave Type,Tip Concediu
 DocType: Purchase Invoice,Supplier Invoice Details,Furnizor Detalii factură
@@ -3641,7 +3641,7 @@ DocType: Accounts Settings,"If enabled, the system will post accounting entries 
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +15,Brokerage,Brokeraj
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +232,Attendance for employee {0} is already marked for this day,Prezență pentru angajat {0} este deja marcat pentru această zi
 DocType: Production Order Operation,"in Minutes
-Updated via 'Time Log'","în procesul-verbal 
+Updated via 'Time Log'","în procesul-verbal
  Actualizat prin ""Ora Log"""
 DocType: Customer,From Lead,Din Conducere
 apps/erpnext/erpnext/config/manufacturing.py +13,Orders released for production.,Comenzi lansat pentru producție.
@@ -3743,7 +3743,7 @@ apps/erpnext/erpnext/config/learn.py +107,Newsletters,Buletine
 DocType: Stock Ledger Entry,Stock Ledger Entry,Stoc Ledger intrare
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +87,Same item has been entered multiple times,Același articol a fost introdus de mai multe ori
 DocType: Department,Leave Block List,Lista Concedii Blocate
-DocType: Sales Invoice,Tax ID,ID impozit
+DocType: Sales Invoice,Tax ID,Cod inregistrare fiscala
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +188,Item {0} is not setup for Serial Nos. Column must be blank,Articolul {0} nu este configurat pentru Numerotare Seriala. Coloana trebuie să fie vida
 DocType: Accounts Settings,Accounts Settings,Setări Conturi
 apps/erpnext/erpnext/schools/doctype/student_applicant/student_applicant.js +7,Approve,Aproba
@@ -3843,7 +3843,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +136,Please find attached
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +34,Bank Statement balance as per General Ledger,Banca echilibru Declarație pe General Ledger
 DocType: Job Applicant,Applicant Name,Nume solicitant
 DocType: Authorization Rule,Customer / Item Name,Client / Denumire articol
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -4195,7 +4195,7 @@ DocType: Purchase Invoice Item,Rejected Serial No,Respins de ordine
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +82,Year start date or end date is overlapping with {0}. To avoid please set company,Anul Data de începere sau de încheiere este suprapunerea cu {0}. Pentru a evita vă rugăm să setați companie
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +157,Start date should be less than end date for Item {0},Data de începere trebuie să fie mai mică decât data de sfârșit pentru postul {0}
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Exemplu:. ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Exemplu:. ABCD #####
  Dacă seria este setat și nu de serie nu este menționat în tranzacții, numărul de atunci automat de serie va fi creat pe baza acestei serii. Dacă întotdeauna doriți să se menționeze explicit Serial nr de acest articol. părăsi acest gol."
 DocType: Upload Attendance,Upload Attendance,Încărcați Spectatori
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +302,BOM and Manufacturing Quantity are required,BOM și cantitatea de producție sunt necesare
