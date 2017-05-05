@@ -8,7 +8,7 @@ import frappe, requests
 def get_items(text, start, limit):
 	hub = frappe.get_single("Hub Settings")
 	response = requests.get(hub.hub_url + "/api/method/hub.hub.api.get_items", params={
-		"access_token": hub.access_token,
+		"password": hub.password,
 		"text": text,
 		"start": start,
 		"limit": limit

@@ -1,0 +1,33 @@
+{% from "erpnext/templates/includes/macros.html" import product_image %}
+<div class="item-content" style="margin-top:20px;">
+	<div class="row">
+		<div class="col-sm-6">
+			{{ product_image(image, "product-full-image") }}
+		</div>
+		<div class="col-sm-6" style="padding-left:20px;">
+			<h2>{{ item_name }}</h2>
+			<p class="text-muted">
+				{{ _("Item Code") }}: <span>{{ item_code }}</span>
+			</p>
+			<div style="min-height: 100px; margin: 10px 0;">
+				<h4 class="item-price" itemprop="price">{{ price }}</h4>
+				<div class="item-stock" itemprop="availability">{{ stock_qty }}</div>
+			</div>
+		</div>
+	</div>	
+	<div class="row description" style="margin-top:30px; margin-bottom:20px">
+		<div class="col-md-12">
+			<div class="h6 text-uppercase">{{ _("Description") }}</div>
+				<div itemprop="description" class="item-desc">
+					{{ description or _("No description given") }}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="seller-info">
+		<h6>Seller Info:</h6>
+		<p class="text-muted small">{%= hub_user_name %}</p>
+		<p class="text-muted small">{%= city %}</p>
+		<p class="text-muted small">{%= country %}</p>
+	</div>
+</div>
