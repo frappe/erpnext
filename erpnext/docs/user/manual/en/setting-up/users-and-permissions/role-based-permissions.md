@@ -1,3 +1,5 @@
+what does 'If owner' mean? Please let me know as it's not documented on this page thanks
+
 # Role Based Permissions
 
 ERPNext has a role-based permission system. It means that you can assign Roles to Users, and set Permissions on Roles. The permission structure also allows you to define different permission rules for different fields, using a concept called **Permission "Level"** of a field. Once roles are assigned to a user, it gives you the ability to limit access for a user to only specific documents.
