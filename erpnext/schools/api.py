@@ -10,6 +10,14 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, cstr
 from frappe.email.doctype.email_group.email_group import add_subscribers
 
+def get_course(program):
+	'''Return list of courses for a particular program
+	:param program: Program
+	'''
+	courses = frappe.db.sql('''select course, course_name from `tabProgram Course` where parent=%s''',
+			(program), as_dict=1)
+	return courses
+
 @frappe.whitelist()
 def enroll_student(source_name):
 	"""Creates a Student Record and returns a Program Enrollment.
