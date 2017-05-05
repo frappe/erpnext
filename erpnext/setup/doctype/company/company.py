@@ -282,7 +282,7 @@ def replace_abbr(company, old, new):
 			if len(parts) == 1 or parts[1].lower() == old.lower():
 				frappe.rename_doc(dt, d[0], parts[0] + " - " + new)
 
-	for dt in ["Account", "Cost Center", "Warehouse"]:
+	for dt in ["Warehouse", "Account", "Cost Center"]:
 		_rename_record(dt)
 		frappe.db.commit()
 

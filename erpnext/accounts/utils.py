@@ -11,7 +11,6 @@ from frappe.utils import formatdate, get_number_format_info
 
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
-from erpnext.accounts.report.financial_statements import sort_root_accounts
 
 class FiscalYearError(frappe.ValidationError): pass
 
@@ -652,6 +651,8 @@ def get_companies():
 
 @frappe.whitelist()
 def get_children():
+	from erpnext.accounts.report.financial_statements import sort_root_accounts
+	
 	args = frappe.local.form_dict
 	doctype, company = args['doctype'], args['company']
 	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))

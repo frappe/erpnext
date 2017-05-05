@@ -189,8 +189,8 @@ class Account(Document):
 
 				if account_balance != stock_balance:
 					frappe.throw(_('Account balance ({0}) and stock value ({1}) must be same')\
-						.format(fmt_money(account_balance, self.account_currency),
-							fmt_money(stock_balance, self.account_currency)))
+						.format(fmt_money(account_balance, currency=self.account_currency),
+							fmt_money(stock_balance, currency=self.account_currency)))
 
 		elif self.warehouse:
 			self.warehouse = None

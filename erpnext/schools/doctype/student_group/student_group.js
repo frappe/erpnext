@@ -42,7 +42,7 @@ frappe.ui.form.on("Student Group", {
 	},
 
 	get_students: function(frm) {
-		if (frm.doc.group_based_on != "Activity") {
+		if (frm.doc.group_based_on == "Batch" || frm.doc.group_based_on == "Course") {
 			var student_list = [];
 			var max_roll_no = 0;
 			$.each(frm.doc.students, function(i,d) {
