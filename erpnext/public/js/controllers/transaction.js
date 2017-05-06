@@ -500,6 +500,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	get_exchange_rate: function(transaction_date, from_currency, to_currency, callback) {
+		if (!transaction_date || !from_currency || !to_currency) return;
 		return frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
@@ -563,14 +564,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	conversion_factor: function(doc, cdt, cdn) {
+	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
 		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
 			refresh_field("stock_qty", item.name, item.parentfield);
 			this.toggle_conversion_factor(item);
-			this.apply_price_list(item, true);
+			if(!dont_fetch_price_list_rate) this.apply_price_list(item, true);
 		}
 	},
 
@@ -581,7 +582,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	qty: function(doc, cdt, cdn) {
-		this.conversion_factor(doc, cdt, cdn);
+		this.conversion_factor(doc, cdt, cdn, true);
+		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
 	},
 
 	set_dynamic_labels: function() {
@@ -762,7 +764,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
 			return;
 		}
-
 		return this.frm.call({
 			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
 			args: {	args: args },
