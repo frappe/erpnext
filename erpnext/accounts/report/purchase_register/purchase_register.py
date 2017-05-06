@@ -20,7 +20,7 @@ def execute(filters=None):
 	invoice_expense_map, invoice_tax_map = get_invoice_tax_map(invoice_list,
 		invoice_expense_map, expense_accounts)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
-	supplier_details = get_supplier_deatils(invoice_list)
+	supplier_details = get_supplier_details(invoice_list)
 	
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 
@@ -205,7 +205,7 @@ def get_account_details(invoice_list):
 
 	return account_map
 
-def get_supplier_deatils(invoice_list):
+def get_supplier_details(invoice_list):
 	supplier_details = {}
 	suppliers = list(set([inv.supplier for inv in invoice_list]))
 	for supp in frappe.db.sql("""select name, supplier_type from `tabSupplier`
