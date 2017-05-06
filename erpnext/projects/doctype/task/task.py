@@ -73,6 +73,7 @@ class Task(Document):
 		self.update_depends_on()
 
 		self.sync_candidates()
+		self.candidates = []
 		self.pending_count()
 		self.update_dow()
 
@@ -94,7 +95,10 @@ class Task(Document):
 				candidate = frappe.get_doc("Candidate", c.candidate_id)
 			else:
 				candidate = frappe.new_doc("Candidate")
+				candidate.customer = frappe.db.get_value("Project", self.project, "customer")
+				candidate.project = self.project
 				candidate.task = self.name
+				candidate.position = self.subject
 
 			candidate.update({
 				"passport_no": c.passport_no,
@@ -140,7 +144,7 @@ class Task(Document):
 
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
-			
+
 	def validate_progress(self):
 		if self.progress > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
@@ -236,7 +240,7 @@ class Task(Document):
 	def has_webform_permission(doc):
 		project_user = frappe.db.get_value("Project User", {"parent": doc.project, "user":frappe.session.user} , "user")
 		if project_user:
-			return True				
+			return True
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
@@ -270,7 +274,7 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 			order by name
 			limit %(start)s, %(page_len)s """ % {'key': searchfield,
 			'txt': "%%%s%%" % frappe.db.escape(txt), 'mcond':get_match_cond(doctype),
-			'start': start, 'page_len': page_len})			
+			'start': start, 'page_len': page_len})
 
 
 @frappe.whitelist()
@@ -285,9 +289,4 @@ def set_tasks_as_overdue():
 	frappe.db.sql("""update tabTask set `status`='Overdue'
 		where exp_end_date is not null
 		and exp_end_date < CURDATE()
-		and `status` not in ('Closed', 'Cancelled', 'Hold','Pending Review','DnD')""")
-
-def set_dow():
-	frappe.db.sql("""update tabTask set `date_of_working`=%s
-		where `status`='Working'""",today())
-
+		and `status` not in ('Closed', 'Cancelled', 'Hold','Pending Review','PSL','DnD')""")

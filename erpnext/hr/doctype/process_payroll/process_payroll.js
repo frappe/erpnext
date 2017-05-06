@@ -125,37 +125,6 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 
 cur_frm.cscript.make_bank_entry = function(doc, cdt, cdn){
     if(doc.company && doc.start_date && doc.end_date){
-cur_frm.cscript.make_bank_entry = function(doc,cdt,cdn){
-    if(doc.company && doc.from_date && doc.to_date){
-		return cur_frm.cscript.reference_entry(doc,cdt,cdn);
-    } else {
-  	  msgprint(__("Company, From Date and To Date is mandatory"));
-    }
-}
-
-cur_frm.cscript.reference_entry = function(doc,cdt,cdn){
-	var dialog = new frappe.ui.Dialog({
-		title: __("Bank Transaction Reference"),
-		fields: [
-			{
-				"label": __("Reference Number"),
-				"fieldname": "reference_number",
-				"fieldtype": "Data",
-				"reqd": 1
-			},
-			{
-				"label": __("Reference Date"),
-				"fieldname": "reference_date",
-				"fieldtype": "Date",
-				"reqd": 1,
-				"default": get_today()
-			}
-		]
-	});
-	dialog.set_primary_action(__("Make"), function() {
-		args = dialog.get_values();
-		if(!args) return;
-		dialog.hide();
 		return frappe.call({
 			doc: cur_frm.doc,
 			method: "make_payment_entry",
@@ -169,12 +138,3 @@ cur_frm.cscript.reference_entry = function(doc,cdt,cdn){
   	  msgprint(__("Company, From Date and To Date is mandatory"));
     }
 }
-	});
-	dialog.show();
-}
-}
-
-
-frappe.ui.form.on("Process Payroll", "refresh", function(frm) {
-	frm.disable_save();
-});

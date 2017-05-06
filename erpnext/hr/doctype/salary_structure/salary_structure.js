@@ -1,96 +1,195 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-# License: GNU General Public License v3. See license.txt
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+// License: GNU General Public License v3. See license.txt
+{% include "erpnext/public/js/controllers/accounts.js" %}
 
-from __future__ import unicode_literals
-import frappe
+cur_frm.add_fetch('employee', 'company', 'company');
+cur_frm.add_fetch('company', 'default_letter_head', 'letter_head');
 
-from frappe.utils import flt, cint, getdate
-from frappe import _
-from frappe.model.mapper import get_mapped_doc
-from frappe.model.document import Document
-from erpnext.hr.utils import set_employee_name
 
-class SalaryStructure(Document):
+cur_frm.cscript.onload = function(doc, dt, dn){
+	e_tbl = doc.earnings || [];
+	d_tbl = doc.deductions || [];
+	if (e_tbl.length == 0 && d_tbl.length == 0)
+		return function(r, rt) { refresh_many(['earnings', 'deductions']);};
+}
 
-	def validate(self):
-		self.validate_amount()
-		for e in self.get('employees'):
-			set_employee_name(e)
-		self.validate_date()
+frappe.ui.form.on('Salary Structure', {
+	onload: function(frm) {
+		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet),
 
-	def get_ss_values(self,employee):
-		basic_info = frappe.db.sql("""select bank_name, bank_ac_no
-			from `tabEmployee` where name =%s""", employee)
-		ret = {'bank_name': basic_info and basic_info[0][0] or '',
-			'bank_ac_no': basic_info and basic_info[0][1] or ''}
-		return ret
-
-	def validate_amount(self):
-		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:
-			frappe.throw(_("Net pay cannot be negative"))
-
-	def validate_date(self):
-		for employee in self.get('employees'):
-			joining_date, relieving_date = frappe.db.get_value("Employee", employee.employee,
-				["date_of_joining", "relieving_date"])
-			if employee.from_date and getdate(employee.from_date) < joining_date:
-				frappe.throw(_("From Date {0} for Employee {1} cannot be before employee's joining Date {2}")
-					    .format(employee.from_date, employee.employee, joining_date))
-
-		st_name = frappe.db.sql("""select parent from `tabSalary Structure Employee`
-			where
-			employee=%(employee)s
-			and (
-				(%(from_date)s between from_date and ifnull(to_date, '2199-12-31'))
-				or (%(to_date)s between from_date and ifnull(to_date, '2199-12-31'))
-				or (from_date between %(from_date)s and %(to_date)s)
-			)
-			and (
-				exists (select name from `tabSalary Structure`
-				where name = `tabSalary Structure Employee`.parent and is_active = 'Yes')
-			)
-			and parent != %(salary_struct)s""",
-			{
-				'employee': employee.employee,
-				'from_date': employee.from_date,
-				'to_date': (employee.to_date or '2199-12-31'),
-				'salary_struct': self.name
-			})
-
-		if st_name:
-			frappe.throw(_("Active Salary Structure {0} found for employee {1} for the given dates")
-				.format(st_name[0][0], employee.employee))
-
-@frappe.whitelist()
-def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):
-	def postprocess(source, target):
-		if employee:
-			employee_details = frappe.db.get_value("Employee", employee,
-							["employee_name", "branch", "designation", "department"], as_dict=1)
-			target.employee = employee
-			target.employee_name = employee_details.employee_name
-			target.branch = employee_details.branch
-			target.designation = employee_details.designation
-			target.department = employee_details.department
-		target.run_method('process_salary_structure')
-
-	doc = get_mapped_doc("Salary Structure", source_name, {
-		"Salary Structure": {
-			"doctype": "Salary Slip",
-			"field_map": {
-				"total_earning": "gross_pay",
-				"name": "salary_structure"
+		frm.set_query("salary_component", "earnings", function() {
+			return {
+				filters: {
+					type: "earning"
+				}
 			}
+		});
+		frm.set_query("salary_component", "deductions", function() {
+			return {
+				filters: {
+					type: "deduction"
+				}
+			}
+		});
+		frm.set_query("employee", "employees", function(doc) {
+			return {
+				query: "erpnext.controllers.queries.employee_query",
+				filters: {
+					company: doc.company
+				}
+			}
+		});
+	},
+
+	refresh: function(frm) {
+		frm.trigger("toggle_fields");
+		frm.fields_dict['earnings'].grid.set_column_disp("default_amount", false);
+		frm.fields_dict['deductions'].grid.set_column_disp("default_amount", false);
+
+		frm.add_custom_button(__("Preview Salary Slip"),
+			function() { frm.trigger('preview_salary_slip'); }, "fa fa-sitemap", "btn-default");
+
+		frm.add_custom_button(__("Add Employees"),function () {
+			frm.trigger('add_employees')
+		})
+
+	},
+
+	add_employees:function (frm) {
+		frm.$emp_dialog = new frappe.ui.Dialog({
+			title: __("Add Employees"),
+			fields: [
+				{fieldname:'company', fieldtype:'Link', options: 'Company', label: __('Company')},
+				{fieldname:'branch', fieldtype:'Link', options: 'Branch', label: __('Branch')},
+				{fieldname:'department', fieldtype:'Link', options: 'Department', label: __('Department')},
+				{fieldname:'designation', fieldtype:'Link', options: 'Designation', label: __('Designation')},
+				{fieldname:'base_variable', fieldtype:'Section Break'},
+				{fieldname:'base', fieldtype:'Currency', label: __('Base')},
+				{fieldname:'base_col_br', fieldtype:'Column Break'},
+				{fieldname:'variable', fieldtype:'Currency', label: __('Variable')}
+			]
+		});
+		frm.$emp_dialog.set_primary_action(__("Add"), function() {
+			frm.trigger('get_employees');
+		});
+		frm.$emp_dialog.show();
+	},
+
+	get_employees:function (frm) {
+		var filters = frm.$emp_dialog.get_values();
+		if ('variable' in filters) {
+			delete filters.variable
 		}
-	}, target_doc, postprocess, ignore_child_tables=True)
+		if ('base' in filters) {
+			delete filters.base
+		}
+		frappe.call({
+			method:'erpnext.hr.doctype.salary_structure.salary_structure.get_employees',
+			args:{
+				filters: filters
+			},
+			callback:function (r) {
+				var employees = $.map(frm.doc.employees, function(d) { return d.employee });
+				for (var i=0; i< r.message.length; i++) {
+					if (employees.indexOf(r.message[i].name) === -1) {
+						var row = frappe.model.add_child(frm.doc, frm.fields_dict.employees.df.options, frm.fields_dict.employees.df.fieldname);
+						row.employee = r.message[i].name;
+						row.employee_name = r.message[i].employee_name;
+						row.base = frm.$emp_dialog.get_value('base');
+						row.variable = frm.$emp_dialog.get_value('variable');
+					}
+				}
+				frm.refresh_field('employees');
+				frm.$emp_dialog.hide()
+			}
+		})
+	},
 
-	if cint(as_print):
-		doc.name = 'Preview for {0}'.format(employee)
-		return frappe.get_print(doc.doctype, doc.name, doc = doc, print_format = print_format)
-	else:
-		return doc
+	salary_slip_based_on_timesheet: function(frm) {
+		frm.trigger("toggle_fields")
+	},
+
+	preview_salary_slip: function(frm) {
+		var d = new frappe.ui.Dialog({
+			title: __("Preview Salary Slip"),
+			fields: [
+				{"fieldname":"employee", "fieldtype":"Select", "label":__("Employee"),
+				options: $.map(frm.doc.employees, function(d) { return d.employee }), reqd: 1, label:"Employee"},
+				{fieldname:"fetch", "label":__("Show Salary Slip"), "fieldtype":"Button"}
+			]
+		});
+		d.get_input("fetch").on("click", function() {
+			var values = d.get_values();
+			if(!values) return;
+			frm.doc.salary_slip_based_on_timesheet?print_format="Salary Slip based on Timesheet":print_format="Salary Slip Standard";
+
+			frappe.call({
+				method: "erpnext.hr.doctype.salary_structure.salary_structure.make_salary_slip",
+				args: {
+					source_name: frm.doc.name,
+					employee: values.employee,
+					as_print: 1,
+					print_format: print_format
+				},
+				callback: function(r) {
+					var new_window = window.open();
+					new_window.document.write(r.message);
+					// frappe.msgprint(r.message);
+				}
+			});
+		});
+		d.show();
+	},
+
+	toggle_fields: function(frm) {
+		frm.toggle_display(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
+		frm.toggle_reqd(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
+		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
+	}
+});
 
 
-@frappe.whitelist()
-def get_employees(**args):
-	return frappe.get_list('Employee',filters=args['filters'], fields=['name', 'employee_name'])
+cur_frm.cscript.amount = function(doc, cdt, cdn){
+	calculate_totals(doc, cdt, cdn);
+};
+
+var calculate_totals = function(doc) {
+	var tbl1 = doc.earnings || [];
+	var tbl2 = doc.deductions || [];
+
+	var total_earn = 0; var total_ded = 0;
+	for(var i = 0; i < tbl1.length; i++){
+		total_earn += flt(tbl1[i].amount);
+	}
+	for(var j = 0; j < tbl2.length; j++){
+		total_ded += flt(tbl2[j].amount);
+	}
+	doc.total_earning = total_earn;
+	doc.total_deduction = total_ded;
+	doc.net_pay = 0.0
+	if(doc.salary_slip_based_on_timesheet == 0){
+		doc.net_pay = flt(total_earn) - flt(total_ded);
+	}
+
+	refresh_many(['total_earning', 'total_deduction', 'net_pay']);
+}
+
+cur_frm.cscript.validate = function(doc, cdt, cdn) {
+	calculate_totals(doc);
+	if(doc.employee && doc.is_active == "Yes") frappe.model.clear_doc("Employee", doc.employee);
+}
+
+
+frappe.ui.form.on('Salary Detail', {
+	amount: function(frm) {
+		calculate_totals(frm.doc);
+	},
+
+	earnings_remove: function(frm) {
+		calculate_totals(frm.doc);
+	},
+
+	deductions_remove: function(frm) {
+		calculate_totals(frm.doc);
+	}
+})

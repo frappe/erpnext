@@ -182,8 +182,6 @@ scheduler_events = {
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries",
 		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary'
-		"erpnext.projects.doctype.task.task.set_dow",
-		"erpnext.projects.doctype.project.project.set_project_as_overdue",
 	]
 }
 

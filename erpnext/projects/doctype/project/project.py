@@ -60,7 +60,7 @@ class Project(Document):
 		if self.expected_start_date and self.expected_end_date:
 			if getdate(self.expected_end_date) < getdate(self.expected_start_date):
 				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
-				
+
 	def validate_weights(self):
 		sum = 0
 		for task in self.tasks:
@@ -176,13 +176,13 @@ class Project(Document):
 			from `tabPurchase Invoice Item` where project = %s and docstatus=1""", self.name)
 
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
-		
+
 	def update_sales_costing(self):
 		total_sales_cost = frappe.db.sql("""select sum(grand_total)
 			from `tabSales Order` where project = %s and docstatus=1""", self.name)
 
 		self.total_sales_cost = total_sales_cost and total_sales_cost[0][0] or 0
-				
+
 
 	def send_welcome_email(self):
 		url = get_url("/project/?name={0}".format(self.name))
@@ -240,10 +240,10 @@ def get_list_context(context=None):
 
 def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
-	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name) 
+	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name)
 		from `tabUser`
 		where enabled=1
-			and name not in ("Guest", "Administrator") 
+			and name not in ("Guest", "Administrator")
 			and ({key} like %(txt)s
 				or full_name like %(txt)s)
 			{fcond} {mcond}
@@ -266,9 +266,3 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_cost_center_name(project):
 	return frappe.db.get_value("Project", project, "cost_center")
-
-def set_project_as_overdue():
-	frappe.db.sql("""update tabProject set `status`='Overdue'
-		where expected_end_date is not null
-		and expected_end_date < CURDATE()
-		and `status` not in ('Completed', 'Cancelled', 'Hold','DnD')""")
