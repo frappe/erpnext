@@ -9,12 +9,15 @@ from erpnext.accounts.report.financial_statements import (get_period_list, get_c
 
 def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
-		filters.periodicity, filters.company)
+		filters.periodicity, filters.accumulated_values, filters.company)
 
 	income = get_data(filters.company, "Income", "Credit", period_list, filters = filters,
-		accumulated_values=filters.accumulated_values, ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
+		accumulated_values=filters.accumulated_values, 
+		ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
+		
 	expense = get_data(filters.company, "Expense", "Debit", period_list, filters=filters,
-		accumulated_values=filters.accumulated_values, ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
+		accumulated_values=filters.accumulated_values, 
+		ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
 
 	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
 

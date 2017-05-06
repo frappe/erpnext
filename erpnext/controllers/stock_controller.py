@@ -54,14 +54,14 @@ class StockController(AccountsController):
 
 						self.check_expense_account(item_row)
 
-						# If item is not a sample item
+						# If the item does not have the allow zero valuation rate flag set
 						# and ( valuation rate not mentioned in an incoming entry
 						# or incoming entry not found while delivering the item),
 						# try to pick valuation rate from previous sle or Item master and update in SLE
 						# Otherwise, throw an exception
 
 						if not sle.stock_value_difference and self.doctype != "Stock Reconciliation" \
-							and not item_row.get("is_sample_item"):
+							and not item_row.get("allow_zero_valuation_rate"):
 
 							sle = self.update_stock_ledger_entries(sle)
 
@@ -176,6 +176,19 @@ class StockController(AccountsController):
 		for sle in stock_ledger_entries:
 				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
 		return stock_ledger
+
+	def make_batches(self, warehouse_field):
+		'''Create batches if required. Called before submit'''
+		for d in self.items:
+			if d.get(warehouse_field) and not d.batch_no:
+				has_batch_no, create_new_batch = frappe.db.get_value('Item', d.item_code, ['has_batch_no', 'create_new_batch'])
+				if has_batch_no and create_new_batch:
+					d.batch_no = frappe.get_doc(dict(
+						doctype='Batch',
+						item=d.item_code,
+						supplier=getattr(self, 'supplier', None),
+						reference_doctype=self.doctype,
+						reference_name=self.name)).insert().name
 
 	def make_adjustment_entry(self, expected_gle, voucher_obj):
 		from erpnext.accounts.utils import get_stock_and_account_difference

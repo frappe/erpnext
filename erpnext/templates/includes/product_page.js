@@ -12,7 +12,7 @@ frappe.ready(function() {
 			item_code: get_item_code()
 		},
 		callback: function(r) {
-			$(".item-cart").toggleClass("hide", (!!!r.message.price || !!!r.message.stock));
+			$(".item-cart").toggleClass("hide", (!!!r.message.price || !!!r.message.in_stock));
 			if(r.message && r.message.price) {
 				$(".item-price")
 					.html(r.message.price.formatted_price + " per " + r.message.uom);

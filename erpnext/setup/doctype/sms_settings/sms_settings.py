@@ -40,10 +40,15 @@ def get_sender_name():
 	return sender_name
 
 @frappe.whitelist()
-def get_contact_number(contact_name, value, key):
+def get_contact_number(contact_name, ref_doctype, ref_name):
 	"returns mobile number of the contact"
-	number = frappe.db.sql("""select mobile_no, phone from tabContact where name=%s and %s=%s""" %
-		('%s', frappe.db.escape(key), '%s'), (contact_name, value))
+	number = frappe.db.sql("""select mobile_no, phone from tabContact 
+		where name=%s 
+			and exists(
+				select name from `tabDynamic Link` where link_doctype=%s and link_name=%s
+			)
+	""", (contact_name, ref_doctype, ref_name))
+	
 	return number and (number[0][0] or number[0][1]) or ''
 
 @frappe.whitelist()

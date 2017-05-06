@@ -1,7 +1,7 @@
 <img class="screenshot" alt="Production Order" src="{{docs_base_url}}/assets/img/manufacturing/manufacturing-flow.png">
-Production Order (also called as Work Order) is a document that is given to
+A Production Order (also known as a Work Order) is a document that is given to
 the manufacturing shop floor by the Production Planner as a signal to produce
-a certain quantity of a certain Item. Production Order also helps to generate
+a certain quantity of a certain Item. The Production Order also helps to generate
 the material requirements (Stock Entry) for the Item to be produced from its
 **Bill of Materials**.
 
@@ -62,12 +62,19 @@ by:
 
 <img class="screenshot" alt="Stock Entry for PO" src="{{docs_base_url}}/assets/img/manufacturing/PO-material-transfer-updated.png">
 
+#### Material Transfer through Stock Entry
+Use cases for this option are:
+* If material transfer is done in bulk and/or is not required to be tracked against a particular Production Order
+* If the responsibility for Material Transfer and Production Entry lies with two separate users
+
+If this is the case, you can select the Skip Material Transfer check box, which will allow you to make the “Manufacture” Stock Entry directly by clicking on the ‘Finish’ button.
+
 ### Making Time Logs
 
 * Progress in the Production Order can be tracked using [Timesheet]({{docs_base_url}}/user/manual/en/projects/timesheet/timesheet-against-production-order.html)
 * Timesheet's time slots are created against Production Order Operations.
-* Drafts of Timesheet is created based on the scheduled operations when an Production Order is Submitted.
-* To create more Timesheet against an operation click 'Make Timesheet' button.
+* Drafts of Timesheet are created based on the scheduled operations when an Production Order is Submitted.
+* To create more Timesheets against an operation click 'Make Timesheet' button.
 
 <img class="screenshot" alt="Make timesheet against PO" src="{{docs_base_url}}/assets/img/manufacturing/PO-operations-make-ts.png">
 
@@ -88,7 +95,7 @@ by:
 ### Stopping a Production Order
 
 * When you stop a Production Order its status is changed to Stop indicating that all production process against that Production Order is to be ceased.
-* To stop the Production Order click on the 'stop' Button
+* To stop the Production Order click on the 'Stop' Button
 
   1. On Submitting the Production Order, the system will reserve a slot for each of the Production Order Operations serially after the planned start date based on the workstation availability. The Workstation availability depends on the Workstation timings, holiday list and if some other Production Order Operation was scheduled in that slot. You can mention the number of days for the system to try scheduling the operations in the Manufacturing Settings. This is set to 30 Days by default. If the operation requires time exceeding the available slot, system shall ask you to break the operations. Once the scheduling is done system shall create Time Logs and save them. You can Modify them and submit them later.
   2. You can also create additional time logs against an Operation. For doing so select the respective operation and click on 'Make Time Log'
@@ -98,7 +105,7 @@ by:
 
 <img class="screenshot" alt="PO - stop" src="{{docs_base_url}}/assets/img/manufacturing/PO-stop.png">
 
-* You can Also re-start a stopped Production Order.
+* You can also re-start a stopped Production Order.
 
 > Note : In order to make a Production Order against an Item you must specify 'Yes' to "Allow Production Order" on the Item form.
 

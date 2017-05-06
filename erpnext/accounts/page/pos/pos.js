@@ -327,6 +327,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.name = null;
 		this.load_data(true);
 		this.setup();
+		this.set_default_customer()
 	},
 
 	load_data: function (load_doc) {
@@ -357,6 +358,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.party_field.$input.attr('disabled', false);
 		if(this.selected_row) {
 			this.selected_row.hide()
+		}
+	},
+
+	set_default_customer: function() {
+		if (this.default_customer && !this.frm.doc.customer) {
+			this.party_field.$input.val(this.default_customer);
+			this.frm.doc.customer = this.default_customer;
+			this.numeric_keypad.show();
+			this.toggle_list_customer(false)
+			this.toggle_item_cart(true)
 		}
 	},
 
@@ -407,8 +418,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		});
 
 		this.search_item_group = this.wrapper.find('.search-item-group');
-
-		var dropdown_html = me.item_groups.map(function(item_group) {
+		sorted_item_groups = this.get_sorted_item_groups()
+		var dropdown_html = sorted_item_groups.map(function(item_group) {
 			return "<li><a class='option' data-value='"+item_group+"'>"+item_group+"</a></li>";
 		}).join("");
 
@@ -435,6 +446,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.page.wrapper.on("click", ".edit-customer-btn", function() {
 			me.update_customer()
 		})
+	},
+
+	get_sorted_item_groups: function() {
+		list = {}
+		$.each(this.item_groups, function(i, data) {
+			list[i] = data[0]
+		})
+
+		return Object.keys(list).sort(function(a,b){return list[a]-list[b]})
 	},
 
 	toggle_more_btn: function() {
@@ -666,11 +686,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.toggle_delete_button();
 		}
 
-		if (this.default_customer && !this.frm.doc.customer) {
-			this.party_field.$input.val(this.default_customer);
-			this.frm.doc.customer = this.default_customer;
-		}
-
 		this.party_field.awesomeplete =
 			new Awesomplete(this.party_field.$input.get(0), {
 				minChars: 0,
@@ -851,6 +866,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.customer_doc.set_primary_action(__("Save"), function () {
 			me.make_offline_customer(new_customer);
 			me.pos_bill.show();
+			me.list_customers.hide();
 		});
 	},
 
@@ -951,6 +967,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 						item_price: format_currency(me.price_list_data[obj.name], me.frm.doc.currency),
 						item_name: obj.name === obj.item_name ? "" : obj.item_name,
 						item_image: obj.image,
+						item_stock: __('Stock Qty') + ": " + me.get_actual_qty(obj),
 						color: frappe.get_palette(obj.item_name),
 						abbr: frappe.get_abbr(obj.item_name)
 					})).tooltip().appendTo($wrap);
@@ -1090,9 +1107,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		// $(me.wrapper).find(".pos-item-wrapper").on("click", function () {
 		$(this.wrapper).on("click", ".pos-item-wrapper", function () {
 			me.item_code = '';
+			me.customer_validate();
 			if($(me.pos_bill).is(":hidden")) return;
 
-			me.customer_validate();
 			if (me.frm.doc.docstatus == 0) {
 				me.items = me.get_items($(this).attr("data-item-code"))
 				me.add_to_cart();
@@ -1355,7 +1372,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				discount_percentage: d.discount_percentage || 0.0,
 				actual_qty: me.actual_qty_dict[d.item_code] || 0.0,
 				projected_qty: d.projected_qty,
-				rate: format_number(d.rate, me.frm.doc.currency),
+				rate: format_currency(d.rate, me.frm.doc.currency),
 				enabled: me.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
 				amount: format_currency(d.amount, me.frm.doc.currency),
 				selected_class: (me.item_code == d.item_code) ? "active" : ""
@@ -1767,7 +1784,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		return $.grep(this.pricing_rules, function (data) {
 			if (item.qty >= data.min_qty && (item.qty <= (data.max_qty ? data.max_qty : item.qty))) {
-				if (data.item_code == item.item_code || in_list(['All Item Groups', item.item_group], data.item_group) || item.brand == data.brand) {
+				if (me.validate_item_condition(data, item)) {
 					if (in_list(['Customer', 'Customer Group', 'Territory', 'Campaign'], data.applicable_for)) {
 						return me.validate_condition(data)
 					} else {
@@ -1776,6 +1793,26 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 			}
 		})
+	},
+
+	validate_item_condition: function (data, item) {
+		var apply_on = frappe.model.scrub(data.apply_on);
+
+		return (data.apply_on == 'Item Group')
+			? this.validate_item_group(data.item_group, item.item_group) : (data[apply_on] == item[apply_on]);
+	},
+
+	validate_item_group: function (pr_item_group, cart_item_group) {
+		//pr_item_group = pricing rule's item group
+		//cart_item_group = cart item's item group
+		//this.item_groups has information about item group's lft and rgt
+		//for example: {'Foods': [12, 19]}
+
+		pr_item_group = this.item_groups[pr_item_group]
+		cart_item_group = this.item_groups[cart_item_group]
+
+		return (cart_item_group[0] >= pr_item_group[0] &&
+			cart_item_group[1] <= pr_item_group[1])
 	},
 
 	validate_condition: function (data) {

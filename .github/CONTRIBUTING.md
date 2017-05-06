@@ -1,67 +1,36 @@
-## General Overview
+### Introduction (first timers)
 
-There are three branches where all the work happens: 
+Thank you for your interest in raising an Issue with ERPNext. An Issue could mean a bug report or a request for a missing feature. By raising a bug report, you are contributing to the development of ERPNext and this is the first step of participating in the community. Bug reports are very helpful for developers as they quickly fix the issue before other users start facing it.
 
-* **master** - This is the production / stable branch for releases.
-* **develop** - This is bleeding edge with features and fixes. Non critical bug fixes and new features go here. All updates to master also get pushed to develop.
-* **hotfix** - Urgent bug fixes go here. This is merged into master for releases.
+Feature requests are also a great way to take the product forward. New ideas can come in any user scenario and the issue list also acts a roadmap of future features.
 
-## Release Cycles
+When you are raising an Issue, you should keep a few things in mind. Remember that the developer does not have access to your machine so you must give all the information you can while raising an Issue. If you are suggesting a feature, you should be very clear about what you want.
 
-Usually, hotfix / develop is pushed to master roughly every week.
+The Issue list is not the right place to ask a question or start a general discussion. If you want to do that , then the right place is the forum [https://discuss.erpnext.com](https://discuss.erpnext.com).
 
-If we are close to a major release, then all bugfixes get pushed to hotfix and a release is done every week or as necessary.
+### Reply and Closing Policy
 
-***
+If your issue is not clear or does not meet the guidelines, then it will be closed. If it is closed, please supply the information asked and re-open it.
 
+### General Issue Guidelines
 
-## Contributing
+1. **Search existing Issues:** Before raising a Issue, search if it has been raised before. Maybe add a 👍 or give additional help by creating a mockup if it is not already created.
+1. **Report each issue separately:** Don't club multiple, unreleated issues in one note.
+1. **Brief:** Please don't include long explanations. Use screenshots and bullet points instead of descriptive paragraphs.
 
-Contributing to ERPNext is not very different from the usual Pull Request workflow on GitHub.
+### Bug Report Guidelines
 
-### Prerequisites : 
+1. **Steps to Reproduce:** The bug report must have a list of steps needed to reproduce a bug. If we cannot reproduce it, then we cannot solve it.
+1. **Version Number:** Please add the version number in your report. Often a bug is fixed in the latest version
+1. **Clear Title:** Add a clear subject to your bug report like "Unable to submit Purchase Order without Basic Rate" instead of just "Cannot Submit"
+1. **Screenshots:** Screenshots are a great way of communicating the issues. Try adding annotations or using LiceCAP to take a screencast in `gif`.
 
-* You need to know [Git and Github basics](https://try.github.io/levels/1/challenges/1)
-* You need to have a Fork of the [ERPNext repo](https://github.com/frappe/erpnext) in your personal Github account 
-* You need to add a [remote](#glossary) for your Forked repository. `git remote add origin [your-erpnext-repo-url]`
+### Feature Request Guidelines
 
-### The Process: 
+1. **Clarity:** Clearly specify how do you want the feature to behave. Don't just say "I would like multiple PDF formats", say that "Ability to add multiple print formats for customers with different languages".
+1. **Solution:** Try and identify how the feature should look like.
+1. **Mockups:** Mockups are a great way to explain your requirement.
 
-1. Make sure you're in the right branch. **develop** for adding features /  fixing issues and **hotfix** for urgent bug fixes
-2. Make your changes
-3. Create and checkout a new branch for the changes you've made. `git checkout -b [branch-name]`
-4. Add and commit your changes `git commit -am "[commit-message]"
-5. If you have been working on sometime for a long time, you should [rebase](#glossary) your branch with main develop branch. `git pull upstream develop --rebase` where `upstream` is the remote name of our repo
-6. Now, push your changes to your fork. `git push origin [branch-name]`   
-If you rebased your commits, you will have to [force push](http://vignette2.wikia.nocookie.net/starwars/images/e/ea/Yodapush.png/revision/latest?cb=20130205190454) `git push origin [branch-name] --force`
-7. You should now be able to see your pushed branch on Github, now create a pull request against the branch that you want to merge to.
-8. Wait for us to review it
+### What if my Issue is closed
 
-### Your Pull Request Should have
-
-1. Clear explanation of the use case
-1. Screenshots / Screecast GIF
-1. Test Cases (if applicable)
-1. Update to documentation
-
-### Common Problems: 
-
-* During rebase you might face _merge conflicts_. A merge conflict occurs when you have made changes to the same file that someone else has, in the commits you're pulling. You need to resolve these conflicts by picking which code you want to keep, yours or theirs. You can use `git mergetool` for help.
-* Sometimes you don't have a local branch to which you want to make changes to. In that case you first run `git fetch` followed by `git checkout --track -b upstream/[branch-name]`
- 
-
-### Good practices: 
-
-* You should rebase your branch with the branch you plan to make a Pull Request (PR) to as often as you can. 
-* Your commit messages should be precise and explain exactly what the commit does. Same goes for the Pull Request title.
-* When making a PR make sure that all your code is committed properly by checking the diffs.
-* If you're working on different things at the same time, make sure you make separate branches for each.
-* Don't create new DocTypes unless absolutely necessary. If you find that there is a another DocType with a similar functionality, then please try and extend that functionality.
-* DRY. Don't Repeat Yourself. Before writing up a similar function /feature make sure it doesn't exist in the codebase already. 
-* Tabs, not spaces.
-
-
-### Glossary
-
-* remote - A remote is a connection to a Github repo. You should have two remotes, one that points to your repo and one to ours. 
-* rebase - When you rebase a branch, you pull commits from your remote branch and move your commits on top of it. This allows you to update your branch with the latest changes without losing  your changes.
+Don't worry, take the feedback, supply the correct information and re-open it!

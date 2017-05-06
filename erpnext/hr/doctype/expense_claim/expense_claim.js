@@ -13,6 +13,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 				"voucher_type": "Bank Entry"
 			},
 			callback: function(r) {
+<<<<<<< HEAD
 				var jv = frappe.model.make_new_doc_and_get_name('Journal Entry');
 				jv = locals['Journal Entry'][jv];
 				jv.voucher_type = 'Bank Entry';
@@ -37,6 +38,32 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 					d1.balance = r.message.balance;
 					d1.account_currency = r.message.account_currency;
 					d1.account_type = r.message.account_type;
+=======
+				var doc = frappe.model.sync(r.message);
+				frappe.set_route('Form', 'Journal Entry', r.message.name);
+			}
+		});
+	},
+	
+	expense_type: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(!doc.company) {
+			d.expense_type = "";
+			frappe.msgprint(__("Please set the Company"));
+			this.frm.refresh_fields()
+			return;
+		}
+
+		return frappe.call({
+			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account",
+			args: {
+				"expense_claim_type": d.expense_type,
+				"company": doc.company
+			},
+			callback: function(r) {
+				if (r.message) {
+					d.default_account = r.message.account;
+>>>>>>> 3f7fff04f4efd05b38f89bf2d4a3b89337ccafac
 				}
 
 				frappe.set_route('Form', 'Journal Entry', jv.name);

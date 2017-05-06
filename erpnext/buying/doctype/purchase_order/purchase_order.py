@@ -59,7 +59,8 @@ class PurchaseOrder(BuyingController):
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
-				"compare_fields": [["rate", "="], ["project", "="], ["item_code", "="]],
+				"compare_fields": [["rate", "="], ["project", "="], ["item_code", "="], 
+					["uom", "="], ["conversion_factor", "="]],
 				"is_child_table": True
 			}
 		})
@@ -340,7 +341,8 @@ def make_stock_entry(purchase_order, item_code):
 	stock_entry.purchase_order = purchase_order.name
 	stock_entry.supplier = purchase_order.supplier
 	stock_entry.supplier_name = purchase_order.supplier_name
-	stock_entry.supplier_address = purchase_order.address_display
+	stock_entry.supplier_address = purchase_order.supplier_address
+	stock_entry.address_display = purchase_order.address_display
 	stock_entry.company = purchase_order.company
 	stock_entry.from_bom = 1
 	po_item = [d for d in purchase_order.items if d.item_code == item_code][0]

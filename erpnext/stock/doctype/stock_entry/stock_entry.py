@@ -9,6 +9,7 @@ from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
 from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor
+from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 import json
 
@@ -48,6 +49,11 @@ class StockEntry(StockController):
 		self.validate_with_material_request()
 		self.validate_batch()
 
+		if self._action == 'submit':
+			self.make_batches('t_warehouse')
+		else:
+			set_batch_nos(self, 's_warehouse', True)
+
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
@@ -86,8 +92,10 @@ class StockEntry(StockController):
 			if item.item_code not in stock_items:
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
 
-			item_details = self.get_item_details(frappe._dict({"item_code": item.item_code,
-				"company": self.company, "project": self.project, "uom": item.uom}), for_update=True)
+			item_details = self.get_item_details(frappe._dict(
+				{"item_code": item.item_code, "company": self.company,
+				"project": self.project, "uom": item.uom, 's_warehouse': item.s_warehouse}),
+				for_update=True)
 
 			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
 				"cost_center", "conversion_factor"):
@@ -462,7 +470,9 @@ class StockEntry(StockController):
 
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
-			expense_account, buying_cost_center, item_group from `tabItem`
+				expense_account, buying_cost_center, item_group, has_serial_no,
+				has_batch_no
+			from `tabItem`
 			where name = %s
 				and disabled=0
 				and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)""",
@@ -472,7 +482,7 @@ class StockEntry(StockController):
 
 		item = item[0]
 
-		ret = {
+		ret = frappe._dict({
 			'uom'			      	: item.stock_uom,
 			'stock_uom'			  	: item.stock_uom,
 			'description'		  	: item.description,
@@ -486,8 +496,10 @@ class StockEntry(StockController):
 			'batch_no'				: '',
 			'actual_qty'			: 0,
 			'basic_rate'			: 0,
-			'serial_no'				: ''
-		}
+			'serial_no'				: '',
+			'has_serial_no'			: item.has_serial_no,
+			'has_batch_no'			: item.has_batch_no
+		})
 		for d in [["Account", "expense_account", "default_expense_account"],
 			["Cost Center", "cost_center", "cost_center"]]:
 				company = frappe.db.get_value(d[0], ret.get(d[1]), "company")
@@ -506,6 +518,11 @@ class StockEntry(StockController):
 
 		stock_and_rate = args.get('warehouse') and get_warehouse_details(args) or {}
 		ret.update(stock_and_rate)
+
+		# automatically select batch for outgoing item
+		if (args.get('s_warehouse', None) and args.get('qty') and
+			ret.get('has_batch_no') and not args.get('batch_no')):
+			args.batch_no = get_batch_no(args['item_code'], args['s_warehouse'], args['qty'])
 
 		return ret
 

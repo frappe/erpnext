@@ -72,6 +72,7 @@ class JournalEntry(AccountsController):
 		self.update_expense_claim()
 		self.update_employee_loan()
 		self.unlink_advance_entry_reference()
+		self.unlink_asset_reference()
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
@@ -81,6 +82,18 @@ class JournalEntry(AccountsController):
 				d.reference_type = ''
 				d.reference_name = ''
 				d.db_update()
+				
+	def unlink_asset_reference(self):
+		for d in self.get("accounts"):
+			if d.reference_type=="Asset" and d.reference_name:
+				asset = frappe.get_doc("Asset", d.reference_name)
+				for s in asset.get("schedules"):
+					if s.journal_entry == self.name:
+						s.db_set("journal_entry", None)
+						asset.value_after_depreciation += s.depreciation_amount
+
+						asset.db_set("value_after_depreciation", asset.value_after_depreciation)
+						asset.set_status()
 
 	def validate_party(self):
 		for d in self.get("accounts"):
@@ -501,7 +514,7 @@ class JournalEntry(AccountsController):
 
 	def update_expense_claim(self):
 		for d in self.accounts:
-			if d.reference_type=="Expense Claim" and d.party:
+			if d.reference_type=="Expense Claim" and d.reference_name:
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
 				update_reimbursed_amount(doc)
 

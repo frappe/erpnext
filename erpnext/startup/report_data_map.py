@@ -241,7 +241,7 @@ data_map = {
 		}
 	},
 	"Purchase Invoice Item": {
-		"columns": ["name", "parent", "item_code", "(qty * conversion_factor) as qty", "base_net_amount"],
+		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {

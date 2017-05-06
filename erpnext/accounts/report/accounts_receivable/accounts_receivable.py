@@ -71,7 +71,10 @@ class ReceivablePayableReport(object):
 			"width": 100
 		})
 		if args.get("party_type") == "Customer":
-			columns += [_("Territory") + ":Link/Territory:80"]
+			columns += [
+				_("Territory") + ":Link/Territory:80", 
+				_("Customer Group") + ":Link/Customer Group:120"
+			]
 		if args.get("party_type") == "Supplier":
 			columns += [_("Supplier Type") + ":Link/Supplier Type:80"]
 			
@@ -139,7 +142,7 @@ class ReceivablePayableReport(object):
 
 					# customer territory / supplier type
 					if args.get("party_type") == "Customer":
-						row += [self.get_territory(gle.party)]
+						row += [self.get_territory(gle.party), self.get_customer_group(gle.party)]
 					if args.get("party_type") == "Supplier":
 						row += [self.get_supplier_type(gle.party)]
 
@@ -186,6 +189,9 @@ class ReceivablePayableReport(object):
 
 	def get_territory(self, party_name):
 		return self.get_party_map("Customer").get(party_name, {}).get("territory") or ""
+		
+	def get_customer_group(self, party_name):
+		return self.get_party_map("Customer").get(party_name, {}).get("customer_group") or ""
 
 	def get_supplier_type(self, party_name):
 		return self.get_party_map("Supplier").get(party_name, {}).get("supplier_type") or ""
@@ -193,12 +199,12 @@ class ReceivablePayableReport(object):
 	def get_party_map(self, party_type):
 		if not hasattr(self, "party_map"):
 			if party_type == "Customer":
-				self.party_map = dict(((r.name, r) for r in frappe.db.sql("""select {0}, {1}, {2} from `tab{3}`"""
-					.format("name", "customer_name", "territory", party_type), as_dict=True)))
-
+				select_fields = "name, customer_name, territory, customer_group"
 			elif party_type == "Supplier":
-				self.party_map = dict(((r.name, r) for r in frappe.db.sql("""select {0}, {1}, {2} from `tab{3}`"""
-					.format("name", "supplier_name", "supplier_type", party_type), as_dict=True)))
+				select_fields = "name, supplier_name, supplier_type"
+			
+			self.party_map = dict(((r.name, r) for r in frappe.db.sql("select {0} from `tab{1}`"
+				.format(select_fields, party_type), as_dict=True)))
 
 		return self.party_map
 
@@ -250,6 +256,19 @@ class ReceivablePayableReport(object):
 		if self.filters.get(party_type_field):
 			conditions.append("party=%s")
 			values.append(self.filters.get(party_type_field))
+
+		if party_type_field=="customer":
+			if self.filters.get("customer_group"):
+				lft, rgt = frappe.db.get_value("Customer Group", 
+					self.filters.get("customer_group"), ["lft", "rgt"])
+			
+				conditions.append("""party in (select name from tabCustomer 
+					where exists(select name from `tabCustomer Group` where lft >= {0} and rgt <= {1} 
+						and name=tabCustomer.customer_group))""".format(lft, rgt))
+						
+			if self.filters.get("credit_days_based_on"):
+				conditions.append("party in (select name from tabCustomer where credit_days_based_on=%s)")
+				values.append(self.filters.get("credit_days_based_on"))
 
 		return " and ".join(conditions), values
 

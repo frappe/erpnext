@@ -41,7 +41,7 @@ class SellingController(StockController):
 
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details()
-		self.set_price_list_and_item_details()
+		self.set_price_list_and_item_details(for_validate=for_validate)
 
 	def set_missing_lead_customer_details(self):
 		if getattr(self, "customer", None):
@@ -60,9 +60,9 @@ class SellingController(StockController):
 				posting_date=self.get('transaction_date') or self.get('posting_date'),
 				company=self.company))
 
-	def set_price_list_and_item_details(self):
+	def set_price_list_and_item_details(self, for_validate=False):
 		self.set_price_list_currency("Selling")
-		self.set_missing_item_details()
+		self.set_missing_item_details(for_validate=for_validate)
 
 	def apply_shipping_rule(self):
 		if self.shipping_rule:
@@ -170,7 +170,7 @@ class SellingController(StockController):
 
 	def validate_selling_price(self):
 		def throw_message(item_name, rate, ref_rate_field):
-			frappe.throw(_("""Selling price for item {0} is lower than its {1}. Selling price should be atleast {2}""")
+			frappe.throw(_("""Selling rate for item {0} is lower than its {1}. Selling rate should be atleast {2}""")
 				.format(item_name, ref_rate_field, rate))
 
 		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
@@ -178,18 +178,19 @@ class SellingController(StockController):
 
 		for it in self.get("items"):
 			last_purchase_rate, is_stock_item = frappe.db.get_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
-
-			if flt(it.base_rate) < flt(last_purchase_rate):
-				throw_message(it.item_name, last_purchase_rate, "last purchase rate")
+			last_purchase_rate_in_sales_uom = last_purchase_rate / (it.conversion_factor or 1)
+			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom):
+				throw_message(it.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
 
 			last_valuation_rate = frappe.db.sql("""
 				SELECT valuation_rate FROM `tabStock Ledger Entry` WHERE item_code = %s
 				AND warehouse = %s AND valuation_rate > 0
 				ORDER BY posting_date DESC, posting_time DESC, name DESC LIMIT 1
 				""", (it.item_code, it.warehouse))
-
-			if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate):
-				throw_message(it.name, last_valuation_rate, "valuation rate")
+			if last_valuation_rate:
+				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
+				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom):
+					throw_message(it.name, last_valuation_rate_in_sales_uom, "valuation rate")
 
 
 	def get_item_list(self):
@@ -203,7 +204,7 @@ class SellingController(StockController):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
 						il.append(frappe._dict({
-							'warehouse': p.warehouse,
+							'warehouse': p.warehouse or d.warehouse,
 							'item_code': p.item_code,
 							'qty': flt(p.qty),
 							'uom': p.uom,

@@ -8,11 +8,20 @@ from frappe.utils import flt, cint
 from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 
 def execute(filters=None):
-	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, filters.periodicity, filters.company)
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
+		filters.periodicity, company=filters.company)
 
-	asset = get_data(filters.company, "Asset", "Debit", period_list, only_current_fiscal_year=False)
-	liability = get_data(filters.company, "Liability", "Credit", period_list, only_current_fiscal_year=False)
-	equity = get_data(filters.company, "Equity", "Credit", period_list, only_current_fiscal_year=False)
+	asset = get_data(filters.company, "Asset", "Debit", period_list, 
+		only_current_fiscal_year=False, filters=filters,
+		accumulated_values=filters.accumulated_values)
+		
+	liability = get_data(filters.company, "Liability", "Credit", period_list, 
+		only_current_fiscal_year=False, filters=filters,
+		accumulated_values=filters.accumulated_values)
+		
+	equity = get_data(filters.company, "Equity", "Credit", period_list, 
+		only_current_fiscal_year=False, filters=filters,
+		accumulated_values=filters.accumulated_values)
 
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(asset, liability, equity,
 		period_list, filters.company)
@@ -43,9 +52,9 @@ def execute(filters=None):
 	if total_credit:
 		data.append(total_credit)		
 
-	columns = get_columns(filters.periodicity, period_list, company=filters.company)
+	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, company=filters.company)
 	
-	chart = get_chart_data(columns, asset, liability, equity)
+	chart = get_chart_data(filters, columns, asset, liability, equity)
 
 	return columns, data, message, chart
 
@@ -102,12 +111,13 @@ def check_opening_balance(asset, liability, equity):
 		opening_balance -= flt(liability[0].get("opening_balance", 0), float_precision)
 	if equity:
 		opening_balance -= flt(equity[0].get("opening_balance", 0), float_precision)
-
+		
+	opening_balance = flt(opening_balance, float_precision)
 	if opening_balance:
 		return _("Previous Financial Year is not closed"),opening_balance
 	return None,None
 		
-def get_chart_data(columns, asset, liability, equity):
+def get_chart_data(filters, columns, asset, liability, equity):
 	x_intervals = ['x'] + [d.get("label") for d in columns[2:]]
 	
 	asset_data, liability_data, equity_data = [], [], []
@@ -128,9 +138,14 @@ def get_chart_data(columns, asset, liability, equity):
 	if equity_data:
 		columns.append(["Equity"] + equity_data)
 
-	return {
+	chart = {
 		"data": {
 			'x': 'x',
 			'columns': columns
 		}
 	}
+
+	if not filters.accumulated_values:
+		chart["chart_type"] = "bar"
+
+	return chart

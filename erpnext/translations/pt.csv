@@ -1035,7 +1035,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and 
 DocType: Timesheet Detail,Bill,Fatura
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,A Próxima Data de Depreciação é inserida como data passada
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Branco
-DocType: SMS Center,All Lead (Open),Todos Pot. Clientes (Abertos)
+DocType: SMS Center,All Lead (Open),Todos Potenciais Clientes (Abertos)
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +222,Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3}),Linha {0}: A qtd não está disponível para {4} no armazém {1} no momento da postagem do registo ({2} {3})
 DocType: Purchase Invoice,Get Advances Paid,Obter Adiantamentos Pagos
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +763,Make ,Efetuar
@@ -1187,7 +1187,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +2304,"Payment Mode is not configu
 DocType: Opportunity,Your sales person will get a reminder on this date to contact the customer,O seu vendedor receberá um lembrete nesta data para contatar o cliente
 apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +75,Same item cannot be entered multiple times.,Mesmo item não pode ser inserido várias vezes.
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +28,"Further accounts can be made under Groups, but entries can be made against non-Groups","Podem ser realizadas outras contas nos Grupos, e os registos podem ser efetuados em Fora do Grupo"
-DocType: Lead,Lead,Pot Clie
+DocType: Lead,Lead,Potenciais Clientes
 DocType: Email Digest,Payables,A Pagar
 DocType: Course,Course Intro,Introdução do Curso
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +157,Stock Entry {0} created,Registo de Stock {0} criado
@@ -1549,7 +1549,7 @@ apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +80,Row # {0}: Ret
 DocType: Purchase Receipt,PREC-,RECC-
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +16,Bank Accounts,Contas Bancárias
 ,Bank Reconciliation Statement,Declaração de Conciliação Bancária
-,Lead Name,Nome de Pot Client
+,Lead Name,Nome de Potencial Cliente
 ,POS,POS
 DocType: C-Form,III,III
 apps/erpnext/erpnext/config/stock.py +305,Opening Stock Balance,Saldo de Stock Inicial
@@ -2433,7 +2433,7 @@ DocType: Notification Control,Sales Order Message,Mensagem de Pedido de Vendas
 apps/erpnext/erpnext/config/setup.py +15,"Set Default Values like Company, Currency, Current Fiscal Year, etc.","Definir Valores Padrão, como a Empresa, Moeda, Ano Fiscal Atual, etc."
 DocType: Payment Entry,Payment Type,Tipo de Pagamento
 DocType: Process Payroll,Select Employees,Selecionar Funcionários
-DocType: Opportunity,Potential Sales Deal,Negócio de Vendas Potencial
+DocType: Opportunity,Potential Sales Deal,Potenciais Negócios de Vendas
 DocType: Payment Entry,Cheque/Reference Date,Data do Cheque/Referência
 DocType: Purchase Invoice,Total Taxes and Charges,Impostos e Encargos Totais
 DocType: Employee,Emergency Contact,Contacto de Emergência
@@ -3341,7 +3341,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 					using Stock Reconciliation","O Item em Série {0} não pode ser atualizado utilizando \
 a Reconciliação de Stock"
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +29,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,O Novo Nr. de Série não pode ter um Armazém. O Armazém deve ser definido no Registo de Compra ou no Recibo de Compra
-DocType: Lead,Lead Type,Tipo Pot. Cliente
+DocType: Lead,Lead Type,Tipo Potencial Cliente
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +133,You are not authorized to approve leaves on Block Dates,Não está autorizado a aprovar licenças em Datas Bloqueadas
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +364,All these items have already been invoiced,Todos estes itens já foram faturados
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py +37,Can be approved by {0},Pode ser aprovado por {0}
@@ -3457,7 +3457,7 @@ DocType: GL Entry,Remarks,Observações
 DocType: Payment Entry,Account Paid From,Conta Paga De
 DocType: Purchase Order Item Supplied,Raw Material Item Code,Código de Item de Matéria-prima
 DocType: Journal Entry,Write Off Based On,Liquidação Baseada Em
-apps/erpnext/erpnext/utilities/activation.py +66,Make Lead,Faça chumbo
+apps/erpnext/erpnext/utilities/activation.py +66,Make Lead,Crie um Potencial Cliente
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +110,Print and Stationery,Impressão e artigos de papelaria
 DocType: Stock Settings,Show Barcode Field,Mostrar Campo do Código de Barras
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +762,Send Supplier Emails,Enviar Emails de Fornecedores
@@ -3648,7 +3648,7 @@ apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +232,Atte
 DocType: Production Order Operation,"in Minutes
 Updated via 'Time Log'","em Minutos
 Atualizado através do ""Registo de Tempo"""
-DocType: Customer,From Lead,Do Pot. Cliente
+DocType: Customer,From Lead,Do Potencial Cliente
 apps/erpnext/erpnext/config/manufacturing.py +13,Orders released for production.,Pedidos lançados para a produção.
 apps/erpnext/erpnext/public/js/account_tree_grid.js +67,Select Fiscal Year...,Selecione o Ano Fiscal...
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +512,POS Profile required to make POS Entry,É necessário colocar o Perfil POS para efetuar um Registo POS
@@ -3966,7 +3966,7 @@ DocType: Purchase Invoice,Recurring Id,ID Recorrente
 DocType: Customer,Sales Team Details,Dados de Equipa de Vendas
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1252,Delete permanently?,Eliminar permanentemente?
 DocType: Expense Claim,Total Claimed Amount,Montante Reclamado Total
-apps/erpnext/erpnext/config/crm.py +17,Potential opportunities for selling.,Oportunidades potenciais de venda.
+apps/erpnext/erpnext/config/crm.py +17,Potential opportunities for selling.,Potenciais oportunidades de venda.
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +211,Invalid {0},Inválido {0}
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +52,Sick Leave,Licença de Doença
 DocType: Email Digest,Email Digest,Email de Resumo
@@ -3997,7 +3997,7 @@ DocType: Maintenance Visit Purpose,Maintenance Visit Purpose,Objetivo da Visita 
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.js +16,Period,Período
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.js +18,General Ledger,Razão Geral
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +33,Employee {0} on Leave on {1},Employee {0} em licença {1}
-apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Ver Pot. Clientes
+apps/erpnext/erpnext/selling/doctype/campaign/campaign.js +10,View Leads,Ver Potenciais Clientes
 DocType: Program Enrollment Tool,New Program,Novo Programa
 DocType: Item Attribute Value,Attribute Value,Valor do Atributo
 ,Itemwise Recommended Reorder Level,Nível de Reposição Recomendada por Item
@@ -4199,7 +4199,7 @@ DocType: Process Payroll,Submit all salary slips for the above selected criteria
 apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +93,{0} Items synced,{0} Itens sincronizados
 DocType: Sales Order,Partly Delivered,Parcialmente Entregue
 DocType: Email Digest,Receivables,A Receber
-DocType: Lead Source,Lead Source,Fonte de Pot. Cliente
+DocType: Lead Source,Lead Source,Fonte de Potencial Cliente
 DocType: Customer,Additional information regarding the customer.,Informações adicionais acerca do cliente.
 DocType: Quality Inspection Reading,Reading 5,Leitura 5
 DocType: Maintenance Visit,Maintenance Date,Data de Manutenção

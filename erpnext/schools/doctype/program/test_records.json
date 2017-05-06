@@ -1,10 +1,12 @@
 [
 	{
 		"program_name": "_Test Program",
-		"program_abbreviation": "TP"
+		"program_code": "_TP1",
+		"program_abbreviation": "TP1"
 	},
 	{
 		"program_name": "_Test Program 2",
+		"program_code": "_TP2",
 		"program_abbreviation": "TP2"
 	}
 ]

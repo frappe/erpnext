@@ -54,7 +54,7 @@ class SalarySlip(TransactionBase):
 		for key in ('earnings', 'deductions'):
 			for struct_row in self._salary_structure_doc.get(key):
 				amount = self.eval_condition_and_formula(struct_row, data)
-				if amount:
+				if amount and struct_row.statistical_component == 0:
 					self.update_component_row(struct_row, amount, key)
 
 	def update_component_row(self, struct_row, amount, key):
@@ -88,12 +88,12 @@ class SalarySlip(TransactionBase):
 			return amount
 
 		except NameError as err:
-		    frappe.throw(_("Name error: {0}".format(err)))
+			frappe.throw(_("Name error: {0}".format(err)))
 		except SyntaxError as err:
-		    frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
+			frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
 		except Exception, e:
-		    frappe.throw(_("Error in formula or condition: {0}".format(e)))
-		    raise
+			frappe.throw(_("Error in formula or condition: {0}".format(e)))
+			raise
 
 	def get_data_for_eval(self):
 		'''Returns data for evaluating formula'''
@@ -321,8 +321,12 @@ class SalarySlip(TransactionBase):
 	def sum_components(self, component_type, total_field):
 		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
+		
 		if not relieving_date:
 			relieving_date = getdate(self.end_date)
+
+		if not joining_date:
+			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(employee.employee)))
 
 		for d in self.get(component_type):
 			if ((cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet) or\

@@ -17,6 +17,21 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"options": "Customer"
 		},
 		{
+			"fieldname":"customer_group",
+			"label": __("Customer Group"),
+			"fieldtype": "Link",
+			"options": "Customer Group"
+		},
+		{
+			"fieldname":"credit_days_based_on",
+			"label": __("Credit Days Based On"),
+			"fieldtype": "Select",
+			"options": "" + NEWLINE + "Fixed Days" + NEWLINE + "Last Day of the Next Month"
+		},
+		{
+			"fieldtype": "Break",
+		},
+		{
 			"fieldname":"report_date",
 			"label": __("Date"),
 			"fieldtype": "Date",
@@ -28,9 +43,6 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"fieldtype": "Select",
 			"options": 'Posting Date' + NEWLINE + 'Due Date',
 			"default": "Posting Date"
-		},
-		{
-			"fieldtype": "Break",
 		},
 		{
 			"fieldname":"range1",
