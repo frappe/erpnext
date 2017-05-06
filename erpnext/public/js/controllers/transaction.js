@@ -500,6 +500,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	get_exchange_rate: function(transaction_date, from_currency, to_currency, callback) {
+		if !(transaction_date && from_currency && to_currency) return;
 		return frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
@@ -762,7 +763,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
 			return;
 		}
-
 		return this.frm.call({
 			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
 			args: {	args: args },

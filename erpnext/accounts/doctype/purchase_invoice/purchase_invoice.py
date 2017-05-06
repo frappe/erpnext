@@ -204,7 +204,7 @@ class PurchaseInvoice(BuyingController):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
 			for d in self.get('items'):
 				if not d.purchase_order:
-					throw(_("Purchse Order number required for Item {0}").format(d.item_code))
+					throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
