@@ -43,6 +43,7 @@ frappe.ui.form.on('Stock Entry', {
 		});
 	},
 	refresh: function(frm) {
+		erpnext.select_batch_and_serial_no(frm);
 		if(!frm.doc.docstatus) {
 			frm.add_custom_button(__('Make Material Request'), function() {
 				frappe.model.with_doctype('Material Request', function() {
@@ -71,6 +72,10 @@ frappe.ui.form.on('Stock Entry', {
 	purpose: function(frm) {
 		frm.fields_dict.items.grid.refresh();
 		frm.cscript.toggle_related_fields(frm.doc);
+	},
+	before_save: function(frm) {
+		console.log("before_save");
+		erpnext.select_batch_and_serial_no(frm);
 	},
 	company: function(frm) {
 		if(frm.doc.company) {
@@ -533,33 +538,54 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 });
 
 erpnext.select_batch_and_serial_no = (frm) => {
-	frm.items.forEach(function(d) {
-		if(d.has_batch_no && !d.batch_no) {
-			show_modal(item_code, qty);
-		}
-	});
 
 	let show_modal = (item_code, qty) => {
 		let d = new frappe.ui.Dialog({
 			fields: [
 				{fieldname: 'item_code', read_only: 1, fieldtype:'Link', options: 'Item',
 					label: __('Item Code'), 'default': item_code},
+				{fieldtype:'Column Break'},
 				{fieldname: 'qty', fieldtype:'Float', label: __('Qty'), 'default': qty},
+				{fieldtype:'Section Break'},
 				{fieldname: 'batches', fieldtype: 'Table',
 					fields: [
-						{fieldtype:'Link', fieldname:'batch_no', options: 'Batch', reqd: 1,
+						{fieldtype:'Link', fieldname:'batch_no', options: 'Batch',
 							label: __('Select Batch'), in_list_view:1, get_query: function(doc) {
 								return {filters: {item: item_code }};
 							}},
-						{fieldtype:'Float', fieldname:'available_qty', reqd: 1,
+						{fieldtype:'Float', fieldname:'available_qty',
 							label: __('Available'), in_list_view:1},
-						{fieldtype:'Float', fieldname:'selected_qty', reqd: 1,
+						{fieldtype:'Float', fieldname:'selected_qty',
 							label: __('Qty'), in_list_view:1},
 					],
+					get_data: function() {
+						console.log("in get data");
+						return [
+							{
+
+							},
+							{
+
+							},
+							{
+
+							}
+						]
+					}
 				}
 			]
 		});
+
+		d.show();
 	}
+
+	show_modal("_Test FG Item", 1);
+
+	// frm.doc.items.forEach(function(d) {
+	// 	if(d.has_batch_no && !d.batch_no) {
+	// 		show_modal(d.item_code, d.qty);
+	// 	}
+	// });
 
 
 }
