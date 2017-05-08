@@ -19,7 +19,7 @@ class PaymentRequest(Document):
 		self.validate_currency()
 
 	def validate_reference_document(self):
-		if not self.reference_doctype and not self.reference_name:
+		if not self.reference_doctype or not self.reference_name:
 			frappe.throw(_("To create a Payment Request reference document is required"))
 
 	def validate_payment_request(self):
