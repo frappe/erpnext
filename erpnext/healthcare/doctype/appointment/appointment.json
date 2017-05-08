@@ -13,7 +13,6 @@
  "editable_grid": 0, 
  "fields": [
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 1, 
    "collapsible": 0, 
@@ -30,7 +29,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 1, 
-   "options": "OP - ", 
+   "options": "OP-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -44,7 +43,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -75,7 +73,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -106,7 +103,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -137,7 +133,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -168,7 +163,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -199,7 +193,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -230,7 +223,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -261,7 +253,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -292,7 +283,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -321,7 +311,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -351,7 +340,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -381,7 +369,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -411,7 +398,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -441,7 +427,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -472,7 +457,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -503,7 +487,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -535,7 +518,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -564,7 +546,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -594,7 +575,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -626,7 +606,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -657,7 +636,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -698,7 +676,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-04-28 19:59:56.620979", 
+ "modified": "2017-05-08 16:37:01.462617", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Appointment", 
