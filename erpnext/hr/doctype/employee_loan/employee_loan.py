@@ -149,6 +149,8 @@ def make_jv_entry(employee_loan, company, employee_loan_account, employee, loan_
 		"debit_in_account_currency": loan_amount,
 		"reference_type": "Employee Loan",
 		"reference_name": employee_loan,
+		"party_type": "Employee",
+		"party": employee,
 		})
 	account_amt_list.append({
 		"account": payment_account,
