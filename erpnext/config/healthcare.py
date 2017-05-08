@@ -33,8 +33,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Procedure",
-					"description": _("Procedures"),
+					"name": "Clinical Procedure",
+					"description": _("Clinical Procedures"),
 				},
 				{
 					"type": "doctype",

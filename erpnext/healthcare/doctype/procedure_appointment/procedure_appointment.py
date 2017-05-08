@@ -91,7 +91,7 @@ def appointment_cancel(appointmentId):
 @frappe.whitelist()
 def create_procedure(appointment):
 	appointment = frappe.get_doc("Procedure Appointment",appointment)
-	procedure = frappe.new_doc("Procedure")
+	procedure = frappe.new_doc("Clinical Procedure")
 	procedure.appointment = appointment.name
 	procedure.patient = appointment.patient
 	procedure.patient_age = appointment.patient_age

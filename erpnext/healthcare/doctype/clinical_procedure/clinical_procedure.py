@@ -9,7 +9,7 @@ from frappe.utils import cint, cstr, flt
 from erpnext.healthcare.doctype.op_settings.op_settings import get_account
 from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
 
-class Procedure(Document):
+class ClinicalProcedure(Document):
 	def after_insert(self):
 		if self.maintain_stock:
 			doc = set_stock_items(self, self.procedure_template, "Procedure Template")
@@ -23,12 +23,12 @@ class Procedure(Document):
 		if template.sample:
 			patient = frappe.get_doc("Patient", self.patient)
 			sample_collection = create_sample_doc(template, patient, None)
-			frappe.db.set_value("Procedure", self.name, "sample", sample_collection.name)
+			frappe.db.set_value("Clinical Procedure", self.name, "sample", sample_collection.name)
 		self.reload()
 	def complete(self):
 		if self.maintain_stock:
 			create_stock_entry(self)
-		frappe.db.set_value("Procedure", self.name, "complete_procedure", 1)
+		frappe.db.set_value("Clinical Procedure", self.name, "complete_procedure", 1)
 
 @frappe.whitelist()
 def set_stock_items(doc, stock_detail_parent, parenttype):
@@ -64,7 +64,7 @@ def get_item_dict(table, parent, parenttype):
 
 def create_stock_entry(doc):
 	stock_entry = frappe.new_doc("Stock Entry")
-	stock_entry = set_stock_items(stock_entry, doc.name, "Procedure")
+	stock_entry = set_stock_items(stock_entry, doc.name, "Clinical Procedure")
 	stock_entry.purpose = "Material Issue"
 	warehouse = frappe.db.get_value("Service Unit", doc.service_unit, "warehouse")
 	expense_account = get_account(None, "expense_account", "OP Settings", doc.company)

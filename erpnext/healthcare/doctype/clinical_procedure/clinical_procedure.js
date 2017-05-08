@@ -1,7 +1,7 @@
 // Copyright (c) 2017, ESS LLP and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Procedure', {
+frappe.ui.form.on('Clinical Procedure', {
 	refresh: function(frm) {
 		frm.set_query("patient", function () {
 			return {
@@ -50,7 +50,7 @@ frappe.ui.form.on('Procedure', {
 	},
 });
 
-frappe.ui.form.on("Procedure", "patient",
+frappe.ui.form.on("Clinical Procedure", "patient",
     function(frm) {
         if(frm.doc.patient){
 		frappe.call({
@@ -75,7 +75,7 @@ frappe.ui.form.on("Procedure", "patient",
 	}
 });
 
-frappe.ui.form.on("Procedure", "appointment",
+frappe.ui.form.on("Clinical Procedure", "appointment",
     function(frm) {
 	if(frm.doc.appointment){
 		frappe.call({
@@ -97,7 +97,7 @@ frappe.ui.form.on("Procedure", "appointment",
 	}
 });
 
-frappe.ui.form.on("Procedure", "procedure_template", function(frm) {
+frappe.ui.form.on("Clinical Procedure", "procedure_template", function(frm) {
 	if(frm.doc.procedure_template){
 		frappe.call({
 		    "method": "frappe.client.get",

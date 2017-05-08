@@ -650,10 +650,10 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-04-26 12:41:33.245473", 
+ "modified": "2017-05-08 16:00:18.751073", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
- "name": "Procedure", 
+ "name": "Clinical Procedure", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [
