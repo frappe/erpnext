@@ -92,12 +92,6 @@ def create_lab_test_doc(invoice, consultation, patient, template):
 	lab_test.test_group = template.test_group
 	lab_test.result_date = getdate()
 	lab_test.report_preference = patient.report_preference
-
-	if patient.admitted:
-		service_type = template.service_type
-		service_unit = get_service_unit(patient.admission, service_type)
-		lab_test.service_unit = service_unit
-
 	return lab_test
 
 def create_normals(template, lab_test):
@@ -162,22 +156,9 @@ def create_sample_doc(template, patient, invoice):
 			sample_collection.sample_quantity = template.sample_quantity
 			if(template.sample_collection_details):
 				sample_collection.sample_collection_details = "Test :"+template.test_name+"\n"+"Collection Detials:\n\t"+template.sample_collection_details
-
-			if patient.admitted:
-				service_type = frappe.get_value("Lab Test Samples", template.sample, "service_type")
-				service_unit = get_service_unit(patient.admission, service_type)
-				sample_collection.service_unit = service_unit
-
 			sample_collection.save(ignore_permissions=True)
 
 		return sample_collection
-
-def get_service_unit(admission, service_type):
-	current_facility = frappe.get_value("Patient Admission", admission, "current_facility")
-	zone = frappe.get_value("Facility", current_facility, "zone")
-	service_unit = frappe.db.get_value("Service Unit List", {"parent": zone, "type" : service_type}, "service_unit")
-	return service_unit
-
 
 @frappe.whitelist()
 def create_lab_test_from_desk(patient, template, prescription, invoice=None):

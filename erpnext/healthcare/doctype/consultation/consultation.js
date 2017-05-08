@@ -78,19 +78,6 @@ frappe.ui.form.on('Consultation', {
 		frm.set_df_property("visit_department", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("consultation_date", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("consultation_time", "read_only", frm.doc.__islocal ? 0:1);
-		if(frm.doc.admitted){
-			frm.set_df_property("appointment", "hidden", 1);
-		}else{
-			frm.set_df_property("appointment", "hidden", 0);
-		}
-		if(!frm.doc.__islocal){
-			if(!frm.doc.admitted && !frm.doc.admit_scheduled){
-				frm.add_custom_button(__('Admit Patient'), function() {
-					btn_admit_patient(frm);
-				 });
-			}
-		}
-
 	}
 });
 
@@ -252,10 +239,6 @@ frappe.ui.form.on("Consultation", "patient",
 					}
 					frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age)
 					frappe.model.set_value(frm.doctype,frm.docname, "patient_sex", data.message.sex)
-					frappe.model.set_value(frm.doctype,frm.docname, "admitted", data.message.admitted)
-					if(data.message.admitted){
-						frappe.model.set_value(frm.doctype,frm.docname, "admission", data.message.admission)
-					}
 					if(frm.doc.__islocal) show_details(data.message);
 		    }
 		})
@@ -314,18 +297,6 @@ frappe.ui.form.on("Drug Prescription", {
 	}
 });
 
-frappe.ui.form.on("IP Routine Observation", {
-	number: function(frm, cdt, cdn){
-		frappe.model.set_value(cdt, cdn, 'update_schedule', 1)
-	},
-	observe: function(frm, cdt, cdn){
-		frappe.model.set_value(cdt, cdn, 'update_schedule', 1)
-	},
-	period: function(frm, cdt, cdn){
-		frappe.model.set_value(cdt, cdn, 'update_schedule', 1)
-	}
-});
-
 frappe.ui.form.on("Review Detail", {
 	number: function(frm, cdt, cdn){
 		var child = locals[cdt][cdn]
@@ -343,20 +314,6 @@ frappe.ui.form.on("Review Detail", {
 		frappe.model.set_value(cdt, cdn, 'review', review)
 	}
 });
-
-var btn_admit_patient = function(frm){
-	var doc = frm.doc;
-	frappe.call({
-		method:"erpnext.healthcare.doctype.consultation.consultation.admit_patient",
-		args: {consultationId: doc.name},
-		callback: function(data){
-			if(!data.exc){
-				frappe.msgprint("Patient scheduled for admission");
-				cur_frm.reload_doc()
-			}
-		}
-	});
-}
 
 me.frm.set_query("appointment", function(doc, cdt, cdn) {
 		return {

@@ -46,22 +46,6 @@ def get_data():
 					"name": "Lab Test",
 					"description": _("Results"),
 				},
-				{
-					"type": "doctype",
-					"name": "Patient Admission",
-					"label": _("Patient Admission"),
-					"description": _("Patient Admission"),
-				},
-				{
-					"type": "doctype",
-					"name": "Service Task",
-					"label": _("Service Task"),
-				},
-				{
-					"type": "doctype",
-					"name": "Discharge Summary",
-					"label": _("Discharge Summary"),
-				}
 			]
 		},
 		{
@@ -136,18 +120,13 @@ def get_data():
 			]
 		},
 		{
-			"label": _("OP/IP Setup"),
+			"label": _("OP Setup"),
 			"icon": "icon-cog",
 			"items": [
 				{
 					"type": "doctype",
 					"name": "Medical Department",
 					"label": "Medical Department"
-				},
-				{
-					"type": "doctype",
-					"name": "Routine Observations",
-					"label": _("Routine Observations"),
 				},
 				{
 					"type": "doctype",
@@ -218,30 +197,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Infrastructure Setup"),
-			"icon": "icon-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Zone",
-					"label": _("Zone"),
-
-				},
-				{
-					"type": "doctype",
-					"name": "Facility",
-					"label": _("Facility"),
-
-				},
-				{
-					"type": "doctype",
-					"name": "Facility Type",
-					"label": _("Facility Type"),
-
-				},
-			]
-		},
-		{
 			"label": _("Settings"),
 			"icon": "icon-star",
 			"items": [
@@ -249,11 +204,6 @@ def get_data():
 					"type": "doctype",
 					"name": "OP Settings",
 					"label": _("OP Settings"),
-				},
-				{
-					"type": "doctype",
-					"name": "IP Settings",
-					"description": _("Settings for IP Module")
 				},
 				{
 					"type": "doctype",
