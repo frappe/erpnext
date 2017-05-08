@@ -145,7 +145,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Duration",
+					"name": "Drug Prescription Duration",
 					"description": _("Drug Prescription Period")
 				},
 				{
