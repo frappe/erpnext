@@ -11,36 +11,35 @@ def execute():
 
 	# for converting student batch into student group
 	frappe.reload_doctype("Student Group")
-	student_batches = frappe.db.sql('''select name as student_group_name, student_batch_name as batch, program, academic_year, academic_term
-		from `tabStudent Batch`''', as_dict=1)
+	student_batches = frappe.db.sql('''select name as student_group_name, student_batch_name as batch,
+		program, academic_year, academic_term from `tabStudent Batch`''', as_dict=1)
 	for student_batch in student_batches:
 		student_batch.update({"doctype":"Student Group", "group_based_on": "Batch"})
 		doc = frappe.get_doc(student_batch)
-		doc.save()
-		student_list = frappe.db.sql('''select student, student_name, active from `tabStudent Batch Student` where parent=%s''', (doc.name), as_dict=1)
+		student_list = frappe.db.sql('''select student, student_name, active from `tabStudent Batch Student`
+			where parent=%s''', (doc.name), as_dict=1)
+		for i, student in enumerate(student_list):
+			student.update({"group_roll_number": i+1})
+
 		if student_list:
 			doc.extend("students", student_list)
 
-		instructor_list = frappe.db.sql('''select instructor, instructor_name from `tabStudent Batch Instructor` where parent=%s''', (doc.name), as_dict=1)
+		instructor_list = frappe.db.sql('''select instructor, instructor_name from `tabStudent Batch Instructor`
+			where parent=%s''', (doc.name), as_dict=1)
 		if instructor_list:
 			doc.extend("instructors", instructor_list)
 		doc.save()
 
 	# delete the student batch and child-table
 	frappe.delete_doc("DocType", "Student Batch", force=1)
-	# frappe.db.sql("drop table if exists `tabStudent Batch`")
 	frappe.delete_doc("DocType", "Student Batch Student", force=1)
-	# frappe.db.sql("drop table if exists `tabStudent Batch Student`")
 	frappe.delete_doc("DocType", "Student Batch Instructor", force=1)
-	# frappe.db.sql("drop table if exists `tabStudent Batch Instructor`")
 
 	# delete the student batch creation tool
 	frappe.delete_doc("DocType", "Student Batch Creation Tool", force=1)
-	# frappe.db.sql("drop table if exists `tabStudent Batch Creation Tool`")
 
 	# delete the student batch creation tool
 	frappe.delete_doc("DocType", "Attendance Tool Student", force=1)
-	# frappe.db.sql("drop table if exists `tabAttendance Tool Student`")
 
 	# change the student batch to student group in the student attendance
 	frappe.reload_doctype("Student Attendance")

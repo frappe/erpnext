@@ -20,9 +20,10 @@ class CourseSchedule(Document):
 		self.title = self.course + " by " + (self.instructor_name if self.instructor_name else self.instructor)
 	
 	def validate_course(self):
-		if self.student_group and frappe.db.get_value("Student Group", self.student_group, "group_based_on") == "Course":
-			self.course= frappe.db.get_value("Student Group", self.student_group, "course")
-		
+		group_based_on, course = frappe.db.get_value("Student Group", self.student_group, ["group_based_on", "course"])
+		if group_based_on == "Course":
+			self.course = course
+
 	def validate_date(self):
 		"""Validates if from_time is greater than to_time"""
 		if self.from_time > self.to_time:

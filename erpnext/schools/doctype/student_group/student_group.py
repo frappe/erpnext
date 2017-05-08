@@ -14,6 +14,7 @@ class StudentGroup(Document):
 		self.validate_strength()
 		if frappe.defaults.get_defaults().student_validation_setting: 
 			self.validate_students()
+		self.validate_roll_no()
 		validate_duplicate_student(self.students)
 
 	def validate_mandatory_fields(self):
@@ -36,6 +37,14 @@ class StudentGroup(Document):
 				frappe.throw(_("{0} - {1} is not enrolled in the given {2}".format(d.group_roll_number, d.student_name, self.group_based_on)))
 			if not frappe.db.get_value("Student", d.student, "enabled") and d.active:
 				frappe.throw(_("{0} - {1} is inactive student".format(d.group_roll_number, d.student_name)))
+
+	def validate_roll_no(self):
+		roll_no_list = []
+		for d in self.students:
+			if d.group_roll_number in roll_no_list:
+				frappe.throw(_("Duplicate roll number for student {0}".format(d.student_name)))
+			else:
+				roll_no_list.append(d.group_roll_number)
 
 @frappe.whitelist()
 def get_students(academic_year, group_based_on, academic_term=None, program=None, batch=None, course=None):

@@ -23,9 +23,10 @@ class CourseSchedulingTool(Document):
 		self.validate_date()
 		self.instructor_name= frappe.db.get_value("Instructor", self.instructor, "instructor_name")
 
-		if self.student_group and frappe.db.get_value("Student Group", self.student_group, "group_based_on") == "Course":
-			self.course= frappe.db.get_value("Student Group", self.student_group, "course")
-		
+		group_based_on, course = frappe.db.get_value("Student Group", self.student_group, ["group_based_on", "course"])
+		if group_based_on == "Course":
+			self.course = course	
+
 		if self.rechedule:
 			rescheduled, reschedule_errors = self.delete_course_schedule(rescheduled, reschedule_errors)
 		
