@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import cstr
 
-class Duration(Document):
+class DrugPrescriptionDuration(Document):
 	def autoname(self):
 		self.name = " ".join(filter(None,
 			[cstr(self.get(f)).strip() for f in ["number", "period"]]))
