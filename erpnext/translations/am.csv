@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,የተቀጣሪ የ�
 DocType: Item,Inspection Criteria,የምርመራ መስፈርት
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,ተዘዋውሯል
 DocType: BOM Website Item,BOM Website Item,BOM የድር ጣቢያ ንጥል
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,የእርስዎን ደብዳቤ ራስ እና አርማ ይስቀሉ. (ቆይተው አርትዕ ማድረግ ይችላሉ).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,የእርስዎን ደብዳቤ ራስ እና አርማ ይስቀሉ. (ቆይተው አርትዕ ማድረግ ይችላሉ).
 DocType: Timesheet Detail,Bill,ቢል
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,ቀጣይ የእርጅና ቀን ባለፈው ቀን እንደ ገባ ነው
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,ነጭ
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,አጠቃላይ ትርፍ / ማጣት
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,ትዕዛዝ ንጥል አቅርቦት ይግዙ
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,የኩባንያ ስም ኩባንያ ሊሆን አይችልም
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,የህትመት አብነቶች ለ ደብዳቤ ኃላፊዎች.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,የህትመት አብነቶች ለ ደብዳቤ ኃላፊዎች.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,የህትመት አብነቶች ለ የማዕረግ Proforma የደረሰኝ ምህበርን.
 DocType: Student Guardian,Student Guardian,የተማሪ አሳዳጊ
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,ግምቱ አይነት ክፍያዎች ያካተተ ምልክት ተደርጎበታል አይችልም
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""",&quot;ሁሉም ምርቶች» ለ 
 DocType: Leave Application,Leave Balance Before Application,ማመልከቻ በፊት ሒሳብ ይነሱ
 DocType: SMS Center,Send SMS,ኤስ ኤም ኤስ ላክ
 DocType: Cheque Print Template,Width of amount in word,ቃል ውስጥ መጠን ስፋት
-DocType: Company,Default Letter Head,ደብዳቤ ኃላፊ ነባሪ
+DocType: Company,Default LetterHead,ደብዳቤ ኃላፊ ነባሪ
 DocType: Purchase Order,Get Items from Open Material Requests,ክፈት ቁሳዊ ጥያቄዎች ከ ንጥሎች ያግኙ
 DocType: Item,Standard Selling Rate,መደበኛ ሽያጭ ተመን
 DocType: Account,Rate at which this tax is applied,ይህ ግብር ተግባራዊ ሲሆን በ ተመን

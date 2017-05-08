@@ -1032,7 +1032,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Немојте сл�
 DocType: Item,Inspection Criteria,Инспекцијски Критеријуми
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Преносе
 DocType: BOM Website Item,BOM Website Item,БОМ Сајт артикла
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Уплоад главу писмо и лого. (Можете их уредити касније).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Уплоад главу писмо и лого. (Можете их уредити касније).
 DocType: Timesheet Detail,Bill,рачун
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Следећа Амортизација Датум је ушао као прошле дана
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Бео
@@ -3091,7 +3091,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Бруто добит / губитак
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Наруџбенице артикла у комплету
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Назив компаније не може бити Фирма
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Письмо главы для шаблонов печати .
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Письмо главы для шаблонов печати .
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,Титулы для шаблонов печатных например Фактуры Proforma .
 DocType: Student Guardian,Student Guardian,студент Гардијан
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Тип Процена трошкови не могу означити као инцлусиве
@@ -3127,7 +3127,7 @@ DocType: Homepage,"URL for ""All Products""",УРЛ за &quot;Сви произ
 DocType: Leave Application,Leave Balance Before Application,Оставите биланс Пре пријаве
 DocType: SMS Center,Send SMS,Пошаљи СМС
 DocType: Cheque Print Template,Width of amount in word,Ширина од износа у речи
-DocType: Company,Default Letter Head,Уобичајено Леттер Хеад
+DocType: Company,Default LetterHead,Уобичајено Леттер Хеад
 DocType: Purchase Order,Get Items from Open Material Requests,Гет ставки из Отворено Материјал Захтеви
 DocType: Item,Standard Selling Rate,Стандард Продаја курс
 DocType: Account,Rate at which this tax is applied,Стопа по којој се примењује овај порез

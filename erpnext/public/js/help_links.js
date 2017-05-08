@@ -25,8 +25,8 @@ frappe.help.help_links['List/Print Heading'] = [
 	{ label: 'Print Heading', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/print/print-headings' },
 ]
 
-frappe.help.help_links['List/Letter Head'] = [
-	{ label: 'Letter Head', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/print/letter-head' },
+frappe.help.help_links['List/LetterHead'] = [
+	{ label: 'LetterHead', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/print/letter-head' },
 ]
 
 frappe.help.help_links['List/Address Template'] = [

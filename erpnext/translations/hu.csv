@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Ne küldjön alkalma
 DocType: Item,Inspection Criteria,Vizsgálati szempontok
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Átvitt
 DocType: BOM Website Item,BOM Website Item,Anyagjegyzék honlap tétel
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Kérjük töltse fel levele fejlécét és logo-ját. (Ezeket később szerkesztheti).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Kérjük töltse fel levele fejlécét és logo-ját. (Ezeket később szerkesztheti).
 DocType: Timesheet Detail,Bill,Számla
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Következő értékcsökkenés dátumaként múltbeli dátumot tüntettek fel
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Fehér
@@ -3038,7 +3038,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Bruttó nyereség / veszteség
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Beszerzési megrendelés tétele leszállítva
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,A Válallkozás neve nem lehet Válallkozás
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Levél fejlécek a nyomtatási sablonokhoz.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Levél fejlécek a nyomtatási sablonokhoz.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,Címek nyomtatási sablonokhoz pl. Pro forma számla.
 DocType: Student Guardian,Student Guardian,Diák felügyelő
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Készletérték típusú költségeket nem lehet megjelölni értékbe beszámíthatónak
@@ -3074,7 +3074,7 @@ DocType: Homepage,"URL for ""All Products""","AZ ""Összes termék"" URL eléré
 DocType: Leave Application,Leave Balance Before Application,Távollét egyenleg az alkalmazás előtt
 DocType: SMS Center,Send SMS,SMS küldése
 DocType: Cheque Print Template,Width of amount in word,Szélesség méret szóban
-DocType: Company,Default Letter Head,Alapértelmezett levélfejléc
+DocType: Company,Default LetterHead,Alapértelmezett levélfejléc
 DocType: Purchase Order,Get Items from Open Material Requests,Kapjon tételeket Nyitott Anyag igénylésekből
 DocType: Item,Standard Selling Rate,Alapértelmezett értékesítési ár
 DocType: Account,Rate at which this tax is applied,"Arány, amelyen ezt az adót alkalmazzák"

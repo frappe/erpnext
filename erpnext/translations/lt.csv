@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Nesiųskite Darbuoto
 DocType: Item,Inspection Criteria,tikrinimo kriterijai
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,pervestos
 DocType: BOM Website Item,BOM Website Item,BOM svetainė punktas
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Įkelti savo laiške galvą ir logotipą. (Galite redaguoti juos vėliau).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Įkelti savo laiške galvą ir logotipą. (Galite redaguoti juos vėliau).
 DocType: Timesheet Detail,Bill,sąskaita
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Kitas Nusidėvėjimas data yra įvesta kaip praeities datos
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,baltas
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Bendrasis pelnas / nuostolis
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Pirkimui užsakyti punktas Pateikiamas
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Įmonės pavadinimas negali būti Įmonės
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Laiškas vadovai dėl spausdinimo šablonus.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Laiškas vadovai dėl spausdinimo šablonus.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,Pavadinimus spausdinimo šablonų pvz išankstinio mokėjimo sąskaitą.
 DocType: Student Guardian,Student Guardian,Studentų globėjas
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Vertinimo tipas mokesčiai negali pažymėta kaip įskaičiuota
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""",URL &quot;Visi produktai&quot;
 DocType: Leave Application,Leave Balance Before Application,Palikite balansas Prieš taikymas
 DocType: SMS Center,Send SMS,siųsti SMS
 DocType: Cheque Print Template,Width of amount in word,Plotis suma žodžiu
-DocType: Company,Default Letter Head,Numatytasis raštas vadovas
+DocType: Company,Default LetterHead,Numatytasis raštas vadovas
 DocType: Purchase Order,Get Items from Open Material Requests,Gauk daiktai iš atvirų Materialiųjų Prašymai
 DocType: Item,Standard Selling Rate,Standartinė pardavimo kursą
 DocType: Account,Rate at which this tax is applied,"Norma, kuri yra taikoma ši mokesčių"

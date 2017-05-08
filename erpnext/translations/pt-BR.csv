@@ -714,7 +714,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +715,All items hav
 DocType: Workstation,Electricity Cost,Custo de Energia Elétrica
 DocType: HR Settings,Don't send Employee Birthday Reminders,Não envie aos colaboradores lembretes de aniversários
 DocType: BOM Website Item,BOM Website Item,LDM do Item do Site
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Publique sua cabeça letra e logotipo. (Você pode editá-las mais tarde).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Publique sua cabeça letra e logotipo. (Você pode editá-las mais tarde).
 DocType: SMS Center,All Lead (Open),Todos os Clientes em Potencial em Aberto
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +222,Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3}),Linha {0}: Qtde não disponível do item {4} no armazén {1} no horário do lançamento ({2} {3})
 DocType: Purchase Invoice,Get Advances Paid,Obter adiantamentos pagos
@@ -2174,7 +2174,7 @@ apps/erpnext/erpnext/accounts/utils.py +501,Please set default {0} in Company {1
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +29,Same supplier has been entered multiple times,Mesmo fornecedor foi inserido várias vezes
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Lucro / Prejuízo Bruto
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Nome da empresa não pode ser empresa
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Cabeçalhos para modelos de impressão.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Cabeçalhos para modelos de impressão.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Títulos para modelos de impressão , por exemplo, Proforma Invoice ."
 DocType: Student Guardian,Student Guardian,Responsável pelo Aluno
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Encargos tipo de avaliação não pode marcado como Inclusive
@@ -2203,7 +2203,7 @@ DocType: Production Planning Tool,Download a report containing all raw materials
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +26,Community Forum,Community Forum
 DocType: Leave Application,Leave Balance Before Application,Saldo de Licenças Antes da Solicitação
 DocType: SMS Center,Send SMS,Envie SMS
-DocType: Company,Default Letter Head,Cabeçalho Padrão
+DocType: Company,Default LetterHead,Cabeçalho Padrão
 DocType: Purchase Order,Get Items from Open Material Requests,Obter Itens de Requisições de Material Abertas
 DocType: Item,Standard Selling Rate,Valor de venda padrão
 DocType: Account,Rate at which this tax is applied,Taxa em que este imposto é aplicado

@@ -23,8 +23,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Letter Head",
-					"description": _("Letter Heads for print templates.")
+					"name": "LetterHead",
+					"description": _("LetterHeads for print templates.")
 				},
 				{
 					"type": "doctype",

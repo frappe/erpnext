@@ -654,7 +654,7 @@ apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedu
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +34,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","Luego las reglas de precios son filtradas en base a Cliente, Categoría de cliente, Territorio, Proveedor, Tipo de Proveedor, Campaña, Socio de Ventas, etc"
 DocType: Opportunity,Enter name of campaign if source of enquiry is campaign,Introduzca el nombre de la campaña si el origen de la encuesta es una campaña
 DocType: BOM Item,Scrap %,Chatarra %
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Carge su membrete y su logotipo. (Puede editarlos más tarde).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Carge su membrete y su logotipo. (Puede editarlos más tarde).
 DocType: Item,Is Purchase Item,Es una compra de productos
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +50,Office Equipments,Equipos de Oficina
 apps/erpnext/erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py +37,Net Profit / Loss,Utilidad/Pérdida Neta

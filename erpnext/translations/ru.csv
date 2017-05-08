@@ -1032,7 +1032,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Не отправл�
 DocType: Item,Inspection Criteria,Осмотр Критерии
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Все передаваемые
 DocType: BOM Website Item,BOM Website Item,BOM Сайт товара
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Загрузить шапку фирменного бланка и логотип. (Вы можете отредактировать их позднее).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Загрузить шапку фирменного бланка и логотип. (Вы можете отредактировать их позднее).
 DocType: Timesheet Detail,Bill,Билл
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Следующий Износ Дата вводится как дату в прошлом
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Белый
@@ -3092,7 +3092,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Валовая прибыль / убыток
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Заказ товара Поставляется
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Название компании не может быть компания
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Письмо главы для шаблонов печати.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Письмо главы для шаблонов печати.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Титулы для шаблонов печати, например, счет-проформа."
 DocType: Student Guardian,Student Guardian,Студент-хранитель
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Обвинения типа Оценка не может отмечен как включено
@@ -3128,7 +3128,7 @@ DocType: Homepage,"URL for ""All Products""",URL для &quot;Все проду�
 DocType: Leave Application,Leave Balance Before Application,Оставьте баланс перед нанесением
 DocType: SMS Center,Send SMS,Отправить SMS
 DocType: Cheque Print Template,Width of amount in word,Ширина суммы в слове
-DocType: Company,Default Letter Head,По умолчанию бланке
+DocType: Company,Default LetterHead,По умолчанию бланке
 DocType: Purchase Order,Get Items from Open Material Requests,Получить товары из Открыть Запросов Материала
 DocType: Item,Standard Selling Rate,Стандартный курс продажи
 DocType: Account,Rate at which this tax is applied,Курс по которому этот налог применяется

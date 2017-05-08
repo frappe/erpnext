@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,എംപ്ലേ�
 DocType: Item,Inspection Criteria,ഇൻസ്പെക്ഷൻ മാനദണ്ഡം
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,ട്രാൻസ്ഫർ
 DocType: BOM Website Item,BOM Website Item,BOM ൽ വെബ്സൈറ്റ് ഇനം
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,നിങ്ങളുടെ കത്ത് തലയും ലോഗോ അപ്ലോഡ്. (നിങ്ങൾക്ക് പിന്നീട് എഡിറ്റ് ചെയ്യാൻ കഴിയും).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,നിങ്ങളുടെ കത്ത് തലയും ലോഗോ അപ്ലോഡ്. (നിങ്ങൾക്ക് പിന്നീട് എഡിറ്റ് ചെയ്യാൻ കഴിയും).
 DocType: Timesheet Detail,Bill,ബില്
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,അടുത്ത മൂല്യത്തകർച്ച തീയതി കഴിഞ്ഞ തീയതി നൽകിയിട്ടുള്ളതെന്ന്
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,വൈറ്റ്
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,മൊത്തം ലാഭം / നഷ്ടം
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,വാങ്ങൽ ഓർഡർ ഇനം നൽകിയത്
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,കമ്പനിയുടെ പേര് കമ്പനി ആകാൻ പാടില്ല
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,പ്രിന്റ് ടെംപ്ലേറ്റുകൾക്കായി കത്ത് മേധാവികൾ.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,പ്രിന്റ് ടെംപ്ലേറ്റുകൾക്കായി കത്ത് മേധാവികൾ.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,പ്രിന്റ് ടെംപ്ലേറ്റുകൾക്കായി ശീര്ഷകം ഇൻവോയ്സിന്റെ ഉദാഹരണമാണ്.
 DocType: Student Guardian,Student Guardian,സ്റ്റുഡന്റ് ഗാർഡിയൻ
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,മൂലധനം തരം ചാർജ് സഹായകം ആയി അടയാളപ്പെടുത്തി കഴിയില്ല
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""",വേണ്ടി &quot;എല്�
 DocType: Leave Application,Leave Balance Before Application,മുമ്പായി ബാലൻസ് വിടുക
 DocType: SMS Center,Send SMS,എസ്എംഎസ് അയയ്ക്കുക
 DocType: Cheque Print Template,Width of amount in word,വാക്കിൽ തുക വീതി
-DocType: Company,Default Letter Head,സ്വതേ ലെറ്റർ ഹെഡ്
+DocType: Company,Default LetterHead,സ്വതേ ലെറ്റർ ഹെഡ്
 DocType: Purchase Order,Get Items from Open Material Requests,ഓപ്പൺ മെറ്റീരിയൽ അഭ്യർത്ഥനകൾ നിന്നുള്ള ഇനങ്ങൾ നേടുക
 DocType: Item,Standard Selling Rate,സ്റ്റാൻഡേർഡ് വിറ്റുപോകുന്ന നിരക്ക്
 DocType: Account,Rate at which this tax is applied,ഈ നികുതി പ്രയോഗിക്കുന്നു തോത്

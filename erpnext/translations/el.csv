@@ -1030,7 +1030,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Μην στέλνε�
 DocType: Item,Inspection Criteria,Κριτήρια ελέγχου
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Μεταφέρονται
 DocType: BOM Website Item,BOM Website Item,BOM Ιστοσελίδα του Είδους
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Ανεβάστε την κεφαλίδα επιστολόχαρτου και το λογότυπό σας. (Μπορείτε να τα επεξεργαστείτε αργότερα).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Ανεβάστε την κεφαλίδα επιστολόχαρτου και το λογότυπό σας. (Μπορείτε να τα επεξεργαστείτε αργότερα).
 DocType: Timesheet Detail,Bill,Νομοσχέδιο
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Επόμενο αποσβέσεις Ημερομηνία εισάγεται ως τελευταία ημερομηνία
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Λευκό
@@ -3088,7 +3088,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Μικτά Κέρδη / Ζημίες
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Προμηθεύτηκε είδος παραγγελίας αγοράς
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Όνομα Εταιρίας δεν μπορεί να είναι Εταιρεία
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Επικεφαλίδες επιστολόχαρτου για πρότυπα εκτύπωσης.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Επικεφαλίδες επιστολόχαρτου για πρότυπα εκτύπωσης.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Τίτλοι για πρότυπα εκτύπωσης, π.Χ. Προτιμολόγιο."
 DocType: Student Guardian,Student Guardian,Guardian φοιτητής
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Χρεώσεις τύπου αποτίμηση δεν μπορεί να χαρακτηρίζεται ως Inclusive
@@ -3124,7 +3124,7 @@ DocType: Homepage,"URL for ""All Products""",URL για &quot;Όλα τα προ
 DocType: Leave Application,Leave Balance Before Application,Υπόλοιπο άδειας πριν από την εφαρμογή
 DocType: SMS Center,Send SMS,Αποστολή SMS
 DocType: Cheque Print Template,Width of amount in word,Πλάτος του ποσού στη λέξη
-DocType: Company,Default Letter Head,Προεπιλογή κεφαλίδα επιστολόχαρτου
+DocType: Company,Default LetterHead,Προεπιλογή κεφαλίδα επιστολόχαρτου
 DocType: Purchase Order,Get Items from Open Material Requests,Πάρετε τα στοιχεία από Open Υλικό Αιτήσεις
 DocType: Item,Standard Selling Rate,Τυπική τιμή πώλησης
 DocType: Account,Rate at which this tax is applied,Ποσοστό με το οποίο επιβάλλεται ο φόρος αυτός

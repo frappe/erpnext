@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,آيا د کارګر
 DocType: Item,Inspection Criteria,تفتیش معیارونه
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,وليږدول
 DocType: BOM Website Item,BOM Website Item,هیښ وېب پاڼه شمیره
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,پورته ستاسو لیک مشر او لوګو. (کولی شئ چې وروسته د سمولو لپاره).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,پورته ستاسو لیک مشر او لوګو. (کولی شئ چې وروسته د سمولو لپاره).
 DocType: Timesheet Detail,Bill,بیل
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,بل د استهالک نېټه ده ته ننوتل په توګه په تېرو نیټه
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,سپین
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,د ناخالصه ګټه / له لاسه ورکول
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,پیري نظم قالب برابر شوي
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,د شرکت نوم نه شي کولای د شرکت وي
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,د چاپي کينډۍ لیک مشرانو.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,د چاپي کينډۍ لیک مشرانو.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,د چاپي کينډۍ عنوانونه لکه فورمه صورتحساب.
 DocType: Student Guardian,Student Guardian,د زده کونکو د ګارډین
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,سنجي ډول تورونه نه په توګه د ټوليزې په نښه کولای شي
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""",په حافظی د &quot;ټول م�
 DocType: Leave Application,Leave Balance Before Application,کاریال مخکې له بیلانس څخه ووځي
 DocType: SMS Center,Send SMS,وليږئ پیغامونه
 DocType: Cheque Print Template,Width of amount in word,په کلمه د اندازه پلنوالی
-DocType: Company,Default Letter Head,افتراضي لیک مشر
+DocType: Company,Default LetterHead,افتراضي لیک مشر
 DocType: Purchase Order,Get Items from Open Material Requests,له پرانیستې مادي غوښتنې لپاره توکي ترلاسه کړئ
 DocType: Item,Standard Selling Rate,معياري پلورل Rate
 DocType: Account,Rate at which this tax is applied,په ميزان کي دغه ماليه د اجرا وړ ده

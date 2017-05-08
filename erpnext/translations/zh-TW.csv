@@ -952,7 +952,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,不要送員工生�
 DocType: Item,Inspection Criteria,檢驗標準
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,轉移
 DocType: BOM Website Item,BOM Website Item,BOM網站項目
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,上傳你的信頭和標誌。 （您可以在以後對其進行編輯）。
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,上傳你的信頭和標誌。 （您可以在以後對其進行編輯）。
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,接下來折舊日期輸入為過去的日期
 DocType: SMS Center,All Lead (Open),所有鉛（開放）
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +222,Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3}),行{0}：數量不適用於{4}在倉庫{1}在發布條目的時間（{2} {3}）
@@ -2840,7 +2840,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,總利潤/虧損
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,採購訂單項目供應商
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,公司名稱不能為公司
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,信頭的列印模板。
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,信頭的列印模板。
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"列印模板的標題, 例如 Proforma Invoice。"
 DocType: Student Guardian,Student Guardian,學生家長
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,估值類型罪名不能標記為包容性
@@ -2876,7 +2876,7 @@ DocType: Homepage,"URL for ""All Products""",網址“所有產品”
 DocType: Leave Application,Leave Balance Before Application,離開平衡應用前
 DocType: SMS Center,Send SMS,發送短信
 DocType: Cheque Print Template,Width of amount in word,在字量的寬度
-DocType: Company,Default Letter Head,預設信頭
+DocType: Company,Default LetterHead,預設信頭
 DocType: Purchase Order,Get Items from Open Material Requests,從開放狀態的物料需求取得項目
 DocType: Item,Standard Selling Rate,標準銷售率
 DocType: Account,Rate at which this tax is applied,此稅適用的匯率

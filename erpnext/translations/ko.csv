@@ -1032,7 +1032,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,직원 생일 알림
 DocType: Item,Inspection Criteria,검사 기준
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,옮겨진
 DocType: BOM Website Item,BOM Website Item,BOM 웹 사이트 항목
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,편지의 머리와 로고를 업로드합니다. (나중에 편집 할 수 있습니다).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,편지의 머리와 로고를 업로드합니다. (나중에 편집 할 수 있습니다).
 DocType: Timesheet Detail,Bill,계산서
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,다음 감가 상각 날짜는 과거 날짜로 입력
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,화이트
@@ -3092,7 +3092,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,총 이익 / 손실
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,구매 주문 상품 공급
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,회사 이름은 회사가 될 수 없습니다
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,인쇄 템플릿에 대한 편지 머리.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,인쇄 템플릿에 대한 편지 머리.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,인쇄 템플릿의 제목은 형식 상 청구서를 예.
 DocType: Student Guardian,Student Guardian,가디언
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,평가 유형 요금은 포괄적으로 표시 할 수 없습니다
@@ -3128,7 +3128,7 @@ DocType: Homepage,"URL for ""All Products""",&quot;모든 제품&quot;에 대한
 DocType: Leave Application,Leave Balance Before Application,응용 프로그램의 앞에 균형을 남겨주세요
 DocType: SMS Center,Send SMS,SMS 보내기
 DocType: Cheque Print Template,Width of amount in word,단어 양의 폭
-DocType: Company,Default Letter Head,편지 헤드 기본
+DocType: Company,Default LetterHead,편지 헤드 기본
 DocType: Purchase Order,Get Items from Open Material Requests,오픈 자료 요청에서 항목 가져 오기
 DocType: Item,Standard Selling Rate,표준 판매 비율
 DocType: Account,Rate at which this tax is applied,요금이 세금이 적용되는

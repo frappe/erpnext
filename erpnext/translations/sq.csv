@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Mos dërgoni punonj�
 DocType: Item,Inspection Criteria,Kriteret e Inspektimit
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Transferuar
 DocType: BOM Website Item,BOM Website Item,BOM Website Item
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Ngarko kokën tuaj letër dhe logo. (Ju mund të modifikoni ato më vonë).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Ngarko kokën tuaj letër dhe logo. (Ju mund të modifikoni ato më vonë).
 DocType: Timesheet Detail,Bill,Fature
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Zhvlerësimi Date tjetër është futur si datë të fundit
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,E bardhë
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Fitimi bruto / Humbja
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Blerje Rendit Item furnizuar
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Emri i kompanisë nuk mund të jetë i kompanisë
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Kryetarët letër për të shtypura templates.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Kryetarët letër për të shtypura templates.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,Titujt për shtypura templates p.sh. ProFORMA faturë.
 DocType: Student Guardian,Student Guardian,Guardian Student
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Akuzat lloj vlerësimi nuk mund të shënuar si gjithëpërfshirës
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""",URL për &quot;Të gjitha Produktet
 DocType: Leave Application,Leave Balance Before Application,Dërgo Bilanci para aplikimit
 DocType: SMS Center,Send SMS,Dërgo SMS
 DocType: Cheque Print Template,Width of amount in word,Gjerësia e shumës në fjalë
-DocType: Company,Default Letter Head,Default Letër Shef
+DocType: Company,Default LetterHead,Default Letër Shef
 DocType: Purchase Order,Get Items from Open Material Requests,Të marrë sendet nga kërkesat Hapur Materiale
 DocType: Item,Standard Selling Rate,Standard Shitja Vlerësoni
 DocType: Account,Rate at which this tax is applied,Shkalla në të cilën kjo taksë aplikohet

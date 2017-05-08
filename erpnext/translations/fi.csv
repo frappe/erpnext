@@ -1011,7 +1011,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,älä lähetä työn
 DocType: Item,Inspection Criteria,tarkastuskriteerit
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,siirretty
 DocType: BOM Website Item,BOM Website Item,BOM-sivuston Kohta
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Tuo kirjeen ylätunniste ja logo. (voit muokata niitä myöhemmin)
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Tuo kirjeen ylätunniste ja logo. (voit muokata niitä myöhemmin)
 DocType: Timesheet Detail,Bill,Laskuttaa
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Seuraavaksi Poistot Date kirjataan ohi päivämäärä
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Valkoinen
@@ -3037,7 +3037,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Bruttotuottoprosentin / tappio
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Tuote ostotilaus toimitettu
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Yrityksen nimeä ei voi Company
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Tulosteotsakkeet mallineille
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Tulosteotsakkeet mallineille
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Tulostus, mallipohjan otsikot esim, proformalaskuun"
 DocType: Student Guardian,Student Guardian,Student Guardian
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Arvotyypin maksuja ei voi merkata sisältyviksi
@@ -3073,7 +3073,7 @@ DocType: Homepage,"URL for ""All Products""","""Kaikki tuotteet"" - sivun WWW-os
 DocType: Leave Application,Leave Balance Before Application,Vapaan määrä ennen
 DocType: SMS Center,Send SMS,Lähetä tekstiviesti
 DocType: Cheque Print Template,Width of amount in word,Leveys määrän sanassa
-DocType: Company,Default Letter Head,oletus kirjeen otsikko
+DocType: Company,Default LetterHead,oletus kirjeen otsikko
 DocType: Purchase Order,Get Items from Open Material Requests,Saamaan kohteita Open Materiaali pyynnöt
 DocType: Item,Standard Selling Rate,Perusmyyntihinta
 DocType: Account,Rate at which this tax is applied,taso jolla tätä veroa sovelletaan

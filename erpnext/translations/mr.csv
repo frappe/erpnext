@@ -1012,7 +1012,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,कर्मचा�
 DocType: Item,Inspection Criteria,तपासणी निकष
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,हस्तांतरण
 DocType: BOM Website Item,BOM Website Item,BOM वेबसाइट बाबींचा
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,आपले पत्र डोके आणि लोगो अपलोड करा. (आपण नंतर संपादित करू शकता).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,आपले पत्र डोके आणि लोगो अपलोड करा. (आपण नंतर संपादित करू शकता).
 DocType: Timesheet Detail,Bill,बिल
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,पुढील घसारा तारीख मागील तारीख प्रवेश केला आहे
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,व्हाइट
@@ -3038,7 +3038,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,निव्वळ नफा / तोटा
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,खरेदी ऑर्डर बाबींचा पुरवठा
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,कंपनी नाव कंपनी असू शकत नाही
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,प्रिंट टेम्पलेट साठी letter.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,प्रिंट टेम्पलेट साठी letter.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,प्रिंट टेम्पलेट साठी शोध शिर्षके फाईल नाव उदा. Proforma चलन
 DocType: Student Guardian,Student Guardian,विद्यार्थी पालक
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,मूल्यांकन प्रकार शुल्क समावेश म्हणून चिन्हांकित करू शकत नाही
@@ -3074,7 +3074,7 @@ DocType: Homepage,"URL for ""All Products""",&quot;सर्व उत्पा�
 DocType: Leave Application,Leave Balance Before Application,अर्ज करण्यापूर्वी शिल्लक सोडा
 DocType: SMS Center,Send SMS,एसएमएस पाठवा
 DocType: Cheque Print Template,Width of amount in word,शब्द रक्कम रुंदी
-DocType: Company,Default Letter Head,लेटरहेडवर डीफॉल्ट
+DocType: Company,Default LetterHead,लेटरहेडवर डीफॉल्ट
 DocType: Purchase Order,Get Items from Open Material Requests,ओपन साहित्य विनंत्यांचे आयटम मिळवा
 DocType: Item,Standard Selling Rate,मानक विक्री दर
 DocType: Account,Rate at which this tax is applied,कर लागू आहे जेथे  हा  दर

@@ -863,7 +863,7 @@ DocType: Workstation,Electricity Cost,עלות חשמל
 DocType: HR Settings,Don't send Employee Birthday Reminders,אל תשלחו לעובדי יום הולדת תזכורות
 DocType: Item,Inspection Criteria,קריטריונים לבדיקה
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,הועבר
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,העלה ראש המכתב ואת הלוגו שלך. (אתה יכול לערוך אותם מאוחר יותר).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,העלה ראש המכתב ואת הלוגו שלך. (אתה יכול לערוך אותם מאוחר יותר).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,לבן
 DocType: SMS Center,All Lead (Open),כל הלידים (פתוח)
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +222,Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3}),שורה {0}: כמות אינה זמינה עבור {4} במחסן {1} בכל שעת הפרסום של כניסה ({2} {3})
@@ -2602,7 +2602,7 @@ DocType: Cheque Print Template,Starting position from top edge,התחלה מן �
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +29,Same supplier has been entered multiple times,ספק זהה הוזן מספר פעמים
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,לרכוש פריט להזמין מסופק
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,שם חברה לא יכול להיות חברה
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,ראשי מכתב לתבניות הדפסה.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,ראשי מכתב לתבניות הדפסה.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,כותרות לתבניות הדפסה למשל פרופורמה חשבונית.
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,חיובי סוג הערכת שווי לא יכולים סומן ככלול
 DocType: POS Profile,Update Stock,בורסת עדכון
@@ -2636,7 +2636,7 @@ apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +26,C
 DocType: Leave Application,Leave Balance Before Application,השאר מאזן לפני היישום
 DocType: SMS Center,Send SMS,שלח SMS
 DocType: Cheque Print Template,Width of amount in word,רוחב של סכום המילה
-DocType: Company,Default Letter Head,ברירת מחדל מכתב ראש
+DocType: Company,Default LetterHead,ברירת מחדל מכתב ראש
 DocType: Purchase Order,Get Items from Open Material Requests,קבל פריטים מבקשות להרחיב חומר
 DocType: Item,Standard Selling Rate,מכירה אחידה דרג
 DocType: Account,Rate at which this tax is applied,קצב שבו מס זה מיושם

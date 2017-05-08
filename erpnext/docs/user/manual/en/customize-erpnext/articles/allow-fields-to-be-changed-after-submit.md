@@ -1,6 +1,6 @@
 #Editing Value in Submitted Document
 
-Once document is submitted, fields are frozen, and no editing is allowd. Still there are certain standard fields like Letter Head, Print Heading which can still be edited. For the custom field, if **Allow on Submit** property is checked, it will be editable even after document is submitted.
+Once document is submitted, fields are frozen, and no editing is allowd. Still there are certain standard fields like LetterHead, Print Heading which can still be edited. For the custom field, if **Allow on Submit** property is checked, it will be editable even after document is submitted.
 
 <div class="well"> Standard fields cannot be set as Allow on Submit.</div>
 

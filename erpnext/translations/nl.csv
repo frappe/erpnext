@@ -1031,7 +1031,7 @@ DocType: HR Settings,Don't send Employee Birthday Reminders,Stuur geen Werknemer
 DocType: Item,Inspection Criteria,Inspectie Criteria
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Overgebrachte
 DocType: BOM Website Item,BOM Website Item,BOM Website Item
-apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your letter head and logo. (you can edit them later).,Upload uw brief hoofd en logo. (Je kunt ze later bewerken).
+apps/erpnext/erpnext/public/js/setup_wizard.js +168,Upload your LetterHead and logo. (you can edit them later).,Upload uw brief hoofd en logo. (Je kunt ze later bewerken).
 DocType: Timesheet Detail,Bill,Bill
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +84,Next Depreciation Date is entered as past date,Volgende Afschrijvingen Date wordt ingevoerd als datum in het verleden
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +170,White,Wit
@@ -3091,7 +3091,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Bruto winst / verlies
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Inkooporder Artikel geleverd
 apps/erpnext/erpnext/public/js/setup_wizard.js +83,Company Name cannot be Company,Bedrijfsnaam kan niet bedrijf zijn
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Briefhoofden voor print sjablonen.
+apps/erpnext/erpnext/config/setup.py +27,LetterHeads for print templates.,Briefhoofden voor print sjablonen.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,Titels voor print sjablonen bijv. Proforma Factuur.
 DocType: Student Guardian,Student Guardian,student Guardian
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +192,Valuation type charges can not marked as Inclusive,Soort waardering kosten kunnen niet zo Inclusive gemarkeerd
@@ -3127,7 +3127,7 @@ DocType: Homepage,"URL for ""All Products""",URL voor &quot;Alle producten&quot;
 DocType: Leave Application,Leave Balance Before Application,Verlofsaldo voor aanvraag
 DocType: SMS Center,Send SMS,SMS versturen
 DocType: Cheque Print Template,Width of amount in word,Breedte van de hoeveelheid in woord
-DocType: Company,Default Letter Head,Standaard Briefhoofd
+DocType: Company,Default LetterHead,Standaard Briefhoofd
 DocType: Purchase Order,Get Items from Open Material Requests,Krijg items van Open Materiaal Aanvragen
 DocType: Item,Standard Selling Rate,Standard Selling Rate
 DocType: Account,Rate at which this tax is applied,Percentage waarmee deze belasting toegepast wordt
