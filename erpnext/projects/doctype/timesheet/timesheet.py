@@ -382,9 +382,13 @@ def get_events(start, end, filters=None):
 
 def get_conditions(filters):
 	conditions = []
-	abbr = {'employee': 'tabTimesheet', 'project': 'tabTimesheet Detail'}
 	for key in filters:
 		if filters.get(key):
-			conditions.append("`%s`.%s = '%s'"%(abbr.get(key), key, filters.get(key)))
+			if frappe.get_meta("Timesheet").has_field(key):
+				dt = 'tabTimesheet'
+			elif frappe.get_meta("Timesheet Detail").has_field(key):
+				dt = 'tabTimesheet Detail'
+				
+			conditions.append("`%s`.%s = '%s'"%(dt, key, filters.get(key)))
 
 	return " and {}".format(" and ".join(conditions)) if conditions else ""
