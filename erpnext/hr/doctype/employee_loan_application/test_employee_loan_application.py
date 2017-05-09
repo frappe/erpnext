@@ -39,13 +39,13 @@ class TestEmployeeLoanApplication(unittest.TestCase):
 	def test_loan_totals(self):
 		loan_application = frappe.get_doc("Employee Loan Application", {"employee":self.employee})
 		self.assertEquals(loan_application.repayment_amount, 11445)
-		self.assertEquals(loan_application.total_payable_interest, 24680)
-		self.assertEquals(loan_application.total_payable_amount, 274680)
+		self.assertEquals(loan_application.total_payable_interest, 24657)
+		self.assertEquals(loan_application.total_payable_amount, 274657)
 
 		loan_application.repayment_method = "Repay Fixed Amount per Period"
 		loan_application.repayment_amount = 15000
 		loan_application.save()
 
 		self.assertEquals(loan_application.repayment_periods, 18)
-		self.assertEquals(loan_application.total_payable_interest, 20000)
-		self.assertEquals(loan_application.total_payable_amount, 270000)
+		self.assertEquals(loan_application.total_payable_interest, 18506)
+		self.assertEquals(loan_application.total_payable_amount, 268506)
