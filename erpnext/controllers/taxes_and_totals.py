@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import json
 import frappe, erpnext
+import math
 from frappe import _, scrub
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
@@ -323,15 +324,23 @@ class calculate_taxes_and_totals(object):
 
 		self.doc.round_floats_in(self.doc, ["grand_total", "base_grand_total"])
 
-		if self.doc.meta.get_field("rounded_total"):
-			self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
-				self.doc.currency, self.doc.precision("rounded_total"))
-		if self.doc.meta.get_field("base_rounded_total"):
-			company_currency = erpnext.get_company_currency(self.doc.company)
+		round_up = frappe.db.get_value("Company", filters={"name": self.doc.company }, fieldname="round_up_total_in_sales_invoice")
 
-			self.doc.base_rounded_total = \
-				round_based_on_smallest_currency_fraction(self.doc.base_grand_total,
-					company_currency, self.doc.precision("base_rounded_total"))
+		if self.doc.meta.get_field("rounded_total"):
+			if round_up == 0:
+				self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
+					self.doc.currency, self.doc.precision("rounded_total"))
+			else:
+				self.doc.rounded_total = math.ceil(float(self.doc.grand_total))
+
+		if self.doc.meta.get_field("base_rounded_total"):
+			if round_up == 0:
+				company_currency = erpnext.get_company_currency(self.doc.company)
+				self.doc.base_rounded_total = \
+					round_based_on_smallest_currency_fraction(self.doc.base_grand_total,
+						company_currency, self.doc.precision("base_rounded_total"))
+			else:
+				self.doc.base_rounded_total =  math.ceil(float(self.doc.base_grand_total))
 
 	def _cleanup(self):
 		for tax in self.doc.get("taxes"):
@@ -405,14 +414,14 @@ class calculate_taxes_and_totals(object):
 			self.doc.total_advance = flt(total_allocated_amount, self.doc.precision("total_advance"))
 
 			if self.doc.party_account_currency == self.doc.currency:
-				invoice_total = flt(self.doc.grand_total - flt(self.doc.write_off_amount), 
+				invoice_total = flt(self.doc.grand_total - flt(self.doc.write_off_amount),
 					self.doc.precision("grand_total"))
 			else:
-				base_write_off_amount = flt(flt(self.doc.write_off_amount) * self.doc.conversion_rate, 
+				base_write_off_amount = flt(flt(self.doc.write_off_amount) * self.doc.conversion_rate,
 					self.doc.precision("base_write_off_amount"))
-				invoice_total = flt(self.doc.grand_total * self.doc.conversion_rate, 
+				invoice_total = flt(self.doc.grand_total * self.doc.conversion_rate,
 					self.doc.precision("grand_total")) - base_write_off_amount
-				
+
 			if invoice_total > 0 and self.doc.total_advance > invoice_total:
 				frappe.throw(_("Advance amount cannot be greater than {0} {1}")
 					.format(self.doc.party_account_currency, invoice_total))
