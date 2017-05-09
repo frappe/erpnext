@@ -360,8 +360,8 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 	sub_query = """ select round(`tabBin`.actual_qty, 2) from `tabBin`
 		where `tabBin`.warehouse = `tabWarehouse`.name
 		{bin_conditions} """.format(
-		bin_conditions=get_filters_cond(doctype, filter_dict.get("Bin"), bin_conditions),
-			ignore_permissions=True)
+		bin_conditions=get_filters_cond(doctype, filter_dict.get("Bin"), 
+			bin_conditions, ignore_permissions=True))
 
 	response = frappe.db.sql("""select `tabWarehouse`.name,
 		CONCAT_WS(" : ", "Actual Qty", ifnull( ({sub_query}), 0) ) as actual_qty
