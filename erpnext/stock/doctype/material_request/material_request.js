@@ -95,14 +95,14 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('Sales Order'),
+			this.frm.add_custom_button(__('Sales Order'),
 				function() {
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
 						source_doctype: "Sales Order",
-						target: cur_frm,
+						target: me.frm,
 						setters: {
-							company: cur_frm.doc.company
+							company: me.frm.doc.company
 						},
 						get_query_filters: {
 							docstatus: 1,
