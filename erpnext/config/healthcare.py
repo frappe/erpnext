@@ -202,19 +202,9 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "OP Settings",
-					"label": _("OP Settings"),
-				},
-				{
-					"type": "doctype",
-					"name": "Laboratory Settings",
-					"description": _("Settings for Laboratory Module")
-				},
-				{
-					"type": "doctype",
-					"name": "PACS Settings",
-					"description": _("Server Settings")
-				},
+					"name": "Healthcare Settings",
+					"label": _("Healthcare Settings"),
+				}
 			]
 		},
 

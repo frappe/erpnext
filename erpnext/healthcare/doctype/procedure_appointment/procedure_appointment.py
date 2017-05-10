@@ -10,7 +10,7 @@ from frappe import msgprint, _
 from frappe.utils import getdate
 import datetime
 import time, json
-from erpnext.healthcare.doctype.op_settings.op_settings import get_receivable_account, get_income_account
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
 
 class ProcedureAppointment(Document):
 	def on_update(self):

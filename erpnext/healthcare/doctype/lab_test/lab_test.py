@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 import time, json
 from frappe.utils import cstr, getdate, get_time, math
-from erpnext.healthcare.doctype.op_settings.op_settings import get_receivable_account,get_income_account
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
 from frappe import _
 
 class LabTest(Document):
@@ -192,7 +192,7 @@ def load_test_from_template(lab_test):
 	load_result_format(lab_test, template, None, None)
 
 def create_sample_collection(lab_test, template, patient, invoice):
-	if(frappe.db.get_value("Laboratory Settings", None, "require_sample_collection") == "1"):
+	if(frappe.db.get_value("Healthcare Settings", None, "require_sample_collection") == "1"):
 		sample_collection = create_sample_doc(template, patient, invoice)
 		if(sample_collection):
 			lab_test.sample = sample_collection.name

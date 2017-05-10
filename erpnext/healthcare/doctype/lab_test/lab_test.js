@@ -49,7 +49,7 @@ frappe.ui.form.on('Lab Test', {
 		if(frm.doc.docstatus==1 && frm.doc.sms_sent==0){
 			frm.add_custom_button(__('Send SMS'), function() {
 				frappe.call({
-					method: "erpnext.healthcare.doctype.laboratory_settings.laboratory_settings.get_sms_text",
+					method: "erpnext.healthcare.doctype.healthcare_settings.healthcare_settings.get_sms_text",
 					args:{doc: frm.doc.name},
 					callback: function(r) {
 						if(!r.exc) {

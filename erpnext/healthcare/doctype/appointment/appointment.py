@@ -13,7 +13,7 @@ from datetime import timedelta
 import calendar
 from erpnext.setup.doctype.sms_settings.sms_settings import send_sms
 from erpnext.healthcare.scheduler import check_availability
-from erpnext.healthcare.doctype.op_settings.op_settings import get_receivable_account,get_income_account
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
 
 class Appointment(Document):
 	def on_update(self):
@@ -103,8 +103,8 @@ def set_pending_appointments():
 	frappe.db.sql("""update `tabAppointment` set status='Pending' where status in ('Scheduled','Open') and appointment_date < %s""",(today))
 
 def confirm_sms(doc):
-	if (frappe.db.get_value("OP Settings", None, "app_con")=='1'):
-		message = frappe.db.get_value("OP Settings", None, "app_con_msg")
+	if (frappe.db.get_value("Healthcare Settings", None, "app_con")=='1'):
+		message = frappe.db.get_value("Healthcare Settings", None, "app_con_msg")
 		send_message(doc, message)
 
 @frappe.whitelist()
@@ -144,8 +144,8 @@ def validity_exists(physician, patient):
 			"patient": patient})
 
 def update_fee_validity(fee_validity, appointment):
-	max_visit = frappe.db.get_value("OP Settings", None, "max_visit")
-	valid_days = frappe.db.get_value("OP Settings", None, "valid_days")
+	max_visit = frappe.db.get_value("Healthcare Settings", None, "max_visit")
+	valid_days = frappe.db.get_value("Healthcare Settings", None, "valid_days")
 	if not valid_days:
 		valid_days = 1
 	if not max_visit:
@@ -192,15 +192,15 @@ def create_consultation(appointment):
 	return consultation.as_dict()
 
 def remind_appointment():
-	if (frappe.db.get_value("OP Settings", None, "app_rem")=='1'):
-		rem_before = datetime.datetime.strptime(frappe.get_value("OP Settings", None, "rem_before"), "%H:%M:%S")
+	if (frappe.db.get_value("Healthcare Settings", None, "app_rem")=='1'):
+		rem_before = datetime.datetime.strptime(frappe.get_value("Healthcare Settings", None, "rem_before"), "%H:%M:%S")
 		rem_dt = datetime.datetime.now() + datetime.timedelta(hours = rem_before.hour, minutes=rem_before.minute, seconds= rem_before.second)
 
 		appointment_list = frappe.db.sql("select name from `tabAppointment` where start_dt between %s and %s and reminded = 0 ", (datetime.datetime.now(), rem_dt))
 
 		for i in range (0,len(appointment_list)):
 			doc = frappe.get_doc("Appointment", appointment_list[i][0])
-			message = frappe.db.get_value("OP Settings", None, "app_rem_msg")
+			message = frappe.db.get_value("Healthcare Settings", None, "app_rem_msg")
 			send_message(doc, message)
 			frappe.db.set_value("Appointment",doc.name,"reminded",1)
 

@@ -8,9 +8,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, cstr, getdate, get_time
 import time, dateutil
-from erpnext.healthcare.doctype.op_settings.op_settings import generate_patient_id
 from erpnext.accounts.party import validate_party_accounts
-from erpnext.healthcare.doctype.op_settings.op_settings import get_receivable_account,get_income_account
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account,generate_patient_id
 
 class Patient(Document):
 	def validate(self):
@@ -18,9 +17,9 @@ class Patient(Document):
 
 	def after_insert(self):
 		generate_patient_id(self)
-		if(frappe.db.get_value("OP Settings", None, "manage_customer") == '1' and not self.customer):
+		if(frappe.db.get_value("Healthcare Settings", None, "manage_customer") == '1' and not self.customer):
 			create_customer(self)
-		if(frappe.db.get_value("OP Settings", None, "register_patient") == '1'):
+		if(frappe.db.get_value("Healthcare Settings", None, "register_patient") == '1'):
 			frappe.db.set_value("Patient", self.name, "disabled", 1)
 			self.reload()
 	def autoname(self):
@@ -69,7 +68,7 @@ def create_customer(doc):
 @frappe.whitelist()
 def register_patient(patient, company=None):
 	frappe.db.set_value("Patient", patient, "disabled", 0)
-	if(frappe.get_value("OP Settings", None, "registration_fee")>0):
+	if(frappe.get_value("Healthcare Settings", None, "registration_fee")>0):
 		sales_invoice = make_invoice(patient, company)
 		sales_invoice.save(ignore_permissions=True)
 		return {'invoice': sales_invoice.name}
@@ -89,7 +88,7 @@ def make_invoice(patient, company):
 	item_line.uom = "Nos"
 	item_line.conversion_factor = 1
 	item_line.income_account = get_income_account(None, company)
-	item_line.rate = frappe.get_value("OP Settings", None, "registration_fee")
+	item_line.rate = frappe.get_value("Healthcare Settings", None, "registration_fee")
 	item_line.amount = item_line.rate
 	sales_invoice.set_missing_values()
 	return sales_invoice

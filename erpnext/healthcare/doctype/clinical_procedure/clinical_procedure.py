@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import cint, cstr, flt
-from erpnext.healthcare.doctype.op_settings.op_settings import get_account
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
 
 class ClinicalProcedure(Document):
@@ -67,7 +67,7 @@ def create_stock_entry(doc):
 	stock_entry = set_stock_items(stock_entry, doc.name, "Clinical Procedure")
 	stock_entry.purpose = "Material Issue"
 	warehouse = frappe.db.get_value("Service Unit", doc.service_unit, "warehouse")
-	expense_account = get_account(None, "expense_account", "OP Settings", doc.company)
+	expense_account = get_account(None, "expense_account", "Healthcare Settings", doc.company)
 
 	for item_line in stock_entry.items:
 		cost_center = frappe.db.get_value("Item", item_line.item_code, "buying_cost_center")
