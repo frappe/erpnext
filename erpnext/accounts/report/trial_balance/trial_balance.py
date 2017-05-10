@@ -137,7 +137,8 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters)
 		"credit": 0.0,
 		"parent_account": None,
 		"indent": 0,
-		"has_value": True
+		"has_value": True,
+		"currency": frappe.db.get_value("Company", filters.company, "default_currency")
 	}
 
 	for d in accounts:
