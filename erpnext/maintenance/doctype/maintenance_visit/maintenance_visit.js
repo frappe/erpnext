@@ -49,6 +49,7 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 						method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
 						source_doctype: "Warranty Claim",
 						target: cur_frm,
+						date_field: "complaint_date",
 						setters: {
 							customer: cur_frm.doc.customer || undefined,
 						},

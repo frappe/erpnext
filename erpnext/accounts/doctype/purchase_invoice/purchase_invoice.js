@@ -71,6 +71,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 					source_doctype: "Purchase Receipt",
 					target: cur_frm,
+					date_field: "posting_date",
 					setters: {
 						supplier: cur_frm.doc.supplier || undefined,
 					},

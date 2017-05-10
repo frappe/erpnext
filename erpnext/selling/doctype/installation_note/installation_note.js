@@ -49,6 +49,7 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
 						source_doctype: "Delivery Note",
 						target: cur_frm,
+						date_field: "posting_date",
 						setters: {
 							customer: cur_frm.doc.customer || undefined,
 						},

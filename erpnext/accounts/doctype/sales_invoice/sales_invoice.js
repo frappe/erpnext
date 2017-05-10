@@ -118,7 +118,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
 					source_doctype: "Sales Order",
 					target: cur_frm,
-					date_field: "transaction_date",
 					setters: {
 						customer: cur_frm.doc.customer || undefined,
 					},
@@ -139,6 +138,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 					source_doctype: "Delivery Note",
 					target: cur_frm,
+					date_field: "posting_date",
 					setters: {
 						company: cur_frm.doc.company
 					},
