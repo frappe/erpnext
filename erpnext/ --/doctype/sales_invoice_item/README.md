@@ -1,0 +1,1 @@
+Item details of parent Sales Invoice.

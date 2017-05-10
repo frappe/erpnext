@@ -1,0 +1,351 @@
+{
+    "country_code": "gt", 
+    "name": "Guatemala - Cuentas", 
+    "tree": {
+        "02 - Pasivos": {
+            "Pasivo Corriente": {
+                "Acreedores 1": {
+                    "account_type": "Payable"
+                }, 
+                "Cuentas por Pagar": {}, 
+                "Impuestos por Pagar": {}, 
+                "Otras Cuentas por Pagar": {}, 
+                "Prestaciones": {}, 
+                "Proveedores": {
+                    "Inventario Recibido pero No Cobrado": {
+                        "account_type": "Stock Received But Not Billed"
+                    }
+                }, 
+                "Sueldos por Liquidar": {}
+            }, 
+            "Pasivo No Corriente": {
+                "Acreedores": {}, 
+                "Provisi\u00f3n para Indemnizaciones": {}
+            }, 
+            "root_type": "Liability"
+        }, 
+        "03 - Patrimonio": {
+            "Capital": {}, 
+            "Resultados del Ejercicio": {}, 
+            "Utilidades Retenidas": {}, 
+            "root_type": "Asset"
+        }, 
+        "04 - Ingresos": {
+            "Productos": {}, 
+            "Servicios": {}, 
+            "root_type": "Income"
+        }, 
+        "05 - Costos": {
+            "Costo de Ventas": {
+                "account_type": "Cost of Goods Sold"
+            }, 
+            "Costos Incluidos en la Valuaci\u00f3n": {
+                "account_type": "Expenses Included In Valuation"
+            }, 
+            "Merma o Ajuste de Inventario": {
+                "account_type": "Stock Adjustment"
+            }, 
+            "root_type": "Expense"
+        }, 
+        "06 - Gastos": {
+            "Alquileres": {}, 
+            "Depreciaciones": {
+                "account_type": "Depreciation"
+            }, 
+            "Gastos Diversos": {}, 
+            "Gastos de Personal": {}, 
+            "Honorarios Profesionales": {}, 
+            "Mantenimiento": {}, 
+            "Seguros": {}, 
+            "Servicios B\u00e1sicos": {}, 
+            "root_type": "Expense"
+        }, 
+        "07 - Otros Gastos y Productos Financieros": {
+            "Otros Gastos": {
+                "Otros Gastos y Productos Financieros 2": {
+                    "Intereses 1": {}, 
+                    "Otros Gastos Financieros 1": {}
+                }
+            }, 
+            "Otros Ingresos": {
+                "Otros Gastos y Productos Financieros 1": {
+                    "Intereses": {}, 
+                    "Otros Gastos Financieros": {}
+                }
+            }, 
+            "root_type": "Expense"
+        }, 
+        "1 - Activos": {
+            "1. Activo Corriente": {
+                "1.10 Activos Corrientes Adicionales": {
+                    "1.10.1 Inversiones Corrientes no Clasificados como Equivalentes de Caja y Bancos": {}, 
+                    "1.10.2 Activos Diferidos o Restringidos": {
+                        "1.10.2.1 Cr\u00e9dito Fiscal (IVA Por Cobrar)": {
+                            "account_type": "Chargeable", 
+                            "is_group": 1
+                        }, 
+                        "account_type": "Chargeable"
+                    }, 
+                    "account_type": "Chargeable"
+                }, 
+                "1.2 Inversion en Propiedades": {
+                    "1.2.1 Inversion Inmobiliaria Bajo Construccion": {
+                        "account_type": "Chargeable"
+                    }, 
+                    "1.2.2 Inversion Inmobiliaria Construida": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "account_type": "Chargeable"
+                }, 
+                "1.3 Activos Intangibles": {
+                    "account_type": "Chargeable", 
+                    "is_group": 1
+                }, 
+                "1.4 Activos Financieros": {
+                    "1.4.1 Inversion o Participaci\u00f3n Accionaria en Empresas Afiliadas": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "1.4.2 Inversiones Burs\u00e1tiles e Instrumentos Financieros": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "1.4.3 Activos Financieros Derivados": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "1.4.4 Otros Activos Financieros": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "1.4.5 Provisi\u00f3n por Riesgo de Cr\u00e9dito (agregado) (Contra-activo)": {
+                        "account_type": "Round Off", 
+                        "is_group": 1
+                    }, 
+                    "1.4.6 Activos Financieros Clasificados por Designaci\u00f3n": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "account_type": "Chargeable"
+                }, 
+                "1.5 Activos Biol\u00f3gicos": {
+                    "1.5.1 Activos Biol\u00f3gicos al Costo": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
+                    "1.5.2 Activos Biol\u00f3gicos a Valor Razonable": {
+                        "1.5.2.1 Animales": {
+                            "account_type": "Stock", 
+                            "is_group": 1
+                        }, 
+                        "1.5.2.2 Plantas": {
+                            "1.5.2.2.1 Division productiva 1er nivel EJEMPLO": {
+                                "1.5.2.2.1.1 Division Productiva 2do nivel EJEMPLO": {
+                                    "1.5.2.2.1.1.1 Division Productiva 3er Nivel EJEMPLO": {
+                                        "1.5.2.2.1.1.1.1 Divisi\u00f3n Productiva 4\u00ba Nivel EJEMPLO": {}, 
+                                        "account_type": "Stock"
+                                    }, 
+                                    "account_type": "Stock"
+                                }, 
+                                "account_type": "Stock"
+                            }, 
+                            "account_type": "Stock"
+                        }, 
+                        "account_type": "Stock"
+                    }, 
+                    "account_type": "Stock"
+                }, 
+                "1.6 Activos Devengables y Otros Activos": {
+                    "1.6.1 Pagos Anticipados y Otros Activos Circulantes": {
+                        "1.6.1.0 Seguro Pagado Anticipadamente": {
+                            "account_type": "Chargeable"
+                        }, 
+                        "account_type": "Chargeable"
+                    }, 
+                    "1.6.2 Cobrables Relacionados con Impuestos": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "1.6.3 Proveedores de Servicio": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "1.6.4 Contratos de Construccion": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "1.6.5 Costos de Montaje": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "1.6.6 Activos Adicionales y Otros": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "account_type": "Chargeable"
+                }, 
+                "1.7 Inventario": {
+                    "1.7.1 Materia Prima": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
+                    "1.7.10 Inventarios Pignorados Como Garant\u00eda de Pasivo": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
+                    "1.7.11 Inventarios a Valor Razonable Menos Costos de Venta": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
+                    "1.7.2 Mercader\u00eda (Mercanc\u00edas)": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
+                    "1.7.3 Suministros de Producci\u00f3n y Consumibles": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
+                    "1.7.4 Repuestos": {
+                        "1.7.4.0 Respuestos en Transito": {
+                            "account_type": "Stock", 
+                            "is_group": 1
+                        }, 
+                        "account_type": "Stock"
+                    }, 
+                    "1.7.5 Combustibles": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
+                    "1.7.6 Trabajo en Progeso": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
+                    "1.7.7 Producto Terminado": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
+                    "1.7.8 Art\u00edculos de Inventario Adicionales": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
+                    "1.7.9 Otros Inventarios": {
+                        "1.7.9.1 Merma o Ajuste de Inventario": {
+                            "account_type": "Stock Adjustment", 
+                            "is_group": 1
+                        }, 
+                        "account_type": "Stock"
+                    }, 
+                    "account_type": "Stock"
+                }, 
+                "1.8 Cobrables": {
+                    "1.8.1 Ventas al Cr\u00e9dito": {
+                        "account_type": "Receivable", 
+                        "is_group": 1
+                    }, 
+                    "1.8.2 Activos bajo Contrato": {
+                        "account_type": "Receivable", 
+                        "is_group": 1
+                    }, 
+                    "1.8.3 Otras Cuentas por Cobrar": {
+                        "1.8.3.1 Cuentas por Cobrar a Otras Entidades no Afiliadas": {
+                            "1.8.3.1.1 Compa\u00f1\u00eda No Afiliada (EJEMPLO)": {
+                                "account_type": "Receivable"
+                            }, 
+                            "account_type": "Receivable"
+                        }, 
+                        "1.8.3.2 Cuentas Por Cobrar Compa\u00f1\u00edas Afiliadas": {
+                            "1.8.3.2.1 Compa\u00f1\u00eda subsidiaria (EJEMPLO)": {
+                                "account_type": "Receivable"
+                            }, 
+                            "account_type": "Receivable"
+                        }, 
+                        "1.8.3.3 Cuentas por Cobrar a Empleados": {
+                            "1.8.3.3.1 Prestamo EJEMPLO": {
+                                "account_type": "Receivable"
+                            }, 
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "1.8.4 Ajustes": {
+                        "account_type": "Chargeable", 
+                        "is_group": 1
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "1.9 Caja y Equivalentes": {
+                    "1.9.1 Caja": {
+                        "account_type": "Cash", 
+                        "is_group": 1
+                    }, 
+                    "1.9.2 Equivalentes de Efectivo (Bancos)": {
+                        "1.9.2.1 Bancos Nacionales": {
+                            "1.9.2.1.1 Banco Industrial": {
+                                "account_type": "Bank", 
+                                "is_group": 1
+                            }, 
+                            "1.9.2.1.2 Banco Agromercantil de Guatemala": {
+                                "account_type": "Bank"
+                            }, 
+                            "1.9.2.1.3 Banco Prom\u00e9rica": {
+                                "account_type": "Bank"
+                            }, 
+                            "1.9.2.1.4 Banco de Am\u00e9rica Central": {
+                                "account_type": "Bank"
+                            }, 
+                            "1.9.2.1.5 Banco G&T Continental": {
+                                "account_type": "Bank"
+                            }, 
+                            "1.9.2.1.6 Banco Internacional": {
+                                "account_type": "Bank"
+                            }, 
+                            "1.9.2.1.7 Banco de Desarrollo Rural": {
+                                "account_type": "Bank"
+                            }, 
+                            "1.9.2.1.8 Banco de los Trabajadores": {
+                                "account_type": "Bank"
+                            }, 
+                            "1.9.2.1.9 Vivibanco": {
+                                "account_type": "Bank"
+                            }, 
+                            "account_type": "Bank"
+                        }, 
+                        "1.9.2.2 Bancos Internacionales": {
+                            "1.9.2.2.1 HSBC": {
+                                "account_type": "Bank"
+                            }, 
+                            "account_type": "Bank"
+                        }, 
+                        "1.9.2.3 Cadena de Bloques (Blockchain)": {
+                            "1.9.2.3.1 Billetera Bitcoin 1234567890abcdefg": {
+                                "account_type": "Cash"
+                            }, 
+                            "account_type": "Cash"
+                        }, 
+                        "account_type": "Bank"
+                    }, 
+                    "1.9.3 Inversiones a Corto Plazo": {
+                        "account_type": "Bank", 
+                        "is_group": 1
+                    }, 
+                    "1.9.4 Otros Equivalentes de Caja y Bancos": {
+                        "account_type": "Cash", 
+                        "is_group": 1
+                    }, 
+                    "account_type": "Bank"
+                }, 
+                "Impuestos por Cobrar": {
+                    "Retenciones de IVA recibidas": {}
+                }
+            }, 
+            "No Corriente": {
+                "Activos Fijos": {
+                    "account_type": "Fixed Asset"
+                }, 
+                "Cargos Diferidos": {}
+            }, 
+            "root_type": "Asset"
+        }
+    }
+}

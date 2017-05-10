@@ -1,0 +1,17 @@
+{
+ "creation": "2012-05-01 12:46:31", 
+ "custom_format": 0, 
+ "disabled": 0, 
+ "doc_type": "Journal Entry", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "html": "", 
+ "idx": 1, 
+ "modified": "2015-11-25 07:06:00.668141", 
+ "modified_by": "Administrator", 
+ "name": "Payment Receipt Voucher", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Server", 
+ "standard": "Yes"
+}
