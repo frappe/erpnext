@@ -13,7 +13,10 @@ frappe.ui.form.on("Company", {
 			frm.set_df_property("abbr", "read_only", 1);
 		}
 
+		frm.toggle_display('address_html', !frm.doc.__islocal);
 		if(!frm.doc.__islocal) {
+			frappe.geo.render_address_and_contact(frm);
+
 			frm.toggle_enable("default_currency", (frm.doc.__onload &&
 				!frm.doc.__onload.transactions_exist));
 
