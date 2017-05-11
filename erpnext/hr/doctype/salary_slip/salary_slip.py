@@ -327,10 +327,10 @@ class SalarySlip(TransactionBase):
 			relieving_date = getdate(self.end_date)
 
 		if not joining_date:
-			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(employee.employee)))
+			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(self.employee_name)))
 
 		for d in self.get(component_type):
-			if ((cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet) or\
+			if self.salary_structure and ((cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet) or\
 			getdate(self.start_date) < joining_date or getdate(self.end_date) > relieving_date):
 
 				d.amount = rounded((flt(d.default_amount) * flt(self.payment_days)
