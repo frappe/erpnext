@@ -17,4 +17,4 @@ class GradingScale(Document):
 			else:
 				thresholds.append(cint(d.threshold))
 		if 0 not in thresholds:
-			frappe.throw(_("Please define grade for treshold 0%"))
+			frappe.throw(_("Please define grade for Threshold 0%"))

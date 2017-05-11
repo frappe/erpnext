@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import cstr, cint, getdate, get_first_day, get_last_day, date_diff, add_days
 from frappe import msgprint, _
 from calendar import monthrange
-from erpnext.schools.api import get_student_batch_students
+from erpnext.schools.api import get_student_group_students
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -15,9 +15,9 @@ def execute(filters=None):
 	to_date = get_last_day(filters["month"] + '-' + filters["year"])
 	total_days_in_month = date_diff(to_date, from_date) +1
 	columns = get_columns(total_days_in_month)
-	students = get_student_batch_students(filters.get("student_batch"))
+	students = get_student_group_students(filters.get("student_group"))
 	students_list = get_students_list(students)
-	att_map = get_attendance_list(from_date, to_date, filters.get("student_batch"), students_list)
+	att_map = get_attendance_list(from_date, to_date, filters.get("student_group"), students_list)
 	data = []
 	for stud in students:
 		row = [stud.student, stud.student_name]
@@ -51,12 +51,12 @@ def get_students_list(students):
 		student_list.append(stud.student)
 	return student_list
 
-def get_attendance_list(from_date, to_date, student_batch, students_list):
-	attendance_list = frappe.db.sql("""select student, date, status 
-		from `tabStudent Attendance` where student_batch = %s 
+def get_attendance_list(from_date, to_date, student_group, students_list):
+	attendance_list = frappe.db.sql('''select student, date, status 
+		from `tabStudent Attendance` where student_group = %s 
 		and date between %s and %s
-		order by student, date""",
-		(student_batch, from_date, to_date), as_dict=1)
+		order by student, date''',
+		(student_group, from_date, to_date), as_dict=1)
 	att_map = {}
 	students_with_leave_application = get_students_with_leave_application(from_date, to_date, students_list)
 	for d in attendance_list:
@@ -97,7 +97,7 @@ def daterange(d1, d2):
 
 @frappe.whitelist()
 def get_attendance_years():
-	year_list = frappe.db.sql_list("""select distinct YEAR(date) from `tabStudent Attendance` ORDER BY YEAR(date) DESC""")
+	year_list = frappe.db.sql_list('''select distinct YEAR(date) from `tabStudent Attendance` ORDER BY YEAR(date) DESC''')
 	if not year_list:
 		year_list = [getdate().year]
 	return "\n".join(str(year) for year in year_list)

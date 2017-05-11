@@ -2,7 +2,6 @@
 // For license information, please see license.txt
 
 cur_frm.add_fetch("student_group", "course", "course");
-cur_frm.add_fetch("student_group", "student_batch", "student_batch");
 cur_frm.add_fetch("examiner", "instructor_name", "examiner_name");
 cur_frm.add_fetch("supervisor", "instructor_name", "supervisor_name");
 
@@ -12,7 +11,7 @@ frappe.ui.form.on("Assessment Plan", {
             frm.add_custom_button(__("Assessment Result"), function() {
                 frappe.route_options = {
                     assessment_plan: frm.doc.name,
-                    student_batch: frm.doc.student_batch
+                    student_group: frm.doc.student_group
                 }
                 frappe.set_route("Form", "Assessment Result Tool");
             });

@@ -10,9 +10,11 @@ import frappe.defaults
 
 
 from frappe.model.document import Document
+from frappe.geo.address_and_contact import load_address_and_contact
 
 class Company(Document):
 	def onload(self):
+		load_address_and_contact(self, "company")
 		self.get("__onload")["transactions_exist"] = self.check_if_transactions_exist()
 
 	def check_if_transactions_exist(self):
