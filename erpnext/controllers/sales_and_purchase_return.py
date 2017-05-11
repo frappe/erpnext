@@ -53,8 +53,8 @@ def validate_returned_items(doc):
 
 	valid_items = frappe._dict()
 
-	select_fields = "item_code, qty, parenttype" if doc.doctype=="Purchase Invoice" \
-		else "item_code, qty, serial_no, batch_no, parenttype"
+	select_fields = "item_code, qty, rate, parenttype" if doc.doctype=="Purchase Invoice" \
+		else "item_code, qty, rate, serial_no, batch_no, parenttype"
 
 	if doc.doctype in ['Purchase Invoice', 'Purchase Receipt']:
 		select_fields += ",rejected_qty, received_qty"
@@ -82,10 +82,15 @@ def validate_returned_items(doc):
 			else:
 				ref = valid_items.get(d.item_code, frappe._dict())
 				validate_quantity(doc, d, ref, valid_items, already_returned_items)
-
-				if ref.batch_no and d.batch_no not in ref.batch_no:
+				
+				if ref.rate and doc.doctype in ("Delivery Note", "Sales Invoice") and flt(d.rate) > ref.rate:
+					frappe.throw(_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}")
+						.format(d.idx, doc.doctype, doc.return_against))
+							
+				elif ref.batch_no and d.batch_no not in ref.batch_no:
 					frappe.throw(_("Row # {0}: Batch No must be same as {1} {2}")
 						.format(d.idx, doc.doctype, doc.return_against))
+						
 				elif ref.serial_no:
 					if not d.serial_no:
 						frappe.throw(_("Row # {0}: Serial No is mandatory").format(d.idx))
@@ -131,6 +136,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	
 	valid_items.setdefault(ref_item_row.item_code, frappe._dict({
 		"qty": 0,
+		"rate": 0,
 		"rejected_qty": 0,
 		"received_qty": 0,
 		"serial_no": [],
@@ -138,6 +144,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	}))
 	item_dict = valid_items[ref_item_row.item_code]
 	item_dict["qty"] += ref_item_row.qty
+	item_dict["rate"] = ref_item_row.get("rate", 0)
 
 	if ref_item_row.parenttype in ['Purchase Invoice', 'Purchase Receipt']:
 		item_dict["received_qty"] += ref_item_row.received_qty

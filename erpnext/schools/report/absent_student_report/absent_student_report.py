@@ -20,7 +20,7 @@ def execute(filters=None):
 	data = []
 	for student in absent_students:
 		if not student.student in leave_applicants:
-			row = [student.student, student.student_name, student.student_batch]
+			row = [student.student, student.student_name, student.student_group]
 			stud_details = frappe.db.get_value("Student", student.student, ['student_email_id', 'student_mobile_number'], as_dict=True)
 			
 			if stud_details.student_email_id:
@@ -41,15 +41,15 @@ def get_columns(filters):
 	columns = [ 
 		_("Student") + ":Link/Student:90", 
 		_("Student Name") + "::150", 
-		_("Student Batch") + "::180",
+		_("Student Group") + "::180",
 		_("Student Email Address") + "::180",
 		_("Student Mobile No.") + "::150",
 	]
 	return columns
 
 def get_absent_students(date):
-	absent_students = frappe.db.sql("""select student, student_name, student_batch from `tabStudent Attendance` 
-		where status="Absent" and date = %s order by student_batch, student_name""", date, as_dict=1)
+	absent_students = frappe.db.sql("""select student, student_name, student_group from `tabStudent Attendance` 
+		where status="Absent" and date = %s order by student_group, student_name""", date, as_dict=1)
 	return absent_students
 
 def get_leave_applications(date):
