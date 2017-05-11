@@ -6,7 +6,7 @@ import frappe
 import frappe.defaults
 from frappe import msgprint, _
 from frappe.model.naming import make_autoname
-from frappe.geo.address_and_contact import (load_address_and_contact,
+from frappe.contacts.address_and_contact import (load_address_and_contact,
 	delete_contact_and_address)
 
 from erpnext.utilities.transaction_base import TransactionBase

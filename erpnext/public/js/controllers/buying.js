@@ -22,7 +22,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			this.frm.set_query("shipping_address", function(){
 				if(me.frm.doc.customer){
 					return {
-						query: 'frappe.geo.doctype.address.address.address_query',
+						query: 'frappe.contacts.doctype.address.address.address_query',
 						filters: { link_doctype: 'Customer', link_name: me.frm.doc.customer }
 					};
 				} else
