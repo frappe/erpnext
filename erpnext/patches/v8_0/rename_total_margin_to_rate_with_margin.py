@@ -12,7 +12,7 @@ def execute():
 
 	for d in ("Sales Order Item", "Sales Invoice Item",
 		"Delivery Note Item", "Quotation Item"):
-
+		frappe.reload_doctype(d)
 		rename_field_if_exists(d, "total_margin", "rate_with_margin")
 
 

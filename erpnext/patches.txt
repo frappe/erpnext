@@ -393,4 +393,4 @@ erpnext.patches.v7_2.stock_uom_in_selling
 erpnext.patches.v8_0.revert_manufacturers_table_from_item
 erpnext.patches.v8_0.disable_instructor_role
 erpnext.patches.v8_0.merge_student_batch_and_student_group
-erpnext.patches.v8_0.rename_total_margin_to_rate_with_margin
+erpnext.patches.v8_0.rename_total_margin_to_rate_with_margin # 11-05-2017
