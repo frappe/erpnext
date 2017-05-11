@@ -5,7 +5,15 @@
 </div>
 {% } %}
 <h2 class="text-center">{%= __("Statement of Account") %}</h2>
-<h4 class="text-center">{%= (filters.party || filters.account) && ((filters.party || filters.account) + ", ")  || "" %} {%= filters.company %}</h4>
+<h4 class="text-center">
+	{% if (filters.party_name) { %}
+		{%= filters.party_name %}
+	{% } else if (filters.party) { %}
+		{%= filters.party %}
+	{% } else if (filters.account) { %}
+		{%= filters.account %}
+	{% } %}
+</h4>
 <h5 class="text-center">
 	{%= dateutil.str_to_user(filters.from_date) %}
 	{%= __("to") %}
