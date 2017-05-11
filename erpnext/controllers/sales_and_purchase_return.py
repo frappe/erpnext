@@ -64,7 +64,7 @@ def validate_returned_items(doc):
 			valid_items = get_ref_item_dict(valid_items, d)
 
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
-		for d in frappe.db.sql("""select item_code, qty, rate, serial_no, batch_no from `tabPacked Item`
+		for d in frappe.db.sql("""select item_code, qty, serial_no, batch_no from `tabPacked Item`
 			where parent = %s""".format(doc.doctype), doc.return_against, as_dict=1):
 				valid_items = get_ref_item_dict(valid_items, d)
 
@@ -144,7 +144,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	}))
 	item_dict = valid_items[ref_item_row.item_code]
 	item_dict["qty"] += ref_item_row.qty
-	item_dict["rate"] = ref_item_row.rate
+	item_dict["rate"] = ref_item_row.get("rate", 0)
 
 	if ref_item_row.parenttype in ['Purchase Invoice', 'Purchase Receipt']:
 		item_dict["received_qty"] += ref_item_row.received_qty
