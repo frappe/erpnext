@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-import datetime from datetime
+from datetime import datetime
 from frappe.utils import (cstr, validate_email_add, cint, comma_and, has_gravatar, now)
 from frappe.model.mapper import get_mapped_doc
 
