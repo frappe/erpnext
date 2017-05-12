@@ -61,6 +61,7 @@ class TestMapper(unittest.TestCase):
 			"order_type": "Sales"
 		})
 		for item in item_list:
-			so.append("items", {"qty": "3", "item_code": item.item_code})
+			so.append("items", {"qty": "3", "item_code": item.item_code,
+				"uom": "Nos", "delivery_warehouse": "Stores - WPL"})
 		so.insert(ignore_permissions=True)
 		return so, item_list
