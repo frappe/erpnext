@@ -42,6 +42,16 @@ frappe.ui.form.on("Production Planning Tool", {
 		});
 	},
 	
+	get_boms: function(frm) {
+		frappe.call({
+			doc: frm.doc,
+			method: "get_boms",
+			callback: function(r) {
+				refresh_field("boms");
+			}
+		});
+	},
+	
 	get_items: function(frm) {
 		frappe.call({
 			doc: frm.doc,

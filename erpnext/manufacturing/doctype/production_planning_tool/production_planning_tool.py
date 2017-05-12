@@ -23,6 +23,42 @@ class ProductionPlanningTool(Document):
 		if not self.company:
 			frappe.throw(_("Please enter Company"))
 
+	def get_boms(self):
+		""" Pull BOMs that are active based on criteria selected"""
+		bom_filter = item_filter = ""
+		if self.project:
+			bom_filter += " and bom.project = %(project)s"
+
+		if self.fg_item:
+			item_filter += " and bom.item = %(item)s"
+
+		parent_bom = frappe.db.sql("""
+			select distinct bom.name, bom.item, bom.quantity, bom.project
+			from `tabBOM` bom
+			where bom.project = %(project)s
+				and bom.item = %(item)s
+				and bom.docstatus != 2 and bom.is_active = 1
+			""".format(bom_filter, item_filter), {
+				"project": self.project,
+				"item": self.fg_item
+			}, as_dict=1)
+
+		self.add_bom_in_table(parent_bom)
+
+	def add_bom_in_table(self, parent_bom):
+		""" Add BOM in the table"""
+
+		self.clear_table("boms")
+
+		bom_list = []
+		for r in parent_bom:
+			if cstr(r['name']) not in bom_list:
+				pp_bom = self.append('boms', {})
+				pp_bom.bom = r['name']
+				pp_bom.item = cstr(r['item'])
+				pp_bom.quantity = flt(r['quantity'])
+				pp_bom.project = cstr(r['project'])
+
 	def get_open_sales_orders(self):
 		""" Pull sales orders  which are pending to deliver based on criteria selected"""
 		so_filter = item_filter = ""
@@ -122,6 +158,8 @@ class ProductionPlanningTool(Document):
 			self.get_so_items()
 		elif self.get_items_from == "Material Request":
 			self.get_mr_items()
+		elif self.get_items_from == "BOM":
+			self.get_bom_items()
 
 	def get_so_items(self):
 		so_list = [d.sales_order for d in self.get('sales_orders') if d.sales_order]
@@ -177,6 +215,36 @@ class ProductionPlanningTool(Document):
 
 		self.add_items(items)
 
+
+	def get_bom_items(self):
+		bom_list = [d.bom for d in self.get('boms') if d.bom]
+		if not bom_list:
+			msgprint(_("Please enter BOM in the above table"))
+			return []
+
+		"""get child bom items for which production order does not exist or production order
+		qty does not match bom qty"""
+		items = frappe.db.sql("""select distinct bom_item.item_code, bom_item.bom_no,\
+		 bom_item.qty, (bom_item.qty-ifnull(po.qty,0)) as pending_qty, bom_item.description,\
+		  bom_item.stock_uom from `tabBOM Item` bom_item left join `tabProduction Order` po \
+		  on bom_item.bom_no = po.bom_no  where bom_item.parent in (%s) and \
+		  bom_item.docstatus!=2 and bom_item.bom_no !="" and\
+		  (po.name is null or po.docstatus=1) and bom_item.qty != ifnull(po.qty,0)""" % \
+			(", ".join(["%s"] * len(bom_list))), tuple(bom_list), as_dict=1)
+
+		self.add_bom_items(items)
+
+	# Separate function for boms since get_item_details function requires a default bom to be present
+	def add_bom_items(self, items):
+		self.clear_table("items")
+		for p in items:
+			pi = self.append('items', {})
+			pi.item_code				= p['item_code']
+			pi.description				= p['description'] or ''
+			pi.stock_uom				= p['stock_uom'] or ''
+			pi.bom_no					= p['bom_no']
+			pi.planned_qty				= flt(p['pending_qty'])
+			pi.pending_qty				= flt(p['pending_qty'])
 
 	def add_items(self, items):
 		self.clear_table("items")
@@ -249,7 +317,8 @@ class ProductionPlanningTool(Document):
 				"wip_warehouse"			: "",
 				"fg_warehouse"			: d.warehouse,
 				"status"				: "Draft",
-				"project"				: frappe.db.get_value("Sales Order", d.sales_order, "project")
+				"project"				: frappe.db.get_value("Sales Order", d.sales_order, "project") \
+											or frappe.db.get_value("BOM", d.bom_no, "project")
 			}
 
 			""" Club similar BOM and item for processing in case of Sales Orders """
