@@ -325,7 +325,7 @@ class Item(WebsiteGenerator):
 
 	def set_disabled_attributes(self, context):
 		"""Disable selection options of attribute combinations that do not result in a variant"""
-		if not self.attributes:
+		if not self.attributes or not self.has_variants:
 			return
 
 		context.disabled_attributes = {}
