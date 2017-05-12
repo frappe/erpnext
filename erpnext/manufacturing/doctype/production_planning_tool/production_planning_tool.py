@@ -222,29 +222,29 @@ class ProductionPlanningTool(Document):
 			msgprint(_("Please enter BOM in the above table"))
 			return []
 
+		"""get child bom items for which production order does not exist or production order
+		qty does not match bom qty"""
 		items = frappe.db.sql("""select distinct bom_item.item_code, bom_item.bom_no,\
-			bom_item.qty, bom_item.stock_uom, bom_item.description, \
-			(bom_item.qty - ifnull(po.qty,0)) as pending_qty
-			from `tabBOM Item` bom_item left join `tabProduction Order` po on bom_item.bom_no = po.bom_no \
-			where bom_item.parent in (%s) and bom_item.docstatus != 2 and \
-			(bom_item.qty != po.qty or po.name is null)""" % \
+		 bom_item.qty, (bom_item.qty-ifnull(po.qty,0)) as pending_qty, bom_item.description,\
+		  bom_item.stock_uom from `tabBOM Item` bom_item left join `tabProduction Order` po \
+		  on bom_item.bom_no = po.bom_no  where bom_item.parent in (%s) and \
+		  bom_item.docstatus!=2 and bom_item.bom_no !="" and\
+		  (po.name is null or po.docstatus=1) and bom_item.qty != ifnull(po.qty,0)""" % \
 			(", ".join(["%s"] * len(bom_list))), tuple(bom_list), as_dict=1)
 
 		self.add_bom_items(items)
 
-
+	# Separate function for boms since get_item_details function requires a default bom to be present
 	def add_bom_items(self, items):
 		self.clear_table("items")
 		for p in items:
 			pi = self.append('items', {})
-			pi.warehouse				= cstr(self.project) + ' - QC - LPEB'
 			pi.item_code				= p['item_code']
 			pi.description				= p['description'] or ''
 			pi.stock_uom				= p['stock_uom'] or ''
 			pi.bom_no					= p['bom_no']
 			pi.planned_qty				= flt(p['pending_qty'])
 			pi.pending_qty				= flt(p['pending_qty'])
-			pi.planned_start_date		= nowdate()
 
 	def add_items(self, items):
 		self.clear_table("items")
