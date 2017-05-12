@@ -131,8 +131,7 @@ class MaterialRequest(BuyingController):
 						(self.name, d.name))[0][0])
 
 					if d.ordered_qty and d.ordered_qty > d.qty:
-						frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1}  \
-							cannot be greater than requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, d.qty, d.item_code))
+						frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1}  \cannot be greater than requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, d.qty, d.item_code))
 
 				elif self.material_request_type == "Manufacture":
 					d.ordered_qty = flt(frappe.db.sql("""select sum(qty)
