@@ -788,7 +788,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	add_customer: function() {
 		this.frm.doc.customer = "";
-		this.update_customer(true)
+		this.update_customer(true);
+		this.numeric_keypad.show();
 	},
 
 	update_customer: function (new_customer) {
