@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+import datetime from datetime
 from frappe.utils import (cstr, validate_email_add, cint, comma_and, has_gravatar, now)
 from frappe.model.mapper import get_mapped_doc
 
@@ -45,7 +46,7 @@ class Lead(SellingController):
 
 			self.image = has_gravatar(self.email_id)
 
-		if self.contact_date and self.contact_date < now():
+		if self.contact_date and self.contact_date < datetime.now():
 			frappe.throw(_("Next Contact Date cannot be in the past"))
 
 	def on_update(self):
