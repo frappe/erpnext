@@ -13,7 +13,15 @@ def execute():
 	frappe.reload_doctype("Student Group")
 	student_batches = frappe.db.sql('''select name as student_group_name, student_batch_name as batch,
 		program, academic_year, academic_term from `tabStudent Batch`''', as_dict=1)
+
 	for student_batch in student_batches:
+		# create student batch name if does not exists !!
+		if student_batch.get("batch") and not frappe.db.exists("Student Batch Name", student_batch.get("batch")):
+			frappe.get_doc({
+				"doctype": "Student Batch Name",
+				"batch_name": student_batch.get("batch")
+			}).insert(ignore_permissions=True)
+
 		student_batch.update({"doctype":"Student Group", "group_based_on": "Batch"})
 		doc = frappe.get_doc(student_batch)
 		student_list = frappe.db.sql('''select student, student_name, active from `tabStudent Batch Student`
