@@ -8,7 +8,7 @@ You can manage multiple incoming and outgoing Email Accounts in ERPNext. There h
 
 ERPNext will create templates for a bunch of email accounts by default. Not all of them are enabled. To enable them, you must set your account details.
 
-There are 2 types of email accounts, outgoing and incoming. Outgoing email accounts use an SMTP service to send emails and emails are retrived from your inbox using a POP service. Most email providers such as GMail, Outlook or Yahoo provide these services.
+There are 2 types of email accounts, outgoing and incoming. Outgoing email accounts use an SMTP service to send emails and emails are retrived from your inbox using a IMAP or POP service. Most email providers such as GMail, Outlook or Yahoo provide these services.
 
 <img class="screenshot" alt="Defining Criteria" src="{{docs_base_url}}/assets/img/setup/email/email-account-list.png">
 
@@ -28,7 +28,7 @@ To setup an incoming Email Account, check on **Enable Incoming** and set your PO
 
 ### How ERPNext handles replies
 
-In ERPNext when you send an email to a contact like a customer, the sender will be the user who sent the email. In the **Reply-To** property, the Email Address will be of the default incoming account (like `replies@yourcompany.com`). ERPNext will automatically extract these emails from the incoming account and tag it to the relvant communication
+In ERPNext when you send an email to a contact like a customer, the sender will be the user who sent the email. In the **Reply-To** property, the Email Address will be of the default incoming account (like `replies@yourcompany.com`). ERPNext will automatically extract these emails from the incoming account and tag it to the relevant communication
 
 ### Notification for unreplied messages
 
