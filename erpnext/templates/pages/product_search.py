@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, nowdate
+from frappe.utils import cstr, nowdate, cint
 from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_html
 
 no_cache = 1
@@ -33,7 +33,7 @@ def get_product_list(search=None, start=0, limit=12):
 		search = "%" + cstr(search) + "%"
 
 	# order by
-	query += """ order by weightage desc, idx desc, modified desc limit %s, %s""" % (start, limit)
+	query += """ order by weightage desc, idx desc, modified desc limit %s, %s""" % (cint(start), cint(limit))
 
 	data = frappe.db.sql(query, {
 		"search": search,
