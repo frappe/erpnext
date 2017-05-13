@@ -50,6 +50,19 @@ class NamingSeries(Document):
 		"""update series list"""
 		self.check_duplicate()
 		series_list = self.set_options.split("\n")
+		import re
+		series=''
+		for n in series_list:
+			if re.findall(r'[^\S\n\t]+', n, re.UNICODE):
+				pattern = re.compile(r'[^\S\n\t]+')
+				series_line1 =  re.sub(pattern, '', n, re.UNICODE)
+				series = series + "\n" + series_line1
+			else:
+				series=series+"\n"+n
+
+		series_list = series.split("\n")
+
+
 
 		# set in doctype
 		self.set_series_for(self.select_doc_for_series, series_list)
