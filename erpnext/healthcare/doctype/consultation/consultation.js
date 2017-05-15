@@ -14,12 +14,6 @@ frappe.ui.form.on('Consultation', {
 			{fieldname: 'test_name', columns: 4},
 			{fieldname: 'test_comment', columns: 4}
 		];
-		frm.get_field('review').grid.editable_fields = [
-			{fieldname: 'review_type', columns: 2},
-			{fieldname: 'number', columns: 1},
-			{fieldname: 'day_month', columns: 1},
-			{fieldname: 'review', columns: 4}
-		];
 	},
 	onload: function(frm){
 		if(frm.doc.__islocal && frm.doc.patient){
@@ -198,26 +192,6 @@ frappe.ui.form.on("Consultation", "diagnosis_select", function(frm) {
 		frappe.model.set_value(frm.doctype,frm.docname, "diagnosis_select", null)
 	}
 });
-frappe.ui.form.on("Consultation", "findings_select", function(frm) {
-	if(frm.doc.findings_select){
-		if(frm.doc.findings)
-			findings = frm.doc.findings + "\n" +frm.doc.findings_select
-		else
-			findings = frm.doc.findings_select
-		frappe.model.set_value(frm.doctype,frm.docname, "findings", findings)
-		frappe.model.set_value(frm.doctype,frm.docname, "findings_select", null)
-	}
-});
-frappe.ui.form.on("Consultation", "confirm_diagnosis_select", function(frm) {
-	if(frm.doc.confirm_diagnosis_select){
-		if(frm.doc.confirm_diagnosis)
-			confirm_diagnosis = frm.doc.confirm_diagnosis + "\n" +frm.doc.confirm_diagnosis_select
-		else
-			confirm_diagnosis = frm.doc.confirm_diagnosis_select
-		frappe.model.set_value(frm.doctype,frm.docname, "confirm_diagnosis", confirm_diagnosis)
-		frappe.model.set_value(frm.doctype,frm.docname, "confirm_diagnosis_select", null)
-	}
-});
 
 frappe.ui.form.on("Consultation", "patient",
     function(frm) {
@@ -294,24 +268,6 @@ frappe.ui.form.on("Drug Prescription", {
 		if(child.in_every == "Hour"){
 			frappe.model.set_value(cdt, cdn, 'dosage', null)
 		}
-	}
-});
-
-frappe.ui.form.on("Review Detail", {
-	number: function(frm, cdt, cdn){
-		var child = locals[cdt][cdn]
-		review = frappe.datetime.add_days(frappe.datetime.now_datetime(), child.number-1)
-		frappe.model.set_value(cdt, cdn, 'review', review)
-		frappe.model.set_value(cdt, cdn, 'day_month', 'Day (s)')
-	},
-	day_month: function(frm, cdt, cdn){
-		var child = locals[cdt][cdn]
-		if(child.day_month == 'Day (s)'){
-			review = frappe.datetime.add_days(frappe.datetime.now_datetime(), child.number-1)
-		}else if (child.day_month == 'Month (s)') {
-			review = frappe.datetime.add_days(frappe.datetime.add_months(frappe.datetime.now_datetime(), child.number), 0);
-		}
-		frappe.model.set_value(cdt, cdn, 'review', review)
 	}
 });
 
