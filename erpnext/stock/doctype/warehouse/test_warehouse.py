@@ -49,6 +49,15 @@ class TestWarehouse(unittest.TestCase):
 		self.assertFalse(frappe.db.get_value("Account",
 			filters={"warehouse": "Test Warehouse for Renaming 1 - _TC"}))
 
+		# Another rename with multiple dashes
+		if frappe.db.exists("Warehouse", "Test - Warehouse - Company"):
+			frappe.delete_doc("Account", "Test - Warehouse - Company")
+		rename_doc("Warehouse", "Test Warehouse for Renaming 2 - _TC", "Test - Warehouse - Company")
+
+		self.assertTrue(frappe.db.exists("Account", "Test - Warehouse - Company"))
+		self.assertTrue(frappe.db.get_value("Account", filters={"warehouse": "Test - Warehouse - Company"}))
+		self.assertFalse(frappe.db.get_value("Account", filters={"warehouse": "Test Warehouse for Renaming 2 - _TC"}))
+
 		# Rename without abbr
 		if frappe.db.exists("Warehouse", "Test Warehouse for Renaming 3 - _TC"):
 			frappe.delete_doc("Warehouse", "Test Warehouse for Renaming 3 - _TC")
