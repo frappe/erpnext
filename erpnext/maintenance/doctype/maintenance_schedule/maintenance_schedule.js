@@ -33,10 +33,13 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
 						source_doctype: "Sales Order",
+						target: me.frm,
+						setters: {
+							customer: me.frm.doc.customer || undefined,
+							order_type: me.frm.doc.order_type,
+						},
 						get_query_filters: {
 							docstatus: 1,
-							order_type: me.frm.doc.order_type,
-							customer: me.frm.doc.customer || undefined,
 							company: me.frm.doc.company
 						}
 					});

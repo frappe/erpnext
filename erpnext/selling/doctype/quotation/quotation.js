@@ -25,6 +25,8 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
 
+		var me = this;
+
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
 			cur_frm.add_custom_button(__('Make Sales Order'),
 				cur_frm.cscript['Make Sales Order']);
@@ -36,17 +38,24 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		}
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('Opportunity'),
+			this.frm.add_custom_button(__('Opportunity'),
 				function() {
+					var setters = {};
+					if(me.frm.doc.customer) {
+						setters.customer = me.frm.doc.customer || undefined;
+					} else if (me.frm.doc.lead) {
+						setters.lead = me.frm.doc.lead || undefined;
+					}
 					erpnext.utils.map_current_doc({
 						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
+						target: me.frm,
+						setters: setters,
 						get_query_filters: {
 							status: ["not in", ["Lost", "Closed"]],
-							enquiry_type: cur_frm.doc.order_type,
-							customer: cur_frm.doc.customer || undefined,
-							lead: cur_frm.doc.lead || undefined,
-							company: cur_frm.doc.company
+							company: me.frm.doc.company,
+							// cannot set enquiry_type as setter, as the fieldname is order_type
+							enquiry_type: me.frm.doc.order_type,
 						}
 					})
 				}, __("Get items from"), "btn-default");
