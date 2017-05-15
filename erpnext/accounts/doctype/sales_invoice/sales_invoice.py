@@ -83,6 +83,7 @@ class SalesInvoice(SellingController):
 		self.validate_c_form()
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
+		self.validate_serial_numbers()
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
@@ -125,6 +126,7 @@ class SalesInvoice(SellingController):
 			self.update_against_document_in_jv()
 
 		self.update_time_sheet(self.name)
+		self.update_serial_no()
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -160,6 +162,7 @@ class SalesInvoice(SellingController):
 
 		self.make_gl_entries_on_cancel()
 		frappe.db.set(self, 'status', 'Cancelled')
+		self.update_serial_no(in_cancel=True)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -775,6 +778,59 @@ class SalesInvoice(SellingController):
 			self.set(fieldname, reference_doc.get(fieldname))
 
 		self.due_date = None
+
+	def update_serial_no(self, in_cancel=False):
+		""" update Sales Invoice refrence in Serial No """
+
+		for item in self.items:
+			if not item.serial_no:
+				continue
+
+			serial_nos = ["'%s'"%serial_no for serial_no in item.serial_no.split("\n")]
+
+			frappe.db.sql(""" update `tabSerial No` set sales_invoice='{invoice}'
+				where name in ({serial_nos})""".format(
+					invoice='' if in_cancel else self.name,
+					serial_nos=",".join(serial_nos)
+				)
+			)
+
+	def validate_serial_numbers(self):
+		"""
+			validate serial number agains Delivery Note and Sales Invoice
+		"""
+		self.validate_serial_against_delivery_note()
+		self.validate_serial_against_sales_invoice()
+
+	def validate_serial_against_delivery_note(self):
+		""" 
+			validate if the serial numbers in Sales Invoice Items are same as in
+			Delivery Note Item
+		"""
+
+		for item in self.items:
+			if not item.delivery_note and not item.dn_detail and not item.serial_no:
+				continue
+
+			serial_nos = frappe.db.get_value("Delivery Note Item", item.dn_detail, "serial_no") or ""
+			dn_serial_nos = set(serial_nos.split("\n"))
+			si_serial_nos = set(item.serial_no.split("\n"))
+
+			if si_serial_nos - dn_serial_nos:
+				frappe.throw(_("Serial Numbers in row {0} does not match with Delivery Note".format(item.idx)))
+
+	def validate_serial_against_sales_invoice(self):
+		""" check if serial number is already used in other sales invoice """
+		for item in self.items:
+			if not item.serial_no:
+				continue
+
+			for serial_no in item.serial_no.split("\n"):
+				sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
+				if sales_invoice and self.name != sales_invoice:
+					frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
+						serial_no, sales_invoice
+					)))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

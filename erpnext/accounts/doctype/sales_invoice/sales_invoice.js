@@ -322,7 +322,8 @@ cur_frm.cscript.hide_fields = function(doc) {
 		}
 	}
 
-	item_fields_stock = ['serial_no', 'batch_no', 'actual_qty', 'expense_account', 'warehouse', 'expense_account', 'warehouse']
+	item_fields_stock = ['batch_no', 'actual_batch_qty', 'actual_qty', 'expense_account',
+		'warehouse', 'expense_account', 'quality_inspection']
 	cur_frm.fields_dict['items'].grid.set_column_disp(item_fields_stock,
 		(cint(doc.update_stock)==1 || cint(doc.is_return)==1 ? true : false));
 
