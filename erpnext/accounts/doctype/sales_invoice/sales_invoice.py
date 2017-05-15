@@ -330,7 +330,7 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Debit To account must be a Receivable account"))
 
 		self.party_account_currency = account.account_currency
-		
+
 	def clear_unallocated_mode_of_payments(self):
 		self.set("payments", self.get("payments", {"amount": ["not in", [0, None, ""]]}))
 
@@ -545,7 +545,7 @@ class SalesInvoice(SellingController):
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
 			return
-			
+
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
@@ -691,7 +691,7 @@ class SalesInvoice(SellingController):
 								else payment_mode.amount
 						}, payment_mode_account_currency)
 					)
-				
+
 	def make_gle_for_change_amount(self, gl_entries):
 		if cint(self.is_pos) and self.change_amount:
 			if self.account_for_change_amount:
@@ -708,7 +708,7 @@ class SalesInvoice(SellingController):
 						"against_voucher_type": self.doctype
 					}, self.party_account_currency)
 				)
-				
+
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": self.account_for_change_amount,
@@ -718,7 +718,7 @@ class SalesInvoice(SellingController):
 				)
 			else:
 				frappe.throw(_("Select change amount account"), title="Mandatory Field")
-		
+
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
 		if self.write_off_account and self.write_off_amount:
@@ -802,7 +802,7 @@ def make_delivery_note(source_name, target_doc=None):
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
 		target_doc.stock_qty = target_doc.qty * flt(source_doc.conversion_factor)
-		
+
 		target_doc.base_amount = target_doc.qty * flt(source_doc.base_rate)
 		target_doc.amount = target_doc.qty * flt(source_doc.rate)
 
@@ -820,7 +820,8 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_invoice",
 				"serial_no": "serial_no",
 				"sales_order": "against_sales_order",
-				"so_detail": "so_detail"
+				"so_detail": "so_detail",
+				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.delivered_by_supplier!=1
