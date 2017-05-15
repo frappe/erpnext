@@ -28,16 +28,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Procedure Appointment",
-					"description": _("Procedure Appointments"),
-				},
-				{
-					"type": "doctype",
-					"name": "Clinical Procedure",
-					"description": _("Clinical Procedures"),
-				},
-				{
-					"type": "doctype",
 					"name": "Sample Collection",
 					"label": _("Sample Collection"),
 				},
@@ -127,11 +117,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Medical Department",
 					"label": "Medical Department"
-				},
-				{
-					"type": "doctype",
-					"name": "Procedure Template",
-					"label": _("Procedure Template"),
 				},
 				{
 					"type": "doctype",
