@@ -33,9 +33,7 @@ frappe.ui.form.on("BOM", {
 			});
 		}
 
-		if(frm.doc.docstatus==2) {
-			// show duplicate button when BOM is cancelled,
-			// its not very intuitive
+		if(frm.doc.docstatus!=0) {
 			frm.add_custom_button(__("Duplicate"), function() {
 				frm.copy_doc();
 			});
