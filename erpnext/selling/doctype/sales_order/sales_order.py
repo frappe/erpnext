@@ -426,6 +426,8 @@ def make_delivery_note(source_name, target_doc=None):
 		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
+
+		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
 		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
 			or item.selling_cost_center \
 			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
