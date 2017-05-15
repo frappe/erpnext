@@ -539,53 +539,106 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 erpnext.select_batch_and_serial_no = (frm) => {
 
-	let show_modal = (item_code, qty) => {
-		let d = new frappe.ui.Dialog({
-			fields: [
-				{fieldname: 'item_code', read_only: 1, fieldtype:'Link', options: 'Item',
-					label: __('Item Code'), 'default': item_code},
-				{fieldtype:'Column Break'},
-				{fieldname: 'qty', fieldtype:'Float', label: __('Qty'), 'default': qty},
-				{fieldtype:'Section Break'},
+	let set_available_qty = (item_code, batch_no, warehouse, field) => {
+		frappe.call({
+			method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
+			args: {
+				batch_no: batch_no,
+				warehouse: warehouse,
+				item_code: item_code
+			},
+			callback: (r) => {
+				if (r.message) {
+					field.set_value(r.message);
+					field.$input.trigger('change');
+				}
+			}
+		});
+	}
+
+	let get_warehouse = (i) => {
+		// console.log("i", i);
+		// console.log("cstr(i.s_warehouse) || cstr(i.t_warehouse)", cstr(i.s_warehouse) || cstr(i.t_warehouse));
+		return cstr(i.s_warehouse) ? cstr(i.s_warehouse) : cstr(i.t_warehouse);
+	}
+	// console.log("available_qty", get_available_qty("_Test FG Item", 'tfi', 'Stores - A'));
+
+	// get_warehouse();
+
+	let show_modal = (item_code, qty, warehouse, has_batch, has_serial) => {
+		// get_warehouse(i);
+		let fields = [
+			{fieldname: 'item_code', read_only: 1, fieldtype:'Link', options: 'Item',
+				label: __('Item Code'), 'default': item_code},
+			{fieldtype:'Column Break'},
+			{fieldname: 'qty', fieldtype:'Float', label: __('Qty'), 'default': qty},
+			{fieldtype:'Section Break'}
+		];
+		if(has_batch) {
+			fields.push(
 				{fieldname: 'batches', fieldtype: 'Table',
 					fields: [
 						{fieldtype:'Link', fieldname:'batch_no', options: 'Batch',
 							label: __('Select Batch'), in_list_view:1, get_query: function(doc) {
 								return {filters: {item: item_code }};
 							}},
-						{fieldtype:'Float', fieldname:'available_qty',
+						{fieldtype:'Float', read_only: 1, fieldname:'available_qty',
 							label: __('Available'), in_list_view:1},
 						{fieldtype:'Float', fieldname:'selected_qty',
 							label: __('Qty'), in_list_view:1},
 					],
+					data: [],
+					// data_length: 3,
 					get_data: function() {
-						console.log("in get data");
-						return [
-							{
-
-							},
-							{
-
-							},
-							{
-
-							}
-						]
+						return this.data;
+					},
+					bind_events: function(grid) {
+						var me = this;
+						grid.wrapper.on('change', 'input[data-fieldname="batch_no"]', function(e) {
+							let $row = $(this).closest('.grid-row');
+							let name = $row.attr('data-name');
+							let row = grid.grid_rows_by_docname[name];
+							// console.log("bind changed: ", $(this), name, row.doc.batch_no, row.doc.idx);
+							// console.log(grid.grid_rows_by_docname);
+							set_available_qty(item_code, row.doc.batch_no, warehouse, row.on_grid_fields[1]);
+						});
 					}
-				}
-			]
+			});
+		}
+		if(has_serial) {
+			fields.push(
+				{fieldname: 'serial_no', fieldtype: 'Small Text', label: __('Serial No')}
+			)
+		}
+		let d = new frappe.ui.Dialog({
+			fields: fields
 		});
+
+		d.set_primary_action(__('Get Items'), function() {
+			var values = d.get_values();
+			d.hide();
+		})
 
 		d.show();
 	}
 
-	show_modal("_Test FG Item", 1);
+	show_modal("_Test FG Item", 10, 'Stores - A', 1, 0);
 
-	// frm.doc.items.forEach(function(d) {
-	// 	if(d.has_batch_no && !d.batch_no) {
-	// 		show_modal(d.item_code, d.qty);
-	// 	}
-	// });
+	frm.doc.items.forEach(function(d){
+		if(d.has_batch_no && !d.batch_no) {
+			console.log("item code, ");
+
+		}
+	});
+
+	frm.doc.items.forEach(function(d) {
+		if(d.has_batch_no && !d.batch_no) {
+			show_modal(d.item_code, d.qty, get_warehouse(d), 1, 0);
+		}
+		if(d.has_serial_no && !d.serial_no) {
+			show_modal(d.item_code, d.qty, get_warehouse(d), 0, 1);
+		}
+	});
 
 
 }
