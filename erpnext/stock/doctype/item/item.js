@@ -65,7 +65,8 @@ frappe.ui.form.on("Item", {
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		if (frm.doc.variant_of) {
-			frm.set_intro(__("This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set", [frm.doc.variant_of]), true);
+			frm.set_intro(__("This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set", 
+				[frm.doc.variant_of]), true);
 		}
 
 		if (frappe.defaults.get_default("item_naming_by")!="Naming Series" || frm.doc.variant_of) {
@@ -96,6 +97,8 @@ frappe.ui.form.on("Item", {
 			}
 			frappe.set_route('Form', 'Item', new_item.name);
 		});
+
+		frm.trigger('make_variant_fields_read_only');
 	},
 
 	validate: function(frm){
@@ -104,6 +107,16 @@ frappe.ui.form.on("Item", {
 
 	image: function(frm) {
 		refresh_field("image_view");
+	},
+
+	make_variant_fields_read_only: function(frm) {
+		if(frm.doc.variant_of) {
+			frm.meta.fields.forEach(function(df) {
+				if (!df.no_copy) {
+					frm.toggle_enable(df.fieldname, false);
+				}
+			});
+		}
 	},
 
 	is_fixed_asset: function(frm) {
