@@ -134,8 +134,7 @@ var show_details = function(data){
 		vitals = "<div style='padding-left:10px; font-size:13px;' align='center'></br><b class='text-muted'>Vital Signs</b>" + vitals + "<br></div>"
 		details = vitals + details
 	}
-	$('#page-Form\\/Consultation').find('.layout-side-section').html(details);
-	$('#page-Form\\/Consultation').find('.layout-side-section').show();
+	cur_frm.fields_dict.patient_details_html.$wrapper.html(details);
 }
 
 frappe.ui.form.on("Consultation", "appointment",
