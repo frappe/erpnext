@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Purchase Common</title>
+	<title>Role Permission for Page and Report</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -22,7 +22,7 @@
     
 
 		</head>
-<body data-path="current/models/buying/purchase_common">
+<body data-path="user/manual/en/setting-up/users-and-permissions/role-permisison-for-page-and-report">
 	<div class="main-section">
 		<div>
 					<nav class="navbar navbar-default navbar-main" role="navigation">
@@ -103,14 +103,14 @@
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
-<div class="page-container" id="page-current/models/buying/purchase_common" data-path="{{ pathname }}"
+<div class="page-container" id="page-user/manual/en/setting-up/users-and-permissions/role-permisison-for-page-and-report" data-path="{{ pathname }}"
 	>
 	<div class="row ">
 		
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -118,8 +118,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//current/models/buying">
-		Module buying</a>
+		<a href="https://frappe.github.io/erpnext//user/manual/en/setting-up/users-and-permissions">
+		Users And Permissions</a>
 	</li>
 	
 </ul>
@@ -129,7 +129,7 @@
 						
 					</div>
 					<div class="col-sm-8 col-xs-6">
-						<h1>Purchase Common</h1>
+						
 					</div>
 					<div class="col-sm-4 col-xs-6">
 						
@@ -139,145 +139,50 @@
 				</div>
 			</div>
 			<div class="page_content">
-<!-- title: Purchase Common -->
+<h1>Role Permission for Page and Report</h1>
 
+<p>In ERPNext, user can make his custom user interface using Page and the custom report using Report Builder or Query Report. ERPNext has role-based-permission system where user can assign roles to the user. And the same role can be assigned to the page and report, to access them.</p>
 
+<p>If user has enabled the developer mode, then they can add the roles directly in the page and report record. But in that case, the permissions will also be reflected in the json file for the page / report.</p>
 
+<h3>For Page</h3>
 
+<p><img alt="Assign roles to the page" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/roles-for-page.png"></p>
 
-<div class="dev-header">
+<h3>For Report</h3>
 
-<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 7.x.x</a>
+<p><img alt="Assign roles to the report" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/roles-for-report.png"></p>
 
+<h2>Tool for custom roles assignment</h2>
 
-	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/buying/doctype/purchase_common"
-		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+<p>If developer mode is disabled, then user can assign the roles to the page and report, using "Role Permission for Page and Report" page.</p>
 
-</div>
+<p>To access, goto Setup &gt; Permissions &gt; Role Permission for Page and Report</p>
 
-<span class="label label-info">Single</span>
+<p><img alt="Tools to assign custom roles to the page" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/role-permission-for-page-and-report.png"></p>
 
+<h3>Reset to defaults</h3>
 
+<p>Using "Reset to Default" button, user can remove the custom permissions applied on a page or report. Then default permissions will be applicable on that page or report.</p>
 
+<p><img alt="Reset the default roles" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/reset-roles-permisison-for-page-report.png"></p>
 
-
-
-<h3>Fields</h3>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th style="width: 5%">Sr</th>
-            <th style="width: 25%">Fieldname</th>
-            <th style="width: 20%">Type</th>
-            <th style="width: 25%">Label</th>
-            <th style="width: 25%">Options</th>
-        </tr>
-    </thead>
-    <tbody>
-        
-    </tbody>
-</table>
-
-
-    <hr>
-    <h3>Controller</h3>
-    <h4>erpnext.buying.doctype.purchase_common.purchase_common</h4>
-
-    
-
-
-
-	
-        
-	<h3 style="font-weight: normal;">Class <b>PurchaseCommon</b></h3>
-    
-    <p style="padding-left: 30px;"><i>Inherits from erpnext.controllers.buying_controller.BuyingController</i></h4>
-    
-    <div class="docs-attr-desc"><p></p>
-</div>
-    <div style="padding-left: 30px;">
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="check_for_closed_status" href="#check_for_closed_status" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>check_for_closed_status</b>
-        <i class="text-muted">(self, doctype, docname)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="update_last_purchase_rate" href="#update_last_purchase_rate" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>update_last_purchase_rate</b>
-        <i class="text-muted">(self, obj, is_submit)</i>
-    </p>
-	<div class="docs-attr-desc"><p>updates last<em>purchase</em>rate in item table for each item</p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="validate_for_items" href="#validate_for_items" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>validate_for_items</b>
-        <i class="text-muted">(self, obj)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-    </div>
-    <hr>
-
-	
-
-	
-        
-    
-    <p><span class="label label-info">Public API</span>
-        <br><code>/api/method/erpnext.buying.doctype.purchase_common.purchase_common.get_linked_material_requests</code>
-    </p>
-	<p class="docs-attr-name">
-        <a name="erpnext.buying.doctype.purchase_common.purchase_common.get_linked_material_requests" href="#erpnext.buying.doctype.purchase_common.purchase_common.get_linked_material_requests" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		erpnext.buying.doctype.purchase_common.purchase_common.<b>get_linked_material_requests</b>
-        <i class="text-muted">(items)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-	
-
-
-    
-    
-
-
-<!-- autodoc -->
-<!-- jinja -->
-<!-- static -->
 </div>
 		</div>
 	</div>
 </div>
 
-				<!-- edit-link -->
+				
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="fa fa-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/setting-up/users-and-permissions/role-permisison-for-page-and-report.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
                 </div>
             </div>
 			<footer class="docs-footer">

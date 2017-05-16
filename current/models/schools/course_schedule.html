@@ -110,7 +110,7 @@
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -181,28 +181,7 @@
         
         <tr >
             <td>1</td>
-            <td ><code>student_batch</code></td>
-            <td >
-                Link</td>
-            <td >
-                Student Batch
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/student_batch">Student Batch</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>2</td>
-            <td ><code>student_group</code></td>
+            <td class="danger" title="Mandatory"><code>student_group</code></td>
             <td >
                 Link</td>
             <td >
@@ -222,7 +201,7 @@
         </tr>
         
         <tr >
-            <td>3</td>
+            <td>2</td>
             <td class="danger" title="Mandatory"><code>instructor</code></td>
             <td >
                 Link</td>
@@ -243,7 +222,7 @@
         </tr>
         
         <tr >
-            <td>4</td>
+            <td>3</td>
             <td ><code>instructor_name</code></td>
             <td >
                 Read Only</td>
@@ -257,7 +236,7 @@
         </tr>
         
         <tr >
-            <td>5</td>
+            <td>4</td>
             <td ><code>column_break_2</code></td>
             <td class="info">
                 Column Break</td>
@@ -269,7 +248,7 @@
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>5</td>
             <td ><code>naming_series</code></td>
             <td >
                 Select</td>
@@ -283,7 +262,7 @@
         </tr>
         
         <tr >
-            <td>7</td>
+            <td>6</td>
             <td class="danger" title="Mandatory"><code>course</code></td>
             <td >
                 Link</td>
@@ -304,7 +283,7 @@
         </tr>
         
         <tr class="info">
-            <td>8</td>
+            <td>7</td>
             <td ><code>section_break_6</code></td>
             <td >
                 Section Break</td>
@@ -316,7 +295,7 @@
         </tr>
         
         <tr >
-            <td>9</td>
+            <td>8</td>
             <td ><code>schedule_date</code></td>
             <td >
                 Date</td>
@@ -328,7 +307,7 @@
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>9</td>
             <td class="danger" title="Mandatory"><code>room</code></td>
             <td >
                 Link</td>
@@ -349,7 +328,7 @@
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>10</td>
             <td ><code>column_break_9</code></td>
             <td class="info">
                 Column Break</td>
@@ -361,7 +340,7 @@
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>11</td>
             <td class="danger" title="Mandatory"><code>from_time</code></td>
             <td >
                 Time</td>
@@ -373,7 +352,7 @@
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>12</td>
             <td class="danger" title="Mandatory"><code>to_time</code></td>
             <td >
                 Time</td>
@@ -385,7 +364,7 @@
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>13</td>
             <td ><code>title</code></td>
             <td >
                 Data</td>
@@ -417,20 +396,6 @@
     <div class="docs-attr-desc"><p></p>
 </div>
     <div style="padding-left: 30px;">
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="set_student_batch" href="#set_student_batch" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>set_student_batch</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
         
         
     
@@ -492,26 +457,12 @@
     
     
 	<p class="docs-attr-name">
-        <a name="validate_mandatory" href="#validate_mandatory" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>validate_mandatory</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
         <a name="validate_overlap" href="#validate_overlap" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_overlap</b>
         <i class="text-muted">(self)</i>
     </p>
-	<div class="docs-attr-desc"><p>Validates overlap for Student Group/Student Batch, Instructor, Room</p>
+	<div class="docs-attr-desc"><p>Validates overlap for Student Group, Instructor, Room</p>
 </div>
 	<br>
 

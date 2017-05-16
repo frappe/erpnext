@@ -110,7 +110,7 @@
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -139,19 +139,22 @@
 				</div>
 			</div>
 			<div class="page_content">
-<p>Batch inventory feature in ERPNext allows you to group multiple units of an item, 
+<p>Batch feature in ERPNext allows you to group multiple units of an item,
 and assign them a unique value/number/tag called Batch No.</p>
 
-<p>The practice of stocking based on batch is mainly followed in the pharmaceutical industry. 
-Medicines/drugs produced in a particular batched is assigned a unique id. 
-This helps them updating and tracking manufacturing and expiry date for all the units produced under specific batch.</p>
+<p>This is done based on the Item. If the Item is batched, then a Batch number must be mentioned in every stock transaction. Batch numbers can be maintained manually or automatically</p>
 
-<blockquote>
-  <p>Note: To set item as a batch item, "Has Batch No" field should be updated as Yes in the Item master.</p>
-</blockquote>
+<h3>Item Setup</h3>
 
-<p>On every stock transaction (Purchase Receipt, Delivery Note, POS Invoice) made for batch item, 
-you should provide item's Batch No. </p>
+<p>To set item as a batch item, "Has Batch No" field should be checked in the Item master.</p>
+
+<p>If you want automatic batch creation at the time of Purchase Receipt, you must check "Create New Batches Automatically"</p>
+
+<p><img class="screenshot" alt="Item Setup for Batches" src="https://frappe.github.io/erpnext/assets/img/stock/item_setup_for_batch.png"></p>
+
+<h3>Creating Batches</h3>
+
+<p>If you have not selected "Create New Batches Automatically", you will have to make Batches Manually as you go along.</p>
 
 <p>To create new Batch No. master for an item, go to:</p>
 
@@ -159,15 +162,28 @@ you should provide item's Batch No. </p>
   <p>Stock &gt; Setup &gt; Batch &gt; New</p>
 </blockquote>
 
-<p>Batch master is created before creation of Purchase Receipt. 
-Hence eveytime there is Purchase Receipt or Production entry being made for a batch item, 
-you will first create its Batch No, and then select it in Purcase order or Production Entry.</p>
+<h3>Splitting and Moving Batches</h3>
 
-<p><img class="screenshot" alt="batch" src="https://frappe.github.io/erpnext/assets/img/stock/batch.png"></p>
+<p>When you open a batch, you will see all the quantities relating this that batch on the page.</p>
+
+<p><img class="screenshot" alt="Batch View" src="https://frappe.github.io/erpnext/assets/img/stock/batch_view.png"></p>
+
+<p>To move the batch from one warehouse to another, you can click on the move button.</p>
+
+<p>You can also split the batch into smaller one by clicking on "Split". This will create a new Batch based on this Batch and the quantities will be split between the batches.</p>
+
+<h3>Transacting Items with Batches</h3>
+
+<p>Batch master is created before creation of Purchase Receipt.
+Hence eveytime there is Purchase Receipt or Production Order being made for a batch item,
+you will first create its Batch No, and then select it in Purchase order or Production Entry.</p>
+
+<p>On every stock transaction (Purchase Receipt, Delivery Note, POS Invoice) made for batch item,
+you should provide item's Batch No.</p>
 
 <blockquote>
-  <p>Note: In stock transactions, Batch IDs will be filtered based on Item Code, Warehouse, 
-  Batch Expiry Date (compared with Posting date of a transaction) and Actual Qty in Warehouse. 
+  <p>Note: In stock transactions, Batch IDs will be filtered based on Item Code, Warehouse,
+  Batch Expiry Date (compared with Posting date of a transaction) and Actual Qty in Warehouse.
   While searching for Batch ID  without value in Warehouse field, then Actual Qty filter won't be applied.</p>
 </blockquote>
 

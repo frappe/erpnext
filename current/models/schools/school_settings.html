@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Assessment Code</title>
+	<title>School Settings</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -22,7 +22,7 @@
     
 
 		</head>
-<body data-path="current/models/schools/assessment_code">
+<body data-path="current/models/schools/school_settings">
 	<div class="main-section">
 		<div>
 					<nav class="navbar navbar-default navbar-main" role="navigation">
@@ -103,14 +103,14 @@
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
-<div class="page-container" id="page-current/models/schools/assessment_code" data-path="{{ pathname }}"
+<div class="page-container" id="page-current/models/schools/school_settings" data-path="{{ pathname }}"
 	>
 	<div class="row ">
 		
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -129,7 +129,7 @@
 						
 					</div>
 					<div class="col-sm-8 col-xs-6">
-						<h1>Assessment Code</h1>
+						<h1>School Settings</h1>
 					</div>
 					<div class="col-sm-4 col-xs-6">
 						
@@ -139,7 +139,7 @@
 				</div>
 			</div>
 			<div class="page_content">
-<!-- title: Assessment Code -->
+<!-- title: School Settings -->
 
 
 
@@ -151,16 +151,14 @@
 	Version 7.x.x</a>
 
 
-	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/schools/doctype/assessment_code"
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/schools/doctype/school_settings"
 		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
 
 </div>
 
+<span class="label label-info">Single</span>
 
 
-
-
-    <p><b>Table Name:</b> <code>tabAssessment Code</code></p>
 
 
 
@@ -181,11 +179,77 @@
         
         <tr >
             <td>1</td>
-            <td class="danger" title="Mandatory"><code>assessment_code</code></td>
+            <td ><code>current_academic_year</code></td>
             <td >
-                Data</td>
+                Link</td>
             <td >
-                Assessment Code
+                Current Academic Year
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/schools/academic_year">Academic Year</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>current_academic_term</code></td>
+            <td >
+                Link</td>
+            <td >
+                Current Academic Term
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/schools/academic_term">Academic Term</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>attendance_freeze_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Attendance Freeze Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>column_break_4</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>validation_from_pe</code></td>
+            <td >
+                Check</td>
+            <td >
+                Validate the Student Group from Program Enrollment
                 
             </td>
             <td></td>
@@ -197,7 +261,7 @@
 
     <hr>
     <h3>Controller</h3>
-    <h4>erpnext.schools.doctype.assessment_code.assessment_code</h4>
+    <h4>erpnext.schools.doctype.school_settings.school_settings</h4>
 
     
 
@@ -205,13 +269,41 @@
 
 	
         
-	<h3 style="font-weight: normal;">Class <b>AssessmentCode</b></h3>
+	<h3 style="font-weight: normal;">Class <b>SchoolSettings</b></h3>
     
     <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
     
     <div class="docs-attr-desc"><p></p>
 </div>
     <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_defaults" href="#get_defaults" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_defaults</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_update" href="#on_update" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>on_update</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>update defaults</p>
+</div>
+	<br>
+
         
     </div>
     <hr>
@@ -220,20 +312,6 @@
 
 
     
-    
-        <h4>Linked In:</h4>
-        <ul>
-        
-			
-            <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/assessment_plan">Assessment Plan</a>
-
-</li>
-			
-        
-        </ul>
     
 
 

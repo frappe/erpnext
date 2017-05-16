@@ -110,7 +110,7 @@
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -181,27 +181,6 @@
         
         <tr >
             <td>1</td>
-            <td ><code>student_batch</code></td>
-            <td >
-                Link</td>
-            <td >
-                Student Batch
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/student_batch">Student Batch</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>2</td>
             <td ><code>academic_year</code></td>
             <td >
                 Link</td>
@@ -222,7 +201,61 @@
         </tr>
         
         <tr >
+            <td>2</td>
+            <td class="danger" title="Mandatory"><code>group_based_on</code></td>
+            <td >
+                Select</td>
+            <td >
+                Group Based on
+                
+            </td>
+            <td>
+                <pre>
+Batch
+Course
+Activity</pre>
+            </td>
+        </tr>
+        
+        <tr >
             <td>3</td>
+            <td class="danger" title="Mandatory"><code>student_group_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Student Group Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>max_strength</code></td>
+            <td >
+                Int</td>
+            <td >
+                Max Strength
+                <p class="text-muted small">
+                    Set 0 for no limit</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>column_break_3</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
             <td ><code>academic_term</code></td>
             <td >
                 Link</td>
@@ -243,19 +276,7 @@
         </tr>
         
         <tr >
-            <td>4</td>
-            <td ><code>column_break_3</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>5</td>
+            <td>7</td>
             <td ><code>program</code></td>
             <td >
                 Link</td>
@@ -276,8 +297,29 @@
         </tr>
         
         <tr >
-            <td>6</td>
-            <td class="danger" title="Mandatory"><code>course</code></td>
+            <td>8</td>
+            <td ><code>batch</code></td>
+            <td >
+                Link</td>
+            <td >
+                Batch
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/schools/student_batch_name">Student Batch Name</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>course</code></td>
             <td >
                 Link</td>
             <td >
@@ -296,21 +338,8 @@
             </td>
         </tr>
         
-        <tr >
-            <td>7</td>
-            <td ><code>max_strength</code></td>
-            <td >
-                Int</td>
-            <td >
-                Max Strength
-                <p class="text-muted small">
-                    Set 0 for no limit</p>
-            </td>
-            <td></td>
-        </tr>
-        
         <tr class="info">
-            <td>8</td>
+            <td>10</td>
             <td ><code>section_break_6</code></td>
             <td >
                 Section Break</td>
@@ -322,7 +351,19 @@
         </tr>
         
         <tr >
-            <td>9</td>
+            <td>11</td>
+            <td ><code>get_students</code></td>
+            <td >
+                Button</td>
+            <td >
+                Get Students
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
             <td ><code>students</code></td>
             <td >
                 Table</td>
@@ -342,13 +383,25 @@
             </td>
         </tr>
         
+        <tr class="info">
+            <td>13</td>
+            <td ><code>section_break_12</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Instructors
+                
+            </td>
+            <td></td>
+        </tr>
+        
         <tr >
-            <td>10</td>
-            <td ><code>amended_from</code></td>
+            <td>14</td>
+            <td ><code>instructors</code></td>
             <td >
-                Link</td>
+                Table</td>
             <td >
-                Amended From
+                Instructors
                 
             </td>
             <td>
@@ -356,7 +409,7 @@
                 
 
 
-<a href="https://frappe.github.io/erpnext/current/models/schools/student_group">Student Group</a>
+<a href="https://frappe.github.io/erpnext/current/models/schools/student_group_instructor">Student Group Instructor</a>
 
 
                 
@@ -389,20 +442,6 @@
     
     
 	<p class="docs-attr-name">
-        <a name="autoname" href="#autoname" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>autoname</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
         <a name="validate" href="#validate" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate</b>
@@ -417,9 +456,23 @@
     
     
 	<p class="docs-attr-name">
-        <a name="validate_name" href="#validate_name" class="text-muted small">
+        <a name="validate_mandatory_fields" href="#validate_mandatory_fields" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>validate_name</b>
+		<b>validate_mandatory_fields</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_roll_no" href="#validate_roll_no" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_roll_no</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -445,23 +498,9 @@
     
     
 	<p class="docs-attr-name">
-        <a name="validate_student_batch" href="#validate_student_batch" class="text-muted small">
+        <a name="validate_students" href="#validate_students" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>validate_student_batch</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="validate_student_name" href="#validate_student_name" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>validate_student_name</b>
+		<b>validate_students</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -474,20 +513,45 @@
 
 	
 
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.doctype.student_group.student_group.get_program_enrollment" href="#erpnext.schools.doctype.student_group.student_group.get_program_enrollment" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.doctype.student_group.student_group.<b>get_program_enrollment</b>
+        <i class="text-muted">(academic_year, academic_term=None, program=None, batch=None, course=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.schools.doctype.student_group.student_group.get_students</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.doctype.student_group.student_group.get_students" href="#erpnext.schools.doctype.student_group.student_group.get_students" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.doctype.student_group.student_group.<b>get_students</b>
+        <i class="text-muted">(academic_year, group_based_on, academic_term=None, program=None, batch=None, course=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
 
     
     
         <h4>Linked In:</h4>
         <ul>
-        
-			
-            <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/announcement">Announcement</a>
-
-</li>
-			
         
 			
             <li>
@@ -529,7 +593,16 @@
             <li>
 
 
-<a href="https://frappe.github.io/erpnext/current/models/schools/student_group">Student Group</a>
+<a href="https://frappe.github.io/erpnext/current/models/schools/student_attendance">Student Attendance</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/schools/student_attendance_tool">Student Attendance Tool</a>
 
 </li>
 			
