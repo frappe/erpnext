@@ -11,11 +11,9 @@ class TestInit(unittest.TestCase):
 
 	def test_encode_company_abbr(self):
 		company = frappe.new_doc("Company")
-		company.company_name = "New from Existing Company"
-		company.abbr = "NFEC"
+		company.company_name = "New from Existing Company For Test"
+		company.abbr = "NFECT"
 		company.default_currency = "INR"
-		company.create_chart_of_accounts_based_on = "Existing Company"
-		company.existing_company = "_Test Company"
 		company.save()
 
 		abbr = company.abbr
@@ -36,7 +34,7 @@ class TestInit(unittest.TestCase):
 		]
 
 		for i in range(len(names)):
-			enc_name = encode_company_abbr(names[i], company)
+			enc_name = encode_company_abbr(names[i], company.name)
 			self.assertTrue(
 				enc_name == expected_names[i],
 			    "{enc} is not same as {exp}".format(enc=enc_name, exp=expected_names[i])
