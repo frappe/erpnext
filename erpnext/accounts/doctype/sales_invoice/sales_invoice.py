@@ -814,7 +814,9 @@ class SalesInvoice(SellingController):
 
 			serial_nos = frappe.db.get_value("Delivery Note Item", item.dn_detail, "serial_no") or ""
 			dn_serial_nos = set(serial_nos.split("\n"))
-			si_serial_nos = set(item.serial_no.split("\n"))
+
+			serial_nos = item.serial_no or ""
+			si_serial_nos = set(serial_nos.split("\n"))
 
 			if si_serial_nos - dn_serial_nos:
 				frappe.throw(_("Serial Numbers in row {0} does not match with Delivery Note".format(item.idx)))

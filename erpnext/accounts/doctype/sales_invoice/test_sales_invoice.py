@@ -742,7 +742,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check if the serial number is already linked with any other Sales Invoice
 		_si = frappe.copy_doc(si.as_dict())
-		self.assertRaises(frappe.ValidationError, si.insert)
+		self.assertRaises(frappe.ValidationError, _si.insert)
 
 		return si
 
