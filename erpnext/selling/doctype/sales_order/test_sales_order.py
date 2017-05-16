@@ -529,8 +529,8 @@ def make_sales_order(**args):
 			"item_code": args.item or args.item_code or "_Test Item",
 			"warehouse": args.warehouse,
 			"qty": args.qty or 10,
-			"rate": args.rate or 100,
-			"conversion_factor": 1.0,
+			"uom": args.uom or None,
+			"rate": args.rate or 100
 		})
 
 	if not args.do_not_save:

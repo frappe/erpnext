@@ -79,7 +79,7 @@
    "bold": 1, 
    "collapsible": 0, 
    "columns": 0, 
-   "description": "Only leaf nodes are allowed in transaction", 
+   "description": "", 
    "fieldname": "is_group", 
    "fieldtype": "Check", 
    "hidden": 0, 
