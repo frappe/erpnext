@@ -78,8 +78,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	make_menu_list: function () {
 		var me = this;
-
 		this.page.clear_menu();
+
+		// for mobile
+		this.page.add_menu_item(__("Pay"), function () {
+			me.validate();
+			me.update_paid_amount_status(true);
+			me.create_invoice();
+			me.make_payment();
+		}).addClass('visible-xs');
+
 		this.page.add_menu_item(__("New Sales Invoice"), function () {
 			me.save_previous_entry();
 			me.create_new();
