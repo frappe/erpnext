@@ -11,11 +11,11 @@ class TestInit(unittest.TestCase):
 
 	def test_encode_company_abbr(self):
 		company = frappe.new_doc("Company")
-		company.company_name = "New Company For Test"
-		company.abbr = "NCFT"
+		company.company_name = "New from Existing Company"
+		company.abbr = "NFEC"
 		company.default_currency = "INR"
-		company.create_chart_of_accounts_based_on = "Standard Template"
-		company.chart_of_accounts = company
+		company.create_chart_of_accounts_based_on = "Existing Company"
+		company.existing_company = "_Test Company"
 		company.save()
 
 		abbr = company.abbr
