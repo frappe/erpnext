@@ -10,8 +10,8 @@ test_records = frappe.get_test_records('Company')
 class TestInit(unittest.TestCase):
 	def setUp(self):
 		self.company = frappe.new_doc("Company")
-		self.company.company_name = "COA from Existing Company"
-		self.company.abbr = "CFEC"
+		self.company.company_name = "New Company For Test"
+		self.company.abbr = "NCFT"
 		self.company.default_currency = "INR"
 		self.company.create_chart_of_accounts_based_on = "Existing Company"
 		self.company.existing_company = "_Test Company"
