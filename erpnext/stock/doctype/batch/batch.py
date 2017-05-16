@@ -66,6 +66,15 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None):
 	return out
 
 @frappe.whitelist()
+def get_oldest_batch_qty(item_code, warehouse):
+	'''Returns the oldest batch and qty for the given item_code and warehouse'''
+	batches = get_batch_qty(item_code = item_code, warehouse = warehouse)
+	oldest_date = min([frappe.get_value('Batch', batch.batch_no, 'expiry_date') for batch in batches])
+	for batch in batches:
+		if (frappe.get_value('Batch', batch.batch_no, 'expiry_date') == oldest_date):
+			return batch
+
+@frappe.whitelist()
 def split_batch(batch_no, item_code, warehouse, qty, new_batch_id = None):
 	'''Split the batch into a new batch'''
 	batch = frappe.get_doc(dict(doctype='Batch', item=item_code, batch_id=new_batch_id)).insert()
