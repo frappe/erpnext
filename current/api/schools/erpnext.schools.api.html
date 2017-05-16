@@ -110,7 +110,7 @@
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -164,15 +164,15 @@
         <a name="erpnext.schools.api.check_attendance_records_exist" href="#erpnext.schools.api.check_attendance_records_exist" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>check_attendance_records_exist</b>
-        <i class="text-muted">(course_schedule=None, student_batch=None, date=None)</i>
+        <i class="text-muted">(course_schedule=None, student_group=None, date=None)</i>
     </p>
-	<div class="docs-attr-desc"><p>Check if Attendance Records are made against the specified Course Schedule or Student Batch for given date.</p>
+	<div class="docs-attr-desc"><p>Check if Attendance Records are made against the specified Course Schedule or Student Group for given date.</p>
 
 <p><strong>Parameters:</strong></p>
 
 <ul>
 <li><strong><code>course_schedule</code></strong> -  Course Schedule.</li>
-<li><strong><code>student_batch</code></strong> -  Student Batch.</li>
+<li><strong><code>student_group</code></strong> -  Student Group.</li>
 <li><strong><code>date</code></strong> -  Date.</li>
 </ul>
 </div>
@@ -280,7 +280,7 @@
         <a name="erpnext.schools.api.get_assessment_students" href="#erpnext.schools.api.get_assessment_students" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>get_assessment_students</b>
-        <i class="text-muted">(assessment_plan, student_group=None, student_batch=None)</i>
+        <i class="text-muted">(assessment_plan, student_group)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -442,30 +442,6 @@
         
     
     <p><span class="label label-info">Public API</span>
-        <br><code>/api/method/erpnext.schools.api.get_student_batch_students</code>
-    </p>
-	<p class="docs-attr-name">
-        <a name="erpnext.schools.api.get_student_batch_students" href="#erpnext.schools.api.get_student_batch_students" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		erpnext.schools.api.<b>get_student_batch_students</b>
-        <i class="text-muted">(student_batch)</i>
-    </p>
-	<div class="docs-attr-desc"><p>Returns List of student, student_name, idx in Student Batch.</p>
-
-<p><strong>Parameters:</strong></p>
-
-<ul>
-<li><strong><code>student_batch</code></strong> -  Student Batch.</li>
-</ul>
-</div>
-	<br>
-
-	
-
-	
-        
-    
-    <p><span class="label label-info">Public API</span>
         <br><code>/api/method/erpnext.schools.api.get_student_group_students</code>
     </p>
 	<p class="docs-attr-name">
@@ -518,7 +494,7 @@
         <a name="erpnext.schools.api.make_attendance_records" href="#erpnext.schools.api.make_attendance_records" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>make_attendance_records</b>
-        <i class="text-muted">(student, student_name, status, course_schedule=None, student_batch=None, date=None)</i>
+        <i class="text-muted">(student, student_name, status, course_schedule=None, student_group=None, date=None)</i>
     </p>
 	<div class="docs-attr-desc"><p>Creates/Update Attendance Record.</p>
 
@@ -563,7 +539,7 @@
         <a name="erpnext.schools.api.mark_attendance" href="#erpnext.schools.api.mark_attendance" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.schools.api.<b>mark_attendance</b>
-        <i class="text-muted">(students_present, students_absent, course_schedule=None, student_batch=None, date=None)</i>
+        <i class="text-muted">(students_present, students_absent, course_schedule=None, student_group=None, date=None)</i>
     </p>
 	<div class="docs-attr-desc"><p>Creates Multiple Attendance Records.</p>
 
@@ -573,7 +549,7 @@
 <li><strong><code>students_present</code></strong> -  Students Present JSON.</li>
 <li><strong><code>students_absent</code></strong> -  Students Absent JSON.</li>
 <li><strong><code>course_schedule</code></strong> -  Course Schedule.</li>
-<li><strong><code>student_batch</code></strong> -  Student Batch.</li>
+<li><strong><code>student_group</code></strong> -  Student Group.</li>
 <li><strong><code>date</code></strong> -  Date.</li>
 </ul>
 </div>

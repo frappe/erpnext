@@ -110,7 +110,7 @@
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -389,18 +389,6 @@ Subcontract</pre>
         
         <tr >
             <td>13</td>
-            <td ><code>set_posting_time</code></td>
-            <td >
-                Check</td>
-            <td >
-                Edit Posting Date and Time
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>14</td>
             <td ><code>posting_date</code></td>
             <td >
                 Date</td>
@@ -412,12 +400,24 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>14</td>
             <td ><code>posting_time</code></td>
             <td >
                 Time</td>
             <td >
                 Posting Time
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td ><code>set_posting_time</code></td>
+            <td >
+                Check</td>
+            <td >
+                Edit Posting Date and Time
                 
             </td>
             <td></td>
@@ -783,16 +783,37 @@ Subcontract</pre>
             <td>40</td>
             <td ><code>supplier_address</code></td>
             <td >
-                Small Text</td>
+                Link</td>
             <td >
                 Supplier Address
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/geo/address">Address</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>41</td>
+            <td ><code>address_display</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Address
                 
             </td>
             <td></td>
         </tr>
         
         <tr >
-            <td>41</td>
+            <td>42</td>
             <td ><code>column_break_39</code></td>
             <td class="info">
                 Column Break</td>
@@ -804,7 +825,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>42</td>
+            <td>43</td>
             <td ><code>customer</code></td>
             <td >
                 Link</td>
@@ -825,7 +846,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>43</td>
+            <td>44</td>
             <td ><code>customer_name</code></td>
             <td >
                 Data</td>
@@ -837,7 +858,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>44</td>
+            <td>45</td>
             <td ><code>customer_address</code></td>
             <td >
                 Small Text</td>
@@ -849,7 +870,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>45</td>
+            <td>46</td>
             <td ><code>printing_settings</code></td>
             <td >
                 Section Break</td>
@@ -861,7 +882,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>46</td>
+            <td>47</td>
             <td ><code>select_print_heading</code></td>
             <td >
                 Link</td>
@@ -882,7 +903,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>47</td>
+            <td>48</td>
             <td ><code>letter_head</code></td>
             <td >
                 Link</td>
@@ -895,7 +916,7 @@ Subcontract</pre>
                 
 
 
-<a href="https://frappe.github.io/erpnext/current/models/print/letter_head">Letter Head</a>
+<a href="https://frappe.github.io/erpnext/current/models/printing/letter_head">Letter Head</a>
 
 
                 
@@ -903,7 +924,7 @@ Subcontract</pre>
         </tr>
         
         <tr class="info">
-            <td>48</td>
+            <td>49</td>
             <td ><code>more_info</code></td>
             <td >
                 Section Break</td>
@@ -915,7 +936,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>49</td>
+            <td>50</td>
             <td ><code>project</code></td>
             <td >
                 Link</td>
@@ -936,7 +957,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>50</td>
+            <td>51</td>
             <td ><code>remarks</code></td>
             <td >
                 Text</td>
@@ -948,7 +969,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>51</td>
+            <td>52</td>
             <td ><code>col5</code></td>
             <td class="info">
                 Column Break</td>
@@ -960,7 +981,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>52</td>
+            <td>53</td>
             <td ><code>total_amount</code></td>
             <td >
                 Currency</td>
@@ -974,7 +995,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>53</td>
+            <td>54</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>
@@ -995,7 +1016,7 @@ Subcontract</pre>
         </tr>
         
         <tr >
-            <td>54</td>
+            <td>55</td>
             <td ><code>credit_note</code></td>
             <td >
                 Link</td>
