@@ -19,28 +19,28 @@
 	<div class="page-content-block">
 		<div class="row">
 			<div class="col-sm-12" style="max-width: 500px;">
-				<label for="project" class="control-label text-muted small">Project</label>
+				<label for="project" class="control-label text-muted small">{{ __("Project") }}</label>
 				<input type="text" class="form-control" name="project" readonly value= "{{ doc.project }}">
 
-				<label for="activity_type" class="control-label text-muted small">Activity Type</label>
+				<label for="activity_type" class="control-label text-muted small">{{ __("Activity Type") }}</label>
 				<input type="text" class="form-control" name="activity_type" readonly value= "{{ doc.activity_type }}">
 
-				<label for="task" class="control-label text-muted small">Task</label>
+				<label for="task" class="control-label text-muted small">{{ __("Task") }}</label>
 				<input type="text" class="form-control" name="task" readonly value= "{{ doc.task }}">
 
-				<label for="from_time" class="control-label text-muted small">From Time</label>
+				<label for="from_time" class="control-label text-muted small">{{ __("From Time") }}</label>
 				<input type="text" class="form-control" name="from_time" readonly value= "{{ doc.from_time }}">
 
-				<label for="to_time" class="control-label text-muted small">To Time</label>
+				<label for="to_time" class="control-label text-muted small">{{ __("To Time") }}</label>
 				<input type="text" class="form-control" name="to_time" readonly value= "{{ doc.to_time }}">
 
-				<label for="to_time" class="control-label text-muted small">Hours</label>
+				<label for="to_time" class="control-label text-muted small">{{ __("Hours") }}</label>
 				<input type="text" class="form-control" name="Hours" readonly value= "{{ doc.hours }}">
 
-				<label for="status" class="control-label text-muted small">Status</label>
+				<label for="status" class="control-label text-muted small">{{ __("Status") }}</label>
 				<input type="text" class="form-control" name="status" readonly value= "{{ doc.status }}">
 
-				<label for="Note" class="control-label text-muted small">Note</label>
+				<label for="Note" class="control-label text-muted small">{{ __("Note") }}</label>
 				<textarea class="form-control" name="Hours" readonly> {{ doc.note }} </textarea>
 			</div>
 		</div>
