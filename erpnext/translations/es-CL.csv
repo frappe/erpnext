@@ -1,2 +1,40 @@
-DocType: Delivery Note,% Installed,% Instalado
-DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
+apps/frappe/frappe/geo/doctype/address/address.py +54,"Company is mandatory, as it is your company address","Compañía es obligatoria, igual que la dirección de la empresa"
+DocType: Address Template,"<h4>Default Template</h4>
+<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
+<pre><code>{{ address_line1 }}&lt;br&gt;
+{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
+{{ city }}&lt;br&gt;
+{% if state %}{{ state }}&lt;br&gt;{% endif -%}
+{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
+{{ country }}&lt;br&gt;
+{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
+{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
+{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
+</code></pre>","<h4> Por defecto la plantilla <!-- h4--> 
+ <p> <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </a> y todos los campos de la Dirección ( incluyendo campos personalizados en su caso) estará disponible <!-- p--> 
+ </p><pre> <code> {{address_line1}} &amp; lt; br &amp; gt; 
+ {% if address_line2%} {{address_line2}} &amp; lt; br &amp; gt; { endif% -%} 
+ {{ciudad}} &amp; lt; br &amp; gt; 
+ {% if%} Estado {{Estado}} &amp; lt; br &amp; gt; {% endif -%} {% if 
+ código PIN%} PIN: {{código PIN}} &amp; lt; br &amp; gt; {% endif -%} 
+ {{país}} &amp; lt; br &amp; gt; 
+ {% if teléfono%} Teléfono: {{teléfono}} &amp; lt; br &amp; gt; { % endif -%} 
+ {% if fax%} Fax: {{fax}} &amp; lt; br &amp; gt; {% endif -%} 
+ {% if email_ID%} Email: {{email_ID}} &amp; lt; br &amp; gt ; {% endif -%} 
+ <!-- code--> <!-- pre--></code></pre></h4>"
+apps/frappe/frappe/email/receive.py +193,Can not find UIDVALIDITY in imap status response,No se puede encontrar UIDVALIDITY en la respuesta de estado IMAP
+apps/frappe/frappe/public/js/frappe/form/footer/timeline.js +473,changed values for {0},Valores modificados para {0}
+DocType: Communication,Link DocType,Enlace DocType
+apps/frappe/frappe/desk/doctype/kanban_board/kanban_board.py +19,Column Name cannot be empty,El Nombre de la Columna no puede estar vacía
+,Feedback Ratings,Ratings de Feedback
+apps/frappe/frappe/email/queue.py +207,Cannot send this email. You have crossed the sending limit of {0} emails for this month.,No se puede enviar este correo electrónico. Usted ha cruzado el límite de envío de {0} mensajes de correo electrónico para este mes.
+apps/frappe/frappe/model/db_query.py +505,Cannot use sub-query in order by,No se puede utilizar una sub-consulta en order by
+apps/frappe/frappe/custom/doctype/customize_form/customize_form.js +225,Permissions can be managed via Setup &gt; Role Permissions Manager,Los permisos se pueden gestionar a través de Configuración &gt; Administrador de permisos
+DocType: LDAP Settings,LDAP First Name Field,Campo de Primer Nombre LDAP
+apps/frappe/frappe/core/page/modules_setup/modules_setup.html +32,Global Settings: Users will only be able to choose checked icons,Configuraciones Globales: Los usuarios sólo podrán elegir los iconos marcados
+DocType: Feedback Request,Feedback Rating,Rating de Feedback
+DocType: Dynamic Link,Link Title,Título del Enlace
+DocType: Website Settings,&lt;head&gt; HTML,HTML
+DocType: OAuth Client,Grant Type,Tipo de Subvención
+DocType: Workflow State,facetime-video,Vídeo FaceTime
+DocType: Payment Gateway,Gateway,Puerta de Entrada
