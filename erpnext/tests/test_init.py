@@ -2,7 +2,7 @@ import unittest
 
 import frappe
 from erpnext import encode_company_abbr
-import six.moves.range
+from six.moves import range
 
 test_records = frappe.get_test_records('Company')
 
