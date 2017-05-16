@@ -8,6 +8,7 @@ from frappe.utils import cstr
 from frappe import msgprint, throw, _
 
 from frappe.model.document import Document
+from frappe.model.naming import parse_naming_series
 from frappe.permissions import get_doctypes_with_read
 
 class NamingSeriesNotSetError(frappe.ValidationError): pass
@@ -136,8 +137,9 @@ class NamingSeries(Document):
 	def get_current(self, arg=None):
 		"""get series current"""
 		if self.prefix:
+			prefix = self.parse_naming_series()
 			self.current_value = frappe.db.get_value("Series",
-				self.prefix.split('.')[0], "current", order_by = "name")
+				prefix, "current", order_by = "name")
 
 	def insert_series(self, series):
 		"""insert series if missing"""
@@ -146,13 +148,24 @@ class NamingSeries(Document):
 
 	def update_series_start(self):
 		if self.prefix:
-			prefix = self.prefix.split('.')[0]
+			prefix = self.parse_naming_series()
 			self.insert_series(prefix)
 			frappe.db.sql("update `tabSeries` set current = %s where name = %s",
 				(self.current_value, prefix))
 			msgprint(_("Series Updated Successfully"))
 		else:
 			msgprint(_("Please select prefix first"))
+
+	def parse_naming_series(self):
+		parts = self.prefix.split('.')
+		# If series contain date format like INV.YYYY.MM.#####
+		if len(parts) > 2:
+			del parts[-1] # Removed ### from the series
+			prefix = parse_naming_series(parts)
+		else:
+			prefix = parts[0]
+
+		return prefix
 
 def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True):
 	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
