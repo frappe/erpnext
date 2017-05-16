@@ -465,6 +465,8 @@ class calculate_taxes_and_totals(object):
 				payment.base_amount = flt(payment.amount * self.doc.conversion_rate)
 				paid_amount += payment.amount
 				base_paid_amount += payment.base_amount
+		elif not self.doc.is_return:
+			self.doc.set('payments', [])
 
 		self.doc.paid_amount = flt(paid_amount, self.doc.precision("paid_amount"))
 		self.doc.base_paid_amount = flt(base_paid_amount, self.doc.precision("base_paid_amount"))

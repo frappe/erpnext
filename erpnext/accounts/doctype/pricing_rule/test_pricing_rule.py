@@ -5,6 +5,9 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.get_item_details import get_item_details
+from frappe import MandatoryError
 
 class TestPricingRule(unittest.TestCase):
 	def test_pricing_rule_for_discount(self):
@@ -203,3 +206,46 @@ class TestPricingRule(unittest.TestCase):
 
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 17.5)
+
+	def test_pricing_rule_for_stock_qty(self):
+		frappe.db.sql("delete from `tabPricing Rule`")
+
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"item_code": "_Test Item",
+			"selling": 1,
+			"price_or_discount": "Discount Percentage",
+			"price": 0,
+			"min_qty": 5,
+			"max_qty": 7,
+			"discount_percentage": 17.5,
+			"company": "_Test Company"
+		}
+		frappe.get_doc(test_record.copy()).insert()
+
+		if not frappe.db.get_value('UOM Conversion Detail',
+			{'parent': '_Test Item', 'uom': 'box'}):
+			item = frappe.get_doc('Item', '_Test Item')
+			item.append('uoms', {
+				'uom': 'Box',
+				'conversion_factor': 5
+			})
+			item.save(ignore_permissions=True)
+
+		# With pricing rule
+		so = make_sales_order(item_code="_Test Item", qty=1, uom="Box", do_not_submit=True)
+		so.items[0].price_list_rate = 100
+		so.submit()
+		so = frappe.get_doc('Sales Order', so.name)
+		self.assertEquals(so.items[0].discount_percentage, 17.5)
+		self.assertEquals(so.items[0].rate, 82.5)
+
+		# Without pricing rule
+		so = make_sales_order(item_code="_Test Item", qty=2, uom="Box", do_not_submit=True)
+		so.items[0].price_list_rate = 100
+		so.submit()
+		so = frappe.get_doc('Sales Order', so.name)
+		self.assertEquals(so.items[0].discount_percentage, 0)
+		self.assertEquals(so.items[0].rate, 100)
