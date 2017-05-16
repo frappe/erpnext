@@ -110,7 +110,7 @@
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -352,6 +352,19 @@ Cancelled</pre>
         
         <tr >
             <td>11</td>
+            <td ><code>skip_transfer</code></td>
+            <td >
+                Check</td>
+            <td >
+                Skip Material Transfer
+                <p class="text-muted small">
+                    Check if material transfer entry is not required</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
             <td ><code>material_transferred_for_manufacturing</code></td>
             <td >
                 Float</td>
@@ -363,7 +376,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>13</td>
             <td ><code>produced_qty</code></td>
             <td >
                 Float</td>
@@ -375,7 +388,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>13</td>
+            <td>14</td>
             <td ><code>warehouses</code></td>
             <td >
                 Section Break</td>
@@ -389,7 +402,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>15</td>
             <td ><code>source_warehouse</code></td>
             <td >
                 Link</td>
@@ -410,7 +423,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>16</td>
             <td ><code>wip_warehouse</code></td>
             <td >
                 Link</td>
@@ -431,7 +444,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>17</td>
             <td ><code>column_break_12</code></td>
             <td class="info">
                 Column Break</td>
@@ -443,7 +456,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>18</td>
             <td ><code>fg_warehouse</code></td>
             <td >
                 Link</td>
@@ -464,7 +477,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>19</td>
             <td ><code>scrap_warehouse</code></td>
             <td >
                 Link</td>
@@ -485,7 +498,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>19</td>
+            <td>20</td>
             <td ><code>time</code></td>
             <td >
                 Section Break</td>
@@ -499,7 +512,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>21</td>
             <td ><code>expected_delivery_date</code></td>
             <td >
                 Date</td>
@@ -511,7 +524,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>22</td>
             <td class="danger" title="Mandatory"><code>planned_start_date</code></td>
             <td >
                 Datetime</td>
@@ -523,7 +536,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>22</td>
+            <td>23</td>
             <td ><code>planned_end_date</code></td>
             <td >
                 Datetime</td>
@@ -535,7 +548,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>23</td>
+            <td>24</td>
             <td ><code>column_break_13</code></td>
             <td class="info">
                 Column Break</td>
@@ -547,7 +560,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>24</td>
+            <td>25</td>
             <td ><code>actual_start_date</code></td>
             <td >
                 Datetime</td>
@@ -559,7 +572,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>25</td>
+            <td>26</td>
             <td ><code>actual_end_date</code></td>
             <td >
                 Datetime</td>
@@ -571,7 +584,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>26</td>
+            <td>27</td>
             <td ><code>operations_section</code></td>
             <td >
                 Section Break</td>
@@ -585,7 +598,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>27</td>
+            <td>28</td>
             <td ><code>operations</code></td>
             <td >
                 Table</td>
@@ -606,7 +619,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>28</td>
+            <td>29</td>
             <td ><code>section_break_22</code></td>
             <td >
                 Section Break</td>
@@ -618,7 +631,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>29</td>
+            <td>30</td>
             <td ><code>planned_operating_cost</code></td>
             <td >
                 Currency</td>
@@ -632,7 +645,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>30</td>
+            <td>31</td>
             <td ><code>actual_operating_cost</code></td>
             <td >
                 Currency</td>
@@ -646,7 +659,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>31</td>
+            <td>32</td>
             <td ><code>additional_operating_cost</code></td>
             <td >
                 Currency</td>
@@ -660,7 +673,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>32</td>
+            <td>33</td>
             <td ><code>column_break_24</code></td>
             <td class="info">
                 Column Break</td>
@@ -672,7 +685,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>33</td>
+            <td>34</td>
             <td ><code>total_operating_cost</code></td>
             <td >
                 Currency</td>
@@ -686,7 +699,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>34</td>
+            <td>35</td>
             <td ><code>required_items_section</code></td>
             <td >
                 Section Break</td>
@@ -698,7 +711,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>35</td>
+            <td>36</td>
             <td ><code>required_items</code></td>
             <td >
                 Table</td>
@@ -719,7 +732,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>36</td>
+            <td>37</td>
             <td ><code>more_info</code></td>
             <td >
                 Section Break</td>
@@ -733,7 +746,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>37</td>
+            <td>38</td>
             <td ><code>description</code></td>
             <td >
                 Small Text</td>
@@ -745,7 +758,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>38</td>
+            <td>39</td>
             <td ><code>stock_uom</code></td>
             <td >
                 Link</td>
@@ -766,7 +779,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>39</td>
+            <td>40</td>
             <td class="danger" title="Mandatory"><code>company</code></td>
             <td >
                 Link</td>
@@ -787,7 +800,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>40</td>
+            <td>41</td>
             <td ><code>column_break2</code></td>
             <td class="info">
                 Column Break</td>
@@ -799,7 +812,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>41</td>
+            <td>42</td>
             <td ><code>material_request</code></td>
             <td >
                 Link</td>
@@ -821,7 +834,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>42</td>
+            <td>43</td>
             <td ><code>material_request_item</code></td>
             <td >
                 Data</td>
@@ -833,7 +846,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>43</td>
+            <td>44</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>

@@ -110,7 +110,7 @@
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -181,7 +181,23 @@
         
         <tr >
             <td>1</td>
-            <td class="danger" title="Mandatory"><code>course</code></td>
+            <td class="danger" title="Mandatory"><code>group_based_on</code></td>
+            <td >
+                Select</td>
+            <td >
+                Group Based On
+                
+            </td>
+            <td>
+                <pre>
+Batch
+Course</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>course</code></td>
             <td >
                 Link</td>
             <td >
@@ -201,21 +217,28 @@
         </tr>
         
         <tr >
-            <td>2</td>
-            <td ><code>course_code</code></td>
+            <td>3</td>
+            <td ><code>batch</code></td>
             <td >
-                Read Only</td>
+                Link</td>
             <td >
-                Course Code
+                Batch
                 
             </td>
             <td>
-                <pre>course.course_code</pre>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/schools/student_batch_name">Student Batch Name</a>
+
+
+                
             </td>
         </tr>
         
         <tr >
-            <td>3</td>
+            <td>4</td>
             <td ><code>column_break_3</code></td>
             <td class="info">
                 Column Break</td>
@@ -227,7 +250,7 @@
         </tr>
         
         <tr >
-            <td>4</td>
+            <td>5</td>
             <td class="danger" title="Mandatory"><code>student_group_name</code></td>
             <td >
                 Data</td>
@@ -239,7 +262,21 @@
         </tr>
         
         <tr >
-            <td>5</td>
+            <td>6</td>
+            <td ><code>course_code</code></td>
+            <td >
+                Read Only</td>
+            <td >
+                Course Code
+                
+            </td>
+            <td>
+                <pre>course.course_name</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
             <td ><code>max_strength</code></td>
             <td >
                 Int</td>

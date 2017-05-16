@@ -110,7 +110,7 @@
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -181,7 +181,7 @@
         
         <tr >
             <td>1</td>
-            <td class="danger" title="Mandatory"><code>batch_id</code></td>
+            <td ><code>batch_id</code></td>
             <td >
                 Data</td>
             <td >
@@ -214,6 +214,39 @@
         
         <tr >
             <td>3</td>
+            <td ><code>image</code></td>
+            <td >
+                Attach Image</td>
+            <td class="text-muted" title="Hidden">
+                image
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>parent_batch</code></td>
+            <td >
+                Link</td>
+            <td >
+                Parent Batch
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/batch">Batch</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
             <td ><code>column_break_3</code></td>
             <td class="info">
                 Column Break</td>
@@ -225,7 +258,7 @@
         </tr>
         
         <tr >
-            <td>4</td>
+            <td>6</td>
             <td ><code>expiry_date</code></td>
             <td >
                 Date</td>
@@ -237,7 +270,87 @@
         </tr>
         
         <tr class="info">
-            <td>5</td>
+            <td>7</td>
+            <td ><code>source</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Source
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>supplier</code></td>
+            <td >
+                Link</td>
+            <td >
+                Supplier
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/supplier">Supplier</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>column_break_9</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>reference_doctype</code></td>
+            <td >
+                Link</td>
+            <td >
+                Source Document Type
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/core/doctype">DocType</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td ><code>reference_name</code></td>
+            <td >
+                Dynamic Link</td>
+            <td >
+                Source Document Name
+                
+            </td>
+            <td>
+                <pre>reference_doctype</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>12</td>
             <td ><code>section_break_7</code></td>
             <td >
                 Section Break</td>
@@ -249,7 +362,7 @@
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>13</td>
             <td ><code>description</code></td>
             <td >
                 Small Text</td>
@@ -286,9 +399,37 @@
     
     
 	<p class="docs-attr-name">
+        <a name="autoname" href="#autoname" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>autoname</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Generate random ID for batch if not specified</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="item_has_batch_enabled" href="#item_has_batch_enabled" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>item_has_batch_enabled</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="onload" href="#onload" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>onload</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -315,11 +456,115 @@
 
 	
 
+	
+        
+	<h3 style="font-weight: normal;">Class <b>UnableToSelectBatchError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.doctype.batch.batch.get_batch_no" href="#erpnext.stock.doctype.batch.batch.get_batch_no" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.doctype.batch.batch.<b>get_batch_no</b>
+        <i class="text-muted">(item_code, warehouse, qty, throw=False)</i>
+    </p>
+	<div class="docs-attr-desc"><p>get the smallest batch with for the given item_code, warehouse and qty</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.doctype.batch.batch.get_batch_qty</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.doctype.batch.batch.get_batch_qty" href="#erpnext.stock.doctype.batch.batch.get_batch_qty" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.doctype.batch.batch.<b>get_batch_qty</b>
+        <i class="text-muted">(batch_no=None, warehouse=None, item_code=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns batch actual qty if warehouse is passed,
+        or returns dict of qty by warehouse if warehouse is None</p>
+
+<pre><code>The user must pass either batch_no or batch_no + warehouse or item_code + warehouse
+</code></pre>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>batch_no</code></strong> -  Optional - give qty for this batch no</li>
+<li><strong><code>warehouse</code></strong> -  Optional - give qty for this warehouse</li>
+<li><strong><code>item_code</code></strong> -  Optional - give qty for this item</li>
+</ul>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.doctype.batch.batch.set_batch_nos" href="#erpnext.stock.doctype.batch.batch.set_batch_nos" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.doctype.batch.batch.<b>set_batch_nos</b>
+        <i class="text-muted">(doc, warehouse_field, throw=False)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Automatically select <code>batch_no</code> for outgoing items in item table</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.doctype.batch.batch.split_batch</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.doctype.batch.batch.split_batch" href="#erpnext.stock.doctype.batch.batch.split_batch" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.doctype.batch.batch.<b>split_batch</b>
+        <i class="text-muted">(batch_no, item_code, warehouse, qty, new_batch_id=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Split the batch into a new batch</p>
+</div>
+	<br>
+
+	
+
 
     
     
         <h4>Linked In:</h4>
         <ul>
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/batch">Batch</a>
+
+</li>
+			
         
 			
             <li>

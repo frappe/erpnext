@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Package Code</title>
+	<title>erpnext.buying.utils</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -22,7 +22,7 @@
     
 
 		</head>
-<body data-path="current/models/stock/package_code">
+<body data-path="current/api/buying/erpnext.buying.utils">
 	<div class="main-section">
 		<div>
 					<nav class="navbar navbar-default navbar-main" role="navigation">
@@ -103,14 +103,14 @@
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
-<div class="page-container" id="page-current/models/stock/package_code" data-path="{{ pathname }}"
+<div class="page-container" id="page-current/api/buying/erpnext.buying.utils" data-path="{{ pathname }}"
 	>
 	<div class="row ">
 		
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -118,8 +118,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//current/models/stock">
-		Module stock</a>
+		<a href="https://frappe.github.io/erpnext//current/api/buying">
+		buying</a>
 	</li>
 	
 </ul>
@@ -129,7 +129,7 @@
 						
 					</div>
 					<div class="col-sm-8 col-xs-6">
-						<h1>Package Code</h1>
+						<h1>erpnext.buying.utils</h1>
 					</div>
 					<div class="col-sm-4 col-xs-6">
 						
@@ -139,19 +139,13 @@
 				</div>
 			</div>
 			<div class="page_content">
-<!-- title: Package Code -->
-
-
-
-
-
-<div class="dev-header">
+<!-- title: erpnext.buying.utils --><div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
 	Version 7.x.x</a>
 
 
-	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/stock/doctype/package_code"
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/buying/utils.py"
 		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
 
 </div>
@@ -160,98 +154,75 @@
 
 
 
-    <p><b>Table Name:</b> <code>tabPackage Code</code></p>
-
-
-
-
-<h3>Fields</h3>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th style="width: 5%">Sr</th>
-            <th style="width: 25%">Fieldname</th>
-            <th style="width: 20%">Type</th>
-            <th style="width: 25%">Label</th>
-            <th style="width: 25%">Options</th>
-        </tr>
-    </thead>
-    <tbody>
-        
-        <tr >
-            <td>1</td>
-            <td class="danger" title="Mandatory"><code>code</code></td>
-            <td >
-                Data</td>
-            <td >
-                Code
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>2</td>
-            <td ><code>description</code></td>
-            <td >
-                Small Text</td>
-            <td >
-                Description
-                
-            </td>
-            <td></td>
-        </tr>
-        
-    </tbody>
-</table>
-
-
-    <hr>
-    <h3>Controller</h3>
-    <h4>erpnext.stock.doctype.package_code.package_code</h4>
-
-    
-
-
-
 	
         
-	<h3 style="font-weight: normal;">Class <b>PackageCode</b></h3>
     
-    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
     
-    <div class="docs-attr-desc"><p></p>
+	<p class="docs-attr-name">
+        <a name="erpnext.buying.utils.check_for_closed_status" href="#erpnext.buying.utils.check_for_closed_status" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.buying.utils.<b>check_for_closed_status</b>
+        <i class="text-muted">(doctype, docname)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
-    <div style="padding-left: 30px;">
-        
-    </div>
-    <hr>
+	<br>
 
 	
 
-
-    
-    
-        <h4>Linked In:</h4>
-        <ul>
+	
         
-			
-            <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/stock/item">Item</a>
-
-</li>
-			
-        
-        </ul>
     
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.buying.utils.get_linked_material_requests</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.buying.utils.get_linked_material_requests" href="#erpnext.buying.utils.get_linked_material_requests" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.buying.utils.<b>get_linked_material_requests</b>
+        <i class="text-muted">(items)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.buying.utils.update_last_purchase_rate" href="#erpnext.buying.utils.update_last_purchase_rate" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.buying.utils.<b>update_last_purchase_rate</b>
+        <i class="text-muted">(doc, is_submit)</i>
+    </p>
+	<div class="docs-attr-desc"><p>updates last<em>purchase</em>rate in item table for each item</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.buying.utils.validate_for_items" href="#erpnext.buying.utils.validate_for_items" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.buying.utils.<b>validate_for_items</b>
+        <i class="text-muted">(doc)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
 
 
 <!-- autodoc -->
-<!-- jinja -->
-<!-- static -->
 </div>
 		</div>
 	</div>

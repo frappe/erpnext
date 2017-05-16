@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Student Batch Creation Tool</title>
+	<title>Bank Guarantee</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -22,7 +22,7 @@
     
 
 		</head>
-<body data-path="current/models/schools/student_batch_creation_tool">
+<body data-path="user/manual/en/accounts/bank-guarantee">
 	<div class="main-section">
 		<div>
 					<nav class="navbar navbar-default navbar-main" role="navigation">
@@ -103,14 +103,14 @@
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
-<div class="page-container" id="page-current/models/schools/student_batch_creation_tool" data-path="{{ pathname }}"
+<div class="page-container" id="page-user/manual/en/accounts/bank-guarantee" data-path="{{ pathname }}"
 	>
 	<div class="row ">
 		
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -118,8 +118,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//current/models/schools">
-		Module schools</a>
+		<a href="https://frappe.github.io/erpnext//user/manual/en/accounts">
+		Accounts</a>
 	</li>
 	
 </ul>
@@ -129,7 +129,7 @@
 						
 					</div>
 					<div class="col-sm-8 col-xs-6">
-						<h1>Student Batch Creation Tool</h1>
+						<h1>Bank Guarantee</h1>
 					</div>
 					<div class="col-sm-4 col-xs-6">
 						
@@ -139,176 +139,32 @@
 				</div>
 			</div>
 			<div class="page_content">
-<!-- title: Student Batch Creation Tool -->
+<p>A Bank Guarantee is a guarantee from a lending institution such as a bank ensuring the liabilities of a debtor will be met. In other words, if the debtor fails to settle a debt, the bank covers it. A Bank Guarantee enables the customer, or debtor, to acquire goods, buy equipment or draw down loans, and thereby expand business activity.</p>
 
+<p>A client may ask you to provide a Bank Guarantee from a third party such as a bank. This guarantee is for a specified amount, which is usually a percentage of the total value of the contract. The Bank Guarantee is valid for a specified duration after which it expires and must be returned to you by the client.</p>
 
+<p>This document allows you to track Bank Guarantees given to clients. You can set Email Alerts as the Bank Guarantee expiry date approaches to remind yourself to get the Bank Guarantee back from your client. </p>
 
+<p><img class="screenshot" alt="Bank Guarantee" src="https://frappe.github.io/erpnext/assets/img/accounts/bank-guarantee.png"></p>
 
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/accounts/accounting-reports">Accounting Reports</a></p></p>
 
-<div class="dev-header">
-
-<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 7.x.x</a>
-
-
-	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/schools/doctype/student_batch_creation_tool"
-		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
-
-</div>
-
-<span class="label label-info">Single</span>
-
-
-
-
-
-
-<h3>Fields</h3>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th style="width: 5%">Sr</th>
-            <th style="width: 25%">Fieldname</th>
-            <th style="width: 20%">Type</th>
-            <th style="width: 25%">Label</th>
-            <th style="width: 25%">Options</th>
-        </tr>
-    </thead>
-    <tbody>
-        
-        <tr >
-            <td>1</td>
-            <td ><code>academic_year</code></td>
-            <td >
-                Link</td>
-            <td >
-                Academic Year
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/academic_year">Academic Year</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>2</td>
-            <td ><code>program</code></td>
-            <td >
-                Link</td>
-            <td >
-                Program
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/program">Program</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>3</td>
-            <td ><code>student_batch_name</code></td>
-            <td >
-                Link</td>
-            <td >
-                Student Batch Name
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/student_batch_name">Student Batch Name</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>4</td>
-            <td ><code>make_student_batch</code></td>
-            <td >
-                Button</td>
-            <td >
-                Make Student Batch
-                
-            </td>
-            <td>
-                <pre>make_batch</pre>
-            </td>
-        </tr>
-        
-    </tbody>
-</table>
-
-
-    <hr>
-    <h3>Controller</h3>
-    <h4>erpnext.schools.doctype.student_batch_creation_tool.student_batch_creation_tool</h4>
-
-    
-
-
-
-	
-        
-	<h3 style="font-weight: normal;">Class <b>StudentBatchCreationTool</b></h3>
-    
-    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
-    
-    <div class="docs-attr-desc"><p></p>
-</div>
-    <div style="padding-left: 30px;">
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="make_batch" href="#make_batch" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>make_batch</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-    </div>
-    <hr>
-
-	
-
-
-    
-    
-
-
-<!-- autodoc -->
-<!-- jinja -->
-<!-- static -->
 </div>
 		</div>
 	</div>
 </div>
 
-				<!-- edit-link -->
+				
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="fa fa-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/bank-guarantee.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
                 </div>
             </div>
 			<footer class="docs-footer">
