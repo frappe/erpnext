@@ -38,7 +38,7 @@ def execute(filters=None):
 
 def get_columns(filters):
 	columns = [ 
-		_("Student Group") + ":Link/Student Batch:250", 
+		_("Student Group") + ":Link/Student Group:250", 
 		_("Student Group Strength") + "::170", 
 		_("Present") + "::90", 
 		_("Absent") + "::90",
