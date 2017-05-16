@@ -16,7 +16,15 @@ frappe.ui.form.on("Vehicle Log", {
 				}
 			})
 		}
+
+		if(frm.doc.docstatus == 1) {
+			frm.add_custom_button(__('Expense Claim'), function() {
+				frm.events.expense_claim(frm)
+			}, __("Make"));
+			frm.page.set_inner_btn_group_as_primary(__("Make"));
+		}
 	},
+
 	expense_claim: function(frm){
 			frappe.call({
 				method: "erpnext.hr.doctype.vehicle_log.vehicle_log.make_expense_claim",
