@@ -216,9 +216,19 @@ class Project(Document):
 			# duplicated project
 			dependency_map = {}
 			for task in self.tasks:
-				name, depends_on_tasks = frappe.db.get_value(
-					'Task', { "subject": task.title, "project": self.copied_from }, ['name', 'depends_on_tasks']
+				_task = frappe.db.get_value(
+					'Task',
+					{"subject": task.title, "project": self.copied_from},
+					['name', 'depends_on_tasks'],
+					as_dict=True
 				)
+
+				if _task is None:
+					continue
+
+				name = _task.name
+				depends_on_tasks = _task.depends_on_tasks
+
 				depends_on_tasks = [x for x in depends_on_tasks.split(',') if x]
 				dependency_map[task.title] = [ x['subject'] for x in frappe.get_list(
 					'Task Depends On', {"parent": name}, ['subject'])]
