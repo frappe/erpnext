@@ -112,33 +112,43 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	sales_order_btn: function() {
-		this.$sales_order_btn = cur_frm.add_custom_button(__('Sales Order'),
+		var me = this;
+		this.$sales_order_btn = this.frm.add_custom_button(__('Sales Order'),
 			function() {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
 					source_doctype: "Sales Order",
+					target: me.frm,
+					setters: {
+						customer: me.frm.doc.customer || undefined,
+					},
 					get_query_filters: {
 						docstatus: 1,
 						status: ["!=", "Closed"],
 						per_billed: ["<", 99.99],
-						customer: cur_frm.doc.customer || undefined,
-						company: cur_frm.doc.company
+						company: me.frm.doc.company
 					}
 				})
 			}, __("Get items from"));
 	},
 
 	delivery_note_btn: function() {
-		this.$delivery_note_btn = cur_frm.add_custom_button(__('Delivery Note'),
+		var me = this;
+		this.$delivery_note_btn = this.frm.add_custom_button(__('Delivery Note'),
 			function() {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 					source_doctype: "Delivery Note",
+					target: me.frm,
+					date_field: "posting_date",
+					setters: {
+						company: me.frm.doc.company
+					},
 					get_query: function() {
 						var filters = {
-							company: cur_frm.doc.company
+							docstatus: 1,
 						};
-						if(cur_frm.doc.customer) filters["customer"] = cur_frm.doc.customer;
+						if(me.frm.doc.customer) filters["customer"] = me.frm.doc.customer;
 						return {
 							query: "erpnext.controllers.queries.get_delivery_notes_to_be_billed",
 							filters: filters

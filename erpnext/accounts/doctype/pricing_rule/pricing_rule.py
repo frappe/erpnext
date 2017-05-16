@@ -285,9 +285,10 @@ def get_pricing_rules(args):
 
 def filter_pricing_rules(args, pricing_rules):
 	# filter for qty
+	stock_qty = args.get('qty') * args.get('conversion_factor', 1)
 	if pricing_rules:
-		pricing_rules = filter(lambda x: (flt(args.get("qty"))>=flt(x.min_qty)
-			and (flt(args.get("qty"))<=x.max_qty if x.max_qty else True)), pricing_rules)
+		pricing_rules = filter(lambda x: (flt(stock_qty)>=flt(x.min_qty)
+			and (flt(stock_qty)<=x.max_qty if x.max_qty else True)), pricing_rules)
 
 		# add variant_of property in pricing rule
 		for p in pricing_rules:

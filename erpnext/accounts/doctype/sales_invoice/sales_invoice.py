@@ -52,7 +52,7 @@ class SalesInvoice(SellingController):
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
-		self.validate_posting_time()
+		self.validate_auto_set_posting_time()
 		self.so_dn_required()
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
@@ -378,6 +378,12 @@ class SalesInvoice(SellingController):
 	def add_remarks(self):
 		if not self.remarks: self.remarks = 'No Remarks'
 
+	def validate_auto_set_posting_time(self):
+		# Don't auto set the posting date and time if invoice is amended
+		if self.is_new() and self.amended_from:
+			self.set_posting_time = 1
+
+		self.validate_posting_time()
 
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""

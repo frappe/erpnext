@@ -48,7 +48,7 @@ frappe.ui.form.on("Request for Quotation",{
 				});
 			});
 		}
-		
+
 	},
 
 	make_suppplier_quotation: function(frm) {
@@ -124,24 +124,28 @@ frappe.ui.form.on("Request for Quotation Supplier",{
 
 erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
+		var me = this;
 		this._super();
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('Material Request'),
+			this.frm.add_custom_button(__('Material Request'),
 				function() {
 					erpnext.utils.map_current_doc({
 						method: "erpnext.stock.doctype.material_request.material_request.make_request_for_quotation",
 						source_doctype: "Material Request",
+						target: me.frm,
+						setters: {
+							company: me.frm.doc.company
+						},
 						get_query_filters: {
 							material_request_type: "Purchase",
 							docstatus: 1,
 							status: ["!=", "Stopped"],
-							per_ordered: ["<", 99.99],
-							company: cur_frm.doc.company
+							per_ordered: ["<", 99.99]
 						}
 					})
 				}, __("Get items from"));
 				// Get items from open Material Requests based on supplier
-				cur_frm.add_custom_button(__('Possible Supplier'), function() {
+				this.frm.add_custom_button(__('Possible Supplier'), function() {
 					// Create a dialog window for the user to pick their supplier
 					var d = new frappe.ui.Dialog({
 						title: __('Select Possible Supplier'),
@@ -150,32 +154,35 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 						{fieldname: 'ok_button', fieldtype:'Button', label:'Get Items from Material Requests'},
 						]
 					});
-					
+
 					// On the user clicking the ok button
 					d.fields_dict.ok_button.input.onclick = function() {
 						var btn = d.fields_dict.ok_button.input;
 						var v = d.get_values();
 						if(v) {
 							$(btn).set_working();
-							
+
 							erpnext.utils.map_current_doc({
 								method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_item_from_material_requests_based_on_supplier",
 								source_name: v.supplier,
+								target: me.frm,
+								setters: {
+									company: me.frm.doc.company
+								},
 								get_query_filters: {
 									material_request_type: "Purchase",
 									docstatus: 1,
 									status: ["!=", "Stopped"],
-									per_ordered: ["<", 99.99],
-									company: cur_frm.doc.company
+									per_ordered: ["<", 99.99]
 								}
 							});
 							$(btn).done_working();
 							d.hide();
 						}
-					}	
+					}
 					d.show();
 				}, __("Get items from"));
-				
+
 		}
 	},
 

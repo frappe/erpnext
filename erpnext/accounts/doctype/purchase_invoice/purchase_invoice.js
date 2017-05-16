@@ -49,29 +49,37 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		}
 
 		if(doc.docstatus===0) {
-			cur_frm.add_custom_button(__('Purchase Order'), function() {
+			var me = this;
+			this.frm.add_custom_button(__('Purchase Order'), function() {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
 					source_doctype: "Purchase Order",
+					target: me.frm,
+					setters: {
+						supplier: me.frm.doc.supplier || undefined,
+					},
 					get_query_filters: {
-						supplier: cur_frm.doc.supplier || undefined,
 						docstatus: 1,
 						status: ["!=", "Closed"],
 						per_billed: ["<", 99.99],
-						company: cur_frm.doc.company
+						company: me.frm.doc.company
 					}
 				})
 			}, __("Get items from"));
 
-			cur_frm.add_custom_button(__('Purchase Receipt'), function() {
+			this.frm.add_custom_button(__('Purchase Receipt'), function() {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 					source_doctype: "Purchase Receipt",
+					target: me.frm,
+					date_field: "posting_date",
+					setters: {
+						supplier: me.frm.doc.supplier || undefined,
+					},
 					get_query_filters: {
-						supplier: cur_frm.doc.supplier || undefined,
 						docstatus: 1,
 						status: ["!=", "Closed"],
-						company: cur_frm.doc.company
+						company: me.frm.doc.company
 					}
 				})
 			}, __("Get items from"));
@@ -120,7 +128,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		hide_fields(this.frm.doc);
 		if(cint(this.frm.doc.is_paid)) {
 			if(!this.frm.doc.company) {
-				cur_frm.set_value("is_paid", 0)
+				this.frm.set_value("is_paid", 0)
 				msgprint(__("Please specify Company to proceed"));
 			}
 		}
