@@ -112,7 +112,7 @@ def get_data():
 			"color": "#2ecc71",
 			"icon": "fa fa-group",
 			"icon": "octicon octicon-organization",
-			"label": _("Human Resources"),
+			"label": _("Recursos Humanos"),
 			"type": "module",
 			"hidden": 1
 		},
@@ -155,7 +155,7 @@ def get_data():
 			"icon": "octicon octicon-device-camera-video",
 			"type": "module",
 			"is_help": True,
-			"label": _("Learn"),
+			"label": _("Aprendizaje"),
 			"hidden": 1
 		},
 		{
