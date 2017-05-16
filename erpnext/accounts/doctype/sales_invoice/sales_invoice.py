@@ -809,7 +809,7 @@ class SalesInvoice(SellingController):
 		"""
 
 		for item in self.items:
-			if not item.delivery_note and not item.dn_detail and not item.serial_no:
+			if not item.delivery_note and not item.dn_detail:
 				continue
 
 			serial_nos = frappe.db.get_value("Delivery Note Item", item.dn_detail, "serial_no") or ""
