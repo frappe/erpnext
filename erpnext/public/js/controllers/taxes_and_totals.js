@@ -594,6 +594,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				paid_amount += data.amount;
 				base_paid_amount += data.base_amount;
 			})
+		} else if(!this.frm.doc.is_return){
+			this.frm.doc.payments = [];
 		}
 
 		this.frm.doc.paid_amount = flt(paid_amount, precision("paid_amount"));
