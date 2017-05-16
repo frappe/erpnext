@@ -43,7 +43,6 @@ frappe.ui.form.on('Stock Entry', {
 		});
 	},
 	refresh: function(frm) {
-		erpnext.select_batch_and_serial_no(frm);
 		if(!frm.doc.docstatus) {
 			frm.add_custom_button(__('Make Material Request'), function() {
 				frappe.model.with_doctype('Material Request', function() {
@@ -73,8 +72,7 @@ frappe.ui.form.on('Stock Entry', {
 		frm.fields_dict.items.grid.refresh();
 		frm.cscript.toggle_related_fields(frm.doc);
 	},
-	before_save: function(frm) {
-		console.log("before_save");
+	validate: function(frm) {
 		erpnext.select_batch_and_serial_no(frm);
 	},
 	company: function(frm) {
@@ -565,8 +563,8 @@ erpnext.select_batch_and_serial_no = (frm) => {
 
 	// get_warehouse();
 
-	let show_modal = (item_code, qty, warehouse, has_batch, has_serial) => {
-		// get_warehouse(i);
+	let show_modal = (item, item_code, qty, warehouse, has_batch, has_serial, oldest = undefined) => {
+		let data = oldest ? [oldest] : []
 		let fields = [
 			{fieldname: 'item_code', read_only: 1, fieldtype:'Link', options: 'Item',
 				label: __('Item Code'), 'default': item_code},
@@ -587,8 +585,7 @@ erpnext.select_batch_and_serial_no = (frm) => {
 						{fieldtype:'Float', fieldname:'selected_qty',
 							label: __('Qty'), in_list_view:1},
 					],
-					data: [],
-					// data_length: 3,
+					data: data,
 					get_data: function() {
 						return this.data;
 					},
@@ -610,33 +607,108 @@ erpnext.select_batch_and_serial_no = (frm) => {
 				{fieldname: 'serial_no', fieldtype: 'Small Text', label: __('Serial No')}
 			)
 		}
-		let d = new frappe.ui.Dialog({
+		let dialog = new frappe.ui.Dialog({
+			title: __("Select Batches"),
 			fields: fields
 		});
 
-		d.set_primary_action(__('Get Items'), function() {
-			var values = d.get_values();
-			d.hide();
+		item_temp = {};
+		Object.assign(item_temp, item);
+
+		let validate_dialog_values = () => {
+			var values = dialog.get_values();
+
+			values.batches.map((batch) => {
+				if (batch.batch_no && batch.selected_qty) {
+					if (parseInt(batch.selected_qty) > parseInt(batch.available_qty)) {
+						frappe.throw(__("Cannot select more than the available qty"));
+						return false;
+					}
+				} else {
+					if (!batch.batch_no) {
+						frappe.throw(__("Please select batch_no"));
+						return false;
+					} else {
+						frappe.throw(__("Please select qty"));
+						return false;
+					}
+				}
+			});
+
+			// validate total_qty
+			return true;
+		}
+
+		dialog.set_primary_action(__('Get Items'), function() {
+
+			if (!validate_dialog_values()) {
+				return;
+			}
+
+			var values = dialog.get_values();
+
+			values.batches.map((batch, i) => {
+				if (i === 0) {
+					item.batch_no = batch.batch_no;
+					item.qty = batch.selected_qty;
+					console.log("item", item, frm.doc.items);
+				} else {
+					var row = frappe.model.add_child(frm.doc, "Stock Entry Detail", "items");
+					Object.assign(row, item_temp);
+					row.idx = i+1;
+					row.batch_no = batch.batch_no;
+					row.qty = batch.selected_qty;
+					console.log("row", row, frm.doc.items);
+				}
+				refresh_field("items");
+			});
+
+
+			refresh_field("items");
+			dialog.hide();
 		})
 
-		d.show();
+		dialog.show();
 	}
 
-	show_modal("_Test FG Item", 10, 'Stores - A', 1, 0);
+	// show_modal("_Test FG Item", 10, 'Stores - A', 1, 0);
+
+	let show_modal_with_oldest_batch = (item, item_code, qty, warehouse, has_batch, has_serial_no) => {
+		frappe.call({
+			method: 'erpnext.stock.doctype.batch.batch.get_oldest_batch_qty',
+			args: {
+				warehouse: warehouse,
+				item_code: item_code
+			},
+			callback: (r) => {
+				if (r.message) {
+					oldest = {name: 'batch 1'};
+					oldest.batch_no = r.message.batch_no;
+					oldest.available_qty = r.message.qty;
+					// if required overall qty is less than available qty in oldest batch, preselect
+					if (parseInt(qty) < parseInt(r.message.qty)) {
+						oldest.selected_qty = qty;
+					}
+					show_modal(item, item_code, qty, warehouse, has_batch, has_serial_no, oldest);
+				}
+			}
+		});
+	}
 
 	frm.doc.items.forEach(function(d){
 		if(d.has_batch_no && !d.batch_no) {
 			console.log("item code, ");
-
 		}
 	});
 
 	frm.doc.items.forEach(function(d) {
 		if(d.has_batch_no && !d.batch_no) {
-			show_modal(d.item_code, d.qty, get_warehouse(d), 1, 0);
+			// console.log(d.item_code, get_warehouse(d));
+			show_modal_with_oldest_batch(d, d.item_code, d.qty, get_warehouse(d), 1, 0);
+			// show_modal(d, d.item_code, d.qty, get_warehouse(d), 1, 0 , oldest);
 		}
 		if(d.has_serial_no && !d.serial_no) {
-			show_modal(d.item_code, d.qty, get_warehouse(d), 0, 1);
+			show_modal(d, d.item_code, d.qty, get_warehouse(d), 0, 1);
 		}
 	});
 
