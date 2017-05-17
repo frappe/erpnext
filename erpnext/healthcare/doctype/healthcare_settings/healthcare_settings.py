@@ -13,6 +13,9 @@ class HealthcareSettings(Document):
 	def validate(self):
 		for key in ["register_patient","manage_customer","require_test_result_approval","require_sample_collection"]:
 			frappe.db.set_default(key, self.get(key, ""))
+		if(self.register_patient):
+			if self.registration_fee <= 0 :
+				frappe.throw("Registration fee can not be Zero")
 
 def generate_patient_id(doc):
 	if (frappe.db.get_value("Healthcare Settings", None, "patient_id")=='1'):
