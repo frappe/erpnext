@@ -691,7 +691,7 @@ def get_children():
 			if each.account_currency != company_currency:
 				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value")))
 
-	return acc
+	return sorted(acc, key=lambda d: d['value'])
 
 def create_payment_gateway_account(gateway):
 	create_payment_gateway_account(gateway)
