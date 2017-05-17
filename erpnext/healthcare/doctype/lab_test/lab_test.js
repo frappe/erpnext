@@ -212,7 +212,8 @@ var make_invoice = function(frm){
 		callback: function(r){
 			cur_frm.reload_doc();
 			if(r.message){
-				frappe.msgprint(__("Sales Invoice <a href='#Form/Sales Invoice/{0}'>{0}</a> created", [r.message]))
+				frappe.show_alert(__('Sales Invoice {0} created',
+					['<a href="#Form/Sales Invoice/'+r.message+'">' + r.message+ '</a>']));
 			}
 		}
 	});

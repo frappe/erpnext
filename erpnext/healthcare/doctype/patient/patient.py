@@ -56,14 +56,13 @@ def create_customer(doc):
 		frappe.throw("Please set default customer group and territory in Selling Settings")
 	customer = frappe.get_doc({"doctype": "Customer",
 	"customer_name": doc.name,
-	"territory": doc.territory,
 	"customer_group": customer_group,
 	"territory" : territory,
 	"customer_type": "Individual"
 	}).insert(ignore_permissions=True)
 	frappe.db.set_value("Patient", doc.name, "customer", customer.name)
-	frappe.msgprint(_("Customer {0} is created.").format(customer.name))
-	doc.reload()
+	frappe.msgprint(_("Customer {0} is created.").format(customer.name), alert=True)
+	#doc.reload()
 
 @frappe.whitelist()
 def register_patient(patient, company=None):
