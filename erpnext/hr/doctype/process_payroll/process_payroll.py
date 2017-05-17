@@ -112,7 +112,7 @@ class ProcessPayroll(Document):
 
 
 	def create_log(self, ss_list):
-		if not ss_list:
+		if not ss_list or len(ss_list) < 1: 
 			log = "<p>" + _("No employee for the above selected criteria OR salary slip already created") + "</p>"
 		else:
 			log = frappe.render_template("templates/includes/salary_slip_log.html",
