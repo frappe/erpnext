@@ -16,7 +16,7 @@ frappe.ui.form.on('Consultation', {
 		];
 	},
 	onload: function(frm){
-		if(frm.doc.__islocal && frm.doc.patient){
+		if(frm.doc.patient){
 			frappe.call({
 					"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
 					args: {
@@ -99,11 +99,29 @@ var btn_create_vital_signs = function (frm) {
 }
 
 var show_details = function(data){
+	var personal_details = "";
+	age = ""
+	if(data.dob){
+		age = calculate_age(data.dob)
+		personal_details += "<br><b>Age :</b> " + age;
+	}else if (data.age){
+		age = data.age
+		if(data.age_as_on){
+			age = age+" as on "+data.age_as_on
+		}
+		personal_details += "<br><b>Age :</b> " + age;
+	}
+	if(data.sex) personal_details += "<br><b>Gender :</b> " + data.sex;
+	if(data.blood_group) personal_details += "<br><b>Blood group : </b> " + data.blood_group;
+	if(data.occupation) personal_details += "<br><b>Occupation :</b> " + data.occupation;
+	if(data.email) personal_details += "<br><b>Email :</b> " + data.email;
+	if(data.mobile) personal_details += "<br><b>Mobile :</b> " + data.mobile;
+
+	if(personal_details){
+		personal_details = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Personal Details</b>" + personal_details + "</div>"
+	}
+
 	var details = "";
-	if(data.email) details += "<br><b>Email :</b> " + data.email;
-	if(data.mobile) details += "<br><b>Mobile :</b> " + data.mobile;
-	if(data.occupation) details += "<br><b>Occupation :</b> " + data.occupation;
-	if(data.blood_group) details += "<br><b>Blood group : </b> " + data.blood_group;
 	if(data.allergies) details +=  "<br><br><b>Allergies : </b> "+  data.allergies;
 	if(data.medication) details +=  "<br><b>Medication : </b> "+  data.medication;
 	if(data.alcohol_current_use) details +=  "<br><br><b>Alcohol use : </b> "+  data.alcohol_current_use;
@@ -117,23 +135,24 @@ var show_details = function(data){
 	if(data.patient_details) details += "<br><br><b>More info : </b> " + data.patient_details;
 
 	if(details){
-		details = "<div style='padding-left:10px; font-size:13px;' align='center'></br><b class='text-muted'>Patient Details</b>" + details + "</div>"
+		details = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Patient Details</b>" + details + "</div>"
 	}
 
 	var vitals = ""
 	if(data.temperature) vitals += "<br><b>Temperature :</b> " + data.temperature;
-	if(data.pulse) vitals += "<br><b>Pulse :</b> " + data.pulse;
-	if(data.respiratory_rate) vitals += "<br><b>Respiratory Rate :</b> " + data.respiratory_rate;
-	if(data.bp) vitals += "<br><b>BP :</b> " + data.bp;
+	if(data.pulse) vitals += " ,<b>Pulse :</b> " + data.pulse;
+	if(data.respiratory_rate) vitals += " ,<b>Respiratory Rate :</b> " + data.respiratory_rate;
+	if(data.bp) vitals += " ,<b>BP :</b> " + data.bp;
 	if(data.bmi) vitals += "<br><b>BMI :</b> " + data.bmi;
-	if(data.height) vitals += "<br><b>Height :</b> " + data.height;
-	if(data.weight) vitals += "<br><b>Weight :</b> " + data.weight;
+	if(data.nutrition_note) vitals += " (" + data.nutrition_note + ")"
+	if(data.height) vitals += " ,<b>Height :</b> " + data.height;
+	if(data.weight) vitals += " ,<b>Weight :</b> " + data.weight;
 	if(data.signs_date) vitals += "<br><b>Date :</b> " + data.signs_date;
 
 	if(vitals){
-		vitals = "<div style='padding-left:10px; font-size:13px;' align='center'></br><b class='text-muted'>Vital Signs</b>" + vitals + "<br></div>"
-		details = vitals + details
+		vitals = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Vital Signs</b>" + vitals + "<br></div>"
 	}
+	details = personal_details + vitals + details
 	cur_frm.fields_dict.patient_details_html.$wrapper.html(details);
 }
 
