@@ -300,7 +300,8 @@ def create_invoice(company, patient, lab_tests, prescriptions):
 		test_code = frappe.get_value("Lab Prescription", line, "test_code")
 		create_item_line(test_code, sales_invoice)
 	for test in test_ids:
-		test_code = frappe.get_value("Lab Test", test, "template")
+		template = frappe.get_value("Lab Test", test, "template")
+		test_code = frappe.get_value("Lab Test Template", template, "item")
 		create_item_line(test_code, sales_invoice)
 	sales_invoice.set_missing_values()
 	sales_invoice.save()
