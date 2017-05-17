@@ -142,11 +142,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					target: me.frm,
 					date_field: "posting_date",
 					setters: {
-						company: me.frm.doc.company
+						customer: me.frm.doc.customer || undefined
 					},
 					get_query: function() {
 						var filters = {
 							docstatus: 1,
+							company: me.frm.doc.company
 						};
 						if(me.frm.doc.customer) filters["customer"] = me.frm.doc.customer;
 						return {
