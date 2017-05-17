@@ -46,23 +46,29 @@ def enroll_random_student(current_date):
 			enrollment.append("courses", course)
 		enrollment.submit()
 		frappe.db.commit()
-		assign_student_group(enrollment.student, enrollment.student_name, enrollment.program, enrolled_courses)
+		assign_student_group(enrollment.student, enrollment.student_name, enrollment.program,
+			enrolled_courses, enrollment.student_batch_name)
 		
-def assign_student_group(student, student_name, program, courses):
+def assign_student_group(student, student_name, program, courses, batch):
 	course_list = [d["course"] for d in courses]
 	for d in frappe.get_list("Student Group", fields=("name"), filters={"program": program, "course":("in", course_list)}):
 		student_group = frappe.get_doc("Student Group", d.name)
 		student_group.append("students", {"student": student, "student_name": student_name,
 			"group_roll_number":len(student_group.students)+1, "active":1})
 		student_group.save()
-		frappe.db.commit()
+	student_batch = frappe.get_list("Student Group", fields=("name"), filters={"program": program, "group_based_on":"Batch", "batch":batch})[0]
+	student_batch_doc = frappe.get_doc("Student Group", student_batch.name)
+	student_batch_doc.append("students", {"student": student, "student_name": student_name,
+		"group_roll_number":len(student_batch_doc.students)+1, "active":1})
+	student_batch_doc.save()
+	frappe.db.commit()
 
 def mark_student_attendance(current_date):
 	status = ["Present", "Absent"]
-	for d in frappe.db.get_list("Student Groups", filters={"group_based_on": "Batch"}):
+	for d in frappe.db.get_list("Student Group", filters={"group_based_on": "Batch"}):
 		students = get_student_group_students(d.name)
 		for stud in students:
-			make_attendance_records(stud.student, stud.student_name, d.name, status[weighted_choice([9,4])])
+			make_attendance_records(stud.student, stud.student_name, status[weighted_choice([9,4])], None, d.name, current_date)
 			
 def make_fees():
 	for d in range(1,10):

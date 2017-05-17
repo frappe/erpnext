@@ -74,7 +74,7 @@ def simulate(domain='Manufacturing'):
 			stock.work()
 			accounts.work()
 			projects.run_projects(current_date)
-			run_messages()
+			# run_messages()
 
 			if domain=='Manufacturing':
 				sales.work()
