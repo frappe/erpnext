@@ -119,7 +119,7 @@ class ProcessPayroll(Document):
 						dict(ss_list=ss_list,
 							keys=sorted(ss_list[0].keys()),
 							title=_('Created Salary Slips')))
-			return log
+		return log
 
 	def get_sal_slip_list(self, ss_status, as_dict=False):
 		"""
