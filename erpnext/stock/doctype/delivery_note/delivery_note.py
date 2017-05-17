@@ -106,7 +106,7 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
-		if self._action != 'submit':
+		if self._action != 'submit' and not self.is_return:
 			set_batch_nos(self, 'warehouse', True)
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list

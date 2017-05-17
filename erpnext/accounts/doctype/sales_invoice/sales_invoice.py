@@ -17,6 +17,7 @@ from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amou
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.accounts.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal
+from erpnext.stock.doctype.batch.batch import set_batch_nos
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -78,6 +79,10 @@ class SalesInvoice(SellingController):
 
 		if not self.is_opening:
 			self.is_opening = 'No'
+			
+		if self._action != 'submit' and self.update_stock and not self.is_return:
+			set_batch_nos(self, 'warehouse', True)
+			
 
 		self.set_against_income_account()
 		self.validate_c_form()
@@ -87,7 +92,7 @@ class SalesInvoice(SellingController):
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
 		self.set_status()
-
+	
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 
