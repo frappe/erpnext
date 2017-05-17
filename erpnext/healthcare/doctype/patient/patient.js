@@ -32,6 +32,9 @@ frappe.ui.form.on('Patient', {
        frm.add_custom_button(__('Medical Record'), function() {
         create_medical_record(frm);
        },"Create");
+       frm.add_custom_button(__('Consultation'), function() {
+        btn_create_consultation(frm);
+       },"Create");
 		}
   },
   onload: function (frm) {
@@ -110,6 +113,16 @@ var btn_create_vital_signs = function (frm) {
 	frappe.new_doc("Vital Signs")
 }
 
+var btn_create_consultation = function (frm) {
+	if(!frm.doc.name){
+		frappe.throw("Please save the patient first")
+	}
+	frappe.route_options = {
+		"patient": frm.doc.name,
+	}
+	frappe.new_doc("Consultation")
+}
+
 var btn_register_patient= function(frm){
 	frappe.call({
 		method:"erpnext.healthcare.doctype.patient.patient.register_patient",
@@ -118,7 +131,8 @@ var btn_register_patient= function(frm){
 			if(!data.exc){
 				cur_frm.reload_doc();
         if(data.message.invoice){
-          msgprint(__("Sales Invoice  <a href='#Form/Sales Invoice/{0}'> {0} </a> created", [data.message.invoice]))
+          frappe.show_alert(__('Sales Invoice {0} created',
+  					['<a href="#Form/Sales Invoice/'+data.message.invoice+'">' + data.message.invoice+ '</a>']));
         }
 			}
 		}
