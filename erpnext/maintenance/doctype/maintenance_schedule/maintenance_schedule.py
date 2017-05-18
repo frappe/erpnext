@@ -163,7 +163,7 @@ class MaintenanceSchedule(TransactionBase):
 					`tabMaintenance Schedule Item` msi where msi.parent=ms.name and
 					msi.sales_order=%s and ms.docstatus=1""", d.sales_order)
 				if chk:
-					throw(_("Maintenance Schedule {0} exists against {0}").format(chk[0][0], d.sales_order))
+					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0][0], d.sales_order))
 
 	def validate(self):
 		self.validate_maintenance_detail()
