@@ -149,5 +149,5 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 			for f in qty_fields:
 				qty = d.get(f)
 				if qty:
-					if abs(int(qty) - float(qty)) > 0.0000001:
+					if abs(int(float(qty)) - float(qty)) > 0.0000001:
 						frappe.throw(_("Quantity ({0}) cannot be a fraction in row {1}").format(qty, d.idx), UOMMustBeIntegerError)
